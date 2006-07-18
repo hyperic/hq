@@ -1,0 +1,604 @@
+/* GENERAL */
+BODY, FORM {margin: 0px;}
+BODY, P, TD, TH, OPTION, INPUT, TEXTAREA, SELECT {font-size: 11px; color: #000000; font-family: arial, sans-serif;}
+
+BLK { color: black; }
+
+/* LINKS */
+A:link {color: #003399; text-decoration: none; font-weight: bold;}
+A:visited {color: #003399; text-decoration: none; font-weight: bold;}
+A:hover {color: #003399; font-weight: bold; text-decoration: underline;}
+
+A.NotBold:link {color: #003399; text-decoration: none; font-weight: normal;}
+A.NotBold:visited {color: #003399; text-decoration: none; font-weight: normal;}
+A.NotBold:hover {color: #003399; font-weight: normal; text-decoration: underline;}
+
+/* TEXT */
+.CaptionText {font-size: 10px; font-weight: normal; color: #000000;}
+.SearchText {font-size: 11px; font-weight: bold; color: #666666;} /* fixme: only on /common/components/FilterToolbar.jsp */
+.TextSelected {color: #663300;} /* fixme: only on /common/components/PageTitle.jsp */
+.ButtonCaptionText {font-size: 11px; color: #999999;}
+.InactiveText {color: #999999;}
+.NormalText {color: #000000; font-weight: normal;}
+.BoldText {font-weight: bold;}
+
+/* PAGE TITLE */
+.PageTitle {font-size: 17px; color: #F35E0C; font-weight: bold; background-color: #CCCCCC;}
+.PageTitleGroupBg, .PageTitleRoleBg, .PageTitleUserBg {background-color: #E5E5E5;}
+.PageTitleServerBg {background-color: #E4F2E4;}
+.PageTitlePlatformBg {background-color: #F2EAE4;}
+.PageTitleServiceBg {background-color: #E1EFF0;}
+.PageTitleApplicationBg {background-color: #ECE6F7;}
+.PageTitleSmallText {font-size: 11px; color: #666666; line-height: 14px;}
+
+/* BLOCK & LIST */
+.ListTitle, .BlockTitle {font-size: 12px; color: #F35E0C; font-weight: bold; background-color: #CCCCCC; padding: 3px;}
+.BlockSubtitle {font-size: 11px; color: #000000; font-weight: normal;}
+.BlockBottomLine {background-color: #D5D8DE; padding: 0px;}
+
+/* BLOCK */
+.BlockContent {background-color: #EBEDF2; padding: 3px;}
+.BlockContentNoPadding {background-color: #EBEDF2; padding: 0px;}
+.BlockLabel {background-color: #EBEDF2; padding: 3px; font-weight: bold; text-align: right;}
+.BlockCheckboxLabel, .BlockLeftAlignLabel {background-color: #EBEDF2; padding: 3px; font-weight: bold; text-align: left;}
+.BlockContentSmallText {background-color: #EBEDF2; padding: 3px; font-size: 11px; color: #000000;}
+.BlockBg {background-color: #EBEDF2;}
+
+/* LIST */
+A.ListHeaderLink:link {color: #004680; text-decoration: none;}
+A.ListHeaderLink:visited {color: #004680; text-decoration: none;}
+A.ListHeaderLink:hover {color: #004680; text-decoration: underline;}
+
+.ListHeader, .tableRowHeader, .tableCellHeader {text-align: left; font-weight: bold; color: #004680; background-color: #DBE3F5; padding: 3px; border-top: solid #ABB1C7; border-bottom: solid #D5D8DE; border-width: 1px;} 
+.ListHeaderCheckbox {text-align: center; font-weight: bold; background-color: #DBE3F5; padding: 0px; border-top: solid #ABB1C7; border-bottom: solid #D5D8DE; border-width: 1px;}
+
+.ListHeaderSorted, .tableRowSorted {font-weight: bold; color: #004680; background-color: #C6CFE5; padding: 3px; border-top: solid #ABB1C7; border-bottom: solid #C6CFE5; border-width: 1px;}
+.ListHeaderInactive, .tableRowInactive {font-weight: bold; background-color: #DBE3F5; padding: 3px; border-top: solid #ABB1C7; border-bottom: solid #C6CFE5; border-width: 1px;}
+.ListHeaderInactiveSorted {font-weight: bold; background-color: #C6CFE5; padding: 3px; border-top: solid #ABB1C7; border-bottom: solid #C6CFE5; border-width: 1px;}
+.ListHeaderOff {text-align: left; font-weight: bold; background-color: #DBE3F5; padding: 3px; border-top: solid #ABB1C7; border-bottom: solid #C6CFE5; border-width: 1px; color: #999999;}
+.ListHeaderInactiveCenter {text-align: center; font-weight: bold; background-color: #DBE3F5; padding: 3px; border-top: solid #ABB1C7; border-bottom: solid #C6CFE5; border-width: 1px;}
+
+.ListRow, .tableRowEven, .tableRowOdd {background-color: #F2F4F7;}
+.ListRowSelected, .tableRowAction {text-align: left; background-color: #EBEDF2;}
+
+.ListCell, .ListCellSelected, .tableCell, .redTableCell {padding: 3px; border-bottom: solid #D5D8DE; border-width: 1px; vertical-align: middle; }
+.ListCellSmall8 {font-size: 8px; border-width: 1px; border-bottom: solid #D5D8DE; border-width: 1px; padding: 3px;}
+.ListCellSmall10 {font-size: 10px; border-width: 1px; border-bottom: solid #D5D8DE; border-width: 1px; padding: 3px;}
+.ListCellSmall12 {font-size: 12px; border-width: 1px; border-bottom: solid #D5D8DE; border-width: 1px; padding: 3px;}
+.ListCellNoPadding {padding: 1px; border-bottom: solid #D5D8DE; border-width: 1px;}
+.ListCellCheckbox {padding: 0px; border-bottom: solid #D5D8DE; border-width: 1px; text-align: center; vertical-align: middle; }
+.ListCellCheckboxSelected {padding: 0px; background-color: #E6EEFF; border-bottom: solid #D5D8DE; border-width: 1px;} /* only in RolePermissionsForm.jsp*/
+.ListCellSelected, .tableCellAction {background-color: #E6EEFF;} /* only in RolePermissionsForm.jsp*/
+.ListCellCheckAll {padding: 3px; font-size: 11px; font-weight: bold;} /* Edit Role page, RolePermissionsForm.jsp */
+.ListCellLine {background-color: #D5D8DE;}
+.ListCellLineEmpty {background-color: #FFFFFF; padding: 0px;}
+.ListCellPrimary {padding: 3px; border-bottom: solid #D5D8DE; border-width: 1px; font-weight: bold;}
+
+.LinkBox {padding: 3px; border: solid #D5D8DE; border-width: 1px; background-color:#F2F9FF}
+
+/* list for MONITOR */
+.ListHeaderLight {background-color: #DBE3F5;}
+.ListHeaderDark {background-color: #C6CFE5;}
+.ListHeaderCheckboxLeftLine {text-align: center; font-weight: bold; padding: 0px; border-top: solid #ABB1C7; border-bottom: solid #D5D8DE; border-left: solid #C6CFE5; border-width: 1px;}
+
+.ListCellHeader {font-weight: bold; background-color: #DBE3F5; padding: 3px; border-bottom: solid #DBE3F5; border-width: 1px;}
+.ListCellHeaderSorted {font-weight: bold; background-color: #C6CFE5; padding: 3px; border-bottom: solid #C6CFE5; border-width: 1px;}
+.MonitorListHeaderCheckbox {text-align: center; font-weight: bold; background-color: #DBE3F5; padding: 0px; border-bottom: solid #D5D8DE; border-width: 1px;}
+
+.ListCellCheckboxLeftLine {padding: 3px; border-bottom: solid #D5D8DE; border-left: solid #D5D8DE; border-width: 1px; text-align: center; vertical-align: middle; }
+.ListCellLeftLine {padding: 3px; border-bottom: solid #DBE3F5; border-left: solid #C6CFE5; border-width: 1px;}
+.ListCellLeftLineNoPadding {border-bottom: solid #DBE3F5; border-left: solid #C6CFE5; border-width: 1px;}
+.MetricRed {background-color: #F7DEE7; width: 100%; text-align: right;}
+.MetricGreen {background-color: #CEEFDE; width: 100%; text-align: right;}
+.MetricYellow {background-color: #FFF1B3; width: 100%; text-align: right;}
+.MetricGray {background-color: #D5D8DE; width: 100%; text-align: right;}
+
+.ListCellRight {padding: 3px; border-bottom: solid #D5D8DE; border-left: solid #D5D8DE; border-width: 1px; text-align: right;}
+.ListCellRightSelected {padding: 3px; border-bottom: solid #D5D8DE; border-left: solid #C6CFE5; border-width: 1px; text-align: right; background-color: #FFEEA1;}
+.ListCellRightNoLine {padding: 3px; border-bottom: solid #D5D8DE; border-width: 1px; text-align: right; vertical-align: middle}
+.ListCellPrimaryInactive {color: #999999; padding: 3px; border-bottom: solid #D5D8DE; border-width: 1px; font-weight: bold;}
+
+.ListCellCompareMetrics {padding: 3px 3px 3px 20px; border-bottom: solid #D5D8DE; border-width: 1px;}
+
+/* list for Config Properties */
+.ConfigPropHeader {font-weight: bold; background-color: #D5D8DE; padding: 3px 3px 3px 15px; border-top: solid #ABB1C7; border-bottom: solid #99A5C0; border-width: 1px;}
+.ConfigPropHeaderHelp {font-size: 14px; font-weight: bold; background-color: #FFFFFF; padding: 3px 3px 3px 15px; border: solid #ABB1C7; border-width: 1px;}
+
+/* INTRO/GUIDE SYSTEM */
+.GuideTitle {font-size: 18px; color: #F35E0C; font-weight: bold; background-color: #CCCCCC; padding: 6px;}
+A.GuideLink:link {color: #003399; text-decoration: none; font-weight: bold; font-size: 16px;}
+A.GuideLink:visited {color: #003399; text-decoration: none; font-weight: bold; font-size: 16px;}
+A.GuideLink:hover {color: #003399; font-weight: bold; text-decoration: underline; font-size: 16px;}
+.GuideText {font-size: 13px; color: #000000; }
+.GuideTextSmall {font-size: 11px; color: #000000; }
+
+/* TOOLBAR */
+.ToolbarContent {background-color: #E5E5E5;}
+.ToolbarLine {background-color: #F35E0C;}
+
+/* ERROR & CONFIRMATION */
+.ErrorField {background-color: #FFFD99; padding: 3px;}
+.ErrorFieldContent {font-size: 10px; font-style: italic;}
+
+.ErrorBlock {background-color: #FFFD99; color: #000000; padding: 2px; border-top: solid #FF9C15; border-width: 1px;}
+
+.ConfirmationBlock {background-color: #BFF1B5; color: #000000; padding: 2px; border-top: solid #00AC3D; border-width: 1px;}
+
+/* TABS */
+.TabCell {border-bottom: solid #DE6329; border-width: 2px;}
+.SubTabCell {background-color: #D9D9D9;}
+.DashTabs {margin-bottom: 4px;}
+
+/* MASTHEAD */
+.MastheadBgTop {background-color: #C6CFE5;}
+.MastheadBgBottom {background-color: #DBE3F5;}
+
+A.MastheadLink:link {font-weight: normal; color: #366CD9; text-decoration: none;}
+A.MastheadLink:visited {font-weight: normal; color: #366CD9; text-decoration: none;}
+A.MastheadLink:hover {font-weight: normal; color: #366CD9; text-decoration: underline;}
+A.MastheadLink:active {font-weight: normal; color: #666666; text-decoration: none;}
+
+.MastheadContent, .RecentAlerts {font-size: 10px; color: #666666;}
+
+.RecentPlaces {color: #000000; font-weight: bold;}
+
+.MastheadBottomLine {background-color: #F35E0C;}
+
+/* FOOTER */
+.FooterBold {font-weight: bold; padding: 3px;}
+.FooterRegular {font-weight: normal; padding: 3px;}
+.FooterSmall {font-size: 8px; font-weight: normal; padding: 3px;}
+
+/* DASHBOARD */
+.DashboardPadding {padding: 5px;} /* only in /portal/MultiColumnLayout.jsp */
+.DashboardControlActionsContainer {background-color: #EBEDF2; padding: 10px;}
+
+.FormLabel {font-weight: bold; text-align: left;}
+.FormLabelRight {font-weight: bold; text-align: right;}
+.Subhead {font-weight: bold; text-align: left; color: #F35E0C; background-color: #CCCCCC; padding: 3px;}
+
+A.dashlink:link {font-size: 11px; font-weight: bold; color: #003399; text-decoration: none;} 
+A.dashlink:visited {font-size: 11px; font-weight: bold; color: #003399; text-decoration: none;}
+A.dashlink:hover {font-size: 11px; font-weight: bold; color: #003399; text-decoration: underline;} 
+
+/* FILTER */
+.FilterLabelText {font-size: 11px; background-color: #D5D8DE; font-weight: bold; padding: 5px;}
+.FilterNonBoldText {font-size: 11px; background-color: #D5D8DE; padding: 5px;}
+.FilterFormText {font-size: 11px; color: #000000; font-weight: normal;}
+.FilterLine {background-color: #ABB1C7;}
+.FilterEmptyCellRight {background-color: #D5D8DE; border-left: solid #FFFFFF; border-width: 5px;}
+.FilterLineLeft {background-color: #ABB1C7; border-right: solid #FFFFFF; border-right-width: 5px;}
+.FilterLineRight {background-color: #ABB1C7; border-left: solid #FFFFFF; border-left-width: 5px;}
+.FilterImage {background-color: #D5D8DE; padding-left: 1px; padding-right: 1px;}
+
+/* SEARCH */
+.SearchBold {font-weight: bold; padding: 3px;}
+.SearchRegular {font-weight: normal; padding: 3px;}
+
+/* ABOUT PAGE */
+.DisplayContent {background-color: #EBEDF2; padding: 3px; font-size: 11px; color: #000000;}
+.DisplayLabel {background-color: #EBEDF2; padding: 3px; font-weight: bold; font-size: 11px; color: #000000;}
+.DisplaySubhead {background-color: #EBEDF2; padding: 3px; font-weight: bold; color: #F35E0C;}
+
+A.displaylink:link {font-size: 11px; color: #003399; text-decoration: none;} 
+A.displaylink:visited {font-size: 11px; color: #003399; text-decoration: none;}
+A.displaylink:hover {font-size: 11px; color: #003399; text-decoration: underline;} 
+
+/* MONITORING */
+.MonitorBlockContainer {background-color: #EBEDF2; padding-top: 10px; border-spacing: 3px; }
+.MonitorBlock {background-color: #D5D8DE;}
+.MonitorBlockTopLine {border-top: solid #949CBD; border-width: 1px;}
+.MonitorToolbar {background-color: #D5D8DE; border-top: solid #ABB1C7; border-width: 1px 0px 0px 0px;}
+.MonitorMetricsBaseline {color: #003399; font-weight: bold;}
+.MonitorMetricsValue {color: #000000; font-weight: bold;}
+.MonitorMetricsSelected {color: #000000; font-weight: bold; background-color: #FFEEA1; width: 100%;}
+.MonitorCurrentHealthChartHeader {font-weight: bold; background-color: #EFEFF7; padding: 3px;}
+.MonitorCurrentHealthChartCell {background-color: #FFFFFF; padding: 3px;}
+.MonitorListRow {background-color: #FFFFFF;}
+.MonitorServiceList {padding: 3px 3px 3px 10px; font-weight: bold;}
+
+.MonitorChartBlock {background-color: #FFFFFF;}
+.MonitorChartCell {background-color: #FFFFFF; padding: 10px;}
+.MonitorChartBlockPadding {background-color: #FFFFFF; padding: 5px;}
+
+/* MONITORING: MINI TABS */
+.MiniTabOn {background-color: #D9D9D9; padding: 0px; border-top: solid #F35E0C; border-width: 1px; font-size: 12px; font-weight: bold; color: #F35E0C;}
+.MiniTabOff {background-color: #C3CEE5; padding: 0px; border-bottom: solid #F35E0C; border-width: 1px; font-size: 12px; font-weight: bold; color: #003399; text-decoration: none;}
+.MiniTabEmpty {padding: 0px; border-bottom: solid #F35E0C; border-width: 1px;}
+
+.SubMiniTab {color: #F35E0C; background-color: #D9D9D9; padding: 3px; font-weight: bold;}
+
+/* CONTROL */
+.ControlBlockContainer {background-color: #EFEFF7; padding: 20px;}
+
+/* SCHEDULE */
+.CalBody {padding: 5px 10px 0px 10px;}
+.CalHeader {background-color: #EBEDF2; padding: 3px; border-top: solid #F35E0C; border-bottom: solid #D5D8DE; border-width: 2px 0px 1px 0px;}
+.CalDays {color: #F35E0C;}
+.CalInactiveDay {color: #999999;}
+
+/* AUTO-DISCOVERY */
+.AutoDiscRowIgnored {background-color: #F5F5F5;}
+.AutoDiscRowNew {background-color: #F5FFF9;}
+.AutoDiscRowModified {background-color: #FCF9E3;}
+
+.AutoDiscContent {padding: 3px;}
+.AutoDiscLabel {padding: 3px; font-weight: bold; text-align: right;}
+
+/* SERVICE, INVENTORY, CONFIG */
+.multiSelect {width: 250px;}
+
+/* RESOURCE HUB */
+.ResourceHubBlockTitle {font-size: 12px; color: #F35E0C; font-weight: bold; background-color: #CCCCCC; padding: 3px;}
+
+/* ADD/REMOVE WIDGET */
+.AddRemoveListCellLeft {padding: 3px; border-bottom: solid #D5D8DE 1px; border-right: solid #D5D8DE 5px;}
+.AddRemoveListCellRight {padding: 3px; border-bottom: solid #D5D8DE 1px; border-left: solid #D5D8DE 5px;}
+.AddRemoveListCellCheckboxRight {padding: 0px; border-bottom: solid #D5D8DE 1px; text-align: center; border-left: solid #D5D8DE 5px;}
+.AddRemoveListHeaderLeft {font-weight: bold; background-color: #DBE3F5; padding: 3px; border-top: solid #ABB1C7 1px; border-bottom: solid #C6CFE5 1px; border-right: solid #D5D8DE 5px;}
+.AddRemoveListHeaderCheckboxRight {text-align: center; font-weight: bold; background-color: #DBE3F5; padding: 0px; border-top: solid #ABB1C7 1px; border-bottom: solid #D5D8DE 1px; border-left: solid #D5D8DE 5px;}
+.AddRemoveFilterLabelTextLeft {font-size: 11px; background-color: #D5D8DE; font-weight: bold; padding: 5px; border-right: solid #FFFFFF 5px;}
+.AddRemoveFilterLabelTextRight {font-size: 11px; background-color: #D5D8DE; font-weight: bold; padding: 5px; border-left: solid #FFFFFF 5px;}
+
+/* MINI CHARTS */
+.MiniChartHeader {
+    text-align: left;
+    font-weight: bold;
+    color: #004680;
+    padding: 2px;
+    font-size: 11px;
+    text-align: left;
+    vertical-align: middle;
+} 
+
+.MiniChartTitle {
+    background-color: #EBEDF2;
+    padding: 3px;
+    font-size: 10px;
+    color: #004680; }
+
+.MetricResourceType {font-size: 9px; font-weight: normal; padding-left: 2em;}
+
+/* NAVIGATION MAP DIAGRAM */
+#diagramDiv {
+position: absolute;
+z-index: 100;
+visibility: hidden; 
+/* TURN THIS OFF B/C OF DROP-SHADOW
+filter: alpha(opacity=85);
+-moz-opacity: 1; // should be 0.85 -- see http://bugzilla.mozilla.org/show_bug.cgi?id=201209
+*/
+
+}
+
+/* These are the style specifications for the menu layers.  
+   Set width to get more browsers corporation  */
+div.menu { 
+  position:absolute;
+  visibility:hidden; 
+  width:24em; left:0; top:0;
+  font-size:10px; 
+  background-color: #e6e6e6; color:#000;
+  border: 2px solid;
+  border-color: #f7faff #99a #99a #f7faff; 
+  z-index:500;
+}
+
+/* Style specifications for menu items and links  */
+div.menu ul { margin:0; padding:0 }
+/* Need to set padding of at least one pixel or ie sets very large margin */
+div.menu ul li { 
+  padding:.3em .4em; margin:0; 
+  list-style-type:none
+  }
+
+/* Set display block and position relative so clicks on list items activate links  */  
+div.menu a, div.eventsSummary a { 
+  cursor:default;
+  background-color:transparent; 
+  display:block; position:relative; 
+  text-decoration:none 
+  }
+  
+div.menu a:link { color:#33b }
+div.menu a:visited { color:#339 }
+div.menu a:hover { color:#fff; background-color:#338 }
+
+/* These are the styles for the link popups */
+a.ListCellPopup1 {
+  position: relative;
+  z-index:24;
+  color: #000;
+  text-decoration:underline;
+  font-weight:normal;
+}
+
+a.ListCellPopup1:hover { z-index:25; }
+a.ListCellPopup1 span{ display: none }
+a.ListCellPopup1:hover span {
+  display:block;
+  position:absolute;
+  top:0.2em; left:-19em; width:40em;
+  padding: 4px;
+  border: 2px solid;
+  border-color: #f7faff #99a #99a #f7faff;
+  background-color:#DBE3F5;
+  color:#000;
+  text-align: left
+}
+
+a.ListCellPopup2{
+  position: relative;
+  z-index:24;
+  color: #000;
+  text-decoration:underline;
+  font-weight:normal;
+}
+
+a.ListCellPopup2:hover { z-index:25; }
+a.ListCellPopup2 span { display: none }
+a.ListCellPopup2:hover span {
+  display:block;
+  position:absolute;
+  top:0.2em;left:-13em;width:48em;
+  padding: 4px;
+  border: 2px solid;
+  border-color: #f7faff #99a #99a #f7faff;
+  background-color:#DBE3F5;
+  color:#000;
+  text-align: left
+}
+
+/* For popups that are also real links, so the color gets set correctly */
+a.ListCellPopup3:link {
+  position: relative;
+  z-index:24;
+  color: #003399;
+  text-decoration:underline;
+  font-weight:bold;
+}
+
+a.ListCellPopup3:visited {
+  position: relative;
+  z-index:24;
+  color: #003399;
+  text-decoration:underline;
+  font-weight:bold;
+}
+
+a.ListCellPopup3:hover, span.SpanPopup1:hover {
+  position: relative;
+  z-index:25;
+  color: #003399;
+  text-decoration:underline;
+  font-weight:bold;
+}
+
+a.ListCellPopup3 span { display: none }
+a.ListCellPopup3:hover span {
+  display:block;
+  position:absolute;
+  top:0.2em;left:-19em;width:40em;
+  padding: 4px;
+  border: 2px solid;
+  border-color: #f7faff #99a #99a #f7faff;
+  background-color:#DBE3F5;
+  color:#000;
+  text-align: left
+}
+
+/* For popups that are also real links, so the color gets set correctly */
+a.ListCellPopup4:link, a.ListCellPopup5:link {
+  z-index:24;
+  color: #000000;
+  text-decoration:none;
+  font-weight:normal;
+}
+
+a.ListCellPopup4:visited, a.ListCellPopup5:visited {
+  z-index:24;
+  color: #000000;
+  text-decoration:underline;
+  font-weight:bold;
+}
+
+a.ListCellPopup4:hover, a.ListCellPopup5:hover {
+  position: relative;
+  z-index:25;
+}
+
+a.ListCellPopup4 span, a.ListCellPopup5 span, span.SpanPopup1 span {
+  display: none
+}
+a.ListCellPopup4:hover span, a.ListCellPopup5:hover span, span.SpanPopup1:hover span {
+  display:block;
+  position:absolute;
+  top: -.3em;
+  left: -.3em;
+  width: 60em;
+  padding: 2px;
+  border: 1px solid;
+  border-color: #000000;
+  background-color:#E6E6E6;
+  color:#000;
+  text-align: left
+}
+
+a.ListCellPopup5:link {font-size: 11px; color: #666666; line-height: 14px;}
+
+a.ListCellPopup5:visited {font-size: 11px; color: #666666; line-height: 14px;}
+
+a.ListCellPopup5:hover span {
+  width: 30em;
+  height: auto;
+}
+
+span.SpanPopup1:link {
+  z-index: 24;
+  color: #003399;
+  text-decoration: none;
+  font-weight:bold;
+}
+
+span.SpanPopup1:visited {
+  z-index: 24;
+  color: #003399;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+span.SpanPopup1:hover {
+  text-decoration: none;
+}
+
+span.SpanPopup1:hover span {
+  top: 1em;
+  left: 0.7em;
+  width: auto;
+  height: auto;
+}
+
+div.overlay { 
+  position: absolute;
+  visibility: hidden; 
+  width:9px; height:0px;
+  left:0; top:200px;
+  font-size:10px; 
+  background-color: #777777; color:#000;
+  border: 0px;
+  z-index: 200;
+  opacity: 0.3;
+  filter:alpha(opacity=30); -moz-opacity:0.3;
+}
+
+/* .99 opacity is for safari bug */
+div.timepopup { 
+  position:absolute;
+  visibility:hidden; 
+  width:70px;
+  left:0; top:-20px;
+  font-size:10px; 
+  padding: 3px;
+  text-align: center;
+  background-color: #e6e6e6; color:#000;
+  border: 1px solid;
+  z-index: 210;
+  opacity: 0.99;
+}
+
+div.scrollable {
+  top: 100px;
+  left: 400px;
+  width: auto;
+  height: 165px;
+  margin-right: -6px;
+  overflow: auto;
+}
+
+div.eventDetails { 
+  position: absolute;
+  width: 672px;
+  background-color: #CCE0FF;
+  margin-top: 2px;
+  border: 1px solid;
+  font-size:10px; 
+  opacity: 0.99;
+}
+
+div.eventsSummary {
+  position: relative;
+  height: 200px;
+  overflow: auto;
+  padding: 6px;
+  z-index: 500;
+}
+
+td.eventsTab, td.eventsTabOn {
+  text-align: center;
+  border-right: solid;
+  border-bottom: solid;
+  border-width: 1px;
+  border-color: #000000;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+td.eventsTabOn {
+  border-bottom: none;
+}
+
+.red, .redTableCell {
+  color: #990000;
+}
+
+A.red:link {color: #990000; text-decoration: none; font-weight: bold;}
+A.red:visited {color: #990000; text-decoration: none; font-weight: bold;}
+A.red:hover {color: #FF0000; text-decoration: none; font-weight: bold;}
+
+.green {
+  color: #009900;
+}
+
+A.green:link {color: #009900; text-decoration: none; font-weight: bold;}
+A.green:visited {color: #009900; text-decoration: none; font-weight: bold;}
+A.green:hover {color: #00CC00; text-decoration: none; font-weight: bold;}
+
+.yellow {
+  color: #BAA301;
+}
+
+A.yellow:link {color: #BAA301; text-decoration: none; font-weight: bold;}
+A.yellow:visited {color: #BAA301; text-decoration: none; font-weight: bold;}
+A.yellow:hover {color: #D1B801; text-decoration: none; font-weight: bold;}
+
+.navy {
+  color: #000080;
+}
+
+A.navy:link {color: #000080; text-decoration: none; font-weight: bold;}
+A.navy:visited {color: #000080; text-decoration: none; font-weight: bold;}
+A.navy:hover {color: #0000FF; text-decoration: none; font-weight: bold;}
+
+.black {
+  color: black;
+}
+
+A.black:link {color: black; text-decoration: none; font-weight: bold;}
+A.black:visited {color: black; text-decoration: none; font-weight: bold;}
+A.black:hover {color: grey; text-decoration: none; font-weight: bold;}
+
+BODY {z-index: 0;}
+
+b.rtop, b.rbottom{display:block;background: #FFF}
+b.rtop b, b.rbottom b{display:block; height: 1px;
+    overflow: hidden; background: #CCCCCC}
+b.r1{margin-left: 4px}
+b.r2{margin-left: 2px}
+b.r3{margin-left: 1px}
+
+div.effectsContainer div.effectsPortlet {
+  height: 100%;
+}
+
+/* Events */
+div.eventBlock {
+  background-color: #003399;
+  height: 8px;
+  width: 8px;
+  font-size:8px;    /* For I.E., even if there's no text, it sets the height */
+  position: relative;
+  z-index: 201;     /* Just above the overlay */
+}
+
+ul.boxy {
+    list-style-type: none;
+    padding: 0px;
+    margin: 0px;
+}
+
+ul.boxy li {
+    padding-left: 4px;
+    margin: 0px; 
+}
+
+

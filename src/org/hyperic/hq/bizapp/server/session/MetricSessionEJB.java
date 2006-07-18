@@ -1,0 +1,834 @@
+/*
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ * "derived work".
+ * 
+ * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * This file is part of HQ.
+ * 
+ * HQ is free software; you can redistribute it and/or modify
+ * it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
+ */
+
+package org.hyperic.hq.bizapp.server.session;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
+
+import javax.ejb.CreateException;
+import javax.naming.NamingException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AgentManagerLocal;
+import org.hyperic.hq.appdef.shared.AgentManagerUtil;
+import org.hyperic.hq.appdef.shared.AgentNotFoundException;
+import org.hyperic.hq.appdef.shared.AgentValue;
+import org.hyperic.hq.appdef.shared.AppdefCompatException;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
+import org.hyperic.hq.appdef.shared.PlatformTypeValue;
+import org.hyperic.hq.auth.shared.SessionManager;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplayConstants;
+import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary;
+import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplayValue;
+import org.hyperic.hq.bizapp.shared.uibeans.ProblemMetricSummary;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.grouping.server.session.GroupUtil;
+import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
+import org.hyperic.hq.measurement.EvaluationException;
+import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.MeasurementNotFoundException;
+import org.hyperic.hq.measurement.TemplateNotFoundException;
+import org.hyperic.hq.measurement.data.DataNotAvailableException;
+import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
+import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
+import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.product.MetricValue;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.timer.StopWatch;
+
+public class MetricSessionEJB extends BizappSessionEJB {
+    private Log log = LogFactory.getLog(MetricSessionEJB.class);
+
+    protected SessionManager manager = SessionManager.getInstance();
+
+    /**
+     * Fetch the metric summaries for specified resources and templates
+     * @param resources the list of resources
+     * @param tmpls the list of measurement templates
+     * @param begin the beginning of time range
+     * @param end the end of time range
+     * @param showNoCollect whether or not to include templates that have not
+     *        collected data
+     * @return Map where key = category, value = List of summary beans
+     */
+    protected Map getResourceMetrics(AuthzSubjectValue subject, List resources,
+                                     List tmpls, long begin, long end,
+                                     boolean showNoCollect)
+        throws AppdefCompatException {
+        List mtVals;
+        Integer[] mtids = new Integer[tmpls.size()];
+        int i = 0;
+        StopWatch timer = new StopWatch();
+                
+        // Create Map of all resources
+        HashMap resmap =
+            new HashMap(MeasurementConstants.VALID_CATEGORIES.length);
+        
+        // bail out early if there's nothing to do
+        if (tmpls.size() < 1 || resources.size() < 1)
+            return resmap;
+            
+        // If templates are just ID's, we have to look them up
+        if (tmpls.get(0) instanceof MeasurementTemplateValue) {
+            mtVals = tmpls;
+            // Iterate through them
+            for (Iterator it = tmpls.iterator(); it.hasNext(); ) {
+                MeasurementTemplateValue tmpl =
+                    (MeasurementTemplateValue) it.next();
+                mtids[i++] = tmpl.getId();
+            }
+        }
+        else {
+            mtids = (Integer[]) tmpls.toArray(mtids);
+            try {
+                mtVals = this.getTemplateManager()
+                             .getTemplates(mtids, PageControl.PAGE_ALL);
+            } catch (TemplateNotFoundException e) {
+                // Well, if we don't find it, *shrug*
+                mtVals = new ArrayList(0);
+            }
+        }
+        
+        // Create the EntityIds array and map of counts
+        Integer[] eids = new Integer[resources.size()];
+        AppdefEntityID aeid = null;
+        Map totalCounts = new HashMap();
+        Iterator it = resources.iterator();
+        for (i = 0; it.hasNext(); i++) {            
+            // We understand two types
+            Object resource = it.next();
+            if (resource instanceof AppdefResourceValue) {
+                AppdefResourceValue resVal = (AppdefResourceValue) resource;
+                aeid = resVal.getEntityId();
+                
+                // Increase count
+                String type = resVal.getAppdefResourceTypeValue().getName();
+                int count = 0;
+                if (totalCounts.containsKey(type)) {
+                    count = ((Integer) totalCounts.get(type)).intValue();
+                }
+                totalCounts.put(type, new Integer(++count));
+            }
+            else if (resource instanceof AppdefEntityID) {
+                aeid = (AppdefEntityID) resource;
+            }
+            else {
+                throw new AppdefCompatException("getResourceMetrics() does " +
+                    "not understand resource class: " + resource.getClass());
+            }
+            
+            eids[i] = aeid.getId();
+        }
+        
+        if (log.isTraceEnabled()) {
+            log.trace("getResourceMetrics -> resource and template maps " +
+                timer.getElapsed());
+        }
+    
+        try {
+            timer.reset();
+            
+            // Now get the aggregate data, keyed by template ID's
+            Map datamap = this.getDataMan()
+                .getAggregateData(mtids, eids, begin, end);
+            
+            // Get the intervals, keyed by template ID's as well
+            Map intervals = this.getDerivedMeasurementManager()
+                .findMetricIntervals(subject, eids, mtids);
+            
+            if (log.isTraceEnabled()) {
+                log.trace("getResourceMetrics -> getAggregateData took " +
+                    timer.getElapsed());
+            }
+    
+            for (it = mtVals.iterator(); it.hasNext(); ) {
+                MeasurementTemplateValue tmpl =
+                    (MeasurementTemplateValue) it.next();
+    
+                int total = eids.length;
+                String type = tmpl.getMonitorableType().getName();
+                if (totalCounts.containsKey(type)) {
+                    total = ((Integer) totalCounts.get(type)).intValue();
+                }
+    
+                double[] data = (double[]) datamap.get(tmpl.getId());
+                
+                if (data == null && !showNoCollect)
+                    continue;
+    
+                String category = tmpl.getCategory().getName();
+                TreeSet summaries = (TreeSet) resmap.get(category);
+                if (summaries == null) {
+                    summaries = new TreeSet();
+                    resmap.put(category, summaries);
+                }
+                
+                Long interval = (Long) intervals.get(tmpl.getId());
+    
+                // Now create a MetricDisplaySummary and add it to the list
+                MetricDisplaySummary summary =
+                    this.getMetricDisplaySummary(tmpl, interval, begin, end,
+                                                 data, total);
+                summaries.add(summary);
+            }
+        } catch (DataNotAvailableException e) {
+            // Then we just return an empty map
+            // don't swallow exception without an
+            // opportunity to log it
+            log.debug("fetching metrics failed: ", e); 
+        }
+        
+        return resmap;
+    }
+
+    /**
+     * Fetch all metric summaries for specified resources
+     * @param resources the list of resources
+     * @param begin the beginning of time range
+     * @param end the end of time range
+     * @param showNoCollect TODO
+     * @return Map where key = category, value = List of summary beans
+     * @throws AppdefCompatException
+     */
+    protected Map getResourceMetrics(AuthzSubjectValue subject, List resources,
+                                     String resourceType, long filters,
+                                     String keyword, long begin, long end,
+                                     boolean showNoCollect)
+        throws AppdefCompatException {
+        // Need to get the templates for this type
+        List tmpls = this.getTemplateManager()
+            .findTemplates(resourceType, filters, keyword);
+    
+        // Look up the metric summaries of associated servers
+        return this.getResourceMetrics(subject, resources, tmpls, begin, end,
+                                       showNoCollect);
+    }
+
+    protected MetricDisplaySummary
+        getMetricDisplaySummary(MeasurementTemplateValue tmpl, Long interval,
+                                long begin, long end, double[] data,
+                                int totalConfigured) {
+        // Create a new metric summary bean
+        MetricDisplaySummary summary = new MetricDisplaySummary();
+            
+        // Set the time range
+        summary.setBeginTimeFrame(new Long(begin));
+        summary.setEndTimeFrame(new Long(end));
+            
+        // Set the template info
+        summary.setLabel(tmpl.getName());
+        summary.setTemplateId(tmpl.getId());
+        summary.setTemplateCat(tmpl.getCategory().getId());
+        summary.setCategory(tmpl.getCategory().getName());
+        summary.setUnits(tmpl.getUnits());
+        summary.setCollectionType(new Integer(tmpl.getCollectionType()));
+        summary.setDesignated(new Boolean(tmpl.getDesignate()));        
+        summary.setMetricSource(tmpl.getMonitorableType().getName());
+        
+        summary.setCollecting(interval != null);
+        
+        if (summary.getCollecting())
+            summary.setInterval(interval.longValue());
+    
+        if (data == null)
+            return summary;
+        
+        // Set the data values
+        summary.setMetric(MetricDisplayConstants.MIN_KEY,
+            new MetricDisplayValue(data[MeasurementConstants.IND_MIN]));
+        summary.setMetric(MetricDisplayConstants.AVERAGE_KEY,
+            new MetricDisplayValue(data[MeasurementConstants.IND_AVG]));
+        summary.setMetric(MetricDisplayConstants.MAX_KEY,
+            new MetricDisplayValue(data[MeasurementConstants.IND_MAX]));
+        
+        // Groups get sums, not last value
+        if (totalConfigured == 1 ||
+            tmpl.getCollectionType() == MeasurementConstants.COLL_TYPE_STATIC) {
+            summary.setMetric(MetricDisplayConstants.LAST_KEY,
+                new MetricDisplayValue(
+                        data[MeasurementConstants.IND_LAST_TIME]));
+        }
+        else {
+            // Availability does not need to be summed
+            if (tmpl.getAlias().equalsIgnoreCase(
+                    MeasurementConstants.CAT_AVAILABILITY)) {
+                summary.setMetric(MetricDisplayConstants.LAST_KEY,
+                    new MetricDisplayValue(data[MeasurementConstants.IND_AVG]));
+            }
+            else {
+                summary.setMetric(MetricDisplayConstants.LAST_KEY,
+                    new MetricDisplayValue(
+                        data[MeasurementConstants.IND_AVG] *
+                        data[MeasurementConstants.IND_CFG_COUNT]));
+            }
+        }
+                        
+        // Number configured
+        summary.setAvailUp(
+            new Integer((int) data[MeasurementConstants.IND_CFG_COUNT]));
+        summary.setAvailUnknown(new Integer(totalConfigured));
+    
+        return summary;
+    }
+
+    protected List getAGMemberIds(AuthzSubjectValue subject,
+                                  AppdefEntityID parentAid,
+                                  AppdefEntityTypeID ctype)
+        throws AppdefEntityNotFoundException, PermissionException {
+        return this.getAGMemberIds(subject, new AppdefEntityID[] { parentAid }, ctype);
+    }
+
+    protected List getAGMemberIds(AuthzSubjectValue subject,
+                                  AppdefEntityID[] aids,
+                                  AppdefEntityTypeID ctype)
+        throws AppdefEntityNotFoundException, PermissionException {
+        // Find the autogroup members
+        List entIds = new ArrayList();
+        for (int i = 0; i < aids.length; i++) {
+            AppdefEntityID aid = aids[i];
+            AppdefEntityValue entVal = new AppdefEntityValue(aid, subject);
+    
+            switch (ctype.getType()) {
+                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                    entIds.addAll(entVal.getAssociatedServerIds(ctype.getId()));
+                    break;
+                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                    // Get service IDs
+                    entIds.addAll(entVal.getAssociatedServiceIds(ctype.getId()));
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                        "Unable to determine autogroup members for " +
+                        "appdef type: " + aid.getType());
+            }
+        }
+        return entIds;
+    }
+
+    protected double[] getAvailability(AuthzSubjectValue subject,
+                                       AppdefEntityID[] ids)
+        throws AppdefEntityNotFoundException, PermissionException {
+        final long TIMEOUT = 20000;     // 20 sec 
+        long current = System.currentTimeMillis();
+        StopWatch watch = new StopWatch(current);
+    
+        AgentManagerLocal agentMan = null;
+        
+        long liveMillis = MeasurementConstants.ACCEPTABLE_PLATFORM_LIVE_MILLIS;
+        
+        // Allow for the maximum window based on collection interval
+        Map midMap = new HashMap(ids.length);        
+        for (int i = 0; i < ids.length; i++) {
+            DerivedMeasurementValue dmv =
+                findAvailabilityMetric(subject, ids[i]);
+    
+            if (dmv != null) {
+                liveMillis = Math.max(liveMillis, 3 * dmv.getInterval());
+                midMap.put(ids[i], dmv.getId());
+            }
+        }
+        
+        long acceptable =
+            liveMillis == 0 ? MeasurementConstants.TIMERANGE_UNLIMITED:
+                              current - liveMillis; 
+    
+        double[] result = new double[ids.length];
+        Arrays.fill(result, MeasurementConstants.AVAIL_UNKNOWN);
+        
+        Map data = new HashMap(0);
+        try {
+            if (midMap.size() > 0) {
+                Integer[] mids =
+                    (Integer[]) midMap.values().toArray(new Integer[0]);
+                data = this.getDataMan().getLastDataPoints(mids, acceptable);
+                log.debug("getLastDataPoints() + " + watch.getElapsed());
+            }
+        } catch (DataNotAvailableException e) {
+            // Then we'll have to assume we have no data
+        }
+    
+        // Organize by agent
+        HashMap toGetLive = new HashMap();
+        
+        for (int i = 0; i < ids.length; i++) {
+            if (midMap.containsKey(ids[i])) {
+                Integer mid = (Integer) midMap.get(ids[i]);
+                if (data.containsKey(mid)) {
+                    MetricValue mval = (MetricValue) data.get(mid);
+                    result[i] = mval.getValue();
+                } else {
+                    if (agentMan == null) {
+                        try {
+                            agentMan = AgentManagerUtil.getLocalHome().create();
+                        } catch (NamingException e) {
+                            throw new SystemException(e);
+                        } catch (CreateException e) {
+                            throw new SystemException(e);
+                        }
+                    }
+                    
+                    // First figure out if the agent of this appdef entity
+                    // already has a list
+                    try {
+                        AgentValue agent = agentMan.getAgent(ids[i]);
+                        
+                        if (!toGetLive.containsKey(agent)) {
+                            toGetLive.put(agent, new ArrayList());
+                        }
+                        
+                        // Now add to list
+                        List toGetLiveList = (List) toGetLive.get(agent);
+                        toGetLiveList.add(new Integer(i));
+                    } catch (AgentNotFoundException e) {
+                        result[i] = MeasurementConstants.AVAIL_DOWN;
+                    }
+                }
+            } else {
+                // cases for abstract resources whose availability are xor'd
+                switch (ids[i].getType()) {
+                    case AppdefEntityConstants.APPDEF_TYPE_APPLICATION :
+                        AppdefEntityValue appVal =
+                            new AppdefEntityValue(ids[i], subject);
+                        AppdefEntityID[] services =
+                            appVal.getFlattenedServiceIds();
+    
+                        result[i] = getAggregateAvailability(subject, services);
+                        break;
+                    case AppdefEntityConstants.APPDEF_TYPE_GROUP :
+                        // determine the aggregate from the AppdefEntityID's
+                        List grpMembers =
+                            GroupUtil.getGroupMembers(subject, ids[i], null);
+                        result[i] = getAggregateAvailability(subject, 
+                            toAppdefEntityIDArray(grpMembers));
+                        break;
+                    default :
+                        break;
+                }
+            }
+        }
+    
+        // Never get live
+        toGetLive.clear();
+        
+        if (toGetLive.size() > 0) {
+            Iterator it = toGetLive.values().iterator();
+            for (int i = 0; it.hasNext(); i++) {
+                // No more waiting...just return the result
+                if (watch.getElapsed() > TIMEOUT) {
+                    return result;
+                }
+    
+                List indList = (List) it.next();
+                
+                // Have to get int values out of the list
+                Integer[] liveMids = new Integer[indList.size()];
+                Iterator indIt = indList.iterator();
+                for (int ind = 0; indIt.hasNext(); ind++) {
+                    int index = ((Integer) indIt.next()).intValue();
+                    liveMids[ind] = (Integer) midMap.get(ids[index]);
+                }
+                
+                try {
+                    MetricValue[] mvals =
+                        this.getDerivedMeasurementManager()
+                             .getLiveMeasurementValues(subject, liveMids);
+    
+                    indIt = indList.iterator();     // Reset iterator
+                    for (int ind = 0; indIt.hasNext(); ind++) {
+                        int index = ((Integer) indIt.next()).intValue();
+                        result[index] = mvals[ind].getValue();
+                    }
+                } catch (MeasurementNotFoundException e) {
+                    // Leave them as AVAIL_UNKNOWN
+                } catch (EvaluationException e) {
+                    // Leave them as AVAIL_UNKNOWN
+                } catch (LiveMeasurementException e) {
+                    // Leave them as AVAIL_UNKNOWN
+                }
+            }
+        }
+    
+        return result;
+    }
+
+    protected DerivedMeasurementValue
+        findAvailabilityMetric(AuthzSubjectValue subject, AppdefEntityID id) {
+        try {
+            return this.getDerivedMeasurementManager()
+                .getAvailabilityMeasurement(subject, id);
+        } catch (MeasurementNotFoundException e) {
+            return null;
+        }
+    }
+
+    protected AppdefEntityID[] toAppdefEntityIDArray(List entities) {
+        AppdefEntityID[] result = new AppdefEntityID[entities.size()];
+        int idx = 0;
+        for (Iterator iter = entities.iterator();  iter.hasNext();) {
+            Object thisThing = iter.next();
+            if (thisThing instanceof AppdefResourceValue) {
+                result[idx++] = ((AppdefResourceValue)thisThing).getEntityId();                
+                continue;
+            }             
+            result[idx++] = (AppdefEntityID)thisThing;
+        }
+        return result;        
+    }
+
+    /**
+     * Given an array of AppdefEntityID's, disqulifies their aggregate 
+     * availability (with the disqualifying status) for all of them if any are 
+     * down or unknown, otherwise the aggregate is deemed
+     * available
+     * 
+     * If there's nothing in the array, then aggregate is not populated.
+     * Ergo, the availability shall be disqualified as unknown i.e. the
+     * (?) representation
+     */
+    protected double getAggregateAvailability(AuthzSubjectValue subject,
+                                              AppdefEntityID[] ids)
+        throws AppdefEntityNotFoundException, PermissionException {
+        if (ids.length == 0)
+            return MeasurementConstants.AVAIL_UNKNOWN;
+        
+        // Break them up and do 5 at a time
+        int length = 5;
+        double sum = 0;
+        int count = 0;
+        int unknownCount = 0;
+        for (int ind = 0; ind < ids.length; ind += length) {
+            
+            if (ids.length - ind < length)
+                length = ids.length - ind;
+    
+            AppdefEntityID[] subids = new AppdefEntityID[length];
+            
+            for (int i = ind; i < ind + length; i++) {
+                subids[i - ind] = ids[i];
+            }
+            
+            double[] avails = getAvailability(subject, subids);
+            
+            for (int i = 0; i < avails.length; i++) {
+                 if (avails[i] == MeasurementConstants.AVAIL_UNKNOWN) {
+                     unknownCount++;
+                 }
+                 else {
+                     sum += avails[i];
+                     count++;
+                 }
+             }
+        }
+        
+        if (unknownCount == ids.length)
+            // All resources are unknown
+            return MeasurementConstants.AVAIL_UNKNOWN;
+        
+        return sum / count;
+    }
+
+    protected Map findMetrics(int sessionId, AppdefEntityID entId, long begin,
+                              long end, PageControl pc)
+        throws SessionTimeoutException, SessionNotFoundException,
+            InvalidAppdefTypeException, PermissionException,
+            AppdefEntityNotFoundException, AppdefCompatException {
+        AppdefEntityID[] entIds = new AppdefEntityID[] { entId };
+        return this.findMetrics(sessionId, entIds,
+                                MeasurementConstants.FILTER_NONE, null,
+                                begin, end, false);
+    }
+
+    protected Map findMetrics(int sessionId, AppdefEntityID[] entIds,
+                              long filters, String keyword, long begin,
+                              long end, boolean showNoCollect)
+        throws SessionTimeoutException, SessionNotFoundException,
+            InvalidAppdefTypeException, PermissionException,
+            AppdefEntityNotFoundException, AppdefCompatException {
+        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        
+        // Assume all entities are of the same type
+        AppdefEntityValue rv = new AppdefEntityValue(entIds[0], subject);
+        
+        List entArr;
+        switch (entIds[0].getType()) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                entArr = Arrays.asList(entIds);
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                try {
+                    entArr = GroupUtil.getCompatGroupMembers(
+                        subject, entIds[0], null, PageControl.PAGE_ALL);
+                } catch (GroupNotCompatibleException e) {
+                    throw new IllegalArgumentException(
+                        "Metrics are not available for groups that " +
+                        "are not compatible types: " + e.getMessage());
+                }                    
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                // No metric support for applications
+                return new HashMap(0);
+            default:
+                throw new InvalidAppdefTypeException(
+                    "entityID is not valid type, id type: " +
+                    entIds[0].getType());
+        }
+        
+        String monitorableType = rv.getMonitorableType();
+    
+        // Look up the metric summaries of associated servers
+        return this.getResourceMetrics(subject, entArr, monitorableType,
+                                       filters, keyword, begin, end,
+                                       showNoCollect);
+    }
+
+    protected Map findMetrics(int sessionId, AppdefEntityID entId, List mtids,
+                              long begin, long end)
+        throws SessionTimeoutException, SessionNotFoundException,
+            PermissionException, AppdefEntityNotFoundException,
+            AppdefCompatException {
+        AuthzSubjectValue subject = manager.getSubject(sessionId);
+    
+        AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
+        List platforms = null, servers = null, services = null;
+        
+        // Can't assume that all templates are only for given entity,
+        // might be for associated resources, too.
+        switch (rv.getID().getType()) {
+            // Hierarchical, not actuall missing "break" statements
+            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                // Get the platforms
+                platforms = rv.getAssociatedPlatforms(PageControl.PAGE_ALL);
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                // Get the servers
+                servers = rv.getAssociatedServers(PageControl.PAGE_ALL);
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                // Get the services
+                services = rv.getAssociatedServices(PageControl.PAGE_ALL);
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                // Does not matter what kind of group this is, just use platform
+                try {
+                    platforms =
+                        GroupUtil.getCompatGroupMembers(subject, entId, null,
+                                                        PageControl.PAGE_ALL);
+                } catch (GroupNotCompatibleException e) {
+                    log.debug("Group not compatible");
+                }
+                break;
+            default:
+                break;
+        }
+        
+        if ( log.isDebugEnabled() ) {
+            log.debug("platforms="+platforms);
+            log.debug("servers="+servers);
+            log.debug("services="+services);
+        }
+        
+        // Look up the metric summaries of all associated resources
+        Map results = new HashMap();
+        if (platforms != null)
+            results.putAll(this.getResourceMetrics(subject, platforms,
+                                                   mtids, begin, end, false));
+        if (servers != null)
+            results.putAll(this.getResourceMetrics(subject, servers,
+                                                   mtids, begin, end, false));
+        if (services != null)
+            results.putAll(this.getResourceMetrics(subject, services,
+                                                   mtids, begin, end, false));
+        return results;
+    }
+
+    protected List findAllMetrics(int sessionId, AppdefEntityID aeid,
+                                  AppdefEntityTypeID ctype, long begin, long end)
+        throws SessionTimeoutException, SessionNotFoundException,
+               AppdefEntityNotFoundException, PermissionException,
+               AppdefCompatException, InvalidAppdefTypeException {
+        ArrayList result = new ArrayList();
+        AppdefEntityID[] entIds = new AppdefEntityID[] { aeid };
+        
+        Map metrics = findAGMetricsByType(sessionId, entIds, ctype,
+                                          MeasurementConstants.FILTER_NONE,
+                                          null, begin, end, false);
+        for (Iterator it = metrics.values().iterator(); it.hasNext(); ) {
+            Collection metricColl = (Collection) it.next();
+            
+            for (Iterator it2 = metricColl.iterator(); it2.hasNext(); ) {
+                MetricDisplaySummary summary =
+                    (MetricDisplaySummary) it2.next();
+                ProblemMetricSummary pms =
+                    new ProblemMetricSummary(summary);
+                pms.setMultipleAppdefKey(ctype.getAppdefKey());
+                result.add(pms);
+            }
+        }
+        return result;
+    }
+
+    protected List findAllMetrics(int sessionId, AppdefEntityID[] aeids,
+                                  long begin, long end)
+        throws SessionTimeoutException, SessionNotFoundException,
+               AppdefEntityNotFoundException, PermissionException,
+               AppdefCompatException, InvalidAppdefTypeException {
+        ArrayList result = new ArrayList();
+        Map metrics = findMetrics(sessionId, aeids,
+                                  MeasurementConstants.FILTER_NONE, null,
+                                  begin, end, false);
+        for (Iterator it = metrics.values().iterator(); it.hasNext(); ) {
+            Collection metricColl = (Collection) it.next();
+            
+            for (Iterator it2 = metricColl.iterator(); it2.hasNext(); ) {
+                MetricDisplaySummary summary =
+                    (MetricDisplaySummary) it2.next();
+                ProblemMetricSummary pms =
+                    new ProblemMetricSummary(summary);
+                result.add(pms);
+            }
+        }
+        return result;
+    }
+
+    protected List findAllMetrics(int sessionId, AppdefEntityID aeid,
+                                  long begin, long end)
+        throws SessionTimeoutException, SessionNotFoundException,
+               AppdefEntityNotFoundException, PermissionException,
+               AppdefCompatException, InvalidAppdefTypeException {
+        ArrayList result = new ArrayList();
+        Map metrics = findMetrics(sessionId, aeid, begin, end,
+                                  PageControl.PAGE_ALL);
+        for (Iterator it = metrics.values().iterator(); it.hasNext(); ) {
+            Collection metricColl = (Collection) it.next();
+            
+            for (Iterator it2 = metricColl.iterator(); it2.hasNext(); ) {
+                MetricDisplaySummary summary =
+                    (MetricDisplaySummary) it2.next();
+                ProblemMetricSummary pms =
+                    new ProblemMetricSummary(summary);
+                pms.setSingleAppdefKey(aeid.getAppdefKey());
+                result.add(pms);
+            }
+        }
+        return result;
+    }
+
+    protected List getPlatformAG(AuthzSubjectValue subject,
+                                 AppdefEntityTypeID ctype)
+        throws AppdefEntityNotFoundException, PermissionException {
+        if(ctype.getType() != AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
+            throw new IllegalArgumentException(ctype.getType() + 
+                    " is not a platform type");
+        }
+        Integer[] platIds = 
+            this.getPlatformManager().getPlatformIds(subject, ctype.getId());
+        List entIds = new ArrayList(platIds.length);
+        for(int i = 0; i < platIds.length; i++) {
+            entIds.add(
+                    new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
+                                       platIds[i]));
+        }
+        return entIds;
+    }
+
+    protected Map findAGPlatformMetricsByType(int sessionId, 
+                                              AppdefEntityTypeID platTypeId,
+                                              long begin, long end,
+                                              boolean showAll)
+        throws SessionTimeoutException, SessionNotFoundException,
+               InvalidAppdefTypeException, AppdefEntityNotFoundException,
+               PermissionException, AppdefCompatException {
+        AuthzSubjectValue subject = manager.getSubject(sessionId);
+    
+        // Get the member IDs
+        List platforms = this.getPlatformAG(subject, platTypeId);
+        
+        // Get resource type name
+        PlatformTypeValue platType =
+            this.getPlatformManager().findPlatformTypeById(platTypeId.getId());
+    
+        // Look up the metric summaries of platforms
+        return this.getResourceMetrics(subject, platforms, platType.getName(),
+                                       MeasurementConstants.FILTER_NONE, null,
+                                       begin, end, showAll);
+    }
+    
+    protected Map findAGMetricsByType(int sessionId, AppdefEntityID[] entIds,
+                                      AppdefEntityTypeID typeId, long filters,
+                                      String keyword, long begin, long end,
+                                      boolean showAll)
+        throws SessionTimeoutException, SessionNotFoundException,
+               InvalidAppdefTypeException, PermissionException,
+               AppdefEntityNotFoundException, AppdefCompatException {
+        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        
+        List group = new ArrayList();
+        for (int i = 0; i < entIds.length; i++) {
+            AppdefEntityValue rv = new AppdefEntityValue(entIds[i], subject);
+            
+            switch (typeId.getType()) {
+                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                    // Get the associated servers
+                    group.addAll(rv.getAssociatedServers(typeId.getId(),
+                                                         PageControl.PAGE_ALL));
+                    break;
+                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                    // Get the associated services
+                    group.addAll(rv.getAssociatedServices(typeId.getId(),
+                                                      PageControl.PAGE_ALL));
+                    break;
+                default:
+                    break;
+            }
+        }
+    
+        // Need to get the templates for this type, using the first resource
+        AppdefResourceValue resource = (AppdefResourceValue) group.get(0);
+        String resourceType = resource.getAppdefResourceTypeValue().getName();
+    
+        // Look up the metric summaries of associated servers
+        return this.getResourceMetrics(subject, group, resourceType,
+                                       filters, keyword, begin, end, showAll);
+    }
+}

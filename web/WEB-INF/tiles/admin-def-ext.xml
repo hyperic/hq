@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+     "-//Apache Software Foundation//DTD Tiles Configuration 1.1//EN"
+     "http://jakarta.apache.org/struts/dtds/tiles-config_1_1.dtd">
+
+<tiles-definitions>
+
+  <!-- admin portlets -->
+  <definition name=".admin.home" path="/admin/AdminHome.jsp"/> 
+
+  <definition name=".admin.user.View"
+              controllerUrl="/admin/user/View.do"
+              path="/admin/user/ViewUser.jsp"/>  
+    
+  <definition name=".admin.user.new.buttons"
+              extends=".form.buttons"/>
+
+  <definition name=".admin.user.page.footer"
+              extends=".page.footer"/>
+
+  <definition name=".admin.config.EditConfig"
+              controllerUrl="/admin/config/EditConfigPrep.do"
+              path="/admin/config/EditServerConfig.jsp"/> 
+
+  <definition name=".admin.config.EditMonitorConfig"
+              path="/admin/config/ChangeResourceTemplate.jsp"/>
+  
+</tiles-definitions>

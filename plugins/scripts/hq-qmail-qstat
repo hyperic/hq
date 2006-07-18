@@ -1,0 +1,12 @@
+#!/bin/sh
+
+#modified version of /var/qmail/bin/qmail-qstat
+#same logic, only the format of the two echo statements differ
+
+cd /var/qmail
+messdirs=`echo queue/mess/* | wc -w`
+messfiles=`find queue/mess/* -print | wc -w`
+tododirs=`echo queue/todo | wc -w`
+todofiles=`find queue/todo -print | wc -w`
+echo MessagesInQueue=`expr $messfiles - $messdirs`
+echo MessagesAwaitingPreprocessing=`expr $todofiles - $tododirs`

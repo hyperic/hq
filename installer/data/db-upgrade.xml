@@ -1,0 +1,1746 @@
+<?xml version="1.0"?>
+
+<project name="db-upgrade" default="upgrade" basedir=".">
+
+<!--
+This target upgrades a database schema.  The parameters that it
+accepts are:
+  jdbc.url      = the jdbc url of the database to upgrade
+  jdbc.user     = the user to connect to the database as
+  jdbc.password = the database user's password
+  typemap.file  = the typemap file to use for mapping column types
+  schema.target = the schema version to upgrade to.  If this is
+                  omitted then the schema is upgraded to the latest
+                  version.
+
+This target assumes that the taskdefs for the dbupgrade ant task
+has already been defined.
+-->
+<target name="upgrade">
+
+<dbupgrade
+   jdbcUrl="${jdbc.url}" jdbcUser="${jdbc.user}" jdbcPassword="${jdbc.password}"
+
+   valueColumn="VALUE" table="EAM_CONFIG_PROPS"
+   keyColumn="KEY" keyMatch="CAM_SCHEMA_VERSION"
+
+   typeMap="${typemap.file}"
+   targetSchemaVersion="${schema.target}">
+
+  <schemaSpec version="1.1">
+    <schema-update table="EAM_MEASUREMENT"
+                   column="dsn"
+                   columnType="VARCHAR2"
+                   value="ARG1"
+                   where="dsn IS NULL"/>
+  </schemaSpec>
+
+  <schemaSpec version="1.2">
+    <schema-addColumn table="EAM_APP_SERVICE"
+                      column="SERVICE_TYPE_ID"
+                      columnType="INTEGER">
+      <initializer>
+          UPDATE EAM_APP_SERVICE SET SERVICE_TYPE_ID= ( 
+              SELECT EAM_SERVICE_TYPE.ID 
+              FROM   EAM_SERVICE_TYPE, EAM_SERVICE 
+              WHERE      EAM_SERVICE_TYPE.ID=EAM_SERVICE.SERVICE_TYPE_ID
+                     AND EAM_SERVICE.ID=EAM_APP_SERVICE.SERVICE_ID)
+      </initializer>
+      <foreignKey constraintName="EAMAPPSVCTYPEID"
+                  references="EAM_SERVICE_TYPE(ID)"/>
+    </schema-addColumn>
+  </schemaSpec>
+
+  <!-- 1.3 upgrade: installed sort_name on most appdef and authz entities -->
+  <schemaSpec version="1.3">
+    <schema-addColumn table="EAM_AGENT_TYPE"
+                      column="SORT_NAME"
+                      columnType="VARCHAR2"
+                      precision="80">
+      <initializer>
+        UPDATE EAM_AGENT_TYPE SET SORT_NAME=UPPER(NAME)
+      </initializer>
+    </schema-addColumn>
+    <schema-addColumn table="EAM_APPLICATION_TYPE"
+                      column="SORT_NAME"
+                      columnType="VARCHAR2"
+                      precision="200">
+      <initializer>
+        UPDATE EAM_APPLICATION_TYPE SET SORT_NAME=UPPER(NAME)
+      </initializer>
+    </schema-addColumn>
+    <schema-addColumn table="EAM_PLATFORM_TYPE"
+                      column="SORT_NAME"
+                      columnType="VARCHAR2"
+                      precision="80">
+      <initializer>
+        UPDATE EAM_PLATFORM_TYPE SET SORT_NAME=UPPER(NAME)
+      </initializer>
+    </schema-addColumn>
+    <schema-addColumn table="EAM_PLATFORM"
+                      column="SORT_NAME"
+                      columnType="VARCHAR2"
+                      precision="100">
+      <initializer>
+        UPDATE EAM_PLATFORM_TYPE SET SORT_NAME=UPPER(NAME)
+      </initializer>
+    </schema-addColumn>
+    <schema-addColumn table="EAM_SERVER_TYPE"
+                      column="SORT_NAME"
+                      columnType="VARCHAR2"
+                      precision="200">
+      <initializer>
+        UPDATE EAM_SERVER_TYPE SET SORT_NAME=UPPER(NAME)
+      </initializer>
+    </schema-addColumn>
+    <schema-addColumn table="EAM_SERVICE_TYPE"
+                      column="SORT_NAME"
+                      columnType="VARCHAR2"
+                      precision="200">
+      <initializer>
+        UPDATE EAM_SERVICE_TYPE SET SORT_NAME=UPPER(NAME)
+      </initializer>
+    </schema-addColumn>
+    <schema-addColumn table="EAM_SERVER"
+                      column="SORT_NAME"
+                      columnType="VARCHAR2"
+                      precision="200">
+      <initializer>
+        UPDATE EAM_SERVER SET SORT_NAME=UPPER(NAME)
+      </initializer>
+    </schema-addColumn>
+    <schema-addColumn table="EAM_SERVICE"
+                      column="SORT_NAME"
+                      columnType="VARCHAR2"
+                      precision="200">
+      <initializer>
+        UPDATE EAM_SERVICE SET SORT_NAME=UPPER(NAME)
+      </initializer>
+    </schema-addColumn>
+    <schema-addColumn table="EAM_APPLICATION"
+                      column="SORT_NAME"
+                      columnType="VARCHAR2"
+                      precision="100">
+      <initializer>
+        UPDATE EAM_APPLICATION SET SORT_NAME=UPPER(NAME)
+      </initializer>
+    </schema-addColumn>
+    <schema-addColumn table="EAM_SVC_CLUSTER"
+                      column="SORT_NAME"
+                      columnType="VARCHAR2"
+                      precision="200">
+      <initializer>
+        UPDATE EAM_SVC_CLUSTER SET SORT_NAME=UPPER(NAME)
+      </initializer>
+    </schema-addColumn>
+    <schema-addColumn table="EAM_RESOURCE"
+                      column="SORT_NAME"
+                      columnType="VARCHAR2"
+                      precision="200">
+      <initializer>
+        UPDATE EAM_RESOURCE SET SORT_NAME=UPPER(NAME)
+      </initializer>
+    </schema-addColumn>
+    <schema-addColumn table="EAM_RESOURCE_GROUP"
+                      column="SORT_NAME"
+                      columnType="VARCHAR2"
+                      precision="100">
+      <initializer>
+        UPDATE EAM_RESOURCE_GROUP SET SORT_NAME=UPPER(NAME)
+      </initializer>
+    </schema-addColumn>
+    <schema-addColumn table="EAM_ROLE"
+                      column="SORT_NAME"
+                      columnType="VARCHAR2"
+                      precision="100">
+      <initializer>
+        UPDATE EAM_ROLE SET SORT_NAME=UPPER(NAME)
+      </initializer>
+    </schema-addColumn>
+    <schema-addColumn table="EAM_SUBJECT"
+                      column="SORT_NAME"
+                      columnType="VARCHAR2"
+                      precision="100">
+      <initializer>
+        UPDATE EAM_SUBJECT SET SORT_NAME=UPPER(NAME)
+      </initializer>
+    </schema-addColumn>
+  </schemaSpec>
+
+  <schemaSpec version="1.4">
+    <!-- Schema 1.4.  Change all Agent AUTOINVENTORYIDENTIFIER columns to
+         CAM Agent Server in the EAM_SERVER table.  -->
+    <schema-update table="EAM_SERVER"
+                   column="AUTOINVENTORYIDENTIFIER"
+                   columnType="VARCHAR2"
+                   value="CAM Agent Server"
+                   where="SERVER_TYPE_ID = (select id from EAM_SERVER_TYPE
+                                           where name = 'CAM Agent 1.0')"/>
+  </schemaSpec>
+
+  <schemaSpec version="1.5">
+    <!-- Schema 1.5.  Modify EAM_CONFIG_PROPS to allow for NULL values.
+         Also add properties for LDAP authentication -->
+    <schema-updateColumn table="EAM_CONFIG_PROPS"
+                         column="DEFAULT_VALUE"
+                         modifyCmd="NULL"/>
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES ('11', 'CAM_LDAP_NAMING_FACTORY_INITIAL', '', 'com.sun.jndi.ldap.LdapCtxFactory')"/>
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES ('12', 'CAM_LDAP_NAMING_PROVIDER_URL', '', 'ldap://localhost/')"/>
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES ('13', 'CAM_LDAP_LOGIN_PROPERTY', '', 'cn')"/>
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES ('14', 'CAM_LDAP_BASE_DN', '', 'o=Covalent Technologies,c=US')"/>
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES ('15', 'CAM_LDAP_BIND_DN', '', '')"/>
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES ('16', 'CAM_LDAP_BIND_PW', '', '')"/>
+  </schemaSpec>
+
+  <schemaSpec version="1.6">
+    <!-- Setting service types values properly now -->
+    <schema-directSQL>
+      <verifySchema table="EAM_APP_SERVICE" column="SERVICE_TYPE_ID"/>
+      <statement desc="Setting FK service type for service">
+          UPDATE EAM_APP_SERVICE SET SERVICE_TYPE_ID= (
+               SELECT EAM_SERVICE_TYPE.ID
+               FROM   EAM_SERVICE_TYPE, EAM_SERVICE
+               WHERE      EAM_SERVICE_TYPE.ID=EAM_SERVICE.SERVICE_TYPE_ID
+                      AND EAM_SERVICE.ID=EAM_APP_SERVICE.SERVICE_ID)
+           WHERE EAM_APP_SERVICE.SERVICE_ID IS NOT NULL
+      </statement>
+      <statement desc="Setting FK service type for cluster">
+          UPDATE EAM_APP_SERVICE SET SERVICE_TYPE_ID= (
+               SELECT EAM_SERVICE_TYPE.ID
+               FROM   EAM_SERVICE_TYPE, EAM_SVC_CLUSTER
+               WHERE      EAM_SERVICE_TYPE.ID=EAM_SVC_CLUSTER.SERVICE_TYPE_ID
+                      AND EAM_SVC_CLUSTER.ID=EAM_APP_SERVICE.CLUSTER_ID)
+           WHERE EAM_APP_SERVICE.CLUSTER_ID IS NOT NULL
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
+  <schemaSpec version="1.7">
+     <!-- Schema 1.7.  Support for LDAP Filters and LDAP over SSL -->
+     <schema-insert table="EAM_CONFIG_PROPS"
+                    insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES (17, 'CAM_LDAP_PROTOCOL', '', '')"/>
+     <schema-insert table="EAM_CONFIG_PROPS"
+                    insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES (18, 'CAM_LDAP_FILTER', '', '')"/>
+  </schemaSpec>
+
+  <schemaSpec version="1.8">
+    <schema-addColumn table="EAM_SERVICE"
+                      column="SERVICE_RT"
+                      columnType="BOOLEAN">
+    </schema-addColumn>
+    <schema-update table="EAM_SERVICE"
+                   column="SERVICE_RT"
+                   columnType="BOOLEAN"
+                   value="FALSE" />
+
+    <schema-addColumn table="EAM_SERVICE"
+                      column="ENDUSER_RT"
+                      columnType="BOOLEAN">
+    </schema-addColumn>
+    <schema-update table="EAM_SERVICE"
+                   column="ENDUSER_RT"
+                   columnType="BOOLEAN"
+                   value="FALSE" />
+  </schemaSpec>
+
+  <schemaSpec version="1.9">
+     <!-- Schema 1.9.  Change all Auth DSN's to CAM -->
+    <schema-update table="EAM_SUBJECT"
+                   column="DSN"
+                   columnType="VARCHAR2"
+                   value="CAM"
+                   where="DSN='JDBC'"/>
+  </schemaSpec>
+
+  <schemaSpec version="1.10">
+     <!-- Schema 1.10.  Add LASTAPPROVED column to AIQ_PLATFORM -->
+    <schema-addColumn table="EAM_AIQ_PLATFORM"
+                      column="LASTAPPROVED"
+                      columnType="LONG">
+    </schema-addColumn>
+    <schema-update table="EAM_AIQ_PLATFORM"
+                   column="LASTAPPROVED"
+                   columnType="LONG"
+                   value="0" />
+  </schemaSpec>
+
+  <schemaSpec version="1.11">
+     <!-- Schema 1.11.  delete all schedule information -->
+    <schema-directSQL>
+      <verifySchema table="EAM_QRTZ_JOB_DETAILS" column="JOB_NAME"/>
+      <statement desc="delete all job details">
+        DELETE FROM EAM_QRTZ_JOB_DETAILS
+      </statement>
+      <verifySchema table="EAM_QRTZ_TRIGGERS" column="TRIGGER_NAME"/>
+      <statement desc="delete all triggers">
+        DELETE FROM EAM_QRTZ_TRIGGERS
+      </statement>
+      <verifySchema table="EAM_QRTZ_CRON_TRIGGERS" column="TRIGGER_NAME"/>
+      <statement desc="delete all cron triggers">
+        DELETE FROM EAM_QRTZ_CRON_TRIGGERS
+      </statement>
+      <verifySchema table="EAM_AUTOINV_SCHEDULE" column="TRIGGERNAME"/>
+      <statement desc="delete all autoinventory schedule">
+        DELETE FROM EAM_AUTOINV_SCHEDULE
+      </statement>
+      <verifySchema table="EAM_CONTROL_SCHEDULE" column="TRIGGERNAME"/>
+      <statement desc="delete all control schedules">
+        DELETE FROM EAM_QRTZ_TRIGGERS
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
+  <schemaSpec version="1.12">
+    <!-- Update AIIDs for existing ERS-apache servers in server table 
+         and AIQ server table.  Now they will match what the updated plugin
+         expects to set/get.  -->
+    <schema-prepend table="EAM_SERVER"
+                    column="AUTOINVENTORYIDENTIFIER"
+                    pkColumn="ID"
+                    value="ERS-Apache "
+                    where="SERVER_TYPE_ID = (SELECT ID FROM EAM_SERVER_TYPE WHERE NAME='Apache-ERS 2.3')"/>
+    <schema-prepend table="EAM_AIQ_SERVER"
+                    column="AUTOINVENTORYIDENTIFIER"
+                    pkColumn="ID"
+                    value="ERS-Apache "
+                    where="SERVERTYPENAME='Apache-ERS 2.3'"/>
+  </schemaSpec>
+
+  <schemaSpec version="1.13">
+    <!-- add High Availability attributes to the schema -->
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES ('19', 'CAM_MULTICAST_ADDRESS', '', '')"/>
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES ('20', 'CAM_MULTICAST_PORT', '', '')"/>
+  </schemaSpec>
+
+  <schemaSpec version="1.14">
+     <!-- Schema 1.14.  Alter value column to higher precision -->
+    <schema-alterColumn table="EAM_MEASUREMENT_DATA"
+                        column="VALUE"
+                        columnType="BIGDEC"/>
+  </schemaSpec>
+
+  <schemaSpec version="1.15">
+    <!-- Schema 1.15.  Alter config column removing null requirement -->
+    <schema-alterColumn table="EAM_AUTOINV_SCHEDULE"
+                        column="CONFIG"
+                        nullable="NULL"/>
+  </schemaSpec>
+
+  <schemaSpec version="1.16">
+    <!-- Setting service types values properly now -->
+    <schema-directSQL>
+      <statement desc="Rename existing table">
+        ALTER TABLE EAM_MEASUREMENT_DATA RENAME TO EAM_MEASUREMENT_DATA_BACKUP
+      </statement>
+      <statement desc="Create new table">
+        CREATE TABLE EAM_MEASUREMENT_DATA (
+            MEASUREMENT_ID NUMBER(22,0) NOT NULL,
+            TIMESTAMP NUMBER(19,0) NOT NULL,
+            VALUE NUMBER(24,5),
+            CONSTRAINT MEASUREMENT_DATA_ID_TIME_PK PRIMARY KEY ( MEASUREMENT_ID, TIMESTAMP) )
+      </statement>
+      <!--
+      <statement desc="Copy existing data">
+        INSERT INTO EAM_MEASUREMENT_DATA
+            (SELECT MEASUREMENT_ID, TIMESTAMP, VALUE FROM EAM_MEASUREMENT_DATA_BACKUP )
+      </statement>
+        -->
+      <statement desc="Create new index for measurement_id">
+        CREATE INDEX MEASUREMENT_DATA_ID_IDX ON EAM_MEASUREMENT_DATA ( MEASUREMENT_ID )
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
+  <schemaSpec version="1.17">
+    <schema-directSQL>
+      <statement desc="Create new SRN table">
+        CREATE TABLE EAM_SRN (
+            APPDEF_TYPE INTEGER NOT NULL,
+            INSTANCE_ID INTEGER NOT NULL,
+            SRN INTEGER NOT NULL,
+            CONSTRAINT MEASUREMENT_SRN_RES_ID PRIMARY KEY ( APPDEF_TYPE, INSTANCE_ID ) )
+      </statement>
+    </schema-directSQL>
+   </schemaSpec>
+
+   <schemaSpec version="1.18">
+     <schema-directSQL>
+       <statement desc="Create index for eam_trigger_event for faster lookup">
+         CREATE INDEX EAM_TRIGGER_EVENTS_IND ON EAM_TRIGGER_EVENT ( EVENT_ID )
+       </statement>
+     </schema-directSQL>
+   </schemaSpec>
+  <schemaSpec version="1.19">
+    <schema-directSQL>
+      <statement desc="Create index for eam_fired_trigger for faster lookup">
+        CREATE INDEX EAM_FIRED_TRIGGER_ID_IND ON EAM_FIRED_TRIGGER ( TRIGGER_ID )
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+  <schemaSpec version="1.20">
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES ('21', 'CAM_SYSLOG_ACTIONS_ENABLED', 'false', 'false')"/>
+  </schemaSpec>
+   <schemaSpec version="1.21">
+       <schema-directSQL>
+           <statement>
+               INSERT INTO EAM_OPERATION (ID, CID, NAME, RESOURCE_TYPE_ID) 
+               VALUES (400, 400, 'managePlatformAlerts', 301)
+           </statement>
+           <statement>
+               INSERT INTO EAM_OPERATION (ID, CID, NAME, RESOURCE_TYPE_ID) 
+               VALUES (401, 401, 'manageServerAlerts', 303)
+           </statement>
+           <statement>
+               INSERT INTO EAM_OPERATION (ID, CID, NAME, RESOURCE_TYPE_ID) 
+               VALUES (402, 402, 'manageServiceAlerts', 305)
+           </statement>
+           <statement>
+               INSERT INTO EAM_OPERATION (ID, CID, NAME, RESOURCE_TYPE_ID) 
+               VALUES (403, 403, 'manageApplicationAlerts', 308)
+           </statement>
+           <statement>
+               INSERT INTO EAM_OPERATION (ID, CID, NAME, RESOURCE_TYPE_ID) 
+               VALUES (404, 404, 'manageGroupAlerts', 303)
+           </statement>
+           <statement>
+               INSERT INTO EAM_ROLE_OPERATION_MAP (OPERATION_ID, ROLE_ID)
+               VALUES (400, 0)
+           </statement>
+           <statement>
+               INSERT INTO EAM_ROLE_OPERATION_MAP (OPERATION_ID, ROLE_ID)
+               VALUES (401, 0)
+           </statement>
+           <statement>
+               INSERT INTO EAM_ROLE_OPERATION_MAP (OPERATION_ID, ROLE_ID)
+               VALUES (402, 0)
+           </statement>
+           <statement>
+               INSERT INTO EAM_ROLE_OPERATION_MAP (OPERATION_ID, ROLE_ID)
+               VALUES (403, 0)
+           </statement>
+           <statement>
+               INSERT INTO EAM_ROLE_OPERATION_MAP (OPERATION_ID, ROLE_ID)
+               VALUES (404, 0)
+           </statement>
+        </schema-directSQL>
+   </schemaSpec>
+   <schemaSpec version="1.22">
+        <schema-addColumn table="EAM_SUBJECT"
+                          column="SMS_ADDRESS"
+                          columnType="VARCHAR2"
+                          precision="100"/>
+   </schemaSpec>
+    <schemaSpec version="1.23">
+        <schema-directSQL>
+            <statement>
+                update eam_operation set RESOURCE_TYPE_ID = 3 where id = 404
+            </statement>
+        </schema-directSQL>
+    </schemaSpec>
+    <schemaSpec version="1.24">
+        <schema-directSQL>
+            <statement>
+            CREATE INDEX MEASUREMENT_DATA_TIME_IDX ON EAM_MEASUREMENT_DATA ( TIMESTAMP ) NOLOGGING
+            </statement>
+        </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.25">
+        <schema-directSQL>
+            <statement>
+            UPDATE EAM_CONFIG_PROPS SET VALUE='1209600000' WHERE ID = 5
+            </statement>
+        </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.26">
+      <schema-addColumn table="EAM_ALERT_DEFINITION"
+                        column="WILL_RECOVER"
+                        columnType="BOOLEAN" >
+        <initializer>
+          UPDATE EAM_ALERT_DEFINITION SET WILL_RECOVER='0'
+        </initializer>
+      </schema-addColumn>
+    </schemaSpec>
+    
+    <schemaSpec version="1.27">
+      <schema-alterColumn table="EAM_ALERT_DEFINITION"
+                        column="WILL_RECOVER"
+                        default="0"
+                        nullable="NOT NULL"/>
+    </schemaSpec>
+
+    <schemaSpec version="1.28">
+      <schema-directSQL>
+        <statement>
+        INSERT INTO EAM_CONFIG_PROPS (ID, KEY, VALUE, DEFAULT_VALUE, FREAD_ONLY)
+          VALUES (22, 'CAM_DATA_PURGE_DELETE_OLDER_THAN',
+                  '7776000000', '7776000000', '0')
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.29">
+      <schema-insert table="EAM_CONFIG_PROPS"
+                     insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES (23, 'CAM_GUIDE_ENABLED', 'true', 'true')"/>
+    </schemaSpec>
+
+    <schemaSpec version="1.30">
+      <schema-directSQL>
+        <statement>UPDATE EAM_AGENT_TYPE SET SORT_NAME=UPPER(NAME)</statement>
+        <statement>UPDATE EAM_APPLICATION_TYPE SET SORT_NAME=UPPER(NAME)</statement>
+        <statement>UPDATE EAM_PLATFORM_TYPE SET SORT_NAME=UPPER(NAME)</statement>
+        <statement>UPDATE EAM_PLATFORM_TYPE SET SORT_NAME=UPPER(NAME)</statement>
+        <statement>UPDATE EAM_SERVER_TYPE SET SORT_NAME=UPPER(NAME)</statement>
+        <statement>UPDATE EAM_SERVICE_TYPE SET SORT_NAME=UPPER(NAME)</statement>
+        <statement>UPDATE EAM_SERVER SET SORT_NAME=UPPER(NAME)</statement>
+        <statement>UPDATE EAM_SERVICE SET SORT_NAME=UPPER(NAME)</statement>
+        <statement>UPDATE EAM_APPLICATION SET SORT_NAME=UPPER(NAME)</statement>
+        <statement>UPDATE EAM_SVC_CLUSTER SET SORT_NAME=UPPER(NAME)</statement>
+        <statement>UPDATE EAM_RESOURCE SET SORT_NAME=UPPER(NAME)</statement>
+        <statement>UPDATE EAM_RESOURCE_GROUP SET SORT_NAME=UPPER(NAME)</statement>
+        <statement>UPDATE EAM_ROLE SET SORT_NAME=UPPER(NAME)</statement>
+        <statement>UPDATE EAM_SUBJECT SET SORT_NAME=UPPER(NAME)</statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.31">
+      <schema-addColumn table="EAM_MEASUREMENT_BL"
+                        column="COMPUTE_TIME"
+                        columnType="LONG">
+        <initializer>
+          UPDATE EAM_MEASUREMENT_BL SET COMPUTE_TIME=END_DATE
+        </initializer>
+      </schema-addColumn>
+      <schema-addColumn table="EAM_MEASUREMENT_BL"
+                        column="MIN_EXPECTED_VAL"
+                        columnType="DOUBLE">
+        <initializer>
+          UPDATE EAM_MEASUREMENT_BL SET MIN_EXPECTED_VAL=
+            (SELECT MIN_EXPECTED_VAL FROM EAM_MEASUREMENT m
+                WHERE MEASUREMENT_ID = m.ID)
+        </initializer>
+      </schema-addColumn>
+      <schema-addColumn table="EAM_MEASUREMENT_BL"
+                        column="MAX_EXPECTED_VAL"
+                        columnType="DOUBLE">
+        <initializer>
+          UPDATE EAM_MEASUREMENT_BL SET MIN_EXPECTED_VAL=
+            (SELECT MIN_EXPECTED_VAL FROM EAM_MEASUREMENT m
+                WHERE MEASUREMENT_ID = m.ID)
+        </initializer>
+      </schema-addColumn>
+      <schema-addColumn table="EAM_MEASUREMENT_BL"
+                        column="USER_ENTERED"
+                        columnType="BOOLEAN"/>
+      <schema-update table="EAM_MEASUREMENT_BL"
+                     column="USER_ENTERED"
+                     columnType="BOOLEAN"
+                     value="TRUE"/>
+      <!-- drop unused columns -->
+      <schema-directSQL>
+        <statement desc="Drop unused column START_DATE.">
+          ALTER TABLE EAM_MEASUREMENT_BL DROP COLUMN START_DATE
+        </statement>
+        <statement desc="Drop unused column END_DATE.">
+          ALTER TABLE EAM_MEASUREMENT_BL DROP COLUMN END_DATE
+        </statement>
+        <statement desc="Drop unused column STD_DEV.">
+          ALTER TABLE EAM_MEASUREMENT_BL DROP COLUMN STD_DEV
+        </statement>
+        <statement desc="Drop unused column NUM_PTS.">
+          ALTER TABLE EAM_MEASUREMENT_BL DROP COLUMN NUM_PTS
+        </statement>
+      </schema-directSQL>
+      <schema-directSQL>
+        <statement>ALTER TABLE EAM_MEASUREMENT DROP COLUMN MIN_EXPECTED_VAL</statement>
+        <statement>ALTER TABLE EAM_MEASUREMENT DROP COLUMN MAX_EXPECTED_VAL</statement>
+      </schema-directSQL>
+    </schemaSpec>
+    
+    <schemaSpec version="1.32">
+    <schema-addColumn table="EAM_SERVER_TYPE"
+                        column="FVIRTUAL"
+                        columnType="BOOLEAN" >
+        <initializer>
+          UPDATE EAM_SERVER_TYPE SET FVIRTUAL = 0
+        </initializer>
+      </schema-addColumn>
+      <schema-directSQL>
+      <statement>UPDATE EAM_SERVER_TYPE SET FVIRTUAL = 1 WHERE plugin = 'system'</statement>
+      </schema-directSQL>
+    </schemaSpec>    
+
+    <schemaSpec version="1.33">
+      <schema-directSQL>
+      <statement>CREATE INDEX EAM_PLATFORM_idx_CTIME ON EAM_PLATFORM(CTIME)</statement>
+      <statement>CREATE INDEX EAM_SERVER_idx_CTIME ON EAM_SERVER(CTIME)</statement>
+      <statement>CREATE INDEX EAM_SERVICE_idx_CTIME ON EAM_SERVICE(CTIME)</statement>
+      <statement>CREATE INDEX MEASUREMENT_IDX_ENABLED ON EAM_MEASUREMENT(ENABLED)</statement>
+      <statement>CREATE INDEX MTYPE_IDX_APPDEFTYPE ON EAM_MONITORABLE_TYPE(APPDEF_TYPE)</statement>
+      <statement>CREATE INDEX EAM_RESOURCE_IDX_TYPE ON EAM_RESOURCE(RESOURCE_TYPE_ID)</statement>
+      </schema-directSQL>
+    </schemaSpec>    
+
+    <schemaSpec version="1.34">
+      <schema-directSQL>
+        <statement>update eam_resource set fsystem = 1 WHERE name like('%NetworkServer%')</statement>
+        <statement>update eam_resource set fsystem = 1 WHERE name like('%FileServer%')</statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.35">
+      <schema-addColumn table="EAM_CONFIG_RESPONSE"
+                        column="USERMANAGED"
+                        columnType="BOOLEAN">
+        <initializer>
+          UPDATE EAM_CONFIG_RESPONSE SET USERMANAGED = %%TRUE%%
+        </initializer>
+      </schema-addColumn>
+      <schema-alterColumn table="EAM_CONFIG_RESPONSE"
+                          column="USERMANAGED"
+                          nullable="NOT NULL"/>
+    </schemaSpec>
+
+    <schemaSpec version="1.36">
+      <schema-addColumn table="EAM_CONFIG_RESPONSE"
+                        column="VALIDATIONERR"
+                        columnType="VARCHAR2"
+                        precision="512">
+        <initializer>
+          UPDATE EAM_CONFIG_RESPONSE SET VALIDATIONERR = NULL
+        </initializer>
+      </schema-addColumn>
+      <schema-directSQL>
+      <statement>CREATE INDEX CRESP_VERR ON EAM_CONFIG_RESPONSE(VALIDATIONERR)</statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.37">
+      <schema-directSQL>
+        <statement>DROP INDEX MEASUREMENT_DATA_ID_IDX</statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.38">
+      <schema-directSQL>
+        <statement>CREATE INDEX ALERT_IDX_TIME ON EAM_ALERT(CTIME)</statement>
+        <statement>CREATE INDEX ALERT_IDX_ALERTDEFINITION ON EAM_ALERT(ALERT_DEFINITION_ID)</statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.39">
+        <schema-addColumn table="EAM_REQUEST_STAT"
+                        column="IPADDR"
+                        columnType="VARCHAR2"
+                        precision="20">
+          <initializer>
+            UPDATE EAM_REQUEST_STAT SET IPADDR = '0.0.0.0'
+          </initializer>
+        </schema-addColumn>
+
+        <schema-directSQL>
+        <statement>CREATE INDEX REQSTAT_IDX_CLIENTIP ON EAM_REQUEST_STAT(IPADDR)</statement>
+        </schema-directSQL>
+        <schema-dropTable table="EAM_STAT_ERRORS"/>
+        <schema-directSQL>
+            <statement targetDB="oracle">
+               CREATE TABLE EAM_STAT_ERRORS (
+                 ID INTEGER NOT NULL PRIMARY KEY, 
+                 ERROR_ID INTEGER REFERENCES EAM_ERROR_CODE(ID), 
+                 COUNT INTEGER NOT NULL, 
+                 REQSTAT_ID INTEGER,
+                 CONSTRAINT STATERR_FK_STAT FOREIGN KEY (REQSTAT_ID)
+                   REFERENCES EAM_REQUEST_STAT(ID) ON DELETE CASCADE
+               ) STORAGE (freelists 5) NOLOGGING CACHE
+            </statement>
+            <statement targetDB="postgresql">
+               CREATE TABLE EAM_STAT_ERRORS (
+                 ID INTEGER NOT NULL PRIMARY KEY, 
+                 ERROR_ID INTEGER REFERENCES EAM_ERROR_CODE(ID), 
+                 COUNT INTEGER NOT NULL, 
+                 REQSTAT_ID INTEGER,
+                 CONSTRAINT STATERR_FK_STAT FOREIGN KEY (REQSTAT_ID)
+                   REFERENCES EAM_REQUEST_STAT(ID) ON DELETE CASCADE
+               )
+            </statement>
+        </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.40">
+      <schema-insert table="EAM_CONFIG_PROPS"
+                     dupFail="false"
+                     insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES (24, 'CAM_RT_COLLECT_IP_ADDRS', 'true', 'true')"/>
+    </schemaSpec>
+
+    <schemaSpec version="1.41">
+      <schema-directSQL>
+        <statement desc="Create new Measurement PROBLEM table"
+                   targetDB="oracle">
+          CREATE TABLE EAM_METRIC_PROB (
+            MEASUREMENT_ID INTEGER NOT NULL,
+            TIMESTAMP NUMBER(19,0) NOT NULL,
+            TYPE INTEGER NOT NULL,
+            ADDITIONAL INTEGER
+          )
+        </statement>
+        <statement desc="Create new Measurement PROBLEM table"
+                   targetDB="postgresql">
+          CREATE TABLE EAM_METRIC_PROB (
+            MEASUREMENT_ID INTEGER NOT NULL,
+            TIMESTAMP BIGINT NOT NULL,
+            TYPE INTEGER NOT NULL,
+            ADDITIONAL INTEGER
+          )
+        </statement>
+        <statement desc="Create new index for measurement_id in Measurement Prob">
+          CREATE INDEX METRIC_PROB_ID_IDX ON EAM_METRIC_PROB ( MEASUREMENT_ID )
+        </statement>
+        <statement desc="Create new index for measurement_id and time in Measurement Prob">
+          CREATE INDEX METRIC_PROB_TIME_IDX ON EAM_METRIC_PROB ( MEASUREMENT_ID, TIMESTAMP )
+        </statement>
+        <statement desc="Create new problem view with appdef ID.">
+        CREATE VIEW EAM_METRIC_PROB_VIEW AS
+        SELECT
+          appdef_type, instance_id, measurement_id, timestamp, type
+            FROM eam_metric_prob, eam_measurement m,
+                 eam_measurement_templ t, eam_monitorable_type mt
+            WHERE measurement_id = m.id AND template_id = t.id AND
+                  monitorable_type_id = mt.id
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <!-- HQ 2.0 STARTS HERE -->
+
+    <schemaSpec version="1.42">
+      <schema-directSQL>
+        <statement desc="Update DataPurgeJob for HQ 2.0">
+          UPDATE EAM_QRTZ_JOB_DETAILS SET 
+          job_class_name='net.hyperic.hq.measurement.DataPurgeJob' WHERE
+          job_class_name='net.covalent.spider.measurement.DataPurgeJob'
+        </statement>
+        <statement desc="Update AIScanJob for HQ 2.0">
+          UPDATE EAM_QRTZ_JOB_DETAILS SET
+          job_class_name='net.hyperic.hq.autoinventory.server.session.AIScanJob' WHERE
+          job_class_name='net.covalent.spider.autoinventory.server.session.AIScanJob'
+        </statement>
+        <statement desc="Update ControlJob for HQ 2.0">
+          UPDATE EAM_QRTZ_JOB_DETAILS SET
+          job_class_name='net.hyperic.hq.control.server.session.ControlActionJob' WHERE
+          job_class_name='net.covalent.spider.control.server.session.ControlActionJob'
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.43">
+      <!-- Create tables for compressed data -->
+      <schema-directSQL>
+        <!-- 1 hour table -->
+        <statement desc="Create Measurement Data Hourly Table"
+                   targetDB="oracle">
+          CREATE TABLE EAM_MEASUREMENT_DATA_1H (
+            MEASUREMENT_ID INTEGER NOT NULL,
+            TIMESTAMP NUMBER(19,0) NOT NULL,
+            VALUE NUMBER(24,5),
+            MINVALUE NUMBER(24,5),
+            MAXVALUE NUMBER(24,5),
+            CONSTRAINT MEASUREMENT_DATA_1H_ID_TIME_PK 
+             PRIMARY KEY (MEASUREMENT_ID, TIMESTAMP)
+          )
+        </statement>
+        <statement desc="Create Measurement Data Hourly Table"
+                   targetDB="postgresql">
+          CREATE TABLE EAM_MEASUREMENT_DATA_1H (
+            MEASUREMENT_ID INTEGER NOT NULL,
+            TIMESTAMP BIGINT NOT NULL,
+            VALUE DECIMAL(24,5),
+            MINVALUE DECIMAL(24,5),
+            MAXVALUE DECIMAL(24,5),
+            CONSTRAINT MEASUREMENT_DATA_1H_ID_TIME_PK 
+             PRIMARY KEY (MEASUREMENT_ID, TIMESTAMP)
+          )
+        </statement>
+        <statement desc="Create Measurement Data Hourly Index">
+          CREATE INDEX MEASUREMENT_DATA_1H_TIME_IDX 
+          ON EAM_MEASUREMENT_DATA_1H ( TIMESTAMP )
+        </statement>
+        <!-- 6 hour table -->
+        <statement desc="Create Measurement Data 6 Hour Table"
+                   targetDB="oracle">
+          CREATE TABLE EAM_MEASUREMENT_DATA_6H (
+            MEASUREMENT_ID INTEGER NOT NULL,
+            TIMESTAMP NUMBER(19,0) NOT NULL,
+            VALUE NUMBER(24,5),
+            MINVALUE NUMBER(24,5),
+            MAXVALUE NUMBER(24,5),
+            CONSTRAINT MEASUREMENT_DATA_6H_ID_TIME_PK 
+             PRIMARY KEY (MEASUREMENT_ID, TIMESTAMP)
+          )
+        </statement>
+        <statement desc="Create Measurement Data 6 Hour Table"
+                   targetDB="postgresql">
+          CREATE TABLE EAM_MEASUREMENT_DATA_6H (
+            MEASUREMENT_ID INTEGER NOT NULL,
+            TIMESTAMP BIGINT NOT NULL,
+            VALUE DECIMAL(24,5),
+            MINVALUE DECIMAL(24,5),
+            MAXVALUE DECIMAL(24,5),
+            CONSTRAINT MEASUREMENT_DATA_6H_ID_TIME_PK 
+             PRIMARY KEY (MEASUREMENT_ID, TIMESTAMP)
+          )
+        </statement>
+        <statement desc="Create Measurement Data 6 Hour Index">
+          CREATE INDEX MEASUREMENT_DATA_6H_TIME_IDX 
+          ON EAM_MEASUREMENT_DATA_6H ( TIMESTAMP )
+        </statement>
+        <!-- 1 day table -->
+        <statement desc="Create Measurement Data Daily Table"
+                   targetDB="oracle">
+          CREATE TABLE EAM_MEASUREMENT_DATA_1D (
+            MEASUREMENT_ID INTEGER NOT NULL,
+            TIMESTAMP NUMBER(19,0) NOT NULL,
+            VALUE NUMBER(24,5),
+            MINVALUE NUMBER(24,5),
+            MAXVALUE NUMBER(24,5),
+            CONSTRAINT MEASUREMENT_DATA_1D_ID_TIME_PK  
+             PRIMARY KEY (MEASUREMENT_ID, TIMESTAMP)
+          )
+        </statement>
+        <statement desc="Create Measurement Data Daily Table"
+                   targetDB="postgresql">
+          CREATE TABLE EAM_MEASUREMENT_DATA_1D (
+            MEASUREMENT_ID INTEGER NOT NULL,
+            TIMESTAMP BIGINT NOT NULL,
+            VALUE DECIMAL(24,5),
+            MINVALUE DECIMAL(24,5),
+            MAXVALUE DECIMAL(24,5),
+            CONSTRAINT MEASUREMENT_DATA_1D_ID_TIME_PK 
+             PRIMARY KEY (MEASUREMENT_ID, TIMESTAMP)
+          )
+        </statement>
+        <statement desc="Create Measurement Data Daily Index">
+          CREATE INDEX MEASUREMENT_DATA_1D_TIME_IDX 
+          ON EAM_MEASUREMENT_DATA_1D ( TIMESTAMP )
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.44">
+    <!-- Drop the old peaklow table.  Not used with new purge -->
+      <schema-directSQL>
+        <statement desc="Drop unused measurement_data_peaklow table">
+          DROP TABLE EAM_MEASUREMENT_PEAKLOW
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.45">
+    <!-- Update config properties with new data storage options -->
+      <schema-directSQL>
+        <statement desc="Drop CAM_DATA_PURGE_OLDER_THAN config property">
+          DELETE FROM EAM_CONFIG_PROPS WHERE KEY='CAM_DATA_PURGE_OLDER_THAN'
+        </statement>
+        <statement desc="Drop CAM_DATA_PURGE_CONDENSE_TO config property">
+          DELETE FROM EAM_CONFIG_PROPS WHERE KEY='CAM_DATA_PURGE_CONDENSE_TO'
+        </statement>
+        <statement desc="Drop CAM_DATA_PURGE_DELETE_OLDER_THAN config property">
+          DELETE FROM EAM_CONFIG_PROPS WHERE KEY='CAM_DATA_PURGE_DELETE_OLDER_THAN'
+        </statement>
+      </schema-directSQL>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                     dupFail="false"
+                     insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES (25, 'CAM_DATA_PURGE_RAW', '172800000', '172800000')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                     dupFail="false"
+                     insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES (26, 'CAM_DATA_PURGE_1H', '1209600000', '1209600000')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                     dupFail="false"
+                     insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES (27, 'CAM_DATA_PURGE_6H', '2678400000', '2678400000')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                     dupFail="false"
+                     insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES (28, 'CAM_DATA_PURGE_1D', '31536000000', '31536000000')"/>
+    </schemaSpec>
+
+    <schemaSpec version="1.46">
+    <!-- DataCompress fixes and updates -->
+      <schema-directSQL>
+        <!-- Update detailed data to be kept for 2 days -->
+        <statement>
+          UPDATE EAM_CONFIG_PROPS SET VALUE='172800000' WHERE KEY='CAM_DATA_PURGE_RAW'
+        </statement>
+        <!-- Update hourly data to be kept for 2 weeks -->
+        <statement>
+          UPDATE EAM_CONFIG_PROPS SET VALUE='1209600000' WHERE KEY='CAM_DATA_PURGE_1H'
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.47">
+      <!-- Add auto-baseline configuration -->
+      <schema-insert table="EAM_CONFIG_PROPS"
+                     dupFail="false"
+                     insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES (29, 'CAM_BASELINE_FREQUENCY', '259200000', '259200000')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                     dupFail="false"
+                     insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES (30, 'CAM_BASELINE_DATASET', '604800000', '604800000')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                     dupFail="false"
+                     insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES (31, 'CAM_BASELINE_MINSET', '40', '40')"/>
+    </schemaSpec>
+
+    <schemaSpec version="1.48">
+      <!-- How often to perform DB maintainence -->
+      <schema-insert table="EAM_CONFIG_PROPS"
+                     dupFail="false"
+                     insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES (32, 'CAM_DATA_MAINTENANCE', '3600000', '3600000')"/>
+    </schemaSpec>
+
+    <schemaSpec version="1.49">
+      <schema-directSQL>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='net.hyperic.hq.bizapp.server.trigger.conditional.AlertTrigger'
+            WHERE CLASSNAME='net.covalent.spider.bizapp.server.trigger.conditional.AlertTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='net.hyperic.hq.bizapp.server.trigger.conditional.ControlEventTrigger'
+            WHERE CLASSNAME='net.covalent.spider.bizapp.server.trigger.conditional.ControlEventTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='net.hyperic.hq.bizapp.server.trigger.conditional.MeasurementBaselineTrigger'
+            WHERE CLASSNAME='net.covalent.spider.bizapp.server.trigger.conditional.MeasurementBaselineTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='net.hyperic.hq.bizapp.server.trigger.conditional.MeasurementThresholdTrigger'
+            WHERE CLASSNAME='net.covalent.spider.bizapp.server.trigger.conditional.MeasurementThresholdTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='net.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger'
+            WHERE CLASSNAME='net.covalent.spider.bizapp.server.trigger.conditional.MultiConditionTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='net.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger'
+            WHERE CLASSNAME='net.covalent.spider.bizapp.server.trigger.conditional.ValueChangeTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='net.hyperic.hq.bizapp.server.trigger.frequency.AvertTrigger'
+            WHERE CLASSNAME='net.covalent.spider.bizapp.server.trigger.frequency.AvertTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='net.hyperic.hq.bizapp.server.trigger.frequency.ConstantDurationTrigger'
+            WHERE CLASSNAME='net.covalent.spider.bizapp.server.trigger.frequency.ConstantDurationTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='net.hyperic.hq.bizapp.server.trigger.frequency.CounterTrigger'
+            WHERE CLASSNAME='net.covalent.spider.bizapp.server.trigger.frequency.CounterTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='net.hyperic.hq.bizapp.server.trigger.frequency.DurationTrigger'
+            WHERE CLASSNAME='net.covalent.spider.bizapp.server.trigger.frequency.DurationTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='net.hyperic.hq.bizapp.server.trigger.frequency.EscalateTrigger'
+            WHERE CLASSNAME='net.covalent.spider.bizapp.server.trigger.frequency.EscalateTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_ACTION
+              SET CLASSNAME='net.hyperic.hq.bizapp.server.action.alert.EnableAlertDefAction'
+            WHERE CLASSNAME='net.covalent.spider.bizapp.server.action.alert.EnableAlertDefAction'
+        </statement>
+        <statement>
+          UPDATE EAM_ACTION
+              SET CLASSNAME='net.hyperic.hq.bizapp.server.action.control.ControlAction'
+            WHERE CLASSNAME='net.covalent.spider.bizapp.server.action.control.ControlAction'
+        </statement>
+        <statement>
+          UPDATE EAM_ACTION
+              SET CLASSNAME='net.hyperic.hq.bizapp.server.action.email.EmailAction'
+            WHERE CLASSNAME='net.covalent.spider.bizapp.server.action.email.EmailAction'
+        </statement>
+        <statement>
+          UPDATE EAM_ACTION
+              SET CLASSNAME='net.hyperic.hq.bizapp.server.action.log.SyslogAction'
+            WHERE CLASSNAME='net.covalent.spider.bizapp.server.action.log.SyslogAction'
+        </statement>
+        <statement>
+          UPDATE EAM_ACTION
+              SET CLASSNAME='net.hyperic.hq.bizapp.server.action.rca.RCAAction'
+            WHERE CLASSNAME='net.covalent.spider.bizapp.server.action.rca.RCAAction'
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.50">
+      <schema-directSQL>
+        <statement>
+          DELETE FROM EAM_CONTROL_SCHEDULE
+        </statement>
+        <statement>
+          DELETE FROM EAM_AUTOINV_SCHEDULE
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.51">
+      <schema-directSQL>
+        <statement>
+        INSERT INTO EAM_CONFIG_PROPS (ID, KEY, VALUE, DEFAULT_VALUE, FREAD_ONLY)
+          VALUES (33, 'DATA_STORE_ALL', 'true', 'true', '0')
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.52">
+      <schema-directSQL>
+        <statement>
+        INSERT INTO EAM_CONFIG_PROPS (ID, KEY, VALUE, DEFAULT_VALUE, FREAD_ONLY)
+          VALUES (34, 'RT_DATA_PURGE', '2678400000', '2678400000', '0')
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <!-- Update HQ related resources and blow away the server AI queue -->
+    <schemaSpec version="1.53">
+      <schema-directSQL>
+        <statement>
+        UPDATE EAM_SERVER SET AUTOINVENTORYIDENTIFIER='HQ PostgreSQL'  
+          WHERE INSTALLPATH LIKE '%hqdb%' AND NAME LIKE '%PostgreSQL%'
+        </statement>
+        <statement>
+        UPDATE EAM_SERVER SET AUTOINVENTORYIDENTIFIER='HQ Tomcat' 
+        WHERE INSTALLPATH LIKE '%hq-engine%' AND NAME LIKE '%Tomcat%'
+        </statement>
+        <statement>
+        UPDATE EAM_SERVER SET AUTOINVENTORYIDENTIFIER='HQ JBoss' WHERE 
+        INSTALLPATH LIKE '%hq-engine%' AND NAME LIKE '%JBoss%' 
+        </statement>
+        <statement>
+        DELETE FROM EAM_AIQ_SERVER
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.54">
+      <schema-directSQL>
+        <statement>
+          CREATE INDEX METRIC_BASELINE_CALCULATED_IDX ON EAM_MEASUREMENT_BL (MEASUREMENT_ID, COMPUTE_TIME)
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.55">
+        <schema-directSQL>
+            <statement>
+            CREATE INDEX TEMPL_MONITORABLE_TYPE_IDX ON EAM_MEASUREMENT_TEMPL (MONITORABLE_TYPE_ID)
+            </statement>
+            <statement>
+            CREATE INDEX TEMPL_DESIG_MT_IDX ON EAM_MEASUREMENT_TEMPL (DESIGNATE, MONITORABLE_TYPE_ID)
+            </statement>
+            <statement>
+            CREATE INDEX ALERT_COND_LOG_IDX ON EAM_ALERT_CONDITION_LOG (ALERT_ID)
+            </statement>
+            <statement>
+            CREATE INDEX ALERT_ACTION_LOG_IDX ON EAM_ALERT_ACTION_LOG (ALERT_ID)
+            </statement>
+            <statement>
+            CREATE INDEX ALERT_DEF_TRIGGER_IDX ON EAM_REGISTERED_TRIGGER (ALERT_DEFINITION_ID)
+            </statement>
+            <statement>
+            CREATE INDEX USER_ALERT_IDX ON EAM_USER_ALERT (USER_ID)
+            </statement>
+            <statement>
+            CREATE INDEX METRIC_BASELINE_IDX ON EAM_MEASUREMENT_BL (MEASUREMENT_ID)
+            </statement>
+        </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.56">
+      <schema-directSQL>
+        <statement targetDB="oracle">
+        INSERT INTO EAM_CONFIG_PROPS (ID, KEY, VALUE, DEFAULT_VALUE) 
+          VALUES (35, 'DATA_REINDEX_NIGHTLY', 'false', 'false')
+        </statement>
+        <statement targetDB="postgresql">
+        INSERT INTO EAM_CONFIG_PROPS (ID, KEY, VALUE, DEFAULT_VALUE) 
+          VALUES (35, 'DATA_REINDEX_NIGHTLY', 'true', 'true')
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.57">
+      <schema-directSQL>
+        <statement desc="Create new EAM_NUMBERS table" targetDB="oracle">
+          CREATE TABLE EAM_NUMBERS2 (
+            I NUMBER(19,0) NOT NULL,
+            CONSTRAINT EAM_NUMBERS_PK PRIMARY KEY (I)
+          )
+        </statement>
+        <statement desc="Create new EAM_NUMBERS table" targetDB="postgresql">
+          CREATE TABLE EAM_NUMBERS2 (
+            I BIGINT NOT NULL,
+            CONSTRAINT EAM_NUMBERS_PK PRIMARY KEY (I)
+          )
+        </statement>
+        <statement>
+          INSERT INTO EAM_NUMBERS2 (SELECT I FROM EAM_NUMBERS)
+        </statement>
+        <statement>
+          DROP TABLE EAM_NUMBERS
+        </statement>
+        <statement>
+          ALTER TABLE EAM_NUMBERS2 RENAME TO EAM_NUMBERS
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.58">
+      <schema-directSQL>
+        <statement>
+            ALTER TABLE EAM_CPROP_KEY RENAME COLUMN KEY TO PROPKEY
+        </statement>
+        <statement>
+            ALTER TABLE EAM_CPROP RENAME COLUMN VALUE TO PROPVALUE
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.59">
+      <schema-alterColumn table="EAM_IP" column="NETMASK" nullable="NULL"/>
+      <schema-alterColumn table="EAM_AIQ_IP" column="NETMASK" nullable="NULL"/>
+      <schema-directSQL>
+        <statement>
+          DROP INDEX EAM_ptype_idx_CERTDN
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.60">
+      <schema-directSQL>
+        <statement>
+          DROP INDEX MEASUREMENT_IDX_ENABLED
+        </statement>
+        <statement>
+          DROP INDEX EAM_MEASURE_BASELINE
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <!-- Delete old configText custom properties -->
+    <schemaSpec version="1.61">
+      <schema-directSQL>
+        <statement>
+          DELETE FROM EAM_CPROP_KEY WHERE propkey='configText'
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <!-- AI Platform ConfigResponses and Server/Service cprops -->
+    <schemaSpec version="1.62">
+      <schema-addColumn table="EAM_AIQ_PLATFORM"
+                        column="PRODUCT_CONFIG"
+                        columnType="BYTES"/>
+      <schema-addColumn table="EAM_AIQ_PLATFORM"
+                        column="CONTROL_CONFIG"
+                        columnType="BYTES"/>
+      <schema-addColumn table="EAM_AIQ_PLATFORM"
+                        column="MEASUREMENT_CONFIG"
+                        columnType="BYTES"/>
+
+      <schema-addColumn table="EAM_AIQ_SERVER"
+                        column="CUSTOM_PROPERTIES"
+                        columnType="BYTES"/>
+
+      <schema-addColumn table="EAM_AIQ_SERVICE"
+                        column="CUSTOM_PROPERTIES"
+                        columnType="BYTES"/>
+    </schemaSpec>
+
+    <!-- mysql5 support - change reserved words interval, key, value -->
+    <schemaSpec version="1.63">
+      <schema-directSQL>
+        <statement>
+            ALTER TABLE EAM_MEASUREMENT RENAME COLUMN INTERVAL TO COLL_INTERVAL
+        </statement>
+        <statement>
+            ALTER TABLE EAM_CONFIG_PROPS RENAME COLUMN VALUE TO PROPVALUE
+        </statement>
+        <statement>
+            ALTER TABLE EAM_CONFIG_PROPS RENAME COLUMN KEY TO PROPKEY
+        </statement>
+        <statement>
+            ALTER TABLE EAM_CONFIG_PROPS RENAME COLUMN DEFAULT_VALUE TO DEFAULT_PROPVALUE
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.64">
+      <schema-directSQL>
+        <statement>
+        INSERT INTO EAM_CONFIG_PROPS (ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY)
+          VALUES (36, 'ALERT_PURGE', '2678400000', '2678400000', '0')
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <!-- description for AI resources, EAM_AIQ_SERVER already has it -->
+    <schemaSpec version="1.65">
+      <schema-addColumn table="EAM_AIQ_PLATFORM"
+                        column="DESCRIPTION"
+                        columnType="VARCHAR2"
+                        precision="300"/>
+
+      <schema-addColumn table="EAM_AIQ_SERVICE"
+                        column="DESCRIPTION"
+                        columnType="VARCHAR2"
+                        precision="300"/>
+    </schemaSpec>
+
+    <schemaSpec version="1.66">
+      <schema-addColumn table="EAM_ACTION"
+                        column="PARENT_ID"
+                        columnType="INTEGER"/>
+    </schemaSpec>
+
+    <schemaSpec version="1.67">
+      <schema-insert table="EAM_CONFIG_PROPS"
+                 insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE) VALUES ('37', 'SNMP_VERSION', '', '')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                 insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE) VALUES ('38', 'SNMP_AUTH_PROTOCOL', 'MD5', '')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                 insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE) VALUES ('39', 'SNMP_AUTH_PASSPHRASE', '', '')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                 insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE) VALUES ('40', 'SNMP_PRIV_PASSPHRASE', '', '')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                 insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE) VALUES ('41', 'SNMP_COMMUNITY', 'public', '')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                 insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE) VALUES ('42', 'SNMP_ENGINE_ID', '', '')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                 insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE) VALUES ('43', 'SNMP_CONTEXT_NAME', '', '')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                 insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE) VALUES ('44', 'SNMP_SECURITY_NAME', '', '')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                 insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE) VALUES ('45', 'SNMP_TRAP_OID', '', '')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                 insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE) VALUES ('46', 'SNMP_ENTERPRISE_OID', '', '')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                 insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE) VALUES ('47', 'SNMP_GENERIC_ID', '', '')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                 insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE) VALUES ('48', 'SNMP_SPECIFIC_ID', '', '')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                 insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE) VALUES ('49', 'SNMP_AGENT_ADDRESS', '', '')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                 insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE) VALUES ('50', 'SNMP_PRIVACY_PROTOCOL', '', '')"/>
+    </schemaSpec>
+
+    <schemaSpec version="1.68">
+      <schema-directSQL>
+        <statement desc="Drop unused column STATE.">
+          ALTER TABLE EAM_SERVER DROP COLUMN STATE
+        </statement>
+        <statement desc="Drop unused column STATE.">
+          ALTER TABLE EAM_SERVICE DROP COLUMN STATE
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.69">
+      <schema-directSQL>
+        <statement>
+          CREATE INDEX EVENT_LOG_IDX ON EAM_EVENT_LOG (ENTITY_TYPE, ENTITY_ID, TIMESTAMP)
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <!-- Add version column for agents -->
+    <schemaSpec version="1.70">
+      <schema-addColumn table="EAM_AGENT"
+                        column="VERSION"
+                        columnType="VARCHAR2"
+                        precision="20"/>
+    </schemaSpec>
+
+    <schemaSpec version="1.71">
+      <schema-directSQL>
+        <statement>
+          CREATE INDEX CTL_HISTORY_STARTTIME ON EAM_CONTROL_HISTORY (STARTTIME)
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <!-- Re-create indicies on server and service names to not be unique -->
+    <schemaSpec version="1.72">
+      <schema-directSQL>
+        <statement>
+          DROP INDEX EAM_SERVER_NAME
+        </statement>
+        <statement>
+          DROP INDEX EAM_SERVICE_NAME
+        </statement>
+        <statement>
+          DROP INDEX AIQ_SERVER_NAME
+        </statement>
+        <statement>
+           DROP INDEX AIQ_SERVICE_NAME
+        </statement>
+        <statement>
+          CREATE INDEX EAM_SERVER_NAME ON EAM_SERVER (NAME)
+        </statement>
+        <statement>
+          CREATE INDEX EAM_SERVICE_NAME ON EAM_SERVICE (NAME)
+        </statement>
+        <statement>
+          CREATE INDEX AIQ_SERVER_NAME ON EAM_AIQ_SERVER (NAME)
+        </statement>
+        <statement>
+          CREATE INDEX AIQ_SERVICE_NAME ON EAM_AIQ_SERVICE (NAME)
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.73">
+      <schema-directSQL>
+        <statement desc="Create new EAM_VIRTUAL table">
+          CREATE TABLE EAM_VIRTUAL (
+            RESOURCE_ID INTEGER NOT NULL,
+            PROCESS_ID INTEGER NOT NULL,
+            PHYSICAL_ID INTEGER,
+            CONSTRAINT EAM_VIRTUAL_PK PRIMARY KEY (RESOURCE_ID)
+          )
+        </statement>
+        <statement desc="Create new virtual platforms view.">
+        CREATE VIEW EAM_VIRT_PLAT_VIEW AS
+        SELECT 
+          p.*, v.RESOURCE_ID, PROCESS_ID, PHYSICAL_ID
+        FROM 
+           EAM_PLATFORM p, EAM_RESOURCE r, EAM_RESOURCE_TYPE rt,
+           EAM_VIRTUAL v
+        WHERE rt.name = 'covalentEAMPlatform' AND
+              r.resource_type_id = rt.id AND
+              r.instance_id = p.id AND
+              r.id = v.resource_id
+        </statement>
+        <statement desc="Create new virtual servers view.">
+        CREATE VIEW EAM_VIRT_SVR_VIEW AS
+        SELECT 
+          s.*, v.RESOURCE_ID, PROCESS_ID, PHYSICAL_ID
+        FROM 
+           EAM_SERVER s, EAM_RESOURCE r, EAM_RESOURCE_TYPE rt,
+           EAM_VIRTUAL v
+        WHERE rt.name = 'covalentEAMServer' AND
+              r.resource_type_id = rt.id AND
+              r.instance_id = s.id AND
+              r.id = v.resource_id
+        </statement>
+        <statement desc="Create new virtual services view.">
+        CREATE VIEW EAM_VIRT_SVC_VIEW AS
+        SELECT 
+          s.*, v.RESOURCE_ID, PROCESS_ID, PHYSICAL_ID
+        FROM 
+           EAM_SERVICE s, EAM_RESOURCE r, EAM_RESOURCE_TYPE rt,
+           EAM_VIRTUAL v
+        WHERE rt.name = 'covalentEAMService' AND
+              r.resource_type_id = rt.id AND
+              r.instance_id = s.id AND
+              r.id = v.resource_id
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <!-- Upgrade to Quartz 1.5.1 -->
+    <schemaSpec version="1.74">
+    
+      <!-- JOB_DETAILS table -->
+      <schema-addColumn table="EAM_QRTZ_JOB_DETAILS"
+                        column="IS_VOLATILE"
+                        columnType="BOOLEAN" />
+      <schema-update table="EAM_QRTZ_JOB_DETAILS"
+                     column="IS_VOLATILE"
+                     columnType="BOOLEAN"
+                     value="FALSE" />
+      <schema-alterColumn table="EAM_QRTZ_JOB_DETAILS"
+                          column="IS_VOLATILE"
+                          nullable="NOT NULL" />
+
+      <!-- TRIGGERS table -->
+      <schema-addColumn table="EAM_QRTZ_TRIGGERS"
+                        column="IS_VOLATILE"
+                        columnType="BOOLEAN" />
+      <schema-update table="EAM_QRTZ_TRIGGERS"
+                     column="IS_VOLATILE"
+                     columnType="BOOLEAN"
+                     value="FALSE" />
+      <schema-alterColumn table="EAM_QRTZ_TRIGGERS"
+                          column="IS_VOLATILE"
+                          nullable="NOT NULL"/>
+      <schema-addColumn table="EAM_QRTZ_TRIGGERS"
+                        column="PREV_FIRE_TIME"
+                        columnType="LONG" />
+      <schema-addColumn table="EAM_QRTZ_TRIGGERS"
+                        column="JOB_DATA"
+                        columnType="BLOB" />
+
+      <!-- BLOB_TRIGGERS table -->
+      <schema-alterColumn table="EAM_QRTZ_BLOB_TRIGGERS"
+                          column="BLOB_DATA"
+                          nullable="NULL"/>
+
+      <!-- FIRED_TRIGGERS table -->
+      <schema-directSQL>
+        <statement>
+            ALTER TABLE EAM_QRTZ_FIRED_TRIGGERS RENAME COLUMN TRIGGER_STATE TO STATE
+        </statement>
+      </schema-directSQL>
+      <schema-addColumn table="EAM_QRTZ_FIRED_TRIGGERS"
+                        column="IS_VOLATILE"
+                        columnType="BOOLEAN" />
+      <schema-update table="EAM_QRTZ_FIRED_TRIGGERS"
+                     column="IS_VOLATILE"
+                     columnType="BOOLEAN"
+                     value="FALSE" />
+      <schema-alterColumn table="EAM_QRTZ_FIRED_TRIGGERS"
+                          column="IS_VOLATILE"
+                          nullable="NOT NULL"/>
+      <schema-addColumn table="EAM_QRTZ_FIRED_TRIGGERS"
+                        column="JOB_NAME"
+                        columnType="VARCHAR2"
+                        precision="80" />
+      <schema-addColumn table="EAM_QRTZ_FIRED_TRIGGERS"
+                        column="JOB_GROUP"
+                        columnType="VARCHAR2"
+                        precision="80" />
+      <schema-addColumn table="EAM_QRTZ_FIRED_TRIGGERS"
+                        column="IS_STATEFUL"
+                        columnType="BOOLEAN" />
+      <schema-addColumn table="EAM_QRTZ_FIRED_TRIGGERS"
+                        column="REQUESTS_RECOVERY"
+                        columnType="BOOLEAN" />
+
+      <!-- PAUSED_TRIGGER_GRPS -->
+      <schema-directSQL>
+        <statement desc="Create new Quartz table: EAM_QRTZ_PAUSED_TRIGGER_GRPS"
+                   targetDB="oracle">
+          CREATE TABLE EAM_QRTZ_PAUSED_TRIGGER_GRPS (
+            TRIGGER_GROUP VARCHAR2(80) NOT NULL
+          )
+        </statement>
+        <statement desc="Create new Quartz table: EAM_QRTZ_PAUSED_TRIGGER_GRPS"
+                   targetDB="postgresql">
+          CREATE TABLE EAM_QRTZ_PAUSED_TRIGGER_GRPS (
+            TRIGGER_GROUP VARCHAR(80) NOT NULL
+          )
+        </statement>
+      </schema-directSQL>
+
+      <schema-directSQL>
+        <statement desc="Creating primary key for EAM_QRTZ_PAUSED_TRIGGER_GRPS">
+          ALTER TABLE EAM_QRTZ_PAUSED_TRIGGER_GRPS ADD PRIMARY KEY ( TRIGGER_GROUP )
+        </statement>
+      </schema-directSQL>
+
+      <!-- SCHEDULER_STATE -->
+      <schema-directSQL>
+        <statement desc="Create new Quartz table: EAM_QRTZ_SCHEDULER_STATE"
+                   targetDB="oracle">
+          CREATE TABLE EAM_QRTZ_SCHEDULER_STATE (
+            INSTANCE_NAME VARCHAR2(80) NOT NULL,
+            LAST_CHECKIN_TIME NUMBER(24,5) NOT NULL,
+            CHECKIN_INTERVAL NUMBER(24,5) NOT NULL,
+            RECOVERER VARCHAR2(80) NULL
+          )
+        </statement>
+        <statement desc="Create new Quartz table: EAM_QRTZ_SCHEDULER_STATE"
+                   targetDB="postgresql">
+          CREATE TABLE EAM_QRTZ_SCHEDULER_STATE (
+            INSTANCE_NAME VARCHAR(80) NOT NULL,
+            LAST_CHECKIN_TIME DECIMAL(24,5) NOT NULL,
+            CHECKIN_INTERVAL DECIMAL(24,5) NOT NULL,
+            RECOVERER VARCHAR(80) NULL
+          )
+        </statement>
+      </schema-directSQL>
+      <schema-directSQL>
+        <statement desc="Creating primary key for EAM_QRTZ_SCHEDULER_STATE">
+          ALTER TABLE EAM_QRTZ_SCHEDULER_STATE ADD PRIMARY KEY ( INSTANCE_NAME )
+        </statement>
+      </schema-directSQL>
+
+      <!-- LOCKS -->        
+      <schema-directSQL>
+        <statement desc="Create new Quartz table: EAM_QRTZ_LOCKS"
+                   targetDB="oracle">
+          CREATE TABLE EAM_QRTZ_LOCKS (
+            LOCK_NAME VARCHAR2(40) NOT NULL
+          )
+        </statement>
+        <statement desc="Create new Quartz table: EAM_QRTZ_LOCKS"
+                   targetDB="postgresql">
+          CREATE TABLE EAM_QRTZ_LOCKS (
+            LOCK_NAME VARCHAR(40) NOT NULL
+          )
+        </statement>
+      </schema-directSQL>
+
+      <schema-directSQL>
+        <statement desc="Creating primary key for EAM_QRTZ_LOCKS">
+          ALTER TABLE EAM_QRTZ_LOCKS ADD PRIMARY KEY ( LOCK_NAME )
+        </statement>
+      </schema-directSQL>
+
+      <schema-insert table="EAM_QRTZ_LOCKS" insertCmd="(LOCK_NAME) VALUES ('TRIGGER_ACCESS')"/>
+      <schema-insert table="EAM_QRTZ_LOCKS" insertCmd="(LOCK_NAME) VALUES ('JOB_ACCESS')"/>
+      <schema-insert table="EAM_QRTZ_LOCKS" insertCmd="(LOCK_NAME) VALUES ('CALENDAR_ACCESS')"/>
+      <schema-insert table="EAM_QRTZ_LOCKS" insertCmd="(LOCK_NAME) VALUES ('STATE_ACCESS')"/>
+      <schema-insert table="EAM_QRTZ_LOCKS" insertCmd="(LOCK_NAME) VALUES ('MISFIRE_ACCESS')"/>
+
+    </schemaSpec>
+
+    <!-- part of the quartz upgrade, see JBNADM-440 -->
+    <schemaSpec version="1.75">
+          <schema-directSQL>
+        <statement desc="Correcting the Quartz Cron String">
+            UPDATE EAM_QRTZ_CRON_TRIGGERS
+               SET CRON_EXPRESSION='0 10 0-23 * * ?'
+             WHERE CRON_EXPRESSION='0 10 0-24 * * ?'
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.76">
+      <schema-directSQL>
+        <statement>
+            ALTER TABLE EAM_CONTROL_HISTORY RENAME COLUMN ERRORSTR TO MESSAGE
+        </statement>
+        <statement>
+            ALTER TABLE EAM_AUTOINV_HISTORY RENAME COLUMN ERRORSTR TO MESSAGE
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <!-- Add args column to track control plugin arguments -->
+    <schemaSpec version="1.77">
+      <schema-addColumn table="EAM_CONTROL_HISTORY"
+                        column="ARGS"
+                        columnType="VARCHAR2"
+                        precision="500"/>
+    </schemaSpec>
+
+    <schemaSpec version="1.78">
+      <schema-directSQL>
+        <statement desc="Update DataPurgeJob for HQ">
+          UPDATE EAM_QRTZ_JOB_DETAILS SET 
+          job_class_name='org.hyperic.hq.measurement.DataPurgeJob' WHERE
+          job_class_name='net.hyperic.hq.measurement.DataPurgeJob'
+        </statement>
+        <statement desc="Update AIScanJob for HQ">
+          UPDATE EAM_QRTZ_JOB_DETAILS SET
+          job_class_name='org.hyperic.hq.autoinventory.server.session.AIScanJob' WHERE
+          job_class_name='net.hyperic.hq.autoinventory.server.session.AIScanJob'
+        </statement>
+        <statement desc="Update ControlJob for HQ">
+          UPDATE EAM_QRTZ_JOB_DETAILS SET
+          job_class_name='org.hyperic.hq.control.server.session.ControlActionJob' WHERE
+          job_class_name='net.hyperic.hq.control.server.session.ControlActionJob'
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.79">
+      <schema-directSQL>
+        <statement desc="Remove unused index: EAM_TRIGGER_EVENTS_IND">
+          DROP INDEX EAM_TRIGGER_EVENTS_IND
+        </statement>
+        <statement desc="Remove unused index: MEASUREMENT_INSTANCE_DSN">
+          DROP INDEX MEASUREMENT_INSTANCE_DSN
+        </statement>
+        <statement desc="Remove unused index: EAM_PLATFORM_idx_CTIME">
+          DROP INDEX EAM_PLATFORM_idx_CTIME
+        </statement>
+        <statement desc="Remove unused index: EAM_PLATFORM_CID_IDX">
+          DROP INDEX EAM_PLATFORM_CID_IDX
+        </statement>
+        <statement desc="Remove unused index: EAM_IP_CID_IDX">
+          DROP INDEX EAM_IP_CID_IDX
+        </statement>
+        <statement desc="Remove unused index: EAM_SERVER_CID_IDX">
+          DROP INDEX EAM_SERVER_CID_IDX
+        </statement>
+        <statement desc="Remove unused index: EAM_APPLICATION_CID_IDX">
+          DROP INDEX EAM_APPLICATION_CID_IDX
+        </statement>
+        <statement desc="Remove unused index: EAM_RESOURCE_TYPE_RESOURCE_KEY">
+          DROP INDEX EAM_RESOURCE_TYPE_RESOURCE_KEY
+        </statement>
+        <statement desc="Remove unused index: EAM_ROLE_RESOURCE_KEY">
+          DROP INDEX EAM_ROLE_RESOURCE_KEY
+        </statement>
+        <statement desc="Remove unused index: EAM_SUBJECT_RESOURCE_KEY">
+          DROP INDEX EAM_SUBJECT_RESOURCE_KEY
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.80">
+      <schema-directSQL>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='org.hyperic.hq.bizapp.server.trigger.conditional.MeasurementThresholdTrigger'
+            WHERE CLASSNAME='net.hyperic.hq.bizapp.server.trigger.conditional.MeasurementThresholdTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger'
+            WHERE CLASSNAME='net.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='org.hyperic.hq.bizapp.server.trigger.conditional.AlertTrigger'
+            WHERE CLASSNAME='net.hyperic.hq.bizapp.server.trigger.conditional.AlertTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='org.hyperic.hq.bizapp.server.trigger.conditional.CustomPropertyTrigger'
+            WHERE CLASSNAME='net.hyperic.hq.bizapp.server.trigger.conditional.CustomPropertyTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='com.covalent.spider.bizapp.server.trigger.conditional.ControlEventTrigger'
+            WHERE CLASSNAME='net.hyperic.hq.bizapp.server.trigger.conditional.ControlEventTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='com.hyperic.hq.bizapp.server.trigger.conditional.MeasurementBaselineTrigger'
+            WHERE CLASSNAME='net.hyperic.hq.bizapp.server.trigger.conditional.MeasurementBaselineTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='com.hyperic.hq.bizapp.server.trigger.conditional.LogEventTrigger'
+            WHERE CLASSNAME='net.hyperic.hq.bizapp.server.trigger.conditional.LogEventTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger'
+            WHERE CLASSNAME='net.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='org.hyperic.hq.bizapp.server.trigger.frequency.AvertTrigger'
+            WHERE CLASSNAME='net.hyperic.hq.bizapp.server.trigger.frequency.AvertTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='org.hyperic.hq.bizapp.server.trigger.frequency.ConstantDurationTrigger'
+            WHERE CLASSNAME='net.hyperic.hq.bizapp.server.trigger.frequency.ConstantDurationTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='org.hyperic.hq.bizapp.server.trigger.frequency.CounterTrigger'
+            WHERE CLASSNAME='net.hyperic.hq.bizapp.server.trigger.frequency.CounterTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='org.hyperic.hq.bizapp.server.trigger.frequency.DurationTrigger'
+            WHERE CLASSNAME='net.hyperic.hq.bizapp.server.trigger.frequency.DurationTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='org.hyperic.hq.bizapp.server.trigger.frequency.EscalateTrigger'
+            WHERE CLASSNAME='net.hyperic.hq.bizapp.server.trigger.frequency.EscalateTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_ACTION
+              SET CLASSNAME='com.hyperic.hq.bizapp.server.action.alert.EnableAlertDefAction'
+            WHERE CLASSNAME='net.hyperic.hq.bizapp.server.action.alert.EnableAlertDefAction'
+        </statement>
+        <statement>
+          UPDATE EAM_ACTION
+              SET CLASSNAME='com.hyperic.hq.bizapp.server.action.alert.SnmpAction'
+            WHERE CLASSNAME='net.hyperic.hq.bizapp.server.action.alert.SnmpAction'
+        </statement>
+        <statement>
+          UPDATE EAM_ACTION
+              SET CLASSNAME='com.hyperic.hq.bizapp.server.action.control.ControlAction'
+            WHERE CLASSNAME='net.hyperic.hq.bizapp.server.action.control.ControlAction'
+        </statement>
+        <statement>
+          UPDATE EAM_ACTION
+              SET CLASSNAME='com.hyperic.hq.bizapp.server.action.email.EmailAction'
+            WHERE CLASSNAME='net.hyperic.hq.bizapp.server.action.email.EmailAction'
+        </statement>
+        <statement>
+          UPDATE EAM_ACTION
+              SET CLASSNAME='com.hyperic.hq.bizapp.server.action.log.SyslogAction'
+            WHERE CLASSNAME='net.hyperic.hq.bizapp.server.action.log.SyslogAction'
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.81">
+      <schema-directSQL>
+        <statement desc="Create index for EAM_MEASUREMENT_ARG for faster lookup">
+          CREATE INDEX MEASUREMENT_ARG_TEMPL_IDX ON EAM_MEASUREMENT_ARG  ( MEASUREMENT_TEMPLATE_ID )
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.82">
+      <schema-directSQL>
+        <statement>
+          UPDATE EAM_ACTION
+              SET CLASSNAME='org.hyperic.hq.measurement.action.MetricAlertAction'
+            WHERE CLASSNAME='net.hyperic.hq.measurement.action.MetricAlertAction'
+        </statement>
+        <statement>
+          DELETE FROM EAM_TRIGGER_EVENT;
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="1.83">
+      <schema-addColumn table="EAM_MEASUREMENT_TEMPL"
+                        column="CTIME"
+                        columnType="LONG">
+        <initializer>
+          UPDATE EAM_MEASUREMENT_TEMPL SET CTIME = 0
+        </initializer>
+      </schema-addColumn>
+      <schema-addColumn table="EAM_MEASUREMENT_TEMPL"
+                        column="MTIME"
+                        columnType="LONG">
+        <initializer>
+          UPDATE EAM_MEASUREMENT_TEMPL SET MTIME = 1
+        </initializer>
+      </schema-addColumn>
+    </schemaSpec>
+
+    <schemaSpec version="1.84">
+      <schema-directSQL>
+        <statement>
+          UPDATE EAM_RESOURCE SET FSYSTEM = %%TRUE%% WHERE ID=6
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+</dbupgrade>
+
+</target>
+
+</project>

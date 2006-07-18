@@ -1,0 +1,20 @@
+    <plugin type="autoinventory" class="NetworkDevicePlatformDetector"/>
+
+    <!-- type must be measurement to override SNMPMeasurementPlugin -->
+    <config include="snmp,interface.index" type="measurement"/>
+
+    <properties>
+      <property name="sysContact"
+                description="Contact Name"/>
+      <property name="sysName"
+                description="Name"/>
+      <property name="sysLocation"
+                description="Location"/>
+      <property name="Version"
+                description="Version"/>
+    </properties>
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.SNMPMeasurementPlugin"/>
+
+    <metrics include="netdevice-platform"/>

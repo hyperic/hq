@@ -1,0 +1,181 @@
+/*
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ * "derived work".
+ * 
+ * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * This file is part of HQ.
+ * 
+ * HQ is free software; you can redistribute it and/or modify
+ * it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
+ */
+
+package org.hyperic.hq.measurement;
+
+import java.util.Calendar;
+import java.util.Properties;
+import java.sql.SQLException;
+
+import javax.ejb.CreateException;
+import javax.naming.NamingException;
+
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
+import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
+import org.hyperic.hq.measurement.TimingVoodoo;
+import org.hyperic.hq.measurement.shared.DataCompressLocal;
+import org.hyperic.hq.measurement.shared.DataCompressUtil;
+import org.hyperic.util.ConfigPropertyException;
+import org.hyperic.util.TimeUtil;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+
+public class DataPurgeJob 
+    implements Job {
+
+    private static final String logCtx  = "DataPurgeJob";
+    private static final Log    log     = LogFactory.getLog(logCtx);
+
+    private static boolean running = false;
+
+    private static long HOUR = 60 * 60 * 1000;
+
+    /**
+     * Public interface for quartz 
+     */
+    public void execute(JobExecutionContext context)
+        throws JobExecutionException {
+
+        try {
+            DataPurgeJob.compressData();
+        } catch (CreateException e) {
+            throw new JobExecutionException(
+                "Unable to create instance of DataManager.", e, false);
+        } catch (NamingException e) {
+            throw new JobExecutionException(
+                "Unable to look up DataManager.", e, false);
+        }
+    }
+    
+    /**
+     * Entry point into compression routine
+     */
+    public static void compressData()
+        throws CreateException, NamingException
+    {
+        ServerConfigManagerLocal serverConfig =
+            ServerConfigManagerUtil.getLocalHome().create();
+
+        DataCompressLocal dataCompress = 
+            DataCompressUtil.getLocalHome().create();
+
+        // First check if we are already running
+        if (running) {
+            log.info("Not starting data compression. (Already running)");
+            return;
+        } else {
+            running = true;
+        }
+
+        // Announce
+        long time_start = System.currentTimeMillis();
+        log.info("Data compression starting at " +
+                 TimeUtil.toString(time_start));
+        
+        try {
+            dataCompress.compressData();
+        } catch (SQLException e) {
+            log.error("Unable to compress data: " + e, e);
+        } finally {
+            running = false;
+        }
+        
+        long time_end = System.currentTimeMillis();
+        log.info("Data compression completed in " +
+                 ((time_end - time_start)/1000) +
+                 " seconds.");
+
+        // Once compression finishes, we check to see if databae maintaince
+        // should be performed.  This is defaulted to 1 hour, so it should
+        // always run unless changed by the user.  This is only a safeguard,
+        // as usually an ANALYZE only takes a fraction of what a full VACUUM
+        // takes.
+        //
+        // VACUUM will occur every day at midnight.
+
+        Properties conf;
+        try {
+            conf = ServerConfigManagerUtil.getLocalHome().create().getConfig();
+        } catch (CreateException e) {
+            throw new SystemException(e);
+        } catch (NamingException e) {
+            throw new SystemException(e);
+        } catch (ConfigPropertyException e) {
+            // Not gonna happen
+            throw new SystemException(e);
+        }
+
+        String dataMaintenance =
+            conf.getProperty(HQConstants.DataMaintenance);
+        if (dataMaintenance == null) {
+            // Should never happen
+            log.error("No data maintenance interval found");
+            return;
+        }
+
+        long maintInterval = Long.parseLong(dataMaintenance);
+        // At midnight we always perform a VACUUM, otherwise we
+        // check to see if it is time to perform normal database
+        // maintenance. (On postgres we just rebuild indicies
+        // using an ANALYZE)
+        Calendar cal = Calendar.getInstance();
+        /*
+        if (cal.get(Calendar.HOUR_OF_DAY) == 0) {
+         */
+        if (TimingVoodoo.roundDownTime(time_start, HOUR) ==
+            TimingVoodoo.roundDownTime(time_start, maintInterval)) {
+            log.info("Performing database maintenance (VACUUM ANALYZE)");
+            serverConfig.vacuum();
+
+            String reindexStr = conf.getProperty(HQConstants.DataReindex);
+            boolean reindexNightly = Boolean.valueOf(reindexStr).booleanValue();
+            if (cal.get(Calendar.HOUR_OF_DAY) == 0 && reindexNightly) {
+                log.info("Re-indexing HQ data tables");
+                serverConfig.reindex();
+            }
+
+            log.info("Database maintenance completed in " +
+                     ((System.currentTimeMillis() - time_end)/1000) +
+                     " seconds.");
+        /*
+        } else if (TimingVoodoo.roundDownTime(time_start, HOUR) ==
+                   TimingVoodoo.roundDownTime(time_start, maintInterval)) {
+            log.info("Performing database maintenance (ANALYZE)");
+            serverConfig.analyze();
+            log.info("Database maintenance completed in " +
+                     ((System.currentTimeMillis() - time_end)/1000) +
+                     " seconds.");
+         */
+        } else {
+            log.info("Not performing database maintenance");
+        }
+    }
+}

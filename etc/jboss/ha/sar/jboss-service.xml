@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<server>
+    <mbean code="org.hyperic.hq.ha.server.mbean.AvailService"
+        name="hyperic.jmx:type=Service,name=Avail">
+        <depends>jboss.jca:service=LocalTxCM,name=HypericDS</depends>
+    </mbean>
+</server>

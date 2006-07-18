@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+
+<project name="setup-interactive" default="generate-props" basedir=".">
+
+  <target name="generate-install-props" unless="setup.upgrade">
+    <property name="setup.title" value="Choose which software to install:"/>
+    <configMultichoice title="${setup.title}">
+
+      <option name="Hyperic HQ Server">
+        <configSchema inputPrefix="^^^INPUT:" outputPrefix="^^^INFO:"
+           class="org.hyperic.hq.install.ServerConfig"
+           file="${setup}.new"
+           completionFile="${setup}.server-summary.txt"
+           installDirPropName="installdir"
+           replaceInstallDir="true" />
+      </option>
+
+      <option name="Hyperic HQ Shell">
+        <configSchema inputPrefix="^^^INPUT:" outputPrefix="^^^INFO:"
+           class="org.hyperic.hq.install.ShellConfig"
+           file="${setup}.new"
+           completionFile="${setup}.shell-summary.txt"
+           installDirPropName="installdir"
+           replaceInstallDir="true" />
+      </option>
+
+      <option name="Hyperic HQ Agent">
+        <configSchema inputPrefix="^^^INPUT:" outputPrefix="^^^INFO:"
+           class="org.hyperic.hq.install.AgentConfig"
+           file="${setup}.new"
+           completionFile="${setup}.agent-summary.txt"
+           installDirPropName="installdir"
+           replaceInstallDir="true" />
+      </option>
+    </configMultichoice>
+
+    <available property="newsetup.available" file="${setup}.new"/>
+    <antcall target="copy-new-setup"/>
+  </target>
+
+  <target name="generate-upgrade-props" if="setup.upgrade">
+
+    <configSchema inputPrefix="^^^INPUT:" outputPrefix="^^^INFO:"
+       class="org.hyperic.hq.install.ServerConfig"
+       file="${setup}.new"
+       completionFile="${setup}.server-summary.txt"
+       installDirPropName="installdir"
+       replaceInstallDir="true" />
+
+    <available property="newsetup.available" file="${setup}.new"/>
+    <antcall target="copy-new-setup"/>
+  </target>
+
+  <target name="generate-props" depends="generate-upgrade-props,generate-install-props"/>
+
+  <target name="copy-new-setup" if="newsetup.available">
+    <delete file="${setup}"/>
+    <copy file="${setup}.new" tofile="${setup}"/>
+    <delete file="${setup}.new" quiet="true"/>
+
+    <chmod file="${setup}" perm="go-rwx"/>
+  </target>
+
+</project>

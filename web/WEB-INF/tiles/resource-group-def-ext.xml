@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+     "-//Apache Software Foundation//DTD Tiles Configuration 1.1//EN"
+     "http://jakarta.apache.org/struts/dtds/tiles-config_1_1.dtd">
+
+
+<tiles-definitions>
+
+  <definition name=".resource.group.inventory.ViewGroup"
+              controllerUrl="/resource/group/inventory/ViewGroup.do"
+              path="/resource/group/inventory/ViewGroup.jsp">
+  </definition>
+  
+  <definition name=".tabs.resource.group"
+              extends=".tabs.resource"> 
+   <putList name="tabList">
+       <item value="Monitor" mode="currentHealth"
+            link="/resource/group/monitor/Visibility.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Inventory" link="/resource/group/Inventory.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+   </putList>     
+  </definition>
+  
+  <definition name=".tabs.resource.group.control.current"
+              extends=".tabs.resource.group">                            
+   <put name="selectedIndex"  value="2" />
+   <put name="subSectionName" value="Control"/>
+   <put name="subSelectedIndex" value="0"/>
+   <putList name="subTabList">
+      <item value="Current" link="/resource/group/Control.do"            
+            height="25" width="104" mode="view"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="History" link="/resource/group/Control.do"
+            height="25" width="104" mode="history"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+   </putList>
+  </definition>
+  
+</tiles-definitions>

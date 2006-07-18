@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Covalent.DBSetup name="measurement-schema.xml" notice="DBSetup, Copyright (C) 2002, Covalent Technologies, Inc., All Rights Reserved.">
+
+    <table name="EAM_MONITORABLE_TYPE">
+        <column name="ID" default="sequence-only" initial="10001"
+                primarykey="true" required="true" type="INTEGER"/>
+        <column name="CID" type="INTEGER"/>
+        <column name="NAME" required="true" size="100" type="VARCHAR2"/>
+        <column name="APPDEF_TYPE" required="true" type="INTEGER"/>
+        <column name="PLUGIN" required="true" size="250" type="VARCHAR2"/>
+        <index name="TYPE_NAME" unique="true">
+            <field ref="NAME" />
+        </index>
+        <index name="MTYPE_IDX_APPDEFTYPE" unique="false">
+            <field ref="APPDEF_TYPE" />
+        </index>
+    </table>
+
+    <table name="EAM_MEASUREMENT_CAT">
+        <column name="ID" default="sequence-only" initial="10001"
+                primarykey="true" required="true" type="INTEGER"/>
+        <column name="CID" type="INTEGER"/>
+        <column name="NAME" required="true" size="100" type="VARCHAR2"/>
+        <index name="CAT_NAME" unique="true">
+            <field ref="NAME" />
+        </index>
+    </table>
+
+     <table name="EAM_MEASUREMENT_TEMPL">
+        <column name="ID" type="INTEGER" default="sequence-only" initial="10001"
+                primarykey="true" required="true"/>
+        <column name="CID" type="INTEGER"/>
+        <column name="NAME" type="VARCHAR2" required="true" size="100"/>
+        <column name="ALIAS" type="VARCHAR2" required="true" size="50"/>
+        <column name="UNITS" type="VARCHAR2" required="false" size="50"/>
+        <column name="COLLECTION_TYPE" type="INTEGER" required="true" default="0"/>
+        <column name="DEFAULT_ON" type="BOOLEAN" required="true"
+                default="FALSE"/>
+        <column name="DEFAULT_INTERVAL" type="LONG" required="true"
+                default="60000"/>
+        <column name="DESIGNATE" type="BOOLEAN" required="true"
+                default="FALSE"/>
+        <column name="MONITORABLE_TYPE_ID" type="INTEGER" required="false"
+                references="EAM_MONITORABLE_TYPE(ID)"/>
+        <column name="CATEGORY_ID" type="INTEGER" required="false"
+                references="EAM_MEASUREMENT_CAT(ID)"/>
+        <column name="TEMPLATE" type="VARCHAR2" required="true" size="500"/>
+        <column name="PLUGIN" type="VARCHAR2" required="false" size="250"/>
+        <column name="EXPRESSION_DATA" type="BYTES" required="false"/>
+        <column name="CTIME" required="true" type="LONG"/>
+        <column name="MTIME" required="true" type="LONG"/>
+        <index name="TEMPL_DESIG_MT_IDX">
+            <field ref="DESIGNATE"/>
+            <field ref="MONITORABLE_TYPE_ID"/>
+        </index>
+        <index name="TEMPL_MONITORABLE_TYPE_IDX">
+            <field ref="MONITORABLE_TYPE_ID"/>
+        </index>
+    </table>
+
+    <table name="EAM_MEASUREMENT_ARG">
+        <column name="ID" default="sequence-only" initial="10001"
+                primarykey="true" required="true" type="INTEGER"/>
+        <column name="CID" type="INTEGER"/>
+        <column name="MEASUREMENT_TEMPLATE_ID" required="false" type="INTEGER"
+                references="EAM_MEASUREMENT_TEMPL(ID)"/>
+        <column name="MEASUREMENT_TEMPLATE_ARG_ID" required="false"
+                type="INTEGER" references="EAM_MEASUREMENT_TEMPL(ID)"/>
+        <column name="PLACEMENT" required="true" type="INTEGER"/>
+        <column name="TICKS" required="false" type="INTEGER" default="0"/>
+        <column name="WEIGHT" required="false" type="FLOAT" default="0"/>
+        <column name="PREVIOUS" required="false" type="INTEGER" default="0"/>
+        <index name="MEASUREMENT_ARG_TEMPL_IDX">
+            <field ref="MEASUREMENT_TEMPLATE_ID"/>
+        </index>
+    </table>
+
+    <table name="EAM_MEASUREMENT" tablespace="@@@LG_DATA@@@" logging="false"
+        storage-options="freelists 5" cache="true">
+        <column name="ID" default="sequence-only" initial="10001"
+                primarykey="true" required="true" type="INTEGER"/>
+        <column name="CID" type="INTEGER"/>
+        <column name="TEMPLATE_ID" type="INTEGER"
+                references="EAM_MEASUREMENT_TEMPL(ID)"/>
+        <column name="ENABLED" required="true" default="TRUE" type="BOOLEAN"/>
+        <column name="INSTANCE_ID" required="true" type="INTEGER"/>
+        <column name="MTIME" required="true" type="LONG"/>
+        <column name="COLL_INTERVAL" required="false" type="LONG"/>
+        <column name="DSN" required="false" size="500" type="VARCHAR2"/>
+
+        <index name="MEASUREMENT_INSTANCE" unique="true" tablespace="@@@LG_IDX@@@">
+            <field ref="INSTANCE_ID" />
+            <field ref="TEMPLATE_ID" />
+        </index>
+
+    </table>
+    <table name="EAM_MEASUREMENT_DATA" logging="false" cache="true" tablespace="@@@M_DATA@@@"
+        storage-options="freelists 20">
+        <column name="MEASUREMENT_ID" required="true" type="INTEGER"/>
+        <column name="TIMESTAMP" required="true" type="LONG"/>
+        <column name="VALUE" required="false" type="BIGDEC"/>
+        
+        <constraint name="MEASUREMENT_DATA_ID_TIME_PK">
+          <primaryKey>
+            <field ref="MEASUREMENT_ID"/>
+            <field ref="TIMESTAMP"/>
+          </primaryKey>
+        </constraint>
+        <index name="MEASUREMENT_DATA_TIME_IDX" tablespace="@@@M_IDX@@@">
+            <field ref="TIMESTAMP"/>
+        </index>
+    </table>
+
+    <table name="EAM_MEASUREMENT_DATA_1H" logging="false" cache="true"
+           tablespace="@@@M_DATA@@@"
+        storage-options="freelists 20">
+        <column name="MEASUREMENT_ID" required="true" type="INTEGER"/>
+        <column name="TIMESTAMP" required="true" type="LONG"/>
+        <column name="VALUE" required="false" type="BIGDEC"/>
+        <column name="MINVALUE" required="false" type="BIGDEC"/>
+        <column name="MAXVALUE" required="false" type="BIGDEC"/>
+        
+        <constraint name="MEASUREMENT_DATA_1H_ID_TIME_PK">
+          <primaryKey>
+            <field ref="MEASUREMENT_ID"/>
+            <field ref="TIMESTAMP"/>
+          </primaryKey>
+        </constraint>
+        <index name="MEASUREMENT_DATA_1H_TIME_IDX" tablespace="@@@M_IDX@@@">
+            <field ref="TIMESTAMP"/>
+        </index>
+    </table>
+
+    <table name="EAM_MEASUREMENT_DATA_6H" logging="false" cache="true"
+           tablespace="@@@M_DATA@@@"
+        storage-options="freelists 20">
+        <column name="MEASUREMENT_ID" required="true" type="INTEGER"/>
+        <column name="TIMESTAMP" required="true" type="LONG"/>
+        <column name="VALUE" required="false" type="BIGDEC"/>
+        <column name="MINVALUE" required="false" type="BIGDEC"/>
+        <column name="MAXVALUE" required="false" type="BIGDEC"/>
+        
+        <constraint name="MEASUREMENT_DATA_6H_ID_TIME_PK">
+          <primaryKey>
+            <field ref="MEASUREMENT_ID"/>
+            <field ref="TIMESTAMP"/>
+          </primaryKey>
+        </constraint>
+        <index name="MEASUREMENT_DATA_6H_TIME_IDX" tablespace="@@@M_IDX@@@">
+            <field ref="TIMESTAMP"/>
+        </index>
+    </table>
+
+    <table name="EAM_MEASUREMENT_DATA_1D" logging="false" cache="true"
+           tablespace="@@@M_DATA@@@"
+        storage-options="freelists 20">
+        <column name="MEASUREMENT_ID" required="true" type="INTEGER"/>
+        <column name="TIMESTAMP" required="true" type="LONG"/>
+        <column name="VALUE" required="false" type="BIGDEC"/>
+        <column name="MINVALUE" required="false" type="BIGDEC"/>
+        <column name="MAXVALUE" required="false" type="BIGDEC"/>
+        
+        <constraint name="MEASUREMENT_DATA_1D_ID_TIME_PK">
+          <primaryKey>
+            <field ref="MEASUREMENT_ID"/>
+            <field ref="TIMESTAMP"/>
+          </primaryKey>
+        </constraint>
+        <index name="MEASUREMENT_DATA_1D_TIME_IDX" tablespace="@@@M_IDX@@@">
+            <field ref="TIMESTAMP"/>
+        </index>
+    </table>
+
+    <table name="EAM_NUMBERS">
+        <column name="I" type="LONG" primarykey="true" />
+    </table>
+	
+    <table name="EAM_MEASUREMENT_BL">
+        <column name="ID" default="sequence-only" initial="10001"
+                primarykey="true" required="true" type="INTEGER"/>
+        <column name="MEASUREMENT_ID" required="false" type="INTEGER"/>
+        <column name="COMPUTE_TIME" required="true" type="LONG"/>
+        <column name="USER_ENTERED" required="true" type="BOOLEAN" 
+            default="FALSE"/>
+        <column name="MEAN" required="false" type="DOUBLE" />
+        <column name="MIN_EXPECTED_VAL" required="false" type="DOUBLE"/>
+        <column name="MAX_EXPECTED_VAL" required="false" type="DOUBLE"/>
+        <index name="METRIC_BASELINE_IDX">
+            <field ref="MEASUREMENT_ID" />
+        </index>
+        <index name="METRIC_BASELINE_CALCULATED_IDX">
+            <field ref="MEASUREMENT_ID" />
+            <field ref="COMPUTE_TIME" />
+        </index>
+    </table>
+	
+    <table name="EAM_SRN">
+        <column name="APPDEF_TYPE" required="true" type="INTEGER"/>
+        <column name="INSTANCE_ID" required="true" type="INTEGER"/>
+        <column name="SRN" required="true" type="INTEGER"/>
+        <constraint name="MEASUREMENT_SRN_RES_ID">
+          <primaryKey>
+            <field ref="APPDEF_TYPE"/>
+            <field ref="INSTANCE_ID"/>
+          </primaryKey>
+        </constraint>
+     </table>
+
+    <table name="EAM_METRIC_PROB">
+        <column name="MEASUREMENT_ID" required="true" type="INTEGER"/>
+        <column name="TIMESTAMP" required="true" type="LONG"/>
+        <column name="TYPE" required="true" type="INTEGER"/>
+        <column name="ADDITIONAL" required="false" type="INTEGER"/>
+        <index name="METRIC_PROB_ID_IDX">
+            <field ref="MEASUREMENT_ID"/>
+        </index>
+        <index name="METRIC_PROB_TIME_IDX">
+            <field ref="MEASUREMENT_ID"/>
+            <field ref="TIMESTAMP"/>
+        </index>
+    </table>
+
+    <view name="EAM_METRIC_PROB_VIEW">
+        <query>
+        SELECT 
+          appdef_type, instance_id, measurement_id,
+          timestamp, type
+        FROM 
+           EAM_METRIC_PROB, EAM_MEASUREMENT m,
+           EAM_MEASUREMENT_TEMPL t, EAM_MONITORABLE_TYPE mt
+        WHERE measurement_id = m.id AND template_id = t.id AND
+              monitorable_type_id = mt.id
+        </query>
+    </view>
+</Covalent.DBSetup>

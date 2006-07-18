@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Covalent.DBSetup name="control-schema.xml">
+<table name="EAM_CONTROL_HISTORY">
+    <!-- Common history columns -->
+    <column name="ID" default="sequence-only" initial="10001"
+            primarykey="true" required="true" type="INTEGER"/>
+    <column name="GROUP_ID" type="INTEGER" required="false"/>
+    <column name="BATCH_ID" type="INTEGER" required="false"/>
+    <column name="ENTITY_TYPE" type="INTEGER" required="true"/>
+    <column name="ENTITY_ID" type="INTEGER" required="true"/>
+    <column name="SUBJECT" size="32" type="VARCHAR2" required="true"/>
+    <column name="SCHEDULED" type="BOOLEAN" required="true"/>
+    <column name="DATE_SCHEDULED" type="LONG" required="true"/>
+    <column name="STARTTIME" type="LONG" required="true"/>
+    <column name="STATUS" size="64" type="VARCHAR2" required="true"/>
+    <column name="ENDTIME" type="LONG" required="true"/>
+    <column name="DURATION" type="LONG" required="true"/>
+    <column name="DESCRIPTION" type="VARCHAR2" size="500" required="false"/>
+    <column name="MESSAGE" type="VARCHAR2" required="false"
+            size="500"/>
+
+    <column name="ACTION" size="32" type="VARCHAR2" required="true"/>
+    <column name="ARGS" type="VARCHAR2" required="false" size="500"/>
+
+    <index name="CTL_HISTORY_STARTTIME" unique="false">
+        <field ref="STARTTIME"/>
+    </index>
+</table>
+
+<table name="EAM_CONTROL_SCHEDULE">
+    <!-- Common schedule columns -->
+    <column name="ID" default="sequence-only" initial="10001"
+            primarykey="true" required="true" type="INTEGER"/>
+    <column name="ENTITY_TYPE" type="INTEGER" required="true"/>
+    <column name="ENTITY_ID" type="INTEGER" required="true"/>
+    <column name="SUBJECT" size="32" type="VARCHAR2" required="true"/>
+    <column name="SCHEDULEVALUEBYTES" type="BYTES" required="true"/>
+    <column name="NEXTFIRETIME" type="LONG" required="true"/>
+    <column name="TRIGGERNAME" type="VARCHAR2" size="128" required="true"/>
+    <column name="JOBNAME" type="VARCHAR2" size="128" required="true"/>
+    <column name="JOB_ORDER_DATA" type="VARCHAR2" size="500" required="false"/>
+
+    <column name="ACTION" size="32" type="VARCHAR2" required="true"/>
+
+    <index name="CTL_SCHEDULE_ENTITY" unique="false">
+        <field ref="ENTITY_TYPE"/>
+        <field ref="ENTITY_ID"/>
+    </index>
+    <index name="CTL_SCHEDULE_NEXTFIRETIME" unique="false">
+        <field ref="NEXTFIRETIME"/>
+    </index>
+    <index name="CTL_SCHEDULE_TRIGGERNAME" unique="true">
+        <field ref="TRIGGERNAME"/>
+    </index>
+    <index name="CTL_SCHEDULE_JOBNAME" unique="true">
+        <field ref="JOBNAME"/>
+    </index>
+</table>
+</Covalent.DBSetup>
+
