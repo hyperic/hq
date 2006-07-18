@@ -1208,13 +1208,34 @@
   </server>
 
   <server name="Weblogic"
-          version="8.1"
+          version="7.0"
           include="6.1">
   </server>
 
   <server name="Weblogic Admin"
-          version="8.1"
+          version="7.0"
           include="6.1">
+
+    <property name="PRODUCT_DIR" value="weblogic700"/>
+
+    <scan>
+      <include name="/**/.internal/console.war"/>
+    </scan>
+  </server>
+
+  <server name="Weblogic NodeManager"
+          version="7.0"
+          include="6.1">
+  </server>
+
+  <server name="Weblogic"
+          version="8.1"
+          include="7.0">
+  </server>
+
+  <server name="Weblogic Admin"
+          version="8.1"
+          include="7.0">
 
     <property name="PRODUCT_DIR" value="weblogic81"/>
 
@@ -1225,7 +1246,7 @@
 
   <server name="Weblogic NodeManager"
           version="8.1"
-          include="6.1">
+          include="7.0">
   </server>
 
   <server name="Weblogic"
