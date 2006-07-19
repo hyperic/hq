@@ -678,13 +678,15 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                     AppdefEntityID aeid = new AppdefEntityID(dm.getAppdefType(),
                                                              dm.getInstanceId());
                     ScheduleRevNumValue srn = srnCache.getSRN(aeid);
-                    try {
-                        srnCache.beginIncrementSRN(
-                            aeid, Math.min(interval, srn.getMinInterval()));
-                    } catch (SRNCreateException e) {
-                        log.error("Should not be creating SRNs", e);
-                    } finally {
-                        srnCache.endIncrementSRN(aeid);
+                    if (srn != null) {  // Increment SRN only if not null
+                        try {
+                            srnCache.beginIncrementSRN(
+                                aeid, Math.min(interval, srn.getMinInterval()));
+                        } catch (SRNCreateException e) {
+                            log.error("Should not be creating SRNs", e);
+                        } finally {
+                            srnCache.endIncrementSRN(aeid);
+                        }
                     }
                 }
             }
