@@ -24,6 +24,13 @@
                 default="FALSE"/>
         <column name="ACT_ON_TRIGGER_ID" type="INTEGER" required="false"/>
         <column name="DELETED" required="true" default="FALSE" type="BOOLEAN"/>
+        <index name="ALERT_DEF_RES_IDX" unique="false">
+            <field ref="APPDEF_ID" />
+            <field ref="APPDEF_TYPE" />
+        </index>
+        <index name="ALERT_DEF_CHILD_IDX" unique="false">
+            <field ref="PARENT_ID" />
+        </index>
     </table>
 
     <table name="EAM_ACTION">

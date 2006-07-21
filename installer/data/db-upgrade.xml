@@ -1739,6 +1739,17 @@ has already been defined.
         </statement>
       </schema-directSQL>
     </schemaSpec>
+
+    <schemaSpec version="1.85">
+      <schema-directSQL>
+        <statement desc="Create index for EAM_ALERT_DEFINITION for faster lookup by resource">
+          CREATE INDEX ALERT_DEF_RES_IDX ON EAM_ALERT_DEFINITION ( APPDEF_ID, APPDEF_TYPE )
+        </statement>
+        <statement desc="Create index for EAM_ALERT_DEFINITION for faster lookup by parent">
+          CREATE INDEX ALERT_DEF_CHILD_IDX ON EAM_ALERT_DEFINITION ( PARENT_ID )
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
 </dbupgrade>
 
 </target>
