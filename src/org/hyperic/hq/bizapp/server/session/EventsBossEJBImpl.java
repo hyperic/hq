@@ -880,7 +880,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     /**
      * Delete a collection of alert definitions
      *
-     * @ejb:interface-method
+     * @ejb:interface-method view-type="local"
      * @ejb:transaction-type="REQUIRED"
      */
     public void removeAlertDefinitions(int sessionID, AppdefEntityID id)
