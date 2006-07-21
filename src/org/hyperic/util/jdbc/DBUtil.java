@@ -59,13 +59,14 @@ public class DBUtil {
     // Constants for supported databases.
     public static final int DATABASE_UNKNOWN      = 0;
     public static final int DATABASE_POSTGRESQL_7 = 1;
-    public static final int DATABASE_ORACLE_8     = 2;
-    public static final int DATABASE_ORACLE_9     = 3;
-    public static final int DATABASE_CLOUDSCAPE_4 = 4;
-    public static final int DATABASE_INSTANTDB_4  = 5;
-	public static final int DATABASE_POINTBASE_4  = 6;	
-    public static final int DATABASE_ORACLE_10    = 7;
-    public static final int DATABASE_MYSQL5       = 8;
+    public static final int DATABASE_POSTGRESQL_8 = 2;
+    public static final int DATABASE_ORACLE_8     = 3;
+    public static final int DATABASE_ORACLE_9     = 4;
+    public static final int DATABASE_CLOUDSCAPE_4 = 5;
+    public static final int DATABASE_INSTANTDB_4  = 6;
+	public static final int DATABASE_POINTBASE_4  = 7;	
+    public static final int DATABASE_ORACLE_10    = 8;
+    public static final int DATABASE_MYSQL5       = 9;
 	
     private static Map _dbTypes = new HashMap();
 
@@ -164,6 +165,7 @@ public class DBUtil {
         int dbType = getDBType(conn);
         switch ( dbType ) {
         case DATABASE_POSTGRESQL_7:
+        case DATABASE_POSTGRESQL_8:
             query = "SELECT last_value " +
                 "FROM " + table + "_" + key + "_seq";
             break;
@@ -218,6 +220,7 @@ public class DBUtil {
         int dbType = getDBType(conn);
         switch ( dbType ) {
         case DATABASE_POSTGRESQL_7:
+        case DATABASE_POSTGRESQL_8:
             query = "SELECT nextval('" +
                 table + "_" + key + "_seq'::text)";
             break;
@@ -295,14 +298,13 @@ public class DBUtil {
             String dbVersion = dbMetaData.getDatabaseProductVersion().toLowerCase();
             log.debug("DBUtil.getDBType: dbName='" + dbName + "', version='" + dbVersion + "'");
 
-            if ( dbName.indexOf("postgresql") != -1 ) {
-                if ( dbVersion.startsWith("7.") ||
-                     dbVersion.startsWith("8.") )
-                {
+            if (dbName.indexOf("postgresql") != -1) {
+                if (dbVersion.startsWith("7.")) {
                     dbType = DATABASE_POSTGRESQL_7;
+                } else if (dbVersion.startsWith("8.")) {
+                    dbType = DATABASE_POSTGRESQL_8;
                 }
-
-            } else if ( dbName.indexOf("oracle") != -1 ) {
+            } else if (dbName.indexOf("oracle") != -1) {
                 if ( dbVersion.startsWith("oracle8") ) {
                     dbType = DATABASE_ORACLE_8;
                 } else if ( dbVersion.startsWith("oracle9") ) {
@@ -346,7 +348,7 @@ public class DBUtil {
         return isPostgreSQL(type);
     }
     public static boolean isPostgreSQL (int type) {
-        return (type == DATABASE_POSTGRESQL_7);
+        return (type == DATABASE_POSTGRESQL_7 || type == DATABASE_POSTGRESQL_8);
     }
 
     /**
@@ -445,6 +447,7 @@ public class DBUtil {
                                               blobColName);
                 break;
             case DBUtil.DATABASE_POSTGRESQL_7:
+            case DBUtil.DATABASE_POSTGRESQL_8:
                 retVal = new PostgresBlobColumn(dsName, tableName, idColName,
                                                 blobColName);
                 break;
@@ -471,6 +474,7 @@ public class DBUtil {
             rval = OracleBlobColumn.doSelect(rs, columnIndex);
             break;
         case DBUtil.DATABASE_POSTGRESQL_7:
+        case DBUtil.DATABASE_POSTGRESQL_8:
             rval = PostgresBlobColumn.doSelect(rs, columnIndex);
             break;
         default:
@@ -705,6 +709,7 @@ public class DBUtil {
             return (e.getErrorCode() == 15006);
 
         case DATABASE_POSTGRESQL_7:
+        case DATABASE_POSTGRESQL_8:
             msg = changeNullAndTrim(e.getMessage());
             return (msg.endsWith("does not exist"));
 
