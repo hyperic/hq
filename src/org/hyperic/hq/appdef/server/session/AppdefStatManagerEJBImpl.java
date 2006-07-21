@@ -366,6 +366,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             case DBUtil.DATABASE_ORACLE_10:
             case DBUtil.DATABASE_POINTBASE_4:
             case DBUtil.DATABASE_POSTGRESQL_7:
+            case DBUtil.DATABASE_POSTGRESQL_8:
             case DBUtil.DATABASE_MYSQL5:    
                 return true;
             default:

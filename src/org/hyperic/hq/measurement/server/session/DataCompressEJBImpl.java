@@ -350,7 +350,7 @@ public class DataCompressEJBImpl
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
 
             String sql;
-            if (DBUtil.getDBType(conn) == DBUtil.DATABASE_POSTGRESQL_7) {
+            if (DBUtil.isPostgreSQL(conn)) {
                 // Postgres handles this much better
                 sql = "SELECT timestamp FROM " + dataTable +
                     " ORDER BY timestamp DESC LIMIT 1";

@@ -88,24 +88,17 @@ public class SST_AlterColumn extends SchemaSpecTask {
         validateAttributes();
 
         Connection c = getConnection();
-        int dbtype = -1;
         try {
-            dbtype = DBUtil.getDBType(c);
+            if (DBUtil.isOracle(c))
+                alter_oracle(c);
+            else if (DBUtil.isPostgreSQL(c))
+                alter_pgsql(c);
+            else {
+                int dbtype = DBUtil.getDBType(c);
+                throw new BuildException("Unsupported database: " + dbtype);
+            }
         } catch (SQLException e) {
             throw new BuildException("Error determining dbtype: " + e, e);
-        }
-        switch (dbtype) {
-        case DBUtil.DATABASE_ORACLE_8:
-        case DBUtil.DATABASE_ORACLE_9:
-        case DBUtil.DATABASE_ORACLE_10:
-            alter_oracle(c);
-            break;
-        case DBUtil.DATABASE_POSTGRESQL_7:
-            alter_pgsql(c);
-            break;
-        default:
-            throw new BuildException("Unsupported database: " 
-                                     + dbtype);
         }
     }
 
