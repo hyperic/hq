@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.bizapp.server.action.email;
 
+import javax.naming.NamingException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -55,9 +57,8 @@ public class EmailFilterJob implements Job {
 
         try {
             ef.sendFiltered(appId);
-        } catch (Exception e) {
-            throw new JobExecutionException(e, false);
-        }
+        } catch (NamingException e) {
+            throw new JobExecutionException(e, false);        }
     }
 }
 

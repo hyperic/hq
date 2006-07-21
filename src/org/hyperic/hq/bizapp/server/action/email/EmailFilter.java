@@ -134,7 +134,7 @@ public class EmailFilter {
 
     public void sendAlert(AppdefEntityID appEnt, InternetAddress[] addresses,
                           String subject, String body, boolean filter)
-        throws NamingException, MessagingException {
+        throws NamingException {
         if (appEnt != null) {
             String resName = this.getAppdefEntityName(appEnt);
             
@@ -252,7 +252,7 @@ public class EmailFilter {
     
     private void sendEmail(InternetAddress[] addresses,
                           String subject, String body)
-        throws NamingException, MessagingException {
+        throws NamingException {
         Session session =
             (Session) PortableRemoteObject.narrow(
                 new InitialContext().lookup("java:/SpiderMail"),
@@ -260,26 +260,31 @@ public class EmailFilter {
 
         MimeMessage m = new MimeMessage(session);
         
-        InternetAddress from = this.getFromAddress();
-        if (from == null) {
-            m.setFrom();
-        }
-        else {
-            m.setFrom(from);
-        }
+        try {
+            InternetAddress from = this.getFromAddress();
+            if (from == null) {
+                m.setFrom();
+            }
+            else {
+                m.setFrom(from);
+            }
 
-        m.setSubject(subject);
-        m.setContent(body, "text/plain");
+            m.setSubject(subject);
+            m.setContent(body, "text/plain");
 
-        // Send to each recipient individually (for D.B. SMS)
-        for (int i = 0; i < addresses.length; i++) {
-            m.setRecipient(Message.RecipientType.TO, addresses[i]);
-            Transport.send(m);
+            // Send to each recipient individually (for D.B. SMS)
+            for (int i = 0; i < addresses.length; i++) {
+                m.setRecipient(Message.RecipientType.TO, addresses[i]);
+                Transport.send(m);
+            }
+        } catch (MessagingException e) {
+            log.error("Error sending email: " + subject);
+            log.debug("Messaging Error sending email", e);
         }
     }
     
     public void sendFiltered(int platId)
-        throws NamingException, MessagingException {
+        throws NamingException {
         if (!alertBuffer.containsKey(platId))
             return;
 
