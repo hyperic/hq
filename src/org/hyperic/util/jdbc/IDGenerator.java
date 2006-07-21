@@ -117,6 +117,7 @@ public class IDGenerator {
         try {
             switch (itsDBType) {
             case DBUtil.DATABASE_POSTGRESQL_7:
+            case DBUtil.DATABASE_POSTGRESQL_8:
                 itsAlterSQL
                     = "SELECT setval ('" + itsSequenceName + "', " + itsMaxKey + ")";
                 alterPS  = conn.prepareStatement(itsAlterSQL);
@@ -171,6 +172,7 @@ public class IDGenerator {
         
         switch (itsDBType) {
         case DBUtil.DATABASE_POSTGRESQL_7:
+        case DBUtil.DATABASE_POSTGRESQL_8:
             itsAlterSQL
                 = "SELECT setval ('" + itsSequenceName + "', " + itsMaxKey + ")";
             itsSelectSQL
