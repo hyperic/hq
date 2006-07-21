@@ -292,19 +292,22 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             conn = DBUtil.getConnByContext(getInitialContext(),
                                            HQConstants.DATASOURCE);
             long duration = 0;
-            if (DBUtil.isPostgreSQL(conn)) {
-                for (int i = 0; i < DATA_TABLES.length; i++) {
-                    duration +=
-                        doCommand(conn, SQL_REINDEX, DATA_TABLES[i]);
-                }
-            }
-            else if (DBUtil.isOracle(conn)) {
+            if (DBUtil.isOracle(conn)) {
                 for (int i = 0; i < INDEXES.length; i++) {
                     duration += doCommand(conn, SQL_REBUILD, INDEXES[i]);
                 }
             }
             else {
-                return -1;
+                if (DBUtil.getDBType(conn) == DBUtil.DATABASE_POSTGRESQL_7) {
+                    for (int i = 0; i < DATA_TABLES.length; i++) {
+                        duration += doCommand(conn, SQL_REINDEX, DATA_TABLES[i]);
+                    }
+                }
+                else if (DBUtil.getDBType(conn) == DBUtil.DATABASE_POSTGRESQL_8)
+                    log.info("PostgreSQL 8.0 and later does not require " +
+                             "re-indexing");
+                else
+                    return -1;
             }
 
             return duration;
