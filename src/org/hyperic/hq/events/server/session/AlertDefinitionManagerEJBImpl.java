@@ -153,6 +153,11 @@ public class AlertDefinitionManagerEJBImpl extends SessionEJB
     private void deleteAlertDefinition(AlertDefinitionLocal alertdef,   
                                        boolean force)
         throws RemoveException {
+        
+        // If this is a child alert definition, do not delete it unless forced
+        if (!force && (alertdef.getParentId() != null &&
+                       alertdef.getParentId().intValue() != 0))
+            return;        
             
         try {
             // If there are any children, delete them, too
@@ -161,8 +166,11 @@ public class AlertDefinitionManagerEJBImpl extends SessionEJB
             for (Iterator i = children.iterator(); i.hasNext(); ) {
                 AlertDefinitionLocal child =
                     (AlertDefinitionLocal) i.next();
-                    
-                deleteAlertDefinition(child, force);
+                
+                if (this.getAlertMan().getAlertCount(child.getId()) > 0)
+                    child.setDeleted(true);
+                else
+                    deleteAlertDefinition(child, true);
             }
         } catch (FinderException e) {
             // Then we don't have to remove them :-)
@@ -489,13 +497,14 @@ public class AlertDefinitionManagerEJBImpl extends SessionEJB
                 // Swallow the FinderException, maybe there aren't any
             }
                 
-            this.deleteAlertDefinition(adef, false);
+            this.deleteAlertDefinition(adef, true);
         }
     }
 
     /** Find an alert definition
+     * Require a transaction because of the other EJBs involved in getting
+     * the value object
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public AlertDefinitionValue getById(Integer id)
         throws FinderException {
@@ -633,8 +642,9 @@ public class AlertDefinitionManagerEJBImpl extends SessionEJB
     }
 
     /** Get list of alert conditions for a resource
+     * Require a transaction because of the other EJBs involved in getting
+     * the value object
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public PageList findAlertDefinitions(AppdefEntityID id, PageControl pc) {
         try {
@@ -661,8 +671,9 @@ public class AlertDefinitionManagerEJBImpl extends SessionEJB
     }
 
     /** Get list of alert conditions for a resource or resource type
+     * Require a transaction because of the other EJBs involved in getting
+     * the value object
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public PageList findAlertDefinitions(AppdefEntityID id, Integer parentId,
                                          PageControl pc) {
