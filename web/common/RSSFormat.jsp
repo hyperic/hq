@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8" ?>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -22,8 +23,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
-<?xml version="1.0" encoding="utf-8" ?>
 <%@ page language="java" contentType="text/xml" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
 <%@ taglib uri="jstl-fmt" prefix="fmt" %>
