@@ -37,8 +37,5 @@
       <td class="BlockContent">
         <html:checkbox property="disableForRecovery"/>
         <fmt:message key="alert.config.props.CB.Content.UntilReenabled"/>
-        <script language="JavaScript" type="text/javascript">
-          checkRecover();
-        </script>
       </td>
     </tr>
