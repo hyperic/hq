@@ -732,7 +732,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                     
                     DerivedMeasurementValue dmval;
                     if ((dmval = cache.get(dm.getId())) != null) {
-                        dmval.setEnabled(true);
+                        dmval.setEnabled(on);
                         dmval.setMtime(current);
                     }
                     
