@@ -67,28 +67,10 @@ public class SNMPValue {
         return ((OctetString)this.var).getValue();
     }
 
-    //override OctetString.isPrintable(), see comment below.
-    private boolean isPrintable() {
-        byte[] value = getBytes();
-
-        for (int i=0; i<value.length; i++) {
-            byte b = value[i];
-            if (b == '\0') {
-                //Windows ifDescr has trailing null byte
-                continue;
-            }
-            if (((b & 0xFF) >= 0x80) ||
-                Character.isISOControl((char)b))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     public String toString() {
-        if (isOctetString() && isPrintable()) {
+        if (isOctetString()) {
+            //avoid OctetString.toString() hex encoding
+            //if bytes contain any ISO control chars
             return new String(getBytes());
         }
         else {
