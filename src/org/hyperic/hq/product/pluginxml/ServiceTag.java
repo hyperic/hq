@@ -26,7 +26,9 @@
 package org.hyperic.hq.product.pluginxml;
 
 import org.hyperic.hq.product.MeasurementPlugin;
+import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.SNMPMeasurementPlugin;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.hq.product.TypeBuilder;
@@ -47,6 +49,7 @@ class ServiceTag
         new String[] {
             ATTR_INTERNAL, ATTR_DESCRIPTION,
             ATTR_SERVER, ATTR_VERSION,
+            ATTR_PLATFORM
     };
 
     private static final String[] SERVER_ATTRS = {
@@ -56,6 +59,7 @@ class ServiceTag
     private boolean isDefaultServer;
     private ServerTag server = null;
     String serverType = null;
+    String platformType = null;
 
     ServiceTag(BaseTag parent) {
         super(parent);
@@ -130,14 +134,24 @@ class ServiceTag
         else {
             boolean hasServerVersion;
 
+            String platform = getAttribute(ATTR_PLATFORM);
             String serverName = getAttribute(ATTR_SERVER);
             String serverVersion = getAttribute(ATTR_VERSION);
 
             if (serverName == null) {
-                //assume platform service.
-                //still need a server to attach to,
-                //NetworkServer will work just fine for now.
-                serverName = "NetworkServer";
+                if ((platform != null) &&
+                    !PlatformDetector.isSupportedPlatform(platform))
+                {
+                    //network device service extension
+                    serverName = platform + " Server";
+                    this.platformType = platform;
+                }
+                else {
+                    //assume platform service.
+                    //still need a server to attach to,
+                    //NetworkServer will work just fine for now.
+                    serverName = "NetworkServer";
+                }
                 //use MeasurementPlugin by default
                 this.isDefaultServer = true;
             }
@@ -154,6 +168,9 @@ class ServiceTag
             ServerTypeInfo server =
                 new ServerTypeInfo(serverName, null, serverVersion);
             server.setDescription(server.getName());
+            if (platform != null) {
+                server.setValidPlatformTypes(new String[] { platform });
+            }
             this.serverType = server.getName();
 
             if (hasServerVersion) {
@@ -174,7 +191,16 @@ class ServiceTag
         setNameProperty(name);
         service.setInternal(isInternal);
     }
-    
+
+    private String getPlatformType() {
+        if ((this.server != null) && (this.server.platform != null)) {
+            return this.server.platform.typeName;
+        }
+        else {
+            return this.platformType;
+        }
+    }
+
     public void endTag() {
         //if the service has metrics but no measurement plugin
         //specified, default to the server measurement plugin
@@ -191,18 +217,27 @@ class ServiceTag
         }
         //default to server plugin
         plugin = this.data.getPlugin(type, this.serverType);
-        if ((plugin == null) &&
-            (this.server != null) && (this.server.platform != null))
-        {
-            //default to platform plugin, e.g. platform service
-            plugin = this.data.getPlugin(type, this.server.platform.typeName);
+        if (plugin == null) {
+            String platform = getPlatformType();
+
+            if (platform != null) {
+                //default to platform plugin, e.g. platform service
+                plugin = this.data.getPlugin(type, platform);
+            }
         }
 
         //default to MeasurementPlugin for services using proxies
         //(sql, exec, snmp, etc), but not for service extensions
         //which will end up using their server's plugin
         if ((plugin == null) && this.isDefaultServer) {
-            plugin = MeasurementPlugin.class.getName();
+            if (this.data.getProperty("MIBS") != null) {
+                //special convience case for SNMP service extensions
+                //required to load MIBS when plugin impl not specified.
+                plugin = SNMPMeasurementPlugin.class.getName();
+            }
+            else {
+                plugin = MeasurementPlugin.class.getName();
+            }
         }
 
         if (plugin != null) {
