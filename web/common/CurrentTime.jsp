@@ -1,5 +1,6 @@
 <%@ taglib uri="struts-html" prefix="html" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
+<%@ taglib uri="hq" prefix="hq" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
