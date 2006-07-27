@@ -41,6 +41,8 @@ public class PostgreSQLMeasurementPlugin
 
     protected static final String JDBC_DRIVER = "org.postgresql.Driver";
 
+    protected static final String PROP_INDEX = "index";
+
     //XXX: Could default this to whatever HQ chooses as a db name
     protected static final String DEFAULT_URL = 
         "jdbc:postgresql://localhost/hq";
@@ -131,6 +133,18 @@ public class PostgreSQLMeasurementPlugin
             // Else normal query from pg_stat_user_table
             return "SELECT " + attr + " FROM pg_stat_user_tables " +
                 "WHERE relname='" + table.toLowerCase() + "'";
+        } else if (objectName.indexOf("Type=Index") != -1) {
+
+            String index = metric.getObjectProperties().getProperty(PROP_INDEX);
+            if (isAvail) {
+                // Hardcode for availability.  Cannot have the same
+                // template else we get plugin dumper errors.
+                attr = "idx_scan";
+            }
+
+            // Else normal query from pg_stat_user_table
+            return "SELECT " + attr + " FROM pg_stat_user_indexes " +
+                "WHERE indexrelname='" + index.toLowerCase() + "'";
         }
 
         // Most likely a hq-plugin.xml typo.  JDBCMeasurementPlugin
