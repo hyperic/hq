@@ -64,6 +64,8 @@ public class PostgreSQLControlPlugin extends JDBCControlPlugin {
                 query = "VACUUM " + this.table;
             } else if (action.equals("VacuumAnalyze")) {
                 query = "VACUUM ANALYZE " + this.table;
+            } else if (action.equals("Reindex")) {
+                query = "REINDEX TABLE " + this.table;
             }
         } else {
             // Server actions

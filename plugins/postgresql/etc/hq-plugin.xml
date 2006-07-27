@@ -286,7 +286,7 @@
       <plugin type="control"
               class="PostgreSQLControlPlugin"/>
 
-      <actions include="Analyze,Vacuum,VacuumAnalyze"/>
+      <actions include="Analyze,Vacuum,VacuumAnalyze,Reindex"/>
 
       <config>
         <option name="table"
