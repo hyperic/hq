@@ -26,7 +26,7 @@
 package org.hyperic.hq.events;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
 import org.hyperic.util.config.ConfigResponse;
 
 /** Interface to be implemented by all Action classes
@@ -36,7 +36,7 @@ public interface ActionInterface extends ActionConfigInterface {
     /** Execute the action
      * @throws org.hyperic.hq.events.ActionExecuteException if execution causes an error
      */
-    public String execute(AlertDefinitionValue alertdef,
+    public String execute(AlertDefinitionBasicValue alertdef,
                           TriggerFiredEvent event, Integer alertId)
         throws ActionExecuteException;
     
