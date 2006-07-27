@@ -41,8 +41,6 @@ public class PostgreSQLMeasurementPlugin
 
     protected static final String JDBC_DRIVER = "org.postgresql.Driver";
 
-    protected static final String PROP_INDEX = "index";
-
     //XXX: Could default this to whatever HQ chooses as a db name
     protected static final String DEFAULT_URL = 
         "jdbc:postgresql://localhost/hq";

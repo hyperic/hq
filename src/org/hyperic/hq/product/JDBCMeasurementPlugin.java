@@ -54,6 +54,7 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
     public static final String PROP_PASSWORD = "jdbcPassword";
 
     public static final String PROP_TABLE    = "table";
+    public static final String PROP_INDEX    = "index";
 
     private static HashMap connectionCache = new HashMap();
     
