@@ -105,7 +105,7 @@ import org.hyperic.hq.events.shared.AlertDefinitionValue;
  *      result-type-mapping="Local"
  *
  * @ejb:value-object name="AlertDefinitionBasic" match="basic" instantiation="eager"
- * @ejb:value-object name="AlertDefinition" match="*" instantiation="eager" extends="org.hyperic.hq.events.shared.AlertDefinitionBasicValue"
+ * @ejb:value-object name="AlertDefinition" match="*" instantiation="eager" extends="org.hyperic.hq.events.shared.AlertDefinitionBasicValue" cacheable="true" cacheDuration="120000"
  * @ejb:transaction type="Required"
  *
  * @jboss:table-name table-name="EAM_ALERT_DEFINITION"
