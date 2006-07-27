@@ -31,6 +31,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -61,6 +62,7 @@ import org.hyperic.hq.events.shared.AlertConditionLocal;
 import org.hyperic.hq.events.shared.AlertConditionLocalHome;
 import org.hyperic.hq.events.shared.AlertConditionUtil;
 import org.hyperic.hq.events.shared.AlertConditionValue;
+import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
 import org.hyperic.hq.events.shared.AlertDefinitionLocal;
 import org.hyperic.hq.events.shared.AlertDefinitionLocalHome;
 import org.hyperic.hq.events.shared.AlertDefinitionPK;
@@ -513,6 +515,19 @@ public class AlertDefinitionManagerEJBImpl extends SessionEJB
         return ad.getAlertDefinitionValue();
     }
     
+    /** Find an alert definition
+     * Require a transaction because of the other EJBs involved in getting
+     * the value object
+     * @ejb:interface-method
+     * @ejb:transaction type="NOTSUPPORTED"
+     */
+    public AlertDefinitionBasicValue getBasicById(Integer id)
+        throws FinderException {
+        AlertDefinitionLocal ad =
+            getADHome().findByPrimaryKey(new AlertDefinitionPK(id));
+        return ad.getAlertDefinitionBasicValue();
+    }
+    
     /** Decide if a trigger should fire the alert, use direct SQL to avoid JBOSS
      * caching the EJB in HA situations.  Plus we can minimize the number of
      * columns looked up if the alert definition is not actually active
@@ -575,6 +590,44 @@ public class AlertDefinitionManagerEJBImpl extends SessionEJB
         AlertDefinitionLocal ad =
             getADHome().findByPrimaryKey(new AlertDefinitionPK(id));
         return ad.getName();
+    }
+
+    /** Get an alert definition's conditions
+     * @ejb:interface-method
+     * @ejb:transaction type="SUPPORTS"
+     */
+    public AlertConditionValue[] getConditionsById(Integer id)
+        throws FinderException {
+        AlertDefinitionLocal ad =
+            getADHome().findByPrimaryKey(new AlertDefinitionPK(id));
+        
+        Collection conds = ad.getConditions();
+        AlertConditionValue[] condVals = new AlertConditionValue[conds.size()];
+        Iterator it = conds.iterator();
+        for (int i = 0; it.hasNext(); i++) {
+            AlertConditionLocal cond = (AlertConditionLocal) it.next();
+            condVals[i] = cond.getAlertConditionValue();
+        }
+        return condVals;
+    }
+    
+    /** Get an alert definition's actions
+     * @ejb:interface-method
+     * @ejb:transaction type="SUPPORTS"
+     */
+    public ActionValue[] getActionsById(Integer id)
+        throws FinderException {
+        AlertDefinitionLocal ad =
+            getADHome().findByPrimaryKey(new AlertDefinitionPK(id));
+        
+        Collection acts = ad.getActions();
+        ActionValue[] actVals = new ActionValue[acts.size()];
+        Iterator it = acts.iterator();
+        for (int i = 0; it.hasNext(); i++) {
+            ActionLocal cond = (ActionLocal) it.next();
+            actVals[i] = cond.getActionValue();
+        }
+        return actVals;
     }
     
     /** Get list of alert conditions for a resource or resource type
