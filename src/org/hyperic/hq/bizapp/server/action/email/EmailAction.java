@@ -57,6 +57,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.shared.AlertConditionValue;
+import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
@@ -102,7 +103,7 @@ public class EmailAction extends EmailActionConfig implements ActionInterface {
         return subjMan;
     }
 
-    private String createPriority(AlertDefinitionValue alertdef) {
+    private String createPriority(AlertDefinitionBasicValue alertdef) {
         StringBuffer pri = new StringBuffer();
         for (int i = 0; i < alertdef.getPriority(); i++) {
             pri.append('!');
@@ -110,7 +111,7 @@ public class EmailAction extends EmailActionConfig implements ActionInterface {
         return pri.toString();
     }
 
-    private String createSubject(AlertDefinitionValue alertdef) {
+    private String createSubject(AlertDefinitionBasicValue alertdef) {
         // XXX - Where can I get product name?
         StringBuffer subj = new StringBuffer("[HQ] ")
             .append(createPriority(alertdef))
@@ -275,7 +276,7 @@ public class EmailAction extends EmailActionConfig implements ActionInterface {
         return baseUrl;
     }
 
-    private String createLink(AlertDefinitionValue alertdef, Integer aid)
+    private String createLink(AlertDefinitionBasicValue alertdef, Integer aid)
         throws ConfigPropertyException, CreateException, NamingException {
         StringBuffer text = new StringBuffer();
 
@@ -291,7 +292,7 @@ public class EmailAction extends EmailActionConfig implements ActionInterface {
         return text.toString();
     }
 
-    private String createText(AlertDefinitionValue alertdef,
+    private String createText(AlertDefinitionBasicValue alertdef,
                               TriggerFiredEvent event, AppdefEntityID aeid,
                               Integer alertId)
         throws NamingException, CreateException, MeasurementNotFoundException
@@ -367,7 +368,7 @@ public class EmailAction extends EmailActionConfig implements ActionInterface {
      * @throws org.hyperic.hq.events.ext.ActionExecuteException if execution causes an error
      *
      */
-    public String execute(AlertDefinitionValue alertdef,
+    public String execute(AlertDefinitionBasicValue alertdef,
                           TriggerFiredEvent event, Integer alertId)
         throws ActionExecuteException {
         AlertManagerLocal aman = null;
