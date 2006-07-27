@@ -32,6 +32,7 @@ import javax.ejb.CreateException;
 import javax.ejb.EntityBean;
 import javax.ejb.RemoveException;
 
+import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
 import org.hyperic.hq.events.shared.AlertDefinitionPK;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 
@@ -103,7 +104,8 @@ import org.hyperic.hq.events.shared.AlertDefinitionValue;
  *      unchecked="true"
  *      result-type-mapping="Local"
  *
- * @ejb:value-object name="AlertDefinition" match="*" instantiation="eager"
+ * @ejb:value-object name="AlertDefinitionBasic" match="basic" instantiation="eager"
+ * @ejb:value-object name="AlertDefinition" match="*" instantiation="eager" extends="org.hyperic.hq.events.shared.AlertDefinitionBasicValue"
  * @ejb:transaction type="Required"
  *
  * @jboss:table-name table-name="EAM_ALERT_DEFINITION"
@@ -128,7 +130,7 @@ public abstract class AlertDefinitionEJBImpl
      * @ejb:pk
      * @ejb:pk-field
      * @ejb:transaction type="SUPPORTS"
-     * @ejb:value-object match="*"
+     * @ejb:value-object match="basic"
      * @jboss:read-only true
      */
     public abstract Integer getId();
@@ -144,7 +146,7 @@ public abstract class AlertDefinitionEJBImpl
      * @ejb:interface-method
      * @ejb:persistent-field
      * @ejb:transaction type="SUPPORTS"
-     * @ejb:value-object match="*"
+     * @ejb:value-object match="basic"
      * @jboss:read-only true
      */
     public abstract String getName();
@@ -161,7 +163,7 @@ public abstract class AlertDefinitionEJBImpl
      * @ejb:interface-method
      * @ejb:persistent-field
      * @ejb:transaction type="SUPPORTS"
-     * @ejb:value-object match="*"
+     * @ejb:value-object match="basic"
      * @jboss:read-only true
      */
     public abstract long getCtime();
@@ -179,7 +181,7 @@ public abstract class AlertDefinitionEJBImpl
      * @ejb:interface-method
      * @ejb:persistent-field
      * @ejb:transaction type="SUPPORTS"
-     * @ejb:value-object match="*"
+     * @ejb:value-object match="basic"
      * @jboss:read-only true
      */
     public abstract long getMtime();
@@ -196,7 +198,7 @@ public abstract class AlertDefinitionEJBImpl
      * @ejb:interface-method
      * @ejb:persistent-field
      * @ejb:transaction type="SUPPORTS"
-     * @ejb:value-object match="*"
+     * @ejb:value-object match="basic"
      * @jboss:column-name name="parent_id"
      * @jboss:read-only true
      */
@@ -213,7 +215,7 @@ public abstract class AlertDefinitionEJBImpl
      * @ejb:interface-method
      * @ejb:persistent-field
      * @ejb:transaction type="SUPPORTS"
-     * @ejb:value-object match="*"
+     * @ejb:value-object match="basic"
      * @jboss:read-only true
      */
     public abstract java.lang.String getDescription();
@@ -228,7 +230,7 @@ public abstract class AlertDefinitionEJBImpl
      * @ejb:interface-method
      * @ejb:persistent-field
      * @ejb:transaction type="SUPPORTS"
-     * @ejb:value-object match="*"
+     * @ejb:value-object match="basic"
      * @jboss:read-only true
      */
     public abstract boolean getEnabled();
@@ -246,7 +248,7 @@ public abstract class AlertDefinitionEJBImpl
      * @ejb:interface-method
      * @ejb:persistent-field
      * @ejb:transaction type="SUPPORTS"
-     * @ejb:value-object match="*"
+     * @ejb:value-object match="basic"
      * @jboss:column-name name="will_recover"
      * @jboss:read-only true
      */
@@ -265,7 +267,7 @@ public abstract class AlertDefinitionEJBImpl
      * @ejb:interface-method
      * @ejb:persistent-field
      * @ejb:transaction type="SUPPORTS"
-     * @ejb:value-object match="*"
+     * @ejb:value-object match="basic"
      * @jboss:column-name name="notify_filtered"
      * @jboss:read-only true
      */
@@ -284,7 +286,7 @@ public abstract class AlertDefinitionEJBImpl
      * @ejb:interface-method
      * @ejb:persistent-field
      * @ejb:transaction type="SUPPORTS"
-     * @ejb:value-object match="*"
+     * @ejb:value-object match="basic"
      * @jboss:column-name name="control_filtered"
      * @jboss:read-only true
      */
@@ -303,7 +305,7 @@ public abstract class AlertDefinitionEJBImpl
      * @ejb:interface-method
      * @ejb:persistent-field
      * @ejb:transaction type="SUPPORTS"
-     * @ejb:value-object match="*"
+     * @ejb:value-object match="basic"
      * @jboss:read-only true
      */
     public abstract int getPriority();
@@ -319,7 +321,7 @@ public abstract class AlertDefinitionEJBImpl
      * @ejb:interface-method
      * @ejb:persistent-field
      * @ejb:transaction type="SUPPORTS"
-     * @ejb:value-object match="*"
+     * @ejb:value-object match="basic"
      * @jboss:column-name name="appdef_id"
      * @jboss:read-only true
      */
@@ -338,7 +340,7 @@ public abstract class AlertDefinitionEJBImpl
      * @ejb:interface-method
      * @ejb:persistent-field
      * @ejb:transaction type="SUPPORTS"
-     * @ejb:value-object match="*"
+     * @ejb:value-object match="basic"
      * @jboss:column-name name="appdef_type"
      * @jboss:read-only true
      */
@@ -357,7 +359,7 @@ public abstract class AlertDefinitionEJBImpl
      * @ejb:interface-method
      * @ejb:persistent-field
      * @ejb:transaction type="SUPPORTS"
-     * @ejb:value-object match="*"
+     * @ejb:value-object match="basic"
      * @jboss:column-name name="frequency_type"
      * @jboss:read-only true
      */
@@ -376,7 +378,7 @@ public abstract class AlertDefinitionEJBImpl
      * @ejb:interface-method
      * @ejb:persistent-field
      * @ejb:transaction type="SUPPORTS"
-     * @ejb:value-object match="*"
+     * @ejb:value-object match="basic"
      * @jboss:read-only true
      */
     public abstract long getCount();
@@ -394,7 +396,7 @@ public abstract class AlertDefinitionEJBImpl
      * @ejb:interface-method
      * @ejb:persistent-field
      * @ejb:transaction type="SUPPORTS"
-     * @ejb:value-object match="*"
+     * @ejb:value-object match="basic"
      * @jboss:read-only true
      */
     public abstract long getRange();
@@ -412,7 +414,7 @@ public abstract class AlertDefinitionEJBImpl
      * @ejb:interface-method
      * @ejb:persistent-field
      * @ejb:transaction type="SUPPORTS"
-     * @ejb:value-object match="*"
+     * @ejb:value-object match="basic"
      * @jboss:column-name name="act_on_trigger_id"
      * @jboss:read-only true
      */
@@ -431,7 +433,7 @@ public abstract class AlertDefinitionEJBImpl
      * @ejb:interface-method
      * @ejb:persistent-field
      * @ejb:transaction type="SUPPORTS"
-     * @ejb:value-object match="*"
+     * @ejb:value-object match="basic"
      * @jboss:read-only true
      */
     public abstract boolean getDeleted();
@@ -541,6 +543,18 @@ public abstract class AlertDefinitionEJBImpl
      */
     public abstract void setAlertDefinitionValue(
         AlertDefinitionValue value);
+
+    /**
+     * Get the Value object for this trigger
+     * @ejb:interface-method
+     */
+    public abstract AlertDefinitionBasicValue getAlertDefinitionBasicValue();
+
+    /**
+     * @ejb:interface-method
+     */
+    public abstract void setAlertDefinitionBasicValue(
+        AlertDefinitionBasicValue value);
 
     ///////////////////////////////////////
     // EJB operations
