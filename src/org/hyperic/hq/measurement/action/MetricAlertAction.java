@@ -28,6 +28,8 @@ package org.hyperic.hq.measurement.action;
 import javax.ejb.CreateException;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
@@ -35,7 +37,7 @@ import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
-import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.shared.MetricProblemLocalHome;
@@ -44,9 +46,6 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  *
@@ -60,7 +59,7 @@ public class MetricAlertAction implements ActionInterface {
     /* (non-Javadoc)
      * @see org.hyperic.hq.events.ActionInterface#execute(org.hyperic.hq.events.shared.AlertDefinitionValue, org.hyperic.hq.events.TriggerFiredEvent, java.lang.Integer)
      */
-    public String execute(AlertDefinitionValue alertdef,
+    public String execute(AlertDefinitionBasicValue alertdef,
                           TriggerFiredEvent event, Integer alertId)
         throws ActionExecuteException {
         StringBuffer actLog = new StringBuffer();
