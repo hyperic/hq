@@ -45,7 +45,7 @@
   <tr valign="top">
     <td width="20%" class="BlockLabel"><fmt:message key="common.label.Name"/></td>
     <td width="30%" class="BlockContent"><c:out value="${alertDef.name}"/><c:if test="${not empty Resource}"><br>
-      <html:link page="/alerts/Config.do?mode=viewRoles&eid=${Resource.entityId.appdefKey}&ad=${alertDef.id}"><fmt:message key="alert.config.props.PB.ViewDef"/></html:link></c:if></td>
+      <html:link page="/alerts/Config.do?mode=viewDefinition&eid=${Resource.entityId.appdefKey}&ad=${alertDef.id}"><fmt:message key="alert.config.props.PB.ViewDef"/></html:link></c:if></td>
     <td width="20%" class="BlockLabel"><fmt:message key="alert.config.props.PB.Priority"/></td>
     <td width="30%" class="BlockContent" colspan="2">
       <fmt:message key="${'alert.config.props.PB.Priority.'}${alertDef.priority}"/>
