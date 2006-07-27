@@ -297,6 +297,11 @@
     </service>
 
     <service name="Index">
+      <plugin type="control"
+              class="PostgreSQLControlPlugin"/>
+
+      <actions include="Reindex"/>
+
       <config>
         <option name="index"
                 description="Index Name"/>

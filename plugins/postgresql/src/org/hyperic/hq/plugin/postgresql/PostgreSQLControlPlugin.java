@@ -49,26 +49,40 @@ public class PostgreSQLControlPlugin extends JDBCControlPlugin {
     public void doAction(String action)
         throws PluginException
     {
-        String query;
+        String query = null;
 
-        if (action.equals("Analyze")) {
-            query = "ANALYZE";
-        } else if (action.equals("Vacuum")) {
-            query = "VACUUM";
-        } else if (action.equals("VacuumAnalyze")) {
-            query = "VACUUM ANALYZE";
-        } else if (action.equals("ResetStatistics")) {
-            // Special case for reset statistics
-            executeQuery("SELECT pg_stat_reset()");
-            return;
+        if (this.index != null) {
+            // Index actions
+            if (action.equals("Reindex")) {
+                query = "REINDEX INDEX " + this.index;
+            }
+        } else if (this.table != null) {
+            // Table actions
+            if (action.equals("Analyze")) {
+                query = "ANALYZE " + this.table;
+            } else if (action.equals("Vacuum")) {
+                query = "VACUUM " + this.table;
+            } else if (action.equals("VacuumAnalyze")) {
+                query = "VACUUM ANALYZE " + this.table;
+            }
         } else {
-            throw new PluginException("Action '" + action +
-                                      "' not supported");
+            // Server actions
+            if (action.equals("Analyze")) {
+                query = "ANALYZE";
+            } else if (action.equals("Vacuum")) {
+                query = "VACUUM";
+            } else if (action.equals("VacuumAnalyze")) {
+                query = "VACUUM ANALYZE";
+            } else if (action.equals("ResetStatistics")) {
+                // Special case for reset statistics
+                executeQuery("SELECT pg_stat_reset()");
+                return;
+            }
         }
 
-        // See if a table was specified
-        if (table != null) {
-            query = query + " " + table;
+        if (query == null) {
+            throw new PluginException("Action '" + action +
+                                      "' not supported");
         }
 
         execute(query);
