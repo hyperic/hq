@@ -519,7 +519,7 @@ public class AlertDefinitionManagerEJBImpl extends SessionEJB
      * Require a transaction because of the other EJBs involved in getting
      * the value object
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="SUPPORTS"
      */
     public AlertDefinitionBasicValue getBasicById(Integer id)
         throws FinderException {
