@@ -1015,6 +1015,21 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     }
 
     /**
+     * Get an alert definition by ID
+     *
+     * @ejb:interface-method
+     */
+    public AlertDefinitionBasicValue getAlertDefinitionBasic(int sessionID,
+                                                             Integer id)
+        throws SessionNotFoundException, SessionTimeoutException, 
+               FinderException, PermissionException {
+        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        AlertDefinitionBasicValue adval = getADM().getBasicById(id);
+        canManageAlerts(subject, getAppdefEntityID(adval));
+        return adval;
+    }
+
+    /**
      * Find an alert by ID
      *
      * @ejb:interface-method
