@@ -943,7 +943,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                LiveMeasurementException, MeasurementNotFoundException
     {
         try {
-            List mcol = getDmHome().findByInstance(id.getType(), id.getID());
+            List mcol = getDmHome().findByInstance(id.getType(), id.getID(),
+                                                   true);
             Integer[] mids = new Integer[mcol.size()];
             Integer availMeasurement = null; // For insert of AVAIL down
             Iterator it = mcol.iterator();
