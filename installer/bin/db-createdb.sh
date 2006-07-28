@@ -8,4 +8,4 @@ HQDB_DIR=`pwd`
 LD_LIBRARY_PATH=${HQDB_DIR}/lib \
 DYLD_LIBRARY_PATH=${HQDB_DIR}/lib \
 SHLIB_PATH=${HQDB_DIR}/lib \
-  ${HQDB_DIR}/bin/createdb -U hqadmin -p 9432 $@
+  ${HQDB_DIR}/bin/createdb -U hqadmin -p @@@PGPORT@@@ $@

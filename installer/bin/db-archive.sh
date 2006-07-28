@@ -21,7 +21,7 @@ echo "Archving database to ${OUTFILE}"
 LD_LIBRARY_PATH=${HQDB_DIR}/lib \
 DYLD_LIBRARY_PATH=${HQDB_DIR}/lib \
 SHLIB_PATH=${HQDB_DIR}/lib \
-  ${HQDB_DIR}/bin/pg_dump -h localhost -p 9432 -U hqadmin hqdb \
+  ${HQDB_DIR}/bin/pg_dump -h localhost -p @@@PGPORT@@@ -U hqadmin hqdb \
        | gzip > ${OUTFILE}
 
 echo "Archive complete"

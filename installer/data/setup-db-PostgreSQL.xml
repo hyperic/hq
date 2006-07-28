@@ -104,6 +104,10 @@
         <replace file="${server.hqdb.dir}/data/postgresql.conf"
                  token="@@@PGPORT@@@" value="${server.postgresql.port}"/>
 
+        <!-- Replace postgresql port in the db scripts -->
+        <replace dir="${server.home}/bin"
+                 token="@@@PGPORT@@@" value="${server.postgresql.port}"/>
+
         <!-- XXX: recreate symlinks.. lame -->
         <antcall target="recreate-symlinks"/>
         <delete dir="${server.hqdb.dir}" includes="**/dir.links"/>

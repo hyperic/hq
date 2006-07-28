@@ -8,4 +8,4 @@ HQDB_DIR=`pwd`
 LD_LIBRARY_PATH=${HQDB_DIR}/lib \
 DYLD_LIBRARY_PATH=${HQDB_DIR}/lib \
 SHLIB_PATH=${HQDB_DIR}/lib \
-  ${HQDB_DIR}/bin/psql -U hqadmin -p 9432 hqdb $@
+  ${HQDB_DIR}/bin/psql -U hqadmin -p @@@PGPORT@@@ hqdb $@
