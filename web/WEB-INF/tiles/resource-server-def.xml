@@ -173,7 +173,7 @@
 
   <definition name=".tabs.resource.server.alert"
               extends=".tabs.resource.server">
-    <put name="selectedIndex"  value="3" />
+    <put name="selectedIndex"  value="2" />
     <put name="subSectionName" value="Monitor"/>
     <putList name="subTabList">
       <item value="Alerts" mode="list"
