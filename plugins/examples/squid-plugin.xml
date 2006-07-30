@@ -30,6 +30,9 @@
   <server name="Squid"
           version="2.x">
 
+  <property name="PROC_QUERY"
+            value="State.Name.eq=squid"/>
+
   <config>
       <option name="snmpIp"
               description="Squid SNMP agent IP"
@@ -56,6 +59,9 @@
 
     <plugin type="measurement"
             class="org.hyperic.hq.product.SNMPMeasurementPlugin"/>
+
+    <plugin type="autoinventory"
+            class="org.hyperic.hq.product.SNMPDetector"/>
 
     <metric name="Availability"
             template="${snmp.template},Avail=true:cacheUptime"
@@ -178,6 +184,51 @@
 
     <metric name="Clients Accessing Cache"
             template="${snmp.template}:cacheClients"/>
+
+    <filter name="index"
+            value="snmpIndexName=${snmpIndexName},snmpIndexValue=%snmpIndexValue%"/>
+
+    <filter name="template"
+            value="${snmp.template}:${object}:${index}"/>
+
+    <service name="Cache Median">
+
+      <plugin type="autoinventory"/>
+
+      <property name="snmpIndexName"
+                value="cacheMedianTime"/>
+
+      <property name="AUTOINVENTORY_NAME"
+                value="Cache Median %snmpIndexValue% Min"/>
+
+      <config>
+        <option name="snmpIndexName"
+                description="Cache Median Time"
+                type="int"/>
+      </config>
+
+      <metric name="Availability"
+              object="cacheMedianTime"
+              indicator="true"
+              template="${snmp.template},Avail=true:${object}:${index}"/>
+
+      <metric name="HTTP All Time"
+              object="cacheHttpAllSvcTime"
+              indicator="true"/>
+
+      <metric name="HTTP Miss Time"
+              object="cacheHttpMissSvcTime"/>
+
+      <metric name="HTTP Nm Time"
+              object="cacheHttpNmSvcTime"/>
+
+      <metric name="HTTP Hit Time"
+              object="cacheHttpHitSvcTime"/>
+
+      <metric name="DNS Time"
+              object="cacheDnsSvcTime"
+              indicator="true"/>
+    </service>
 
     <help>
     <![CDATA[
