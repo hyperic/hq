@@ -347,7 +347,11 @@ public class PluginDiscoverer implements ScanListener {
     private void dumpProperties(Properties props, String type, String name) {
         if (this.fetchMetrics) {
             TypeInfo info =
-                this.pd.ppm.getTypeInfo(PluginDumper.OS, type);
+                this.pd.ppm.getTypeInfo(this.os, type);
+            if (info == null) {
+                this.log.error("No TypeInfo found for: " + type);
+                return;
+            }
             //add command line props for stuff like passwords
             props.putAll(this.pd.getProperties());
 
