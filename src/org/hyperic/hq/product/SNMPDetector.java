@@ -23,7 +23,8 @@ public class SNMPDetector extends DaemonDetector {
     private static final Log log =
         LogFactory.getLog(SNMPDetector.class.getName());
 
-    static final String SNMP_INDEX_NAME = "snmpIndexName";
+    static final String SNMP_INDEX_NAME =
+        SNMPMeasurementPlugin.PROP_INDEX_NAME;
     static final String SNMP_DESCRIPTION = "snmpDescription";
 
     public List getServerResources(ConfigResponse platformConfig)
@@ -183,7 +184,8 @@ public class SNMPDetector extends DaemonDetector {
             String indexValue = column.get(i).toString().trim();
             String resourceDescr = null;
 
-            config.setValue(SNMP_INDEX_NAME, indexValue);
+            config.setValue(SNMPMeasurementPlugin.PROP_INDEX_VALUE,
+                            indexValue);
 
             for (int j=0; j<keys.length; j++) {
                 String key = keys[j];
