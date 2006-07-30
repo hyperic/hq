@@ -35,6 +35,7 @@ import org.apache.commons.logging.Log;
 import org.hyperic.hq.product.PlatformServiceDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.SNMPDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
 
@@ -69,7 +70,7 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
         throws PluginException {
 
         Log log = getLog();
-        
+
         List services = new ArrayList();
 
         openSession(serverConfig);
@@ -77,7 +78,7 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
         if (log.isDebugEnabled()) {
             log.debug("Using snmp config=" + serverConfig);
         }
-        
+
         String type = getServiceTypeName(SVC_NAME);
 
         String[] keys =
@@ -106,7 +107,18 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
 
         String descrColumn =
             columnName.equals(IF_DESCR) ? IF_NAME : IF_DESCR;
-        List descriptions = getColumn(descrColumn);
+        List descriptions;
+        
+        try {
+            descriptions = getColumn(descrColumn);
+        } catch (PluginException e) {
+            descriptions = null;
+            String msg =
+                "Error getting descriptions from " +
+                descrColumn + ": " + e;
+            log.warn(msg);
+        }
+
         boolean hasDescriptions = 
             (descriptions != null) && (descriptions.size() == interfaces.size());
 
@@ -189,6 +201,12 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
             }
             services.add(service);
         }
+
+        List extServices =
+            SNMPDetector.discoverServices(this,
+                                          serverConfig,
+                                          this.session);
+        services.addAll(extServices);
 
         closeSession();
 
