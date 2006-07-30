@@ -205,7 +205,7 @@ public class MxServerDetector
             setProductConfig(server, config);
 
             String name =
-                getAutoInventoryName(server.getType(),
+                formatAutoInventoryName(server.getType(),
                                      platformConfig,
                                      server.getProductConfig(),
                                      new ConfigResponse());
@@ -219,25 +219,6 @@ public class MxServerDetector
         }
 
         return servers;
-    }
-
-    protected String getAutoInventoryName(String type,
-                                          ConfigResponse parentConfig,
-                                          ConfigResponse config,
-                                          ConfigResponse cprops) {
-        String name =
-            getTypeProperty(type, "AUTOINVENTORY_NAME");
-
-        if (name == null) {
-            return null;
-        }
-
-        //<property name="AUTOINVENTORY_NAME" value="My %Name% Service @ %Location%"/> 
-        name = Metric.translate(name, parentConfig);
-        name = Metric.translate(name, config);
-        name = Metric.translate(name, cprops);
-
-        return name;
     }
 
     protected List discoverMxServices(MBeanServerConnection mServer,
@@ -280,7 +261,7 @@ public class MxServerDetector
             service.setType(query.getResourceType());
 
             String name =
-                getAutoInventoryName(service.getType(),
+                formatAutoInventoryName(service.getType(),
                                      serverConfig,
                                      config,
                                      cprops);

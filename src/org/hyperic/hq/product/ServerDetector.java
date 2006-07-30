@@ -428,6 +428,41 @@ public abstract class ServerDetector
     }
 
     /**
+     * Format the auto-inventory name as defined by the plugin, for example: 
+     * <property name="AUTOINVENTORY_NAME" value="My %Name% Service @ %Location%"/> 
+     * %value%s are replaced using the ConfigResponse parameters.
+     * @param type The resource type name used to lookup AUTOINVENTORY_NAME
+     * @param parentConfig The platform or server configuration
+     * @param config The server or services configuration
+     * @param cprops Custom properties
+     * @return The formatted name or null if AUTOINVENTORY_NAME is not defined
+     * for the given resource type name
+     */
+    protected String formatAutoInventoryName(String type,
+                                             ConfigResponse parentConfig,
+                                             ConfigResponse config,
+                                             ConfigResponse cprops) {
+        String name =
+            getTypeProperty(type, "AUTOINVENTORY_NAME");
+
+        if (name == null) {
+            return null;
+        }
+
+        if (parentConfig != null) {
+            name = Metric.translate(name, parentConfig);
+        }
+        if (config != null) {
+            name = Metric.translate(name, config);
+        }
+        if (cprops != null) {
+            name = Metric.translate(name, cprops);
+        }
+
+        return name;
+    }
+
+    /**
      * Chop the last element off a path.  For example, if you pass in
      * /usr/local/foo then this will return /usr/local
      * If there is not enough to chop off, this throws IllegalArgumentException
