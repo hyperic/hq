@@ -237,7 +237,7 @@ public class SNMPDetector extends DaemonDetector {
 
             if (isServiceDiscovery) {
                 ServiceResource service = new ServiceResource();
-                service.setType(plugin, typeName);
+                service.setType(type);
                 service.setServiceName(resourceName);
 
                 service.setProductConfig(config);
