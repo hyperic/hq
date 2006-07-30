@@ -25,15 +25,20 @@
 
 package org.hyperic.hq.product.pluginxml;
 
+import org.hyperic.util.xmlparser.XmlTextHandler;
+
 //for filtering within hq-plugin.xml only
 //after hq-plugin.xml has been processed this value are cleared
-class FilterTag extends BaseTag {
+class FilterTag extends BaseTag implements XmlTextHandler {
 
-    private static final String[] ATTRS = 
-        new String[] { ATTR_NAME, ATTR_VALUE };
-    
+    private static final String[] REQUIRED_ATTRS = 
+        { ATTR_NAME };
+
+    private static final String[] OPTIONAL_ATTRS =
+        { ATTR_VALUE };
+
     protected PluginData data;
-    protected String name, value;
+    protected String name, value="";
     
     public FilterTag(BaseTag parent) {
         super(parent);
@@ -45,9 +50,17 @@ class FilterTag extends BaseTag {
     }
     
     public String[] getRequiredAttributes() {
-        return ATTRS; 
+        return REQUIRED_ATTRS; 
     }
-    
+
+    public String[] getOptionalAttributes() {
+        return OPTIONAL_ATTRS;
+    }
+
+    public void handleText(String text) {
+        this.value = text.trim();
+    }
+
     public void handleAttribute(String name, String value) {
         if (name.equals(ATTR_NAME)) {
             this.name = value;
