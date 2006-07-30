@@ -58,7 +58,10 @@ class FilterTag extends BaseTag implements XmlTextHandler {
     }
 
     public void handleText(String text) {
-        this.value = text.trim();
+        text = text.trim();
+        if (text.length() != 0) {
+            this.value = text;
+        }
     }
 
     public void handleAttribute(String name, String value) {
