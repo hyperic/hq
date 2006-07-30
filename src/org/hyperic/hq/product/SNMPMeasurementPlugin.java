@@ -49,8 +49,8 @@ public class SNMPMeasurementPlugin
 
     public static final String DOMAIN = "snmp";
 
-    private static final String PROP_INDEX_NAME  = "snmpIndexName";
-    private static final String PROP_INDEX_VALUE = "snmpIndexValue";
+    public static final String PROP_INDEX_NAME  = "snmpIndexName";
+    public static final String PROP_INDEX_VALUE = "snmpIndexValue";
 
     private static final String PROP_OID         = "snmpOID";
     private static final String PROP_VARTYPE     = "snmpVarType";
