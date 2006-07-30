@@ -166,7 +166,9 @@ public class NetworkDevicePlatformDetector extends PlatformDetector {
 
         if (!hasConfig) {
             //should only happen when the platform is created
-            platform.setMeasurementConfig(metricConfig);
+            config.merge(metricConfig, false);
+            platform.setProductConfig(config);
+            platform.setMeasurementConfig(new ConfigResponse());
             log.debug("Setting measurement config="+metricConfig);
         }
         
