@@ -158,7 +158,7 @@
         <forward name="cancel" path="/alerts/Config.do?mode=viewUsers" redirect="true"/>
         <forward name="reset" path="/alerts/Config.do?mode=editSyslogAction" redirect="true"/>
         <forward name="failure" path="/alerts/Config.do?mode=editSyslogAction"/>
-        <forward name="success" path="/alerts/Config.do?mode=viewRoles" redirect="true"/>
+        <forward name="success" path="/alerts/Config.do?mode=viewDefinition" redirect="true"/>
       </action>
       
       <action path="/resource/common/monitor/visibility/ViewChartFormPrepare"

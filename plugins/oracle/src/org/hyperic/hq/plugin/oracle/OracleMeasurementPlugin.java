@@ -180,10 +180,14 @@ public class OracleMeasurementPlugin
                            "SELECT SUM(bytes) from V$LOG");
         genericQueries.put("RedoSyncWrites", baseQuery +
                            "'redo synch writes'");
-        genericQueries.put("SessionUGAMemory", baseQuery +
-                           "'session uga memory'");
-        genericQueries.put("SessionPGAMemory", baseQuery +
-                           "'session pga memory'");
+        genericQueries.put("SessionUGAMemory",
+                           "SELECT SUM(s.value) FROM V$STATNAME sn, " +
+                           "V$SESSTAT s WHERE sn.statistic#=s.statistic# AND " +
+                           "sn.name='session uga memory' GROUP BY sn.name");
+        genericQueries.put("SessionPGAMemory",
+                           "SELECT SUM(s.value) FROM V$STATNAME sn, " +
+                           "V$SESSTAT s WHERE sn.statistic#=s.statistic# AND " +
+                           "sn.name='session pga memory' GROUP BY sn.name");
         genericQueries.put("TableFetchContinuedRow", baseQuery +
                            "'table fetch continued row'");
         genericQueries.put("TableFetchRowId", baseQuery +

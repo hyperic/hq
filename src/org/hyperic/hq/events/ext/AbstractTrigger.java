@@ -39,6 +39,8 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.AbstractEvent;
@@ -55,9 +57,9 @@ import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
+import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
-import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.hq.events.shared.AlertValue;
@@ -68,9 +70,6 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /** Abstract class that defines a trigger, which can fire actions
  */
@@ -155,7 +154,6 @@ public abstract class AbstractTrigger implements TriggerInterface {
             return;
             
         ActionValue[] actions;
-        AlertDefinitionValue alertDef;
         AlertValue alert = new AlertValue();
         
         // No matter what, send a message to let people know that this trigger
@@ -164,6 +162,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
 
         AlertDefinitionManagerLocal aman;
         AlertManagerLocal alman;
+        AlertDefinitionBasicValue adBasic;
         try {
             aman = AlertDefinitionManagerUtil.getLocalHome().create();
             alman = AlertManagerUtil.getLocalHome().create();
@@ -180,10 +179,10 @@ public abstract class AbstractTrigger implements TriggerInterface {
             if (adId == null)
                 return;
             
-            alertDef = aman.getById(adId);
+            adBasic = aman.getBasicById(adId);
 
             // See if we need to supress this trigger        
-            if (alertDef.getFrequencyType() == EventConstants.FREQ_NO_DUP) {
+            if (adBasic.getFrequencyType() == EventConstants.FREQ_NO_DUP) {
                 TriggerTrackerLocal tracker;
                 try {
                     tracker = TriggerTrackerUtil.getLocalHome().create();
@@ -199,18 +198,18 @@ public abstract class AbstractTrigger implements TriggerInterface {
                     return;
             }
 
-            if (alertDef.getFrequencyType() == EventConstants.FREQ_ONCE ||
-                alertDef.getWillRecover()) {
+            if (adBasic.getFrequencyType() == EventConstants.FREQ_ONCE ||
+                    adBasic.getWillRecover()) {
             	// Disable the alert definition now that we've fired
                 aman.updateAlertDefinitionsEnable(
-                    new Integer[]{ alertDef.getId() }, false);
+                    new Integer[]{ adBasic.getId() }, false);
             }
             
             if (log.isDebugEnabled())
                 log.debug("Firing trigger " + getId() + " actions");
 
             // Start the Alert object
-            alert.setAlertDefId(alertDef.getId());
+            alert.setAlertDefId(adBasic.getId());
 
             // Create time is the same as the fired event
             alert.setCtime(event.getTimestamp());
@@ -226,7 +225,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
             }
         
             // Create a alert condition logs for every condition
-            AlertConditionValue[] conds = alertDef.getConditions();
+            AlertConditionValue[] conds = aman.getConditionsById(adId);
             for (int i = 0; i < conds.length; i++) {
                 AlertConditionLogValue clog = new AlertConditionLogValue();
                 clog.setCondition(conds[i]);
@@ -239,7 +238,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
         
             // Store the alert
             alman.updateAlert(alert);
-            actions = alertDef.getActions();
+            actions = aman.getActionsById(adId);
         } catch (FinderException e) {
             throw new ActionExecuteException(
                 "Alert Definition not found for trigger: " + this.getId());
@@ -247,7 +246,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
 
         // Regardless of whether or not the actions succeed, we will send an
         // AlertFiredEvent
-        this.publishEvent(new AlertFiredEvent(event, alert.getId(), alertDef));
+        this.publishEvent(new AlertFiredEvent(event, alert.getId(), adBasic));
         
         // Iterate through the actions
         for (int i = 0; i < actions.length; i++) {
@@ -261,7 +260,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
                 action.init(ConfigResponse.decode(action.getConfigSchema(),
                                                   aval.getConfig()));
 
-                String detail = action.execute(alertDef, event, alert.getId());
+                String detail = action.execute(adBasic, event, alert.getId());
                                    
                 AlertActionLogValue alog = new AlertActionLogValue();
                 alog.setActionId(aval.getId());

@@ -66,13 +66,17 @@ public class PostgreSQLServerDetector
     private static final String PTQL_QUERY =
         "State.Name.eq=postmaster,Args.0.ew=postmaster";
 
-    // Service discovery query
-    private static final String QUERY = 
+    // Table discovery query
+    private static final String TABLE_QUERY = 
         "SELECT relname FROM pg_stat_user_tables";
+    // Index discovery query
+    private static final String INDEX_QUERY =
+        "SELECT indexrelname FROM pg_stat_user_indexes";
 
     // Resource types and versions
     static final String SERVER_NAME = "PostgreSQL";
     static final String TABLE       = "Table";
+    static final String INDEX       = "Index";
 
     static final String VERSION_74 = "7.4";
     static final String VERSION_80 = "8.0";
@@ -128,7 +132,8 @@ public class PostgreSQLServerDetector
         return getServerList(path);
     }
 
-    public List getServerResources (ConfigResponse platformConfig, String path, RegistryKey current) 
+    public List getServerResources (ConfigResponse platformConfig, 
+                                    String path, RegistryKey current) 
         throws PluginException
     {
         return getServerList(path);
@@ -300,11 +305,11 @@ public class PostgreSQLServerDetector
         Statement stmt = null;
         ResultSet rs = null;
 
-        // Discover all PostgreSQL tables.
         try {
             conn = DriverManager.getConnection(url, user, pass);
+            // Discover all PostgreSQL tables.
             stmt = conn.createStatement();
-            rs = stmt.executeQuery(QUERY);
+            rs = stmt.executeQuery(TABLE_QUERY);
 
             while (rs != null && rs.next()) {
                 String tablename = rs.getString(1);
@@ -323,6 +328,30 @@ public class PostgreSQLServerDetector
 
                 services.add(service);
             }
+
+            /* Discovery of PostgreSQL indexes is currently disabled.
+            rs.close();
+            rs = stmt.executeQuery(INDEX_QUERY);
+
+            while (rs != null && rs.next()) {
+                String indexname = rs.getString(1);
+
+                ServiceResource service = new ServiceResource();
+                service.setType(this, INDEX);
+                service.setServiceName(indexname);
+
+                ConfigResponse productConfig = new ConfigResponse();
+                productConfig.setValue(PostgreSQLMeasurementPlugin.PROP_INDEX,
+                                       indexname);
+
+                service.setProductConfig(productConfig);
+                service.setMeasurementConfig();
+                service.setControlConfig();
+
+                services.add(service);
+            }
+            */
+
         } catch (SQLException e) {
             throw new PluginException("Error querying for " +
                                       "services: " + e.getMessage());

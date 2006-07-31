@@ -163,6 +163,37 @@
             collectionType="trendsup"/>
   </metrics>
 
+  <metrics name="pg-index">
+    <metric name="Availability"
+            alias="Availability"
+            template="${domain}:Type=Index,index=%index%:availability"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+    <metric name="Index Scans"
+            alias="IndexScans"
+            template="${domain}:Type=Index,index=%index%:idx_scan"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+    <metric name="Index Reads"
+            alias="IndexReads"
+            template="${domain}:Type=Index,index=%index%:idx_tup_read"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+    <metric name="Index Fetches"
+            alias="IndexFetches"
+            template="${domain}:Type=Index,index=%index%:idx_tup_fetch"
+            category="UTILIZATION"
+            indicator="false"
+            units="none"
+            collectionType="trendsup"/>
+  </metrics>
+
   <!-- ==================== Plugin Help =========================== -->
 
   <help name="PostgreSQL">
@@ -252,13 +283,10 @@
     </config>
 
     <service name="Table">
-      <plugin type="measurement"
-              class="PostgreSQLMeasurementPlugin"/>
-
       <plugin type="control"
               class="PostgreSQLControlPlugin"/>
 
-      <actions include="Analyze,Vacuum,VacuumAnalyze"/>
+      <actions include="Analyze,Vacuum,VacuumAnalyze,Reindex"/>
 
       <config>
         <option name="table"
@@ -266,6 +294,20 @@
       </config>
 
       <metrics include="pg-table"/>
+    </service>
+
+    <service name="Index">
+      <plugin type="control"
+              class="PostgreSQLControlPlugin"/>
+
+      <actions include="Reindex"/>
+
+      <config>
+        <option name="index"
+                description="Index Name"/>
+      </config>
+
+      <metrics include="pg-index"/>
     </service>
   </server>
 

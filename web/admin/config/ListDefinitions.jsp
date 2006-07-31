@@ -120,7 +120,7 @@ function setActiveInactive() {
     <display:checkboxdecorator name="definitions" onclick="ToggleSelection(this,widgetProperties)" styleClass="listMember"/>
   </display:column>
   <display:column width="20%" property="name" sort="true" sortAttr="1"
-                  defaultSort="false" title="alerts.config.DefinitionList.ListHeader.AlertDefinition" href="/alerts/Config.do?mode=viewRoles&aetid=${param.aetid}" paramId="ad" paramProperty="alertDefId"/>
+                  defaultSort="false" title="alerts.config.DefinitionList.ListHeader.AlertDefinition" href="/alerts/Config.do?mode=viewDefinition&aetid=${param.aetid}" paramId="ad" paramProperty="alertDefId"/>
     
   <display:column width="20%" property="description"
                   title="common.header.Description" >

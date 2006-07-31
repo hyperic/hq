@@ -43,6 +43,7 @@ public abstract class JDBCControlPlugin extends ControlPlugin {
     protected String user;
     protected String password;
     protected String table = null;
+    protected String index = null;
 
     public void configure(ConfigResponse config)
         throws PluginException
@@ -57,6 +58,8 @@ public abstract class JDBCControlPlugin extends ControlPlugin {
         // Optional
         this.table = 
             config.getValue(JDBCMeasurementPlugin.PROP_TABLE);
+        this.index =
+            config.getValue(JDBCMeasurementPlugin.PROP_INDEX);
 
         // Validate.
         Connection conn = null;

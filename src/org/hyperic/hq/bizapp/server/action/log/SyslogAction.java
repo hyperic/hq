@@ -44,7 +44,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.shared.AlertConditionValue;
-import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -119,7 +119,7 @@ public class SyslogAction extends SyslogActionConfig
      * @throws org.hyperic.hq.events.ext.ActionExecuteException if execution causes an error
      *
      */
-    public String execute(AlertDefinitionValue alertdef,
+    public String execute(AlertDefinitionBasicValue alertdef,
                           TriggerFiredEvent event, Integer alertId)
         throws ActionExecuteException {
         TriggerFiredEvent[] firedEvents = event.getRootEvents();

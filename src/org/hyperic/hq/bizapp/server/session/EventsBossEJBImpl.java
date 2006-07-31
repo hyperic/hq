@@ -85,6 +85,7 @@ import org.hyperic.hq.events.shared.ActionManagerLocal;
 import org.hyperic.hq.events.shared.ActionManagerUtil;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
+import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
@@ -414,7 +415,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                 "Conditions cannot be null or empty");
         }        
         // check that the user can modify alerts for resource
-        canManageAlerts(subject, adval);
+        canManageAlerts(subject, getAppdefEntityID(adval));
+        
         // Create list of ID's to create the alert definition
         List appdefIds = new ArrayList();
         appdefIds.add(this.getAppdefEntityID(adval));
@@ -706,7 +708,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         // check that the user can actually manage alerts for this resource
         for (Iterator it = alertdefs.iterator(); it.hasNext(); ) {
             AlertDefinitionValue ad = (AlertDefinitionValue) it.next();
-            canManageAlerts(subject, ad);
+            canManageAlerts(subject, getAppdefEntityID(ad));
             action = getActMan().createAction(action);
             
             // Create an array out with the new action
@@ -1008,7 +1010,22 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                FinderException, PermissionException {
         AuthzSubjectValue subject = this.manager.getSubject(sessionID);
         AlertDefinitionValue adval = getADM().getById(id);
-        canManageAlerts(subject, adval);
+        canManageAlerts(subject, getAppdefEntityID(adval));
+        return adval;
+    }
+
+    /**
+     * Get an alert definition by ID
+     *
+     * @ejb:interface-method
+     */
+    public AlertDefinitionBasicValue getAlertDefinitionBasic(int sessionID,
+                                                             Integer id)
+        throws SessionNotFoundException, SessionTimeoutException, 
+               FinderException, PermissionException {
+        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        AlertDefinitionBasicValue adval = getADM().getBasicById(id);
+        canManageAlerts(subject, getAppdefEntityID(adval));
         return adval;
     }
 
@@ -1460,7 +1477,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                TriggerCreateException {
         AuthzSubjectValue subject = this.manager.getSubject(sessionID);
         // check security
-        canManageAlerts(subject, adval);
+        canManageAlerts(subject, getAppdefEntityID(adval));
         RegisteredTriggerValue trigger = new RegisteredTriggerValue();
         trigger.setClassname(className);
         try {
@@ -1506,6 +1523,10 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         return new AppdefEntityID(ad.getAppdefType(), ad.getAppdefId());
     }
     
+    private AppdefEntityID getAppdefEntityID(AlertDefinitionBasicValue ad) {
+        return new AppdefEntityID(ad.getAppdefType(), ad.getAppdefId());
+    }
+    
     private void canManageAlerts(AuthzSubjectValue who, Integer[] adIds)
         throws PermissionException, FinderException {
         for(int i = 0; i < adIds.length; i++) {
@@ -1515,7 +1536,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     
     private void canManageAlerts(AuthzSubjectValue who, Integer alertDefId)
         throws PermissionException, FinderException {
-        AlertDefinitionValue ad = this.getADM().getById(alertDefId);
+        AlertDefinitionBasicValue ad = this.getADM().getBasicById(alertDefId);
         canManageAlerts(who, ad);        
     }
     
@@ -1530,11 +1551,12 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         throws PermissionException {
         for(int i = 0; i < ads.size(); i++) {
             AlertDefinitionValue ad = (AlertDefinitionValue)ads.get(i);
-            canManageAlerts(who, ad);                                         
+            canManageAlerts(who, getAppdefEntityID(ad));                                         
         }
     }
     
-    private void canManageAlerts(AuthzSubjectValue who, AlertDefinitionValue ad)
+    private void canManageAlerts(AuthzSubjectValue who,
+                                 AlertDefinitionBasicValue ad)
         throws PermissionException {
         if (!EventConstants.TYPE_ALERT_DEF_ID.equals(ad.getParentId()))
             canManageAlerts(who, getAppdefEntityID(ad));
