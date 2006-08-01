@@ -300,9 +300,6 @@ sometimes we don't want any left side buttons or checkboxes at all
     <tr>
       <td width="1%" class="ListCellHeader"><span style="width: 1px; height: 1px;"></span></td>
       <td colspan="10" class="ListCellHeader"><fmt:message key="${heading}"/></td>
-      <c:if test="${MetricsDisplayForm.showNumberCollecting}">
-        <td class="ListCellHeader">&nbsp;</td>
-      </c:if>
     </tr>
     <tiles:insert definition=".resource.common.monitor.visibility.metricsDisplay.row">
       <tiles:put name="rows" beanName="metrics"/>
