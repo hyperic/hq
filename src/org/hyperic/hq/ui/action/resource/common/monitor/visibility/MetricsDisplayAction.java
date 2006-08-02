@@ -96,6 +96,8 @@ public class MetricsDisplayAction extends MetricsControlAction {
                 " user.prefs = " + user.getPreferences());
             AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
             boss.setUserPrefs(sessionId, user.getId(), user.getPreferences());
+            
+            return returnSuccess(request, mapping);
         }
         else if (displayForm.isOkClicked()) {
             Integer[] m = displayForm.getM();
@@ -118,7 +120,10 @@ public class MetricsDisplayAction extends MetricsControlAction {
 
             }
             RequestUtils.setConfirmation(request,
-                "resource.common.monitor.visibility.config.ConfigMetrics.Confirmation");
+                "resource.common.monitor.visibility.config.ConfigMetrics." +
+                "Confirmation");
+            
+            return returnSuccess(request, mapping);
         }
         else if (displayForm.isRemoveClicked()) {
             Integer[] m = displayForm.getM();
@@ -137,8 +142,11 @@ public class MetricsDisplayAction extends MetricsControlAction {
                 }
 
                 RequestUtils.setConfirmation(request, 
-                    "resource.common.monitor.visibility.config.RemoveMetrics.Confirmation");
+                    "resource.common.monitor.visibility.config.RemoveMetrics." +
+                    "Confirmation");
             }
+            
+            return returnSuccess(request, mapping);
         }
 
         return super.execute(mapping, form, request, response);
