@@ -1010,7 +1010,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                FinderException, PermissionException {
         AuthzSubjectValue subject = this.manager.getSubject(sessionID);
         AlertDefinitionValue adval = getADM().getById(id);
-        canManageAlerts(subject, getAppdefEntityID(adval));
+        if (!EventConstants.TYPE_ALERT_DEF_ID.equals(adval.getParentId()))
+            canManageAlerts(subject, getAppdefEntityID(adval));
         return adval;
     }
 
