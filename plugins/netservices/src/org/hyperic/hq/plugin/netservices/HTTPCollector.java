@@ -112,6 +112,22 @@ public class HTTPCollector extends SocketChecker {
         }
     }
 
+    protected String getURL() {
+        return this.url;
+    }
+
+    protected void setURL(String url) {
+        this.url = url;
+    }
+
+    protected String getMethod() {
+        return this.method;
+    }
+
+    protected void setMethod(String method) {
+        this.method = method;
+    }
+
     private double getAvail(int code)  {
         // There are too many options to list everything that is
         // successful.  So, instead we are going to call out the
@@ -150,7 +166,7 @@ public class HTTPCollector extends SocketChecker {
     //Content-Type: text/plain
     //Content-Length: <= 8192
     //XXX flag to always disable and/or change these checks
-    private void parseResults(HttpMethod method) {
+    protected void parseResults(HttpMethod method) {
         Header length =
             method.getResponseHeader("Content-Length");
         Header type =
@@ -219,7 +235,7 @@ public class HTTPCollector extends SocketChecker {
         this.matches.clear();
         HttpMethod method;
         boolean isHEAD =
-            this.method.equals(METHOD_HEAD);
+            getMethod().equals(METHOD_HEAD);
         HttpClient client = new HttpClient();
         client.setConnectionTimeout(getTimeoutMillis());
         client.setTimeout(getTimeoutMillis());
@@ -230,12 +246,12 @@ public class HTTPCollector extends SocketChecker {
         }
 
         if (isHEAD) {
-            HeadMethod head = new HeadMethod(this.url);
+            HeadMethod head = new HeadMethod(getURL());
             head.setBodyCheckTimeout(-1);
             method = head;
         }
         else {
-            GetMethod get = new GetMethod(this.url);
+            GetMethod get = new GetMethod(getURL());
             method = get;
         }        
 
