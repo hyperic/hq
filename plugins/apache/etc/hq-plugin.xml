@@ -25,6 +25,11 @@
 
 <plugin name="apache">
 
+  <!-- ApacheStatusCollector extends HTTPCollector -->
+  <classpath>
+    <include name="pdk/plugins/netservices-plugin.jar"/>
+  </classpath>
+
   <!--
     rather than load the entire NETWORK-SERVICES-MIB.txt
     define the OID for the one object type used.
@@ -376,6 +381,61 @@
             group="Reliability"
             units="epoch-millis"
             collectionType="static"/>
+  </metrics>
+
+  <filter name="template"
+          value="apache-status:${url.config}:${alias}"/>
+
+  <metrics name="apache-status">
+    <metric name="Availability"
+            indicator="true"/>
+
+    <metric name="Busy Servers"/>
+
+    <metric name="Idle Servers"/>
+
+    <metric name="Bytes Served per Second"
+            alias="BytesPerSec"
+            category="THROUGHPUT"
+            units="B"/>
+
+    <metric name="Bytes Served per Request"
+            alias="BytesPerReq"
+            category="THROUGHPUT"
+            units="B"/>
+
+    <metric name="Requests Served per Second"
+            alias="ReqPerSec"
+            indicator="true"
+            category="THROUGHPUT"/>
+
+    <metric name="CPU Load"/>
+
+    <metric name="Requests Served"
+            alias="TotalAccesses"
+            indicator="true"
+            collectionType="trendsup"
+            category="THROUGHPUT"/>
+
+    <metric name="Bytes Served"
+            alias="TotalkBytes"
+            units="KB"
+            indicator="true"
+            collectionType="trendsup"
+            category="THROUGHPUT"/>
+
+    <!-- scoreboard -->
+    <metric name="Waiting"/>
+    <metric name="Starting"/>
+    <metric name="Reading"/>
+    <metric name="Sending"/>
+    <metric name="Keepalive"/>
+    <metric name="DNS"/>
+    <metric name="Closing"/>
+    <metric name="Logging"/>
+    <metric name="Finishing"/>
+    <metric name="Free"/>
+
   </metrics>
 
   <help name="restart-server">
@@ -735,5 +795,21 @@
     <scan>
       <include name="/**/${VERSION_FILE}"/>
     </scan>
+  </server>
+
+  <server name="Apache httpd">
+    <!-- override default url.path -->
+    <property name="path" value="/server-status"/>
+
+    <config include="url"/>
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+    <plugin type="collector"
+            class="ApacheStatusCollector"/>
+
+    <metrics include="apache-status"/>
+
   </server>
 </plugin>
