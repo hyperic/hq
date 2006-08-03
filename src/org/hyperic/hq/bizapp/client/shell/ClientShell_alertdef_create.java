@@ -47,12 +47,7 @@ import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
-import org.hyperic.util.config.ConfigOption;
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.ConfigSchema;
-import org.hyperic.util.config.EncodingException;
-import org.hyperic.util.config.InvalidOptionException;
-import org.hyperic.util.config.SchemaBuilder;
+import org.hyperic.util.config.*;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.paramParser.FormatParser;
 import org.hyperic.util.paramParser.ParseResult;
@@ -318,12 +313,22 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
 
             ConfigResponse actionResp = getClientShell().processConfigSchema(emailActionSchema);
             getClientShell().getOutStream().println();
-            
-            while (! this.getEntityFetcher().ensureNamesAreIds(actionResp) ) {
-                actionResp = getClientShell().processConfigSchema(emailActionSchema);
-                getClientShell().getOutStream().println();
+
+            // fix for HQ-333: on invalid user input, allow user the opportunity to supply a proper value
+            while ( true ) {
+                try {
+                    if (this.getEntityFetcher().ensureNamesAreIds(actionResp)) {
+                        break;
+                    }
+                    actionResp = getClientShell().processConfigSchema(emailActionSchema);
+                    getClientShell().getOutStream().println();
+                    break;
+                } catch (InvalidOptionValueException e) {
+                    getClientShell().getOutStream().println("An invalid value or a list of values was entered.  Please re-enter.");
+                    actionResp = getClientShell().processConfigSchema(emailActionSchema);
+                }
             }
-            
+
             // save the alert for each resource in the resources list
             for(int i = 0 ; i < resources.size(); i++) {
                 AppdefResourceValue aRes = (AppdefResourceValue)resources.get(i);
