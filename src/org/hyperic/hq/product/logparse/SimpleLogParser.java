@@ -89,6 +89,16 @@ public class SimpleLogParser extends BaseLogParser
             String ip = null;
             if (st.hasMoreTokens()) {
                 ip = st.nextToken();
+                
+                // Make sure we form the IP correctly
+                String[] strips = ip.split("^\\d+\\.\\d+\\.\\d+\\.\\d+");
+                for (int i = 0; i < strips.length; i++) {
+                    if (strips[i].length() > 0) {
+                        int index = ip.indexOf(strips[i]);
+                        ip = ip.substring(0, index);
+                        break;
+                    }
+                }
             }
             
             RtStat rs = new RtStat(id, svcType, ip);
