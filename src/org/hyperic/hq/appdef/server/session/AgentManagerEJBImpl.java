@@ -133,10 +133,8 @@ public class AgentManagerEJBImpl
     {
         MiniResourceTreeGenerator generator;
         PlatformLocalHome platHome;
-        AppdefEntityID[] platIds;
         Collection plats;
         AgentLocal agt;
-        ArrayList idList;
 
         agt = this.getAgentInternal(agentToken);
         try {
@@ -151,21 +149,23 @@ public class AgentManagerEJBImpl
             return new MiniResourceTree();
         }
 
-        idList = new ArrayList();
-        for(Iterator i=plats.iterator(); i.hasNext(); ){
-            PlatformLocal plat = (PlatformLocal)i.next();
+        AppdefEntityID[] platIds = new AppdefEntityID[plats.size()];
+        int i = 0;
+        for (Iterator it = plats.iterator(); it.hasNext(); i++) {
+            PlatformLocal plat = (PlatformLocal) it.next();
 
-            idList.add(plat.getEntityId());
+            platIds[i] =
+                new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
+                                   ((PlatformPK) plat.getPrimaryKey()).getId());
         }
         
         generator = new MiniResourceTreeGenerator(subject);
-        platIds = (AppdefEntityID[])idList.toArray(new AppdefEntityID[0]);
         try {
-            return generator.generate(platIds, 
+            return generator.generate(platIds,
                                       ResourceTreeGenerator.TRAVERSE_UP);
         } catch(AppdefEntityNotFoundException exc){
             throw new SystemException("Internal inconsistancy finding " +
-                                         "resources for agent");
+                                      "resources for agent");
         }
     }
 
