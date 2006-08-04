@@ -806,7 +806,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * permission exceptions, just PlatformNotFoundException.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="SUPPORTS"
      * @param Integer id
      */
     public MiniResourceValue getMiniPlatformById(AuthzSubjectValue subject,
