@@ -25,18 +25,14 @@
 
 package org.hyperic.hq.product.logparse;
 
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.StringTokenizer;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Date;
+import java.util.StringTokenizer;
 
-import org.hyperic.hq.product.logparse.BaseLogParser;
 import org.hyperic.hq.product.RtStat;
-
-import org.hyperic.util.JDK;
 
 /* This is a very simple log parser that uses a StringTokenizer instead
  * of a regular expression to parse the log file.  This should greatly
