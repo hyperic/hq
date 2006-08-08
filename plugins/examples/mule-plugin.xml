@@ -181,10 +181,10 @@
       <metric name="Executed Events"
               collectionType="trendsup"/>
 
-      <metric name="ExecutionErrors"
+      <metric name="Execution Errors"
               collectionType="trendsup"/>
 
-      <metric name="FatalErrors"
+      <metric name="Fatal Errors"
               collectionType="trendsup"/>
 
       <metric name="Min Execution Time"
