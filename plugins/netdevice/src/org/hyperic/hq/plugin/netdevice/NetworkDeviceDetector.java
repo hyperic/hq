@@ -66,6 +66,16 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
 
     private SNMPSession session;
 
+    private Object get(String name, List column, int ix) {
+        int size = column.size();
+        if (ix >= size) {
+            getLog().warn(name + " column index [" + ix + "] " +
+                          "out-of-bounds [" + size + "]");
+            return null;
+        }
+        return column.get(ix);
+    }
+
     public List discoverServices(ConfigResponse serverConfig)
         throws PluginException {
 
@@ -167,11 +177,15 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
                     continue;
                 }
                 String val;
+                Object obj = get(key, data, i);
+                if (obj == null) {
+                    continue;
+                }
                 if (key.equals(MAC_COLUMN)) {
-                    mac = val = ((SNMPValue)data.get(i)).toPhysAddressString();
+                    mac = val = ((SNMPValue)obj).toPhysAddressString();
                 }
                 else {
-                    val = data.get(i).toString();
+                    val = obj.toString();
                 }
                 cprops.setValue(key, val);
             }
@@ -192,12 +206,15 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
             //might be more than 1 interface w/ the same name
             //so append the mac address to make it unique
             name = name.trim() + " " + SVC_NAME;
-            if (!mac.equals("0:0:0:0:0:0")) {
+            if ((mac != null) && !mac.equals("0:0:0:0:0:0")) {
                 name += " (" + mac + ")";
             }
             service.setServiceName(name);
             if (hasDescriptions) {
-                service.setDescription(descriptions.get(i).toString());
+                Object obj = get(IF_DESCR, descriptions, i);
+                if (obj != null) {
+                    service.setDescription(obj.toString());
+                }
             }
             services.add(service);
         }
