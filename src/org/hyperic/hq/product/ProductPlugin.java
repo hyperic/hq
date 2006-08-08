@@ -139,24 +139,25 @@ public abstract class ProductPlugin extends GenericPlugin {
         try {
             pluginClass = loadClass(loader, name);
         } catch (ClassNotFoundException e) {
-            if (PluginData.getServiceExtension(info.getName()) == null) {
-                plugin.getLog().error("Error loading " + plugin + ": " + e);
-                return null;
-            }
-            else {
-                //we get here if the server's implementation is a class loaded
-                //from hq-product.jar rather than the plugin's ClassLoader
-                try {
-                    plugin.getLog().debug("Trying data ClassLoader to load: " +
-                                          name + " for plugin " + info.getName());
-                    pluginClass = loadClass(plugin.data.getClassLoader(), name);
-                } catch (ClassNotFoundException e2) {
+            //we get here if the server's implementation is a class loaded
+            //from hq-product.jar rather than the plugin's ClassLoader
+            try {
+                plugin.getLog().debug("Trying data ClassLoader to load: " +
+                                      name + " for plugin " + info.getName());
+                pluginClass = loadClass(plugin.data.getClassLoader(), name);
+            } catch (ClassNotFoundException e2) {
+                String msg =
+                    "Unable to load " + name +
+                    " for plugin " + info.getName();
+                if (PluginData.getServiceExtension(info.getName()) == null) {
+                    plugin.getLog().error(msg);
+                }
+                else {
                     //plugin class is likely in another plugin
                     //see PluginManager.getPlugin where we try later.
-                    plugin.getLog().debug("Unable to create " + name +
-                                          " for plugin " + info.getName());
-                    return null;
+                    plugin.getLog().debug(msg + ": " + e);
                 }
+                return null;
             }
         }
         try {
