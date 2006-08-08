@@ -34,7 +34,6 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.hyperic.hq.product.GenericPlugin;
-import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.ProductPluginManager;
 
 class MxObjectNameQuery extends MxServiceQuery {
@@ -86,9 +85,8 @@ class MxObjectNameQuery extends MxServiceQuery {
             throw new IllegalArgumentException(msg);
         }
 
-        name = MxUtil.expandObjectName(name);
-        name = Metric.translate(name,
-                                getServerDetector().getConfig()); 
+        name = MxUtil.expandObjectName(name,
+                                       getServerDetector().getConfig()); 
 
         this.names = new ArrayList();
         ObjectName oName;

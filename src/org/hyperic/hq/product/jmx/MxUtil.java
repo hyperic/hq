@@ -61,6 +61,7 @@ import org.hyperic.hq.product.MetricInvalidException;
 import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.util.config.ConfigResponse;
 
 public class MxUtil {
 
@@ -115,6 +116,18 @@ public class MxUtil {
         }
         
         return objectName.toString();
+    }
+
+    static String expandObjectName(String name,
+                                   ConfigResponse config) {
+
+        return Metric.translate(expandObjectName(name), config);
+    }
+
+    static String expandObjectName(String name,
+                                   Properties config) {
+
+        return Metric.translate(expandObjectName(name), config);
     }
 
     private static MetricInvalidException invalidObjectName(String name,

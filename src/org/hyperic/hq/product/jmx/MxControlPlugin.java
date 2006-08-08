@@ -58,8 +58,8 @@ public class MxControlPlugin
                                       " not defined for " +
                                       plugin.getTypeInfo().getName());
         }
-        objectName = MxUtil.expandObjectName(objectName);
-        objectName = Metric.translate(objectName, plugin.getConfig());
+        objectName = MxUtil.expandObjectName(objectName,
+                                             plugin.getConfig());
         
         return objectName;
     }

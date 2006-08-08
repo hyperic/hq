@@ -39,7 +39,6 @@ import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.LogTrackPlugin;
-import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.TrackEvent;
 
@@ -84,8 +83,8 @@ public class MxNotificationListener implements NotificationListener {
         String[] translated = new String[mbeans.length];
 
         for (int i=0; i<mbeans.length; i++) {
-            String mbean = MxUtil.expandObjectName(mbeans[i]);
-            translated[i] = Metric.translate(mbean, this.props);
+            translated[i] =
+                MxUtil.expandObjectName(mbeans[i], this.props);
         }
 
         return translated;
