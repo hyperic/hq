@@ -105,6 +105,7 @@ public class AvailabilityCheckService
 
     private long interval = 0;
     private long startTime = 0;
+    private long wait = 5 * MeasurementConstants.MINUTE;
     
     private DataManagerLocal dataMan = null;
     private DataManagerLocal getDataMan() {
@@ -141,13 +142,27 @@ public class AvailabilityCheckService
      * @jmx:managed-operation
      */
     public void hit(Date lDate) {
-        if (!isActive())
-            return;
-
         if (!started) {
             this.log.debug("HQ Services have not been started for " + logCtx);
             return;
         }
+        
+        if (!isActive())
+            return;
+
+        long current = lDate.getTime();
+
+        // Don't start backfilling until 10 minutes after app has started
+        if (startTime == 0) {
+            startTime = current;
+            return;
+        }
+        else if (startTime + wait > current) {
+                return;
+        }
+
+        if (log.isDebugEnabled())
+            log.debug("AvailabilityCheckService.hit()");
         
         if (fill == null) {
             try {
@@ -176,18 +191,6 @@ public class AvailabilityCheckService
         if (fill.booleanValue() == false)
             return;
         
-        long current = lDate.getTime();
-
-        // Don't start backfilling until 3 minutes after app has started
-        if (startTime == 0) {
-            startTime = current;
-            return;
-        }
-        else {
-            if (startTime + 180000 > current)
-                return;
-        }
-
         SRNCache srnCache = SRNCache.getInstance();
 
         // If this is the GUI node, try to look up values first
@@ -405,6 +408,24 @@ public class AvailabilityCheckService
      */
     public void setInterval(long interval) {
         this.interval = interval;
+    }
+    
+    /**
+     * Get the wait for how long after service starts to backfill
+     *
+     * @jmx:managed-attribute
+     */
+    public long getWait() {
+        return this.wait;
+    }
+
+    /**
+     * Set the wait for how long after service starts to backfill
+     *
+     * @jmx:managed-attribute
+     */
+    public void setWait(long wait) {
+        this.wait = wait;
     }
     
     //---------------------------------------------------------------------
