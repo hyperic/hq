@@ -27,7 +27,6 @@ package org.hyperic.hq.plugin.mqseries;
 
 import java.io.File;
 
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +34,7 @@ import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.FileServerDetector;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.RegistryServerDetector;
 import org.hyperic.hq.product.RuntimeDiscoverer;
 import org.hyperic.hq.product.ServerDetector;
@@ -50,18 +50,21 @@ public class MQSeriesDetector
                RegistryServerDetector,
                AutoServerDetector {
 
-    public static final String MQ_KEY =
-        "SOFTWARE\\IBM\\MQSeries\\CurrentVersion";
+    static String MQ_KEY;
 
-    private static final String[] SCAN_KEYS = {
-        MQ_KEY,
-    };
+    public void init(PluginManager manager)
+        throws PluginException {
 
-    private static final List SCAN_KEYS_LIST =
-        Arrays.asList(SCAN_KEYS);
+        super.init(manager);
 
-    public MQSeriesDetector() {
-        super();
+        if (isWin32()) {
+            String prop = "mqseries.regkey";
+            MQ_KEY = getProperty(prop);
+            if (MQ_KEY == null) {
+                throw new IllegalArgumentException(prop +
+                                                   " property undefined");
+            }
+        }
     }
 
     private List getServerList(String path) {
@@ -110,10 +113,6 @@ public class MQSeriesDetector
 
         //XXX check CurrentVersion\\MQServer{Release,Version}
         return getServerList(path);
-    }
-
-    public List getRegistryScanKeys() {
-        return SCAN_KEYS_LIST;
     }
 
     public RuntimeDiscoverer getRuntimeDiscoverer() {

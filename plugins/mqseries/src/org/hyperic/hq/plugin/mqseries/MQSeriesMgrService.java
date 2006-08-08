@@ -46,10 +46,6 @@ public class MQSeriesMgrService
     //XXX might need to unhardcode.
     public static final File QMGRS_PATH = new File("/var/mqm/qmgrs");
 
-    private static final String MQ_MGR_KEY =
-        MQSeriesDetector.MQ_KEY +
-        "\\Configuration\\QueueManager";
-
     private String name;
     private String fullname;
     private String type;
@@ -106,6 +102,10 @@ public class MQSeriesMgrService
 
     private static String[] findQmgrsRegistry()
         throws PluginException {
+
+        String MQ_MGR_KEY =
+            MQSeriesDetector.MQ_KEY +
+            "\\Configuration\\QueueManager";
 
         try {
             RegistryKey key =

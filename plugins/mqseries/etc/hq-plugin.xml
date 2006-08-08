@@ -82,6 +82,9 @@
             units="none"/>
   </metrics>
 
+  <property name="mqseries.regkey"
+            value="SOFTWARE\IBM\MQSeries\CurrentVersion"/>
+
   <server name="MQSeries"
           version="5.x"
           description="Messaging Server">
@@ -92,13 +95,32 @@
     <plugin type="autoinventory"
             class="MQSeriesDetector"/>
 
+    <scan registry="${mqseries.regkey}">
+      <include name="FilePath"/>
+    </scan>
+
+    <scan>
+      <include name="/**/bin/runmqlsr"/>
+    </scan>
+
     <service name="Queue Manager">
+      <config>
+        <option name="queue.manager.name"
+                description="Queue manager name"
+                default="MQ_hostname"/>
+      </config>
+
       <plugin type="measurement"
               class="MQSeriesMeasurementPlugin"/>
-
     </service>
 
     <service name="Queue">
+      <config>
+        <option name="queue.name"
+                description="Queue name"
+                default="default"/>
+      </config>
+
       <plugin type="measurement"
               class="MQSeriesMeasurementPlugin"/>
 
