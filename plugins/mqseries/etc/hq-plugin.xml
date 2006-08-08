@@ -81,4 +81,27 @@
             collectionType="dynamic"
             units="none"/>
   </metrics>
+
+  <server name="MQSeries"
+          version="5.x"
+          description="Messaging Server">
+
+    <plugin type="measurement"
+            class="MQSeriesServerMeasurementPlugin"/>
+
+    <plugin type="autoinventory"
+            class="MQSeriesDetector"/>
+
+    <service name="Queue Manager">
+      <plugin type="measurement"
+              class="MQSeriesMeasurementPlugin"/>
+
+    </service>
+
+    <service name="Queue">
+      <plugin type="measurement"
+              class="MQSeriesMeasurementPlugin"/>
+
+    </service>
+   </server>
 </plugin>

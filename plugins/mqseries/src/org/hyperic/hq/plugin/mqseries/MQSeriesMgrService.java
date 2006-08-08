@@ -148,18 +148,4 @@ public class MQSeriesMgrService
 
         return services;
     }
-
-    public static void main(String[] args) throws Exception {
-        List productServices =
-            findServices(MQSeriesProductPlugin.VERSION_5_NAME);
-
-        for (int i=0; i<productServices.size(); i++) {
-            MQSeriesService mqsvc =
-                (MQSeriesService)productServices.get(i);
-
-            System.out.println("discovered: " +
-                               mqsvc.getTypeName() + "/" + 
-                               mqsvc.getFullName());
-        }
-    }
 }

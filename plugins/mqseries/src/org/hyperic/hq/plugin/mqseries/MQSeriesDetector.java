@@ -33,6 +33,7 @@ import java.util.List;
 
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.FileServerDetector;
+import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.RegistryServerDetector;
 import org.hyperic.hq.product.RuntimeDiscoverer;
@@ -116,6 +117,8 @@ public class MQSeriesDetector
     }
 
     public RuntimeDiscoverer getRuntimeDiscoverer() {
-        return new MQSeriesRuntimeDiscoverer();
+        RuntimeDiscoverer plugin = new MQSeriesRuntimeDiscoverer();
+        ((GenericPlugin)plugin).setTypeInfo(getTypeInfo());
+        return plugin;
     }
 }

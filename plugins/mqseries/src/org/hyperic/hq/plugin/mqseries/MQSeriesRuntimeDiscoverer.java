@@ -58,7 +58,7 @@ public class MQSeriesRuntimeDiscoverer extends GenericPlugin
         AIServiceValue[] services;
 
         List productServices =
-            MQSeriesMgrService.findServices(MQSeriesProductPlugin.VERSION_5_NAME);
+            MQSeriesMgrService.findServices(getTypeInfo().getName());
 
         services = new AIServiceValue[productServices.size()];
         Long nowTime = new Long(System.currentTimeMillis());

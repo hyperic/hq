@@ -35,10 +35,6 @@ import org.hyperic.hq.product.PluginException;
 public class MQSeriesMeasurementPlugin
     extends MeasurementPlugin {
 
-    public MQSeriesMeasurementPlugin() {
-        setName(MQSeriesProductPlugin.NAME);
-    }
-
     public MetricValue getValue(Metric metric)
         throws PluginException,
                MetricNotFoundException,
