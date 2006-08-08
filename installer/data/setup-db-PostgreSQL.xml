@@ -61,6 +61,7 @@
       <and>
         <available file="${install.dir}/data/hqdb/tune-os.sh"/>
         <not><available file="/tmp/_hq-was-tuned"/></not>
+        <isfalse value="${setup.upgrade}"/>
       </and>
     </condition>
     <antcall target="tune-os"/>
