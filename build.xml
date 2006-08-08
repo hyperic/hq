@@ -98,7 +98,12 @@
 
   <path id="pdkjars">
     <path refid="pdknative" />
-    <fileset dir="${pdk.lib}" includes="**/*.jar"/>
+    <!-- exclude hq-product.jar, else version.properties
+         update will fail on windows -->
+    <fileset dir="${pdk.lib}"
+             excludes="hq-product.jar"
+             includes="**/*.jar" />
+    <path location="${build.dir}/classes" />
   </path>
 
   <path id="custom-ant-tasks.path" >
