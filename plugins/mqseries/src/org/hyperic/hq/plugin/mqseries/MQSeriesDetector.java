@@ -32,14 +32,12 @@ import java.util.List;
 
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.FileServerDetector;
-import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.RegistryServerDetector;
-import org.hyperic.hq.product.RuntimeDiscoverer;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
-
+import org.hyperic.hq.product.ServiceResource;
 
 import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.util.config.ConfigResponse;
@@ -115,9 +113,32 @@ public class MQSeriesDetector
         return getServerList(path);
     }
 
-    public RuntimeDiscoverer getRuntimeDiscoverer() {
-        RuntimeDiscoverer plugin = new MQSeriesRuntimeDiscoverer();
-        ((GenericPlugin)plugin).setTypeInfo(getTypeInfo());
-        return plugin;
+    protected List discoverServices(ConfigResponse serverConfig)
+        throws PluginException {
+        List productServices =
+            MQSeriesMgrService.findServices(getTypeInfo().getName());
+
+        List services = new ArrayList(productServices.size());
+
+        for (int i=0; i<productServices.size(); i++) {
+            MQSeriesService mqsvc =
+                (MQSeriesService)productServices.get(i);
+
+            getLog().debug("discovered: " + mqsvc.getFullName());
+
+            ServiceResource service = new ServiceResource();
+            service.setType(mqsvc.getTypeName());
+            service.setServiceName(mqsvc.getFullName());
+
+            ConfigResponse config =
+                new ConfigResponse(mqsvc.getProductConfig());
+            service.setProductConfig(config);
+
+            service.setMeasurementConfig();
+
+            services.add(service);
+        }
+
+        return services;
     }
 }
