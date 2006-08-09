@@ -116,7 +116,7 @@ public class ViewAction extends TilesAction {
             // Most likely a permissions error.  Return an empty list
             List emptyList = new ArrayList();
             context.putAttribute("recentlyApproved", emptyList);
-            log.error("Error generating tree: " + e.getMessage());
+            log.debug("Error generating tree: " + e.getMessage());
         }
        
         return null;
