@@ -1273,4 +1273,22 @@
           version="9.1"
           include="8.1">
   </server>
+
+  <server name="Weblogic"
+          version="9.2"
+          include="9.1">
+  </server>
+
+  <server name="Weblogic Admin"
+          version="9.2"
+          include="9.1">
+
+    <property name="PRODUCT_DIR" value="weblogic92"/>
+  </server>
+
+  <server name="Weblogic NodeManager"
+          version="9.2"
+          include="9.1">
+  </server>
 </plugin>
+
