@@ -170,7 +170,7 @@ startBuiltinDB () {
     debugOut "loading dbport..."
     DBPORT=`loadDBPort`
     debugOut "loaded dbport=${DBPORT}"
-    waitForPort ${DBPORT} "postmaster" 10 'HQ built-in database failed to start:' '${SERVER_HOME}/hqdb/data/hqdb.log' 1
+    waitForPort ${DBPORT} "postmaster" 10 'HQ built-in database failed to start:' '${SERVER_HOME}/logs/hqdb.log' 1
     if [ $? -eq 0 ] ; then
       exit 1
     fi
@@ -277,7 +277,7 @@ doStopSignal () {
       infoOut "Stopping HQ built-in database..."
       ${SERVER_HOME}/bin/db-stop.sh
       DBPORT=`loadDBPort`
-      waitForPort ${DBPORT} "postmaster" 30 'HQ built-in database failed to stop:' '${SERVER_HOME}/hqdb/data/hqdb.log' 0
+      waitForPort ${DBPORT} "postmaster" 30 'HQ built-in database failed to stop:' '${SERVER_HOME}/logs/hqdb.log' 0
       if [ $? -eq 0 ] ; then
         exit 1
       fi
