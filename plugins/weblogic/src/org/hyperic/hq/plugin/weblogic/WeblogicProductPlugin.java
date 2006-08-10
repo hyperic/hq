@@ -183,6 +183,7 @@ public class WeblogicProductPlugin extends ProductPlugin {
             installpath + "/server/lib/weblogic.jar", 
             installpath + "/server/lib/wlcipher.jar",
             installpath + "/server/lib/webservices.jar",
+            installpath + "/server/lib/jsafe.jar", //9.x+ssl
             installpath + "/lib/weblogic.jar" //6.1
         };
     }
