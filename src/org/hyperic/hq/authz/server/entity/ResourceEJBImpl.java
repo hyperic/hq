@@ -356,16 +356,16 @@ public abstract class ResourceEJBImpl extends AuthzNamedEntity
        sb = new StringBuffer();
 
        sb.append ("SELECT DISTINCT OBJECT(r) " )
-         .append ( "FROM Resource as r,      " )
-         .append ( "  IN(r.resourceGroups) g," )
-         .append ( "          AND (          " );
+         .append ( "FROM Resource as r, "      )
+         .append ( "  IN(r.resourceGroups) g " )
+         .append ( "      WHERE "              );
 
-       for (int x=1; x<noArgs; x++) {
-           if (x>1) sb.append(" OR ");
-           sb.append(" r = ?" + (x+1) + " ");
-           parms.add((Object)resLocArr[x-1]);
-       }
-       sb.append(")");
+       for (int x = 1; x < noArgs; x++) {
+            if (x > 1)
+                sb.append(" OR ");
+            sb.append(" r = ?" + x + " ");
+            parms.add((Object) resLocArr[x - 1]);
+        }
 
        parmArr = (Object[]) parms.toArray(new Object[0]);
 
