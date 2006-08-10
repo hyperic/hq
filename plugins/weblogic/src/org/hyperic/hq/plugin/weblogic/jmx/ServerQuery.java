@@ -123,8 +123,12 @@ public class ServerQuery
         return query;
     }
 
+    private boolean isAdminPortEnabled() {
+        return "true".equals(getAttribute(ATTR_ADMIN_PORT_ENABLED));
+    }
+
     public String getListenPort() {
-        if ("true".equals(getAttribute(ATTR_ADMIN_PORT_ENABLED))) {
+        if (isAdminPortEnabled()) {
             String oPort = getAttribute(ATTR_ADMIN_OVERRIDE_PORT);
             if ("0".equals(oPort)) {
                 //no override port configured.
@@ -279,6 +283,12 @@ public class ServerQuery
 
         if (!super.getAttributes(mServer, name, SERVER_ATTRS)) {
             return false;
+        }
+
+        if (isAdminPortEnabled()) {
+            //gone in 9.1+
+            super.getAttributes(mServer, name,
+                                new String[] { ATTR_ADMIN_OVERRIDE_PORT });
         }
 
         ObjectName runtimeName = getServerRuntime();
