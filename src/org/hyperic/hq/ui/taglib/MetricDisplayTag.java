@@ -34,6 +34,7 @@ import javax.servlet.jsp.tagext.TagSupport;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.struts.taglib.TagUtils;
 import org.apache.struts.util.RequestUtils;
 import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 import org.hyperic.hq.measurement.UnitsConvert;
@@ -124,9 +125,9 @@ public class MetricDisplayTag extends TagSupport {
 
         if (getMetricVal() == null ||
             Double.isNaN(getMetricVal().doubleValue()) && defaultKeyIsSet) {
-            sb.append(RequestUtils.message(pageContext, bundle,
-                                           userLocale.toString(),
-                                           getDefaultKeyVal()));
+            sb.append(TagUtils.getInstance().message(pageContext, bundle,
+                                                     userLocale.toString(),
+                                                     getDefaultKeyVal()));
         }
         // XXXX remove duplication with the metric decorator
         // and the UnitsConvert/UnitsFormat stuff
@@ -136,9 +137,10 @@ public class MetricDisplayTag extends TagSupport {
             f.setMaximumFractionDigits(3);
             String formatted = f.format(getMetricVal().doubleValue() / 1000);
             String[] args = new String[] { formatted };
-            sb.append(RequestUtils.message(pageContext, bundle, 
-                userLocale.toString(),
-                "metric.tag.units.s.arg", args));
+            sb.append(TagUtils.getInstance().message(pageContext, bundle, 
+                                                     userLocale.toString(),
+                                                     "metric.tag.units.s.arg",
+                                                     args));
         }
         else {
             FormattedNumber f =
@@ -280,7 +282,7 @@ public class MetricDisplayTag extends TagSupport {
     private Object evalAttr(String attributeName, String expression, Class expectedType) 
             throws JspException {
         return ExpressionUtil.evalNotNull(TAG_NAME, attributeName, expression,
-                     expectedType, this, pageContext);
+                                          expectedType, this, pageContext);
     }
 
     private Double getMetricVal() {

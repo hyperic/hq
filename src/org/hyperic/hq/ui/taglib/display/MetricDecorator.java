@@ -29,23 +29,21 @@ import java.util.Locale;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
+import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagSupport;
-import javax.servlet.jsp.PageContext;
-
-import org.hyperic.hq.measurement.UnitsConvert;
-import org.hyperic.util.units.FormattedNumber;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.Action;
+import org.apache.struts.taglib.TagUtils;
 import org.apache.struts.util.RequestUtils;
 import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
 import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
-
-import org.hyperic.util.units.UnitsFormat;
+import org.hyperic.hq.measurement.UnitsConvert;
+import org.hyperic.util.units.FormattedNumber;
 import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
+import org.hyperic.util.units.UnitsFormat;
 
 /**
  * This class is a two in one decorator/tag for use within the
@@ -128,8 +126,8 @@ public class MetricDecorator extends ColumnDecorator implements Tag {
                  Double.isNaN(m.doubleValue()) ||
                  Double.isInfinite(m.doubleValue())) &&
                 dk != null) {
-                buf.append(RequestUtils.message(context, bundle,
-                                                l.toString(), dk));
+                buf.append(TagUtils.getInstance().message(context, bundle,
+                                                          l.toString(), dk));
             }
             else if (u.equals("ms")) {
                 // we don't care about scaling and such. we just want
