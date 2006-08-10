@@ -25,10 +25,13 @@
 
 package org.hyperic.hq.ui.taglib.display;
 
-import javax.servlet.http.HttpServletRequest;
+import java.util.Locale;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.jstl.fmt.LocaleSupport;
+
+import org.apache.struts.taglib.TagUtils;
+import org.apache.struts.util.RequestUtils;
 
 /**
  * Extends column for internationalization of title.
@@ -80,8 +83,16 @@ public class LocalizedColumnTag extends ColumnTag
     /** internationalize the title */
     public String getTitle() {
         if (isLocalizedTitle) {
-            return LocaleSupport.getLocalizedMessage(pageContext,
-                super.getTitle());
+            Locale userLocale =
+                RequestUtils.getUserLocale(
+                    (HttpServletRequest) pageContext.getRequest(), null);
+            try {
+                return TagUtils.getInstance().message(pageContext, null,
+                                                      userLocale.toString(),
+                                                      super.getTitle());
+            } catch (JspException e) {
+                // Do not localize then
+            }
         }
         return super.getTitle();
     }
