@@ -153,6 +153,10 @@ public class WeblogicFinder {
             }
         });
 
+        if (dirs == null) {
+            return new File[0];
+        }
+
         return dirs;
     }
 

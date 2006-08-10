@@ -302,6 +302,10 @@ public class WeblogicDetector
         if (!dir.exists()) {
             return;
         }
+        if (!dir.canRead()) {
+            log.debug(getName() + " cannot read directory:" + dir);
+            return;
+        }
 
         log.debug(getName() + " checking path=" + dir);
 
