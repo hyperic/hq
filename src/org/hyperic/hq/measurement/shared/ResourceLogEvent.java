@@ -105,7 +105,7 @@ public class ResourceLogEvent extends AbstractEvent
     }
     
     public String toString() {
-        return this.getMessage();
+        return this.logSrc + ": " + this.getMessage();
     }
     
     public static final String getLevelString(int level) {
