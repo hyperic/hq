@@ -95,6 +95,12 @@ public class WeblogicAuth
         String password =
             props.getProperty(WeblogicMetric.PROP_ADMIN_PASSWORD, "");
 
+        return getInstance(url, username, password);
+    }
+
+    public static WeblogicAuth getInstance(String url,
+                                           String username,
+                                           String password) {
         int hash = 0;
         hash ^= url.hashCode();
         hash ^= username.hashCode();
