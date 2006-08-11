@@ -130,7 +130,7 @@ public class ServerQuery
     public String getListenPort() {
         if (isAdminPortEnabled()) {
             String oPort = getAttribute(ATTR_ADMIN_OVERRIDE_PORT);
-            if ("0".equals(oPort)) {
+            if ("0".equals(oPort) || (oPort == null)) {
                 //no override port configured.
                 return getAttribute(ATTR_ADMIN_PORT);
             }
