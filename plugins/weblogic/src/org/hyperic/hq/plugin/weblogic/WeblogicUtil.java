@@ -276,7 +276,8 @@ public class WeblogicUtil {
             final String doc =
                 "http://e-docs.bea.com/wls/docs70/secmanage/domain.html#1171534";
             String msg =
-                "SecurityException getting MBeanServer: " +
+                "SecurityException getting MBeanServer (jaas=" + 
+                WeblogicProductPlugin.useJAAS() + "): " +
                 e.getMessage() + "\n" +
                 "Likely cause: domain credential mismatch\n" +
                 "See: " + doc;
