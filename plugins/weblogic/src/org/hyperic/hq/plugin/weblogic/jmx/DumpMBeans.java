@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.plugin.weblogic.jmx;
 
+import java.security.PrivilegedAction;
 import java.util.Iterator;
 
 import javax.management.MBeanAttributeInfo;
@@ -34,11 +35,14 @@ import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.naming.Context;
 
+import org.hyperic.hq.plugin.weblogic.WeblogicAuth;
+
 import weblogic.jndi.Environment;
 import weblogic.management.MBeanHome;
 import weblogic.management.RemoteMBeanServer;
 
-public class DumpMBeans {
+public class DumpMBeans implements PrivilegedAction {
+    private String url, username, password;
 
     public static void main(String[] args) throws Exception {
 
@@ -52,10 +56,28 @@ public class DumpMBeans {
             args = new String[]{"t3://localhost:7001", "weblogic", "weblogic"};
         }
 
-        String url      = args[0];
-        String username = args[1];
-        String password = args[2];
+        DumpMBeans dumper = new DumpMBeans();
+        dumper.url      = args[0];
+        dumper.username = args[1];
+        dumper.password = args[2];
 
+        WeblogicAuth auth =
+            WeblogicAuth.getInstance(dumper.url,
+                                     dumper.username,
+                                     dumper.password);
+        auth.runAs(dumper);
+    }
+    
+    public Object run() {
+        try {
+            dump();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private void dump() throws Exception {
         Environment env = new Environment();
 
         env.setProviderUrl(url);
