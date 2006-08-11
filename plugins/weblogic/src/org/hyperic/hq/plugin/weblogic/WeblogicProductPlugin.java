@@ -93,8 +93,24 @@ public class WeblogicProductPlugin extends ProductPlugin {
         final String loginConfig =
             "java.security.auth.login.config";
 
+        if (System.getProperty(loginConfig) == null) { //cmdline PluginDumper
+            String pdk = System.getProperty("pdk.dir");
+            String config;
+            String configFile = "jaas.config";
+            if (pdk != null) {
+                config = pdk + "/../" + configFile;
+            }
+            else {
+                config = configFile;
+            }
+            if (new File(config).exists()) {
+                log.debug("-D" + loginConfig + "=" + config);
+                System.setProperty(loginConfig, config);
+            }
+        }
+
         if ("jndi".equals(auth) ||
-            System.getProperty(loginConfig) == null) //cmdline PluginDumper
+            System.getProperty(loginConfig) == null)
         {
             useJAAS = false;
         }
