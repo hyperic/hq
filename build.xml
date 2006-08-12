@@ -1162,7 +1162,7 @@
       <fileset dir="${sigar.lib}" includes="**"/>
       <fileset dir="${thirdparty.lib}">
         <include name="oracle_jdbc/ojdbc14.jar"/>
-        <include name="postgresql/postgresql-8.0-312.jdbc3.jar"/>
+        <include name="postgresql/postgresql-8.0-317.jdbc3.jar"/>
         <include name="mysql_jdbc/mysql-connector-java-3.0.12-*.jar"/>
         <include name="jakarta-oro*.jar" />
         <include name="ant-contrib.jar" />
