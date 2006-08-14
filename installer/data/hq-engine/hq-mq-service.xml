@@ -15,7 +15,7 @@
      name="jboss.messaging.destination:service=Topic,name=eventsTopic"
      xmbean-dd="xmdesc/Topic-xmbean.xml">
     <depends optional-attribute-name="ServerPeer">jboss.messaging:service=ServerPeer</depends>
-    <attribute name="FullSize">500000</attribute>
+    <attribute name="FullSize">50000</attribute>
   </mbean>
 
   <mbean code="org.jboss.jms.server.destination.Queue"
