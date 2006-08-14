@@ -73,3 +73,7 @@ License: http://www.gnu.org/licenses/lgpl.txt
 - PrintfFormat.java -
 Information: http://java.sun.com/developer/technicalArticles/Programming/sprintf/PrintfFormat.java
 License: within src/org/hyperic/util/PrintfFormat.java 
+
+- JBoss Messaging -
+Information: http://labs.jboss.com/portal/jbossmessaging/
+License: http://www.jboss.org/company/opensouce_aboutlgpl
