@@ -77,7 +77,7 @@
     <fileset dir="${thirdparty.lib}" includes="*.zip" />      
     <fileset dir="${thirdparty.lib}/oracle_jdbc" includes="*.jar" />
     <fileset dir="${thirdparty.lib}/postgresql"
-             includes="postgresql-8.0-317.jdbc3.jar"/>
+             includes="postgresql-8.0-*.jdbc3.jar"/>
     <fileset dir="${thirdparty.lib}/mysql_jdbc" includes="mysql*.jar"/>
     <fileset dir="${thirdparty.lib}/mx4j" includes="*.jar" />
     <fileset dir="${xdoclet.lib}" includes="*.jar" />
@@ -1162,7 +1162,7 @@
       <fileset dir="${sigar.lib}" includes="**"/>
       <fileset dir="${thirdparty.lib}">
         <include name="oracle_jdbc/ojdbc14.jar"/>
-        <include name="postgresql/postgresql-8.0-317.jdbc3.jar"/>
+        <include name="postgresql/postgresql-8.0-*.jdbc3.jar"/>
         <include name="mysql_jdbc/mysql-connector-java-3.0.12-*.jar"/>
         <include name="jakarta-oro*.jar" />
         <include name="ant-contrib.jar" />
