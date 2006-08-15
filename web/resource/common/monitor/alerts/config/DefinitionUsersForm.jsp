@@ -54,8 +54,14 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 <c:url var="selfPnaAction" value="/alerts/Config.do">
   <c:param name="mode" value="addUsers"/>
   <c:param name="ad" value="${alertDef.id}"/>
-  <c:param name="eid" value="${eid}"/>
-  <c:param name="aetid" value="${aetid}"/>
+  <c:choose>
+    <c:when test="${not empty aetid}">
+      <c:param name="aetid" value="${aetid}"/>
+    </c:when>
+    <c:otherwise>
+      <c:param name="eid" value="${eid}"/>
+    </c:otherwise>
+  </c:choose>
   <c:if test="${not empty param.psa}">
     <c:param name="psa" value="${param.psa}"/>
   </c:if>
@@ -82,8 +88,14 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 <c:url var="selfPnpAction" value="/alerts/Config.do">
   <c:param name="mode" value="addUsers"/>
   <c:param name="ad" value="${alertDef.id}"/>
-  <c:param name="eid" value="${eid}"/>
-  <c:param name="aetid" value="${aetid}"/>
+  <c:choose>
+    <c:when test="${not empty aetid}">
+      <c:param name="aetid" value="${aetid}"/>
+    </c:when>
+    <c:otherwise>
+      <c:param name="eid" value="${eid}"/>
+    </c:otherwise>
+  </c:choose>
   <c:if test="${not empty param.psa}">
     <c:param name="psa" value="${param.psa}"/>
   </c:if>
@@ -110,8 +122,14 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 <c:url var="selfPsaAction" value="/alerts/Config.do">
   <c:param name="mode" value="addUsers"/>
   <c:param name="ad" value="${alertDef.id}"/>
-  <c:param name="eid" value="${eid}"/>
-  <c:param name="aetid" value="${aetid}"/>
+  <c:choose>
+    <c:when test="${not empty aetid}">
+      <c:param name="aetid" value="${aetid}"/>
+    </c:when>
+    <c:otherwise>
+      <c:param name="eid" value="${eid}"/>
+    </c:otherwise>
+  </c:choose>
   <c:if test="${not empty param.pna}">
     <c:param name="pna" value="${param.pna}"/>
   </c:if>
@@ -138,8 +156,14 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 <c:url var="selfPspAction" value="/alerts/Config.do">
   <c:param name="mode" value="addUsers"/>
   <c:param name="ad" value="${alertDef.id}"/>
-  <c:param name="eid" value="${eid}"/>
-  <c:param name="aetid" value="${aetid}"/>
+  <c:choose>
+    <c:when test="${not empty aetid}">
+      <c:param name="aetid" value="${aetid}"/>
+    </c:when>
+    <c:otherwise>
+      <c:param name="eid" value="${eid}"/>
+    </c:otherwise>
+  </c:choose>
   <c:if test="${not empty param.pna}">
     <c:param name="pna" value="${param.pna}"/>
   </c:if>
@@ -166,8 +190,14 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 <c:url var="selfPaAction" value="/alerts/Config.do">
   <c:param name="mode" value="addUsers"/>
   <c:param name="ad" value="${alertDef.id}"/>
-  <c:param name="eid" value="${eid}"/>
-  <c:param name="aetid" value="${aetid}"/>
+  <c:choose>
+    <c:when test="${not empty aetid}">
+      <c:param name="aetid" value="${aetid}"/>
+    </c:when>
+    <c:otherwise>
+      <c:param name="eid" value="${eid}"/>
+    </c:otherwise>
+  </c:choose>
   <c:if test="${not empty param.pna}">
     <c:param name="pna" value="${param.pna}"/>
   </c:if>
@@ -191,8 +221,14 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 <c:url var="selfPpAction" value="/alerts/Config.do">
   <c:param name="mode" value="addUsers"/>
   <c:param name="ad" value="${alertDef.id}"/>
-  <c:param name="eid" value="${eid}"/>
-  <c:param name="aetid" value="${aetid}"/>
+  <c:choose>
+    <c:when test="${not empty aetid}">
+      <c:param name="aetid" value="${aetid}"/>
+    </c:when>
+    <c:otherwise>
+      <c:param name="eid" value="${eid}"/>
+    </c:otherwise>
+  </c:choose>
   <c:if test="${not empty param.pna}">
     <c:param name="pna" value="${param.pna}"/>
   </c:if>
