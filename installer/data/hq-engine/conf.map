@@ -7,7 +7,7 @@ conf=${ENGINE}/server/default/conf
 # File mappings
 hq-ds.xml=${deploy}/
 server.xml=${deploy}/jbossweb-tomcat55.sar/
-jaws.xml=${deploy}/hq.ear/hq-entity.jar/${META}
+jaws.xml=${deploy}/hq.ear/hq-entity.jar/META-INF/
 jbosscmp-jdbc.xml=${deploy}/hq.ear/hq-entity.jar/META-INF/
 ha-service.xml=${deploy}/hq.ear/ha-mbeans.sar/${META}
 jboss-service-events.xml=${deploy}/hq.ear/events-mbeans.sar/${META}
