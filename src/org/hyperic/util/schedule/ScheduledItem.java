@@ -57,7 +57,6 @@ public class ScheduledItem {
      */
     public static long getScheduledTimePrev(long interval){
         long currentTime = System.currentTimeMillis();
-        interval = Math.max(interval, 1);       // Prevent / by zero error
         return currentTime - (currentTime % interval);
     }
     
@@ -73,7 +72,6 @@ public class ScheduledItem {
      */
     public static long getScheduledTime(long interval){
         long currentTime = System.currentTimeMillis();
-        interval = Math.max(interval, 1);       // Prevent / by zero error
         return currentTime + interval - (currentTime % interval);
     }
 
