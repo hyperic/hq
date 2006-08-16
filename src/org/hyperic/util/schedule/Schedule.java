@@ -123,14 +123,7 @@ public class Schedule {
     public synchronized long scheduleItem(Object item, long interval, 
                                           boolean repeat)
     {
-        long itemId;
-        ScheduledItem newItem;
-
-        itemId      = this.consumeNextGlobalID();
-        newItem     = new ScheduledItem(item, interval, repeat,
-                                        itemId);
-        this.insertScheduledItem(newItem);
-        return itemId;
+        return this.scheduleItem(item, interval, false, repeat);
     }
 
     /**
