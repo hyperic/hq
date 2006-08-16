@@ -747,9 +747,6 @@
     <!-- just an example.  Win32ControlPlugin overrides this -->
     <actions include="start,stop,restart"/>
 
-    <property name="mssql.regkey"
-              value="SOFTWARE\Microsoft\Microsoft SQL Server"/>
-
     <property name="mssql.version" value="8"/>
 
     <metrics>

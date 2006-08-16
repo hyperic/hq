@@ -59,11 +59,139 @@ public class MsSQLDetector
     static final String DEFAULT_SERVICE_NAME =
         DEFAULT_NAME + "SERVER";
 
+    private static final String MSSQL_DEFAULT_NAME = "MSSQLServer"; 
+    private static final String MSKEY = "SOFTWARE\\Microsoft\\";
+    private static final String MSSQL_DEFAULT = 
+        MSKEY + MSSQL_DEFAULT_NAME;
+
+    private static final String MSSQL_INSTANCE =
+        MSKEY + "Microsoft SQL Server";
+
     public List getServerResources(ConfigResponse platformConfig)
         throws PluginException {
 
-        String rootName      = getTypeProperty("mssql.regkey");
-        String wantedVersion = getTypeProperty("mssql.version") + ".";
+        String wantedVersion =
+            getTypeProperty("mssql.version") + ".";
+        ArrayList servers = new ArrayList();
+        List found =
+            getServerResources(platformConfig,
+                               MSSQL_INSTANCE,
+                               wantedVersion);
+        if (found != null) {
+            servers.addAll(found);
+        }
+        RegistryKey root;
+
+        try {
+            root = RegistryKey.LocalMachine.openSubKey(MSSQL_DEFAULT);
+            ServerResource server =
+                detectServer(root, MSSQL_DEFAULT_NAME, wantedVersion);
+            if (server != null) {
+                servers.add(server);
+            }
+            root.close();
+        } catch (Win32Exception e) {
+            log.debug(MSSQL_DEFAULT + " regkey does not exist");
+        }
+
+        return servers;
+    }
+
+    private ServerResource detectServer(RegistryKey key,
+                                        String name,
+                                        String wantedVersion) {
+        RegistryKey setup;
+        File dir;
+
+        try {
+            setup = key.openSubKey("Setup");            
+        } catch (Win32Exception e) {
+            return null;
+        }
+
+        try {
+            dir = new File(setup.getStringValue("SQLPath"));
+        } catch (Win32Exception e) {
+            setup.close();
+            return null;
+        }
+
+        setup.close();
+
+        log.debug("checking path=" + dir);
+
+        boolean isDefault = false;
+        
+        //the default install
+        if (name.equals(DEFAULT_NAME) ||
+            name.equals(MSSQL_DEFAULT_NAME))
+        {
+            name = DEFAULT_SERVICE_NAME;
+            dir = dir.getParentFile();
+            isDefault = true;
+        }
+        else {
+            //non-default install (multiple instances)
+            name = DEFAULT_NAME + "$" + name;
+        }
+
+        RegistryKey versionKey;
+        String productVersion;
+
+        try {
+            versionKey =
+                key.openSubKey("MSSQLServer\\CurrentVersion");            
+        } catch (Win32Exception e) {
+            return null;
+        }
+
+        try {
+            productVersion =
+                versionKey.getStringValue("CurrentVersion").trim();
+        } catch (Win32Exception e) {
+            versionKey.close();
+            return null;
+        }
+
+        versionKey.close();
+
+        if (!productVersion.startsWith(wantedVersion)) {
+            return null;
+        }
+
+        ServerResource server =
+            createServerResource(dir.getAbsolutePath());
+
+        if (!isDefault) {
+            String instance;
+            if (name.startsWith("MSSQL$")) {
+                instance = name.substring(6);
+            }
+            else {
+                instance = name;
+            }
+            server.setName(server.getName() + " " + instance);
+        }
+
+        ConfigResponse config = new ConfigResponse();
+        config.setValue(Win32ControlPlugin.PROP_SERVICENAME, name);
+        server.setProductConfig(config);
+        server.setMeasurementConfig();
+        server.setControlConfig();
+
+        ConfigResponse cprops = new ConfigResponse();
+        cprops.setValue("version", productVersion);
+        server.setCustomProperties(cprops);
+
+        return server;
+    }
+
+    private List getServerResources(ConfigResponse platformConfig,
+                                    String rootName,
+                                    String wantedVersion)
+        throws PluginException {
+
+
         RegistryKey root;
 
         try {
@@ -77,78 +205,27 @@ public class MsSQLDetector
         ArrayList servers = new ArrayList();
 
         if (log.isDebugEnabled()) {
-            log.debug("Scanning keys=" + Arrays.asList(keys));
+            log.debug("Scanning keys=" + rootName + "\\" +
+                      Arrays.asList(keys));
         }
         
         for (int i=0; i<keys.length; i++) {
             String name = keys[i];
             RegistryKey key;
-            RegistryKey setup;
-            File dir;
 
             try {
                 key = root.openSubKey(name);
-                setup = key.openSubKey("Setup");
-                dir = new File(setup.getStringValue("SQLPath"));
             } catch (Win32Exception e) {
-                continue;
-            }
-
-            log.debug("checking path=" + dir);
-
-            boolean isDefault = false;
-
-            //the default install
-            if (name.equals(DEFAULT_NAME)) {
-                name = DEFAULT_SERVICE_NAME;
-                dir = dir.getParentFile();
-                isDefault = true;
-            }
-            else {
-                //non-default install (multiple instances)
-                name = DEFAULT_NAME + "$" + name;
-            }
-
-            RegistryKey versionKey;
-            String productVersion;
-
-            try {
-                versionKey =
-                    key.openSubKey("MSSQLServer\\CurrentVersion");
-                productVersion = versionKey.getStringValue("CurrentVersion").trim();
-            } catch (Win32Exception e) {
-                continue;
-            }
-
-            if (!productVersion.startsWith(wantedVersion)) {
                 continue;
             }
 
             ServerResource server =
-                createServerResource(dir.getAbsolutePath());
-
-            if (!isDefault) {
-                String instance;
-                if (name.startsWith("MSSQL$")) {
-                    instance = name.substring(6);
-                }
-                else {
-                    instance = name;
-                }
-                server.setName(server.getName() + " " + instance);
+                detectServer(key, name, wantedVersion);
+            if (server != null) {
+                servers.add(server);
             }
 
-            ConfigResponse config = new ConfigResponse();
-            config.setValue(Win32ControlPlugin.PROP_SERVICENAME, name);
-            server.setProductConfig(config);
-            server.setMeasurementConfig();
-            server.setControlConfig();
-
-            ConfigResponse cprops = new ConfigResponse();
-            cprops.setValue("version", productVersion);
-            server.setCustomProperties(cprops);
-
-            servers.add(server);
+            key.close();
         }
 
         return servers;

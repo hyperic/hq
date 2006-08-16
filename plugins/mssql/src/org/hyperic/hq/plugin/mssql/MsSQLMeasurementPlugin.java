@@ -48,7 +48,7 @@ public class MsSQLMeasurementPlugin
             props.getProperty(Win32ControlPlugin.PROP_SERVICENAME,
                               MsSQLDetector.DEFAULT_SERVICE_NAME);
 
-        if (serviceName.equals(MsSQLDetector.DEFAULT_SERVICE_NAME)) {
+        if (serviceName.equalsIgnoreCase(MsSQLDetector.DEFAULT_SERVICE_NAME)) {
             // not sure why they drop the 'MS' from the service name
             // in the default case.
             serviceName = "SQLServer";
