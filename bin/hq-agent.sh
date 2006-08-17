@@ -34,6 +34,8 @@ else
     esac
 fi
 
+chmod +x ./pdk/scripts/*
+
 HQ_JAVA="${HQ_JAVA_HOME}/bin/java"
 
 JDK13_LIBS="${AGENT_LIB}/jdk1.3-compat"
