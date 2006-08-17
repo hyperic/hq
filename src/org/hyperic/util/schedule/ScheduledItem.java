@@ -32,10 +32,6 @@ public class ScheduledItem {
     private boolean repeat;   // Should this event be repeated?
     private long    id;       // Global schedule ID
     
-    ScheduledItem(Object obj, long interval, boolean repeat, long id) {
-        this(obj, interval, false, repeat, id);
-    }
-
     ScheduledItem(Object obj, long interval, boolean prev,
                   boolean repeat, long id) {
         this.obj      = obj;
