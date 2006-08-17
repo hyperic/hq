@@ -23,29 +23,38 @@
 
 /*-- START diagram.js --*/
 
+var shown = false;
+var diagramDiv;
+
 function toggleDiagram(eId) {
-  var thisDiv = document.getElementById(eId);
+  var thisDiv = $(eId);
   
-  if ( thisDiv.style.visibility == "hidden") {
-    showDiagram(eId);
+  if ( shown ) {
+    hideDiagram(thisDiv);
   } else {
-    hideDiagram(eId);
+    showDiagram(thisDiv);
   }
 }
 
-function hideDiagram(eId) {
-  var thisDiv = document.getElementById(eId);
-  
-  thisDiv.style.visibility = "hidden";  
+function hideDiagram(thisDiv) {
+  new Effect.SlideUp(thisDiv);
   showFormElements();
   
+  shown = false;
 }
 
-function showDiagram(eId) {
-  var thisDiv = document.getElementById(eId);
-
-  thisDiv.style.visibility = "visible";
+function showDiagram(thisDiv) {
+  new Effect.SlideDown(thisDiv);
   hideFormElements();
+
+  shown = true;
+
+  diagramDiv = thisDiv;
+  setTimeout("makeDiagramVisible()", 500);
+}
+
+function makeDiagramVisible(eId) {
+  diagramDiv.style.visibility = "visible";
 }
 
 // We register this body.onclick handler within this javascript file

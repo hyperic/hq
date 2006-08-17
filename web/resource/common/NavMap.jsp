@@ -34,6 +34,7 @@
 <hq:navMapSupported var="navMapSupported"/>
 <c:if test="${navMapSupported}">
 
+<script src="<html:rewrite page="/js/"/>effects.js" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/"/>diagram.js" type="text/javascript"></script>
 
 
@@ -74,7 +75,8 @@
     <td class="PageTitleSmallText" colspan="2">
       <br>
       <html:link href="#" onclick="toggleDiagram('diagramDiv'); return false;"><html:img imageName="navMapIcon" border="0" alt="" page="/images/icon_navmap.png"/></html:link>
-      <div id="diagramDiv" style="visibility: hidden;"><html:img imageName="navMapImage" page="/resource/NavMapImage?treeVar=${treeVar}&imageWidth=${imageWidth}" alt="" border="0" usemap="#diagram" />
+      <div id="diagramDiv"><html:img imageName="navMapImage" page="/resource/NavMapImage?treeVar=${treeVar}&imageWidth=${imageWidth}" alt="" border="0" usemap="#diagram" />
+      </div>
     </td>
     <td class="PageTitleSmallText">&nbsp;</td>
   </tr>
@@ -85,3 +87,4 @@
 </table>
 
 </c:if>
+
