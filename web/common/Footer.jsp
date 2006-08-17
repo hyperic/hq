@@ -28,7 +28,8 @@
  --%>
 
 
-<script src="<html:rewrite page="/js/"/>footer.js" type="text/javascript"></script>
+<script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
+<script src="<html:rewrite page="/js/footer.js"/>" type="text/javascript"></script>
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr> 
@@ -61,7 +62,53 @@
   </tr>
 </table>
 
+<div id="about" class="dialog" style="filter: alpha(opacity=0);opacity: 0;visibility: hidden;">
+<table cellpadding="2" cellspacing="0" border="0" width="305">
+  <tr>
+    <td rowspan="6"><html:img page="/images/spacer.gif" width="15" height="215" border="0"/></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td rowspan="6" valign="top"><html:img page="/images/dash-icon_delete.gif" onclick="closeAbout()"/></td>
+  </tr>
+  <tr>
+    <td width="1%" class="PageTitle"><html:img page="/images/spacer.gif" width="1" height="32" alt="" border="0"/></td>
+    <td width="66%" class="PageTitle"><fmt:message key="about.Title"/></td>
+    <td class="PageTitle" align="right"><html:link href="" onclick="window.open(help + 'About+Hyperic+HQ','help','width=800,height=650,scrollbars=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/title_pagehelp.gif" width="20" height="20" alt="" border="0" hspace="10"/></html:link></td>
+  </tr>
+  <tr>
+    <td class="DisplayLabel" rowspan="3">&nbsp;</td>
+    <td valign="top" class="DisplaySubhead" colspan="2"><html:img page="/images/spacer.gif" width="1" height="5" border="0"/><br>
+    <fmt:message key="footer.version"/>
+    <c:out value="${HQVersion}"/><br>&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="DisplayContent" colspan="2"><span class="DisplayLabel"><fmt:message key="footer.Copyright"/></span><fmt:message key="about.Copyright.Content"/><br>
+    <br>&nbsp;<br></td>
+  </tr>
+  <tr>
+    <td valign="top" class="DisplayContent" colspan="2"><fmt:message key="about.MoreInfo.Label"/><br>
+    <html:link href="http://support.hyperic.com" onclick="window.open('http://support.hyperic.com');"><fmt:message key="about.MoreInfo.LinkSupport"/></html:link><br>
+    <html:link href="http://forums.hyperic.org"  onclick="window.open('http://forums.hyperic.org');"><fmt:message key="about.MoreInfo.LinkForums"/></html:link><br>
+    &nbsp;</td>
+  </tr>
+  <tr>
+    <td colspan="3">&nbsp;</td>
+  </td>
+</table>
+</div>
+
 <script language="JavaScript" type="text/javascript">
   setFoot();
+
+  function hideAbout() {
+    var about = $('about');
+    Rico.Corner.round(about, {corners:"tl,br",compact:true});
+    new Effect.Fade(about, {duration: 0});
+    about.style.visibility = "visible";
+  }
+
+  onloads.push( hideAbout );
+
 </script>
 

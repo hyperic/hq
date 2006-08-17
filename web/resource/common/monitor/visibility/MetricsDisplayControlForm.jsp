@@ -392,10 +392,7 @@
   </div>
 </div>
 <!--  /  -->
-<script src="/web/js/effects.js" type="text/javascript"></script>
 <script type="text/javascript">
-  onloads.push( hideAdvanced );
-
   function hideAdvanced() {
     var advancedDiv = $('advancedDisplay');
     new Rico.Effect.Position( 'advancedDisplay',
@@ -405,8 +402,8 @@
                                1, // 1 steps
                                {}
                              );
-    Rico.Corner.round('advancedDisplay', {corners:"tl,br",compact:true});
-    new Effect.Fade('advancedDisplay', {duration: 0});
+    Rico.Corner.round(advancedDiv , {corners:"tl,br",compact:true});
+    new Effect.Fade(advancedDiv, {duration: 0});
   }
 
   function showAdvanced() {
@@ -425,4 +422,7 @@
         $('simpleRu').disabled = false;
     new Effect.Fade('advancedDisplay');
   }
+
+  onloads.push( hideAdvanced );
+
 </script>
