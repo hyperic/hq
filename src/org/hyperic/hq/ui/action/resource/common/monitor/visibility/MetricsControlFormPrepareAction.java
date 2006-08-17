@@ -110,6 +110,14 @@ public class MetricsControlFormPrepareAction extends TilesAction {
         form.populateStartDate(new Date(begin.longValue()),
                                request.getLocale());
         form.populateEndDate(new Date(end.longValue()), request.getLocale());
+        
+        Boolean readOnly = (Boolean) pref.get(MonitorUtils.RO);
+        if (readOnly.booleanValue()) {
+            form.setA(MetricDisplayRangeForm.ACTION_DATE_RANGE);
+        }
+        else {
+            form.setA(MetricDisplayRangeForm.ACTION_LASTN);
+        }
     }
 
     protected void prepareForm(HttpServletRequest request,
