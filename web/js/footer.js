@@ -46,10 +46,11 @@ function setFoot() {
   }
 }
 
-function about() {
+function hideAbout() {
     var about = $('about');
-    var x = (document.body.clientWidth - about.offsetWidth) / 2;
-    var y = (document.body.clientHeight - about.offsetHeight) / 2;
+    var anchor = $('aboutAnchor');
+    var x = anchor.offsetLeft;
+    var y = anchor.offsetTop - about.offsetHeight + anchor.offsetHeight;
     new Rico.Effect.Position( about,
                               x,
                               y,
@@ -57,6 +58,13 @@ function about() {
                               1, // 1 steps
                               {}
                              );
+    Rico.Corner.round(about, {corners:"tl"});
+    new Effect.Fade(about, {duration: 0});
+    about.style.visibility = "visible";
+}
+
+function about() {
+    var about = $('about');
     new Effect.Appear( about, {to: 0.85} );
 }
 

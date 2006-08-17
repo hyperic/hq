@@ -49,9 +49,10 @@
           </td>
           <td class="FooterRegular" width="30">&nbsp;</td>
           <td class="FooterRegular" nowrap>
+          <div id="aboutAnchor" style="position:relative;">
           <a href="javascript:about('<html:rewrite page="/common/"/>')"><fmt:message key="footer.HQ"/>
           <fmt:message key="footer.version"/> <c:out value="${HQVersion}"/></a> <c:out value="${HQBuild}"/></td>
-          <td class="FooterRegular" width="30">&nbsp;</td>
+          <td class="FooterRegular" width="30"></div></td>
           <td class="FooterSmall" nowrap><fmt:message key="footer.pageVersionPrefix"/><c:out value="${camTitle}"/><fmt:message key="footer.pageVersionSuffix"/>
           <td class="FooterRegular" width="100%" align="right"><fmt:message key="footer.Copyright"/></td>
           <td class="FooterBold" nowrap><a href="http://www.hyperic.com" target="_blank">www.hyperic.com</a></td>
@@ -62,7 +63,7 @@
   </tr>
 </table>
 
-<div id="about" class="dialog" style="filter: alpha(opacity=0);opacity: 0;visibility: hidden;">
+<div id="about" class="dialog" style="filter: alpha(opacity=0);opacity: 0;visibility: hidden;width=310px">
 <table cellpadding="2" cellspacing="0" border="0" width="305">
   <tr>
     <td rowspan="6"><html:img page="/images/spacer.gif" width="15" height="215" border="0"/></td>
@@ -100,13 +101,6 @@
 
 <script language="JavaScript" type="text/javascript">
   setFoot();
-
-  function hideAbout() {
-    var about = $('about');
-    Rico.Corner.round(about, {corners:"tl,br",compact:true});
-    new Effect.Fade(about, {duration: 0});
-    about.style.visibility = "visible";
-  }
 
   onloads.push( hideAbout );
 

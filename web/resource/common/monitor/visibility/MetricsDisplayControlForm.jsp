@@ -378,7 +378,7 @@
     <td class="SmokeyContent"><span class="CaptionText"><fmt:message key="resource.common.monitor.visibility.TheseSettings"/></span>
     <html:image property="advanced" page="/images/fb_redraw.gif" border="0" onmouseover="imageSwap(this, imagePath + 'fb_redraw', '_over');" onmouseout="imageSwap(this, imagePath +  'fb_redraw', '');" onmousedown="imageSwap(this, imagePath +  'fb_redraw', '_down')"/></td>
   <script language="javascript">
-      if (/MSIE/.test(navigator.userAgent)) {
+      if (isIE) {
         document.write('<tr><td colspan="2" height="18">&nbsp;</td></tr>');
       }
   </script>
@@ -402,7 +402,7 @@
                                1, // 1 steps
                                {}
                              );
-    Rico.Corner.round(advancedDiv , {corners:"tl,br",compact:true});
+    Rico.Corner.round(advancedDiv , {corners:"tl"});
     new Effect.Fade(advancedDiv, {duration: 0});
   }
 
