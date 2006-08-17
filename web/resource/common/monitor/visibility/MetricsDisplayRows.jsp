@@ -229,8 +229,7 @@
     </c:choose>
   </c:url>
   <c:url var="chartLink" value="/resource/common/monitor/Visibility.do">
-    <c:param name="type" value="${Resource.entityId.type}"/>
-    <c:param name="rid" value="${Resource.id}"/>
+    <c:param name="eid" value="${Resource.entityId}"/>
     <c:param name="m" value="${metricDisplaySummary.templateId}"/>
     <c:choose>
       <c:when test="${metricDisplaySummary.availUp > 1}">
