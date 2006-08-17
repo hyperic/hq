@@ -44,7 +44,11 @@ import org.hyperic.hq.measurement.shared.RawMeasurementValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.schedule.EmptyScheduleException;
 import org.hyperic.util.schedule.Schedule;
+import org.hyperic.util.schedule.ScheduleException;
 import org.hyperic.util.schedule.UnscheduledItemException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /** The abstract data class to be extended to be able to
  * communicate with specific agent types to schedule
@@ -53,6 +57,8 @@ import org.hyperic.util.schedule.UnscheduledItemException;
 public abstract class ScheduledMonitor
     implements MonitorInterface, java.io.Serializable {
     public static String QNAME = "queue/monitorAlarmQueue";
+
+    private Log log = LogFactory.getLog(ScheduledMonitor.class);
     
     // Static Messenger for convenience
     private static Messenger sender = new Messenger();
@@ -189,9 +195,20 @@ public abstract class ScheduledMonitor
                 // That's fine, no worries
             }
             
-            long sid =
-                getSchedule().scheduleItem(new ScheduledItem(dMetric,rMetrics),
-                                           dMetric.getInterval(), true);
+            long sid;
+            try {
+                sid =
+                    getSchedule().scheduleItem(new ScheduledItem(dMetric,
+                                                                 rMetrics),
+                                               dMetric.getInterval(), true);
+            } catch (ScheduleException e) {
+                //XXX: We continue through the schedule rather than bail with
+                //     an Exception.
+                log.error("Unable to schedule metric '" +
+                          dMetric.getTemplate() + "', skipping. Cause is " +
+                          e.getMessage(), e);
+                return;
+            }
 
             // See if we changed the schedule
             long after = 0;

@@ -51,6 +51,7 @@ import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.util.collection.IntHashMap;
 import org.hyperic.util.schedule.EmptyScheduleException;
 import org.hyperic.util.schedule.Schedule;
+import org.hyperic.util.schedule.ScheduleException;
 import org.hyperic.util.schedule.UnscheduledItemException;
 
 import org.apache.commons.logging.Log;
@@ -179,8 +180,17 @@ public class ScheduleThread
                 oldNextTime = 0;
             }
 
-            mID     = this.schedule.scheduleItem(meas, meas.getInterval(), 
+            try {
+                mID = this.schedule.scheduleItem(meas, meas.getInterval(), 
                                                  true, true);
+            } catch (ScheduleException e) {
+                //XXX: We continue through the schedule rather than bail with
+                //     an Exception.
+                log.error("Unable to schedule metric '" +
+                          logMetric(meas.getDSN()) + "', skipping. Cause is " +
+                          e.getMessage(), e);
+                return;
+            }
 
             mIDList = (Vector)this.entSchedule.get(meas.getEntity());
             if(mIDList == null){
