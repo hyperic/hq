@@ -74,7 +74,7 @@
   <tr valign="top"> 
     <td class="PageTitleSmallText" colspan="2">
       <br>
-      <html:link href="#" onclick="toggleDiagram('diagramDiv'); return false;"><html:img imageName="navMapIcon" border="0" alt="" page="/images/icon_navmap.png"/></html:link>
+      <html:link href="#" onclick="toggleDiagram('diagramDiv'); return false;"><html:img imageName="navMapIcon" border="0" alt="" page="/images/icon_navmap.png"/></html:link><br/>
       <div id="diagramDiv"><html:img imageName="navMapImage" page="/resource/NavMapImage?treeVar=${treeVar}&imageWidth=${imageWidth}" alt="" border="0" usemap="#diagram" />
       </div>
     </td>
