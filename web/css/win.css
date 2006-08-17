@@ -44,6 +44,9 @@ A.NotBold:hover {color: #003399; font-weight: normal; text-decoration: underline
 .BlockContentSmallText {background-color: #EBEDF2; padding: 3px; font-size: 11px; color: #000000;}
 .BlockBg {background-color: #EBEDF2;}
 
+.SmokeyLabel {padding: 3px; font-weight: bold; text-align: right;}
+.SmokeyContent {padding: 3px;}
+
 /* LIST */
 A.ListHeaderLink:link {color: #004680; text-decoration: none;}
 A.ListHeaderLink:visited {color: #004680; text-decoration: none;}
@@ -263,12 +266,10 @@ A.displaylink:hover {font-size: 11px; color: #003399; text-decoration: underline
 #diagramDiv {
 position: absolute;
 z-index: 100;
-visibility: hidden; 
-/* TURN THIS OFF B/C OF DROP-SHADOW
+visibility: hidden;
+/* TURN THIS OFF B/C OF DROP-SHADOW */
 filter: alpha(opacity=85);
--moz-opacity: 1; // should be 0.85 -- see http://bugzilla.mozilla.org/show_bug.cgi?id=201209
-*/
-
+opacity: 0.85;
 }
 
 /* These are the style specifications for the menu layers.  
@@ -468,7 +469,7 @@ div.overlay {
   border: 0px;
   z-index: 200;
   opacity: 0.3;
-  filter:alpha(opacity=30); -moz-opacity:0.3;
+  filter:alpha(opacity=30); opacity:0.3;
 }
 
 /* .99 opacity is for safari bug */
@@ -601,4 +602,10 @@ ul.boxy li {
     margin: 0px; 
 }
 
-
+.dialog {
+  position: absolute;
+  background: #cccccc;
+  filter: alpha(opacity=85);
+  opacity: 0.85;
+  z-index: 300;
+}
