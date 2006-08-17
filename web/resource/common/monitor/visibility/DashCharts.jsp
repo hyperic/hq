@@ -179,7 +179,7 @@
 </c:forEach>
 </ul>
 
-<div id="slowScreenSplash" align="center" class="ListHeader" style="position:absolute;z-index:5;top:15%;left:25%;background-color:#FFFFFF;padding:5px;border:solid;">
+<div id="slowScreenSplash" align="center" class="dialog" style="top:15%;left:25%;padding:5px;">
 <fmt:message key="resource.common.monitor.visibility.request.wait"/>
 </div>
 
