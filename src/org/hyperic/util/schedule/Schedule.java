@@ -92,15 +92,22 @@ public class Schedule {
      *        force immediate firing.
      * @param repeat true if the item should stay in the schedule even after
      *               its time has expired
+     * @throws UnscheduledItemException If the given schedule interval is <= 0
      *
      * @return a global identifier for the scheduled item
      */
 
     public synchronized long scheduleItem(Object item, long interval, 
                                           boolean prev, boolean repeat)
+        throws ScheduleException
     {
         long itemId;
         ScheduledItem newItem;
+        
+        if (interval <= 0) {
+            throw new ScheduleException("Invalid schedule interval given (" +
+                                        interval + ")");
+        }
 
         itemId      = this.consumeNextGlobalID();
         newItem     = new ScheduledItem(item, interval, prev,
@@ -122,6 +129,7 @@ public class Schedule {
 
     public synchronized long scheduleItem(Object item, long interval, 
                                           boolean repeat)
+        throws ScheduleException
     {
         return this.scheduleItem(item, interval, false, repeat);
     }
@@ -131,7 +139,9 @@ public class Schedule {
      * See the documentation for scheduleItem for more information.
      */
 
-    public long scheduleItem(Object item, long interval){
+    public long scheduleItem(Object item, long interval)
+        throws ScheduleException
+    {
         return this.scheduleItem(item, interval, true);
     }
 
