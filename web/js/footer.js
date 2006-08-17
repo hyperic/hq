@@ -46,7 +46,21 @@ function setFoot() {
   }
 }
 
-function about(path) {
-  window.open(path + "About.jsp","aboutPopup","width=305,height=215,resizable=no,scrollbars=no,left=600,top=50");
+function about() {
+    var about = $('about');
+    var x = (document.body.clientWidth - about.offsetWidth) / 2;
+    var y = (document.body.clientHeight - about.offsetHeight) / 2;
+    new Rico.Effect.Position( about,
+                              x,
+                              y,
+                              0,
+                              1, // 1 steps
+                              {}
+                             );
+    new Effect.Appear( about, {to: 0.85} );
+}
+
+function closeAbout() {
+    new Effect.Fade( 'about' );
 }
 /*-- END footer.js --*/
