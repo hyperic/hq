@@ -98,18 +98,11 @@
         <tr>
           <td class="MonitorChartBlock" colspan="3">
             <tiles:insert page="/resource/common/monitor/visibility/ChartTimeIntervalToolbar.jsp">
-            <tiles:put name="rangeNow" beanName="ViewChartForm" beanProperty="rangeNow"/>
-            <tiles:put name="begin" beanName="metricRange" beanProperty="begin"/>
-            <tiles:put name="end" beanName="metricRange" beanProperty="end"/>
-            </tiles:insert>
-            &nbsp;<br>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="3">
-            <tiles:insert definition=".resource.common.monitor.visibility.embeddedMetricDisplayRange">
               <tiles:put name="form" beanName="ViewChartForm"/>
               <tiles:put name="formName" value="ViewChartForm"/>
+              <tiles:put name="rangeNow" beanName="ViewChartForm" beanProperty="rangeNow"/>
+              <tiles:put name="begin" beanName="metricRange" beanProperty="begin"/>
+              <tiles:put name="end" beanName="metricRange" beanProperty="end"/>
             </tiles:insert>
           </td>
         </tr>

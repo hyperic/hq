@@ -29,6 +29,8 @@
  --%>
 
 
+<tiles:importAttribute name="form"/>
+<tiles:importAttribute name="formName"/>
 <tiles:importAttribute name="rangeNow"/>
 <tiles:importAttribute name="begin"/>
 <tiles:importAttribute name="end"/>
@@ -65,6 +67,43 @@
       <html:image property="${nextProperty}" page="/images/tbb_pageright.gif" border="0"/>
       </c:otherwise>
       </c:choose>
+  <div id="advancedDisplay" class="dialog" style="width:600px;filter: alpha(opacity=0);opacity: 0;">
+        <table cellpadding="2">
+          <tr>
+            <td width="100%">
+            <tiles:insert definition=".resource.common.monitor.visibility.embeddedMetricDisplayRange">
+              <tiles:put name="form" beanName="form"/>
+              <tiles:put name="formName" beanName="formName"/>
+            </tiles:insert>
+            <td align="right" valign="top">
+              <a href="javascript:cancelAdvanced()"><html:img page="/images/dash-icon_delete.gif" border="0"/></a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </div>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3" class="BlockContent" align="right">
+    <html:link href="javascript:showAdvanced()"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn"/></html:link>
     </td>
   </tr>
 </table>
+
+<script language="javascript">
+  function hideAdvanced() {
+    var advancedDiv = $('advancedDisplay');
+    new Rico.Effect.Position( 'advancedDisplay',
+                               advancedDisplay.offsetLeft - advancedDisplay.offsetWidth,
+                               null, // move across x axis
+                               0,
+                               1, // 1 steps
+                               {}
+                             );
+    Rico.Corner.round(advancedDiv , {corners:"tl"});
+    new Effect.Fade(advancedDiv, {duration: 0});
+  }
+
+  onloads.push( hideAdvanced );
+</script>

@@ -76,12 +76,12 @@
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr>
-    <td width="20%" class="BlockLabel"><fmt:message key="resource.common.monitor.visibility.DefineRangeLabel"/></td>
+    <td width="20%" class="SmokeyLabel"><fmt:message key="resource.common.monitor.visibility.DefineRangeLabel"/></td>
 <logic:messagesPresent property="rn">
     <td width="80%" class="ErrorField">
 </logic:messagesPresent>
 <logic:messagesNotPresent property="rn">
-    <td width="80%" class="BlockContent">
+    <td width="80%" class="SmokeyContent">
 </logic:messagesNotPresent>
       <html:radio property="a" value="1"/>
       <fmt:message key="monitoring.baseline.BlockContent.Last"/>&nbsp;&nbsp;
@@ -101,12 +101,12 @@
   </tr>
 
   <tr>
-    <td class="BlockLabel">&nbsp;</td>
+    <td class="SmokeyLabel">&nbsp;</td>
 <logic:messagesPresent property="endDate">
     <td width="80%" class="ErrorField">
 </logic:messagesPresent>
 <logic:messagesNotPresent property="endDate">
-    <td width="80%" class="BlockContent">
+    <td width="80%" class="SmokeyContent">
 </logic:messagesNotPresent>
       <html:radio property="a" value="2"/>
       <fmt:message key="monitoring.baseline.BlockContent.WithinRange"/>
@@ -252,18 +252,46 @@
 
     </td>
   </tr>
+  <tr>
+    <td class="SmokeyLabel">&nbsp;</td>
+    <td class="SmokeyContent"><span class="CaptionText"><fmt:message key="resource.common.monitor.visibility.TheseSettings"/></span></td>
+  </tr>
   <c:if test="${showRedraw}">
   <tr>
-      <td class="BlockLabel">&nbsp;</td>
-      <td class="BlockContent"><html:image property="redraw" page="/images/fb_redraw.gif" border="0" onmouseover="imageSwap(this, imagePath + 'fb_redraw', '_over');" onmouseout="imageSwap(this, imagePath +  'fb_redraw', '');" onmousedown="imageSwap(this, imagePath +  'fb_redraw', '_down')"/></td>
+      <td class="SmokeyLabel">&nbsp;</td>
+      <td class="SmokeyContent" align="center"><html:image property="redraw" page="/images/fb_redraw.gif" border="0" onmouseover="imageSwap(this, imagePath + 'fb_redraw', '_over');" onmouseout="imageSwap(this, imagePath +  'fb_redraw', '');" onmousedown="imageSwap(this, imagePath +  'fb_redraw', '_down')"/></td>
   </tr>
   </c:if>
-  <tr>
-    <td class="BlockLabel">&nbsp;</td>
-    <td class="BlockContent"><span class="CaptionText"><fmt:message key="resource.common.monitor.visibility.TheseSettings"/></span></td>
-  <tr>
-    <td colspan="2" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-  </tr>
 </table>
 
+<script language="javascript">
+  function hideAdvanced() {
+    var advancedDiv = $('advancedDisplay');
+    new Rico.Effect.Position( 'advancedDisplay',
+                               advancedDisplay.offsetLeft - advancedDisplay.offsetWidth,
+                               null, // move across x axis
+                               0,
+                               1, // 1 steps
+                               {}
+                             );
+    new Effect.Fade(advancedDiv, {duration: 0});
+  }
 
+  function showAdvanced() {
+    new Effect.Appear('advancedDisplay', {to: 0.85});
+    if ($('simpleRn'))
+        $('simpleRn').disabled = true;
+    if ($('simpleRu'))
+        $('simpleRu').disabled = true;
+    $('advancedDisplay').style.visibility = "visible";
+  }
+
+  function cancelAdvanced() {
+    if ($('simpleRn'))
+        $('simpleRn').disabled = false;
+    if ($('simpleRu'))
+        $('simpleRu').disabled = false;
+    new Effect.Puff('advancedDisplay');
+  }
+
+</script>
