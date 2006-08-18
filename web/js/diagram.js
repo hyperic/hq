@@ -74,7 +74,7 @@ function bodyClicked(e) {
     target = e.srcElement;
   }
 
-  if ( !target || ('navMapIcon' != target.name && 'navMapImage' != target.name) ) {
+  if ( shown && (!target || ('navMapIcon' != target.name && 'navMapImage' != target.name)) ) {
     hideDiagram('diagramDiv');
   }
 }
