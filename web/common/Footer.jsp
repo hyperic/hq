@@ -75,7 +75,7 @@
   <tr>
     <td width="1%" class="PageTitle"><html:img page="/images/spacer.gif" width="1" height="32" alt="" border="0"/></td>
     <td width="66%" class="PageTitle"><fmt:message key="about.Title"/></td>
-    <td class="PageTitle" align="right"><html:link href="" onclick="window.open(help + 'About+Hyperic+HQ','help','width=800,height=650,scrollbars=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/title_pagehelp.gif" width="20" height="20" alt="" border="0" hspace="10"/></html:link></td>
+    <td class="PageTitle" align="right"><html:link href="" onclick="window.open(genHelp + 'About+Hyperic+HQ','help','width=800,height=650,scrollbars=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/title_pagehelp.gif" width="20" height="20" alt="" border="0" hspace="10"/></html:link></td>
   </tr>
   <tr>
     <td class="DisplayLabel" rowspan="3">&nbsp;</td>
