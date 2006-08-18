@@ -345,17 +345,21 @@ public class OracleServerDetector
                 service.setMeasurementConfig(metricConfig);
 
                 ConfigResponse svcProps = new ConfigResponse();
-                
-                svcProps.setValue("block_size",
-                                  rs.getString("BLOCK_SIZE"));
+
+                // 9i and 10g only
+                if (!getTypeInfo().getVersion().equals(VERSION_8i)) {
+                    svcProps.setValue("block_size",
+                                      rs.getString("BLOCK_SIZE"));
+                    svcProps.setValue("allocation_type",
+                                      rs.getString("ALLOCATION_TYPE"));
+                    svcProps.setValue("space_management",
+                                      rs.getString("SEGMENT_SPACE_MANAGEMENT"));
+                }
+
                 svcProps.setValue("contents",
                                   rs.getString("CONTENTS"));
                 svcProps.setValue("logging",
                                   rs.getString("LOGGING"));
-                svcProps.setValue("allocation_type",
-                                  rs.getString("ALLOCATION_TYPE"));
-                svcProps.setValue("space_management",
-                                  rs.getString("SEGMENT_SPACE_MANAGEMENT"));
                 service.setCustomProperties(svcProps);
 
                 services.add(service);
