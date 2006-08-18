@@ -152,7 +152,13 @@ public class OracleServerDetector
                 }
             } else {
                 // No dgmgrl or trcess, assume Oracle 8i
-                version = VERSION_8i;
+                if (getTypeInfo().getVersion().
+                    equals(VERSION_8i)) {
+                    version = VERSION_8i;
+                } else {
+                    // 9i or 10g detector
+                    return servers;
+                }
             }
 
             servers.add(createServerResource(path));
