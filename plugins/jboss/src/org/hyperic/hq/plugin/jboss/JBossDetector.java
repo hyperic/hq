@@ -62,6 +62,10 @@ public class JBossDetector
 
     private static final String JBOSS_MAIN = "org.jboss.Main";
 
+    private static final String PROP_CP = "-Djava.class.path=";
+
+    private static final String PROP_AGENT = "-javaagent:";
+
     private static final String EMBEDDED_TOMCAT = "jbossweb-tomcat";
 
     //use .sw=java to find both "java" and "javaw"
@@ -77,6 +81,7 @@ public class JBossDetector
             String[] args = getProcArgs(pids[i]);
 
             String classpath = null;
+            String runJar = null;
             String config = "default";
             boolean mainArgs = false;
 
@@ -87,6 +92,15 @@ public class JBossDetector
                     arg.equals("-cp"))
                 {
                     classpath = args[j+1];
+                    continue;
+                }
+                else if (arg.startsWith(PROP_CP)) {
+                    classpath = arg.substring(PROP_CP.length());
+                    continue;
+                }
+                else if (arg.startsWith(PROP_AGENT)) {
+                    //.../bin/pluggable-instrumentor.jar
+                    runJar = arg.substring(PROP_AGENT.length());
                     continue;
                 }
 
@@ -105,15 +119,16 @@ public class JBossDetector
                 }
             }
 
-            String runJar = null;
-            StringTokenizer tok =
-                new StringTokenizer(classpath, File.pathSeparator);
+            if (classpath != null) {
+                StringTokenizer tok =
+                    new StringTokenizer(classpath, File.pathSeparator);
 
-            while (tok.hasMoreTokens()) {
-                String jar = tok.nextToken();
-                if (jar.endsWith("run.jar")) {
-                    runJar = jar;
-                    break;
+                while (tok.hasMoreTokens()) {
+                    String jar = tok.nextToken();
+                    if (jar.endsWith("run.jar")) {
+                        runJar = jar;
+                        break;
+                    }
                 }
             }
 
