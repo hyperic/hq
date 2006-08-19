@@ -27,7 +27,7 @@
 
 <plugin name="netservices">
 
-  <config name="sockaddr">
+  <config name="sockaddr" type="global">
     <option name="hostname"
             description="Hostname"
             default="localhost"/>
@@ -42,7 +42,7 @@
             type="int"/>
   </config>
 
-  <config name="credentials">
+  <config name="credentials" type="global">
     <option name="user"
             description="Username"
             optional="true"/>
@@ -54,13 +54,13 @@
   </config>
 
   <config name="basicauth"
-          include="credentials">
+          include="credentials" type="global">
     <option name="realm"
             description="Realm"
             optional="true"/>
   </config>
 
-  <config name="ssl">
+  <config name="ssl" type="global">
     <option name="ssl"
             description="Use SSL"
             type="boolean"
@@ -68,7 +68,7 @@
             default="false"/>
   </config>
 
-  <config name="sslprotocol">
+  <config name="sslprotocol" type="global">
     <option name="sslprotocol" type="enum"
             description="SSL Protocol">
       <include name="None"/>
@@ -78,7 +78,8 @@
   </config>
 
   <config name="sslsockaddr"
-          include="ssl,sockaddr"/>
+          include="ssl,sockaddr"
+          type="global"/>
 
   <config name="url"
           include="sslsockaddr"
@@ -119,13 +120,16 @@
   </config>
 
   <config name="pop3"
-          include="sslsockaddr,credentials"/>
+          include="sslsockaddr,credentials"
+          type="global"/>
 
   <config name="ftp"
-          include="sockaddr,credentials"/>
+          include="sockaddr,credentials"
+          type="global"/>
 
   <config name="ldap"
-          include="sslsockaddr">
+          include="sslsockaddr"
+          type="global">
 
     <option name="baseDN"
             description="Search Base"/>
@@ -155,27 +159,32 @@
     </option>
   </config>
 
-  <config name="dns" include="sockaddr">
+  <config name="dns"
+          include="sockaddr"
+          type="global">
     <option name="lookupname"
             description="Lookup Name"
             default="www.hyperic.com"/>
   </config>
 
   <config name="ssh"
-          include="sockaddr,credentials"/>
+          include="sockaddr,credentials"
+          type="global"/>
 
   <config name="ntp"
-          include="sockaddr"/>
+          include="sockaddr"
+          type="global"/>
 
   <config name="dhcp"
-          include="sockaddr">
+          include="sockaddr"
+          type="global">
 
     <option name="hwaddr"
             description="Hardware (MAC) Address"
             optional="true"/>
   </config>
 
-  <config name="rpc">
+  <config name="rpc" type="global">
     <option name="hostname"
             description="Hostname"/>
             default="localhost"/>
