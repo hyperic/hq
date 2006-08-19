@@ -252,16 +252,15 @@
 
     </td>
   </tr>
+  <c:if test="${showRedraw}">
+  <tr>
+      <td class="SmokeyContent" colspan="2" align="center"><html:image property="redraw" page="/images/fb_redraw.gif" border="0" onmouseover="imageSwap(this, imagePath + 'fb_redraw', '_over');" onmouseout="imageSwap(this, imagePath +  'fb_redraw', '');" onmousedown="imageSwap(this, imagePath +  'fb_redraw', '_down')"/></td>
+  </tr>
+  </c:if>
   <tr>
     <td class="SmokeyLabel">&nbsp;</td>
     <td class="SmokeyContent"><span class="CaptionText"><fmt:message key="resource.common.monitor.visibility.TheseSettings"/></span></td>
   </tr>
-  <c:if test="${showRedraw}">
-  <tr>
-      <td class="SmokeyLabel">&nbsp;</td>
-      <td class="SmokeyContent" align="center"><html:image property="redraw" page="/images/fb_redraw.gif" border="0" onmouseover="imageSwap(this, imagePath + 'fb_redraw', '_over');" onmouseout="imageSwap(this, imagePath +  'fb_redraw', '');" onmousedown="imageSwap(this, imagePath +  'fb_redraw', '_down')"/></td>
-  </tr>
-  </c:if>
 </table>
 
 <script language="javascript">
@@ -279,18 +278,26 @@
 
   function showAdvanced() {
     new Effect.Appear('advancedDisplay', {to: 0.85});
-    if ($('simpleRn'))
-        $('simpleRn').disabled = true;
-    if ($('simpleRu'))
-        $('simpleRu').disabled = true;
     $('advancedDisplay').style.visibility = "visible";
+    if ($('simpleRn')) {
+        $('simpleRn').style.visibility = "hidden";
+        $('simpleRn').disabled = true;
+    }
+    if ($('simpleRu')) {
+        $('simpleRu').style.visibility = "hidden";
+        $('simpleRu').disabled = true;
+    }
   }
 
   function cancelAdvanced() {
-    if ($('simpleRn'))
+    if ($('simpleRn')) {
         $('simpleRn').disabled = false;
-    if ($('simpleRu'))
+        $('simpleRn').style.visibility = "visible";
+    }
+    if ($('simpleRu')) {
         $('simpleRu').disabled = false;
+        $('simpleRu').style.visibility = "visible";
+    }
     new Effect.Puff('advancedDisplay');
   }
 
