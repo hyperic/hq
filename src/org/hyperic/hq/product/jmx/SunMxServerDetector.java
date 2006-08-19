@@ -90,6 +90,7 @@ public class SunMxServerDetector extends MxServerDetector {
                     server.setName(server.getName() + " " + name);
                     server.setIdentifier(args[j]);
                     setProductConfig(server, config);
+                    server.setMeasurementConfig();
 
                     servers.add(server);
                     break;
