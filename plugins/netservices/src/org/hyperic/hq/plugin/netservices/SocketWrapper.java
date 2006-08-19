@@ -35,27 +35,31 @@ import java.net.Socket;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-class SocketWrapper {
+public class SocketWrapper {
     private static Log log =
         LogFactory.getLog(SocketWrapper.class.getName());
 
     boolean isDebug = log.isDebugEnabled();
 
-    static final String CRLF = "\r\n";
+    public static final String CRLF = "\r\n";
 
     Socket socket;
     BufferedReader reader = null;
     BufferedWriter writer = null;
     
-    SocketWrapper(Socket socket) {
+    public SocketWrapper(Socket socket) {
         this.socket = socket;
     }
 
-    void close() {
+    public Socket getSocket() {
+        return this.socket;
+    }
+
+    public void close() {
         close(this.socket);
     }
 
-    static void close(Socket socket) {
+    public static void close(Socket socket) {
         if (socket == null) {
             return;
         }
@@ -65,21 +69,21 @@ class SocketWrapper {
         }        
     }
 
-    BufferedReader getReader() throws IOException {
+    public BufferedReader getReader() throws IOException {
         if (this.reader == null) {
             this.reader = getReader(this.socket);
         }
         return this.reader;
     }
     
-    BufferedWriter getWriter() throws IOException {
+    public BufferedWriter getWriter() throws IOException {
         if (this.writer == null) {
             this.writer = getWriter(this.socket);
         }
         return this.writer;
     }
 
-    String readLine() throws IOException {
+    public String readLine() throws IOException {
         String line = getReader().readLine();
         if (isDebug) {
             log.debug("<<< " + line);
@@ -90,7 +94,7 @@ class SocketWrapper {
         return line;
     }
 
-    void writeLine(String line) throws IOException {
+    public void writeLine(String line) throws IOException {
         getWriter();
         if (isDebug) {
             log.debug(">>> " + line);
@@ -100,7 +104,7 @@ class SocketWrapper {
         this.writer.flush();
     }
 
-    static BufferedReader getReader(Socket socket)
+    public static BufferedReader getReader(Socket socket)
         throws IOException {
 
         InputStreamReader is =
@@ -108,7 +112,7 @@ class SocketWrapper {
         return new BufferedReader(is);
     }
 
-    static BufferedWriter getWriter(Socket socket)
+    public static BufferedWriter getWriter(Socket socket)
         throws IOException {
     
         OutputStreamWriter os =
