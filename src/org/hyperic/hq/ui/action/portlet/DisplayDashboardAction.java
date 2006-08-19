@@ -60,10 +60,7 @@ public class DisplayDashboardAction extends TilesAction {
             //construct from user preferences.
             WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );        
             portal.addPortletsFromString( user.getPreference(Constants.USER_PORTLETS_FIRST), 1);
-            portal.addPortletsFromString(".dashContent.addContent.narrow", 1);
-            
             portal.addPortletsFromString( user.getPreference(Constants.USER_PORTLETS_SECOND), 2);
-            portal.addPortletsFromString(".dashContent.addContent.wide", 2);                        
             
             session.setAttribute(Constants.USERS_SES_PORTAL, portal);
         }
