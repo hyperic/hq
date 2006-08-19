@@ -747,6 +747,8 @@
     <hqplugin name="nagios"/>
 
     <hqplugin name="ntds"/>
+
+    <hqplugin name="memcached"/>
   </target>
   
   <!-- Copy plugins -->
