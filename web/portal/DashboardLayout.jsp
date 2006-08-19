@@ -28,6 +28,7 @@
   USA.
  --%>
 
+<script language="JavaScript" src="<html:rewrite page="/js/scriptaculous.js"/>" type="text/javascript"></script>
 
 <td>
 <script src="<html:rewrite page="/js/dashboard.js"/>" type="text/javascript"></script>
@@ -41,11 +42,8 @@
   ajaxEngine.registerRequest( 'removePortlet',
                               '<html:rewrite page="/dashboard/RemovePortlet.do"/>' );
 
-  ajaxEngine.registerRequest( 'movePortletUp',
-                              '<html:rewrite page="/dashboard/MovePortletUp.do"/>' );
-
-  ajaxEngine.registerRequest( 'movePortletDown',
-                              '<html:rewrite page="/dashboard/MovePortletDown.do"/>' );
+  ajaxEngine.registerRequest( 'movePortlet',
+                              '<html:rewrite page="/dashboard/ReorderPortlets.do"/>' );
 
   function removePortlet(name, label) {
     ajaxEngine.sendRequest( 'removePortlet', 'portletName=' + name );
@@ -70,33 +68,6 @@
     }
   }
 
-  function movePortletUp(id) {
-    ajaxEngine.sendRequest( 'movePortletUp', 'portletName=' + id );
-
-    var root;
-    if (isWide(id)) {
-      root = $('narrowList_false'); 
-    }
-    else {
-      root = $('narrowList_true'); 
-    }
-    var elem = $(id);
-    moveElementUp(elem, root);
-  }
-
-  function movePortletDown(id) {
-    ajaxEngine.sendRequest( 'movePortletDown', 'portletName=' + id );
-
-    var root;
-    if (isWide(id)) {
-      root = $('narrowList_false'); 
-    }
-    else {
-      root = $('narrowList_true'); 
-    }
-    var elem = $(id);
-    moveElementDown(elem, root);
-  }
 </script>
 
 <%
@@ -168,11 +139,38 @@
   <c:forEach var="portlet" items="${columnsList}">
   <c:set var="isFirstPortlet" value="${portlet.isFirst}" scope="request"/>
   <c:set var="isLastPortlet"  value="${portlet.isLast}"  scope="request"/>
-  <li id="<c:out value="${portlet.url}"/>"><table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <li id="<c:out value="${portlet.url}"/>">
+    <span style="cursor: move;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0">
     <tr><td valign="top" class="DashboardPadding"><tiles:insert beanProperty="url" beanName="portlet" flush="true"/></td></tr>
-  </table></li>
+  </table>
+  </span>
+  </li>
   </c:forEach>
 </ul>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td valign="top" class="DashboardPadding">
+  <c:choose>
+  <c:when test="${narrow eq 'true'}">      
+    <tiles:insert name=".dashContent.addContent.narrow" flush="true"/>
+  </c:when>
+  <c:otherwise>
+    <tiles:insert name=".dashContent.addContent.wide" flush="true"/>
+  </c:otherwise>
+  </c:choose>
+  </td></tr>
+</table>
+      <script type="text/javascript">
+      <!--
+        Sortable.create("<c:out value="narrowList_${narrow}"/>",
+          {dropOnEmpty: true,
+           format: /^(.*)$/,
+           containment: ["<c:out value="narrowList_${narrow}"/>"],
+           onUpdate: function() {
+                ajaxEngine.sendRequest( 'movePortlet', Sortable.serialize('<c:out value="narrowList_${narrow}"/>') ); },
+           constraint: false});
+      -->
+      </script>
       <c:choose >
         <c:when test="${narrow eq 'true'}">              
           <c:set var="narrow" value="false" />

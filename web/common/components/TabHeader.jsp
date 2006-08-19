@@ -72,32 +72,14 @@
 
     <c:if test="${showUpAndDown}">
       <td class="BlockTitle">
-      <c:choose>
-        <c:when test="${not empty portletName}">
-          <a href="javascript:movePortletUp('<c:out value="${portletName}" escapeXml="false"/>')">
-          <html:img page="/images/dash_icon_up.gif" width="16" height="16" border="0"/>
-          </a>
-        </c:when>
-        <c:otherwise>
-        <c:if test="${not isFirstPortlet}">
+        <c:if test="${empty portletName && not isFirstPortlet}">
         <html:link page="/dashboard/MovePortletUp.do?portletName=${portletName}"><html:img page="/images/dash_icon_up.gif" border="0" width="17" height="16"/></html:link>
         </c:if>
-        </c:otherwise>
-      </c:choose>
       </td>
       <td class="BlockTitle">
-      <c:choose>
-        <c:when test="${not empty portletName}">
-          <a href="javascript:movePortletDown('<c:out value="${portletName}" escapeXml="false"/>')">
-          <html:img page="/images/dash_icon_down.gif" width="16" height="16" border="0"/>
-          </a>
-        </c:when>
-        <c:otherwise>
-        <c:if test="${not isLastPortlet}">
+        <c:if test="${empty portletName && not isLastPortlet}">
         <html:link page="/dashboard/MovePortletDown.do?portletName=${portletName}"><html:img page="/images/dash_icon_down.gif" border="0" width="17" height="16"/></html:link>
         </c:if>
-        </c:otherwise>
-      </c:choose>
       </td>
     </c:if>
 
