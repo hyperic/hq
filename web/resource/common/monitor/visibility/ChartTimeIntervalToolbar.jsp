@@ -67,7 +67,14 @@
       <html:image property="${nextProperty}" page="/images/tbb_pageright.gif" border="0"/>
       </c:otherwise>
       </c:choose>
-  <div id="advancedDisplay" class="dialog" style="width:600px;filter: alpha(opacity=0);opacity: 0;">
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" class="BlockContent" align="right">
+    <html:link href="javascript:showAdvanced()"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn"/></html:link>
+    </td>
+    <td class="BlockContent">
+      <div id="advancedDisplay" class="dialog" style="width:600px;filter: alpha(opacity=0);opacity: 0;">
         <table cellpadding="2">
           <tr>
             <td width="100%">
@@ -84,11 +91,6 @@
     </div>
     </td>
   </tr>
-  <tr>
-    <td colspan="3" class="BlockContent" align="right">
-    <html:link href="javascript:showAdvanced()"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn"/></html:link>
-    </td>
-  </tr>
 </table>
 
 <script language="javascript">
@@ -96,7 +98,7 @@
     var advancedDiv = $('advancedDisplay');
     new Rico.Effect.Position( 'advancedDisplay',
                                advancedDisplay.offsetLeft - advancedDisplay.offsetWidth,
-                               null, // move across x axis
+                               advancedDisplay.offsetTop - advancedDisplay.offsetHeight,
                                0,
                                1, // 1 steps
                                {}
