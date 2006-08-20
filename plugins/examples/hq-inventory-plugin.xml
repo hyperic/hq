@@ -27,11 +27,11 @@
 <plugin>
   <service name="HQ Inventory">
 
-    <!-- "sql:" domain required to proxy through sqlquery-plugin -->
-    <filter name="template" value="sql:${query}:${name}"/>
-
     <!-- config defined by the sqlquery-plugin -->
     <config include="sql"/>
+
+    <!-- "sql:" domain required to proxy through sqlquery-plugin -->
+    <filter name="template" value="sql:${query}:${name}"/>
 
     <!-- use filters for common sql -->
     <filter name="count"
