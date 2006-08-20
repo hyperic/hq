@@ -26,6 +26,7 @@
 package org.hyperic.hq.product.pluginxml;
 
 import java.util.List;
+import java.util.Properties;
 
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigSchema;
@@ -39,10 +40,13 @@ import org.hyperic.util.config.ConfigSchema;
 class LateBindingConfigSchema extends ConfigSchema {
 
     private List includes;
-    
-    LateBindingConfigSchema(List includes) {
+    private Properties props;
+
+    LateBindingConfigSchema(List includes, Properties props) {
         super();
         this.includes = includes;
+        this.props = new Properties();
+        this.props.putAll(props);
     }
 
     public List getOptions() {
@@ -64,11 +68,17 @@ class LateBindingConfigSchema extends ConfigSchema {
                         (ConfigOption)options.get(j);
 
                     if (getOption(option.getName()) == null) {
+                        String defVal =
+                            this.props.getProperty(option.getName());
+                        option =
+                            ConfigTag.includeConfigOption(option, defVal);
                         addOption(option);
                     } //else plugin has overridden this option (e.g. snmpPort)
                 }
             }
             this.includes.clear(); //one and done.
+            this.props.clear();
+            this.props = null;
         }
 
         return super.getOptions();

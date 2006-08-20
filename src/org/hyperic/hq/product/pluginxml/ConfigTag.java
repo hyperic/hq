@@ -84,15 +84,7 @@ class ConfigTag extends BaseTag implements XmlEndAttrHandler {
         return PluginData.getSharedConfigSchema(include);
     }
 
-    private ConfigOption includeConfigOption(ConfigOption option) {
-        if (!isResourceParent()) {
-            return option;
-        }
-        ResourceTag resource = (ResourceTag)this.parent; 
-        //allow <property> to override default value
-        String defVal =
-            resource.getAttribute(option.getName());
-
+    static ConfigOption includeConfigOption(ConfigOption option, String defVal) {
         if (defVal != null) {
             try {
                 ConfigOption copy = option.copy();
@@ -102,8 +94,19 @@ class ConfigTag extends BaseTag implements XmlEndAttrHandler {
                 e.printStackTrace(); //XXX
             }
         }
-
         return option;
+    }
+
+    private ConfigOption includeConfigOption(ConfigOption option) {
+        if (!isResourceParent()) {
+            return option;
+        }
+        ResourceTag resource = (ResourceTag)this.parent; 
+        //allow <property> to override default value
+        String defVal =
+            resource.getAttribute(option.getName());
+
+        return includeConfigOption(option, defVal);
     }
     
     public void endAttributes() throws XmlAttrException {
@@ -227,7 +230,8 @@ class ConfigTag extends BaseTag implements XmlEndAttrHandler {
         ConfigSchema schema = this.schema.getSchema();
         if (this.unresolved.size() != 0) {
             List options = schema.getOptions();
-            schema = new LateBindingConfigSchema(this.unresolved);
+            schema = new LateBindingConfigSchema(this.unresolved,
+                                                 resource.props);
             schema.addOptions(options);
         }
         String typeName = resource.getPlatformName(this);
