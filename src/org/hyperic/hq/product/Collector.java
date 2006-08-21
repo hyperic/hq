@@ -34,6 +34,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.hyperic.util.PluginLoader;
+import org.hyperic.util.config.ConfigResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -96,7 +97,7 @@ public abstract class Collector implements Runnable {
 
     static Map containers = new HashMap();
     
-    private MeasurementPlugin plugin;
+    private GenericPlugin plugin;
     private Properties props;
 
     private int timeout = -1;
@@ -198,7 +199,7 @@ public abstract class Collector implements Runnable {
         return this.props;
     }
 
-    protected MeasurementPlugin getPlugin() {
+    protected GenericPlugin getPlugin() {
         return this.plugin;
     }
     
