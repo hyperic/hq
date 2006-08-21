@@ -659,6 +659,13 @@ public class PluginDumper {
 
         //-Dmetric-cat=availability
         String category = getProperty("metric-cat", "all");
+        
+        //e.g. -Dmetric-iter=1000
+        String iter = getProperty("metric-iter");
+        int iterations = 1;
+        if (iter != null) {
+            iterations = Integer.parseInt(iter);            
+        }
 
         for (int j=0; j<metrics.length; j++) {
             if (isDefault && !metrics[j].isDefaultOn()) {
@@ -698,20 +705,11 @@ public class PluginDumper {
             if (translateOnly) {
                 continue;
             }
-                
-            //e.g. -Dmetric-iter=1000
-            String iter = getProperty("metric-iter");
+
+            StopWatch timer = new StopWatch();
 
             try {
-                if (iter != null) {
-                    int max = Integer.parseInt(iter);
-                    StopWatch timer = new StopWatch();
-                    for (int x=0; x<max; x++) {
-                        this.mpm.getValue(template);
-                    }
-                    System.out.println("   =>" + timer + "<=");
-                }
-                else {
+                for (int x=0; x<iterations; x++) {
                     MetricValue value = getValue(template);
                     if (value.isNone()) {
                         continue;
@@ -719,10 +717,15 @@ public class PluginDumper {
                     FormattedNumber number =
                         UnitsConvert.convert(value.getValue(),
                                              metrics[j].getUnits());
-                    System.out.println("   =>" + number + "<=");
+                    if ((iter == null) || isPause) {
+                        System.out.println("   =>" + number + "<=");
+                    }
                     if (isPause) {
                         promptContinue();
                     }
+                }
+                if ((iter != null) && !isPause) {
+                    System.out.println("   [" + timer + "]");
                 }
             } catch (Exception e) {
                 String exClass = e.getClass().getName();
