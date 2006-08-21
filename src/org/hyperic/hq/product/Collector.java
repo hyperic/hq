@@ -129,6 +129,38 @@ public abstract class Collector implements Runnable {
 
     public abstract void collect();
 
+    /**
+     * Initialize a Collector instance for use outside of MeasurementPlugin.
+     * Collectors are generally used for metric collection, but can also be
+     * used in some cases for inventory property discovery and/or control.
+     * @param plugin A ServerDetector or ControlPlugin
+     * @param config Resource configuration properties
+     * @throws PluginException
+     */
+    public void init(GenericPlugin plugin, ConfigResponse config) 
+        throws PluginException {
+
+        this.plugin = plugin;
+        setProperties(config.toProperties());
+        init();        
+    }
+
+    /**
+     * Initialize and collect values for use outside of MeasurementPlugin.
+     * This method is useful for inventory property discovery.
+     * @param plugin A ServerDetector or ControlPlugin
+     * @param config
+     * @return Resource configuration properties
+     * @throws PluginException
+     */
+    public Map getValues(GenericPlugin plugin, ConfigResponse config)
+        throws PluginException {
+
+        init(plugin, config);
+        collect();
+        return getResult().values;
+    }
+
     public int getTimeout() {
         if (this.timeout == -1) {
             this.timeout =
