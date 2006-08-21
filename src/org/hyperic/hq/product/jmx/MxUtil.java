@@ -294,6 +294,7 @@ public class MxUtil {
         } catch (MalformedObjectNameException e) {
             throw invalidObjectName(metric.getObjectName(), e);
         } catch (IOException e) {
+            removeMBeanConnector(config);
             throw unreachable(metric.getProperties(), e);
         } catch (MBeanException e) {
             throw error(metric.toString(), e);
@@ -323,6 +324,13 @@ public class MxUtil {
                 return new Double(Metric.AVAIL_UP);
             }
             throw e;
+        }
+    }
+
+    private static void removeMBeanConnector(Properties config) {
+        String jmxUrl = config.getProperty(MxUtil.PROP_JMX_URL);
+        if (cache.remove(jmxUrl) != null) {
+            log.debug("Removing cached connection for: " + jmxUrl);
         }
     }
 
