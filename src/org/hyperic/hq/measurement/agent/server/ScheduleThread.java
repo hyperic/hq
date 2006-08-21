@@ -367,7 +367,8 @@ public class ScheduleThread
                     long elapsed = (getTime - lastFailed.longValue()); 
                     if (elapsed > UNREACHABLE_EXPIRE) {
                         unreachable.remove(id);
-                        this.log.info("Re-enabling metrics for id=" + id);
+                        this.log.info("Re-enabling metrics for type=" + type + 
+                                      " id=" + id);
                     }
                     else {
                         //prevent stacktrace bombs if a resource is down.
@@ -395,7 +396,8 @@ public class ScheduleThread
                     this.logCache("Metric unreachable", dsn, exc);
                     lastFailed = new Long(getTime);
                     unreachable.put(id, lastFailed);
-                    this.log.warn("Disabling metrics for id=" + id);
+                    this.log.warn("Disabling metrics for type=" + type + 
+                                  " id=" + id);
                 } catch(Exception exc){
                     // Unexpected exception
                     this.logCache("Error getting measurement value",
