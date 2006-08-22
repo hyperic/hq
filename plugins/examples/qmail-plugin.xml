@@ -24,6 +24,22 @@
  -->
 
 <plugin>
+  <!-- extracted to: pdk/scripts/qmail/hq-qmail-qstat -->
+  <script name="hq-qmail-qstat">
+#!/bin/sh
+
+#modified version of /var/qmail/bin/qmail-qstat
+#same logic, only the format of the two echo statements differ
+
+cd /var/qmail
+messdirs=`echo queue/mess/* | wc -w`
+messfiles=`find queue/mess/* -print | wc -w`
+tododirs=`echo queue/todo | wc -w`
+todofiles=`find queue/todo -print | wc -w`
+echo MessagesInQueue=`expr $messfiles - $messdirs`
+echo MessagesAwaitingPreprocessing=`expr $todofiles - $tododirs`
+  </script>
+
   <server name="qmail" description="MTA">
 
     <config>
@@ -83,7 +99,7 @@
 
     <!-- qmail-qstat metrics -->
     <filter name="template"
-            value="exec:file=/var/qmail/bin/hq-qmail-qstat,exec=sudo:${alias}"/>
+            value="exec:file=pdk/scripts/qmail/hq-qmail-qstat,exec=sudo:${alias}"/>
 
     <metric name="Messages In Queue"
             indicator="true"/>
