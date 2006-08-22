@@ -38,6 +38,7 @@ import java.net.URLDecoder;
 import org.apache.log4j.BasicConfigurator;
 
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.util.PluginLoader;
 
 /**
@@ -49,7 +50,7 @@ import org.hyperic.util.PluginLoader;
 public class PluginMain {
 
     private static final String PDK_DIR =
-        System.getProperty(PluginDumper.PROP_PDK_DIR, getPdkDir());
+        System.getProperty(ProductPluginManager.PROP_PDK_DIR, getPdkDir());
     
     private static final String DEFAULT_PACKAGE =
         "org.hyperic.hq.plugin";
@@ -248,7 +249,7 @@ public class PluginMain {
             }
         }
 
-        System.setProperty(PluginDumper.PROP_PDK_DIR, PDK_DIR);
+        System.setProperty(ProductPluginManager.PROP_PDK_DIR, PDK_DIR);
 
         System.setProperty("org.hyperic.sigar.path", pdkLib);
 
