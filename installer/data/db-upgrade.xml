@@ -1750,6 +1750,16 @@ has already been defined.
         </statement>
       </schema-directSQL>
     </schemaSpec>
+
+    <schemaSpec version="1.86">
+      <schema-directSQL>
+        <statement>
+        INSERT INTO EAM_CONFIG_PROPS (ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY)
+          VALUES (51, 'EVENT_LOG_PURGE', '2678400000', '2678400000', '0')
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
 </dbupgrade>
 
 </target>

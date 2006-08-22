@@ -152,6 +152,11 @@
               FREAD_ONLY="FALSE"/>
         <data ID="50" KEY="SNMP_PRIVACY_PROTOCOL" VALUE="" DEFAULT_VALUE=""
               FREAD_ONLY="FALSE"/>
+
+        <!-- How long to keep event logs around -->
+        <data ID="51" PROPKEY="EVENT_LOG_PURGE" PROPVALUE="2678400000"
+              DEFAULT_PROPVALUE="2678400000" FREAD_ONLY="FALSE"/>
+
     </table>
 
 </Covalent.DBSetup>
