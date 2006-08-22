@@ -1753,6 +1753,9 @@ has already been defined.
 
     <schemaSpec version="1.86">
       <schema-directSQL>
+        <statement desc="Delete EVENT_LOG_PURGE property if it exists so that we can upgrade from previous version correctly">
+        DELETE FROM EAM_CONFIG_PROPS WHERE ID = 51
+        </statement>
         <statement>
         INSERT INTO EAM_CONFIG_PROPS (ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY)
           VALUES (51, 'EVENT_LOG_PURGE', '2678400000', '2678400000', '0')
