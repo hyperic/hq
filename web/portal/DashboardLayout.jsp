@@ -168,7 +168,7 @@
            containment: ["<c:out value="narrowList_${narrow}"/>"],
            onUpdate: function() {
                 ajaxEngine.sendRequest( 'movePortlet', Sortable.serialize('<c:out value="narrowList_${narrow}"/>') ); },
-           constraint: false});
+           constraint: 'vertical'});
       -->
       </script>
       <c:choose >
