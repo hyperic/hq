@@ -16,10 +16,11 @@ public class EmbedTag
     implements XmlTextHandler {
 
     private static final String[] REQUIRED_ATTRS = {
-        ATTR_NAME, ATTR_TYPE
+        ATTR_NAME
     };
 
     private static final String[] OPTIONAL_ATTRS = {
+        ATTR_TYPE
     };
 
     private String text;
@@ -45,12 +46,21 @@ public class EmbedTag
     }
 
     protected File getSubDirectory(String pdk) {
+        File dir = null;
         String type = getAttribute(ATTR_TYPE);
+        if (type == null) {
+            dir = new File(pdk, "../tmp");
+            if (dir.exists()) {
+                return dir;
+            }
+            else {
+                return null;
+            }
+        }
         //e.g. <embed type="script" name="foo"/>
         //check for pdk/scripts/
         String[] dirs = { type + 's', type };
 
-        File dir = null;
         for (int i=0; i<dirs.length; i++) {
             dir = new File(pdk, dirs[i]);
             if (dir.exists()) {
@@ -62,7 +72,7 @@ public class EmbedTag
         return dir;
     }
 
-    private void writeFile() throws XmlTagException {
+    protected void writeFile() throws XmlTagException {
         String name = getAttribute(ATTR_NAME);
         
         String pdk = this.data.getPdkDir();
@@ -92,6 +102,12 @@ public class EmbedTag
         }
 
         File file = new File(dir, name);
+
+        writeFile(file);
+    }
+
+    protected void writeFile(File file)
+        throws XmlTagException {
 
         FileOutputStream os = null;
     
