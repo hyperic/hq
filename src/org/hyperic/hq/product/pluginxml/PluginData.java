@@ -100,6 +100,16 @@ public class PluginData {
         this.name = name;
     }
 
+    String getPluginName() {
+        if (this.name != null) {
+            return this.name;
+        }
+        if (this.file != null) {
+            return ProductPluginManager.getNameFromFile(this.file);
+        }
+        return null;
+    }
+
     public String getFile() {
         return this.file;
     }
