@@ -110,6 +110,10 @@ public class ProductPluginManager extends PluginManager {
         this.registerTypes = registerTypes;
     }
 
+    public boolean getRegisterTypes() {
+        return this.registerTypes;
+    }
+
     public void setUnpackNestedJars(boolean unpackNestedJars) {
         this.unpackNestedJars = unpackNestedJars;
     }
@@ -691,7 +695,7 @@ public class ProductPluginManager extends PluginManager {
                 dataLoader = loader;
             }
 
-            data = PluginData.getInstance(dataLoader, this.registerTypes, jarName);
+            data = PluginData.getInstance(this, dataLoader, jarName);
             
             String implName = loader.getPluginClassName(); 
             if (implName == null) {

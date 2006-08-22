@@ -232,8 +232,8 @@ public class PluginData {
         }
     }
 
-    public synchronized static PluginData getInstance(ClassLoader loader,
-                                                      boolean isServer,
+    public synchronized static PluginData getInstance(ProductPluginManager manager,
+                                                      ClassLoader loader,
                                                       String file) 
         throws PluginException {
 
@@ -243,6 +243,7 @@ public class PluginData {
         }
 
         PluginParser parser = new PluginParser();
+        boolean isServer = manager.getRegisterTypes();
         if (!isServer) {
             parser.collectHelp(false);
             parser.collectMetrics(false);
