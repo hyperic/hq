@@ -75,6 +75,8 @@
               <tr>
                 <td class="MonitorChartBlock">
             <tiles:insert page="/resource/common/monitor/visibility/ChartTimeIntervalToolbar.jsp">
+            <tiles:put name="form" beanName="PerformanceForm"/>
+            <tiles:put name="formName" value="PerformanceForm"/>
             <tiles:put name="rangeNow" beanName="PerformanceForm" beanProperty="rangeNow"/>
             <tiles:put name="begin"><c:out value="${PerformanceForm.rbDate.time}"/></tiles:put>
             <tiles:put name="end"><c:out value="${PerformanceForm.reDate.time}"/></tiles:put>
