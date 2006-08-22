@@ -128,10 +128,10 @@ public class PluginData {
     }
 
     public static void deployed(ClassLoader loader) {
-        try {
-            PluginData data = getInstance(loader, true);
+        PluginData data = (PluginData)cache.get(loader);
+        if (data != null) {
             data.deployed();
-        } catch (PluginException e) { }
+        }
     }
 
     static class PluginResolver implements EntityResolver {
@@ -295,13 +295,6 @@ public class PluginData {
         cache.put(loader, data);
         
         return data;
-    }
-
-    public static PluginData getInstance(ClassLoader loader,
-                                         boolean isServer) 
-        throws PluginException {
-
-        return getInstance(loader, isServer, "NONE");
     }
 
     public static InputStream openPluginResource(ClassLoader loader, String file)
