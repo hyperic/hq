@@ -85,7 +85,7 @@ public class PluginData {
     Map cprops = new HashMap();
     static Map sharedConfig = new HashMap();
     Map actions = new HashMap();
-    Map classpath = new HashMap();
+    private List classpath = null;
     private Properties properties = new Properties();
     private static Properties globalProperties = new Properties();
     private static Map serviceExtensions = null;
@@ -465,11 +465,12 @@ public class PluginData {
     }
 
     public List getClassPath() {
-        return (List)this.classpath.get(this.name);
+        return this.classpath;
     }
     
     void setClassPath(List classpath) {
-        this.classpath.put(this.name, classpath);
+        this.classpath = new ArrayList();
+        this.classpath.addAll(classpath);
     }
 
     public String getHelp(String name) {
