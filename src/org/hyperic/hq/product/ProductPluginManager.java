@@ -186,6 +186,20 @@ public class ProductPluginManager extends PluginManager {
         return ProductPlugin.TYPE_PRODUCT;
     }
 
+    /**
+     * Derive plugin name from *-plugin.{xml,jar} name
+     */
+    public static String getNameFromFile(String file) {
+        String name = new File(file).getName();
+        int ix = name.indexOf("-plugin.");
+        if (ix != -1) {
+            return name.substring(0, ix);
+        }
+        else {
+            return null;
+        }
+    }
+
     //assumes type names are unique across plugins,
     //which they should be.  if needed we could index on
     //product name too.
@@ -731,13 +745,8 @@ public class ProductPluginManager extends PluginManager {
                 pluginName = data.getName(); //hq-plugin.xml
             }
             if (pluginName == null) {
-                //if name not specified, derive from *-plugin.{xml,jar} name
-                String jar = new File(jarName).getName();
-                int ix = jar.indexOf("-plugin.");
-                if (ix != -1) {
-                    pluginName = jar.substring(0, ix);
-                }
-                else {
+                pluginName = getNameFromFile(jarName);
+                if (pluginName == null) {
                     throw new PluginException("Malformed name for: " + jarName);
                 }
             }
