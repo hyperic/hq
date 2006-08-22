@@ -144,26 +144,20 @@ public class PluginJar extends Jar {
         //setBasedir(new File(buildDir + "/classes"));
         setDestFile(destFile);
 
+        String[] dirs = {
+            "etc", "mibs", "lib", "scripts"
+        };
+
         //<fileset dir="plugins/${plugin.dirname}" includes="etc/**"/>
-        FileSet etc = new FileSet();
-        etc.setDir(new File(getDir()));
-        etc.setIncludes("etc/**");
-        addFileset(etc);
-
-        //<fileset dir="plugins/${plugin.dirname}" includes="mibs/**"/>
-        if (new File(getDir(), "mibs").exists()) {
-            FileSet mibs = new FileSet();
-            mibs.setDir(new File(getDir()));
-            mibs.setIncludes("mibs/**");
-            addFileset(mibs);
-        }
-
-        //<fileset dir="plugins/${plugin.dirname}" includes="lib/*.*"/>
-        if (new File(getDir(), "lib").exists()) {
-            FileSet libs = new FileSet();
-            libs.setDir(new File(getDir()));
-            libs.setIncludes("lib/*.*");
-            addFileset(libs);
+        for (int i=0; i<dirs.length; i++) {
+            String name = dirs[i];
+            if (!new File(getDir(), name).exists()) {
+                continue;
+            }
+            FileSet set = new FileSet();
+            set.setDir(new File(getDir()));
+            set.setIncludes(name + "/**");
+            addFileset(set);
         }
 
         //<include name="org.hyperic.hq.product/${plugin.package}/**/*.class"/>
