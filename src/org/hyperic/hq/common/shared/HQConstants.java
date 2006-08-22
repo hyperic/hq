@@ -63,9 +63,6 @@ public class HQConstants {
     // Whether or not to reindex nightly
     public static final String DataReindex     = "DATA_REINDEX_NIGHTLY";
 
-    // How long do we keep rt data
-    public static final String RtDataPurge     = "RT_DATA_PURGE";
-
     // How long do we keep alerts
     public static final String AlertPurge      = "ALERT_PURGE";
 
@@ -83,10 +80,6 @@ public class HQConstants {
     // Help related
     public static final String HelpUser = "CAM_HELP_USER";
     public static final String HelpUserPassword = "CAM_HELP_PASSWORD";
-
-    // High Availability related
-    public static final String HighAvailAddress = "CAM_MULTICAST_ADDRESS";
-    public static final String HighAvailPort = "CAM_MULTICAST_PORT";
 
     // Syslog Actions enabled
     public static final String SyslogActionsEnabled = "CAM_SYSLOG_ACTIONS_ENABLED";
