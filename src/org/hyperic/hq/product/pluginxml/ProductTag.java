@@ -55,6 +55,8 @@ class ProductTag
                            XmlTagInfo.ZERO_OR_MORE),
             new XmlTagInfo(new FilterTag(this), 
                            XmlTagInfo.ZERO_OR_MORE),
+            new XmlTagInfo(new EmbedTag(this),
+                           XmlTagInfo.ZERO_OR_MORE),
             new XmlTagInfo(new PlatformTag(this),
                            XmlTagInfo.ZERO_OR_MORE),                           
             new XmlTagInfo(new ServerTag(this), 
