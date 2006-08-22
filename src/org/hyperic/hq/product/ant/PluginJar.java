@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.hq.product.pluginxml.PluginData;
 import org.hyperic.hq.product.pluginxml.PluginParser;
 import org.hyperic.util.StringUtil;
@@ -191,7 +192,8 @@ public class PluginJar extends Jar {
 
         if (validate) {
             String plugin = getDir() + "/etc/hq-plugin.xml";
-            validatePluginXML(getProperty("pdk.dir", "pdk"), plugin);
+            String pdk = getProperty(ProductPluginManager.PROP_PDK_DIR, "pdk");
+            validatePluginXML(pdk, plugin);
         }
     }
 }

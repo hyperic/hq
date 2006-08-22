@@ -94,7 +94,8 @@ public class WeblogicProductPlugin extends ProductPlugin {
             "java.security.auth.login.config";
 
         if (System.getProperty(loginConfig) == null) { //cmdline PluginDumper
-            String pdk = System.getProperty("pdk.dir");
+            String pdk =
+                System.getProperty(ProductPluginManager.PROP_PDK_DIR);
             String config;
             String configFile = "jaas.config";
             if (pdk != null) {

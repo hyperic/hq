@@ -28,6 +28,7 @@ package org.hyperic.hq.product.ant;
 import java.util.Enumeration;
 
 import org.apache.tools.ant.taskdefs.Copy;
+import org.hyperic.hq.product.ProductPluginManager;
 
 /**
  * Extend Copy task, validating the plugin xml 
@@ -38,7 +39,8 @@ public class PluginCopy extends Copy {
         Enumeration e = this.fileCopyMap.keys();
         while (e.hasMoreElements()) {
             String fromFile = (String)e.nextElement();
-            String pdkDir = getProject().getProperty("pdk.dir");
+            String pdkDir =
+                getProject().getProperty(ProductPluginManager.PROP_PDK_DIR);
             PluginJar.validatePluginXML(pdkDir, fromFile);
         }
         super.doFileOperations();

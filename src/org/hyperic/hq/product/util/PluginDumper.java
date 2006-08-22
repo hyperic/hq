@@ -83,7 +83,6 @@ import org.hyperic.util.units.FormattedNumber;
  */
 public class PluginDumper {
     static final String PRODUCT_JAR = "hq-product.jar";
-    static final String PROP_PDK_DIR = "pdk.dir";
 
     PluginDumperConfig config;
 
@@ -208,7 +207,8 @@ public class PluginDumper {
                 this.props.getProperty("output.dir", this.outputDir);
 
             this.pdkDir =
-                this.props.getProperty(PROP_PDK_DIR, this.pdkDir);
+                this.props.getProperty(ProductPluginManager.PROP_PDK_DIR,
+                                       this.pdkDir);
 
             this.pluginDir =
                 this.props.getProperty("plugin.dir", this.pluginDir);

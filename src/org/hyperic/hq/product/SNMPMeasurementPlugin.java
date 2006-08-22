@@ -133,7 +133,7 @@ public class SNMPMeasurementPlugin
         }
 
         final String pdkDir =
-            manager.getProperty("pdk.dir");
+            manager.getProperty(ProductPluginManager.PROP_PDK_DIR);
 
         if (pdkDir != null) {
             MIBTree.setMibDir(pdkDir + "/mibs");

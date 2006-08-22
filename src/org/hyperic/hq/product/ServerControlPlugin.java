@@ -426,7 +426,9 @@ public abstract class ServerControlPlugin extends ControlPlugin {
             File background = new File(dir, BACKGROUND_SCRIPT);
             if (!background.exists()) {
                 //try relative to pdk.dir for command-line usage
-                dir = props.getProperty("pdk.dir") + "/../";
+                String pdk =
+                    props.getProperty(ProductPluginManager.PROP_PDK_DIR); 
+                dir = pdk + "/../";
                 background = new File(dir, BACKGROUND_SCRIPT);
             }
             if (background.exists()) {

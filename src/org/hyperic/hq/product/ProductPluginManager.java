@@ -52,6 +52,7 @@ import org.apache.commons.logging.Log;
  * and is also a manager of plugin managers.
  */
 public class ProductPluginManager extends PluginManager {
+    public static final String PROP_PDK_DIR = "pdk.dir";
 
     //this is really verbose and not very helpful
     static final boolean DEBUG_LIFECYCLE = false;
@@ -641,7 +642,7 @@ public class ProductPluginManager extends PluginManager {
         }
 
         log.debug("adding to " + plugin.getName() + " classpath:");
-        String pdkDir = getProperty("pdk.dir");
+        String pdkDir = getProperty(PROP_PDK_DIR);
 
         for (int i=0; i<classpath.length; i++) {
             String path = classpath[i];

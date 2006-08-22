@@ -48,6 +48,7 @@ import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.hq.product.TypeBuilder;
@@ -109,7 +110,7 @@ public class PluginData {
 
     public String getPdkDir() {
         if (this.pdkDir == null) {
-            return System.getProperty("pdk.dir");
+            return System.getProperty(ProductPluginManager.PROP_PDK_DIR);
         }
         return this.pdkDir;
     }

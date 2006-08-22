@@ -34,6 +34,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.util.PropertyUtil;
 
 /**
@@ -79,7 +80,8 @@ public class AgentConfig {
     public static final String[] PROP_DATADIR = 
     { "agent.dataDir", System.getProperty("agent.dataDir", "data") };
     public static final String[] PROP_PDK = 
-    { "pdk.dir", System.getProperty("pdk.dir", "./pdk") };
+    { ProductPluginManager.PROP_PDK_DIR,
+      System.getProperty(ProductPluginManager.PROP_PDK_DIR, "./pdk") };
 
     private static final String[][] propertyList = {
         PROP_LISTENPORT,
