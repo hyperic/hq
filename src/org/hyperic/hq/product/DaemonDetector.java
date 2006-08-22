@@ -27,7 +27,10 @@ package org.hyperic.hq.product;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,6 +49,103 @@ public class DaemonDetector
 
     protected String getProcessQuery() {
         return getTypeProperty("PROC_QUERY");
+    }
+
+    protected boolean isSwitch(String arg) {
+        return arg.startsWith("-");
+    }
+
+    /**
+     * Convert getopt-style process arguments into a Map.
+     * @param pid Process id
+     * @return Map of -switch => value arguments
+     */
+    protected Map getProcOpts(long pid) {
+        String[] args = getProcArgs(pid);
+        int len = args.length;
+        Map opts = new HashMap();
+
+        for (int i=0; i<len; i++) {
+            String opt = args[i];
+            String val;
+
+            if (!isSwitch(opt)) {
+                continue;
+            }
+
+            //"-p=22122"
+            int ix = opt.indexOf('=');
+            if (ix != -1) {
+                val = opt.substring(ix+1);
+                opt = opt.substring(ix);
+            }
+            //"-p 22122"
+            else if (i+1 < len) {
+                val = args[i+1];
+                if (isSwitch(val)) {
+                    continue;
+                }
+                i++;
+            }
+            else {
+                continue;
+            }
+
+            opts.put(opt, val);
+        }
+
+        return opts;
+    }
+
+    /**
+     * Auto-discover server configuration
+     * @param server Auto-discovered server
+     * @param pid Process id
+     */
+    protected void discoverServerConfig(ServerResource server, long pid) {
+        Map opts = null;
+        boolean isDebug = log.isDebugEnabled();
+        boolean hasOpts = false;
+        ConfigResponse config = server.getProductConfig();
+
+        if (config == null) {
+            config = new ConfigResponse();
+            //start by setting the defaults
+            setProductConfig(server, config);
+        }
+
+        for (Iterator it=config.getKeys().iterator(); it.hasNext();) {
+            String key = (String)it.next();
+            //<property name="port.opt" value="-p"/>
+            String opt = getTypeProperty(key + ".opt");
+
+            if (opt == null) {
+                continue;
+            }
+            if (opts == null) {
+                opts = getProcOpts(pid);
+            }
+
+            String val = (String)opts.get(opt);
+            if (val != null) {
+                config.setValue(key, val);
+                hasOpts = true;
+                if (isDebug) {
+                    log.debug("Set " + key + "=" + val + 
+                              ", using " + opt + " from pid=" + pid);
+                }
+            }
+        }
+
+        if (hasOpts) {
+            server.setProductConfig(config);
+        }
+    }
+
+    protected ServerResource newServerResource(long pid, String exe) {
+        ServerResource server = newServerResource(exe);
+        discoverServerConfig(server, pid);
+        return server;
     }
 
     protected ServerResource newServerResource(String exe) {
@@ -171,7 +271,7 @@ public class DaemonDetector
                 exe = query;
             }
 
-            servers.add(newServerResource(exe));
+            servers.add(newServerResource(pid, exe));
         }
         
         return servers;
