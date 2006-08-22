@@ -28,6 +28,8 @@ package org.hyperic.hq.product.pluginxml;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.xmlparser.XmlAttr;
@@ -83,6 +85,10 @@ public abstract class BaseTag
     }
     
     public abstract String getName();
+
+    protected Log getLog() {
+        return LogFactory.getLog(this.getClass().getName());
+    }
 
     boolean isResourceParent() {
         if (this.parent == null) {

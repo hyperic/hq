@@ -42,7 +42,7 @@ public class EmbedTag
     }
 
     public void handleText(String text) {
-        this.text = text;
+        this.text = text.trim();
     }
 
     protected File getSubDirectory(String pdk) {
@@ -83,6 +83,9 @@ public class EmbedTag
 
         File dir = getSubDirectory(pdk);
         if (dir == null) {
+            //ok+expected on the server-side
+            getLog().debug("Unable to determine subdirectory to write: " +
+                           name);
             return;
         }
 
@@ -97,13 +100,18 @@ public class EmbedTag
         dir = new File(dir, pluginName);
         if (!dir.exists()) {
             if (!dir.mkdir()) {
+                getLog().error("mkdir(" + dir + ") failed");
                 return;
+            }
+            else {
+                getLog().debug("mkdir(" + dir + ") succeeded");
             }
         }
 
         File file = new File(dir, name);
 
         writeFile(file);
+        getLog().debug("Wrote file: '" + file + "'");
     }
 
     protected void writeFile(File file)
