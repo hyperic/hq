@@ -182,7 +182,7 @@ public class PluginLoader extends URLClassLoader {
 
         if ((pluginName != null) && pluginName.endsWith(".jar")) {
             ArrayList urls = new ArrayList();
-
+            ZipFile zipfile = null;
             try {
                 URL jarUrl = toURL(pluginName);
 
@@ -190,7 +190,8 @@ public class PluginLoader extends URLClassLoader {
 
                 // Unpack any embedded jars and add them to the classpath
                 if (unpackNestedJars) {
-                    urls.addAll(unpackEmbeddedJars(new ZipFile(pluginName)));
+                    zipfile = new ZipFile(pluginName);
+                    urls.addAll(unpackEmbeddedJars(zipfile));
                 }
 
                 // Get the plugin name from the jar
@@ -199,6 +200,12 @@ public class PluginLoader extends URLClassLoader {
                 String msg =
                     "failed to configure plugin jar=" + pluginName;
                 throw new PluginLoaderException(msg, e);
+            } finally {
+                if (zipfile != null) {
+                    try {
+                        zipfile.close();
+                    } catch (IOException e) {}
+                }
             }
             classpath = (URL[])urls.toArray(new URL[0]);
         }
