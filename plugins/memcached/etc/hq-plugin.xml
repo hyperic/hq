@@ -51,6 +51,18 @@
     <plugin type="collector"
             class="org.hyperic.hq.plugin.memcached.MemcachedStats"/>
 
+    <!-- inventory properties from the stats cmd -->
+    <properties>
+      <property name="version"
+                description="memcached version"/>
+
+      <property name="limit_maxbytes"
+                description="Maximum Bytes Limit"/>
+
+      <property name="pid"
+                description="PID"/>
+    </properties>
+
     <filter name="template"
             value="memcached:${sockaddr.config}:${alias}"/>
 
