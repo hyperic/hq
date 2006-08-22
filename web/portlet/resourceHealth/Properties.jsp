@@ -119,7 +119,7 @@ var help = '<hq:help/>';
       <script type="text/javascript">
       <!--
         Sortable.create("resOrd",
-          {dropOnEmpty:true,containment:["resOrd"],constraint:false});
+          {dropOnEmpty:true,containment:["resOrd"],constraint:'vertical'});
       -->
       </script>
 
