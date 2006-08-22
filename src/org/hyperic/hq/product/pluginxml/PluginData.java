@@ -243,6 +243,7 @@ public class PluginData {
         }
 
         PluginParser parser = new PluginParser();
+        String pdk = manager.getProperty(ProductPluginManager.PROP_PDK_DIR);
         boolean isServer = manager.getRegisterTypes();
         if (!isServer) {
             parser.collectHelp(false);
@@ -253,6 +254,7 @@ public class PluginData {
         InputStream is = null;
         data = new PluginData();
         data.file = file;
+        data.setPdkDir(pdk);
 
         if (isJar) {
             try {
