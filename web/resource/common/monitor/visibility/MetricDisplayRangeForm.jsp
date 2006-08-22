@@ -254,7 +254,7 @@
   </tr>
   <c:if test="${showRedraw}">
   <tr>
-      <td class="SmokeyContent" colspan="2" align="center"><html:image property="redraw" page="/images/fb_redraw.gif" border="0" onmouseover="imageSwap(this, imagePath + 'fb_redraw', '_over');" onmouseout="imageSwap(this, imagePath +  'fb_redraw', '');" onmousedown="imageSwap(this, imagePath +  'fb_redraw', '_down')"/></td>
+      <td class="SmokeyContent" colspan="2" align="center"><html:image property="advanced" page="/images/fb_redraw.gif" border="0" onmouseover="imageSwap(this, imagePath + 'fb_redraw', '_over');" onmouseout="imageSwap(this, imagePath +  'fb_redraw', '');" onmousedown="imageSwap(this, imagePath +  'fb_redraw', '_down')"/></td>
   </tr>
   </c:if>
   <tr>
