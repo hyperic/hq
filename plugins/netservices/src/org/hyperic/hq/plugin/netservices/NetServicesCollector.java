@@ -182,7 +182,7 @@ public abstract class NetServicesCollector extends Collector {
 
     public abstract void collect();
     
-    protected String getHostname() {
+    public String getHostname() {
         return getProperty(PROP_HOSTNAME, DEFAULT_HOSTNAME);
     }
 
@@ -201,7 +201,7 @@ public abstract class NetServicesCollector extends Collector {
                this.defaultSSLPort : this.defaultPort;
     }
     
-    protected int getPort() {
+    public int getPort() {
         if (this.port == -1) {
             this.port =
                 getIntegerProperty(PROP_PORT,
@@ -211,35 +211,35 @@ public abstract class NetServicesCollector extends Collector {
         return this.port;
     }
 
-    protected String getUsername() {
+    public String getUsername() {
         return this.user;
     }
 
-    protected String getPassword() {
+    public String getPassword() {
         return this.pass;
     }
 
-    protected boolean hasCredentials() {
+    public boolean hasCredentials() {
         return this.hasCredentials;
     }
     
-    protected boolean isSSL() {
+    public boolean isSSL() {
         return this.isSSL;
     }
 
-    protected String getSSLProtocol() {
+    public String getSSLProtocol() {
         return this.sslProtcol;
     }
 
-    protected boolean isFollow() {
+    public boolean isFollow() {
         return "true".equals(getProperty(PROP_FOLLOW));
     }
     
-    protected String getPath() {
+    public String getPath() {
         return getProperty(PROP_PATH, "/");
     }
 
-    protected InetSocketAddress getSocketAddress() {
+    public InetSocketAddress getSocketAddress() {
         if (this.sockaddr == null) {
             String host = getHostname();
             int port = getPort();
@@ -252,7 +252,7 @@ public abstract class NetServicesCollector extends Collector {
         return this.sockaddr;
     }
     
-    protected String getHostAddress() {
+    public String getHostAddress() {
         return getSocketAddress().getAddress().getHostAddress();
     }
 
@@ -296,7 +296,7 @@ public abstract class NetServicesCollector extends Collector {
         }        
     }
     
-    protected Socket getSocket()
+    public Socket getSocket()
         throws IOException {
         
         Socket socket;
@@ -328,7 +328,7 @@ public abstract class NetServicesCollector extends Collector {
         return socket;
     }
     
-    protected SocketWrapper getSocketWrapper()
+    public SocketWrapper getSocketWrapper()
         throws IOException {
 
         return new SocketWrapper(getSocket());
