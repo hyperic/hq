@@ -36,6 +36,9 @@
             value="State.Name.eq=memcached"/>
 
     <property name="port" value="11211"/>
+    <!-- for auto-configuration -->
+    <property name="port.opt" value="-p"/>
+    <property name="hostname.opt" value="-l"/>
 
     <config include="sockaddr"/>
 
