@@ -77,8 +77,10 @@ var help = '<hq:help/>';
           <td width="80%" class="BlockContent" colspan="3" valign="center">
             <fmt:message key="dash.settings.criticalAlerts.last"/>&nbsp;
             <html:select property="numberOfAlerts">
-              <html:option value="5">5</html:option>
-              <html:option value="10">10</html:option> 
+              <html:option value="5"/>
+              <html:option value="10"/> 
+              <html:option value="20"/> 
+              <html:option value="30"/> 
             </html:select> 
             <html:select property="priority">
               <html:option value="3">!!! - High</html:option>
