@@ -120,12 +120,15 @@ public class AgentMonitor implements MonitorInterface
                 DerivedMeasurementValue dMetric = 
                     schedule[i].getDerivedMetric();
                 RawMeasurementValue[] rMetrics = schedule[i].getRawMetrics();
-                
+
                 for(int j=0; j<rMetrics.length; j++) {
+                    String category = 
+                        rMetrics[j].getTemplate().getCategory().getName();
                     args.addMeasurement(rMetrics[j].getDsn(),
                                         dMetric.getInterval(),
                                         dMetric.getId().intValue(),
-                                        rMetrics[j].getId().intValue());
+                                        rMetrics[j].getId().intValue(),
+                                        category);
                 }
             }
 

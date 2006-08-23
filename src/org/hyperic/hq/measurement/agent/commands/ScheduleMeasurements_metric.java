@@ -30,14 +30,16 @@ public class ScheduleMeasurements_metric {
     private long   interval;
     private int    derivedID;
     private int    dsnID;
+    private String category;
 
     ScheduleMeasurements_metric(String dsn, long interval, int derivedID,
-                                int dsnID)
+                                int dsnID, String category)
     {
         this.dsn       = dsn;
         this.interval  = interval;
         this.derivedID = derivedID;
         this.dsnID     = dsnID;
+        this.category  = category;
     }
 
     public String getDSN(){
@@ -54,5 +56,9 @@ public class ScheduleMeasurements_metric {
 
     public int getDSNID(){
         return this.dsnID;
+    }
+
+    public String getCategory(){
+        return this.category;
     }
 }

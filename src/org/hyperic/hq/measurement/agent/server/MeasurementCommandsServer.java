@@ -202,7 +202,8 @@ public class MeasurementCommandsServer
                                                metric.getInterval(),
                                                metric.getDerivedID(),
                                                metric.getDSNID(),
-                                               ent);
+                                               ent,
+                                               metric.getCategory());
             try {
                 this.schedStorage.storeMeasurement(sMetric);
             } catch(AgentStorageException exc){

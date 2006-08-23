@@ -40,15 +40,17 @@ public class ScheduledMeasurement {
     private int            derivedID;
     private int            dsnID;
     private AppdefEntityID ent;
+    private String         category;
 
     public ScheduledMeasurement(String dsn, long interval, int derivedID,
-                                int dsnID, AppdefEntityID ent)
+                                int dsnID, AppdefEntityID ent, String category)
     {
         this.dsn       = dsn;
         this.interval  = interval;
         this.derivedID = derivedID;
         this.dsnID     = dsnID;
         this.ent       = ent;
+        this.category  = category;
     }
 
     public String getDSN(){
@@ -71,6 +73,10 @@ public class ScheduledMeasurement {
         return this.ent;
     }
 
+    public String getCategory(){
+        return this.category;
+    }
+
     public String encode(){
         ByteArrayOutputStream bOs;
         DataOutputStream dOs;
@@ -85,6 +91,7 @@ public class ScheduledMeasurement {
             dOs.writeInt(this.dsnID);
             dOs.writeInt(this.ent.getType());
             dOs.writeInt(this.ent.getID());
+            dOs.writeUTF(this.category);
         } catch(IOException exc){
             // Shouldn't ever occur, but ...
             System.out.println("Unable to encode record: " + exc.getMessage());
@@ -107,9 +114,11 @@ public class ScheduledMeasurement {
             int dsnID     = dIs.readInt();
             int entType   = dIs.readInt();
             int entID     = dIs.readInt();
+            String category = dIs.readUTF();
 
             return new ScheduledMeasurement(dsn, interval, derivedID, dsnID,
-                                            new AppdefEntityID(entType,entID));
+                                            new AppdefEntityID(entType,entID),
+                                            category);
         } catch(IOException exc){
             // Shouldn't ever occur, but ...
             System.out.println("Unable to encode record: " + exc.getMessage());

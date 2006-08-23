@@ -43,6 +43,7 @@ public class ScheduleMeasurements_args
     private static final String PARAM_SRN_ID     = "srnID";
     private static final String PARAM_DSN_ID     = "dsnID";
     private static final String PARAM_NMEAS      = "nmeas";   // # measurements
+    private static final String PARAM_CATEGORY   = "category";
 
     private void setup(){
         AppdefEntityID ent;
@@ -84,19 +85,27 @@ public class ScheduleMeasurements_args
         // to check validity of the arguments, since this is an entry point
         // into the API
         for(int i=0; i<nmeas; i++){
-            String dsn;
+            String dsn, category;
             long ival;
             int derID, dsnID;
 
             dsn  = args.getValue(ScheduleMeasurements_args.PARAM_DSN + i);
-            ival  = 
-               args.getValueAsLong(ScheduleMeasurements_args.PARAM_INTERVAL+i);
-            derID =
-              args.getValueAsInt(ScheduleMeasurements_args.PARAM_DERIVED_ID+i);
-            dsnID =
-              args.getValueAsInt(ScheduleMeasurements_args.PARAM_DSN_ID + i);
+            ival = args.getValueAsLong(ScheduleMeasurements_args.
+                                       PARAM_INTERVAL + i);
+            derID = args.getValueAsInt(ScheduleMeasurements_args.
+                                       PARAM_DERIVED_ID + i);
+            dsnID = args.getValueAsInt(ScheduleMeasurements_args.
+                                       PARAM_DSN_ID + i);
+            category = args.getValue(ScheduleMeasurements_args.
+                                     PARAM_CATEGORY + i);
 
-            this.addMeasurement(dsn, ival, derID, dsnID);
+            // Add backwards compat for older servers (< 2.7.4 and < 2.6.29)
+            // that don't send the category
+            if (category == null) {
+                category = "";
+            }
+
+            this.addMeasurement(dsn, ival, derID, dsnID, category);
         }
     }
 
@@ -119,7 +128,7 @@ public class ScheduleMeasurements_args
     }
 
     public void addMeasurement(String dsn, long interval, int derivedID, 
-                               int dsnID)
+                               int dsnID, String category)
     {
         int curMeas = this.getNumMeasurements();
 
@@ -130,9 +139,11 @@ public class ScheduleMeasurements_args
                        Integer.toString(derivedID));
         super.setValue(ScheduleMeasurements_args.PARAM_DSN_ID + curMeas,
                        Integer.toString(dsnID));
+        super.setValue(ScheduleMeasurements_args.PARAM_CATEGORY + curMeas,
+                       category);
+
         this.setNumMeasurements(curMeas + 1);
     }
-
 
     public void setValue(String key, String val){
         throw new AgentAssertionException("This should never be called");
@@ -142,7 +153,8 @@ public class ScheduleMeasurements_args
         return new ScheduleMeasurements_metric(this.getDSN(measNum),
                                                this.getInterval(measNum),
                                                this.getDerivedID(measNum),
-                                               this.getDSNId(measNum));
+                                               this.getDSNId(measNum),
+                                               this.getCategory(measNum));
     }
 
     private String getDSN(int measNum){
@@ -203,4 +215,14 @@ public class ScheduleMeasurements_args
                                               "construction failed");
         }
     }
+
+    private String getCategory(int measNum){
+        String res;
+
+        String qval = ScheduleMeasurements_args.PARAM_CATEGORY + measNum;
+
+        res = this.getValue(qval);
+   
+        return res;
+    }        
 }
