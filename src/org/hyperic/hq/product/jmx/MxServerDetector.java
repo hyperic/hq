@@ -36,10 +36,10 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 
 import org.hyperic.hq.product.AutoServerDetector;
+import org.hyperic.hq.product.DaemonDetector;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
 
@@ -48,7 +48,7 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 
 public class MxServerDetector
-    extends ServerDetector
+    extends DaemonDetector
     implements AutoServerDetector
 {
     static final String PROP_SERVICE_NAME = "name";
