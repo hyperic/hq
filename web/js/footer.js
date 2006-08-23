@@ -89,8 +89,8 @@ function closeAbout(e) {
     aboutShown = false;
   }
 
-  if (bodyClicked != null) {
-    bodyClicked(e);
+  if (typeof(window['diagShown']) == undefined) {
+      bodyClicked(e);
   }
 }
 
