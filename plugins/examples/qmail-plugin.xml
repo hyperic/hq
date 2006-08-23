@@ -24,7 +24,7 @@
  -->
 
 <plugin>
-  <!-- extracted to: pdk/scripts/qmail/hq-qmail-qstat -->
+  <!-- extracted to: pdk/work/scripts/qmail/hq-qmail-qstat -->
   <script name="hq-qmail-qstat">
 #!/bin/sh
 
@@ -99,7 +99,7 @@ echo MessagesAwaitingPreprocessing=`expr $todofiles - $tododirs`
 
     <!-- qmail-qstat metrics -->
     <filter name="template"
-            value="exec:file=pdk/scripts/qmail/hq-qmail-qstat,exec=sudo:${alias}"/>
+            value="exec:file=pdk/work/scripts/qmail/hq-qmail-qstat,exec=sudo:${alias}"/>
 
     <metric name="Messages In Queue"
             indicator="true"/>
