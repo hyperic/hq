@@ -261,7 +261,9 @@ Draggable.prototype = {
       if(src.tagName && (
         src.tagName=='INPUT' ||
         src.tagName=='SELECT' ||
+        src.tagName=='OPTION' ||
         src.tagName=='BUTTON' ||
+        src.tagName=='IMG' ||
         src.tagName=='TEXTAREA')) return;
         
       if(this.element._revert) {
