@@ -346,7 +346,7 @@ public class ProductManagerEJBImpl
             }
         }
 
-        this.log.info(pluginName + " deployment took: " + timer);
+        this.log.info(pluginName + " deployment took: " + timer + " seconds");
 
         pluginDeployed(pInfo);
         this.updateEJBPlugin(plHome, pInfo);
