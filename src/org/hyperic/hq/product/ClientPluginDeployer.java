@@ -45,7 +45,7 @@ import org.apache.commons.logging.LogFactory;
  * Deployment of embedded plugin files.
  * Plugins can embed scripts, jars, native libraries, etc.
  * This class deploys such files on the agent-side only to
- * pdk/deploy/$type/$plugin/
+ * pdk/work/$type/$plugin/
  * Where type is "scripts", "lib", etc., plugin is the plugin name.
  * The pdk/$type directory must exist otherwise deployment is skipped.
  */
@@ -53,6 +53,8 @@ public class ClientPluginDeployer {
 
     private static final Log log =
         LogFactory.getLog(ClientPluginDeployer.class.getName());
+
+    public static final String WORK_DIR = "work";
 
     private String plugin;
     private String pdk;
@@ -129,7 +131,7 @@ public class ClientPluginDeployer {
             }
 
             String subdir =
-                "deploy" + File.separator +
+                WORK_DIR + File.separator +
                 this.name + File.separator +
                 deployer.plugin;
 
