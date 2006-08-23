@@ -196,7 +196,7 @@
                                1, // 1 steps
                                {}
                              );
-    Rico.Corner.round(advancedDiv , {corners:"tl"});
+    Rico.Corner.round(advancedDiv , {border:'#F35E0C',compact:true});
     new Effect.Fade(advancedDiv, {duration: 0});
   }
 
