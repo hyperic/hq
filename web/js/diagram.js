@@ -23,13 +23,13 @@
 
 /*-- START diagram.js --*/
 
-var shown = false;
+var diagShown = false;
 var diagramDiv;
 
 function toggleDiagram(eId) {
   var thisDiv = $(eId);
   
-  if ( shown ) {
+  if ( diagShown ) {
     hideDiagram(thisDiv);
   } else {
     showDiagram(thisDiv);
@@ -40,14 +40,14 @@ function hideDiagram(thisDiv) {
   new Effect.SlideUp(thisDiv);
   showFormElements();
   
-  shown = false;
+  diagShown = false;
 }
 
 function showDiagram(thisDiv) {
   new Effect.SlideDown(thisDiv);
   hideFormElements();
 
-  shown = true;
+  diagShown = true;
 
   diagramDiv = thisDiv;
   setTimeout("makeDiagramVisible()", 500);
@@ -74,10 +74,12 @@ function bodyClicked(e) {
     target = e.srcElement;
   }
 
-  if ( shown && (!target || ('navMapIcon' != target.name && 'navMapImage' != target.name)) ) {
+  if ( diagShown && (!target || ('navMapIcon' != target.name &&
+                                 'navMapImage' != target.name)) ) {
     hideDiagram('diagramDiv');
   }
 }
+
 document.body.onclick = bodyClicked;
 
 /*-- END diagram.js --*/
