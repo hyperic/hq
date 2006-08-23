@@ -66,14 +66,6 @@ public class HQConstants {
     // How long do we keep alerts
     public static final String AlertPurge      = "ALERT_PURGE";
 
-    // Baseline config options
-    // The frequency to run auto-baselines
-    public static final String BaselineFrequency = "CAM_BASELINE_FREQUENCY";
-    // How much data to include
-    public static final String BaselineDataSet = "CAM_BASELINE_DATASET";
-    // How many points to require at a mininum
-    public static final String BaselineMinSet  = "CAM_BASELINE_MINSET";
-
     // email related
     public static final String EmailSender = "CAM_EMAIL_SENDER";
     
