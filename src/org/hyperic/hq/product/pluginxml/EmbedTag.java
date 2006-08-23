@@ -113,6 +113,10 @@ public class EmbedTag
             return;
         }
 
+        if (deployer.upToDate(new File(this.data.file), file)) {
+            return;
+        }
+
         try {
             deployer.write(this.text, file);
         } catch (IOException e) {
