@@ -178,8 +178,7 @@ public class ClientPluginDeployer {
                 continue;
             }
 
-            if (entry.getTime() < file.lastModified()) {
-                log.debug(file + " unchanged.");
+            if (upToDate(entry, file)) {
                 continue;
             }
 
@@ -248,6 +247,34 @@ public class ClientPluginDeployer {
         return pluginFile;
     }
 
+    public boolean upToDate(long source, long target) {
+        return source < target;
+    }
+
+    public boolean upToDate(ZipEntry source, File target) {
+        boolean upToDate =
+            upToDate(source.getTime(),
+                     target.lastModified());
+
+        if (upToDate) {
+            log.debug("Unchanged file: " + target);
+        }
+
+        return upToDate;
+    }
+
+    public boolean upToDate(File source, File target) {
+        boolean upToDate =
+            upToDate(source.lastModified(),
+                     target.lastModified());
+
+        if (upToDate) {
+            log.debug("Unchanged file: " + target);
+        }
+
+        return upToDate;
+    }
+
     public void write(String data, File file)
         throws IOException {
 
@@ -261,11 +288,13 @@ public class ClientPluginDeployer {
             return;
         }
 
+        boolean exists = file.exists();
         FileOutputStream os;
 
         try {
             os = new FileOutputStream(file);
-            log.debug("Wrote file: " + file);
+            log.debug((exists ? "Updated" : "Created") +
+                      " file: " + file);
         } catch (IOException e) {
             if (file.exists() && (file.length() > 0)) {
                 //e.g. on win32, agent running w/ dll loaded
