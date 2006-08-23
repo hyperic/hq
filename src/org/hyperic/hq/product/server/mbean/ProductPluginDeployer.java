@@ -148,7 +148,7 @@ public class ProductPluginDeployer
         File propFile = ProductPluginManager.PLUGIN_PROPERTIES_FILE;
         this.ppm = new ProductPluginManager(propFile);
         this.ppm.setRegisterTypes(true);
-        this.ppm.setUnpackNestedJars(false); //jboss already does
+
         if (propFile.canRead()) {
             log.info("Loaded custom properties from: " + propFile);
         }

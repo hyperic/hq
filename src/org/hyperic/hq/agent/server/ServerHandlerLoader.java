@@ -67,7 +67,7 @@ class ServerHandlerLoader {
 
         try {
             PluginLoader loader = 
-                PluginLoader.create(jarPath, false,
+                PluginLoader.create(jarPath,
                                     this.getClass().getClassLoader());
             PluginLoader.setClassLoader(loader);
 

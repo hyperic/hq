@@ -25,14 +25,8 @@
 
 package org.hyperic.util;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FilenameFilter;
-import java.io.IOException;
-
 
 import java.net.URLClassLoader;
 import java.net.URL;
@@ -41,12 +35,10 @@ import java.net.MalformedURLException;
 
 import java.util.jar.Attributes;
 
-import java.util.Enumeration;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 public class PluginLoader extends URLClassLoader {
 
@@ -88,92 +80,9 @@ public class PluginLoader extends URLClassLoader {
     }
 
     /*
-     * Unpack any embedded jars in the plugin archive.  A few rules:
-     * - All contents of the lib directory will be unpacked into
-     *   the temporary directory.
-     * - Only .jar files are added to the plugin's classpath
-     *
-     * The embedded jars will be placed in the directory specified by
-     * the java.io.tmpdir System property.
-     *
-     * @param zipfile The plugin jar
-     * @return A vector of URL's to the embedded jars
-     */
-    private static ArrayList unpackEmbeddedJars(ZipFile zipfile)
-        throws IOException
-    {
-        ArrayList urls = new ArrayList();
-
-        for (Enumeration e = zipfile.entries(); e.hasMoreElements();) {
-            
-            ZipEntry entry = (ZipEntry)e.nextElement();
-            String entryName = entry.getName();
-
-            if (entryName.startsWith("lib") && entryName.length() > 4) {
-
-                int i = entryName.lastIndexOf('/');
-                if (i < 0)
-                    i = entryName.lastIndexOf('\\');
-                String s = entryName.substring(i + 1);
-
-                File file = null;
-                try {
-                    if (s.endsWith(".jar")) {
-                        file = File.createTempFile(s, null);
-                        urls.add(file.toURL());
-                    } else {
-                        // All non-jar files are extracted as-is with the
-                        // same filename.
-                        file = new File(System.getProperty("java.io.tmpdir"),
-                                        s);
-                    }
-
-                    BufferedOutputStream outputStream;
-                    try {
-                        outputStream = 
-                            new BufferedOutputStream(new FileOutputStream(file));
-                    } catch (FileNotFoundException ex) {
-                        if (file.exists() && (file.length() > 0)) {
-                            //e.g. on win32, agent running w/ dll loaded
-                            //PluginDumper cannot overwrite file inuse.
-                            continue;
-                        }
-                        else {
-                            throw ex;
-                        }
-                    }
-
-                    file.deleteOnExit();
-
-                    BufferedInputStream inputStream =
-                        new BufferedInputStream(zipfile.
-                                                getInputStream(entry));
-
-                    int count = 0;
-                    byte b[] = new byte[8192];
-                    while ((count = inputStream.read(b)) > -1) {
-                        outputStream.write(b, 0, count);
-                    }
-                    outputStream.flush();
-                    outputStream.close();
-                    inputStream.close();
-
-                } catch (IOException ioe) {
-                    if (file != null) {
-                        file.delete();
-                    }
-                    throw ioe;
-                }
-            }
-        }
-        return urls;
-    }
-
-    /*
      * allow each plugin to have their own classpath.
      */
     public static PluginLoader create(String pluginName,
-                                      boolean unpackNestedJars,
                                       ClassLoader parent)
         throws PluginLoaderException {
 
@@ -182,17 +91,10 @@ public class PluginLoader extends URLClassLoader {
 
         if ((pluginName != null) && pluginName.endsWith(".jar")) {
             ArrayList urls = new ArrayList();
-            ZipFile zipfile = null;
             try {
                 URL jarUrl = toURL(pluginName);
 
                 urls.add(jarUrl); //note-to-self
-
-                // Unpack any embedded jars and add them to the classpath
-                if (unpackNestedJars) {
-                    zipfile = new ZipFile(pluginName);
-                    urls.addAll(unpackEmbeddedJars(zipfile));
-                }
 
                 // Get the plugin name from the jar
                 pluginClassName = getPluginMainClass(jarUrl);
@@ -200,13 +102,8 @@ public class PluginLoader extends URLClassLoader {
                 String msg =
                     "failed to configure plugin jar=" + pluginName;
                 throw new PluginLoaderException(msg, e);
-            } finally {
-                if (zipfile != null) {
-                    try {
-                        zipfile.close();
-                    } catch (IOException e) {}
-                }
             }
+
             classpath = (URL[])urls.toArray(new URL[0]);
         }
         else {
@@ -356,6 +253,14 @@ public class PluginLoader extends URLClassLoader {
 
         for (int i=0; i<urls.length; i++) {
             addURL(urls[i]);
+        }
+    }
+
+    public void addURLs(List urls)
+        throws PluginLoaderException {
+
+        for (int i=0; i<urls.size(); i++) {
+            addURL((String)urls.get(i));
         }
     }
 
