@@ -155,7 +155,7 @@ class MeasurementSchedule {
             ScheduledMeasurement metric;
 
             if((metric = ScheduledMeasurement.decode(value)) == null){
-                this.log.error("Unable to decode metric from storage, nuking");
+                this.log.error("Unable to decode metric from storage, deleting.");
                 i.remove();
                 continue;
             }
