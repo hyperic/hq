@@ -1,9 +1,9 @@
 package org.hyperic.hq.product.pluginxml;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
+import org.hyperic.hq.product.ClientPluginDeployer;
 import org.hyperic.util.xmlparser.XmlTagException;
 import org.hyperic.util.xmlparser.XmlTextHandler;
 
@@ -45,47 +45,22 @@ public class EmbedTag
         this.text = text.trim();
     }
 
-    protected File getSubDirectory(String pdk) {
-        File dir = null;
+    protected String getType() {
         String type = getAttribute(ATTR_TYPE);
         if (type == null) {
-            dir = new File(pdk, "../tmp");
-            if (dir.exists()) {
-                return dir;
-            }
-            else {
-                return null;
-            }
+            return getName();
         }
-        //e.g. <embed type="script" name="foo"/>
-        //check for pdk/scripts/
-        String[] dirs = { type + 's', type };
-
-        for (int i=0; i<dirs.length; i++) {
-            dir = new File(pdk, dirs[i]);
-            if (dir.exists()) {
-                break;
-            }
-            dir = null;
+        else {
+            return type;
         }
-
-        return dir;
     }
 
-    protected void writeFile() throws XmlTagException {
+    void write() throws XmlTagException {
         String name = getAttribute(ATTR_NAME);
-        
+
         String pdk = this.data.getPdkDir();
 
         if (pdk == null) {
-            return;
-        }
-
-        File dir = getSubDirectory(pdk);
-        if (dir == null) {
-            //ok+expected on the server-side
-            getLog().debug("Unable to determine subdirectory to write: " +
-                           name);
             return;
         }
 
@@ -97,48 +72,36 @@ public class EmbedTag
             throw new XmlTagException(msg);
         }
 
-        dir = new File(dir, pluginName);
-        if (!dir.exists()) {
-            if (!dir.mkdir()) {
-                getLog().error("mkdir(" + dir + ") failed");
-                return;
-            }
-            else {
-                getLog().debug("mkdir(" + dir + ") succeeded");
-            }
-        }
+        ClientPluginDeployer deployer =
+            new ClientPluginDeployer(pdk, pluginName);
 
-        File file = new File(dir, name);
+        String type = getType();
 
-        writeFile(file);
-        getLog().debug("Wrote file: '" + file + "'");
-    }
-
-    protected void writeFile(File file)
-        throws XmlTagException {
-
-        FileOutputStream os = null;
-    
-        try {
-            os = new FileOutputStream(file);
-            os.write(this.text.getBytes());
-        } catch (IOException e) {
+        if (!deployer.isDeployableType(type)) {
             String msg =
-                "Error writing '" + file + "': " +
-                e.getMessage();
+                "Invalid " + getName() + " type=" + type;
             throw new XmlTagException(msg);
-        } finally {
-            if (os != null) {
-                try {
-                    os.close();
-                } catch (IOException e) {}
-            }
+        }
+
+        File file = deployer.getFile(type, name);
+        if (file == null) {
+            return;
+        }
+
+        try {
+            deployer.write(this.text, file);
+        } catch (IOException e) {
+            throw new XmlTagException(e.getMessage());
         }
     }
-    
+
     void endTag() throws XmlTagException {
         super.endTag();
-        writeFile();
-        this.text = null;
+
+        try {
+            write();
+        } finally {
+            this.text = null;
+        }
     }
 }
