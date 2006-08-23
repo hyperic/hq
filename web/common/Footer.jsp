@@ -50,7 +50,7 @@
           <td class="FooterRegular" width="30">&nbsp;</td>
           <td class="FooterRegular" nowrap>
           <div id="aboutAnchor" style="position:relative;">
-          <a href="javascript:about('<html:rewrite page="/common/"/>')"><fmt:message key="footer.HQ"/>
+          <a name="aboutLink" href="javascript:about('<html:rewrite page="/common/"/>')"><fmt:message key="footer.HQ"/>
           <fmt:message key="footer.version"/> <c:out value="${HQVersion}"/></a> <c:out value="${HQBuild}"/></td>
           <td class="FooterRegular" width="30"></div></td>
           <td class="FooterSmall" nowrap><fmt:message key="footer.pageVersionPrefix"/><c:out value="${camTitle}"/><fmt:message key="footer.pageVersionSuffix"/>
@@ -65,13 +65,6 @@
 
 <div id="about" class="dialog" style="filter: alpha(opacity=0);opacity: 0;visibility: hidden;width=310px">
 <table cellpadding="2" cellspacing="0" border="0" width="305">
-  <tr>
-    <td rowspan="6"><html:img page="/images/spacer.gif" width="15" height="215" border="0"/></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td rowspan="6" valign="top"><html:img page="/images/dash-icon_delete.gif" onclick="closeAbout()"/></td>
-  </tr>
   <tr>
     <td width="1%" class="PageTitle"><html:img page="/images/spacer.gif" width="1" height="32" alt="" border="0"/></td>
     <td width="66%" class="PageTitle"><fmt:message key="about.Title"/></td>
@@ -89,8 +82,8 @@
   </tr>
   <tr>
     <td valign="top" class="DisplayContent" colspan="2"><fmt:message key="about.MoreInfo.Label"/><br>
-    <html:link href="http://support.hyperic.com" onclick="window.open('http://support.hyperic.com');"><fmt:message key="about.MoreInfo.LinkSupport"/></html:link><br>
-    <html:link href="http://forums.hyperic.org"  onclick="window.open('http://forums.hyperic.org');"><fmt:message key="about.MoreInfo.LinkForums"/></html:link><br>
+    <html:link href="#" onclick="window.open('http://support.hyperic.com');"><fmt:message key="about.MoreInfo.LinkSupport"/></html:link><br>
+    <html:link href="#"  onclick="window.open('http://forums.hyperic.org');"><fmt:message key="about.MoreInfo.LinkForums"/></html:link><br>
     &nbsp;</td>
   </tr>
   <tr>
