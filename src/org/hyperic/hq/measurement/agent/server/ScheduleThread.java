@@ -40,6 +40,7 @@ import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.MeasurementPluginManager;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricInvalidException;
@@ -372,9 +373,13 @@ public class ScheduleThread
                                       " id=" + id);
                     }
                     else {
-                        //prevent stacktrace bombs if a resource is down.
-                        this.stat_numMetricsFailed++;
-                        continue;
+                        if (!category.equals(MeasurementConstants.
+                                             CAT_AVAILABILITY)) {
+                            // Prevent stacktrace bombs if a resource is down,
+                            // but don't skip processing availability metrics.
+                            this.stat_numMetricsFailed++;
+                            continue;
+                        }
                     }
                 }
 
