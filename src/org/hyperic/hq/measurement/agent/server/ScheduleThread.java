@@ -352,6 +352,7 @@ public class ScheduleThread
             for(int i=0; i<items.size() && this.shouldDie == false; i++){
                 ScheduledMeasurement meas = (ScheduledMeasurement)items.get(i);
                 AppdefEntityID aid = meas.getEntity();
+                String category = meas.getCategory();
                 int id = aid.getID();
                 int type = aid.getType();
                 IntHashMap unreachable = this.unreachable[type];
@@ -420,8 +421,8 @@ public class ScheduleThread
 
                 if(success){
                     if (this.log.isDebugEnabled()) {
-                        this.log.debug("[" + type + ":" + id + "] Metric='" +
-                                       dsn + "' -> " + data);
+                        this.log.debug("[" + type + ":" + id + ":" + category + 
+                                       "] Metric='" + dsn + "' -> " + data);
                     }
                     if (data.isNone()) {
                         //wouldn't be inserted into the database anyhow
