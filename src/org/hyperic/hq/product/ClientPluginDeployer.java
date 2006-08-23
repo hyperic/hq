@@ -178,6 +178,11 @@ public class ClientPluginDeployer {
                 continue;
             }
 
+            if (entry.getTime() < file.lastModified()) {
+                log.debug(file + " unchanged.");
+                continue;
+            }
+
             InputStream is = zipfile.getInputStream(entry);
             try {
                 write(is, file);
