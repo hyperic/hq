@@ -124,9 +124,9 @@ public class ClientPluginDeployer {
             //e.g. check /.../pdk/$name exists
             File pluginDir = new File(deployer.pdk, this.name);
             if (!pluginDir.exists()) {
+                log.debug(pluginDir + " does not exist.");
                 return null;
             }
-            log.debug(pluginDir + " exists");
 
             String subdir =
                 "deploy" + File.separator +
