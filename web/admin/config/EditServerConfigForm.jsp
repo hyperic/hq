@@ -71,9 +71,9 @@
 <!--  EMAIL CONFIG CONTENTS -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
-    <td width="20%" class="BlockLabel"><fmt:message key="admin.settings.BaseURL"/></td>
-    <td width="30%" class="BlockContent"><html:text size="31" property="baseUrl" /></td>
-    <td width="20%" class="BlockContent" colspan="2"></td>
+    <td width="30%" class="BlockLabel"><fmt:message key="admin.settings.BaseURL"/></td>
+    <td width="40%" class="BlockContent"><html:text size="31" property="baseUrl" /></td>
+    <td width="30%" class="BlockContent" colspan="2"></td>
   </tr>
   <tr>
     <td class="BlockLabel"><fmt:message key="admin.settings.SenderEmailAddressLabel"/></td>
@@ -96,53 +96,6 @@
 <!--  /  -->
 
 <!--  DATA MANAGER CONFIG CONTENTS -->
-  <tr>
-    <td class="BlockLabel"><fmt:message key="admin.settings.PurgeOlderThanLabel"/></td>
-    <td class="BlockContent">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-<logic:messagesPresent property="deleteUnitsVal">
-          <td class="ErrorField">
-            <html:text size="2" property="deleteUnitsVal" />
-          </td>
-          <td class="ErrorField" width="100%"><fmt:message key="admin.settings.Days"/>
-            <html:hidden property="deleteUnits" value="${CONST_DAYS}"/>
-          </td>
-</logic:messagesPresent>          
-<logic:messagesNotPresent property="deleteUnitsVal">
-          <td class="BlockContent">
-            <html:text size="2" property="deleteUnitsVal" />
-          </td>
-          <td class="BlockContent" width="100%"><fmt:message key="admin.settings.Days"/>
-            <html:hidden property="deleteUnits" value="${CONST_DAYS}"/>
-          </td>
-</logic:messagesNotPresent>          
-        </tr>
-<logic:messagesPresent property="deleteUnitsVal">
-        <tr>
-          <td class="ErrorField" colspan="2">
-            <span class="ErrorFieldContent">- <html:errors property="deleteUnitsVal"/></span>            
-          </td>
-        </tr>
-</logic:messagesPresent>
-<logic:messagesNotPresent property="deleteUnitsVal">
-        <tr>
-          <td class="BlockContent" colspan="2">
-          </td>
-        </tr>
-</logic:messagesNotPresent>
-      </table>
-    </td>
-    <td class="BlockLabel"/>
-    <td class="BlockContent">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td class="BlockContent" colspan="2">
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
   <tr>
     <td class="BlockLabel"><fmt:message key="admin.settings.DataMaintInterval"/></td>
     <td class="BlockContent">
@@ -191,37 +144,36 @@
     </td>
   </tr>
 
-  <c:if test="${not empty showRt}">
   <tr>
-    <td class="BlockLabel"><fmt:message key="admin.settings.RtDataPurge"/></td>
+    <td class="BlockLabel"><fmt:message key="admin.settings.PurgeOlderThanLabel"/></td>
     <td class="BlockContent">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-<logic:messagesPresent property="rtPurgeVal">
+<logic:messagesPresent property="deleteUnitsVal">
           <td class="ErrorField">
-            <html:text size="2" property="maintIntervalVal" />
+            <html:text size="2" property="deleteUnitsVal" />
           </td>
           <td class="ErrorField" width="100%"><fmt:message key="admin.settings.Days"/>
-            <html:hidden property="rtPurge" value="${CONST_DAYS}"/>
+            <html:hidden property="deleteUnits" value="${CONST_DAYS}"/>
           </td>
 </logic:messagesPresent>          
-<logic:messagesNotPresent property="rtPurgeVal">
+<logic:messagesNotPresent property="deleteUnitsVal">
           <td class="BlockContent">
-            <html:text size="2" property="rtPurgeVal" />
+            <html:text size="2" property="deleteUnitsVal" />
           </td>
           <td class="BlockContent" width="100%"><fmt:message key="admin.settings.Days"/>
-            <html:hidden property="rtPurge" value="${CONST_DAYS}"/>
+            <html:hidden property="deleteUnits" value="${CONST_DAYS}"/>
           </td>
 </logic:messagesNotPresent>          
         </tr>
-<logic:messagesPresent property="rtPurgeVal">
+<logic:messagesPresent property="deleteUnitsVal">
         <tr>
           <td class="ErrorField" colspan="2">
-            <span class="ErrorFieldContent">- <html:errors property="rtPurgeVal"/></span>            
+            <span class="ErrorFieldContent">- <html:errors property="deleteUnitsVal"/></span>            
           </td>
         </tr>
 </logic:messagesPresent>
-<logic:messagesNotPresent property="rtPurgeVal">
+<logic:messagesNotPresent property="deleteUnitsVal">
         <tr>
           <td class="BlockContent" colspan="2">
           </td>
@@ -229,7 +181,7 @@
 </logic:messagesNotPresent>
       </table>
     </td>
-    <td class="BlockLabel"></td>
+    <td class="BlockLabel"/>
     <td class="BlockContent">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
@@ -239,7 +191,20 @@
       </table>
     </td>
   </tr>
-  </c:if>
+
+  <tr>
+    <td class="BlockLabel"><fmt:message key="admin.settings.Reindex"/></td>
+    <td class="BlockLabel">
+      <table cellpadding="0" cellspacing="4" border="0">
+        <tr>
+          <td align="left"><html:radio property="reindex" value="true"/><fmt:message key="yesno.true"/></td>
+          <td align="left"><html:radio property="reindex" value="false"/><fmt:message key="yesno.false"/></td>
+        </tr>
+      </table>
+    </td>
+    <td class="BlockLabel"></td>
+    <td class="BlockContent"></td>
+  </tr>
 
   <tr>
     <td class="BlockLabel"><fmt:message key="admin.settings.AlertPurge"/></td>
@@ -289,22 +254,5 @@
     </td>
   </tr>
 
-  <tr>
-    <td class="BlockLabel"><fmt:message key="admin.settings.Reindex"/></td>
-    <td class="BlockLabel">
-      <table cellpadding="0" cellspacing="4" border="0">
-        <tr>
-          <td align="left"><html:radio property="reindex" value="true"/><fmt:message key="yesno.true"/></td>
-          <td align="left"><html:radio property="reindex" value="false"/><fmt:message key="yesno.false"/></td>
-        </tr>
-      </table>
-    </td>
-    <td class="BlockLabel"></td>
-    <td class="BlockContent"></td>
-  </tr>
-
-  <tr>
-    <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-  </tr>
 </table>
 
