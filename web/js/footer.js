@@ -27,6 +27,7 @@ var conH;
 var winH;
 var footerH = 28;
 var browserH = 88;
+var aboutShown = false;
 
 function setFoot() {
   if (isIE) {
@@ -66,9 +67,33 @@ function hideAbout() {
 function about() {
     var about = $('about');
     new Effect.Appear( about, {to: 0.85} );
+    aboutShown = true;
 }
 
-function closeAbout() {
+function closeAbout(e) {
+  if (!e) {
+    if (window.event) {
+      e = window.event;
+    }
+  }
+
+  var target = null;
+  if (e.target) {
+    target = e.target;
+  } else if (e.srcElement) {
+    target = e.srcElement;
+  }
+
+  if (aboutShown && (!target || "aboutLink" != target.name )) {
     new Effect.Fade( 'about' );
+    aboutShown = false;
+  }
+
+  if (bodyClicked != null) {
+    bodyClicked(e);
+  }
 }
+
+document.body.onclick = closeAbout;
+
 /*-- END footer.js --*/
