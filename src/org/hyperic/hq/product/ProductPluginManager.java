@@ -70,7 +70,7 @@ public class ProductPluginManager extends PluginManager {
     };
     
     private boolean registerTypes = false;
-    private boolean unpackNestedJars = true;
+    private boolean isClient;
     private HashMap managers = new HashMap();
     private HashMap types = new HashMap();
     private HashMap includePlugins = null;
@@ -112,10 +112,6 @@ public class ProductPluginManager extends PluginManager {
 
     public boolean getRegisterTypes() {
         return this.registerTypes;
-    }
-
-    public void setUnpackNestedJars(boolean unpackNestedJars) {
-        this.unpackNestedJars = unpackNestedJars;
     }
 
     public static String getPropertyKey(String plugin, String key) {
@@ -269,6 +265,18 @@ public class ProductPluginManager extends PluginManager {
 
         Properties props = getProperties();
         props.putAll(ProductProperties.getProperties());
+
+        String pdk = getProperty(PROP_PDK_DIR);
+        if (pdk != null) {
+            this.isClient = new File(pdk, "lib").exists();
+        }
+        if (this.isClient) {
+            log.debug("Initializing in client mode " +
+                      "(pdk=" + pdk + ")");
+        }
+        else {
+            log.debug("Initializing in server mode");
+        }
 
         this.mpm = new MeasurementPluginManager(props);
         this.cpm = new ControlPluginManager(props);
@@ -697,7 +705,6 @@ public class ProductPluginManager extends PluginManager {
         try {
             PluginLoader loader =
                 PluginLoader.create(jarName,
-                                    this.unpackNestedJars,
                                     this.getClass().getClassLoader());
 
             PluginLoader.setClassLoader(loader);
@@ -758,9 +765,26 @@ public class ProductPluginManager extends PluginManager {
                 plugin.setName(pluginName);
             }
 
+            List embeddedJars = null;
+            if (this.isClient && jarName.endsWith(".jar")) {
+                String pdk =
+                    getProperty(PROP_PDK_DIR);
+
+                ClientPluginDeployer deployer =
+                    new ClientPluginDeployer(pdk, plugin.getName());
+                embeddedJars = deployer.unpackJar(jarName);
+            }
+
             //only setup classpath on the agentside.
             //server-side within JBoss, ClassLoader is a UCL not PluginLoader.
             if (pluginClass.getClassLoader() instanceof PluginLoader) {
+                if ((embeddedJars != null) &&
+                    (embeddedJars.size() != 0))
+                {
+                    loader.addURLs(embeddedJars);
+                    log.debug("Adding embedded jars to classpath for: " +
+                              plugin.getName() + "=" + embeddedJars);
+                }
                 addClassPath(plugin, loader);
             }
 
@@ -824,6 +848,7 @@ public class ProductPluginManager extends PluginManager {
                     registerTypePlugin(pm, info, gPlugin, types[j]);
                 }
             }
+
             return pluginName;
         } catch (PluginException e) {
             throw e;
