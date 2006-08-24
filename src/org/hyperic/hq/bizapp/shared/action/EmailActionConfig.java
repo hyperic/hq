@@ -78,10 +78,10 @@ public class EmailActionConfig implements ActionConfigInterface {
 
         // Determine the type of recipients
         type = new IntegerConfigOption(
-            CFG_TYPE, "Recipient Type ([1] Emails [2] Users [3] Roles)",
+            CFG_TYPE, "Recipient Type ([1] Emails [2] Users)",
             new Integer(1));
         type.setMinValue(TYPE_EMAILS);
-        type.setMaxValue(TYPE_ROLES);
+        type.setMaxValue(TYPE_USERS);
         res.addOption(type);
 
         // Recipients
