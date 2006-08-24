@@ -29,6 +29,9 @@ package org.hyperic.hq.product.pluginxml;
 //plugin use via GenericPlugin.getProperty
 class PropertyTag extends FilterTag {
 
+    private static final String[] OPTIONAL_ATTRS =
+        { ATTR_VALUE, ATTR_TYPE };
+    
     private BaseTag parent;
     
     public PropertyTag(BaseTag parent) {
@@ -39,7 +42,11 @@ class PropertyTag extends FilterTag {
     public String getName() {
         return "property";
     }
-    
+
+    public String[] getOptionalAttributes() {
+        return OPTIONAL_ATTRS;
+    }
+
     void endTag() {
         super.endTag(); //make filter-able too
 
@@ -54,6 +61,10 @@ class PropertyTag extends FilterTag {
         }
         else {
             this.data.setProperty(this.name, this.value);
+        }
+
+        if (isGlobalType()) {
+            this.data.setGlobalProperty(this.name, this.value);
         }
     }
 }
