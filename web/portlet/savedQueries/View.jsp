@@ -37,6 +37,7 @@
   <tiles:put name="tabKey" value="dash.home.SavedQueries"/>
   <tiles:put name="adminUrl" beanName="adminUrl" />
   <tiles:put name="portletName" beanName="portletName" />
+  <tiles:put name="dragDrop" value="true"/>
 </tiles:insert>
 
 <!-- Content Block Contents -->

@@ -140,11 +140,9 @@
   <c:set var="isFirstPortlet" value="${portlet.isFirst}" scope="request"/>
   <c:set var="isLastPortlet"  value="${portlet.isLast}"  scope="request"/>
   <li id="<c:out value="${portlet.url}"/>">
-    <span style="cursor: move;">
   <table width="100%" border="0" cellspacing="0" cellpadding="0">
     <tr><td valign="top" class="DashboardPadding"><tiles:insert beanProperty="url" beanName="portlet" flush="true"/></td></tr>
   </table>
-  </span>
   </li>
   </c:forEach>
 </ul>

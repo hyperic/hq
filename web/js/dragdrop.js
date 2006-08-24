@@ -263,9 +263,11 @@ Draggable.prototype = {
         src.tagName=='SELECT' ||
         src.tagName=='OPTION' ||
         src.tagName=='BUTTON' ||
-        src.tagName=='IMG' ||
         src.tagName=='TEXTAREA')) return;
         
+      if (src.style.cursor != "move")
+        return;
+
       if(this.element._revert) {
         this.element._revert.cancel();
         this.element._revert = null;

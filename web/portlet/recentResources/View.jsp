@@ -35,6 +35,7 @@
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="dash.home.RecentResources"/>
   <tiles:put name="portletName" beanName="portletName" />
+  <tiles:put name="dragDrop" value="true"/>
 </tiles:insert>
 
 <tiles:importAttribute name="resourceHealth"/>

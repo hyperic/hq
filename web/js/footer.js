@@ -68,7 +68,10 @@ function about() {
     var about = $('about');
     new Effect.Appear( about, {to: 0.85} );
     aboutShown = true;
+
+  if (typeof(window['diagShown']) != 'undefined') {
     hideFormElements();
+  }
 }
 
 function closeAbout(e) {
@@ -92,10 +95,8 @@ function closeAbout(e) {
 
   if (typeof(window['diagShown']) != 'undefined') {
       bodyClicked(e);
+      showFormElements();
   }
-
-  showFormElements();
-
 }
 
 document.body.onclick = closeAbout;

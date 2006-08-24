@@ -34,6 +34,7 @@
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="dash.home.DidYouKnow"/>
   <tiles:put name="portletName" beanName="portletName" />
+  <tiles:put name="dragDrop" value="true"/>
 </tiles:insert>
 
 <tiles:importAttribute name="tip"/>
