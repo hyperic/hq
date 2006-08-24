@@ -25,11 +25,14 @@
 
 package org.hyperic.hq.product.pluginxml;
 
+import org.hyperic.util.xmlparser.XmlAttrException;
+import org.hyperic.util.xmlparser.XmlEndAttrHandler;
 import org.hyperic.util.xmlparser.XmlTextHandler;
 
 //for filtering within hq-plugin.xml only
 //after hq-plugin.xml has been processed this value are cleared
-class FilterTag extends BaseTag implements XmlTextHandler {
+class FilterTag extends BaseTag
+    implements XmlTextHandler, XmlEndAttrHandler {
 
     private static final String[] REQUIRED_ATTRS = 
         { ATTR_NAME };
@@ -64,13 +67,9 @@ class FilterTag extends BaseTag implements XmlTextHandler {
         }
     }
 
-    public void handleAttribute(String name, String value) {
-        if (name.equals(ATTR_NAME)) {
-            this.name = value;
-        }
-        else {
-            this.value = value;
-        }
+    public void endAttributes() throws XmlAttrException {
+        this.name = getAttribute(ATTR_NAME);
+        this.value = getAttribute(ATTR_VALUE, "true");
     }
 
     void endTag() {
