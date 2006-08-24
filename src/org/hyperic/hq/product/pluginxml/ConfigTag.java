@@ -149,7 +149,7 @@ class ConfigTag extends BaseTag implements XmlEndAttrHandler {
     public void endTag() throws XmlTagException {
         String name = getAttribute(ATTR_NAME);
         String type = getAttribute(ATTR_TYPE);
-        boolean isGlobal = "global".equals(type);
+        boolean isGlobal = isGlobalType();
         
         if (!isResourceParent()) {
             if (name == null) {

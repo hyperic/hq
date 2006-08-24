@@ -59,6 +59,8 @@ public abstract class BaseTag
     static final String ATTR_PLATFORM    = "platform";
     static final String ATTR_CLASS       = "class";
 
+    static final String TYPE_GLOBAL      = "global";
+
     private static final String[] EMPTY_LIST = new String[0];
 
     private static final String[] EMPTY_ATTRS =
@@ -88,6 +90,10 @@ public abstract class BaseTag
 
     protected Log getLog() {
         return LogFactory.getLog(this.getClass().getName());
+    }
+
+    boolean isGlobalType() {
+        return TYPE_GLOBAL.equals(getAttribute(ATTR_TYPE));
     }
 
     boolean isResourceParent() {
