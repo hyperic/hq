@@ -61,27 +61,21 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
         ClientShell_resource.PARAM_SERVICE,
     };
     
-    private static final int[] PARAM_VALID_RESOURCETYPE = {
-            ClientShell_resource.PARAM_PLATFORM,
-            ClientShell_resource.PARAM_SERVER,
-            ClientShell_resource.PARAM_SERVICE,
-    };
-
-    private static final String PROP_NAME        = "name";
-    private static final String PROP_DESCRIPTION = "description";
-    private static final String PROP_PRIORITY    = "priority";
-    private static final String PROP_FIL_NOTIF   = "filter notification";
-    private static final String PROP_FIL_CONTROL = "filter control";
+    protected static final String PROP_NAME        = "name";
+    protected static final String PROP_DESCRIPTION = "description";
+    protected static final String PROP_PRIORITY    = "priority";
     
-    private static final String PROP_METRIC_ID   = "measurement ID";
-    private static final String PROP_COMPARATOR  = "comparator";
-    private static final String PROP_THRESHOLD   = "threshold";
-    private static final String PROP_OPTION      = "option";
+    private static final String PROP_METRIC_ID     = "id";
+    private static final String PROP_COMPARATOR    = "comparator";
+    private static final String PROP_THRESHOLD     = "threshold";
+    protected static final String PROP_OPTION      = "option";
     
     private static final String PARAM_FORMAT =
         "<" + ClientShellParseUtil.makeResourceBlock(PARAM_VALID_RESOURCE) + ">";
     
-    private static String[] AR_REQ = { "Yes (AND)", "NO  (OR)" };
+    protected static String[] AR_REQ = { "Yes (AND)", "NO  (OR)" };
+
+    private Collection metrics;
     
     public ClientShell_alertdef_create(ClientShell shell) {
         super(shell, PARAM_FORMAT);
@@ -92,20 +86,18 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
         ClientShellParseUtil.bubbleUpResourceBlock(result, blockVals);
     }
 
-    private ConfigSchema getDefCreateSchema() {
+    protected ConfigSchema getDefCreateSchema() {
         SchemaBuilder sb = new SchemaBuilder();
 
         sb.add(PROP_NAME,         "Name", "New Alert");
         sb.add(PROP_DESCRIPTION,  "Description", "", true);
         sb.addEnum(PROP_PRIORITY, "Priority", EventConstants.getPriorities(),
                    EventConstants.getPriority(EventConstants.PRIORITY_MEDIUM));
-        sb.add(PROP_FIL_NOTIF,    "Filter Notifications", false);
-        sb.add(PROP_FIL_CONTROL,  "Filter Control Actions", false);
 
         return sb.getSchema();
     }
 
-    private ConfigSchema getCondTypeSchema() {
+    protected ConfigSchema getCondTypeSchema() {
         SchemaBuilder sb = new SchemaBuilder();
         
         sb.addEnum(PROP_OPTION, "Alert Condition Type",
@@ -118,7 +110,6 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
     private String getMetricAliases(AppdefEntityID id)
         throws ShellCommandExecException {
         
-        Collection metrics;
         try {
             metrics = this.getEntityFetcher().getMetricsForID(id);
             if (metrics.size() == 0)
@@ -148,16 +139,17 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
      * resource appdef id associated... use with care
      * @return an unsaved AlertDefinitionValue object
      */
-    private AlertDefinitionValue createAlertDefinitionTempl(
+    protected AlertDefinitionValue createAlertDefinitionTempl(
         ConfigResponse resp) throws ShellCommandExecException {
         return createAlertDefinitionTempl(null, resp);
     }
+    
     /**
      * Create an alertdefinitionvalue object
      * which can then be passed into the backend for saving
      * @return an unsaved AlertDefinitionValue object
      */
-    private AlertDefinitionValue createAlertDefinitionTempl(
+    protected AlertDefinitionValue createAlertDefinitionTempl(
         AppdefEntityID aid,
         ConfigResponse resp) throws ShellCommandExecException {
         AlertDefinitionValue alertdef = new AlertDefinitionValue();
@@ -180,15 +172,6 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
         }
         alertdef.setPriority(pri);
         
-        // Set filtering options
-        boolean filNotif =
-            new Boolean(resp.getValue(PROP_FIL_NOTIF)).booleanValue();
-        alertdef.setNotifyFiltered(filNotif);
-        
-        boolean filCtrl =
-            new Boolean(resp.getValue(PROP_FIL_CONTROL)).booleanValue();
-        alertdef.setControlFiltered(filCtrl);
-
         // Enable it, of course
         alertdef.setEnabled(true);
         
@@ -220,11 +203,17 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
                 cond.setThreshold(
                     Double.parseDouble(resp.getValue(PROP_THRESHOLD)));
             case EventConstants.TYPE_CHANGE :
-                // Get the measurement ID
-                dmv =
-                    this.getEntityFetcher().getMetricByAliasAndID(
-                        aid, resp.getValue(PROP_METRIC_ID));
-                cond.setMeasurementId(dmv.getId().intValue());
+                cond.setMeasurementId(
+                    Integer.parseInt(resp.getValue(PROP_METRIC_ID)));
+                
+                // Find the metric name
+                for (Iterator it = metrics.iterator(); it.hasNext(); ) {
+                    dmv = (DerivedMeasurementValue) it.next();
+                    if (dmv.getId().intValue() == cond.getMeasurementId()) {
+                        cond.setName(dmv.getTemplate().getName());
+                        break;
+                    }
+                }
                 break;
             default :
                 break;
@@ -276,63 +265,57 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
         //  Create the conditions until user says no-mo
         boolean req = true;
         try {
-            while (true) {
-                // Need to find out what type of alert the user wants
-                typeResp = this.getClientShell().processConfigSchema(this.getCondTypeSchema());
+            // Need to find out what type of alert the user wants
+            typeResp = this.getClientShell()
+                    .processConfigSchema(this.getCondTypeSchema());
+        
+            int type = EventConstants.getType(typeResp.getValue(PROP_OPTION));
             
-                int type = EventConstants.getType(typeResp.getValue(PROP_OPTION));
-                
-                // Get the proper schema from the user
-                ConfigResponse condResp = getCondSchemaByType(firstId, type);
-                
-                // add it to the list
-                conditions.add(condResp);
-                typeMap.put(condResp, new Integer(type));
-                reqMap.put(condResp, Boolean.valueOf(req));
-                
-                String addMore = super.getShell().getInput(
-                    "Do you wish to add additional conditions (Y/N)? ");
-                
-                if (addMore.toUpperCase().startsWith("N"))
-                    break;
-                
-                // Ask if the new condition is required
-                SchemaBuilder sb = new SchemaBuilder();
-                sb.addEnum(PROP_OPTION, "Is the new condition required",
-                           AR_REQ, AR_REQ[0]);
-    
-                req = (this.getClientShell().processConfigSchema(sb.getSchema()))
-                            .getValue(PROP_OPTION).equals(AR_REQ[0]);
-            }
-
+            // Get the proper schema from the user
+            ConfigResponse condResp = getCondSchemaByType(firstId, type);
+            
+            // add it to the list
+            conditions.add(condResp);
+            typeMap.put(condResp, new Integer(type));
+            reqMap.put(condResp, Boolean.valueOf(req));
+            
             // get the email and user ids for the alertdef from the user
-            ConfigSchema emailActionSchema =
-                this.getEntityFetcher()
-                    .getActionConfigSchema(new EmailActionConfig().getImplementor());
-            getClientShell().getOutStream().println("[ Configure Email Actions ]");
+            ConfigSchema emailActionSchema = this.getEntityFetcher()
+                    .getActionConfigSchema(new EmailActionConfig()
+                                                   .getImplementor());
+            getClientShell().getOutStream()
+                    .println("[ Configure Email Actions ]");
 
-            ConfigResponse actionResp = getClientShell().processConfigSchema(emailActionSchema);
+            ConfigResponse actionResp = getClientShell()
+                    .processConfigSchema(emailActionSchema);
             getClientShell().getOutStream().println();
 
-            // fix for HQ-333: on invalid user input, allow user the opportunity to supply a proper value
+            // fix for HQ-333: on invalid user input, allow user the opportunity
+            // to supply a proper value
             while ( true ) {
                 try {
                     if (this.getEntityFetcher().ensureNamesAreIds(actionResp)) {
                         break;
                     }
-                    actionResp = getClientShell().processConfigSchema(emailActionSchema);
+                    actionResp = getClientShell()
+                            .processConfigSchema(emailActionSchema);
                     getClientShell().getOutStream().println();
                     break;
                 } catch (InvalidOptionValueException e) {
-                    getClientShell().getOutStream().println("An invalid value or a list of values was entered.  Please re-enter.");
-                    actionResp = getClientShell().processConfigSchema(emailActionSchema);
+                    getClientShell()
+                            .getOutStream()
+                            .println("An invalid value or a list of values was entered.  Please re-enter.");
+                    actionResp = getClientShell()
+                            .processConfigSchema(emailActionSchema);
                 }
             }
 
             // save the alert for each resource in the resources list
             for(int i = 0 ; i < resources.size(); i++) {
-                AppdefResourceValue aRes = (AppdefResourceValue)resources.get(i);
-                saveAlertByResource(aRes, def, conditions, typeMap, reqMap, actionResp);
+                AppdefResourceValue aRes =
+                    (AppdefResourceValue) resources.get(i);
+                saveAlertByResource(aRes, def, conditions, typeMap, reqMap,
+                                    actionResp);
             } 
             
         } catch (InvalidOptionException e) {
@@ -351,7 +334,7 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
      * @param condList
      * @param req
      */
-    private void saveAlertByResource(AppdefResourceValue aRes,
+    protected void saveAlertByResource(AppdefResourceValue aRes,
                                      AlertDefinitionValue def,
 									 ArrayList conditions,
 									 HashMap typeMap,
@@ -393,7 +376,7 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
         try {
             // now save the alert definition in the backend
             clone = this.getEntityFetcher().createAlertDefinition(clone);
-            super.getShell().sendToOutStream("Alert Definition '" +
+            getShell().sendToOutStream("Alert Definition '" +
                     def.getName() + "' (ID: " + clone.getId() + 
                     ") has been added to resource '" +
                     aRes.getName() + "'");
@@ -415,7 +398,7 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
      * @throws EncodingException
      * @throws IOException
      */
-    private ConfigResponse getCondSchemaByType(AppdefEntityID id, int type)
+    protected ConfigResponse getCondSchemaByType(AppdefEntityID id, int type)
         throws ShellCommandExecException, EncodingException, IOException {
         ConfigSchema condSchema =
             ConditionalTriggerSchema.getConfigSchema(type);
@@ -433,6 +416,7 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
         switch (type) {
         case EventConstants.TYPE_THRESHOLD:
         case EventConstants.TYPE_BASELINE :
+        case EventConstants.TYPE_CHANGE:
             // Print out metrics
             this.getOutStream().println(getMetricAliases(id));
             break;
@@ -454,7 +438,7 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
         throws ShellCommandUsageException, ShellCommandExecException {
         
         ClientShell_alertdef_add adder =
-            new ClientShell_alertdef_add(super.getClientShell());
+            new ClientShell_alertdef_add(getClientShell());
         adder.processCommand(
             new String[] { "-action", "Email",
                            String.valueOf(def.getId()) },
