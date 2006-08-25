@@ -7,6 +7,11 @@
   </classpath>
 
   <server name="lighttpd">
+    <property name="PROC_QUERY"
+              value="State.Name.eq=lighttpd"/>
+
+    <property name="port" value="80"/>
+
     <!-- override default url.path -->
     <property name="path" value="/server-status"/>
 
@@ -17,6 +22,9 @@
 
     <plugin type="collector"
             class="org.hyperic.hq.plugin.apache.ApacheStatusCollector"/>
+
+    <plugin type="autoinventory"
+            class="org.hyperic.hq.product.DaemonDetector"/>
 
     <metric name="Availability"
             indicator="true"/>
