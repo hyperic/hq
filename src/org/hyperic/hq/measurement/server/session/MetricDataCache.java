@@ -49,14 +49,15 @@ public class MetricDataCache {
 
     private MetricDataCache() {}
     
-    public void add(Integer mid, MetricValue mval) {
+    public boolean add(Integer mid, MetricValue mval) {
         MetricValue oldVal = (MetricValue) data.get(mid.intValue());
 
         // Existing data is actually newer than value
         if (oldVal != null && oldVal.getTimestamp() > mval.getTimestamp())
-            return;
+            return false;
         
         data.put(mid.intValue(), mval);
+        return true;
     }
     
     public MetricValue get(Integer mid, long timestamp) {
