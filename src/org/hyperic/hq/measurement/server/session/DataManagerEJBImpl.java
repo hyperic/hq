@@ -332,19 +332,20 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     }
                 }
 
-                MeasurementEvent event = new MeasurementEvent(mid, dpts[ind]);
-                
-                // See if we need to send the measurement event                
-                if (RegisteredTriggers.isTriggerInterested(event))
-                    events.add(event);
-                
                 // Analyze the value
                 if (analyzer != null) {
                     analyzer.analyzeMetricValue(mid, dpts[ind]);
                 }
 
                 // Save value in "last" cache
-                cache.add(mid, dpts[ind]);
+                if (cache.add(mid, dpts[ind])) {
+                    MeasurementEvent event =
+                        new MeasurementEvent(mid, dpts[ind]);
+                    
+                    // See if we need to send the measurement event                
+                    if (RegisteredTriggers.isTriggerInterested(event))
+                        events.add(event);                    
+                }
             }
         } catch (NamingException e) {
             throw new SystemException(e);
