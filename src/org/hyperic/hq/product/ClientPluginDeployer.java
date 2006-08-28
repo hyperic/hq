@@ -180,6 +180,10 @@ public class ClientPluginDeployer {
                 continue;
             }
 
+            if (name.endsWith(".jar")) {
+                jars.add(file.toString());
+            }
+
             if (upToDate(entry, file)) {
                 continue;
             }
@@ -187,10 +191,6 @@ public class ClientPluginDeployer {
             InputStream is = zipfile.getInputStream(entry);
             try {
                 write(is, file);
-
-                if (name.endsWith(".jar")) {
-                    jars.add(file.toString());
-                }
             } catch (IOException ioe) {
                 zipfile.close();
                 throw ioe;
