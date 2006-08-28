@@ -310,6 +310,7 @@ public class JBossDetector
         //for use w/ -jar hq-product.jar or agent.properties
         Properties props = getManager().getProperties();
         String[] credProps = {
+            Context.PROVIDER_URL,
             Context.SECURITY_PRINCIPAL,
             Context.SECURITY_CREDENTIALS
         };
