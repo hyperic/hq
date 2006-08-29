@@ -30,13 +30,16 @@
   USA.
  --%>
 
-
 <hq:navMapSupported var="navMapSupported"/>
 <c:if test="${navMapSupported}">
 
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr valign="top"> 
+   <c:choose>
+      <c:when test="${xlib}">
+    <td class="PageTitleSmallText" colspan="2">
 <script src="<html:rewrite page="/js/"/>effects.js" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/"/>diagram.js" type="text/javascript"></script>
-
 
 <c:set var="imageWidth" value="800"/>
 <hq:navMap areasVar="mapAreas" areasSizeVar="mapAreasSize" imageWidth="${imageWidth}"/>
@@ -70,11 +73,6 @@
 </c:forEach>
 </map>
 
-<table width="100%" border="0" cellspacing="0" cellpadding="0">
-  <tr valign="top"> 
-   <c:choose>
-      <c:when test="${xlib}">
-    <td class="PageTitleSmallText" colspan="2">
       <br>
       <html:link href="#" onclick="toggleDiagram('diagramDiv'); return false;"><html:img imageName="navMapIcon" border="0" alt="" page="/images/icon_navmap.png"/></html:link><br/>
       <div id="diagramDiv"><html:img imageName="navMapImage" page="/resource/NavMapImage?treeVar=${treeVar}&imageWidth=${imageWidth}" alt="" border="0" usemap="#diagram" />
