@@ -3,7 +3,13 @@
     <service>product-plugin-service.xml</service>
   </module>
   <module>
+    <service>measurement-mq-service.xml</service>
+  </module>
+  <module>
     <service>measurement-prop-service.xml</service>
+  </module>
+  <module>
+    <service>events-mq-service.xml</service>
   </module>
   <module>
     <service>alertdef-prop-service.xml</service>

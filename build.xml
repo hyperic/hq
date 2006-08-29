@@ -219,6 +219,8 @@
 
     <copy file="etc/jboss/events/alertdef-prop-service.xml" tofile="${ear.dir}/alertdef-prop-service.xml" />
      <copy file="etc/jboss/measurement/measurement-prop-service.xml" tofile="${ear.dir}/measurement-prop-service.xml" />
+    <copy file="etc/jboss/measurement/measurement-mq-service.xml" tofile="${ear.dir}/measurement-mq-service.xml" />
+    <copy file="etc/jboss/events/events-mq-service.xml" tofile="${ear.dir}/events-mq-service.xml" />
 
     <copy file="etc/jboss/pdk/product-plugin-service.xml" tofile="${ear.dir}/product-plugin-service.xml" />
     <replace file="${ear.dir}/product-plugin-service.xml">

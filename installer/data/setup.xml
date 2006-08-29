@@ -155,6 +155,7 @@ Setup properties will be written to %WRITABLEFILE% instead.
     <!-- Parameterized names of things to deploy -->
     <echo>^^^INFO: Preparing to install...</echo>
     <property name="hyperic.db-service.tag" value="hq-ds.xml" />
+    <property name="covalent.jbossmq-service.tag" value="jbossmq-service.xml" />
     <property name="hq.ear.tag" value="hq.ear" />
     <property name="covalent.tc-service.tag" value="tomcat41-service.xml" />
     <property name="covalent.jboss-service.tag" value="jboss-service.xml" />
