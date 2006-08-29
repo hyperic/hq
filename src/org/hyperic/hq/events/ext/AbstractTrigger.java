@@ -180,6 +180,14 @@ public abstract class AbstractTrigger implements TriggerInterface {
                 return;
             
             adBasic = aman.getBasicById(adId);
+            if (adBasic.getEnabled()) {
+                if (log.isDebugEnabled())
+                    log.debug("Trigger ID " + this.getId() +
+                              " causing alert definition ID " + adId +
+                              " to fire");
+            }
+            else
+                return;
 
             // See if we need to supress this trigger        
             if (adBasic.getFrequencyType() == EventConstants.FREQ_NO_DUP) {
