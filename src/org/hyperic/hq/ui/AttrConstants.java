@@ -920,4 +920,9 @@ public interface AttrConstants {
     public static final String AJAX_TYPE = "ajaxType";
     public static final String AJAX_ID   = "ajaxId";
     public static final String AJAX_HTML = "ajaxHTML";
+    
+    /**
+     * XLib present
+     */
+    public static final String XLIB_INSTALLED = "xlib";
 }
