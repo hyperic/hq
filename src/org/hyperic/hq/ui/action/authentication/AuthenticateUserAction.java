@@ -50,6 +50,7 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.image.widget.ResourceTree;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
@@ -208,6 +209,14 @@ public class AuthenticateUserAction extends TilesAction {
             // will be cleaned out during registration
             session.setAttribute(Constants.PASSWORD_SES_ATTR,
                                  logonForm.getJ_password());
+        }
+        
+        // See if graphics engine is present
+        try {
+            new ResourceTree(1);
+            session.setAttribute(Constants.XLIB_INSTALLED, Boolean.TRUE);
+        } catch (Throwable t) {
+            session.setAttribute(Constants.XLIB_INSTALLED, Boolean.FALSE);
         }
 
         return af;
