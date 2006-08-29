@@ -185,21 +185,6 @@
               path="/resource/common/monitor/visibility/MetricsDisplayControlForm.jsp"
               controllerUrl="/resource/common/monitor/visibility/MetricsControlFormPrepareAction.do"/>
 
-  <definition name=".resource.common.monitor.visibility.performance.controlForm"
-              path="/resource/common/monitor/visibility/PerformanceControlForm.jsp"/>
-
-  <definition name=".resource.common.monitor.visibility.childResources.performance.table"
-              path="/resource/common/monitor/visibility/ChildResourcesPerformanceTable.jsp"/>
-
-  <definition name=".resource.common.monitor.visibility.childResources.performance.byType"
-              path="/resource/common/monitor/visibility/ChildResourcesPerformanceByType.jsp"/>
-
-  <definition name=".resource.common.monitor.visibility.childResources.performance.byUrl"
-              path="/resource/common/monitor/visibility/ChildResourcesPerformanceByUrl.jsp"/>
-
-  <definition name=".resource.common.monitor.visibility.performance.urlDetail"
-              path="/resource/common/monitor/visibility/UrlPerformanceDetail.jsp"/>
-
   <!-- monitoring visibility config -->
   <definition name=".resource.common.monitor.config.editConfigMetricsVisibility"
               path="/resource/common/monitor/config/EditConfigMetricsVisibility.jsp"/>
