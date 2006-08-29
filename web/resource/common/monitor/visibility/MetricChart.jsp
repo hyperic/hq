@@ -58,10 +58,10 @@
           </td>
         </tr>
         <tr>
-          <td width="50%" class="MonitorChartCell"
+          <td class="MonitorChartCell"
             rowspan="2"><html:img page="/images/spacer.gif" width="1"
             height="1" border="0"/></td>
-          <td class="MonitorChartCell">
+          <td class="MonitorChartCell" width="755">
             <c:forEach var="i" varStatus="status" begin="0" end="${chartDataKeysSize - 1}">
             <c:url var="chartUrl" value="/resource/MetricChart">
             <c:param name="chartDataKey" value="${chartDataKeys[i]}"/>
@@ -82,11 +82,18 @@
             </c:url>
             <b><fmt:message key="resource.common.monitor.visibility.chart.Metric"/></b>
             <c:out value="${chartedMetrics[i].metricName}"/><br>
+   <c:choose>
+     <c:when test="${xlib}">
             <html:img src="${chartUrl}" width="755" height="300" border="0"/>
             <c:if test="${!status.last}">&nbsp;<br><br></c:if>
+     </c:when>
+     <c:otherwise>
+      <p><fmt:message key="error.NoXLibInstalled"/></p>
+     </c:otherwise>
+   </c:choose>
             </c:forEach>
           </td>
-          <td width="50%" class="MonitorChartCell"
+          <td class="MonitorChartCell"
             rowspan="2"><html:img page="/images/spacer.gif" width="1"
             height="1" border="0"/></td>
         </tr>

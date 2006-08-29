@@ -72,12 +72,21 @@
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr valign="top"> 
+   <c:choose>
+      <c:when test="${xlib}">
     <td class="PageTitleSmallText" colspan="2">
       <br>
       <html:link href="#" onclick="toggleDiagram('diagramDiv'); return false;"><html:img imageName="navMapIcon" border="0" alt="" page="/images/icon_navmap.png"/></html:link><br/>
       <div id="diagramDiv"><html:img imageName="navMapImage" page="/resource/NavMapImage?treeVar=${treeVar}&imageWidth=${imageWidth}" alt="" border="0" usemap="#diagram" />
       </div>
     </td>
+      </c:when>
+      <c:otherwise>
+    <td class="ErrorBlock" colspan="2">
+      <fmt:message key="error.NoXLibInstalled"/>
+    </td>
+      </c:otherwise>
+    </c:choose>
     <td class="PageTitleSmallText">&nbsp;</td>
   </tr>
   <tr valign="top"> 

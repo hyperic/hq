@@ -174,7 +174,18 @@
     </td>
   </tr>
 </table>
+   <c:choose>
+     <c:when test="${xlib}">
 <html:img src="${chartImg}" border="0"/>
+     </c:when>
+     <c:otherwise>
+    <table><tr>
+    <td class="ErrorBlock" colspan="2">
+      <fmt:message key="error.NoXLibInstalled"/>
+    </td>
+    </tr></table>
+     </c:otherwise>
+   </c:choose>
 </li>
 </c:forEach>
 </ul>
