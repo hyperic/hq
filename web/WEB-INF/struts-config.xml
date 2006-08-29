@@ -720,13 +720,6 @@
         <forward name="dash"  path="/Dashboard.do" redirect="true"/>
       </action>
 
-      <action path="/resource/platform/inventory/EditConfigFormPrepare"
-              name="CommonConfigForm"
-              scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.ResourceConfigFormPrepareAction">
-        <set-property property="title" value="2.2.6.3"/>
-      </action>
-      
       <!-- / -->
 
       <!-- resource platform autodiscovery actions -->
@@ -1221,13 +1214,6 @@
         <forward name="dash"  path="/Dashboard.do" redirect="true"/>
       </action>
       
-      <action path="/resource/server/inventory/EditConfigFormPrepare"
-              name="CommonConfigForm"
-              scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.ResourceConfigFormPrepareAction">
-        <set-property property="title" value="2.2.6.3"/>
-      </action>
-
       <action path="/resource/server/inventory/RemoveService" 
               name="RemoveResourceForm"
               type="org.hyperic.hq.ui.action.resource.server.inventory.RemoveServiceAction"
@@ -1368,13 +1354,6 @@
                  redirect="true"/>
         <forward name="failure" path="/resource/service/Inventory.do?mode=editConfig"/>
         <forward name="dash"  path="/Dashboard.do" redirect="true"/>
-      </action>
-
-      <action path="/resource/service/inventory/EditConfigFormPrepare"
-             name="CommonConfigForm"
-              scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.ResourceConfigFormPrepareAction">
-        <set-property property="title" value="2.2.6.3"/>
       </action>
 
       <!-- service monitoring -->

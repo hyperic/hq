@@ -199,6 +199,13 @@
         <forward name="editRange" path="/resource/common/monitor/Visibility.do?mode=editRange"/>
       </action>
       
+      <action path="/resource/platform/inventory/EditConfigFormPrepare"
+              name="CommonConfigForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.inventory.ResourceConfigFormPrepareAction">
+        <set-property property="title" value="2.2.6.3"/>
+      </action>
+      
       <action path="/resource/server/monitor/visibility/ServerMetrics"
               type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDisplayAction"
               name="MetricsDisplayForm"
@@ -232,6 +239,13 @@
         <forward name="editRange" path="/resource/common/monitor/Visibility.do?mode=editRange" redirect="true"/>
       </action>
 
+      <action path="/resource/server/inventory/EditConfigFormPrepare"
+              name="CommonConfigForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.inventory.ResourceConfigFormPrepareAction">
+        <set-property property="title" value="2.2.6.3"/>
+      </action>
+
       <action path="/resource/application/monitor/visibility/ApplicationDeployedServices"
               type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDisplayAction"
               name="MetricsDisplayForm"
@@ -263,6 +277,13 @@
         <forward name="compare" path="/resource/service/monitor/Visibility.do?mode=resourceMetrics"/>
         <forward name="chart" path="/resource/common/monitor/Visibility.do?mode=chartMultiMetricSingleResource" redirect="true"/>
         <forward name="editRange" path="/resource/common/monitor/Visibility.do?mode=editRange" redirect="true"/>
+      </action>
+
+      <action path="/resource/service/inventory/EditConfigFormPrepare"
+             name="CommonConfigForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.inventory.ResourceConfigFormPrepareAction">
+        <set-property property="title" value="2.2.6.3"/>
       </action>
 
       <action path="/resource/group/monitor/visibility/GroupMetrics"
