@@ -605,6 +605,9 @@ ul.boxy li {
 .dialog {
   position: absolute;
   background: #cccccc;
+  border-color: #F35E0C;
+  border-style: solid;
+  border-width: 1px;
   filter: alpha(opacity=85);
   opacity: 0.85;
   z-index: 300;

@@ -82,6 +82,7 @@
               <tiles:put name="form" beanName="form"/>
               <tiles:put name="formName" beanName="formName"/>
             </tiles:insert>
+            </td>
             <td align="right" valign="top">
               <a href="javascript:cancelAdvanced()"><html:img page="/images/dash-icon_delete.gif" border="0"/></a>
             </td>
@@ -103,7 +104,6 @@
                                1, // 1 steps
                                {}
                              );
-    Rico.Corner.round(advancedDiv , {border:'#F35E0C',compact:true});
     new Effect.Fade(advancedDiv, {duration: 0});
   }
 

@@ -59,7 +59,6 @@ function hideAbout() {
                               1, // 1 steps
                               {}
                              );
-    Rico.Corner.round(about, {border:'#F35E0C',compact:true});
     new Effect.Fade(about, {duration: 0});
     about.style.visibility = "visible";
 }
