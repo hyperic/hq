@@ -44,6 +44,7 @@ public class DB2ProductPlugin
     static final String SERVER_NAME     = "DB2";
     static final String VERSION_7       = "7.x";
     static final String VERSION_8       = "8.x";
+    static final String VERSION_9       = "9.x";
 
     static final String DATABASE        = "Database";
     static final String TABLE           = "Table";
@@ -77,6 +78,21 @@ public class DB2ProductPlugin
 
     static final String FULL_TABLESPACE_NAME_V8 =
         TypeBuilder.composeServiceTypeName(FULL_SERVER_NAME_V8, 
+                                           TABLESPACE);
+
+    static final String FULL_SERVER_NAME_V9 =
+        TypeBuilder.composeServerTypeName(SERVER_NAME, VERSION_9);
+
+    static final String FULL_DATABASE_NAME_V9 =
+        TypeBuilder.composeServiceTypeName(FULL_SERVER_NAME_V9, 
+                                           DATABASE);
+
+    static final String FULL_TABLE_NAME_V9 =
+        TypeBuilder.composeServiceTypeName(FULL_SERVER_NAME_V9, 
+                                           TABLE);
+
+    static final String FULL_TABLESPACE_NAME_V9 =
+        TypeBuilder.composeServiceTypeName(FULL_SERVER_NAME_V9, 
                                            TABLESPACE);
 
     static final String SERVICES[] = {
@@ -155,6 +171,10 @@ public class DB2ProductPlugin
 
         // 8.x Types
         server = types.addServer(VERSION_8);
+        types.addServices(server, SERVICES);
+
+        // 9.x Types
+        server = types.addServer(VERSION_9);
         types.addServices(server, SERVICES);
 
         return types.getTypes();

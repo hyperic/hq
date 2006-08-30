@@ -139,10 +139,13 @@ public class DB2RuntimeAutoDiscoveryPlugin
             if (this.version.equals(DB2ProductPlugin.VERSION_7)) {
                 service.setServiceTypeName(DB2ProductPlugin.
                                            FULL_DATABASE_NAME_V7);
-            } else {
-                // Version 8
+            } else if (this.version.equals(DB2ProductPlugin.VERSION_8)) {
                 service.setServiceTypeName(DB2ProductPlugin.
                                            FULL_DATABASE_NAME_V8);
+            } else {
+                // Assume version 9.x
+                service.setServiceTypeName(DB2ProductPlugin.
+                                           FULL_DATABASE_NAME_V9);
             }
 
             service.setName("%serverName%" + " " + dbName +
@@ -201,10 +204,12 @@ public class DB2RuntimeAutoDiscoveryPlugin
             if (this.version.equals(DB2ProductPlugin.VERSION_7)) {
                 service.setServiceTypeName(DB2ProductPlugin.
                                            FULL_TABLE_NAME_V7);
-            } else {
-                // Version 8
+            } else if (this.version.equals(DB2ProductPlugin.VERSION_8)) {
                 service.setServiceTypeName(DB2ProductPlugin.
                                            FULL_TABLE_NAME_V8);
+            } else {
+                service.setServiceTypeName(DB2ProductPlugin.
+                                           FULL_TABLE_NAME_V9);
             }
 
             service.setName("%serverName%" + " " + dbName +
@@ -252,10 +257,12 @@ public class DB2RuntimeAutoDiscoveryPlugin
             if (this.version.equals(DB2ProductPlugin.VERSION_7)) {
                 service.setServiceTypeName(DB2ProductPlugin.
                                            FULL_TABLESPACE_NAME_V7);
-            } else {
-                // Version 8
+            } else if (this.version.equals(DB2ProductPlugin.VERSION_8)) {
                 service.setServiceTypeName(DB2ProductPlugin.
                                            FULL_TABLESPACE_NAME_V8);
+            } else {
+                service.setServiceTypeName(DB2ProductPlugin.
+                                           FULL_TABLESPACE_NAME_V9);
             }
 
             service.setName("%serverName%" + " " + dbName +

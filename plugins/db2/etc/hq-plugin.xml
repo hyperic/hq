@@ -712,6 +712,11 @@
   <metrics name="DB2 8.x Table" include="DB2 7.x Table"/>
   <metrics name="DB2 8.x Tablespace" include="DB2 7.x Tablespace"/>
 
+  <metrics name="DB2 9.x" include="DB2 8.x"/>
+  <metrics name="DB2 9.x Database" include="DB2 8.x Database"/>
+  <metrics name="DB2 9.x Table" include="DB2 8.x Table"/>
+  <metrics name="DB2 9.x Tablespace" include="DB2 8.x Tablespace"/>
+
   <help name="DB2">
   <![CDATA[
   <p>
