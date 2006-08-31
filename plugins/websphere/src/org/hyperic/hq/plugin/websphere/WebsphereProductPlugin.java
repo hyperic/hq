@@ -26,7 +26,9 @@
 package org.hyperic.hq.plugin.websphere;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
@@ -104,7 +106,8 @@ public class WebsphereProductPlugin extends ProductPlugin {
     private static final String[] REG_VERSIONS = {
         "5.1.0.0",
         "5.0.0.0",
-        "6.0.0.0"
+        "6.0.0.0",
+        "6.1.0.0"
         //no point in looking for 4.0, requires agent to run w/ ibm jdk
     };
 
@@ -112,6 +115,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
 
     private static String REG_KEY;
     private static boolean autoRT = false;
+    private static boolean hasSoapConfig = false;
 
     //if we are running with the ibm jdk we can configure
     //websphere.installpath ourselves.
@@ -196,8 +200,11 @@ public class WebsphereProductPlugin extends ProductPlugin {
                 dir = getInstallPathFromJDK();
             }
             if (dir == null) {
-                //default WebSphere installpath
-                dir = "/opt/WebSphere/AppServer";
+                //default WebSphere installpath(s)
+                dir = "/opt/IBM/WebSphere/AppServer";
+                if (!new File(dir).isDirectory()) {
+                    dir = "/opt/WebSphere/AppServer";
+                }
             }
             else {
                 log.debug(PROP_INSTALLPATH + " found in process table");
@@ -218,33 +225,99 @@ public class WebsphereProductPlugin extends ProductPlugin {
         return autoRT;
     }
 
-    private String[] getClassPath(String installDir) {
-        ArrayList path = new ArrayList();
+    public static boolean hasSoapConfig() {
+        return hasSoapConfig;
+    }
 
-        String[] dirs = {
-            "lib",
-            "java/jre/lib",
-            "java/jre/lib/ext",
-            "etc"
-        };
+    private void addClassPath(List path,
+                              String dir,
+                              String[] jars) {
 
-        for (int i=0; i<dirs.length; i++) {
-            String dir = installDir + "/" + dirs[i] + "/";
-            String[] jars = new File(dir).list();
-            if (jars == null) {
+        if (jars == null) {
+            return;
+        }
+
+        for (int j=0; j<jars.length; j++) {
+            if (!jars[j].endsWith(".jar")) {
                 continue;
             }
-            for (int j=0; j<jars.length; j++) {
-                if (!jars[j].endsWith(".jar")) {
-                    continue;
+            if (jars[j].endsWith("runtimefw.jar")) {
+                //XXX if we dont do this, the IBM JRE dies
+                //an ugly StackOverflow death.  Problem does
+                //not happen with the Sun JRE.
+                continue;
+            }
+            path.add(dir + jars[j]);
+        }
+    }
+
+    //jar names minus version "_6.1.0.jar"
+    private void addClassPathOSGi(List path,
+                                  String dir,
+                                  String[] jars)
+    {
+        final HashMap wantedJars = new HashMap();
+        for (int i=0; i<jars.length; i++) {
+            wantedJars.put(jars[i], Boolean.TRUE);
+        }
+
+        String[] files =
+            new File(dir).list(new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    int ix = name.indexOf('_');
+                    if (ix == -1) {
+                        return false;
+                    }
+                    name = name.substring(0, ix);
+                    return wantedJars.get(name) != null;
                 }
-                if (jars[j].endsWith("runtimefw.jar")) {
-                    //XXX if we dont do this, the IBM JRE dies
-                    //an ugly StackOverflow death.  Problem does
-                    //not happen with the Sun JRE.
-                    continue;
-                }
-                path.add(dir + jars[j]);
+            });
+
+        addClassPath(path, dir, files);
+    }
+
+    private String[] getClassPath(String installDir, boolean isOSGi) {
+        ArrayList path = new ArrayList();
+
+        if (isOSGi) {
+            final String[] plugins = {
+                "com.ibm.ws.runtime",
+                "com.ibm.ws.security.crypto",
+                "com.ibm.ws.emf"
+            };
+            addClassPathOSGi(path, installDir + "/plugins/", plugins);
+
+            final String[] runtimes = {
+                "com.ibm.ws.webservices.thinclient",
+            };
+            addClassPathOSGi(path, installDir + "/runtimes/", runtimes);
+
+            final String[] libs = {
+                "j2ee.jar",
+                "bootstrap.jar",
+                "urlprotocols.jar",
+                "mail-impl.jar"    
+            };
+            addClassPath(path, installDir + "/lib/", libs);
+
+            final String[] etc = {
+                "tmx4jTransform.jar"
+            };
+            addClassPath(path, installDir + "/etc/", etc);
+        }
+        else {
+            //XXX temp add all for 6.0 until bloody classloader mess is
+            //sorted out.
+            String[] dirs = {
+                "lib",
+                "java/jre/lib",
+                "java/jre/lib/ext",
+                "etc"
+            };
+
+            for (int i=0; i<dirs.length; i++) {
+                String dir = installDir + "/" + dirs[i] + "/";
+                addClassPath(path, dir, new File(dir).list());
             }
         }
 
@@ -297,9 +370,22 @@ public class WebsphereProductPlugin extends ProductPlugin {
             "properties" + File.separator + "soap.client.props";
 
         String defaultSoapConfig = installDir;
-        String profile = "default";
-        File defaultProfile =
-            new File(installDir, "profiles/" + profile);
+        File profileDir = new File(installDir, "profiles");
+        File defaultProfile = new File(profileDir, "default");
+
+        //argh. 6.1 doesn't have soap.client.properties by default
+        if (profileDir.isDirectory()) {
+            String[] profiles = profileDir.list();
+            if (profiles != null) {
+                for (int i=0; i<profiles.length; i++) {
+                    defaultProfile = new File(profileDir, profiles[i]);
+                    if (new File(defaultProfile, defaultSoapProps).exists()) {
+                        break;
+                    }
+                }
+            }
+        }
+        String profile = defaultProfile.getName();
 
         if (defaultProfile.exists()) {
             //WAS 6.0+ need to use soap.client.props from a profile
@@ -328,18 +414,38 @@ public class WebsphereProductPlugin extends ProductPlugin {
             managerProps.getProperty("websphere.SOAP.ConfigURL",
                                      defaultSoapConfig);
 
-        System.setProperty("com.ibm.SOAP.ConfigURL",
-                           "file:" + soapConfig);
+        File soapConfigFile = new File(soapConfig);
+        hasSoapConfig = soapConfigFile.exists();
+        if (hasSoapConfig) {
+            log.debug("Using soap properties: " + soapConfig);    
+            System.setProperty("com.ibm.SOAP.ConfigURL",
+                               "file:" + soapConfig);
+        }
+        else {
+            log.debug("Unable to find soap.client.props");
+        }
 
-        log.debug("Using soap properties: " + soapConfig);
+        boolean isOSGi =
+            new File(installDir, "/runtimes").isDirectory();
 
-        //required for 6.0
+        //required for 6.1
+        File sslConfigFile =
+            new File(soapConfigFile.getParent(),
+                     "ssl.client.props");
+        if (sslConfigFile.exists()) {
+            log.debug("Using ssl properties: " + soapConfig);
+            System.setProperty("com.ibm.SSL.ConfigURL",
+                               "file:" + sslConfigFile);
+        }
+        else if (isOSGi) {
+            log.debug("Unable to find ssl.client.props");
+        }
+
+        //required for 6.x
         System.setProperty("was.install.root", installDir);
 
-        //XXX temp add all for 6.0 until bloody classloader mess is
-        //sorted out.
-        if (new File(installDir, "/lib/management.jar").exists()) {
-            return getClassPath(installDir);
+        if (isOSGi || new File(installDir, "/lib/management.jar").exists()) {
+            return getClassPath(installDir, isOSGi);
         }
 
         return new String[] {
