@@ -25,9 +25,12 @@
 
 package org.hyperic.hq.plugin.websphere;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -205,6 +208,54 @@ public abstract class WebsphereDetector
         return ((Process)servers.get(0)).installRoot;
     }
 
+    //used for 6.0 and 6.1
+    static final String VERSION_START = "<version>";
+    static final String VERSION_END = "</version>";
+
+    protected String getComponentVersion(File file) {
+        Reader reader = null;
+
+        try {
+            reader = new FileReader(file);
+            BufferedReader buffer =
+                new BufferedReader(reader);
+            String line;
+
+            while ((line = buffer.readLine()) != null) {
+                line = line.trim();
+                if (line.length() == 0) {
+                    continue;
+                }
+                int ix;
+                if (!(line.startsWith(VERSION_START) &&
+                     ((ix = line.indexOf(VERSION_END)) != -1)))
+                {
+                    continue;
+                }
+
+                return line.substring(VERSION_START.length(), ix).trim();
+            }
+
+            return null;
+        } catch (IOException e) {
+            return null;
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {}
+            }
+        }
+    }
+
+    protected boolean isComponentVersion(File file) {
+        String version = getComponentVersion(file);
+        if (version == null) {
+            return false;
+        }
+        return version.startsWith(getTypeInfo().getVersion());
+    }
+
     protected List getServerList(File serverDir, String version)
         throws PluginException {
         File controlScript = null;
@@ -243,6 +294,11 @@ public abstract class WebsphereDetector
           
             if (!exists) {
                 return null;
+            }
+            if (file.getName().equals("WAS.product")) {
+                if (!isComponentVersion(file)) {
+                    return null;
+                }
             }
         }
         

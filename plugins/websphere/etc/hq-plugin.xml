@@ -1372,6 +1372,15 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
           include="5.0">
 
     <property name="UNIQUE_FILE"
-              value="installedFilters"/>
+              value="../../properties/version/WAS.product"/>
+  </server>
+
+  <server name="WebSphere"
+          version="6.1"
+          include="6.0"/>
+
+  <server name="WebSphere Admin"
+          version="6.1"
+          include="6.0">
   </server>
 </plugin>
