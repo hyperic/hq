@@ -276,56 +276,39 @@ public class WebsphereProductPlugin extends ProductPlugin {
         addClassPath(path, dir, files);
     }
 
-    private String[] getClassPath(String installDir, boolean isOSGi) {
+    private String[] getClassPathOSGi(String installDir) {
         ArrayList path = new ArrayList();
 
-        if (isOSGi) {
-            final String[] plugins = {
-                "com.ibm.ws.runtime",
-                "com.ibm.ws.security.crypto",
-                "com.ibm.ws.emf"
-            };
-            addClassPathOSGi(path, installDir + "/plugins/", plugins);
+        final String[] plugins = {
+            "com.ibm.ws.runtime",
+            "com.ibm.ws.security.crypto",
+            "com.ibm.ws.emf"
+        };
+        addClassPathOSGi(path, installDir + "/plugins/", plugins);
 
-            final String[] runtimes = {
-                "com.ibm.ws.webservices.thinclient",
-            };
-            addClassPathOSGi(path, installDir + "/runtimes/", runtimes);
+        final String[] runtimes = {
+            "com.ibm.ws.webservices.thinclient",
+        };
+        addClassPathOSGi(path, installDir + "/runtimes/", runtimes);
 
-            final String[] libs = {
-                "j2ee.jar",
-                "bootstrap.jar",
-                "urlprotocols.jar",
-                "mail-impl.jar"    
-            };
-            addClassPath(path, installDir + "/lib/", libs);
+        final String[] libs = {
+            "j2ee.jar",
+            "bootstrap.jar",
+            "urlprotocols.jar",
+            "mail-impl.jar"    
+        };
+        addClassPath(path, installDir + "/lib/", libs);
 
-            final String[] etc = {
-                "tmx4jTransform.jar"
-            };
-            addClassPath(path, installDir + "/etc/", etc);
-        }
-        else {
-            //XXX temp add all for 6.0 until bloody classloader mess is
-            //sorted out.
-            String[] dirs = {
-                "lib",
-                "java/jre/lib",
-                "java/jre/lib/ext",
-                "etc"
-            };
-
-            for (int i=0; i<dirs.length; i++) {
-                String dir = installDir + "/" + dirs[i] + "/";
-                addClassPath(path, dir, new File(dir).list());
-            }
-        }
+        final String[] etc = {
+            "tmx4jTransform.jar"
+        };
+        addClassPath(path, installDir + "/etc/", etc);
 
         String[] cp = new String[path.size()];
         path.toArray(cp);
         return cp;
     }
-    
+
     public String[] getClassPath(ProductPluginManager manager) {
         if (isWin32()) {
             String prop = "websphere.regkey";
@@ -393,7 +376,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
             //not work w/ global security enabled.
             defaultSoapConfig +=
                 File.separator + "profiles" + File.separator;
-            
+
             List servers = WebsphereDetector5.getServerProcessList();
             if (servers.size() != 0) {
                 WebsphereDetector.Process process =
@@ -444,8 +427,8 @@ public class WebsphereProductPlugin extends ProductPlugin {
         //required for 6.x
         System.setProperty("was.install.root", installDir);
 
-        if (isOSGi || new File(installDir, "/lib/management.jar").exists()) {
-            return getClassPath(installDir, isOSGi);
+        if (isOSGi) {
+            return getClassPathOSGi(installDir);
         }
 
         return new String[] {
@@ -500,10 +483,13 @@ public class WebsphereProductPlugin extends ProductPlugin {
 
             //6.0
             installDir + "/lib/management.jar",
+            installDir + "/lib/mail-impl.jar",
             installDir + "/lib/emf.jar",
             installDir + "/lib/utils.jar",
             installDir + "/lib/runtime.jar",
             installDir + "/lib/classloader.jar",
+            installDir + "/lib/security.jar",
+            installDir + "/lib/wasproduct.jar",
             installDir + "/java/jre/lib/ibmcertpathprovider.jar",
             installDir + "/java/jre/lib/ext/ibmjceprovider.jar",
             installDir + "/java/jre/lib/ext/ibmjcefips.jar",
