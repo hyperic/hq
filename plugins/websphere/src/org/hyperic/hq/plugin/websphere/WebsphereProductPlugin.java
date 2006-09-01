@@ -72,6 +72,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
     public static final String VERSION_40  = "4.0";
     public static final String VERSION_50  = "5.0";
 
+    public static final String PROP_INSTALL_ROOT   = "was.install.root";
     public static final String PROP_ADMIN_HOST     = "admin.host";
     public static final String PROP_ADMIN_PORT     = "admin.port";
     public static final String PROP_ADMIN_VERS     = "admin.vers";
@@ -116,6 +117,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
     private static String REG_KEY;
     private static boolean autoRT = false;
     private static boolean hasSoapConfig = false;
+    private static boolean isOSGi = false;
 
     //if we are running with the ibm jdk we can configure
     //websphere.installpath ourselves.
@@ -227,6 +229,10 @@ public class WebsphereProductPlugin extends ProductPlugin {
 
     public static boolean hasSoapConfig() {
         return hasSoapConfig;
+    }
+
+    public static boolean isOSGi() {
+        return isOSGi;
     }
 
     private void addClassPath(List path,
@@ -429,7 +435,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
             log.debug("Unable to find soap.client.props");
         }
 
-        boolean isOSGi =
+        isOSGi =
             new File(installDir, "/runtimes").isDirectory();
 
         //required for 6.1
@@ -446,7 +452,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
         }
 
         //required for 6.x
-        System.setProperty("was.install.root", installDir);
+        System.setProperty(PROP_INSTALL_ROOT, installDir);
 
         if (isOSGi) {
             return getClassPathOSGi(installDir);

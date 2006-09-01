@@ -1051,6 +1051,28 @@
   ]]>
   </help>
 
+  <help name="enable-pmi-6">
+  <![CDATA[
+    <p><h4>Enable WebSphere PMI</h4></p>
+
+    WebSphere 6.x has PMI enabled at the Basic level by default,
+    which is sufficient for HQ to collect the metrics enabled by
+    default.  The PMI level may need to be increased to collect
+    certain metrics not enabled by default.
+
+    <ul>
+      <li>Using a Web browser open http://${admin.host}:9060/admin </li>
+      <li><b>Server</b> -> <b>Application Servers</b> ->
+          <b>${server.name}</b> -> <b>Performance Monitoring</b> </li>
+      <li>Check the Startup button </li>
+      <li>Set level to Basic or higher </li>
+      <li>Click OK </li>
+      <li>Click Save to apply changes to the master configuration </li>
+      <li>Restart server </li>
+    </ul>
+  ]]>
+  </help>
+
   <help name="agent-setup-4">
   <![CDATA[
     <p>
@@ -1078,6 +1100,19 @@
     The plugin will auto-configure this value using the Windows
     registry or process table if WebSphere is already running.
     </p>
+  ]]>
+  </help>
+
+  <help name="agent-setup-6">
+  <![CDATA[
+    <p>
+    <h4>The HQ Agent must be run using the IBM JDK to monitor WebSphere:</h4>
+    </p>
+    
+    <pre>
+    ${CMD.prompt} ${CMD.env.set} HQ_JAVA_HOME=${was.install.root}${FILE.sep}java
+    ${CMD.prompt} hq-agent.${CMD.ext} start
+    </pre>
   ]]>
   </help>
 
@@ -1115,17 +1150,43 @@
   ]]>
   </help>
 
+  <!-- same as above with ssl.client.props -->
+  <help name="config-auth-6">
+  <![CDATA[
+    <p>
+    <h4>Global Security Configuration</h4>
+    If Global Security is enabled,
+    check that the user running the agent has read access to 
+    <i>${installpath}${FILE.sep}properties${FILE.sep}ssl.client.props</i>
+    and that the following properties are correct:
+    </p>
+
+    <pre>
+    com.ibm.ssl.keyStore=...
+    com.ibm.ssl.keyStorePassword=...
+    com.ibm.ssl.trustStore=...
+    com.ibm.ssl.trustStorePassword=...
+    </pre>
+  ]]>
+  </help>
+
   <help name="WebSphere AE Admin 4.0"
         include="agent-setup-4,enable-pmi-4-unix,config-auth-4"/>
 
   <help name="WebSphere Admin 5.0"
         include="agent-setup-5,enable-pmi-5,config-auth-5"/>
 
+  <help name="WebSphere Admin 6.1"
+        include="agent-setup-6,enable-pmi-6,config-auth-6"/>
+
   <help name="WebSphere AE Admin 4.0 Win32"
         include="agent-setup-4,enable-pmi-4-win32,config-auth-4"/>
 
   <help name="WebSphere Admin 5.0 Win32,config-auth-5"
         include="enable-pmi-5"/>
+
+  <help name="WebSphere Admin 6.1 Win32,config-auth-6"
+        include="enable-pmi-6"/>
 
   <help name="websphere-server">
   <![CDATA[
@@ -1382,5 +1443,14 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
   <server name="WebSphere Admin"
           version="6.1"
           include="6.0">
+
+    <property name="was.install.root"
+              value="/opt/IBM/WebSphere/AppServer"/>
+
+    <config include="connector">
+      <option name="was.install.root"
+              description="WebSphere install root"
+              default="${was.install.root}"/>
+    </config>
   </server>
 </plugin>

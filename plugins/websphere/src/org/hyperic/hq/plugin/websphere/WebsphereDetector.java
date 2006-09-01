@@ -334,6 +334,15 @@ public abstract class WebsphereDetector
         ConfigResponse productConfig =
             new ConfigResponse(getProductConfig(serverDir));
 
+        if (WebsphereProductPlugin.isOSGi()) {
+            String prop = WebsphereProductPlugin.PROP_INSTALL_ROOT;
+            String root =
+                System.getProperty(prop, getTypeProperty(prop));
+            if (root != null) {
+                productConfig.setValue(prop, root);
+            }
+        }
+
         //if we find more than one server w/ the same connect config,
         //this will make sure only 1 gets auto-enabled for metrics/ai
         server.setConnectProperties(METRIC_CONNECT_PROPS);
