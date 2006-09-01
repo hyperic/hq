@@ -645,12 +645,12 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                     new MeasurementTemplatePK(templIds[i]);
                 MeasurementTemplateLocal ejb = getMtHome().findByPrimaryKey(pk);
                 
-                if (!ejb.getDefaultOn())
-                    ejb.setDefaultOn(true);
-                    
                 if (interval != ejb.getDefaultInterval())
                     ejb.setDefaultInterval(interval);
                 
+                if (!ejb.getDefaultOn())
+                    ejb.setDefaultOn(interval != 0);
+                    
                 ejb.setMtime(current);
                 
                 List metrics = dmHome.findByTemplate(templIds[i]);
@@ -663,8 +663,8 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                     if (dm.getInterval() != interval)
                         dm.setInterval(interval);
                     
-                    if (!dm.getEnabled())
-                        dm.setEnabled(true);
+                    if (ejb.getDefaultOn() != dm.getEnabled())
+                        dm.setEnabled(ejb.getDefaultOn());
                     
                     dm.setMtime(current);
                     
@@ -724,7 +724,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                     DerivedMeasurementLocal dm =
                         (DerivedMeasurementLocal) it.next();
                     
-                    if (dm.getEnabled() == on)
+                    if (dm.getEnabled() == on || dm.getInterval() == 0)
                         continue;
                     
                     dm.setEnabled(on);
