@@ -184,7 +184,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         DerivedMeasurementLocal dmLoc = this.getDmHome().
             findByTemplateForInstance(tid, iid);
         dmLoc.setInterval(interval);
-        dmLoc.setEnabled(true);
+        dmLoc.setEnabled(interval != 0);
         dmLoc.setMtime(current);
         
         /* XXX
@@ -194,7 +194,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
          */
         DerivedMeasurementValue dmv = dmLoc.getDerivedMeasurementValue();
         dmv.setInterval(interval);
-        dmv.setEnabled(true);
+        dmv.setEnabled(interval != 0);
         dmv.setMtime(current);
         
         DMValueCache.getInstance().put(dmv);
