@@ -241,14 +241,35 @@ public class WebsphereProductPlugin extends ProductPlugin {
             if (!jars[j].endsWith(".jar")) {
                 continue;
             }
-            if (jars[j].endsWith("runtimefw.jar")) {
-                //XXX if we dont do this, the IBM JRE dies
-                //an ugly StackOverflow death.  Problem does
-                //not happen with the Sun JRE.
+            if (jars[j].startsWith("com.ibm.ws.security.crypto")) {
+                try {
+                    addLoaderURL(dir + jars[j]);
+                } catch (Exception e) {
+                    log.debug("Error adding to classpath" + jars[j], e);
+                }
                 continue;
             }
             path.add(dir + jars[j]);
         }
+    }
+
+    //XXX temp workaround for WAS 6.1 + Global Security enabled
+    //SSLSocketFactory chokes on PluginLoader's jar:file:... URLs
+    private void addLoaderURL(String file) throws Exception {
+        java.net.URL url = new java.net.URL("file:" + file);
+        java.net.URLClassLoader loader =
+            (java.net.URLClassLoader)this.getClass().getClassLoader();
+
+        //bypass protected access.
+        java.lang.reflect.Method addURL =
+            java.net.URLClassLoader.class.getDeclaredMethod("addURL",
+                                                            new Class[] {
+                                                                url.getClass()
+                                                            });
+
+        addURL.setAccessible(true);
+
+        addURL.invoke(loader, new Object[] { url });
     }
 
     //jar names minus version "_6.1.0.jar"
