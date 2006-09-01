@@ -153,9 +153,8 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
                                                    entId.getID());
 
                     // update the interval for each derived measurement to
-                    // the interval computed by the graph if they are
-                    // different
-                    long interval = -1;
+                    // the interval computed by the graph if they are different
+                    long interval;
                     try {
                         interval = dn.getInterval();
                     } catch (CircularDependencyException e) {
@@ -176,7 +175,7 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
                             DerivedMeasurementLocal mlocal =
                                 getDmHome().findByPrimaryKey(pk);
                             mlocal.setInterval(interval);
-                            mlocal.setEnabled(true);
+                            mlocal.setEnabled(interval != 0);
                             mlocal.setMtime(System.currentTimeMillis());
                             // Update the derived measurement value
                             dmval = mlocal.getDerivedMeasurementValue();
@@ -186,6 +185,10 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
                                 dmval.getId(), e);
                         }
                     }
+                    
+                    // Do not continue if interval was 0
+                    if (interval == 0)
+                        continue;
 
                     // Get the minimum interval time
                     minInterval = Math.min(minInterval, interval);
