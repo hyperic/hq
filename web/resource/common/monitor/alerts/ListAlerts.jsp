@@ -109,6 +109,25 @@
     <c:param name="day" value="${param.day}"/>
   </c:if>
 </c:url>
+<c:url var="psAction" value="/alerts/Alerts.do">
+  <c:param name="mode" value="list"/>
+  <c:param name="eid" value="${entityId.type}:${Resource.id}"/>
+  <c:if test="${not empty param.so}">
+    <c:param name="so" value="${param.so}"/>
+  </c:if>
+  <c:if test="${not empty param.sc}">
+    <c:param name="sc" value="${param.sc}"/>
+  </c:if>
+  <c:if test="${not empty param.year}">
+    <c:param name="year" value="${param.year}"/>
+  </c:if>
+  <c:if test="${not empty param.month}">
+    <c:param name="month" value="${param.month}"/>
+  </c:if>
+  <c:if test="${not empty param.day}">
+    <c:param name="day" value="${param.day}"/>
+  </c:if>
+</c:url>
 <c:url var="calAction" value="/alerts/Alerts.do">
   <c:param name="mode" value="list"/>
   <c:param name="eid" value="${entityId.type}:${Resource.id}"/>
@@ -296,7 +315,7 @@ title="alerts.alert.AlertList.ListHeader.ActualValue" />
   <tiles:put name="deleteOnly" value="true"/>
   <tiles:put name="listSize" beanName="listSize"/>
   <tiles:put name="pageNumAction" beanName="pnAction"/>
-  <tiles:put name="pageSizeAction" beanName="pnAction"/>
+  <tiles:put name="pageSizeAction" beanName="psAction"/>
   <tiles:put name="defaultSortColumn" value="2"/>
   <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
 </tiles:insert>
