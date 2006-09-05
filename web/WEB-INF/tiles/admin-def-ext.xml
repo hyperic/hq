@@ -25,4 +25,8 @@
   <definition name=".admin.config.EditMonitorConfig"
               path="/admin/config/ChangeResourceTemplate.jsp"/>
   
+
+  <definition name=".admin.auth.functions"
+              path="/admin/AuthFunctions.jsp"/>
+
 </tiles-definitions>

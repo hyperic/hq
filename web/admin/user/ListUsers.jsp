@@ -90,7 +90,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   </tiles:insert>
   <!--  /  -->
 
-<tiles:insert page="/admin/AuthFunctions.jsp"/>
+<tiles:insert definition=".admin.auth.functions"/>
 
   <display:table cellspacing="0" cellpadding="0" width="100%" action="${sortAction}" pageSize="${pageSize}" items="${AllUsers}" var="user">
 

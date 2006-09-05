@@ -33,7 +33,7 @@
 </tiles:insert>
 <!--  /  -->
 
-<tiles:insert page="/admin/AuthFunctions.jsp"/>
+<tiles:insert definition=".admin.auth.functions"/>
 
 <tiles:insert page="/admin/Settings.jsp"/>
 
