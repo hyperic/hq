@@ -726,10 +726,10 @@ public class LatherDispatcher
         } else if(method.equals(CommandInfo.CMD_TRACK_SEND_CONFIG_CHANGE)){
             return this.cmdTrackConfigChange(arg);
         } else {
-            this.log.warn(ctx.getCallerIP() + " attempted to invoke '" + 
+            this.log.warn("Agent (" + ctx.getCallerIP() + ") may be an " +
+                          "incompatible version.  Attempted to invoke '" + 
                           method + "' which could not be found");
-            throw new LatherRemoteException("Unknown method, '" + method + 
-                                            "'");
+            throw new LatherRemoteException("Unknown method, '" + method + "'");
         }
     }
 
