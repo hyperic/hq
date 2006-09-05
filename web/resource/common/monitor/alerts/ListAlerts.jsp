@@ -141,8 +141,16 @@
 
 <!-- FORM -->
 <html:form method="POST" action="/alerts/RemoveAlerts.do">
-<html:hidden property="rid" value="${Resource.id}"/>
-<html:hidden property="type" value="${Resource.entityId.type}"/>
+<html:hidden property="eid" value="${Resource.entityId}"/>
+  <c:if test="${not empty param.year}">
+    <input type="hidden" name="year" value="<c:out value="${param.year}"/>"/>
+  </c:if>
+  <c:if test="${not empty param.month}">
+    <input type="hidden" name="month" value="<c:out value="${param.month}"/>"/>
+  </c:if>
+  <c:if test="${not empty param.day}">
+    <input type="hidden" name="day" value="<c:out value="${param.day}"/>"/>
+  </c:if>
 
 <c:if test="${ CONST_PLATFORM == entityId.type}">
 <c:set var="entityId" value="${Resource.entityId}"/>
