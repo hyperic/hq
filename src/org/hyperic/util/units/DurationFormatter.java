@@ -43,7 +43,8 @@ public class DurationFormatter
     private static final int GRANULAR_DAYS   = 2;  // 1 day < time < 1 year 
     private static final int GRANULAR_HOURS  = 3;  // 1 hour < time < 1 day
     private static final int GRANULAR_MINS   = 4;  // 1 min < time < 1 hour
-    private static final int GRANULAR_SECS   = 5;  // 0 < time < 1 min
+    private static final int GRANULAR_SECS   = 5;  // 1 sec < time < 1 min
+    private static final int GRANULAR_MILLIS = 6;  // 0 < time < 1 sec
 
     private static final int MILLISEC_DIGITS = 3;  // Standard 3 digits to the
                                                    // right of the decimal point
@@ -132,8 +133,7 @@ public class DurationFormatter
                                           tbd.nMilli);
         } else if(granularity == GRANULAR_HOURS ||
                   granularity == GRANULAR_MINS ||
-                  granularity == GRANULAR_SECS)
-        {
+                  granularity == GRANULAR_SECS) {
             long nMillis;
 
             nMillis = baseTime.divide(UnitsUtil.FACT_MILLIS, 
@@ -143,6 +143,17 @@ public class DurationFormatter
 
             if(granularity == GRANULAR_SECS)
                 res = res + 's';                                            
+        } else if (granularity == GRANULAR_MILLIS) {
+            // Format into milliseconds
+            double dMillis = baseTime.doubleValue() / 100000;
+            
+            NumberFormat fmt = NumberFormat.getInstance();
+            fmt.setMinimumIntegerDigits(1);
+            fmt.setMaximumIntegerDigits(3);
+            fmt.setMinimumFractionDigits(0);
+            fmt.setMaximumFractionDigits(milliDigits);
+            
+            res = fmt.format(dMillis) + "ms";
         } else {
             throw new IllegalStateException("Unexpected granularity");
         }
@@ -199,8 +210,10 @@ public class DurationFormatter
             return GRANULAR_HOURS;
         else if(tbd.nMins > 0)
             return GRANULAR_MINS;
-        else
+        else if (tbd.nSecs > 0)
             return GRANULAR_SECS;
+        else
+            return GRANULAR_MILLIS;
     }
 
     public BigDecimal getBaseValue(double value, int scale){
@@ -248,7 +261,6 @@ public class DurationFormatter
         throws ParseException
     {
         final int unitType = UnitsConstants.UNIT_DURATION;
-        UnitNumber res;
         String[] vals;
 
         vals = (String[])StringUtil.explode(val, " ").toArray(new String[0]);
