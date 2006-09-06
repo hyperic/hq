@@ -444,7 +444,7 @@
             alias="FirstConnTime"
             template="db2:type=Database,database=%database%:${alias}"
             category="PERFORMANCE"
-            indicator="true"
+            indicator="false"
             units="epoch-seconds"
             collectionType="static"/>
     <metric name="Total Connects"
