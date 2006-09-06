@@ -82,6 +82,11 @@ public class JBossUtil {
             Context.URL_PKG_PREFIXES,
             "org.jboss.naming:org.jnp.interfaces"
         },
+        {
+            //http://wiki.jboss.org/wiki/Wiki.jsp?page=NamingContextFactory
+            "jnp.disableDiscovery",
+            "true"
+        }
     };
 
     private static final String STAT_PROVIDER   = "StatisticsProvider";
