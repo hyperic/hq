@@ -585,7 +585,8 @@
       <include name="${pdk.productStub}"/>
       <!-- include hq version information -->
       <include name="org/hyperic/hq/common/shared/ProductProperties.class"/>
-      <include name="weblogic/org/file/Handler.class"/>
+      <!-- workaround for StackOverflow w/ WLS 9.x -->
+      <include name="weblogic/net/file/Handler.class"/>
     </jar>
 
     <!-- Pack version info -->
