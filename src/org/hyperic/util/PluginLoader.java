@@ -48,19 +48,26 @@ public class PluginLoader extends URLClassLoader {
 
     private String pluginClassName = null;
 
+    private static String toFileURL(String file) {
+        return "file:" + StringUtil.replace(file, " ", "%20"); //escape spaces        
+    }
+
+    private static URL toJarURL(String file)
+        throws MalformedURLException {
+
+        return new URL("jar", "", toFileURL(file) + "!/");
+    }
+
     private static URL toURL(String file)
         throws MalformedURLException {
 
-        return new URL("jar", "",
-                       "file:" +
-                       StringUtil.replace(file, " ", "%20") + //escape spaces
-                       "!/");
+        return new URL(toFileURL(file));
     }
 
     public static String getPluginMainClass(String jar)
         throws Exception {
 
-        return getPluginMainClass(toURL(jar));
+        return getPluginMainClass(toJarURL(jar));
     }
 
     /*
@@ -92,7 +99,7 @@ public class PluginLoader extends URLClassLoader {
         if ((pluginName != null) && pluginName.endsWith(".jar")) {
             ArrayList urls = new ArrayList();
             try {
-                URL jarUrl = toURL(pluginName);
+                URL jarUrl = toJarURL(pluginName);
 
                 urls.add(jarUrl); //note-to-self
 
