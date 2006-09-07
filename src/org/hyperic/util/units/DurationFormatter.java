@@ -57,7 +57,6 @@ public class DurationFormatter
                                   FormatSpecifics specifics)
     {
         BigDecimal baseTime;
-        String res;
         int granularity;
 
         baseTime    = val.getBaseValue();
@@ -145,7 +144,7 @@ public class DurationFormatter
                 res = res + 's';                                            
         } else if (granularity == GRANULAR_MILLIS) {
             // Format into milliseconds
-            double dMillis = baseTime.doubleValue() / 100000;
+            double dMillis = baseTime.doubleValue() / 1000000;
             
             NumberFormat fmt = NumberFormat.getInstance();
             fmt.setMinimumIntegerDigits(1);
@@ -233,8 +232,6 @@ public class DurationFormatter
     {
         double nHours, nMins, nSecs;
         String[] vals;
-        int idx;
-
         vals = (String[])StringUtil.explode(duration, 
                                             ":").toArray(new String[0]);
 
