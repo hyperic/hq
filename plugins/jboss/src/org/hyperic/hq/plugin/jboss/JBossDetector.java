@@ -28,6 +28,7 @@ package org.hyperic.hq.plugin.jboss;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -73,8 +74,12 @@ public class JBossDetector
         "State.Name.sw=java,Args.*.eq=" + JBOSS_MAIN,
     };
 
+    private static HashMap bindings = new HashMap();
+
     //figure out the install root based on run.jar location in the classpath
     private static void findServerProcess(List servers, String query) {
+        bindings.clear();
+
         long[] pids = getPids(query);
 
         for (int i=0; i<pids.length; i++) {
@@ -83,6 +88,7 @@ public class JBossDetector
             String classpath = null;
             String runJar = null;
             String config = "default";
+            String address = null;
             boolean mainArgs = false;
 
             for (int j=0; j<args.length; j++) {
@@ -117,6 +123,13 @@ public class JBossDetector
                     }
                     continue;
                 }
+                else if (mainArgs && arg.startsWith("-b")) {
+                    address = arg.substring(2, arg.length());
+                    if (address.equals("")) {
+                        address = args[j+1];
+                    }
+                    continue;
+                }
             }
 
             if (classpath != null) {
@@ -148,7 +161,11 @@ public class JBossDetector
                 continue;
             }
 
-            servers.add(getServerConfigPath(root, config));
+            String configPath = getServerConfigPath(root, config);
+            if (address != null) {
+                bindings.put(configPath, address);
+            }
+            servers.add(configPath);
         }
     }
 
@@ -260,6 +277,43 @@ public class JBossDetector
         return servers;
     }
 
+    private String getJnpURL(String installpath, File serviceXML) {
+        JBossConfig cfg = JBossConfig.getConfig(serviceXML);
+
+        String port = cfg.getJnpPort();
+        if (port == null) {
+            port = "1099";
+        }
+
+        //attempt to determine address using:
+        //1) -b address cmdline argument
+        //2) TCP listen address for port
+        //3) config file, which will likely be the default 127.0.0.1
+        //   since ${jboss.bind.address} is used by default and
+        //    overridden by the -b address cmdline argument
+        String where;
+        String address = (String)bindings.get(installpath);
+
+        if (address == null) {
+            address = getListenAddress(port);
+            if ((address == null) || address.equals("localhost")) {
+                address = cfg.getJnpAddress();
+                where = "configuration";
+            }
+            else {
+                where = "TCP listen table";
+            }
+        }
+        else {
+            where = "-b argument";
+        }
+
+        String url = "jnp://" + address + ":" + port;
+        getLog().debug("JNP url=" + url +
+                       " (address determined from " + where + ")");
+        return url;
+    }
+
     /**
      * @param installpath Example: /usr/jboss-3.2.3/server/default
      */
@@ -299,13 +353,8 @@ public class JBossDetector
         ConfigResponse controlConfig = new ConfigResponse();
         ConfigResponse metricConfig = new ConfigResponse();
 
-        JBossConfig cfg = JBossConfig.getConfig(serviceXML);
-
-        String url = "jnp://127.0.0.1";
-        if (cfg.getJnpPort() != null) {
-            url += ":" + cfg.getJnpPort();
-        }
-        config.setValue(Context.PROVIDER_URL, url.toString());
+        config.setValue(Context.PROVIDER_URL,
+                        getJnpURL(installpath, serviceXML));
 
         //for use w/ -jar hq-product.jar or agent.properties
         Properties props = getManager().getProperties();

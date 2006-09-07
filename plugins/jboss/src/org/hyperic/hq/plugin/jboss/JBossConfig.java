@@ -62,6 +62,8 @@ public class JBossConfig {
     private File bindingXML;
     private String jnpPort;
     private String jnpPortBinding;
+    private String jnpAddress;
+    private String jnpAddressBinding;
     private String serverBinding;
     private long lastModified;
     private long lastModifiedBinding;
@@ -130,6 +132,21 @@ public class JBossConfig {
              this.jnpPort : this.jnpPortBinding;
     }
 
+    public String getJnpAddress() {
+        String addr =
+            (this.jnpAddressBinding == null) ?
+             this.jnpAddress : this.jnpAddressBinding;
+
+        if ((addr == null) ||
+             addr.equals("${jboss.bind.address}"))
+        {
+            return "127.0.0.1";
+        }
+        else {
+            return addr;
+        }
+    }
+
     private String getAttribute(Node node, String name) {
         NamedNodeMap attrs = node.getAttributes();
         if (attrs == null) {
@@ -163,6 +180,7 @@ public class JBossConfig {
     }
 
     private boolean findJnpPortBinding(Document doc) {
+        boolean foundPort = false;
         NodeList servers =
             doc.getDocumentElement().getElementsByTagName("server");
 
@@ -208,7 +226,11 @@ public class JBossConfig {
                         String val = getAttribute(binding, "port");
                         if (hasValue(val)) {
                             this.jnpPortBinding = val;
-                            return true;
+                            foundPort = true;
+                        }
+                        val = getAttribute(binding, "host");
+                        if (hasValue(val)) {
+                            this.jnpAddressBinding = val;
                         }
                     }
                     break;
@@ -217,7 +239,7 @@ public class JBossConfig {
             }
         }
 
-        return false;
+        return foundPort;
     }
 
     private boolean findJnpPortBinding(Node mbean)
@@ -273,23 +295,30 @@ public class JBossConfig {
 
     private boolean findJnpPort(Node mbean) {
         NodeList attrs = mbean.getChildNodes();
+        boolean foundPort = false;
 
         for (int i=0; i<attrs.getLength(); i++) {
             Node attr = attrs.item(i);
             if (!attr.hasAttributes()) {
                 continue;
             }
-            if ("Port".equals(getAttribute(attr, "name"))) {
+            String attrName = getAttribute(attr, "name");
+            if ("Port".equals(attrName)) {
                 String val = getText(attr);
                 if (hasValue(val)) {
                     this.jnpPort = val;
-                    return true;
+                    foundPort = true;
                 }
-                break;
+            }
+            else if ("BindAddress".equals(attrName)) {
+                String val = getText(attr);
+                if (hasValue(val)) {
+                    this.jnpAddress = val;
+                }
             }
         }
 
-        return false;
+        return foundPort;
     }
 
     private void findJnpPort(Document doc)
@@ -308,11 +337,13 @@ public class JBossConfig {
             String name = getAttribute(mbean, "name");
             if (NAMING_MBEAN.equals(name)) {
                 findJnpPort(mbean);
-                log.debug(NAMING_MBEAN + " port=" + this.jnpPort);
+                log.debug(NAMING_MBEAN + " port=" + this.jnpPort +
+                          ", host=" + this.jnpAddress);
             }
             else if (BINDING_MBEAN.equals(name)) {
                 findJnpPortBinding(mbean);
-                log.debug(BINDING_MBEAN + " port=" + this.jnpPortBinding);
+                log.debug(BINDING_MBEAN + " port=" + this.jnpPortBinding +
+                          ", host=" + this.jnpAddressBinding);
             }
         }
 
@@ -351,6 +382,8 @@ public class JBossConfig {
 
         JBossConfig cfg = JBossConfig.getConfig(new File(args[0]));
 
-        System.out.println("JNP port: " + cfg.getJnpPort());
+        System.out.println("JNP url: jnp://" +
+                           cfg.getJnpAddress() + ":" +
+                           cfg.getJnpPort());
     }
 }
