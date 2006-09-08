@@ -41,9 +41,6 @@
     <include name="client/jmx-rmi-connector-client.jar"/>
     <include name="lib/jboss-system.jar"/>
     <include name="lib/jboss-jmx.jar"/>
-    <include name="server/default/lib/jboss-management.jar"/>
-    <include name="server/minimal/lib/jboss-management.jar"/>
-    <include name="server/all/lib/jboss-management.jar"/>
     <include name="lib/jboss-management.jar"/>
     <include name="lib/dom4j.jar"/>
     <!-- used underneath javax.management.Query.match() -->
@@ -51,10 +48,17 @@
     <!-- required for MainDeployer.listDeployed() -->
     <include name="lib/endorsed/xercesImpl.jar"/>
     <include name="lib/endorsed/xml-apis.jar"/>
+
+    <include name="server/default/lib/jboss-management.jar"/>
+    <include name="server/all/lib/jboss-management.jar"/>
     <!-- for jndi authentication -->
     <include name="server/default/lib/jbosssx.jar"/>
-    <include name="server/minimal/lib/jbosssx.jar"/>
     <include name="server/all/lib/jbosssx.jar"/>
+
+    <!-- relative to $installpath incase
+         server/{default,all} do not exist -->
+    <include name="lib/jboss-management.jar"/>
+    <include name="lib/jbosssx.jar"/>
   </classpath>
 
   <filter name="url" value="java.naming.provider.url"/>

@@ -43,6 +43,33 @@ public class JBossProductPlugin
             "true".equals(manager.getProperty("jboss.ignoreHashCodes"));
     }
 
+    protected void adjustClassPath(String installpath) {
+        //super.init will call this if jboss.installpath is configured
+        File servers = new File(installpath, "server");
+        if (!servers.exists()) {
+            return;
+        }
+
+        File[] dirs = servers.listFiles();
+        if (dirs == null) {
+            return;
+        }
+
+        for (int i=0; i<dirs.length; i++) {
+            File dir = dirs[i];
+            String name = dir.getName();
+            //skip server/ dirs already listed in hq-plugin.xml
+            if (name.equals("all") ||
+                name.equals("default") ||
+                name.equals("minimal"))
+            {
+                continue;
+            }
+
+            super.adjustClassPath(dir.toString());
+        }
+    }
+
     public static boolean ignoreHashCodes() {
         return ignoreHashCodes;
     }

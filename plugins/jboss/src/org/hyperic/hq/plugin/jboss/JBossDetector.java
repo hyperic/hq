@@ -420,6 +420,9 @@ public class JBossDetector
             server.setName(server.getName() + " " + serverName);
         }
 
+        //pickup any jars found relative to this installpath
+        adjustClassPath(installpath);
+
         List servers = new ArrayList();
         servers.add(server);
         return servers;
