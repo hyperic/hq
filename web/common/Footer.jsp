@@ -30,6 +30,7 @@
 
 <script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/footer.js"/>" type="text/javascript"></script>
+<script src="<html:rewrite page="/js/window.js"/>" type="text/javascript"></script>
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr> 
@@ -63,7 +64,7 @@
   </tr>
 </table>
 
-<div id="about" class="dialog" style="filter: alpha(opacity=0);opacity: 0;visibility: hidden;width=310px;background-color: #EBEDF2;">
+<div id="about" class="dialog" style="filter: alpha(opacity=80);opacity: 0.80;visibility: hidden;width=310px;background-color: #EBEDF2;">
 <table cellpadding="2" cellspacing="0" border="0" width="305">
   <tr>
     <td width="1%" class="PageTitle" style="background-color: #EBEDF2"><html:img page="/images/spacer.gif" width="1" height="32" alt="" border="0"/></td>
@@ -94,8 +95,5 @@
 
 <script language="JavaScript" type="text/javascript">
   setFoot();
-
-  onloads.push( hideAbout );
-
 </script>
 

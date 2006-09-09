@@ -27,7 +27,6 @@ var conH;
 var winH;
 var footerH = 28;
 var browserH = 88;
-var aboutShown = false;
 
 function setFoot() {
   if (isIE) {
@@ -47,55 +46,14 @@ function setFoot() {
   }
 }
 
-function hideAbout() {
-    var about = $('about');
-    var anchor = $('aboutAnchor');
-    var x = anchor.offsetLeft;
-    var y = anchor.offsetTop - about.offsetHeight + anchor.offsetHeight;
-    new Rico.Effect.Position( about,
-                              x,
-                              y,
-                              0,
-                              1, // 1 steps
-                              {}
-                             );
-    new Effect.Fade(about, {duration: 0});
-    about.style.visibility = "visible";
-}
-
 function about() {
-    var about = $('about');
-    new Effect.Appear( about, {to: 0.85} );
-    aboutShown = true;
-
-  if (typeof(window['diagShown']) != 'undefined') {
-    hideFormElements();
-  }
+  Dialog.info($('about').innerHTML,
+              {windowParameters: {className:'dialog', width:320, height:200,
+               resize:false, draggable:false}});
 }
 
 function closeAbout(e) {
-  if (!e) {
-    if (window.event) {
-      e = window.event;
-    }
-  }
-
-  var target = null;
-  if (e.target) {
-    target = e.target;
-  } else if (e.srcElement) {
-    target = e.srcElement;
-  }
-
-  if (aboutShown && (!target || "aboutLink" != target.name )) {
-    new Effect.Fade( 'about' );
-    aboutShown = false;
-  }
-
-  if (typeof(window['diagShown']) != 'undefined') {
-      bodyClicked(e);
-      showFormElements();
-  }
+  Dialog.closeInfo();
 }
 
 document.body.onclick = closeAbout;
