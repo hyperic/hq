@@ -48,6 +48,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.MeasurementSummary;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.AvailabilityDataPoint;
+import org.hyperic.hq.ui.beans.ChartDataBean;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 
@@ -65,14 +66,14 @@ public class AvailabilityStoplightChartServlet extends ChartServlet {
     /* (non-Javadoc)
      * @see org.hyperic.hq.ui.servlet.ChartServlet#createChart()
      */
-    protected Chart createChart() {
+    protected Chart createChart(ChartDataBean dataBean) {
         return new AvailabilityReportChart();
     }
 
     /* (non-Javadoc)
      * @see org.hyperic.hq.ui.servlet.ChartServlet#plotData(javax.servlet.http.HttpServletRequest)
      */
-    protected void plotData(HttpServletRequest request, Chart chart)
+    protected void plotData(HttpServletRequest request, Chart chart, ChartDataBean dataBean)
             throws ServletException {
 
         // the user

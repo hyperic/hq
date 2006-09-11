@@ -91,8 +91,8 @@ public abstract class VerticalChartServlet extends ChartServlet {
      *
      * @param chart the chart
      */
-    protected void initializeChart(Chart chart) {
-        super.initializeChart(chart);
+    protected void initializeChart(Chart chart, HttpServletRequest request) {
+        super.initializeChart(chart, request);
 
         VerticalChart verticalChart = (VerticalChart) chart;
         int cumulativeTrend = getTrendForCollectionType(collectionType);

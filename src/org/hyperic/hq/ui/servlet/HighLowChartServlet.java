@@ -40,6 +40,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.beans.ChartDataBean;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
@@ -65,7 +66,7 @@ public class HighLowChartServlet extends ChartServlet {
     /* (non-Javadoc)
      * @see org.hyperic.hq.ui.servlet.ChartServlet#createChart()
      */
-    protected Chart createChart() {
+    protected Chart createChart(ChartDataBean dataBean) {
         log.trace("plotting a high low chart");
         return new HighLowChart( getImageWidth(), getImageHeight() );
     }
@@ -76,8 +77,8 @@ public class HighLowChartServlet extends ChartServlet {
      *
      * @param chart the chart
      */
-    protected void initializeChart(Chart chart) {
-        super.initializeChart(chart);
+    protected void initializeChart(Chart chart, HttpServletRequest request) {
+        super.initializeChart(chart, request);
 
         HighLowChart hiloChart = (HighLowChart) chart;
         hiloChart.setNumberDataSets(1);
@@ -90,7 +91,7 @@ public class HighLowChartServlet extends ChartServlet {
     /* (non-Javadoc)
      * @see org.hyperic.hq.ui.servlet.ChartServlet#plotData(javax.servlet.http.HttpServletRequest)
      */
-    protected void plotData(HttpServletRequest request, Chart chart)
+    protected void plotData(HttpServletRequest request, Chart chart, ChartDataBean dataBean)
         throws ServletException {
         // Make sure the entity and measurement IDs were passed in
         Integer tid = RequestUtils.getIntParameter(request, "tid");

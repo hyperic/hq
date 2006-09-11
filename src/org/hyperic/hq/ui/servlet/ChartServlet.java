@@ -30,7 +30,9 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
+import org.hyperic.hq.ui.beans.ChartDataBean;
 import org.hyperic.image.chart.Chart;
 import org.hyperic.util.units.UnitsConstants;
 
@@ -116,7 +118,6 @@ public abstract class ChartServlet extends ImageServlet {
     private Log log = LogFactory.getLog( ChartServlet.class.getName() );
     private int unitScale;
     private int unitUnits;
-    private String imageFormat;
     private boolean showPeak;
     private boolean showHighRange;
     private boolean showValues;
@@ -136,14 +137,26 @@ public abstract class ChartServlet extends ImageServlet {
      *
      * @param request the servlet request
      */
-    protected Object createImage(HttpServletRequest request) throws ServletException {
+    protected Object createImage(HttpServletRequest request)
+        throws ServletException {
+        // chart data key
+        String chartDataKey = getChartDataKey(request);
+        log.debug("Get from session: " + chartDataKey);
+        
+        ChartDataBean dataBean = null;
+        if (chartDataKey != null) {
+            HttpSession session = request.getSession();
+            dataBean = (ChartDataBean) session.getAttribute(chartDataKey);
+            session.removeAttribute(chartDataKey);
+        }
+
         // initialize the chart
-        Chart chart = createChart();
-        initializeChart(chart);
+        Chart chart = createChart(dataBean);
+        initializeChart(chart, request);
 
         // the subclass is responsible for plotting the data
         log.debug("Plotting data.");
-        plotData(request, chart);
+        plotData(request, chart, dataBean);
         return chart;
     }
 
@@ -242,18 +255,20 @@ public abstract class ChartServlet extends ImageServlet {
     /**
      * Create and return the chart.  This method will be called after
      * the parameters have been parsed.
+     * @param dataBean TODO
      *
      * @return the newly created chart
      */
-    protected abstract Chart createChart();
+    protected abstract Chart createChart(ChartDataBean dataBean);
 
     /**
      * Initialize the chart.  This method will be called after the
      * parameters have been parsed and the chart has been created.
      *
      * @param chart the chart
+     * @param request TODO
      */
-    protected void initializeChart(Chart chart) {
+    protected void initializeChart(Chart chart, HttpServletRequest request) {
         chart.setFormat(unitUnits, unitScale);
         chart.showPeak = showPeak;
         chart.showHighRange = showHighRange;
@@ -273,8 +288,10 @@ public abstract class ChartServlet extends ImageServlet {
      * Y axis labels, etc.
      *
      * @param request the HTTP request
+     * @param dataBean TODO
      */
-    protected abstract void plotData(HttpServletRequest request, Chart chart)
+    protected abstract void plotData(HttpServletRequest request, Chart chart,
+                                     ChartDataBean dataBean)
         throws ServletException;
 
     /**
@@ -408,6 +425,10 @@ public abstract class ChartServlet extends ImageServlet {
             sb.append(LOWRANGE_PARAM); sb.append(": "); sb.append(lowRange);
             log.debug( sb.toString() );
         }
+    }
+
+    protected String getChartDataKey(HttpServletRequest request) {
+        return null;
     }
 }
 

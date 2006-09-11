@@ -26,6 +26,7 @@
 package org.hyperic.hq.ui.servlet;
 
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.ui.beans.ChartDataBean;
 import org.hyperic.image.chart.AvailabilityChart;
 import org.hyperic.image.chart.Chart;
 
@@ -42,7 +43,7 @@ public class AvailHealthChartServlet extends CurrentHealthChartServlet {
      *
      * @return the newly created chart
      */
-    protected Chart createChart() {
+    protected Chart createChart(ChartDataBean dataBean) {
         return new AvailabilityChart( getImageWidth(), getImageHeight() );
     }
 

@@ -30,8 +30,9 @@ import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.ui.beans.ChartDataBean;
 import org.hyperic.image.chart.Chart;
 import org.hyperic.image.chart.ColumnChart;
@@ -39,9 +40,6 @@ import org.hyperic.image.chart.DataPointCollection;
 import org.hyperic.image.chart.EventPointCollection;
 import org.hyperic.image.chart.LineChart;
 import org.hyperic.image.chart.VerticalChart;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * <p>Extends ChartServlet to graph one or more metrics.  By default,
@@ -65,7 +63,9 @@ import org.apache.commons.logging.LogFactory;
  *
  */
 public class MetricChartServlet extends VerticalChartServlet {
-    /** Request parameter for the chart data key session attribute. */
+    /**
+     * Request parameter for the chart data key session attribute. 
+     */
     public static final String CHART_DATA_KEY_PARAM = "chartDataKey";
 
     /** Request parameter for whether or not to show control actions. */
@@ -73,42 +73,8 @@ public class MetricChartServlet extends VerticalChartServlet {
 
     // member data
     private Log log = LogFactory.getLog( MetricChartServlet.class.getName() );
-    private String chartDataKey;
-    private boolean showEvents;
-    private boolean plotLineChart;
-    private ChartDataBean dataBean;
 
     public MetricChartServlet () {}
-
-    /**
-     * This method will be called automatically by the ChartServlet.
-     * It should handle the parsing and error-checking of any specific
-     * parameters for the chart being rendered.
-     *
-     * @param request the HTTP request object
-     */
-    protected void parseParameters(HttpServletRequest request) {
-        super.parseParameters(request);
-
-        // chart data key
-        chartDataKey = parseRequiredStringParameter(request, CHART_DATA_KEY_PARAM);
-        log.debug("Get from session: " + chartDataKey);
-        // We will actually set a flag here to determine whether we
-        // should draw a LineChart or a column chart.  If we are
-        // charting just one set of data / event points, we'll plot a
-        // ColumnChart.  Otherwise we'll plot a LineChart.
-        HttpSession session = request.getSession();
-        dataBean = (ChartDataBean) session.getAttribute(chartDataKey);
-        session.removeAttribute(chartDataKey);
-        
-        List dataPointsList = dataBean.getDataPoints();
-        plotLineChart = (dataPointsList.size() > 1);
-
-        // chart flags
-        showEvents = parseBooleanParameter( request, SHOW_EVENTS_PARAM,
-                                            getDefaultShowEvents() );
-        _logParameters();
-    }
 
     /**
      * Create and return the chart.  This method will be called after
@@ -116,7 +82,14 @@ public class MetricChartServlet extends VerticalChartServlet {
      *
      * @return the newly created chart
      */
-    protected Chart createChart() {
+    protected Chart createChart(ChartDataBean dataBean) {
+        // We will actually set a flag here to determine whether we
+        // should draw a LineChart or a column chart.  If we are
+        // charting just one set of data / event points, we'll plot a
+        // ColumnChart.  Otherwise we'll plot a LineChart.        
+        List dataPointsList = dataBean.getDataPoints();
+        boolean plotLineChart = (dataPointsList.size() > 1);
+
         if (plotLineChart) {
             log.trace("plotting a line chart");
             return new LineChart( getImageWidth(), getImageHeight() );
@@ -132,8 +105,12 @@ public class MetricChartServlet extends VerticalChartServlet {
      *
      * @param chart the chart
      */
-    protected void initializeChart(Chart chart) {
-        super.initializeChart(chart);
+    protected void initializeChart(Chart chart, HttpServletRequest request) {
+        super.initializeChart(chart, request);
+
+        // chart flags
+        boolean showEvents = parseBooleanParameter( request, SHOW_EVENTS_PARAM,
+                                                    getDefaultShowEvents() );
 
         VerticalChart verticalChart = (VerticalChart) chart;
         verticalChart.showEvents = showEvents;
@@ -149,34 +126,35 @@ public class MetricChartServlet extends VerticalChartServlet {
      *
      * @param request the HTTP request
      */
-    protected void plotData(HttpServletRequest request, Chart chart)
+    protected void plotData(HttpServletRequest request, Chart chart,
+                            ChartDataBean dataBean)
         throws ServletException {
         VerticalChart veritcalChart = (VerticalChart) chart;
-        
+
         List dataPointsList = dataBean.getDataPoints();
         List eventsPointsList = dataBean.getEventPoints();
         // make sure they're the same size
-        if ( dataPointsList.size() == eventsPointsList.size() ) {
-            if ( log.isDebugEnabled() ) {
+        if (dataPointsList.size() == eventsPointsList.size()) {
+            if (log.isDebugEnabled()) {
                 log.debug("got " + dataPointsList.size() + " set(s) of data / event points.");
             }
         } else {
-            throw new ServletException
-                ("Number of data point sets and number of event point sets must be the same.");
+            throw new ServletException(
+                    "Number of data point sets and number of event point sets must be the same.");
         }
-        veritcalChart.setNumberDataSets( dataPointsList.size() );
-        int i=0;
+        veritcalChart.setNumberDataSets(dataPointsList.size());
+        int i = 0;
         Iterator it = dataPointsList.iterator();
         Iterator jt = eventsPointsList.iterator();
-        while ( it.hasNext() && jt.hasNext() ) {
+        while (it.hasNext() && jt.hasNext()) {
             // data points
-            List data = (List)it.next();
+            List data = (List) it.next();
             log.trace("plotting " + data.size() + " data points");
             DataPointCollection chartData = chart.getDataPoints(i);
             chartData.addAll(data);
 
             // events
-            List events = (List)jt.next();
+            List events = (List) jt.next();
             log.trace("plotting " + events.size() + " event points");
             EventPointCollection chartEvents = chart.getEventPoints(i);
             chartEvents.addAll(events);
@@ -185,6 +163,7 @@ public class MetricChartServlet extends VerticalChartServlet {
             ++i;
         }
 
+        String chartDataKey = getChartDataKey(request);
         request.getSession().removeAttribute(chartDataKey);
     }
 
@@ -244,19 +223,8 @@ public class MetricChartServlet extends VerticalChartServlet {
         return true;
     }
 
-
-    //---------------------------------------------------------------
-    //-- private helpers
-    //---------------------------------------------------------------
-    private void _logParameters() {
-        if ( log.isDebugEnabled() ) {
-            StringBuffer sb = new StringBuffer("Parameters:");
-            sb.append("\n");sb.append("\t");
-            sb.append(CHART_DATA_KEY_PARAM); sb.append(": "); sb.append(chartDataKey);
-            sb.append("\n");sb.append("\t");
-            sb.append(SHOW_EVENTS_PARAM); sb.append(": "); sb.append(showEvents);
-            log.debug( sb.toString() );
-        }
+    protected String getChartDataKey(HttpServletRequest request) {
+        return parseRequiredStringParameter(request, CHART_DATA_KEY_PARAM);
     }
 }
 

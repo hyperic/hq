@@ -46,6 +46,7 @@ import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.beans.ChartDataBean;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -114,8 +115,8 @@ public abstract class CurrentHealthChartServlet extends VerticalChartServlet {
      */
     protected abstract String getMetricCategory();
 
-    protected void initializeChart(Chart chart) {
-        super.initializeChart(chart);
+    protected void initializeChart(Chart chart, HttpServletRequest request) {
+        super.initializeChart(chart, request);
         chart.font = Chart.SMALL_FONT;
         chart.showFullLabels = false;
     }
@@ -127,7 +128,7 @@ public abstract class CurrentHealthChartServlet extends VerticalChartServlet {
      *
      * @param request the HTTP request
      */
-    protected void plotData(HttpServletRequest request, Chart chart)
+    protected void plotData(HttpServletRequest request, Chart chart, ChartDataBean dataBean)
         throws ServletException {
         AppdefEntityID[] eids = null;
         AppdefEntityTypeID ctype = null;
