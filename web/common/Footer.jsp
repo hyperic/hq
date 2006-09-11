@@ -64,7 +64,7 @@
   </tr>
 </table>
 
-<div id="about" class="dialog" style="filter: alpha(opacity=80);opacity: 0.80;visibility: hidden;width=310px;background-color: #EBEDF2;">
+<div id="about" class="dialog" style="position: absolute; top: 0px; left: 0px; visibility: hidden;">
 <table cellpadding="2" cellspacing="0" border="0" width="305">
   <tr>
     <td width="1%" class="PageTitle" style="background-color: #EBEDF2"><html:img page="/images/spacer.gif" width="1" height="32" alt="" border="0"/></td>
