@@ -1,3 +1,9 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
 <!--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -53,49 +59,10 @@ echo MessagesAwaitingPreprocessing=`expr $todofiles - $tododirs`
 
     <!-- process metrics -->
     <metric name="Availability"
-            template="sigar.ptql:Type=ProcState,Arg=$!:State:%process.query%"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
             indicator="true"/>
 
-    <metric name="Process Virtual Memory Size"
-            template="sigar.ptql:Type=ProcMem,Arg=$!:Size:%process.query%"
-            units="B"/>
-
-    <metric name="Process Resident Memory Size"
-            template="sigar.ptql:Type=ProcMem,Arg=$!:Resident:%process.query%"
-            indicator="true"
-            units="B"/>
-
-    <metric name="Process Cpu System Time"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:Stime:%process.query%"
-            units="sec"
-            collectionType="trendsup"/>
-
-    <metric name="Process Cpu User Time"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:Utime:%process.query%"
-            units="sec"
-            collectionType="trendsup"/>
-
-    <metric name="Process Cpu Total Time"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:Total:%process.query%"
-            units="sec"
-            collectionType="trendsup"/>
-
-    <metric name="Process Cpu Usage"
-            template="sigar.ptql:Type=ProcCpu,Arg=$!:Percent:%process.query%"
-            indicator="true"
-            units="percentage"/>
-
-    <metric name="Process Start Time"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:StartTime:%process.query%"
-            category="AVAILABILITY"
-            units="epoch-millis"
-            collectionType="static"/>
-
-    <metric name="Process Open File Descriptors"
-            template="sigar.ptql:Type=ProcFd,Arg=$!:Total:%process.query%"/>
-
-    <metric name="Process Threads"
-            template="sigar.ptql:Type=ProcState,Arg=$!:Threads:%process.query%"/>
+    &process-metrics;
 
     <!-- qmail-qstat metrics -->
     <filter name="template"
