@@ -25,47 +25,47 @@
 
 <!-- Process metrics, see activemq-plugin.xml for example usage -->
 <metric name="Process Virtual Memory Size"
-        template="sigar.ptql:Type=ProcMem,Arg=$!:Size:%process.query%"
+        template="sigar:Type=ProcMem,Arg=%process.query%:Size"
         units="B"/>
 
 <metric name="Process Resident Memory Size"
-        template="sigar.ptql:Type=ProcMem,Arg=$!:Resident:%process.query%"
+        template="sigar:Type=ProcMem,Arg=%process.query%:Resident"
         indicator="true"
         units="B"/>
 
 <metric name="Process Page Faults"
-        template="sigar.ptql:Type=ProcMem,Arg=$!:PageFaults:%process.query%"
+        template="sigar:Type=ProcMem,Arg=%process.query%:PageFaults"
         collectionType="trendsup"/>
 
 <metric name="Process Cpu System Time"
-        template="sigar.ptql:Type=ProcTime,Arg=$!:Stime:%process.query%"
+        template="sigar:Type=ProcCpu,Arg=%process.query%:Sys"
         units="sec"
         collectionType="trendsup"/>
 
 <metric name="Process Cpu User Time"
-        template="sigar.ptql:Type=ProcTime,Arg=$!:Utime:%process.query%"
+        template="sigar:Type=ProcCpu,Arg=%process.query%:User"
         units="sec"
         collectionType="trendsup"/>
 
 <metric name="Process Cpu Total Time"
-        template="sigar.ptql:Type=ProcTime,Arg=$!:Total:%process.query%"
+        template="sigar:Type=ProcCpu,Arg=%process.query%:Total"
         units="sec"
         collectionType="trendsup"/>
 
 <metric name="Process Cpu Usage"
-        template="sigar.ptql:Type=ProcCpu,Arg=$!:Percent:%process.query%"
+        template="sigar:Type=ProcCpu,Arg=%process.query%:Percent"
         indicator="true"
         units="percentage"/>
 
 <metric name="Process Start Time"
-        template="sigar.ptql:Type=ProcTime,Arg=$!:StartTime:%process.query%"
+        template="sigar:Type=ProcTime,Arg=%process.query%:StartTime"
         category="AVAILABILITY"
         units="epoch-millis"
         collectionType="static"/>
 
 <metric name="Process Open File Descriptors"
-        template="sigar.ptql:Type=ProcFd,Arg=$!:Total:%process.query%"/>
+        template="sigar:Type=ProcFd,Arg=%process.query%:Total"/>
 
 <metric name="Process Threads"
-        template="sigar.ptql:Type=ProcState,Arg=$!:Threads:%process.query%"/>
+        template="sigar:Type=ProcState,Arg=%process.query%:Threads"/>
 
