@@ -74,7 +74,8 @@ public class PluginParser {
         throws PluginException
     {
         this.replacer = new TokenReplacer();
-        
+        this.replacer.addFilters(PluginData.getGlobalProperties());
+
         data.parser = this;
         data.scratch = new HashMap();
         ProductTag tag = new ProductTag(data);
