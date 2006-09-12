@@ -74,11 +74,11 @@
 
   <metrics name="queue">
     <metric name="Queued Messages"
-            template="queue:index=%index%,path=%path%:${alias}"
+            template="queue:path=%path%:${alias}"
             indicator="true"/>
 
     <metric name="Queue Size"
-            template="queue:index=%index%,path=%path%:${alias}"
+            template="queue:path=%path%:${alias}"
             units="B"/>
   </metrics>
 
@@ -114,10 +114,6 @@
       <option name="configDir"
               description="config directory (path to main.cf)"
               default="/etc/postfix"/>
-      <option name="index"
-              description="unique identifier for the postfix server"
-              default="0"
-              type="hidden" />
     </config>
 
     <metrics include="process"/>
@@ -133,12 +129,6 @@
                 description="Queue Name"/>
         <option name="path"
                 description="full path to the queue"/>
-<!--
-        <option name="index"
-                description="unique identifier for the postfix server"
-                default="0"
-                type="hidden" />
--->
       </config>
 
       <metrics include="queue-avail,queue"/>

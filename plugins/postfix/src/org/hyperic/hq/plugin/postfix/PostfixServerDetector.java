@@ -60,21 +60,30 @@ public class PostfixServerDetector
     static final String QUEUE = "Queue";
 
     protected static final String PROP_PATH = "path";
-    protected static final String PROP_IDX = "index";
     protected static final String PROP_QDIR  = "queueDir";
     protected static final String PROP_QUEUE = "queue";
     protected static final String PROP_POSTCONF = "postconf";
     protected static final String PROP_CONFDIR = "configDir";
 
-    private static final HashMap postconfInfo = new HashMap();
+    private static final HashMap postconfInfoCache = new HashMap();
 
     private static String postconfBin = null;
 
-    public void getPostconfInfo(String index, ConfigResponse config) {
+    private String getPostconfValue(ConfigResponse config, String key) {
+        String confDir = config.getValue(PROP_CONFDIR);
+        HashMap info = (HashMap)postconfInfoCache.get(confDir);
+        if (info == null) {
+            info = getPostconfInfo(config);
+            postconfInfoCache.put(confDir, info);
+        }
+        return (String)info.get(key);
+    }
+
+    private HashMap getPostconfInfo(ConfigResponse config) {
+        HashMap info = new HashMap();
         Process postconf;
 
-        String crPostconfBin =
-            config.getValue(PROP_POSTCONF);
+        String crPostconfBin = config.getValue(PROP_POSTCONF);
         String confDir = config.getValue(PROP_CONFDIR);
 
         // now that PROP_POSTCONF and PROP_CONFDIR gets set before
@@ -94,7 +103,7 @@ public class PostfixServerDetector
             postconf = Runtime.getRuntime().exec(argv);
         } catch (IOException e) {
             this.log.error("postconf exec failed:" + e);
-            return;
+            return info;
         }
 
         BufferedReader in = null;
@@ -109,9 +118,9 @@ public class PostfixServerDetector
                 // XXX:String.split() no workie in java 1.3
                 String conf[] = line.split(" = ");
                 if (conf.length == 1) {
-                    postconfInfo.put(conf[0] + index, "");
+                    info.put(conf[0], "");
                 } else {
-                    postconfInfo.put(conf[0] + index, conf[1]);
+                    info.put(conf[0], conf[1]);
                 }
             }
         } catch (IOException e) {
@@ -122,6 +131,7 @@ public class PostfixServerDetector
             }
         }
 
+        return info;
     }
 
     public List getServerResources(ConfigResponse platformConfig) 
@@ -186,16 +196,12 @@ public class PostfixServerDetector
                 productConfig.setValue(PROP_POSTCONF, postconfBin);
 
                 // get version from postconf output
-                String version = (String)postconfInfo.get("mail_version" + i);
+                String version =
+                    getPostconfValue(productConfig, "mail_version");
 
-                // if the version is null, we havent ran postconf
-                // for this server yet...
                 if (version == null) {
-                    getPostconfInfo(String.valueOf(i), productConfig);
-                    version = (String)postconfInfo.get("mail_version" + i);
-                    if (version == null) {
-                       this.log.error("cant find mail_version key in postconf");
-                    }
+                    this.log.warn("cant find mail_version key in postconf");
+                    continue;
                 }
 
                 // get queue directory from postconf
@@ -219,7 +225,7 @@ public class PostfixServerDetector
                 productConfig.setValue("process.query", ptqlQuery);
 
                 productConfig.setValue(PROP_QDIR, qdir);
-                productConfig.setValue(PROP_IDX, String.valueOf(i));
+
                 server.setProductConfig(productConfig);
                 server.setMeasurementConfig();
 
@@ -247,19 +253,13 @@ public class PostfixServerDetector
 
         ArrayList services = new ArrayList();
 
-        String index = config.getValue(PROP_IDX);
-        String qNames = (String)postconfInfo.get("hash_queue_names" + index);
+        String qNames = getPostconfValue(config, "hash_queue_names");
 
-        // if qNames is null, we need to run postconf for this server
         if (qNames == null) {
-            getPostconfInfo(index, config);
-            qNames = (String)postconfInfo.get("hash_queue_names" + index);
-            if (qNames == null) {
-                this.log.error("cant find hash_queue_names key in postconf");
-            }
+            this.log.error("cant find hash_queue_names key in postconf");
+            return null;
         }
 
-        // XXX:String.split() no workie in java 1.3
         String queues[] = qNames.split(", ");
 
         String qdir = config.getValue(PROP_QDIR);
@@ -274,8 +274,6 @@ public class PostfixServerDetector
             ConfigResponse productConfig = new ConfigResponse();
             productConfig.setValue(PROP_QUEUE, name);
             productConfig.setValue(PROP_PATH, path);
-            // set index to the same value as the server.
-            productConfig.setValue(PROP_IDX, index);
 
             service.setProductConfig(productConfig);
             service.setMeasurementConfig();

@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.Properties;
 
 import java.io.File;
-import org.hyperic.sigar.FileInfo;
 
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
@@ -41,8 +40,38 @@ import org.hyperic.hq.product.SigarMeasurementPlugin;
 public class PostfixMeasurementPlugin
     extends SigarMeasurementPlugin
 {
+    private static HashMap cache = new HashMap();
 
-    private static HashMap queueMetrics = new HashMap(2);
+    private MetricValue getValue(File file, String attr)
+        throws MetricNotFoundException {
+
+        HashMap metrics = (HashMap)cache.get(file);
+        if (metrics == null) {
+            metrics = new HashMap();
+            cache.put(file, metrics);
+        }
+
+        Integer val = (Integer)metrics.get(attr);
+        if (val == null) {
+            // recharge the cache if the value is not found
+            int qMetrics[] = getQueueMetrics(file);
+
+            metrics.put("QueuedMessages", new Integer(qMetrics[0]));
+            metrics.put("QueueSize", new Integer(qMetrics[1]));
+            
+            val = (Integer)metrics.get(attr);
+        }
+
+        // remove the metric from the cache to force a refresh
+        // next time around
+        val = (Integer)metrics.remove(attr);
+        if (val == null) {
+            throw new MetricNotFoundException("No metric mapped to " +
+                                              " metric: " + attr);
+        }
+
+        return new MetricValue(val.intValue());
+    }
 
     public MetricValue getValue(Metric metric)
         throws PluginException,
@@ -56,18 +85,10 @@ public class PostfixMeasurementPlugin
         }
 
         if (domain.equals("system.avail")) {
-
-            double avail;
-
-            try {
-                double val = super.getValue(metric).getValue();
-                avail = Metric.AVAIL_UP;
-
-                if (val != FileInfo.TYPE_DIR)
-                    avail = Metric.AVAIL_DOWN;
-            } catch (MetricNotFoundException e) {
-                avail = Metric.AVAIL_DOWN;
-            }
+            String path = metric.getObjectProperty("Arg");
+            double avail =
+                new File(path).isDirectory() ?
+                    Metric.AVAIL_UP : Metric.AVAIL_DOWN;
 
             return new MetricValue(avail);
         }
@@ -75,8 +96,7 @@ public class PostfixMeasurementPlugin
         if (domain.equals("queue")) {
             Properties props = metric.getObjectProperties();
             String qpath = props.getProperty(PostfixServerDetector.PROP_PATH);
-            String index = props.getProperty(PostfixServerDetector.PROP_IDX);
-            String attr = metric.getAttributeName() + index;
+            String attr = metric.getAttributeName();
 
             File queue = new File(qpath);
             // make sure we can read the queue.
@@ -90,43 +110,10 @@ public class PostfixMeasurementPlugin
                 throw new MetricNotFoundException("invalid queue: " + qpath);
             }
 
-            Integer val = (Integer)queueMetrics.get(attr);
-            if (val == null) {
-                // recharge the cache if the value is not found
-                cacheQueueMetrics(index, queue);
-
-                val = (Integer)queueMetrics.get(attr);
-                if (val == null) {
-                    throw new MetricNotFoundException("No metric mapped to " +
-                                                      " metric: " + attr);
-                }
-            }
-
-            // remove the metric from the cache to force a refresh
-            // next time around
-            queueMetrics.remove(attr);
-
-            return new MetricValue(val.intValue(), System.currentTimeMillis());
+            return getValue(queue, attr);
         }
 
         throw new MetricNotFoundException(domain);
-    }
-
-    private void cacheQueueMetrics(String index, File queue)
-    {
-
-        int qMetrics[] = getQueueMetrics(queue);
-
-        /*
-        XXX: putting the index into the key so we know which postfix
-        server the metrics are coming from.  possibly want to look at
-        using a different data structure.
-        */
-        //String qm = "QueuedMessages" + index;
-        //String qs = "QueueSize" + index;
-        queueMetrics.put("QueuedMessages" + index, new Integer(qMetrics[0]));
-        queueMetrics.put("QueueSize" + index, new Integer(qMetrics[1]));
-
     }
 
     private int[] getQueueMetrics(File queue)
