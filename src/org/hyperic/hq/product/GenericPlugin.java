@@ -37,6 +37,7 @@ import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.ConfigResponse;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
@@ -486,7 +487,11 @@ public abstract class GenericPlugin {
         throws IOException {
         
         ClassLoader loader = this.getClass().getClassLoader();
-        return PluginData.openPluginResource(loader, name);
+        InputStream is = PluginData.openPluginResource(loader, name);
+        if (is == null) {
+            throw new FileNotFoundException("Cannot find: " + name);
+        }
+        return is;
     }
 
     public String getPluginClassName(String pluginType, String resourceType) {
