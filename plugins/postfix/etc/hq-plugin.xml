@@ -31,174 +31,55 @@
   <!-- Process metrics -->
   <metrics name="process">
     <metric name="Availability"
-            alias="Availability"
             template="sigar.ptql:Type=ProcState,Arg=$!:State:%process.query%"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
+            indicator="true"/>
 
     <metric name="Virtual Memory Size"
-            alias="VirtualMemSize"
             template="sigar.ptql:Type=ProcMem,Arg=$!:Size:%process.query%"
-            category="UTILIZATION"
-            units="B"
-            collectionType="dynamic"/>
+            units="B"/>
 
     <metric name="Resident Memory Size"
-            alias="ResidentMemSize"
             template="sigar.ptql:Type=ProcMem,Arg=$!:Resident:%process.query%"
-            category="UTILIZATION"
             units="B"
             collectionType="dynamic"/>
 
     <metric name="Cpu System Time"
-            alias="SystemTime"
             template="sigar.ptql:Type=ProcTime,Arg=$!:Stime:%process.query%"
-            category="UTILIZATION"
             units="sec"
             collectionType="trendsup"/>
 
     <metric name="Cpu User Time"
-            alias="UserTime"
             template="sigar.ptql:Type=ProcTime,Arg=$!:Utime:%process.query%"
-            category="UTILIZATION"
             units="sec"
             collectionType="trendsup"/>
 
     <metric name="Cpu Total Time"
-            alias="TotalTime"
             template="sigar.ptql:Type=ProcTime,Arg=$!:Total:%process.query%"
-            category="UTILIZATION"
             units="sec"
             collectionType="trendsup"/>
 
     <metric name="Cpu Usage"
-            alias="Usage"
             template="sigar.ptql:Type=ProcCpu,Arg=$!:Percent:%process.query%"
-            category="UTILIZATION"
             indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
-<!--
+            units="percentage"/>
+
     <metric name="Open File Descriptors"
-            alias="OpenFd"
-            template="sigar.ptql:Type=ProcFd,Arg=$!:Total:%process.query%"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
--->
+            template="sigar.ptql:Type=ProcFd,Arg=$!:Total:%process.query%"/>
   </metrics>
   <metrics name="queue-avail">
     <metric name="Availability"
-            alias="Availability"
             template="system.avail:Type=FileInfo,Arg=%path%:Type"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
+            indicator="true"/>
   </metrics>
 
   <metrics name="queue">
-
-<!--
-    <metric name="Last Modified Time"
-            alias="LastModified"
-            template="sigar:Type=FileInfo,Arg=%path%:Mtime"
-            category="UTILIZATION"
-            units="epoch-millis"
-            collectionType="static"/>
-
-    <metric name="Last Change Time"
-            alias="LastChange"
-            template="sigar:Type=FileInfo,Arg=%path%:Ctime"
-            category="UTILIZATION"
-            units="epoch-millis"
-            collectionType="static"/>
-
-    <metric name="Last Access Time"
-            alias="LastAccess"
-            template="sigar:Type=FileInfo,Arg=%path%:Atime"
-            category="UTILIZATION"
-            units="epoch-millis"
-            collectionType="static"/>
-
-    <metric name="Permissions"
-            alias="Permissions"
-            template="sigar:Type=FileInfo,Arg=%path%:Mode"
-            category="UTILIZATION"
-            units="none"
-            collectionType="static"/>
-
-    <metric name="Owner User Id"
-            alias="Uid"
-            template="sigar:Type=FileInfo,Arg=%path%:Uid"
-            category="UTILIZATION"
-            units="none"
-            collectionType="static"/>
-
-    <metric name="Owner Group Id"
-            alias="Gid"
-            template="sigar:Type=FileInfo,Arg=%path%:Gid"
-            category="UTILIZATION"
-            units="none"
-            collectionType="static"/>
-
-    <metric name="Regular Files"
-            alias="Files"
-            template="sigar:Type=DirStats,Arg=%path%:Files"
-            category="UTILIZATION"
-            indicator="true"
-            units="none"
-            collectionType="dynamic"/>
-
-    <metric name="Subdirectories"
-            alias="Subdirs"
-            template="sigar:Type=DirStats,Arg=%path%:Subdirs"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
-    <metric name="Symbolic Links"
-            alias="Symlinks"
-            template="sigar:Type=DirStats,Arg=%path%:Symlinks"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
-
-    <metric name="Character Devices"
-            alias="Chrdevs"
-            template="sigar:Type=DirStats,Arg=%path%:Chrdevs"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
-
-    <metric name="Block Devices"
-            alias="Blkdevs"
-            template="sigar:Type=DirStats,Arg=%path%:Blkdevs"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
-
-    <metric name="Sockets"
-            alias="Sockets"
-            template="sigar:Type=DirStats,Arg=%path%:Sockets"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
--->
     <metric name="Queued Messages"
-            alias="QueuedMessages"
             template="queue:index=%index%,path=%path%:${alias}"
-            category="UTILIZATION"
-            indicator="true"
-            units="none"
-            collectionType="dynamic"/>
+            indicator="true"/>
+
     <metric name="Queue Size"
-            alias="QueueSize"
             template="queue:index=%index%,path=%path%:${alias}"
-            category="UTILIZATION"
-            units="B"
-            collectionType="dynamic"/>
+            units="B"/>
   </metrics>
 
   <help name="postfix">
