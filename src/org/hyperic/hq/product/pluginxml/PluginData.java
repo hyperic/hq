@@ -62,6 +62,7 @@ public class PluginData {
     public static final String PLUGIN_XML = "etc/hq-plugin.xml";
     public static final String PLUGIN_PROPERTIES = "etc/plugin.properties";
     
+    private static final String PLUGINS_PREFIX = "pdk/plugins/";
     private static final Log log = LogFactory.getLog("PluginData");
     private static final TypeInfo[] NO_TYPES = new TypeInfo[0];
     private static HashMap cache = new HashMap();
@@ -175,14 +176,11 @@ public class PluginData {
             return name;            
         }
 
-        //resolve external references to files in 
-        //the plugin directories
-        private String resolveFile(String name) {
-            final String prefix = "pdk/plugins/";
-            if (!name.startsWith(prefix)) {
-                return resolveParentFile(name);
-            }
+        private boolean isPluginFile(String name) {
+            return name.startsWith(PLUGINS_PREFIX);
+        }
 
+        private String resolvePluginFile(String name) {
             String dir;
 
             //XXX ProductPluginManager ought to set 1 variable we can
@@ -200,7 +198,19 @@ public class PluginData {
                 dir = serverHome + "/deploy/hq.ear/hq-plugins";
             }
 
-            return dir + "/" + name.substring(prefix.length());
+            return dir + "/" + name.substring(PLUGINS_PREFIX.length());            
+        }
+
+        //resolve external references to files in 
+        //the plugin directories
+        private String resolveFile(String name) {
+            
+            if (isPluginFile(name)) {
+                return resolvePluginFile(name);
+            }
+            else {
+                return resolveParentFile(name);
+            }
         }
 
         public InputSource resolveEntity(String publicId, String systemId) {
@@ -222,11 +232,11 @@ public class PluginData {
                     if (name.startsWith("/")) {
                         name = name.substring(1);
                     }
-                    InputStream is;
+                    InputStream is = null;
                     if (this.loader != null) {
                         is = openPluginResource(this.loader, name);
                     }
-                    else {
+                    if (is == null) {
                         resolvedName = resolveFile(name);
                         log.debug("resolveEntity: " +
                                   name + "->" + resolvedName);
@@ -269,9 +279,11 @@ public class PluginData {
         if (isJar) {
             try {
                 is = openPluginResource(loader, PLUGIN_PROPERTIES);
-                Properties props = new Properties();
-                props.load(is);
-                data.properties.putAll(props);
+                if (is != null) {
+                    Properties props = new Properties();
+                    props.load(is);
+                    data.properties.putAll(props);
+                }
             } catch (FileNotFoundException e) {
                 //optional
             } catch (IOException e) {
@@ -321,9 +333,6 @@ public class PluginData {
         }
 
         is = loader.getResourceAsStream(file);
-        if (is == null) {
-            throw new FileNotFoundException("Cannot find: " + file);
-        }
 
         return is;
     }
