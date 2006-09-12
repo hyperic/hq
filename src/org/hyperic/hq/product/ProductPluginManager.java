@@ -31,6 +31,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -62,15 +63,18 @@ public class ProductPluginManager extends PluginManager {
     
     private static final String PLUGIN_STUB =
         "org/hyperic/hq/product/ProductPluginXML.stub";
-    
-    private static final String[] CORE_PLUGINS = {
-        "system",      //absolute must-have
+
+    //absolute must-have
+    private static final String SYSTEM_PLUGIN = "system";
+
+    private static final String[] BASE_PLUGINS = {
         "netservices", //many plugins depend on this
         "sqlquery",    //for sql: metrics
     };
-    
+
     private boolean registerTypes = false;
     private boolean isClient;
+    private HashMap basePlugins = new HashMap();
     private HashMap managers = new HashMap();
     private HashMap types = new HashMap();
     private HashMap includePlugins = null;
@@ -78,7 +82,8 @@ public class ProductPluginManager extends PluginManager {
     private Log log = null;
     private byte[] pluginStub = null;
     private int pluginStubLength = 0;
-    
+    private Comparator pluginSorter;
+
     public static final int DEPLOYMENT_ORDER_LAST = 
         TypeInfo.TYPE_SERVICE + 1;
 
@@ -142,40 +147,6 @@ public class ProductPluginManager extends PluginManager {
 
     public ProductPluginManager(Properties props) {
         super(props);
-        log = LogFactory.getLog(this.getClass().getName());
-
-        String include = props.getProperty("plugins.include");
-        String exclude = props.getProperty("plugins.exclude");
-        if ((include != null) && (exclude != null)) {
-            log.warn("plugins.{include,exclude} are both defined" +
-                     ", use one or the other.");
-        }
-        if (include != null) {
-            this.includePlugins = new HashMap();
-            List plugins = StringUtil.explode(include, ",");
-            for (int i=0; i<plugins.size(); i++) {
-                this.includePlugins.put(plugins.get(i), Boolean.TRUE);                
-            }
-            //must-haves
-            for (int i=0; i<CORE_PLUGINS.length; i++) {
-                this.includePlugins.put(CORE_PLUGINS[i], Boolean.TRUE);
-            }
-        }
-        if (exclude != null) {
-            this.excludePlugins = new HashMap();
-            List plugins = StringUtil.explode(exclude, ",");
-            for (int i=0; i<plugins.size(); i++) {
-                this.excludePlugins.put(plugins.get(i), Boolean.TRUE);                
-            }
-            for (int i=0; i<CORE_PLUGINS.length; i++) {
-                String plugin = 
-                    (String)this.excludePlugins.remove(CORE_PLUGINS[i]);
-                if (plugin != null) {
-                    this.log.warn("Cannot exclude " + plugin +
-                                  " plugin, ignoring.");
-                }
-            }
-        }
     }
 
     public String getName() {
@@ -256,6 +227,97 @@ public class ProductPluginManager extends PluginManager {
         return order;
     }
 
+    private String[] getPluginNames(String plugins) {
+        if (plugins == null) {
+            return null;
+        }
+
+        List names = StringUtil.explode(plugins, ",");
+        return (String[])names.toArray(new String[0]);
+    }
+
+    //NOTE: use of TypeInfo for sorting plugin deployment order
+    //on the agent side is intended to load in the following order:
+    //1st: system plugin
+    //2nd: base plugins
+    //3rd: other plugins
+    //the order doesn't actually matter for the agent, but it may
+    //for command-line testing.  the server ProductPluginDeployer
+    //does its own sorting based on the actual TypeInfo.getType()
+    private class PluginSorter implements Comparator {
+        private Map basePlugins;
+
+        private PluginSorter(Map basePlugins) {
+            this.basePlugins = basePlugins;
+        }
+
+        private int getPluginValue(Object o) {
+            File file = (File)o;
+            String name = getNameFromFile(file.getName());
+            Integer value = (Integer)this.basePlugins.get(name);
+            return value == null ?
+                TypeInfo.TYPE_SERVICE : value.intValue();
+        }
+
+        public int compare(Object o1, Object o2) {
+            return getPluginValue(o1) - getPluginValue(o2);
+        }        
+    }
+
+    private void initPluginFilters() {
+        log = LogFactory.getLog(this.getClass().getName());
+
+        this.basePlugins.put(SYSTEM_PLUGIN, //must-have
+                             new Integer(TypeInfo.TYPE_PLATFORM));
+        String[] defaultPlugins;
+        String base = getProperty("plugins.base");
+        if (base == null) {
+            defaultPlugins = BASE_PLUGINS;
+        }
+        else {
+            defaultPlugins = getPluginNames(base);
+        }
+
+        for (int i=0; i<defaultPlugins.length; i++) {
+            this.basePlugins.put(defaultPlugins[i],
+                                 new Integer(TypeInfo.TYPE_SERVER));
+        }
+
+        this.pluginSorter = new PluginSorter(this.basePlugins);
+
+        String include = getProperty("plugins.include");
+        String exclude = getProperty("plugins.exclude");
+        if ((include != null) && (exclude != null)) {
+            log.warn("plugins.{include,exclude} are both defined" +
+                     ", use one or the other.");
+        }
+
+        if (include != null) {
+            this.includePlugins = new HashMap();
+            String[] plugins = getPluginNames(include);
+            for (int i=0; i<plugins.length; i++) {
+                this.includePlugins.put(plugins[i], Boolean.TRUE);                
+            }
+            //must-haves
+            this.includePlugins.putAll(this.basePlugins);
+        }
+
+        if (exclude != null) {
+            this.excludePlugins = new HashMap();
+            String[] plugins = getPluginNames(exclude);
+            for (int i=0; i<plugins.length; i++) {
+                String name = plugins[i];
+                if (this.basePlugins.get(name) == null) {
+                    this.excludePlugins.put(name, Boolean.TRUE);
+                }
+                else {
+                    this.log.warn("Cannot exclude " + name +
+                                  " plugin, ignoring.");                    
+                }
+            }
+        }
+    }
+
     public void init()
         throws PluginException {
 
@@ -265,6 +327,8 @@ public class ProductPluginManager extends PluginManager {
 
         Properties props = getProperties();
         props.putAll(ProductProperties.getProperties());
+
+        initPluginFilters();
 
         String pdk = getProperty(PROP_PDK_DIR);
         if (pdk != null) {
@@ -527,18 +591,19 @@ public class ProductPluginManager extends PluginManager {
         if (!(name.endsWith("-plugin.jar") ||
               name.endsWith("-plugin.xml")))
         {
+            log.debug(name + " not a loadable plugin");
             return false;
         }
 
         name = name.substring(0, name.length()-11);
         if (this.includePlugins != null) {
-            if (this.includePlugins.get(name) != Boolean.TRUE) {
+            if (this.includePlugins.get(name) == null) {
                 log.debug("Skipping " + name + " (not in plugins.include)");
                 return false;
             }
         }
         if (this.excludePlugins != null) {
-            if (this.excludePlugins.get(name) == Boolean.TRUE) {
+            if (this.excludePlugins.get(name) != null) {
                 log.debug("Skipping " + name + " (in plugins.exclude)");
                 return false;
             }
@@ -591,6 +656,12 @@ public class ProductPluginManager extends PluginManager {
         }
         return 0;
     }
+
+    private File[] listPlugins(File dir) {
+        File[] plugins = dir.listFiles();
+        Arrays.sort(plugins, this.pluginSorter);
+        return plugins;
+    }
     
     public int registerPlugins(String path)
         throws PluginException, PluginExistsException {
@@ -599,7 +670,6 @@ public class ProductPluginManager extends PluginManager {
         List dirs = StringUtil.explode(path, File.pathSeparator);
 
         for (int i=0; i<dirs.size(); i++) {
-            
             File dir = new File((String)dirs.get(i));
             if (!dir.exists()) {
                 log.debug("register plugins: " + dir +
@@ -612,12 +682,10 @@ public class ProductPluginManager extends PluginManager {
                 continue;
             }
 
-            File[] plugins = dir.listFiles();
+            File[] plugins = listPlugins(dir);
             for (int j=0; j<plugins.length; j++) {
                 String name = plugins[j].getName();
                 if (!isLoadablePluginName(name)) {
-                    log.debug("register plugins: " + name +
-                              " not a plugin");
                     continue;
                 }
                 log.info("Loading plugin: " + name);
