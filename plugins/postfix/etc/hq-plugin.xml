@@ -66,13 +66,12 @@
     <metric name="Open File Descriptors"
             template="sigar.ptql:Type=ProcFd,Arg=$!:Total:%process.query%"/>
   </metrics>
-  <metrics name="queue-avail">
-    <metric name="Availability"
-            template="system.avail:Type=FileInfo,Arg=%path%:Type"
-            indicator="true"/>
-  </metrics>
 
   <metrics name="queue">
+    <metric name="Availability"
+            template="queue:path=%path%:${alias}"
+            indicator="true"/>
+
     <metric name="Queued Messages"
             template="queue:path=%path%:${alias}"
             indicator="true"/>
@@ -131,7 +130,7 @@
                 description="full path to the queue"/>
       </config>
 
-      <metrics include="queue-avail,queue"/>
+      <metrics include="queue"/>
     </service>
 
   </server>

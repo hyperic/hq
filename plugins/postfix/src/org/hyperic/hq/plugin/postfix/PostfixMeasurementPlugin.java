@@ -26,12 +26,11 @@
 package org.hyperic.hq.plugin.postfix;
 
 import java.util.HashMap;
-import java.util.Properties;
-
 import java.io.File;
 
 import org.hyperic.hq.product.MeasurementPlugin;
 import org.hyperic.hq.product.Metric;
+import org.hyperic.hq.product.MetricInvalidException;
 import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
@@ -42,8 +41,10 @@ public class PostfixMeasurementPlugin
 {
     private static HashMap cache = new HashMap();
 
+    //XXX implement a Collector or use Sigar.getDirUsage()
     private MetricValue getValue(File file, String attr)
-        throws MetricNotFoundException {
+        throws MetricNotFoundException,
+               MetricUnreachableException {
 
         HashMap metrics = (HashMap)cache.get(file);
         if (metrics == null) {
@@ -53,6 +54,19 @@ public class PostfixMeasurementPlugin
 
         Integer val = (Integer)metrics.get(attr);
         if (val == null) {
+            // make sure the queue is a directory.
+            if (!file.isDirectory()) {
+                String msg =
+                    "Queue is not a directory: " + file;
+                throw new MetricNotFoundException(msg);
+            }
+
+            // make sure we can read the queue.
+            if (!file.canRead()) {
+                String msg = 
+                    "Cannot read " + file + ", check permissions";
+                throw new MetricUnreachableException(msg);
+            }
             // recharge the cache if the value is not found
             int qMetrics[] = getQueueMetrics(file);
 
@@ -78,43 +92,45 @@ public class PostfixMeasurementPlugin
                MetricNotFoundException,
                MetricUnreachableException
     {
+        String prop = PostfixServerDetector.PROP_PATH;
         String domain = metric.getDomainName();
-
+        String attr = metric.getAttributeName();
+        String qpath;
+        
+        //back-compat w/ old template
         if (domain.equals("system.avail")) {
-            String path = metric.getObjectProperty("Arg");
-            double avail =
-                new File(path).isDirectory() ?
-                    Metric.AVAIL_UP : Metric.AVAIL_DOWN;
+            domain = "queue";
+            attr = Metric.ATTR_AVAIL;
+            qpath = metric.getObjectProperty("Arg");
+        }
+        else {
+            qpath = metric.getObjectProperty(prop);
+        }
 
+        if (!domain.equals("queue")) {
+            return super.getValue(metric); //shouldnothappen
+        }
+
+        if (qpath == null) {
+            String msg = "Missing " + prop + ": " + metric;
+            throw new MetricInvalidException(msg);
+        }
+
+        File queue = new File(qpath);
+
+        if (attr.equals(Metric.ATTR_AVAIL)) {
+            double avail = 
+                queue.isDirectory() ?
+                Metric.AVAIL_UP : Metric.AVAIL_DOWN;
             return new MetricValue(avail);
         }
-
-        if (domain.equals("queue")) {
-            Properties props = metric.getObjectProperties();
-            String qpath = props.getProperty(PostfixServerDetector.PROP_PATH);
-            String attr = metric.getAttributeName();
-
-            File queue = new File(qpath);
-            // make sure we can read the queue.
-            if (!queue.canRead()) {
-                throw new MetricNotFoundException("cannot read "
-                    + qpath + ", check permissions!");
-            }
-
-            // make sure the queue is a directory.
-            if (!queue.isDirectory()) {
-                throw new MetricNotFoundException("invalid queue: " + qpath);
-            }
-
+        else {
             return getValue(queue, attr);
         }
-
-        throw new MetricNotFoundException(domain);
     }
 
     private int[] getQueueMetrics(File queue)
     {
-
         File queueContents[] = queue.listFiles();
         int messageCount = 0;
         int queueSize = 0;
