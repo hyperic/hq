@@ -109,7 +109,6 @@ public class NavMapImageServlet extends ImageServlet {
      * @param request the HTTP request object
      */
     protected void parseParameters(HttpServletRequest request) {
-        super.parseParameters(request);
         // chart data key
         treeVar = parseRequiredStringParameter(request, TREE_VAR_PARAM);
 

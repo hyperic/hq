@@ -34,17 +34,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.util.MessageResources;
-import org.apache.struts.util.MessageResourcesFactory;
-
-import org.hyperic.image.chart.AvailabilityChart;
-import org.hyperic.image.chart.Chart;
-import org.hyperic.image.chart.ColumnChart;
-import org.hyperic.image.chart.LineChart;
-import org.hyperic.image.chart.PerformanceChart;
-import org.hyperic.image.chart.StackedPerformanceChart;
-import org.hyperic.image.chart.UsageChart;
-import org.hyperic.util.units.UnitsConstants;
 
 /**
  * <p>This servlet returns a response that contains the binary data of
@@ -86,10 +75,6 @@ public abstract class ImageServlet extends ParameterizedServlet {
 
     // member data
     private Log log = LogFactory.getLog( ImageServlet.class.getName() );
-    private String imageFormat;
-    private int imageWidth;
-    private int imageHeight;
-    
     public ImageServlet () {}
 
     public void init() {
@@ -105,14 +90,27 @@ public abstract class ImageServlet extends ParameterizedServlet {
         try {
             // parse the parameters
             log.debug("Parsing parameters.");
+            
             parseParameters(request);
+            
+            // image format
+            String imageFormat = parseStringParameter(request,
+                                                      IMAGE_FORMAT_PARAM,
+                                                      getDefaultImageFormat(),
+                                                      VALID_IMAGE_FORMATS);
+            if (log.isDebugEnabled()) {
+                StringBuffer sb = new StringBuffer("Parameters:");
+                sb.append("\n\t");
+                sb.append(IMAGE_FORMAT_PARAM).append(": ").append(imageFormat);
+                log.debug(sb.toString());
+            }
 
             Object imgObj = createImage(request);
         
             // render the chart
             log.debug("Rendering image.");
             ServletOutputStream out = response.getOutputStream();
-            if ( getImageFormat().equals(IMAGE_FORMAT_PNG) ) {
+            if ( imageFormat.equals(IMAGE_FORMAT_PNG) ) {
                 response.setContentType("image/png");
                 renderPngImage(out, imgObj);
             } else {
@@ -159,50 +157,30 @@ public abstract class ImageServlet extends ParameterizedServlet {
      *
      * @param request the HTTP request object
      */
-    protected void parseParameters(HttpServletRequest request) {
-        // image format
-        imageFormat = parseStringParameter(request, IMAGE_FORMAT_PARAM,
-                                           getDefaultImageFormat(), VALID_IMAGE_FORMATS);
-
-        // image width
-        imageWidth = parseIntParameter( request, IMAGE_WIDTH_PARAM,
-                                        getDefaultImageWidth() );
-
-        // image height
-        imageHeight=  parseIntParameter( request, IMAGE_HEIGHT_PARAM,
-                                         getDefaultImageHeight() );
-
-        _logParameters();
-    }
-
-    /**
-     * Return the image format.
-     *
-     * @return <code>{@link IMAGE_FORMAT_PNG}</code> or <code>{@link
-     * IMAGE_FORMAT_JPEG}</code>
-     */
-    protected String getImageFormat() {
-        return imageFormat;
-    }
+    protected abstract void parseParameters(HttpServletRequest request);
 
     /**
      * Return the image height.
+     * @param request TODO
      *
      * @return the height of the image
      * @see <code>{@link IMAGE_HEIGHT_DEFAULT}</code>
      */
-    protected int getImageHeight() {
-        return imageHeight;
+    protected int getImageHeight(HttpServletRequest request) {
+        return parseIntParameter( request, IMAGE_HEIGHT_PARAM,
+                                  getDefaultImageHeight() );
     }
 
     /**
      * Return the image width.
+     * @param request TODO
      *
      * @return the width of the image
      * @see <code>{@link IMAGE_WIDTH_DEFAULT}</code>
      */
-    protected int getImageWidth() {
-        return imageWidth;
+    protected int getImageWidth(HttpServletRequest request) {
+        return parseIntParameter( request, IMAGE_WIDTH_PARAM,
+                                  getDefaultImageWidth() );
     }
 
     /**
@@ -224,22 +202,6 @@ public abstract class ImageServlet extends ParameterizedServlet {
      */
     protected int getDefaultImageHeight() {
         return IMAGE_HEIGHT_DEFAULT;
-    }
-
-    //---------------------------------------------------------------
-    //-- private helpers
-    //---------------------------------------------------------------
-    private void _logParameters() {
-        if ( log.isDebugEnabled() ) {
-            StringBuffer sb = new StringBuffer("Parameters:");
-            sb.append("\n");sb.append("\t");
-            sb.append(IMAGE_FORMAT_PARAM); sb.append(": "); sb.append(imageFormat);
-            sb.append("\n");sb.append("\t");
-            sb.append(IMAGE_WIDTH_PARAM); sb.append(": "); sb.append(imageWidth);
-            sb.append("\n");sb.append("\t");
-            sb.append(IMAGE_HEIGHT_PARAM); sb.append(": "); sb.append(imageHeight);
-            log.debug( sb.toString() );
-        }
     }
 }
 

@@ -151,7 +151,7 @@ public abstract class ChartServlet extends ImageServlet {
         }
 
         // initialize the chart
-        Chart chart = createChart(dataBean);
+        Chart chart = createChart(dataBean, request);
         initializeChart(chart, request);
 
         // the subclass is responsible for plotting the data
@@ -190,8 +190,6 @@ public abstract class ChartServlet extends ImageServlet {
      * @param request the HTTP request object
      */
     protected void parseParameters(HttpServletRequest request) {
-        super.parseParameters(request);
-
         // units / scale
         unitUnits = parseIntParameter( request, UNIT_UNITS_PARAM,
                                        getDefaultUnitUnits() );
@@ -256,10 +254,11 @@ public abstract class ChartServlet extends ImageServlet {
      * Create and return the chart.  This method will be called after
      * the parameters have been parsed.
      * @param dataBean TODO
+     * @param request TODO
      *
      * @return the newly created chart
      */
-    protected abstract Chart createChart(ChartDataBean dataBean);
+    protected abstract Chart createChart(ChartDataBean dataBean, HttpServletRequest request);
 
     /**
      * Initialize the chart.  This method will be called after the

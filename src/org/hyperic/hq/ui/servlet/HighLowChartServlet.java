@@ -66,9 +66,9 @@ public class HighLowChartServlet extends ChartServlet {
     /* (non-Javadoc)
      * @see org.hyperic.hq.ui.servlet.ChartServlet#createChart()
      */
-    protected Chart createChart(ChartDataBean dataBean) {
+    protected Chart createChart(ChartDataBean dataBean, HttpServletRequest request) {
         log.trace("plotting a high low chart");
-        return new HighLowChart( getImageWidth(), getImageHeight() );
+        return new HighLowChart( getImageWidth(request), getImageHeight(request) );
     }
 
     /**
@@ -83,7 +83,7 @@ public class HighLowChartServlet extends ChartServlet {
         HighLowChart hiloChart = (HighLowChart) chart;
         hiloChart.setNumberDataSets(1);
         hiloChart.leftBorder = 0;
-        hiloChart.rightLabelWidth = (int) (this.getImageWidth() * 0.1);
+        hiloChart.rightLabelWidth = (int) (this.getImageWidth(request) * 0.1);
         hiloChart.columnWidth = 7;
     }
 

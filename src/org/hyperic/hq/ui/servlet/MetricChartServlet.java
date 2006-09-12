@@ -82,20 +82,23 @@ public class MetricChartServlet extends VerticalChartServlet {
      *
      * @return the newly created chart
      */
-    protected Chart createChart(ChartDataBean dataBean) {
+    protected Chart createChart(ChartDataBean dataBean,
+                                HttpServletRequest request) {
         // We will actually set a flag here to determine whether we
-        // should draw a LineChart or a column chart.  If we are
+        // should draw a LineChart or a column chart. If we are
         // charting just one set of data / event points, we'll plot a
-        // ColumnChart.  Otherwise we'll plot a LineChart.        
+        // ColumnChart. Otherwise we'll plot a LineChart.
         List dataPointsList = dataBean.getDataPoints();
         boolean plotLineChart = (dataPointsList.size() > 1);
 
         if (plotLineChart) {
             log.trace("plotting a line chart");
-            return new LineChart( getImageWidth(), getImageHeight() );
+            return new LineChart(getImageWidth(request),
+                    getImageHeight(request));
         } else {
             log.trace("plotting a column chart");
-            return new ColumnChart( getImageWidth(), getImageHeight() );
+            return new ColumnChart(getImageWidth(request),
+                    getImageHeight(request));
         }
     }
 
@@ -115,7 +118,7 @@ public class MetricChartServlet extends VerticalChartServlet {
         VerticalChart verticalChart = (VerticalChart) chart;
         verticalChart.showEvents = showEvents;
         verticalChart.showRightLabels = false;
-        verticalChart.rightLabelWidth = (int) (getImageWidth() * 0.1);
+        verticalChart.rightLabelWidth = (int) (getImageWidth(request) * 0.1);
         verticalChart.xLabelsSkip = 5;
     }
 

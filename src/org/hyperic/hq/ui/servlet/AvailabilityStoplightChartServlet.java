@@ -53,6 +53,7 @@ import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 
 public class AvailabilityStoplightChartServlet extends ChartServlet {
+    
 
     Log log = LogFactory.getLog(AvailabilityStoplightChartServlet.class.getName());
 
@@ -66,7 +67,8 @@ public class AvailabilityStoplightChartServlet extends ChartServlet {
     /* (non-Javadoc)
      * @see org.hyperic.hq.ui.servlet.ChartServlet#createChart()
      */
-    protected Chart createChart(ChartDataBean dataBean) {
+    protected Chart createChart(ChartDataBean dataBean,
+                                HttpServletRequest request) {
         return new AvailabilityReportChart();
     }
 

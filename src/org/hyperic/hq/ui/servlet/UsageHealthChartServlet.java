@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.ui.servlet;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.ui.beans.ChartDataBean;
 import org.hyperic.image.chart.Chart;
@@ -43,8 +45,9 @@ public class UsageHealthChartServlet extends CurrentHealthChartServlet {
      *
      * @return the newly created chart
      */
-    protected Chart createChart(ChartDataBean dataBean) {
-        return new UsageChart( getImageWidth(), getImageHeight() );
+    protected Chart createChart(ChartDataBean dataBean,
+                                HttpServletRequest request) {
+        return new UsageChart( getImageWidth(request), getImageHeight(request) );
     }
 
     /**
