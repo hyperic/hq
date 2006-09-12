@@ -32,6 +32,13 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.Action;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.util.LabelValueBean;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
@@ -45,31 +52,11 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.Action;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.util.LabelValueBean;
-
 /**
  * An Action that retrieves data from the BizApp to facilitate display
  * of the <em>AddGroupResources</em> form. 
  */
 public class AddGroupResourcesFormPrepareAction extends Action {
-    
-    /**
-     * this fields are used in the inner class objects.
-     */
-    private int sessionId;
-    private AppdefBoss boss = null;
-    private AppdefGroupValue group = null;
-    private PageControl pcAvail = null;
-    private int appdefType = -1;
-    private String nameFilter = null;
-    private AppdefEntityID[] pendingResItems = null;
-    private AddGroupResourcesForm addForm = null;
     
     // ---------------------------------------------------- Public Methods
     
@@ -109,7 +96,7 @@ public class AddGroupResourcesFormPrepareAction extends Action {
         throws Exception {
         Log log = LogFactory.getLog(getClass().getName());
         
-        addForm = (AddGroupResourcesForm) form;
+        AddGroupResourcesForm addForm = (AddGroupResourcesForm) form;
         
         Integer groupId = addForm.getRid();
         
@@ -121,15 +108,16 @@ public class AddGroupResourcesFormPrepareAction extends Action {
         
         ServletContext ctx = getServlet().getServletContext();
         
-        sessionId = RequestUtils.getSessionIdInt(request);
-        boss = ContextUtils.getAppdefBoss(ctx);
+        int sessionId = RequestUtils.getSessionIdInt(request);
+        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
         
-        pcAvail = 
+        PageControl pcAvail =
             RequestUtils.getPageControl(request, "psa", "pna","soa", "sca");
         pcPending = 
             RequestUtils.getPageControl(request, "psp", "pnp","sop", "scp");
         
-        group = (AppdefGroupValue) RequestUtils.getResource(request);
+        AppdefGroupValue group =
+            (AppdefGroupValue) RequestUtils.getResource(request);
         if (group == null) {
             RequestUtils.setError(request,
                 "resource.group.inventory.error.GroupNotFound");
@@ -151,12 +139,14 @@ public class AddGroupResourcesFormPrepareAction extends Action {
             SessionUtils.getListAsListStr(request.getSession(),
                 Constants.PENDING_RESOURCES_SES_ATTR);
         
-        nameFilter = RequestUtils.getStringParameter(request, "nameFilter",
-                                                     null);
+        String nameFilter = RequestUtils.getStringParameter(request,
+                                                            "nameFilter", null);
         
         log.trace("getting pending resources for group [" + groupId + "]");
         
         List entities = BizappUtils.buildAppdefEntityIds(pendingResourceIds);
+        
+        AppdefEntityID[] pendingResItems;
         
         if (entities.size() > 0) {
             pendingResItems = new AppdefEntityID[entities.size()];
@@ -192,7 +182,7 @@ public class AddGroupResourcesFormPrepareAction extends Action {
         
         String filterBy = addForm.getFilterBy();
         
-        appdefType = -1;
+        int appdefType = -1;
         if (filterBy != null)
             appdefType = new Integer(filterBy).intValue();
         
@@ -209,7 +199,7 @@ public class AddGroupResourcesFormPrepareAction extends Action {
         else
             p = new PrepareMixedGroup();
         
-        p.loadGroupMembers();
+        p.loadGroupMembers(sessionId, addForm, group, boss, appdefType, nameFilter, pendingResItems, pcAvail);
         PageList availResources = p.getAvailResources();
         
         request.setAttribute(Constants.AVAIL_RESOURCES_ATTR, availResources);
@@ -233,8 +223,23 @@ public class AddGroupResourcesFormPrepareAction extends Action {
         
         /**
          * This method loads group members from the back-end.
+         * @param sessionId TODO
+         * @param group TODO
+         * @param boss TODO
+         * @param appdefType TODO
+         * @param nameFilter TODO
+         * @param pendingResItems TODO
+         * @param pcAvail TODO
          */
-        protected abstract void loadGroupMembers() throws Exception;
+        protected abstract void loadGroupMembers(int sessionId,
+                                                 AddGroupResourcesForm addForm,
+                                                 AppdefGroupValue group,
+                                                 AppdefBoss boss,
+                                                 int appdefType,
+                                                 String nameFilter,
+                                                 AppdefEntityID[] pendingResItems,
+                                                 PageControl pcAvail)
+            throws Exception;
     }
     
     /**
@@ -247,7 +252,14 @@ public class AddGroupResourcesFormPrepareAction extends Action {
             return avail;
         }
         
-        protected void loadGroupMembers() throws Exception {
+        protected void loadGroupMembers(int sessionId,
+                                        AddGroupResourcesForm addForm,
+                                        AppdefGroupValue group,
+                                        AppdefBoss boss, int appdefType,
+                                        String nameFilter,
+                                        AppdefEntityID[] pendingResItems,
+                                        PageControl pcAvail)
+            throws Exception {
             avail = boss.findCompatInventory(sessionId,
                                              group.getGroupEntType(),
                                              group.getGroupEntResType(),
@@ -268,7 +280,14 @@ public class AddGroupResourcesFormPrepareAction extends Action {
             return availMembers;
         }
         
-        protected void loadGroupMembers() throws Exception {
+        protected void loadGroupMembers(int sessionId,
+                                        AddGroupResourcesForm addForm,
+                                        AppdefGroupValue group,
+                                        AppdefBoss boss, int appdefType,
+                                        String nameFilter,
+                                        AppdefEntityID[] pendingResItems,
+                                        PageControl pcAvail)
+            throws Exception {
             if (appdefType == -1)
                 appdefType = AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
             
@@ -293,7 +312,14 @@ public class AddGroupResourcesFormPrepareAction extends Action {
             return availMembers;
         }
         
-        protected void loadGroupMembers() throws Exception {
+        protected void loadGroupMembers(int sessionId,
+                                        AddGroupResourcesForm addForm,
+                                        AppdefGroupValue group,
+                                        AppdefBoss boss, int appdefType,
+                                        String nameFilter,
+                                        AppdefEntityID[] pendingResItems,
+                                        PageControl pcAvail)
+            throws Exception {
             if (appdefType == -1)
                 appdefType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP;
             
@@ -323,7 +349,14 @@ public class AddGroupResourcesFormPrepareAction extends Action {
             return filteredAvailList;
         }
         
-        protected void loadGroupMembers() throws Exception {
+        protected void loadGroupMembers(int sessionId,
+                                        AddGroupResourcesForm addForm,
+                                        AppdefGroupValue group,
+                                        AppdefBoss boss, int appdefType,
+                                        String nameFilter,
+                                        AppdefEntityID[] pendingResItems,
+                                        PageControl pcAvail)
+            throws Exception {
             if (appdefType == -1)
                 appdefType = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
             
