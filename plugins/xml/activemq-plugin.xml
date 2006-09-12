@@ -105,7 +105,7 @@
             class="org.hyperic.hq.product.ConfigFileTrackPlugin"/>
 
     <metric name="Availability"
-            template="sigar.ptql:Type=ProcState,Arg=$!:State:%process.query%"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
             indicator="true"/>
 
     &process-metrics;
