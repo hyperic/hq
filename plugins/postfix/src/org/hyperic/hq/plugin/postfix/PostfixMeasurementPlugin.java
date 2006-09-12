@@ -30,15 +30,15 @@ import java.util.Properties;
 
 import java.io.File;
 
+import org.hyperic.hq.product.MeasurementPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.SigarMeasurementPlugin;
 
 public class PostfixMeasurementPlugin
-    extends SigarMeasurementPlugin
+    extends MeasurementPlugin
 {
     private static HashMap cache = new HashMap();
 
@@ -79,10 +79,6 @@ public class PostfixMeasurementPlugin
                MetricUnreachableException
     {
         String domain = metric.getDomainName();
-
-        if (domain.equals("sigar.ptql") || domain.equals("sigar")) {
-            return super.getValue(metric);
-        }
 
         if (domain.equals("system.avail")) {
             String path = metric.getObjectProperty("Arg");
