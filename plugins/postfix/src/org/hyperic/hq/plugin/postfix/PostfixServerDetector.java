@@ -33,6 +33,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.ServerDetector;
@@ -134,114 +135,115 @@ public class PostfixServerDetector
         return info;
     }
 
+    private String whichPostconf(String envPath) {
+        if (envPath == null) {
+            return null;
+        }
+        String[] path = envPath.split(":");
+
+        for (int i=0; i<path.length; i++) {
+            File postconf =
+                new File(path[i], "postconf");
+
+            if (postconf.exists()) {
+                log.debug("Using postconf=" + postconf);
+                return postconf.toString();
+            }
+        }
+
+        return null;
+    }
+
     public List getServerResources(ConfigResponse platformConfig) 
         throws PluginException
     {
+        long[] pids = getPids(PTQL_QUERY);
+        String user = System.getProperty("user.name");
+
+        //XXX use getSigar().getProcCred().getEuid() != 0 ?
+        if (!"root".equals(user)) {
+            int num = pids.length;
+            if (num != 0) {
+                log.info("Found " + num + " postfix processes" + 
+                         " but cannot discover or monitor unless " +
+                         "running as root (user.name=" + user + ")");
+            }
+            return null;
+        }
+
         List servers = new ArrayList();
 
-        long[] pids = getPids(PTQL_QUERY);
-
         for (int i=0; i < pids.length; i++) {
-
-            // Config directory is the cwd
-            String postfixConfigDir;
+            Map env;
             try {
-                postfixConfigDir =
-                    getSigar().getProcEnv(pids[i], "config_directory");
-            }
-            catch (SigarException e) {
-                //throw new PluginException(e);
-                //XXX: non-root users will get a permissions error here.
+              env = getSigar().getProcEnv(pids[i]);
+            } catch (SigarException e) {
                 this.log.debug("must be root to get postfix info...");
                 return servers;
+            }
+
+            // Config directory is the cwd
+            String postfixConfigDir = (String)env.get("config_directory");
+            if (postfixConfigDir == null) {
+                continue;
             }
 
             // try to find postconf in the PATH
             // but only if we havent already found one.
             if (postconfBin == null) {
-                String[] path;
-                try {
-                    path = getSigar().getProcEnv(pids[i], "PATH").split(":");
-                }
-                catch (SigarException e) {
-                    throw new PluginException(e);
-                }
-                boolean foundPostconf = false;
-                for (int j=0; j < path.length; j++) {
-                    postconfBin = path[j] + "/postconf";
-                    this.log.debug("checking for " + postconfBin);
-                    File pcFile = new File(path[j] + "/postconf");
-
-                    if (pcFile.exists()) {
-                        this.log.debug("found " + postconfBin);
-                        foundPostconf = true;
-                        break;
-                    }
-                }
-                if (!foundPostconf) {
-                    this.log.warn("cant find postconf in path!");
-                    postconfBin = null;
-                }
-            }
-
-            String postfix = getProcExe(pids[i]);
-            if (postfix != null) {
-                // postfix master process is running
-
-                ConfigResponse productConfig = new ConfigResponse();
-
-                // set PROP_CONFDIR and PROP_POSTCONF here so
-                // getPostconfInfo can use it
-                productConfig.setValue(PROP_CONFDIR, postfixConfigDir);
-                productConfig.setValue(PROP_POSTCONF, postconfBin);
-
-                // get version from postconf output
-                String version =
-                    getPostconfValue(productConfig, "mail_version");
-
-                if (version == null) {
-                    this.log.warn("cant find mail_version key in postconf");
+                postconfBin = whichPostconf((String)env.get("PATH"));
+                if (postconfBin == null) {
+                    log.warn("Unable to find postconf in PATH");
                     continue;
                 }
-
-                // get queue directory from postconf
-                //String qdir = (String)postconfInfo.get("queue_directory" + i);
-                // get queue directory from process env with sigar
-                String qdir;
-                try {
-                    qdir = getSigar().getProcEnv(pids[i], "queue_directory");
-                }
-                catch (SigarException e) {
-                    throw new PluginException(e);
-                }
-
-                // create server with postfixConfigDir instead of postfix
-                // so it will be unique for multiple servers.
-                ServerResource server =  createServerResource(postfixConfigDir);
-
-                // set a server specific ptql query so avail works
-                //XXX: Pid will probably not work with restarts, etc.
-                String ptqlQuery = PTQL_QUERY + ",Pid.Pid.eq=" + pids[i];
-                productConfig.setValue("process.query", ptqlQuery);
-
-                productConfig.setValue(PROP_QDIR, qdir);
-
-                server.setProductConfig(productConfig);
-                server.setMeasurementConfig();
-
-                // set server name - different if there are multiple
-                // servers running
-                if (pids.length > 1) {
-                    server.setName(getPlatformName() + " " + SERVER_NAME
-                        + " " + version + " (" + postfixConfigDir + ")");
-                }
-                else {
-                    server.setName(getPlatformName() + " " + SERVER_NAME
-                        + " " + version);
-                }
-
-                servers.add(server);
             }
+
+            ConfigResponse productConfig = new ConfigResponse();
+
+            // set PROP_CONFDIR and PROP_POSTCONF here so
+            // getPostconfInfo can use it
+            productConfig.setValue(PROP_CONFDIR, postfixConfigDir);
+            productConfig.setValue(PROP_POSTCONF, postconfBin);
+
+            // get version from postconf output
+            String version =
+                getPostconfValue(productConfig, "mail_version");
+
+            if (version == null) {
+                log.warn("cant find mail_version key in postconf");
+                continue;
+            }
+
+            String qdir = getPostconfValue(productConfig, "queue_directory");
+            if (qdir == null) {
+                continue;
+            }
+            // create server with postfixConfigDir instead of postfix
+            // so it will be unique for multiple servers.
+            ServerResource server = createServerResource(postfixConfigDir);
+
+            // set a server specific ptql query so avail works
+            //XXX: Pid will probably not work with restarts, etc.
+            String ptqlQuery = PTQL_QUERY + ",Pid.Pid.eq=" + pids[i];
+            productConfig.setValue("process.query", ptqlQuery);
+
+            productConfig.setValue(PROP_QDIR, qdir);
+
+            server.setProductConfig(productConfig);
+            server.setMeasurementConfig();
+
+            String name =
+                getPlatformName() + " " + SERVER_NAME + " " + version;
+
+            // set server name - different if there are multiple
+            // servers running
+            if (pids.length > 1) {
+                name += " (" + postfixConfigDir + ")";
+            }
+
+            server.setName(name);
+
+            servers.add(server);
         }
 
         return servers;
