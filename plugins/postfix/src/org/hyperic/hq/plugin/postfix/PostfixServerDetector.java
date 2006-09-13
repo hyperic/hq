@@ -222,9 +222,10 @@ public class PostfixServerDetector
             // so it will be unique for multiple servers.
             ServerResource server = createServerResource(postfixConfigDir);
 
-            // set a server specific ptql query so avail works
-            //XXX: Pid will probably not work with restarts, etc.
-            String ptqlQuery = PTQL_QUERY + ",Pid.Pid.eq=" + pids[i];
+            // set a server specific ptql query for process metrics
+            File pidFile = new File(qdir, "pid/master.pid");//XXX check exists
+            String ptqlQuery = "Pid.PidFile.eq=" + pidFile;
+
             productConfig.setValue("process.query", ptqlQuery);
 
             productConfig.setValue(PROP_QDIR, qdir);
