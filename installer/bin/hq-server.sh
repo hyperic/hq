@@ -164,25 +164,29 @@ startBuiltinDB () {
   if [ -f "${DBPIDFILE}" ] ; then
     DBPID=`cat ${DBPIDFILE} | tr -d ' '`
     if [ ! "x${DBPID}" = "x" ]; then
+      # First check for stale pid file
       DBPIDCHECK=`kill -0 ${DBPID} 2> /dev/null`
       if [ $? -eq 1 ]; then
         infoOut "Removing stale pid file ${DBPIDFILE}"
         rm -f ${DBPIDFILE}
-        infoOut "Starting HQ built-in database..."
-        ${SERVER_HOME}/bin/db-start.sh
-
-        debugOut "loading dbport..."
-        DBPORT=`loadDBPort`
-        debugOut "loaded dbport=${DBPORT}"
-        waitForPort ${DBPORT} "postmaster" 10 'HQ built-in database failed to start:' '${SERVER_HOME}/hqdb/data/hqdb.log' 1
-        if [ $? -eq 0 ] ; then
-          exit 1
-        fi
-        infoOut "HQ built-in database started."
-      else 
-        infoOut "HQ built-in database already running (pid file found: ${DBPIDFILE}), not starting it again."
+      else
+        infoOut "HQ built-in database already running (pid file found: ${DBPIDFILE}), not starting it again." 
       fi
     fi
+  fi 
+
+  if [ ! -f "${DBPIDFILE}" ] ; then
+    infoOut "Starting HQ built-in database..."
+    ${SERVER_HOME}/bin/db-start.sh
+
+    debugOut "loading dbport..."
+    DBPORT=`loadDBPort`
+    debugOut "loaded dbport=${DBPORT}"
+    waitForPort ${DBPORT} "postmaster" 10 'HQ built-in database failed to start:' '${SERVER_HOME}/hqdb/data/hqdb.log' 1
+    if [ $? -eq 0 ] ; then
+      exit 1
+    fi
+    infoOut "HQ built-in database started."
   fi
 }
 
