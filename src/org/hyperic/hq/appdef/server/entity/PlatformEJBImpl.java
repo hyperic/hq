@@ -459,6 +459,24 @@ public abstract class PlatformEJBImpl
     public void updatePlatform(PlatformValue existing) 
         throws NamingException, FinderException, UpdateException {
             log.debug("Updating platform: " + existing.getId());
+            // first remove any which were in the removedIp collection
+            for(Iterator i = existing.getRemovedIpValues().iterator();
+                i.hasNext();) {
+                IpValue aIp = (IpValue)i.next();
+                if(aIp.idHasBeenSet()) {
+                    log.debug("Removing ip: " + aIp);
+                    try {
+                        IpLocal ipEjb = IpUtil.getLocalHome()
+                            .findByPrimaryKey(aIp.getPrimaryKey());
+                        ipEjb.remove();
+                    } catch (RemoveException e) {
+                        rollback();
+                        log.error("Unable to delete ip", e);
+                        throw new UpdateException("Unable to delete IP: " 
+                            + e.getMessage());
+                    }
+                }
+            }
             // Bug #4924 Xdoclet's setPlatformValue method
             // does not handle the IP's correctly
             Collection ips = existing.getAddedIpValues();
@@ -490,23 +508,6 @@ public abstract class PlatformEJBImpl
                     } catch (CreateException e) {
                         rollback();
                         throw new UpdateException("Unable to create new Ip: "
-                            + e.getMessage());
-                    }
-                }
-            }
-            // now remove any which were in the removedIp collection
-            for(Iterator i = existing.getRemovedIpValues().iterator(); i.hasNext();) {
-                IpValue aIp = (IpValue)i.next();
-                if(aIp.idHasBeenSet()) {
-                    log.debug("Removing ip: " + aIp);
-                    try {
-                        IpLocal ipEjb = IpUtil.getLocalHome()
-                            .findByPrimaryKey(aIp.getPrimaryKey());
-                        ipEjb.remove();
-                    } catch (RemoveException e) {
-                        rollback();
-                        log.error("Unable to delete ip", e);
-                        throw new UpdateException("Unable to delete IP: " 
                             + e.getMessage());
                     }
                 }
