@@ -32,15 +32,14 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.hyperic.hq.appdef.shared.IpValue;
-import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.ui.action.resource.ResourceForm;
-
 import org.apache.struts.Globals;
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
 import org.apache.struts.util.LabelValueBean;
+import org.hyperic.hq.appdef.shared.IpValue;
+import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.ui.action.resource.ResourceForm;
 
 /**
  * A subclass of <code>ResourceForm</code> representing the
@@ -206,8 +205,6 @@ public class PlatformForm extends ResourceForm  {
         // update ip addresses
         IpValue[] oldIps = platform.getIpValues();
         
-        List addedIpValues = Arrays.asList(platform.getIpValues());
-
         if (oldIps == null) {
             oldIps = new IpValue[0];
         } 
@@ -217,7 +214,8 @@ public class PlatformForm extends ResourceForm  {
         platform.removeAllIpValues();
 
         // add all new ips
-        for (int i=0; i<numNewIps; i++) {
+        int i;
+        for (i = 0; i < numNewIps; i++) {
             IpValue newIp = getIp(i);
             if (i < numOldIps) {
                 // update the old ip and add it back
@@ -225,10 +223,7 @@ public class PlatformForm extends ResourceForm  {
                 oldIp.setAddress(newIp.getAddress());
                 oldIp.setMACAddress(newIp.getMACAddress());
                 oldIp.setNetmask(newIp.getNetmask());
-                if(oldIp.getId() !=null && oldIp.getId() != new Integer(0)){
-                    oldIp.setId(newIp.getId());
-                }
-                platform.addIpValue(oldIp);
+                platform.updateIpValue(oldIp);
             }
             else {
                 // we're into the land of new ips- use the form one
@@ -240,59 +235,12 @@ public class PlatformForm extends ResourceForm  {
                 platform.addIpValue(dbNewIp);
             }
         }
-               
-/*        if ( numOldIps > numNewIps ) {
-            for (int i = numNewIps; i < numOldIps; i++) {
-                platform.removeIpValue(oldIps[i]);
-            }
-        }*/ 
-
-    /*    if ( numOldIps > numNewIps ) {
-
-
-            List newIPValues = Arrays.asList(platform.getIpValues());
-   
-            for(Iterator rmdIps = addedIpValues.iterator(); rmdIps.hasNext();) {
         
-                IpValue rmdIp = (IpValue) rmdIps.next();
-
-                if(!newIPValues.contains(rmdIp)) {
-                    platform.removeIpValue(rmdIp);
-                }
-            } 
-
-
-        } */
-        // remove any remaining
-        /*
-        Iterator i = oldIpsSet.iterator();
-        while (i.hasNext()) {
-            IpValue tmpIp = (IpValue)i.next();
-            platform.removeIpValue(tmpIp);
+        for (;i < numOldIps; i++) {
+            platform.removeIpValue(oldIps[i]);
         }
-        */
     }
 
-    /*
-    public boolean removeOldIps(PlatformValue platform) {
-
-        // update ip addresses
-        IpValue[] oldIps = platform.getIpValues();
-        if (oldIps == null) {
-            oldIps = new IpValue[0];
-        }
-        int numOldIps = oldIps.length;
-        int numNewIps = getNumIps().intValue();
-        
-        if (numOldIps > numNewIps) {
-            for (int i = numNewIps; i < numOldIps; i++) {
-                platform.removeIpValue(oldIps[i]);
-            }
-            return true;
-        }
-        return false;
-    }
-    */
     public ActionErrors validate(ActionMapping mapping,
                                  HttpServletRequest request) {
         // don't validate if it's already happened in this action chain
