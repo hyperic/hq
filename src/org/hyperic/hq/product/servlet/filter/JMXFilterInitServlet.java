@@ -28,6 +28,7 @@ package org.hyperic.hq.product.servlet.filter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
@@ -69,7 +70,7 @@ public class JMXFilterInitServlet extends HttpServlet {
     
     private static Hashtable contextInfoByCL = new Hashtable(); 
 
-    //private static Hashtable mbeans=new Hashtable(); 
+    private static Hashtable mbeans=new Hashtable(); 
     
     public static void registerFilter( JMXFilter f ) {
         // XXX:  We could use the thread class loader to make sure we don't
@@ -230,8 +231,7 @@ public class JMXFilterInitServlet extends HttpServlet {
             
             mServer.registerMBean(contextInfo, oname); 
 
-            //see destroy() XXX will we ever need this???
-            //mbeans.put(cl, oname);
+            mbeans.put(cl, oname);
             contextInfoByCL.put( cl, contextInfo);
         } catch (InstanceAlreadyExistsException ex) {
             // 2 threads attempting to register the same object? JBNMAN-393
@@ -314,19 +314,16 @@ public class JMXFilterInitServlet extends HttpServlet {
     
     public void destroy() {
         // need to unregister only the mbeans in the same context
-        // if( mServer != null ) {
-        //     Iterator it=mbeans.values().iterator();
-        //     while( it.hasNext() ) {
-        //         ObjectName oname=(ObjectName)it.next();
-        //         try {
-        //             mServer.unregisterMBean(oname);
-        //         } catch (InstanceNotFoundException e) {
-        //             // ignore
-        //         } catch (MBeanRegistrationException e) {
-        //             // ignore
-        //         }
-        //     }
-        // }
-        // mServer = null;
+        if( mServer != null ) {
+            Iterator it=mbeans.values().iterator();
+            while( it.hasNext() ) {
+                ObjectName oname=(ObjectName)it.next();
+                try {
+                    mServer.unregisterMBean(oname);
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+        }
     }
 }
