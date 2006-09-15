@@ -264,19 +264,26 @@ public class PlatformForm extends ResourceForm  {
         // in the config file
 
         IpValue[] ips = getIps();
-        for (int i=1; i<ips.length; i++) {
-            IpValue ip = ips[i];
-
-            // address is required
-            String address = ip.getAddress();
-            if (address == null || "".equals(address)) {
-                ActionMessage err = new ActionMessage(
-                    "resource.platform.inventory.error.IpAddressIsRequired");
-                errors.add("ip[" + i + "].address", err);
-            } else if (address.equals("127.0.0.1")) {
+        
+        if (ips.length == 1) {
+            String address = ips[0].getAddress();
+            if (address.equals("127.0.0.1")) {
                 ActionMessage err = new ActionMessage(
                     "resource.platform.inventory.error.IpAddressInvalid");
-                errors.add("ip[" + i + "].address", err);
+                errors.add("ip[0].address", err);
+            }
+        }
+        else {
+            for (int i=1; i<ips.length; i++) {
+                IpValue ip = ips[i];
+
+                // address is required
+                String address = ip.getAddress();
+                if (address == null || "".equals(address)) {
+                    ActionMessage err = new ActionMessage(
+                        "resource.platform.inventory.error.IpAddressIsRequired");
+                    errors.add("ip[" + i + "].address", err);
+                }
             }
         }
 
