@@ -770,7 +770,8 @@ public class AIQueueManagerEJBImpl
             // localhost doesn't give us any information.  Long
             // term, when we are trying to match all addresses,
             // this can go away.
-            if (address.equals("127.0.0.1") && i.hasNext()) {
+            if ((address.equals("127.0.0.1") || address.equals("0.0.0.0")) &&
+                    i.hasNext()) {
                 continue;
             }
                 
