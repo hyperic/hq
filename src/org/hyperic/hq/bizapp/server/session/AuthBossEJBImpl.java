@@ -147,7 +147,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @param password The new password for the user
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public void changePassword(int sessionID, String username, String password) 
         throws FinderException, PermissionException,
@@ -163,7 +163,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @exception FinderException
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public boolean isUser(int sessionID, String username)
         throws SessionTimeoutException, SessionNotFoundException
@@ -183,7 +183,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @exception FinderException
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public Collection getAllUsers(int sessionID)
         throws FinderException, 
