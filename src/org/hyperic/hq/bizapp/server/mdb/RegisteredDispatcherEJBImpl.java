@@ -50,7 +50,7 @@ import org.hyperic.hq.events.ext.RegisteredTriggers;
  * @ejb:bean name="RegisteredDispatcher"
  *      jndi-name="ejb/event/RegisteredDispatcher"
  *      local-jndi-name="LocalRegisteredDispatcher"
- *      transaction-type="Container"
+ *      transaction-type="Bean"
  *      acknowledge-mode="Auto-acknowledge"
  *      destination-type="javax.jms.Topic"
  *
