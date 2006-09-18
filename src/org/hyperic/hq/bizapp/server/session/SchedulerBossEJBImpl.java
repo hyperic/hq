@@ -74,7 +74,7 @@ public class SchedulerBossEJBImpl implements SessionBean {
      * Get a list of all job groups in the scheduler.
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public String[] getJobGroupNames(int sessionID) throws
         SessionNotFoundException,
@@ -91,7 +91,7 @@ public class SchedulerBossEJBImpl implements SessionBean {
      * Get a list of all trigger groups in the scheduler.
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public String[] getTriggerGroupNames(int sessionID) throws
         SessionNotFoundException,
@@ -110,7 +110,7 @@ public class SchedulerBossEJBImpl implements SessionBean {
      * @param jobGroup the group whose jobs should be listed
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public String[] getJobNames(int sessionID, String jobGroup) throws
         SessionNotFoundException,
@@ -129,7 +129,7 @@ public class SchedulerBossEJBImpl implements SessionBean {
      * @param triggerGroup the group whose triggers should be listed
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public String[] getTriggerNames(int sessionID, String triggerGroup) throws
         SessionNotFoundException,
@@ -146,7 +146,7 @@ public class SchedulerBossEJBImpl implements SessionBean {
      * Get a list of all currently-executing jobs.
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public Key[] getCurrentlyExecutingJobs(int sessionID) throws
         SessionNotFoundException,
