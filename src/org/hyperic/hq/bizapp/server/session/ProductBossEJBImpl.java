@@ -64,7 +64,7 @@ import org.hyperic.util.config.EncodingException;
  *      local-jndi-name="LocalProductBoss"
  *      view-type="both"
  *      type="Stateless"
- * @ejb:transaction-type="NOTSUPPORTED"
+ * @ejb:transaction type="NOTSUPPORTED"
  */
 public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
 {
@@ -252,7 +252,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
      *                     already configured.
      *
      * @ejb:interface-method view-type="local"
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public ConfigSchema getConfigSchema(AuthzSubjectValue subject, 
                                         AppdefEntityID id, String type,
@@ -341,7 +341,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
 
     /**
      * @ejb:interface-method view-type="local"
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public void setConfigResponse(AuthzSubjectValue subject, 
                                   AppdefEntityID id, ConfigResponse response, 
