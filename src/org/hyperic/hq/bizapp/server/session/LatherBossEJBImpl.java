@@ -70,7 +70,7 @@ public class LatherBossEJBImpl
      *         representing the result of the invoked method
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="SUPPORTS"
+     * @ejb:transaction type="SUPPORTS"
      */
     public LatherValue dispatch(LatherContext ctx, String method, 
                                 LatherValue arg)
