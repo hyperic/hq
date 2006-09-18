@@ -301,7 +301,7 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @exception RemoveException If the user could not be removed 
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public void deleteUser(AuthzSubjectValue subject, String username)
         throws NamingException, FinderException, RemoveException
@@ -320,7 +320,7 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @exception FinderException
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="SUPPORTS"
+     * @ejb:transaction type="SUPPORTS"
      */
     public boolean isUser(AuthzSubjectValue subject, String username)
         throws NamingException
@@ -342,7 +342,7 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @exception FinderException
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="SUPPORTS"
+     * @ejb:transaction type="SUPPORTS"
      */
     public Collection getAllUsers(AuthzSubjectValue subject)
         throws NamingException, FinderException
