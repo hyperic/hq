@@ -268,7 +268,7 @@ public class AlertDefinitionManagerEJBImpl extends SessionEJB
      * Update just the basics
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public void updateAlertDefinitionBasic(Integer id,
                                            String name, String desc,
@@ -594,7 +594,6 @@ public class AlertDefinitionManagerEJBImpl extends SessionEJB
 
     /** Get an alert definition's conditions
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public AlertConditionValue[] getConditionsById(Integer id)
         throws FinderException {
@@ -613,7 +612,6 @@ public class AlertDefinitionManagerEJBImpl extends SessionEJB
     
     /** Get an alert definition's actions
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public ActionValue[] getActionsById(Integer id)
         throws FinderException {
