@@ -56,6 +56,8 @@ import org.hyperic.util.jdbc.DBUtil;
  *      local-jndi-name="LocalEventTracker"
  *      view-type="local"
  *      type="Stateless"
+ *      
+ * @ejb:transaction type="NOTSUPPORTED"
  */
 public class EventTrackerEJBImpl extends SessionEJB implements SessionBean {
     private final String logCtx =
@@ -77,7 +79,6 @@ public class EventTrackerEJBImpl extends SessionEJB implements SessionBean {
 
     /** Add a reference from a Trigger to an Event
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      * @param tid the Trigger ID
      * @param event the referenced Event
      */
@@ -157,7 +158,6 @@ public class EventTrackerEJBImpl extends SessionEJB implements SessionBean {
 
     /** Add a reference from a Trigger to an Event
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      * @param tid the Trigger ID
      * @param event the referenced Event
      */
@@ -218,7 +218,6 @@ public class EventTrackerEJBImpl extends SessionEJB implements SessionBean {
 
     /** Remove all references of a Trigger
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      * @param tid the Trigger ID
      */
     public void deleteReference(Integer tid) throws SQLException {
@@ -227,7 +226,6 @@ public class EventTrackerEJBImpl extends SessionEJB implements SessionBean {
 
         Connection conn = null;
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         StringBuffer strBuf;
         try {
             long current = System.currentTimeMillis();
@@ -273,7 +271,6 @@ public class EventTrackerEJBImpl extends SessionEJB implements SessionBean {
     /** Get the list of Events that are referenced by a given Trigger in order
      * of reference creation
      * @ejb:interface-method
-     * @ejb:transaction type="Supports"
      * @param tid the Trigger ID
      * @return the list of ObjectInputStream's (Events) referenced by Trigger
      */
