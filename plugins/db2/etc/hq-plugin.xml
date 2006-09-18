@@ -749,4 +749,5 @@
 
   <help name="DB2 7.x" include="DB2"/>
   <help name="DB2 8.x" include="DB2"/>
+  <help name="DB2 9.x" include="DB2"/>
 </plugin>
