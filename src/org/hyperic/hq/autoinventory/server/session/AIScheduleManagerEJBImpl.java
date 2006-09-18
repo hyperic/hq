@@ -159,7 +159,7 @@ public class AIScheduleManagerEJBImpl
     /**
      * Schedule an AI scan on an appdef entity (platform or group of platforms)
      * @ejb:interface-method
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public void doScheduledScan(AuthzSubjectValue subject,
                                 AppdefEntityID id, 
