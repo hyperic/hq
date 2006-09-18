@@ -118,7 +118,7 @@ import org.hyperic.util.timer.StopWatch;
  *      view-type="both"
  *      type="Stateless"
  * 
- * @ejb:transaction-type="NOTSUPPORTED"
+ * @ejb:transaction type="NOTSUPPORTED"
  */
 
 public class EventsBossEJBImpl extends BizappSessionEJB
@@ -399,7 +399,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * Create an alert definition
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public AlertDefinitionValue createAlertDefinition(
         int sessionID, AlertDefinitionValue adval)
@@ -491,7 +491,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * Create an alert definition for a resource type
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public AlertDefinitionValue createResourceTypeAlertDefinition(
         int sessionID, AppdefEntityTypeID aetid, AlertDefinitionValue adval)
@@ -623,7 +623,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * @throws AlertDefinitionCreateException
      * @throws ActionCreateException
      * @ejb:interface-method
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public void inheritResourceTypeAlertDefinition(AuthzSubjectValue subject,
                                                    AppdefEntityID id)
@@ -680,7 +680,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * Create a trigger
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public ActionValue createAction(int sessionID, Integer adid,
                                     String className, ConfigResponse config)
@@ -738,7 +738,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * Enable/Disable a collection of alert definitions
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public void enableAlertDefinitions(int sessionID, Integer[] ids,
                                        boolean enable)
@@ -770,7 +770,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * Create an alert definition
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public void updateAlertDefinition(int sessionID, AlertDefinitionValue adval)
         throws TriggerCreateException, InvalidOptionException,
@@ -870,7 +870,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * Update an action
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public void updateAction(int sessionID, ActionValue aval)
         throws SessionNotFoundException, SessionTimeoutException, 
@@ -883,7 +883,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * Delete a collection of alert definitions
      *
      * @ejb:interface-method view-type="local"
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public void removeAlertDefinitions(int sessionID, AppdefEntityID id)
         throws SessionNotFoundException, SessionTimeoutException, 
@@ -895,7 +895,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * Delete a collection of alert definitions
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public void deleteAlertDefinitions(int sessionID, Integer[] ids)
         throws SessionNotFoundException, SessionTimeoutException, 
@@ -914,7 +914,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * Delete a collection of alert definitions for a type
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public void deleteResourceTypeAlertDefinitions(int sessionID, Integer[] ids)
         throws SessionNotFoundException, SessionTimeoutException, 
@@ -927,7 +927,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * Delete list of alerts
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="NOTSUPPORTED"
+     * @ejb:transaction type="NOTSUPPORTED"
      */
     public void deleteAlerts(int sessionID, Integer[] ids)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -948,7 +948,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * Delete all alerts for a resource
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="NOTSUPPORTED"
+     * @ejb:transaction type="NOTSUPPORTED"
      */
     public int deleteAlerts(int sessionID, AppdefEntityID aeid)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -963,7 +963,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * Delete all alerts for a given period of time
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="NOTSUPPORTED"
+     * @ejb:transaction type="NOTSUPPORTED"
      */
     public int deleteAlerts(int sessionID, long begin, long end)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -977,7 +977,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * Delete all alerts for a list of alert definitions
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="NOTSUPPORTED"
+     * @ejb:transaction type="NOTSUPPORTED"
      */
     public int deleteAlertsForDefinitions(int sessionID, Integer[] adids)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -1467,7 +1467,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * Create a trigger
      *
      * @ejb:interface-method
-     * @ejb:transaction-type="REQUIRED"
+     * @ejb:transaction type="REQUIRED"
      */
     public Integer addRegisteredTrigger(int sessionID, String className,
                                         ConfigResponse config,
