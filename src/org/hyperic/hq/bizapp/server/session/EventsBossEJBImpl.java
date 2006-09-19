@@ -708,7 +708,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         // check that the user can actually manage alerts for this resource
         for (Iterator it = alertdefs.iterator(); it.hasNext(); ) {
             AlertDefinitionValue ad = (AlertDefinitionValue) it.next();
-            canManageAlerts(subject, getAppdefEntityID(ad));
+            canManageAlerts(subject, ad);
             action = getActMan().createAction(action);
             
             // Create an array out with the new action
@@ -1558,6 +1558,13 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     
     private void canManageAlerts(AuthzSubjectValue who,
                                  AlertDefinitionBasicValue ad)
+        throws PermissionException {
+        if (!EventConstants.TYPE_ALERT_DEF_ID.equals(ad.getParentId()))
+            canManageAlerts(who, getAppdefEntityID(ad));
+    }
+    
+    private void canManageAlerts(AuthzSubjectValue who,
+                                 AlertDefinitionValue ad)
         throws PermissionException {
         if (!EventConstants.TYPE_ALERT_DEF_ID.equals(ad.getParentId()))
             canManageAlerts(who, getAppdefEntityID(ad));
