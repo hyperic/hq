@@ -104,6 +104,11 @@ import org.hyperic.hq.events.shared.AlertDefinitionValue;
  *      unchecked="true"
  *      result-type-mapping="Local"
  *
+ * Even though we define extends  for AlertDefinition.  XDoclet does not
+ * actually work.  The extends has to be defined in the first @ejb:value-object
+ * tag, and furthermore, it gets applied to all @ejb:value-object's.  Thus
+ * rendering AlertDefinitionBasic self-extending.
+ * 
  * @ejb:value-object name="AlertDefinitionBasic" match="basic" instantiation="eager"
  * @ejb:value-object name="AlertDefinition" match="*" instantiation="eager" extends="org.hyperic.hq.events.shared.AlertDefinitionBasicValue" cacheable="true" cacheDuration="120000"
  * @ejb:transaction type="Required"
