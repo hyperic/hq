@@ -132,8 +132,6 @@
           <td width="100%"><html:img page="/images/spacer.gif" width="1" height="21" alt="" border="0"/></td>
         </tr>
       </table>
-      <html:hidden property="rn"/>
-      <html:hidden property="ru"/>
     </td>
   </tr>
   </c:when>
