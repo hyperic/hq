@@ -34,6 +34,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
@@ -83,7 +84,6 @@ public class CurrentHealthAction extends TilesAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Exception thrown = null;
         AppdefResourceValue resource = RequestUtils.getResource(request);
 
         if (resource == null) {
@@ -122,7 +122,19 @@ public class CurrentHealthAction extends TilesAction {
 
             List data = boss.findMeasurementData(sessionId, aeid, mtv, begin,
                                                  end, interval, true, pc);
-            
+
+            // Seems like sometimes Postgres does not average cleanly for
+            // groups, and the value ends up being like 0.9999999999.  We don't
+            // want the insignificant amount to mess up our display.
+            if (resource.getEntityId().getType() ==
+                AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+                for (Iterator it = data.iterator(); it.hasNext(); ) {
+                    MetricValue val = (MetricValue) it.next();
+                    if (val.toString().equals("1"))
+                        val.setValue(1);
+                }
+            }
+
             request.setAttribute(Constants.CAT_AVAILABILITY_METRICS_ATTR, data);
             request.setAttribute(Constants.AVAIL_METRICS_ATTR,
                                  getFormattedAvailability(data));
