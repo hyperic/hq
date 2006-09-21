@@ -82,9 +82,6 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
     private Log log = LogFactory.getLog(
         "org.hyperic.hq.appdef.server.session.ServerVOHelperEJBImpl");
     
-    private ServiceVOHelperLocal serviceHelper;
-    private ServiceManagerLocal serviceManager;
-    
     private final String SERVER_SQL = "SELECT ID, PLATFORM_ID, SERVER_TYPE_ID," 
         + " NAME, SORT_NAME, DESCRIPTION, MTIME, CTIME, " 
         + " MODIFIED_BY, LOCATION, OWNER, CONFIG_RESPONSE_ID, RUNTIMEAUTODISCOVERY, " 
@@ -160,48 +157,12 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
         throws NamingException {
         VOCache cache = VOCache.getInstance();
         AppdefResourceValue vo;
-        ServerPK spk = (ServerPK)ejb.getPrimaryKey();
         synchronized(cache.getServerLock()) {
-            vo = (ServerValue) getServerValueDirectSQL(spk, false);
-            Integer[] serviceIds;
-            try {
-                serviceIds = getServiceManager().getServiceIdsByServer(getOverlord(), 
-                                                                       spk.getId(), 
-                                                                       null);
-            } catch (Exception e) { throw new SystemException(e); }
-            for(int i = 0; i < serviceIds.length; i++) {
-                // this is ugly, but if I use the vo helper's method, I'll cause a deadlock
-                ((ServerValue)vo).addServiceValue((ServiceLightValue)
-                        (getServiceVOHelper().getServiceValueDirectSQL(
-                                new ServicePK(serviceIds[i]), true)));
-            
-            }
+            vo = ejb.getServerValue();
             cache.put(vo.getId(), vo);
         }
         return vo;
     } 
-    
-    private ServiceManagerLocal getServiceManager() {
-        if(serviceManager == null) {    
-            try {
-                serviceManager = ServiceManagerUtil.getLocalHome().create();
-            } catch (Exception e) {
-                throw new SystemException(e);
-            }
-        }
-        return serviceManager;
-    }
-    
-    private ServiceVOHelperLocal getServiceVOHelper() {
-        if(serviceHelper == null) {
-            try {
-                serviceHelper = ServiceVOHelperUtil.getLocalHome().create();
-            } catch (Exception e) {
-                throw new SystemException(e);
-            }
-        }
-        return serviceHelper;
-    }
     
     /**
      * Synchronized VO retrieval 

@@ -51,6 +51,7 @@ import org.hyperic.hq.appdef.shared.PlatformTypeUtil;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformUtil;
 import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.appdef.shared.ServerLightValue;
 import org.hyperic.hq.appdef.shared.ServerLocal;
 import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.ServerTypeLocal;
@@ -189,23 +190,16 @@ public class PlatformVOHelperEJBImpl extends AppdefSessionEJB
                 }
                 pv = (PlatformValue)this.getPlatformValueDirectSQL(ppk, false);
                 Iterator serverIt = ejb.getServerSnapshot().iterator();
-                try {
-                    ServerVOHelperLocal voh =
-                        ServerVOHelperUtil.getLocalHome().create();
-                    while (serverIt.hasNext()){
-                        try {
-                            ServerPK spk = (ServerPK)
-                                ((ServerLocal) serverIt.next()).getPrimaryKey();
-                            pv.addServerValue(voh.getServerLightValue(spk));
-                        } catch (NoSuchObjectLocalException e) {
-                            // the server was removed during our iteration
-                            // not a problem
-                        } catch (FinderException e) {
-                            // same here. server was removed
-                        }
+                while (serverIt.hasNext()){
+                    try {
+                        ServerLightValue slv = ((ServerLocal)
+                            serverIt.next()).getServerLightValue();
+                        pv.addServerValue(slv);
+                        cache.put(slv.getId(), slv);
+                    } catch (NoSuchObjectLocalException e) {
+                        // the server was removed during our iteration
+                        // not a problem
                     }
-                } catch (CreateException e) {
-                    throw new SystemException(e);
                 }
                 
                 // add it to the cache
