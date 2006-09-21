@@ -42,8 +42,6 @@
 
 <tiles:insert definition=".events.config.view.notifications"/>
 
-<tiles:insert definition=".events.config.view.syslogactionbox"/>
-
 <tiles:insert definition=".events.config.view.nav"/>
 
 <tiles:insert definition=".page.footer"/>

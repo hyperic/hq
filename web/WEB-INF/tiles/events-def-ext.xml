@@ -62,4 +62,12 @@
     </putList>
   </definition>
 
+  <definition name=".events.config.view.others"
+      path="/resource/common/monitor/alerts/config/ViewDefinition.jsp"
+      controllerUrl="/alerts/ViewDefinition.do"/>
+
+  <definition name=".events.config.view.users"
+      path="/resource/common/monitor/alerts/config/ViewDefinition.jsp"
+      controllerUrl="/alerts/ViewDefinition.do"/>
+
 </tiles-definitions>

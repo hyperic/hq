@@ -190,22 +190,6 @@
   <definition name=".events.config.view.syslogaction"
               path="/resource/common/monitor/alerts/config/ViewDefinitionSyslogAction.jsp"/>
 
-  <definition name=".events.config.view.others"
-      path="/resource/common/monitor/alerts/config/ViewDefinition.jsp"
-      controllerUrl="/alerts/ViewDefinition.do"/>
-
-  <definition name=".events.config.view.roles"
-      path="/resource/common/monitor/alerts/config/ViewDefinition.jsp"
-      controllerUrl="/alerts/ViewDefinition.do"/>
-              
-  <definition name=".events.config.view.users"
-      path="/resource/common/monitor/alerts/config/ViewDefinition.jsp"
-      controllerUrl="/alerts/ViewDefinition.do"/>
-
-  <definition name=".events.config.view.snmp"
-      path="/resource/common/monitor/alerts/config/ViewDefinition.jsp"
-      controllerUrl="/alerts/ViewDefinition.do"/>
-
   <!-- mockups -->
   <definition name =".events.config.addusers"
         controllerUrl="/events/config/AddUsersFormPrepare.do"
