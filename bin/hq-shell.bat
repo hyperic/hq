@@ -34,7 +34,7 @@ REM logging stuff NOTE: NoOpLog turns off logging, SimpleLog turns on logging.
 SET LOG=org.apache.commons.logging.impl.NoOpLog
 REM LOG=org.apache.commons.logging.impl.SimpleLog
 
-SET SYS_PROPS=-Dorg.apache.commons.logging.Log=%LOG%
+SET SYS_PROPS=-Dorg.apache.commons.logging.Log=%LOG% -Dlog4j.rootCategory=ERROR
 
 SET MAIN_CLASS=org.hyperic.hq.bizapp.client.shell.ClientShell
 
