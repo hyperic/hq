@@ -44,7 +44,7 @@ done
 # logging stuff NOTE: NoOpLog turns off logging, SimpleLog turns on logging.
 LOG=org.apache.commons.logging.impl.NoOpLog
 #LOG=org.apache.commons.logging.impl.SimpleLog
-SYS_PROPS="-Dorg.apache.commons.logging.Log=${LOG} "
+SYS_PROPS="-Dorg.apache.commons.logging.Log=${LOG} -Dlog4j.rootCategory=ERROR"
 
 SYS_PROPS="${SYS_PROPS} -Dpage.size=$LINES -Djava.net.preferIPv4Stack=true"
 
