@@ -40,7 +40,7 @@ SET MAIN_CLASS=org.hyperic.hq.bizapp.client.shell.ClientShell
 
 rem Use this when communicating insecurely (regular way) with the server
 rem echo cp %CLASSPATH%
-"%JAVA_HOME%\bin\java" %SYS_PROPS% -cp %SHELL_CP% %MAINL_CLASS%
+"%JAVA_HOME%\bin\java" %SYS_PROPS% -cp %SHELL_CP% %MAIN_CLASS%
 
 rem Use this when communicating securely with the server
 rem #%JAVA% %SYS_PROPS% \
