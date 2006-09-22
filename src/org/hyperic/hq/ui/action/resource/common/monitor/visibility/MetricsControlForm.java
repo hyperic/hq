@@ -291,4 +291,12 @@ public class MetricsControlForm extends MetricDisplayRangeForm {
         readOnly = null;
         simple = new ImageButtonBean();
     }
+
+    protected boolean shouldValidate(ActionMapping mapping,
+                                     HttpServletRequest request) {
+        if (super.shouldValidate(mapping, request))
+            return true;
+        
+        return isAdvancedClicked() && mapping.getInput() != null;
+    }
 }

@@ -593,7 +593,8 @@ public class ViewChartForm extends MetricDisplayRangeForm {
             isCancelHighRangeClicked() ||
             isChangeLowRangeClicked() ||
             isSaveLowRangeClicked() ||
-            isCancelLowRangeClicked();
+            isCancelLowRangeClicked() ||
+            isDateRangeSelected();
         return isRedrawing && (mapping.getInput() != null);
     }
     
