@@ -36,7 +36,7 @@ REM LOG=org.apache.commons.logging.impl.SimpleLog
 
 SET SYS_PROPS=-Dorg.apache.commons.logging.Log=%LOG%
 
-SET MAIN_CLASS=@@@MAIN_CLASS@@@
+SET MAIN_CLASS=org.hyperic.hq.bizapp.client.shell.ClientShell
 
 rem Use this when communicating insecurely (regular way) with the server
 rem echo cp %CLASSPATH%
