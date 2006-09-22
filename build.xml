@@ -1398,6 +1398,7 @@
 
     <!-- Copy server startup scripts -->
     <copy todir="${archive-dir}/server-${version}/bin" file="installer/bin/hq-server.sh"/>
+    <copy todir="${archive-dir}/server-${version}/bin" file="installer/bin/hq-threaddump.sh"/>
     <copy todir="${archive-dir}/server-${version}/bin" file="${launcher.dir}/hq-server.exe" />
     
     <!-- Copy EAR -->
