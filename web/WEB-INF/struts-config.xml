@@ -2323,9 +2323,12 @@
       <action path="/resource/common/monitor/visibility/MetricsControl"
               type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsControlAction"
               name="MetricsControlForm"
+              input="/Resource.do?mode=currentHealth"
+              validate="true"
               scope="request">
         <set-property property="workflow" value="monitor/range"/>
         <forward name="success" path="/Resource.do?mode=currentHealth"/>
+        <forward name="failure" path="/Resource.do?mode=currentHealth"/>
         <forward name="editRange" path="/resource/common/monitor/Visibility.do?mode=editRange"/>
       </action>
 

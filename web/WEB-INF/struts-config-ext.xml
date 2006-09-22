@@ -83,6 +83,7 @@
               name="ViewChartForm"
               scope="request"
               input="/resource/common/monitor/Visibility.do"
+              validate="true"
               type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.ViewChartAction">
         <set-property property="workflow" value="visibility/ViewChart"/>
         <!-- path is ignored ... uses returnPath -->
