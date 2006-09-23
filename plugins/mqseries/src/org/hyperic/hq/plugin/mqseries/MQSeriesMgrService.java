@@ -40,6 +40,8 @@ import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.TypeBuilder;
 
+import org.hyperic.util.StringUtil;
+
 public class MQSeriesMgrService
     extends MQSeriesService {
 
@@ -133,7 +135,9 @@ public class MQSeriesMgrService
         for (int i=0; i<qmgrs.length; i++) {
             MQSeriesMgrService mgr = new MQSeriesMgrService();
 
-            mgr.name = qmgrs[i];
+            //queue mgr names have '.' encoded to '!' in the
+            //windows registry and /var/mqm/qmgrs/ on unix platforms
+            mgr.name = StringUtil.replace(qmgrs[i], "!", ".");
 
             mgr.serverType = serverType;
 
