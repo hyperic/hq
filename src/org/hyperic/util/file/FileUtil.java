@@ -330,4 +330,28 @@ public class FileUtil {
             }
         }
     }
+
+    /**
+     * Chop the last element off a path.  For example, if you pass in
+     * /usr/local/foo then this will return /usr/local
+     * If there is not enough to chop off, this throws IllegalArgumentException
+     */
+    public static String getParentDir(String path) {
+        int idx = path.lastIndexOf(File.separator);
+        if (idx == -1 || idx == 0) {
+            throw new IllegalArgumentException("Path has no parent: " + path);
+        }
+        return path.substring(0, idx);
+    }
+
+    /**
+     * Chop the last elements off of a path.
+     */
+    public static String getParentDir(String path, int levels) {
+        while (levels-- > 0) {
+            path = getParentDir(path);
+        }
+    
+        return path;
+    }
 }

@@ -48,6 +48,7 @@ import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
+import org.hyperic.util.file.FileUtil;
 
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.sigar.Sigar;
@@ -463,27 +464,17 @@ public abstract class ServerDetector
     }
 
     /**
-     * Chop the last element off a path.  For example, if you pass in
-     * /usr/local/foo then this will return /usr/local
-     * If there is not enough to chop off, this throws IllegalArgumentException
+     * @see FileUtil#getParentDir(String)
      */
     protected static String getParentDir(String path) {
-        int idx = path.lastIndexOf(File.separator);
-        if (idx == -1 || idx == 0) {
-            throw new IllegalArgumentException("Path has no parent: " + path);
-        }
-        return path.substring(0, idx);
+        return FileUtil.getParentDir(path);
     }
 
     /**
-     * Chop the last elements off of a path.
+     * @see FileUtil#getParentDir(String, int)
      */
-    public static String getParentDir(String path, int levels) {
-        while (levels-- > 0) {
-            path = getParentDir(path);
-        }
-    
-        return path;
+    protected static String getParentDir(String path, int levels) {
+        return FileUtil.getParentDir(path, levels);
     }
     
     /**
