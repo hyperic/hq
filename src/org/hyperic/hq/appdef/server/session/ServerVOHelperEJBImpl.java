@@ -91,7 +91,7 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
     /**
      * Get the server value object
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS" 
+     * @ejb:transaction type="REQUIRED"
      */    
     public ServerValue getServerValue(ServerPK pk) 
         throws FinderException, NamingException {
