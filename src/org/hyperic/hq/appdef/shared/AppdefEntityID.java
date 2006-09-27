@@ -49,7 +49,6 @@ public class AppdefEntityID
      * 
      */    
     public AppdefEntityID(String id){
-        
         try {
             if (id == null)
                 throw new InvalidAppdefTypeException("Invalid entity type: " +
@@ -233,24 +232,33 @@ public class AppdefEntityID
 
     /** Convenience method to check if this is a platform
      * @return true if this entity refers to a platform, false otherwise. */
-    public boolean isPlatform () { return this.getType() == AppdefEntityConstants.APPDEF_TYPE_PLATFORM; }
+    public boolean isPlatform () { 
+        return this.getType() == AppdefEntityConstants.APPDEF_TYPE_PLATFORM; 
+    }
 
     /** Convenience method to check if this is a server
      * @return true if this entity refers to a server, false otherwise. */
-    public boolean isServer () { return this.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER; }
+    public boolean isServer () { 
+        return this.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER; 
+    }
 
     /** Convenience method to check if this is a service
      * @return true if this entity refers to a service, false otherwise. */
-    public boolean isService () { return this.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVICE; }
+    public boolean isService () { 
+        return this.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVICE; 
+    }
 
     /** Convenience method to check if this is a application
      * @return true if this entity refers to a application, false otherwise. */
-    public boolean isApplication () { return this.getType() == AppdefEntityConstants.APPDEF_TYPE_APPLICATION; }
+    public boolean isApplication () { 
+        return this.getType() == AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
+    }
 
     /** Convenience method to check if this is a group
      * @return true if this entity refers to a group, false otherwise. */
-    public boolean isGroup () { return this.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP; }
-
+    public boolean isGroup () { 
+        return this.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP; 
+    }
 
     public String toString(){
         return this.getAppdefKey();
@@ -265,5 +273,29 @@ public class AppdefEntityID
 
     public int hashCode(){
         return this.entityType * this.entityID;
+    }
+
+    public static AppdefEntityID newPlatformID(int id) {
+        return new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM, 
+                                  id);
+    }
+
+    public static AppdefEntityID newServerID(int id) {
+        return new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER, 
+                                  id);
+    }
+
+    public static AppdefEntityID newServiceID(int id) {
+        return new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE, 
+                                  id);
+    }
+
+    public static AppdefEntityID newAppID(int id) {
+        return new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_APPLICATION, 
+                                  id);
+    }
+
+    public static AppdefEntityID newGroupID(int id) {
+        return new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP, id);
     }
 }
