@@ -103,7 +103,6 @@ public final class JMXServlet extends HttpServlet {
 
     public void destroy() {
         unregisterSigarProcessMBean(SIGAR_PROCESS_NAME);
-        mServer = null;
     }
 
     private void outputException(PrintWriter out, String msg) {

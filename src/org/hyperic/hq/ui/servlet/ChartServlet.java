@@ -25,19 +25,17 @@
 
 package org.hyperic.hq.ui.servlet;
 
-import java.io.IOException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.ui.beans.ChartDataBean;
+import org.hyperic.image.chart.Chart;
+import org.hyperic.util.units.UnitsConstants;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-
-import org.hyperic.hq.ui.beans.ChartDataBean;
-import org.hyperic.image.chart.Chart;
-import org.hyperic.util.units.UnitsConstants;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.io.IOException;
 
 /**
  * <p>This servlet returns a response that contains the binary data of
@@ -116,20 +114,29 @@ public abstract class ChartServlet extends ImageServlet {
 
     // member data
     private Log log = LogFactory.getLog( ChartServlet.class.getName() );
-    private int unitScale;
-    private int unitUnits;
-    private boolean showPeak;
-    private boolean showHighRange;
-    private boolean showValues;
-    private boolean showAverage;
-    private boolean showLowRange;
-    private boolean showLow;
-    private boolean showBaseline;
-    private double baseline;
 
-    private double highRange;
-    private double lowRange;
-    
+    private static ThreadLocal chartInfo = new ThreadLocal() {
+      protected Object initialValue() {
+          return new ChartInfo();
+      }
+    };
+
+    private static class ChartInfo {
+        private int unitScale;
+        private int unitUnits;
+        private boolean showPeak;
+        private boolean showHighRange;
+        private boolean showValues;
+        private boolean showAverage;
+        private boolean showLowRange;
+        private boolean showLow;
+        private boolean showBaseline;
+        private double baseline;
+
+        private double highRange;
+        private double lowRange;
+    }
+
     public ChartServlet () {}
 
     /**
@@ -191,59 +198,61 @@ public abstract class ChartServlet extends ImageServlet {
      */
     protected void parseParameters(HttpServletRequest request) {
         // units / scale
-        unitUnits = parseIntParameter( request, UNIT_UNITS_PARAM,
+
+        ChartInfo info = (ChartInfo)chartInfo.get();
+        info.unitUnits = parseIntParameter( request, UNIT_UNITS_PARAM,
                                        getDefaultUnitUnits() );
-        unitScale = parseIntParameter( request, UNIT_SCALE_PARAM,
+        info.unitScale = parseIntParameter( request, UNIT_SCALE_PARAM,
                                        getDefaultUnitScale() );
 
         // chart flags
-        showPeak = parseBooleanParameter( request, SHOW_PEAK_PARAM,
+        info.showPeak = parseBooleanParameter( request, SHOW_PEAK_PARAM,
                                           getDefaultShowPeak() );
-        showHighRange = parseBooleanParameter( request, SHOW_HIGHRANGE_PARAM,
+        info.showHighRange = parseBooleanParameter( request, SHOW_HIGHRANGE_PARAM,
                                                getDefaultShowHighRange() );
-        showValues = parseBooleanParameter( request, SHOW_VALUES_PARAM,
+        info.showValues = parseBooleanParameter( request, SHOW_VALUES_PARAM,
                                             getDefaultShowValues() );
-        showAverage = parseBooleanParameter( request, SHOW_AVERAGE_PARAM,
+        info.showAverage = parseBooleanParameter( request, SHOW_AVERAGE_PARAM,
                                              getDefaultShowAverage() );
-        showLowRange = parseBooleanParameter( request, SHOW_LOWRANGE_PARAM,
+        info.showLowRange = parseBooleanParameter( request, SHOW_LOWRANGE_PARAM,
                                               getDefaultShowLowRange() );
-        showLow = parseBooleanParameter( request, SHOW_LOW_PARAM,
+        info.showLow = parseBooleanParameter( request, SHOW_LOW_PARAM,
                                          getDefaultShowLow() );
-        showBaseline = parseBooleanParameter( request, SHOW_BASELINE_PARAM,
+        info.showBaseline = parseBooleanParameter( request, SHOW_BASELINE_PARAM,
                                               getDefaultShowBaseline() );
 
         // baseline, high range and low range
-        if (showBaseline) {
+        if (info.showBaseline) {
             try {
-                baseline = parseRequiredDoubleParameter(request, BASELINE_PARAM);
+                info.baseline = parseRequiredDoubleParameter(request, BASELINE_PARAM);
             } catch (IllegalArgumentException e) {
                 if ( log.isDebugEnabled() ) {
                     log.debug("invalid " + BASELINE_PARAM + ", setting " +
                               SHOW_BASELINE_PARAM + " to: " + false);
                 }
-                showBaseline = false;
+                info.showBaseline = false;
             }
         }
-        if (showHighRange) {
+        if (info.showHighRange) {
             try {
-                highRange = parseRequiredDoubleParameter(request, HIGHRANGE_PARAM);
+                info.highRange = parseRequiredDoubleParameter(request, HIGHRANGE_PARAM);
             } catch (IllegalArgumentException e) {
                 if ( log.isDebugEnabled() ) {
                     log.debug("invalid " + HIGHRANGE_PARAM + ", setting " +
                               SHOW_HIGHRANGE_PARAM + " to: " + false);
                 }
-                showHighRange = false;
+                info.showHighRange = false;
             }
         }
-        if (showLowRange) {
+        if (info.showLowRange) {
             try {
-                lowRange = parseRequiredDoubleParameter(request, LOWRANGE_PARAM);
+                info.lowRange = parseRequiredDoubleParameter(request, LOWRANGE_PARAM);
             } catch (IllegalArgumentException e) {
                 if ( log.isDebugEnabled() ) {
                     log.debug("invalid " + LOWRANGE_PARAM + ", setting " +
                               SHOW_LOWRANGE_PARAM + " to: " + false);
                 }
-                showLowRange = false;
+                info.showLowRange = false;
             }
         }
 
@@ -268,17 +277,18 @@ public abstract class ChartServlet extends ImageServlet {
      * @param request TODO
      */
     protected void initializeChart(Chart chart, HttpServletRequest request) {
-        chart.setFormat(unitUnits, unitScale);
-        chart.showPeak = showPeak;
-        chart.showHighRange = showHighRange;
-        chart.showValues = showValues;
-        chart.showAverage = showAverage;
-        chart.showLowRange = showLowRange;
-        chart.showLow = showLow;
-        chart.showBaseline = showBaseline;
-        chart.baseline = baseline;
-        chart.highRange = highRange;
-        chart.lowRange = lowRange;
+        ChartInfo info = (ChartInfo)chartInfo.get();
+        chart.setFormat(info.unitUnits, info.unitScale);
+        chart.showPeak = info.showPeak;
+        chart.showHighRange = info.showHighRange;
+        chart.showValues = info.showValues;
+        chart.showAverage = info.showAverage;
+        chart.showLowRange = info.showLowRange;
+        chart.showLow = info.showLow;
+        chart.showBaseline = info.showBaseline;
+        chart.baseline = info.baseline;
+        chart.highRange = info.highRange;
+        chart.lowRange = info.lowRange;
     }
 
     /**
@@ -297,21 +307,21 @@ public abstract class ChartServlet extends ImageServlet {
      * Return the value of property <code>showLow</code>.
      */
     public boolean getShowLow() {
-        return this.showLow;
+        return ((ChartInfo)chartInfo.get()).showLow;
     }
 
     /**
      * Return the value of property <code>showPeak</code>.
      */
     public boolean getShowPeak() {
-        return this.showPeak;
+        return ((ChartInfo)chartInfo.get()).showPeak;
     }
 
     /**
      * Return the value of property <code>showAverage</code>.
      */    
     public boolean getShowAvg() {
-        return this.showAverage;
+        return ((ChartInfo)chartInfo.get()).showAverage;
     }
 
     /**
@@ -397,31 +407,32 @@ public abstract class ChartServlet extends ImageServlet {
     //---------------------------------------------------------------
     private void _logParameters() {
         if ( log.isDebugEnabled() ) {
+            ChartInfo info = (ChartInfo)chartInfo.get();
             StringBuffer sb = new StringBuffer("Parameters:");
             sb.append("\n");sb.append("\t");
-            sb.append(UNIT_UNITS_PARAM); sb.append(": "); sb.append(unitUnits);
+            sb.append(UNIT_UNITS_PARAM); sb.append(": "); sb.append(info.unitUnits);
             sb.append("\n");sb.append("\t");
-            sb.append(UNIT_SCALE_PARAM); sb.append(": "); sb.append(unitScale);
+            sb.append(UNIT_SCALE_PARAM); sb.append(": "); sb.append(info.unitScale);
             sb.append("\n");sb.append("\t");
-            sb.append(SHOW_PEAK_PARAM); sb.append(": "); sb.append(showPeak);
+            sb.append(SHOW_PEAK_PARAM); sb.append(": "); sb.append(info.showPeak);
             sb.append("\n");sb.append("\t");
-            sb.append(SHOW_HIGHRANGE_PARAM); sb.append(": "); sb.append(showHighRange);
+            sb.append(SHOW_HIGHRANGE_PARAM); sb.append(": "); sb.append(info.showHighRange);
             sb.append("\n");sb.append("\t");
-            sb.append(SHOW_VALUES_PARAM); sb.append(": "); sb.append(showValues);
+            sb.append(SHOW_VALUES_PARAM); sb.append(": "); sb.append(info.showValues);
             sb.append("\n");sb.append("\t");
-            sb.append(SHOW_AVERAGE_PARAM); sb.append(": "); sb.append(showAverage);
+            sb.append(SHOW_AVERAGE_PARAM); sb.append(": "); sb.append(info.showAverage);
             sb.append("\n");sb.append("\t");
-            sb.append(SHOW_LOWRANGE_PARAM); sb.append(": "); sb.append(showLowRange);
+            sb.append(SHOW_LOWRANGE_PARAM); sb.append(": "); sb.append(info.showLowRange);
             sb.append("\n");sb.append("\t");
-            sb.append(SHOW_LOW_PARAM); sb.append(": "); sb.append(showLow);
+            sb.append(SHOW_LOW_PARAM); sb.append(": "); sb.append(info.showLow);
             sb.append("\n");sb.append("\t");
-            sb.append(SHOW_BASELINE_PARAM); sb.append(": "); sb.append(showBaseline);
+            sb.append(SHOW_BASELINE_PARAM); sb.append(": "); sb.append(info.showBaseline);
             sb.append("\n");sb.append("\t");
-            sb.append(BASELINE_PARAM); sb.append(": "); sb.append(baseline);
+            sb.append(BASELINE_PARAM); sb.append(": "); sb.append(info.baseline);
             sb.append("\n");sb.append("\t");
-            sb.append(HIGHRANGE_PARAM); sb.append(": "); sb.append(highRange);
+            sb.append(HIGHRANGE_PARAM); sb.append(": "); sb.append(info.highRange);
             sb.append("\n");sb.append("\t");
-            sb.append(LOWRANGE_PARAM); sb.append(": "); sb.append(lowRange);
+            sb.append(LOWRANGE_PARAM); sb.append(": "); sb.append(info.lowRange);
             log.debug( sb.toString() );
         }
     }

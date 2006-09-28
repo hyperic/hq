@@ -58,7 +58,11 @@ public abstract class VerticalChartServlet extends ChartServlet {
 
     // member data
     private Log log = LogFactory.getLog( VerticalChartServlet.class.getName() );
-    private int collectionType;
+    private static ThreadLocal collectionType = new ThreadLocal(){
+        protected Object initialValue(){
+            return new Integer(0);
+        }
+    };
 
     public VerticalChartServlet () {}
 
@@ -80,8 +84,8 @@ public abstract class VerticalChartServlet extends ChartServlet {
         super.parseParameters(request);
 
         // cumulative trend
-        collectionType = parseIntParameter( request, COLLECTION_TYPE_PARAM,
-                                            getDefaultCollectionType() );
+        collectionType.set(new Integer(parseIntParameter( request, COLLECTION_TYPE_PARAM,
+                                            getDefaultCollectionType() )));
         _logParameters();
     }
 
@@ -95,7 +99,7 @@ public abstract class VerticalChartServlet extends ChartServlet {
         super.initializeChart(chart, request);
 
         VerticalChart verticalChart = (VerticalChart) chart;
-        int cumulativeTrend = getTrendForCollectionType(collectionType);
+        int cumulativeTrend = getTrendForCollectionType(((Integer)collectionType.get()).intValue());
         verticalChart.setCumulativeTrend(cumulativeTrend);
     }
 
@@ -134,7 +138,7 @@ public abstract class VerticalChartServlet extends ChartServlet {
         if ( log.isDebugEnabled() ) {
             StringBuffer sb = new StringBuffer("Parameters:");
             sb.append("\n");sb.append("\t");
-            sb.append(COLLECTION_TYPE_PARAM); sb.append(": "); sb.append(collectionType);
+            sb.append(COLLECTION_TYPE_PARAM); sb.append(": "); sb.append(((Integer)collectionType.get()).intValue());
             log.debug( sb.toString() );
         }
     }

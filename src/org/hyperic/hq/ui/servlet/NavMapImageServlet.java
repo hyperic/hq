@@ -25,17 +25,15 @@
 
 package org.hyperic.hq.ui.servlet;
 
-import java.io.IOException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.image.WebImage;
+import org.hyperic.image.widget.ResourceTree;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
-
-import org.hyperic.image.WebImage;
-import org.hyperic.image.widget.ResourceTree;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.io.IOException;
 
 /**
  * <p>This servlet returns a response that contains the binary data of
@@ -60,7 +58,11 @@ public class NavMapImageServlet extends ImageServlet {
 
     // member data
     private Log log = LogFactory.getLog( NavMapImageServlet.class.getName() );
-    private String treeVar;
+    private static ThreadLocal treeVar = new ThreadLocal() {
+        protected Object initialValue() {
+            return new String();
+        }
+    };
     public NavMapImageServlet () {}
 
     /**
@@ -69,9 +71,10 @@ public class NavMapImageServlet extends ImageServlet {
      * @param request the servlet request
      */
     protected Object createImage(HttpServletRequest request) throws ServletException {
+        String tree = (String)treeVar.get();
         WebImage image =
-            (ResourceTree)request.getSession().getAttribute(treeVar);
-        request.getSession().removeAttribute(treeVar);
+            (ResourceTree)request.getSession().getAttribute(tree);
+        request.getSession().removeAttribute(tree);
         return image;
     }
 
@@ -110,7 +113,7 @@ public class NavMapImageServlet extends ImageServlet {
      */
     protected void parseParameters(HttpServletRequest request) {
         // chart data key
-        treeVar = parseRequiredStringParameter(request, TREE_VAR_PARAM);
+        treeVar.set(parseRequiredStringParameter(request, TREE_VAR_PARAM));
 
         _logParameters();
     }
