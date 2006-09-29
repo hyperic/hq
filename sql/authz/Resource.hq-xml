@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+      "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping
+  package="org.hyperic.hq.authz.shared.pojo">
+
+  <class name="Resource" table="EAM_RESOURCE">
+    <id name="id" type="integer">
+      <meta attribute="scope-set">private</meta>
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_RESOURCE_ID_SEQ</param>
+        <!-- postgres flavor -->
+        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
+        <!-- oracle flavor -->
+        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
+      </generator>
+    </id>
+
+    <natural-id mutable="false">
+      <many-to-one name="resourceTypeId" class="ResourceType" foreign-key="EAM_RESOURCE_RESOURCE_TYPE_ID_FKEY">
+        <column name="RESOURCE_TYPE_ID" index="EAM_RESOURCE_INSTANCE_KEY, EAM_RESOURCE_IDX_TYPE" unique="false" not-null="false" />
+      </many-to-one>
+
+      <property name="instanceId" type="integer">
+        <column name="INSTANCE_ID" index="EAM_RESOURCE_INSTANCE_KEY, EAM_RESOURCE_INSTANCE_ID" not-null="false" />
+      </property>
+    </natural-id>
+
+    <version name="_version_" type="long">
+      <column name ="_VERSION_" default="0" />
+    </version>
+
+    <property name="cid" type="integer">
+      <column name="CID" not-null="false" />
+    </property>
+
+    <property name="subjectId" type="integer">
+      <column name="SUBJECT_ID" index="EAM_RESOURCE_OWNER_ID" not-null="false"/>
+    </property>
+
+    <property name="name" type="string">
+      <column name="NAME" not-null="false" length="200" />
+    </property>
+
+    <property name="sortName" type="string">
+      <column name="SORT_NAME" not-null="false" length="200"/>
+    </property>
+
+    <property name="fsystem" type="boolean">
+      <column name="FSYSTEM" not-null="false" default="false"/>
+    </property>
+
+    <bag name="resourceGroups" table="EAM_RES_GRP_RES_MAP">
+      <key column="RESOURCE_ID"/>
+      <many-to-many class="ResourceGroup" column="RESOURCE_GROUP_ID" foreign-key="EAM_RES_GRP_RES_MAP_RESOURCE_GROUP_ID_FKEY" />
+    </bag>
+
+    <bag name="group" table="EAM_RESOURCE_GROUP">
+      <key column="RESOURCE_ID" />
+      <one-to-many class="ResourceGroup" />
+    </bag>
+
+    <bag name="roles" table="EAM_ROLE">
+      <key column="RESOURCE_ID" />
+      <one-to-many class="Role" />
+    </bag>
+  </class>
+
+  <class name="ResourceType" table="EAM_RESOURCE_TYPE">
+    <id name="id" type="integer">
+      <meta attribute="scope-set">private</meta>
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_RESOURCE_TYPE_ID_SEQ</param>
+        <!-- postgres flavor -->
+        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
+        <!-- oracle flavor -->
+        <param name="parameters" dialect="Oracle">start with 10001 increment by 1 cache 10</param>
+        <param name="parameters" dialect="Oracle9">start with 10001 increment by 1 cache 10</param>
+      </generator>
+    </id>
+
+    <natural-id mutable="true">
+      <property name="name" type="string">
+        <column name="NAME" index="EAM_RES_TYPE_NAME_KEY" not-null="true" length="100" />
+      </property>
+    </natural-id>
+
+    <version name="_version_" type="long">
+      <column name ="_VERSION_" default="0" />
+    </version>
+
+    <property name="cid" type="integer">
+      <column name="CID" index="EAM_RESOURCE_TYPE_CID_IDX" not-null="false" />
+    </property>
+
+    <property name="resourceId" type="integer">
+      <column name="RESOURCE_ID" index="EAM_RESOURCE_TYPE_RESOURCE_KEY" not-null="false"/>
+    </property>
+
+    <property name="fsystem" type="boolean">
+      <column name="FSYSTEM" not-null="false" default="FALSE"/>
+    </property>
+
+    <bag name="operations" table="EAM_OPERATION">
+      <key column="RESOURCE_TYPE_ID" />
+      <one-to-many class="Operation" />
+    </bag>
+
+    <bag name="resources" table="EAM_RESOURCE">
+      <key column="RESOURCE_TYPE_ID" />
+      <one-to-many class="Resource" />
+    </bag>
+  </class>
+
+</hibernate-mapping>

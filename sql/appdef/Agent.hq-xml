@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+      "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping
+  package="org.hyperic.hq.appdef.shared.pojo">
+
+  <class name="Agent" table="EAM_AGENT">
+    <id name="id" type="integer">
+      <meta attribute="scope-set">private</meta>
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_AGENT_ID_SEQ</param>
+        <!-- postgres flavor -->
+        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
+        <!-- oracle flavor -->
+        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
+      </generator>
+    </id>
+
+    <natural-id>
+      <property name="address" type="string">
+        <column name="ADDRESS" index="AGENT_ADDRESS_PORT" not-null="true" length="64" />
+      </property>
+      <property name="port" type="integer">
+        <column name="PORT" index="AGENT_ADDRESS_PORT" not-null="true" />
+      </property>
+    </natural-id>
+
+    <version name="_version_" type="long">
+      <column name ="_VERSION_" default="0" />
+    </version>
+
+    <property name="authToken" type="string">
+      <column name="AUTHTOKEN" not-null="true" length="100" />
+    </property>
+
+    <property name="agentToken" unique="true" type="string">
+      <column name="AGENTTOKEN" index="AGENT_TOKEN_UNIQUE" not-null="true" length="100" />
+    </property>
+
+    <property name="version" type="string">
+      <column name="VERSION" length="20" />
+    </property>
+
+    <property name="ctime" type="long">
+      <column name="CTIME" />
+    </property>
+
+    <property name="mtime" type="long">
+      <column name="MTIME" />
+    </property>
+
+    <many-to-one name="agentTypeId" class="AgentType" foreign-key="EAM_AGENT_AGENT_TYPE_ID_FKEY">
+      <column name="AGENT_TYPE_ID" not-null="false" />
+    </many-to-one>
+
+    <bag name="platforms" table="EAM_PLATFORM" lazy="true">
+      <key column="AGENT_ID" />
+      <one-to-many class="Platform" />
+    </bag>
+  </class>
+
+  <class name="AgentType" table="EAM_AGENT_TYPE">
+    <id name="id" type="integer">
+      <meta attribute="scope-set">private</meta>
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_AGENT_TYPE_ID_SEQ</param>
+        <!-- postgres flavor -->
+        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
+        <!-- oracle flavor -->
+        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name ="_VERSION_" default="0" />
+    </version>
+
+    <property name="name" type="string">
+      <column name="NAME" length="80" />
+    </property>
+
+    <property name="sortName" type="string">
+      <column name="SORT_NAME" length="80" />
+    </property>
+
+    <property name="ctime" type="long">
+      <column name="CTIME" />
+    </property>
+
+    <property name="mtime" type="long">
+      <column name="MTIME" />
+    </property>
+
+    <bag name="agents" table="EAM_AGENT"
+         cascade="save-update,delete,evict,delete-orphan"
+         inverse="true" lazy="true">
+      <key column="AGENT_TYPE_ID" />
+      <one-to-many class="Agent" />
+    </bag>
+  </class>
+
+</hibernate-mapping>

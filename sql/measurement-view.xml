@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Covalent.DBSetup name="measurement-schema.xml" notice="DBSetup, Copyright (C) 2002, Covalent Technologies, Inc., All Rights Reserved.">
+    <view name="EAM_METRIC_PROB_VIEW">
+        <query>
+        SELECT 
+          appdef_type, instance_id, measurement_id,
+          timestamp, type
+        FROM 
+           EAM_METRIC_PROB, EAM_MEASUREMENT m,
+           EAM_MEASUREMENT_TEMPL t, EAM_MONITORABLE_TYPE mt
+        WHERE measurement_id = m.id AND template_id = t.id AND
+              monitorable_type_id = mt.id
+        </query>
+    </view>
+</Covalent.DBSetup>

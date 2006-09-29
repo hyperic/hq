@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+      "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping
+  package="org.hyperic.hq.measurement.shared.pojo">
+
+  <class name="Baseline" table="EAM_MEASUREMENT_BL">
+    <id name="id" type="integer">
+      <meta attribute="scope-set">private</meta>
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_MEASUREMENT_BL_ID_SEQ</param>
+        <!-- postgres flavor -->
+        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
+        <!-- oracle flavor -->
+        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
+      </generator>
+    </id>
+
+    <natural-id mutable="false">
+      <many-to-one name="derivedMeasurement" unique="true" fetch="join" class="DerivedMeasurement" foreign-key="EAM_MEASUREMENT_BL_MEASUREMENT_ID_FKEY">
+        <column name="MEASUREMENT_ID" index="METRIC_BASELINE_IDX, METRIC_BASELINE_CALCULATED_IDX" />
+      </many-to-one>
+    </natural-id>
+
+    <version name="_version_" type="long">
+      <column name="_version_" default="0" />
+    </version>
+
+    <property name="computeTime" type="long">
+      <column name="COMPUTE_TIME" index="METRIC_BASELINE_CALCULATED_IDX" not-null="true" />
+    </property>
+
+    <property name="userEntered" type="boolean">
+      <column name="USER_ENTERED" not-null="true" default="false" />
+    </property>
+
+    <property name="mean" type="double">
+      <column name="MEAN" />
+    </property>
+
+    <property name="minExpectedVal" type="double">
+      <column name="MIN_EXPECTED_VAL" />
+    </property>
+
+    <property name="maxExpectedVal" type="double">
+      <column name="MAX_EXPECTED_VAL" />
+    </property>
+  </class>
+
+</hibernate-mapping>

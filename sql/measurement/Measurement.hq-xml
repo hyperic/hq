@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+      "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping
+  package="org.hyperic.hq.measurement.shared.pojo">
+
+  <class name="Measurement" table="EAM_MEASUREMENT">
+    <id name="id" type="integer">
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_MEASUREMENT_ID_SEQ</param>
+        <!-- postgres flavor -->
+        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
+        <!-- oracle flavor -->
+        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
+      </generator>
+    </id>
+
+    <discriminator>
+      <column name="MEASUREMENT_CLASS" sql-type="character" length="1"/>
+    </discriminator>
+
+    <natural-id mutable="false">
+      <property name="instanceId" type="integer">
+        <column name="INSTANCE_ID" not-null="true" />
+      </property>
+      <many-to-one name="template" fetch="join" class="MeasurementTemplate" foreign-key="EAM_MEASUREMENT_MEASUREMENT_TEMPLATE_ID_FKEY">
+        <column name="TEMPLATE_ID" not-null="true" index="MEASUREMENT_INSTANCE" />
+      </many-to-one>
+    </natural-id>
+
+    <version name="_version_" type="long">
+      <column name="_version_" default="0" />
+    </version>
+
+    <property name="cid" type="integer">
+      <column name="CID" />
+    </property>
+
+    <property name="mtime" type="long">
+      <column name="MTIME" not-null="true" />
+    </property>
+
+    <property name="appdefType" type="integer" update="false" insert="false">
+      <formula><![CDATA[(
+        select
+            m.APPDEF_TYPE
+        from
+            EAM_MONITORABLE_TYPE m, EAM_MEASUREMENT_TEMPL t
+        where
+            m.ID = t.MONITORABLE_TYPE_ID AND
+            t.ID = TEMPLATE_ID
+      )]]></formula>
+    </property>
+
+    <subclass name="DerivedMeasurement" extends="Measurement" discriminator-value="D">
+      <meta attribute="class-code"><![CDATA[
+      private Baseline baseline;
+      public void setBaseline(Baseline b)
+      {
+          if (b != null) {
+              b.setDerivedMeasurement(this);
+          }
+          this.baseline = b;
+      }
+
+      public Baseline getBaseline()
+      {
+          return this.baseline;
+      }
+      ]]></meta>
+      <property name="enabled" type="boolean">
+        <column name="ENABLED" not-null="true" default="true"/>
+      </property>
+      <property name="interval" type="long">
+        <column name="COLL_INTERVAL" />
+      </property>
+      <property name="formula" type="string">
+        <column name="DSN" length="500" />
+      </property>
+      <one-to-one name="baseline" fetch="join" class="Baseline"
+                  property-ref="derivedMeasurement"
+                  cascade="save-update,delete,merge,evict" >
+        <meta attribute="gen-property">false</meta>
+      </one-to-one>
+
+    </subclass>
+
+    <subclass name="RawMeasurement" extends="Measurement" discriminator-value="R">
+      <property name="dsn" type="string">
+        <column name="DSN" length="500" />
+      </property>
+
+    </subclass>
+
+  </class>
+
+  <!-- one to N relationship with measurementBL measurement -->
+  <class name="MeasurementTemplate" table="EAM_MEASUREMENT_TEMPL">
+    <meta attribute="class-code"><![CDATA[
+      public void addMeasurement(Measurement m)
+      {
+          Collection coll = getMeasurements();
+          if (m != null && coll != null) {
+              m.setTemplate(this);
+              coll.add(m);
+          }
+      }
+
+      public void addTemplateArg(MeasurementArg a)
+      {
+          Collection coll = getMeasurementArgs();
+          if (a != null && coll != null) {
+              a.setTemplateArg(this);
+              coll.add(a);
+          }
+      }
+    ]]></meta>
+
+    <id name="id" type="integer">
+      <meta attribute="use-in-equals">true</meta>
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_MEASUREMENT_TEMPL_ID_SEQ</param>
+        <!-- postgres flavor -->
+        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
+        <!-- oracle flavor -->
+        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name="_version_" default="0" />
+    </version>
+
+    <property name="cid" type="integer">
+      <column name="CID" />
+    </property>
+
+    <property name="name" type="string">
+      <column name="NAME" not-null="true" length="100" />
+    </property>
+
+    <property name="alias" type="string">
+      <column name="ALIAS" not-null="true" length="50" />
+    </property>
+
+    <property name="units" type="string">
+      <column name="UNITS" length="50" />
+    </property>
+
+    <property name="collectionType" type="integer">
+      <column name="COLLECTION_TYPE" not-null="true" default="0" />
+    </property>
+
+    <property name="defaultOn" type="boolean">
+      <column name="DEFAULT_ON" not-null="true" default="false" />
+    </property>
+
+    <property name="defaultInterval" type="long">
+      <column name="DEFAULT_INTERVAL" not-null="true" default="60000" />
+    </property>
+
+    <property name="designate" type="boolean">
+      <column name="DESIGNATE" not-null="true" default="false" />
+    </property>
+
+    <property name="template" type="string">
+      <column name="TEMPLATE" not-null="true" length="500" />
+    </property>
+
+    <property name="plugin" type="string">
+      <column name="PLUGIN" length="250" />
+    </property>
+
+    <property name="expressionData" type="binary">
+      <column name="EXPRESSION_DATA" />
+    </property>
+
+    <property name="ctime" type="long">
+      <column name="CTIME" not-null="true" />
+    </property>
+
+    <property name="mtime" type="long">
+      <column name="MTIME" not-null="true" />
+    </property>
+
+    <many-to-one name="monitorableType" class="MonitorableType" foreign-key="EAM_MEASUREMENT_TEMPL_MONITORABLE_TYPE_ID_FKEY">
+      <column name="MONITORABLE_TYPE_ID" />
+    </many-to-one>
+
+    <many-to-one name="category" class="Category" foreign-key="EAM_MEASUREMENT_TEMPL_CATEGORY_ID_FKEY">
+      <column name="CATEGORY_ID" />
+    </many-to-one>
+
+    <bag name="measurements" table="EAM_MEASUREMENT" inverse="true" cascade="save-update,delete,evict,delete-orphan">
+      <key column="TEMPLATE_ID" />
+      <one-to-many class="Measurement" />
+    </bag>
+
+    <bag name="measurementArgs" table="EAM_MEASUREMENT_ARG" inverse="true" cascade="save-update,delete,evict,delete-orphan">
+      <key column="MEASUREMENT_TEMPLATE_ID" />
+      <one-to-many class="MeasurementArg" />
+    </bag>
+
+  </class>
+
+  <class name="MonitorableType" table="EAM_MONITORABLE_TYPE">
+    <id name="id" type="integer">
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_MONITORABLE_TYPE_ID_SEQ</param>
+        <!-- postgres flavor -->
+        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
+        <!-- oracle flavor -->
+        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
+      </generator>
+    </id>
+
+    <natural-id mutable="false">
+      <property name="name" type="string">
+        <column name="NAME" index="TYPE_NAME" not-null="true" length="100" />
+      </property>
+    </natural-id>
+
+    <version name="_version_" type="long">
+      <column name="_version_" default="0" />
+    </version>
+
+    <property name="cid" type="integer">
+      <column name="CID" />
+    </property>
+
+    <property name="appdefType" index="MTYPE_IDX_APPDEFTYPE" type="integer">
+      <column name="APPDEF_TYPE" not-null="true" />
+    </property>
+
+    <property name="plugIn" type="string">
+      <column name="PLUGIN" not-null="true" length="250" />
+    </property>
+
+    <bag name="measurementTemplates" table="EAM_MEASUREMENT_TEMPL">
+      <key column="MONITORABLE_TYPE_ID" />
+      <one-to-many class="MeasurementTemplate" />
+    </bag>
+  </class>
+
+  <class name="Category" table="EAM_MEASUREMENT_CAT">
+    <id name="id" type="integer">
+      <meta attribute="scope-set">private</meta>
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_MEASUREMENT_CAT_ID_SEQ</param>
+        <!-- postgres flavor -->
+        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
+        <!-- oracle flavor -->
+        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
+      </generator>
+    </id>
+
+    <natural-id mutable="false">
+      <property name="name" type="string">
+        <column name="NAME" index="CAT_NAME" not-null="true" length="100" />
+      </property>
+    </natural-id>
+
+    <version name="_version_" type="long">
+      <column name="_version_" default="0" />
+    </version>
+
+    <property name="cid" type="integer">
+      <column name="CID" />
+    </property>
+
+    <bag name="measurementTemplates" table="EAM_MEASUREMENT_TEMPL">
+      <key column="CATEGORY_ID" />
+      <one-to-many class="MeasurementTemplate" />
+    </bag>
+  </class>
+
+  <class name="MeasurementArg" table="EAM_MEASUREMENT_ARG">
+
+    <id name="id" type="integer">
+      <meta attribute="scope-set">private</meta>
+      <meta attribute="use-in-equals">true</meta>
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_MEASUREMENT_ARG_ID_SEQ</param>
+        <!-- postgres flavor -->
+        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
+        <!-- oracle flavor -->
+        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name="_version_" default="0" />
+    </version>
+
+    <property name="cid" type="integer">
+      <column name="CID" />
+    </property>
+
+    <property name="placement" type="integer">
+      <column name="PLACEMENT" not-null="true" />
+    </property>
+
+    <property name="ticks" type="integer">
+      <column name="TICKS"  default="0" />
+    </property>
+
+    <property name="weight" type="double">
+      <column name="WEIGHT" default="0" />
+    </property>
+
+    <property name="previous" type="integer">
+      <column name="PREVIOUS" default="0" />
+    </property>
+
+    <many-to-one name="template" class="MeasurementTemplate" foreign-key="EAM_MEASUREMENT_ARG_MEASUREMENT_TEMPLATE_ID_FKEY">
+      <column name="MEASUREMENT_TEMPLATE_ID" index="MEASUREMENT_ARG_TEMPL_IDX" />
+    </many-to-one>
+
+    <!-- uni-directional lookup for template, only derived measurements have args defined -->
+    <many-to-one name="templateArg" fetch="join" class="MeasurementTemplate" foreign-key="EAM_MEASUREMENT_ARG_MEASUREMENT_TEMPLATE_ARG_ID_FKEY">
+      <column name="MEASUREMENT_TEMPLATE_ARG_ID" />
+    </many-to-one>
+  </class>
+
+  <class name="ScheduleRevNum" table="EAM_SRN">
+    <composite-id name="id" class="SrnId">
+      <meta attribute="use-in-equals">true</meta>
+      <meta attribute="class-code"><![CDATA[
+        public boolean equals(Object other)
+        {
+            if (this == other) return true;
+            if (other == null) return false;
+            if (!(other instanceof SrnId)) return false;
+            SrnId castOther = (SrnId)other;
+            return this.getAppdefType().intValue() == castOther.getAppdefType().intValue() && 
+                   this.getInstanceId().intValue() == castOther.getInstanceId().intValue();
+        }
+
+        public int hashCode()
+        {
+            return 17;
+        }
+      ]]></meta>
+
+      <key-property name="appdefType" type="integer">
+        <column name="APPDEF_TYPE" not-null="true" />
+      </key-property>
+
+      <key-property name="instanceId" type="integer">
+        <column name="INSTANCE_ID" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <version name="_version_" type="long">
+      <column name="_version_" default="0" />
+    </version>
+
+    <property name="srn" type="integer">
+      <column name="SRN" not-null="true" />
+    </property>
+
+    <!-- for Pojo -->
+    <property name="minInterval" type="long" formula="0" insert="false" update="false" />
+    <property name="lastReported" type="long" formula="0" insert="false" update="false" />
+    <property name="pending" type="boolean" formula="false" insert="false" update="false" />
+  </class>
+
+  <class name="Number" table="EAM_NUMBERS">
+    <id name="I" type="long" />
+  </class>
+
+</hibernate-mapping>

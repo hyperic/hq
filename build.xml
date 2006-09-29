@@ -6,6 +6,8 @@
     <!ENTITY jsp-build SYSTEM "build_util/jsp-build.xml">
     <!ENTITY jboss-build SYSTEM "build_util/jboss-build.xml">
     <!ENTITY archive-build SYSTEM "build_util/archive-build.xml">
+    <!ENTITY hibernate-build SYSTEM "build_util/hibernate-build.xml">
+    <!ENTITY dbsetup-build SYSTEM "build_util/dbsetup-build.xml">
 ]>
 
 <project name="HQ" default="build" basedir=".">
@@ -43,6 +45,7 @@
   <!-- Thirdparty libs -->
   <property name="thirdparty.lib" location="thirdparty/lib"/>
   <property name="xdoclet.lib" location="${thirdparty.lib}/xdoclet"/>
+  <property name="hibernate.lib" location="${thirdparty.lib}/hibernate"/>
 
   <property name="webapp.home" location="${hq.home}/web" />
   <property name="ear.dir" location="${build.dir}/hq.ear" />
@@ -73,14 +76,15 @@
   <path id="alljars">
     <path refid="pdknative" />
     <fileset dir="${lather.lib}" includes="lather.jar" />
-    <fileset dir="${thirdparty.lib}" includes="*.jar" />
+    <fileset dir="${thirdparty.lib}" includes="*.jar" excludes="aspectj*.jar,cactus*.jar"/>
     <fileset dir="${thirdparty.lib}" includes="*.zip" />      
     <fileset dir="${thirdparty.lib}/oracle_jdbc" includes="*.jar" />
     <fileset dir="${thirdparty.lib}/postgresql"
-             includes="postgresql-8.0-*.jdbc3.jar"/>
+             includes="postgresql-8.1-*.jdbc3.jar"/>
     <fileset dir="${thirdparty.lib}/mysql_jdbc" includes="mysql*.jar"/>
     <fileset dir="${thirdparty.lib}/mx4j" includes="*.jar" />
     <fileset dir="${xdoclet.lib}" includes="*.jar" />
+    <fileset dir="${hibernate.lib}" includes="*.jar" />
     <fileset dir="${jboss.home}/server/default/lib" includes="*.jar" />
     <fileset dir="${jboss.home}/lib" includes="*.jar" />
     <fileset dir="${jboss.home}/client" includes="*.jar" />
@@ -126,6 +130,8 @@
   <target name="init-taskdefs" unless="init-taskdefs.notrequired">
     <taskdef resource="net/sf/antcontrib/antcontrib.properties"
              classpathref="alljars"/>
+    <taskdef name="for" classname="net.sf.antcontrib.logic.For"
+             classpathref="alljars"/>
     <taskdef resource="org/hyperic/tools/ant/ant-tools.properties"
              classpathref="custom-ant-tasks.path"/>
     <property name="init-taskdefs.notrequired" value="true"/>
@@ -137,8 +143,9 @@
     <mkdir dir="${build.dir}/classes" />
 
     <javac destdir="${build.dir}/classes"
-           optimize="off"
-           debug="on"
+           optimize="${hq.javac.optimize}"
+           debug="${hq.javac.debug}"
+           source="${hq.javac.source}"
            classpathref="alljars" >
       <src>
         <!-- Generated sources -->
@@ -171,6 +178,29 @@
     </copy>
   </target>
 
+  <target name="compile-test" depends="compile">
+    <mkdir dir="${build.dir}/test-classes" />
+    <javac destdir="${build.dir}/test-classes"
+           optimize="${hq.javac.optimize}"
+           debug="${hq.javac.debug}"
+           source="${hq.javac.source}">
+      <classpath>
+        <path refid="alljars"/>
+        <path location="${thirdparty.lib}/cactus-13-1.6.1.jar" />
+        <path location="${build.dir}/classes"/>
+      </classpath>
+      <src>
+        <path location="test" />
+      </src>
+    </javac>
+    <copy toDir="${build.dir}/test-classes">
+      <fileset dir="${hq.home}/etc" includes="cactus.properties,log_client.properties" />
+    </copy>
+    <condition property="pack-test.enable" value="true">
+      <isset property="debug.enable" />
+    </condition>
+  </target>
+
   <!-- ==================== JSP precompile ============================ -->
   
   &jsp-build; <!-- Include precompile-jsp -->
@@ -178,12 +208,17 @@
   <!-- ==================== Source code generation ==================== -->
 
   &xdoclet-build;
+  &hibernate-build;
+
+  <!-- ================== DB Setup =================== -->
+
+  &dbsetup-build;
 
   <!-- ==================== EAR packaging ==================== -->
 
   <!-- Doesn't depend on compile - if you use an IDE it'll compile the classes for
        you, only need to package -->
-  <target name="pack-ear" description="Create the ear directory structure" 
+  <target name="pack-ear-files" description="Create the ear directory structure" 
           depends="dbsetup-init">
     <mkdir dir="${ear.dir}" />
     <mkdir dir="${ear.dir}/META-INF" />
@@ -209,13 +244,13 @@
       <fileset dir="${build.dir}/dd/mdb" includes="*" />
     </copy>
 
-    <copy file="etc/application.xml" tofile="${ear.dir}/META-INF/application.xml" />
-    <copy file="etc/jboss-app.xml" tofile="${ear.dir}/META-INF/jboss-app.xml" />
-    <copy file="etc/EAR-MANIFEST.MF" tofile="${ear.dir}/META-INF/MANIFEST.MF" />
-
-    <replace file="${ear.dir}/META-INF/MANIFEST.MF">
-      <replacefilter token="@@@HYPERIC_EAR@@@" value="hq.ear"/>
-    </replace>
+    <copy todir="${ear.dir}/META-INF" overwrite="true">
+        <fileset dir="etc" includes="application.xml,jboss-app.xml" />
+        <fileset dir="${build.dir}/classes/META-INF">
+            <include name="**/*.hbm.xml" />
+            <include name="*.cfg.xml" />
+        </fileset>
+    </copy>
 
     <copy file="etc/jboss/events/alertdef-prop-service.xml" tofile="${ear.dir}/alertdef-prop-service.xml" />
      <copy file="etc/jboss/measurement/measurement-prop-service.xml" tofile="${ear.dir}/measurement-prop-service.xml" />
@@ -318,6 +353,16 @@
       <fileset dir="${build.dir}/lib" >
         <include name="jxla.jar" />
       </fileset>
+      <fileset dir="${hibernate.lib}">
+        <include name="antlr-2.7.6rc1.jar" />
+        <include name="asm-attrs.jar" />
+        <include name="asm.jar" />
+        <include name="cglib-2.1.3.jar" />
+        <include name="concurrent-1.3.2.jar" />
+        <include name="dom4j-1.6.1.jar" />
+        <include name="ehcache-1.1.jar" />
+        <include name="hibernate3.jar" />
+      </fileset>
     </copy>
 
     <copy todir="${ear.dir}/sigar_bin/lib" >
@@ -335,8 +380,46 @@
     <touch file="${ear.dir}/META-INF/application.xml" />
   </target>
 
+  <target name="pack-ear" depends="pack-ear-files" unless="generate-manifest.notrequired">
+    <!-- generate EAR MANIFEST file -->
+    <pathconvert pathSep="," property="Class-Path">
+      <path>
+        <fileset dir="${ear.dir}" includes="hq.jar,hqee.jar" />
+        <fileset dir="${ear.dir}/lib" includes="*.jar" />
+      </path>
+      <map from="${ear.dir}/" to="hq.ear/" />
+    </pathconvert>
+    <delete quiet="true" file="${ear.dir}/META-INF/MANIFEST.MF" />
+    <echo file="${ear.dir}/META-INF/MANIFEST.MF">Manifest-Version: 1.0${line.separator}</echo>
+    <echo file="${ear.dir}/META-INF/MANIFEST.MF" append="true">Class-Path:</echo>
+    <for param="hqjar" list="${Class-Path}">
+      <sequential>
+        <echo file="${ear.dir}/META-INF/MANIFEST.MF" append="true">  @{hqjar}${line.separator}</echo>
+      </sequential>
+    </for>
+    <property name="generate-manifest.notrequired" value="true" />
+  </target>
+
+  <target name="pack-test" if="pack-test.enable">
+    <mkdir dir="${ear.dir}/hq.war" />
+    <mkdir dir="${ear.dir}/hq.war/WEB-INF/lib" />
+
+    <copy todir="${ear.dir}/hq.war/WEB-INF/lib/" >
+      <fileset dir="${thirdparty.lib}" >
+        <include name="aspectjrt-1.2.1.jar" />
+        <include name="cactus-13-1.6.1.jar" />
+        <include name="junit.jar" />
+        <include name="commons-httpclient-2.0.jar" />
+      </fileset>
+    </copy>
+
+    <copy todir="${ear.dir}/hq.war/WEB-INF/classes" >
+      <fileset dir="${build.dir}/test-classes" includes="**" />
+    </copy>
+  </target>
+
   <target name="pack-war" description="Create the war directory structure ( use if you modify .jsp or other web files, but no sources )"
-          depends="pack-ear">
+          depends="pack-ear,pack-test">
     <mkdir dir="${ear.dir}/hq.war" />
     <mkdir dir="${ear.dir}/hq.war/WEB-INF/lib" />
     
@@ -403,15 +486,22 @@
 
   <target name="build-war" description="Build and create the war" 
           depends="compile,pack-war" />
+  
+  <target name="build-test-ear" description="Build and create the ear directory structure for test" 
+          depends="compile-test,pack-ear,pack-war" />
+
+  <target name="build-test-war" description="Build and create the war for test" 
+          depends="compile-test,pack-war" />
 
   <!-- ==================== UI packaging ==================== -->
   
   <target name="compile-ui">
     <!-- Compile all of the ui classes -->
     <javac destdir="${build.dir}/classes"
-           optimize="off"
+           optimize="${hq.javac.optimize}"
            deprecation="${hq.remote-dev.deprecation}"
-           debug="on"
+           debug="${hq.javac.debug}"
+           source="${hq.javac.source}"
            classpathref="remotejars" >
       <src path="src"/>
       <include name="**/hq/ui/**"/>
@@ -1060,14 +1150,22 @@
   </target>
 
   <target name="all" description="xdoclet, compile and pack for everything" 
-          depends="init,xdoclet,build" >
+          depends="init,xdoclet,hibernate-pojo,build" >
+  </target>
+
+  <target name="all-test" description="xdoclet, compile and pack for everything to test" 
+          depends="init,xdoclet,hibernate-pojo,build-test" >
   </target>
 
  <target name="build" depends="init,compile,pack" description="Compile and pack - no code generation" >
     <!--  Triger jboss reloading -->
   </target>
 
-  <target name="clean" depends="remote-clean" description="Clean the build directory" >
+ <target name="build-test" depends="init,compile-test,pack" description="Compile and pack - no code generation" >
+    <!--  Triger jboss reloading -->
+  </target>
+
+ <target name="clean" depends="remote-clean" description="Clean the build directory" >
     <delete dir="${build.dir}"/>
   </target>
   
@@ -1167,7 +1265,7 @@
       <fileset dir="${sigar.lib}" includes="**"/>
       <fileset dir="${thirdparty.lib}">
         <include name="oracle_jdbc/ojdbc14.jar"/>
-        <include name="postgresql/postgresql-8.0-*.jdbc3.jar"/>
+        <include name="postgresql/postgresql-8.1-*.jdbc3.jar"/>
         <include name="mysql_jdbc/mysql-connector-java-3.0.12-*.jar"/>
         <include name="jakarta-oro*.jar" />
         <include name="ant-contrib.jar" />
@@ -1221,8 +1319,9 @@
     <delete dir="${build.dir}/installer-classes"/>
     <mkdir dir="${build.dir}/installer-classes"/>
     <javac destdir="${build.dir}/installer-classes"
-           optimize="off"
-           debug="on"
+           optimize="${hq.javac.optimize}"
+           debug="${hq.javac.debug}"
+           source="${hq.javac.source}"
            classpathref="custom-ant-tasks.path" >
       <src>
         <path location="installer/src" />
@@ -1302,8 +1401,8 @@
     </delete>
     <delete dir="${ear.dir}/hq.war/test" />
     <delete file="${ear.dir}/hq.war/WEB-INF/lib/junit.jar"/>
-    <delete file="${ear.dir}/hq.war/WEB-INF/lib/aspectjrt.jar" />
-    <delete file="${ear.dir}/hq.war/WEB-INF/lib/cactus.jar" />
+    <delete file="${ear.dir}/hq.war/WEB-INF/lib/aspectjrt-*.jar" />
+    <delete file="${ear.dir}/hq.war/WEB-INF/lib/cactus-*.jar" />
     <delete file="${ear.dir}/hq.war/WEB-INF/lib/strutstest.jar" />
     <delete file="${ear.dir}/hq.war/WEB-INF/lib/commons-httpclient-2.0.jar" />    
     <delete file="${ear.dir}/hq.war/WEB-INF/classes/cactus.properties"/>
@@ -1462,206 +1561,11 @@
     <antcall target="roll-archives"/>
   </target>
 
-  <!-- ==================== DBSetup ==================== -->
-  <target name="dbsetup-init" depends="init-taskdefs" unless="dbsetup-init.isLoaded">
-  
-    <switch value="${hq.server.ds-mapping}">
-      <case value="Oracle8">
-        <echo>dbsetup-init: Oracle8</echo>
-        <property name="using.oracle8.db" value="true"/>
-        <property name="quartz.delegate" value="org.quartz.impl.jdbcjobstore.oracle.OracleDelegate"/>
-      </case>
-      <case value="Oracle9i">
-        <echo>dbsetup-init: Oracle9i</echo>
-        <property name="using.oracle8.db" value="true"/>
-        <property name="quartz.delegate" value="org.quartz.impl.jdbcjobstore.oracle.OracleDelegate"/>
-      </case>
-      <case value="PostgreSQL">
-        <echo>dbsetup-init: PostgreSQL</echo>
-        <property name="quartz.delegate" value="org.quartz.impl.jdbcjobstore.PostgreSQLDelegate"/>
-      </case>
-
-      <case value="mySQL">
-        <echo>dbsetup-init: MySQL</echo>
-        <property name="quartz.delegate" value="org.quartz.impl.jdbcjobstore.StdJDBCDelegate"/>
-      </case>
-      <default>
-        <fail>
-        Unrecognized datasource mapping name: ${hq.server.ds-mapping}
-        </fail>
-      </default>
-    </switch>
-
-    <mkdir dir="${build.dir}/sql" />
-
-    <property name="dbsetup-init.isLoaded" value="t"/>
-    <property name="dbsetup-subsystems"
-              value="appdef,auth,authz,control,events,measurement,bizapp,common,scheduler,agtmgmt,rt,pdk" />
-  </target>
-
-  <target name="dbsetup-combine-check">
-    <uptodate property="dbsetup-combine.notrequired"
-              targetfile="${build.dir}/sql/dbsetup-combine.tstamp">
-      <srcfiles dir="${hq.home}/sql">
-        <include name="*.xml"/>
-      </srcfiles>
-    </uptodate>
-  </target>
-
-  <target name="dbsetup-uncombine">
-    <delete file="${build.dir}/sql/dbsetup-combine.tstamp"/>
-  </target>
-
-  <target name="dbsetup-combine" depends="dbsetup-init,dbsetup-combine-check"
-          unless="dbsetup-combine.notrequired">
-    <dbsetup-cat
-       debug="true"
-       destfile="${build.dir}/sql/schema-orig.xml" 
-       name="schema-orig.xml"
-       notice="Copyright (C) 2004-2006, Hyperic, Inc., All Rights Reserved."
-       order="${dbsetup-subsystems}">
-      <fileset dir="sql">
-        <include name="*-schema.xml"/>
-      </fileset>
-    </dbsetup-cat>
-
-    <dbsetup-cat
-       debug="true"
-       destfile="${build.dir}/sql/data-orig.xml" 
-       name="data-orig.xml"
-       notice="Copyright (C) 2004-2006, Hyperic, Inc., All Rights Reserved."
-       order="${dbsetup-subsystems}">
-      <fileset dir="sql">
-        <include name="*.xml"/>
-        <exclude name="*-schema.xml"/>
-      </fileset>
-    </dbsetup-cat>
-
-    <touch file="${build.dir}/sql/dbsetup-combine.tstamp" />
-  </target>
-
-  <target name="dbsetup-replace" depends="dbsetup-combine">
-    <crypto value="${server.admin.password}" property="server.admin.password.encrypted"/>
-
-    <delete file="${build.dir}/sql/schema.xml"/>
-    <copy file="${build.dir}/sql/schema-orig.xml"
-          tofile="${build.dir}/sql/schema.xml"/>
-
-    <replace file="${build.dir}/sql/schema.xml">
-      <replacefilter token="@@@M_DATA@@@" value="${server.tablespace.m_data}"/>
-      <replacefilter token="@@@M_IDX@@@" value="${server.tablespace.m_idx}"/>
-      <replacefilter token="@@@PL_DATA@@@" value="${server.tablespace.pl_data}"/>
-      <replacefilter token="@@@PL_IDX@@@" value="${server.tablespace.pl_idx}"/>
-      <replacefilter token="@@@LG_DATA@@@" value="${server.tablespace.lg_data}"/>
-      <replacefilter token="@@@LG_IDX@@@" value="${server.tablespace.lg_idx}"/>
-      <replacefilter token="@@@SM_DATA@@@" value="${server.tablespace.sm_data}"/>
-      <replacefilter token="@@@SM_IDX@@@" value="${server.tablespace.sm_idx}"/>
-    </replace>
-
-    <delete file="${build.dir}/sql/data.xml"/>
-
-    <copy file="${build.dir}/sql/data-orig.xml"
-          tofile="${build.dir}/sql/data.xml"/>
-
-    <replace file="${build.dir}/sql/data.xml">
-      <replacefilter token="@@@ADMINUSERNAME@@@" value="${server.admin.username}"/>
-      <replacefilter token="@@@ADMINPASSWORD@@@" value="${server.admin.password.encrypted}"/>
-      <replacefilter token="@@@ADMINEMAIL@@@" value="${server.admin.email}"/>
-      <replacefilter token="@@@BASEURL@@@" value="${server.webapp.baseurl}"/>
-      <replacefilter token="@@@MAILHOST@@@" value="${server.mail.host}"/>
-      <replacefilter token="@@@MAILSENDER@@@" value="${server.mail.sender}"/>
-      <replacefilter token="@@@JAASPROVIDER@@@" value="${server.jaas.provider}"/>
-      <replacefilter token="@@@LDAPURL@@@" value="${server.ldap.url}"/>
-      <replacefilter token="@@@LDAPPROTOCOL@@@" value="${server.ldap.protocol}"/>
-      <replacefilter token="@@@LDAPLOGINPROP@@@" value="${server.ldap.loginProperty}"/>
-      <replacefilter token="@@@LDAPBASEDN@@@" value="${server.ldap.baseDN}"/>
-      <replacefilter token="@@@LDAPSEARCHFILTER@@@" value="${server.ldap.searchFilter}"/>
-      <replacefilter token="@@@LDAPBINDDN@@@" value="${server.ldap.bindDN}"/>
-      <replacefilter token="@@@LDAPBINDPW@@@" value="${server.ldap.bindPW}"/>
-      <replacefilter token="@@@MULTICAST_ADDR@@@" value="${server.highavail.address}"/>
-      <replacefilter token="@@@MULTICAST_PORT@@@" value="${server.highavail.port}"/>
-    </replace>
-  </target>
-
-  <target name="dbsetup-schema" 
-          depends="dbsetup-init,dbsetup-combine"
-          description="Initialize the database schema">
-    <antcall target="dbsetup-process-file">
-      <param name="sqlfile"   value="${build.dir}/sql/schema.xml" />
-      <param name="data"      value="false" />
-      <param name="uninstall" value="false" />
-    </antcall>
-  </target>
-
-  <target name="dbsetup-data" 
-          depends="dbsetup-init,dbsetup-combine"
-          description="Initialize the deployment data">
-    <antcall target="dbsetup-process-file">
-      <param name="sqlfile"   value="${build.dir}/sql/data.xml" />
-      <param name="data"      value="true" />
-      <param name="uninstall" value="false" />
-    </antcall>
-  </target> 
-
-  <target name="dbsetup-uninstall" 
-          depends="dbsetup-init,dbsetup-combine"
-          description="Drop the schema">
-    <antcall target="dbsetup-process-file">
-      <param name="sqlfile"   value="${build.dir}/sql/schema.xml" />
-      <param name="data"      value="false" />
-      <param name="uninstall" value="true" />
-    </antcall>
-  </target>
-
-  <!-- This target is used via antcall by dbsetup-schema and dbsetup-data.
-       The param expected is:
-         sqlfile   : the name of the sql file (expected to be the full
-                     path to the DBSetup XML file)
-         data      : if the dbsetup file is creating/dropping tables, this is false.
-                     if the dbsetup file is inserting data, this is true.
-         uninstall : if the dbsetup file is creating stuff, this is false.
-                     if the dbsetup file is dropping stuff, this is true.
-  -->
-  <target name="dbsetup-process-file" depends="init-taskdefs">
-    <dbsetup xmlFile="${sqlfile}"
-         jdbcUrl="${hq.jdbc.url}" 
-         jdbcUser="${hq.jdbc.user}"
-         jdbcPassword="${hq.jdbc.password}"
-         typeMap="${hq.home}/sql/common-dbsetup-typemap.xml"
-         data="${data}"
-         sqlFile="${hq.home}/build/sql/dbsetup-all-${hq.server.ds-mapping}-install.sql"
-         noexec="false"
-         uninstall="${uninstall}"
-         appendToSqlFile="true" />
-  </target> 
-
-  <!-- Main DBSetup target -->
-  <target name="dbsetup"
-          depends="dbsetup-schema-only,dbsetup-data,dbsetup-upgrade"
-          description="Full drop and setup for database"/>
-
-  <target name="dbsetup-schema-only"
-          depends="dbsetup-combine,dbsetup-replace,dbsetup-uninstall,dbsetup-schema"
-          description="Create an empty schema in the database, without any data."/>
-
-  <target name="dbsetup-upgrade" depends="init-taskdefs">
-    <ant antfile="${hq.home}/installer/data/db-upgrade.xml"
-         target="upgrade"
-         inheritAll="true"
-         inheritRefs="true">
-      <property name="jdbc.url" value="${hq.jdbc.url}"/>
-      <property name="jdbc.user" value="${hq.jdbc.user}"/>
-      <property name="jdbc.password" value="${hq.jdbc.password}"/>
-      <property name="typemap.file" value="sql/common-dbsetup-typemap.xml"/>
-      <property name="schema.target" value="${hq.schema.target.version}"/>
-    </ant>
-  </target>
-
   <target name="extract-jboss" depends="jboss-version">
     <unzip src="${jboss.zip}" dest="${jboss.home}/.."/>
   </target>
 
-  <target name="hq-javadoc" depends="xdoclet">
+  <target name="hq-javadoc" depends="xdoclet,hibernate-pojo">
     <!-- 
     set this in ~/hq/build.properties if you want it someplace other than 
     your source tree 

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+      "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping
+  package="org.hyperic.hq.events.shared.pojo">
+
+  <class name="AlertDefinition" table="EAM_ALERT_DEFINITION">
+    <id name="id" type="integer">
+      <meta attribute="scope-set">private</meta>
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_ALERT_DEFINITION_ID_SEQ</param>
+        <!-- postgres flavor -->
+        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
+        <!-- oracle flavor -->
+        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name ="_VERSION_" default="0" />
+    </version>
+
+    <property name="name" type="string">
+      <column name="NAME" not-null="true" length="100" />
+    </property>
+
+    <property name="ctime" type="long">
+      <column name="CTIME" not-null="true" />
+    </property>
+
+    <property name="mtime" type="long">
+      <column name="MTIME" not-null="true" />
+    </property>
+
+    <property name="parentId" type="integer">
+      <column name="PARENT_ID" />
+    </property>
+
+    <property name="description" type="string">
+      <column name="DESCRIPTION" not-null="false" length="250" />
+    </property>
+
+    <property name="priority" type="integer">
+      <column name="PRIORITY" index="ALERT_DEF_CHILD_IDX" not-null="true" default="1" />
+    </property>
+
+    <property name="appdefId" type="integer">
+      <column name="APPDEF_ID" index="ALERT_DEF_RES_IDX" not-null="true" />
+    </property>
+
+    <property name="appdefType" type="integer">
+      <column name="APPDEF_TYPE" index="ALERT_DEF_RES_IDX" not-null="true" />
+    </property>
+
+    <property name="enabled" type="boolean">
+      <column name="ENABLED" not-null="true" default="true" />
+    </property>
+
+    <property name="frequencyType" type="integer">
+      <column name="FREQUENCY_TYPE" not-null="true" />
+    </property>
+
+    <property name="count" type="long">
+      <column name="COUNT" />
+    </property>
+
+    <property name="range" type="long">
+      <column name="RANGE" />
+    </property>
+
+    <property name="willRecover" type="boolean">
+      <column name="WILL_RECOVER" not-null="true" default="false" />
+    </property>
+
+    <property name="notifyFiltered" type="boolean">
+      <column name="NOTIFY_FILTERED" not-null="true" default="false" />
+    </property>
+
+    <property name="controlFiltered" type="boolean">
+      <column name="CONTROL_FILTERED" not-null="true" default="false" />
+    </property>
+
+    <property name="actOnTriggerId" type="integer">
+      <column name="ACT_ON_TRIGGER_ID" />
+    </property>
+
+    <property name="deleted" type="boolean">
+      <column name="DELETED" not-null="true" default="false" />
+    </property>
+
+    <bag name="actions" table="EAM_ACTION">
+      <key column="ALERT_DEFINITION_ID" />
+      <one-to-many class="Action" />
+    </bag>
+
+    <bag name="alerts" table="EAM_ALERT">
+      <key column="ALERT_DEFINITION_ID" />
+      <one-to-many class="Alert" />
+    </bag>
+
+    <bag name="alertConditions" table="EAM_ALERT_CONDITION">
+      <key column="ALERT_DEFINITION_ID" />
+      <one-to-many class="AlertCondition" />
+    </bag>
+
+    <bag name="triggers" table="EAM_REGISTERED_TRIGGER">
+      <key column="ALERT_DEFINITION_ID" />
+      <one-to-many class="RegisteredTrigger" />
+    </bag>
+  </class>
+
+</hibernate-mapping>

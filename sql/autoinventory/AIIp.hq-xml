@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+      "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping
+  package="org.hyperic.hq.autoinventory.shared.pojo">
+
+  <class name="AIIp" table="EAM_AIQ_IP">
+    <id name="id" type="integer">
+      <meta attribute="scope-set">private</meta>
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_AIQ_IP_ID_SEQ</param>
+        <!-- postgres flavor -->
+        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
+        <!-- oracle flavor -->
+        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
+      </generator>
+    </id>
+
+    <natural-id mutable="false">
+      <many-to-one name="aiqPlatformId" class="AIPlatform" foreign-key="EAM_AIQ_IP_AIQ_PLATFORM_ID_FKEY">
+        <column name="AIQ_PLATFORM_ID" index="AIQ_IP_IDX" not-null="false" />
+      </many-to-one>
+      <property name="address" type="string">
+        <column name="ADDRESS" index="AIQ_IP_IDX" not-null="true" length="64" />
+      </property>
+    </natural-id>
+
+    <version name="_version_" type="long">
+      <column name ="_VERSION_" default="0" />
+    </version>
+
+    <property name="netmask" type="string">
+      <column name="NETMASK" not-null="false" length="64"/>
+    </property>
+
+    <property name="macAddress" type="string">
+      <column name="MAC_ADDRESS" not-null="false" length="64" />
+    </property>
+
+    <property name="queueStatus" type="integer">
+      <column name="QUEUESTATUS" not-null="false" />
+    </property>
+
+    <property name="diff" type="long">
+      <column name="DIFF" not-null="false" />
+    </property>
+
+    <property name="ignored" type="boolean">
+      <column name="IGNORED" not-null="false" />
+    </property>
+
+    <property name="ctime" type="long">
+      <column name="CTIME" not-null="false" />
+    </property>
+
+    <property name="mtime" type="long">
+      <column name="MTIME" not-null="false" />
+    </property>
+  </class>
+
+</hibernate-mapping>

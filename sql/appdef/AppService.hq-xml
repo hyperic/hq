@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+      "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping
+  package="org.hyperic.hq.appdef.shared.pojo">
+
+  <class name="AppService" table="EAM_APP_SERVICE">
+    <id name="id" type="integer">
+      <meta attribute="scope-set">private</meta>
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_APP_SERVICE_ID_SEQ</param>
+        <!-- postgres flavor -->
+        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
+        <!-- oracle flavor -->
+        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
+      </generator>
+    </id>
+
+    <natural-id>
+      <many-to-one name="serviceId" class="Service" foreign-key="EAM_APP_SERVICE_SERVICE_ID_FKEY">
+        <column name="SERVICE_ID" index="EAM_SERVICE_KEY" not-null="false" />
+      </many-to-one>
+      <many-to-one name="clusterId" class="SvcCluster" foreign-key="EAM_APP_SERVICE_CLUSTER_ID_FKEY">
+        <column name="CLUSTER_ID" index="EAM_SERVICE_KEY" not-null="false" />
+      </many-to-one>
+      <many-to-one name="applicationId" class="Application" foreign-key="EAM_APP_SERVICE_APPLICATION_ID_FKEY">
+        <column name="APPLICATION_ID" index="EAM_SERVICE_KEY" not-null="false" />
+      </many-to-one>
+    </natural-id>
+
+    <version name="_version_" type="long">
+      <column name ="_VERSION_" default="0" />
+    </version>
+
+    <property name="isCluster" type="boolean">
+      <column name="ISCLUSTER" not-null="true" />
+    </property>
+
+    <property name="ctime" type="long">
+      <column name="CTIME" not-null="false" />
+    </property>
+
+    <property name="mtime" type="long">
+      <column name="MTIME" not-null="false" />
+    </property>
+
+    <property name="modifiedBy" type="string">
+      <column name="MODIFIED_BY" not-null="false" length="100" />
+    </property>
+
+    <property name="fentryPoint" type="boolean">
+      <column name="FENTRY_POINT" not-null="true" default="true" />
+    </property>
+
+    <many-to-one name="serviceTypeId" class="ServiceType" foreign-key="EAM_APP_SERVICE_SERVICE_TYPE_ID_FKEY">
+      <column name="SERVICE_TYPE_ID" not-null="false" />
+    </many-to-one>
+
+    <bag name="appService" table="EAM_SERVICE_DEP_MAP" cascade="all,delete-orphan" inverse="true">
+      <key column="APPSERVICE_ID" />
+      <one-to-many class="ServiceDepMap" />
+    </bag>
+
+    <bag name="dependents" table="EAM_SERVICE_DEP_MAP" cascade="all,delete-orphan" inverse="true">
+      <key column="DEPENDENT_SERVICE_ID" />
+      <one-to-many class="ServiceDepMap" />
+    </bag>
+  </class>
+
+  <class name="ServiceDepMap" table="EAM_SERVICE_DEP_MAP">
+    <id name="id" type="integer">
+      <meta attribute="scope-set">private</meta>
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_SERVICE_DEP_MAP_ID_SEQ</param>
+        <!-- postgres flavor -->
+        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
+        <!-- oracle flavor -->
+        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name ="_VERSION_" default="0" />
+    </version>
+
+    <property name="ctime" type="long">
+      <column name="CTIME" not-null="false" />
+    </property>
+
+    <property name="mtime" type="long">
+      <column name="MTIME" not-null="false" />
+    </property>
+
+    <many-to-one name="appServiceId" class="AppService" unique="true" foreign-key="EAM_SERVICE_DEP_MAP_APPSERVICE_ID_FKEY">
+      <column name="APPSERVICE_ID" not-null="false" />
+    </many-to-one>
+
+    <many-to-one name="dependentServiceId" class="AppService" foreign-key="EAM_SERVICE_DEP_MAP_DEPENDENT_SERVICE_ID_FKEY">
+      <column name="DEPENDENT_SERVICE_ID" not-null="false" />
+    </many-to-one>
+  </class>
+
+</hibernate-mapping>

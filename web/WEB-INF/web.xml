@@ -112,6 +112,18 @@
     <load-on-startup>1</load-on-startup>
   </servlet>
 
+  <!-- Cactus Redirector -->
+  <servlet>
+    <servlet-name>ServletRedirector</servlet-name>
+    <servlet-class>org.apache.cactus.server.ServletTestRedirector</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>JspRedirector</servlet-name>
+    <jsp-file>/jspRedirector.jsp</jsp-file>
+  </servlet>
+  <!-- end cactus redirector -->
+
 <!-- BEGIN GENERATED JSPS -->
 <!--GENERATED_JSPS-->
 <!-- END GENERATED JSPS -->

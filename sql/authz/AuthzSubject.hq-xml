@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+      "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping
+  package="org.hyperic.hq.authz.shared.pojo">
+
+  <class name="AuthzSubject" table="EAM_SUBJECT">
+    <id name="id" type="integer">
+      <meta attribute="scope-set">private</meta>
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_SUBJECT_ID_SEQ</param>
+        <!-- postgres flavor -->
+        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
+        <!-- oracle flavor -->
+        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
+      </generator>
+    </id>
+
+    <natural-id mutable="true">
+      <property name="name" type="string">
+        <column name="NAME" index="EAM_SUBJECT_AUTH_KEY" not-null="true" length="100" />
+      </property>
+
+      <property name="dsn" type="string">
+        <column name="DSN" index="EAM_SUBJECT_AUTH_KEY" not-null="true" length="100" />
+      </property>
+    </natural-id>
+
+    <version name="_version_" type="long">
+      <column name ="_VERSION_" default="0" />
+    </version>
+
+    <property name="cid" type="integer">
+      <column name="CID" index="EAM_SUBJECT_CID_IDX" not-null="false" />
+    </property>
+
+    <property name="sortName" type="string">
+      <column name="SORT_NAME" not-null="false" length="100"/>
+    </property>
+
+    <property name="firstName" type="string">
+      <column name="FIRST_NAME" length="100"/>
+    </property>
+
+    <property name="lastName" type="string">
+      <column name="LAST_NAME" length="100"/>
+    </property>
+
+    <property name="emailAddress" type="string">
+      <column name="EMAIL_ADDRESS" length="100"/>
+    </property>
+
+    <property name="smsAddress" type="string">
+      <column name="SMS_ADDRESS" length="100"/>
+    </property>
+
+    <property name="phoneNumber" type="string">
+      <column name="PHONE_NUMBER" length="100"/>
+    </property>
+
+    <property name="department" type="string">
+      <column name="DEPARTMENT" length="100"/>
+    </property>
+
+    <property name="factive" type="boolean">
+      <column name="FACTIVE" not-null="true" default="true"/>
+    </property>
+
+    <property name="fsystem" type="boolean">
+      <column name="FSYSTEM" not-null="true" default="false"/>
+    </property>
+
+    <many-to-one name="resourceId" class="Resource" foreign-key="EAM_SUBJECT_RESOURCE_ID_FKEY">
+      <column name="RESOURCE_ID" index="EAM_SUBJECT_RESOURCE_KEY" />
+    </many-to-one>
+
+    <bag name="roles" table="EAM_SUBJECT_ROLE_MAP">
+      <key column="SUBJECT_ID" />
+      <many-to-many class="Role" column="ROLE_ID" foreign-key="EAM_SUBJECT_ROLE_MAP_ROLE_ID_FKEY" />
+    </bag>
+
+    <bag name="userConfigs" table="EAM_USER_CONFIG_RESP">
+      <key column="SUBJECT_ID" />
+      <one-to-many class="UserConfigResp" />
+    </bag>
+  </class>
+
+  <class name="AuthzSubjRoleMap" table="EAM_SUBJECT_ROLE_MAP">
+    <composite-id name="id" class="AuthzSubjRoleMapId">
+      <key-many-to-one name="roleId" class="Role" foreign-key="EAM_SUBJECT_ROLE_MAP_ROLE_ID_FKEY">
+        <column name="ROLE_ID" not-null="true" />
+      </key-many-to-one>
+
+      <key-many-to-one name="subjectId" class="AuthzSubject" foreign-key="EAM_SUBJECT_ROLE_MAP_SUBJECT_ID_FKEY">
+        <column name="SUBJECT_ID" not-null="true" />
+      </key-many-to-one>
+    </composite-id>
+
+    <property name="cid" type="integer">
+      <column name="CID" index="EAM_SUBJ_ROLE_MAP_CID_IDX" />
+    </property>
+  </class>
+
+</hibernate-mapping>

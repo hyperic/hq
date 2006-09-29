@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+      "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping
+  package="org.hyperic.hq.autoinventory.shared.pojo">
+
+  <class name="AISchedule" table="EAM_AUTOINV_SCHEDULE">
+    <id name="id" type="integer">
+      <meta attribute="scope-set">private</meta>
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_AUTOINV_SCHEDULE_ID_SEQ</param>
+        <!-- postgres flavor -->
+        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
+        <!-- oracle flavor -->
+        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name ="_VERSION_" default="0" />
+    </version>
+
+    <property name="entityType" type="integer">
+      <column name="ENTITY_TYPE" index="AI_SCHEDULE_ENTITY" not-null="true" />
+    </property>
+
+    <property name="entityId" type="integer">
+      <column name="ENTITY_ID" index="AI_SCHEDULE_ENTITY" not-null="true" />
+    </property>
+
+    <property name="subject" type="string">
+      <column name="SUBJECT" not-null="true" length="32"/>
+    </property>
+
+    <property name="scheduleValueBytes" type="binary">
+      <column name="SCHEDULEVALUEBYTES" />
+    </property>
+
+    <property name="nextFireTime" type="long">
+      <column name="NEXTFIRETIME" index="AI_SCHEDULE_NEXTFIRETIME" not-null="true" />
+    </property>
+
+    <property name="triggerName" type="string">
+      <column name="TRIGGERNAME" index="AI_SCHEDULE_TRIGGERNAME" not-null="true" length="128" />
+    </property>
+
+    <property name="jobName" type="string">
+      <column name="JOBNAME" not-null="true" index="AI_SCHEDULE_JOBNAME" length="128" />
+    </property>
+
+    <property name="jobOrderData" type="string">
+      <column name="JOB_ORDER_DATA" length="500" />
+    </property>
+
+    <property name="scanName" type="string">
+      <column name="SCANNAME" index="AI_SCHEDULE_SCANNAME" length="100" />
+    </property>
+
+    <property name="scanDesc" type="string">
+      <column name="SCANDESC" length="200" />
+    </property>
+
+    <property name="config" type="binary">
+      <column name="CONFIG" />
+    </property>
+  </class>
+
+</hibernate-mapping>

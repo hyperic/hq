@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+      "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping
+  package="org.hyperic.hq.events.shared.pojo">
+
+  <class name="FiredTrigger" table="EAM_FIRED_TRIGGER">
+    <id name="id" type="integer">
+      <meta attribute="scope-set">private</meta>
+      <column name="ID" not-null="true" default="nextval('EAM_FIRED_TRIGGER_ID_SEQ')" />
+      <generator class="sequence">
+        <param name="sequence">EAM_FIRED_TRIGGER_ID_SEQ</param>
+        <!-- postgres flavor -->
+        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
+        <!-- oracle flavor -->
+        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
+      </generator>
+    </id>
+
+    <property name="triggerId" type="integer">
+      <column name="TRIGGER_ID" index="EAM_FIRED_TRIGGER_REF" not-null="true" />
+    </property>
+
+    <property name="timestamp" type="long">
+      <column name="TIMESTAMP" not-null="true" />
+    </property>
+  </class>
+
+</hibernate-mapping>

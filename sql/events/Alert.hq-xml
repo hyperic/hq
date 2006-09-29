@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+      "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping
+  package="org.hyperic.hq.events.shared.pojo">
+
+  <class name="Alert" table="EAM_ALERT">
+    <id name="id" type="integer">
+      <meta attribute="scope-set">private</meta>
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_ALERT_ID_SEQ</param>
+        <!-- postgres flavor -->
+        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
+        <!-- oracle flavor -->
+        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name ="_VERSION_" default="0" />
+    </version>
+
+    <property name="ctime" type="long">
+      <column name="CTIME" not-null="true" index="ALERT_IDX_TIME" />
+    </property>
+
+    <many-to-one name="alertDefinitionId" class="AlertDefinition" foreign-key="EAM_ALERT_ALERT_DEFINITION_ID_FKEY">
+      <column name="ALERT_DEFINITION_ID" index="ALERT_IDX_ALERTDEFINITION" />
+    </many-to-one>
+
+    <bag name="alertActions" table="EAM_ALERT_ACTION_LOG">
+      <key column="ALERT_ID" />
+      <one-to-many class="AlertActionLog" />
+    </bag>
+
+    <bag name="alertConditions" table="EAM_ALERT_CONDITION_LOG">
+      <key column="ALERT_ID" />
+      <one-to-many class="AlertConditionLog" />
+    </bag>
+
+    <bag name="userAlerts" table="EAM_USER_ALERT">
+      <key column="ALERT_ID" />
+      <one-to-many class="UserAlert" />
+    </bag>
+  </class>
+
+</hibernate-mapping>
