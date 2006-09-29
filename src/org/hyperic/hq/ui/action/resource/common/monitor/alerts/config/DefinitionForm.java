@@ -215,6 +215,12 @@ public class DefinitionForm extends ResourceForm  {
         while (conditions.size() < numConditions) {
             conditions.add( new ConditionBean() );
         }
+        
+        // Remove extra conditions if necessary
+        if (conditions.size() > numConditions) {
+            for (int i = conditions.size(); i > numConditions; i--)
+                conditions.remove(i - 1);
+        }
     }
 
     /**
