@@ -741,6 +741,11 @@
     </properties>
   </server>
 
+  <server name="Apache"
+          version="2.2"
+          include="2.0">
+  </server>
+
   <server name="Apache-ERS"
           version="2.3"
           include="Apache 2.0">
