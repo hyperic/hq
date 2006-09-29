@@ -549,7 +549,8 @@ public abstract class ServerControlPlugin extends ControlPlugin {
 
         if (getResult() != RESULT_SUCCESS) {
             if (getMessage() == null) {
-                setMessage("Unknown Error");
+                setMessage("Unknown Error (exit code=" +
+                           this.exitCode + ")");
             }
 
             return;
