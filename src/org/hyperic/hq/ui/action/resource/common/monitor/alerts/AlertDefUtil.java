@@ -232,7 +232,7 @@ public class AlertDefUtil {
                         RequestUtils.message(request, msgKey, args.toArray()));
             default:
                 // do nothing
-                break;
+                continue;
             }
 
             AlertConditionBean acb = new AlertConditionBean
