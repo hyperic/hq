@@ -20,7 +20,7 @@
     </id>
 
     <discriminator>
-      <column name="MEASUREMENT_CLASS" sql-type="character" length="1"/>
+      <column name="MEASUREMENT_CLASS" not-null="false" sql-type="character" length="1"/>
     </discriminator>
 
     <natural-id mutable="false">
@@ -28,7 +28,7 @@
         <column name="INSTANCE_ID" not-null="true" />
       </property>
       <many-to-one name="template" fetch="join" class="MeasurementTemplate" foreign-key="EAM_MEASUREMENT_MEASUREMENT_TEMPLATE_ID_FKEY">
-        <column name="TEMPLATE_ID" not-null="true" index="MEASUREMENT_INSTANCE" />
+        <column name="TEMPLATE_ID" not-null="false" index="MEASUREMENT_INSTANCE" />
       </many-to-one>
     </natural-id>
 
