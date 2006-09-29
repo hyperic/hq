@@ -573,11 +573,11 @@ public class ServerConfig extends BaseConfig {
         return buf.toString();
     }
 
-    private String computeHTTPBaseUrl(String fqdn, String port) {
+    protected String computeHTTPBaseUrl(String fqdn, String port) {
         return computeBaseUrl("http", fqdn, port, "80");
     }
 
-    private String computeDomain(String fqdn) {
+    protected String computeDomain(String fqdn) {
         String domainname;
 
         StringTokenizer token = new StringTokenizer(fqdn, ".");
@@ -592,7 +592,7 @@ public class ServerConfig extends BaseConfig {
         return domainname;
     }
 
-    private String computeFQDN() {
+    protected String computeFQDN() {
         String fqdn = null;
         try {
             fqdn = new Sigar().getFQDN();
@@ -607,7 +607,7 @@ public class ServerConfig extends BaseConfig {
         return fqdn;
     }
 
-    private boolean serverAlreadyInstalled (String dir) {
+    protected boolean serverAlreadyInstalled (String dir) {
         String serverFile
             = dir + File.separator
             + "server-" + getProjectProperty("version") + File.separator
@@ -733,7 +733,7 @@ public class ServerConfig extends BaseConfig {
         return s;
     }
 
-    private boolean databaseExists (ConfigResponse config) 
+    protected boolean databaseExists (ConfigResponse config) 
         throws EarlyExitException {
 
         String user     = config.getValue("server.database-user");
@@ -757,7 +757,7 @@ public class ServerConfig extends BaseConfig {
         return (dbUpgrade != null && dbUpgrade.equals(YesNoConfigOption.YES));
     }
 
-    private boolean getReleaseHasBuiltinDB () {
+    protected boolean getReleaseHasBuiltinDB () {
         File hqdbDir = new File(getProjectProperty("install.dir")
                                 + File.separator
                                 + "data"
