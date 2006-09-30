@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+      "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping
+    package="org.hyperic.hq.appdef.shared.pojo">
+
+  <class name="AppdefResource" abstract="true">
+    <meta attribute="scope-class" inherit="false">public abstract</meta>
+    <id name="id" type="integer">
+      <meta attribute="scope-set">private</meta>
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_APPDEFRESOURCE_ID_SEQ</param>
+        <!-- postgres flavor -->
+        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
+        <!-- oracle flavor -->
+        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name ="_VERSION_" default="0" />
+    </version>
+
+    <property name="cid" type="integer">
+      <column name="CID" not-null="false" />
+    </property>
+
+    <property name="description" type="string">
+      <column name="DESCRIPTION" not-null="false" length="256" />
+    </property>
+
+    <property name="ctime" type="long">
+      <column name="CTIME" not-null="false" />
+    </property>
+
+    <property name="mtime" type="long">
+      <column name="MTIME" not-null="false" />
+    </property>
+
+    <property name="modifiedBy" type="string">
+      <column name="MODIFIED_BY" not-null="false" length="100" />
+    </property>
+
+    <property name="owner" type="string">
+      <column name="OWNER" not-null="false" length="100" />
+    </property>
+
+    <property name="location" type="string">
+      <column name="LOCATION" not-null="false" length="100" />
+    </property>
+
+    <union-subclass name="Platform" table="EAM_PLATFORM">
+      <property name="name" type="string">
+        <column name="NAME" index="EAM_PLATFORM_NAME" not-null="true" length="100" />
+      </property>
+
+      <property name="fqDN" type="string">
+        <column name="FQDN" index="EAM_PLATFORM_FQDN" not-null="true" length="200" />
+      </property>
+
+      <property name="sortName" type="string">
+        <column name="SORT_NAME" not-null="false" length="100" />
+      </property>
+
+      <property name="certDN" type="string">
+        <column name="CERTDN" not-null="false" length="200" />
+      </property>
+
+      <property name="comment_text" type="string">
+        <column name="COMMENT_TEXT" not-null="false" length="256" />
+      </property>
+
+      <property name="cpuCount" type="integer">
+        <column name="CPU_COUNT" not-null="false" />
+      </property>
+
+      <many-to-one name="platformTypeId" class="PlatformType" foreign-key="EAM_PLATFORM_PLATFORM_TYPE_ID_FKEY">
+        <column name="PLATFORM_TYPE_ID" not-null="false" />
+      </many-to-one>
+
+      <many-to-one name="configResponseId" class="ConfigResponse" foreign-key="EAM_PLATFORM_CONFIG_RESPONSE_ID_FKEY">
+        <column name="CONFIG_RESPONSE_ID" not-null="false" />
+      </many-to-one>
+
+      <many-to-one name="agentId" lazy="false" class="Agent" foreign-key="EAM_PLATFORM_AGENT_ID_FKEY">
+        <column name="AGENT_ID" not-null="false" />
+      </many-to-one>
+
+      <bag name="ips" table="EAM_IP"
+           cascade="save-update,delete,evict,delete-orphan"
+           inverse="true" lazy="true">
+        <key column="PLATFORM_ID" />
+        <one-to-many class="Ip" />
+      </bag>
+
+      <bag name="servers" table="EAM_SERVER">
+        <key column="PLATFORM_ID" />
+        <one-to-many class="Server" />
+      </bag>
+    </union-subclass>
+
+    <union-subclass name="Server" table="EAM_SERVER">
+      <many-to-one name="platformId" class="Platform" foreign-key="EAM_SERVER_PLATFORM_ID_FKEY">
+        <column name="PLATFORM_ID" index="EAM_SERVER_AIID_IDX" not-null="false" />
+      </many-to-one>
+
+      <property name="autoInventoryIdentifier" type="string">
+        <column name="AUTOINVENTORYIDENTIFIER" index="EAM_SERVER_AIID_IDX" not-null="false" length="250" />
+      </property>
+
+      <property name="name" type="string">
+        <column name="NAME" index="EAM_SERVER_NAME" not-null="true" length="200" />
+      </property>
+
+      <property name="sortName" type="string">
+        <column name="SORT_NAME" not-null="false" length="200" />
+      </property>
+
+      <property name="runTimeAutoDiscovery" type="boolean">
+        <column name="RUNTIMEAUTODISCOVERY" not-null="false" />
+      </property>
+
+      <property name="wasAutoDiscovered" type="boolean">
+        <column name="WASAUTODISCOVERED" not-null="false" />
+      </property>
+
+      <property name="servicesAutoManaged" type="boolean">
+        <column name="SERVICESAUTOMANAGED" not-null="false" />
+      </property>
+
+      <property name="autoDiscoveryZombie" type="boolean">
+        <column name="AUTODISCOVERY_ZOMBIE" not-null="false" />
+      </property>
+
+      <property name="installPath" type="string">
+        <column name="INSTALLPATH" not-null="false" length="200" />
+      </property>
+
+      <many-to-one name="serverTypeId" class="ServerType" foreign-key="EAM_SERVER_SERVER_TYPE_ID_FKEY">
+        <column name="SERVER_TYPE_ID" not-null="false" />
+      </many-to-one>
+
+      <many-to-one name="configResponseId" class="ConfigResponse" foreign-key="EAM_SERVER_CONFIG_RESPONSE_ID_FKEY">
+        <column name="CONFIG_RESPONSE_ID" not-null="false" />
+      </many-to-one>
+
+      <bag name="aiservices" table="EAM_AIQ_SERVICE">
+        <key column="SERVER_ID" />
+        <one-to-many class="org.hyperic.hq.autoinventory.shared.pojo.AIService" />
+      </bag>
+
+      <bag name="services" table="EAM_SERVICE">
+        <key column="SERVER_ID" />
+        <one-to-many class="Service" />
+      </bag>
+    </union-subclass>
+
+    <union-subclass name="Service" table="EAM_SERVICE">
+      <property name="name" type="string">
+        <column name="NAME" index="EAM_SERVICE_NAME" length="200" />
+      </property>
+
+      <property name="sortName" type="string">
+        <column name="SORT_NAME" not-null="false" length="200" />
+      </property>
+
+      <property name="parentServiceId" type="integer">
+        <column name="PARENT_SERVICE_ID" index="EAM_SERVICE_PARENT" not-null="false" />
+      </property>
+
+      <property name="autoDiscoveryZombie" type="boolean">
+        <column name="AUTODISCOVERY_ZOMBIE" not-null="false" />
+      </property>
+
+      <property name="serviceRt" type="boolean">
+        <column name="SERVICE_RT" not-null="false" />
+      </property>
+
+      <property name="endUserRt" type="boolean">
+        <column name="ENDUSER_RT" not-null="false" />
+      </property>
+
+      <many-to-one name="serverId" class="Server" foreign-key="EAM_SERVICE_SERVER_ID_FKEY">
+        <column name="SERVER_ID" not-null="false" />
+      </many-to-one>
+
+      <many-to-one name="serviceTypeId" class="ServiceType" foreign-key="EAM_SERVICE_SERVICE_TYPE_ID_FKEY">
+        <column name="SERVICE_TYPE_ID" not-null="false" />
+      </many-to-one>
+
+      <many-to-one name="svcClusterId" class="SvcCluster" foreign-key="EAM_SERVICE_SVC_CLUSTER_ID_FKEY">
+        <column name="SVC_CLUSTER_ID" not-null="false" />
+      </many-to-one>
+
+      <many-to-one name="configResponseId" class="ConfigResponse" foreign-key="EAM_SERVICE_CONFIG_RESPONSE_ID_FKEY">
+        <column name="CONFIG_RESPONSE_ID" not-null="false" />
+      </many-to-one>
+
+      <bag name="appServices" table="EAM_APP_SERVICE">
+        <key column="SERVICE_ID" />
+        <one-to-many class="AppService" />
+      </bag>
+    </union-subclass>
+
+    <union-subclass name="Application" table="EAM_APPLICATION">
+      <property name="name" type="string">
+        <column name="NAME" not-null="true" length="200" />
+      </property>
+
+      <property name="sortName" type="string">
+        <column name="SORT_NAME" not-null="false" length="200" />
+      </property>
+
+      <property name="engContact" type="string">
+        <column name="ENG_CONTACT" not-null="false" length="100" />
+      </property>
+
+      <property name="opsContact" type="string">
+        <column name="OPS_CONTACT" not-null="false" length="100" />
+      </property>
+
+      <property name="busContact" type="string">
+        <column name="BUS_CONTACT" not-null="false" length="100" />
+      </property>
+
+      <many-to-one name="applicationTypeId" class="ApplicationType" foreign-key="EAM_APPLICATION_APPLICATION_TYPE_ID_FKEY">
+        <column name="APPLICATION_TYPE_ID" not-null="false" />
+      </many-to-one>
+
+      <bag name="appServices" table="EAM_APP_SERVICE"
+           cascade="save-update,delete,evict,delete-orphan"
+           inverse="true" lazy="true">
+        <key column="APPLICATION_ID" />
+        <one-to-many class="AppService" />
+      </bag>
+    </union-subclass>
+
+  </class>
+
+</hibernate-mapping>

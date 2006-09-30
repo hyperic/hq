@@ -210,7 +210,7 @@ public abstract class ApplicationEJBImpl extends AppdefEntityBean
 implements EntityBean {
 
     public final String ctx = ApplicationEJBImpl.class.getName();
-    public final String SEQUENCE_NAME = "EAM_APPLICATION_ID_SEQ";
+    public final String SEQUENCE_NAME = "EAM_APPDEFRESOURCE_ID_SEQ";
     public final int SEQUENCE_INTERVAL = 10;
     private AppdefEntityID eid = null;
     protected Log log = LogFactory.getLog("org.hyperic.hq.appdef.server.entity.ApplicationEJBImpl");

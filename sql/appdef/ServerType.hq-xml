@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+      "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping
+  package="org.hyperic.hq.appdef.shared.pojo">
+
+  <class name="ServerType" table="EAM_SERVER_TYPE">
+    <id name="id" type="integer">
+      <meta attribute="scope-set">private</meta>
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_SERVER_TYPE_ID_SEQ</param>
+        <!-- postgres flavor -->
+        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
+        <!-- oracle flavor -->
+        <param name="parameters" dialect="Oracle">start with 10001 increment by 1 cache 10</param>
+        <param name="parameters" dialect="Oracle9">start with 10001 increment by 1 cache 10</param>
+
+      </generator>
+    </id>
+
+    <natural-id mutable="true">
+      <property name="name" type="string">
+        <column name="NAME" index="EAM_SERVER_TYPE_NAME_IDX" not-null="false" length="200" />
+      </property>
+    </natural-id>
+
+    <version name="_version_" type="long">
+      <column name ="_VERSION_" default="0" />
+    </version>
+
+    <property name="cid" type="integer">
+      <column name="CID" not-null="false" />
+    </property>
+
+    <property name="sortName" type="string">
+      <column name="SORT_NAME" not-null="false" length="200" />
+    </property>
+
+    <property name="description" type="string">
+      <column name="DESCRIPTION" not-null="false" length="200" />
+    </property>
+
+    <property name="plugin" type="string">
+      <column name="PLUGIN" index="EAM_SERVER_TYPE_PLUGIN_IDX" not-null="false" length="250" />
+    </property>
+
+    <property name="ctime" type="long">
+      <column name="CTIME" not-null="false" />
+    </property>
+
+    <property name="mtime" type="long">
+      <column name="MTIME" not-null="false" />
+    </property>
+
+    <property name="fvirtual" type="boolean">
+      <column name="FVIRTUAL" not-null="false" />
+    </property>
+
+    <bag name="platforms" table="EAM_PLATFORM_SERVER_TYPE_MAP">
+      <key column="SERVER_TYPE_ID" not-null="false" />
+      <many-to-many class="PlatformType" column="PLATFORM_TYPE_ID" foreign-key="EAM_PLATFORM_SERVER_TYPE_MAP_PLATFORM_TYPE_ID_FKEY" />
+    </bag>
+
+    <bag name="servers" table="EAM_SERVER">
+      <key column="SERVER_TYPE_ID" />
+      <one-to-many class="Server" />
+    </bag>
+
+    <bag name="serviceTypes" table="EAM_SERVICE_TYPE">
+      <key column="SERVER_TYPE_ID" />
+      <one-to-many class="ServiceType" />
+    </bag>
+  </class>
+
+</hibernate-mapping>

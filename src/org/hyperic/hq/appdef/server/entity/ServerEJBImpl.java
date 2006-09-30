@@ -143,7 +143,7 @@ public abstract class ServerEJBImpl
     extends ServerBaseBean implements EntityBean {
 
     private final String ctx = ServerEJBImpl.class.getName();
-    public final String SEQUENCE_NAME = "EAM_SERVER_ID_SEQ";
+    public final String SEQUENCE_NAME = "EAM_APPDEFRESOURCE_ID_SEQ";
     public final int SEQUENCE_INTERVAL = 10;
 
     protected Log log = LogFactory.getLog(ServerEJBImpl.class.getName());

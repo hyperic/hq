@@ -185,7 +185,7 @@ public abstract class PlatformEJBImpl
     extends PlatformBaseBean implements EntityBean {
 
     public final String ctx = PlatformEJBImpl.class.getName();
-    public final String SEQUENCE_NAME = "EAM_PLATFORM_ID_SEQ";
+    public final String SEQUENCE_NAME = "EAM_APPDEFRESOURCE_ID_SEQ";
     public final int SEQUENCE_INTERVAL = 10;
     // how long before the cachedVO expires?
     private final int CACHE_TIMEOUT = 15000;

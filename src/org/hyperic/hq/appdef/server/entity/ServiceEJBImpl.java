@@ -237,7 +237,7 @@ public abstract class ServiceEJBImpl
     extends ServiceBaseBean
     implements EntityBean {
 
-    public final String SEQUENCE_NAME = "EAM_SERVICE_ID_SEQ";
+    public final String SEQUENCE_NAME = "EAM_APPDEFRESOURCE_ID_SEQ";
     public final int SEQUENCE_INTERVAL = 10;
 
     protected Log log = LogFactory.getLog(ServiceEJBImpl.class.getName());
