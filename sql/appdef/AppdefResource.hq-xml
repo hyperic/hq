@@ -13,7 +13,7 @@
       <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />
       <generator class="sequence">
-        <param name="sequence">EAM_APPDEFRESOURCE_ID_SEQ</param>
+        <param name="sequence">EAM_APPDEF_RESOURCE_ID_SEQ</param>
         <!-- postgres flavor -->
         <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
         <!-- oracle flavor -->

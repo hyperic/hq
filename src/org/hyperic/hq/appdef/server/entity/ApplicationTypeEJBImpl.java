@@ -69,7 +69,7 @@ public abstract class ApplicationTypeEJBImpl extends AppdefEntityBean
 implements EntityBean {
 
     public final String ctx = PlatformTypeEJBImpl.class.getName();
-    public final String SEQUENCE_NAME = "EAM_APPLICATION_TYPE_ID_SEQ";
+    public final String SEQUENCE_NAME = "EAM_APPDEF_RESOURCE_TYPE_ID_SEQ";
     public final int SEQUENCE_INTERVAL = 10;
 
     protected Log log = LogFactory.getLog("org.hyperic.hq.appdef.server.entity.ApplicationTypeEJBImpl");

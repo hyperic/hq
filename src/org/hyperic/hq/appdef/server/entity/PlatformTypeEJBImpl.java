@@ -88,7 +88,7 @@ import org.apache.commons.logging.LogFactory;
 public abstract class PlatformTypeEJBImpl extends AppdefEntityBean 
 implements EntityBean {
 
-    public final String SEQUENCE_NAME = "EAM_PLATFORM_TYPE_ID_SEQ";
+    public final String SEQUENCE_NAME = "EAM_APPDEF_RESOURCE_TYPE_ID_SEQ";
     public final int SEQUENCE_INTERVAL = 10;
 
     protected Log log = LogFactory.getLog("org.hyperic.hq.appdef.server.entity.PlatformTypeEJBImpl");

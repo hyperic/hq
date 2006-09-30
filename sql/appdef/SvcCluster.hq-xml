@@ -7,12 +7,12 @@
 <hibernate-mapping
   package="org.hyperic.hq.appdef.shared.pojo">
 
-  <class name="ApplicationType" table="EAM_APPLICATION_TYPE">
+  <class name="SvcCluster" table="EAM_SVC_CLUSTER">
     <id name="id" type="integer">
       <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />
       <generator class="sequence">
-        <param name="sequence">EAM_APPLICATION_TYPE_ID_SEQ</param>
+        <param name="sequence">EAM_SVC_CLUSTER_ID_SEQ</param>
         <!-- postgres flavor -->
         <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
         <!-- oracle flavor -->
@@ -22,7 +22,7 @@
 
     <natural-id mutable="true">
       <property name="name" type="string">
-        <column name="NAME" not-null="true" length="200" />
+        <column name="NAME" not-null="false" length="200" />
       </property>
     </natural-id>
 
@@ -38,8 +38,8 @@
       <column name="DESCRIPTION" not-null="false" length="200" />
     </property>
 
-    <property name="cid" type="integer">
-      <column name="CID" not-null="false" />
+    <property name="groupId" type="integer">
+      <column name="GROUP_ID" not-null="false" />
     </property>
 
     <property name="ctime" type="long">
@@ -50,16 +50,18 @@
       <column name="MTIME" not-null="false" />
     </property>
 
-    <bag name="services" table="EAM_APP_TYPE_SERVICE_TYPE_MAP">
-      <key column="APPLICATION_TYPE_ID" not-null="false" />
-      <many-to-many class="ServiceType" column="SERVICE_TYPE_ID" foreign-key="EAM_APP_TYPE_SERVICE_TYPE_MAP_SERVICE_TYPE_ID_FKEY" />
+    <many-to-one name="serviceTypeId" class="ServiceType" foreign-key="EAM_SVC_CLUSTER_SERVICE_TYPE_ID_FKEY">
+      <column name="SERVICE_TYPE_ID" />
+    </many-to-one>
+
+    <bag name="appServices" table="EAM_APP_SERVICE">
+      <key column="CLUSTER_ID" />
+      <one-to-many class="AppService" />
     </bag>
 
-    <bag name="applications" table="EAM_APPLICATION"
-         cascade="save-update,delete,evict,delete-orphan"
-         inverse="true" lazy="true">
-      <key column="APPLICATION_TYPE_ID" />
-      <one-to-many class="Application" />
+    <bag name="services" table="EAM_SERVICE">
+      <key column="SVC_CLUSTER_ID" />
+      <one-to-many class="Service" />
     </bag>
   </class>
 
