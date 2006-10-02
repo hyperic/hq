@@ -25,12 +25,11 @@
 
 package org.hyperic.util.notReady;
 
-import java.io.PrintWriter;
-
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServlet;
+import java.io.PrintWriter;
 
 /**
  * Servlet to display server startup status using a log4j appender
@@ -45,11 +44,6 @@ public class StartupServlet extends HttpServlet {
     }
 
     public void destroy() {
-        if (this.appender != null) {
-            org.apache.log4j.Logger.getRootLogger().
-                removeAppender(this.appender);
-            this.appender = null;
-        }
     }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response)

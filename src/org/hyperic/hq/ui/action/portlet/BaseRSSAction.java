@@ -25,13 +25,8 @@
 
 package org.hyperic.hq.ui.action.portlet;
 
-import java.rmi.RemoteException;
-import java.util.Properties;
-
-import javax.security.auth.login.LoginException;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.common.ApplicationException;
@@ -43,8 +38,11 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import javax.security.auth.login.LoginException;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import java.rmi.RemoteException;
+import java.util.Properties;
 
 /**
  * Base RSSAction class to extend.  Provides utility methods.
@@ -101,9 +99,11 @@ public abstract class BaseRSSAction extends BaseAction {
     private Properties getConfigProps(HttpServletRequest request)
         throws RemoteException, ConfigPropertyException {
         if (configProps == null) {
-            ServletContext ctx = getServlet().getServletContext();
-            ConfigBoss cboss = ContextUtils.getConfigBoss(ctx);
-            configProps = cboss.getConfig();
+            synchronized(this) {
+                ServletContext ctx = getServlet().getServletContext();
+                ConfigBoss cboss = ContextUtils.getConfigBoss(ctx);
+                configProps = cboss.getConfig();
+            }
         }
         
         return configProps;

@@ -25,25 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.platform.autodiscovery;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.autoinventory.ScanMethod;
-import org.hyperic.hq.autoinventory.ScanMethodConfig;
-import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
-import org.hyperic.hq.bizapp.shared.AIBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.config.ConfigSchema;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,15 +32,26 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
+import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.autoinventory.ScanMethod;
+import org.hyperic.hq.autoinventory.ScanMethodConfig;
+import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.util.config.ConfigSchema;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  */
 public class EditAutoDiscoveryPrepAction extends NewAutoDiscoveryPrepAction {
 
-    private AIBoss aiboss = null;
-    private int sessionId; 
-    private AIScheduleValue schedule = null;
+    private static ThreadLocal schedule = new ThreadLocal();
     
     /**
      * Create the platform with the attributes specified in the given
@@ -76,14 +68,8 @@ public class EditAutoDiscoveryPrepAction extends NewAutoDiscoveryPrepAction {
 
         PlatformAutoDiscoveryForm aForm = (PlatformAutoDiscoveryForm) form;
 
-        ServletContext ctx = getServlet().getServletContext();
-        aiboss = ContextUtils.getAIBoss(ctx);
-        sessionId = RequestUtils.getSessionId(request).intValue();
-
-        Integer resourceId = RequestUtils.getResourceId(request);
-
         AIScheduleValue sVal = (AIScheduleValue)request.getAttribute(Constants.AISCHEDULE_ATTR);
-        schedule = sVal;
+        schedule.set(sVal);
         aForm.setSid(sVal.getId());
         loadScanConfig(aForm, request);
         
@@ -97,15 +83,14 @@ public class EditAutoDiscoveryPrepAction extends NewAutoDiscoveryPrepAction {
                                   HttpServletRequest request)
         throws Exception
     {
-        Integer resourceId = RequestUtils.getResourceId(request);
-        
-        ScanMethodConfig[] configs = schedule.getConfigObj().getScanMethodConfigs();
+        AIScheduleValue sched = (AIScheduleValue)schedule.get();
+        ScanMethodConfig[] configs = sched.getConfigObj().getScanMethodConfigs();
         
         if (configs.length == 0)
             throw new RuntimeException("no ScanMethodConfig objects setup");
             
-        aForm.setName(schedule.getScanName());
-        aForm.setDescription(schedule.getScanDesc());
+        aForm.setName(sched.getScanName());
+        aForm.setDescription(sched.getScanDesc());
         String smClass = configs[0].getMethodClass();
         ScanMethod scanMethod = (ScanMethod) Class.forName(smClass).newInstance();
         ConfigSchema schema = scanMethod.getConfigSchema();
@@ -118,7 +103,7 @@ public class EditAutoDiscoveryPrepAction extends NewAutoDiscoveryPrepAction {
                                  configs[0].getConfig());
         aForm.setScanMethod(scanMethod.getName());
         // load the schedule
-        aForm.populateFromSchedule(schedule.getScheduleValue(), request.getLocale());                                       
+        aForm.populateFromSchedule(sched.getScheduleValue(), request.getLocale());
     }
     
     /**
@@ -129,7 +114,7 @@ public class EditAutoDiscoveryPrepAction extends NewAutoDiscoveryPrepAction {
     {          
         List serverDetectorList = new ArrayList();
         CollectionUtils.addAll(serverDetectorList, 
-                               schedule.getConfigObj().getServerSignatures());
+                               ((AIScheduleValue)schedule.get()).getConfigObj().getServerSignatures());
         
         return BizappUtils.buildServerTypesFromServerSig(
                                 pValue.getPlatformType().getServerTypeValues(),

@@ -25,13 +25,12 @@
 
 package org.hyperic.hq.ui.action.resource.platform.autodiscovery;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionErrors;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
@@ -53,12 +52,11 @@ import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Action class which saves an auto-discovery.  The autodiscovery
@@ -70,9 +68,6 @@ public class NewAutoDiscoveryAction extends BaseAction {
     public final static long TIMEOUT = 5000;
     public final static long INTERVAL = 500;
         
-    private AppdefBoss appdefBoss = null;
-    private AIBoss aiBoss = null;
-
     /**
      * Create a new auto-discovery with the attributes specified in the given
      * <code>AutoDiscoveryForm</code>.
@@ -110,8 +105,8 @@ public class NewAutoDiscoveryAction extends BaseAction {
             }         
 
             ServletContext ctx = getServlet().getServletContext();
-            appdefBoss = ContextUtils.getAppdefBoss(ctx);
-            aiBoss = ContextUtils.getAIBoss(ctx);
+            AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+            AIBoss aiBoss = ContextUtils.getAIBoss(ctx);
             int sessionId = RequestUtils.getSessionIdInt(request);
             
             PlatformValue pValue =
