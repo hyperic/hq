@@ -648,42 +648,6 @@ public class DBUtil {
         }
     }
 
-    public static void main(String[] args) {
-        // This method was added for the windows installer.
-        // Result is:
-        //  -1 if can't connect
-        //   0 if can connect and found table
-        //   1 if can connect and can't find table                   
-
-        PrintWriter wrt = null;
-        int errcode = 0;
-        
-        try {
-            // Open a log file
-            String logfile = System.getProperty("dbutil.logfile");
-            if(logfile.length() > 0) wrt = new PrintWriter( new FileOutputStream(logfile) );
-        } catch(Exception e) {}
-        
-        if(args.length >= 4) {
-            try {
-                DBUtil.checkTableExists(args[0], args[1], args[2], args[3]);
-                System.exit( (DBUtil.checkTableExists(args[0], args[1], args[2], args[3]) == true) ? 0 : 1 );
-            } catch(Exception e) {
-                System.err.println(e);
-                if(wrt != null) wrt.println(e);
-                errcode = -1;
-            }
-        } else {
-            String err = "Missing mandatory arguments: DButil <url> <user> <password> <table>";
-            System.err.println(err);
-            if(wrt != null) wrt.println(err);
-            errcode = -1;
-        }
-        
-        if(wrt != null) wrt.close();
-        System.exit(errcode);
-    }
-    
     /**
      * @return true if the given exception is the database's "table not found"
      * exception.
