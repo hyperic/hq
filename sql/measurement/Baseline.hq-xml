@@ -22,7 +22,8 @@
 
     <natural-id mutable="false">
       <many-to-one name="derivedMeasurement" unique="true" fetch="join" class="DerivedMeasurement" foreign-key="EAM_MEASUREMENT_BL_MEASUREMENT_ID_FKEY">
-        <column name="MEASUREMENT_ID" index="METRIC_BASELINE_IDX, METRIC_BASELINE_CALCULATED_IDX" />
+        <!-- allow null value for ejb backward compatibility -->
+        <column name="MEASUREMENT_ID" not-null="false" index="METRIC_BASELINE_IDX, METRIC_BASELINE_CALCULATED_IDX" />
       </many-to-one>
     </natural-id>
 
