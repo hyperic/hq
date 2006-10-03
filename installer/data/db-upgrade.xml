@@ -1765,7 +1765,7 @@ has already been defined.
 
     <schemaSpec version="1.87">
       <schema-directSQL>
-        <statement desc="Migrate appdef resources to use eam_appdef_resource_id_seq sequence"
+        <statement desc="Bump the starting sequence number for eam_appdef_resource_id_seq appdef resource types to be max(id)+1 of specific resources below"
                    targetDB="postgresql">
         select setval('eam_appdef_resource_id_seq',
                         (select max(r.rid)+1 from
@@ -1778,7 +1778,7 @@ has already been defined.
                            select max(id) as rid from eam_service) r)
                      )
         </statement>
-        <statement desc="Bump the starting sequence number for eam_appdef_resource_type_id_seq appdef resource types to be max(id)+1 of"
+        <statement desc="Bump the starting sequence number for eam_appdef_resource_type_id_seq appdef resource types to be max(id)+1 of specific types below"
                    targetDB="postgresql">
         select setval('eam_appdef_resource_type_id_seq',
                         (select max(r.rid)+1 from
