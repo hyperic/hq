@@ -25,18 +25,16 @@
 
 package org.hyperic.tools.ant.dbupgrade;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class SST_DirectSQL extends SchemaSpecTask {
 
@@ -150,7 +148,7 @@ public class SST_DirectSQL extends SchemaSpecTask {
                 ps = conn.prepareStatement(sqlStmt);
                 log(">>>>> Processing statement desc=["+desc+"] " +
                     "SQL=["+sqlStmt+"]");
-                ps.executeUpdate();
+                ps.execute();
 
             } catch ( Exception e ) {
                 throw new BuildException("Error executing statement " +
