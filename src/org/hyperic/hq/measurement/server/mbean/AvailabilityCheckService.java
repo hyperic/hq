@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.ejb.CreateException;
@@ -43,6 +42,8 @@ import javax.management.ObjectName;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
@@ -62,9 +63,6 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * This job is responsible for filling in missing availabilty
@@ -132,10 +130,6 @@ public class AvailabilityCheckService
         return Mode.getInstance().isActivated();
     }
 
-    private boolean isGUI () {
-        return Mode.getInstance().isFrontEnd();
-    }
-
     /**
      * Send the message.
      *
@@ -192,127 +186,81 @@ public class AvailabilityCheckService
             return;
         
         SRNCache srnCache = SRNCache.getInstance();
-
-        // If this is the GUI node, try to look up values first
-        if (isGUI()) {
-            List needData = srnCache.getOutOfSyncSRNs(2);
-            for (Iterator it = needData.iterator(); it.hasNext(); ) {
-                ScheduleRevNumValue srnVal = (ScheduleRevNumValue) it.next();
-                
-                AppdefEntityID aeid =
-                    new AppdefEntityID(srnVal.getAppdefType(),
-                                       srnVal.getInstanceId());
-                List ids = getEnabledMetrics(aeid);
-                
-                if (ids.size() == 0) {
-                    // No metrics to report
-                    srnVal.setLastReported(current);
-                    continue;
-                }
-                
-                Integer[] idsArr =
-                    (Integer[]) ids.toArray(new Integer[ids.size()]);
-                
-                Map values;
-                try {
-                    // Note: this also updates metrics cache
-                    values = this.getDataMan().getLastDataPoints(
-                            idsArr, srnVal.getLastReported());
-                } catch (DataNotAvailableException e) {
-                    continue;       // Too bad
-                }
-                
-                // Only valid if there's more than one value, because that one
-                // value could be a backfilled availability
-                if (values.size() > 1) {
-                    for (int i = 0; i < idsArr.length; i++) {
-                        MetricValue mv = (MetricValue) values.get(idsArr[i]);
-                        if (mv != null &&
-                            mv.getTimestamp() > srnVal.getLastReported())
-                            srnVal.setLastReported(mv.getTimestamp());
-                    }
-                }
-                else {
-                    it.remove();
-                }
-            }
-            
-            if (needData.size() > 0) {
-                srnCache.reportDatabaseSRNs((ScheduleRevNumValue[])
-                    needData.toArray(new ScheduleRevNumValue[needData.size()]));
-            }
-        }
         
-        try {
-            // Fetch all derived availablity measurements
-            List dmList = this.getEnabledAvailabilityMetrics();
-            MetricDataCache metCache = MetricDataCache.getInstance();
+        // Fetch all derived availablity measurements
+        List dmList = this.getEnabledAvailabilityMetrics();
+        MetricDataCache metCache = MetricDataCache.getInstance();
+        
+        if (log.isDebugEnabled())
+            log.debug("Total of " + dmList.size() +
+                      " availability metrics to check");
             
-            // Now check every derived measurement    
-            for (Iterator it = dmList.iterator(); it.hasNext(); ) {
-                DerivedMeasurementValue dmVo =
-                    (DerivedMeasurementValue) it.next();
+        // Now check every derived measurement    
+        for (Iterator it = dmList.iterator(); it.hasNext(); ) {
+            DerivedMeasurementValue dmVo =
+                (DerivedMeasurementValue) it.next();
 
-                // End is at least more than 1/2 interval away
-                long end = TimingVoodoo.closestTime(
-                    current - dmVo.getInterval(), dmVo.getInterval());
+            // End is at least more than 1/2 interval away
+            long end = TimingVoodoo.closestTime(
+                current - dmVo.getInterval(), dmVo.getInterval());
 
-                // We have to get at least the measurement interval
-                long maxInterval = Math.max(this.interval, dmVo.getInterval());
-                
-                // Begin is maximum of interval or measurement create time
-                long begin = Math.max(end - maxInterval,
-                    TimingVoodoo.roundDownTime(
-                        dmVo.getMtime() + dmVo.getInterval(),
-                        dmVo.getInterval()));
+            // We have to get at least the measurement interval
+            long maxInterval = Math.max(this.interval, dmVo.getInterval());
+            
+            // Begin is maximum of mbean interval or measurement create time
+            long begin = Math.max(end - maxInterval,
+                                  dmVo.getMtime() + dmVo.getInterval());
+            begin = TimingVoodoo.roundDownTime(begin, dmVo.getInterval());
 
-                // If our time range is negative, then we just wait until next
-                if (end < begin)
-                    continue;
-                                                       
-                long[] theMissing = this.getDataMan().getMissingDataTimestamps(
+            // If our time range is negative, then we just wait until next
+            if (end < begin)
+                continue;
+                                                   
+            long[] theMissing;
+            try {
+                theMissing = this.getDataMan().getMissingDataTimestamps(
                         dmVo.getId(), dmVo.getInterval(), begin, end);
+            } catch (DataNotAvailableException e) {
+                log.error("Failed in AvailabilityCheckService", e);
+                continue;
+            }
+            
+            // Go through the data and add missing data points
+            MetricValue mval;
+            for (int i = 0; i < theMissing.length; i++) {
+                // Insert the missing data point
+                mval = new MetricValue(
+                    MeasurementConstants.AVAIL_DOWN, theMissing[i]);
+                this.getDataMan().addData(dmVo.getId(), mval, false);
+            }
+            
+            // Check SRN to see if somehow the agent lost the schedule
+            if (theMissing.length > 0) {
+                // First see if it was reported recently
+                if (metCache.get(dmVo.getId(),
+                    theMissing[theMissing.length - 1] + 1) != null)
+                    continue;
                 
-                // Go through the data and add missing data points
-                MetricValue mval;
-                for (int i = 0; i < theMissing.length; i++) {
-                    // Insert the missing data point
-                    mval = new MetricValue(
-                        MeasurementConstants.AVAIL_DOWN, theMissing[i]);
-                    this.getDataMan().addData(dmVo.getId(), mval, false);
-                }
+                AppdefEntityID aeid = new AppdefEntityID(
+                    dmVo.getAppdefType(), dmVo.getInstanceId());
+                ScheduleRevNumValue srn = srnCache.getSRN(aeid);
                 
-                // Check SRN to see if somehow the agent lost the schedule
-                if (theMissing.length > 0) {
-                    // First see if it was reported recently
-                    if (metCache.get(dmVo.getId(),
-                        theMissing[theMissing.length - 1] + 1) != null)
-                        continue;
-                    
-                    AppdefEntityID aeid = new AppdefEntityID(
-                        dmVo.getAppdefType(), dmVo.getInstanceId());
-                    ScheduleRevNumValue srn = srnCache.getSRN(aeid);
-                    
-                    if (srn == null)
-                        continue;
-                    
+                if (srn == null)
+                    continue;
+                
+                if (log.isDebugEnabled())
+                    log.debug("Compare missing " + theMissing[0] +
+                              " to last reported " + srn.getLastReported());
+                
+                // That's odd, why is there no data, then?
+                if (srn.getLastReported() > theMissing[0]) {
                     if (log.isDebugEnabled())
-                        log.debug("Compare missing " + theMissing[0] +
-                                  " to last reported " + srn.getLastReported());
+                        log.debug("Reset report time for " + aeid);
                     
-                    // That's odd, why is there no data, then?
-                    if (srn.getLastReported() > theMissing[0]) {
-                        if (log.isDebugEnabled())
-                            log.debug("Reset report time for " + aeid);
-                        
-                        // Let ScheduleVerification reschedule
-                        srn.setLastReported(theMissing[0]);
-                    }
+                    // Let ScheduleVerification reschedule
+                    srn.setLastReported(theMissing[0]);
                 }
             }
-        } catch (Exception e) {
-            log.error("Failed in AvailabilityCheckService", e);
-            // Swallow all exceptions
         }
     }
     
