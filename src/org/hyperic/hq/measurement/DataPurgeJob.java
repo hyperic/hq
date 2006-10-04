@@ -147,9 +147,6 @@ public class DataPurgeJob
         // maintenance. (On postgres we just rebuild indicies
         // using an ANALYZE)
         Calendar cal = Calendar.getInstance();
-        /*
-        if (cal.get(Calendar.HOUR_OF_DAY) == 0) {
-         */
         if (TimingVoodoo.roundDownTime(time_start, HOUR) ==
             TimingVoodoo.roundDownTime(time_start, maintInterval)) {
             log.info("Performing database maintenance (VACUUM ANALYZE)");
@@ -165,15 +162,6 @@ public class DataPurgeJob
             log.info("Database maintenance completed in " +
                      ((System.currentTimeMillis() - time_end)/1000) +
                      " seconds.");
-        /*
-        } else if (TimingVoodoo.roundDownTime(time_start, HOUR) ==
-                   TimingVoodoo.roundDownTime(time_start, maintInterval)) {
-            log.info("Performing database maintenance (ANALYZE)");
-            serverConfig.analyze();
-            log.info("Database maintenance completed in " +
-                     ((System.currentTimeMillis() - time_end)/1000) +
-                     " seconds.");
-         */
         } else {
             log.info("Not performing database maintenance");
         }
