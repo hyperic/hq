@@ -27,12 +27,12 @@ package org.hyperic.hq.plugin.db2;
 
 import java.util.Properties;
 
-import net.covalent.db2monitor.DB2Monitor;
-import net.covalent.db2monitor.DB2MonitorException;
-import net.covalent.db2monitor.SqlmDB2;
-import net.covalent.db2monitor.SqlmDbase;
-import net.covalent.db2monitor.SqlmTable;
-import net.covalent.db2monitor.SqlmTablespace;
+import org.hyperic.db2monitor.DB2Monitor;
+import org.hyperic.db2monitor.DB2MonitorException;
+import org.hyperic.db2monitor.SqlmDB2;
+import org.hyperic.db2monitor.SqlmDbase;
+import org.hyperic.db2monitor.SqlmTable;
+import org.hyperic.db2monitor.SqlmTablespace;
 
 import org.hyperic.hq.product.MeasurementPlugin;
 import org.hyperic.hq.product.Metric;
