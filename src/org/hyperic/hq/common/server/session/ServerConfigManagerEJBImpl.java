@@ -293,9 +293,8 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
                                            HQConstants.DATASOURCE);
             long duration = 0;
             if (DBUtil.isOracle(conn)) {
-                for (int i = 0; i < INDEXES.length; i++) {
-                    duration += doCommand(conn, SQL_REBUILD, INDEXES[i]);
-                }
+                log.info("Oracle should update statistics for the " +
+                         "cost-based optimizer");
             }
             else {
                 if (DBUtil.getDBType(conn) == DBUtil.DATABASE_POSTGRESQL_7) {
