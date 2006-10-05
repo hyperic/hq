@@ -10,7 +10,8 @@
   <class name="FiredTrigger" table="EAM_FIRED_TRIGGER">
     <id name="id" type="integer">
       <meta attribute="scope-set">private</meta>
-      <column name="ID" not-null="true" default="nextval('EAM_FIRED_TRIGGER_ID_SEQ')" />
+      <column name="ID" not-null="true" dialect="PostgreSQL" default="nextval('EAM_FIRED_TRIGGER_ID_SEQ')" />
+      <column name="ID" not-null="true" dialect="Oracle, Oracle9" />
       <generator class="sequence">
         <param name="sequence">EAM_FIRED_TRIGGER_ID_SEQ</param>
         <!-- postgres flavor -->

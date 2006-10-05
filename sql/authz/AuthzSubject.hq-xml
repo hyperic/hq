@@ -31,7 +31,7 @@
     </natural-id>
 
     <version name="_version_" type="long">
-      <column name ="_VERSION_" default="0" />
+      <column name ="VERSION_COL" default="0" />
     </version>
 
     <property name="cid" type="integer">
@@ -67,20 +67,22 @@
     </property>
 
     <property name="factive" type="boolean">
-      <column name="FACTIVE" not-null="true" default="true"/>
+      <column name="FACTIVE" not-null="true" dialect="PostgreSQL" default="true"/>
+      <column name="FACTIVE" not-null="true" dialect="Oracle, Oracle9" default="1"/>
     </property>
 
     <property name="fsystem" type="boolean">
-      <column name="FSYSTEM" not-null="true" default="false"/>
+      <column name="FSYSTEM" not-null="true" dialect="PostgreSQL" default="false"/>
+      <column name="FSYSTEM" not-null="true" dialect="Oracle, Oracle9" default="0"/>
     </property>
 
-    <many-to-one name="resourceId" class="Resource" foreign-key="EAM_SUBJECT_RESOURCE_ID_FKEY">
+    <many-to-one name="resourceId" class="Resource">
       <column name="RESOURCE_ID" index="EAM_SUBJECT_RESOURCE_KEY" />
     </many-to-one>
 
     <bag name="roles" table="EAM_SUBJECT_ROLE_MAP">
       <key column="SUBJECT_ID" />
-      <many-to-many class="Role" column="ROLE_ID" foreign-key="EAM_SUBJECT_ROLE_MAP_ROLE_ID_FKEY" />
+      <many-to-many class="Role" column="ROLE_ID" />
     </bag>
 
     <bag name="userConfigs" table="EAM_USER_CONFIG_RESP">
@@ -91,11 +93,11 @@
 
   <class name="AuthzSubjRoleMap" table="EAM_SUBJECT_ROLE_MAP">
     <composite-id name="id" class="AuthzSubjRoleMapId">
-      <key-many-to-one name="roleId" class="Role" foreign-key="EAM_SUBJECT_ROLE_MAP_ROLE_ID_FKEY">
+      <key-many-to-one name="roleId" class="Role">
         <column name="ROLE_ID" not-null="true" />
       </key-many-to-one>
 
-      <key-many-to-one name="subjectId" class="AuthzSubject" foreign-key="EAM_SUBJECT_ROLE_MAP_SUBJECT_ID_FKEY">
+      <key-many-to-one name="subjectId" class="AuthzSubject">
         <column name="SUBJECT_ID" not-null="true" />
       </key-many-to-one>
     </composite-id>

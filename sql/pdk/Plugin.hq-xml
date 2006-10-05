@@ -27,7 +27,7 @@
     </natural-id>
 
     <version name="_version_" type="long">
-      <column name="_VERSION_" default="0" />
+      <column name="VERSION_COL" default="0" />
     </version>
 
     <property name="path" type="string">

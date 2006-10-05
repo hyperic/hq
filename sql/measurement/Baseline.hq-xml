@@ -21,14 +21,14 @@
     </id>
 
     <natural-id mutable="false">
-      <many-to-one name="derivedMeasurement" unique="true" fetch="join" class="DerivedMeasurement" foreign-key="EAM_MEASUREMENT_BL_MEASUREMENT_ID_FKEY">
+      <many-to-one name="derivedMeasurement" unique="true" fetch="join" class="DerivedMeasurement">
         <!-- allow null value for ejb backward compatibility -->
         <column name="MEASUREMENT_ID" not-null="false" index="METRIC_BASELINE_IDX, METRIC_BASELINE_CALCULATED_IDX" />
       </many-to-one>
     </natural-id>
 
     <version name="_version_" type="long">
-      <column name="_version_" default="0" />
+      <column name="VERSION_COL" default="0" />
     </version>
 
     <property name="computeTime" type="long">
@@ -36,7 +36,8 @@
     </property>
 
     <property name="userEntered" type="boolean">
-      <column name="USER_ENTERED" not-null="true" default="false" />
+      <column name="USER_ENTERED" not-null="true" dialect="PostgreSQL" default="false" />
+      <column name="USER_ENTERED" not-null="true" dialect="Oracle, Oracle9" default="0" />
     </property>
 
     <property name="mean" type="double">

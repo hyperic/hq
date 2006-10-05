@@ -1,5 +1,12 @@
 <?xml version="1.0"?>
+
+<!DOCTYPE project [
+    <!ENTITY hibernate-build SYSTEM "setup-db-hibernate.xml">
+]>
+
 <project name="setup-db-common" default="direct-error" basedir=".">
+
+  &hibernate-build;
 
   <target name="direct-error">
     <fail>
@@ -73,7 +80,7 @@
     </if>
   </target>
 
-  <target name="dbsetup">
+  <target name="dbsetup" depends="hibernate-create">
     <antcall target="dbsetup-process-file">
       <param name="dbsetupfile" value="${data.dir}/schema.xml"/>
       <param name="data"        value="false"/>
@@ -108,7 +115,7 @@
     </sql>
   </target>
 
-  <target name="upgrade-db">
+  <target name="upgrade-db" depends="hibernate-upgrade">
     <ant antfile="${install.dir}/data/db-upgrade.xml"
          target="upgrade"
          inheritAll="true"

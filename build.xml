@@ -1235,6 +1235,7 @@
     <delete dir="${installer.dir}"/>
     <mkdir dir="${installer.dir}"/>
     <mkdir dir="${installer.dir}/bin"/>
+    <mkdir dir="${installer.dir}/etc"/>
     <mkdir dir="${installer.dir}/lib"/>
     <mkdir dir="${installer.dir}/data"/>
     <mkdir dir="${installer.dir}/logs"/>
@@ -1259,6 +1260,17 @@
       </fileset>
     </copy>
 
+    <copy todir="${installer.dir}/etc">
+      <fileset dir="${hq.home}/etc">
+        <include name="hibernate/hibernate*"/>
+      </fileset>
+    </copy>
+    <copy todir="${installer.dir}/etc/hibernate">
+     <fileset dir="${hq.home}">
+        <include name="sql/**/*.hq-xml"/>
+      </fileset>
+    </copy>
+
     <!-- Copy ant libs and DB driver libs -->
     <copy todir="${installer.dir}/lib" flatten="true">
       <fileset dir="${build.dir}/ant" includes="**/lib/*"/>
@@ -1270,6 +1282,8 @@
         <include name="jakarta-oro*.jar" />
         <include name="ant-contrib.jar" />
         <include name="commons-logging.jar"/>
+        <include name="commons-collections.jar"/>
+        <include name="hibernate/*.jar"/>
       </fileset>
     </copy>
 

@@ -27,13 +27,13 @@
       <property name="instanceId" type="integer">
         <column name="INSTANCE_ID" not-null="true" />
       </property>
-      <many-to-one name="template" fetch="join" class="MeasurementTemplate" foreign-key="EAM_MEASUREMENT_MEASUREMENT_TEMPLATE_ID_FKEY">
+      <many-to-one name="template" fetch="join" class="MeasurementTemplate">
         <column name="TEMPLATE_ID" not-null="false" index="MEASUREMENT_INSTANCE" />
       </many-to-one>
     </natural-id>
 
     <version name="_version_" type="long">
-      <column name="_version_" default="0" />
+      <column name="VERSION_COL" default="0" />
     </version>
 
     <property name="cid" type="integer">
@@ -73,7 +73,8 @@
       }
       ]]></meta>
       <property name="enabled" type="boolean">
-        <column name="ENABLED" not-null="true" default="true"/>
+        <column name="ENABLED" not-null="true" dialect="PostgreSQL" default="true"/>
+        <column name="ENABLED" not-null="true" dialect="Oracle, Oracle9" default="1"/>
       </property>
       <property name="interval" type="long">
         <column name="COLL_INTERVAL" />
@@ -133,7 +134,7 @@
     </id>
 
     <version name="_version_" type="long">
-      <column name="_version_" default="0" />
+      <column name="VERSION_COL" default="0" />
     </version>
 
     <property name="cid" type="integer">
@@ -157,7 +158,8 @@
     </property>
 
     <property name="defaultOn" type="boolean">
-      <column name="DEFAULT_ON" not-null="true" default="false" />
+      <column name="DEFAULT_ON" not-null="true" dialect="PostgreSQL" default="false" />
+      <column name="DEFAULT_ON" not-null="true" dialect="Oracle, Oracle9" default="0" />
     </property>
 
     <property name="defaultInterval" type="long">
@@ -165,7 +167,8 @@
     </property>
 
     <property name="designate" type="boolean">
-      <column name="DESIGNATE" not-null="true" default="false" />
+      <column name="DESIGNATE" not-null="true" dialect="PostgreSQL" default="false" />
+      <column name="DESIGNATE" not-null="true" dialect="Oracle, Oracle9" default="0" />
     </property>
 
     <property name="template" type="string">
@@ -188,11 +191,11 @@
       <column name="MTIME" not-null="true" />
     </property>
 
-    <many-to-one name="monitorableType" class="MonitorableType" foreign-key="EAM_MEASUREMENT_TEMPL_MONITORABLE_TYPE_ID_FKEY">
+    <many-to-one name="monitorableType" class="MonitorableType">
       <column name="MONITORABLE_TYPE_ID" />
     </many-to-one>
 
-    <many-to-one name="category" class="Category" foreign-key="EAM_MEASUREMENT_TEMPL_CATEGORY_ID_FKEY">
+    <many-to-one name="category" class="Category">
       <column name="CATEGORY_ID" />
     </many-to-one>
 
@@ -227,7 +230,7 @@
     </natural-id>
 
     <version name="_version_" type="long">
-      <column name="_version_" default="0" />
+      <column name="VERSION_COL" default="0" />
     </version>
 
     <property name="cid" type="integer">
@@ -268,7 +271,7 @@
     </natural-id>
 
     <version name="_version_" type="long">
-      <column name="_version_" default="0" />
+      <column name="VERSION_COL" default="0" />
     </version>
 
     <property name="cid" type="integer">
@@ -297,7 +300,7 @@
     </id>
 
     <version name="_version_" type="long">
-      <column name="_version_" default="0" />
+      <column name="VERSION_COL" default="0" />
     </version>
 
     <property name="cid" type="integer">
@@ -320,12 +323,12 @@
       <column name="PREVIOUS" default="0" />
     </property>
 
-    <many-to-one name="template" class="MeasurementTemplate" foreign-key="EAM_MEASUREMENT_ARG_MEASUREMENT_TEMPLATE_ID_FKEY">
+    <many-to-one name="template" class="MeasurementTemplate">
       <column name="MEASUREMENT_TEMPLATE_ID" index="MEASUREMENT_ARG_TEMPL_IDX" />
     </many-to-one>
 
     <!-- uni-directional lookup for template, only derived measurements have args defined -->
-    <many-to-one name="templateArg" fetch="join" class="MeasurementTemplate" foreign-key="EAM_MEASUREMENT_ARG_MEASUREMENT_TEMPLATE_ARG_ID_FKEY">
+    <many-to-one name="templateArg" fetch="join" class="MeasurementTemplate">
       <column name="MEASUREMENT_TEMPLATE_ARG_ID" />
     </many-to-one>
   </class>
@@ -340,7 +343,7 @@
             if (other == null) return false;
             if (!(other instanceof SrnId)) return false;
             SrnId castOther = (SrnId)other;
-            return this.getAppdefType().intValue() == castOther.getAppdefType().intValue() && 
+            return this.getAppdefType().intValue() == castOther.getAppdefType().intValue() &&
                    this.getInstanceId().intValue() == castOther.getInstanceId().intValue();
         }
 
@@ -360,7 +363,7 @@
     </composite-id>
 
     <version name="_version_" type="long">
-      <column name="_version_" default="0" />
+      <column name="VERSION_COL" default="0" />
     </version>
 
     <property name="srn" type="integer">

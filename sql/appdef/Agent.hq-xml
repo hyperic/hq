@@ -30,7 +30,7 @@
     </natural-id>
 
     <version name="_version_" type="long">
-      <column name ="_VERSION_" default="0" />
+      <column name ="VERSION_COL" default="0" />
     </version>
 
     <property name="authToken" type="string">
@@ -53,7 +53,7 @@
       <column name="MTIME" />
     </property>
 
-    <many-to-one name="agentTypeId" class="AgentType" foreign-key="EAM_AGENT_AGENT_TYPE_ID_FKEY">
+    <many-to-one name="agentTypeId" class="AgentType">
       <column name="AGENT_TYPE_ID" not-null="false" />
     </many-to-one>
 
@@ -77,7 +77,7 @@
     </id>
 
     <version name="_version_" type="long">
-      <column name ="_VERSION_" default="0" />
+      <column name ="VERSION_COL" default="0" />
     </version>
 
     <property name="name" type="string">

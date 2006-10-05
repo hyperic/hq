@@ -13,7 +13,7 @@
       <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />
       <generator class="sequence">
-        <param name="sequence">EAM_APPDEF_RESOURCE_TYPE_ID_SEQ</param>
+        <param name="sequence">EAM_APPDEF_RESOURCETYPE_ID_SEQ</param>
         <!-- postgres flavor -->
         <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
         <!-- oracle flavor -->
@@ -28,7 +28,7 @@
     </natural-id>
 
     <version name="_version_" type="long">
-      <column name ="_VERSION_" default="0" />
+      <column name ="VERSION_COL" default="0" />
     </version>
 
     <property name="sortName" type="string">
@@ -54,7 +54,7 @@
     <union-subclass name="ApplicationType" table="EAM_APPLICATION_TYPE">
       <bag name="services" table="EAM_APP_TYPE_SERVICE_TYPE_MAP">
         <key column="APPLICATION_TYPE_ID" not-null="false" />
-        <many-to-many class="ServiceType" column="SERVICE_TYPE_ID" foreign-key="EAM_APP_TYPE_SERVICE_TYPE_MAP_SERVICE_TYPE_ID_FKEY" />
+        <many-to-many class="ServiceType" column="SERVICE_TYPE_ID" />
       </bag>
 
       <bag name="applications" table="EAM_APPLICATION"
@@ -84,7 +84,7 @@
 
       <bag name="servers" table="EAM_PLATFORM_SERVER_TYPE_MAP">
         <key column="PLATFORM_TYPE_ID" not-null="false" />
-        <many-to-many class="ServerType" column="SERVER_TYPE_ID" foreign-key="EAM_PLATFORM_SERVER_TYPE_MAP_SERVER_TYPE_ID_FKEY" />
+        <many-to-many class="ServerType" column="SERVER_TYPE_ID" />
       </bag>
 
       <bag name="platforms" table="EAM_PLATFORM">
@@ -104,7 +104,7 @@
 
       <bag name="platforms" table="EAM_PLATFORM_SERVER_TYPE_MAP">
         <key column="SERVER_TYPE_ID" not-null="false" />
-        <many-to-many class="PlatformType" column="PLATFORM_TYPE_ID" foreign-key="EAM_PLATFORM_SERVER_TYPE_MAP_PLATFORM_TYPE_ID_FKEY" />
+        <many-to-many class="PlatformType" column="PLATFORM_TYPE_ID" />
       </bag>
 
       <bag name="servers" table="EAM_SERVER">
@@ -127,17 +127,17 @@
         <column name="FINTERNAL" />
       </property>
 
-      <many-to-one name="serverTypeId" class="ServerType" foreign-key="EAM_SERVICE_TYPE_SERVER_TYPE_ID_FKEY">
+      <many-to-one name="serverTypeId" class="ServerType">
         <column name="SERVER_TYPE_ID" />
       </many-to-one>
 
-      <many-to-one name="tierTypeId" class="TierType" foreign-key="EAM_SERVICE_TYPE_TIER_TYPE_ID_FKEY">
+      <many-to-one name="tierTypeId" class="TierType">
         <column name="TIER_TYPE_ID" />
       </many-to-one>
 
       <bag name="applications" table="EAM_APP_TYPE_SERVICE_TYPE_MAP" >
         <key column="SERVICE_TYPE_ID" not-null="false"  />
-        <many-to-many class="ApplicationType" column="APPLICATION_TYPE_ID" foreign-key="EAM_APP_TYPE_SERVICE_TYPE_MAP_APPLICATION_TYPE_ID_FKEY" />
+        <many-to-many class="ApplicationType" column="APPLICATION_TYPE_ID" />
       </bag>
 
       <bag name="appServices" table="EAM_APP_SERVICE">

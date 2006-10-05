@@ -21,7 +21,7 @@
     </id>
 
     <version name="_version_" type="long">
-      <column name ="_VERSION_" default="0" />
+      <column name ="VERSION_COL" default="0" />
     </version>
 
     <property name="name" type="string">
@@ -57,7 +57,8 @@
     </property>
 
     <property name="enabled" type="boolean">
-      <column name="ENABLED" not-null="true" default="true" />
+      <column name="ENABLED" not-null="true" dialect="PostgreSQL" default="true" />
+      <column name="ENABLED" not-null="true" dialect="Oracle, Oracle9" default="1" />
     </property>
 
     <property name="frequencyType" type="integer">
@@ -73,15 +74,18 @@
     </property>
 
     <property name="willRecover" type="boolean">
-      <column name="WILL_RECOVER" not-null="true" default="false" />
+      <column name="WILL_RECOVER" not-null="true" dialect="PostgreSQL" default="false" />
+      <column name="WILL_RECOVER" not-null="true" dialect="Oracle, Oracle9" default="0" />
     </property>
 
     <property name="notifyFiltered" type="boolean">
-      <column name="NOTIFY_FILTERED" not-null="true" default="false" />
+      <column name="NOTIFY_FILTERED" not-null="true" dialect="PostgreSQL" default="false" />
+      <column name="NOTIFY_FILTERED" not-null="true" dialect="Oracle, Oracle9" default="0" />
     </property>
 
     <property name="controlFiltered" type="boolean">
-      <column name="CONTROL_FILTERED" not-null="true" default="false" />
+      <column name="CONTROL_FILTERED" not-null="true" dialect="PostgreSQL" default="false" />
+      <column name="CONTROL_FILTERED" not-null="true" dialect="Oracle, Oracle9" default="0" />
     </property>
 
     <property name="actOnTriggerId" type="integer">
@@ -89,7 +93,8 @@
     </property>
 
     <property name="deleted" type="boolean">
-      <column name="DELETED" not-null="true" default="false" />
+      <column name="DELETED" not-null="true" dialect="PostgreSQL" default="false" />
+      <column name="DELETED" not-null="true" dialect="Oracle, Oracle9" default="0" />
     </property>
 
     <bag name="actions" table="EAM_ACTION">

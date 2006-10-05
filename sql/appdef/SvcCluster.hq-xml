@@ -27,7 +27,7 @@
     </natural-id>
 
     <version name="_version_" type="long">
-      <column name ="_VERSION_" default="0" />
+      <column name ="VERSION_COL" default="0" />
     </version>
 
     <property name="sortName" type="string">
@@ -50,7 +50,7 @@
       <column name="MTIME" not-null="false" />
     </property>
 
-    <many-to-one name="serviceTypeId" class="ServiceType" foreign-key="EAM_SVC_CLUSTER_SERVICE_TYPE_ID_FKEY">
+    <many-to-one name="serviceTypeId" class="ServiceType">
       <column name="SERVICE_TYPE_ID" />
     </many-to-one>
 

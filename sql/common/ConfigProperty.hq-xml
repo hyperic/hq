@@ -30,7 +30,7 @@
     </natural-id>
 
     <version name="_version_" type="long">
-      <column name="_VERSION_" default="0" />
+      <column name="VERSION_COL" default="0" />
     </version>
 
     <property name="propValue" type="string">
@@ -42,7 +42,8 @@
     </property>
 
     <property name="freadOnly" type="boolean">
-      <column name="FREAD_ONLY" default="false" />
+      <column name="FREAD_ONLY" dialect="PostgreSQL" default="false" />
+      <column name="FREAD_ONLY" dialect="Oracle, Oracle9" default="0" />
     </property>
 
   </class>
