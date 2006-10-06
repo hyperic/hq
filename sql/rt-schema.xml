@@ -41,10 +41,6 @@
         <column name="SVCTYPE" required="true" type="INTEGER"/>
 
         <!-- EVIDENT.  We'll need this index for queries -->
-        <index name="REQSTAT_IDX_CLIENTIP" unique="false" tablespace="@@@LG_IDX@@@">
-            <field ref="IPADDR"/>
-        </index>
-
         <index name="SERVICE_ID" unique="false" tablespace="@@@LG_IDX@@@">
             <field ref="SVCREQ_ID"/>
         </index>
@@ -55,10 +51,6 @@
         <index name="REQSTAT_IDX_ENDTIME" unique="false" 
             tablespace="@@@LG_IDX@@@">
             <field ref="ENDTIME"/>
-        </index>
-        <index name="REQSTAT_IDX_SVCTYPE" unique="false" 
-            tablespace="@@@LG_IDX@@@">
-            <field ref="SVCTYPE"/>
         </index>
     </table>
     
