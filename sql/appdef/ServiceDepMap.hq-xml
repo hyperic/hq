@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+      "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping
+  package="org.hyperic.hq.appdef.shared.pojo">
+
+  <class name="ServiceDepMap" table="EAM_SERVICE_DEP_MAP">
+    <id name="id" type="integer">
+      <meta attribute="scope-set">private</meta>
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_SERVICE_DEP_MAP_ID_SEQ</param>
+        <!-- postgres flavor -->
+        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
+        <!-- oracle flavor -->
+        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
+      </generator>
+    </id>
+
+    <property name="ctime" type="long">
+      <column name="CTIME" not-null="false" />
+    </property>
+
+    <property name="mtime" type="long">
+      <column name="MTIME" not-null="false" />
+    </property>
+
+    <many-to-one name="appServiceId" class="AppService" unique="true">
+      <column name="APPSERVICE_ID" not-null="false" />
+    </many-to-one>
+
+    <many-to-one name="dependentServiceId" class="AppService">
+      <column name="DEPENDENT_SERVICE_ID" not-null="false" />
+    </many-to-one>
+  </class>
+
+</hibernate-mapping>
