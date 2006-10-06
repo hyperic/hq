@@ -57,12 +57,12 @@ public class TrackEvent implements java.io.Serializable {
         this.level = level;
 
         if (source.length() > SRCMAX)
-            this.source = source.substring(0, SRCMAX);
+            this.source = source.substring(0, SRCMAX - 1);
         else
             this.source = source;
 
         if (message.length() > MSGMAX)
-            this.message = message.substring(0, MSGMAX);
+            this.message = message.substring(0, MSGMAX - 1);
         else
             this.message = message;
     }
