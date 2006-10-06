@@ -1763,6 +1763,17 @@ has already been defined.
       </schema-directSQL>
     </schemaSpec>
 
+    <schemaSpec version="1.87">
+      <schema-directSQL>
+        <statement desc="Delete unused index">
+        drop index reqstat_idx_clientip
+        </statement>
+        <statement desc="Delete unused index">
+        drop index reqstat_idx_svctype
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
 </dbupgrade>
 
 </target>
