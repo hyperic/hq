@@ -86,6 +86,7 @@ public class CPropManagerEJBImpl
     private static final String DATASOURCE     = HQConstants.DATASOURCE;
     private static final String CPROP_TABLE    = "EAM_CPROP";
     private static final String CPROPKEY_TABLE = "EAM_CPROP_KEY";
+    private static final String CPROP_SEQUENCE = "EAM_CPROP_ID_SEQ";
 
     private CPropKeyLocalHome cpLocalHome;
     private InitialContext    initialContext;
@@ -314,10 +315,20 @@ public class CPropManagerEJBImpl
             // Optionally add new values
             if(val != null){
                 String[] chunks = chunk(val, CHUNKSIZE);
-                addStmt = conn.prepareStatement("INSERT INTO " + CPROP_TABLE +
-                                                " (keyid, appdef_id, " +
-                                                "value_idx, PROPVALUE) VALUES " +
-                                                "(?, ?, ?, ?)");
+                StringBuffer sql = new StringBuffer()
+                    .append("INSERT INTO ")
+                    .append(CPROP_TABLE);
+                if (DBUtil.isOracle(conn)) {
+                    sql.append(" (id,keyid,appdef_id,value_idx,PROPVALUE) VALUES (")
+                        .append(CPROP_SEQUENCE)
+                        .append(".NEXTVAL,")
+                        .append("?, ?, ?, ?)");
+                } else {
+                    // assume sequence is generated in the db layer
+                    sql.append(" (keyid,appdef_id,value_idx,PROPVALUE) VALUES ")
+                        .append("(?, ?, ?, ?)");
+                }
+                addStmt = conn.prepareStatement(sql.toString());
                 addStmt.setInt(1, keyId);
                 addStmt.setInt(2, aID.getID());
                 for(int i=0; i<chunks.length; i++){

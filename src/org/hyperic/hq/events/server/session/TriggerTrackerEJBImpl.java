@@ -110,9 +110,16 @@ public class TriggerTrackerEJBImpl extends SessionEJB implements SessionBean {
             }
             else {
                 // Insert
-                strBuf.append("INSERT INTO ")
-                      .append(TAB_FIRED_TRIGGER)
-                      .append(" (timestamp, trigger_id) VALUES (?,?)");
+                if (DBUtil.isOracle(conn)) {
+                    strBuf.append("INSERT INTO ")
+                        .append(TAB_FIRED_TRIGGER)
+                        .append(" (id, timestamp, trigger_id) VALUES")
+                        .append(" (EAM_FIRED_TRIGGER_ID_SEQ.nextval,?,?)");
+                } else {
+                    strBuf.append("INSERT INTO ")
+                        .append(TAB_FIRED_TRIGGER)
+                        .append(" (timestamp, trigger_id) VALUES (?,?)");
+                }
             }
 
             // Now add the Trigger to Event relationship
