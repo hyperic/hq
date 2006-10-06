@@ -25,9 +25,7 @@
 
 package org.hyperic.hq.scheduler;
 
-import org.hyperic.util.schedule.ScheduleException;
-
-public class ScheduleWillNeverFireException extends ScheduleException {
+public class ScheduleWillNeverFireException extends Exception {
     public ScheduleWillNeverFireException() {
         super();
     }

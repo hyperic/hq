@@ -26,7 +26,9 @@
 package org.hyperic.util.schedule;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Collections;
 import java.util.Vector;
 
 /**
@@ -40,13 +42,13 @@ import java.util.Vector;
  */
 
 public class Schedule {
-    private long   scheduleID;   // Used for assigning unique event IDs
-    private Vector schedule;     // The actual events being scheduled, sorted
-                                 // by ascending nextTime in the item
+    private long  _scheduleID;   // Used for assigning unique event IDs
+    private List  _schedule;     /* The actual events being scheduled, sorted
+                                    by ascending nextTime in the item */
 
     public Schedule(){
-        this.schedule   = new Vector();
-        this.scheduleID = 0;
+        _schedule   = new ArrayList();
+        _scheduleID = 0;
     }
 
     /**
@@ -54,9 +56,10 @@ public class Schedule {
      *
      * @return a globally unique identifier, for the next scheduled item.
      */
-
     private long consumeNextGlobalID(){
-        return this.scheduleID++;
+        synchronized (_schedule) {
+            return _scheduleID++;
+        }
     }
 
     /**
@@ -65,24 +68,26 @@ public class Schedule {
      *
      * @param item The item to be inserted into the schedule
      */
-
     private void insertScheduledItem(ScheduledItem item){
-        int i, size = this.schedule.size();
         long nextTime = item.getNextTime();
-        ScheduledItem x;
 
-        for(i=0; i<size; i++){
-            x = (ScheduledItem) this.schedule.get(i);
-            if(x.getNextTime() > nextTime){
-                this.schedule.add(i, item);
-                return;
+        synchronized (_schedule) {
+            int size = _schedule.size();
+            
+            for (int i=0; i < size; i++){
+                ScheduledItem x = (ScheduledItem)_schedule.get(i);
+                
+                if (x.getNextTime() > nextTime) {
+                    _schedule.add(i, item);
+                    return;
+                }
             }
+            
+            // Else add at the end of the vector (time greater than all others)
+            _schedule.add(item);
         }
-        // Else add at the end of the vector (time greater than all others)
-        this.schedule.add(item);
     }
 
-    
     /**
      * Add an item to the internal schedule.  
      *
@@ -92,27 +97,21 @@ public class Schedule {
      *        force immediate firing.
      * @param repeat true if the item should stay in the schedule even after
      *               its time has expired
-     * @throws UnscheduledItemException If the given schedule interval is <= 0
      *
      * @return a global identifier for the scheduled item
      */
-
-    public synchronized long scheduleItem(Object item, long interval, 
-                                          boolean prev, boolean repeat)
-        throws ScheduleException
+    public long scheduleItem(Object item, long interval, boolean prev, 
+                             boolean repeat)
     {
         long itemId;
-        ScheduledItem newItem;
         
-        if (interval <= 0) {
-            throw new ScheduleException("Invalid schedule interval given (" +
-                                        interval + ")");
-        }
+        if (interval <= 0) 
+            throw new IllegalArgumentException("Interval must be >= 0");
 
-        itemId      = this.consumeNextGlobalID();
-        newItem     = new ScheduledItem(item, interval, prev,
-                                        repeat, itemId);
-        this.insertScheduledItem(newItem);
+        itemId  = consumeNextGlobalID();
+
+        insertScheduledItem(new ScheduledItem(item, interval, prev, repeat, 
+                                              itemId));
         return itemId;
     }
     
@@ -126,23 +125,16 @@ public class Schedule {
      *
      * @return a global identifier for the scheduled item
      */
-
-    public synchronized long scheduleItem(Object item, long interval, 
-                                          boolean repeat)
-        throws ScheduleException
-    {
-        return this.scheduleItem(item, interval, false, repeat);
+    public long scheduleItem(Object item, long interval, boolean repeat) {
+        return scheduleItem(item, interval, false, repeat);
     }
 
     /**
      * Add an item to the internal schedule, with the repeat flag set to true.
      * See the documentation for scheduleItem for more information.
      */
-
-    public long scheduleItem(Object item, long interval)
-        throws ScheduleException
-    {
-        return this.scheduleItem(item, interval, true);
+    public long scheduleItem(Object item, long interval) {
+        return scheduleItem(item, interval, true);
     }
 
     /**
@@ -151,24 +143,22 @@ public class Schedule {
      *
      * @param id ID returned by a call to scheduleItem of the item to remove
      *
-     * @throws UnscheduledItemException indicating the ID was not found.
+     * @returns true if the id was found and removed, else false
      */
+    public boolean unscheduleItem(long id) {
+        int size = _schedule.size();
 
-    public synchronized void unscheduleItem(long id) 
-        throws UnscheduledItemException 
-    {
-        int i, size = this.schedule.size();
-
-        for(i=0; i<size; i++){
-            ScheduledItem item = (ScheduledItem) this.schedule.get(i);
-
-            if(item.getId() == id){
-                this.schedule.remove(i);
-                return;
+        synchronized (_schedule) {
+            for (int i=0; i < size; i++) {
+                ScheduledItem item = (ScheduledItem)_schedule.get(i);
+                
+                if(item.getId() == id){
+                    _schedule.remove(i);
+                    return true;
+                }
             }
+            return false;
         }
-
-        throw new UnscheduledItemException("id '" + id + "' not found");
     }
 
     /**
@@ -176,81 +166,61 @@ public class Schedule {
      * returned time is in UTC since the epoch (similar to 
      * System.currentTimeMillis())
      *
-     * @return the absolute the the next event is to be executed
-     * 
-     * @throws EmptyScheduleException indicating there is no next item for
-     *                                which the time can be retrieved.
+     * @return the absolute time the next event is to be executed, or -1
+     *         if the schedule is empty
      */
-
-    public synchronized long getTimeOfNext() 
-        throws EmptyScheduleException 
-    {
-        int size = this.schedule.size();
-        ScheduledItem item;
-
-        if(size == 0)
-            throw new EmptyScheduleException();
-
-        item = (ScheduledItem) this.schedule.get(0);
-        return item.getNextTime();
+    public long getTimeOfNext() {
+        synchronized (_schedule) {
+            ScheduledItem item;
+            
+            if (_schedule.isEmpty()) 
+                return -1;
+            
+            item = (ScheduledItem)_schedule.get(0);
+            return item.getNextTime();
+        }
     }
 
     /**
      * Get the next item (or items) to be executed.  If more than one item
      * is scheduled for a specific time, they are all returned.  Items 
-     * returned by this function are re-inserted into the schedule, if their
+     * returned by this function are re-inserted into the schedule if their
      * repeat flag is set to true -- otherwise they are removed.
      *
      * @return a list of items to execute
-     *
-     * @throws EmptyScheduleException indicating there was no 'next item'
      */
+    public List consumeNextItems() {
+        List res = new ArrayList();
+        List toReschedule = new ArrayList();
 
-    public synchronized List consumeNextItems() 
-        throws EmptyScheduleException 
-    {
-        int size = this.schedule.size();
-        ScheduledItem base;
-        ArrayList res;
-        long baseNextTime;
+        synchronized (_schedule) {
+            long baseNextTime;
 
-        if(size == 0)
-            throw new EmptyScheduleException();
+            if (_schedule.isEmpty())
+                return res;
 
-        res = new ArrayList(1);
+            baseNextTime = -1;
+            for (Iterator i=_schedule.iterator(); i.hasNext(); ) {
+                ScheduledItem item = (ScheduledItem)i.next();
+                
+                if (baseNextTime == -1 || item.getNextTime() == baseNextTime) {
+                    baseNextTime = item.getNextTime();
+                    res.add(item.getObj());
+                }
 
-        // We always add the first item to the list of returned objects
-        base = (ScheduledItem) this.schedule.get(0);
-        baseNextTime = base.getNextTime();
-        res.add(base);
-
-        // Now add other items if they occur at the same time 
-        for(int i=1; i<size; i++){
-            ScheduledItem other = (ScheduledItem) this.schedule.get(i);
-
-            if(other.getNextTime() == baseNextTime){
-                res.add(other);
-            } else {
-                break;
+                i.remove();
+                if (item.isRepeat()) {
+                    toReschedule.add(item);
+                }
             }
         }
 
-        // Finally, loop through the objects we are about to return, so
-        // we can re-order our innards, and return the actual objects
-        // stored instead of the ScheduledItem
-        // XXX -- This could be MUCH more efficient, especially with respect
-        //        to re-inserting into the list, since all of the returned
-        //        objects are of the same size.
-        for(int i=0; i<res.size(); i++){
-            ScheduledItem other = (ScheduledItem) res.get(i);
+        // Finally, add back in repeatable items which need to be rescheduled
+        for (Iterator i=toReschedule.iterator(); i.hasNext(); ) {
+            ScheduledItem item = (ScheduledItem)i.next();
 
-            this.schedule.remove(other);
-            if(other.isRepeat()){
-                other.stepNextTime();
-                this.insertScheduledItem(other);
-            }
-
-            res.set(i, other.getObj());
+            item.stepNextTime();
+            insertScheduledItem(item);
         }
         return res;
     }
@@ -260,19 +230,10 @@ public class Schedule {
      *
      * @return the number of items in the schedule.
      */
-
     public int getNumItems(){
-        return this.schedule.size();
-    }
-
-    /**
-     * Get a list of all the currently scheduled items.
-     *
-     * @return the list of scheduled items.
-     */
-
-    public ScheduledItem[] getScheduledItems(){
-        return (ScheduledItem[]) this.schedule.toArray(new ScheduledItem[0]);
+        synchronized (_schedule) {
+            return _schedule.size();
+        }
     }
 
     public static void main(String args[]) throws Exception {

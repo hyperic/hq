@@ -115,6 +115,7 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.scheduler.ScheduleValue;
+import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
@@ -124,7 +125,6 @@ import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
-import org.hyperic.util.schedule.ScheduleException;
 
 public class ClientShellEntityFetcher {
     protected ClientShellBossManager   bossManager;
@@ -814,7 +814,7 @@ public class ClientShellEntityFetcher {
         throws SessionNotFoundException, SessionTimeoutException,
                CreateException, NamingException, EncodingException,
                FinderException, PermissionException, RemoteException,
-               ClientShellAuthenticationException, ScheduleException,
+               ClientShellAuthenticationException,
                ConfigFetchException, ApplicationException
     {
         ProductBoss boss;
@@ -946,7 +946,7 @@ public class ClientShellEntityFetcher {
                                ScanConfigurationCore scanConfig,
                                String scanName, String scanDesc,
                                ScheduleValue schedule)
-        throws ScheduleException, AutoinventoryException,
+        throws AutoinventoryException, ScheduleWillNeverFireException,
                FinderException, NamingException, AppdefEntityNotFoundException,
                SessionNotFoundException, SessionTimeoutException,
                PermissionException, RemoteException,
