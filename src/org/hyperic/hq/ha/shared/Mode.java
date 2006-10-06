@@ -40,9 +40,6 @@ public class Mode {
     public boolean isActivated () {
         return true;
     }
-    public boolean isFrontEnd() {
-        return true;
-    }
     public boolean isProcessingData () {
         return true;
     }
