@@ -69,6 +69,7 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.product.RuntimeResourceReport;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
 import org.apache.commons.logging.Log;
@@ -507,20 +508,26 @@ public class RuntimeReportProcessor {
             log.info("Updating services for server: " + foundAppdefServer.getName());
 
             AIServiceValue[] aiservices;
-            List appdefServiceList;
-            ServiceLightValue[] appdefServices;
+            List appdefServices;
 
             aiservices
                 = ((AIServerExtValue) aiserver).getAIServiceValues();
-            appdefServiceList = new ArrayList();
             if (aiservices != null) {
-                appdefServices = foundAppdefServer.getServiceValues();
-                appdefServiceList.addAll(Arrays.asList(appdefServices));
+                // ServerValue.getServiceValues not working here for some reason,
+                // get the services explicitly from the ServiceManager.
+                try {
+                    appdefServices = 
+                        serviceMgr.getServicesByServer(subject,
+                                                       foundAppdefServer.getId(),
+                                                       PageControl.PAGE_ALL);
+                } catch (Exception e) {
+                    appdefServices = new ArrayList();
+                }
 
                 for (i=0; i<aiservices.length; i++) {
                     if(aiservices[i] != null) {
                         mergeServiceIntoInventory(subject, foundAppdefServer, aiservices[i],
-                                                  appdefServiceList, reportingServer,
+                                                  appdefServices, reportingServer,
                                                   serviceMgr, configMgr,
                                                   cpropMgr, subjectMgr);
                     } else {
@@ -528,29 +535,25 @@ public class RuntimeReportProcessor {
                                   " reported null aiservice. Skipping.");
                     }
                 }
-            }
 
-            // any services that we haven't handled, we should mark them
-            // as AI-zombies.
-            ServiceLightValue appdefServiceLight;
-            ServiceValue appdefService = null;
-            for (i=0; i<appdefServiceList.size(); i++) {
-                appdefServiceLight
-                    = (ServiceLightValue) appdefServiceList.get(i);
-                try {
-                    log.info("Marking service as AI zombie: " + appdefServiceLight.getName());
-                    appdefService
-                        = serviceMgr.getServiceById(subject,
-                                                    appdefServiceLight.getId());
-                    appdefService.setAutodiscoveryZombie(true);
-                    serviceMgr.updateService(subject, appdefService);
-                    if (isDebug) {
-                        log.debug("Service marked as zombie: " + appdefService);
-                    }
-                } catch (ApplicationException e) {
-                    log.error("RRP: Error marking service as zombie: " + appdefService.getName(), e);
-                    continue;
-                } 
+                // any services that we haven't handled, we should mark them
+                // as AI-zombies.
+                ServiceValue appdefService;
+                for (i=0; i<appdefServices.size(); i++) {
+                    appdefService = (ServiceValue) appdefServices.get(i);
+                    try {
+                        appdefService.setAutodiscoveryZombie(true);
+                        serviceMgr.updateService(subject, appdefService);
+                        if (isDebug) {
+                            log.debug("Service marked as zombie: " +
+                                      appdefService);
+                        }
+                    } catch (ApplicationException e) {
+                        log.error("RRP: Error marking service as zombie: " +
+                                  appdefService.getName(), e);
+                        continue;
+                    } 
+                }
             }
         }
         log.info("Completed merging server: " + reportingServer.getName() + " into inventory");
@@ -568,7 +571,7 @@ public class RuntimeReportProcessor {
         throws CreateException, PermissionException, ValidationException {
 
         int i;
-        ServiceLightValue appdefServiceLight;
+        ServiceValue appdefService;
         ServiceValue foundAppdefService = null;
         boolean isDebug = log.isDebugEnabled();
 
@@ -584,20 +587,11 @@ public class RuntimeReportProcessor {
 
         // Does this service exist (by name) ?
         for (i=0; i<appdefServices.size(); i++) {
-            appdefServiceLight = (ServiceLightValue) appdefServices.get(i);
-            if (appdefServiceLight.getName().equals(aiservice.getName())) {
-                // found it. expand it to a regular ServiceValue object
-                try {
-                    foundAppdefService
-                        = serviceMgr.getServiceById(subject,
-                                                    appdefServiceLight.getId());
-                    if (isDebug) {
-                        log.debug("Found existing service: " + foundAppdefService);
-                    }
-                } catch (ServiceNotFoundException e) {
-                    // Failed to look up a service we knew already existed
-                    // (trying to convert lightVO to regularVO)
-                    throw new SystemException(e);
+            appdefService = (ServiceValue) appdefServices.get(i);
+            if (appdefService.getName().equals(aiservice.getName())) {
+                foundAppdefService = appdefService;
+                if (isDebug) {
+                    log.debug("Found existing service: " + foundAppdefService);
                 }
                 // Remove from list so all that's left are zombies
                 appdefServices.remove(i);
