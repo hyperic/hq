@@ -1,4 +1,4 @@
-package org.hyperic.hq.hibernate.dialect;
+package org.hyperic.hibernate.dialect;
 
 /**
  *
