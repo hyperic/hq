@@ -1765,6 +1765,17 @@ has already been defined.
 
     <schemaSpec version="1.87">
       <schema-directSQL>
+        <statement desc="Delete unused index">
+        drop index reqstat_idx_clientip
+        </statement>
+        <statement desc="Delete unused index">
+        drop index reqstat_idx_svctype
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="3.00">
+      <schema-directSQL>
         <statement desc="Bump the starting sequence number for eam_appdef_resource_id_seq appdef resource types to be max(id)+1 of specific resources below"
                    targetDB="postgresql">
         select setval('eam_appdef_resource_id_seq',
