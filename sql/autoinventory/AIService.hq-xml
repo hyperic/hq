@@ -13,10 +13,6 @@
       <column name="ID" not-null="true" />
       <generator class="sequence">
         <param name="sequence">EAM_AIQ_SERVICE_ID_SEQ</param>
-        <!-- postgres flavor -->
-        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
-        <!-- oracle flavor -->
-        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
       </generator>
     </id>
 

@@ -1791,7 +1791,7 @@ has already been defined.
         </statement>
         <statement desc="Bump the starting sequence number for eam_appdef_resource_type_id_seq appdef resource types to be max(id)+1 of specific types below"
                    targetDB="postgresql">
-        select setval('eam_appdef_resource_type_id_seq',
+        select setval('eam_appdef_resourcetype_id_seq',
                         (select max(r.rid)+1 from
                           (select max(id) as rid from eam_application_type
                              union

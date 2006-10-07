@@ -14,10 +14,6 @@
       <column name="ID" not-null="true" />
       <generator class="sequence">
         <param name="sequence">EAM_APPDEF_RESOURCETYPE_ID_SEQ</param>
-        <!-- postgres flavor -->
-        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
-        <!-- oracle flavor -->
-        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
       </generator>
     </id>
 
@@ -57,9 +53,7 @@
         <many-to-many class="ServiceType" column="SERVICE_TYPE_ID" />
       </bag>
 
-      <bag name="applications" table="EAM_APPLICATION"
-           cascade="save-update,delete,evict,delete-orphan"
-           inverse="true" lazy="true">
+      <bag name="applications" table="EAM_APPLICATION">
         <key column="APPLICATION_TYPE_ID" />
         <one-to-many class="Application" />
       </bag>

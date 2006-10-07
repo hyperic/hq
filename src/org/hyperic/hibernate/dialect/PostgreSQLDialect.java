@@ -12,8 +12,13 @@ public class PostgreSQLDialect
     }
 
 	public String getCreateSequenceString(String sequenceName) {
-        return "create sequence " + sequenceName + " start " + 
-            HypericDialect.SEQUENCE_START + 
-           " increment 1 cache " + HypericDialect.SEQUENCE_CACHE;
+        return new StringBuffer()
+            .append("create sequence ")
+            .append(sequenceName)
+            .append(" start ")
+            .append(HypericDialect.SEQUENCE_START)
+            .append(" increment 1 cache ")
+            .append(HypericDialect.SEQUENCE_CACHE)
+            .toString();
     }
 }

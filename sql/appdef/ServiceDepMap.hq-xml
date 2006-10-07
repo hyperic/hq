@@ -13,10 +13,6 @@
       <column name="ID" not-null="true" />
       <generator class="sequence">
         <param name="sequence">EAM_SERVICE_DEP_MAP_ID_SEQ</param>
-        <!-- postgres flavor -->
-        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
-        <!-- oracle flavor -->
-        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
       </generator>
     </id>
 
@@ -28,7 +24,7 @@
       <column name="MTIME" not-null="false" />
     </property>
 
-    <many-to-one name="appServiceId" class="AppService" unique="true">
+    <many-to-one name="appServiceId" class="AppService">
       <column name="APPSERVICE_ID" not-null="false" />
     </many-to-one>
 

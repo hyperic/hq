@@ -12,10 +12,6 @@
       <column name="ID" not-null="true" />
       <generator class="sequence">
         <param name="sequence">EAM_MEASUREMENT_ID_SEQ</param>
-        <!-- postgres flavor -->
-        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
-        <!-- oracle flavor -->
-        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
       </generator>
     </id>
 
@@ -126,10 +122,6 @@
       <column name="ID" not-null="true" />
       <generator class="sequence">
         <param name="sequence">EAM_MEASUREMENT_TEMPL_ID_SEQ</param>
-        <!-- postgres flavor -->
-        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
-        <!-- oracle flavor -->
-        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
       </generator>
     </id>
 
@@ -216,10 +208,6 @@
       <column name="ID" not-null="true" />
       <generator class="sequence">
         <param name="sequence">EAM_MONITORABLE_TYPE_ID_SEQ</param>
-        <!-- postgres flavor -->
-        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
-        <!-- oracle flavor -->
-        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
       </generator>
     </id>
 
@@ -257,10 +245,6 @@
       <column name="ID" not-null="true" />
       <generator class="sequence">
         <param name="sequence">EAM_MEASUREMENT_CAT_ID_SEQ</param>
-        <!-- postgres flavor -->
-        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
-        <!-- oracle flavor -->
-        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
       </generator>
     </id>
 
@@ -292,10 +276,6 @@
       <column name="ID" not-null="true" />
       <generator class="sequence">
         <param name="sequence">EAM_MEASUREMENT_ARG_ID_SEQ</param>
-        <!-- postgres flavor -->
-        <param name="parameters" dialect="PostgreSQL">start 10001 increment 1 cache 10</param>
-        <!-- oracle flavor -->
-        <param name="parameters" dialect="Oracle, Oracle9">start with 10001 increment by 1 cache 10</param>
       </generator>
     </id>
 

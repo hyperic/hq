@@ -16,8 +16,13 @@ public class Oracle9Dialect
     }
 
 	public String getCreateSequenceString(String sequenceName) {
-        return "create sequence " + sequenceName + " start with " + 
-            HypericDialect.SEQUENCE_START + 
-           " increment by 1 cache " + HypericDialect.SEQUENCE_CACHE;
+        return new StringBuffer()
+            .append("create sequence ")
+            .append(sequenceName)
+            .append(" start with ")
+            .append(HypericDialect.SEQUENCE_START)
+            .append(" increment by 1 cache ")
+            .append(HypericDialect.SEQUENCE_CACHE)
+            .toString();
     }
 }
