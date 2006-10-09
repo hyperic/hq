@@ -134,11 +134,7 @@ public class JMXFilterInitServlet extends HttpServlet {
                 log("Servlet mbean already registered: " + ex.toString(), ex);
             }
         } catch(Exception ex) {
-            if (debug != null) {
-                log("Error registering servlet mbean: " + ex.toString(), ex);
-            } else {
-                log("Error registering servlet mbean: " + ex.toString());
-            }
+            log("Error registering servlet mbean: " + ex.toString(), ex);
         }
     }
     
