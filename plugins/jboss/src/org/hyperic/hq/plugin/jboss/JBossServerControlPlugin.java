@@ -232,21 +232,7 @@ public class JBossServerControlPlugin extends ServerControlPlugin {
             return;
         }
 
-        //tell background.sh to check that the process is still
-        //alive after a few seconds, in case it bailed early due
-        //to JAVA_HOME not being set for example.
-        //can't do this when using a prefix such as 'sudo' since
-        //it will exec() another process then go away.
-        //XXX super class should check this.
-        if (!hasPrefix()) {
-            setBackgroundWaitTime(3);
-        }
-
         doCommand();
-
-        if (!hasPrefix()) {
-            setBackgroundWaitTime(0);
-        }
 
         handleResult(STATE_STARTED);
     }
