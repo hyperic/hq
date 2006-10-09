@@ -115,8 +115,10 @@ public class Tomcat41RuntimeADPlugin
                 // XXX: We dont support monitoring of the JK connectors.
                 //
                 String handler = atts.getValue("protocolHandlerClassName");
-                if (handler.equals("org.apache.jk.server.JkCoyoteHandler"))
+                if (handler != null &&
+                    handler.equals("org.apache.jk.server.JkCoyoteHandler")) {
                     continue;
+                }
 
                 String port = atts.getValue("port");
                 String scheme = atts.getValue("scheme");
