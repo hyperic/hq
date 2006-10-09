@@ -516,6 +516,9 @@
     </config>
 
     <config type="control">
+      <option name="start.args"
+              description="Server start program arguments"
+              optional="true"/>
       <option name="stop.program"
               description="Server stop program (default uses JMX)"
               optional="true"/>
@@ -523,6 +526,10 @@
               description="Server stop program arguments"
               optional="true"
               default="-S"/>
+      <option name="configSet"
+              description="Server config file set"
+              optional="true"
+              default="default"/>
     </config>
 
     <properties>
