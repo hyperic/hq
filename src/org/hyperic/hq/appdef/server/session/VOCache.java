@@ -42,6 +42,7 @@ import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceLightValue;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
+
 import org.hyperic.hq.common.shared.ProductProperties;
 
 /**
@@ -50,35 +51,31 @@ import org.hyperic.hq.common.shared.ProductProperties;
  * retrieved.
  */
 public abstract class VOCache {
-    private static VOCache singleton;
+    private static       VOCache _singleton;
+    private static final Object  _singLock = new Object();
 
+    private final Object _serviceLock      = new Object();
+    private final Object _groupLock        = new Object();
+    private final Object _platformLock     = new Object();
+    private final Object _platformTypeLock = new Object();
+    private final Object _serverLock       = new Object();
+    private final Object _applicationLock  = new Object();
+    private final Object _serverTypeLock   = new Object();
+    private final Object _serviceTypeLock  = new Object();
+    
     public static VOCache getInstance() {
-        if (singleton == null) {
-            singleton = (VOCache) ProductProperties
-                .getPropertyInstance("hyperic.hq.appdef.vocache");
+        synchronized (_singLock) {
+            if (_singleton == null) {
+                _singleton = (VOCache) ProductProperties
+                    .getPropertyInstance("hyperic.hq.appdef.vocache");
+            }
 
-            if (singleton == null)
-                singleton = new VOCacheImpl();
+            if (_singleton == null)
+                _singleton = new VOCacheImpl();
         }
-        return singleton;
+        return _singleton;
     }
 
-    private Object serviceLock = new Object();
-
-    private Object groupLock = new Object();
-
-    private Object platformLock = new Object();
-
-    private Object platformTypeLock = new Object();
-
-    private Object serverLock = new Object();
-
-    private Object applicationLock = new Object();
-
-    private Object serverTypeLock = new Object();
-
-    private Object serviceTypeLock = new Object();
-    
     /**
      * Put an inventory value object into the cache
      */
@@ -92,7 +89,7 @@ public abstract class VOCache {
     /** ApplicationValue Cache APIs **/
     
     public ApplicationValue getApplication(ApplicationLocal ejb) {
-        return this.getApplication(((ApplicationPK)ejb.getPrimaryKey()).getId()); 
+        return getApplication(((ApplicationPK)ejb.getPrimaryKey()).getId()); 
     }
     
     public abstract ApplicationValue getApplication(Integer id);
@@ -140,19 +137,19 @@ public abstract class VOCache {
         int type = id.getType();
         switch (type) {
             case (AppdefEntityConstants.APPDEF_TYPE_PLATFORM):
-                this.removePlatform(id.getId());
+                removePlatform(id.getId());
                 break;
             case (AppdefEntityConstants.APPDEF_TYPE_SERVER):
-                this.removeServer(id.getId());
+                removeServer(id.getId());
                 break;
             case (AppdefEntityConstants.APPDEF_TYPE_SERVICE):
-                this.removeService(id.getId());
+                removeService(id.getId());
                 break;
             case (AppdefEntityConstants.APPDEF_TYPE_APPLICATION):
-                this.removeApplication(id.getId());
+                removeApplication(id.getId());
                 break;
             case (AppdefEntityConstants.APPDEF_TYPE_GROUP):
-                this.removeGroup(id.getId());
+                removeGroup(id.getId());
                 break;    
             default:
                 throw new IllegalArgumentException("Unsupported Type");        
@@ -196,34 +193,34 @@ public abstract class VOCache {
     }
 
     public Object getGroupLock() {
-        return groupLock;
+        return _groupLock;
     }
 
     public Object getApplicationLock() {
-        return this.applicationLock;
+        return _applicationLock;
     }
 
     public Object getPlatformLock() {
-        return this.platformLock;
+        return _platformLock;
     }
 
     public Object getPlatformTypeLock() {
-        return this.platformTypeLock;
+        return _platformTypeLock;
     }
 
     public Object getServerLock() {
-        return this.serverLock;
+        return _serverLock;
     }
 
     public Object getServerTypeLock() {
-        return this.serverTypeLock;
+        return _serverTypeLock;
     }
 
     public Object getServiceLock() {
-        return this.serviceLock;
+        return _serviceLock;
     }
 
     public Object getServiceTypeLock() {
-        return this.serviceTypeLock;
+        return _serviceTypeLock;
     }
 }
