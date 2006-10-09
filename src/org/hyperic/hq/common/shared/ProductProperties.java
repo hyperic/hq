@@ -27,18 +27,23 @@ package org.hyperic.hq.common.shared;
 
 import java.io.IOException;
 import java.io.InputStream;
+
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class ProductProperties {
-
     private static final String PROP_VERSION    = "version";
     private static final String PROP_BUILD      = "build.number";
     private static final String PROP_COMMENT    = "build.comment";
     private static final String PROP_BUILD_DATE = "build.date";
-    private static Properties props = null;
+
+    private static final Log  _log = 
+        LogFactory.getLog(ProductProperties.class);
+
+    private static Properties _props;
+    private static Object     _propsLock;
 
     private ProductProperties(){}
  
@@ -65,15 +70,14 @@ public class ProductProperties {
 
         if (in == null) {
             if (required) {
-                throw new IllegalStateException("Package not packed correctly, missing: " +
-                                                name);
+                throw new IllegalStateException("Package not packed " + 
+                                                "correctly, missing: " + name);
             }
-
             return;
         }
 
         try {
-            props.load(in);
+            _props.load(in);
         } catch(IOException e) {
             throw new IllegalStateException("Failed to read " + name +
                                             ": " + e);
@@ -81,13 +85,15 @@ public class ProductProperties {
     }
     
     public static Properties getProperties() {
-        if (props == null) {
-            props = new Properties();
-
-            load("version.properties", true);
-            load("product.properties", false);
+        synchronized (_propsLock) {
+            if (_props == null) {
+                _props = new Properties();
+                
+                load("version.properties", true);
+                load("product.properties", false);
+            }
         }
-        return props;
+        return _props;
     }
 
     public static String getProperty(String key) {
@@ -104,18 +110,16 @@ public class ProductProperties {
     }
     
     public static Object getPropertyInstance(String key) {
-        Log log = LogFactory.getLog(ProductProperties.class);
         String className = ProductProperties.getProperty(key);
         if (className != null) {
             try {
-                log.debug("Property " + key + " implemented by " + className);
+                _log.debug("Property " + key + " implemented by " + className);
                 return Class.forName(className).newInstance();
             } catch (Exception e) {
-                log.error("Unable to instantiate " + className
-                        + " for property " + key, e);
+                _log.error("Unable to instantiate " + className +
+                           " for property " + key, e);
             }
         }
         return null;
     }
-
 }
