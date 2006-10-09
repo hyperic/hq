@@ -46,7 +46,7 @@
       <column name="MTIME" not-null="false" />
     </property>
 
-    <many-to-one name="serviceTypeId" class="ServiceType">
+    <many-to-one name="serviceType" class="ServiceType">
       <column name="SERVICE_TYPE_ID" />
     </many-to-one>
 

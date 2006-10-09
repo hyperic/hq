@@ -24,11 +24,11 @@
       <column name="MTIME" not-null="false" />
     </property>
 
-    <many-to-one name="appServiceId" class="AppService">
+    <many-to-one name="appService" class="AppService">
       <column name="APPSERVICE_ID" not-null="false" />
     </many-to-one>
 
-    <many-to-one name="dependentServiceId" class="AppService">
+    <many-to-one name="dependentService" class="AppService">
       <column name="DEPENDENT_SERVICE_ID" not-null="false" />
     </many-to-one>
   </class>

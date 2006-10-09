@@ -37,7 +37,7 @@
     </property>
 
     <bag name="agents" table="EAM_AGENT"
-         cascade="save-update,delete,evict,delete-orphan"
+         cascade="save-update,delete,evict,persist,merge"
          inverse="true" lazy="true">
       <key column="AGENT_TYPE_ID" />
       <one-to-many class="Agent" />

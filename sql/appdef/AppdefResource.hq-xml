@@ -66,7 +66,7 @@
         <column name="CERTDN" not-null="false" length="200" />
       </property>
 
-      <property name="comment_text" type="string">
+      <property name="comment" type="string">
         <column name="COMMENT_TEXT" not-null="false" length="256" />
       </property>
 
@@ -74,33 +74,35 @@
         <column name="CPU_COUNT" not-null="false" />
       </property>
 
-      <many-to-one name="platformTypeId" class="PlatformType">
+      <many-to-one name="platformType" class="PlatformType">
         <column name="PLATFORM_TYPE_ID" not-null="false" />
       </many-to-one>
 
-      <many-to-one name="configResponseId" class="ConfigResponse">
+      <many-to-one name="configResponse" class="ConfigResponse">
         <column name="CONFIG_RESPONSE_ID" not-null="false" />
       </many-to-one>
 
-      <many-to-one name="agentId" lazy="false" class="Agent">
+      <many-to-one name="agent" class="Agent">
         <column name="AGENT_ID" not-null="false" />
       </many-to-one>
 
       <bag name="ips" table="EAM_IP"
-           cascade="save-update,delete,evict,delete-orphan"
+           cascade="save-update,delete,persist,merge,evict"
            inverse="true" lazy="true">
         <key column="PLATFORM_ID" />
         <one-to-many class="Ip" />
       </bag>
 
-      <bag name="servers" table="EAM_SERVER">
+      <bag name="servers" table="EAM_SERVER"
+           cascade="save-update,delete,evict,persist,merge"
+           inverse="true" lazy="true">
         <key column="PLATFORM_ID" />
         <one-to-many class="Server" />
       </bag>
     </union-subclass>
 
     <union-subclass name="Server" table="EAM_SERVER">
-      <many-to-one name="platformId" class="Platform">
+      <many-to-one name="platform" class="Platform">
         <column name="PLATFORM_ID" index="EAM_SERVER_AIID_IDX" not-null="false" />
       </many-to-one>
 
@@ -136,20 +138,22 @@
         <column name="INSTALLPATH" not-null="false" length="200" />
       </property>
 
-      <many-to-one name="serverTypeId" class="ServerType">
+      <many-to-one name="serverType" class="ServerType">
         <column name="SERVER_TYPE_ID" not-null="false" />
       </many-to-one>
 
-      <many-to-one name="configResponseId" class="ConfigResponse">
+      <many-to-one name="configResponse" class="ConfigResponse">
         <column name="CONFIG_RESPONSE_ID" not-null="false" />
       </many-to-one>
 
-      <bag name="aiservices" table="EAM_AIQ_SERVICE">
+      <bag name="aiServices" table="EAM_AIQ_SERVICE">
         <key column="SERVER_ID" />
         <one-to-many class="org.hyperic.hq.autoinventory.shared.pojo.AIService" />
       </bag>
 
-      <bag name="services" table="EAM_SERVICE">
+      <bag name="services" table="EAM_SERVICE"
+           cascade="save-update,delete,evict,persist,merge"
+           inverse="true" lazy="true">
         <key column="SERVER_ID" />
         <one-to-many class="Service" />
       </bag>
@@ -164,10 +168,6 @@
         <column name="SORT_NAME" not-null="false" length="200" />
       </property>
 
-      <property name="parentServiceId" type="integer">
-        <column name="PARENT_SERVICE_ID" index="EAM_SERVICE_PARENT" not-null="false" />
-      </property>
-
       <property name="autoDiscoveryZombie" type="boolean">
         <column name="AUTODISCOVERY_ZOMBIE" not-null="false" />
       </property>
@@ -180,23 +180,29 @@
         <column name="ENDUSER_RT" not-null="false" />
       </property>
 
-      <many-to-one name="serverId" class="Server">
+      <many-to-one name="parentService" class="Service">
+        <column name="PARENT_SERVICE_ID" index="EAM_SERVICE_PARENT" not-null="false" />
+      </many-to-one>
+
+      <many-to-one name="server" class="Server">
         <column name="SERVER_ID" not-null="false" />
       </many-to-one>
 
-      <many-to-one name="serviceTypeId" class="ServiceType">
+      <many-to-one name="serviceType" class="ServiceType">
         <column name="SERVICE_TYPE_ID" not-null="false" />
       </many-to-one>
 
-      <many-to-one name="svcClusterId" class="SvcCluster">
+      <many-to-one name="svcCluster" class="SvcCluster">
         <column name="SVC_CLUSTER_ID" not-null="false" />
       </many-to-one>
 
-      <many-to-one name="configResponseId" class="ConfigResponse">
+      <many-to-one name="configResponse" class="ConfigResponse">
         <column name="CONFIG_RESPONSE_ID" not-null="false" />
       </many-to-one>
 
-      <bag name="appServices" table="EAM_APP_SERVICE">
+      <bag name="appServices" table="EAM_APP_SERVICE"
+           cascade="save-update,delete,evict,persist,merge"
+           inverse="true" lazy="true">
         <key column="SERVICE_ID" />
         <one-to-many class="AppService" />
       </bag>
@@ -223,12 +229,12 @@
         <column name="BUS_CONTACT" not-null="false" length="100" />
       </property>
 
-      <many-to-one name="applicationTypeId" class="ApplicationType">
+      <many-to-one name="applicationType" class="ApplicationType">
         <column name="APPLICATION_TYPE_ID" not-null="false" />
       </many-to-one>
 
       <bag name="appServices" table="EAM_APP_SERVICE"
-           cascade="save-update,delete,evict,delete-orphan"
+           cascade="save-update,delete,evict,persist,merge"
            inverse="true" lazy="true">
         <key column="APPLICATION_ID" />
         <one-to-many class="AppService" />

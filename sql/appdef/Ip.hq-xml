@@ -17,7 +17,7 @@
     </id>
 
     <natural-id mutable="false">
-      <many-to-one name="platformId" class="Platform">
+      <many-to-one name="platform" class="Platform">
         <column name="PLATFORM_ID" index="EAM_IP_IDX" not-null="false" />
       </many-to-one>
       <property name="address" type="string">

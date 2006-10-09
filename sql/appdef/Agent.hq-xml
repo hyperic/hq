@@ -49,7 +49,7 @@
       <column name="MTIME" />
     </property>
 
-    <many-to-one name="agentTypeId" class="AgentType">
+    <many-to-one name="agentType" class="AgentType">
       <column name="AGENT_TYPE_ID" not-null="false" />
     </many-to-one>
 

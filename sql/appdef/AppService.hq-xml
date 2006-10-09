@@ -17,13 +17,13 @@
     </id>
 
     <natural-id>
-      <many-to-one name="serviceId" class="Service">
+      <many-to-one name="service" class="Service">
         <column name="SERVICE_ID" index="EAM_SERVICE_KEY" not-null="false" />
       </many-to-one>
-      <many-to-one name="clusterId" class="SvcCluster">
+      <many-to-one name="cluster" class="SvcCluster">
         <column name="CLUSTER_ID" index="EAM_SERVICE_KEY" not-null="false" />
       </many-to-one>
-      <many-to-one name="applicationId" class="Application">
+      <many-to-one name="application" class="Application">
         <column name="APPLICATION_ID" index="EAM_SERVICE_KEY" not-null="false" />
       </many-to-one>
     </natural-id>
@@ -53,11 +53,11 @@
       <column name="FENTRY_POINT" not-null="true" dialect="Oracle, Oracle9" default="1" />
     </property>
 
-    <many-to-one name="serviceTypeId" class="ServiceType">
+    <many-to-one name="serviceType" class="ServiceType">
       <column name="SERVICE_TYPE_ID" not-null="false" />
     </many-to-one>
 
-    <bag name="dependents" table="EAM_SERVICE_DEP_MAP" cascade="all,delete-orphan" inverse="true">
+    <bag name="dependents" table="EAM_SERVICE_DEP_MAP" cascade="save-update,delete,evict,merge,persist" inverse="true">
       <key column="APPSERVICE_ID" />
       <one-to-many class="ServiceDepMap" />
     </bag>

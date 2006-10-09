@@ -128,6 +128,22 @@
       </property>
     </xsl:template>
 
+    <xsl:template mode="properties" match="property[@name='hibernate.transaction.manager_lookup_class']" priority="3.0">
+      <xsl:if test="normalize-space(@value)">
+        <property name="{@name}">
+          <xsl:value-of select="@value"/>
+        </property>
+      </xsl:if>
+    </xsl:template>
+
+    <xsl:template mode="properties" match="property[@name='hq.jta.UserTransaction']" priority="3.0">
+      <xsl:if test="normalize-space(@value)">
+        <property name="jta.UserTransaction">
+          <xsl:value-of select="@value"/>
+        </property>
+      </xsl:if>
+    </xsl:template>
+
     <xsl:template mode="properties" match="property[@name='hibernate.session_factory_name']" priority="2.0" />
     <xsl:template mode="properties" match="property[not(starts-with(@name, 'hibernate.'))]" priority="2.0" />
 

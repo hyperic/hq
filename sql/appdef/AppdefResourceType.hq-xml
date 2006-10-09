@@ -121,11 +121,11 @@
         <column name="FINTERNAL" />
       </property>
 
-      <many-to-one name="serverTypeId" class="ServerType">
+      <many-to-one name="serverType" class="ServerType">
         <column name="SERVER_TYPE_ID" />
       </many-to-one>
 
-      <many-to-one name="tierTypeId" class="TierType">
+      <many-to-one name="tierType" class="TierType">
         <column name="TIER_TYPE_ID" />
       </many-to-one>
 
