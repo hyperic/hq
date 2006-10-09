@@ -25,22 +25,25 @@
 
 package org.hyperic.util.notReady;
 
+import java.io.PrintWriter;
+
 import javax.servlet.ServletException;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
+
+import org.apache.log4j.Logger;
 
 /**
  * Servlet to display server startup status using a log4j appender
  */
 public class StartupServlet extends HttpServlet {
-
-    private NotReadyAppender appender = null;
+    private NotReadyAppender _appender;
 
     public void init() throws ServletException {
-        this.appender = new NotReadyAppender();
-        org.apache.log4j.Logger.getRootLogger().addAppender(this.appender);
+        _appender = new NotReadyAppender();
+        Logger.getRootLogger().addAppender(_appender);
     }
 
     public void destroy() {
@@ -52,9 +55,9 @@ public class StartupServlet extends HttpServlet {
         HttpServletResponse hres = (HttpServletResponse) response;
         StringBuffer sb = new StringBuffer();
 
-        String status       = this.appender.getStatus();
-        String lastError    = this.appender.getLastError();
-        int percentComplete = this.appender.getPercent();
+        String status       = _appender.getStatus();
+        String lastError    = _appender.getLastError();
+        int percentComplete = _appender.getPercent();
 
         sb.append("<html>\n")
             .append("<head>\n")

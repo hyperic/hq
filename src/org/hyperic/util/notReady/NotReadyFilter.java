@@ -40,7 +40,7 @@ import javax.servlet.http.HttpServletResponse;
  * A simple filter that will return 503 ( Service unavailable ) until the 
  * setReady(true) is called.
  * 
- * It can be used by CAM or any other app to reject requests until all 
+ * It can be used by HQ or any other app to reject requests until all 
  * initialization is completed.
  * 
  * To use it, just insert it in the web.xml, and map all the URIs of interest 
@@ -48,7 +48,7 @@ import javax.servlet.http.HttpServletResponse;
  * 
  * When all subsystems are initialized and started, call setReady().
  * 
- * Another option is to use the AuthenticationFilter ( for the CAM UI ) and 
+ * Another option is to use the AuthenticationFilter ( for the HQ UI ) and 
  * the AgentCallbackBossEJBImpl ( for agent callbacks ). 
  * 
  * In any case - the critical step is figuring when all things are started 
@@ -57,9 +57,10 @@ import javax.servlet.http.HttpServletResponse;
 public class NotReadyFilter 
     implements Filter
 {
-    static boolean isReady = false;
+    private static boolean _isReady = false;
+    private static final Object _readyLock = new Object();
 
-    private ServletContext servletCtx;
+    private ServletContext _servletCtx;
 
     public NotReadyFilter(){
     }
@@ -67,7 +68,7 @@ public class NotReadyFilter
     public void init(FilterConfig filterConfig) 
         throws ServletException 
     {
-        this.servletCtx = filterConfig.getServletContext();
+        _servletCtx = filterConfig.getServletContext();
     }
 
     public void doFilter(ServletRequest servletRequest, 
@@ -78,28 +79,35 @@ public class NotReadyFilter
         HttpServletResponse hResp;
         HttpServletRequest hReq;
 
-        if(isReady){
-            filterChain.doFilter(servletRequest, servletResponse);
-        } else {
-            hResp = (HttpServletResponse)servletResponse;
-            hReq  = (HttpServletRequest)servletRequest;
-
-            this.servletCtx.log("Not ready - received request for " + 
-                                hReq.getRequestURI());
-                    
-            hResp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
-                            "Server is still starting");
+        synchronized(_readyLock) {
+            if (_isReady){
+                filterChain.doFilter(servletRequest, servletResponse);
+                return;
+            }
         }
+
+        hResp = (HttpServletResponse)servletResponse;
+        hReq  = (HttpServletRequest)servletRequest;
+        
+        _servletCtx.log("Not ready - received request for " + 
+                        hReq.getRequestURI());
+        
+        hResp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+                        "Server is still starting");
     }
 
     public void destroy() {
     }
 
     static boolean getReady() {
-        return isReady;
+        synchronized(_readyLock) {
+            return _isReady;
+        }
     }
 
     static void setReady(boolean ready) {
-        isReady = ready;
+        synchronized(_readyLock) {
+            _isReady = ready;
+        }
     }
 }

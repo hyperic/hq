@@ -46,8 +46,8 @@ import org.apache.commons.logging.LogFactory;
 public class NotReadyManager
     implements NotReadyManagerMBean, MBeanRegistration
 {
-    private Log log = LogFactory.getLog(this.getClass().getName());
-    private MBeanServer server = null;
+    private Log         _log = LogFactory.getLog(NotReadyManager.class);
+    private MBeanServer _server;
 
     public NotReadyManager(){
     }
@@ -60,34 +60,32 @@ public class NotReadyManager
         return NotReadyFilter.getReady();
     }
 
-    public ObjectName preRegister(MBeanServer server, ObjectName name)
-        throws Exception { 
-        this.server = server;
+    public ObjectName preRegister(MBeanServer server, ObjectName name) {
+        _server = server;
         return name;
     }
 
     /**
-     * JBoss waits until the server is fully started to start the connectors.  We
-     * start them early to avoid long server startup times.
+     * JBoss waits until the server is fully started to start the connectors.  
+     * We start them early to avoid long server startup times.
      */
     public void postRegister(Boolean registrationDone) {
-        log.info("Starting Tomcat connectors");
+        _log.info("Starting Tomcat connectors");
 
         try {
             ObjectName service = 
                 new ObjectName("jboss.web:type=Service,serviceName=jboss.web");
             Object[] args = {};
             String[] sig = {};
-            Connector[] connectors = 
-                (Connector[]) server.invoke(service, "findConnectors", 
-                                            args, sig);
-            for (int n = 0; n < connectors.length; n++) {
+            Connector[] connectors = (Connector[]) 
+                _server.invoke(service, "findConnectors", args, sig);
 
+            for (int n = 0; n < connectors.length; n++) {
                 Lifecycle lc = (Lifecycle) connectors[n];
                 lc.start();
             }
         } catch (Exception e) {
-            log.error("Unable to start Tomcat connectors: " + e, e);
+            _log.error("Unable to start Tomcat connectors: " + e, e);
         }
     }
 
