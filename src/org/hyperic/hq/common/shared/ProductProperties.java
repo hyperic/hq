@@ -42,8 +42,8 @@ public class ProductProperties {
     private static final Log  _log = 
         LogFactory.getLog(ProductProperties.class);
 
-    private static Properties _props;
-    private static Object     _propsLock;
+    private static       Properties _props;
+    private static final Object     _propsLock = new Object();
 
     private ProductProperties(){}
  
