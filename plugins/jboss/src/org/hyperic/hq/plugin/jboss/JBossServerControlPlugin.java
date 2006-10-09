@@ -27,6 +27,7 @@ package org.hyperic.hq.plugin.jboss;
 
 import java.io.File;
 import java.rmi.RemoteException;
+import java.util.List;
 
 import javax.naming.NamingException;
 
@@ -39,9 +40,9 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.TypeInfo;
 
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.StringConfigOption;
 
 public class JBossServerControlPlugin extends ServerControlPlugin {
 
@@ -49,9 +50,9 @@ public class JBossServerControlPlugin extends ServerControlPlugin {
     protected static final int DEFAULT_TIMEOUT = 10 * 60;
 
     public static final String PROP_CONFIGSET = "configSet";
-    public static final String PROP_CONFIGSET_DEFAULT = "";
     static final String PROP_STOP_PROGRAM = "stop.program";
     static final String PROP_STOP_ARGS    = "stop.args";
+    static final String PROP_START_ARGS   = "start.args";
     
     private static final String SERVER = "jboss.system:type=Server";
 
@@ -121,21 +122,6 @@ public class JBossServerControlPlugin extends ServerControlPlugin {
         }
     }
 
-    protected String[] getCommandArgs() {
-        if (this.isStopProgramAction) {
-            return new String[0];
-        }
-
-        String config = getConfigSet();
-
-        if ((config == null) || (config.length() == 0)) {
-            return super.getCommandArgs();
-        }
-
-        String[] args = { "-c", config };
-        return args;
-    }
-
     protected File getWorkingDirectory() {
         return new File(getInstallPrefix(), "bin");
     }
@@ -191,13 +177,17 @@ public class JBossServerControlPlugin extends ServerControlPlugin {
 
         schema.setDefault(PROP_PROGRAM,
                           installpath + sep + getControlProgram());
+    }
 
-        StringConfigOption opt =
-            new StringConfigOption(PROP_CONFIGSET,
-                                   "Server config file set",
-                                   PROP_CONFIGSET_DEFAULT);
-        opt.setOptional(true); //defaults to "default"
-        schema.addOption(opt);
+    public ConfigSchema getConfigSchema(TypeInfo info, ConfigResponse config) {
+        //XXX re-order for UI display
+        ConfigSchema schema = super.getConfigSchema(info, config);
+        ConfigOption opt = schema.getOption(PROP_PROGRAM);
+        opt.setDescription("Server start program");
+        List options = schema.getOptions();
+        options.remove(opt);
+        options.add(0, opt);
+        return schema;
     }
 
     protected String[] getCommandEnv() {
@@ -220,19 +210,35 @@ public class JBossServerControlPlugin extends ServerControlPlugin {
         return false;
     }
 
-    private boolean hasPrefix() {
-        String prefix = getControlProgramPrefix();
-        return (prefix != null) && (prefix.length() != 0);
-    }
-
     // control methods
+
+    private String[] getProgramArgs(String prop) {
+        String cmdline = getConfig(prop);
+        if (cmdline == null) {
+            return null;
+        }
+        return StringUtil.explodeQuoted(cmdline);        
+    }
 
     public void start() {
         if (isBrandedServer()) {
             return;
         }
 
-        doCommand();
+        String[] args = getProgramArgs(PROP_START_ARGS);
+
+        if (args == null) {
+            String config = getConfigSet();
+
+            if ((config == null) || (config.length() == 0)) {
+                args = new String[0];
+            }
+            else {
+                args = new String[] { "-c", config };
+            }
+        }
+
+        doCommand(getControlProgram(), args);
 
         handleResult(STATE_STARTED);
     }
