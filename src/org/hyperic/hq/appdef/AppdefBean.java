@@ -17,7 +17,6 @@ public abstract class AppdefBean implements Serializable
     protected long _version_;
 
     // legacy stuff, do we really need this?
-    
     protected Integer cid;
 
     protected AppdefBean()
@@ -40,7 +39,7 @@ public abstract class AppdefBean implements Serializable
         return creationTime;
     }
 
-    protected void setCreationTime(long creationTime)
+    public void setCreationTime(long creationTime)
     {
         this.creationTime = creationTime;
     }
@@ -50,7 +49,7 @@ public abstract class AppdefBean implements Serializable
         return modifiedTime;
     }
 
-    protected void setModifiedTime(long modifiedTime)
+    public void setModifiedTime(long modifiedTime)
     {
         this.modifiedTime = modifiedTime;
     }
