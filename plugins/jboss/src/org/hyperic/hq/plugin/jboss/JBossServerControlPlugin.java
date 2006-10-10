@@ -214,7 +214,7 @@ public class JBossServerControlPlugin extends ServerControlPlugin {
 
     private String[] getProgramArgs(String prop) {
         String cmdline = getConfig(prop);
-        if (cmdline == null) {
+        if ((cmdline == null) || (cmdline.length() == 0)) {
             return null;
         }
         return StringUtil.explodeQuoted(cmdline);        
