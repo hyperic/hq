@@ -46,25 +46,11 @@ public class TrackEvent implements java.io.Serializable {
     private String source;      // The source (file, class, etc)
     private String message;     // Message to report
 
-    // Maximum storage allowed in the database
-    private static final int MSGMAX = 500;
-    private static final int SRCMAX = 100;
-
     public TrackEvent(AppdefEntityID id, long time, int level,
                       String source, String message) {
         this.id = id;
         this.time = time;
         this.level = level;
-
-        if (source.length() > SRCMAX)
-            this.source = source.substring(0, SRCMAX - 1);
-        else
-            this.source = source;
-
-        if (message.length() > MSGMAX)
-            this.message = message.substring(0, MSGMAX - 1);
-        else
-            this.message = message;
     }
 
     public TrackEvent(String id, long time, int level,
