@@ -1,7 +1,7 @@
 package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
-import org.hyperic.hq.appdef.shared.pojo.Application;
+import org.hyperic.hq.appdef.Application;
 
 /**
  * CRUD methods, finders, etc. for Application

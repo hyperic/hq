@@ -5,7 +5,7 @@
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping
-    package="org.hyperic.hq.appdef.shared.pojo">
+    package="org.hyperic.hq.appdef">
 
   <class name="AppdefResource" abstract="true">
     <meta attribute="scope-class" inherit="false">public abstract</meta>
@@ -29,11 +29,11 @@
       <column name="DESCRIPTION" not-null="false" length="256" />
     </property>
 
-    <property name="ctime" type="long">
+    <property name="creationTime" type="long">
       <column name="CTIME" not-null="false" />
     </property>
 
-    <property name="mtime" type="long">
+    <property name="modifiedTime" type="long">
       <column name="MTIME" not-null="false" />
     </property>
 
@@ -148,7 +148,7 @@
 
       <bag name="aiServices" table="EAM_AIQ_SERVICE">
         <key column="SERVER_ID" />
-        <one-to-many class="org.hyperic.hq.autoinventory.shared.pojo.AIService" />
+        <one-to-many class="org.hyperic.hq.autoinventory.AIService" />
       </bag>
 
       <bag name="services" table="EAM_SERVICE"

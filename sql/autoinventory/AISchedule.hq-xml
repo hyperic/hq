@@ -5,7 +5,7 @@
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping
-  package="org.hyperic.hq.autoinventory.shared.pojo">
+  package="org.hyperic.hq.autoinventory">
 
   <class name="AISchedule" table="EAM_AUTOINV_SCHEDULE">
     <id name="id" type="integer">

@@ -5,7 +5,7 @@
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping
-  package="org.hyperic.hq.autoinventory.shared.pojo">
+  package="org.hyperic.hq.autoinventory">
 
   <class name="AIService" table="EAM_AIQ_SERVICE">
     <id name="id" type="integer">
@@ -44,11 +44,11 @@
       <column name="IGNORED" />
     </property>
 
-    <property name="ctime" type="long">
+    <property name="creationTime" type="long">
       <column name="CTIME" />
     </property>
 
-    <property name="mtime" type="long">
+    <property name="modifiedTime" type="long">
       <column name="MTIME" />
     </property>
 
@@ -72,9 +72,9 @@
       <column name="RESPONSETIME_CONFIG" not-null="false" />
     </property>
 
-    <many-to-one name="serverId" class="org.hyperic.hq.appdef.shared.pojo.Server">
+    <!--many-to-one name="serverId" class="org.hyperic.hq.appdef.Server">
       <column name="SERVER_ID" not-null="false" />
-    </many-to-one>
+    </many-to-one-->
   </class>
 
 </hibernate-mapping>

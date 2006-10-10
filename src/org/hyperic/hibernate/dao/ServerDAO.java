@@ -1,7 +1,7 @@
 package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
-import org.hyperic.hq.appdef.shared.pojo.Server;
+import org.hyperic.hq.appdef.Server;
 
 /**
  * CRUD methods, finders, etc. for Server

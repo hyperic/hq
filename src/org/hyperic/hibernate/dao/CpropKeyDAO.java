@@ -1,7 +1,7 @@
 package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
-import org.hyperic.hq.appdef.shared.pojo.CpropKey;
+import org.hyperic.hq.appdef.CpropKey;
 
 /**
  * CRUD methods, finders, etc. for CpropKey

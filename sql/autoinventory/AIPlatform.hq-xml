@@ -5,7 +5,7 @@
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping
-  package="org.hyperic.hq.autoinventory.shared.pojo">
+  package="org.hyperic.hq.autoinventory">
 
   <class name="AIPlatform" table="EAM_AIQ_PLATFORM">
     <id name="id" type="integer">
@@ -64,11 +64,11 @@
       <column name="IGNORED" not-null="false" />
     </property>
 
-    <property name="ctime" type="long">
+    <property name="creationTime" type="long">
       <column name="CTIME" not-null="false" />
     </property>
 
-    <property name="mtime" type="long">
+    <property name="modifiedTime" type="long">
       <column name="MTIME" not-null="false" />
     </property>
 

@@ -1,7 +1,7 @@
 package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
-import org.hyperic.hq.appdef.shared.pojo.Cprop;
+import org.hyperic.hq.appdef.Cprop;
 
 /**
  * CRUD methods, finders, etc. for Cprop

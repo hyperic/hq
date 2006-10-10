@@ -1,7 +1,7 @@
 package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
-import org.hyperic.hq.appdef.shared.pojo.Agent;
+import org.hyperic.hq.appdef.Agent;
 
 /**
  * CRUD methods, finders, etc. for Agent

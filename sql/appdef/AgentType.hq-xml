@@ -5,7 +5,7 @@
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping
-  package="org.hyperic.hq.appdef.shared.pojo">
+  package="org.hyperic.hq.appdef">
 
   <class name="AgentType" table="EAM_AGENT_TYPE">
     <id name="id" type="integer">
@@ -28,11 +28,11 @@
       <column name="SORT_NAME" length="80" />
     </property>
 
-    <property name="ctime" type="long">
+    <property name="creationTime" type="long">
       <column name="CTIME" />
     </property>
 
-    <property name="mtime" type="long">
+    <property name="modifiedTime" type="long">
       <column name="MTIME" />
     </property>
 

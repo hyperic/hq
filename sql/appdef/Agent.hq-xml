@@ -5,11 +5,10 @@
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping
-  package="org.hyperic.hq.appdef.shared.pojo">
+  package="org.hyperic.hq.appdef">
 
   <class name="Agent" table="EAM_AGENT">
     <id name="id" type="integer">
-      <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />
       <generator class="sequence">
         <param name="sequence">EAM_AGENT_ID_SEQ</param>
@@ -41,11 +40,11 @@
       <column name="VERSION" length="20" />
     </property>
 
-    <property name="ctime" type="long">
+    <property name="creationTime" type="long">
       <column name="CTIME" />
     </property>
 
-    <property name="mtime" type="long">
+    <property name="modifiedTime" type="long">
       <column name="MTIME" />
     </property>
 
