@@ -2,8 +2,8 @@
 <%@ page errorPage="/common/Error.jsp" %>
 <%@ taglib uri="struts-tiles" prefix="tiles" %>
 <%@ taglib uri="struts-html-el" prefix="html" %>
+<%@ taglib uri="struts-logic-el" prefix="logic" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
 <%@ taglib uri="hq" prefix="hq" %>
 <%@ taglib uri="display" prefix="display" %>
 <%--
@@ -271,6 +271,9 @@
              '<c:out value="${calAction}" escapeXml="false"/>');
   }
 </script>
+
+<tiles:insert definition=".portlet.confirm"/>
+<tiles:insert definition=".portlet.error"/>
 
 <table width="100%"><tr>
 <td width="100%">&nbsp;</td>
