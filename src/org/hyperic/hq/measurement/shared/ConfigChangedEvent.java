@@ -73,7 +73,11 @@ public class ConfigChangedEvent extends AbstractEvent
     
     public String toString() {
         // More clear than the default toString()
-        return this.getMessage();
+        String message = getMessage();
+        if (message != null) {
+            return message;
+        } else {
+            return super.toString();
+        }
     }
-    
 }
