@@ -87,38 +87,38 @@ public abstract class ResourceController extends BaseDispatchAction {
         throws Exception {
         Integer sessionId = RequestUtils.getSessionId(request);
 
-        try {
-            ServletContext ctx = getServlet().getServletContext();            
-            AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
-            AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+        ServletContext ctx = getServlet().getServletContext();            
+        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
 
-            AppdefEntityTypeID aetid = null;
-            if (null == entityId || entityId instanceof AppdefEntityTypeID) {
-                // this can happen if we're an auto-group of platforms
-                request.setAttribute(Constants.CONTROL_ENABLED_ATTR,
-                                     Boolean.FALSE);
-                request.setAttribute(Constants.PERFORMANCE_SUPPORTED_ATTR,
-                                     Boolean.FALSE);
-                try {
-                    if (entityId != null)
-                        aetid = (AppdefEntityTypeID) entityId;
-                    else
-                        aetid = new AppdefEntityTypeID(
-                            RequestUtils.getStringParameter(
-                                request, Constants.APPDEF_RES_TYPE_ID));
-                    
-                    AppdefResourceTypeValue resourceTypeVal =
-                        appdefBoss.findResourceTypeById(sessionId.intValue(),
-                                                        aetid);
-                    request.setAttribute(Constants.RESOURCE_TYPE_ATTR,
-                                         resourceTypeVal);
-                    // Set the title parameters
-                    request.setAttribute(Constants.TITLE_PARAM_ATTR,
-                                         resourceTypeVal.getName());
-                } catch (Exception e) {
-                    // if this param isnt found, leave aetid null 
-                }
-            } else {
+        AppdefEntityTypeID aetid = null;
+        if (null == entityId || entityId instanceof AppdefEntityTypeID) {
+            // this can happen if we're an auto-group of platforms
+            request.setAttribute(Constants.CONTROL_ENABLED_ATTR,
+                                 Boolean.FALSE);
+            request.setAttribute(Constants.PERFORMANCE_SUPPORTED_ATTR,
+                                 Boolean.FALSE);
+            try {
+                if (entityId != null)
+                    aetid = (AppdefEntityTypeID) entityId;
+                else
+                    aetid = new AppdefEntityTypeID(
+                        RequestUtils.getStringParameter(
+                            request, Constants.APPDEF_RES_TYPE_ID));
+                
+                AppdefResourceTypeValue resourceTypeVal =
+                    appdefBoss.findResourceTypeById(sessionId.intValue(),
+                                                    aetid);
+                request.setAttribute(Constants.RESOURCE_TYPE_ATTR,
+                                     resourceTypeVal);
+                // Set the title parameters
+                request.setAttribute(Constants.TITLE_PARAM_ATTR,
+                                     resourceTypeVal.getName());
+            } catch (Exception e) {
+                // if this param isnt found, leave aetid null 
+            }
+        } else {
+            try {
                 log.trace("finding resource [" + entityId + "]");
                 AppdefResourceValue resource =
                     appdefBoss.findById(sessionId.intValue(), entityId);
@@ -167,10 +167,12 @@ public abstract class ResourceController extends BaseDispatchAction {
                     authzBoss.setUserPrefs(sessionId, user.getId(),
                                            user.getPreferences());
                 }
+            } catch (AppdefEntityNotFoundException aenf) {
+                RequestUtils.setError(request, Constants.ERR_RESOURCE_NOT_FOUND);
+                throw aenf;
+            } catch (Exception e) {
+                throw AppdefEntityNotFoundException.build(entityId);
             }
-        }
-        catch (AppdefEntityNotFoundException aenf) {
-            RequestUtils.setError(request, Constants.ERR_RESOURCE_NOT_FOUND);
         }
     }
 
