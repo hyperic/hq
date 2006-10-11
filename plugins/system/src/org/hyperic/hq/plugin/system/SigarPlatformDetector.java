@@ -174,6 +174,10 @@ public class SigarPlatformDetector extends PlatformDetector {
 
                 String address = ifconfig.getAddress();
 
+                if (address.equals(NetFlags.ANY_ADDR)) {
+                    continue; //skip "0.0.0.0"
+                }
+
                 if (!this.networkConnected) {
                     if ((flags & NetFlags.IFF_LOOPBACK) <= 0) {
                         getLog().info(PROP_NETWORK_CONNECTED +
