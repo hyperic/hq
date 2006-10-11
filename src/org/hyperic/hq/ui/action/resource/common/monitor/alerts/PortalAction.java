@@ -31,8 +31,15 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.events.AlertNotFoundException;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.ui.Constants;
@@ -44,12 +51,6 @@ import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.StringUtil;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 
 /**
  * A dispatcher for the alerts portal.
@@ -113,21 +114,27 @@ public class PortalAction extends ResourceController {
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
 
         Integer alertId = new Integer( request.getParameter("a") );
-        AlertValue av = eb.getAlert(sessionID, alertId);
-        AlertDefinitionValue adv =
-            eb.getAlertDefinition( sessionID, av.getAlertDefId() );
-        request.setAttribute(Constants.TITLE_PARAM2_ATTR, adv.getName());
-        
-        AppdefEntityID aeid =
-            new AppdefEntityID(adv.getAppdefType(), adv.getAppdefId());
-        setResource(request, aeid, false);
+        try {
+            AlertValue av = eb.getAlert(sessionID, alertId);
+            AlertDefinitionValue adv =
+                eb.getAlertDefinition( sessionID, av.getAlertDefId() );
+            request.setAttribute(Constants.TITLE_PARAM2_ATTR, adv.getName());
+            
+            AppdefEntityID aeid =
+                new AppdefEntityID(adv.getAppdefType(), adv.getAppdefId());
+            setResource(request, aeid, false);
 
-        Portal portal = Portal.createPortal();
-        setTitle(aeid, portal, "alert.current.platform.detail.Title");
-        portal.addPortlet(new Portlet(".events.alert.view"), 1);
+            Portal portal = Portal.createPortal();
+            setTitle(aeid, portal, "alert.current.platform.detail.Title");
+            portal.addPortlet(new Portlet(".events.alert.view"), 1);
 
-        portal.setDialog(true);
-        request.setAttribute(Constants.PORTAL_KEY, portal);
+            portal.setDialog(true);
+            request.setAttribute(Constants.PORTAL_KEY, portal);
+
+        } catch (AlertNotFoundException e) {
+            RequestUtils.setError(request, "exception.AlertNotFoundException");
+            return listAlerts(mapping, form, request, response);
+        }
 
         return null;
     }
@@ -140,9 +147,8 @@ public class PortalAction extends ResourceController {
     {
         setResource(request);
         
-        super.setNavMapLocation(request,mapping,
-                                 Constants.ALERT_LOC); 
-        // clean out the return path        
+        super.setNavMapLocation(request, mapping, Constants.ALERT_LOC); 
+        // clean out the return path
         SessionUtils.resetReturnPath(request.getSession());
         // set the return path
         try {
