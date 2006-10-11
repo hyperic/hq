@@ -1774,6 +1774,19 @@ has already been defined.
       </schema-directSQL>
     </schemaSpec>
 
+    <schemaSpec version="1.88">
+      <schema-directSQL>
+        <statement>
+          UPDATE EAM_CONFIG_PROPS SET propvalue = '2678400000'
+          WHERE propkey='RT_DATA_PURGE'
+        </statement>
+        <statement>
+          UPDATE EAM_CONFIG_PROPS SET propvalue = '2678400000'
+          WHERE propkey='EVENT_LOG_PURGE'
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
     <schemaSpec version="3.00">
       <schema-directSQL>
         <statement desc="Bump the starting sequence number for eam_appdef_resource_id_seq appdef resource types to be max(id)+1 of specific resources below"
