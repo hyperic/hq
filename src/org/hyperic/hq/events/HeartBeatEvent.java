@@ -23,19 +23,10 @@
  * USA.
  */
 
-/*
- * HeartBeatEvent.java
- *
- * Created on October 22, 2002, 3:54 PM
- */
-
 package org.hyperic.hq.events;
 
 import java.util.Date;
 
-/**
- *
- */
 public class HeartBeatEvent extends AbstractEvent
     implements java.io.Serializable {
     
@@ -47,27 +38,6 @@ public class HeartBeatEvent extends AbstractEvent
         setBeat(beat);
     }
     
-    /** Returns a string representation of the object. In general, the
-     * <code>toString</code> method returns a string that
-     * "textually represents" this object. The result should
-     * be a concise but informative representation that is easy for a
-     * person to read.
-     * It is recommended that all subclasses override this method.
-     * <p>
-     * The <code>toString</code> method for class <code>Object</code>
-     * returns a string consisting of the name of the class of which the
-     * object is an instance, the at-sign character `<code>@</code>', and
-     * the unsigned hexadecimal representation of the hash code of the
-     * object. In other words, this method returns a string equal to the
-     * value of:
-     * <blockquote>
-     * <pre>
-     * getClass().getName() + '@' + Integer.toHexString(hashCode())
-     * </pre></blockquote>
-     *
-     * @return  a string representation of the object.
-     *
-     */
     public String toString() {
         if (this.beat != null)
             return this.beat.toString();
@@ -90,5 +60,4 @@ public class HeartBeatEvent extends AbstractEvent
     public void setBeat(Date beat) {
         this.beat = beat;
     }
-    
 }

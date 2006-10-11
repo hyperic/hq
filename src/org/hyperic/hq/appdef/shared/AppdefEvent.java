@@ -33,8 +33,6 @@ import org.hyperic.hq.events.ResourceEventInterface;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-/**
- */
 public class AppdefEvent extends AbstractEvent implements java.io.Serializable,
         ResourceEventInterface {
 

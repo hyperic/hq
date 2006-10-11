@@ -23,14 +23,7 @@
  * USA.
  */
 
-/*
- * TriggerNotFiredEvent.java
- *
- * Created on October 22, 2002, 3:54 PM
- */
-
 package org.hyperic.hq.events;
-
 
 /** When a trigger fails evaluation
  *
@@ -42,5 +35,4 @@ public class TriggerNotFiredEvent extends AbstractEvent
     public TriggerNotFiredEvent(Integer instanceId) {
         setInstanceId(instanceId);
     }
-    
 }

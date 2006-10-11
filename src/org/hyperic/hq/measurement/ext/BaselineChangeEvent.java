@@ -45,12 +45,11 @@ public class BaselineChangeEvent
         // set the instance id to the baseline id 
         setInstanceId(bid);
     }
-    
-	/**
-	 * @see org.hyperic.hq.events.ResourceEventInterface#getResource()
-	 */
-	public AppdefEntityID getResource() {
-		return null;
-	}
 
+    /**
+     * @see org.hyperic.hq.events.ResourceEventInterface#getResource()
+     */
+    public AppdefEntityID getResource() {
+        return null;
+    }
 }

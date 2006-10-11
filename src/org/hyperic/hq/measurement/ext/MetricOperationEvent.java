@@ -56,5 +56,4 @@ public class MetricOperationEvent extends AbstractEvent {
     public void setMetricIds(Integer[] metricIds) {
         this.metricIds = metricIds;
     }
-    
 }

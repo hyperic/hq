@@ -23,20 +23,11 @@
  * USA.
  */
 
-/*
- * TriggerEvent.java
- *
- * Created on September 27, 2002, 12:42 PM
- */
-
 package org.hyperic.hq.events.ext;
 
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 
-/**
- *
- */
 public class RegisteredTriggerEvent extends AbstractEvent implements java.io.Serializable {
     
     public static final int ADD    = 1;
@@ -89,5 +80,4 @@ public class RegisteredTriggerEvent extends AbstractEvent implements java.io.Ser
     public void setAction(int action) {
         this.action = action;
     }
-    
 }

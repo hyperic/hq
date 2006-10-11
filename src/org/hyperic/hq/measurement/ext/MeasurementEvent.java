@@ -37,8 +37,6 @@ import org.hyperic.hq.product.MetricValue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-/**
- */
 public class MeasurementEvent extends AbstractEvent
     implements java.io.Serializable, ResourceEventInterface {
     private static final Log log = LogFactory.getLog(MeasurementEvent.class);
