@@ -25,12 +25,25 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+import javax.ejb.CreateException;
+import javax.ejb.SessionBean;
+import javax.ejb.SessionContext;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.HibernateException;
+
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hibernate.dao.CpropKeyDAO;
 import org.hyperic.hibernate.Util;
+import org.hyperic.hibernate.dao.CpropKeyDAO;
 import org.hyperic.hq.appdef.CpropKey;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -50,21 +63,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
-
-import javax.ejb.CreateException;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
+import org.hyperic.util.jdbc.DBUtil;
 
 /**
  * @ejb:bean name="CPropManager"
@@ -85,9 +84,7 @@ public class CPropManagerEJBImpl
     private static final String CPROPKEY_TABLE = "EAM_CPROP_KEY";
     private static final String CPROP_SEQUENCE = "EAM_CPROP_ID_SEQ";
 
-    private CpropKeyDAO cpLocalHome;
-    private InitialContext    initialContext;
-    private Log               log = 
+    private Log log = 
         LogFactory.getLog(CPropManagerEJBImpl.class.getName());
 
     private Messenger sender = new Messenger();
@@ -104,18 +101,11 @@ public class CPropManagerEJBImpl
      * @ejb:transaction type="Required"
      */
     public List getKeys(int appdefType, int appdefTypeId){
-        CpropKeyDAO cpHome;
         Collection keys;
-        ArrayList res = new ArrayList();
+        List res = new ArrayList();
 
-        try {
-            keys = DAOFactory.getDAOFactory()
-                .getCpropKeyDAO()
-                .findByAppdefType(appdefType, appdefTypeId);
-        } catch(HibernateException exc){
-            return res;
-        }
-
+        keys = getCPropKeyDAO().findByAppdefType(appdefType, 
+                                                 appdefTypeId);
         for(Iterator i=keys.iterator(); i.hasNext(); ){
             CpropKey key = (CpropKey)i.next();
             res.add(key.getCPropKeyValue());
@@ -170,14 +160,10 @@ public class CPropManagerEJBImpl
         // Insure that the resource type exists
         recValue = this.findResourceType(key.getAppdefType(),
                                          key.getAppdefTypeId());
-        cpHome = DAOFactory.getDAOFactory().getCpropKeyDAO();
+        cpHome = getCPropKeyDAO();
 
-        try {
-            cpKey = cpHome.findByKey(key.getAppdefType(), 
-                                     key.getAppdefTypeId(), key.getKey());
-        } catch(HibernateException exc){
-            cpKey = null;
-        }
+        cpKey = cpHome.findByKey(key.getAppdefType(), 
+                                 key.getAppdefTypeId(), key.getKey());
 
         if(cpKey != null){
             throw new CPropKeyExistsException("Key, '" + key.getKey() + "', " +
@@ -186,12 +172,8 @@ public class CPropManagerEJBImpl
                " type, '" + recValue.getName() + "'");
         }
 
-        try {
-            cpHome.create(key.getAppdefType(), key.getAppdefTypeId(),
-                          key.getKey(), key.getDescription());
-        } catch(HibernateException exc){
-            throw new SystemException(exc);
-        }
+        cpHome.create(key.getAppdefType(), key.getAppdefTypeId(),
+                      key.getKey(), key.getDescription());
     }
 
     /**
@@ -214,11 +196,10 @@ public class CPropManagerEJBImpl
         Connection conn = null;
         int keyId;
 
-        cpHome = getCPropKeyLocalHome();
+        cpHome = getCPropKeyDAO();
 
-        try {
-            cpKey = cpHome.findByKey(appdefType, appdefTypeId, key);
-        } catch(HibernateException exc){
+        cpKey = cpHome.findByKey(appdefType, appdefTypeId, key);
+        if (cpKey == null) {
             throw new CPropKeyNotFoundException("Key, '" + key + "', does not"+
                              " exist for " +
                              AppdefEntityConstants.typeToString(appdefType) +
@@ -228,11 +209,7 @@ public class CPropManagerEJBImpl
         CPropKeyPK pk = cpKey.getPrimaryKey();
         keyId = pk.getId().intValue();
 
-        try {
-            cpHome.remove(cpKey);
-        } catch(HibernateException exc){
-            throw new SystemException(exc);
-        }
+        cpHome.remove(cpKey);
 
         try {
             conn = cpHome.getSession().connection();
@@ -240,12 +217,12 @@ public class CPropManagerEJBImpl
                                          " WHERE KEYID=?");
             stmt.setInt(1, keyId);
             stmt.executeUpdate();
-            stmt.close();
         } catch(SQLException exc){
-            this.log.error("Unable to delete CPropKey values: " +
-                           exc.getMessage(), exc);
+            log.error("Unable to delete CPropKey values: " +
+                      exc.getMessage(), exc);
             throw new SystemException(exc);
         } finally {
+            DBUtil.closeStatement(this, stmt);
             cpHome.getSession().disconnect();
         }
     }
@@ -267,7 +244,8 @@ public class CPropManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void setValue(AppdefEntityID aID, int typeId, String key, String val)
+    public void setValue(AppdefEntityID aID, int typeId, String key, 
+                         String val)
         throws CPropKeyNotFoundException, AppdefEntityNotFoundException,
                PermissionException
     {
@@ -282,7 +260,8 @@ public class CPropManagerEJBImpl
         selStmt = null;
         delStmt = null;
         addStmt = null;
-        cpHome = DAOFactory.getDAOFactory().getCpropKeyDAO();
+        cpHome = getCPropKeyDAO();
+
         try {
             CPropKeyPK pk = propKey.getPrimaryKey();
             final int keyId = pk.getId().intValue();
@@ -337,10 +316,6 @@ public class CPropManagerEJBImpl
                 for(int i=0; i<chunks.length; i++){
                     addStmt.setInt(3, i);
                     addStmt.setString(4, chunks[i]);
-
-                    // According to the javadocs, executeQuery should
-                    // never return null -- it has been for me under
-                    // pointbase.
                     addStmt.executeUpdate();
                 }
             }
@@ -350,28 +325,20 @@ public class CPropManagerEJBImpl
                           " changed from " + oldval + " to " + val);
             
             // Send cprop value changed event
-            CPropChangeEvent event =
-                new CPropChangeEvent(aID, key, oldval, val);
+            CPropChangeEvent event = new CPropChangeEvent(aID, key, oldval, 
+                                                          val);
             
             // Now publish the event
             sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
-            if (rs != null) {
-                rs.close();
-            }
-            if (selStmt != null) {
-                selStmt.close();
-            }
-            if (delStmt != null) {
-                delStmt.close();
-            }
-            if (addStmt != null) {
-                addStmt.close();
-            }
         } catch(SQLException exc){
-            this.log.error("Unable to update CPropKey values: " + 
-                           exc.getMessage(), exc);
+            log.error("Unable to update CPropKey values: " + 
+                      exc.getMessage(), exc);
             throw new SystemException(exc);
         } finally {
+            DBUtil.closeResultSet(this, rs);
+            DBUtil.closeStatement(this, selStmt);
+            DBUtil.closeStatement(this, delStmt);
+            DBUtil.closeStatement(this, addStmt);
             cpHome.getSession().disconnect();
         }
     }
@@ -406,7 +373,7 @@ public class CPropManagerEJBImpl
         int typeId  = recType.getId().intValue();
         
         propKey = this.getKey(aID, typeId, key);
-        cpHome = DAOFactory.getDAOFactory().getCpropKeyDAO();
+        cpHome  = getCPropKeyDAO();
         try {
             CPropKeyPK pk = propKey.getPrimaryKey();
             final int keyId = pk.getId().intValue();
@@ -428,8 +395,6 @@ public class CPropManagerEJBImpl
                 buf.append(rs.getString(1));
             }
 
-            rs.close();
-            stmt.close();
             if(didSomething)
                 return buf.toString();
             else
@@ -439,6 +404,8 @@ public class CPropManagerEJBImpl
                            exc.getMessage(), exc);
             throw new SystemException(exc);
         } finally {
+            DBUtil.closeResultSet(this, rs);
+            DBUtil.closeStatement(this, stmt);
             cpHome.getSession().disconnect();
         }
     }
@@ -450,7 +417,7 @@ public class CPropManagerEJBImpl
         Properties res = new Properties();
         ResultSet rs = null;
 
-        CpropKeyDAO cpdao = DAOFactory.getDAOFactory().getCpropKeyDAO();
+        CpropKeyDAO cpdao = getCPropKeyDAO();
         try {
             StringBuffer buf;
             String lastKey;
@@ -489,13 +456,13 @@ public class CPropManagerEJBImpl
             if(buf != null && buf.length() != 0){
                 res.setProperty(lastKey, buf.toString());
             }
-            rs.close();
-            stmt.close();
         } catch(SQLException exc){
-            this.log.error("Unable to get CPropKey values: " +
-                           exc.getMessage(), exc);
+            log.error("Unable to get CPropKey values: " +
+                      exc.getMessage(), exc);
             throw new SystemException(exc);
         } finally {
+            DBUtil.closeResultSet(this, rs);
+            DBUtil.closeStatement(this, stmt);
             cpdao.getSession().disconnect();
         }
 
@@ -548,11 +515,9 @@ public class CPropManagerEJBImpl
      *
      * @ejb:interface-method
      */
-    public void setConfigResponse(AppdefEntityID aID,
-                                  int typeId,
-                                  byte[] data)
-        throws PermissionException, AppdefEntityNotFoundException {
-
+    public void setConfigResponse(AppdefEntityID aID, int typeId, byte[] data)
+        throws PermissionException, AppdefEntityNotFoundException 
+    {
         if (data == null) {
             return;
         }
@@ -564,15 +529,18 @@ public class CPropManagerEJBImpl
             throw new SystemException(e);
         }
         
-        log.debug("cprops=" + cprops);
-        log.debug("aID=" + aID.toString() + ", typeId=" + typeId);
+        if (log.isDebugEnabled()) {
+            log.debug("cprops=" + cprops);
+            log.debug("aID=" + aID.toString() + ", typeId=" + typeId);
+        }
+
         for (Iterator it=cprops.getKeys().iterator(); it.hasNext();) {
             String key = (String)it.next();
             String val = cprops.getValue(key);
             try {
                 setValue(aID, typeId, key, val);
             } catch (CPropKeyNotFoundException e) {
-                log.error(e.getMessage());
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -583,12 +551,11 @@ public class CPropManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void deleteValues(int appdefType, int id)
-    {
+    public void deleteValues(int appdefType, int id) {
         PreparedStatement stmt = null;
         Connection conn = null;
 
-        CpropKeyDAO cpdao = DAOFactory.getDAOFactory().getCpropKeyDAO();
+        CpropKeyDAO cpdao = getCPropKeyDAO();
         try {
             conn = cpdao.getSession().connection();
             stmt = conn.prepareStatement("DELETE FROM " + CPROP_TABLE + " " +
@@ -603,29 +570,18 @@ public class CPropManagerEJBImpl
             stmt.setInt(2, id);
                                          
             stmt.executeUpdate();
-            stmt.close();
         } catch(SQLException exc){
-            this.log.error("Unable to delete CProp values: " +
-                           exc.getMessage(), exc);
+            log.error("Unable to delete CProp values: " +
+                      exc.getMessage(), exc);
             throw new SystemException(exc);
         } finally {
+            DBUtil.closeStatement(this, stmt);
             cpdao.getSession().disconnect();
         }
     }
 
-    private CpropKeyDAO getCPropKeyLocalHome(){
+    private CpropKeyDAO getCPropKeyDAO(){
         return DAOFactory.getDAOFactory().getCpropKeyDAO();
-    }
-
-    private InitialContext getInitialContext(){
-        if(this.initialContext == null){
-            try {
-                this.initialContext = new InitialContext();
-            } catch(NamingException exc){
-                throw new SystemException(exc);
-            }
-        }
-        return this.initialContext;
     }
 
     private CpropKey getKey(AppdefEntityID aID, int typeId, String key)
@@ -634,15 +590,10 @@ public class CPropManagerEJBImpl
     {
         CpropKey res;
 
-        try {
-            res = getCPropKeyLocalHome().findByKey(aID.getType(), typeId, key);
-        } catch(HibernateException exc){
-            res = null;
-        }
+        res = getCPropKeyDAO().findByKey(aID.getType(), typeId, key);
 
         if(res == null){
-            String msg =
-                "Key, '" + key + "', does " +
+            String msg = "Key, '" + key + "', does " +
                 "not exist for aID=" + aID + ", typeId=" + typeId;
             throw new CPropKeyNotFoundException(msg);
         }
