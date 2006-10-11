@@ -142,4 +142,8 @@ public class Util
         }
     }
 
+    public static String getDialect()
+    {
+        return configuration.getProperty(Environment.DIALECT);
+    }
 }

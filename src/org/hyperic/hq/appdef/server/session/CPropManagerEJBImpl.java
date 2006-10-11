@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.dao.CpropKeyDAO;
+import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.CpropKey;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -49,7 +50,6 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
-import org.hyperic.util.jdbc.DBUtil;
 
 import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
@@ -235,18 +235,18 @@ public class CPropManagerEJBImpl
         }
 
         try {
-            conn = this.getDBConn();
+            conn = cpHome.getSession().connection();
             stmt = conn.prepareStatement("DELETE FROM " + CPROP_TABLE +
                                          " WHERE KEYID=?");
             stmt.setInt(1, keyId);
             stmt.executeUpdate();
+            stmt.close();
         } catch(SQLException exc){
             this.log.error("Unable to delete CPropKey values: " +
                            exc.getMessage(), exc);
             throw new SystemException(exc);
         } finally {
-            DBUtil.closeStatement("CPropManager", stmt);
-            DBUtil.closeConnection("CPropManager", conn);
+            cpHome.getSession().disconnect();
         }
     }
 
@@ -282,11 +282,12 @@ public class CPropManagerEJBImpl
         selStmt = null;
         delStmt = null;
         addStmt = null;
+        cpHome = DAOFactory.getDAOFactory().getCpropKeyDAO();
         try {
-            CPropKeyPK pk = (CPropKeyPK)propKey.getPrimaryKey();
+            CPropKeyPK pk = propKey.getPrimaryKey();
             final int keyId = pk.getId().intValue();
 
-            conn = this.getDBConn();
+            conn = cpHome.getSession().connection();
                                     
             // Lock the rows we want to trash
             selStmt = conn.prepareStatement("SELECT PROPVALUE FROM " +
@@ -320,7 +321,7 @@ public class CPropManagerEJBImpl
                 StringBuffer sql = new StringBuffer()
                     .append("INSERT INTO ")
                     .append(CPROP_TABLE);
-                if (DBUtil.isOracle(conn)) {
+                if (Util.getDialect().indexOf("Oracle") > 0) {
                     sql.append(" (id,keyid,appdef_id,value_idx,PROPVALUE) VALUES (")
                         .append(CPROP_SEQUENCE)
                         .append(".NEXTVAL,")
@@ -354,15 +355,24 @@ public class CPropManagerEJBImpl
             
             // Now publish the event
             sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
+            if (rs != null) {
+                rs.close();
+            }
+            if (selStmt != null) {
+                selStmt.close();
+            }
+            if (delStmt != null) {
+                delStmt.close();
+            }
+            if (addStmt != null) {
+                addStmt.close();
+            }
         } catch(SQLException exc){
             this.log.error("Unable to update CPropKey values: " + 
                            exc.getMessage(), exc);
             throw new SystemException(exc);
         } finally {
-            DBUtil.closeJDBCObjects("CPropManager", null, selStmt, rs);
-            DBUtil.closeStatement("CPropManager", delStmt);
-            DBUtil.closeStatement("CPropManager", addStmt);
-            DBUtil.closeConnection("CPropManager", conn);
+            cpHome.getSession().disconnect();
         }
     }
 
@@ -396,13 +406,14 @@ public class CPropManagerEJBImpl
         int typeId  = recType.getId().intValue();
         
         propKey = this.getKey(aID, typeId, key);
+        cpHome = DAOFactory.getDAOFactory().getCpropKeyDAO();
         try {
-            CPropKeyPK pk = (CPropKeyPK)propKey.getPrimaryKey();
+            CPropKeyPK pk = propKey.getPrimaryKey();
             final int keyId = pk.getId().intValue();
             StringBuffer buf = new StringBuffer();
             boolean didSomething;
 
-            conn = this.getDBConn();
+            conn = cpHome.getSession().connection();
             stmt = conn.prepareStatement("SELECT PROPVALUE FROM " + 
                                          CPROP_TABLE +
                                          " WHERE KEYID=? AND APPDEF_ID=? " +
@@ -417,6 +428,8 @@ public class CPropManagerEJBImpl
                 buf.append(rs.getString(1));
             }
 
+            rs.close();
+            stmt.close();
             if(didSomething)
                 return buf.toString();
             else
@@ -426,7 +439,7 @@ public class CPropManagerEJBImpl
                            exc.getMessage(), exc);
             throw new SystemException(exc);
         } finally {
-            DBUtil.closeJDBCObjects("CPropManager", conn, stmt, rs);
+            cpHome.getSession().disconnect();
         }
     }
 
@@ -437,11 +450,12 @@ public class CPropManagerEJBImpl
         Properties res = new Properties();
         ResultSet rs = null;
 
+        CpropKeyDAO cpdao = DAOFactory.getDAOFactory().getCpropKeyDAO();
         try {
             StringBuffer buf;
             String lastKey;
 
-            conn = this.getDBConn();
+            conn = cpdao.getSession().connection();
             stmt = conn.prepareStatement("SELECT A." + column +
                                          ", B.propvalue FROM " + 
                                          CPROPKEY_TABLE + " A, " +
@@ -475,12 +489,14 @@ public class CPropManagerEJBImpl
             if(buf != null && buf.length() != 0){
                 res.setProperty(lastKey, buf.toString());
             }
+            rs.close();
+            stmt.close();
         } catch(SQLException exc){
             this.log.error("Unable to get CPropKey values: " +
                            exc.getMessage(), exc);
             throw new SystemException(exc);
         } finally {
-            DBUtil.closeJDBCObjects("CPropManager", conn, stmt, rs);
+            cpdao.getSession().disconnect();
         }
 
         return res;
@@ -572,8 +588,9 @@ public class CPropManagerEJBImpl
         PreparedStatement stmt = null;
         Connection conn = null;
 
+        CpropKeyDAO cpdao = DAOFactory.getDAOFactory().getCpropKeyDAO();
         try {
-            conn = this.getDBConn();
+            conn = cpdao.getSession().connection();
             stmt = conn.prepareStatement("DELETE FROM " + CPROP_TABLE + " " +
                                          "WHERE ID IN " +
                                          "(SELECT prop.id " +
@@ -586,13 +603,13 @@ public class CPropManagerEJBImpl
             stmt.setInt(2, id);
                                          
             stmt.executeUpdate();
+            stmt.close();
         } catch(SQLException exc){
             this.log.error("Unable to delete CProp values: " +
                            exc.getMessage(), exc);
             throw new SystemException(exc);
         } finally {
-            DBUtil.closeStatement("CPropManager", stmt);
-            DBUtil.closeConnection("CPropManager", conn);
+            cpdao.getSession().disconnect();
         }
     }
 
@@ -609,22 +626,6 @@ public class CPropManagerEJBImpl
             }
         }
         return this.initialContext;
-    }
-
-    private Connection getDBConn()
-        throws SQLException
-    {
-        Connection conn;
-
-        try {
-            conn = DBUtil.getConnByContext(this.getInitialContext(), 
-                                           DATASOURCE);
-        } catch(NamingException exc){
-            throw new SystemException("Unable to get database context: " +
-                                         exc.getMessage(), exc);
-        }
-
-        return conn;
     }
 
     private CpropKey getKey(AppdefEntityID aID, int typeId, String key)

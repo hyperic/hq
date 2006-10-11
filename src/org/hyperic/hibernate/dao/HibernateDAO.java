@@ -33,7 +33,7 @@ public abstract class HibernateDAO
         this.session = session;
     }
 
-    protected Session getSession()
+    public Session getSession()
     {
         if (session == null) {
             throw new IllegalStateException("Session not set.");
