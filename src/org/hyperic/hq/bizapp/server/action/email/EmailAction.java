@@ -58,7 +58,6 @@ import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
-import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -76,7 +75,7 @@ import org.hyperic.util.units.FormattedNumber;
  */
 public class EmailAction extends EmailActionConfig implements ActionInterface {
     private static final String LINK_FORMAT =
-        "alerts/Alerts.do?mode=viewAlert&type={0,number,#}&rid={1,number,#}&a={2,number,#}";
+        "alerts/Alerts.do?mode=viewAlert&eid={0,number,#}:{1,number,#}&a={2,number,#}";
 
     private static final String NOTAVAIL = "Not Available";
     private static final String SEPARATOR =
@@ -116,9 +115,9 @@ public class EmailAction extends EmailActionConfig implements ActionInterface {
         StringBuffer subj = new StringBuffer("[HQ] ")
             .append(createPriority(alertdef))
             .append(" - ")
-            .append(RES_NAME_HOLDER)
+            .append(alertdef.getName())
             .append(" ")
-            .append(alertdef.getName());
+            .append(RES_NAME_HOLDER);
         return subj.toString();
     }
 
