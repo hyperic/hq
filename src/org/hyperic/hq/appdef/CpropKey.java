@@ -1,5 +1,8 @@
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.shared.CPropKeyValue;
+import org.hyperic.hq.appdef.shared.CPropKeyPK;
+
 import java.io.Serializable;
 
 /**
@@ -11,7 +14,7 @@ public class CpropKey implements Serializable
     private long _version_;
     private Integer appdefType;
     private Integer appdefTypeId;
-    private String propKey;
+    private String key;
     private String description;
 
     /**
@@ -63,14 +66,14 @@ public class CpropKey implements Serializable
         this.appdefTypeId = appdefTypeId;
     }
 
-    public String getPropKey()
+    public String getKey()
     {
-        return this.propKey;
+        return this.key;
     }
 
-    public void setPropKey(String propKey)
+    public void setKey(String propKey)
     {
-        this.propKey = propKey;
+        this.key = propKey;
     }
 
     public String getDescription()
@@ -83,6 +86,23 @@ public class CpropKey implements Serializable
         this.description = description;
     }
 
+    public CPropKeyValue getCPropKeyValue()
+    {
+        CPropKeyValue value = new CPropKeyValue();
+        value.setAppdefType(appdefType == null ? 0 : appdefType.intValue());
+        value.setAppdefTypeId(appdefTypeId == null ? 0 : appdefTypeId.intValue());
+        value.setDescription(description);
+        value.setKey(key);
+        value.setId(id);
+        return value;
+    }
+
+    public CPropKeyPK getPrimaryKey()
+    {
+        CPropKeyPK key = new CPropKeyPK();
+        key.setId(getId());
+        return key;
+    }
 
     // TODO: fix equals and hashCode
     public boolean equals(Object other)
@@ -94,7 +114,7 @@ public class CpropKey implements Serializable
 
         return ((this.getAppdefType() == castOther.getAppdefType()) || (this.getAppdefType() != null && castOther.getAppdefType() != null && this.getAppdefType().equals(castOther.getAppdefType())))
                && ((this.getAppdefTypeId() == castOther.getAppdefTypeId()) || (this.getAppdefTypeId() != null && castOther.getAppdefTypeId() != null && this.getAppdefTypeId().equals(castOther.getAppdefTypeId())))
-               && ((this.getPropKey() == castOther.getPropKey()) || (this.getPropKey() != null && castOther.getPropKey() != null && this.getPropKey().equals(castOther.getPropKey())));
+               && ((this.getKey() == castOther.getKey()) || (this.getKey() != null && castOther.getKey() != null && this.getKey().equals(castOther.getKey())));
     }
 
     public int hashCode()

@@ -25,24 +25,12 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
-
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.HibernateException;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.dao.CpropKeyDAO;
+import org.hyperic.hq.appdef.CpropKey;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -50,11 +38,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.CPropChangeEvent;
 import org.hyperic.hq.appdef.shared.CPropKeyExistsException;
-import org.hyperic.hq.appdef.shared.CPropKeyLocal;
-import org.hyperic.hq.appdef.shared.CPropKeyLocalHome;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropKeyPK;
-import org.hyperic.hq.appdef.shared.CPropKeyUtil;
 import org.hyperic.hq.appdef.shared.CPropKeyValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
@@ -66,8 +51,20 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.jdbc.DBUtil;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import javax.ejb.CreateException;
+import javax.ejb.SessionBean;
+import javax.ejb.SessionContext;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * @ejb:bean name="CPropManager"
@@ -88,7 +85,7 @@ public class CPropManagerEJBImpl
     private static final String CPROPKEY_TABLE = "EAM_CPROP_KEY";
     private static final String CPROP_SEQUENCE = "EAM_CPROP_ID_SEQ";
 
-    private CPropKeyLocalHome cpLocalHome;
+    private CpropKeyDAO cpLocalHome;
     private InitialContext    initialContext;
     private Log               log = 
         LogFactory.getLog(CPropManagerEJBImpl.class.getName());
@@ -104,22 +101,23 @@ public class CPropManagerEJBImpl
      * @return a List of CPropKeyValue objects
      *
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public List getKeys(int appdefType, int appdefTypeId){
-        CPropKeyLocalHome cpHome;
+        CpropKeyDAO cpHome;
         Collection keys;
         ArrayList res = new ArrayList();
 
         try {
-            keys = this.getCPropKeyLocalHome().findByAppdefType(appdefType,
-                                                                appdefTypeId);
-        } catch(FinderException exc){
+            keys = DAOFactory.getDAOFactory()
+                .getCpropKeyDAO()
+                .findByAppdefType(appdefType, appdefTypeId);
+        } catch(HibernateException exc){
             return res;
         }
 
         for(Iterator i=keys.iterator(); i.hasNext(); ){
-            CPropKeyLocal key = (CPropKeyLocal)i.next();
-
+            CpropKey key = (CpropKey)i.next();
             res.add(key.getCPropKeyValue());
         }
         return res;
@@ -132,6 +130,7 @@ public class CPropManagerEJBImpl
      *        that the key references could not be found
      * @throw CPropKeyExistsException if the key already exists
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
 
     public void addKey(TypeInfo info, String key, String description)
@@ -159,23 +158,24 @@ public class CPropManagerEJBImpl
      *        that the key references could not be found
      * @throw CPropKeyExistsException if the key already exists
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public void addKey(CPropKeyValue key)
         throws AppdefEntityNotFoundException, CPropKeyExistsException
     {
         AppdefResourceTypeValue recValue;
-        CPropKeyLocalHome cpHome;
-        CPropKeyLocal cpKey;
+        CpropKeyDAO cpHome;
+        CpropKey cpKey;
 
         // Insure that the resource type exists
         recValue = this.findResourceType(key.getAppdefType(),
                                          key.getAppdefTypeId());
-        cpHome = this.getCPropKeyLocalHome();
+        cpHome = DAOFactory.getDAOFactory().getCpropKeyDAO();
 
         try {
             cpKey = cpHome.findByKey(key.getAppdefType(), 
                                      key.getAppdefTypeId(), key.getKey());
-        } catch(FinderException exc){
+        } catch(HibernateException exc){
             cpKey = null;
         }
 
@@ -189,7 +189,7 @@ public class CPropManagerEJBImpl
         try {
             cpHome.create(key.getAppdefType(), key.getAppdefTypeId(),
                           key.getKey(), key.getDescription());
-        } catch(CreateException exc){
+        } catch(HibernateException exc){
             throw new SystemException(exc);
         }
     }
@@ -203,33 +203,34 @@ public class CPropManagerEJBImpl
      *
      * @throw CPropKeyNotFoundException if the CPropKey could not be found
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public void deleteKey(int appdefType, int appdefTypeId, String key)
         throws CPropKeyNotFoundException
     {
         PreparedStatement stmt = null;
-        CPropKeyLocalHome cpHome;
-        CPropKeyLocal cpKey;
+        CpropKeyDAO cpHome;
+        CpropKey cpKey;
         Connection conn = null;
         int keyId;
 
-        cpHome = this.getCPropKeyLocalHome();
+        cpHome = getCPropKeyLocalHome();
 
         try {
             cpKey = cpHome.findByKey(appdefType, appdefTypeId, key);
-        } catch(FinderException exc){
+        } catch(HibernateException exc){
             throw new CPropKeyNotFoundException("Key, '" + key + "', does not"+
                              " exist for " +
                              AppdefEntityConstants.typeToString(appdefType) +
                              " " + appdefTypeId);
         }
 
-        CPropKeyPK pk = (CPropKeyPK)cpKey.getPrimaryKey();
+        CPropKeyPK pk = cpKey.getPrimaryKey();
         keyId = pk.getId().intValue();
 
         try {
-            cpKey.remove();
-        } catch(RemoveException exc){
+            cpHome.remove(cpKey);
+        } catch(HibernateException exc){
             throw new SystemException(exc);
         }
 
@@ -264,18 +265,19 @@ public class CPropManagerEJBImpl
      * @throw AppdefEntityNotFoundException if id for 'aVal' specifies
      *        a resource which does not exist
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public void setValue(AppdefEntityID aID, int typeId, String key, String val)
         throws CPropKeyNotFoundException, AppdefEntityNotFoundException,
                PermissionException
     {
         PreparedStatement selStmt, delStmt, addStmt;
-        CPropKeyLocalHome cpHome;
-        CPropKeyLocal propKey;
+        CpropKeyDAO cpHome;
+        CpropKey propKey;
         Connection conn = null;
         ResultSet rs = null;
         
-        propKey = this.getKey(aID, typeId, key);
+        propKey = getKey(aID, typeId, key);
 
         selStmt = null;
         delStmt = null;
@@ -378,13 +380,14 @@ public class CPropManagerEJBImpl
      *        not found
      *
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public String getValue(AppdefEntityValue aVal, String key)
         throws CPropKeyNotFoundException, AppdefEntityNotFoundException,
                PermissionException
     {
-        CPropKeyLocalHome cpHome;
-        CPropKeyLocal propKey;
+        CpropKeyDAO cpHome;
+        CpropKey propKey;
         PreparedStatement stmt = null;
         Connection conn = null;
         ResultSet rs = null;
@@ -494,6 +497,7 @@ public class CPropManagerEJBImpl
      *         no custom properties defined for the resource
      *
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public Properties getEntries(AppdefEntityID aID)
         throws PermissionException, AppdefEntityNotFoundException
@@ -510,6 +514,7 @@ public class CPropManagerEJBImpl
      * @return The properties stored for a specific entity ID
      *
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public Properties getDescEntries(AppdefEntityID aID)
         throws PermissionException, AppdefEntityNotFoundException
@@ -560,6 +565,7 @@ public class CPropManagerEJBImpl
      * Remove custom properties for a given resource.
      *
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public void deleteValues(int appdefType, int id)
     {
@@ -590,15 +596,8 @@ public class CPropManagerEJBImpl
         }
     }
 
-    private CPropKeyLocalHome getCPropKeyLocalHome(){
-        if(this.cpLocalHome == null) {
-            try {
-                this.cpLocalHome = CPropKeyUtil.getLocalHome();
-            } catch(NamingException exc){
-                throw new SystemException(exc);
-            }
-        }
-        return this.cpLocalHome;
+    private CpropKeyDAO getCPropKeyLocalHome(){
+        return DAOFactory.getDAOFactory().getCpropKeyDAO();
     }
 
     private InitialContext getInitialContext(){
@@ -628,15 +627,15 @@ public class CPropManagerEJBImpl
         return conn;
     }
 
-    private CPropKeyLocal getKey(AppdefEntityID aID, int typeId, String key)
+    private CpropKey getKey(AppdefEntityID aID, int typeId, String key)
         throws CPropKeyNotFoundException, AppdefEntityNotFoundException,
                PermissionException
     {
-        CPropKeyLocal res;
+        CpropKey res;
 
         try {
-            res = this.getCPropKeyLocalHome().findByKey(aID.getType(), typeId, key);
-        } catch(FinderException exc){
+            res = getCPropKeyLocalHome().findByKey(aID.getType(), typeId, key);
+        } catch(HibernateException exc){
             res = null;
         }
 

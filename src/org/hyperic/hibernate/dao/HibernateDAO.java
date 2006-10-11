@@ -4,6 +4,7 @@ import org.hibernate.LockMode;
 import org.hibernate.Session;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * Hibernate Data Access Object
@@ -50,6 +51,11 @@ public abstract class HibernateDAO
         return lock
                ? getSession().load(getPersistentClass(), id, LockMode.UPGRADE)
                : getSession().load(getPersistentClass(), id);
+    }
+
+    public Collection findAll()
+    {
+        return getSession().createCriteria(getPersistentClass()).list();
     }
 
     protected void evict(Object entity)

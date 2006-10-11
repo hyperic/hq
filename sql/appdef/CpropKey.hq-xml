@@ -23,7 +23,7 @@
       <property name="appdefTypeId" type="integer">
         <column name="APPDEF_TYPEID" index="EAM_CROP_KEY_UNIQUE" not-null="true" />
       </property>
-      <property name="propKey" type="string">
+      <property name="key" type="string">
         <column name="PROPKEY" index="EAM_CROP_KEY_UNIQUE" not-null="true" length="100" />
       </property>
     </natural-id>
