@@ -20,6 +20,8 @@ public abstract class DAOFactory
     public static final int HIBERNATE = 1;
     public static final int HIBERNATE_MOCKTEST = 2;
 
+    public static int DEFAULT = HIBERNATE;
+
     public abstract AgentDAO getAgentDAO();
     public abstract ApplicationDAO getApplicationDAO();
     public abstract ConfigResponseDAO getConfigResponseDAO();
@@ -29,9 +31,11 @@ public abstract class DAOFactory
     public abstract ServerDAO getServerDAO();
     public abstract ServiceDAO getServiceDAO();
 
+    public static ThreadLocal defaultSession = new ThreadLocal();
+
     public static DAOFactory getDAOFactory()
     {
-        return getDAOFactory(HIBERNATE);
+        return getDAOFactory(DEFAULT);
     }
 
     /**
@@ -50,8 +54,20 @@ public abstract class DAOFactory
         case HIBERNATE:
             return new HibernateDAOFactory();
         case HIBERNATE_MOCKTEST:
-            return new HibernateMockDAOFactory();
+            HibernateMockDAOFactory factory = new HibernateMockDAOFactory();
+            factory.setCurrentSession((Session)defaultSession.get());
+            return factory;
         }
         throw new RuntimeException("DAOFactory type not found: " + which);
+    }
+
+    public static void setDefaultDAOFactory(int which)
+    {
+        DEFAULT = which;
+    }
+
+    public static void setMockSession(Session session)
+    {
+        defaultSession.set(session);
     }
 }

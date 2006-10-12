@@ -14,13 +14,7 @@
  */
 package org.hyperic;
 
-import javax.jms.MessageListener;
-import javax.jms.Queue;
-import javax.jms.QueueConnectionFactory;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
+import com.mockrunner.mock.ejb.MockUserTransaction;
 import org.mockejb.MDBDescriptor;
 import org.mockejb.MockContainer;
 import org.mockejb.OptionalCactusTestCase;
@@ -28,10 +22,15 @@ import org.mockejb.SessionBeanDescriptor;
 import org.mockejb.jms.MockQueue;
 import org.mockejb.jms.QueueConnectionFactoryImpl;
 import org.mockejb.jndi.MockContextFactory;
-
 import org.postgresql.jdbc2.optional.SimpleDataSource;
+import org.hyperic.dao.DAOFactory;
 
-import com.mockrunner.mock.ejb.MockUserTransaction;
+import javax.jms.MessageListener;
+import javax.jms.Queue;
+import javax.jms.QueueConnectionFactory;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 /**
  * Abstract base class for all JUnit tests that use Mock EJB
@@ -141,6 +140,10 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
         ds.setPassword(password);
         ds.setServerName(server);
         context.rebind("java:/HypericDS", ds);
+
+        // set dao factory suitable for out-of-container testing via mockejb
+        // be sure to set the mocksession
+        DAOFactory.setDefaultDAOFactory(DAOFactory.HIBERNATE_MOCKTEST);
     }
 
    /**
@@ -176,6 +179,29 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
         // Deploy operation creates Home and binds it to JNDI
         this.container.deploy(sampleServiceDescriptor);
     }
+
+    /**
+     * Convenience method for registering session beans
+     * @param jndiName
+     * @param home
+     * @param local
+     * @param impl
+     * @throws Exception
+     */
+    public void deploySessionBean(String jndiName, Class home, Class local,
+                                  Class impl)
+    	throws Exception
+    {
+        if (isRunningOnServer())
+            return;
+
+        SessionBeanDescriptor sampleServiceDescriptor =
+            new SessionBeanDescriptor(jndiName, home, local,impl);
+        // Deploy operation creates Home and binds it to JNDI
+        this.container.deploy(sampleServiceDescriptor);
+    }
+
+
     
     /**
      * Deploy an MDB attached to a queue to the mock container
