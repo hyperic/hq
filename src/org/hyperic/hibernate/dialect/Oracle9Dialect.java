@@ -11,7 +11,6 @@ public class Oracle9Dialect
     extends org.hibernate.dialect.Oracle9Dialect
 {
     public Oracle9Dialect() {
-        super();
         registerColumnType(Types.VARBINARY, 2000, "blob");
     }
 
