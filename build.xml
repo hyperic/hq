@@ -141,19 +141,32 @@
              classpathref="alljars"/>
     <taskdef resource="org/hyperic/tools/ant/ant-tools.properties"
              classpathref="custom-ant-tasks.path"/>
+
+    <macrodef name="hq-javac">
+      <attribute name="destdir"      default="${build.dir}/classes"/>
+      <attribute name="source"       default="${hq.javac.source}"/>
+      <attribute name="deprecation"  default=""/>
+      <element name="javac-body" implicit="yes"/>      
+
+      <sequential>
+        <javac destdir="@{destdir}"
+               optimize="${hq.javac.optimize}"
+               debug="${hq.javac.debug}"
+               source="@{source}">
+          <javac-body/>
+        </javac>
+      </sequential>
+    </macrodef>
+
     <property name="init-taskdefs.notrequired" value="true"/>
   </target>
 
   <!-- ==================== Compile java sources ==================== -->
-  <target name="compile" description="Compile sources"
-          depends="init">
+  <target name="compile" description="Compile sources" 
+          depends="init,init-taskdefs">
     <mkdir dir="${build.dir}/classes" />
-
-    <javac destdir="${build.dir}/classes"
-           optimize="${hq.javac.optimize}"
-           debug="${hq.javac.debug}"
-           source="${hq.javac.source}"
-           classpathref="alljars" >
+    <hq-javac>
+      <classpath refid="alljars"/>
       <src>
         <!-- Generated sources -->
         <path location="${build.dir}/src" />
@@ -165,7 +178,7 @@
         </dirset>
       </src>
       <exclude name="**/*_test.java" />
-    </javac>
+    </hq-javac>
 
     <!-- Copy resources -->
     <copy toDir="${build.dir}/classes">
@@ -187,10 +200,7 @@
 
   <target name="compile-test" depends="compile">
     <mkdir dir="${build.dir}/test-classes" />
-    <javac destdir="${build.dir}/test-classes"
-           optimize="${hq.javac.optimize}"
-           debug="${hq.javac.debug}"
-           source="${hq.javac.source}">
+    <hq-javac destdir="${build.dir}/test-classes">
       <classpath>
         <path refid="testjars"/>
         <path location="${build.dir}/classes"/>
@@ -198,7 +208,8 @@
       <src>
         <path location="test" />
       </src>
-    </javac>
+    </hq-javac>
+
     <copy toDir="${build.dir}/test-classes">
       <fileset dir="${hq.home}/etc" includes="cactus.properties,log_client.properties" />
     </copy>
@@ -504,18 +515,15 @@
 
   <!-- ==================== UI packaging ==================== -->
   
-  <target name="compile-ui">
+  <target name="compile-ui" depends="init,init-taskdefs">
     <!-- Compile all of the ui classes -->
-    <javac destdir="${build.dir}/classes"
-           optimize="${hq.javac.optimize}"
-           deprecation="${hq.remote-dev.deprecation}"
-           debug="${hq.javac.debug}"
-           source="${hq.javac.source}"
-           classpathref="remotejars" >
+
+    <hq-javac deprecation="${hq.remote-dev.deprecation}">
+      <classpath refid="remotejars"/>
       <src path="src"/>
       <include name="**/hq/ui/**"/>
       <exclude name="**/test/**" />
-    </javac>          
+    </hq-javac>
    </target>
 
   <target name="pack-remote" description="Create the remote war directory structure ( use if you modify .jsp or other web files, but no sources )"
@@ -1337,19 +1345,16 @@
     </antcall>
   </target>
 
-  <target name="installer-jar">
+  <target name="installer-jar" depends="init,init-taskdefs">
     <!-- Build installer-specific sources -->
     <delete dir="${build.dir}/installer-classes"/>
     <mkdir dir="${build.dir}/installer-classes"/>
-    <javac destdir="${build.dir}/installer-classes"
-           optimize="${hq.javac.optimize}"
-           debug="${hq.javac.debug}"
-           source="${hq.javac.source}"
-           classpathref="custom-ant-tasks.path" >
+    <hq-javac destdir="${build.dir}/installer-classes">
+      <classpath refid="custom-ant-tasks.path"/>
       <src>
         <path location="installer/src" />
       </src>
-    </javac>
+    </hq-javac>
 
     <copy todir="${build.dir}/installer-classes">
       <fileset dir="${build.dir}/classes">
