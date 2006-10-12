@@ -56,6 +56,8 @@ public class ApacheServerDetector
     extends ServerDetector 
     implements FileServerDetector, AutoServerDetector {
 
+    static final String TYPE_HTTPD = "Apache httpd";
+
     static final String DEFAULT_SERVICE_NAME = "Apache2";
     
     static final String VHOST_NAME = "VHost";
@@ -159,22 +161,54 @@ public class ApacheServerDetector
     protected void configureServer(ServerResource server)
         throws PluginException {
 
+        ConfigResponse metricConfig, productConfig, controlConfig;
         String installpath = server.getInstallPath();
-        ConfigResponse metricConfig = getMeasurementConfig(installpath);
-        ConfigResponse productConfig = getProductConfig(metricConfig);
-        ConfigResponse controlConfig = getControlConfig(installpath);
+        File snmpConfig = getSnmpdConf(installpath);
 
-        if (productConfig != null) {
-            setProductConfig(server, productConfig);
-            setMeasurementConfig(server, metricConfig);
-            if (controlConfig != null) {
-                setControlConfig(server, controlConfig);
+        if (snmpConfig.exists()) {
+            metricConfig = getSnmpConfig(snmpConfig);
+            productConfig = getProductConfig(metricConfig);
+            controlConfig = getControlConfig(installpath);
+
+            if (productConfig != null) {
+                setProductConfig(server, productConfig);
+                setMeasurementConfig(server, metricConfig);
+                if (controlConfig != null) {
+                    setControlConfig(server, controlConfig);
+                }
+
+                server.setConnectProperties(new String[] {
+                    SNMPClient.PROP_PORT,
+                    SNMPClient.PROP_VERSION, //only need to avoid udp port conflicts
+                });
             }
 
-            server.setConnectProperties(new String[] {
-                SNMPClient.PROP_PORT,
-                SNMPClient.PROP_VERSION, //only need to avoid udp port conflicts
-            });
+            server.setDescription("mod_snmp monitor");
+        }
+        else {
+            log.debug(snmpConfig +
+                      " does not exist, discovering as type: " +
+                      TYPE_HTTPD);
+            productConfig = new ConfigResponse();
+            String port = "80";
+            String address =
+                getListenAddress(port, this.defaultIp);
+
+            productConfig.setValue(Collector.PROP_PROTOCOL,
+                                   getConnectionProtocol(port));
+            productConfig.setValue(Collector.PROP_SSL, isSSL(port));
+            productConfig.setValue(Collector.PROP_HOSTNAME, address);
+            productConfig.setValue(Collector.PROP_PORT, port);
+            productConfig.setValue(Collector.PROP_PATH, "/server-status");
+
+            server.setDescription("mod_status monitor");
+            server.setType(TYPE_HTTPD);
+            //in the event that mod_snmp is added later,
+            //we won't clash w/ the other types
+            server.setIdentifier(TYPE_HTTPD + " " + server.getInstallPath());
+            server.setProductConfig(productConfig);
+            //XXX need to auto-configure port and path
+            //server.setMeasurementConfig();
         }
     }
 
@@ -199,32 +233,37 @@ public class ApacheServerDetector
 
         ServerResource sValue = createServerResource(installpath);
 
-        configureServer(sValue, binary);
-
         //name was already set, but we want to include .minor version too
         String name = getPlatformName() + " Apache " + fullVersion;
         sValue.setName(name);
+
+        configureServer(sValue, binary);
 
         List servers = new ArrayList();
         servers.add(sValue);
         return servers;
     }
 
-    protected ConfigResponse getMeasurementConfig(String path) {
-        ApacheSNMP.ConfigFile config = null;
+    protected File getSnmpdConf(String path) {
         //XXX conf dir is not always relative to installpath
         File file = new File(path, "conf" + File.separator + "snmpd.conf");
+        return file;
+    }
+
+    protected ConfigResponse getSnmpConfig(File file) {
+        ApacheSNMP.ConfigFile config = null;
 
         if (file.exists()) {
             try {
                 config = ApacheSNMP.getConfig(file.toString());
-                log.debug(path + " snmp agent=" + config);
+                log.debug(file + " snmp agent=" + config);
+                return new ConfigResponse(ApacheSNMP.getConfigProperties(config));
             } catch (IOException e) {
                 log.warn("Unable to parse SNMP port from: " + file, e);
             }
         }
 
-        return new ConfigResponse(ApacheSNMP.getConfigProperties(config));
+        return new ConfigResponse();
     }
 
     protected String getListenAddress(String port,
@@ -379,6 +418,10 @@ public class ApacheServerDetector
 
     protected List discoverServices(ConfigResponse serverConfig)
         throws PluginException {
+
+        if (serverConfig.getValue(SNMPClient.PROP_IP) == null) {
+            return null; //server type "Apache httpd"
+        }
 
         ApacheSNMP snmp = new ApacheSNMP();
 
