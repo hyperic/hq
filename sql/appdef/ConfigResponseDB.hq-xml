@@ -7,7 +7,7 @@
 <hibernate-mapping
   package="org.hyperic.hq.appdef">
 
-  <class name="ConfigResponse" table="EAM_CONFIG_RESPONSE">
+  <class name="ConfigResponseDB" table="EAM_CONFIG_RESPONSE">
     <id name="id" type="integer">
       <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />
@@ -36,7 +36,7 @@
       <column name="AUTOINVENTORY_RESPONSE" not-null="false" />
     </property>
 
-    <property name="reponseTimeResponse" type="binary">
+    <property name="responseTimeResponse" type="binary">
       <column name="RESPONSE_TIME_RESPONSE" not-null="false" />
     </property>
 
@@ -44,7 +44,7 @@
       <column name="USERMANAGED" not-null="true" />
     </property>
 
-    <property name="validationErr" type="string">
+    <property name="validationError" type="string">
       <column name="VALIDATIONERR" index="CRESP_ERR" not-null="false" length="512" />
     </property>
 

@@ -25,25 +25,16 @@
 
 package org.hyperic.hq.appdef.server.entity;
 
-import java.rmi.RemoteException;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
-import javax.ejb.CreateException;
-import javax.ejb.EntityBean;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
-import javax.naming.NamingException;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.dao.ConfigResponseDAO;
+import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AgentLocal;
 import org.hyperic.hq.appdef.shared.AgentLocalHome;
 import org.hyperic.hq.appdef.shared.AgentPK;
 import org.hyperic.hq.appdef.shared.AgentUtil;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.appdef.shared.ConfigResponseLocal;
-import org.hyperic.hq.appdef.shared.ConfigResponseUtil;
 import org.hyperic.hq.appdef.shared.IpLocal;
 import org.hyperic.hq.appdef.shared.IpLocalHome;
 import org.hyperic.hq.appdef.shared.IpUtil;
@@ -70,8 +61,16 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import javax.ejb.CreateException;
+import javax.ejb.EntityBean;
+import javax.ejb.FinderException;
+import javax.ejb.RemoveException;
+import javax.naming.NamingException;
+import java.rmi.RemoteException;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /** 
  * This is the PlatformEJB implementation.
@@ -892,17 +891,20 @@ public abstract class PlatformEJBImpl
     /**
      * Initialize the config response for a platform
      */
-    private ConfigResponseLocal initConfigResponse() throws CreateException {
-        ConfigResponseLocal cLocal = null;
+    private ConfigResponseDB initConfigResponse() throws CreateException {
+        ConfigResponseDB cLocal = null;
+        ConfigResponseDAO cdao = DAOFactory.getDAOFactory().getConfigResponseDAO();
         try {
-			cLocal = ConfigResponseUtil.getLocalHome().create();
+            cLocal = new ConfigResponseDB();
             ConfigResponse metricCfg = new ConfigResponse();
             ConfigResponse productCfg = new ConfigResponse();
             cLocal.setProductResponse(productCfg.encode());
-            cLocal.setMeasurementResponse(metricCfg.encode());    
-		} catch (NamingException e) {
-			throw new SystemException(e);
-		} catch (EncodingException e) {
+            cLocal.setMeasurementResponse(metricCfg.encode());
+            cdao.save(cLocal);
+
+            // TODO: get rid of this when hibernate migration is complete
+            cdao.getSession().flush();
+        } catch (EncodingException e) {
             // will never happen, we're setting up an empty response   
 		}
         return cLocal;

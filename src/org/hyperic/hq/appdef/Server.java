@@ -15,7 +15,7 @@ public class Server extends AppdefResource
     private boolean autoDiscoveryZombie;
     private String installPath;
     private ServerType serverType;
-    private ConfigResponse configResponse;
+    private ConfigResponseDB configResponse;
     private Collection aiServices;
     private Collection services;
 
@@ -108,12 +108,12 @@ public class Server extends AppdefResource
         this.serverType = serverType;
     }
 
-    public ConfigResponse getConfigResponse()
+    public ConfigResponseDB getConfigResponse()
     {
         return this.configResponse;
     }
 
-    public void setConfigResponse(ConfigResponse configResponse)
+    public void setConfigResponse(ConfigResponseDB configResponse)
     {
         this.configResponse = configResponse;
     }

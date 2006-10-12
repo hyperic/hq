@@ -18,9 +18,9 @@
     </id>
 
     <natural-id>
-      <property name="keyId" type="integer">
+      <many-to-one name="key" class="CpropKey">
         <column name="KEYID" index="EAM_CROP_UNIQUE" not-null="true" />
-      </property>
+      </many-to-one>
       <property name="appdefId" type="integer">
         <column name="APPDEF_ID" index="EAM_CROP_UNIQUE" not-null="true" />
       </property>

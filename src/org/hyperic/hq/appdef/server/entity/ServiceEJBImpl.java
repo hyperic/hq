@@ -25,22 +25,17 @@
 
 package org.hyperic.hq.appdef.server.entity;
 
-import java.rmi.RemoteException;
-
-import javax.ejb.CreateException;
-import javax.ejb.EntityBean;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
-import javax.naming.NamingException;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.dao.ConfigResponseDAO;
+import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AppServiceLocal;
 import org.hyperic.hq.appdef.shared.AppServiceUtil;
 import org.hyperic.hq.appdef.shared.AppSvcDependencyLocal;
 import org.hyperic.hq.appdef.shared.AppSvcDependencyUtil;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationPK;
-import org.hyperic.hq.appdef.shared.ConfigResponseLocal;
-import org.hyperic.hq.appdef.shared.ConfigResponseUtil;
 import org.hyperic.hq.appdef.shared.ServerLocal;
 import org.hyperic.hq.appdef.shared.ServerLocalHome;
 import org.hyperic.hq.appdef.shared.ServerPK;
@@ -54,8 +49,13 @@ import org.hyperic.hq.appdef.shared.ServiceTypePK;
 import org.hyperic.hq.appdef.shared.ServiceTypeUtil;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import javax.ejb.CreateException;
+import javax.ejb.EntityBean;
+import javax.ejb.FinderException;
+import javax.ejb.RemoveException;
+import javax.naming.NamingException;
+import java.rmi.RemoteException;
 
 /**
  * This is the ServiceEJB implementaiton.
@@ -679,8 +679,13 @@ public abstract class ServiceEJBImpl
             setServer(parentServer);
 
             // Setup config response entries
-            ConfigResponseLocal cLocal =
-                ConfigResponseUtil.getLocalHome().create();
+            ConfigResponseDAO dao = DAOFactory.getDAOFactory()
+                .getConfigResponseDAO();
+            ConfigResponseDB cLocal = new ConfigResponseDB();
+            dao.save(cLocal);
+            // TODO: get rid of this when hibernate migration is complete
+            dao.getSession().flush();
+            
             setConfigResponseId(cLocal.getId());
 
             if(log.isDebugEnabled()) {

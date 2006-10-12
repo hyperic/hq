@@ -14,7 +14,7 @@ public class Service extends AppdefResource
     private Server server;
     private ServiceType serviceType;
     private SvcCluster svcCluster;
-    private ConfigResponse configResponse;
+    private ConfigResponseDB configResponse;
     private Collection appServices;
 
     /**
@@ -95,12 +95,12 @@ public class Service extends AppdefResource
         this.svcCluster = svcCluster;
     }
 
-    public ConfigResponse getConfigResponse()
+    public ConfigResponseDB getConfigResponse()
     {
         return this.configResponse;
     }
 
-    public void setConfigResponse(ConfigResponse configResponse)
+    public void setConfigResponse(ConfigResponseDB configResponse)
     {
         this.configResponse = configResponse;
     }

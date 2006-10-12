@@ -71,6 +71,11 @@ public class CpropKeyDAO extends HibernateDAO implements ICPropKeyDAO
             .uniqueResult();
     }
 
+    /**
+     * for legacy EJB Entity Bean compatibility.
+     * @param pk
+     * @return
+     */
     public CpropKey findByPrimaryKey(CPropKeyPK pk)
     {
         return findById(pk.getId());

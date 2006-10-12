@@ -9,6 +9,7 @@ import org.hyperic.hibernate.dao.PlatformDAO;
 import org.hyperic.hibernate.dao.ServerDAO;
 import org.hyperic.hibernate.dao.ServiceDAO;
 import org.hyperic.hibernate.dao.HibernateMockDAOFactory;
+import org.hyperic.hibernate.dao.ConfigResponseDAO;
 import org.hibernate.Session;
 
 /**
@@ -21,6 +22,7 @@ public abstract class DAOFactory
 
     public abstract AgentDAO getAgentDAO();
     public abstract ApplicationDAO getApplicationDAO();
+    public abstract ConfigResponseDAO getConfigResponseDAO();
     public abstract CpropDAO getCpropDAO();
     public abstract CpropKeyDAO getCpropKeyDAO();
     public abstract PlatformDAO getPlatformDAO();

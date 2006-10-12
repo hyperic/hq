@@ -4,6 +4,7 @@ import org.hyperic.hq.appdef.shared.CPropKeyValue;
 import org.hyperic.hq.appdef.shared.CPropKeyPK;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  *
@@ -16,6 +17,18 @@ public class CpropKey implements Serializable
     private Integer appdefTypeId;
     private String key;
     private String description;
+
+    public Collection getCprops()
+    {
+        return cprops;
+    }
+
+    public void setCprops(Collection cprops)
+    {
+        this.cprops = cprops;
+    }
+
+    private Collection cprops;
 
     /**
      * default constructor
@@ -86,22 +99,26 @@ public class CpropKey implements Serializable
         this.description = description;
     }
 
+    private CPropKeyValue _value = new CPropKeyValue();
+    /**
+     * for legacy EJB Entity Bean compatibility
+     * @return
+     */
     public CPropKeyValue getCPropKeyValue()
     {
-        CPropKeyValue value = new CPropKeyValue();
-        value.setAppdefType(appdefType == null ? 0 : appdefType.intValue());
-        value.setAppdefTypeId(appdefTypeId == null ? 0 : appdefTypeId.intValue());
-        value.setDescription(description);
-        value.setKey(key);
-        value.setId(id);
-        return value;
+        _value.setAppdefType(appdefType == null ? 0 : appdefType.intValue());
+        _value.setAppdefTypeId(appdefTypeId == null ? 0 : appdefTypeId.intValue());
+        _value.setDescription(description == null ? "" : description);
+        _value.setKey(key == null ? "" : key);
+        _value.setId(id);
+        return _value;
     }
 
+    private CPropKeyPK _pkey = new CPropKeyPK();
     public CPropKeyPK getPrimaryKey()
     {
-        CPropKeyPK key = new CPropKeyPK();
-        key.setId(getId());
-        return key;
+        _pkey.setId(getId());
+        return _pkey;
     }
 
     // TODO: fix equals and hashCode

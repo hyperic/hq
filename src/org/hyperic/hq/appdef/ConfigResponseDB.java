@@ -1,12 +1,15 @@
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.shared.ConfigResponseValue;
+import org.hyperic.hq.appdef.shared.ConfigResponsePK;
+
 import java.util.Collection;
 import java.io.Serializable;
 
 /**
  *
  */
-public class ConfigResponse implements Serializable
+public class ConfigResponseDB implements Serializable
 {
     private Integer id;
     private long _version_;
@@ -14,9 +17,9 @@ public class ConfigResponse implements Serializable
     private byte[] controlResponse;
     private byte[] measurementResponse;
     private byte[] autoInventoryResponse;
-    private byte[] reponseTimeResponse;
+    private byte[] responseTimeResponse;
     private boolean userManaged;
-    private String validationErr;
+    private String validationError;
     private Collection platforms;
     private Collection servers;
     private Collection services;
@@ -26,7 +29,7 @@ public class ConfigResponse implements Serializable
     /**
      * default constructor
      */
-    public ConfigResponse()
+    public ConfigResponseDB()
     {
         super();
     }
@@ -92,14 +95,14 @@ public class ConfigResponse implements Serializable
         this.autoInventoryResponse = autoInventoryResponse;
     }
 
-    public byte[] getReponseTimeResponse()
+    public byte[] getResponseTimeResponse()
     {
-        return this.reponseTimeResponse;
+        return this.responseTimeResponse;
     }
 
-    public void setReponseTimeResponse(byte[] reponseTimeResponse)
+    public void setResponseTimeResponse(byte[] responseTimeResponse)
     {
-        this.reponseTimeResponse = reponseTimeResponse;
+        this.responseTimeResponse = responseTimeResponse;
     }
 
     public boolean isUserManaged()
@@ -107,19 +110,28 @@ public class ConfigResponse implements Serializable
         return this.userManaged;
     }
 
+    /**
+     * added for legacy EJB Entity Bean compatibility
+     * @return
+     */
+    public boolean getUserManaged()
+    {
+        return isUserManaged();
+    }
+
     public void setUserManaged(boolean userManaged)
     {
         this.userManaged = userManaged;
     }
 
-    public String getValidationErr()
+    public String getValidationError()
     {
-        return this.validationErr;
+        return this.validationError;
     }
 
-    public void setValidationErr(String validationErr)
+    public void setValidationError(String validationErr)
     {
-        this.validationErr = validationErr;
+        this.validationError = validationErr;
     }
 
     public Collection getPlatforms()
@@ -151,4 +163,47 @@ public class ConfigResponse implements Serializable
     {
         this.services = services;
     }
+
+    private ConfigResponseValue _value = new ConfigResponseValue();
+    /**
+     * for legacy EJB Entity Bean compatibility
+     * @return
+     */
+    public ConfigResponseValue getConfigResponseValue()
+    {
+        _value.setId(getId());
+        _value.setProductResponse(getProductResponse());
+        _value.setControlResponse(getControlResponse());
+        _value.setMeasurementResponse(getMeasurementResponse());
+        _value.setAutoinventoryResponse(getAutoInventoryResponse());
+        _value.setResponseTimeResponse(getResponseTimeResponse());
+        _value.setUserManaged(getUserManaged());
+        _value.setValidationError(
+            (getValidationError() == null) ? "" : getValidationError());
+        return _value;
+    }
+
+    public void setConfigResponseValue(ConfigResponseValue valueHolder)
+    {
+        setProductResponse( valueHolder.getProductResponse() );
+        setControlResponse( valueHolder.getControlResponse() );
+        setMeasurementResponse( valueHolder.getMeasurementResponse() );
+        setAutoInventoryResponse( valueHolder.getAutoinventoryResponse() );
+        setResponseTimeResponse( valueHolder.getResponseTimeResponse() );
+        setUserManaged( valueHolder.getUserManaged() );
+        setValidationError( valueHolder.getValidationError() );
+    }
+
+    private ConfigResponsePK _pkey = new ConfigResponsePK();
+    /**
+     * for legacy EJB Entity Bean compatibility
+     * @return
+     */
+    public ConfigResponsePK getPrimaryKey()
+    {
+        _pkey.setId(id);
+        return _pkey;
+    }
+
+    // TODO: add equals and hashCode()
 }

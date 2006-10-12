@@ -25,27 +25,13 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
-import javax.ejb.CreateException;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.hibernate.dialect.Dialect;
-
+import org.hibernate.dialect.Oracle9Dialect;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dao.CpropKeyDAO;
+import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.CpropKey;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -66,6 +52,19 @@ import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.jdbc.DBUtil;
+
+import javax.ejb.CreateException;
+import javax.ejb.SessionBean;
+import javax.ejb.SessionContext;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * @ejb:bean name="CPropManager"
@@ -192,11 +191,8 @@ public class CPropManagerEJBImpl
     public void deleteKey(int appdefType, int appdefTypeId, String key)
         throws CPropKeyNotFoundException
     {
-        PreparedStatement stmt = null;
         CpropKeyDAO cpHome;
         CpropKey cpKey;
-        Connection conn = null;
-        int keyId;
 
         cpHome = getCPropKeyDAO();
 
@@ -207,26 +203,8 @@ public class CPropManagerEJBImpl
                              AppdefEntityConstants.typeToString(appdefType) +
                              " " + appdefTypeId);
         }
-
-        CPropKeyPK pk = cpKey.getPrimaryKey();
-        keyId = pk.getId().intValue();
-
+        // cascade on delete to remove Cprop as well
         cpHome.remove(cpKey);
-
-        try {
-            conn = cpHome.getSession().connection();
-            stmt = conn.prepareStatement("DELETE FROM " + CPROP_TABLE +
-                                         " WHERE KEYID=?");
-            stmt.setInt(1, keyId);
-            stmt.executeUpdate();
-        } catch(SQLException exc){
-            log.error("Unable to delete CPropKey values: " +
-                      exc.getMessage(), exc);
-            throw new SystemException(exc);
-        } finally {
-            DBUtil.closeStatement(this, stmt);
-            cpHome.getSession().disconnect();
-        }
     }
 
     /**
@@ -298,13 +276,24 @@ public class CPropManagerEJBImpl
             
             // Optionally add new values
             if(val != null){
-                String[] chunks = chunk(val, CHUNKSIZE);
                 Dialect dialect = Util.getDialect();
+                String[] chunks = chunk(val, CHUNKSIZE);
                 StringBuffer sql = new StringBuffer()
                     .append("INSERT INTO ")
                     .append(CPROP_TABLE);
-                
-                if (dialect.supportsSequences()) {
+
+                if (dialect instanceof Oracle9Dialect) {
+                    // Only do this for Oracle until we figure out
+                    // the best schema migration path for Postgres.
+                    //
+                    // There is a existing nextval function
+                    // defined as a default value constraint on the
+                    // id column in the eam_cprop table for postgres.
+                    // Need to figure what to do with the default
+                    // value constraint on schema migration to 3.0
+                    //
+                    // For Oracle, the constraint is defined as a trigger
+                    // which can be dropped on schema migration to 3.0
                     sql.append(" (id,keyid,appdef_id,value_idx,PROPVALUE) VALUES (")
                         .append(dialect.getSelectSequenceNextValString(CPROP_SEQUENCE))
                         .append(", ?, ?, ?, ?)");

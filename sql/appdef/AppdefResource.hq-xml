@@ -78,7 +78,7 @@
         <column name="PLATFORM_TYPE_ID" not-null="false" />
       </many-to-one>
 
-      <many-to-one name="configResponse" class="ConfigResponse">
+      <many-to-one name="configResponse" class="ConfigResponseDB">
         <column name="CONFIG_RESPONSE_ID" not-null="false" />
       </many-to-one>
 
@@ -142,7 +142,7 @@
         <column name="SERVER_TYPE_ID" not-null="false" />
       </many-to-one>
 
-      <many-to-one name="configResponse" class="ConfigResponse">
+      <many-to-one name="configResponse" class="ConfigResponseDB">
         <column name="CONFIG_RESPONSE_ID" not-null="false" />
       </many-to-one>
 
@@ -196,7 +196,7 @@
         <column name="SVC_CLUSTER_ID" not-null="false" />
       </many-to-one>
 
-      <many-to-one name="configResponse" class="ConfigResponse">
+      <many-to-one name="configResponse" class="ConfigResponseDB">
         <column name="CONFIG_RESPONSE_ID" not-null="false" />
       </many-to-one>
 

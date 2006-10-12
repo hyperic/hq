@@ -25,30 +25,14 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
-import javax.ejb.SessionBean;
-import javax.naming.NamingException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.shared.ConfigResponseLocal;
 import org.hyperic.hq.appdef.shared.ConfigResponseValue;
 import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformLocal;
@@ -90,6 +74,21 @@ import org.hyperic.util.math.MathUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
+import javax.ejb.CreateException;
+import javax.ejb.FinderException;
+import javax.ejb.RemoveException;
+import javax.ejb.SessionBean;
+import javax.naming.NamingException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * This is an entity bean which is intended to abstract the
  * tables for appdef entities, for fetching configuration information.
@@ -114,6 +113,7 @@ public class ConfigManagerEJBImpl
     private PlatformManagerLocalHome platformManagerLocalHome;
     private ServerManagerLocalHome   serverManagerLocalHome;
     private ServiceManagerLocalHome  serviceManagerLocalHome;
+    private ResourceValue _bogus; // workaround for Intellij import optimization
 
     private PlatformManagerLocal getPlatformManagerLocal(){
         try {
@@ -733,7 +733,7 @@ public class ConfigManagerEJBImpl
 
         // Update the config response
         if (configWasUpdated) {
-            ConfigResponseLocal cLocal
+            ConfigResponseDB cLocal
                 = getConfigResponseLocalHome()
                 .findByPrimaryKey(existing.getPrimaryKey());
             cLocal.setConfigResponseValue(existing);

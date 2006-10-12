@@ -35,6 +35,14 @@
     <property name="description" type="string">
       <column name="DESCRIPTION" not-null="true" length="200" />
     </property>
+
+    <bag name="cprops" table="EAM_CPROP"
+         cascade="save-update,delete,evict,persist,merge"
+         inverse="true" lazy="true">
+      <key column="KEYID" />
+      <one-to-many class="Cprop" />
+    </bag>
+    
   </class>
 
 </hibernate-mapping>

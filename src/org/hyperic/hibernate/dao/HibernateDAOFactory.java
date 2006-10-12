@@ -40,6 +40,11 @@ public class HibernateDAOFactory extends DAOFactory
         return new ApplicationDAO(getCurrentSession());
     }
 
+    public ConfigResponseDAO getConfigResponseDAO()
+    {
+        return new ConfigResponseDAO(getCurrentSession());
+    }
+
     public CpropDAO getCpropDAO()
     {
         return new CpropDAO(getCurrentSession());

@@ -12,7 +12,7 @@ public class Platform extends AppdefResource
     private String comment;
     private Integer cpuCount;
     private PlatformType platformType;
-    private ConfigResponse configResponse;
+    private ConfigResponseDB configResponse;
     private Agent agent;
     private Collection ips;
     private Collection servers;
@@ -75,12 +75,12 @@ public class Platform extends AppdefResource
         this.platformType = platformType;
     }
 
-    public ConfigResponse getConfigResponse()
+    public ConfigResponseDB getConfigResponse()
     {
         return this.configResponse;
     }
 
-    public void setConfigResponse(ConfigResponse configResponse)
+    public void setConfigResponse(ConfigResponseDB configResponse)
     {
         this.configResponse = configResponse;
     }

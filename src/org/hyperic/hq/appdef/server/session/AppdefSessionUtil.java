@@ -25,10 +25,8 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.naming.NamingException;
-
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.dao.ConfigResponseDAO;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AIServerLocalHome;
@@ -39,8 +37,8 @@ import org.hyperic.hq.appdef.shared.AgentTypeUtil;
 import org.hyperic.hq.appdef.shared.AgentUtil;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocalHome;
 import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
+import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocalHome;
 import org.hyperic.hq.appdef.shared.AppdefGroupManagerUtil;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationLocalHome;
@@ -51,13 +49,10 @@ import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationTypeLocalHome;
 import org.hyperic.hq.appdef.shared.ApplicationTypeUtil;
 import org.hyperic.hq.appdef.shared.ApplicationUtil;
-import org.hyperic.hq.appdef.shared.CPropKeyValue;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.CPropManagerUtil;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerUtil;
-import org.hyperic.hq.appdef.shared.ConfigResponseLocalHome;
-import org.hyperic.hq.appdef.shared.ConfigResponseUtil;
 import org.hyperic.hq.appdef.shared.IpLocalHome;
 import org.hyperic.hq.appdef.shared.IpUtil;
 import org.hyperic.hq.appdef.shared.PlatformLocalHome;
@@ -83,14 +78,16 @@ import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceTypeLocalHome;
 import org.hyperic.hq.appdef.shared.ServiceTypeUtil;
 import org.hyperic.hq.appdef.shared.ServiceUtil;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.PermissionManager;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectLocalHome;
 import org.hyperic.hq.authz.shared.AuthzSubjectUtil;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.product.TypeInfo;
+
+import javax.ejb.CreateException;
+import javax.ejb.FinderException;
+import javax.naming.NamingException;
 
 public abstract class AppdefSessionUtil {
     private AIQueueManagerLocal         aiqManagerLocal;
@@ -102,7 +99,6 @@ public abstract class AppdefSessionUtil {
     private AppdefGroupManagerLocalHome grpMgrLHome;
     private ApplicationTypeLocalHome    appTypeLHome;
     private ConfigManagerLocal          configMgrL;
-    private ConfigResponseLocalHome     configRespLHome;
     private IpLocalHome                 ipLHome;
     private PlatformLocalHome           platformLHome;
     private PlatformManagerLocalHome    platformMgrLHome;
@@ -170,16 +166,9 @@ public abstract class AppdefSessionUtil {
         return agentTypeLHome;
     }
 
-    protected ConfigResponseLocalHome getConfigResponseLocalHome()  
+    protected ConfigResponseDAO getConfigResponseLocalHome()
     {
-        if (configRespLHome == null) {
-            try {
-                configRespLHome = ConfigResponseUtil.getLocalHome();
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
-        return configRespLHome;
+        return DAOFactory.getDAOFactory().getConfigResponseDAO();
     }
 
     protected ApplicationManagerLocal getApplicationMgrLocal() {

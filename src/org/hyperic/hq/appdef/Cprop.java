@@ -9,7 +9,7 @@ public class Cprop implements Serializable
 {
     private Integer id;
     private long _version_;
-    private Integer keyId;
+    private Integer key;
     private Integer appdefId;
     private Integer valueIdx;
     private String propValue;
@@ -45,14 +45,14 @@ public class Cprop implements Serializable
         this._version_ = _version_;
     }
 
-    public Integer getKeyId()
+    public Integer getKey()
     {
-        return this.keyId;
+        return this.key;
     }
 
-    public void setKeyId(Integer keyId)
+    public void setKey(Integer keyId)
     {
-        this.keyId = keyId;
+        this.key = keyId;
     }
 
     public Integer getAppdefId()
@@ -93,7 +93,7 @@ public class Cprop implements Serializable
         if (!(other instanceof Cprop)) return false;
         Cprop castOther = (Cprop) other;
 
-        return ((this.getKeyId() == castOther.getKeyId()) || (this.getKeyId() != null && castOther.getKeyId() != null && this.getKeyId().equals(castOther.getKeyId())))
+        return ((this.getKey() == castOther.getKey()) || (this.getKey() != null && castOther.getKey() != null && this.getKey().equals(castOther.getKey())))
                && ((this.getAppdefId() == castOther.getAppdefId()) || (this.getAppdefId() != null && castOther.getAppdefId() != null && this.getAppdefId().equals(castOther.getAppdefId())))
                && ((this.getValueIdx() == castOther.getValueIdx()) || (this.getValueIdx() != null && castOther.getValueIdx() != null && this.getValueIdx().equals(castOther.getValueIdx())));
     }
