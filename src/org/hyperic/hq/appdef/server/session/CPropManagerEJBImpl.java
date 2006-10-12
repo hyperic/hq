@@ -41,6 +41,8 @@ import javax.ejb.SessionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.hibernate.dialect.Dialect;
+
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dao.CpropKeyDAO;
@@ -297,14 +299,15 @@ public class CPropManagerEJBImpl
             // Optionally add new values
             if(val != null){
                 String[] chunks = chunk(val, CHUNKSIZE);
+                Dialect dialect = Util.getDialect();
                 StringBuffer sql = new StringBuffer()
                     .append("INSERT INTO ")
                     .append(CPROP_TABLE);
-                if (Util.getDialect().indexOf("Oracle") > 0) {
+                
+                if (dialect.supportsSequences()) {
                     sql.append(" (id,keyid,appdef_id,value_idx,PROPVALUE) VALUES (")
-                        .append(CPROP_SEQUENCE)
-                        .append(".NEXTVAL,")
-                        .append("?, ?, ?, ?)");
+                        .append(dialect.getSelectSequenceNextValString(CPROP_SEQUENCE))
+                        .append(", ?, ?, ?, ?)");
                 } else {
                     // assume sequence is generated in the db layer
                     sql.append(" (keyid,appdef_id,value_idx,PROPVALUE) VALUES ")
