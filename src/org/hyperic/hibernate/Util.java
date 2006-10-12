@@ -1,33 +1,41 @@
 package org.hyperic.hibernate;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.cfg.Environment;
-import org.hibernate.SessionFactory;
-import org.hibernate.Interceptor;
-import org.hibernate.EmptyInterceptor;
-
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.hibernate.EmptyInterceptor;
+import org.hibernate.Interceptor;
+import org.hibernate.SessionFactory;
+
+import org.hibernate.cfg.Configuration;
+import org.hibernate.cfg.Environment;
+
+import org.hibernate.dialect.Dialect;
+
+import org.hibernate.engine.SessionFactoryImplementor;
+
 /**
- * <p/>
- * from hibernate caveat emptor with modifications to optimize initial context lookup
+ * from hibernate caveat emptor with modifications to optimize initial 
+ * context lookup
  */
-public class Util
-{
+public class Util {
     private static Log log = LogFactory.getLog(Util.class);
 
-    private static final String INTERCEPTOR_CLASS = "hibernate.util.interceptor_class";
+    private static final String INTERCEPTOR_CLASS = 
+        "hibernate.util.interceptor_class";
 
     private static Configuration configuration;
     private static SessionFactory sessionFactory;
 
     static {
-        // Create the initial SessionFactory from the default configuration files
+        // Create the initial SessionFactory from the default configuration 
+        // files
         try {
-            // Replace with Configuration() if you don't use annotations or JDK 5.0
+            // Replace with Configuration() if you don't use annotations 
+            // or JDK 5.0
             configuration = new Configuration();
 
             // Read not only hibernate.properties, but also hibernate.cfg.xml
@@ -36,7 +44,9 @@ public class Util
             // Set global interceptor from configuration
             setInterceptor(configuration, null);
 
-            String jndiName = configuration.getProperty(Environment.SESSION_FACTORY_NAME);
+            String jndiName = 
+                configuration.getProperty(Environment.SESSION_FACTORY_NAME);
+
             if (jndiName != null) {
                 // Let Hibernate bind the factory to JNDI
                 configuration.buildSessionFactory();
@@ -67,10 +77,11 @@ public class Util
      *
      * @return SessionFactory
      */
-    public static SessionFactory getSessionFactory()
-    {
+    public static SessionFactory getSessionFactory() {
         SessionFactory sf;
-        String sfName = configuration.getProperty(Environment.SESSION_FACTORY_NAME);
+        String sfName = 
+            configuration.getProperty(Environment.SESSION_FACTORY_NAME);
+
         if (sfName != null) {
             if (log.isDebugEnabled()) {
                 log.debug("Looking up SessionFactory JNDI = " + sfName);
@@ -94,8 +105,7 @@ public class Util
      * The only other method that can be called on HibernateUtil
      * after this one is rebuildSessionFactory(Configuration).
      */
-    public static void shutdown()
-    {
+    public static void shutdown() {
         log.debug("Shutting down Hibernate.");
         // Close caches and connection pools
         getSessionFactory().close();
@@ -105,16 +115,14 @@ public class Util
         sessionFactory = null;
     }
 
-    public static Interceptor getInterceptor()
-    {
+    public static Interceptor getInterceptor() {
         return configuration.getInterceptor();
     }
 
     /**
      * Resets global interceptor to default state.
      */
-    public static void resetInterceptor()
-    {
+    public static void resetInterceptor() {
         log.debug("Resetting global interceptor to configuration setting");
         setInterceptor(configuration, null);
     }
@@ -123,7 +131,8 @@ public class Util
      * Either sets the given interceptor on the configuration or looks
      * it up from configuration if null.
      */
-    private static void setInterceptor(Configuration configuration, Interceptor interceptor)
+    private static void setInterceptor(Configuration configuration, 
+                                       Interceptor interceptor)
     {
         String interceptorName = configuration.getProperty(INTERCEPTOR_CLASS);
         if (interceptor == null && interceptorName != null) {
@@ -132,7 +141,8 @@ public class Util
                         Util.class.getClassLoader().loadClass(interceptorName);
                 interceptor = (Interceptor) interceptorClass.newInstance();
             } catch (Exception ex) {
-                throw new RuntimeException("Could not configure interceptor: " + interceptorName, ex);
+                throw new RuntimeException("Could not configure interceptor: "
+                                           + interceptorName, ex);
             }
         }
         if (interceptor != null) {
@@ -142,8 +152,7 @@ public class Util
         }
     }
 
-    public static String getDialect()
-    {
-        return configuration.getProperty(Environment.DIALECT);
+    public static Dialect getDialect() {
+        return ((SessionFactoryImplementor)getSessionFactory()).getDialect();
     }
 }
