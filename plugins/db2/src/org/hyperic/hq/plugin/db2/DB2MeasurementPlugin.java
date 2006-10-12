@@ -91,7 +91,6 @@ public class DB2MeasurementPlugin
             return;
         } catch (DB2MonitorException e) {
             //platform not supported
-            getLog().debug(e.getMessage());
         }
     }
 
