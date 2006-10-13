@@ -200,6 +200,12 @@ public class JMXFilterInitServlet extends HttpServlet {
             String docBase = ctx.getRealPath(File.separator);
             String contextName = getName(ctx);
 
+            if (contextName == null) {
+                log("Unable to determine name for context " + ctx +
+                    ". No display-name set?");
+                return;
+            }
+
             if(filter == null) {
                 log("No filter for context " + contextName );
                 return;
