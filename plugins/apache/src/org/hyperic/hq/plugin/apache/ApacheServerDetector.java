@@ -402,6 +402,10 @@ public class ApacheServerDetector
     public List getServerResources(ConfigResponse platformConfig, String path) throws PluginException {
         String version = getTypeInfo().getVersion();
         ApacheBinaryInfo binary = ApacheBinaryInfo.getInfo(path, version);
+        if (binary == null) {
+            return null; //does not match our server type version
+        }
+
         String fullVersion = binary.version;
 
         if (fullVersion == null) {
