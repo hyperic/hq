@@ -381,7 +381,7 @@ public final class JMXFilter implements Filter {
         // update per servlet data
         String key = hRequest.getServletPath();
         ServletInfo servletData = (ServletInfo)servlets.get(key);
-        if(servletData == null) {
+        if(key != null && servletData == null) {
             //System.out.println("NEW URL " + jmxFilterServlet );
 
             // Only register servlet mbean if the response was 200
