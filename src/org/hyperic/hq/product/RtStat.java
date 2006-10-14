@@ -161,8 +161,18 @@ public class RtStat implements Serializable {
             }
         }
     }
-    
-    public String getIp() { return (ip == null) ? NULL_IP : ip; }
+
+    /**
+     * XXX: For 3.0 we should validate the IP address passed into setIp is 
+     *      valid
+     */
+    public String getIp() { 
+        if (ip == null || ip.length() == 0) {
+            return NULL_IP;
+        } else {
+            return this.ip;
+        }
+    }
     public void   setIp(String ip) { this.ip = ip; }
     public void   resetIp() { this.ip = null; }
 
