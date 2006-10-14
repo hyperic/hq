@@ -26,6 +26,8 @@
 package org.hyperic.hq.plugin.jboss;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,6 +69,20 @@ public class JBossDetector
 
     private static final String PROP_AGENT = "-javaagent:";
 
+    //command line options that may lead us to the home directory of 
+    //the JBoss instance. Listed in the order we should search them.
+    //Only if none of these is specified, we should resort to
+    //the run.jar detection method for detection of the paths.
+
+    private static final String PROP_SRV_CONFIG_URL =
+        "-Djboss.server.config.url=";
+   
+    private static final String PROP_SRV_HOME_URL =
+        "-Djboss.server.home.url=";
+
+    private static final String PROP_SRV_BASE_URL =
+        "-Djboss.server.base.url=";
+
     private static final String EMBEDDED_TOMCAT = "jbossweb-tomcat";
 
     //use .sw=java to find both "java" and "javaw"
@@ -75,6 +91,20 @@ public class JBossDetector
     };
 
     private static HashMap bindings = new HashMap();
+
+    private static File getFileFromURL(String name) {
+        try {
+            URI uri = new URI(name);
+            File file = new File(uri);
+            if (file.exists()) {
+                return file;
+            }
+        }
+        catch(URISyntaxException e) {
+            //e.printStackTrace();
+        }
+        return null;
+    }
 
     //figure out the install root based on run.jar location in the classpath
     private static void findServerProcess(List servers, String query) {
@@ -89,6 +119,11 @@ public class JBossDetector
             String runJar = null;
             String config = "default";
             String address = null;
+            String srvHomeUrl = null;
+            String srvConfigUrl = null;
+            String srvBaseUrl = null;
+            String configPath = null;
+            String installPath = null;
             boolean mainArgs = false;
 
             for (int j=0; j<args.length; j++) {
@@ -107,6 +142,18 @@ public class JBossDetector
                 else if (arg.startsWith(PROP_AGENT)) {
                     //.../bin/pluggable-instrumentor.jar
                     runJar = arg.substring(PROP_AGENT.length());
+                    continue;
+                }
+                else if (arg.startsWith(PROP_SRV_CONFIG_URL)) {
+                    srvConfigUrl = arg.substring(PROP_SRV_CONFIG_URL.length());
+                    continue;
+                }
+                else if (arg.startsWith(PROP_SRV_HOME_URL)) {
+                    srvHomeUrl = arg.substring(PROP_SRV_HOME_URL.length());
+                    continue;
+                }
+                else if (arg.startsWith(PROP_SRV_BASE_URL)) {
+                    srvBaseUrl = arg.substring(PROP_SRV_BASE_URL.length());
                     continue;
                 }
 
@@ -130,6 +177,27 @@ public class JBossDetector
                     }
                     continue;
                 }
+            }
+
+            File configDir = null;
+            if (srvConfigUrl != null) {
+                configDir = getFileFromURL(srvConfigUrl);
+                if (configDir != null) {
+                    configDir = configDir.getParentFile();
+                }
+            }
+            else if (srvHomeUrl != null) {
+                configDir = getFileFromURL(srvHomeUrl);
+            }
+            else if ((srvBaseUrl != null) && (config != null)) {
+                configDir = getFileFromURL(srvBaseUrl);
+                if (configDir != null) {
+                    configDir = new File(configDir, config);
+                }
+            }
+
+            if ((configDir != null) && configDir.exists()) {
+                configPath = configDir.getAbsolutePath();
             }
 
             if (classpath != null) {
@@ -161,11 +229,17 @@ public class JBossDetector
                 continue;
             }
 
-            String configPath = getServerConfigPath(root, config);
+            if (configPath == null) {
+                configPath = getServerConfigPath(root, config);
+            }
+
             if (address != null) {
                 bindings.put(configPath, address);
             }
-            servers.add(configPath);
+
+            installPath = root.getAbsolutePath();
+
+            servers.add(new JBossInstance(installPath, configPath));
         }
     }
 
@@ -221,10 +295,10 @@ public class JBossDetector
         if (servers.size() == 0) {
             return null;
         }
-
-        String path = (String)servers.get(0);
-
-        return new File(path).getParentFile().getParent();
+        
+	    JBossInstance instance = 
+                (JBossInstance)servers.get(0);
+        return instance.getHomePath();
     }
 
     /**
@@ -266,7 +340,8 @@ public class JBossDetector
         List paths = getServerProcessList(this);
 
         for (int i=0; i<paths.size(); i++) {
-            String dir = (String)paths.get(i);
+            String dir = 
+                ((JBossInstance)paths.get(i)).getConfigPath();
             List found = getServerList(dir);
             if (found != null) {
                 servers.addAll(found);
