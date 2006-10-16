@@ -712,14 +712,21 @@ public abstract class ServerDetector
     }
 
     /**
-     * XPathAPI.eval() wrapper
+     * XPathAPI.eval() wrapper.  XPathAPI.eval never returns null,
+     * however this wrapper method will return null if
+     * XObject.toString().length() == 0
      * @param node Node to search
      * @param xpath XPath string
      * @return XObject.toString() or null if Exception is caught
      */
     protected String getXPathValue(Node node, String xpath) {
         try {
-            return XPathAPI.eval(node, xpath).toString();
+            String val =
+                XPathAPI.eval(node, xpath).toString();
+            if ((val == null) || (val.length() == 0)) {
+                return null;
+            }
+            return val; 
         } catch (Exception e) {
             return null;
         }
