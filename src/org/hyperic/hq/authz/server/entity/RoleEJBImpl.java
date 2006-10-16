@@ -207,16 +207,16 @@ import org.apache.commons.logging.LogFactory;
  *      where=" EAM_ROLE.id = {0} AND EAM_ROLE.id NOT IN
                     (SELECT role_id FROM EAM_SUBJECT_ROLE_MAP WHERE subject_id = {1})"
  * 
- * @ejb:finder signature="Collection findAvailableForGroup(java.lang.Integer groupId)"
+ * @ejb:finder signature="Collection findAvailableForGroup(boolean system, java.lang.Integer groupId)"
  *      query=""
  *      unchecked="true"
  *      result-type-mapping="Local"
  * @jboss:declared-sql
- *      signature="Collection findAvailableForGroup(java.lang.Integer groupId)"
- *      where="EAM_ROLE.fsystem = FALSE AND
+ *      signature="Collection findAvailableForGroup(boolean system, java.lang.Integer groupId)"
+ *      where="EAM_ROLE.fsystem = {0} AND
                EAM_ROLE.id NOT IN
                     (SELECT role_id FROM EAM_ROLE_RESOURCE_GROUP_MAP
-                     WHERE resource_group_id = {0}) ORDER BY EAM_ROLE.sort_name"
+                     WHERE resource_group_id = {1}) ORDER BY EAM_ROLE.sort_name"
  * 
  * 
  * @ejb:value-object
