@@ -752,6 +752,8 @@
     <hqplugin name="ntds"/>
 
     <hqplugin name="memcached"/>
+
+    <hqplugin name="mule"/>
   </target>
   
   <!-- Copy plugins -->
