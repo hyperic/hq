@@ -1,11 +1,14 @@
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.shared.ServiceTypePK;
+import org.hyperic.hq.appdef.shared.ServiceClusterPK;
+
 import java.util.Collection;
 
 /**
  *
  */
-public class SvcCluster extends AppdefBean
+public class ServiceCluster extends AppdefBean
 {
     private String name;
     private String sortName;
@@ -20,7 +23,7 @@ public class SvcCluster extends AppdefBean
     /**
      * default constructor
      */
-    public SvcCluster()
+    public ServiceCluster()
     {
         super();
     }
@@ -100,8 +103,8 @@ public class SvcCluster extends AppdefBean
     {
         if ((this == other)) return true;
         if ((other == null)) return false;
-        if (!(other instanceof SvcCluster)) return false;
-        SvcCluster castOther = (SvcCluster) other;
+        if (!(other instanceof ServiceCluster)) return false;
+        ServiceCluster castOther = (ServiceCluster) other;
 
         return ((this.getName() == castOther.getName()) || (this.getName() != null && castOther.getName() != null && this.getName().equals(castOther.getName())));
     }
@@ -110,5 +113,17 @@ public class SvcCluster extends AppdefBean
     {
         int result = 17;
         return result;
+    }
+
+    private ServiceClusterPK pkey = new ServiceClusterPK();
+    /**
+     * legacy EJB primary key getter
+     * @deprecated use getId() instead
+     * @return
+     */
+    public ServiceClusterPK getPrimaryKey()
+    {
+        pkey.setId(getId());
+        return pkey;
     }
 }

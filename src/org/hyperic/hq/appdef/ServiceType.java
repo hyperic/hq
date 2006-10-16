@@ -1,5 +1,7 @@
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.shared.ServiceTypePK;
+
 import java.util.Collection;
 
 /**
@@ -8,13 +10,13 @@ import java.util.Collection;
 public class ServiceType extends AppdefResourceType
 {
     private String plugin;
-    private boolean finternal;
+    private boolean isInternal;
     private ServerType serverType;
     private TierType tierType;
-    private Collection applications;
+    private Collection applicationTypes;
     private Collection appServices;
     private Collection services;
-    private Collection svcClusters;
+    private Collection serviceClusters;
 
     /**
      * default constructor
@@ -35,14 +37,24 @@ public class ServiceType extends AppdefResourceType
         this.plugin = plugin;
     }
 
-    public boolean isFinternal()
+    public boolean isIsInternal()
     {
-        return this.finternal;
+        return this.isInternal;
     }
 
-    public void setFinternal(boolean finternal)
+    /**
+     * legacy EJB getter
+     * @deprecated use isIsInternal() instead
+     * @return
+     */
+    public boolean getIsInternal()
     {
-        this.finternal = finternal;
+        return this.isInternal;
+    }
+
+    public void setIsInternal(boolean internal)
+    {
+        this.isInternal = internal;
     }
 
     public ServerType getServerType()
@@ -65,14 +77,14 @@ public class ServiceType extends AppdefResourceType
         this.tierType = tierType;
     }
 
-    public Collection getApplications()
+    public Collection getApplicationTypes()
     {
-        return this.applications;
+        return this.applicationTypes;
     }
 
-    public void setApplications(Collection applications)
+    public void setApplicationTypes(Collection applications)
     {
-        this.applications = applications;
+        this.applicationTypes = applications;
     }
 
     public Collection getAppServices()
@@ -95,13 +107,25 @@ public class ServiceType extends AppdefResourceType
         this.services = services;
     }
 
-    public Collection getSvcClusters()
+    public Collection getServiceClusters()
     {
-        return this.svcClusters;
+        return this.serviceClusters;
     }
 
-    public void setSvcClusters(Collection svcClusters)
+    public void setServiceClusters(Collection serviceClusters)
     {
-        this.svcClusters = svcClusters;
+        this.serviceClusters = serviceClusters;
+    }
+
+    private ServiceTypePK pkey = new ServiceTypePK();
+    /**
+     * legacy EJB primary key getter
+     * @deprecated use getId() instead
+     * @return
+     */
+    public ServiceTypePK getPrimaryKey()
+    {
+        pkey.setId(getId());
+        return pkey;
     }
 }

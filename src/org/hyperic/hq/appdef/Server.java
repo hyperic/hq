@@ -1,18 +1,21 @@
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.shared.ServerPK;
+
 import java.util.Collection;
 
 /**
- *
+ * Pojo for hibernate hbm mapping file
+ * TODO: fix equals and hashCode()
  */
 public class Server extends AppdefResource
 {
     private Platform platform;
-    private String autoInventoryIdentifier;
-    private boolean runTimeAutoDiscovery;
-    private boolean wasAutoDiscovered;
-    private boolean servicesAutoManaged;
-    private boolean autoDiscoveryZombie;
+    private String autoinventoryIdentifier;
+    private boolean runtimeAutodiscovery;
+    private boolean wasAutodiscovered;
+    private boolean servicesAutomanaged;
+    private boolean autodiscoveryZombie;
     private String installPath;
     private ServerType serverType;
     private ConfigResponseDB configResponse;
@@ -38,54 +41,54 @@ public class Server extends AppdefResource
         this.platform = platform;
     }
 
-    public String getAutoInventoryIdentifier()
+    public String getAutoinventoryIdentifier()
     {
-        return this.autoInventoryIdentifier;
+        return this.autoinventoryIdentifier;
     }
 
-    public void setAutoInventoryIdentifier(String autoInventoryIdentifier)
+    public void setAutoinventoryIdentifier(String autoinventoryIdentifier)
     {
-        this.autoInventoryIdentifier = autoInventoryIdentifier;
+        this.autoinventoryIdentifier = autoinventoryIdentifier;
     }
 
-    public boolean isRunTimeAutoDiscovery()
+    public boolean isRuntimeAutodiscovery()
     {
-        return this.runTimeAutoDiscovery;
+        return this.runtimeAutodiscovery;
     }
 
-    public void setRunTimeAutoDiscovery(boolean runTimeAutoDiscovery)
+    public void setRuntimeAutodiscovery(boolean runtimeAutodiscovery)
     {
-        this.runTimeAutoDiscovery = runTimeAutoDiscovery;
+        this.runtimeAutodiscovery = runtimeAutodiscovery;
     }
 
-    public boolean isWasAutoDiscovered()
+    public boolean isWasAutodiscovered()
     {
-        return this.wasAutoDiscovered;
+        return this.wasAutodiscovered;
     }
 
-    public void setWasAutoDiscovered(boolean wasAutoDiscovered)
+    public void setWasAutodiscovered(boolean wasAutodiscovered)
     {
-        this.wasAutoDiscovered = wasAutoDiscovered;
+        this.wasAutodiscovered = wasAutodiscovered;
     }
 
-    public boolean isServicesAutoManaged()
+    public boolean isServicesAutomanaged()
     {
-        return this.servicesAutoManaged;
+        return this.servicesAutomanaged;
     }
 
-    public void setServicesAutoManaged(boolean servicesAutoManaged)
+    public void setServicesAutomanaged(boolean servicesAutomanaged)
     {
-        this.servicesAutoManaged = servicesAutoManaged;
+        this.servicesAutomanaged = servicesAutomanaged;
     }
 
-    public boolean isAutoDiscoveryZombie()
+    public boolean isAutodiscoveryZombie()
     {
-        return this.autoDiscoveryZombie;
+        return this.autodiscoveryZombie;
     }
 
-    public void setAutoDiscoveryZombie(boolean autoDiscoveryZombie)
+    public void setAutodiscoveryZombie(boolean autodiscoveryZombie)
     {
-        this.autoDiscoveryZombie = autoDiscoveryZombie;
+        this.autodiscoveryZombie = autodiscoveryZombie;
     }
 
     public String getInstallPath()
@@ -136,5 +139,17 @@ public class Server extends AppdefResource
     public void setServices(Collection services)
     {
         this.services = services;
+    }
+
+    private ServerPK pkey = new ServerPK();
+    /**
+     * legacy EJB primary key getter
+     * @deprecated use getId() instead
+     * @return
+     */
+    public ServerPK getPrimaryKey()
+    {
+        pkey.setId(getId());
+        return pkey;
     }
 }

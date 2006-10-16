@@ -11,7 +11,7 @@ public class PlatformType extends AppdefResourceType
     private String osVersion;
     private String arch;
     private String plugin;
-    private Collection servers;
+    private Collection serverTypes;
     private Collection platforms;
 
     /**
@@ -63,14 +63,14 @@ public class PlatformType extends AppdefResourceType
         this.plugin = plugin;
     }
 
-    public Collection getServers()
+    public Collection getServerTypes()
     {
-        return this.servers;
+        return this.serverTypes;
     }
 
-    public void setServers(Collection servers)
+    public void setServerTypes(Collection servers)
     {
-        this.servers = servers;
+        this.serverTypes = servers;
     }
 
     public Collection getPlatforms()

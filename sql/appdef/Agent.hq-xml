@@ -15,18 +15,18 @@
       </generator>
     </id>
 
-    <natural-id>
+    <version name="_version_" type="long">
+      <column name ="VERSION_COL" default="0" />
+    </version>
+
+    <properties name="agentId" unique="true">
       <property name="address" type="string">
         <column name="ADDRESS" index="AGENT_ADDRESS_PORT" not-null="true" length="64" />
       </property>
       <property name="port" type="integer">
         <column name="PORT" index="AGENT_ADDRESS_PORT" not-null="true" />
       </property>
-    </natural-id>
-
-    <version name="_version_" type="long">
-      <column name ="VERSION_COL" default="0" />
-    </version>
+    </properties>
 
     <property name="authToken" type="string">
       <column name="AUTHTOKEN" not-null="true" length="100" />

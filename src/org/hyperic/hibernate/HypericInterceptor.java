@@ -43,7 +43,7 @@ public class HypericInterceptor extends EmptyInterceptor
         for (int i = 0; i < propertyNames.length; i++) {
             if ("creationTime".equals(propertyNames[i])) {
                 Long ctime = (Long)state[i];
-                if (ctime.longValue() == 0) {
+                if (ctime == null || ctime.longValue() == 0) {
                     state[i] = new Long(System.currentTimeMillis());
                     modified =  true;
                 }

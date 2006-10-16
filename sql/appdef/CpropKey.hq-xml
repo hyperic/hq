@@ -16,7 +16,11 @@
       </generator>
     </id>
 
-    <natural-id>
+    <version name="_version_" type="long">
+      <column name ="VERSION_COL" default="0" />
+    </version>
+
+    <properties name="cpropKeyId" unique="true">
       <property name="appdefType" type="integer">
         <column name="APPDEF_TYPE" index="EAM_CROP_KEY_UNIQUE" not-null="true" />
       </property>
@@ -26,11 +30,7 @@
       <property name="key" type="string">
         <column name="PROPKEY" index="EAM_CROP_KEY_UNIQUE" not-null="true" length="100" />
       </property>
-    </natural-id>
-
-    <version name="_version_" type="long">
-      <column name ="VERSION_COL" default="0" />
-    </version>
+    </properties>
 
     <property name="description" type="string">
       <column name="DESCRIPTION" not-null="true" length="200" />

@@ -8,7 +8,7 @@ public class Ip extends AppdefBean
     private Platform platform;
     private String address;
     private String netmask;
-    private String macAddress;
+    private String MACAddress;
 
     /**
      * default constructor
@@ -48,14 +48,14 @@ public class Ip extends AppdefBean
         this.netmask = netmask;
     }
 
-    public String getMacAddress()
+    public String getMACAddress()
     {
-        return this.macAddress;
+        return this.MACAddress;
     }
 
-    public void setMacAddress(String macAddress)
+    public void setMACAddress(String MACAddress)
     {
-        this.macAddress = macAddress;
+        this.MACAddress = MACAddress;
     }
 
     // TODO: fix equals and hashCode

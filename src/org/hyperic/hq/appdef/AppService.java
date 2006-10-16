@@ -8,7 +8,7 @@ import java.util.Collection;
 public class AppService extends AppdefBean
 {
     private Service service;
-    private SvcCluster cluster;
+    private ServiceCluster serviceCluster;
     private Application application;
     private boolean isCluster;
     private String modifiedBy;
@@ -34,14 +34,14 @@ public class AppService extends AppdefBean
         this.service = service;
     }
 
-    public SvcCluster getCluster()
+    public ServiceCluster getServiceCluster()
     {
-        return this.cluster;
+        return this.serviceCluster;
     }
 
-    public void setCluster(SvcCluster cluster)
+    public void setServiceCluster(ServiceCluster cluster)
     {
-        this.cluster = cluster;
+        this.serviceCluster = cluster;
     }
 
     public Application getApplication()
@@ -112,9 +112,18 @@ public class AppService extends AppdefBean
         if (!(other instanceof AppService)) return false;
         AppService castOther = (AppService) other;
 
-        return ((this.getService() == castOther.getService()) || (this.getService() != null && castOther.getService() != null && this.getService().equals(castOther.getService())))
-               && ((this.getCluster() == castOther.getCluster()) || (this.getCluster() != null && castOther.getCluster() != null && this.getCluster().equals(castOther.getCluster())))
-               && ((this.getApplication() == castOther.getApplication()) || (this.getApplication() != null && castOther.getApplication() != null && this.getApplication().equals(castOther.getApplication())));
+        return ((this.getService() == castOther.getService()) ||
+                (this.getService() != null &&
+                 castOther.getService() != null &&
+                 this.getService().equals(castOther.getService())))
+               && ((this.getServiceCluster() == castOther.getServiceCluster()) ||
+                   (this.getServiceCluster() != null &&
+                    castOther.getServiceCluster() != null &&
+                    this.getServiceCluster().equals(castOther.getServiceCluster())))
+               && ((this.getApplication() == castOther.getApplication()) ||
+                   (this.getApplication() != null &&
+                    castOther.getApplication() != null &&
+                    this.getApplication().equals(castOther.getApplication())));
     }
 
     public int hashCode()

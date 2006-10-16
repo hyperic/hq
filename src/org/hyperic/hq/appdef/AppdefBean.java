@@ -1,5 +1,7 @@
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+
 import java.io.Serializable;
 
 /**
@@ -9,8 +11,8 @@ import java.io.Serializable;
 public abstract class AppdefBean implements Serializable
 {
     protected Integer id;
-    protected long creationTime;
-    protected long modifiedTime;
+    protected Long creationTime;
+    protected Long modifiedTime;
 
     // for hibernate optimistic locks
     // don't mess with this.
@@ -24,7 +26,7 @@ public abstract class AppdefBean implements Serializable
         super();
     }
 
-    private void setId(Integer id)
+    public void setId(Integer id)
     {
         this.id = id;
     }
@@ -36,23 +38,42 @@ public abstract class AppdefBean implements Serializable
 
     public long getCreationTime()
     {
-        return creationTime;
+        return creationTime != null ? creationTime.longValue() : 0;
     }
 
-    public void setCreationTime(long creationTime)
+    public void setCreationTime(Long creationTime)
     {
         this.creationTime = creationTime;
     }
 
     public long getModifiedTime()
     {
-        return modifiedTime;
+        return modifiedTime != null ? modifiedTime.longValue() : 0;
     }
 
-    public void setModifiedTime(long modifiedTime)
+    public void setModifiedTime(Long modifiedTime)
     {
         this.modifiedTime = modifiedTime;
     }
+
+    // for legacy EJB assessor
+    /**
+     * @deprecated
+     * @return
+     */
+    public Long getCTime()
+    {
+        return creationTime;
+    }
+    /**
+     * @deprecated
+     * @return
+     */
+    public Long getMTime()
+    {
+        return modifiedTime;
+    }
+    // end legacy EJB assessors
 
     public long get_version_()
     {
@@ -72,5 +93,26 @@ public abstract class AppdefBean implements Serializable
     public void setCid(Integer cid)
     {
         this.cid = cid;
+    }
+
+    /**
+     * legacy EJB entity bean code
+     * @param obj
+     * @return
+     */
+    public boolean matchesValueObject(AppdefResourceValue obj)
+    {
+        boolean matches = true;
+        if (obj.getId() != null) {
+            matches = (obj.getId().intValue() == this.getId().intValue());
+        } else {
+            matches = (this.getId() == null);
+        }
+        if (obj.getCTime() != null) {
+            matches = (obj.getCTime().floatValue() == getCTime().floatValue());
+        } else {
+            matches = (this.getCreationTime() == 0);
+        }
+        return matches;
     }
 }

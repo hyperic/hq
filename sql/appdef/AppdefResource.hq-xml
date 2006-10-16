@@ -50,11 +50,11 @@
     </property>
 
     <union-subclass name="Platform" table="EAM_PLATFORM">
-      <property name="name" type="string">
+      <property name="name" unique="true" type="string">
         <column name="NAME" index="EAM_PLATFORM_NAME" not-null="true" length="100" />
       </property>
 
-      <property name="fqDN" type="string">
+      <property name="fqdn" type="string">
         <column name="FQDN" index="EAM_PLATFORM_FQDN" not-null="true" length="200" />
       </property>
 
@@ -62,11 +62,11 @@
         <column name="SORT_NAME" not-null="false" length="100" />
       </property>
 
-      <property name="certDN" type="string">
+      <property name="certdn" type="string">
         <column name="CERTDN" not-null="false" length="200" />
       </property>
 
-      <property name="comment" type="string">
+      <property name="commentText" type="string">
         <column name="COMMENT_TEXT" not-null="false" length="256" />
       </property>
 
@@ -87,8 +87,8 @@
       </many-to-one>
 
       <bag name="ips" table="EAM_IP"
-           cascade="save-update,delete,persist,merge,evict"
-           inverse="true" lazy="true">
+           cascade="save-update,delete,persist,merge,evict,delete-orphan"
+           inverse="true" lazy="false">
         <key column="PLATFORM_ID" />
         <one-to-many class="Ip" />
       </bag>
@@ -106,11 +106,11 @@
         <column name="PLATFORM_ID" index="EAM_SERVER_AIID_IDX" not-null="false" />
       </many-to-one>
 
-      <property name="autoInventoryIdentifier" type="string">
+      <property name="autoinventoryIdentifier" type="string">
         <column name="AUTOINVENTORYIDENTIFIER" index="EAM_SERVER_AIID_IDX" not-null="false" length="250" />
       </property>
 
-      <property name="name" type="string">
+      <property name="name" unique="true" type="string">
         <column name="NAME" index="EAM_SERVER_NAME" not-null="true" length="200" />
       </property>
 
@@ -118,19 +118,19 @@
         <column name="SORT_NAME" not-null="false" length="200" />
       </property>
 
-      <property name="runTimeAutoDiscovery" type="boolean">
+      <property name="runtimeAutodiscovery" type="boolean">
         <column name="RUNTIMEAUTODISCOVERY" not-null="false" />
       </property>
 
-      <property name="wasAutoDiscovered" type="boolean">
+      <property name="wasAutodiscovered" type="boolean">
         <column name="WASAUTODISCOVERED" not-null="false" />
       </property>
 
-      <property name="servicesAutoManaged" type="boolean">
+      <property name="servicesAutomanaged" type="boolean">
         <column name="SERVICESAUTOMANAGED" not-null="false" />
       </property>
 
-      <property name="autoDiscoveryZombie" type="boolean">
+      <property name="autodiscoveryZombie" type="boolean">
         <column name="AUTODISCOVERY_ZOMBIE" not-null="false" />
       </property>
 
@@ -160,7 +160,7 @@
     </union-subclass>
 
     <union-subclass name="Service" table="EAM_SERVICE">
-      <property name="name" type="string">
+      <property name="name" unique="true" type="string">
         <column name="NAME" index="EAM_SERVICE_NAME" length="200" />
       </property>
 
@@ -168,7 +168,7 @@
         <column name="SORT_NAME" not-null="false" length="200" />
       </property>
 
-      <property name="autoDiscoveryZombie" type="boolean">
+      <property name="autodiscoveryZombie" type="boolean">
         <column name="AUTODISCOVERY_ZOMBIE" not-null="false" />
       </property>
 
@@ -192,7 +192,7 @@
         <column name="SERVICE_TYPE_ID" not-null="false" />
       </many-to-one>
 
-      <many-to-one name="svcCluster" class="SvcCluster">
+      <many-to-one name="serviceCluster" class="ServiceCluster">
         <column name="SVC_CLUSTER_ID" not-null="false" />
       </many-to-one>
 
@@ -209,7 +209,7 @@
     </union-subclass>
 
     <union-subclass name="Application" table="EAM_APPLICATION">
-      <property name="name" type="string">
+      <property name="name" unique="true" type="string">
         <column name="NAME" not-null="true" length="200" />
       </property>
 

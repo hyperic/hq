@@ -8,8 +8,8 @@ import java.util.Collection;
 public class ServerType extends AppdefResourceType
 {
     private String plugin;
-    private boolean fvirtual;
-    private Collection platforms;
+    private boolean virtual;
+    private Collection platformTypes;
     private Collection servers;
     private Collection serviceTypes;
 
@@ -32,24 +32,34 @@ public class ServerType extends AppdefResourceType
         this.plugin = plugin;
     }
 
-    public boolean isFvirtual()
+    public boolean isVirtual()
     {
-        return this.fvirtual;
+        return this.virtual;
     }
 
-    public void setFvirtual(boolean fvirtual)
+    /**
+     * legacy EJB getter
+     * @deprecated use isVirtual() instead
+     * @return
+     */
+    public boolean getVirtual()
     {
-        this.fvirtual = fvirtual;
+        return this.virtual;
     }
 
-    public Collection getPlatforms()
+    public void setVirtual(boolean virtual)
     {
-        return this.platforms;
+        this.virtual = virtual;
     }
 
-    public void setPlatforms(Collection platforms)
+    public Collection getPlatformTypes()
     {
-        this.platforms = platforms;
+        return this.platformTypes;
+    }
+
+    public void setPlatformTypes(Collection platformTypes)
+    {
+        this.platformTypes = platformTypes;
     }
 
     public Collection getServers()

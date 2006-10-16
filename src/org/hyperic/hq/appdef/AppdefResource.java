@@ -1,5 +1,8 @@
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+
 /**
  * abstract base class for all appdef resources
  */
@@ -69,6 +72,7 @@ public abstract class AppdefResource extends AppdefBean
     public void setName(String name)
     {
         this.name = name;
+        setSortName(name);
     }
 
     public String getSortName()
@@ -78,6 +82,29 @@ public abstract class AppdefResource extends AppdefBean
 
     public void setSortName(String sortName)
     {
-        this.sortName = sortName;
+        if (sortName != null) {
+            this.sortName = sortName.toUpperCase();
+        }
+    }
+
+    private AppdefEntityID appdefEntityId;
+    /**
+     * Get the appdefEntityId for this platform
+     * legacy code from EJB entity bean
+     */
+    public AppdefEntityID getEntityId() {
+        if(appdefEntityId == null) {
+            appdefEntityId = new AppdefEntityID(
+                        AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
+                        getId().intValue());
+        } else if (!appdefEntityId.getId().equals(getId())) {
+            // Sometimes the id object can get stale if this entity bean is
+            // being reused from the bean pool and was previously used by
+            // a different object.
+            appdefEntityId = new AppdefEntityID(
+                        AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
+                        getId().intValue());
+        }
+        return appdefEntityId;
     }
 }

@@ -7,9 +7,9 @@ import java.util.Collection;
  */
 public class Platform extends AppdefResource
 {
-    private String fqDN;
-    private String certDN;
-    private String comment;
+    private String fqdn;
+    private String certdn;
+    private String commentText;
     private Integer cpuCount;
     private PlatformType platformType;
     private ConfigResponseDB configResponse;
@@ -25,34 +25,34 @@ public class Platform extends AppdefResource
         super();
     }
 
-    public String getFqDN()
+    public String getFqdn()
     {
-        return this.fqDN;
+        return this.fqdn;
     }
 
-    public void setFqDN(String fqDN)
+    public void setFqdn(String fqDN)
     {
-        this.fqDN = fqDN;
+        this.fqdn = fqDN;
     }
 
-    public String getCertDN()
+    public String getCertdn()
     {
-        return this.certDN;
+        return this.certdn;
     }
 
-    public void setCertDN(String certDN)
+    public void setCertdn(String certDN)
     {
-        this.certDN = certDN;
+        this.certdn = certDN;
     }
 
-    public String getComment()
+    public String getCommentText()
     {
-        return this.comment;
+        return this.commentText;
     }
 
-    public void setComment(String comment)
+    public void setCommentText(String comment)
     {
-        this.comment = comment;
+        this.commentText = comment;
     }
 
     public Integer getCpuCount()
