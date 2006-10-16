@@ -139,14 +139,6 @@ public abstract class ServletDiscoveryPlugin
                 String base = atts.getValue("DocBase");
                 String logDir = atts.getValue("ResponseTimeLogDir");
 
-                if (name.equals("/ROOT") &&
-                    logDir != null &&
-                    logDir.indexOf("hq-engine") != -1) {
-                    // Skip /ROOT webapp deployed within HQ since it is only
-                    // active during the bootup process.
-                    continue;
-                }
-
                 AIServiceValue service = new AIServiceValue();
                 service.setServiceTypeName(serviceTypeName);
 
