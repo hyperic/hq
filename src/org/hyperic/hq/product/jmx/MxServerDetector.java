@@ -115,16 +115,37 @@ public class MxServerDetector
     }
 
     protected class MxProcess {
-        long pid;
-        String installpath;
-        String[] args;
+        long _pid;
+        String _installpath;
+        String[] _args;
+        String _url;
 
         protected MxProcess(long pid,
                             String[] args,
                             String installpath) {
-            this.pid = pid;
-            this.args = args;
-            this.installpath = installpath;
+            _pid = pid;
+            _args = args;
+            _installpath = installpath;
+        }
+
+        public long getPid() {
+            return _pid;
+        }
+
+        public String getInstallPath() {
+            return _installpath;
+        }
+
+        public String[] getArgs() {
+            return _args;
+        }
+
+        public String getURL() {
+            return _url;
+        }
+
+        public void setURL(String url) {
+            _url = url;
         }
     }
 
@@ -162,7 +183,7 @@ public class MxServerDetector
 
         for (int i=0; i<procs.size(); i++) {
             MxProcess process = (MxProcess)procs.get(i);
-            String dir = process.installpath;
+            String dir = process.getInstallPath();
 
             //optional use a file to determine correct type version
             if (versionFile != null) {
@@ -195,9 +216,16 @@ public class MxServerDetector
                 }
             }
 
-            for (int j=0; j<process.args.length; j++) {
-                if (configureMxURL(config, process.args[j])) {
-                    break;
+            if (process.getURL() != null) {
+                config.setValue(MxUtil.PROP_JMX_URL,
+                                process.getURL());
+            }
+            else {
+                String[] args = process.getArgs();
+                for (int j=0; j<args.length; j++) {
+                    if (configureMxURL(config, args[j])) {
+                        break;
+                    }
                 }
             }
 
