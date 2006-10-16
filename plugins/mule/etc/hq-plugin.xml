@@ -15,6 +15,10 @@
     <property name="PROC_HOME_PROPERTY"
               value="mule.home"/>
 
+    <!-- mule's default -->
+    <property name="jmx.url"
+              value="service:jmx:rmi:///jndi/rmi://localhost:1099/server"/>
+
     <config include="jmx">
     </config>
 
