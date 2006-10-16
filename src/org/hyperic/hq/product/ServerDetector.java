@@ -26,6 +26,7 @@
 package org.hyperic.hq.product;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -38,6 +39,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.apache.xpath.XPathAPI;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerExtValue;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
@@ -55,6 +60,8 @@ import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarProxyCache;
 import org.hyperic.sigar.ptql.ProcessFinder;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 /**
  * Encapsulate the know-how to determine all kinds of 
@@ -691,6 +698,48 @@ public abstract class ServerDetector
         return isSSLPort(port) ?
                 Collector.PROTOCOL_HTTPS :
                 Collector.PROTOCOL_HTTP;
+    }
+
+    /**
+     * DocumentBuilder.parse() wrapper
+     * @param file File to parse
+     * @return parsed Document
+     * @throws IOException For any exception
+     */
+    protected Document getDocument(File file) throws IOException {
+        FileInputStream fis = new FileInputStream(file);        
+        try {
+            DocumentBuilderFactory dbf =
+                DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            return db.parse(fis);
+        } catch (Exception e) {
+            throw new IOException(e.getMessage());
+        } finally {
+            fis.close();
+        }
+    }
+
+    /**
+     * XPathAPI.eval() wrapper
+     * @param node Node to search
+     * @param xpath XPath string
+     * @return XObject.toString() or null if Exception is caught
+     */
+    protected String getXPathValue(Node node, String xpath) {
+        try {
+            return XPathAPI.eval(node, xpath).toString();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    protected String getXPathValue(File file, String xpath) {
+        try {
+            return getXPathValue(getDocument(file), xpath);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     protected ConfigSchema getConfigSchema(String name, int type) {
