@@ -228,6 +228,7 @@ import java.rmi.RemoteException;
  *      cacheable="true" cacheDuration="600000"
  * @ejb:value-object name="Service" match="*" extends="org.hyperic.hq.appdef.shared.AppdefResourceValue"
  *
+ * @jboss:container-configuration name="Inventory CMP 2.x Entity Bean"
  * @jboss:table-name table-name="EAM_SERVICE"
  * @jboss:create-table false
  * @jboss:remove-table false
