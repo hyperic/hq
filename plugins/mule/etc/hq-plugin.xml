@@ -1,0 +1,207 @@
+<plugin name="mule">
+  <classpath>
+    <include name="pdk/lib/mx4j"/>
+  </classpath>
+
+  <filter name="template"
+          value="${OBJECT_NAME}:${alias}"/>
+
+  <filter name="domain" value="Mule"/>
+
+  <server name="Mule" version="1.3">
+    <property name="OBJECT_NAME"
+              value="${domain}:type=org.mule.ManagementContext,name=MuleServerInfo"/>
+
+    <property name="PROC_HOME_PROPERTY"
+              value="mule.home"/>
+
+    <!-- mule's default -->
+    <property name="jmx.url"
+              value="service:jmx:rmi:///jndi/rmi://localhost:1099/server"/>
+
+    <config include="jmx">
+    </config>
+
+    <plugin type="autoinventory"
+            class="org.hyperic.hq.plugin.mule.MuleServerDetector"/>
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
+
+    <properties>
+      <property name="ServerId"/>
+      <property name="Vendor"/>
+      <property name="Copyright"/>
+      <property name="Version"/>
+    </properties>
+
+    <actions include="start,stop"/>
+
+    <metric name="Availability"
+            indicator="true"/>
+
+    <metric name="Free Memory"
+            indicator="true"
+            units="B"/>
+
+    <metric name="Total Memory"
+            indicator="true"
+            units="B"/>
+
+    <metric name="Max Memory"
+            units="B"
+            collectionType="static"/>
+
+    <service name="Endpoint">
+      <property name="OBJECT_NAME"
+                value="${domain}:type=org.mule.Endpoint,component=*,name=*"/>
+
+      <plugin type="autoinventory"/>
+
+      <properties>
+        <property name="Synchronous"/>
+        <property name="Type"/>
+      </properties>
+
+      <actions include="disconnect,connect"/>
+
+      <metric name="Availability"
+              template="${OBJECT_NAME}:Connected"
+              indicator="true"/>
+    </service>
+
+    <service name="Connector">
+      <property name="OBJECT_NAME"
+                value="${domain}:type=org.mule.Connector,name=*"/>
+
+      <config>
+        <option name="name"
+                description="Connector name"
+                default=""/>
+      </config>
+
+      <plugin type="autoinventory"/>
+
+      <properties>
+        <property name="Protocol"/>
+      </properties>
+
+      <actions include="startConnector,stopConnector"/>
+
+      <metric name="Availability"
+              template="${OBJECT_NAME}:Started"
+              indicator="true"/>
+    </service>
+
+    <service name="Router">
+      <property name="OBJECT_NAME"
+                value="${domain}:type=org.mule.Statistics,component=*,router=*"/>
+
+      <config>
+        <option name="component"
+                description="Component name"
+                default=""/>
+
+        <option name="router"
+                description="Router name"
+                default=""/>
+      </config>
+
+      <plugin type="autoinventory"/>
+
+      <metric name="Availability"
+              template="${OBJECT_NAME}:Availability"
+              indicator="true"/>
+
+      <metric name="Received"
+              alias="TotalReceived"
+              collectionType="trendsup"
+              indicator="true"/>
+
+      <metric name="Routed"
+              alias="TotalRouted"
+              collectionType="trendsup"
+              indicator="true"/>
+
+      <metric name="Not Routed"
+              collectionType="trendsup"/>
+
+      <metric name="Caught Messages"
+              collectionType="trendsup"/>
+    </service>
+
+    <service name="Component">
+      <property name="OBJECT_NAME"
+                value="${domain}:type=org.mule.Component,name=*"/>
+
+      <config>
+        <option name="name"
+                description="Component name"
+                default=""/>
+      </config>
+
+      <plugin type="autoinventory"/>
+
+      <properties>
+        <property name="MaxQueueSize" description="Max Queue Size"/>
+      </properties>
+
+      <actions include="pause,forceStop,resume,stop,start"/>
+
+      <metric name="Availability"
+              template="${OBJECT_NAME}:Availability"
+              indicator="true"/>
+
+      <metric name="Queue Size"
+              indicator="true"/>
+
+      <metric name="Queued Events"
+              indicator="true"/>
+
+      <metric name="Average Queue Size"/>
+
+      <metric name="Sync Events Received"
+              collectionType="trendsup"/>
+
+      <metric name="Async Events Received"
+              collectionType="trendsup"/>
+
+      <metric name="Total Events Received"
+              collectionType="trendsup"/>
+
+      <metric name="Sync Events Sent"
+              collectionType="trendsup"/>
+
+      <metric name="Async Events Sent"
+              collectionType="trendsup"/>
+
+      <metric name="ReplyTo Events Sent"
+              collectionType="trendsup"/>
+
+      <metric name="Total Events Sent"
+              collectionType="trendsup"/>
+
+      <metric name="Executed Events"
+              collectionType="trendsup"/>
+
+      <metric name="Execution Errors"
+              collectionType="trendsup"/>
+
+      <metric name="Fatal Errors"
+              collectionType="trendsup"/>
+
+      <metric name="Min Execution Time"
+              category="PERFORMANCE"/>
+
+      <metric name="Max Execution Time"
+              category="PERFORMANCE"/>
+
+      <metric name="Average Execution Time"
+              category="PERFORMANCE"/>
+
+      <metric name="Total Execution Time"
+              category="PERFORMANCE"/>
+    </service>
+  </server>
+
+</plugin>
