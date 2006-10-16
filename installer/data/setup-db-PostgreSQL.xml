@@ -89,7 +89,7 @@
           <fileset dir="${server.upgradedir}/hqdb"/>
         </copy>
         <copy todir="${server.home}/bin">
-          <fileset dir="${install.dir}/bin" includes="db-*"/>
+          <fileset dir="${server.upgradedir}/bin" includes="db-*"/>
         </copy>
         <chmod perm="a+rx">
           <fileset dir="${server.hqdb.dir}/bin" includes="*"/>
