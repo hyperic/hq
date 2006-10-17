@@ -89,3 +89,7 @@ License: http://www.gnu.org/licenses/lgpl.txt
 - Dom4j -
 Information: http://www.dom4j.org
 License: http://www.dom4j.org/license.html
+
+- Prototype Window Class -
+Information: http://prototype-window.xilinus.com
+License: http://prototype-window.xilinus.com/index.html
