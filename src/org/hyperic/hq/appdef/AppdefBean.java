@@ -4,36 +4,25 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 
 import java.io.Serializable;
 
+import org.hyperic.hibernate.PersistedObject;
+
 /**
  * This is the base abstract class for all appdef pojos.
  * This is modeled after the AppdefEntityBean less the EJB code.
  */
-public abstract class AppdefBean implements Serializable
+public abstract class AppdefBean 
+    extends PersistedObject
+    implements Serializable
 {
-    protected Integer id;
+    // XXX -- Can we make these private?  We have accessors.  -- JMT
     protected Long creationTime;
     protected Long modifiedTime;
-
-    // for hibernate optimistic locks
-    // don't mess with this.
-    protected long _version_;
 
     // legacy stuff, do we really need this?
     protected Integer cid;
 
-    protected AppdefBean()
-    {
+    protected AppdefBean() {
         super();
-    }
-
-    public void setId(Integer id)
-    {
-        this.id = id;
-    }
-
-    public Integer getId()
-    {
-        return id;
     }
 
     public long getCreationTime()
@@ -74,17 +63,6 @@ public abstract class AppdefBean implements Serializable
         return modifiedTime;
     }
     // end legacy EJB assessors
-
-    public long get_version_()
-    {
-        return _version_;
-    }
-
-    private void set_version_(long _version_)
-    {
-        this._version_ = _version_;
-    }
-
     public Integer getCid()
     {
         return cid;
