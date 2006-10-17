@@ -28,23 +28,16 @@ package org.hyperic.hq.events.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
-import javax.naming.NamingException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.events.TriggerCreateException;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.dao.TriggerDAO;
+import org.hyperic.hq.events.RegisteredTrigger;
 import org.hyperic.hq.events.ext.RegisteredTriggerEvent;
-import org.hyperic.hq.events.shared.RegisteredTriggerLocal;
-import org.hyperic.hq.events.shared.RegisteredTriggerLocalHome;
 import org.hyperic.hq.events.shared.RegisteredTriggerPK;
-import org.hyperic.hq.events.shared.RegisteredTriggerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 
 /** 
@@ -60,67 +53,30 @@ import org.hyperic.hq.events.shared.RegisteredTriggerValue;
  */
 
 public class RegisteredTriggerManagerEJBImpl implements SessionBean {
-    Log log = LogFactory.getLog(RegisteredTriggerManagerEJBImpl.class );
-
-    RegisteredTriggerLocalHome rtHome = null;
-    private RegisteredTriggerLocalHome getRTHome() {
-        try {
-            if (rtHome == null)
-                rtHome = RegisteredTriggerUtil.getLocalHome();
-            return rtHome;
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+    private TriggerDAO getTriggerDAO(){
+        return DAOFactory.getDAOFactory().getTriggerDAO();
     }
     
-    private RegisteredTriggerLocal getRegisteredTrigger(Integer trigId)
-        throws FinderException {
-        return getRTHome().findByPrimaryKey(new RegisteredTriggerPK(trigId));
+    private RegisteredTrigger getRegisteredTrigger(Integer trigId) {
+        return getTriggerDAO().findByPrimaryKey(new RegisteredTriggerPK(trigId));
     }
     
     /**
      * Get a collection of all triggers
      *
+     * @ejb:transaction type="REQUIRED"
      * @ejb:interface-method
      */
     public Collection getAllTriggers() {
         Collection triggers;
-        ArrayList triggerValues = new ArrayList();
+        List triggerValues = new ArrayList();
 
-        try {
-            triggers = getRTHome().findAll();
+        triggers = getTriggerDAO().findAll();
 
-            for (Iterator i = triggers.iterator(); i.hasNext(); ) {
-                RegisteredTriggerLocal trigger =
-                    (RegisteredTriggerLocal) i.next();
-                triggerValues.add(trigger.getRegisteredTriggerValue());
-            }
-        } catch (FinderException e) {
-            // No triggers found, just return an empty list, then
-        }
-
-        return triggerValues;
-    }
-
-    /**
-     * Get a collection of all triggers
-     *
-     * @ejb:interface-method
-     */
-    public Collection getAllRegisteredTriggers() {
-        Collection triggers;
-        ArrayList triggerValues = new ArrayList();
-
-        try {
-            triggers = getRTHome().findAll();
-
-            for (Iterator i = triggers.iterator(); i.hasNext(); ) {
-                RegisteredTriggerLocal trigger =
-                    (RegisteredTriggerLocal) i.next();
-                triggerValues.add(trigger.getRegisteredTriggerValue());
-            }
-        } catch (FinderException e) {
-            // No triggers found, just return an empty list, then
+        for (Iterator i = triggers.iterator(); i.hasNext(); ) {
+            RegisteredTrigger t = (RegisteredTrigger) i.next();
+            
+            triggerValues.add(t.getRegisteredTriggerValue());
         }
 
         return triggerValues;
@@ -131,31 +87,27 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
      *
      * @return a RegisteredTriggerValue 
      *
+     * @ejb:transaction type="REQUIRED"
      * @ejb:interface-method
      */
-    public RegisteredTriggerValue createTrigger(RegisteredTriggerValue val)
-        throws TriggerCreateException {
-        try {
-            RegisteredTriggerLocal tlocal = getRTHome().create(val);
-            
-            // Register the trigger with the dispatcher
-            val = tlocal.getRegisteredTriggerValue();
-        } catch (CreateException e) {
-            throw new TriggerCreateException(e);
-        }
-        
-        return val;
+    public RegisteredTriggerValue createTrigger(RegisteredTriggerValue val) {
+        // XXX -- Things here aren't symmetrical.  The EventsBoss is currently
+        // registering the trigger with the dispatcher, and updateTrigger()
+        // is updating it with the dispatcher.  Seems like this should all
+        // be done here in the manager
+        return getTriggerDAO().create(val).getRegisteredTriggerValue();
     }
 
     /**
      * Update a trigger.
      *
+     * @ejb:transaction type="REQUIRED"
      * @ejb:interface-method
      */
-    public void updateTrigger(RegisteredTriggerValue val)
-        throws FinderException {
-        RegisteredTriggerLocal local = this.getRegisteredTrigger(val.getId());
-        local.setRegisteredTriggerValue(val);
+    public void updateTrigger(RegisteredTriggerValue val) {
+        RegisteredTrigger t = getRegisteredTrigger(val.getId());
+
+        t.setRegisteredTriggerValue(val);
         
         // Re-register the trigger with the dispatcher
         RegisteredTriggerNotifier.broadcast(RegisteredTriggerEvent.UPDATE, val);
@@ -167,11 +119,11 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void deleteTrigger(Integer trigId)
-        throws FinderException, RemoveException {
-        RegisteredTriggerLocal local = this.getRegisteredTrigger(trigId);
-        RegisteredTriggerValue val = local.getRegisteredTriggerValue();
-        local.remove();
+    public void deleteTrigger(Integer trigId) {
+        RegisteredTrigger t = getRegisteredTrigger(trigId);
+        RegisteredTriggerValue val = t.getRegisteredTriggerValue();
+
+        getTriggerDAO().remove(t);
         
         // Unregister the trigger with the dispatcher
         RegisteredTriggerNotifier.broadcast(RegisteredTriggerEvent.DELETE, val);
@@ -183,24 +135,22 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void deleteAlertDefinitionTriggers(Integer adId)
-        throws FinderException, RemoveException {
-        Collection triggers = getRTHome().findTriggersByAlertDef(adId);
+    public void deleteAlertDefinitionTriggers(Integer adId) {
+        Collection triggers = getTriggerDAO().findTriggersByAlertDef(adId);
         RegisteredTriggerValue[] vals =
             new RegisteredTriggerValue[triggers.size()];
-        
+
         int i = 0;
         for (Iterator it = triggers.iterator(); it.hasNext(); i++) {
-            RegisteredTriggerLocal local =
-                (RegisteredTriggerLocal) it.next();
-
-            vals[i] = local.getRegisteredTriggerValue();
-            local.remove();
+            RegisteredTrigger t = (RegisteredTrigger) it.next();
+            
+            vals[i] = t.getRegisteredTriggerValue();
+            getTriggerDAO().remove(t);
         }       
 
         // Unregister the trigger with the dispatcher
-        RegisteredTriggerNotifier
-                .broadcast(RegisteredTriggerEvent.DELETE, vals);
+        RegisteredTriggerNotifier.broadcast(RegisteredTriggerEvent.DELETE, 
+                                            vals);
     }
 
     public void ejbCreate() {}
