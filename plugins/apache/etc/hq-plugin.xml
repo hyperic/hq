@@ -634,7 +634,7 @@
           version="1.3"
           platforms="Unix,Win32">
 
-    <property name="DEFAULT_CONF"
+    <property name="DEFAULT_CONF_FILE"
               value="conf/httpd.conf"/>
 
     <property name="DEFAULT_LOG_FILE"
@@ -777,7 +777,7 @@
     <property name="DEFAULT_PIDFILE"
               value="logs/httpsd.pid"/>
 
-    <property name="DEFAULT_CONF"
+    <property name="DEFAULT_CONF_FILE"
               value="conf/httpsd.conf"/>
 
     <property name="DEFAULT_LOG_FILE"
@@ -802,8 +802,10 @@
     </scan>
   </server>
 
-  <server name="Apache httpd">
-    <property name="DEFAULT_CONF"
+  <server name="Apache httpd"
+          platforms="Unix,Win32">
+
+    <property name="DEFAULT_CONF_FILE"
               value="conf/httpd.conf"/>
 
     <property name="DEFAULT_LOG_FILE"
@@ -833,6 +835,24 @@
     <plugin type="config_track"
             class="ApacheConfigTrackPlugin"/>
 
+    <plugin type="control"
+            class="ApacheControlPlugin"/>
+
+    <actions include="start,stop,restart,graceful,startssl,configtest"/>
+
+    <plugin type="control"
+            platform="Win32"
+            class="org.hyperic.hq.product.Win32ControlPlugin"/>
+
+    <actions platform="Win32"
+             include="start,stop,restart"/>
+
+    <config type="control" platform="Win32">
+      <option name="service_name"
+              default="Apache2"
+              description="Apache Service Name"/>
+    </config>
+
     <plugin type="measurement"
             class="org.hyperic.hq.product.MeasurementPlugin"/>
 
@@ -841,5 +861,20 @@
 
     <metrics include="apache-status"/>
 
+    <help>
+    <![CDATA[
+The mod_status module must be installed to monitor this server type.
+Example Apache configuration:
+<pre>
+ExtendedStatus On
+&lt;Location /server-status&gt;
+    SetHandler server-status
+    Order deny,allow
+    Deny from all
+    Allow from localhost
+&lt;/Location&gt;
+</pre>
+    ]]>
+    </help>
   </server>
 </plugin>
