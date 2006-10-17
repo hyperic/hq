@@ -803,10 +803,35 @@
   </server>
 
   <server name="Apache httpd">
+    <property name="DEFAULT_CONF"
+              value="conf/httpd.conf"/>
+
+    <property name="DEFAULT_LOG_FILE"
+              value="logs/error_log"/>
+
     <!-- override default url.path -->
     <property name="path" value="/server-status"/>
 
     <config include="url"/>
+
+    <properties>
+       <property name="version"
+                 description="Apache Version"/>
+       <property name="exe"
+                 description="Server Executable"/>
+       <property name="serverTokens"
+                 description="Server Tokens"/>
+       <property name="built"
+                 description="Server Built"/>
+       <property name="serverAdmin"
+                 description="Server Admin"/>
+    </properties>
+
+    <plugin type="log_track"
+            class="ApacheErrorLogPlugin"/>
+
+    <plugin type="config_track"
+            class="ApacheConfigTrackPlugin"/>
 
     <plugin type="measurement"
             class="org.hyperic.hq.product.MeasurementPlugin"/>
