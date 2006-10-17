@@ -296,8 +296,8 @@ public class JBossDetector
             return null;
         }
         
-	    JBossInstance instance = 
-                (JBossInstance)servers.get(0);
+        JBossInstance instance = 
+            (JBossInstance)servers.get(0);
         return instance.getHomePath();
     }
 
