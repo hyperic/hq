@@ -1,6 +1,9 @@
 package org.hyperic.hq.appdef;
 
 import org.hyperic.hq.appdef.shared.ServiceTypePK;
+import org.hyperic.hq.appdef.shared.ServiceTypeLocal;
+import org.hyperic.hq.appdef.shared.ServiceTypeValue;
+import org.hyperic.hq.appdef.shared.ServerTypeLocal;
 
 import java.util.Collection;
 
@@ -127,5 +130,52 @@ public class ServiceType extends AppdefResourceType
     {
         pkey.setId(getId());
         return pkey;
+    }
+
+    private ServiceTypeValue serviceTypeValue = new ServiceTypeValue();
+    /**
+     * legacy EJB DTO pattern
+     * @deprecated use (this) ServiceType object instead
+     * @return
+     */
+    public ServiceTypeValue getServiceTypeValue()
+    {
+        serviceTypeValue.setName(getName());
+        serviceTypeValue.setSortName(getSortName());
+        serviceTypeValue.setDescription(getDescription());
+        serviceTypeValue.setPlugin(getPlugin());
+        serviceTypeValue.setIsInternal(getIsInternal());
+        serviceTypeValue.setId(getId());
+        serviceTypeValue.setMTime(getMTime());
+        serviceTypeValue.setCTime(getCTime());
+        return serviceTypeValue;
+    }
+
+    /**
+     * legacy DTO pattern
+     * @depreacated use (this) ServiceType setters instead
+     * @param val
+     */
+    public void setServiceTypeValue(ServiceTypeValue val)
+    {
+        setName( val.getName() );
+        setSortName( val.getSortName() );
+        setDescription( val.getDescription() );
+        setPlugin( val.getPlugin() );
+        setIsInternal( val.getIsInternal() );
+    }
+
+    /**
+     * legacy EJB setter
+     * @deprecated use setServerType(ServerType) instead
+     * @param serverType
+     */
+    public void setServerType(ServerTypeLocal serverType)
+    {
+        if (serverType != null && serverType.getId() != null) {
+            ServerType st = new ServerType();
+            st.setId(serverType.getId());
+            setServerType(st);
+        }
     }
 }

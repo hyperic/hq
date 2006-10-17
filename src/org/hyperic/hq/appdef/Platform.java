@@ -1,5 +1,7 @@
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.shared.PlatformPK;
+
 import java.util.Collection;
 
 /**
@@ -113,5 +115,17 @@ public class Platform extends AppdefResource
     public void setServers(Collection servers)
     {
         this.servers = servers;
+    }
+
+    private PlatformPK pkey = new PlatformPK();
+    /**
+     * legacy EJB primary key getter
+     * @deprecated use getId() instead
+     * @return
+     */
+    public PlatformPK getPrimaryKey()
+    {
+        pkey.setId(getId());
+        return pkey;
     }
 }

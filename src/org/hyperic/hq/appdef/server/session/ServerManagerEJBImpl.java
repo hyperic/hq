@@ -85,6 +85,7 @@ import org.hyperic.hq.appdef.shared.ServiceTypePK;
 import org.hyperic.hq.appdef.shared.ServiceTypeUtil;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.appdef.Service;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -100,6 +101,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.hibernate.ObjectNotFoundException;
 
 /**
  * This class is responsible for managing Server objects in appdef
@@ -657,19 +659,20 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         throws ServerNotFoundException, ServiceNotFoundException, 
                PermissionException
     {
-        ServiceLocal serviceLocal; 
+        Service serviceLocal;
         ServerValue serverValue;
         try {
-            serviceLocal = this.getServiceLocalHome().findByPrimaryKey(
-                new ServicePK(sID));
+            serviceLocal = getServiceDAO().findById(sID);
             
             serverValue = ServerVOHelperUtil.getLocalHome().create()
-                .getServerValue(serviceLocal.getServer());
+                .getServerValue(serviceLocal.getServer().getPrimaryKey());
             
             // Make sure they're authorized to see it. Otherwise, we should
             // throw a not-found exception.
             checkViewPermission(subject, serverValue.getEntityId());
         } catch (FinderException e) {
+            throw new ServiceNotFoundException(sID, e);
+        } catch (ObjectNotFoundException e) {
             throw new ServiceNotFoundException(sID, e);
         } catch (NamingException e) {
             throw new SystemException(e);

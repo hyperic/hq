@@ -75,6 +75,9 @@ import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ServiceTypeLocal;
 import org.hyperic.hq.appdef.shared.ServiceTypePK;
 import org.hyperic.hq.appdef.shared.UpdateException;
+import org.hyperic.hq.appdef.Service;
+import org.hyperic.hq.appdef.Server;
+import org.hyperic.hq.appdef.ServiceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -96,6 +99,7 @@ import org.hyperic.util.pager.SortAttribute;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
 
 /**
  * Parent abstract class of all appdef session ejbs
@@ -147,7 +151,10 @@ public abstract class AppdefSessionEJB
                     
                     if (obj instanceof ServiceTypeLocal)
                         return ((ServiceTypeLocal) obj).getSortName();
-                    
+
+                    if (obj instanceof ServiceType)
+                        return ((ServiceType) obj).getSortName();
+
                     return "";
                 }
                 
@@ -156,13 +163,20 @@ public abstract class AppdefSessionEJB
                 }
             }
         );
-        
+
         Iterator iterator = resources.iterator();
         while (iterator.hasNext()) {
-            AppdefResourceLocal resource = (AppdefResourceLocal)iterator.next();
-            EJBLocalObject rTypeLocal = resource.getAppdefResourceType();
-            if (!resTypes.contains(rTypeLocal))
-                resTypes.add(rTypeLocal);        
+            Object o = iterator.next();
+            if (o instanceof AppdefResourceLocal) {
+                AppdefResourceLocal resource = (AppdefResourceLocal)iterator.next();
+                EJBLocalObject rTypeLocal = resource.getAppdefResourceType();
+                if (!resTypes.contains(rTypeLocal))
+                    resTypes.add(rTypeLocal);
+            } else if (o instanceof Service) {
+                ServiceType st = ((Service)o).getServiceType();
+                if (!resTypes.contains(st))
+                    resTypes.add(st);
+            }
         }
         return resTypes;
     }
@@ -362,11 +376,11 @@ public abstract class AppdefSessionEJB
      * Find a ServiceLocal by primary key
      * @return ServiceLocal
      */
-    protected ServiceLocal findServiceByPK(ServicePK pk)
+    protected Service findServiceByPK(ServicePK pk)
         throws ServiceNotFoundException, NamingException {
         try {
-            return getServiceLocalHome().findByPrimaryKey(pk);
-        } catch (FinderException e) {
+            return getServiceDAO().findByPrimaryKey(pk);
+        } catch (ObjectNotFoundException e) {
             throw new ServiceNotFoundException(pk.getId(), e);
         }
     }
@@ -444,15 +458,15 @@ public abstract class AppdefSessionEJB
      * @ejb:transaction type="REQUIRED"
      */
     public PlatformPK getPlatformPkByServicePk(ServicePK servicePK)
-        throws NamingException, FinderException {
-            // TODO refactor this using finder
-            // find the installed service
-            ServiceLocal isvc = getServiceLocalHome()
-                .findByPrimaryKey(servicePK);
-            // find the Server and get its platform
-            ServerLocal server = isvc.getServer();
-            // return the parent server's pk
-            return (PlatformPK)(server.getPlatform().getPrimaryKey());
+        throws NamingException, FinderException
+    {
+        // TODO refactor this using finder
+        // find the installed service
+        Service isvc = getServiceDAO().findByPrimaryKey(servicePK);
+        // find the Server and get its platform
+        Server server = isvc.getServer();
+        // return the parent server's pk
+        return (server.getPlatform().getPrimaryKey());
     }
 
     /**
@@ -1350,8 +1364,7 @@ public abstract class AppdefSessionEJB
                 return ServerVOHelperUtil.getLocalHome().create()
                             .getServerValue(serv);
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                ServiceLocal service = 
-                    this.findServiceByPK(new ServicePK(intID));
+                Service service = findServiceByPK(new ServicePK(intID));
                     
                 return service.getServiceValue();
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:

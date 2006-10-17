@@ -138,9 +138,11 @@ public class Service extends AppdefResource
      */
     public void setParentId(Integer parentId)
     {
-        Service s = new Service();
-        s.setId(parentId);
-        setParentService(s);
+        if (parentId != null) {
+            Service s = new Service();
+            s.setId(parentId);
+            setParentService(s);
+        }
     }
 
     public Server getServer()
@@ -200,9 +202,11 @@ public class Service extends AppdefResource
      */
     public void setConfigResponseId(Integer crif)
     {
-        ConfigResponseDB c = new ConfigResponseDB();
-        c.setId(crif);
-        setConfigResponse(c);
+        if (crif != null) {
+            ConfigResponseDB c = new ConfigResponseDB();
+            c.setId(crif);
+            setConfigResponse(c);
+        }
     }
 
     public Collection getAppServices()
@@ -431,23 +435,29 @@ public class Service extends AppdefResource
 
     public void setServer(ServerLocal server)
     {
-        Server s = new Server();
-        s.setId(server.getId());
-        setServer(s);
+        if (server != null) {
+            Server s = new Server();
+            s.setId(server.getId());
+            setServer(s);
+        }
     }
 
     public void setServiceCluster(ServiceClusterLocal serviceCluster)
     {
-        ServiceCluster s = new ServiceCluster();
-        s.setId(serviceCluster.getId());
-        setServiceCluster(s);
+        if (serviceCluster != null) {
+            ServiceCluster s = new ServiceCluster();
+            s.setId(serviceCluster.getId());
+            setServiceCluster(s);
+        }
     }
 
     public void setServiceType(ServiceTypeLocal serviceType)
     {
-        ServiceType s = new ServiceType();
-        s.setId(serviceType.getId());
-        setServiceType(s);
+        if (serviceType != null) {
+            ServiceType s = new ServiceType();
+            s.setId(serviceType.getId());
+            setServiceType(s);
+        }
     }
 
     /**

@@ -27,6 +27,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.dao.ConfigResponseDAO;
+import org.hyperic.hibernate.dao.ServiceDAO;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AIServerLocalHome;
@@ -70,7 +71,6 @@ import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerTypeLocalHome;
 import org.hyperic.hq.appdef.shared.ServerTypeUtil;
 import org.hyperic.hq.appdef.shared.ServerUtil;
-import org.hyperic.hq.appdef.shared.ServiceLocalHome;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
@@ -107,7 +107,6 @@ public abstract class AppdefSessionUtil {
     private ServerLocalHome             serverLHome;
     private ServerManagerLocalHome      serverMgrLHome;
     private ServerTypeLocalHome         serverTypeLHome;
-    private ServiceLocalHome            serviceLHome;
     private ServiceManagerLocalHome     serviceMgrLHome;
     private ServiceTypeLocalHome        serviceTypeLHome;
     private AuthzSubjectLocalHome      subjectLHome;
@@ -319,15 +318,8 @@ public abstract class AppdefSessionUtil {
         return serviceTypeLHome;
     }
 
-    protected ServiceLocalHome getServiceLocalHome() {
-        if(serviceLHome == null) {
-            try {
-                serviceLHome = ServiceUtil.getLocalHome();
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
-        return serviceLHome;
+    protected ServiceDAO getServiceDAO() {
+        return DAOFactory.getDAOFactory().getServiceDAO();
     }
 
     /**

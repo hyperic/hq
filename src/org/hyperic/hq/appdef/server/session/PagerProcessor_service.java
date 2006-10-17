@@ -32,6 +32,8 @@ import org.hyperic.hq.appdef.shared.ServiceLocal;
 import org.hyperic.hq.appdef.shared.ServiceClusterLocal;
 import org.hyperic.hq.appdef.shared.ServiceTypeLocal;
 import org.hyperic.hq.appdef.shared.ServiceVOHelperUtil;
+import org.hyperic.hq.appdef.Service;
+import org.hyperic.hq.appdef.ServiceType;
 
 public class PagerProcessor_service implements PagerProcessor {
 
@@ -44,6 +46,10 @@ public class PagerProcessor_service implements PagerProcessor {
                 return ServiceVOHelperUtil.getLocalHome().create()
                     .getServiceValue((ServiceLocal)o);
             }
+            if ( o instanceof Service) {
+                return ServiceVOHelperUtil.getLocalHome().create()
+                    .getServiceValue((Service)o);
+            }
             if ( o instanceof AppServiceLocal ) {
                 return ((AppServiceLocal) o).getAppServiceValue();
             }
@@ -53,6 +59,10 @@ public class PagerProcessor_service implements PagerProcessor {
             if ( o instanceof ServiceTypeLocal ) {
                 return ServiceVOHelperUtil.getLocalHome().create()
                     .getServiceTypeValue((ServiceTypeLocal)o);
+            }
+            if ( o instanceof ServiceType) {
+                return ServiceVOHelperUtil.getLocalHome().create()
+                    .getServiceTypeValue((ServiceType)o);
             }
         } catch ( Exception e ) {
             throw new IllegalStateException("Error converting to ServiceValue: " + e);

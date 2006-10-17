@@ -46,6 +46,8 @@ import org.hyperic.hq.appdef.shared.ServiceTypePK;
 import org.hyperic.hq.appdef.shared.ServiceTypeUtil;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
+import org.hyperic.hq.appdef.Service;
+import org.hyperic.hq.appdef.ServiceType;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.common.SystemException;
@@ -110,6 +112,17 @@ public class ServiceVOHelperEJBImpl extends AppdefSessionEJB implements
     }
 
     /**
+     * Get the service light value object from an ejb local
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public ServiceLightValue getServiceLightValue(Service ejb)
+            throws FinderException, NamingException {
+        return getServiceLightValue(ejb.getPrimaryKey());
+    }
+
+    /**
      * Get the server value object
      * 
      * @ejb:interface-method
@@ -119,6 +132,24 @@ public class ServiceVOHelperEJBImpl extends AppdefSessionEJB implements
             throws NamingException {
         try {
             return getServiceValue((ServicePK) ejb.getPrimaryKey());
+        } catch (FinderException e) {
+            // This should never happen, as we have already gotten the local obj
+            log.error("ServiceLocal primary key " + ejb.getPrimaryKey()
+                    + " invalid: ", e);
+            return null;
+        }
+    }
+
+    /**
+     * Get the server value object
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public ServiceValue getServiceValue(Service ejb)
+            throws NamingException {
+        try {
+            return getServiceValue(ejb.getPrimaryKey());
         } catch (FinderException e) {
             // This should never happen, as we have already gotten the local obj
             log.error("ServiceLocal primary key " + ejb.getPrimaryKey()
@@ -266,6 +297,21 @@ public class ServiceVOHelperEJBImpl extends AppdefSessionEJB implements
     }
 
     /**
+     * Get the server type value object
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public ServiceTypeValue getServiceTypeValue(ServiceType ejb)
+            throws NamingException {
+        ServiceTypeValue vo = cache.getServiceType(ejb.getId());
+        if (vo != null) {
+            return vo;
+        }
+        return getServiceTypeValueImpl(ejb);
+    }
+
+    /**
      * Synchronized VO retrieval
      */
     private ServiceTypeValue getServiceTypeValueImpl(ServiceTypeLocal ejb)
@@ -274,6 +320,24 @@ public class ServiceVOHelperEJBImpl extends AppdefSessionEJB implements
         synchronized (cache.getServiceTypeLock()) {
             vo = cache.getServiceType(((ServiceTypePK) ejb.getPrimaryKey())
                     .getId());
+            if (vo != null) {
+                return vo;
+            }
+
+            vo = ejb.getServiceTypeValue();
+            cache.put(vo.getId(), vo);
+        }
+        return vo;
+    }
+
+    /**
+     * Synchronized VO retrieval
+     */
+    private ServiceTypeValue getServiceTypeValueImpl(ServiceType ejb)
+            throws NamingException {
+        ServiceTypeValue vo;
+        synchronized (cache.getServiceTypeLock()) {
+            vo = cache.getServiceType(ejb.getId());
             if (vo != null) {
                 return vo;
             }

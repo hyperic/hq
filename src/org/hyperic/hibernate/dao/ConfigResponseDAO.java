@@ -39,6 +39,16 @@ public class ConfigResponseDAO extends HibernateDAO implements IConfigResponseDA
         super.remove(entity);
     }
 
+    /**
+     * @return newly instantiated config response object
+     */
+    public ConfigResponseDB create()
+    {
+        ConfigResponseDB newConfig = new ConfigResponseDB();
+        save(newConfig);
+        return newConfig;
+    }
+
     public ConfigResponseDB findByPlatformId(Integer id)
     {
         String sql = "select c from ConfigResponseDB c, Platform p where " +

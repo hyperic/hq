@@ -28,6 +28,7 @@ package org.hyperic.hq.appdef.server.session;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.appdef.Service;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -274,8 +275,7 @@ public class ConfigManagerEJBImpl
                 break;
 
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                ServiceLocal service = 
-                    this.findServiceByPK(new ServicePK(intID));
+                Service service = findServiceByPK(new ServicePK(intID));
                 pname = service.getServiceType().getPlugin();
                 break;
 

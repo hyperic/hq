@@ -29,7 +29,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.dao.ConfigResponseDAO;
+import org.hyperic.hibernate.dao.ServiceDAO;
 import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.appdef.Service;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformLightValue;
 import org.hyperic.hq.appdef.shared.PlatformLocal;
@@ -503,19 +505,14 @@ public abstract class ServerEJBImpl
      * @throws CreateException -
      * @throws ValidationException
      */
-    public ServiceLocal createService(ServiceValue sv)
+    public Service createService(ServiceValue sv)
         throws CreateException, ValidationException {
-            try {
-                // validate the service
-                this.validateNewService(sv);
-                // get the Service home
-                ServiceLocalHome sLHome = ServiceUtil.getLocalHome();                // create it
-                return sLHome.create(sv, this.getPK());
-            } catch (javax.naming.NamingException e) {
-                log.error("Naming Exception in createService.", e);
-                throw new CreateException("Unable to create Service: "
- + e.getMessage());
-            }
+        // validate the service
+        this.validateNewService(sv);
+        // get the Service home
+        ServiceDAO sLHome =
+            DAOFactory.getDAOFactory().getServiceDAO();                // create it
+        return sLHome.create(sv, this.getPK());
     }
 
     /**
