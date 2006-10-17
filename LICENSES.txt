@@ -77,3 +77,8 @@ License: within src/org/hyperic/util/PrintfFormat.java
 - JBoss Messaging -
 Information: http://labs.jboss.com/portal/jbossmessaging/
 License: http://www.jboss.org/company/opensouce_aboutlgpl
+
+- Prototype Window Class -
+Information: http://prototype-window.xilinus.com
+License: http://prototype-window.xilinus.com/index.html
+
