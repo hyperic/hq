@@ -270,7 +270,11 @@ public class JBossDetector
             if (engine != null) {
                 root = new File(root, engine);
             }
-            servers.add(getServerConfigPath(root, "default"));
+
+            String configPath =
+                getServerConfigPath(root, "default");
+
+            servers.add(new JBossInstance(root.getPath(), configPath));
         }
     }
 
