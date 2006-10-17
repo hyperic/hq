@@ -10,6 +10,7 @@ import org.hyperic.hibernate.dao.ServerDAO;
 import org.hyperic.hibernate.dao.ServiceDAO;
 import org.hyperic.hibernate.dao.HibernateMockDAOFactory;
 import org.hyperic.hibernate.dao.ConfigResponseDAO;
+import org.hyperic.hibernate.dao.ServiceTypeDAO;
 import org.hibernate.Session;
 
 /**
@@ -30,6 +31,7 @@ public abstract class DAOFactory
     public abstract PlatformDAO getPlatformDAO();
     public abstract ServerDAO getServerDAO();
     public abstract ServiceDAO getServiceDAO();
+    public abstract ServiceTypeDAO getServiceTypeDAO();
 
     public static ThreadLocal defaultSession = new ThreadLocal();
 

@@ -32,6 +32,7 @@ import org.hyperic.hibernate.dao.ConfigResponseDAO;
 import org.hyperic.hibernate.dao.ServiceDAO;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Service;
+import org.hyperic.hq.appdef.ServiceType;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformLightValue;
 import org.hyperic.hq.appdef.shared.PlatformLocal;
@@ -405,15 +406,15 @@ public abstract class ServerEJBImpl
      */
     public Collection getSupportedServiceTypes() throws FinderException {
         // first get our service type
-        ServerTypeLocal myType = this.getServerType();
+        ServerTypeLocal myType = getServerType();
         // now get the service types
-        Set serviceTypes = myType.getServiceTypes();
+        Set serviceTypes = myType.getServiceTypesFromDAO();
         // now turn em into beans
         Collection suppSvcTypes = new ArrayList();
         Iterator it = serviceTypes.iterator();
         while(it.hasNext()) {
-            ServiceTypeLocal svcType = (ServiceTypeLocal)it.next();
-            suppSvcTypes.add(svcType.getServiceTypeValue());
+            ServiceType svcType = (ServiceType)it.next();
+            suppSvcTypes.add(svcType.getName());
         }
         return suppSvcTypes;
     }
@@ -559,8 +560,8 @@ public abstract class ServerEJBImpl
                 log.debug("Checking to see if Server: " + getName() 
                     + " supports service type: " + stv);
             }
-            Collection suppServiceTypes = this.getSupportedServiceTypes();
-            REQUIRED = suppServiceTypes.contains(stv);        
+            Collection suppServiceTypes = getSupportedServiceTypes();
+            REQUIRED = suppServiceTypes.contains(stv.getName());        
         } catch (javax.ejb.FinderException e) {
             log.error("Unable to find ServiceType: " + stv);
         }

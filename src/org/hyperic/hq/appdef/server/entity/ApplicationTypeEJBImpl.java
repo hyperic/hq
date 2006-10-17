@@ -33,6 +33,8 @@ import org.hyperic.hq.appdef.shared.ApplicationTypePK;
 import org.hyperic.hq.appdef.shared.ServiceTypePK;
 import org.hyperic.hq.appdef.shared.ServiceTypeLocal;
 import org.hyperic.hq.appdef.shared.ServiceTypeUtil;
+import org.hyperic.hq.appdef.ServiceType;
+import org.hyperic.dao.DAOFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -169,7 +171,7 @@ implements EntityBean {
     /**
      * Check to see if a service type is supported by this application type
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      * @return boolean - true if its supported, false otherwise.. including 
      * cases where the service type can not be found.
      */
@@ -177,8 +179,9 @@ implements EntityBean {
         boolean supports = false;
         try {
             // first look up the ServiceTypeLocal
-            ServiceTypeLocal serviceType = 
-                ServiceTypeUtil.getLocalHome().findByPrimaryKey(stPK);
+            ServiceType serviceType =
+                DAOFactory.getDAOFactory()
+                    .getServiceTypeDAO().findById(stPK.getId());
             supports = this.getServiceTypes().contains(serviceType);
         } catch (Exception e) {
             log.error("Caught exception while checking supportsServiceType: " + stPK, e);

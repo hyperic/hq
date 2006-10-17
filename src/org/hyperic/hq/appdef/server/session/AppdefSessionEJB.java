@@ -69,7 +69,6 @@ import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.ServerTypeLocal;
 import org.hyperic.hq.appdef.shared.ServerTypePK;
 import org.hyperic.hq.appdef.shared.ServerVOHelperUtil;
-import org.hyperic.hq.appdef.shared.ServiceLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ServiceTypeLocal;
@@ -387,11 +386,11 @@ public abstract class AppdefSessionEJB
 
     /**
      * Find a ServiceTypeLocal by primary key
-     * @return ServiceTypeLocal
+     * @return ServiceType
      */
-    protected ServiceTypeLocal findServiceTypeByPK(ServiceTypePK pk)
-        throws FinderException, NamingException {
-            return getServiceTypeLocalHome().findByPrimaryKey(pk);
+    protected ServiceType findServiceTypeByPK(ServiceTypePK pk)
+    {
+        return getServiceTypeDAO().findByPrimaryKey(pk);
     }
 
     /**

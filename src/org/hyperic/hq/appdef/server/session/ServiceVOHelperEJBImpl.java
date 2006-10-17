@@ -266,7 +266,7 @@ public class ServiceVOHelperEJBImpl extends AppdefSessionEJB implements
      * Get the server type value object
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
     public ServiceTypeValue getServiceTypeValue(ServiceTypePK pk)
             throws FinderException, NamingException {
@@ -275,8 +275,8 @@ public class ServiceVOHelperEJBImpl extends AppdefSessionEJB implements
             return vo;
         }
 
-        ServiceTypeLocal ejb =
-            ServiceTypeUtil.getLocalHome().findByPrimaryKey(pk);
+        ServiceType ejb =
+            getServiceTypeDAO().findById(pk.getId());
         return getServiceTypeValueImpl(ejb);
     }
 

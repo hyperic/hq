@@ -85,7 +85,6 @@ import org.hyperic.hq.appdef.shared.ServiceLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ServiceTypeLocal;
-import org.hyperic.hq.appdef.shared.ServiceTypeLocalHome;
 import org.hyperic.hq.appdef.shared.ServiceTypePK;
 import org.hyperic.hq.appdef.shared.ServiceTypeUtil;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
@@ -95,6 +94,8 @@ import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.ServiceUtil;
 import org.hyperic.hq.appdef.Service;
+import org.hyperic.hq.appdef.ServiceType;
+import org.hyperic.hq.appdef.ServerType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -112,6 +113,7 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.hibernate.dao.ServiceDAO;
+import org.hyperic.hibernate.dao.ServiceTypeDAO;
 import org.hyperic.dao.DAOFactory;
 
 /**
@@ -371,6 +373,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     /**
      * Create a service type supported by a specific server type
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public ServiceTypePK createServiceType(AuthzSubjectValue subject,
         ServiceTypeValue stv, ServerTypeValue serverType) 
@@ -384,10 +387,10 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             ServerTypeLocal servTypeEJB = getServerTypeLocalHome()
                 .findByPrimaryKey(serverType.getPrimaryKey());
             // now create the service type on it
-            ServiceTypeLocal stype = servTypeEJB.createServiceType(stv);
+            ServiceType stype = servTypeEJB.createServiceType(stv);
             // flush the cache for the parent server type
             VOCache.getInstance().removeServerType(serverType.getId());
-            return (ServiceTypePK)stype.getPrimaryKey();
+            return stype.getPrimaryKey();
         } catch (NamingException e) {
             log.error("Unable to get ServiceTypeLocalHome", e);
             throw new SystemException("Unable to get ServiceTypeLocalHome: " +
@@ -446,13 +449,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      */
     public PageList getAllServiceTypes(AuthzSubjectValue subject,
                                        PageControl pc)
-        throws FinderException {
-        Collection serviceTypes;
-        try {
-            serviceTypes = getServiceTypeLocalHome().findAll();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+    {
+        Collection serviceTypes = getServiceTypeDAO().findAll();
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
         return valuePager.seek(serviceTypes, pc);
@@ -488,14 +486,10 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     public PageList getServiceTypesByServerType(AuthzSubjectValue subject,
                                                 int serverTypeId) {
         PageControl pc = PageControl.PAGE_ALL;
-        Collection serviceTypes;
-        try {
-            serviceTypes = getServiceTypeLocalHome()
-                .findByServerType_orderName_asc(serverTypeId);
-        } catch (FinderException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
+        Collection serviceTypes =
+            getServiceTypeDAO().findByServerType_orderName(serverTypeId, true);
+        if (serviceTypes.size() == 0) {
+            throw new SystemException(serverTypeId+"");
         }
         return valuePager.seek(serviceTypes, pc);
     }
@@ -507,14 +501,10 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     public PageList findVirtualServiceTypesByPlatform(AuthzSubjectValue subject,
                                                       Integer platformId) {
         PageControl pc = PageControl.PAGE_ALL;
-        Collection serviceTypes;
-        try {
-            serviceTypes = getServiceTypeLocalHome()
+        Collection serviceTypes = getServiceTypeDAO()
                 .findVirtualServiceTypesByPlatform(platformId.intValue());
-        } catch (FinderException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
+        if (serviceTypes.size() == 0) {
+            throw new SystemException(platformId+"");
         }
         return valuePager.seek(serviceTypes, pc);
     }
@@ -1727,13 +1717,12 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         HashMap serverTypes = new HashMap();
         
         try {
-            ServiceTypeLocalHome stLHome = getServiceTypeLocalHome();
-
+            ServiceTypeDAO stLHome = getServiceTypeDAO();
             Collection curServices = stLHome.findByPlugin(plugin);
             ServerTypeLocalHome stHome = ServerTypeUtil.getLocalHome();
             
             for (Iterator i = curServices.iterator(); i.hasNext();) {
-                ServiceTypeLocal stlocal = (ServiceTypeLocal) i.next();
+                ServiceType stlocal = (ServiceType) i.next();
 
                 if (log.isDebugEnabled()) {
                     log.debug("Begin updating ServiceTypeLocal: " + 
@@ -1761,9 +1750,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                         }
                     }
                     
-                    cache.removeServiceType(((ServiceTypePK)
-                                             stlocal.getPrimaryKey()).getId());
-                    stlocal.remove();
+                    cache.removeServiceType(stlocal.getId());
+                    stLHome.remove(stlocal);
                 } else {
                     // Just update it
                     // XXX TODO MOVE THIS INTO THE ENTITY
@@ -1778,13 +1766,14 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                         stlocal.setIsInternal(sinfo.getInternal());
                     // flush cached value of service type
                     cache.removeServiceType(
-                        ((ServiceTypePK) stlocal.getPrimaryKey()).getId());    
+                        stlocal.getId());
                     // Could be null if servertype was deleted/updated by plugin
-                    ServerTypeLocal svrtp = stlocal.getServerType();
+                    ServerType svrtype = stlocal.getServerType();
+                    ServerTypeLocal svrtp;
 
                     // Check server type
-                    if (svrtp == null ||
-                        !sinfo.getServerName().equals(svrtp.getName())) {
+                    if (svrtype == null ||
+                        !sinfo.getServerName().equals(svrtype.getName())) {
                         // Lookup the server type
                         if (serverTypes.containsKey(sinfo.getServerName()))
                             svrtp = (ServerTypeLocal)
@@ -1819,7 +1808,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 stype.setIsInternal(sinfo.getInternal());
 
                 // Now create the service type
-                ServiceTypeLocal stlocal = stLHome.create(stype);
+                ServiceType stlocal = stLHome.create(stype);
                 ServiceTypeValue stvo = stlocal.getServiceTypeValue();
                 
                 // Save it in the VOCache

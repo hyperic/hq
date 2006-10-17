@@ -1,7 +1,6 @@
 package org.hyperic.hq.appdef;
 
 import org.hyperic.hq.appdef.shared.ServiceTypePK;
-import org.hyperic.hq.appdef.shared.ServiceTypeLocal;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServerTypeLocal;
 
@@ -163,6 +162,8 @@ public class ServiceType extends AppdefResourceType
         setDescription( val.getDescription() );
         setPlugin( val.getPlugin() );
         setIsInternal( val.getIsInternal() );
+        setModifiedTime(val.getMTime());
+        setCreationTime(val.getCTime());
     }
 
     /**
@@ -177,5 +178,27 @@ public class ServiceType extends AppdefResourceType
             st.setId(serverType.getId());
             setServerType(st);
         }
+    }
+
+    public boolean equals(Object obj)
+    {
+        if (!super.equals(obj) || !(obj instanceof ServiceType)) {
+            return false;
+        }
+        ServiceType o = (ServiceType)obj;
+        return
+            ((plugin!=o.getPlugin()) ||
+             (plugin!=null && o.getPlugin()!=null && plugin.equals(o)))
+            &&
+            (isInternal == o.isIsInternal());
+    }
+
+    public int hashCode()
+    {
+        int result = super.hashCode();
+
+        result = 37*result + (plugin != null ? plugin.hashCode() : 0);
+        result = 37*result + (isInternal ? 0 : 1);
+        return result;
     }
 }

@@ -86,6 +86,7 @@ import org.hyperic.hq.appdef.shared.ServiceTypeUtil;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.Service;
+import org.hyperic.hq.appdef.ServiceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -949,7 +950,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @param pc The page control.
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public PageList getServersByPlatformServiceType( AuthzSubjectValue subject,
                                                      Integer platId,
@@ -959,12 +960,9 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         PageControl pc = PageControl.PAGE_ALL;
         Integer servTypeId;
         try {
-            ServiceTypeLocal typeV = ServiceTypeUtil.getLocalHome()
-                .findByPrimaryKey(new ServiceTypePK(svcTypeId));
+            ServiceType typeV = getServiceTypeDAO().findById(svcTypeId);
             servTypeId = typeV.getServerType().getId();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (FinderException e) {
+        } catch (ObjectNotFoundException e) {
             throw new ServerNotFoundException("Service Type not found", e);
         }
         

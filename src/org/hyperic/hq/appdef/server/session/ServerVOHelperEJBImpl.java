@@ -57,6 +57,7 @@ import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ServiceTypeLocal;
 import org.hyperic.hq.appdef.shared.ServiceVOHelperLocal;
 import org.hyperic.hq.appdef.shared.ServiceVOHelperUtil;
+import org.hyperic.hq.appdef.ServiceType;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -286,11 +287,7 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
             vo = ejb.getServerTypeValueObject();
             Iterator serviceIt = ejb.getServiceTypeSnapshot().iterator();
             while(serviceIt.hasNext()) {
-                try {
-                    vo.addServiceTypeValue(((ServiceTypeLocal)serviceIt.next()).getServiceTypeValue());
-                } catch (NoSuchObjectLocalException e) {
-                // not a problem. A service type was removed while we were iterating
-                }
+                vo.addServiceTypeValue(((ServiceType)serviceIt.next()).getServiceTypeValue());
             }
             cache.put(vo.getId(), vo);
         }

@@ -86,17 +86,17 @@ import org.apache.commons.logging.LogFactory;
  * @jboss:table-name table-name="EAM_SERVICE_TYPE"
  * @jboss:create-table false
  * @jboss:remove-table false
+
+    protected Log log = LogFactory.getLog(ServiceTypeEJBImpl.class);
+
+    public ServiceTypeEJBImpl() {
+    }
  */
 public abstract class ServiceTypeEJBImpl extends AppdefEntityBean
 implements EntityBean {
 
     public final String SEQUENCE_NAME = "EAM_APPDEF_RESOURCETYPE_ID_SEQ";
     public final int SEQUENCE_INTERVAL = 10;
-
-    protected Log log = LogFactory.getLog(ServiceTypeEJBImpl.class);
-
-    public ServiceTypeEJBImpl() {
-    }
 
     /**
      * Name of this ServiceType

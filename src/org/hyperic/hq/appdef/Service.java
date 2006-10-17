@@ -9,8 +9,6 @@ import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ServerLocal;
 import org.hyperic.hq.appdef.shared.ServiceClusterLocal;
 import org.hyperic.hq.appdef.shared.ServiceTypeLocal;
-import org.hyperic.hq.appdef.shared.ServiceTypeUtil;
-import org.hyperic.hq.appdef.shared.ServiceTypeLocalHome;
 import org.hyperic.hq.appdef.shared.ServerLocalHome;
 import org.hyperic.hq.appdef.shared.ServerUtil;
 import org.hyperic.hq.appdef.shared.ServiceClusterLocalHome;
@@ -18,8 +16,12 @@ import org.hyperic.hq.appdef.shared.ServiceClusterUtil;
 import org.hyperic.hq.appdef.shared.AppServiceLocal;
 import org.hyperic.hq.appdef.shared.AppServiceUtil;
 import org.hyperic.hq.appdef.shared.AppSvcDependencyUtil;
+import org.hyperic.hq.appdef.shared.ServiceLocal;
+import org.hyperic.hibernate.dao.ServiceTypeDAO;
+import org.hyperic.dao.DAOFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
 
 import javax.naming.NamingException;
 import javax.ejb.FinderException;
@@ -325,13 +327,13 @@ public class Service extends AppdefResource
             // temporarily rely on EJB until
             // it is hibernized
             try {
-                ServiceTypeLocalHome shome = ServiceTypeUtil.getLocalHome();
-                ServiceTypeLocal st =
-                    shome.findByPrimaryKey(getServiceType().getPrimaryKey());
+                ServiceTypeDAO shome =
+                    DAOFactory.getDAOFactory().getServiceTypeDAO();
+                ServiceType st =
+                    shome.findById(getServiceType().getId());
                 serviceLightValue.setServiceType(
                     st.getServiceTypeValue());
-            } catch(NamingException ignore) {
-            } catch (javax.ejb.FinderException e) {
+            } catch (ObjectNotFoundException e) {
             }
         }
         else
@@ -395,12 +397,12 @@ public class Service extends AppdefResource
             // temporarily rely on EJB until
             // it is hibernized
             try {
-                ServiceTypeLocalHome shome = ServiceTypeUtil.getLocalHome();
-                ServiceTypeLocal st =
-                    shome.findByPrimaryKey(getServiceType().getPrimaryKey());
+                ServiceTypeDAO shome =
+                    DAOFactory.getDAOFactory().getServiceTypeDAO();
+                ServiceType st =
+                    shome.findById(getServiceType().getId());
                 serviceValue.setServiceType(st.getServiceTypeValue());
-            } catch(NamingException ignore) {
-            } catch (javax.ejb.FinderException e) {
+            } catch (ObjectNotFoundException e) {
             }
         }
         else

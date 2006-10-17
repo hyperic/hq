@@ -25,6 +25,7 @@ public abstract class AppdefResourceType extends AppdefBean
     public void setName(String name)
     {
         this.name = name;
+        setSortName(name);
     }
 
     public String getSortName()
@@ -34,7 +35,11 @@ public abstract class AppdefResourceType extends AppdefBean
 
     public void setSortName(String sortName)
     {
-        this.sortName = sortName;
+        if (sortName != null) {
+            this.sortName = sortName.toUpperCase();
+        } else {
+            this.sortName = null;
+        }
     }
 
     public String getDescription()
@@ -45,5 +50,30 @@ public abstract class AppdefResourceType extends AppdefBean
     public void setDescription(String description)
     {
         this.description = description;
+    }
+
+    public boolean equals(Object o)
+    {
+        if (!super.equals(o) || !(o instanceof AppdefResourceType)) {
+            return false;
+        }
+        AppdefResourceType a = (AppdefResourceType)o;
+        return
+            ((name==a.getName()) || (name!=null && a.getName()!=null &&
+                                     name.equals(a.getName())))
+            &&
+            ((description==a.getDescription()) ||
+             (description!=null && a.getDescription()!=null &&
+              description.equals(a.getDescription())));
+    }
+
+    public int hashCode()
+    {
+        int result = super.hashCode();
+
+        result = 37*result + (name!=null ? name.hashCode() : 0);
+        result = 37*result + (description!=null ? description.hashCode() : 0);
+
+        return result;
     }
 }

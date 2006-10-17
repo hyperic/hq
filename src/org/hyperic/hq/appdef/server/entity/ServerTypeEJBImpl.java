@@ -28,6 +28,8 @@ package org.hyperic.hq.appdef.server.entity;
 import java.rmi.RemoteException;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.Collection;
+import java.util.HashSet;
 
 import javax.ejb.CreateException;
 import javax.ejb.EntityBean;
@@ -40,6 +42,9 @@ import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceTypeLocal;
 import org.hyperic.hq.appdef.shared.ServiceTypeUtil;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
+import org.hyperic.hq.appdef.ServiceType;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.dao.ServiceTypeDAO;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -211,6 +216,23 @@ implements EntityBean {
     public abstract java.util.Set getServiceTypes();
 
     /**
+     * temporary method to retrieve service types from
+     * hibernate
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public java.util.Set getServiceTypesFromDAO()
+    {
+        ServiceTypeDAO sdao =
+            DAOFactory.getDAOFactory().getServiceTypeDAO();
+        HashSet set = new HashSet();
+        Collection st =
+            sdao.findByServerType_orderName(getId().intValue(), true);
+        set.addAll(st);
+        return set;
+    }
+
+    /**
      * Set the ServiceTypes for this Server
      * @ejb:interface-method
      * @ejb:transaction type="MANDATORY"
@@ -247,20 +269,14 @@ implements EntityBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public ServiceTypeLocal createServiceType(ServiceTypeValue stv)
-        throws CreateException {
-
-        try {
-            // first create the service type
-            ServiceTypeLocal stl = ServiceTypeUtil.getLocalHome().create(stv);
-            // now set the server type to this
-            stl.setServerType((ServerTypeLocal)this.getSelfLocal());
-            return stl;
-        } catch (NamingException e) {
-            log.error("Failed to look up LocalHome in createServiceType", e);
-            throw new CreateException("Failed to look up LocalHome in createServiceType: "
-                + e.getMessage());
-        }
+    public ServiceType createServiceType(ServiceTypeValue stv)
+    {
+        // first create the service type
+        ServiceType stl =
+            DAOFactory.getDAOFactory().getServiceTypeDAO().create(stv);
+        // now set the server type to this
+        stl.setServerType((ServerTypeLocal)this.getSelfLocal());
+        return stl;
     }
     
     /**
@@ -289,7 +305,8 @@ implements EntityBean {
      * 
      */
     public Set getServiceTypeSnapshot() {
-        return new LinkedHashSet(getServiceTypes());
+        // get it thru hibernate
+        return new LinkedHashSet(getServiceTypesFromDAO());
     }
     
     /**

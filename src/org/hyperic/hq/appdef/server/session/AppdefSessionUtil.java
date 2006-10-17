@@ -28,6 +28,7 @@ package org.hyperic.hq.appdef.server.session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.dao.ConfigResponseDAO;
 import org.hyperic.hibernate.dao.ServiceDAO;
+import org.hyperic.hibernate.dao.ServiceTypeDAO;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AIServerLocalHome;
@@ -75,9 +76,6 @@ import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
-import org.hyperic.hq.appdef.shared.ServiceTypeLocalHome;
-import org.hyperic.hq.appdef.shared.ServiceTypeUtil;
-import org.hyperic.hq.appdef.shared.ServiceUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectLocalHome;
 import org.hyperic.hq.authz.shared.AuthzSubjectUtil;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
@@ -108,7 +106,6 @@ public abstract class AppdefSessionUtil {
     private ServerManagerLocalHome      serverMgrLHome;
     private ServerTypeLocalHome         serverTypeLHome;
     private ServiceManagerLocalHome     serviceMgrLHome;
-    private ServiceTypeLocalHome        serviceTypeLHome;
     private AuthzSubjectLocalHome      subjectLHome;
     private CPropManagerLocal           cpropLocal;
 
@@ -307,15 +304,11 @@ public abstract class AppdefSessionUtil {
 
     /**
      * Get the LocalHome reference for the ServiceTypeObject
-     * @return ServiceTypeLocalHome
+     * @return ServiceTypeDAO
      */
-    protected ServiceTypeLocalHome getServiceTypeLocalHome()
-        throws NamingException 
+    protected ServiceTypeDAO getServiceTypeDAO()
     {
-        if(serviceTypeLHome == null) {
-            serviceTypeLHome = ServiceTypeUtil.getLocalHome();
-        }
-        return serviceTypeLHome;
+        return DAOFactory.getDAOFactory().getServiceTypeDAO();
     }
 
     protected ServiceDAO getServiceDAO() {

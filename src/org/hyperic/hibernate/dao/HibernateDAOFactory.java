@@ -69,4 +69,9 @@ public class HibernateDAOFactory extends DAOFactory
     {
         return new ServiceDAO(getCurrentSession());
     }
+
+    public ServiceTypeDAO getServiceTypeDAO()
+    {
+        return new ServiceTypeDAO(getCurrentSession());
+    }
 }
