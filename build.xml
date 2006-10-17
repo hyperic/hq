@@ -141,7 +141,7 @@
              classpathref="alljars"/>
     <taskdef resource="org/hyperic/tools/ant/ant-tools.properties"
              classpathref="custom-ant-tasks.path"/>
-
+      
     <macrodef name="hq-javac">
       <attribute name="destdir"      default="${build.dir}/classes"/>
       <attribute name="source"       default="${hq.javac.source}"/>
@@ -161,12 +161,35 @@
     <property name="init-taskdefs.notrequired" value="true"/>
   </target>
 
+  <target name="test" depends="init,init-taskdefs">
+    <echo> ${java.home} </echo>
+    <junit fork="no">
+      <classpath>
+        <path refid="alljars"/>
+        <path refid="testjars"/>
+        <path location="${build.dir}/classes" />
+        <path>
+          <fileset dir="${thirdparty.lib}" includes="*.jar" />
+        </path>
+      </classpath>
+      <formatter type="plain"/>
+      <batchtest fork="yes" todir="${basedir}">
+        <fileset dir="src">
+          <include name="**/*Test.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+    
   <!-- ==================== Compile java sources ==================== -->
   <target name="compile" description="Compile sources" 
           depends="init,init-taskdefs">
     <mkdir dir="${build.dir}/classes" />
     <hq-javac>
-      <classpath refid="alljars"/>
+      <classpath>
+          <path refid="alljars"/>
+          <path refid="testjars"/>
+      </classpath>
       <src>
         <!-- Generated sources -->
         <path location="${build.dir}/src" />
