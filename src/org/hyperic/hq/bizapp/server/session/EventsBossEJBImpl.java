@@ -1517,7 +1517,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         throws SessionNotFoundException, SessionTimeoutException, 
                FinderException {
         AuthzSubjectValue subject = this.manager.getSubject(sessionID);
-        return getRTM().getAllRegisteredTriggers();
+        return getRTM().getAllTriggers();
     }
 
     private AppdefEntityID getAppdefEntityID(AlertDefinitionValue ad) {
