@@ -4,8 +4,7 @@
       "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
-<hibernate-mapping
-  package="org.hyperic.hq.events.shared.pojo">
+<hibernate-mapping package="org.hyperic.hq.events">
 
   <class name="AlertCondition" table="EAM_ALERT_CONDITION">
     <id name="id" type="integer">

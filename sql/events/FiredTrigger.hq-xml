@@ -5,7 +5,7 @@
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping
-  package="org.hyperic.hq.events.shared.pojo">
+  package="org.hyperic.hq.events">
 
   <class name="FiredTrigger" table="EAM_FIRED_TRIGGER">
     <id name="id" type="integer">

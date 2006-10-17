@@ -5,7 +5,7 @@
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping
-  package="org.hyperic.hq.events.shared.pojo">
+  package="org.hyperic.hq.events">
 
   <class name="Event" table="EAM_EVENT">
     <id name="id" type="long">

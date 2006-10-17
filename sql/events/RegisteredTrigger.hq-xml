@@ -4,8 +4,7 @@
       "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
-<hibernate-mapping
-  package="org.hyperic.hq.events.shared.pojo">
+<hibernate-mapping package="org.hyperic.hq.events">
 
   <class name="RegisteredTrigger" table="EAM_REGISTERED_TRIGGER">
     <id name="id" type="integer">
@@ -24,7 +23,7 @@
       <column name="FREQUENCY" not-null="true" default="0" />
     </property>
 
-    <property name="className" type="string">
+    <property name="classname" type="string">
       <column name="CLASSNAME" not-null="true" length="200" />
     </property>
 
@@ -32,7 +31,7 @@
       <column name="CONFIG" />
     </property>
 
-    <many-to-one name="alertDefinitionId" class="AlertDefinition">
+    <many-to-one name="alertDef" class="AlertDefinition">
       <column name="ALERT_DEFINITION_ID" index="ALERT_DEF_TRIGGER_IDX" />
     </many-to-one>
   </class>
