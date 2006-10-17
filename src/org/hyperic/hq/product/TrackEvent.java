@@ -51,6 +51,8 @@ public class TrackEvent implements java.io.Serializable {
         this.id = id;
         this.time = time;
         this.level = level;
+        this.source = source;
+        this.message = message;
     }
 
     public TrackEvent(String id, long time, int level,
