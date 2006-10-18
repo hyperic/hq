@@ -1,5 +1,7 @@
 package org.hyperic.hibernate;
 
+import java.io.Serializable;
+
 import org.hyperic.hq.appdef.AppdefBean;
 
 /**
@@ -10,7 +12,9 @@ import org.hyperic.hq.appdef.AppdefBean;
  * restricts other rogue objects from doing bad things like setting the ID
  * & version #.
  */
-public abstract class PersistedObject {
+public abstract class PersistedObject 
+    implements Serializable
+{
     private Integer _id;
 
     // for hibernate optimistic locks -- don't mess with this.
