@@ -48,7 +48,7 @@ function setFoot() {
 
 function about() {
   Dialog.info($('about').innerHTML,
-              {windowParameters: {className:'dialog', width:320, height:200,
+              {windowParameters: {className:'dialog', width:305, height:200,
                resize:false, draggable:false}});
 }
 
