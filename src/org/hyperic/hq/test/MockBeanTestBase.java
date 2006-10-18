@@ -53,36 +53,36 @@ import javax.naming.NamingException;
  */
 public abstract class MockBeanTestBase extends OptionalCactusTestCase
 {
-    private Context	               context ;
-    private MockContainer          container ;
-    private QueueConnectionFactory qcf ;
-    private Queue                  queue ;
+    private Context                _context;
+    private MockContainer          _container;
+    private QueueConnectionFactory _qcf;
+    private Queue                  _queue;
 
     // override these in the subclass
-    private String database = null;
-    private String username = null;
-    private String password = null;
-    private String server   = null;
+    private String _database = null;
+    private String _username = null;
+    private String _password = null;
+    private String _server   = null;
 
     public MockBeanTestBase(String testName){
         super(testName);
         
-        database = System.getProperty("hq.jdbc.name");
-        username = System.getProperty("hq.jdbc.user");
-        password = System.getProperty("hq.jdbc.password");
-        server   = System.getProperty("hq.jdbc.server");
+        _database = System.getProperty("hq.jdbc.name");
+        _username = System.getProperty("hq.jdbc.user");
+        _password = System.getProperty("hq.jdbc.password");
+        _server   = System.getProperty("hq.jdbc.server");
         
-        if (database == null)
-            database = "hq";
+        if (_database == null)
+            _database = "hq";
             
-        if (username == null)
-            username = "hq";
+        if (_username == null)
+            _username = "hq";
             
-        if (password == null)
-            password = "hq";
+        if (_password == null)
+            _password = "hq";
 
-        if (server == null)
-            server = "localhost";
+        if (_server == null)
+            _server = "localhost";
     }
     
     public MockBeanTestBase() {
@@ -90,19 +90,19 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
     }
 
     public void setDatabase(String database) {
-        this.database = database;
+        _database = database;
     }
 
     public void setUsername(String username) {
-        this.username = username;
+        _username = username;
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        _password = password;
     }
 
     public void setServer(String server) {
-        this.server = server;
+        _server = server;
     }
 
     /**
@@ -140,23 +140,23 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
             MockContextFactory.setAsInitial();
         }
         // create the initial context that will be used for binding EJBs
-        this.context = new InitialContext();
+        _context = new InitialContext();
         
         // Create an instance of the MockContainer
-        this.container = new MockContainer(context);
+        _container = new MockContainer(_context);
 
         // bind jta transaction
         // we use MockTransaction outside of the app server
         MockUserTransaction mockTransaction = new MockUserTransaction();
-        context.rebind("javax.transaction.UserTransaction", mockTransaction);
+        _context.rebind("javax.transaction.UserTransaction", mockTransaction);
 
         // bind datasource (we use postgres in test environ)
         SimpleDataSource ds = new SimpleDataSource();
-        ds.setDatabaseName(database);
-        ds.setUser(username);
-        ds.setPassword(password);
-        ds.setServerName(server);
-        context.rebind("java:/HypericDS", ds);
+        ds.setDatabaseName(_database);
+        ds.setUser(_username);
+        ds.setPassword(_password);
+        ds.setServerName(_server);
+        _context.rebind("java:/HypericDS", ds);
 
         // set dao factory suitable for out-of-container testing via mockejb
         // be sure to set the mocksession
@@ -194,13 +194,13 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
             new SessionBeanDescriptor(jndiName, homeClass, remoteClass, 
                                       bean);
         // Deploy operation creates Home and binds it to JNDI
-        this.container.deploy(sampleServiceDescriptor);
+        _container.deploy(sampleServiceDescriptor);
     }
 
     protected void deploySessionBean(SessionBeanDescriptor d) 
         throws Exception
     {
-        this.container.deploy(d);
+        _container.deploy(d);
     }
     
     /**
@@ -221,10 +221,8 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
         SessionBeanDescriptor sampleServiceDescriptor =
             new SessionBeanDescriptor(jndiName, home, local,impl);
         // Deploy operation creates Home and binds it to JNDI
-        this.container.deploy(sampleServiceDescriptor);
+        _container.deploy(sampleServiceDescriptor);
     }
-
-
     
     /**
      * Deploy an MDB attached to a queue to the mock container
@@ -248,22 +246,22 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
         Class beanClass = ldr.loadClass(beanClassName);
         Object beanObj = beanClass.newInstance() ;
         
-        this.qcf = new QueueConnectionFactoryImpl() ;
-        this.context.rebind(factoryName, this.qcf);
+        _qcf = new QueueConnectionFactoryImpl() ;
+        _context.rebind(factoryName, _qcf);
         
-        this.queue = new MockQueue(requestQueueName) ;
-        ((MockQueue)this.queue).addMessageListener((MessageListener)beanObj) ;
-        this.context.rebind(requestQueueName, this.queue);
+        _queue = new MockQueue(requestQueueName) ;
+        ((MockQueue)_queue).addMessageListener((MessageListener)beanObj) ;
+        _context.rebind(requestQueueName, _queue);
         
-        this.context.rebind(responseQueueName, 
-                            new MockQueue(responseQueueName));
+        _context.rebind(responseQueueName, 
+                        new MockQueue(responseQueueName));
         
         MDBDescriptor mdbDescriptor = 
             new MDBDescriptor(factoryName, requestQueueName, beanObj);
         mdbDescriptor.setIsAlreadyBound(true) ;
         // This will create connection factory and destination, create 
         // MDB and set it as the listener to the destination
-        this.container.deploy( mdbDescriptor );
+        _container.deploy( mdbDescriptor );
     }
     
     /**
@@ -272,15 +270,15 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
      * @return a context object
      */
     public Context getContext() {
-        return this.context ;
+        return _context ;
     }
     
     public QueueConnectionFactory getCurrentQCF() {
-        return this.qcf ;
+        return _qcf ;
     }
     
     public Queue getCurrentQueue() {
-        return this.queue ;
+        return _queue ;
     }
 }
 
