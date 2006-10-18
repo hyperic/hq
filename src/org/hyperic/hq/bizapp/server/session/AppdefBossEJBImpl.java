@@ -1174,6 +1174,7 @@ public class AppdefBossEJBImpl
      * @return A PageList of all registered appdef resource types
      * of a particular entity type.
      * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
      */
     public PageList findAllResourceTypes(int sessionId, int entType,
                                          PageControl pc)
