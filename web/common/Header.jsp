@@ -43,18 +43,18 @@
         <tr>                     
           <c:choose>
             <c:when test="${applicationScope.largeLogo}">           
-              <td>
+              <td class="logo">
                 <html:img page="/customer/${applicationScope.largeLogoName}" width="225" height="31" alt="" border="0"/>
                 <br>
                 <html:img page="/images/cobrand_logo.gif" width="225" height="25" alt="" border="0"/>
               </td>
             </c:when>
             <c:otherwise>
-                <td><html:img page="/images/logo_large.gif" width="147" height="56" alt="" border="0"/></td>
+                <td class="logo"><html:img page="/images/logo_large.gif" width="223" height="56" alt="" border="0"/></td>
             </c:otherwise>
           </c:choose>
-          <td width="100%" background="<html:rewrite page="/images/logo_Gradient_large.gif"/>"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
-          <td><html:img page="/images/logo_Image_large.gif" width="107" height="56" alt="" border="0"/></td>
+          <td width="100%" class="logo"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
+          <td class="logo"><html:img page="/images/logo_Image_large.jpg" width="225" height="56" alt="" border="0"/></td>
         </tr>
       </table>
     </td>
@@ -84,12 +84,12 @@
       <table width="250" border="0" cellspacing="4" cellpadding="0">
         <tr> 
           <td rowspan="99"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
-          <td><html:link page="/Dashboard.do"><html:img page="/images/toolbox_Dashboard.gif" onmouseover="imageSwap(this, imagePath + 'toolbox_Dashboard', '_on')" onmouseout="imageSwap(this, imagePath + 'toolbox_Dashboard', '')" width="64" height="11" alt="" border="0"/></html:link></td>
-          <td><html:link page="/ResourceHub.do"><html:img page="/images/toolbox_BrowseResources.gif" onmouseover="imageSwap(this, imagePath + 'toolbox_BrowseResources', '_on')" onmouseout="imageSwap(this, imagePath + 'toolbox_BrowseResources', '')" width="104" height="11" alt="Resource Hub" border="0"/></html:link></td>
+          <td><html:link page="/Dashboard.do"><html:img page="/images/toolbox_Dashboard.gif" onmouseover="imageSwap(this, imagePath + 'toolbox_Dashboard', '_on')" onmouseout="imageSwap(this, imagePath + 'toolbox_Dashboard', '')" width="66" height="12" alt="" border="0"/></html:link></td>
+          <td><html:link page="/ResourceHub.do"><html:img page="/images/toolbox_BrowseResources.gif" onmouseover="imageSwap(this, imagePath + 'toolbox_BrowseResources', '_on')" onmouseout="imageSwap(this, imagePath + 'toolbox_BrowseResources', '')" width="113" height="12" alt="Resource Hub" border="0"/></html:link></td>
         </tr>
         <tr>           
-          <td><html:link href="" onclick="window.open(genHelp,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/toolbox_Help.gif" onmouseover="imageSwap(this, imagePath + 'toolbox_Help', '_on');" onmouseout="imageSwap(this, imagePath + 'toolbox_Help', '')" width="28" height="14" alt="" border="0"/></html:link></td>
-          <td><html:link page="/Admin.do"><html:img page="/images/toolbox_Administration.gif" onmouseover="imageSwap(this, imagePath + 'toolbox_Administration', '_on');" onmouseout="imageSwap(this, imagePath + 'toolbox_Administration', '')" width="86" height="14" alt="" border="0"/></html:link></td>         
+          <td><html:link href="" onclick="window.open(genHelp,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/toolbox_Help.gif" onmouseover="imageSwap(this, imagePath + 'toolbox_Help', '_on');" onmouseout="imageSwap(this, imagePath + 'toolbox_Help', '')" width="28" height="12" alt="" border="0"/></html:link></td>
+          <td><html:link page="/Admin.do"><html:img page="/images/toolbox_Administration.gif" onmouseover="imageSwap(this, imagePath + 'toolbox_Administration', '_on');" onmouseout="imageSwap(this, imagePath + 'toolbox_Administration', '')" width="88" height="12" alt="" border="0"/></html:link></td>         
         </tr>
       </table>
     </td>

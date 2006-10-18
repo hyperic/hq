@@ -46,8 +46,8 @@
               <td><html:img page="/images/logo_small.gif" width="119" height="22" alt="" border="0"/></td>
             </c:otherwise>
           </c:choose>           
-          <td width="100%" background="<html:rewrite page="/images/logo_Gradient_large.gif"/>"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
-          <td><html:img page="/images/logo_Image_small.gif" width="135" height="22" alt="" border="0"/></td>
+          <td width="100%" class="logoSm"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
+          <td><html:img page="/images/logo_Image_small.gif" width="161" height="22" alt="" border="0"/></td>
         </tr>
       </table>
     </td>
@@ -55,7 +55,7 @@
       <table width="250" border="0" cellspacing="4" cellpadding="0">
         <tr> 
           <td rowspan="99"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
-          <td width="100%"><html:link href="" onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/toolbox_Help.gif" onmouseover="imageSwap(this, imagePath + 'toolbox_Help', '_on');" onmouseout="imageSwap(this, imagePath + 'toolbox_Help', '')" width="28" height="14" alt="" border="0"/></html:link></td>
+          <td width="100%"><html:link href="" onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/toolbox_Help.gif" onmouseover="imageSwap(this, imagePath + 'toolbox_Help', '_on');" onmouseout="imageSwap(this, imagePath + 'toolbox_Help', '')" width="28" height="12" alt="" border="0"/></html:link></td>
         </tr>
       </table>
     </td>
