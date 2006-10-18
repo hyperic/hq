@@ -1,4 +1,5 @@
 /* GENERAL */
+BODY {background-color: #ffffff;}
 BODY, FORM {margin: 0px;}
 BODY, P, TD, TH, OPTION, INPUT, TEXTAREA, SELECT {font-size: 11px; color: #000000; font-family: arial, sans-serif;}
 
@@ -22,8 +23,13 @@ A.NotBold:hover {color: #003399; font-weight: normal; text-decoration: underline
 .NormalText {color: #000000; font-weight: normal;}
 .BoldText {font-weight: bold;}
 
+/* LOGO */
+.logo{background-color: #b4b4b4;}
+.logoSm{background-color: #d2d2d2;}
+
 /* PAGE TITLE */
-.PageTitle {font-size: 17px; color: #F35E0C; font-weight: bold; background-color: #CCCCCC;}
+.PageTitle, .PageTitleBar, .PageTitleBar td {font-size: 17px; color: #ffffff; font-weight: bold; background-color: #CCCCCC;}
+.PageTitleBar a, .PageTitleBar td a{color: #9f3c00;}
 .PageTitleGroupBg, .PageTitleRoleBg, .PageTitleUserBg {background-color: #E5E5E5;}
 .PageTitleServerBg {background-color: #E4F2E4;}
 .PageTitlePlatformBg {background-color: #F2EAE4;}
@@ -32,7 +38,7 @@ A.NotBold:hover {color: #003399; font-weight: normal; text-decoration: underline
 .PageTitleSmallText {font-size: 11px; color: #666666; line-height: 14px;}
 
 /* BLOCK & LIST */
-.ListTitle, .BlockTitle {font-size: 12px; color: #F35E0C; font-weight: bold; background-color: #CCCCCC; padding: 3px;}
+.ListTitle, .BlockTitle {font-size: 12px; color: #ffffff; font-weight: bold; background-color: #60a5ea; padding: 3px;}
 .BlockSubtitle {font-size: 11px; color: #000000; font-weight: normal;}
 .BlockBottomLine {background-color: #D5D8DE; padding: 0px;}
 
@@ -43,9 +49,6 @@ A.NotBold:hover {color: #003399; font-weight: normal; text-decoration: underline
 .BlockCheckboxLabel, .BlockLeftAlignLabel {background-color: #EBEDF2; padding: 3px; font-weight: bold; text-align: left;}
 .BlockContentSmallText {background-color: #EBEDF2; padding: 3px; font-size: 11px; color: #000000;}
 .BlockBg {background-color: #EBEDF2;}
-
-.SmokeyLabel {padding: 3px; font-weight: bold; text-align: right;}
-.SmokeyContent {padding: 3px;}
 
 /* LIST */
 A.ListHeaderLink:link {color: #004680; text-decoration: none;}
@@ -133,19 +136,20 @@ A.GuideLink:hover {color: #003399; font-weight: bold; text-decoration: underline
 .DashTabs {margin-bottom: 4px;}
 
 /* MASTHEAD */
-.MastheadBgTop {background-color: #C6CFE5;}
-.MastheadBgBottom {background-color: #DBE3F5;}
+.MastheadBgTop {background-color: #7bbcfe;}
+.MastheadBgBottom {background-color: #DBE3F6;}
 
-A.MastheadLink:link {font-weight: normal; color: #366CD9; text-decoration: none;}
-A.MastheadLink:visited {font-weight: normal; color: #366CD9; text-decoration: none;}
-A.MastheadLink:hover {font-weight: normal; color: #366CD9; text-decoration: underline;}
+A.MastheadLink:link {font-weight: normal; color: #105CA8; text-decoration: none;}
+A.MastheadLink:visited {font-weight: normal; color: #105CA8; text-decoration: none;}
+A.MastheadLink:hover {font-weight: normal; color: #105CA8; text-decoration: underline;}
 A.MastheadLink:active {font-weight: normal; color: #666666; text-decoration: none;}
 
-.MastheadContent, .RecentAlerts {font-size: 10px; color: #666666;}
+.MastheadContent, .RecentAlerts {font-size: 10px; color: #3b3b74;}
+td.MastheadBgTop .MastheadContent{color: #ffffff;}
 
 .RecentPlaces {color: #000000; font-weight: bold;}
 
-.MastheadBottomLine {background-color: #F35E0C;}
+.MastheadBottomLine {background-color: #3399ff;}
 
 /* FOOTER */
 .FooterBold {font-weight: bold; padding: 3px;}
@@ -266,10 +270,12 @@ A.displaylink:hover {font-size: 11px; color: #003399; text-decoration: underline
 #diagramDiv {
 position: absolute;
 z-index: 100;
-visibility: hidden;
-/* TURN THIS OFF B/C OF DROP-SHADOW */
+visibility: hidden; 
+/* TURN THIS OFF B/C OF DROP-SHADOW
 filter: alpha(opacity=85);
-opacity: 0.85;
+-moz-opacity: 1; // should be 0.85 -- see http://bugzilla.mozilla.org/show_bug.cgi?id=201209
+*/
+
 }
 
 /* These are the style specifications for the menu layers.  
@@ -469,7 +475,7 @@ div.overlay {
   border: 0px;
   z-index: 200;
   opacity: 0.3;
-  filter:alpha(opacity=30); opacity:0.3;
+  filter:alpha(opacity=30); -moz-opacity:0.3;
 }
 
 /* .99 opacity is for safari bug */
