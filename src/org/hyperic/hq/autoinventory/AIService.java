@@ -1,6 +1,7 @@
 package org.hyperic.hq.autoinventory;
 
 import org.hyperic.hq.appdef.AppdefBean;
+import org.hyperic.hq.appdef.Server;
 
 /**
  *
@@ -18,6 +19,7 @@ public class AIService extends AppdefBean
     private byte[] controlConfig;
     private byte[] measurementConfig;
     private byte[] responseTimeConfig;
+    private Server server;
 
     /**
      * default constructor
@@ -135,5 +137,15 @@ public class AIService extends AppdefBean
     public void setResponseTimeConfig(byte[] responseTimeConfig)
     {
         this.responseTimeConfig = responseTimeConfig;
+    }
+
+    public Server getServer()
+    {
+        return server;
+    }
+
+    public void setServer(Server server)
+    {
+        this.server = server;
     }
 }

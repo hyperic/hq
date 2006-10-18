@@ -146,11 +146,6 @@
         <column name="CONFIG_RESPONSE_ID" not-null="false" />
       </many-to-one>
 
-      <bag name="aiServices" table="EAM_AIQ_SERVICE">
-        <key column="SERVER_ID" />
-        <one-to-many class="org.hyperic.hq.autoinventory.AIService" />
-      </bag>
-
       <bag name="services" table="EAM_SERVICE"
            cascade="save-update,delete,evict,persist,merge"
            inverse="true" lazy="true">

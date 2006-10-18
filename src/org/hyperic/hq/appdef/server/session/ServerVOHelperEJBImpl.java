@@ -59,6 +59,7 @@ import org.hyperic.hq.appdef.shared.ServiceVOHelperLocal;
 import org.hyperic.hq.appdef.shared.ServiceVOHelperUtil;
 import org.hyperic.hq.appdef.ServiceType;
 import org.hyperic.hq.appdef.Server;
+import org.hyperic.hq.appdef.ServerType;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -94,7 +95,7 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
      * Get the server value object
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
-     */    
+     */
     public ServerValue getServerValue(ServerPK pk) 
         throws FinderException, NamingException {
         ServerValue vo = VOCache.getInstance().getServer(pk.getId());
@@ -108,8 +109,8 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
     /**
      * Get the server value object
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS" 
-     */    
+     * @ejb:transaction type="SUPPORTS"
+     */
     public ServerValue getServerValue(ServerLocal ejb) 
         throws NamingException {
         ServerValue vo = VOCache.getInstance().getServer(
@@ -139,8 +140,8 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
     /**
      * Get the server light value object
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS" 
-     */    
+     * @ejb:transaction type="SUPPORTS"
+     */
     public ServerLightValue getServerLightValue(ServerPK pk) 
         throws FinderException, NamingException {
         ServerLightValue vo = VOCache.getInstance().getServerLight(pk.getId());
@@ -153,8 +154,8 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
     /**
      * Get the server light value object
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS" 
-     */    
+     * @ejb:transaction type="SUPPORTS"
+     */
     public ServerLightValue getServerLightValue(ServerLocal ejb) 
         throws NamingException {
         try {
@@ -280,7 +281,7 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
             if(vo != null) {
                 return vo;
             }
-            ServerTypeLocal ejb = ServerTypeUtil.getLocalHome().findByPrimaryKey(pk);
+            ServerType ejb = getServerTypeDAO().findById(pk.getId());
             return getServerTypeValue(ejb);
     }
                         
@@ -301,6 +302,21 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
     }
 
     /**
+     * Get the server type value object
+     * @ejb:interface-method
+     */
+    public ServerTypeValue getServerTypeValue(ServerType ejb)
+        throws NamingException {
+        ServerTypeValue vo = VOCache.getInstance()
+            .getServerType(((ServerTypePK)ejb.getPrimaryKey()).getId());
+        if(vo != null) {
+            log.debug("Returning cached instance of ServerType: " + vo.getId());
+            return vo;
+        }
+        return getServerTypeValueImpl(ejb);
+    }
+
+    /**
      * Synchronized VO retrieval
      */
     private ServerTypeValue getServerTypeValueImpl(ServerTypeLocal ejb)
@@ -310,6 +326,27 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
         synchronized(cache.getServerTypeLock()) {
             vo = cache
                 .getServerType(((ServerTypePK)ejb.getPrimaryKey()).getId());
+            if(vo != null) {
+                log.debug("Returning cached instance of ServerType: " + vo.getId());
+                return vo;
+            }
+            vo = ejb.getServerTypeValueObject();
+            Iterator serviceIt = ejb.getServiceTypeSnapshot().iterator();
+            while(serviceIt.hasNext()) {
+                vo.addServiceTypeValue(((ServiceType)serviceIt.next()).getServiceTypeValue());
+            }
+            cache.put(vo.getId(), vo);
+        }
+        return vo;
+    }
+
+    private ServerTypeValue getServerTypeValueImpl(ServerType ejb)
+        throws NamingException {
+        VOCache cache = VOCache.getInstance();
+        ServerTypeValue vo;
+        synchronized(cache.getServerTypeLock()) {
+            vo = cache
+                .getServerType(ejb.getId());
             if(vo != null) {
                 log.debug("Returning cached instance of ServerType: " + vo.getId());
                 return vo;

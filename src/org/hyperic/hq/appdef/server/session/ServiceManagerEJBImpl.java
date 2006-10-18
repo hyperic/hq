@@ -66,14 +66,8 @@ import org.hyperic.hq.appdef.shared.ConfigResponseUtil;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformPK;
-import org.hyperic.hq.appdef.shared.ServerLocal;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerPK;
-import org.hyperic.hq.appdef.shared.ServerTypeLocal;
-import org.hyperic.hq.appdef.shared.ServerTypeLocalHome;
-import org.hyperic.hq.appdef.shared.ServerTypePK;
-import org.hyperic.hq.appdef.shared.ServerTypeUtil;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceClusterLocal;
 import org.hyperic.hq.appdef.shared.ServiceClusterLocalHome;
@@ -84,7 +78,6 @@ import org.hyperic.hq.appdef.shared.ServiceLightValue;
 import org.hyperic.hq.appdef.shared.ServiceLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServicePK;
-import org.hyperic.hq.appdef.shared.ServiceTypeLocal;
 import org.hyperic.hq.appdef.shared.ServiceTypePK;
 import org.hyperic.hq.appdef.shared.ServiceTypeUtil;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
@@ -115,7 +108,9 @@ import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.hibernate.dao.ServiceDAO;
 import org.hyperic.hibernate.dao.ServiceTypeDAO;
+import org.hyperic.hibernate.dao.ServerTypeDAO;
 import org.hyperic.dao.DAOFactory;
+import org.hibernate.ObjectNotFoundException;
 
 /**
  * This class is responsible for managing Server objects in appdef
@@ -385,19 +380,16 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             }
             validateNewServiceType(stv, serverType);
             // first look up the parent server
-            ServerTypeLocal servTypeEJB = getServerTypeLocalHome()
+            ServerType servType = getServerTypeDAO()
                 .findByPrimaryKey(serverType.getPrimaryKey());
             // now create the service type on it
-            ServiceType stype = servTypeEJB.createServiceType(stv);
+
+            ServiceType stype =
+                getServiceTypeDAO().createServiceType(servType, stv);
             // flush the cache for the parent server type
             VOCache.getInstance().removeServerType(serverType.getId());
             return stype.getPrimaryKey();
-        } catch (NamingException e) {
-            log.error("Unable to get ServiceTypeLocalHome", e);
-            throw new SystemException("Unable to get ServiceTypeLocalHome: " +
-                                         e.getMessage());
-        } catch (FinderException e) {
-            log.error("Unable to find parent Server Type", e);
+        } catch (ObjectNotFoundException e) {
             throw new CreateException("Unable to find Parent Server Type: " +
                                       e.getMessage());
         }
@@ -1716,17 +1708,17 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         }
 
         HashMap serverTypes = new HashMap();
-        
+
+        ServiceTypeDAO stLHome = getServiceTypeDAO();
         try {
-            ServiceTypeDAO stLHome = getServiceTypeDAO();
             Collection curServices = stLHome.findByPlugin(plugin);
-            ServerTypeLocalHome stHome = ServerTypeUtil.getLocalHome();
+            ServerTypeDAO stHome = getServerTypeDAO();
             
             for (Iterator i = curServices.iterator(); i.hasNext();) {
                 ServiceType stlocal = (ServiceType) i.next();
 
                 if (log.isDebugEnabled()) {
-                    log.debug("Begin updating ServiceTypeLocal: " + 
+                    log.debug("Begin updating ServiceTypeLocal: " +
                               stlocal.getName());
                 }
 
@@ -1760,7 +1752,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                         stlocal.setName(sinfo.getName());
                         
                     if (!sinfo.getDescription().equals(
-                        stlocal.getDescription()))    
+                        stlocal.getDescription()))
                         stlocal.setDescription(sinfo.getDescription());
                     
                     if (sinfo.getInternal() !=  stlocal.getIsInternal())
@@ -1770,30 +1762,28 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                         stlocal.getId());
                     // Could be null if servertype was deleted/updated by plugin
                     ServerType svrtype = stlocal.getServerType();
-                    ServerTypeLocal svrtp;
 
                     // Check server type
                     if (svrtype == null ||
                         !sinfo.getServerName().equals(svrtype.getName())) {
                         // Lookup the server type
                         if (serverTypes.containsKey(sinfo.getServerName()))
-                            svrtp = (ServerTypeLocal)
+                            svrtype = (ServerType)
                                 serverTypes.get(sinfo.getServerName());
                         else {
-                            try {
-                                svrtp = stHome.findByName(sinfo.getServerName());
-                                serverTypes.put(svrtp.getName(), svrtp);
-                            } catch(FinderException exc){
+                            svrtype = stHome.findByName(sinfo.getServerName());
+                            if (svrtype == null) {
                                 throw new FinderException(
                                     "Unable to find server " +
                                     sinfo.getServerName() +
                                     " on which service '" +
-                                    stlocal.getName() + 
+                                    stlocal.getName() +
                                     "' relies");
                             }
-                        }                        
-                        stlocal.setServerType(svrtp);
-                     }
+                            serverTypes.put(svrtype.getName(), svrtype);
+                        }
+                        stlocal.setServerType(svrtype);
+                    }
                 }
             }
             
@@ -1802,7 +1792,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 ServiceTypeInfo sinfo = (ServiceTypeInfo) i.next();
 
                 // Just update it
-                ServiceTypeValue stype = new ServiceTypeValue();
+                ServiceType stype = new ServiceType();
                 stype.setPlugin(plugin);
                 stype.setName(sinfo.getName());
                 stype.setDescription(sinfo.getDescription());
@@ -1816,9 +1806,9 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 cache.put(stvo.getId(), stvo);
 
                 // Lookup the server type
-                ServerTypeLocal servTypeEJB;
+                ServerType servTypeEJB;
                 if (serverTypes.containsKey(sinfo.getServerName()))
-                    servTypeEJB = (ServerTypeLocal)
+                    servTypeEJB = (ServerType)
                         serverTypes.get(sinfo.getServerName());
                 else {
                     servTypeEJB = stHome.findByName(sinfo.getServerName());
@@ -1830,14 +1820,11 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             // expire the server types
             for (Iterator it = serverTypes.values().iterator(); it.hasNext(); )
             {
-                ServerTypeLocal servTypeEJB = (ServerTypeLocal) it.next();
-                cache.removeServerType(((ServerTypePK)
-                    servTypeEJB.getPrimaryKey()).getId());
+                ServerType servTypeEJB = (ServerType) it.next();
+                cache.removeServerType(servTypeEJB.getId());
             }
-        } catch (NamingException e) {
-
-            throw new SystemException("Unable to get ServiceTypeLocalHome: " +
-                                         e.getMessage());
+        } finally {
+            stLHome.getSession().flush();
         }
     }
 

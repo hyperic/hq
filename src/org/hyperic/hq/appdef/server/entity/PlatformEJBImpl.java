@@ -29,7 +29,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.dao.ConfigResponseDAO;
+import org.hyperic.hibernate.dao.PlatformTypeDAO;
 import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.appdef.PlatformType;
+import org.hyperic.hq.appdef.ServerType;
 import org.hyperic.hq.appdef.shared.AgentLocal;
 import org.hyperic.hq.appdef.shared.AgentLocalHome;
 import org.hyperic.hq.appdef.shared.AgentPK;
@@ -788,10 +791,13 @@ public abstract class PlatformEJBImpl
 
         if(msg == null){
             ServerTypePK typePk = sv.getServerType().getPrimaryKey();
-            
-            for (Iterator i = this.getPlatformType().getServerTypes().iterator()
-                    ; i.hasNext(); ) {
-                ServerTypeLocal sVal = (ServerTypeLocal) i.next();
+            PlatformTypeDAO pdao =
+                DAOFactory.getDAOFactory().getPlatformTypeDAO();
+            PlatformType ptype = pdao.findByPrimaryKey(
+                (PlatformTypePK)getPlatformType().getPrimaryKey());
+            Collection stypes = ptype.getServerTypes();
+            for (Iterator i = stypes.iterator(); i.hasNext(); ) {
+                ServerType sVal = (ServerType) i.next();
 
                 if(sVal.getPrimaryKey().equals(typePk))
                     return;

@@ -38,6 +38,8 @@ import org.hyperic.hibernate.dao.ServerDAO;
 import org.hyperic.hibernate.dao.ServiceDAO;
 import org.hyperic.hibernate.dao.TriggerDAO;
 import org.hyperic.hibernate.dao.ServiceTypeDAO;
+import org.hyperic.hibernate.dao.ServerTypeDAO;
+import org.hyperic.hibernate.dao.PlatformTypeDAO;
 
 /**
  *
@@ -55,7 +57,9 @@ public abstract class DAOFactory
     public abstract CpropDAO getCpropDAO();
     public abstract CpropKeyDAO getCpropKeyDAO();
     public abstract PlatformDAO getPlatformDAO();
+    public abstract PlatformTypeDAO getPlatformTypeDAO();
     public abstract ServerDAO getServerDAO();
+    public abstract ServerTypeDAO getServerTypeDAO();
     public abstract ServiceDAO getServiceDAO();
     public abstract TriggerDAO getTriggerDAO();
     public abstract ServiceTypeDAO getServiceTypeDAO();

@@ -2,6 +2,7 @@ package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
 import org.hyperic.hq.appdef.ServiceType;
+import org.hyperic.hq.appdef.ServerType;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceTypePK;
 
@@ -44,13 +45,37 @@ public class ServiceTypeDAO extends HibernateDAO
         super.remove(entity);
     }
 
-    public ServiceType create(ServiceTypeValue stv)
+    private ServiceType createServiceType(ServiceTypeValue stv)
     {
         ServiceType st = new ServiceType();
         st.setName(stv.getName());
         st.setDescription(stv.getDescription());
         st.setIsInternal(stv.getIsInternal());
         st.setPlugin(stv.getPlugin());
+        return st;
+    }
+
+    public ServiceType create(ServiceTypeValue stv)
+    {
+        ServiceType st = createServiceType(stv);
+        save(st);
+        return st;
+    }
+
+    public ServiceType create(ServiceType st)
+    {
+        save(st);
+        return st;
+    }
+    /**
+     * Create a service type for this server type
+     */
+    public ServiceType createServiceType(ServerType srvtp, ServiceTypeValue stv)
+    {
+        // first create the service type
+        ServiceType st = createServiceType(stv);
+        // now set the server type to this
+        st.setServerType(srvtp);
         save(st);
         return st;
     }

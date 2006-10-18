@@ -85,7 +85,7 @@ import org.apache.commons.logging.LogFactory;
  * @jboss:remove-table false
  */
 
-public abstract class PlatformTypeEJBImpl extends AppdefEntityBean 
+public abstract class PlatformTypeEJBImpl extends AppdefEntityBean
 implements EntityBean {
 
     public final String SEQUENCE_NAME = "EAM_APPDEF_RESOURCETYPE_ID_SEQ";

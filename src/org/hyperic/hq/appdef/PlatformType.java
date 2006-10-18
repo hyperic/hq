@@ -1,6 +1,17 @@
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.shared.PlatformTypeLocal;
+import org.hyperic.hq.appdef.shared.PlatformLocal;
+import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.appdef.shared.AgentPK;
+import org.hyperic.hq.appdef.shared.AIPlatformValue;
+import org.hyperic.hq.appdef.shared.PlatformTypeValue;
+import org.hyperic.hq.appdef.shared.PlatformTypePK;
+
+import javax.ejb.CreateException;
+import javax.ejb.EJBException;
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * 
@@ -81,5 +92,44 @@ public class PlatformType extends AppdefResourceType
     public void setPlatforms(Collection platforms)
     {
         this.platforms = platforms;
+    }
+
+    public PlatformLocal createPlatform(PlatformValue platform, AgentPK agent)
+    throws CreateException
+    {
+        return null;
+    }
+
+    public PlatformLocal createPlatform(AIPlatformValue aiplatform,
+                                        String initialOwner)
+    throws CreateException
+    {
+        return null;
+    }
+
+    public PlatformTypeValue getPlatformTypeValue()
+    {
+        return null;
+    }
+
+    public PlatformTypeValue getPlatformTypeValueObject()
+    {
+        return null;
+    }
+
+    public Set getServerTypeSnapshot()
+    {
+        return null;
+    }
+
+    private PlatformTypePK pkey = new PlatformTypePK();
+    /**
+     * @deprecated use getId()
+     * @return
+     */
+    public PlatformTypePK getPrimaryKey()
+    {
+        pkey.setId(getId());
+        return pkey;
     }
 }

@@ -81,9 +81,19 @@ public class HibernateDAOFactory extends DAOFactory
         return new PlatformDAO(getCurrentSession());
     }
 
+    public PlatformTypeDAO getPlatformTypeDAO()
+    {
+        return new PlatformTypeDAO(getCurrentSession());
+    }
+
     public ServerDAO getServerDAO()
     {
         return new ServerDAO(getCurrentSession());
+    }
+
+    public ServerTypeDAO getServerTypeDAO()
+    {
+        return new ServerTypeDAO(getCurrentSession());
     }
 
     public ServiceDAO getServiceDAO()

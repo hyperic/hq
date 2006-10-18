@@ -94,7 +94,7 @@ import org.apache.commons.logging.LogFactory;
  *      view-type="local"
  *      type="Stateless"
  * @ejb:util generate="physical"
- * 
+ *
  */
 public class AIQueueManagerEJBImpl
     extends AppdefSessionEJB implements SessionBean {
@@ -568,7 +568,7 @@ public class AIQueueManagerEJBImpl
      * @param action One of the AIQueueConstants.Q_DECISION_XXX constants
      * indicating what to do with the platforms, ips and servers.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="RequiresNew"
      */
     public void processQueue ( AuthzSubjectValue subject, 
                                List platformList, 

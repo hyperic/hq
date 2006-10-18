@@ -244,7 +244,7 @@ public class ProductManagerEJBImpl
     
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
     public void deploymentNotify(String pluginName)
         throws PluginNotFoundException, NamingException, FinderException,

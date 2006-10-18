@@ -56,22 +56,16 @@ import org.hyperic.hq.appdef.shared.ApplicationLocal;
 import org.hyperic.hq.appdef.shared.ApplicationLocalHome;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationPK;
-import org.hyperic.hq.appdef.shared.ConfigResponsePK;
-import org.hyperic.hq.appdef.shared.ConfigResponseUtil;
 import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformPK;
-import org.hyperic.hq.appdef.shared.PlatformTypeLocal;
-import org.hyperic.hq.appdef.shared.PlatformTypeLocalHome;
 import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
 import org.hyperic.hq.appdef.shared.ServerLocal;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerPK;
-import org.hyperic.hq.appdef.shared.ServerTypeLocal;
-import org.hyperic.hq.appdef.shared.ServerTypeLocalHome;
 import org.hyperic.hq.appdef.shared.ServerTypePK;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerVOHelperUtil;
@@ -84,6 +78,8 @@ import org.hyperic.hq.appdef.shared.ServerUtil;
 import org.hyperic.hq.appdef.Service;
 import org.hyperic.hq.appdef.ServiceType;
 import org.hyperic.hq.appdef.Server;
+import org.hyperic.hq.appdef.ServerType;
+import org.hyperic.hq.appdef.PlatformType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -101,6 +97,8 @@ import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.hibernate.dao.ServerDAO;
 import org.hyperic.hibernate.dao.ConfigResponseDAO;
+import org.hyperic.hibernate.dao.ServerTypeDAO;
+import org.hyperic.hibernate.dao.PlatformTypeDAO;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.ObjectNotFoundException;
 
@@ -201,15 +199,12 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // rollback the transaction if no permission to create
             // a server; otherwise, a server record gets created without its
             // corresponding resource record.
-            rollback();
             throw e;
         } catch (FinderException e) {
-            rollback();
             log.error("Unable to find server type", e);
             throw new CreateException("Unable to find server type: " 
                                       + ppk + " : " + e.getMessage());
         } catch (NamingException e) {
-            rollback();
             log.error("Unable to get LocalHome", e);
             throw new SystemException("Unable to get LocalHome " + 
                                          e.getMessage());
@@ -337,14 +332,15 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             }
             validateNewServerType(stv, suppPlatTypes);
             // now we create the serverType 
-            ServerTypeLocalHome stLHome = getServerTypeLocalHome();
-            ServerTypeLocal sType = stLHome.create(stv);
+            ServerTypeDAO stLHome = getServerTypeDAO();
+            ServerType sType = stLHome.create(stv);
             // now we need to add the platform types
             HashSet ptSet = new HashSet();
             for(int i=0;i<suppPlatTypes.size(); i++) {
                 PlatformTypeValue ptv =(PlatformTypeValue)suppPlatTypes.get(i);
                 // now find the ejb
-                PlatformTypeLocal pType = getPlatformTypeLocalHome()
+                PlatformType pType =
+                    DAOFactory.getDAOFactory().getPlatformTypeDAO()
                     .findByPrimaryKey(ptv.getPrimaryKey());
                 // and add it to the set
                 ptSet.add(pType);
@@ -355,13 +351,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             sType.setPlatformTypes(ptSet);
             
             // and finally, return the primary key
-            return (ServerTypePK)sType.getPrimaryKey();
-        } catch (NamingException e) {
-            log.error("Could not get Local Home", e);
-            throw new SystemException(
-                "Failed to get LocalHome in createServerType: " + e.getMessage());
-        } catch (FinderException e) {
-            log.error("Failed to look up a PlatformType", e);
+            return sType.getPrimaryKey();
+        } catch (ObjectNotFoundException e) {
             throw new CreateException("Failed to look up a PlatformType: " +
                                       e.getMessage());
         }
@@ -371,17 +362,13 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Find all server types
      * @return list of serverTypeValues
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public PageList getAllServerTypes(AuthzSubjectValue subject,
                                       PageControl pc)
         throws FinderException {
 
-        Collection serverTypes;
-        try {
-            serverTypes = getServerTypeLocalHome().findAll();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        Collection serverTypes = getServerTypeDAO().findAll();
 
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
@@ -392,6 +379,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Find viewable server types
      * @return list of serverTypeValues
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public PageList getViewableServerTypes(AuthzSubjectValue subject,
                                       PageControl pc)
@@ -412,6 +400,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Find viewable server non-virtual types for a platform
      * @return list of serverTypeValues
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public PageList getServerTypesByPlatform(AuthzSubjectValue subject,
                                              Integer platId,
@@ -424,6 +413,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Find viewable server types for a platform
      * @return list of serverTypeValues
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public PageList getServerTypesByPlatform(AuthzSubjectValue subject,
                                              Integer platId,
@@ -452,6 +442,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @param subject - who
      * @param id - id of server
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public ServerValue findServerById(AuthzSubjectValue subject,
                                       Integer id) 
@@ -477,6 +468,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @param subject - who
      * @param name - name of server
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public ServerValue[] findServersByName(AuthzSubjectValue subject,
                                            String name)
@@ -518,7 +510,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @param id - The ID of the server
      * @return ServerTypeValue
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public ServerTypeValue findServerTypeById(Integer id)
         throws FinderException {
@@ -538,12 +530,15 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @param name - the name of the server
      * @return ServerTypeValue
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public ServerTypeValue findServerTypeByName(String name)
         throws FinderException {
         try {
-            ServerTypeLocal ejb = getServerTypeLocalHome().findByName(name);
+            ServerType ejb = getServerTypeDAO().findByName(name);
+            if (ejb == null) {
+                throw new FinderException("name not found: " + name);
+            }
             return ServerVOHelperUtil.getLocalHome().create().getServerTypeValue(ejb);
         } catch (NamingException e) {
             throw new SystemException(e);
@@ -573,6 +568,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get server IDs by server type.
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      *
      * @param subject The subject trying to list servers.
      * @param servTypeId server type id.
@@ -615,7 +611,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /** 
      * Get server by id.
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      * @param Integer id
      */
     public ServerValue getServerById(AuthzSubjectValue subject, 
@@ -643,6 +639,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get servers by name.
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      * @param Subject - who
      * @param name - name of server
      */
@@ -655,7 +652,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get server by service.
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      * @param Subject - who
      * @param service - Service ID for which to fetch the server
      */
@@ -691,7 +688,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Get server by service.  The virtual servers are not filtere out of
      * returned list.
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      * @param Subject - who
      * @param service - Service ID for which to fetch the server
      * @throws ServerNotFoundException
@@ -763,6 +760,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get all servers.
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      *
      * @param subject The subject trying to list servers.
      * @param PageControl  
@@ -885,6 +883,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get servers by platform.
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      *
      * @param subject The subject trying to list servers.
      * @param platId platform id.
@@ -893,7 +892,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @param pc The page control.
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public PageList getServersByPlatform ( AuthzSubjectValue subject,
                                            Integer platId,
@@ -912,6 +910,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get servers by server type and platform.
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      *
      * @param subject The subject trying to list servers.
      * @param servTypeId server type id.
@@ -919,7 +918,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @param pc The page control.
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public PageList getServersByPlatform ( AuthzSubjectValue subject,
                                            Integer platId,
@@ -979,7 +977,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      *
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public List getServersByType( AuthzSubjectValue subject, Integer typeId)
         throws PermissionException {
@@ -1019,7 +1017,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Unlike it's value object counterpart this method will not throw 
      * permission exceptions, just ServerNotFoundException.
      *
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      * @ejb:interface-method
      * @param Integer id
      */
@@ -1087,7 +1085,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get a server by service.
      *
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      * @ejb:interface-method
      * @param Integer id
      */
@@ -1153,7 +1151,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * is also not capable of filtering on server types, though it would
      * be easy to add.  This method also excludes virtual server types.
      *
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      * @ejb:interface-method
      */
     public PageList
@@ -1241,6 +1239,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get non-virtual server IDs by server type and platform.
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      *
      * @param subject The subject trying to list servers.
      * @param servTypeId server type id.
@@ -1261,6 +1260,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get server IDs by server type and platform.
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      *
      * @param subject The subject trying to list servers.
      * @param servTypeId server type id.
@@ -1397,6 +1397,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get servers by application.
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      *
      * @param subject The subject trying to list servers.
      * @param appId Application id.
@@ -1415,6 +1416,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get servers by application and serverType.
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      *
      * @param subject The subject trying to list servers.
      * @param appId Application id.
@@ -1438,6 +1440,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get server IDs by application and serverType.
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      *
      * @param subject The subject trying to list servers.
      * @param appId Application id.
@@ -1575,12 +1578,11 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Update server types
      * @param ServerTypeValue
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="RequiresNew"
      */
     public void updateServerTypes(String plugin, ServerTypeInfo[] infos)
         throws CreateException, FinderException, RemoveException {
         VOCache cache = VOCache.getInstance();
-        AuthzSubjectValue overlord = null;
 
         // First, put all of the infos into a Hash
         HashMap infoMap = new HashMap();
@@ -1606,134 +1608,101 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             }
         }
 
-        try {
-            ServerTypeLocalHome stLHome = getServerTypeLocalHome();
-            Collection curServers = stLHome.findByPlugin(plugin);
+        ServerTypeDAO stLHome = getServerTypeDAO();
+        Collection curServers = stLHome.findByPlugin(plugin);
             
-            for (Iterator i = curServers.iterator(); i.hasNext();) {
-                ServerTypeLocal stlocal = (ServerTypeLocal) i.next();
-                String serverName = stlocal.getName();
-                ServerTypeInfo sinfo =
-                    (ServerTypeInfo) infoMap.remove(serverName);
+        for (Iterator i = curServers.iterator(); i.hasNext();) {
+            ServerType stlocal = (ServerType) i.next();
+            String serverName = stlocal.getName();
+            ServerTypeInfo sinfo =
+                (ServerTypeInfo) infoMap.remove(serverName);
 
-                // See if this exists
-                if (sinfo == null) {
-                    log.debug("Removing ServerType: " + serverName);
-                    
-                    // Get overlord
-                    if (overlord == null)
-                        overlord = getOverlord();
+            // See if this exists
+            if (sinfo == null) {
+                log.debug("Removing ServerType: " + serverName);
+                // flush cache
+                cache.removeServerType(stlocal.getId());
+                stLHome.remove(stlocal);
+            } else {
+                String   curDesc    = stlocal.getDescription();
+                Collection      curPlats   = stlocal.getPlatformTypes();
+                String   newDesc    = sinfo.getDescription();
+                String[] newPlats   = sinfo.getValidPlatformTypes();
+                boolean  updatePlats;
 
-                    // Remove all the servers
-                    for (Iterator svIt = stlocal.getServers().iterator();
-                         svIt.hasNext(); ) {
-                        ServerLocal svLocal = (ServerLocal) svIt.next();
-                        try {
-                            removeServer(overlord, svLocal, true);
-                        } catch (PermissionException e) {
-                            // Should never happen
-                            throw new SystemException(e);
-                        } catch (ServerNotFoundException e) {
-                            // Should never happen
-                            throw new SystemException(e);
-                        }
-                    }
-                    
-                    // flush cache
-                    cache.removeServerType(stlocal.getId());
-                    stlocal.remove();
-                } else {
-                    String   curDesc    = stlocal.getDescription();
-                    Set      curPlats   = stlocal.getPlatformTypes();
-                    String   newDesc    = sinfo.getDescription();
-                    String[] newPlats   = sinfo.getValidPlatformTypes();
-                    boolean  updatePlats;
-
-                    log.debug("Updating ServerType: " + serverName);
+                log.debug("Updating ServerType: " + serverName);
                         
-                    if (!newDesc.equals(curDesc))
-                        stlocal.setDescription(newDesc);
+                if (!newDesc.equals(curDesc))
+                    stlocal.setDescription(newDesc);
 
-                    // See if we need to update the supported platforms
-                    updatePlats = newPlats.length != curPlats.size();
-                    if(updatePlats == false){
-                        // Ensure that the lists are the same
-                        for(Iterator k = curPlats.iterator(); k.hasNext(); ){
-                            PlatformTypeLocal pLocal = 
-                                (PlatformTypeLocal) k.next();
-                            int j;
+                // See if we need to update the supported platforms
+                updatePlats = newPlats.length != curPlats.size();
+                if(updatePlats == false){
+                    // Ensure that the lists are the same
+                    for(Iterator k = curPlats.iterator(); k.hasNext(); ){
+                        PlatformType pLocal = (PlatformType)k.next();
+                        int j;
                             
-                            for(j=0; j<newPlats.length; j++){
-                                if(newPlats[j].equals(pLocal.getName()))
-                                    break;
-                            }
-                            if(j == newPlats.length){
-                                updatePlats = true;
+                        for(j=0; j<newPlats.length; j++){
+                            if(newPlats[j].equals(pLocal.getName()))
                                 break;
-                            }
                         }
-                    }
-
-                    if(updatePlats == true){
-                        Set platSet;
-
-                        try {
-                            platSet = this.getPlatformTypeSet(newPlats);
-                        } catch(FinderException exc){
-                            throw new CreateException("Could not setup " +
-                                   "server '" + serverName + "' because: " +
-                                   exc.getMessage());
+                        if(j == newPlats.length){
+                            updatePlats = true;
+                            break;
                         }
-                        // iterate over the collection to flush the cache
-                        for(Iterator it = platSet.iterator(); it.hasNext();) {
-                            PlatformTypeLocal pt = (PlatformTypeLocal)it.next();
-                            cache.removePlatformType(pt.getId());
-                        }
-                        stlocal.setPlatformTypes(platSet);
                     }
                 }
+
+                if(updatePlats == true){
+                    Set platSet;
+
+                    try {
+                        platSet = getPlatformTypeSet(newPlats);
+                    } catch(FinderException exc){
+                        throw new CreateException("Could not setup " +
+                                                  "server '" + serverName + "' because: " +
+                                                  exc.getMessage());
+                    }
+                    // iterate over the collection to flush the cache
+                    for(Iterator it = platSet.iterator(); it.hasNext();) {
+                        PlatformType pt = (PlatformType)it.next();
+                        cache.removePlatformType(pt.getId());
+                    }
+                    stlocal.setPlatformTypes(platSet);
+                }
             }
+        }
             
-            // Now create the left-overs
-            for (Iterator i = infoMap.values().iterator(); i.hasNext(); ) {
-                ServerTypeInfo sinfo = (ServerTypeInfo) i.next();
-                ServerTypeValue stype = new ServerTypeValue();
-                ServerTypeLocal stlocal;
-                Set platSet;
+        // Now create the left-overs
+        for (Iterator i = infoMap.values().iterator(); i.hasNext(); ) {
+            ServerTypeInfo sinfo = (ServerTypeInfo) i.next();
+            ServerType stype = new ServerType();
+            Set platSet;
 
-                log.debug("Creating new ServerType: " + sinfo.getName());
-                stype.setPlugin(plugin);
-                stype.setName(sinfo.getName());
-                stype.setDescription(sinfo.getDescription());
-                stype.setVirtual(sinfo.isVirtual());
-                try {
-                    String newPlats[] = sinfo.getValidPlatformTypes();
+            log.debug("Creating new ServerType: " + sinfo.getName());
+            stype.setPlugin(plugin);
+            stype.setName(sinfo.getName());
+            stype.setDescription(sinfo.getDescription());
+            stype.setVirtual(sinfo.isVirtual());
+            try {
+                String newPlats[] = sinfo.getValidPlatformTypes();
                     
-                    platSet = this.getPlatformTypeSet(newPlats);
-                } catch(FinderException exc){
-                    throw new CreateException("Could not setup " +
-                                  "server '" + sinfo.getName() + "' because: " +
-                                  exc.getMessage());
-                }
-
-                // Now create the server type 
-                stlocal = stLHome.create(stype);
-                stlocal.setPlatformTypes(platSet);
-                
-                // expire the underlying platform types Bug# 9795
-                for(Iterator pti = platSet.iterator(); pti.hasNext();) {
-                    PlatformTypePK ptPk = (PlatformTypePK)((PlatformTypeLocal)pti.next()).getPrimaryKey();
-                    cache.removePlatformType(ptPk.getId());
-                }
-                
-                // We only need the flat value object so we get it directly
-                // from the entity
-                ServerTypeValue stValue = stlocal.getServerTypeValueObject();
+                platSet = getPlatformTypeSet(newPlats);
+            } catch(FinderException exc){
+                throw new CreateException("Could not setup " +
+                                          "server '" + sinfo.getName() + "' because: " +
+                                          exc.getMessage());
             }
-        } catch (NamingException e) {
-            log.error("Unable to find ServerTypeLocalHome", e);
-            throw new SystemException("Unable to get ServerTypeLocalHome: " + 
-                                         e.getMessage());
+            stype.setPlatformTypes(platSet);
+            // Now create the server type
+            stLHome.create(stype);
+
+            // expire the underlying platform types Bug# 9795
+            for(Iterator pti = platSet.iterator(); pti.hasNext();) {
+                PlatformTypePK ptPk = ((PlatformType)pti.next()).getPrimaryKey();
+                cache.removePlatformType(ptPk.getId());
+            }
         }
     }
 
@@ -1743,26 +1712,21 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      */
     private Set getPlatformTypeSet(String[] platNames)
         throws FinderException {
-        try {
-            PlatformTypeLocalHome platHome = getPlatformTypeLocalHome();
-            HashSet res = new HashSet();
+        PlatformTypeDAO platHome =
+            DAOFactory.getDAOFactory().getPlatformTypeDAO();
+        HashSet res = new HashSet();
             
-            for(int i=0; i<platNames.length; i++){
-                PlatformTypeLocal pType;
+        for(int i=0; i<platNames.length; i++){
+            PlatformType pType;
             
-                try {
-                    pType = platHome.findByName(platNames[i]);
-                } catch(FinderException exc){
-                    throw new FinderException("Could not find platform type '" +
-                                              platNames[i] + "'");
-                }
-            
-                res.add(pType);
+            pType = platHome.findByName(platNames[i]);
+            if (pType == null) {
+                throw new FinderException("Could not find platform type '" +
+                                          platNames[i] + "'");
             }
-            return res;
-        } catch (NamingException e) {
-            throw new SystemException(e);
+            res.add(pType);
         }
+        return res;
     }
 
     /**
@@ -1799,6 +1763,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @param ejb - the Server EJB
      * @return ResourceValue
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public ResourceValue getServerResourceValue(ServerPK pk)
         throws FinderException, NamingException {

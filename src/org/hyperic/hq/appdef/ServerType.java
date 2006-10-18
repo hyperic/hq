@@ -1,8 +1,13 @@
 package org.hyperic.hq.appdef;
 
 import org.hyperic.hq.appdef.shared.ServerTypePK;
+import org.hyperic.hq.appdef.shared.ServiceTypeValue;
+import org.hyperic.hq.appdef.shared.ServerTypeValue;
 
 import java.util.Collection;
+import java.util.Set;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 
 /**
  *
@@ -92,5 +97,59 @@ public class ServerType extends AppdefResourceType
     {
         pkey.setId(getId());
         return pkey;
+    }
+
+    public ServiceType createServiceType(ServiceTypeValue stv)
+    {
+        throw new UnsupportedOperationException(
+            "use ServiceTypeDAO.createService()");
+    }
+
+    /**
+     * legacy EJB DTO (value object) pattern
+     * @deprecated use (this) ServerType object instead
+     */
+    public ServerTypeValue getServerTypeValueObject()
+    {
+        ServerTypeValue vo = new ServerTypeValue();
+        vo.setName(getName());
+        vo.setSortName(getSortName());
+        vo.setDescription(getDescription());
+        vo.setPlugin(getPlugin());
+        vo.setId(getId());
+        vo.setMTime(getMTime());
+        vo.setCTime(getCTime());
+        vo.setVirtual(isVirtual());
+        return vo;
+    }
+
+    private ServerTypeValue serverTypeValue = new ServerTypeValue();
+    /**
+     * legacy EJB DTO (value object) pattern
+     * @deprecated use (this) ServerType object instead
+     */
+    public ServerTypeValue getServerTypeValue()
+    {
+        serverTypeValue.setName(getName());
+        serverTypeValue.setVirtual(isVirtual());
+        serverTypeValue.setSortName(getSortName());
+        serverTypeValue.setDescription(getDescription());
+        serverTypeValue.setPlugin(getPlugin());
+        serverTypeValue.setId(getId());
+        serverTypeValue.setMTime(getMTime());
+        serverTypeValue.setCTime(getCTime());
+        serverTypeValue.removeAllServiceTypeValues();
+        Iterator iServiceTypeValue = getServiceTypes().iterator();
+        while (iServiceTypeValue.hasNext()){
+            serverTypeValue.addServiceTypeValue(
+                ((ServiceType)iServiceTypeValue.next()).getServiceTypeValue());
+        }
+        serverTypeValue.cleanServiceTypeValue();
+        return serverTypeValue;
+    }
+
+    public Set getServiceTypeSnapshot()
+    {
+        return new LinkedHashSet(getServiceTypes());
     }
 }

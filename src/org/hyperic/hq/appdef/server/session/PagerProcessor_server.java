@@ -29,6 +29,8 @@ import org.hyperic.hq.appdef.shared.ServerLocal;
 import org.hyperic.hq.appdef.shared.ServerTypeLocal;
 import org.hyperic.hq.appdef.shared.ServerVOHelperLocal;
 import org.hyperic.hq.appdef.shared.ServerVOHelperUtil;
+import org.hyperic.hq.appdef.ServerType;
+import org.hyperic.hq.appdef.Server;
 import org.hyperic.util.pager.PagerProcessor;
 
 public class PagerProcessor_server implements PagerProcessor {
@@ -47,6 +49,13 @@ public class PagerProcessor_server implements PagerProcessor {
             }
             if ( o instanceof ServerTypeLocal ) {
                 return helperLocal.getServerTypeValue((ServerTypeLocal) o);
+            }
+            
+            if ( o instanceof Server) {
+                return helperLocal.getServerValue((Server)o);
+            }
+            if ( o instanceof ServerType) {
+                return helperLocal.getServerTypeValue((ServerType) o);
             }
         } catch ( Exception e ) {
             IllegalStateException ex =

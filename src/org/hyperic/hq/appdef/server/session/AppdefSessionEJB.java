@@ -63,7 +63,6 @@ import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformTypeLocal;
 import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformVOHelperUtil;
-import org.hyperic.hq.appdef.shared.ServerLocal;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.ServerTypeLocal;
@@ -78,6 +77,9 @@ import org.hyperic.hq.appdef.Server;
 import org.hyperic.hq.appdef.ServerType;
 import org.hyperic.hq.appdef.Service;
 import org.hyperic.hq.appdef.ServiceType;
+import org.hyperic.hq.appdef.ServerType;
+import org.hyperic.hq.appdef.Platform;
+import org.hyperic.hq.appdef.PlatformType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -147,9 +149,15 @@ public abstract class AppdefSessionEJB
                 private String getName(Object obj) {
                     if (obj instanceof PlatformTypeLocal)
                         return ((PlatformTypeLocal) obj).getSortName();
+
+                    if (obj instanceof PlatformType)
+                        return ((PlatformType) obj).getSortName();
                     
                     if (obj instanceof ServerTypeLocal)
                         return ((ServerTypeLocal) obj).getSortName();
+
+                    if (obj instanceof ServerType)
+                        return ((ServerType) obj).getSortName();
                     
                     if (obj instanceof ServiceTypeLocal)
                         return ((ServiceTypeLocal) obj).getSortName();
@@ -174,6 +182,14 @@ public abstract class AppdefSessionEJB
                 EJBLocalObject rTypeLocal = resource.getAppdefResourceType();
                 if (!resTypes.contains(rTypeLocal))
                     resTypes.add(rTypeLocal);
+            } else if (o instanceof Platform) {
+                PlatformType st = ((Platform)o).getPlatformType();
+                if (!resTypes.contains(st))
+                    resTypes.add(st);
+            } else if (o instanceof Server) {
+                ServerType st = ((Server)o).getServerType();
+                if (!resTypes.contains(st))
+                    resTypes.add(st);
             } else if (o instanceof Service) {
                 ServiceType st = ((Service)o).getServiceType();
                 if (!resTypes.contains(st))
@@ -373,9 +389,9 @@ public abstract class AppdefSessionEJB
      * Find a ServerTypeLocal by primary key
      * @return ServerTypeLocal
      */
-    protected ServerTypeLocal findServerTypeByPK(ServerTypePK pk)
+    protected ServerType findServerTypeByPK(ServerTypePK pk)
         throws FinderException, NamingException {
-            return getServerTypeLocalHome().findByPrimaryKey(pk);
+            return getServerTypeDAO().findByPrimaryKey(pk);
     }
 
     /**

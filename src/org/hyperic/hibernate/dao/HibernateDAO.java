@@ -71,6 +71,7 @@ public abstract class HibernateDAO
     protected void save(Object entity)
     {
         getSession().saveOrUpdate(entity);
+        getSession().flush();
     }
 
     protected void remove(Object entity)

@@ -5,8 +5,6 @@ import org.hyperic.hq.appdef.shared.ServerLightValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.PlatformLocal;
 import org.hyperic.hq.appdef.shared.ServerTypeLocal;
-import org.hyperic.hq.appdef.shared.ServerTypeUtil;
-import org.hyperic.hq.appdef.shared.ServerTypeLocalHome;
 import org.hyperic.hq.appdef.shared.PlatformLocalHome;
 import org.hyperic.hq.appdef.shared.PlatformUtil;
 import org.hyperic.hq.appdef.shared.ServiceValue;
@@ -40,7 +38,6 @@ public class Server extends AppdefResource
     private String installPath;
     private ServerType serverType;
     private ConfigResponseDB configResponse;
-    private Collection aiServices;
     private Collection services;
 
     /**
@@ -53,7 +50,7 @@ public class Server extends AppdefResource
 
     public Service createService(ServiceValue sv)
     {
-        throw new UnsupportedOperationException("use Server.createService()");
+        throw new UnsupportedOperationException("use ServerDAO.createService()");
     }
 
     public void setServerType(ServerTypeLocal serverType)
@@ -156,16 +153,6 @@ public class Server extends AppdefResource
         this.configResponse = configResponse;
     }
 
-    public Collection getAiServices()
-    {
-        return this.aiServices;
-    }
-
-    public void setAiServices(Collection aiServices)
-    {
-        this.aiServices = aiServices;
-    }
-
     public Collection getServices()
     {
         return this.services;
@@ -223,15 +210,7 @@ public class Server extends AppdefResource
         serverLightValue.setMTime(getMTime());
         serverLightValue.setCTime(getCTime());
         if ( getServerType() != null ) {
-            // temporary until ServerType is hibernized
-            try {
-                ServerTypeLocalHome shome = ServerTypeUtil.getLocalHome();
-                ServerTypeLocal s =
-                    shome.findByPrimaryKey(getServerType().getPrimaryKey());
-                serverLightValue.setServerType(s.getServerTypeValue());
-            } catch (NamingException e) {
-            } catch (FinderException e) {
-            }
+            serverLightValue.setServerType(getServerType().getServerTypeValue());
         }
         else
             serverLightValue.setServerType( null );
@@ -269,15 +248,7 @@ public class Server extends AppdefResource
         }
         serverValue.cleanServiceValue();
         if ( getServerType() != null ) {
-            // temporary until ServerType is hibernized
-            try {
-                ServerTypeLocalHome shome = ServerTypeUtil.getLocalHome();
-                ServerTypeLocal s =
-                    shome.findByPrimaryKey(getServerType().getPrimaryKey());
-                serverValue.setServerType(s.getServerTypeValue());
-            } catch (NamingException e) {
-            } catch (FinderException e) {
-            }
+            serverValue.setServerType(getServerType().getServerTypeValue());
         }
         else
             serverValue.setServerType( null );
@@ -323,15 +294,7 @@ public class Server extends AppdefResource
         vo.setConfigResponseId(getConfigResponseId());
         ServerType stype = getServerType();
         if ( stype != null ) {
-            // temporary until ServerType is hibernized
-            try {
-                ServerTypeLocalHome shome = ServerTypeUtil.getLocalHome();
-                ServerTypeLocal s =
-                    shome.findByPrimaryKey(getServerType().getPrimaryKey());
-                vo.setServerType( s.getServerTypeValueObject() );
-            } catch (NamingException e) {
-            } catch (FinderException e) {
-            }
+            vo.setServerType( stype.getServerTypeValueObject() );
         }
         else
             vo.setServerType( null );

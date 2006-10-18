@@ -180,7 +180,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @param type - name of the platform type
      * @return platformTypeValue 
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public PlatformTypeValue findPlatformTypeByName(String type) 
         throws PlatformNotFoundException {
@@ -686,7 +685,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get all platforms.
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      * @param subject The subject trying to list platforms.
      * @param pc a PageControl object which determines the size of the page and
      * the sorting, if any.
@@ -756,7 +754,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get platform by AIPlatform.
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      * @param Integer id
      */
     public PlatformValue getPlatformByAIPlatform(AuthzSubjectValue subject, 
@@ -787,7 +784,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * Generate a resource tree based on the root resources and
      * the traversal (one of ResourceTreeGenerator.TRAVERSE_*)
      *
-     * @ejb:transaction type="NOTSUPPORTED"
      * @ejb:interface-method
      */
     public MiniResourceTree getMiniResourceTree(AuthzSubjectValue subject,
@@ -808,7 +804,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * permission exceptions, just PlatformNotFoundException.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      * @param Integer id
      */
     public MiniResourceValue getMiniPlatformById(AuthzSubjectValue subject,
@@ -871,7 +866,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get a platform by server.
      *
-     * @ejb:transaction type="NOTSUPPORTED"
      * @ejb:interface-method
      * @param Integer id
      */
@@ -1028,7 +1022,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get the platform by agent token
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public PlatformPK getPlatformPkByAgentToken(AuthzSubjectValue subject,
                                                 String agentToken)
@@ -1645,6 +1638,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * Update platform types
      * @param PlatformTypeValue
      * @ejb:interface-method
+     * @ejb:transaction type="RequiresNew"
      */
     public void updatePlatformTypes(String plugin, PlatformTypeInfo[] infos)
         throws CreateException, FinderException, RemoveException {
