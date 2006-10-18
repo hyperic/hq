@@ -74,8 +74,9 @@ import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ServiceTypeLocal;
 import org.hyperic.hq.appdef.shared.ServiceTypePK;
 import org.hyperic.hq.appdef.shared.UpdateException;
-import org.hyperic.hq.appdef.Service;
 import org.hyperic.hq.appdef.Server;
+import org.hyperic.hq.appdef.ServerType;
+import org.hyperic.hq.appdef.Service;
 import org.hyperic.hq.appdef.ServiceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
@@ -167,12 +168,16 @@ public abstract class AppdefSessionEJB
         while (iterator.hasNext()) {
             Object o = iterator.next();
             if (o instanceof AppdefResourceLocal) {
-                AppdefResourceLocal resource = (AppdefResourceLocal)iterator.next();
+                AppdefResourceLocal resource = (AppdefResourceLocal)o;
                 EJBLocalObject rTypeLocal = resource.getAppdefResourceType();
                 if (!resTypes.contains(rTypeLocal))
                     resTypes.add(rTypeLocal);
             } else if (o instanceof Service) {
                 ServiceType st = ((Service)o).getServiceType();
+                if (!resTypes.contains(st))
+                    resTypes.add(st);
+            } else if (o instanceof Server) {
+                ServerType st = ((Server)o).getServerType();
                 if (!resTypes.contains(st))
                     resTypes.add(st);
             }
