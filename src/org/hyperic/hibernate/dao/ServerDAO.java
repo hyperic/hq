@@ -115,7 +115,7 @@ public class ServerDAO extends HibernateDAO
     {
         String sql="from Server s join fetch s.serverType st " +
                    "where st.virtual=false " +
-                   "order by sortName " + (asc ? "asc" : "desc");
+                   "order by s.sortName " + (asc ? "asc" : "desc");
         return getSession().createQuery(sql).list();
     }
 
