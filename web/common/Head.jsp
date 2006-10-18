@@ -32,3 +32,7 @@
   var imagePath = "<html:rewrite page="/images/"/>";
 </script>
 <script language="JavaScript" src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
+
+<style type="text/css">
+	.PageTitleBar, .PageTitleBar td {background-image: url(<html:rewrite page="/images/bg_PageTitle.gif"/>); background-repeat: repeat-x; background-color: #cb4c00;}
+</style>
