@@ -178,6 +178,10 @@
           <include name="**/*Test.java"/>
         </fileset>
       </batchtest>
+      <sysproperty key="hq.jdbc.name" value="${hq.jdbc.name}"/>
+      <sysproperty key="hq.jdbc.user" value="${hq.jdbc.user}"/>
+      <sysproperty key="hq.jdbc.password" value="${hq.jdbc.password}"/>
+      <sysproperty key="hq.jdbc.server" value="${hq.jdbc.server}"/>
     </junit>
   </target>
     

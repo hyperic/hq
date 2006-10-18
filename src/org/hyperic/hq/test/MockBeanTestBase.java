@@ -59,17 +59,34 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
     private Queue                  queue ;
 
     // override these in the subclass
-    private String database = "hq";
-    private String username = "hq";
-    private String password = "hq";
-    private String server   = "localhost";
+    private String database = null;
+    private String username = null;
+    private String password = null;
+    private String server   = null;
 
     public MockBeanTestBase(String testName){
         super(testName);
+        
+        database = System.getProperty("hq.jdbc.name");
+        username = System.getProperty("hq.jdbc.user");
+        password = System.getProperty("hq.jdbc.password");
+        server   = System.getProperty("hq.jdbc.server");
+        
+        if (database == null)
+            database = "hq";
+            
+        if (username == null)
+            username = "hq";
+            
+        if (password == null)
+            password = "hq";
+
+        if (server == null)
+            server = "localhost";
     }
     
     public MockBeanTestBase() {
-        super("MockBeanTest");
+        this("MockBeanTest");
     }
 
     public void setDatabase(String database) {
