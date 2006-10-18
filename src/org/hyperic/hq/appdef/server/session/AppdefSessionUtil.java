@@ -29,6 +29,7 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.dao.ConfigResponseDAO;
 import org.hyperic.hibernate.dao.ServiceDAO;
 import org.hyperic.hibernate.dao.ServiceTypeDAO;
+import org.hyperic.hibernate.dao.ServerDAO;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AIServerLocalHome;
@@ -64,14 +65,12 @@ import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.appdef.shared.PlatformTypeLocalHome;
 import org.hyperic.hq.appdef.shared.PlatformTypeUtil;
 import org.hyperic.hq.appdef.shared.PlatformUtil;
-import org.hyperic.hq.appdef.shared.ServerLocalHome;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ServerManagerUtil;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerTypeLocalHome;
 import org.hyperic.hq.appdef.shared.ServerTypeUtil;
-import org.hyperic.hq.appdef.shared.ServerUtil;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
@@ -102,7 +101,6 @@ public abstract class AppdefSessionUtil {
     private PlatformManagerLocalHome    platformMgrLHome;
     private PlatformTypeLocalHome       platTypeLHome;
     private ResourceManagerLocal        rmLocal;
-    private ServerLocalHome             serverLHome;
     private ServerManagerLocalHome      serverMgrLHome;
     private ServerTypeLocalHome         serverTypeLHome;
     private ServiceManagerLocalHome     serviceMgrLHome;
@@ -278,15 +276,9 @@ public abstract class AppdefSessionUtil {
         return platTypeLHome;
     }
 
-    protected ServerLocalHome getServerLocalHome() {
-        if(serverLHome == null) {
-            try {
-                serverLHome = ServerUtil.getLocalHome();
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
-        return serverLHome;
+    protected ServerDAO getServerDAO()
+    {
+        return DAOFactory.getDAOFactory().getServerDAO();
     }
 
     /**

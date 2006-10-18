@@ -37,6 +37,7 @@ import org.hyperic.hibernate.dao.PlatformDAO;
 import org.hyperic.hibernate.dao.ServerDAO;
 import org.hyperic.hibernate.dao.ServiceDAO;
 import org.hyperic.hibernate.dao.TriggerDAO;
+import org.hyperic.hibernate.dao.ServiceTypeDAO;
 
 /**
  *

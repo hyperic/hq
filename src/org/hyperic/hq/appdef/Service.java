@@ -9,14 +9,11 @@ import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ServerLocal;
 import org.hyperic.hq.appdef.shared.ServiceClusterLocal;
 import org.hyperic.hq.appdef.shared.ServiceTypeLocal;
-import org.hyperic.hq.appdef.shared.ServerLocalHome;
-import org.hyperic.hq.appdef.shared.ServerUtil;
 import org.hyperic.hq.appdef.shared.ServiceClusterLocalHome;
 import org.hyperic.hq.appdef.shared.ServiceClusterUtil;
 import org.hyperic.hq.appdef.shared.AppServiceLocal;
 import org.hyperic.hq.appdef.shared.AppServiceUtil;
 import org.hyperic.hq.appdef.shared.AppSvcDependencyUtil;
-import org.hyperic.hq.appdef.shared.ServiceLocal;
 import org.hyperic.hibernate.dao.ServiceTypeDAO;
 import org.hyperic.dao.DAOFactory;
 import org.apache.commons.logging.Log;
@@ -364,16 +361,7 @@ public class Service extends AppdefResource
         serviceValue.setMTime(getMTime());
         serviceValue.setCTime(getCTime());
         if (getServer() != null) {
-            // temporarily rely on EJB until
-            // it is hibernized
-            try {
-                ServerLocalHome shome = ServerUtil.getLocalHome();
-                ServerLocal s =
-                    shome.findByPrimaryKey(getServer().getPrimaryKey());
-                serviceValue.setServer(s.getServerLightValue());
-            } catch(NamingException ignore) {
-            } catch (javax.ejb.FinderException e) {
-            }
+            serviceValue.setServer(getServer().getServerLightValue());
         }
         else
             serviceValue.setServer( null );
@@ -494,5 +482,30 @@ public class Service extends AppdefResource
     {
         pkey.setId(getId());
         return pkey;
+    }
+
+    public boolean equals(Object obj)
+    {
+        if (!super.equals(obj) || !(obj instanceof Service)) {
+            return false;
+        }
+        Service o = (Service)obj;
+        return
+            (autodiscoveryZombie==o.isAutodiscoveryZombie())
+            &&
+            (serviceRt==o.isServiceRt())
+            &&
+            (endUserRt==o.isEndUserRt());
+    }
+
+    public int hashCode()
+    {
+        int result=super.hashCode();
+
+        result = 37*result + (autodiscoveryZombie ? 0 : 1);
+        result = 37*result + (serviceRt ? 0 : 1);
+        result = 37*result + (endUserRt ? 0 : 1);
+        
+        return result;
     }
 }

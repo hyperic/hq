@@ -96,32 +96,22 @@ public abstract class AppdefBean
 
     public boolean equals(Object obj)
     {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || !(obj instanceof AppdefBean)) {
+        if (!super.equals(obj) || !(obj instanceof AppdefBean)) {
             return false;
         }
         AppdefBean o = (AppdefBean)obj;
         return
-            ((id == o.getId()) ||
-             (id!=null && o.getId()!=null &&
-              id.equals(o.getId())))
-            &&
-            (_version_ == o.get_version_())
-            &&
             (creationTime!=null && o.getCTime()!=null && creationTime.equals(o));
     }
 
     public int hashCode()
     {
-        int result = 17;
+        int result = super.hashCode();
 
-        result = 37*result + (id != null ? id.hashCode() : 0);
-        result = 37*result + (int)(_version_ ^ (_version_ >>> 32));
         result = 37*result +
                  (creationTime != null ? creationTime.hashCode() : 0);
 
         return result;
     }
+
 }

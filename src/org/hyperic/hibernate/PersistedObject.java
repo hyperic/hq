@@ -1,5 +1,7 @@
 package org.hyperic.hibernate;
 
+import org.hyperic.hq.appdef.AppdefBean;
+
 /**
  * Base class for all HQ persisted objects.
  * 
@@ -30,5 +32,31 @@ public abstract class PersistedObject {
 
     protected void set_version_(long newVer) {
         _version_ = newVer;
+    }
+
+    public boolean equals(Object obj)
+    {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof PersistedObject)) {
+            return false;
+        }
+        PersistedObject o = (PersistedObject)obj;
+        return
+            ((_id == o.getId()) ||
+             (_id!=null && o.getId()!=null && _id.equals(o.getId())))
+            &&
+            (_version_ == o.get_version_());
+    }
+
+    public int hashCode()
+    {
+        int result = 17;
+
+        result = 37*result + (_id != null ? _id.hashCode() : 0);
+        result = 37*result + (int)(_version_ ^ (_version_ >>> 32));
+
+        return result;
     }
 }

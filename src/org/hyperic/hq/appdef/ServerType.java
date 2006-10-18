@@ -1,5 +1,7 @@
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.shared.ServerTypePK;
+
 import java.util.Collection;
 
 /**
@@ -80,5 +82,15 @@ public class ServerType extends AppdefResourceType
     public void setServiceTypes(Collection serviceTypes)
     {
         this.serviceTypes = serviceTypes;
+    }
+
+    private ServerTypePK pkey=new ServerTypePK();
+    /**
+     * @deprecated use getId()
+     */
+    public ServerTypePK getPrimaryKey()
+    {
+        pkey.setId(getId());
+        return pkey;
     }
 }

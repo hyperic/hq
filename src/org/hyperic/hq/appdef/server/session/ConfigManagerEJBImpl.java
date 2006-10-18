@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Service;
+import org.hyperic.hq.appdef.Server;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -269,7 +270,7 @@ public class ConfigManagerEJBImpl
                 break;
 
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                ServerLocal serv = 
+                Server serv = 
                     this.findServerByPK(new ServerPK(intID));
                 pname = serv.getServerType().getPlugin();
                 break;

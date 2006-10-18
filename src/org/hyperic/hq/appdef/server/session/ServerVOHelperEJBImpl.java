@@ -58,6 +58,7 @@ import org.hyperic.hq.appdef.shared.ServiceTypeLocal;
 import org.hyperic.hq.appdef.shared.ServiceVOHelperLocal;
 import org.hyperic.hq.appdef.shared.ServiceVOHelperUtil;
 import org.hyperic.hq.appdef.ServiceType;
+import org.hyperic.hq.appdef.Server;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -100,7 +101,7 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
         if(vo != null) {
             return vo;
         }
-        ServerLocal ejb = ServerUtil.getLocalHome().findByPrimaryKey(pk);
+        Server ejb = getServerDAO().findByPrimaryKey(pk);
         return getServerValue(ejb);
     }
             
@@ -116,6 +117,21 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
         if(vo != null) {
             log.debug("Returning cached instance for Server: " + vo.getId());
             return vo;            
+        }
+        return (ServerValue)getServerValueImpl(ejb);
+    }
+
+    /**
+     * Get the server value object
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public ServerValue getServerValue(Server ejb)
+        throws NamingException {
+        ServerValue vo = VOCache.getInstance().getServer(ejb.getId());
+        if(vo != null) {
+            log.debug("Returning cached instance for Server: " + vo.getId());
+            return vo;
         }
         return (ServerValue)getServerValueImpl(ejb);
     }
@@ -163,7 +179,21 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
             cache.put(vo.getId(), vo);
         }
         return vo;
-    } 
+    }
+
+    /**
+     * Synchronized VO retrieval
+     */
+    private AppdefResourceValue getServerValueImpl(Server ejb)
+        throws NamingException {
+        VOCache cache = VOCache.getInstance();
+        AppdefResourceValue vo;
+        synchronized(cache.getServerLock()) {
+            vo = ejb.getServerValue();
+            cache.put(vo.getId(), vo);
+        }
+        return vo;
+    }
     
     /**
      * Synchronized VO retrieval 

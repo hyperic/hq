@@ -91,6 +91,7 @@ import org.hyperic.hq.appdef.shared.ServiceUtil;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.miniResourceTree.MiniResourceTree;
+import org.hyperic.hq.appdef.Server;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -107,6 +108,7 @@ import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
+import org.hibernate.ObjectNotFoundException;
 
 /**
  * This class is responsible for managing Platform objects in appdef
@@ -1107,14 +1109,16 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                                                Integer serverId ) 
         throws PlatformNotFoundException, PermissionException {
         try {
-            ServerLocal serverLocal = getServerLocalHome()
-                .findByPrimaryKey(new ServerPK(serverId));
-            PlatformPK pk = (PlatformPK) serverLocal.getPlatform().getPrimaryKey();
+            Server serverLocal = getServerDAO().findById(serverId);
+            PlatformPK pk = serverLocal.getPlatform().getPrimaryKey();
             PlatformValue platformValue = PlatformVOHelperUtil.getLocalHome()
                 .create().getPlatformValue(pk);
             checkViewPermission(subject, platformValue.getEntityId());
             return platformValue;
         } catch (FinderException e) {
+            throw new PlatformNotFoundException("platform for server " +
+                                                serverId + " not found", e);
+        } catch (ObjectNotFoundException e) {
             throw new PlatformNotFoundException("platform for server " +
                                                 serverId + " not found", e);
         } catch (NamingException e) {
@@ -1133,12 +1137,11 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     public Integer getPlatformIdByServer ( Integer serverId ) 
         throws PlatformNotFoundException {
         try {
-            ServerLocal serverLocal = getServerLocalHome()
-                .findByPrimaryKey(new ServerPK(serverId));
+            Server serverLocal = getServerDAO().findById(serverId);
             PlatformPK pk =
-                (PlatformPK) serverLocal.getPlatform().getPrimaryKey();
+                serverLocal.getPlatform().getPrimaryKey();
             return pk.getId();
-        } catch (FinderException e) {
+        } catch (ObjectNotFoundException e) {
             throw new PlatformNotFoundException("platform for server " +
                                                 serverId + " not found", e);
         }

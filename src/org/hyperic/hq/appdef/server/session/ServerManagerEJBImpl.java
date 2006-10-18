@@ -68,7 +68,6 @@ import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
 import org.hyperic.hq.appdef.shared.ServerLocal;
-import org.hyperic.hq.appdef.shared.ServerLocalHome;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.ServerTypeLocal;
@@ -79,14 +78,12 @@ import org.hyperic.hq.appdef.shared.ServerVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
-import org.hyperic.hq.appdef.shared.ServicePK;
-import org.hyperic.hq.appdef.shared.ServiceTypeLocal;
-import org.hyperic.hq.appdef.shared.ServiceTypePK;
-import org.hyperic.hq.appdef.shared.ServiceTypeUtil;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.appdef.shared.ServerUtil;
 import org.hyperic.hq.appdef.Service;
 import org.hyperic.hq.appdef.ServiceType;
+import org.hyperic.hq.appdef.Server;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -102,6 +99,9 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.hyperic.hibernate.dao.ServerDAO;
+import org.hyperic.hibernate.dao.ConfigResponseDAO;
+import org.hyperic.dao.DAOFactory;
 import org.hibernate.ObjectNotFoundException;
 
 /**
@@ -232,8 +232,10 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         // find it
         ServerLocal server;
         try {
-            server = getServerLocalHome().findByPrimaryKey(pk);
+            server = ServerUtil.getLocalHome().findByPrimaryKey(pk);
         } catch (FinderException e) {
+            throw new ServerNotFoundException(id);
+        } catch (NamingException e) {
             throw new ServerNotFoundException(id);
         }
         removeServer(subject, server, deep);
@@ -248,12 +250,12 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     public void removeServer (AuthzSubjectValue subject,
                               ServerLocal server, boolean deep)
         throws ServerNotFoundException, RemoveException, PermissionException {
-        ServerPK pk = (ServerPK) server.getPrimaryKey();
+        ServerPK pk = (ServerPK)server.getPrimaryKey();
         Integer id = pk.getId();
         try {
             // check to see if there are services installed on the
             // server
-            Set services = server.getServices();
+            Collection services = server.getServices();
             int numServices = services.size();
             if(numServices > 0 && !deep) {
                 throw new RemoveException("Server " + server.getName() 
@@ -267,7 +269,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // remove the service resource entries and validate permissions
             Iterator servicesIt = services.iterator();
             while(servicesIt.hasNext()) {
-                ServiceLocal aService = (ServiceLocal)servicesIt.next();
+                Service aService = (Service)servicesIt.next();
                 getServiceMgrLocal().removeService(subject, aService, true);
                 /*
                 ResourceValue serviceRv = getServiceResourceValue(
@@ -287,16 +289,17 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // remove the server and platform vo's from the cache
             VOCache.getInstance().removeServer(id);
             VOCache.getInstance().removePlatform(
-                ((PlatformPK)server.getPlatform().getPrimaryKey()).getId());
+                ((ServerPK)server.getPlatform().getPrimaryKey()).getId());
             // remove it
             server.remove();
 
             // remove the config response
             if (cid != null) {
                 try {
-                    ConfigResponseUtil.getLocalHome()
-                        .findByPrimaryKey(new ConfigResponsePK(cid)).remove();
-                } catch (FinderException e) {
+                    ConfigResponseDAO cdao =
+                        DAOFactory.getDAOFactory().getConfigResponseDAO();
+                    cdao.remove(cdao.findById(cid));
+                } catch (ObjectNotFoundException e) {
                     // OK, no config response, just log it
                     log.warn("Invalid config ID " + cid);
                 }
@@ -480,7 +483,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         throws ServerNotFoundException
     {
         try {
-            List serverLocals = getServerLocalHome().findByName(name);
+            List serverLocals = getServerDAO().findByName(name);
 
             int numServers = serverLocals.size();
             if (numServers == 0) {
@@ -490,7 +493,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
             List servers = new ArrayList();
             for (int i = 0; i < numServers; i++) {
-                ServerLocal sLocal = (ServerLocal)serverLocals.get(i);
+                Server sLocal = (Server)serverLocals.get(i);
                 ServerValue sValue = ServerVOHelperUtil.getLocalHome().
                     create().getServerValue(sLocal);
                 try {
@@ -507,8 +510,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             throw new SystemException(e);
         } catch (CreateException e) {
             throw new SystemException(e);
-        } catch (FinderException e) {
-            throw new ServerNotFoundException(name, e);
         }
     }
 
@@ -554,17 +555,17 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /** 
      * Get server lite value by id.  Does not check permission.
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      * @param Integer id
      */
     public ServerLightValue getServerLightValue(Integer id)
         throws ServerNotFoundException {
         try {
-            ServerLocalHome serverLocalHome = getServerLocalHome();
-            ServerLocal server =
+            ServerDAO serverLocalHome = getServerDAO();
+            Server server =
                 serverLocalHome.findByPrimaryKey(new ServerPK(id));
             return server.getServerLightValue();
-        } catch (FinderException e) {
+        } catch (ObjectNotFoundException e) {
             throw new ServerNotFoundException(id, e);
         }
     }
@@ -580,10 +581,13 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     public Integer[] getServerIds(AuthzSubjectValue subject,
                                   Integer servTypeId)
         throws PermissionException {
-        ServerLocalHome sLHome;
+        ServerDAO sLHome;
         try {
-            sLHome = getServerLocalHome();
+            sLHome = getServerDAO();
             Collection servers = sLHome.findByType(servTypeId);
+            if (servers.size() == 0) {
+                return new Integer[0];
+            }
             List serverIds = new ArrayList(servers.size());
          
             // now get the list of PKs
@@ -592,8 +596,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // viewable list
             int i = 0;
             for (Iterator it = servers.iterator(); it.hasNext(); i++) {
-                ServerLocal aEJB = (ServerLocal) it.next();
-                if (viewable.contains((ServerPK) aEJB.getPrimaryKey())) {
+                Server aEJB = (Server) it.next();
+                if (viewable.contains(aEJB.getPrimaryKey())) {
                     // add the item, user can see it
                     serverIds.add(aEJB.getId());
                 }
@@ -745,9 +749,9 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 continue;
             
             try {
-                ServerLocal server = getServerLocalHome().findByPrimaryKey(pk);
+                Server server = getServerDAO().findByPrimaryKey(pk);
                 servers.add(server);
-            } catch (FinderException e) {
+            } catch (ObjectNotFoundException e) {
                 continue;
             }
         }
@@ -794,20 +798,15 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             }
             switch(attr) {
                 case SortAttribute.RESOURCE_NAME:
-                    if(pc != null && pc.isDescending()) {
-                        servers = getServerLocalHome().findAll_orderName_desc();
-                    } else {
-                        servers = getServerLocalHome().findAll_orderName_asc();
-                    }
+                    servers = getServerDAO().findAll_orderName(
+                        pc != null ? !pc.isDescending() : true);
                     break;
                 default:
-                    servers = getServerLocalHome().findAll_orderName_asc();
+                    servers = getServerDAO().findAll_orderName(true);
                     break;
             }
-        
             for(Iterator i = servers.iterator(); i.hasNext();) {
-                ServerPK sPK = 
-                    (ServerPK)((ServerLocal)i.next()).getPrimaryKey();
+                ServerPK sPK = ((Server)i.next()).getPrimaryKey();
                 // remove server if its not viewable
                 if(!authzPks.contains(sPK)) {
                     i.remove();
@@ -837,33 +836,31 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         }
         
         List servers;
-        try {
-            // first, if they specified a server type, then filter on it
-            if(servTypeId != APPDEF_RES_TYPE_UNDEFINED) {
-                if(!excludeVirtual) {
-                    servers = getServerLocalHome()
-                        .findByPlatformAndType_orderName(platId, servTypeId);
-                } else {
-                    servers = getServerLocalHome()
-                        .findByPlatformAndType_orderName(platId, servTypeId,
-                                                         Boolean.FALSE);
-                }       
+        // first, if they specified a server type, then filter on it
+        if(servTypeId != APPDEF_RES_TYPE_UNDEFINED) {
+            if(!excludeVirtual) {
+                servers = getServerDAO()
+                    .findByPlatformAndType_orderName(platId, servTypeId);
+            } else {
+                servers = getServerDAO()
+                    .findByPlatformAndType_orderName(platId, servTypeId,
+                                                     Boolean.FALSE);
             }
-            else {
-                if(!excludeVirtual) {
-                    servers = getServerLocalHome()
-                        .findByPlatform_orderName(platId);
-                } else {
-                    servers = getServerLocalHome()
-                        .findByPlatform_orderName(platId, Boolean.FALSE);
-                }
-            }
-        } catch(FinderException exc){
-            throw new PlatformNotFoundException(platId, exc);
         }
-        
+        else {
+            if(!excludeVirtual) {
+                servers = getServerDAO()
+                    .findByPlatform_orderName(platId);
+            } else {
+                servers = getServerDAO()
+                    .findByPlatform_orderName(platId, Boolean.FALSE);
+            }
+        }
+        if (servers.size() == 0) {
+            throw new PlatformNotFoundException(platId);
+        }
         for(Iterator i = servers.iterator(); i.hasNext();) {
-            ServerLocal aServer = (ServerLocal)i.next();
+            Server aServer = (Server)i.next();
             
             // Keep the virtual ones, we need them so that child services can be
             // added.  Otherwise, no one except the super user will have access
@@ -872,7 +869,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 continue;
             
             // Remove the server if its not viewable
-            if (!authzPks.contains((ServerPK) aServer.getPrimaryKey())) {
+            if (!authzPks.contains(aServer.getPrimaryKey())) {
                 i.remove();
             }
         } 
@@ -987,12 +984,11 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     public List getServersByType( AuthzSubjectValue subject, Integer typeId)
         throws PermissionException {
         try {
-            Collection servers = getServerLocalHome().findByType(typeId);
+            Collection servers = getServerDAO().findByType(typeId);
 
             List authzPks = getViewableServers(subject);        
             for(Iterator i = servers.iterator(); i.hasNext();) {
-                ServerPK sPK = 
-                    (ServerPK) ((ServerLocal) i.next()).getPrimaryKey();
+                ServerPK sPK = ((Server) i.next()).getPrimaryKey();
                 // remove server if its not viewable
                 if(!authzPks.contains(sPK))
                     i.remove();
@@ -1286,7 +1282,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         Integer[] ids = new Integer[servers.size()];
         Iterator it = servers.iterator();
         for (int i = 0; it.hasNext(); i++) {
-            ServerLocal server = (ServerLocal) it.next();
+            Server server = (Server) it.next();
             ids[i] = server.getId();
         }
         
@@ -1499,16 +1495,15 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Update a server
      * @param existing 
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public ServerValue updateServer(AuthzSubjectValue subject,
                                     ServerValue existing)
         throws PermissionException, UpdateException,
                AppdefDuplicateNameException, ServerNotFoundException {
         try {
-            ServerLocal server =
-                getServerLocalHome().findByPrimaryKey(
-                    existing.getPrimaryKey());
+            Server server =
+                getServerDAO().findByPrimaryKey(existing.getPrimaryKey());
             checkModifyPermission(subject, server.getEntityId());
             existing.setModifiedBy(subject.getName());
             existing.setMTime(new Long(System.currentTimeMillis()));
@@ -1532,6 +1527,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             throw new SystemException(e);
         } catch (FinderException e) {
             throw new ServerNotFoundException(existing.getId(), e);
+        } catch (ObjectNotFoundException e) {
+            throw new ServerNotFoundException(existing.getId(), e);
         }
     }
 
@@ -1548,10 +1545,10 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                                          AuthzSubjectValue newOwner)
         throws PermissionException, ServerNotFoundException {
         ServerPK aPK = new ServerPK(serverId);
-        ServerLocal serverEJB;
+        Server serverEJB;
         try {
             // first lookup the server
-            serverEJB = getServerLocalHome().findByPrimaryKey(aPK);
+            serverEJB = getServerDAO().findByPrimaryKey(aPK);
             // check if the caller can modify this server
             checkModifyPermission(who, serverEJB.getEntityId());
             // now get its authz resource
@@ -1566,6 +1563,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         } catch (NamingException e) {
             throw new SystemException(e);
         } catch (FinderException e) {
+            throw new ServerNotFoundException(serverId, e);
+        } catch (ObjectNotFoundException e) {
             throw new ServerNotFoundException(serverId, e);
         }
         

@@ -352,11 +352,11 @@ public abstract class AppdefSessionEJB
      * Find a ServerLocal by primary key
      * @return ServerLocal
      */
-    protected ServerLocal findServerByPK(ServerPK pk)
+    protected Server findServerByPK(ServerPK pk)
         throws ServerNotFoundException, NamingException {
         try {
-            return getServerLocalHome().findByPrimaryKey(pk);
-        } catch (FinderException e) {
+            return getServerDAO().findByPrimaryKey(pk);
+        } catch (ObjectNotFoundException e) {
             throw new ServerNotFoundException(pk.getId(), e);
         }
     }
@@ -440,13 +440,13 @@ public abstract class AppdefSessionEJB
      * @ejb:transaction type="REQUIRED"
      */
     public PlatformPK getPlatformPkByServerPk(ServerPK serverPK)
-        throws NamingException, FinderException {
-            // TODO refactor this using finder
-            // find the Server and get its platform
-            ServerLocal server = getServerLocalHome()
-                .findByPrimaryKey(serverPK);
-            // return the parent server's pk
-            return (PlatformPK)(server.getPlatform().getPrimaryKey());
+    {
+        // TODO refactor this using finder
+        // find the Server and get its platform
+        Server server = getServerDAO()
+            .findByPrimaryKey(serverPK);
+        // return the parent server's pk
+        return (server.getPlatform().getPrimaryKey());
     }
 
     /**
@@ -1357,7 +1357,7 @@ public abstract class AppdefSessionEJB
                             .getPlatformValue(plat);
             
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                ServerLocal serv = 
+                Server serv = 
                     this.findServerByPK(new ServerPK(intID));
             
                 return ServerVOHelperUtil.getLocalHome().create()

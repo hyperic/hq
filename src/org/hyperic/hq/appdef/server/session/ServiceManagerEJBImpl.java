@@ -96,6 +96,7 @@ import org.hyperic.hq.appdef.shared.ServiceUtil;
 import org.hyperic.hq.appdef.Service;
 import org.hyperic.hq.appdef.ServiceType;
 import org.hyperic.hq.appdef.ServerType;
+import org.hyperic.hq.appdef.Server;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -175,7 +176,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             trimStrings(sValue);
             // first we look up the server
             // if this bombs we go no further
-            ServerLocal sLocal = findServerByPK(spk);
+            Server sLocal = findServerByPK(spk);
             try {
                 // set the service type
                 ServiceTypeValue serviceType = ServiceVOHelperUtil.getLocalHome()
@@ -187,21 +188,21 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             sValue.setOwner(subject.getName());
             sValue.setModifiedBy(subject.getName());
             // call the create
-            Service service = sLocal.createService(sValue);
+            Service service = getServerDAO().createService(sLocal, sValue);
             
             try {
                 if (sLocal.getServerType().getVirtual()) {
                     // Look for the platform authorization
                     createAuthzService(sValue.getName(), 
-                                       ((ServicePK)service.getPrimaryKey()).getId(),
-                                       ((PlatformPK)sLocal.getPlatform().getPrimaryKey()).getId(),
+                                       service.getId(),
+                                       sLocal.getPlatform().getId(),
                                        false, 
                                        subject);
                 }
                 else {
                     // now add the authz resource
                     createAuthzService(sValue.getName(), 
-                                       ((ServicePK)service.getPrimaryKey()).getId(), 
+                                       service.getId(),
                                        spk.getId(), 
                                        true, 
                                        subject);
@@ -220,7 +221,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             // remove the server vo from the cache 
             // since the service set has changed
             VOCache.getInstance().removeServer(spk.getId());
-            return (ServicePK)service.getPrimaryKey();
+            return service.getPrimaryKey();
         } catch (FinderException e) {
             log.error("Unable to find ServiceType", e);
             throw new CreateException("Unable to find ServiceType: " 
