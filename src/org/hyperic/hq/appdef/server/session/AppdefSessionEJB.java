@@ -137,6 +137,8 @@ public abstract class AppdefSessionEJB
 
     /**
      * builds a list of resource types from the list of resources
+     * 
+     * XXX -- This code is completely rotten.  Needs to be fixed badly.  -- JMT 
      */
     protected Collection filterResourceTypes(Collection resources) {
         // Create TreeSet which sorts on the name
