@@ -112,27 +112,32 @@ public class RSSAction extends BaseRSSAction {
                 String link = feed.getBaseUrl() + "/Resource.do?eid=" +
                               aeid.getAppdefKey();
 
-                UnitNumber avail =
-                    new UnitNumber(summary.getAvailability().doubleValue(),
-                                   UnitsConstants.UNIT_PERCENTAGE);
-                String availText = res.getMessage(
-                    "dash.home.ResourceHealth.rss.item.availability",
-                    UnitsFormat.format(avail).toString());
-                
                 long current = System.currentTimeMillis();
-                
+
                 StringBuffer desc =
-                    new StringBuffer("<table><tr><td align=center>")
-                    .append(availText)
-                    .append("</td></tr>")
-                    .append("<tr><td><img src=\"")
-                    .append(feed.getBaseUrl())
-                    .append("/resource/AvailHealthChart?eid=")
-                    .append(aeid.getAppdefKey())
-                    .append("&tid=").append(summary.getAvailTempl())
-                    .append("&user=").append(user)
-                    .append("&").append(current)
-                    .append("\"></td></tr></table>");
+                    new StringBuffer("<table><tr><td align=center>");
+                if (Boolean.FALSE.equals(summary.getMonitorable())) {
+                    desc.append(res.getMessage("common.value.notavail"));
+                }
+                else {
+                    UnitNumber avail =
+                        new UnitNumber(summary.getAvailability().doubleValue(),
+                                       UnitsConstants.UNIT_PERCENTAGE);
+                    desc.append(res.getMessage(
+                        "dash.home.ResourceHealth.rss.item.availability",
+                        UnitsFormat.format(avail).toString()))
+                        .append("</td></tr><tr><td>")
+                        .append("<img src=\"")
+                        .append(feed.getBaseUrl())
+                        .append("/resource/AvailHealthChart?eid=")
+                        .append(aeid.getAppdefKey())
+                        .append("&tid=").append(summary.getAvailTempl())
+                        .append("&user=").append(user)
+                        .append("&").append(current)
+                        .append("\">");
+                }
+                
+                desc.append("</td></tr></table>");
                 
                 feed.addItem(summary.getResourceName(), link, desc.toString(),
                              current);
