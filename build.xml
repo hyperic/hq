@@ -163,7 +163,7 @@
 
   <target name="test" depends="init,init-taskdefs">
     <echo> ${java.home} </echo>
-    <junit fork="no">
+    <junit fork="no" printsummary="yes" haltonerror="no">
       <classpath>
         <path refid="alljars"/>
         <path refid="testjars"/>
