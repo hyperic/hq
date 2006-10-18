@@ -66,7 +66,7 @@
 
 <div id="about" class="dialog" style="position: absolute; top: 0px; left: 0px; visibility: hidden;">
 <table cellpadding="2" cellspacing="0" border="0" width="305">
-  <tr>
+  <tr class="PageTitleBar">
     <td width="1%" class="PageTitle" style="background-color: #EBEDF2"><html:img page="/images/spacer.gif" width="1" height="32" alt="" border="0"/></td>
     <td width="66%" class="PageTitle" style="background-color: #EBEDF2"><fmt:message key="about.Title"/></td>
     <td class="PageTitle" align="right" style="background-color: #EBEDF2"><html:link href="" onclick="window.open(genHelp + 'About+Hyperic+HQ','help','width=800,height=650,scrollbars=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/title_pagehelp.gif" width="20" height="20" alt="" border="0" hspace="10"/></html:link></td>
