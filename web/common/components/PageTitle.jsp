@@ -64,10 +64,10 @@
     <td colspan="4">
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
-  <tr class="PageTitle"> 
-    <td width="5" rowspan="99"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
+  <tr class="PageTitleBar"> 
+    <td width="5"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
     <td width="15"><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
-    <td width="67%" class="PageTitle" colspan="2">
+    <td width="67%" colspan="2" nowrap>
 <c:choose>
   <c:when test="${not empty titleKey}">
     <fmt:message key="${titleKey}">
@@ -89,8 +89,8 @@
     </td>
 <c:choose>
   <c:when test="${not empty titleBgStyle && not empty titleImg}">
-    <td width="32%" class="<c:out value="${titleBgStyle}"/>"><html:img page="/images/${titleImg}" width="202" height="32" alt="" border="0"/></td>
-    <td width="1%" class="<c:out value="${titleBgStyle}"/>"><html:link href="" onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/title_pagehelp.gif" width="20" height="20" alt="" border="0" hspace="10"/></html:link></td>
+    <td width="32%"><html:img page="/images/${titleImg}" width="202" height="32" alt="" border="0" style="float: right;"/></td>
+    <td width="1%"><html:link href="" onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/title_pagehelp.gif" width="20" height="20" alt="" border="0" hspace="10"/></html:link></td>
   </c:when>
   <c:otherwise>
     <td width="33%"><html:img page="/images/spacer.gif" width="1" height="32" alt="" border="0"/></td>
@@ -99,6 +99,7 @@
 </c:choose>
   </tr>
   <tr>
+    <td width="5" rowspan="99" class="PageTitle"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
     <td valign="top" align="left" rowspan="99"><html:img page="/images/title_TLcorner.gif" width="8" height="8" alt="" border="0"/></td>
     <td colspan="4"><html:img page="/images/spacer.gif" width="1" height="10" alt="" border="0"/></td>
   </tr>
