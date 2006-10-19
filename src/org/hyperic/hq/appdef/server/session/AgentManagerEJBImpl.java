@@ -55,20 +55,21 @@ import org.hyperic.hq.appdef.shared.AgentConnectionUtil;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformLocal;
-import org.hyperic.hq.appdef.shared.PlatformLocalHome;
-import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.miniResourceTree.MiniResourceTree;
+import org.hyperic.hq.appdef.Platform;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
+import org.hyperic.hibernate.dao.PlatformDAO;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
 
 /**
  * @ejb:bean name="AgentManager"
@@ -125,38 +126,28 @@ public class AgentManagerEJBImpl
      * Agent.  
      *
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
     public MiniResourceTree getEntitiesForAgent(AuthzSubjectValue subject,
                                                 String agentToken)
         throws AgentNotFoundException, PermissionException
     {
         MiniResourceTreeGenerator generator;
-        PlatformLocalHome platHome;
-        Collection plats;
-        AgentLocal agt;
 
-        agt = this.getAgentInternal(agentToken);
-        try {
-            platHome = this.getPlatformLocalHome();
-        } catch(NamingException exc){
-            throw new SystemException(exc);
-        }
+        AgentLocal agt = getAgentInternal(agentToken);
+        PlatformDAO platHome = getPlatformDAO();
 
-        try {
-            plats = platHome.findByAgent(agt);
-        } catch(FinderException exc){
+        Collection plats = platHome.findByAgent(agt);
+        if (plats.size() == 0) {
             return new MiniResourceTree();
         }
-
         AppdefEntityID[] platIds = new AppdefEntityID[plats.size()];
         int i = 0;
         for (Iterator it = plats.iterator(); it.hasNext(); i++) {
-            PlatformLocal plat = (PlatformLocal) it.next();
-
+            Platform plat = (Platform) it.next();
             platIds[i] =
                 new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
-                                   ((PlatformPK) plat.getPrimaryKey()).getId());
+                                   plat.getId());
         }
         
         generator = new MiniResourceTreeGenerator(subject);
@@ -286,24 +277,14 @@ public class AgentManagerEJBImpl
      *
      * @param agent Agent local object
      */
-    private void clearVoCache(AgentLocal agent) 
+    private void clearVoCache(AgentLocal agent)
     {
-        PlatformLocalHome platHome;
-        Collection plats;
-
-        try {
-            platHome = this.getPlatformLocalHome();
-            plats = platHome.findByAgent(agent);
-        } catch(NamingException exc) {
-            throw new SystemException(exc);
-        } catch(FinderException exc) {
-            plats = new ArrayList();
-        }
+        PlatformDAO platHome = getPlatformDAO();
+        Collection plats = platHome.findByAgent(agent);
 
         for(Iterator i=plats.iterator(); i.hasNext();) {
-            PlatformLocal plat = (PlatformLocal)i.next();
-            VOCache.getInstance().removePlatform(
-                ((PlatformPK) plat.getPrimaryKey()).getId());
+            Platform plat = (Platform)i.next();
+            VOCache.getInstance().removePlatform(plat.getId());
         }
     }
 
@@ -420,35 +401,27 @@ public class AgentManagerEJBImpl
      * @return An agent which is set to manage the specified ID
      *
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
     public AgentValue getAgent(AppdefEntityID aID)
         throws AgentNotFoundException
     {
-        PlatformLocalHome platformLocalHome;
-        try {
-            platformLocalHome = getPlatformLocalHome();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-        
+        PlatformDAO platformLocalHome = getPlatformDAO();
         PlatformValue platformValue;
         Integer platformId;
 
         try {
-            PlatformLocal platformLocal = null;
+            Platform platformLocal = null;
             switch (aID.getType()) {
                 case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
                     platformLocal =
                         platformLocalHome.findByServiceId(aID.getId());
-                    platformId =
-                        ((PlatformPK) platformLocal.getPrimaryKey()).getId();
+                    platformId = platformLocal.getId();
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER :
                     platformLocal =
                         platformLocalHome.findByServerId(aID.getId());
-                    platformId =
-                        ((PlatformPK) platformLocal.getPrimaryKey()).getId();
+                    platformId = platformLocal.getId();
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM :
                     platformId = aID.getId();
@@ -472,18 +445,17 @@ public class AgentManagerEJBImpl
             
             // Let's see if we have the local object
             if (platformLocal == null) {
-                platformLocal = platformLocalHome
-                    .findByPrimaryKey(new PlatformPK(platformId));
+                platformLocal = platformLocalHome.findById(platformId);
             }
 
-            AgentLocal agent = platformLocal.getAgent();
+            Agent agent = platformLocal.getAgent();
             if (agent == null) {
                 throw new AgentNotFoundException(platformId +
                     " has no agent which can service it");
             }
             
             return agent.getAgentValue();
-        } catch (FinderException exc) {
+        } catch (ObjectNotFoundException exc) {
             throw new AgentNotFoundException("No agent found for " + aID);
         }
     }

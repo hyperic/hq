@@ -1,5 +1,7 @@
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.shared.IpValue;
+
 /**
  *
  */
@@ -56,6 +58,37 @@ public class Ip extends AppdefBean
     public void setMACAddress(String MACAddress)
     {
         this.MACAddress = MACAddress;
+    }
+
+    /**
+     * convenience method for copying simple values
+     * from the legacy EJB Value Object
+     *
+     * @deprecated
+     * @param valueHolder
+     */
+    public void setIpValue(IpValue valueHolder)
+    {
+        setAddress( valueHolder.getAddress() );
+        setNetmask( valueHolder.getNetmask() );
+        setMACAddress( valueHolder.getMACAddress() );
+    }
+
+    private IpValue ipValue = new IpValue();
+    /**
+     * legacy EJB DTO pattern
+     * @deprecated use (this) Ip Object instead
+     * @return
+     */
+    public IpValue getIpValue()
+    {
+        ipValue.setAddress(getAddress());
+        ipValue.setNetmask(getNetmask());
+        ipValue.setMACAddress(getMACAddress());
+        ipValue.setId(getId());
+        ipValue.setMTime(getMTime());
+        ipValue.setCTime(getCTime());
+        return ipValue;
     }
 
     // TODO: fix equals and hashCode

@@ -3,6 +3,8 @@ package org.hyperic.hibernate.dao;
 import org.hibernate.Session;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.ConfigResponsePK;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.EncodingException;
 
 /**
  * CRUD methods, finders, etc. for ConfigResponseDAO
@@ -47,6 +49,24 @@ public class ConfigResponseDAO extends HibernateDAO implements IConfigResponseDA
         ConfigResponseDB newConfig = new ConfigResponseDB();
         save(newConfig);
         return newConfig;
+    }
+
+    /**
+     * Initialize the config response for a new platform
+     */
+    public ConfigResponseDB createPlatform()
+    {
+        ConfigResponseDB cLocal = new ConfigResponseDB();
+        try {
+            ConfigResponse metricCfg = new ConfigResponse();
+            ConfigResponse productCfg = new ConfigResponse();
+            cLocal.setProductResponse(productCfg.encode());
+            cLocal.setMeasurementResponse(metricCfg.encode());
+            save(cLocal);
+        } catch (EncodingException e) {
+            // will never happen, we're setting up an empty response
+		}
+        return cLocal;
     }
 
     public ConfigResponseDB findByPlatformId(Integer id)

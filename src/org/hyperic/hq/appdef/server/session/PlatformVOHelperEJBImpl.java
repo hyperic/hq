@@ -40,25 +40,23 @@ import javax.naming.NamingException;
 import org.hyperic.hq.appdef.shared.AgentTypeValue;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.IpLocal;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformLightValue;
-import org.hyperic.hq.appdef.shared.PlatformLocal;
 import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformTypeLocal;
 import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformTypeUtil;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
-import org.hyperic.hq.appdef.shared.PlatformUtil;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
 import org.hyperic.hq.appdef.shared.ServerLocal;
-import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.ServerTypeLocal;
 import org.hyperic.hq.appdef.shared.ServerTypePK;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerVOHelperLocal;
 import org.hyperic.hq.appdef.shared.ServerVOHelperUtil;
+import org.hyperic.hq.appdef.Platform;
+import org.hyperic.hq.appdef.Server;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 
@@ -99,7 +97,7 @@ public class PlatformVOHelperEJBImpl extends AppdefSessionEJB
     /**
      * Get a value object for this platform
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
     public PlatformValue getPlatformValue(PlatformPK ppk) throws FinderException,
         NamingException {
@@ -107,20 +105,20 @@ public class PlatformVOHelperEJBImpl extends AppdefSessionEJB
             if(vo != null) {
                 return vo;
             }
-            PlatformLocal ejb = PlatformUtil.getLocalHome().findByPrimaryKey(ppk);
+            Platform ejb = getPlatformDAO().findByPrimaryKey(ppk);
             return getPlatformValue(ejb);
     }
                 
     /**
      * Get a value object for this platform
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
-    public PlatformValue getPlatformValue(PlatformLocal ejb) throws 
+    public PlatformValue getPlatformValue(Platform ejb) throws
         NamingException {
         // first see if its in the cache
         PlatformValue pv = VOCache.getInstance()
-            .getPlatform(((PlatformPK)ejb.getPrimaryKey()).getId());
+            .getPlatform(ejb.getId());
         if (pv != null) {
             log.debug("Returning cached instance for platform: " + pv.getId());
             return pv;
@@ -130,7 +128,7 @@ public class PlatformVOHelperEJBImpl extends AppdefSessionEJB
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
     public PlatformLightValue getPlatformLightValue(PlatformPK ppk) throws FinderException,
         NamingException {
@@ -138,20 +136,20 @@ public class PlatformVOHelperEJBImpl extends AppdefSessionEJB
             if(vo != null) {
                 return vo;
             }
-            PlatformLocal ejb = PlatformUtil.getLocalHome().findByPrimaryKey(ppk);
+            Platform ejb = getPlatformDAO().findByPrimaryKey(ppk);
             return getPlatformLightValue(ejb);
     }
                 
     /**
      * Get a value object for this platform
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
-    public PlatformLightValue getPlatformLightValue(PlatformLocal ejb) throws 
+    public PlatformLightValue getPlatformLightValue(Platform ejb) throws
         NamingException {
         // first see if its in the cache
         PlatformLightValue pv = VOCache.getInstance()
-            .getPlatformLight(((PlatformPK)ejb.getPrimaryKey()).getId());
+            .getPlatformLight(ejb.getId());
         if (pv != null) {
             log.debug("Returning cached instance for platform: " + pv.getId());
             return pv;
@@ -162,10 +160,10 @@ public class PlatformVOHelperEJBImpl extends AppdefSessionEJB
     /** 
      * Synchronized VO retrieval
      */
-    private AppdefResourceValue getPlatformValueImpl(PlatformLocal ejb, boolean getLight) throws
+    private AppdefResourceValue getPlatformValueImpl(Platform ejb, boolean getLight) throws
         NamingException {
         VOCache cache = VOCache.getInstance();
-        PlatformPK ppk = (PlatformPK)ejb.getPrimaryKey();
+        PlatformPK ppk = ejb.getPrimaryKey();
         
         synchronized(cache.getPlatformLock()) {
             
@@ -192,7 +190,7 @@ public class PlatformVOHelperEJBImpl extends AppdefSessionEJB
                 Iterator serverIt = ejb.getServerSnapshot().iterator();
                 while (serverIt.hasNext()){
                     try {
-                        ServerLightValue slv = ((ServerLocal)
+                        ServerLightValue slv = ((Server)
                             serverIt.next()).getServerLightValue();
                         pv.addServerValue(slv);
                         cache.put(slv.getId(), slv);

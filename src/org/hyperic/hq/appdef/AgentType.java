@@ -1,5 +1,7 @@
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.shared.AgentTypeValue;
+
 import java.util.Collection;
 
 /**
@@ -47,5 +49,20 @@ public class AgentType extends AppdefBean
     public void setAgents(Collection agents)
     {
         this.agents = agents;
+    }
+
+    private AgentTypeValue agentTypeValue = new AgentTypeValue();
+    /**
+     * legacy EJB DTO pattern
+     * @deprecated use (this) AgentType object instead
+     */
+    public AgentTypeValue getAgentTypeValue()
+    {
+        agentTypeValue.setName(getName());
+        agentTypeValue.setSortName(getSortName());
+        agentTypeValue.setId(getId());
+        agentTypeValue.setMTime(getMTime());
+        agentTypeValue.setCTime(getCTime());
+        return agentTypeValue;
     }
 }

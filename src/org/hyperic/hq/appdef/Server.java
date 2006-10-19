@@ -3,18 +3,12 @@ package org.hyperic.hq.appdef;
 import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.PlatformLocal;
-import org.hyperic.hq.appdef.shared.ServerTypeLocal;
-import org.hyperic.hq.appdef.shared.PlatformLocalHome;
-import org.hyperic.hq.appdef.shared.PlatformUtil;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.ejb.FinderException;
-import javax.naming.NamingException;
 import java.util.Collection;
 import java.util.Set;
 import java.util.Iterator;
@@ -51,15 +45,6 @@ public class Server extends AppdefResource
     public Service createService(ServiceValue sv)
     {
         throw new UnsupportedOperationException("use ServerDAO.createService()");
-    }
-
-    public void setServerType(ServerTypeLocal serverType)
-    {
-        if (serverType != null & serverType.getId() != null) {
-            ServerType st = new ServerType();
-            st.setId(serverType.getId());
-            setServerType(st);
-        }
     }
 
     // Property accessors
@@ -253,15 +238,7 @@ public class Server extends AppdefResource
         else
             serverValue.setServerType( null );
         if ( getPlatform() != null ) {
-            // temporary until Platform is hibernized
-            try {
-                PlatformLocalHome phome = PlatformUtil.getLocalHome();
-                PlatformLocal p =
-                    phome.findByPrimaryKey(getPlatform().getPrimaryKey());
-                serverValue.setPlatform(p.getPlatformLightValue());
-            } catch (NamingException e) {
-            } catch (FinderException e) {
-            }
+            serverValue.setPlatform(getPlatform().getPlatformLightValue());
         }
         else
             serverValue.setPlatform( null );
@@ -300,15 +277,7 @@ public class Server extends AppdefResource
             vo.setServerType( null );
         Platform plat = getPlatform();
         if ( plat != null) {
-            // temporary until Platform is hibernized
-            try {
-                PlatformLocalHome phome = PlatformUtil.getLocalHome();
-                PlatformLocal p =
-                    phome.findByPrimaryKey(getPlatform().getPrimaryKey());
-                vo.setPlatform(p.getPlatformLightValue());
-            } catch (NamingException e) {
-            } catch (FinderException e) {
-            }
+            vo.setPlatform(plat.getPlatformLightValue());
         }
         return vo;
     }
@@ -368,19 +337,6 @@ public class Server extends AppdefResource
             ConfigResponseDB c = new ConfigResponseDB();
             c.setId(crif);
             setConfigResponse(c);
-        }
-    }
-
-    /**
-     * @deprecated use setPlatform(Platform)
-     * @param platform
-     */
-    public void setPlatform(PlatformLocal platform)
-    {
-        if (platform != null && platform.getId() != null) {
-            Platform p = new Platform();
-            p.setId(platform.getId());
-            setPlatform(p);
         }
     }
 

@@ -1,5 +1,8 @@
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.shared.AgentPK;
+import org.hyperic.hq.appdef.shared.AgentValue;
+
 import java.util.Collection;
 
 /**
@@ -111,5 +114,44 @@ public class Agent extends AppdefBean
         int result = 17;
 
         return result;
+    }
+
+    private AgentValue agentValue = new AgentValue();
+    /**
+     * legacy EJB code to get DTO (Value) object
+     * @deprecated use (this) Agent object instead
+     * @return
+     */
+    public AgentValue getAgentValue()
+    {
+        agentValue.setAddress(
+            (getAddress() == null) ? "" : getAddress());
+        agentValue.setPort(getPort().intValue());
+        agentValue.setAuthToken(
+            (getAuthToken() == null) ? "" : getAuthToken());
+        agentValue.setAgentToken(
+            (getAgentToken() == null) ? "" : getAgentToken());
+        agentValue.setVersion(
+            (getVersion() == null) ? "" : getVersion());
+        agentValue.setId(getId());
+        agentValue.setMTime(getMTime());
+        agentValue.setCTime(getCTime());
+        if ( getAgentType() != null )
+            agentValue.setAgentType( getAgentType().getAgentTypeValue() );
+        else
+            agentValue.setAgentType( null );
+        return agentValue;
+    }
+
+    private AgentPK _pkey = new AgentPK();
+    /**
+     * legacy EJB primary key accessor
+     * @return
+     * @deprecated
+     */
+    public AgentPK getPrimaryKey()
+    {
+        _pkey.setId(getId());
+        return _pkey;
     }
 }

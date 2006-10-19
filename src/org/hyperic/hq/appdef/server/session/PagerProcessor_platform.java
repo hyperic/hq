@@ -25,9 +25,9 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.appdef.shared.PlatformLocal;
 import org.hyperic.hq.appdef.shared.PlatformTypeLocal;
 import org.hyperic.hq.appdef.shared.PlatformVOHelperUtil;
+import org.hyperic.hq.appdef.Platform;
 import org.hyperic.util.pager.PagerProcessor;
 
 public class PagerProcessor_platform implements PagerProcessor {
@@ -37,9 +37,9 @@ public class PagerProcessor_platform implements PagerProcessor {
     public Object processElement ( Object o ) {
         if ( o == null ) return null;
         try {
-            if ( o instanceof PlatformLocal ) {
+            if ( o instanceof Platform) {
                 return PlatformVOHelperUtil.getLocalHome().create()
-                    .getPlatformValue((PlatformLocal)o);
+                    .getPlatformValue((Platform)o);
             }
             if ( o instanceof PlatformTypeLocal ) {
                 return PlatformVOHelperUtil.getLocalHome().create()

@@ -44,7 +44,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigResponseValue;
-import org.hyperic.hq.appdef.shared.PlatformLocal;
 import org.hyperic.hq.appdef.shared.IpLocal;
 import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformTypePK;
@@ -53,12 +52,14 @@ import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
-import org.hyperic.hq.appdef.shared.PlatformLocalHome;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.ServerTypePK;
+import org.hyperic.hq.appdef.Platform;
+import org.hyperic.hq.appdef.Ip;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
+import org.hyperic.hibernate.dao.PlatformDAO;
 
 /**
  * A utility class for calculating queue status and diff for an AIPlatform.
@@ -76,11 +77,11 @@ public class AI2AppdefDiff {
      */
     public AIPlatformValue diffAgainstAppdef ( Log log,
                                                AuthzSubjectValue subject,
-                                               PlatformLocalHome pmLH,
+                                               PlatformDAO pmLH,
                                                ConfigManagerLocal cmLocal,
                                                CPropManagerLocal cpropMgr,
                                                AIPlatformValue aiplatform ) {
-        PlatformLocal appdefPlatform;
+        Platform appdefPlatform;
         AIPlatformValue revisedAIplatform;
         int i;
 
@@ -231,7 +232,7 @@ public class AI2AppdefDiff {
     }
 
     private void doIpDiffs ( Log log,
-                             PlatformLocal appdefPlatform,
+                             Platform appdefPlatform,
                              AIPlatformValue aiPlatform,
                              AIPlatformValue revisedAIplatform,
                              boolean isDevice ) {
@@ -249,7 +250,7 @@ public class AI2AppdefDiff {
             log.debug("AI2AppdefDiff: doIpDiffs:" +
                      " appdefIps=" + StringUtil.listToString(appdefIps) +
                      " scannedIps=" + StringUtil.listToString(scannedIps));
-        IpLocal appdefIp = null;
+        Ip appdefIp = null;
         AIIpValue scannedIp = null;
         Iterator i = scannedIps.iterator();
         while ( i.hasNext() ) {
@@ -321,7 +322,7 @@ public class AI2AppdefDiff {
         // so they must have been removed from the platform.
         i = appdefIps.iterator();
         while ( i.hasNext() ) {
-            appdefIp = (IpLocal) i.next();
+            appdefIp = (Ip) i.next();
             scannedIp = new AIIpValue();
             scannedIp.setAddress(appdefIp.getAddress());
             scannedIp.setNetmask(appdefIp.getNetmask());
@@ -342,12 +343,11 @@ public class AI2AppdefDiff {
      * @return The appdefIp if it was found, null if it was not.  If the
      * appdefIp was found, it is also removed from the appdefIps list.
      */
-    private IpLocal findAndRemoveAppdefIp(String address, List appdefIps) {
+    private Ip findAndRemoveAppdefIp(String address, List appdefIps) {
         // Is the appdef ip in the scan state?
         int size = appdefIps.size();
-        IpLocal appdefIp;
         for (int i=0; i<size; i++ ) {
-            appdefIp = (IpLocal) appdefIps.get(i);
+            Ip appdefIp = (Ip) appdefIps.get(i);
             if ( appdefIp.getAddress().equals(address) ) {
 
                 // Found a match based on address, remove it from
@@ -360,7 +360,7 @@ public class AI2AppdefDiff {
     }
 
     private void doServerDiffs ( Log log,
-                                 PlatformLocal appdefPlatform,
+                                 Platform appdefPlatform,
                                  ConfigManagerLocal cmLocal,
                                  CPropManagerLocal cpropMgr,
                                  AIPlatformValue aiPlatform,
@@ -538,7 +538,7 @@ public class AI2AppdefDiff {
     }
 
     private void doPlatformAttrDiff ( Log log,
-                                      PlatformLocal appdefPlatform,
+                                      Platform appdefPlatform,
                                       AIPlatformValue aiPlatform ) {
         // Compare AI platform against appdef data.
         if ( !appdefPlatform.getFqdn().equals(aiPlatform.getFqdn()) ) {
@@ -588,32 +588,22 @@ public class AI2AppdefDiff {
      * @param aiPlatform the AI platform to find in appdef
      * @return The PlatformLocal for the platform that the scan came from.
      */
-    private PlatformLocal getAppdefPlatform ( Log log, PlatformLocalHome pmLH,
-                                              AuthzSubjectValue subject,
-                                              AIPlatformValue aiPlatform ) {
-        PlatformLocal platform = null;
+    private Platform getAppdefPlatform (Log log, PlatformDAO pmLH,
+                                        AuthzSubjectValue subject,
+                                        AIPlatformValue aiPlatform ) {
         String certdn = aiPlatform.getCertdn();
         String fqdn = aiPlatform.getFqdn();
-        try {
-            // First try to find by fqdn
-            platform = pmLH.findByFQDN(fqdn);
-        } catch ( FinderException fe ) {
-            // Now try to find by certdn
-            try {
-                platform = pmLH.findByCertDN(certdn);
-            } catch ( FinderException fe2 ) {
+        // First try to find by fqdn
+        Platform platform = pmLH.findByFQDN(fqdn);
+        if (platform == null) {
+            platform = pmLH.findByCertDN(certdn);
+            if (platform == null) {
                 if (log.isDebugEnabled()) {
-                    log.debug("FindByCertDN failed: " + fe2);
+                    log.debug("FindByCertDN failed: ");
                 }
                 return null;
             }
-
-            return platform;
-        } catch ( Exception e ) {
-            log.error("Error finding platform by fqdn: " + e, e);
-            throw new SystemException(e);
         }
-
         return platform;
     }
 

@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Service;
 import org.hyperic.hq.appdef.Server;
+import org.hyperic.hq.appdef.Platform;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -37,7 +38,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigResponseValue;
 import org.hyperic.hq.appdef.shared.MiniResourceValue;
-import org.hyperic.hq.appdef.shared.PlatformLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocalHome;
 import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
@@ -262,7 +262,7 @@ public class ConfigManagerEJBImpl
         try {
             switch(id.getType()){
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                PlatformLocal plat = 
+                Platform plat = 
                     this.findPlatformByPK(new PlatformPK(intID));
                 pname = plat.getPlatformType().getPlugin();
                 break;

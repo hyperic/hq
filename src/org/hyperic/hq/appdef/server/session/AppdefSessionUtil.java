@@ -31,6 +31,7 @@ import org.hyperic.hibernate.dao.ServiceDAO;
 import org.hyperic.hibernate.dao.ServiceTypeDAO;
 import org.hyperic.hibernate.dao.ServerDAO;
 import org.hyperic.hibernate.dao.ServerTypeDAO;
+import org.hyperic.hibernate.dao.PlatformDAO;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AIServerLocalHome;
@@ -59,13 +60,11 @@ import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerUtil;
 import org.hyperic.hq.appdef.shared.IpLocalHome;
 import org.hyperic.hq.appdef.shared.IpUtil;
-import org.hyperic.hq.appdef.shared.PlatformLocalHome;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocalHome;
 import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.appdef.shared.PlatformTypeLocalHome;
 import org.hyperic.hq.appdef.shared.PlatformTypeUtil;
-import org.hyperic.hq.appdef.shared.PlatformUtil;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ServerManagerUtil;
@@ -96,7 +95,6 @@ public abstract class AppdefSessionUtil {
     private ApplicationTypeLocalHome    appTypeLHome;
     private ConfigManagerLocal          configMgrL;
     private IpLocalHome                 ipLHome;
-    private PlatformLocalHome           platformLHome;
     private PlatformManagerLocalHome    platformMgrLHome;
     private PlatformTypeLocalHome       platTypeLHome;
     private ResourceManagerLocal        rmLocal;
@@ -253,13 +251,9 @@ public abstract class AppdefSessionUtil {
     /**
      * Get the LocalHome reference for the PlatformObject
      */
-    protected PlatformLocalHome getPlatformLocalHome() 
-        throws NamingException 
+    protected PlatformDAO getPlatformDAO() 
     {
-        if(platformLHome == null){
-            platformLHome = PlatformUtil.getLocalHome();
-        }
-        return platformLHome;
+        return DAOFactory.getDAOFactory().getPlatformDAO();
     }
 
     /**

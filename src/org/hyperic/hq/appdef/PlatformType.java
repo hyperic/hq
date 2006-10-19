@@ -1,20 +1,16 @@
 package org.hyperic.hq.appdef;
 
-import org.hyperic.hq.appdef.shared.PlatformTypeLocal;
-import org.hyperic.hq.appdef.shared.PlatformLocal;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.AgentPK;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformTypePK;
 
-import javax.ejb.CreateException;
-import javax.ejb.EJBException;
 import java.util.Collection;
 import java.util.Set;
 
 /**
- * 
+ * Pojo for hibernate hbm mapping file
  */
 public class PlatformType extends AppdefResourceType
 {
@@ -94,17 +90,19 @@ public class PlatformType extends AppdefResourceType
         this.platforms = platforms;
     }
 
-    public PlatformLocal createPlatform(PlatformValue platform, AgentPK agent)
-    throws CreateException
+    public Platform createPlatform(PlatformValue platform, AgentPK agent)
     {
-        return null;
+        throw new UnsupportedOperationException(
+            "use PlatformDAO.createPlatform()"
+        );
     }
 
-    public PlatformLocal createPlatform(AIPlatformValue aiplatform,
-                                        String initialOwner)
-    throws CreateException
+    public Platform createPlatform(AIPlatformValue aiplatform,
+                                   String initialOwner)
     {
-        return null;
+        throw new UnsupportedOperationException(
+            "use PlatformDAO.createPlatform()"
+        );
     }
 
     public PlatformTypeValue getPlatformTypeValue()

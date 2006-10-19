@@ -62,15 +62,14 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
-import org.hyperic.hq.appdef.shared.IpLocal;
-import org.hyperic.hq.appdef.shared.PlatformLocal;
-import org.hyperic.hq.appdef.shared.PlatformLocalHome;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.appdef.Platform;
+import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.authz.shared.AuthzSubjectLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectLocalHome;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -81,6 +80,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.hyperic.hibernate.dao.PlatformDAO;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -98,7 +98,6 @@ import org.apache.commons.logging.LogFactory;
  */
 public class AIQueueManagerEJBImpl
     extends AppdefSessionEJB implements SessionBean {
-
     protected final String AIPLATFORM_PROCESSOR
         = "org.hyperic.hq.appdef.server.session.PagerProcessor_aiplatform";
     protected final String AIPLATFORM_PROCESSOR_NOPLACEHOLDERS
@@ -134,7 +133,7 @@ public class AIQueueManagerEJBImpl
         // log.info("AIQmgr.queue: aiplatform.getAIIpValues=" + StringUtil.arrayToString(aiplatform.getAIIpValues()));
 
         AIPlatformLocalHome aiplatformLH = getAIPlatformLocalHome();
-        PlatformLocalHome pmLH = getPlatformLocalHome();
+        PlatformDAO pmLH = getPlatformDAO();
         AIQueueManagerLocal aiqLocal = getAIQManagerLocal();
         ConfigManagerLocal crmLocal = getConfigMgrLocal();
         CPropManagerLocal cpropMgr = getCPropMgrLocal();
@@ -745,14 +744,9 @@ public class AIQueueManagerEJBImpl
                                                      int platformID)
         throws FinderException, NamingException, PermissionException
     {
-        PlatformLocal pLocal;
+        Platform pLocal = getPlatformDAO().findById(new Integer(platformID));
 
-        pLocal = getPlatformLocalHome().findByPrimaryKey(
-                             new PlatformPK(new Integer(platformID)));
-        Set ips;
-        AIPlatformValue pValue;
-
-        ips = pLocal.getIps();
+        Collection ips = pLocal.getIps();
         // We can't use the FQDN to find a platform, because
         // the FQDN can change too easily.  Instead we use the
         // IP address now.  For now, if we get one IP address
@@ -760,7 +754,7 @@ public class AIQueueManagerEJBImpl
         // the same platform.  In the future, we are probably going
         // to need to do better.
         for (Iterator i = ips.iterator(); i.hasNext(); ) {
-            IpLocal qip = (IpLocal) i.next();
+            Ip qip = (Ip) i.next();
             
             String address = qip.getIpValue().getAddress();
             // XXX This is a hack that we need to get rid of

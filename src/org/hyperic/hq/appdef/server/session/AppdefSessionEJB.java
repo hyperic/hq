@@ -57,7 +57,6 @@ import org.hyperic.hq.appdef.shared.ApplicationTypePK;
 import org.hyperic.hq.appdef.shared.ApplicationVOHelperUtil;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
-import org.hyperic.hq.appdef.shared.PlatformLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformTypeLocal;
@@ -77,7 +76,6 @@ import org.hyperic.hq.appdef.Server;
 import org.hyperic.hq.appdef.ServerType;
 import org.hyperic.hq.appdef.Service;
 import org.hyperic.hq.appdef.ServiceType;
-import org.hyperic.hq.appdef.ServerType;
 import org.hyperic.hq.appdef.Platform;
 import org.hyperic.hq.appdef.PlatformType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -331,11 +329,11 @@ public abstract class AppdefSessionEJB
      * Find a PlatformLocal by primary key
      * @return PlatformLocal
      */
-    protected PlatformLocal findPlatformByPK(PlatformPK pk) 
+    protected Platform findPlatformByPK(PlatformPK pk)
         throws PlatformNotFoundException, NamingException {
         try {            
-            return getPlatformLocalHome().findByPrimaryKey(pk);
-        } catch (FinderException e) {
+            return getPlatformDAO().findByPrimaryKey(pk);
+        } catch (ObjectNotFoundException e) {
             throw new PlatformNotFoundException(pk.getId(), e);
         }
     }
@@ -1285,26 +1283,20 @@ public abstract class AppdefSessionEJB
     {
         // first find all, based on the sorting attribute passed in, or
         // with no sorting if the page control is null
-        Collection ejbList = null;
+        Collection ejbList;
         // if page control is null, find all platforms
         if (pc == null) {
-            ejbList = getPlatformLocalHome().findAll();
+            ejbList = getPlatformDAO().findAll();
         } else {
             pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
             int attr = pc.getSortattribute();
             switch (attr) {
                 case SortAttribute.RESOURCE_NAME:
-                    if(pc.isDescending()) {
-                        ejbList = getPlatformLocalHome()
-                            .findAll_orderName_desc();
-                    } else {
-                        ejbList = getPlatformLocalHome()
-                            .findAll_orderName_asc();
-                    }
+                    ejbList =
+                        getPlatformDAO().findAll_orderName(!pc.isDescending());
                     break;
                 default:
-                    throw new FinderException("Invalid sort attribute: "
-                        + attr);
+                    throw new FinderException("Invalid sort attribute: "+attr);
             }
         }
         // now get the list of PKs
@@ -1312,8 +1304,8 @@ public abstract class AppdefSessionEJB
         // and iterate over the ejbList to remove any item not in the
         // viewable list
         for(Iterator i = ejbList.iterator(); i.hasNext();) {
-            PlatformLocal aEJB = (PlatformLocal)i.next();
-            if(!viewable.contains((PlatformPK)aEJB.getPrimaryKey())) {
+            Platform aEJB = (Platform)i.next();
+            if(!viewable.contains(aEJB.getPrimaryKey())) {
                 // remove the item, user cant see it
                 i.remove();
             }
@@ -1374,7 +1366,7 @@ public abstract class AppdefSessionEJB
         try {
             switch(id.getType()){
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                PlatformLocal plat = 
+                Platform plat = 
                     this.findPlatformByPK(new PlatformPK(intID));
                 return PlatformVOHelperUtil.getLocalHome().create()
                             .getPlatformValue(plat);

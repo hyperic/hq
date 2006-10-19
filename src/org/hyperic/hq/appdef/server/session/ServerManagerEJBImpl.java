@@ -57,7 +57,6 @@ import org.hyperic.hq.appdef.shared.ApplicationLocalHome;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationPK;
 import org.hyperic.hq.appdef.shared.MiniResourceValue;
-import org.hyperic.hq.appdef.shared.PlatformLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformTypePK;
@@ -80,6 +79,7 @@ import org.hyperic.hq.appdef.ServiceType;
 import org.hyperic.hq.appdef.Server;
 import org.hyperic.hq.appdef.ServerType;
 import org.hyperic.hq.appdef.PlatformType;
+import org.hyperic.hq.appdef.Platform;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -155,13 +155,12 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             log.debug("Begin createServer: " + sValue);
         }
 
-        ServerLocal server = null;
         try {
             validateNewServer(sValue);
             trimStrings(sValue);
             // first we look up the platform
             // if this bombs we go no further
-            PlatformLocal pLocal = findPlatformByPK(ppk);
+            Platform pLocal = findPlatformByPK(ppk);
             ServerTypeValue serverType = null;
             try {
                 serverType = ServerVOHelperUtil.getLocalHome()
@@ -176,24 +175,18 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // set modified by
             sValue.setModifiedBy(subject.getName());
             // call the create
-            server = pLocal.createServer(sValue); 
+            Server server = getServerDAO().createServer(pLocal, sValue); 
             // now do authz check
             createAuthzServer(sValue.getName(), 
-                              ((ServerPK)server.getPrimaryKey()).getId(), 
+                              server.getId(),
                               ppk.getId(), 
                               serverType.getVirtual(), 
                               subject);
             // remove platform vo from the cache
             // since the server set has changed
             VOCache.getInstance().removePlatform(ppk.getId());
-            return (ServerPK)server.getPrimaryKey();
+            return server.getPrimaryKey();
         } catch (CreateException e) {
-            try {
-                if(server != null) {
-                    server.remove();
-                }
-            } catch (RemoveException re) { }
-            rollback();
             throw e;
         } catch (PermissionException e) {
             // rollback the transaction if no permission to create
@@ -201,12 +194,10 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // corresponding resource record.
             throw e;
         } catch (FinderException e) {
-            log.error("Unable to find server type", e);
-            throw new CreateException("Unable to find server type: " 
+            throw new CreateException("Unable to find server type: "
                                       + ppk + " : " + e.getMessage());
         } catch (NamingException e) {
-            log.error("Unable to get LocalHome", e);
-            throw new SystemException("Unable to get LocalHome " + 
+            throw new SystemException("Unable to get LocalHome " +
                                          e.getMessage());
         }
     }

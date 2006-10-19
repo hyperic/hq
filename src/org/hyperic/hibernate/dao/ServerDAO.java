@@ -10,10 +10,12 @@ import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.appdef.shared.PlatformLightValue;
 import org.hyperic.dao.DAOFactory;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Iterator;
 
 /**
  * CRUD methods, finders, etc. for Server
@@ -91,6 +93,64 @@ public class ServerDAO extends HibernateDAO
         ServiceDAO sLHome =
             DAOFactory.getDAOFactory().getServiceDAO();                // create it
         return sLHome.create(sv, s.getPrimaryKey());
+    }
+
+    /**
+     * legacy EJB method for creating a server.
+     *
+     * Create a server for this Platform. The server is assumed
+     * to have an associated server type already set. This operation
+     * has to be performed as part of an existing transaction.
+     */
+    public Server createServer(Platform p, ServerValue sv)
+        throws ValidationException
+    {
+        // validate the object
+        validateNewServer(p, sv);
+        // set the parent platform to be this
+        // XXX cheap hack, the ejbPostCreate in ServerEJB only
+        // needs to be able to detect the foreign key of
+        // the parent platform. So, I'll skip the valueobject
+        // creation and create one with just an ID
+        PlatformLightValue pv = new PlatformLightValue();
+        pv.setId(p.getId());
+        sv.setPlatform(pv);
+        // get the server home
+        // create it
+        return create(sv);
+    }
+
+    /**
+     * Validate a server value object which is to be created on this
+     * platform. This method will check IP conflicts and any other
+     * special constraint required to succesfully add a server instance
+     * to a platform
+     */
+    private void validateNewServer(Platform p, ServerValue sv)
+        throws ValidationException
+    {
+        // ensure the server value has a server type
+        String msg = null;
+        if(sv.getServerType() == null) {
+            msg = "Server has no ServiceType";
+        } else if(sv.idHasBeenSet()){
+            msg = "This server is not new, it has ID:" + sv.getId();
+        }
+        if(msg == null) {
+            Integer id = sv.getServerType().getId();
+            Collection stypes = p.getPlatformType().getServerTypes();
+            for (Iterator i = stypes.iterator(); i.hasNext();) {
+                ServerType sVal = (ServerType)i.next();
+                if(sVal.getId().equals(id))
+                    return;
+            }
+            msg = "Servers of type '" + sv.getServerType().getName() +
+                "' cannot be created on platforms of type '" +
+                p.getPlatformType().getName() +"'";
+        }
+        if (msg != null) {
+            throw new ValidationException(msg);
+        }
     }
 
     /**
