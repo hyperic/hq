@@ -40,6 +40,7 @@ import org.hyperic.hibernate.dao.TriggerDAO;
 import org.hyperic.hibernate.dao.ServiceTypeDAO;
 import org.hyperic.hibernate.dao.ServerTypeDAO;
 import org.hyperic.hibernate.dao.PlatformTypeDAO;
+import org.hyperic.hibernate.dao.BaselineDAO;
 
 /**
  *
@@ -63,6 +64,7 @@ public abstract class DAOFactory
     public abstract ServiceDAO getServiceDAO();
     public abstract TriggerDAO getTriggerDAO();
     public abstract ServiceTypeDAO getServiceTypeDAO();
+    public abstract BaselineDAO getBaselineDAO();
 
     public static ThreadLocal defaultSession = new ThreadLocal();
 
