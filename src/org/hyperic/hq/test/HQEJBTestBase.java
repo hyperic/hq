@@ -3,22 +3,32 @@ package org.hyperic.hq.test;
 import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
+import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
 import org.mockejb.SessionBeanDescriptor;
 
 public abstract class HQEJBTestBase    
     extends MockBeanTestBase 
 {
+    private static boolean _initialized = false;
     private Session _session;
     
     public HQEJBTestBase(String testName) {
         super(testName);
     }
     
-    public abstract Class[] getUsedSessionBeans();
+    private Class[] getUsedSessionBeans() {
+        return new Class[] { RegisteredTriggerManagerEJBImpl.class };
+    }
 
     public void setUp() 
         throws Exception
     {
+        if (_initialized) {
+            _session = Util.getSessionFactory().openSession();
+            DAOFactory.setMockSession(_session);
+            return;
+        }
+        
         super.setUp();
 
         // Deploy the session beans into the MockEJB converter.  We have to
@@ -51,7 +61,6 @@ public abstract class HQEJBTestBase
     }
 
     public void tearDown() throws Exception {
-        super.tearDown();
         _session.disconnect();
     }
 }
