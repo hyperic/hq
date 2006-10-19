@@ -68,8 +68,6 @@ import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformLightValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformPK;
-import org.hyperic.hq.appdef.shared.PlatformTypeLocal;
-import org.hyperic.hq.appdef.shared.PlatformTypeLocalHome;
 import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformVOHelperUtil;
@@ -142,12 +140,14 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         }
     }
 
-    private PlatformTypeValue getPlatformTypeValue(PlatformTypeLocal ptype)
-        throws NamingException {
+    private PlatformTypeValue getPlatformTypeValue(PlatformType ptype)
+    {
         try {
             return PlatformVOHelperUtil.getLocalHome().create()
                     .getPlatformTypeValue(ptype);
         } catch (CreateException e) {
+            throw new SystemException(e);
+        } catch (NamingException e) {
             throw new SystemException(e);
         }
     }
@@ -161,13 +161,10 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     public PlatformTypeValue findPlatformTypeById(Integer id) 
         throws PlatformNotFoundException {
         try {
-            PlatformTypeLocal ptype = getPlatformTypeLocalHome().
-                findByPrimaryKey(new PlatformTypePK(id));
+            PlatformType ptype = getPlatformTypeDAO().findById(id);
             return getPlatformTypeValue(ptype);
-        } catch (FinderException e) {
+        } catch (ObjectNotFoundException e) {
             throw new PlatformNotFoundException(id);
-        } catch (NamingException e) {
-            throw new SystemException(e);
         }
     }
 
@@ -178,16 +175,13 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public PlatformTypeValue findPlatformTypeByName(String type) 
-        throws PlatformNotFoundException {
-        PlatformTypeLocal ptype;
-        try {
-            ptype = getPlatformTypeLocalHome().findByName(type);
-            return getPlatformTypeValue(ptype);
-        } catch (FinderException e) {
+        throws PlatformNotFoundException
+    {
+        PlatformType ptype = getPlatformTypeDAO().findByName(type);
+        if (ptype == null) {
             throw new PlatformNotFoundException(type);
-        } catch (NamingException e) {
-            throw new SystemException(e);
         }
+        return getPlatformTypeValue(ptype);
     }
 
     /**
@@ -197,13 +191,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      */
     public PageList getAllPlatformTypes(AuthzSubjectValue subject,
                                         PageControl pc) 
-        throws FinderException {
-        Collection platTypes;
-        try {
-            platTypes = getPlatformTypeLocalHome().findAll();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+    {
+        Collection platTypes = getPlatformTypeDAO().findAll();
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
         return valuePager.seek(platTypes, pc);
@@ -322,21 +311,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             log.debug("Begin createPlatformType: " + pType);
         }
         validateNewPlatformType(pType);
+        PlatformType platformType = getPlatformTypeDAO().create(pType);
+        return platformType.getPrimaryKey();
 
-        try {
-            PlatformTypeLocalHome ptLHome = getPlatformTypeLocalHome();
-            PlatformTypeLocal platformType = ptLHome.create(pType);
-
-            return (PlatformTypePK)platformType.getPrimaryKey();
-
-        } catch (NamingException e) {
-            log.error("Unable to find PlatformTypeLocalHome", e);
-            throw new CreateException("Unable to get PlatformTypeLocalHome: " +
-                                      e.getMessage());
-        } catch (CreateException e) {
-            rollback();
-            throw e;
-        }
     }
 
     /**
@@ -1577,75 +1554,48 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         for (int i = 0; i < infos.length; i++) {
             infoMap.put(infos[i].getName(), infos[i]);
         }
-
-        try {
-            PlatformTypeLocalHome ptLHome = getPlatformTypeLocalHome();
-            Collection curPlatforms = ptLHome.findByPlugin(plugin);
+        PlatformTypeDAO ptLHome = getPlatformTypeDAO();
+        Collection curPlatforms = ptLHome.findByPlugin(plugin);
             
-            for (Iterator i = curPlatforms.iterator(); i.hasNext();) {
-                PlatformTypeLocal ptlocal = (PlatformTypeLocal) i.next();
-                String localName = ptlocal.getName();
-                PlatformTypeInfo pinfo =
-                    (PlatformTypeInfo) infoMap.remove(localName);
+        for (Iterator i = curPlatforms.iterator(); i.hasNext();) {
+            PlatformType ptlocal = (PlatformType) i.next();
+            String localName = ptlocal.getName();
+            PlatformTypeInfo pinfo =
+                (PlatformTypeInfo) infoMap.remove(localName);
 
-                // See if this exists
-                if (pinfo == null) {
-                    // Remove platforms which are not supposed to exist
-                    log.debug("Removing PlatformType: " + localName);
+            // See if this exists
+            if (pinfo == null) {
+                // Remove platforms which are not supposed to exist
+                log.debug("Removing PlatformType: " + localName);
                     
-                    // Get overlord
-                    if (overlord == null)
-                        overlord = getOverlord();
-                    
-                    Collection platforms = getPlatformDAO()
-                        .findByType(ptlocal.getId());
-                    for (Iterator plIt = platforms.iterator();
-                         plIt.hasNext(); ) {
-                        try {
-                            removePlatform(overlord,
-                                           (Platform) plIt.next(),
-                                           true);
-                        } catch (PlatformNotFoundException e) {
-                            // Should never happen, we passed platform in
-                            throw new SystemException(e);
-                        } catch (PermissionException e) {
-                            // Should never happen, we are the overlord
-                            throw new SystemException(e);
-                        }
-                    }
-                    cache.removePlatformType(ptlocal.getId());
-                    ptlocal.remove();
-                } else {
-                    String curName = ptlocal.getName();
-                    String newName = pinfo.getName();
+                cache.removePlatformType(ptlocal.getId());
+                ptLHome.remove(ptlocal);
+            } else {
+                String curName = ptlocal.getName();
+                String newName = pinfo.getName();
 
-                    // Just update it
-                    log.debug("Updating PlatformType: " + localName);
+                // Just update it
+                log.debug("Updating PlatformType: " + localName);
 
-                    if (!newName.equals(curName))
-                        ptlocal.setName(newName);
+                if (!newName.equals(curName))
+                    ptlocal.setName(newName);
                     
-                    // flush the type Cache
-                    cache.removePlatformType(ptlocal.getId());    
-                }
+                // flush the type Cache
+                cache.removePlatformType(ptlocal.getId());
             }
+        }
             
-            // Now create the left-overs
-            for (Iterator i = infoMap.values().iterator(); i.hasNext(); ) {
-                PlatformTypeInfo pinfo = (PlatformTypeInfo) i.next();
-                PlatformTypeValue ptype = new PlatformTypeValue();
+        // Now create the left-overs
+        for (Iterator i = infoMap.values().iterator(); i.hasNext(); ) {
+            PlatformTypeInfo pinfo = (PlatformTypeInfo) i.next();
+            PlatformTypeValue ptype = new PlatformTypeValue();
 
-                log.debug("Creating new PlatformType: " + pinfo.getName());
-                ptype.setPlugin(plugin);
-                ptype.setName(pinfo.getName());
+            log.debug("Creating new PlatformType: " + pinfo.getName());
+            ptype.setPlugin(plugin);
+            ptype.setName(pinfo.getName());
 
-                // Now create the platform
-                ptLHome.create(ptype);
-            }
-        } catch (NamingException e) {
-            log.error("Unable to find PlatformTypeLocalHome", e);
-            throw new CreateException("Unable to get PlatformTypeLocalHome: " +
-                                      e.getMessage());
+            // Now create the platform
+            ptLHome.create(ptype);
         }
     }
 

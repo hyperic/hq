@@ -43,20 +43,18 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformLightValue;
 import org.hyperic.hq.appdef.shared.PlatformPK;
-import org.hyperic.hq.appdef.shared.PlatformTypeLocal;
 import org.hyperic.hq.appdef.shared.PlatformTypePK;
-import org.hyperic.hq.appdef.shared.PlatformTypeUtil;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
-import org.hyperic.hq.appdef.shared.ServerLocal;
-import org.hyperic.hq.appdef.shared.ServerTypeLocal;
 import org.hyperic.hq.appdef.shared.ServerTypePK;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerVOHelperLocal;
 import org.hyperic.hq.appdef.shared.ServerVOHelperUtil;
 import org.hyperic.hq.appdef.Platform;
 import org.hyperic.hq.appdef.Server;
+import org.hyperic.hq.appdef.PlatformType;
+import org.hyperic.hq.appdef.ServerType;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 
@@ -211,29 +209,29 @@ public class PlatformVOHelperEJBImpl extends AppdefSessionEJB
     /**
      * Get platform type value object with full CMR graph
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      *
      */
     public PlatformTypeValue getPlatformTypeValue(PlatformTypePK pk) 
-        throws FinderException, NamingException {
-        PlatformTypeLocal ejb = PlatformTypeUtil.getLocalHome().findByPrimaryKey(pk);
-        return getPlatformTypeValue(ejb);        
+    {
+        PlatformType ejb = getPlatformTypeDAO().findByPrimaryKey(pk);
+        return getPlatformTypeValue(ejb);
     }
     
     /**
      * Get the platform tyep value object with full CMR graph
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      *
      */
-    public PlatformTypeValue getPlatformTypeValue(PlatformTypeLocal ejb) 
-        throws NamingException {
+    public PlatformTypeValue getPlatformTypeValue(PlatformType ejb)
+    {
         // first see if its in the cache
         PlatformTypeValue vo = VOCache.getInstance()
-            .getPlatformType(((PlatformTypePK)ejb.getPrimaryKey()).getId());
+            .getPlatformType(ejb.getId());
         if (vo != null) {
-            log.debug("Returning cached instance for platform type: " + 
-                vo.getId());
+            log.debug("Returning cached instance for platform type: " +
+                      vo.getId());
             return vo;
         }
         return getPlatformTypeValueImpl(ejb);
@@ -242,15 +240,14 @@ public class PlatformVOHelperEJBImpl extends AppdefSessionEJB
     /**
      * Synchronized VO retrieval
      */
-    private PlatformTypeValue getPlatformTypeValueImpl(PlatformTypeLocal ejb) 
-        throws NamingException {
+    private PlatformTypeValue getPlatformTypeValueImpl(PlatformType ejb)
+    {
         VOCache cache = VOCache.getInstance();
         PlatformTypeValue vo;
         synchronized(cache.getPlatformTypeLock()) {
             // check the cache again
             // first see if its in the cache
-            vo = cache
-                .getPlatformType(((PlatformTypePK)ejb.getPrimaryKey()).getId());
+            vo = cache.getPlatformType(ejb.getId());
             if (vo != null) {
                 log.debug("Returning cached instance for platform type: " +
                     vo.getId());
@@ -263,8 +260,8 @@ public class PlatformVOHelperEJBImpl extends AppdefSessionEJB
                     ServerVOHelperUtil.getLocalHome().create();
                 while (serverIt.hasNext()) {
                     try {
-                        ServerTypePK stpk = (ServerTypePK)
-                            ((ServerTypeLocal)serverIt.next()).getPrimaryKey();
+                        ServerTypePK stpk =
+                            ((ServerType)serverIt.next()).getPrimaryKey();
                         ServerTypeValue stv = svo.getServerTypeValue(stpk);
                         vo.addServerTypeValue(stv);
                     } catch (NoSuchObjectLocalException e) {
@@ -274,6 +271,8 @@ public class PlatformVOHelperEJBImpl extends AppdefSessionEJB
                     }
                 }
             } catch (CreateException e) {
+                throw new SystemException(e);
+            } catch (NamingException e) {
                 throw new SystemException(e);
             }
             cache.put(vo.getId(), vo);

@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.appdef.shared.ServerLocal;
-import org.hyperic.hq.appdef.shared.ServerTypeLocal;
 import org.hyperic.hq.appdef.shared.ServerVOHelperLocal;
 import org.hyperic.hq.appdef.shared.ServerVOHelperUtil;
 import org.hyperic.hq.appdef.ServerType;
@@ -43,13 +41,6 @@ public class PagerProcessor_server implements PagerProcessor {
         try {
             if (helperLocal == null)
                 helperLocal = ServerVOHelperUtil.getLocalHome().create();
-            
-//            if ( o instanceof ServerLocal ) {
-//                return helperLocal.getServerValue((ServerLocal)o);
-//            }
-//            if ( o instanceof ServerTypeLocal ) {
-//                return helperLocal.getServerTypeValue((ServerTypeLocal) o);
-//            }
             
             if ( o instanceof Server) {
                 return helperLocal.getServerValue((Server)o);

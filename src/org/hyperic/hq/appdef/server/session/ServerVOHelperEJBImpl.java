@@ -41,20 +41,14 @@ import org.hyperic.hq.appdef.shared.PlatformLightValue;
 import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
-import org.hyperic.hq.appdef.shared.ServerLocal;
 import org.hyperic.hq.appdef.shared.ServerPK;
-import org.hyperic.hq.appdef.shared.ServerTypeLocal;
 import org.hyperic.hq.appdef.shared.ServerTypePK;
-import org.hyperic.hq.appdef.shared.ServerTypeUtil;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
-import org.hyperic.hq.appdef.shared.ServerUtil;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceLightValue;
-import org.hyperic.hq.appdef.shared.ServiceLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.shared.ServicePK;
-import org.hyperic.hq.appdef.shared.ServiceTypeLocal;
 import org.hyperic.hq.appdef.shared.ServiceVOHelperLocal;
 import org.hyperic.hq.appdef.shared.ServiceVOHelperUtil;
 import org.hyperic.hq.appdef.ServiceType;
@@ -113,22 +107,6 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-//    public ServerValue getServerValue(ServerLocal ejb)
-//        throws NamingException {
-//        ServerValue vo = VOCache.getInstance().getServer(
-//            ((ServerPK) ejb.getPrimaryKey()).getId());
-//        if(vo != null) {
-//            log.debug("Returning cached instance for Server: " + vo.getId());
-//            return vo;
-//        }
-//        return (ServerValue)getServerValueImpl(ejb);
-//    }
-
-    /**
-     * Get the server value object
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
-     */
     public ServerValue getServerValue(Server ejb)
         throws NamingException {
         ServerValue vo = VOCache.getInstance().getServer(ejb.getId());
@@ -158,23 +136,6 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-//    public ServerLightValue getServerLightValue(ServerLocal ejb)
-//        throws NamingException {
-//        try {
-//            return this.getServerLightValue((ServerPK) ejb.getPrimaryKey());
-//        } catch (FinderException e) {
-//            // Should never happen
-//            log.error("EJB passed for non-existent server entity: " +
-//                    ((ServerPK) ejb.getPrimaryKey()).getId());
-//            return null;
-//        }
-//    }
-
-    /**
-     * Get the server light value object
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
-     */
     public ServerLightValue getServerLightValue(Server ejb)
         throws NamingException {
         try {
@@ -187,20 +148,6 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
         }
     }
     
-    /**
-     * Synchronized VO retrieval 
-     */
-//    private AppdefResourceValue getServerValueImpl(ServerLocal ejb)
-//        throws NamingException {
-//        VOCache cache = VOCache.getInstance();
-//        AppdefResourceValue vo;
-//        synchronized(cache.getServerLock()) {
-//            vo = ejb.getServerValue();
-//            cache.put(vo.getId(), vo);
-//        }
-//        return vo;
-//    }
-
     /**
      * Synchronized VO retrieval
      */
@@ -311,22 +258,6 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-//    public ServerTypeValue getServerTypeValue(ServerTypeLocal ejb)
-//        throws NamingException {
-//        ServerTypeValue vo = VOCache.getInstance()
-//            .getServerType(((ServerTypePK)ejb.getPrimaryKey()).getId());
-//        if(vo != null) {
-//            log.debug("Returning cached instance of ServerType: " + vo.getId());
-//            return vo;
-//        }
-//        return getServerTypeValueImpl(ejb);
-//    }
-
-    /**
-     * Get the server type value object
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
-     */
     public ServerTypeValue getServerTypeValue(ServerType ejb)
         throws NamingException {
         ServerTypeValue vo = VOCache.getInstance().getServerType(ejb.getId());
@@ -336,30 +267,6 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
         }
         return getServerTypeValueImpl(ejb);
     }
-
-    /**
-     * Synchronized VO retrieval
-     */
-//    private ServerTypeValue getServerTypeValueImpl(ServerTypeLocal ejb)
-//        throws NamingException {
-//        VOCache cache = VOCache.getInstance();
-//        ServerTypeValue vo;
-//        synchronized(cache.getServerTypeLock()) {
-//            vo = cache
-//                .getServerType(((ServerTypePK)ejb.getPrimaryKey()).getId());
-//            if(vo != null) {
-//                log.debug("Returning cached instance of ServerType: " + vo.getId());
-//                return vo;
-//            }
-//            vo = ejb.getServerTypeValueObject();
-//            Iterator serviceIt = ejb.getServiceTypeSnapshot().iterator();
-//            while(serviceIt.hasNext()) {
-//                vo.addServiceTypeValue(((ServiceType)serviceIt.next()).getServiceTypeValue());
-//            }
-//            cache.put(vo.getId(), vo);
-//        }
-//        return vo;
-//    }
 
     private ServerTypeValue getServerTypeValueImpl(ServerType ejb)
         throws NamingException {

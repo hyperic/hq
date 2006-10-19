@@ -856,16 +856,20 @@ public abstract class PlatformEJBImpl
         pv.setCTime(getCTime());
         pv.setConfigResponseId(getConfigResponseId());
         PlatformTypeLocal ptype = getPlatformType();
-        if ( ptype != null )
-            try {
-                pv.setPlatformType( PlatformVOHelperUtil.getLocalHome().create()
-                    .getPlatformTypeValue(ptype));
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            } catch (CreateException e) {
-                throw new SystemException(e);
-            }
-        else
+
+        // just make this compile as we are no longer using
+        // entity beans as of 10/18/2006
+        // This is replace with PlatformDAO
+//        if ( ptype != null )
+//            try {
+//                pv.setPlatformType( PlatformVOHelperUtil.getLocalHome().create()
+//                    .getPlatformTypeValue(ptype));
+//            } catch (NamingException e) {
+//                throw new SystemException(e);
+//            } catch (CreateException e) {
+//                throw new SystemException(e);
+//            }
+//        else
            pv.setPlatformType( null );
         AgentLocal agent = getAgent();           
         if ( agent != null )

@@ -59,17 +59,14 @@ import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformPK;
-import org.hyperic.hq.appdef.shared.PlatformTypeLocal;
 import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerPK;
-import org.hyperic.hq.appdef.shared.ServerTypeLocal;
 import org.hyperic.hq.appdef.shared.ServerTypePK;
 import org.hyperic.hq.appdef.shared.ServerVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServicePK;
-import org.hyperic.hq.appdef.shared.ServiceTypeLocal;
 import org.hyperic.hq.appdef.shared.ServiceTypePK;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.Server;
@@ -145,21 +142,15 @@ public abstract class AppdefSessionEJB
         TreeSet resTypes = new TreeSet(
             new Comparator() {
                 private String getName(Object obj) {
-                    if (obj instanceof PlatformTypeLocal)
-                        return ((PlatformTypeLocal) obj).getSortName();
+                    if (obj instanceof PlatformType)
+                        return ((PlatformType) obj).getSortName();
 
                     if (obj instanceof PlatformType)
                         return ((PlatformType) obj).getSortName();
                     
-                    if (obj instanceof ServerTypeLocal)
-                        return ((ServerTypeLocal) obj).getSortName();
-
                     if (obj instanceof ServerType)
                         return ((ServerType) obj).getSortName();
                     
-                    if (obj instanceof ServiceTypeLocal)
-                        return ((ServiceTypeLocal) obj).getSortName();
-
                     if (obj instanceof ServiceType)
                         return ((ServiceType) obj).getSortName();
 
@@ -364,9 +355,9 @@ public abstract class AppdefSessionEJB
      * Find a PlatformTypeLocal by primary key
      * @return PlatformTypeLocal
      */
-    protected PlatformTypeLocal findPlatformTypeByPK(PlatformTypePK pk)
-        throws FinderException, NamingException {
-            return getPlatformTypeLocalHome().findByPrimaryKey(pk);
+    protected PlatformType findPlatformTypeByPK(PlatformTypePK pk)
+    {
+        return getPlatformTypeDAO().findByPrimaryKey(pk);
     }
 
     /**

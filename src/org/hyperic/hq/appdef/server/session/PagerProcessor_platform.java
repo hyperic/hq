@@ -25,9 +25,9 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.appdef.shared.PlatformTypeLocal;
 import org.hyperic.hq.appdef.shared.PlatformVOHelperUtil;
 import org.hyperic.hq.appdef.Platform;
+import org.hyperic.hq.appdef.PlatformType;
 import org.hyperic.util.pager.PagerProcessor;
 
 public class PagerProcessor_platform implements PagerProcessor {
@@ -41,9 +41,9 @@ public class PagerProcessor_platform implements PagerProcessor {
                 return PlatformVOHelperUtil.getLocalHome().create()
                     .getPlatformValue((Platform)o);
             }
-            if ( o instanceof PlatformTypeLocal ) {
+            if ( o instanceof PlatformType ) {
                 return PlatformVOHelperUtil.getLocalHome().create()
-                    .getPlatformTypeValue((PlatformTypeLocal) o);
+                    .getPlatformTypeValue((PlatformType) o);
             }
         } catch ( Exception e ) {
             throw new IllegalStateException("Error converting to PlatformValue: " + e);

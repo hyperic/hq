@@ -356,7 +356,7 @@ public class PlatformDAO extends HibernateDAO
 
     public Platform findByServerId(Integer id)
     {
-        String sql = "select s.platform from Server s where s.id=?";
+        String sql = "select platform from Server s where s.id=?";
         return (Platform)getSession()
             .createQuery(sql)
             .setInteger(0, id.intValue())

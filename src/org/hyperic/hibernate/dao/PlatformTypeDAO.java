@@ -67,6 +67,12 @@ public class PlatformTypeDAO extends HibernateDAO
             .list();
     }
 
+    /**
+     * legacy EJB object finder by primary key
+     * @deprecated use findById()
+     * @param pk
+     * @return
+     */
     public PlatformType findByPrimaryKey(PlatformTypePK pk)
     {
         return findById(pk.getId());

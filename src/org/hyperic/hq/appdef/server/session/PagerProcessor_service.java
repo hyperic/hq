@@ -42,10 +42,6 @@ public class PagerProcessor_service implements PagerProcessor {
     public Object processElement ( Object o ) {
         if ( o == null ) return null;
         try {
-//            if ( o instanceof ServiceLocal ) {
-//                return ServiceVOHelperUtil.getLocalHome().create()
-//                    .getServiceValue((ServiceLocal)o);
-//            }
             if ( o instanceof Service) {
                 return ServiceVOHelperUtil.getLocalHome().create()
                     .getServiceValue((Service)o);
@@ -56,10 +52,6 @@ public class PagerProcessor_service implements PagerProcessor {
             if ( o instanceof ServiceClusterLocal ) {
                 return ((ServiceClusterLocal) o).getServiceClusterValue();
             }
-//            if ( o instanceof ServiceTypeLocal ) {
-//                return ServiceVOHelperUtil.getLocalHome().create()
-//                    .getServiceTypeValue((ServiceTypeLocal)o);
-//            }
             if ( o instanceof ServiceType) {
                 return ServiceVOHelperUtil.getLocalHome().create()
                     .getServiceTypeValue((ServiceType)o);
