@@ -15,15 +15,6 @@
 package org.hyperic.hq.test;
 
 import com.mockrunner.mock.ejb.MockUserTransaction;
-import org.mockejb.MDBDescriptor;
-import org.mockejb.MockContainer;
-import org.mockejb.OptionalCactusTestCase;
-import org.mockejb.SessionBeanDescriptor;
-import org.mockejb.jms.MockQueue;
-import org.mockejb.jms.QueueConnectionFactoryImpl;
-import org.mockejb.jndi.MockContextFactory;
-import org.postgresql.jdbc2.optional.SimpleDataSource;
-import org.hyperic.dao.DAOFactory;
 
 import javax.jms.MessageListener;
 import javax.jms.Queue;
@@ -31,6 +22,20 @@ import javax.jms.QueueConnectionFactory;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.sql.DataSource;
+
+import org.hyperic.dao.DAOFactory;
+
+import org.mockejb.MDBDescriptor;
+import org.mockejb.MockContainer;
+import org.mockejb.OptionalCactusTestCase;
+import org.mockejb.SessionBeanDescriptor;
+import org.mockejb.jms.MockQueue;
+import org.mockejb.jms.QueueConnectionFactoryImpl;
+import org.mockejb.jndi.MockContextFactory;
+
+import org.postgresql.jdbc2.optional.SimpleDataSource;
+import oracle.jdbc.pool.OracleDataSource;
 
 /**
  * Abstract base class for all JUnit tests that use Mock EJB
@@ -57,21 +62,27 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
     private MockContainer          _container;
     private QueueConnectionFactory _qcf;
     private Queue                  _queue;
+    
+    private static final String DS_ORACLE9 = "Oracle9i";
+    private static final String DS_POSTGRESQL = "PostgreSQL";
 
-    // override these in the subclass
-    private String _database = null;
-    private String _username = null;
-    private String _password = null;
-    private String _server   = null;
+    private String _dsMapping = DS_POSTGRESQL;
+    private String _url;
+    private String _database;
+    private String _username;
+    private String _password;
+    private String _server;
 
     public MockBeanTestBase(String testName){
         super(testName);
         
-        _database = System.getProperty("hq.jdbc.name");
-        _username = System.getProperty("hq.jdbc.user");
-        _password = System.getProperty("hq.jdbc.password");
-        _server   = System.getProperty("hq.jdbc.server");
-        
+        _dsMapping = System.getProperty("hq.server.ds-mapping");
+        _url       = System.getProperty("hq.jdbc.url");
+        _database  = System.getProperty("hq.jdbc.name");
+        _username  = System.getProperty("hq.jdbc.user");
+        _password  = System.getProperty("hq.jdbc.password");
+        _server    = System.getProperty("hq.jdbc.server");
+
         if (_database == null)
             _database = "hq";
             
@@ -123,12 +134,33 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
         // Inside the container this method does not do anything
         MockContextFactory.revertSetAsInitial();
     }
-    
+
+    private DataSource getDataSource() throws Exception {
+        if (_dsMapping.equals(DS_POSTGRESQL)) {
+            SimpleDataSource ds = new SimpleDataSource();
+            ds.setDatabaseName(_database);
+            ds.setUser(_username);
+            ds.setPassword(_password);
+            ds.setServerName(_server);
+            return ds;
+        } else if(_dsMapping.equals(DS_ORACLE9)) {
+            OracleDataSource ds = new OracleDataSource();
+            ds.setURL(_url);
+            ds.setUser(_username);
+            ds.setPassword(_password);
+            return ds;
+        } else {
+            throw new IllegalArgumentException("Unknown " +
+                                               "hq.server.ds-mapping: " + 
+                                               _dsMapping);
+        }
+    }
+
     /**
      * Initialising the context and mock container
      * @throws NamingException if the initialisation cannot be completed
      */
-    public void initialiseContainer() throws NamingException {
+    public void initialiseContainer() throws Exception {
         /* We want to use MockEJB JNDI provider only if we run outside of
          * container.  Inside container we want to rely on the "real" JNDI 
          * provided by that container. 
@@ -150,12 +182,8 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
         MockUserTransaction mockTransaction = new MockUserTransaction();
         _context.rebind("javax.transaction.UserTransaction", mockTransaction);
 
-        // bind datasource (we use postgres in test environ)
-        SimpleDataSource ds = new SimpleDataSource();
-        ds.setDatabaseName(_database);
-        ds.setUser(_username);
-        ds.setPassword(_password);
-        ds.setServerName(_server);
+        // bind datasource
+        DataSource ds = getDataSource();
         _context.rebind("java:/HypericDS", ds);
 
         // set dao factory suitable for out-of-container testing via mockejb
