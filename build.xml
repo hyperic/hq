@@ -168,6 +168,7 @@
         <path refid="alljars"/>
         <path refid="testjars"/>
         <path location="${build.dir}/classes" />
+        <path location="${build.dir}/src" />            
         <path>
           <fileset dir="${thirdparty.lib}" includes="*.jar" />
         </path>
