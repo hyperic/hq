@@ -84,12 +84,12 @@ public class Category extends PersistedObject
         return ((getName()==castOther.getName()) || 
                 (getName() != null && castOther.getName() != null &&
                  getName().equals(castOther.getName())));
-   }
+    }
    
-   public int hashCode() {
-         int result = 17;
-         return result;
-   }   
+    public int hashCode() {
+        int result = 17;
+        return result;
+    }   
 }
 
 
