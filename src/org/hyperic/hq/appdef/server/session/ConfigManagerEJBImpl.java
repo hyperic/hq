@@ -73,6 +73,9 @@ import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.math.MathUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.dao.ConfigResponseDAO;
+import org.hyperic.hibernate.Util;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -180,7 +183,7 @@ public class ConfigManagerEJBImpl
         + "AND s.ID = ?";
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
     public ConfigResponseValue getConfigResponseValue (AppdefEntityID id)
         throws AppdefEntityNotFoundException {
@@ -206,8 +209,10 @@ public class ConfigManagerEJBImpl
                                                "does not support config " +
                                                "responses");
         }
+        ConfigResponseDAO cdao =
+            DAOFactory.getDAOFactory().getConfigResponseDAO();
         try {
-            conn = getDBConn();
+            conn = cdao.getSession().connection();
             ps = conn.prepareStatement(sql);
             ps.setInt(1, id.getId().intValue());
             rs = ps.executeQuery();
@@ -228,7 +233,8 @@ public class ConfigManagerEJBImpl
             throw new SystemException("Error looking up config response "
                                          + "for entity: " + id + ": " + e, e);
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, ps, rs);
+            DBUtil.closeJDBCObjects(logCtx, null, ps, rs);
+            cdao.getSession().disconnect();
         }
     }
 
@@ -332,7 +338,7 @@ public class ConfigManagerEJBImpl
      * @return the merged ConfigResponse
      *
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public ConfigResponse getMergedConfigResponse(AuthzSubjectValue subject,
                                                   String productType,
@@ -580,6 +586,7 @@ public class ConfigManagerEJBImpl
      * If this is null, that means that no error occurred and the config is
      * valid. 
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public void setValidationError (AuthzSubjectValue subject,
                                     AppdefEntityID id,
@@ -637,7 +644,8 @@ public class ConfigManagerEJBImpl
                                          + "validation error string for id: "
                                          + id + ": " + e, e);
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, ps, rs);
+            DBUtil.closeJDBCObjects(logCtx, null, ps, rs);
+            disconnectDBConn();
         }
     }
 
@@ -832,14 +840,14 @@ public class ConfigManagerEJBImpl
     public void ejbActivate() {}
     public void ejbPassivate() {}
 
-    private Connection getDBConn() throws SQLException {
-        try {
-            return DBUtil.getConnByContext(this.getInitialContext(), 
-                                            HQConstants.DATASOURCE);
-        } catch(NamingException exc){
-            throw new SystemException("Unable to get database context: " +
-                                         exc.getMessage(), exc);
-        }
+    private Connection getDBConn()
+    {
+        return Util.getConnection();
+    }
+
+    private void disconnectDBConn()
+    {
+        Util.endConnection();
     }
 
     private static final String SQL_SERVERBYSERVICE
@@ -866,7 +874,8 @@ public class ConfigManagerEJBImpl
             throw new SystemException("Error looking up config response "
                                          + "for service: " + id + ": " + e, e);
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, ps, rs);
+            DBUtil.closeJDBCObjects(logCtx, null, ps, rs);
+            disconnectDBConn();
         }
     }
     
@@ -894,7 +903,8 @@ public class ConfigManagerEJBImpl
             throw new SystemException("Error looking up config response "
                                          + "for server: " + id + ": " + e, e);
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, ps, rs);
+            DBUtil.closeJDBCObjects(logCtx, null, ps, rs);
+            disconnectDBConn();
         }
     }
 
@@ -925,7 +935,8 @@ public class ConfigManagerEJBImpl
             throw new SystemException("Error looking up config response " +
                                       "for server: " + id + ": " + e, e);
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, ps, rs);
+            DBUtil.closeJDBCObjects(logCtx, null, ps, rs);
+            disconnectDBConn();
         }
     }
 
@@ -956,7 +967,8 @@ public class ConfigManagerEJBImpl
             throw new SystemException("Error looking up config response " +
                                       "for server: " + id + ": " + e, e);
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, ps, rs);
+            DBUtil.closeJDBCObjects(logCtx, null, ps, rs);
+            disconnectDBConn();
         }
     }
 
@@ -1002,7 +1014,8 @@ public class ConfigManagerEJBImpl
             throw new SystemException("Error looking up config response " +
                                       "for server: " + id + ": " + e, e);
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, ps, rs);
+            DBUtil.closeJDBCObjects(logCtx, null, ps, rs);
+            disconnectDBConn();
         }
     }
 
@@ -1069,7 +1082,8 @@ public class ConfigManagerEJBImpl
                                          + "configured for metrics: " 
                                          + e, e);
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, ps, rs);
+            DBUtil.closeJDBCObjects(logCtx, null, ps, rs);
+            disconnectDBConn();
         }
         return results;
     }
@@ -1141,7 +1155,8 @@ public class ConfigManagerEJBImpl
                                          + "invalid configs: " 
                                          + e, e);
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, ps, rs);
+            DBUtil.closeJDBCObjects(logCtx, null, ps, rs);
+            disconnectDBConn();
         }
         return results;
     }

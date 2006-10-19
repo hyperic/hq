@@ -63,27 +63,20 @@ import org.hyperic.hq.appdef.shared.ApplicationLocal;
 import org.hyperic.hq.appdef.shared.ApplicationLocalHome;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationPK;
-import org.hyperic.hq.appdef.shared.ConfigResponsePK;
-import org.hyperic.hq.appdef.shared.ConfigResponseUtil;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformLightValue;
-import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformTypeLocal;
 import org.hyperic.hq.appdef.shared.PlatformTypeLocalHome;
 import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
-import org.hyperic.hq.appdef.shared.PlatformUtil;
 import org.hyperic.hq.appdef.shared.PlatformVOHelperUtil;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServerLocal;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.ServiceLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
-import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.miniResourceTree.MiniResourceTree;
@@ -109,6 +102,7 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.hibernate.dao.PlatformDAO;
 import org.hyperic.hibernate.dao.PlatformTypeDAO;
+import org.hyperic.hibernate.dao.ConfigResponseDAO;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.ObjectNotFoundException;
 
@@ -260,8 +254,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             if(id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
                 // look up the service ejb
                 try {
-                    Service service = getServiceDAO()
-                        .findByPrimaryKey(new ServicePK(id.getId()));
+                    Service service = getServiceDAO().findById(id.getId());
                     pv = service.getServer().getPlatform().getPlatformLightValue();
                     typeName = service.getServiceType().getName();
                 } catch (ObjectNotFoundException e) {
@@ -271,8 +264,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             else if(id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
                 // look up the server
                 try {
-                    Server server = getServerDAO()
-                        .findByPrimaryKey(new ServerPK(id.getId()));
+                    Server server = getServerDAO().findById(id.getId());
                     pv = server.getPlatform().getPlatformLightValue();
                     typeName = server.getServerType().getName();
                 } catch (ObjectNotFoundException e) {
@@ -281,8 +273,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             }
             else if(id.getType() == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
                 try {
-					Platform platform = getPlatformDAO()
-					    .findByPrimaryKey(new PlatformPK(id.getId()));
+					Platform platform = getPlatformDAO().findById(id.getId());
 					pv = platform.getPlatformLightValue();    
 					typeName = pv.getPlatformType().getName();
 				} catch (ObjectNotFoundException e) {
@@ -360,10 +351,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                                boolean deep)
         throws RemoveException, PlatformNotFoundException, PermissionException {
         try {
-            PlatformPK pk = new PlatformPK(id);
             // find it
-            Platform platform =
-                getPlatformDAO().findByPrimaryKey(pk);
+            Platform platform = getPlatformDAO().findById(id);
             removePlatform(subject, platform, deep);
         } catch (ObjectNotFoundException e) {
             throw new PlatformNotFoundException(id);
@@ -373,7 +362,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     private void removePlatform(AuthzSubjectValue subject,
                                 Platform platform, boolean deep)
         throws RemoveException, PermissionException, PlatformNotFoundException {
-        PlatformPK ppk = platform.getPrimaryKey();
         try {
             // check to see if there are servers installed on the
             // platform
@@ -386,7 +374,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             // check to see that the user has the remove permission
             // on the platform
             ResourceValue platformRv = this.getPlatformResourceValue(
-                (PlatformPK)platform.getPrimaryKey());
+                platform.getPrimaryKey());
             this.checkRemovePermission(subject, platform.getEntityId());
             // remove the resources for any servers and services
             // on this host. This is done because the entity beans
@@ -400,15 +388,16 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             // now remove the resource for the platform
             removeAuthzResource(subject, platformRv);
             // flush the cache
-            VOCache.getInstance().removePlatform(ppk.getId());
+            VOCache.getInstance().removePlatform(platform.getId());
             getPlatformDAO().remove(platform);
 
             // remove the config response
             if (cid != null) {
                 try {
-                    ConfigResponseUtil.getLocalHome()
-                        .findByPrimaryKey(new ConfigResponsePK(cid)).remove();
-                } catch (FinderException e) {
+                    ConfigResponseDAO cdao =
+                        DAOFactory.getDAOFactory().getConfigResponseDAO();
+                    cdao.remove(cdao.findById(cid));
+                } catch (ObjectNotFoundException e) {
                     // OK, no config response, just log it
                     log.warn("Invalid config ID " + cid);
                 }
@@ -416,11 +405,11 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
             // remove custom properties
             deleteCustomProperties(AppdefEntityConstants.APPDEF_TYPE_PLATFORM, 
-                                   ppk.getId().intValue());
+                                   platform.getId().intValue());
 
 
             // Send platform deleted event
-            sendAppdefEvent(subject, new AppdefEntityID(ppk),
+            sendAppdefEvent(subject, new AppdefEntityID(platform.getPrimaryKey()),
                             AppdefEvent.ACTION_DELETE);
         } catch (RemoveException e) {
             log.debug("Error while removing Platform");
@@ -439,7 +428,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         } catch (NamingException e) {
             throw new SystemException(e);
         } catch (FinderException e) {
-            throw new PlatformNotFoundException(ppk.getId());
+            throw new PlatformNotFoundException(platform.getId());
         }
     } 
 
@@ -500,12 +489,12 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             // AUTHZ CHECK
             // in order to succeed subject has to be in a role 
             // which allows creating of authz resources
-            createAuthzPlatform(pValue.getName(), 
-                    ((PlatformPK)platform.getPrimaryKey()).getId(), 
-                    subject);
+            createAuthzPlatform(pValue.getName(),
+                                platform.getId(),
+                                subject);
 
             // platforms get configured as part of their creation
-            return (PlatformPK) platform.getPrimaryKey();
+            return platform.getPrimaryKey();
         } catch (CreateException e) {
             throw e;
         } catch (FinderException e) {
@@ -675,8 +664,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         throws PlatformNotFoundException {
         PlatformDAO platformLocalHome = getPlatformDAO();
         try {
-            Platform platform =
-                platformLocalHome.findByPrimaryKey(new PlatformPK(id));
+            Platform platform = platformLocalHome.findById(id);
             return platform.getPlatformLightValue();
         } catch (ObjectNotFoundException e) {
             throw new PlatformNotFoundException(id, e);
@@ -892,10 +880,14 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                                            String name)
         throws PlatformNotFoundException, PermissionException {
         try {
-            PlatformPK pk = getPlatformDAO().findByName(name)
-                .getPrimaryKey();
+            Platform p = getPlatformDAO().findByName(name);
+            if (p == null) {
+                throw new PlatformNotFoundException("platform " + name +
+                                                    " not found");
+            }
             PlatformValue platformValue =
-                PlatformVOHelperUtil.getLocalHome().create().getPlatformValue(pk);
+                PlatformVOHelperUtil.getLocalHome().create()
+                    .getPlatformValue(p.getPrimaryKey());
             // now check if the user can see this at all
             checkViewPermission(subject, platformValue.getEntityId());
             return platformValue;
@@ -917,10 +909,13 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                                              String certDN)
         throws PlatformNotFoundException, PermissionException {
         try {
-            PlatformPK pk = (PlatformPK)PlatformUtil.getLocalHome()
-                .findByCertDN(certDN).getPrimaryKey();
+            Platform p = getPlatformDAO().findByCertDN(certDN);
+            if (p == null) {
+                throw new PlatformNotFoundException(
+                    "Platform with certdn " + certDN + " not found");
+            }
             PlatformValue platformValue = PlatformVOHelperUtil.getLocalHome()
-                .create().getPlatformValue(pk);
+                .create().getPlatformValue(p.getPrimaryKey());
             // now check if the user can see this at all
             checkViewPermission(subject, platformValue.getEntityId());
             return platformValue;
@@ -942,10 +937,13 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                                            String fqdn)
         throws PlatformNotFoundException, PermissionException {
         try {
-            PlatformPK pk = (PlatformPK)PlatformUtil.getLocalHome()
-                .findByFQDN(fqdn).getPrimaryKey();
+            Platform p = getPlatformDAO().findByFQDN(fqdn);
+            if (p == null) {
+                throw new PlatformNotFoundException("Platform with fqdn "
+                                                    + fqdn + " not found");
+            }
             PlatformValue platformValue = PlatformVOHelperUtil.getLocalHome()
-                .create().getPlatformValue(pk);
+                .create().getPlatformValue(p.getPrimaryKey());
             // now check if the user can see this at all
             checkViewPermission(subject, platformValue.getEntityId());
             return platformValue;
@@ -976,18 +974,15 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      */
     public PlatformPK getPlatformPkByAgentToken(AuthzSubjectValue subject,
                                                 String agentToken)
-        throws FinderException, PermissionException, PlatformNotFoundException {
-        try {
-            PlatformPK pk = (PlatformPK)PlatformUtil.getLocalHome()
-                .findByAgentToken(agentToken).getPrimaryKey();
-            checkViewPermission(subject, new AppdefEntityID(pk));
-            return pk;
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (FinderException e) {
-            throw new PlatformNotFoundException("Platform with agent token "
-                                                + agentToken + " not found");
+        throws FinderException, PermissionException, PlatformNotFoundException
+    {
+        Platform p = getPlatformDAO().findByAgentToken(agentToken);
+        if (p == null) {
+            throw new PlatformNotFoundException(
+                "Platform with agent token " + agentToken + " not found");
         }
+        checkViewPermission(subject, new AppdefEntityID(p.getPrimaryKey()));
+        return p.getPrimaryKey();
     }
 
     /**
@@ -1002,10 +997,14 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                                                 Integer serviceId ) 
         throws PlatformNotFoundException, PermissionException {
         try {
-            PlatformPK pk = (PlatformPK)PlatformUtil.getLocalHome()
-                .findByServiceId(serviceId).getPrimaryKey();
-            PlatformValue platformValue = 
-                PlatformVOHelperUtil.getLocalHome().create().getPlatformValue(pk);
+            Platform p = getPlatformDAO().findByServiceId(serviceId);
+            if (p == null) {
+                throw new PlatformNotFoundException(
+                    "platform for service " + serviceId + " not found");
+            }
+            PlatformValue platformValue =
+                PlatformVOHelperUtil.getLocalHome().create()
+                    .getPlatformValue(p.getPrimaryKey());
             
             // now check if the user can see this at all
             checkViewPermission(subject, platformValue.getEntityId());
@@ -1029,18 +1028,14 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @return the Platform
      */
     public Integer getPlatformIdByService ( Integer serviceId ) 
-        throws PlatformNotFoundException {
-        try {
-            PlatformPK pk = (PlatformPK)PlatformUtil.getLocalHome()
-                .findByServiceId(serviceId).getPrimaryKey();
-            
-            return pk.getId();
-        } catch (FinderException e) {
+        throws PlatformNotFoundException
+    {
+        Platform p = getPlatformDAO().findByServiceId(serviceId);
+        if (p == null) {
             throw new PlatformNotFoundException("platform for service " +
-                                                serviceId + " not found", e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
+                                                serviceId + " not found");
         }
+        return p.getId();
     }
     
     /**
@@ -1082,9 +1077,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         throws PlatformNotFoundException {
         try {
             Server serverLocal = getServerDAO().findById(serverId);
-            PlatformPK pk =
-                serverLocal.getPlatform().getPrimaryKey();
-            return pk.getId();
+            return serverLocal.getPlatform().getId();
         } catch (ObjectNotFoundException e) {
             throw new PlatformNotFoundException("platform for server " +
                                                 serverId + " not found", e);
@@ -1469,26 +1462,18 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @param existing - the value object for the platform you want to
      * save
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="RequiresNew"
      */
     public PlatformValue updatePlatform(AuthzSubjectValue subject,
                                         PlatformValue existing)
         throws UpdateException, PermissionException,
                AppdefDuplicateNameException, PlatformNotFoundException, 
-               AppdefDuplicateFQDNException, ApplicationException {
-        try {
-            boolean updated = PlatformManagerUtil.getLocalHome().create()
-                .updatePlatformImpl(subject, existing);
-        
-            if (updated)
-                return getPlatformById(subject, existing.getId());
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
-        
-        return existing;        
+               AppdefDuplicateFQDNException, ApplicationException
+    {
+        boolean updated = updatePlatformImpl(subject, existing);
+        if (updated)
+            return getPlatformById(subject, existing.getId());
+        return existing;
     }
     
     /**
@@ -1612,29 +1597,22 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                     if (overlord == null)
                         overlord = getOverlord();
                     
-                    try {
-                        Collection platforms = PlatformUtil.getLocalHome()
-                            .findByType(ptlocal.getId());
-                        for (Iterator plIt = platforms.iterator();
-                             plIt.hasNext(); ) {
-                            try {
-                                removePlatform(overlord,
-                                               (Platform) plIt.next(),
-                                               true);
-                            } catch (PlatformNotFoundException e) {
-                                // Should never happen, we passed platform in
-                                throw new SystemException(e);                                
-                            } catch (PermissionException e) {
-                                // Should never happen, we are the overlord
-                                throw new SystemException(e);
-                            }
+                    Collection platforms = getPlatformDAO()
+                        .findByType(ptlocal.getId());
+                    for (Iterator plIt = platforms.iterator();
+                         plIt.hasNext(); ) {
+                        try {
+                            removePlatform(overlord,
+                                           (Platform) plIt.next(),
+                                           true);
+                        } catch (PlatformNotFoundException e) {
+                            // Should never happen, we passed platform in
+                            throw new SystemException(e);
+                        } catch (PermissionException e) {
+                            // Should never happen, we are the overlord
+                            throw new SystemException(e);
                         }
-                        
-                    } catch (FinderException e) {
-                        // Nothing to delete
-                        log.debug("PlatformType has no platforms to remove");
                     }
-                    
                     cache.removePlatformType(ptlocal.getId());
                     ptlocal.remove();
                 } else {

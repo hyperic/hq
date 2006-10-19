@@ -227,9 +227,12 @@ public class Server extends AppdefResource
         serverValue.setMTime(getMTime());
         serverValue.setCTime(getCTime());
         serverValue.removeAllServiceValues();
-        Iterator iServiceValue = getServices().iterator();
-        while (iServiceValue.hasNext()){
-            serverValue.addServiceValue( ((Service)iServiceValue.next()).getServiceLightValue() );
+        Collection services = getServices();
+        if (services != null) {
+            Iterator isv = services.iterator();
+            while (isv.hasNext()){
+                serverValue.addServiceValue(((Service)isv.next()).getServiceLightValue());
+            }
         }
         serverValue.cleanServiceValue();
         if ( getServerType() != null ) {
@@ -284,6 +287,9 @@ public class Server extends AppdefResource
 
     public Set getServiceSnapshot()
     {
+        if (getServices() == null) {
+            return new LinkedHashSet();
+        }
         return new LinkedHashSet(getServices());
     }
 

@@ -70,17 +70,15 @@ public class LatherBossEJBImpl
      *         representing the result of the invoked method
      *
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
     public LatherValue dispatch(LatherContext ctx, String method, 
                                 LatherValue arg)
         throws LatherRemoteException
     {
         try {
-            return this.dispatcher.dispatch(ctx, method, arg);
+            return dispatcher.dispatch(ctx, method, arg);
         } catch(RuntimeException exc){
-            this.log.error("Error dispatching method '" + method + "'", exc);
-            this.sessionCtx.setRollbackOnly();
             throw new LatherRemoteException("Runtime exception: " + 
                                             exc.getMessage());
         }

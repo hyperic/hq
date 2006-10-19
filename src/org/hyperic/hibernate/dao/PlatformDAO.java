@@ -208,6 +208,7 @@ public class PlatformDAO extends HibernateDAO
     {
         // reassociate platform
         Platform platform = findById(existing.getId());
+        
         // retrieve current list of ips
         Collection curips = platform.getIps();
         if (curips == null) {
@@ -244,17 +245,18 @@ public class PlatformDAO extends HibernateDAO
             }
         }
         // finally update the platform ejb
-        setPlatformValue(existing);
+        platform.setPlatformValue(existing);
 
         // if there is a agent
         if (existing.getAgent() != null)
         {
             // get the agent token and set the agent tp the platform
             AgentDAO agentLHome = DAOFactory.getDAOFactory().getAgentDAO();
-            Agent agentLocal
-                = agentLHome.findByPrimaryKey(existing.getAgent().getPrimaryKey());
+            Agent agentLocal = agentLHome.findById(
+                existing.getAgent().getId());
             platform.setAgent(agentLocal);
         }
+        save(platform);
     }
 
     private void removeAIp(Collection coll, IpValue ipv)
@@ -277,28 +279,6 @@ public class PlatformDAO extends HibernateDAO
                 return;
             }
         }
-    }
-
-    /**
-     * convenience method for copying simple values from
-     * legacy Platform Value Object.
-     * @deprecated
-     * @param pv
-     */
-    public void setPlatformValue(PlatformValue pv)
-    {
-        // reassociate platform
-        Platform p = findById(pv.getId());
-
-        p.setDescription(pv.getDescription());
-        p.setCommentText( pv.getCommentText() );
-        p.setModifiedBy( pv.getModifiedBy() );
-        p.setOwner( pv.getOwner() );
-        p.setLocation( pv.getLocation() );
-        p.setCpuCount( pv.getCpuCount() );
-        p.setCertdn( pv.getCertdn() );
-        p.setFqdn( pv.getFqdn() );
-        p.setName( pv.getName() );
     }
 
     public Platform findByFQDN(String fqdn)

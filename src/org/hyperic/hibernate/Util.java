@@ -17,6 +17,8 @@ import org.hibernate.dialect.Dialect;
 
 import org.hibernate.engine.SessionFactoryImplementor;
 
+import java.sql.Connection;
+
 /**
  * from hibernate caveat emptor with modifications to optimize initial 
  * context lookup
@@ -154,5 +156,27 @@ public class Util {
 
     public static Dialect getDialect() {
         return ((SessionFactoryImplementor)getSessionFactory()).getDialect();
+    }
+
+    /**
+     *
+     * @return SQL Connection object associated with current JTA context
+     */
+    public static Connection getConnection()
+    {
+        return getSessionFactory().getCurrentSession().connection();
+    }
+
+    /**
+     * disconnect SQL Connection from current JTA context
+     */
+    public static void endConnection()
+    {
+        getSessionFactory().getCurrentSession().disconnect();
+    }
+
+    public static void flushCurrentSession()
+    {
+        getSessionFactory().getCurrentSession().flush();
     }
 }

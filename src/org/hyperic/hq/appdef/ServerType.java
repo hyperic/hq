@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.HashSet;
 
 /**
  *
@@ -139,10 +140,13 @@ public class ServerType extends AppdefResourceType
         serverTypeValue.setMTime(getMTime());
         serverTypeValue.setCTime(getCTime());
         serverTypeValue.removeAllServiceTypeValues();
-        Iterator iServiceTypeValue = getServiceTypes().iterator();
-        while (iServiceTypeValue.hasNext()){
-            serverTypeValue.addServiceTypeValue(
-                ((ServiceType)iServiceTypeValue.next()).getServiceTypeValue());
+        Collection types = getServiceTypes();
+        if (types != null) {
+            Iterator isv = types.iterator();
+            while (isv.hasNext()){
+                serverTypeValue.addServiceTypeValue(
+                    ((ServiceType)isv.next()).getServiceTypeValue());
+            }
         }
         serverTypeValue.cleanServiceTypeValue();
         return serverTypeValue;
@@ -150,6 +154,9 @@ public class ServerType extends AppdefResourceType
 
     public Set getServiceTypeSnapshot()
     {
+        if (getServiceTypes() == null) {
+            return new LinkedHashSet();
+        }
         return new LinkedHashSet(getServiceTypes());
     }
 }

@@ -71,6 +71,7 @@ import org.hyperic.hq.product.RuntimeResourceReport;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.hyperic.hibernate.Util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -177,6 +178,7 @@ public class RuntimeReportProcessor {
                                                configMgr,
                                                cpropMgr,
                                                subjectMgr);
+                    Util.flushCurrentSession();
                 } else {
                     log.error("Runtime Report from server: " + appdefServers[i].getName() 
                             + " contained null aiPlatform. Skipping.");
@@ -217,8 +219,7 @@ public class RuntimeReportProcessor {
         // Does this platform exist (by fqdn) ?
         String fqdn = aiplatform.getFqdn();
         try {
-            appdefPlatform = platformMgr.getPlatformByFqdn(subject,
-                                                           fqdn);
+            appdefPlatform = platformMgr.getPlatformByFqdn(subject, fqdn);
             if (isDebug) {
                 log.debug("Platform : " + appdefPlatform.getFqdn() +
                           " was found in inventory.");
@@ -273,6 +274,7 @@ public class RuntimeReportProcessor {
                                          appdefServerList, reportingServer,
                                          serverMgr, serviceMgr, configMgr, 
                                          cpropMgr, subjectMgr);
+                Util.flushCurrentSession();
             } else {
                 log.error("Platform: " + appdefPlatform.getName() + 
                           " reported null aiServer. Skipping.");
@@ -530,6 +532,7 @@ public class RuntimeReportProcessor {
                                                   appdefServices, reportingServer,
                                                   serviceMgr, configMgr,
                                                   cpropMgr, subjectMgr);
+                        Util.flushCurrentSession();
                     } else {
                         log.error("Server: " + reportingServer.getName() + 
                                   " reported null aiservice. Skipping.");
@@ -548,6 +551,7 @@ public class RuntimeReportProcessor {
                             log.debug("Service marked as zombie: " +
                                       appdefService);
                         }
+                        Util.flushCurrentSession();
                     } catch (ApplicationException e) {
                         log.error("RRP: Error marking service as zombie: " +
                                   appdefService.getName(), e);

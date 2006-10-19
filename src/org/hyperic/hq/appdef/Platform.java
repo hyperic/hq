@@ -10,8 +10,6 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.ArrayList;
-import java.util.HashSet;
 
 /**
  * Pojo for hibernate hbm mapping file
@@ -238,7 +236,7 @@ public class Platform extends AppdefResource
     {
         Collection servers = getServers();
         if(servers == null) {
-            return new HashSet();
+            return new LinkedHashSet();
         }
         return new LinkedHashSet(servers);
     }
@@ -301,16 +299,22 @@ public class Platform extends AppdefResource
         platformValue.setMTime(getMTime());
         platformValue.setCTime(getCTime());
         platformValue.removeAllIpValues();
-        Iterator iIpValue = getIps().iterator();
-        while (iIpValue.hasNext()){
-            platformValue.addIpValue( ((Ip)iIpValue.next()).getIpValue() );
+        Collection ips = getIps();
+        if (ips != null) {
+            Iterator iIpValue = ips.iterator();
+            while (iIpValue.hasNext()){
+                platformValue.addIpValue( ((Ip)iIpValue.next()).getIpValue() );
+            }
         }
         platformValue.cleanIpValue();
         platformValue.removeAllServerValues();
-        Iterator iServerValue = getServers().iterator();
-        while (iServerValue.hasNext()){
-            platformValue.addServerValue(
-                ((Server)iServerValue.next()).getServerLightValue());
+        Collection servers = getServers();
+        if (servers != null) {
+            Iterator iServerValue = servers.iterator();
+            while (iServerValue.hasNext()){
+                platformValue.addServerValue(
+                    ((Server)iServerValue.next()).getServerLightValue());
+            }
         }
         platformValue.cleanServerValue();
         if ( getPlatformType() != null )
@@ -350,9 +354,12 @@ public class Platform extends AppdefResource
         platformLightValue.setMTime(getMTime());
         platformLightValue.setCTime(getCTime());
         platformLightValue.removeAllIpValues();
-        Iterator iIpValue = getIps().iterator();
-        while (iIpValue.hasNext()){
-            platformLightValue.addIpValue( ((Ip)iIpValue.next()).getIpValue() );
+        Collection ips = getIps();
+        if (ips != null) {
+            Iterator iIpValue = ips.iterator();
+            while (iIpValue.hasNext()){
+                platformLightValue.addIpValue( ((Ip)iIpValue.next()).getIpValue() );
+            }
         }
         platformLightValue.cleanIpValue();
         if ( getPlatformType() != null )
@@ -364,11 +371,32 @@ public class Platform extends AppdefResource
     }
 
     /**
+     * convenience method for copying simple values from
+     * legacy Platform Value Object.
+     * @param pv
+     */
+    public void setPlatformValue(PlatformValue pv)
+    {
+        setDescription(pv.getDescription());
+        setCommentText( pv.getCommentText() );
+        setModifiedBy( pv.getModifiedBy() );
+        setOwner( pv.getOwner() );
+        setLocation( pv.getLocation() );
+        setCpuCount( pv.getCpuCount() );
+        setCertdn( pv.getCertdn() );
+        setFqdn( pv.getFqdn() );
+        setName( pv.getName() );
+    }
+
+    /**
      * Get a snapshot of the IPLocals associated with this platform
      * @deprecated use getIps()
      */
     public Set getIpSnapshot()
     {
+        if (getIps() == null) {
+            return new LinkedHashSet();
+        }
         return new LinkedHashSet(getIps());
     }
 

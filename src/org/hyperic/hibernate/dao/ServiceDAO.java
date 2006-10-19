@@ -8,6 +8,7 @@ import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.ServicePK;
+import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.dao.DAOFactory;
 
 import java.util.Collection;
@@ -77,6 +78,15 @@ public class ServiceDAO extends HibernateDAO
         s.setConfigResponse(configResponse);
         save(s);
         return s;
+    }
+
+    public Service createService(Server s, ServiceValue sv)
+        throws ValidationException
+    {
+        // validate the service
+        s.validateNewService(sv);
+        // get the Service home
+        return create(sv, s.getPrimaryKey());
     }
 
     public Collection findByParent(Integer parentId)

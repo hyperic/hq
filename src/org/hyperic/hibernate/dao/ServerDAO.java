@@ -5,10 +5,8 @@ import org.hyperic.hq.appdef.Server;
 import org.hyperic.hq.appdef.Platform;
 import org.hyperic.hq.appdef.ServerType;
 import org.hyperic.hq.appdef.ConfigResponseDB;
-import org.hyperic.hq.appdef.Service;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServerPK;
-import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.PlatformLightValue;
 import org.hyperic.dao.DAOFactory;
@@ -54,10 +52,8 @@ public class ServerDAO extends HibernateDAO
 
     public Server create(ServerValue sv)
     {
-        ConfigResponseDAO dao = DAOFactory.getDAOFactory()
-            .getConfigResponseDAO();
-        ConfigResponseDB configResponse = new ConfigResponseDB();
-        dao.save(configResponse);
+        ConfigResponseDB configResponse = DAOFactory.getDAOFactory()
+            .getConfigResponseDAO().create();
 
         Server s = new Server();
         s.setName(sv.getName());
@@ -82,17 +78,6 @@ public class ServerDAO extends HibernateDAO
         s.setServerType(st);
         save(s);
         return s;
-    }
-
-    public Service createService(Server s, ServiceValue sv)
-        throws ValidationException
-    {
-        // validate the service
-        s.validateNewService(sv);
-        // get the Service home
-        ServiceDAO sLHome =
-            DAOFactory.getDAOFactory().getServiceDAO();                // create it
-        return sLHome.create(sv, s.getPrimaryKey());
     }
 
     /**

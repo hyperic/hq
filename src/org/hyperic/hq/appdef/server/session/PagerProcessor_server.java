@@ -44,12 +44,12 @@ public class PagerProcessor_server implements PagerProcessor {
             if (helperLocal == null)
                 helperLocal = ServerVOHelperUtil.getLocalHome().create();
             
-            if ( o instanceof ServerLocal ) {
-                return helperLocal.getServerValue((ServerLocal)o);
-            }
-            if ( o instanceof ServerTypeLocal ) {
-                return helperLocal.getServerTypeValue((ServerTypeLocal) o);
-            }
+//            if ( o instanceof ServerLocal ) {
+//                return helperLocal.getServerValue((ServerLocal)o);
+//            }
+//            if ( o instanceof ServerTypeLocal ) {
+//                return helperLocal.getServerTypeValue((ServerTypeLocal) o);
+//            }
             
             if ( o instanceof Server) {
                 return helperLocal.getServerValue((Server)o);

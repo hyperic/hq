@@ -79,7 +79,6 @@ import org.hyperic.hq.appdef.shared.ServiceLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ServiceTypePK;
-import org.hyperic.hq.appdef.shared.ServiceTypeUtil;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ServiceValue;
@@ -155,7 +154,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @return ServiceValue - the saved value object
      * @exception CreateException - if it fails to add the service
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
+     * @ejb:transaction type="RequiresNew"
      */
     public ServicePK createService(AuthzSubjectValue subject,
         ServerPK spk, ServiceTypePK stpk, ServiceValue sValue)
@@ -183,7 +182,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             sValue.setOwner(subject.getName());
             sValue.setModifiedBy(subject.getName());
             // call the create
-            Service service = getServerDAO().createService(sLocal, sValue);
+            Service service = getServiceDAO().createService(sLocal, sValue);
             
             try {
                 if (sLocal.getServerType().getVirtual()) {
@@ -369,7 +368,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     /**
      * Create a service type supported by a specific server type
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * @ejb:transaction type="RequiresNew"
      */
     public ServiceTypePK createServiceType(AuthzSubjectValue subject,
         ServiceTypeValue stv, ServerTypeValue serverType) 
@@ -424,9 +423,12 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         throws FinderException {
         ServiceTypeValue typeV;
         try {
+            ServiceType st = getServiceTypeDAO().findByName(name);
+            if (st == null) {
+                throw new FinderException("service type not found: "+ name);
+            }
             typeV = ServiceVOHelperUtil.getLocalHome().create()
-                .getServiceTypeValue(
-                    ServiceTypeUtil.getLocalHome().findByName(name));
+                .getServiceTypeValue(st);
         } catch (NamingException e) {
             throw new SystemException(e);
         } catch (CreateException e) {
@@ -1610,7 +1612,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * @ejb:transaction type="RequiresNew"
      */
     public ServiceValue updateService(AuthzSubjectValue subject,
                                       ServiceValue existing)

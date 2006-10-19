@@ -81,6 +81,7 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.hibernate.dao.PlatformDAO;
+import org.hyperic.hibernate.Util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -566,8 +567,9 @@ public class AIQueueManagerEJBImpl
      * null, in which case it is ignored.
      * @param action One of the AIQueueConstants.Q_DECISION_XXX constants
      * indicating what to do with the platforms, ips and servers.
+     *
      * @ejb:interface-method
-     * @ejb:transaction type="RequiresNew"
+     * @ejb:transaction type="Required"
      */
     public void processQueue ( AuthzSubjectValue subject, 
                                List platformList, 
@@ -698,7 +700,6 @@ public class AIQueueManagerEJBImpl
             for (i=0; i<aiserversToRemove.size(); i++) {
                 ((AIServerLocal) aiserversToRemove.get(i)).remove();
             }
-
             // Send create messages out
             for (i=0; i<createdResources.size(); i++) {
                 // Send an event to notify creation

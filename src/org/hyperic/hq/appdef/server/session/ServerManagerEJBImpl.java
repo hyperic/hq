@@ -145,7 +145,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return ServerValue - the saved value object
      * @exception CreateException - if it fails to add the server
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
+     * @ejb:transaction type="RequiresNew"
      */
     public ServerPK createServer(AuthzSubjectValue subject, PlatformPK ppk,
                                     ServerTypePK stpk, ServerValue sValue)
@@ -175,7 +175,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // set modified by
             sValue.setModifiedBy(subject.getName());
             // call the create
-            Server server = getServerDAO().createServer(pLocal, sValue); 
+            Server server = getServerDAO().createServer(pLocal, sValue);
             // now do authz check
             createAuthzServer(sValue.getName(), 
                               server.getId(),
