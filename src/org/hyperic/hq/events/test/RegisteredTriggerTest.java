@@ -13,10 +13,6 @@ public class RegisteredTriggerTest
         super(string);
     }
 
-    public Class[] getUsedSessionBeans() {
-        return new Class[] { RegisteredTriggerManagerEJBImpl.class };
-    }
- 
     public void testVerySimpleCount() 
         throws Exception
     {
