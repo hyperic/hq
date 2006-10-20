@@ -38,16 +38,10 @@ public class DerivedMeasurement extends Measurement
     public DerivedMeasurement() {
     }
 
-    public DerivedMeasurement(Integer instanceId, long mtime, boolean enabled) {
-        super(instanceId, mtime);        
-        _enabled = enabled;
-    }
-
     public DerivedMeasurement(Integer instanceId, MeasurementTemplate template,
-                              Integer cid, long mtime, Integer appdefType,
                               boolean enabled, long interval, String formula,
                               Baseline baseline) {
-        super(instanceId, template, cid, mtime, appdefType);        
+        super(instanceId, template);
         _enabled = enabled;
         _interval = interval;
         _formula = formula;

@@ -35,24 +35,14 @@ public class Measurement extends PersistedObject
     private MeasurementTemplate _template;
     private Integer _cid;
     private long _mtime;
-    private Integer _appdefType;
     
     // Constructors
     public Measurement() {
     }
 
-    public Measurement(Integer instanceId, long mtime) {
-        _instanceId = instanceId;
-        _mtime = mtime;
-    }
-
-    public Measurement(Integer instanceId, MeasurementTemplate template,
-                       Integer cid, long mtime, Integer appdefType) {
+    public Measurement(Integer instanceId, MeasurementTemplate template) {
         _instanceId = instanceId;
         _template = template;
-        _cid = cid;
-        _mtime = mtime;
-        _appdefType = appdefType;
     }
    
     // Property accessors
@@ -86,14 +76,6 @@ public class Measurement extends PersistedObject
     
     public void setMtime(long mtime) {
         _mtime = mtime;
-    }
-
-    public Integer getAppdefType() {
-        return _appdefType;
-    }
-    
-    public void setAppdefType(Integer appdefType) {
-        _appdefType = appdefType;
     }
 
     /**

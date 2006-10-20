@@ -34,14 +34,9 @@ public class RawMeasurement extends Measurement implements java.io.Serializable 
     public RawMeasurement() {
     }
 
-    public RawMeasurement(Integer instanceId, long mtime) {
-        super(instanceId, mtime);        
-    }
-
     public RawMeasurement(Integer instanceId, MeasurementTemplate template, 
-                          Integer cid, long mtime, Integer appdefType,
                           String dsn) {
-        super(instanceId, template, cid, mtime, appdefType);        
+        super(instanceId, template);
         _dsn = dsn;
     }
     
@@ -54,5 +49,3 @@ public class RawMeasurement extends Measurement implements java.io.Serializable 
         _dsn = dsn;
     }
 }
-
-

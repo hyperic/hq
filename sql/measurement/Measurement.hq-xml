@@ -39,18 +39,6 @@
       <column name="MTIME" not-null="true" />
     </property>
 
-    <property name="appdefType" type="integer" update="false" insert="false">
-      <formula><![CDATA[(
-        select
-            m.APPDEF_TYPE
-        from
-            EAM_MONITORABLE_TYPE m, EAM_MEASUREMENT_TEMPL t
-        where
-            m.ID = t.MONITORABLE_TYPE_ID AND
-            t.ID = TEMPLATE_ID
-      )]]></formula>
-    </property>
-
     <subclass name="DerivedMeasurement" extends="Measurement" discriminator-value="D">
       <meta attribute="class-code"><![CDATA[
       private Baseline baseline;
@@ -82,7 +70,6 @@
                   cascade="save-update,delete,merge,evict" >
         <meta attribute="gen-property">false</meta>
       </one-to-one>
-
     </subclass>
 
     <subclass name="RawMeasurement" extends="Measurement" discriminator-value="R">
