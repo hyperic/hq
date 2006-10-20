@@ -37,8 +37,8 @@ public class HibernateDAOFactory extends DAOFactory
     {
         if (sessionFactory == null) {
             synchronized(this) {
-                // cache session factory, we cache it because hibernate session factory
-                // lookup is an rather expensive JNDI call
+                // Cache session factory, we cache it because hibernate 
+                // session factor lookup is an rather expensive JNDI call
                 if (sessionFactory == null) {
                     sessionFactory  = Util.getSessionFactory();
                 }
@@ -113,5 +113,10 @@ public class HibernateDAOFactory extends DAOFactory
     public BaselineDAO getBaselineDAO()
     {
         return new BaselineDAO(getCurrentSession());
+    }
+
+    public CategoryDAO getCategoryDAO()
+    {
+        return new CategoryDAO(getCurrentSession());
     }
 }
