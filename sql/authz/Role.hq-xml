@@ -5,7 +5,7 @@
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping
-  package="org.hyperic.hq.authz.shared.pojo">
+  package="org.hyperic.hq.authz">
 
   <class name="Role" table="EAM_ROLE">
     <id name="id" type="integer">
@@ -16,15 +16,15 @@
       </generator>
     </id>
 
-    <natural-id mutable="true">
-      <property name="name" type="string">
-        <column name="NAME" not-null="true" length="100" />
-      </property>
-    </natural-id>
-
     <version name="_version_" type="long">
       <column name ="VERSION_COL" default="0" />
     </version>
+
+    <properties name="roleName" unique="true">
+      <property name="name" type="string">
+        <column name="NAME" not-null="true" length="100" />
+      </property>
+    </properties>
 
     <property name="cid" type="integer">
       <column name="CID" index="EAM_ROLE_CID_IDX" not-null="false" />
@@ -38,12 +38,12 @@
       <column name="DESCRIPTION" not-null="false" length="100"/>
     </property>
 
-    <property name="fsystem" type="boolean">
+    <property name="system" type="boolean">
       <column name="FSYSTEM" not-null="false" dialect="PostgreSQL" default="false"/>
       <column name="FSYSTEM" not-null="false" dialect="Oracle, Oracle9" default="0"/>
     </property>
 
-    <many-to-one name="resourceId" class="Resource">
+    <many-to-one name="resource" class="Resource">
       <column name="RESOURCE_ID"/>
     </many-to-one>
 
