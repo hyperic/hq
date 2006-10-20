@@ -109,7 +109,7 @@ public class AuthzSubjectManagerEJBImpl
      * @throws CreateException 
      * @throws NamingException 
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRES"
+     * @ejb:transaction type="REQUIRED"
      */
     public AuthzSubjectPK createSubject(AuthzSubjectValue whoami,
                                         AuthzSubjectValue subject)
