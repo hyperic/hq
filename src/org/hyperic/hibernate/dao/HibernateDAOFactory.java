@@ -110,6 +110,10 @@ public class HibernateDAOFactory extends DAOFactory
         return new ServiceTypeDAO(getCurrentSession());
     }
 
+    public AuthzSubjectDAO getAuthzSubjectDAO() {
+        return new AuthzSubjectDAO(getCurrentSession());
+    }
+
     public BaselineDAO getBaselineDAO()
     {
         return new BaselineDAO(getCurrentSession());
