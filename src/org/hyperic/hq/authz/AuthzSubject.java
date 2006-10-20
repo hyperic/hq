@@ -86,102 +86,102 @@ public class AuthzSubject extends AuthzNamedEntity
     }
        
     public String getDsn() {
-        return this.dsn;
+        return dsn;
     }
     
-    public void setDsn(String dsn) {
-        this.dsn = dsn;
+    public void setDsn(String val) {
+        dsn = val;
     }
     public Integer getCid() {
-        return this.cid;
+        return cid;
     }
     
-    public void setCid(Integer cid) {
-        this.cid = cid;
+    public void setCid(Integer val) {
+        cid = val;
     }
     public String getSortName() {
-        return this.sortName;
+        return sortName;
     }
     
-    public void setSortName(String sortName) {
-        this.sortName = sortName;
+    public void setSortName(String val) {
+        sortName = val;
     }
     public String getFirstName() {
-        return this.firstName;
+        return firstName;
     }
     
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setFirstName(String val) {
+        firstName = val;
     }
     public String getLastName() {
-        return this.lastName;
+        return lastName;
     }
     
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setLastName(String val) {
+        lastName = val;
     }
     public String getEmailAddress() {
-        return this.emailAddress;
+        return emailAddress;
     }
     
-    public void setEmailAddress(String emailAddress) {
-        this.emailAddress = emailAddress;
+    public void setEmailAddress(String val) {
+        emailAddress = val;
     }
     public String getSmsAddress() {
-        return this.smsAddress;
+        return smsAddress;
     }
     
-    public void setSmsAddress(String smsAddress) {
-        this.smsAddress = smsAddress;
+    public void setSmsAddress(String val) {
+        smsAddress = val;
     }
     public String getPhoneNumber() {
-        return this.phoneNumber;
+        return phoneNumber;
     }
     
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public void setPhoneNumber(String val) {
+        phoneNumber = val;
     }
     public String getDepartment() {
-        return this.department;
+        return department;
     }
     
-    public void setDepartment(String department) {
-        this.department = department;
+    public void setDepartment(String val) {
+        department = val;
     }
     public boolean isFactive() {
-        return this.factive;
+        return factive;
     }
     
-    public void setFactive(boolean factive) {
-        this.factive = factive;
+    public void setFactive(boolean val) {
+        factive = val;
     }
     public boolean isFsystem() {
-        return this.fsystem;
+        return fsystem;
     }
     
-    public void setFsystem(boolean fsystem) {
-        this.fsystem = fsystem;
+    public void setFsystem(boolean val) {
+        fsystem = val;
     }
     public Resource getResourceId() {
-        return this.resourceId;
+        return resourceId;
     }
     
-    public void setResourceId(Resource resourceId) {
-        this.resourceId = resourceId;
+    public void setResourceId(Resource val) {
+        resourceId = val;
     }
     public Collection getRoles() {
-        return this.roles;
+        return roles;
     }
     
-    public void setRoles(Collection roles) {
-        this.roles = roles;
+    public void setRoles(Collection val) {
+        roles = val;
     }
     public Collection getUserConfigs() {
-        return this.userConfigs;
+        return userConfigs;
     }
     
-    public void setUserConfigs(Collection userConfigs) {
-        this.userConfigs = userConfigs;
+    public void setUserConfigs(Collection val) {
+        userConfigs = val;
     }
 
     public AuthzSubjectValue getAuthzSubjectValue() {
@@ -224,8 +224,8 @@ public class AuthzSubject extends AuthzNamedEntity
         if ( !(other instanceof AuthzSubject) ) return false;
         AuthzSubject castOther = ( AuthzSubject ) other; 
          
-        return ( (this.getName()==castOther.getName()) || ( this.getName()!=null && castOther.getName()!=null && this.getName().equals(castOther.getName()) ) )
- && ( (this.getDsn()==castOther.getDsn()) || ( this.getDsn()!=null && castOther.getDsn()!=null && this.getDsn().equals(castOther.getDsn()) ) );
+        return ( (getName()==castOther.getName()) || ( getName()!=null && castOther.getName()!=null && getName().equals(castOther.getName()) ) )
+ && ( (getDsn()==castOther.getDsn()) || ( getDsn()!=null && castOther.getDsn()!=null && getDsn().equals(castOther.getDsn()) ) );
    }
    
     public int hashCode() {
