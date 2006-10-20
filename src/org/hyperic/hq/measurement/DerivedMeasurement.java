@@ -39,13 +39,9 @@ public class DerivedMeasurement extends Measurement
     }
 
     public DerivedMeasurement(Integer instanceId, MeasurementTemplate template,
-                              boolean enabled, long interval, String formula,
-                              Baseline baseline) {
+                              long interval) {
         super(instanceId, template);
-        _enabled = enabled;
         _interval = interval;
-        _formula = formula;
-        _baseline = baseline;
     }
 
     // Property accessors
