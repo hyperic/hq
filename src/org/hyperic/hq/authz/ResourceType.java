@@ -110,7 +110,7 @@ public class ResourceType extends AuthzNamedEntity implements Serializable {
         resourceTypeValue.setSystem(isFsystem());
         
         // Clear out the operation values first
-        resourceTypeValue.cleanOperationValue();
+        resourceTypeValue.removeAllOperationValues();
         if (getOperations() != null) {
             for (Iterator it = getOperations().iterator(); it.hasNext(); ) {
                 Operation op = (Operation) it.next();
