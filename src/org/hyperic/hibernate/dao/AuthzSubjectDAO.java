@@ -98,7 +98,7 @@ public class AuthzSubjectDAO extends HibernateDAO
     public Collection findAll_orderName(boolean asc)
     {
         return getSession()
-            .createQuery("from AuthzSubject WHERE fsystem = false " +
+            .createQuery("from AuthzSubject WHERE system = false " +
                          "order by sortName " + (asc ? "asc" : "desc"))
             .list();
     }
@@ -106,7 +106,7 @@ public class AuthzSubjectDAO extends HibernateDAO
     public Collection findAll_orderFirstName(boolean asc)
     {
         return getSession()
-            .createQuery("from AuthzSubject WHERE fsystem = false " +
+            .createQuery("from AuthzSubject WHERE system = false " +
                          "order by firstName " + (asc ? "asc" : "desc"))
             .list();
     }
@@ -114,7 +114,7 @@ public class AuthzSubjectDAO extends HibernateDAO
     public Collection findAll_orderLastName(boolean asc)
     {
         return getSession()
-            .createQuery("from AuthzSubject WHERE fsystem = false " +
+            .createQuery("from AuthzSubject WHERE system = false " +
                          "order by lastName " + (asc ? "asc" : "desc"))
             .list();
     }
@@ -123,7 +123,7 @@ public class AuthzSubjectDAO extends HibernateDAO
     {
         return getSession()
             .createQuery("from AuthzSubject " +
-                         "where fsystem = false or id = 1 " +
+                         "where system = false or id = 1 " +
                          "order by sortName " + (asc ? "asc" : "desc"))
             .list();
     }
@@ -132,7 +132,7 @@ public class AuthzSubjectDAO extends HibernateDAO
     {
         return getSession()
             .createQuery("from AuthzSubject " +
-                         "where fsystem = false or id = 1 " +
+                         "where system = false or id = 1 " +
                          "order by firstName " + (asc ? "asc" : "desc"))
             .list();
     }
@@ -141,7 +141,7 @@ public class AuthzSubjectDAO extends HibernateDAO
     {
         return getSession()
             .createQuery("from AuthzSubject " +
-                         "where fsystem = false or id = 1 " +
+                         "where system = false or id = 1 " +
                          "order by lastName " + (asc ? "asc" : "desc"))
             .list();
     }
@@ -150,7 +150,7 @@ public class AuthzSubjectDAO extends HibernateDAO
     {
         return getSession()
             .createQuery("from AuthzSubject join fetch roles r " +
-                         "where r.id = ? and fsystem = false " +
+                         "where r.id = ? and system = false " +
                          "order by sortName " + (asc ? "asc" : "desc"))
             .setInteger(0, roleId.intValue())
             .list();
@@ -162,7 +162,7 @@ public class AuthzSubjectDAO extends HibernateDAO
             .createQuery("from AuthzSubject where userId not in " +
                          "(select s2.userId from AuthzSubject s2 join " +
                          "fetch s2.roles r where r.id = ? ) and " +
-                         "fsystem = false order by sortName " +
+                         "system = false order by sortName " +
                          (asc ? "asc" : "desc"))
             .list();
     }
@@ -171,7 +171,7 @@ public class AuthzSubjectDAO extends HibernateDAO
     {
         return getSession()
             .createQuery("from AuthzSubject join fetch roles r " +
-                         "WHERE r.size = 0 and fsystem = false " +
+                         "WHERE r.size = 0 and system = false " +
                          "order by sortName " + (asc ? "asc" : "desc"))
             .list();
     }
