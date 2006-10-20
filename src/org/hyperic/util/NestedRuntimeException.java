@@ -66,10 +66,6 @@ public class NestedRuntimeException extends RuntimeException {
         return theRealDeal.getExceptionOfType(exceptionType);
     }
 
-    protected String toString(int lvl){ 
-        return theRealDeal.toString(lvl);
-    }
-
     public String toString() { 
         return theRealDeal.toString();
     }

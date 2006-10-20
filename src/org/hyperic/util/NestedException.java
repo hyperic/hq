@@ -25,9 +25,6 @@
 
 package org.hyperic.util;
 
-import java.io.PrintStream;
-
-import java.util.Iterator;
 import java.util.Vector;
 
 /**
@@ -56,8 +53,7 @@ public abstract class NestedException extends Exception {
      * that can later be dumped out by toString() and/or printStackTrace()
      */
     public NestedException(Throwable t) {
-        super();
-        super.initCause(t);
+        super(t);
     }
 
     /**
@@ -68,8 +64,7 @@ public abstract class NestedException extends Exception {
      * toString() and/or printStackTrace()
      */
     public NestedException(String s, Throwable t) {
-        super(s);
-        super.initCause(t);
+        super(s, t);
         addException(t);
     }
 
@@ -144,52 +139,5 @@ public abstract class NestedException extends Exception {
 
         }
         return null;
-    }
-
-    protected String toString(int lvl){ 
-        TextIndenter tIndent = new TextIndenter(2);
-        tIndent.append(super.toString());
-        Iterator exceptionIterator = _exception.iterator();
-        while ( exceptionIterator.hasNext() ) {
-            Throwable nestedException = (Throwable) exceptionIterator.next();
-            String toAdd;
-
-            tIndent.pushIndent();
-            tIndent.append("\n[" + lvl + "]-NESTED-EXCEPTION:\n");
-
-            if(nestedException instanceof NestedException){
-                toAdd = ((NestedException)nestedException).toString(lvl+1);
-            } else {
-                toAdd = nestedException.toString();
-            }
-            tIndent.append(toAdd);
-            tIndent.popIndent();
-        }
-        return tIndent.toString();
-    }
-
-    /**
-     * Prints out the exception, including any nested
-     * exceptions.
-     *
-     * @return The error message for the exception, followed by
-     * error messages from any nested exceptions.
-     */
-    public String toString() { 
-        return this.toString(1);
-    }
-
-    public void printStackTrace(PrintStream out){
-        Iterator exceptionIterator = _exception.iterator();
-        while ( exceptionIterator.hasNext() ) {
-            out.println("NESTED-EXCEPTION:");
-            Throwable nestedException = (Throwable) exceptionIterator.next();
-            nestedException.printStackTrace(out);
-        }
-        super.printStackTrace(out);
-    }
-
-    public void printStackTrace(){
-        this.printStackTrace(System.out);
     }
 }
