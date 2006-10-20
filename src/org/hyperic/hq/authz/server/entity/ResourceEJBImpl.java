@@ -535,14 +535,13 @@ public abstract class ResourceEJBImpl extends AuthzNamedEntity
             /* XXX throw exception instead */
         } else {
             /* overlord owns every thing */
-            if (possibleOwner.intValue() == AuthzConstants.overlordId) {
-                is = true;
-            } else {
+            if (is = possibleOwner.equals(AuthzConstants.overlordId)
+                    == false) {
                 if (log.isDebugEnabled() && possibleOwner != null) {
                     log.debug("User is " + possibleOwner +
                               " owner is " + getOwner().getId());
                 }
-                is = (possibleOwner == getOwner().getId());
+                is = (possibleOwner.equals(getOwner().getId()));
             }
         }
         return is;
