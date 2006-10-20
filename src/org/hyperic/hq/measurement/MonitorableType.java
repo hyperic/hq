@@ -36,25 +36,25 @@ public class MonitorableType extends PersistedObject
      private String _name;
      private Integer _cid;
      private Integer _appdefType;
-     private String _plugIn;
+     private String _plugin;
      private Collection _measurementTemplates;
 
      // Constructors
     public MonitorableType() {
     }
 
-    public MonitorableType(String name, Integer appdefType, String plugIn) {
+    public MonitorableType(String name, Integer appdefType, String plugin) {
         _name = name;
         _appdefType = appdefType;
-        _plugIn = plugIn;
+        _plugin = plugin;
     }
 
     public MonitorableType(String name, Integer cid, Integer appdefType,
-                           String plugIn, Collection measurementTemplates) {
+                           String plugin, Collection measurementTemplates) {
         _name = name;
         _cid = cid;
         _appdefType = appdefType;
-        _plugIn = plugIn;
+        _plugin = plugin;
         _measurementTemplates = measurementTemplates;
     }
     
@@ -83,12 +83,12 @@ public class MonitorableType extends PersistedObject
         _appdefType = appdefType;
     }
 
-    public String getPlugIn() {
-        return _plugIn;
+    public String getPlugin() {
+        return _plugin;
     }
     
-    public void setPlugIn(String plugIn) {
-        _plugIn = plugIn;
+    public void setPlugin(String plugin) {
+        _plugin = plugin;
     }
 
     public Collection getMeasurementTemplates() {

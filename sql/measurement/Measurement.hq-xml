@@ -228,7 +228,7 @@
       <column name="APPDEF_TYPE" not-null="true" />
     </property>
 
-    <property name="plugIn" type="string">
+    <property name="plugin" type="string">
       <column name="PLUGIN" not-null="true" length="250" />
     </property>
 

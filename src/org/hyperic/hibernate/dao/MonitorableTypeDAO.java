@@ -66,7 +66,7 @@ public class MonitorableTypeDAO extends HibernateDAO
 
         mt.setName(name);
         mt.setAppdefType(appdefType);
-        mt.setPlugIn(plugin);
+        mt.setPlugin(plugin);
         save(mt);
         return mt;
     }
