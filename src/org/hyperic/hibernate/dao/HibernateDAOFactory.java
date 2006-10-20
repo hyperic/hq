@@ -151,4 +151,9 @@ public class HibernateDAOFactory extends DAOFactory
     {
         return new DerivedMeasurementDAO(getCurrentSession());
     }
+
+    public MeasurementTemplateDAO getMeasurementTemplateDAO()
+    {
+        return new MeasurementTemplateDAO(getCurrentSession());
+    }
 }
