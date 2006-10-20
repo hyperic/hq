@@ -1,5 +1,7 @@
 package org.hyperic.hq.authz.test;
 
+import javax.ejb.FinderException;
+
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
@@ -98,5 +100,11 @@ public class AuthzSubjectTest
         assertEquals(BOGUS_NAME, rt.getName());
         
         rman.removeResourceType(overlord, rt);
+        
+        try {
+            rt = rman.findResourceTypeByName(BOGUS_NAME);
+            assertTrue(false);
+        } catch (FinderException e) {
+        }
     }
 }
