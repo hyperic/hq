@@ -27,7 +27,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.util.pager.PagerProcessor;
 
-import org.hyperic.hq.appdef.shared.AgentLocal;
+import org.hyperic.hq.appdef.Agent;
 
 public class PagerProcessor_agent 
     implements PagerProcessor 
@@ -36,8 +36,8 @@ public class PagerProcessor_agent
         if(o == null) 
             return null;
 
-        if(o instanceof AgentLocal){
-            return ((AgentLocal) o).getAgentValue();
+        if(o instanceof Agent){
+            return ((Agent) o).getAgentValue();
         }
         return o;
     }

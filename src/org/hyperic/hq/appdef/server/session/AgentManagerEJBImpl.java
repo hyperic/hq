@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -37,7 +36,6 @@ import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
-import javax.naming.NamingException;
 
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentConnectionException;
@@ -45,10 +43,7 @@ import org.hyperic.hq.agent.FileData;
 import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.appdef.shared.AgentCreateException;
-import org.hyperic.hq.appdef.shared.AgentLocal;
-import org.hyperic.hq.appdef.shared.AgentLocalHome;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
-import org.hyperic.hq.appdef.shared.AgentTypeLocal;
 import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AgentConnectionUtil;
@@ -59,6 +54,7 @@ import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.miniResourceTree.MiniResourceTree;
 import org.hyperic.hq.appdef.Platform;
 import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
@@ -90,35 +86,29 @@ public class AgentManagerEJBImpl
     /**
      * Grab an agent object by ip:port
      */
-    private AgentLocal getAgentInternal(String ip, int port)
+    private Agent getAgentInternal(String ip, int port)
         throws AgentNotFoundException
     {
-        AgentLocalHome alHome;
-
-        alHome = this.getAgentLocalHome();
-        try {
-            return alHome.findByIpAndPort(ip, port);
-        } catch(FinderException exc){
+        Agent agent = getAgentDAO().findByIpAndPort(ip, port);
+        if (agent == null) {
             throw new AgentNotFoundException("Agent at " + ip + ":" + port +
                                              " not found");
         }
+        return agent;
     }
 
     /**
      * Find an agent by agent token.
      */
-    private AgentLocal getAgentInternal(String agentToken) 
+    private Agent getAgentInternal(String agentToken)
         throws AgentNotFoundException 
     {
-        AgentLocalHome alHome;
-
-        alHome = this.getAgentLocalHome();
-        try {
-            return alHome.findByAgentToken(agentToken);
-        } catch(FinderException exc){
+        Agent agent = getAgentDAO().findByAgentToken(agentToken);
+        if (agent == null) {
             throw new AgentNotFoundException("Agent with token " + agentToken +
                                              " not found");
         }
+        return agent;
     }
 
     /**
@@ -134,7 +124,7 @@ public class AgentManagerEJBImpl
     {
         MiniResourceTreeGenerator generator;
 
-        AgentLocal agt = getAgentInternal(agentToken);
+        Agent agt = getAgentInternal(agentToken);
         PlatformDAO platHome = getPlatformDAO();
 
         Collection plats = platHome.findByAgent(agt);
@@ -163,15 +153,13 @@ public class AgentManagerEJBImpl
     /**
      * Get a list of all the agents in the system
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
     public PageList getAgents(PageControl pc){
-        Collection agents;
         Pager pager;
 
-        try {
-            agents = this.getAgentLocalHome().findAll();
-        } catch(FinderException exc){
+        Collection agents = getAgentDAO().findAll();
+        if (agents.size() == 0) {
             // No entities found throws us this exception
             return new PageList();
         }
@@ -187,30 +175,24 @@ public class AgentManagerEJBImpl
     /**
      * Get a count of all the agents in the system
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
-    public int getAgentCount(){
-        try {
-            Collection agents = this.getAgentLocalHome().findAll();
-            return agents.size();
-        } catch(FinderException exc){
-            // No entities found throws us this exception
-            return 0;
-        }
+    public int getAgentCount()
+    {
+        return getAgentDAO().size();
     }
 
     /**
      * Get a list of all the unused agents in the system plus the one agent 
      * used by the platform whose id = input.
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public PageList getUnusedAgents(PageControl pc, Integer platformId){
-        Collection agents;
         Pager pager;
 
-        try {
-            agents = this.getAgentLocalHome().findUnusedAgents(platformId);
-        } catch(FinderException exc){
+        Collection agents = this.getAgentDAO().findUnusedAgents(platformId);
+        if (agents.size() == 0) {
             // No entities found throws us this exception
             return new PageList();
         }
@@ -237,29 +219,13 @@ public class AgentManagerEJBImpl
     public AgentValue createAgent(AgentValue agentVal)
         throws AgentCreateException
     {
-        AgentTypeLocal type;
-
-        try {
-            type = this.getAgentTypeLocalHome().findByName(CAM_AGENT_TYPE);
-        } catch(NamingException exc){
-            throw new SystemException("Unable to find CAM agent type " +
-                                         "bean: " + exc.getMessage());
-        } catch(FinderException exc){
-            throw new SystemException("Unable to find CAM agent type '" + 
-                                         CAM_AGENT_TYPE + "'");
+        AgentType type = getAgentTypeDAO().findByName(CAM_AGENT_TYPE);
+        if (type == null){
+            throw new SystemException("Unable to find CAM agent type '" +
+                                      CAM_AGENT_TYPE + "'");
         }
-
-        try {
-            AgentLocal agent;
-
-            agent = this.getAgentLocalHome().create(agentVal, type);
-            return agent.getAgentValue();
-        } catch(CreateException exc){
-            throw new AgentCreateException("Unable to create agent @ " +
-                                           agentVal.getAddress() + ":" + 
-                                           agentVal.getPort() + ": " +
-                                           exc.getMessage());
-        }
+        Agent agent = this.getAgentDAO().create(agentVal, type);
+        return agent.getAgentValue();
     }
 
     private void validateAgentUpdate(String ip, int port, AgentValue agentVal){
@@ -277,7 +243,7 @@ public class AgentManagerEJBImpl
      *
      * @param agent Agent local object
      */
-    private void clearVoCache(AgentLocal agent)
+    private void clearVoCache(Agent agent)
     {
         PlatformDAO platHome = getPlatformDAO();
         Collection plats = platHome.findByAgent(agent);
@@ -303,14 +269,14 @@ public class AgentManagerEJBImpl
     public AgentValue updateAgent(String ip, int port, AgentValue newData)
         throws AgentNotFoundException
     {
-        AgentLocal agent;
+        Agent agent;
 
         this.validateAgentUpdate(ip, port, newData);
         agent = this.getAgentInternal(ip, port);
         agent.setAuthToken(newData.getAuthToken());
         agent.setAgentToken(newData.getAgentToken());
         agent.setVersion(newData.getVersion());
-        agent.setMTime(new Long(System.currentTimeMillis()));
+        agent.setModifiedTime(new Long(System.currentTimeMillis()));
         this.clearVoCache(agent);
         return agent.getAgentValue();
     }
@@ -330,7 +296,7 @@ public class AgentManagerEJBImpl
     public AgentValue updateAgent(String agentToken, AgentValue val)
         throws AgentNotFoundException
     {
-        AgentLocal agent;
+        Agent agent;
 
         if(agentToken.equals(val.getAgentToken()) == false){
             throw new IllegalArgumentException("AgentToken argument does not "+
@@ -344,7 +310,7 @@ public class AgentManagerEJBImpl
         agent.setVersion(val.getVersion());
         agent.setAuthToken(val.getAuthToken());
         agent.setAgentToken(val.getAgentToken());
-        agent.setMTime(new Long(System.currentTimeMillis()));
+        agent.setModifiedTime(new Long(System.currentTimeMillis()));
         this.clearVoCache(agent);
         return agent.getAgentValue();
     }
@@ -359,11 +325,8 @@ public class AgentManagerEJBImpl
     public void checkAgentAuth(String agentToken)
         throws AgentUnauthorizedException
     {
-        AgentLocalHome alHome;
-
-        try {
-            this.getAgentLocalHome().findByAgentToken(agentToken);
-        } catch(FinderException exc){
+        Agent agent = getAgentDAO().findByAgentToken(agentToken);
+        if (agent == null) {
             throw new AgentUnauthorizedException("Agent unauthorized");
         }
     }
@@ -372,7 +335,7 @@ public class AgentManagerEJBImpl
      * Find an agent listening on a specific IP & port
      *
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
     public AgentValue getAgent(String ip, int port)
         throws AgentNotFoundException

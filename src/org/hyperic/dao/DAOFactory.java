@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.dao;
+ package org.hyperic.dao;
 
 import org.hibernate.Session;
 import org.hyperic.hibernate.dao.AgentDAO;
@@ -41,6 +41,7 @@ import org.hyperic.hibernate.dao.ServerTypeDAO;
 import org.hyperic.hibernate.dao.ServiceDAO;
 import org.hyperic.hibernate.dao.ServiceTypeDAO;
 import org.hyperic.hibernate.dao.TriggerDAO;
+import org.hyperic.hibernate.dao.AgentTypeDAO;
 import org.hyperic.hibernate.dao.BaselineDAO;
 import org.hyperic.hibernate.dao.CategoryDAO;
 
@@ -52,6 +53,7 @@ public abstract class DAOFactory
     public static int DEFAULT = HIBERNATE;
 
     public abstract AgentDAO getAgentDAO();
+    public abstract AgentTypeDAO getAgentTypeDAO();
     public abstract ApplicationDAO getApplicationDAO();
     public abstract ConfigResponseDAO getConfigResponseDAO();
     public abstract CpropDAO getCpropDAO();
@@ -81,7 +83,7 @@ public abstract class DAOFactory
      */
     public static DAOFactory getMockDAOFactory(Session session)
     {
-        HibernateMockDAOFactory factory = 
+        HibernateMockDAOFactory factory =
             (HibernateMockDAOFactory)getDAOFactory(HIBERNATE_MOCKTEST);
         factory.setCurrentSession(session);
         return factory;

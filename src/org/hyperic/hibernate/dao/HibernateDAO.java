@@ -83,6 +83,14 @@ public abstract class HibernateDAO
         return getSession().createCriteria(getPersistentClass()).list();
     }
 
+    public int size()
+    {
+        return ((Integer)getSession()
+            .createQuery("select count(*) from "+getPersistentClass().getName())
+            .uniqueResult())
+            .intValue();
+    }
+
     protected void evict(Object entity)
     {
         getSession().evict(entity);

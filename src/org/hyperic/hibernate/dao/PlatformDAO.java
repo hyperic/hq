@@ -39,7 +39,6 @@ import org.hyperic.hq.appdef.shared.AgentPK;
 import org.hyperic.hq.appdef.shared.ApplicationLocal;
 import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.IpValue;
-import org.hyperic.hq.appdef.shared.AgentLocal;
 import org.hyperic.dao.DAOFactory;
 
 import java.util.Collection;
@@ -429,7 +428,7 @@ public class PlatformDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByAgent(AgentLocal agt)
+    public Collection findByAgent(Agent agt)
     {
         String sql = "from Platform where agent.id=?";
         return getSession()

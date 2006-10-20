@@ -33,14 +33,12 @@ import org.hyperic.hibernate.dao.ServerDAO;
 import org.hyperic.hibernate.dao.ServerTypeDAO;
 import org.hyperic.hibernate.dao.PlatformDAO;
 import org.hyperic.hibernate.dao.PlatformTypeDAO;
+import org.hyperic.hibernate.dao.AgentTypeDAO;
+import org.hyperic.hibernate.dao.AgentDAO;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AIServerLocalHome;
 import org.hyperic.hq.appdef.shared.AIServerUtil;
-import org.hyperic.hq.appdef.shared.AgentLocalHome;
-import org.hyperic.hq.appdef.shared.AgentTypeLocalHome;
-import org.hyperic.hq.appdef.shared.AgentTypeUtil;
-import org.hyperic.hq.appdef.shared.AgentUtil;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
@@ -59,8 +57,6 @@ import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.CPropManagerUtil;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerUtil;
-import org.hyperic.hq.appdef.shared.IpLocalHome;
-import org.hyperic.hq.appdef.shared.IpUtil;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocalHome;
 import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
@@ -86,14 +82,11 @@ import javax.naming.NamingException;
 public abstract class AppdefSessionUtil {
     private AIQueueManagerLocal         aiqManagerLocal;
     private AIServerLocalHome           aiqServerLHome;
-    private AgentLocalHome              agentLHome;
-    private AgentTypeLocalHome          agentTypeLHome;
     private ApplicationLocalHome        appLHome;
     private ApplicationManagerLocalHome appMgrLHome;
     private AppdefGroupManagerLocalHome grpMgrLHome;
     private ApplicationTypeLocalHome    appTypeLHome;
     private ConfigManagerLocal          configMgrL;
-    private IpLocalHome                 ipLHome;
     private PlatformManagerLocalHome    platformMgrLHome;
     private ResourceManagerLocal        rmLocal;
     private ServerManagerLocalHome      serverMgrLHome;
@@ -123,35 +116,14 @@ public abstract class AppdefSessionUtil {
         return configMgrL;
     }
 
-    protected IpLocalHome getIpLocalHome()
-        throws NamingException 
+    protected AgentDAO getAgentDAO()
     {
-        if (ipLHome == null) {
-            ipLHome = IpUtil.getLocalHome();
-        }
-        return ipLHome;
+        return DAOFactory.getDAOFactory().getAgentDAO();
     }
 
-    protected AgentLocalHome getAgentLocalHome()
-        throws SystemException
+    protected AgentTypeDAO getAgentTypeDAO()
     {
-        if(this.agentLHome == null) {
-            try {
-                this.agentLHome = AgentUtil.getLocalHome();
-            } catch(NamingException exc){
-                throw new SystemException(exc);
-            }
-        }
-        return agentLHome;
-    }
-
-    protected AgentTypeLocalHome getAgentTypeLocalHome()
-        throws NamingException 
-    {
-        if (agentTypeLHome == null) {
-            agentTypeLHome = AgentTypeUtil.getLocalHome();
-        }
-        return agentTypeLHome;
+        return DAOFactory.getDAOFactory().getAgentTypeDAO();
     }
 
     protected ConfigResponseDAO getConfigResponseLocalHome()

@@ -41,8 +41,6 @@ import org.hyperic.hq.agent.AgentCommandsAPI;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentPK;
-import org.hyperic.hq.appdef.shared.AgentTypeLocalHome;
-import org.hyperic.hq.appdef.shared.AgentTypeUtil;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
 import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
@@ -136,7 +134,6 @@ class ImportHelper
     extends BizappSessionEJB
 {
     private AgentManagerLocal       agentMan;
-    private AgentTypeLocalHome      agtTypeHome;
     private PlatformManagerLocal    platMan;
     private ServerManagerLocal      servMan;
     private ServiceManagerLocal     serviceMan;
@@ -168,7 +165,6 @@ class ImportHelper
 
         try {
             this.agentMan    = this.getAgentManager();
-            this.agtTypeHome = AgentTypeUtil.getLocalHome();
             this.platMan     = PlatformManagerUtil.getLocalHome().create();
             this.servMan     = ServerManagerUtil.getLocalHome().create();
             this.serviceMan  = ServiceManagerUtil.getLocalHome().create();

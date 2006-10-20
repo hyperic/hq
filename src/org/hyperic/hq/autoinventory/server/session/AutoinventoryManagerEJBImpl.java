@@ -52,10 +52,7 @@ import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
-import org.hyperic.hq.appdef.shared.AgentTypeLocal;
-import org.hyperic.hq.appdef.shared.AgentTypeUtil;
 import org.hyperic.hq.appdef.shared.AgentTypeValue;
-import org.hyperic.hq.appdef.shared.AgentUtil;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -81,6 +78,7 @@ import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.authz.shared.AuthzSubjectLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectLocalHome;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
@@ -115,6 +113,7 @@ import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.dao.DAOFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -929,7 +928,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     }
     protected AuthzSubjectManagerLocalHome authzSubjectManagerLHome;
 
-    private AgentTypeLocal AT_LOCAL;
+    private AgentType AT_LOCAL;
     private HashMap generatedAddrs = new HashMap(); 
     
     /************************************************************
@@ -954,9 +953,9 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                                
         AgentTypeValue atValue = new AgentTypeValue();
         atValue.setName("bogus-agent-type-" + System.currentTimeMillis());
-        AT_LOCAL = AgentTypeUtil.getLocalHome().create(atValue);
+        AT_LOCAL = DAOFactory.getDAOFactory().getAgentTypeDAO().create(atValue);
         
-        AgentUtil.getLocalHome().create(agtValue, AT_LOCAL);
+        DAOFactory.getDAOFactory().getAgentDAO().create(agtValue, AT_LOCAL);
         return agtValue.getAgentToken();
     }
 

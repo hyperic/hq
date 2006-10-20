@@ -56,6 +56,11 @@ public class HibernateDAOFactory extends DAOFactory
         return new AgentDAO(getCurrentSession());
     }
 
+    public AgentTypeDAO getAgentTypeDAO()
+    {
+        return new AgentTypeDAO(getCurrentSession());
+    }
+
     public ApplicationDAO getApplicationDAO()
     {
         return new ApplicationDAO(getCurrentSession());
