@@ -27,6 +27,7 @@ package org.hyperic.hq.authz;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Iterator;
 
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 
@@ -107,6 +108,15 @@ public class ResourceType extends AuthzNamedEntity implements Serializable {
         resourceTypeValue.setId(getId());
         resourceTypeValue.setName(getName());
         resourceTypeValue.setSystem(isFsystem());
+        
+        // Clear out the operation values first
+        resourceTypeValue.cleanOperationValue();
+        if (getOperations() != null) {
+            for (Iterator it = getOperations().iterator(); it.hasNext(); ) {
+                Operation op = (Operation) it.next();
+                resourceTypeValue.addOperationValue(op.getOperationValue());            
+            }
+        }
         return resourceTypeValue;
     }
 
