@@ -237,6 +237,36 @@ public class AuthzSubject extends AuthzNamedEntity
    
     public int hashCode() {
         int result = 17;
+        result = 37*result + ((getSortName() != null) ?
+                getSortName().hashCode() : 0);
+
+        result = 37*result + (isFactive() ? 0 : 1);
+
+        result = 37*result + (isFsystem() ? 0 : 1);
+
+        result = 37*result + ((getDsn() != null) ? getDsn().hashCode() : 0);
+
+        result = 37*result + ((getEmailAddress() != null) ?
+                getEmailAddress().hashCode() : 0);
+
+        result = 37*result + ((getSmsAddress() != null) ?
+                getSmsAddress().hashCode() : 0);
+
+        result = 37*result + ((getFirstName() != null) ?
+                getFirstName().hashCode() : 0);
+
+        result = 37*result + ((getLastName() != null) ?
+                getLastName().hashCode() : 0);
+
+        result = 37*result + ((getPhoneNumber() != null) ?
+                getPhoneNumber().hashCode() : 0);
+
+        result = 37*result + ((getDepartment() != null) ?
+                getDepartment().hashCode() : 0);
+
+        result = 37*result + ((getName() != null) ? getName().hashCode() : 0);
+
+        result = 37*result + ((getId() != null) ? getId().hashCode() : 0);
         return result;
     }
 }
