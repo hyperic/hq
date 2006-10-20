@@ -32,7 +32,8 @@ import org.hyperic.hibernate.PersistedObject;
 public class MeasurementTemplate extends PersistedObject
     implements java.io.Serializable {
 
-    // Fields    
+    // Fields
+    private Integer _cid;
     private String _name;
     private String _alias;
     private String _units;
@@ -98,6 +99,14 @@ public class MeasurementTemplate extends PersistedObject
     }
    
     // Property accessors
+    public Integer getCid() {
+        return _cid;
+    }
+
+    public void setCid(Integer cid) {
+        _cid = cid;
+    }
+
     public String getName() {
         return _name;
     }
