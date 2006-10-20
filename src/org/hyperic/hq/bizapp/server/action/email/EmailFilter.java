@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.ejb.CreateException;
-import javax.ejb.FinderException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -45,6 +44,9 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -63,9 +65,6 @@ import org.hyperic.hq.scheduler.shared.SchedulerLocal;
 import org.hyperic.hq.scheduler.shared.SchedulerUtil;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.collection.IntHashMap;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.quartz.JobDetail;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleTrigger;
@@ -110,7 +109,7 @@ public class EmailFilter {
             // Then we'll keep those values null
         } catch (NamingException e) {
             // Then we'll keep those values null
-        } catch (FinderException e) {
+        } catch (ObjectNotFoundException e) {
             // Then we'll keep those values null
         }
         return false;
