@@ -162,8 +162,7 @@
   </target>
 
   <target name="test" depends="init,init-taskdefs">
-    <echo> ${java.home} </echo>
-    <junit fork="no" printsummary="yes" haltonerror="no">
+    <junit reloading="no" fork="no" printsummary="yes" haltonerror="no">
       <classpath>
         <path refid="alljars"/>
         <path refid="testjars"/>
@@ -174,7 +173,7 @@
         </path>
       </classpath>
       <formatter type="plain"/>
-      <batchtest fork="yes" todir="${basedir}">
+      <batchtest todir="${basedir}">
         <fileset dir="src">
           <include name="**/*Test.java"/>
         </fileset>
