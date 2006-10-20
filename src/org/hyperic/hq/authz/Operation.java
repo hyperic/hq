@@ -115,12 +115,7 @@ public class Operation extends AuthzNamedEntity implements Serializable {
     }
    
    public int hashCode() {
-      int result = 17;
-      result = 37*result + ((getName() != null) ? getName().hashCode() : 0);
-
-      result = 37*result + ((getId() != null) ? getId().hashCode() : 0);
-
-      return result;
+       return super.hashCode();
    }
 }
 

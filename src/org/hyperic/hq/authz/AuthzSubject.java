@@ -236,7 +236,7 @@ public class AuthzSubject extends AuthzNamedEntity
     }
    
     public int hashCode() {
-        int result = 17;
+        int result = super.hashCode();
         result = 37*result + ((getSortName() != null) ?
                 getSortName().hashCode() : 0);
 
@@ -264,9 +264,6 @@ public class AuthzSubject extends AuthzNamedEntity
         result = 37*result + ((getDepartment() != null) ?
                 getDepartment().hashCode() : 0);
 
-        result = 37*result + ((getName() != null) ? getName().hashCode() : 0);
-
-        result = 37*result + ((getId() != null) ? getId().hashCode() : 0);
         return result;
     }
 }

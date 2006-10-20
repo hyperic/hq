@@ -142,12 +142,8 @@ public class ResourceType extends AuthzNamedEntity implements Serializable {
     }
 
     public int hashCode() {
-      int result = 17;
+      int result = super.hashCode();
       result = 37*result + (isFsystem() ? 0 : 1);
-
-      result = 37*result + ((getName() != null) ? getName().hashCode() : 0);
-
-      result = 37*result + ((getId() != null) ? getId().hashCode() : 0);
 
       result = 37*result + ((getOperations() != null) ?
               getOperations().hashCode() : 0);

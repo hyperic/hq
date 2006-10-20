@@ -40,7 +40,17 @@ public abstract class AuthzNamedEntity extends PersistedObject {
     public String getName() {
         return name;
     }
+    
     public void setName(String name) {
         this.name = name;
+    }
+    
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + ((getName() != null) ? getName().hashCode() : 0);
+
+        result = 37*result + ((getId() != null) ? getId().hashCode() : 0);
+
+        return result;
     }
 }
