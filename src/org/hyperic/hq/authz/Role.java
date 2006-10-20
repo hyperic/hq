@@ -57,13 +57,14 @@ public class Role extends AuthzNamedEntity implements java.io.Serializable {
 
 	/** minimal constructor */
     public Role(RoleValue val) {
-        this.name = val.getName();
+        super();
+        setRoleValue(val);
     }
     /** full constructor */
     public Role(String name, Integer cid, String sortName, String description,
                 boolean fsystem, Resource resourceId, Collection resourceGroups,
                 Collection operations, Collection subjects) {
-        this.name = name;
+        super(name);
         this.cid = cid;
         this.sortName = sortName;
         this.description = description;
@@ -76,67 +77,67 @@ public class Role extends AuthzNamedEntity implements java.io.Serializable {
     
    
     public String getName() {
-        return this.name;
+        return name;
     }
     
-    public void setName(String name) {
-        this.name = name;
+    public void setName(String val) {
+        name = val;
     }
     public Integer getCid() {
-        return this.cid;
+        return cid;
     }
     
-    public void setCid(Integer cid) {
-        this.cid = cid;
+    public void setCid(Integer val) {
+        cid = val;
     }
     public String getSortName() {
-        return this.sortName;
+        return sortName;
     }
     
-    public void setSortName(String sortName) {
-        this.sortName = sortName;
+    public void setSortName(String val) {
+        sortName = val;
     }
     public String getDescription() {
-        return this.description;
+        return description;
     }
     
-    public void setDescription(String description) {
-        this.description = description;
+    public void setDescription(String val) {
+        description = val;
     }
     public boolean isSystem() {
-        return this.system;
+        return system;
     }
     
     public void setSystem(boolean fsystem) {
-        this.system = fsystem;
+        system = fsystem;
     }
     public Resource getResource() {
-        return this.resource;
+        return resource;
     }
     
     public void setResource(Resource resourceId) {
-        this.resource = resourceId;
+        resource = resourceId;
     }
     public Collection getResourceGroups() {
-        return this.resourceGroups;
+        return resourceGroups;
     }
     
-    public void setResourceGroups(Collection resourceGroups) {
-        this.resourceGroups = resourceGroups;
+    public void setResourceGroups(Collection val) {
+        resourceGroups = val;
     }
     public Collection getOperations() {
-        return this.operations;
+        return operations;
     }
     
-    public void setOperations(Collection operations) {
-        this.operations = operations;
+    public void setOperations(Collection val) {
+        operations = val;
     }
     public Collection getSubjects() {
-        return this.subjects;
+        return subjects;
     }
     
-    public void setSubjects(Collection subjects) {
-        this.subjects = subjects;
+    public void setSubjects(Collection val) {
+        subjects = val;
     }
 
 
@@ -158,8 +159,12 @@ public class Role extends AuthzNamedEntity implements java.io.Serializable {
         return roleValue;
     }
 
-    public void setRoleValue(RoleValue roleValue) {
-        this.roleValue = roleValue;
+    public void setRoleValue(RoleValue val) {
+        setId(val.getId());
+        setName(val.getName());
+        setDescription(val.getDescription());
+        setSortName(val.getSortName());
+        setSystem(val.getSystem());
     }
 
     public boolean equals(Object other) {
@@ -168,9 +173,9 @@ public class Role extends AuthzNamedEntity implements java.io.Serializable {
 		 if ( !(other instanceof Role) ) return false;
 		 Role castOther = ( Role ) other; 
          
-		 return ((this.getName() == castOther.getName()) ||
-                 (this.getName() != null
-                && castOther.getName() != null && this.getName()
+		 return ((getName() == castOther.getName()) ||
+                 (getName() != null
+                && castOther.getName() != null && getName()
                 .equals(castOther.getName())));
     }
    
