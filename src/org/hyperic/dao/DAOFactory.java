@@ -37,6 +37,7 @@ import org.hyperic.hibernate.dao.CpropDAO;
 import org.hyperic.hibernate.dao.CpropKeyDAO;
 import org.hyperic.hibernate.dao.HibernateDAOFactory;
 import org.hyperic.hibernate.dao.HibernateMockDAOFactory;
+import org.hyperic.hibernate.dao.OperationDAO;
 import org.hyperic.hibernate.dao.PlatformDAO;
 import org.hyperic.hibernate.dao.PlatformTypeDAO;
 import org.hyperic.hibernate.dao.ResourceTypeDAO;
@@ -70,6 +71,7 @@ public abstract class DAOFactory
     // Authz DAOs
     public abstract AuthzSubjectDAO getAuthzSubjectDAO();
     public abstract ResourceTypeDAO getResourceTypeDAO();
+    public abstract OperationDAO    getOperationDAO();
 
     // Measurement DAOs
     public abstract BaselineDAO getBaselineDAO();
