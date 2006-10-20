@@ -219,14 +219,21 @@ public class AuthzSubject extends AuthzNamedEntity
     }
 
     public boolean equals(Object other) {
-        if ( (this == other ) ) return true;
-        if ( (other == null ) ) return false;
-        if ( !(other instanceof AuthzSubject) ) return false;
-        AuthzSubject castOther = ( AuthzSubject ) other; 
-         
-        return ( (getName()==castOther.getName()) || ( getName()!=null && castOther.getName()!=null && getName().equals(castOther.getName()) ) )
- && ( (getDsn()==castOther.getDsn()) || ( getDsn()!=null && castOther.getDsn()!=null && getDsn().equals(castOther.getDsn()) ) );
-   }
+        if ((this == other))
+            return true;
+        if ((other == null))
+            return false;
+        if (!(other instanceof AuthzSubject))
+            return false;
+        AuthzSubject castOther = (AuthzSubject) other;
+
+        return ((getName() == castOther.getName()) || (getName() != null
+                && castOther.getName() != null && getName()
+                .equals(castOther.getName())))
+                && ((getDsn() == castOther.getDsn()) || (getDsn() != null
+                        && castOther.getDsn() != null && getDsn()
+                        .equals(castOther.getDsn())));
+    }
    
     public int hashCode() {
         int result = 17;
