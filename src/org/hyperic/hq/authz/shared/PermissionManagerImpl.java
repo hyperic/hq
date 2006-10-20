@@ -41,6 +41,7 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.authz.ResourceType;
 import org.hyperic.hq.authz.server.session.AuthzSession;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.StringUtil;
@@ -97,6 +98,10 @@ public class PermissionManagerImpl
 
     public void check(Integer subject, ResourceTypeLocal type,
                       Integer instanceId, String operation)
+        throws PermissionException {}
+
+    public void check(Integer subject, ResourceType type, Integer instanceId,
+                      String operation)
         throws PermissionException {}
 
     public void check(Integer subjectId, Integer typeId, Integer instanceId,
