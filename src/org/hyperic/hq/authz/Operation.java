@@ -50,38 +50,39 @@ public class Operation extends AuthzNamedEntity implements Serializable {
 
 	/** minimal constructor */
     public Operation(OperationValue val) {
+        super();
         setOperationValue(val);
     }
     /** full constructor */
-    public Operation(String name, ResourceType resourceTypeId, Integer cid,
+    public Operation(String name, ResourceType resourceType, Integer cid,
                      Collection roles) {
         super(name);
-        this.resourceType = resourceTypeId;
+        this.resourceType = resourceType;
         this.cid = cid;
         this.roles = roles;
     }
     
    
     public ResourceType getResourceType() {
-        return this.resourceType;
+        return resourceType;
     }
     
     public void setResourceType(ResourceType resourceTypeId) {
-        this.resourceType = resourceTypeId;
+        resourceType = resourceTypeId;
     }
     public Integer getCid() {
-        return this.cid;
+        return cid;
     }
     
-    public void setCid(Integer cid) {
-        this.cid = cid;
+    public void setCid(Integer val) {
+        cid = val;
     }
     public Collection getRoles() {
-        return this.roles;
+        return roles;
     }
     
-    public void setRoles(Collection roles) {
-        this.roles = roles;
+    public void setRoles(Collection val) {
+        roles = val;
     }
 
     public OperationValue getOperationValue() {
@@ -104,13 +105,13 @@ public class Operation extends AuthzNamedEntity implements Serializable {
             return false;
         Operation castOther = (Operation) other;
 
-        return ((this.getName() == castOther.getName()) ||
-                (this.getName() != null && castOther.getName() != null &&
-                        this.getName().equals(castOther.getName()))) &&
-               ((this.getResourceType() == castOther.getResourceType()) ||
-                        (this.getResourceType() != null &&
+        return ((getName() == castOther.getName()) ||
+                (getName() != null && castOther.getName() != null &&
+                        getName().equals(castOther.getName()))) &&
+               ((getResourceType() == castOther.getResourceType()) ||
+                        (getResourceType() != null &&
                          castOther.getResourceType() != null &&
-                         this.getResourceType()
+                         getResourceType()
                          .equals(castOther.getResourceType())));
     }
    
