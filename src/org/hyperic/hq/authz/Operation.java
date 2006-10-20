@@ -85,11 +85,14 @@ public class Operation extends AuthzNamedEntity implements Serializable {
     }
 
     public OperationValue getOperationValue() {
+        operationValue.setId(getId());
+        operationValue.setName(getName());
         return operationValue;
     }
 
-    public void setOperationValue(OperationValue operationValue) {
-        this.operationValue = operationValue;
+    public void setOperationValue(OperationValue val) {
+        setId(val.getId());
+        setName(val.getName());
     }   
 
    public boolean equals(Object other) {
@@ -112,8 +115,12 @@ public class Operation extends AuthzNamedEntity implements Serializable {
     }
    
    public int hashCode() {
-         int result = 17;
-         return result;
+      int result = 17;
+      result = 37*result + ((getName() != null) ? getName().hashCode() : 0);
+
+      result = 37*result + ((getId() != null) ? getId().hashCode() : 0);
+
+      return result;
    }
 }
 
