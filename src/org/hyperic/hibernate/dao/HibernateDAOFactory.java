@@ -128,4 +128,8 @@ public class HibernateDAOFactory extends DAOFactory
     {
         return new CategoryDAO(getCurrentSession());
     }
+
+    public ResourceTypeDAO getResourceTypeDAO() {
+        return new ResourceTypeDAO(getCurrentSession());
+    }
 }
