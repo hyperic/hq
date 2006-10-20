@@ -265,11 +265,12 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean 
      * @exception NamingException
      * @exception FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="REQUIRED"
      */
     public ResourceTypeValue findResourceTypeByName(String name)
         throws FinderException {
-        ResourceType rt = DAOFactory.getDAOFactory().getResourceTypeDAO().findByName(name);
+        ResourceType rt =
+            DAOFactory.getDAOFactory().getResourceTypeDAO().findByName(name);
         
         if (rt == null)
             throw new FinderException("ResourceType " + name + " not found");
