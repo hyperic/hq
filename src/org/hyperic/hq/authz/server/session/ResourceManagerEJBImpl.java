@@ -39,11 +39,15 @@ import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.dao.OperationDAO;
+import org.hyperic.hibernate.dao.ResourceTypeDAO;
+import org.hyperic.hq.authz.AuthzSubject;
+import org.hyperic.hq.authz.Operation;
+import org.hyperic.hq.authz.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.OperationLocal;
-import org.hyperic.hq.authz.shared.OperationLocalHome;
 import org.hyperic.hq.authz.shared.OperationValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -52,7 +56,6 @@ import org.hyperic.hq.authz.shared.ResourceLocal;
 import org.hyperic.hq.authz.shared.ResourceLocalHome;
 import org.hyperic.hq.authz.shared.ResourcePK;
 import org.hyperic.hq.authz.shared.ResourceTypeLocal;
-import org.hyperic.hq.authz.shared.ResourceTypeLocalHome;
 import org.hyperic.hq.authz.shared.ResourceTypePK;
 import org.hyperic.hq.authz.shared.ResourceTypeUtil;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
@@ -96,33 +99,29 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean 
      * created. So make this these are nonexistent operations. Use
      * setOperations() to associate existing Operations.
      * @return Value-object for the ResourceType.
-     * @exception CreateException Unable to create the specified entity.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami may not perform createResource on the covalentAuthzRootResourceType ResourceType.
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
     public ResourceTypePK createResourceType(AuthzSubjectValue whoami,
-                                                ResourceTypeValue type,
-                                                OperationValue[] operations)
-        throws CreateException, NamingException, FinderException,
-               PermissionException {
-        ResourceTypeLocalHome typeLome = getResourceTypeHome();
-        AuthzSubjectLocal whoamiLocal = this.lookupSubject(whoami);
-        ResourceTypeLocal typeLocal = typeLome.create(whoamiLocal, type);
-        typeLocal.setWhoami(whoamiLocal);
+                                             ResourceTypeValue type,
+                                             OperationValue[] operations) {
+        AuthzSubject whoamiPojo = this.lookupSubjectPojo(whoami);
+        ResourceType typePojo =
+            DAOFactory.getDAOFactory().getResourceTypeDAO().create(whoamiPojo,
+                                                                   type);
 
         /* create associated operations */
         if (operations != null) {
-            int counter;
-            OperationLocalHome opLome = getOperationHome();
-            for (counter = 0; counter < operations.length; counter++) {
-                OperationLocal op = opLome.create(operations[counter]);
-                typeLocal.addOperation(op);
+            List ops = new ArrayList();
+            OperationDAO dao = DAOFactory.getDAOFactory().getOperationDAO();
+            for (int i = 0; i < operations.length; i++) {
+                Operation op = dao.create(operations[i]);
+                ops.add(op);
             }
+            
+            typePojo.setOperations(ops);
         }
-        return (ResourceTypePK)typeLocal.getPrimaryKey();
+        return new ResourceTypePK(typePojo.getId());
     }
 
     /**
@@ -138,14 +137,13 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean 
     public void removeResourceType(AuthzSubjectValue whoami,
                                    ResourceTypeValue type)
         throws NamingException, FinderException, RemoveException {
-        ResourceTypeLocal typeLocal =
-            getResourceTypeHome().findByPrimaryKey(type.getPrimaryKey());
+        ResourceTypeDAO dao = DAOFactory.getDAOFactory().getResourceTypeDAO();
+        ResourceType rt = dao.findById(type.getId());
         // flush VOCache
         VOCache.getInstance().removeResourceType(type.getName());
-        AuthzSubjectLocal who =
-            getSubjectHome().findByPrimaryKey(whoami.getPrimaryKey());
-        typeLocal.setWhoami(who);
-        typeLocal.remove();
+        AuthzSubject who = DAOFactory.getDAOFactory().getAuthzSubjectDAO()
+            .findById(whoami.getId());
+        dao.remove(who, rt);
     }
 
     /**
@@ -271,14 +269,12 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean 
      */
     public ResourceTypeValue findResourceTypeByName(String name)
         throws FinderException {
-        try {
-            return ResourceVOHelperUtil.getLocalHome().create()
-                        .getResourceTypeValue(name);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        ResourceType rt = DAOFactory.getDAOFactory().getResourceTypeDAO().findByName(name);
+        
+        if (rt == null)
+            throw new FinderException("ResourceType " + name + " not found");
+        
+        return rt.getResourceTypeValue();
     }
 
     /**
