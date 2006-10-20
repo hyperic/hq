@@ -25,9 +25,11 @@
 
 package org.hyperic.hibernate.dao;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 import org.hibernate.Session;
+import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.ResourceType;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 
@@ -40,11 +42,15 @@ public class ResourceTypeDAO extends HibernateDAO
         super(ResourceType.class, session);
     }
 
-    public ResourceType create(ResourceType creator,
+    public ResourceType create(AuthzSubject creator,
                                ResourceTypeValue createInfo) {
         ResourceType res = new ResourceType(createInfo);
         save(res);
         return res;
+    }
+
+    public ResourceType findById(Integer id) {
+        return (ResourceType) super.findById(id);
     }
 
     public Collection findAll() {
@@ -59,7 +65,8 @@ public class ResourceTypeDAO extends HibernateDAO
         return (ResourceType) super.merge(entity);
     }
 
-    public void remove(ResourceType entity) {
+    public void remove(AuthzSubject whoami, ResourceType entity) {
+        // XXX need to check against owner
         super.remove(entity);
     }
 
