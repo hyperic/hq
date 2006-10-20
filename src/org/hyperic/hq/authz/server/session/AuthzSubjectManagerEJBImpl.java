@@ -574,7 +574,7 @@ public class AuthzSubjectManagerEJBImpl
     public AuthzSubjectValue getOverlord() {
         if (overlord == null) {
             overlord = getSubjectDAO().findById(
-                new Integer(AuthzConstants.overlordId)).getAuthzSubjectValue();
+                AuthzConstants.overlordId).getAuthzSubjectValue();
         }
         return overlord;
     }
