@@ -43,21 +43,6 @@ public interface PermissionManager {
     final String OPERATION_PAGER = PagerProcessor_operation.class.getName();
 
     /**
-     * Check permission
-     *
-     * @param subject The subject.
-     * @param type The type of the resource.
-     * @param instanceId The consumer's ID for the resource in question.
-     * @param operation The operation that the subject may want to perform.
-     * @exception PermissionException If subject is not authorized to 
-     * perform the given operation on the resource of the given type whose
-     * id is instanceId.
-     */
-    public void check(Integer subject, ResourceTypeLocal type,
-                      Integer instanceId, OperationLocal operation)
-        throws PermissionException;
-
-    /**
      * Check permission.
      *
      * @param subject The subject.

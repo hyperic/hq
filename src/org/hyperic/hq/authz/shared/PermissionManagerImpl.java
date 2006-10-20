@@ -93,10 +93,6 @@ public class PermissionManagerImpl
     }
 
     public void check(Integer subject, ResourceTypeLocal type,
-                      Integer instanceId, OperationLocal operation)
-        throws PermissionException {}
-
-    public void check(Integer subject, ResourceTypeLocal type,
                       Integer instanceId, String operation)
         throws PermissionException {}
 
