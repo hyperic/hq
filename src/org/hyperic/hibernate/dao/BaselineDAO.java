@@ -29,8 +29,6 @@ import org.hibernate.Session;
 
 import org.hyperic.hq.measurement.Baseline;
 
-import java.util.List;
-
 /**
  * CRUD methods, finders, etc. for Baseline
  */
