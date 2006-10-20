@@ -38,6 +38,7 @@ import org.hyperic.hibernate.dao.CpropKeyDAO;
 import org.hyperic.hibernate.dao.DerivedMeasurementDAO;
 import org.hyperic.hibernate.dao.HibernateDAOFactory;
 import org.hyperic.hibernate.dao.HibernateMockDAOFactory;
+import org.hyperic.hibernate.dao.MeasurementArgDAO;
 import org.hyperic.hibernate.dao.MeasurementTemplateDAO;
 import org.hyperic.hibernate.dao.MonitorableTypeDAO;
 import org.hyperic.hibernate.dao.OperationDAO;
@@ -84,6 +85,7 @@ public abstract class DAOFactory
     public abstract RawMeasurementDAO getRawMeasurementDAO();
     public abstract DerivedMeasurementDAO getDerivedMeasurementDAO();
     public abstract MeasurementTemplateDAO getMeasurementTemplateDAO();
+    public abstract MeasurementArgDAO getMeasurementArgDAO();
 
     public static ThreadLocal defaultSession = new ThreadLocal();
 
