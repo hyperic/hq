@@ -47,12 +47,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dao.AuthzSubjectDAO;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectLocalHome;
 import org.hyperic.hq.authz.shared.AuthzSubjectPK;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -109,18 +107,17 @@ public class AuthzSubjectManagerEJBImpl
      * @return Value-object for the new Subject.
      * @exception PermissionException whoami may not perform createSubject on the rootResource ResourceType.
      * @throws CreateException 
+     * @throws NamingException 
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRES"
      */
     public AuthzSubjectPK createSubject(AuthzSubjectValue whoami,
                                         AuthzSubjectValue subject)
         throws FinderException, PermissionException, CreateException {
-        /* XXX restore after ResourceType conversion
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         pm.check(whoami.getId(), getRootResourceType(),
                  AuthzConstants.rootResourceId,
                  AuthzConstants.subjectOpCreateSubject);
-         */
         AuthzSubjectDAO dao = getSubjectDAO();
         // Make sure there's not already a system subject with that name
         try {
@@ -150,7 +147,6 @@ public class AuthzSubjectManagerEJBImpl
     /** Write the specified entity out to permanent storage.
      * @param whoami The current running user.
      * @param role The subject to save.
-     * @exception NamingException
      * @exception FinderException Unable to find a given or dependent entities.
      * @exception PermissionException whoami may not perform modifySubject on this subject.
      * @ejb:interface-method
@@ -158,8 +154,8 @@ public class AuthzSubjectManagerEJBImpl
      */
     public void saveSubject(AuthzSubjectValue whoami,
                             AuthzSubjectValue subject)
-        throws NamingException, FinderException, PermissionException {
-        AuthzSubjectLocal subjectLocal = this.lookupSubject(subject);
+        throws PermissionException {
+        AuthzSubject subjectPojo = this.lookupSubjectPojo(subject);
 
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         // check to see if the user attempting the modification
@@ -174,7 +170,7 @@ public class AuthzSubjectManagerEJBImpl
         if(subject.getId().equals(AuthzConstants.rootSubjectId)) {
             subject.setActive(true);
         }
-        subjectLocal.setAuthzSubjectValue(subject);
+        subjectPojo.setAuthzSubjectValue(subject);
         // remove from cache
         VOCache.getInstance().removeSubject(subject.getName());
     }
@@ -186,16 +182,12 @@ public class AuthzSubjectManagerEJBImpl
      * @ejb:transaction type="REQUIRED"
      */
     public void checkModifyUsers(AuthzSubjectValue caller) 
-        throws SystemException, PermissionException, FinderException {
-        try {
-            PermissionManager pm = PermissionManagerFactory.getInstance();
-            pm.check(caller.getId(),
-                     getRootResourceType(),
-                     AuthzConstants.rootResourceId,
-                     AuthzConstants.subjectOpModifySubject);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        throws PermissionException {
+        PermissionManager pm = PermissionManagerFactory.getInstance();
+        pm.check(caller.getId(),
+                 getRootResourceType(),
+                 AuthzConstants.rootResourceId,
+                 AuthzConstants.subjectOpModifySubject);
     }
 
     /** Delete the specified subject.
@@ -205,8 +197,7 @@ public class AuthzSubjectManagerEJBImpl
      * @ejb:transaction type="REQUIRED"
      */
     public void removeSubject(AuthzSubjectValue whoami, Integer subject)
-        throws NamingException, FinderException, 
-               RemoveException, PermissionException {
+        throws RemoveException, PermissionException {
         // no removing of the root user!
         if (subject.equals(AuthzConstants.rootSubjectId)) {
             throw new RemoveException("Root user can not be deleted");
@@ -219,13 +210,10 @@ public class AuthzSubjectManagerEJBImpl
         // XXX Should we do anything special for the "suicide" case?
         // Perhaps a log message?
         if ( !whoami.getId().equals(subject) ) {
-            /* XXX restore after ResourceType conversion
             PermissionManager pm = PermissionManagerFactory.getInstance(); 
             pm.check(whoami.getId(), getRootResourceType().getId(),
                      AuthzConstants.rootResourceId,
                      AuthzConstants.perm_removeSubject);
-
-            */
         }
 
         deleteUserPrefs(dao.getSession().connection(), subject);
@@ -262,7 +250,6 @@ public class AuthzSubjectManagerEJBImpl
 
         AuthzSubject sub = getSubjectDAO().findById(id);
         
-        /* XXX restore after ResourceType conversion
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         // users can see their own entries without requiring special permission
         if(!whoami.getId().equals(id)) {
@@ -270,7 +257,6 @@ public class AuthzSubjectManagerEJBImpl
                      AuthzConstants.rootResourceId,
                      AuthzConstants.perm_viewSubject);
         }
-        */
         return sub.getAuthzSubjectValue();
     }
 
@@ -306,7 +292,7 @@ public class AuthzSubjectManagerEJBImpl
      * @ejb:transaction type="SUPPORTS"
      */
     public PageList getAllSubjects(AuthzSubjectValue whoami, PageControl pc)
-        throws NamingException, FinderException, PermissionException {
+        throws FinderException, PermissionException {
         Collection subjects;
         pc = PageControl.initDefaults(pc, SortAttribute.SUBJECT_NAME);
         PageList plist = new PageList();
@@ -316,7 +302,6 @@ public class AuthzSubjectManagerEJBImpl
         // all they can see is their own entry.
         AuthzSubject who = dao.findById(whoami.getId());
 
-        /* XXX restore after ResourceType conversion
         try {
             PermissionManager pm = PermissionManagerFactory.getInstance(); 
             pm.check(whoami.getId(), getRootResourceType(),
@@ -328,7 +313,6 @@ public class AuthzSubjectManagerEJBImpl
             plist.setTotalSize(1);
             return plist;
         }
-        */
 
         switch (pc.getSortattribute()) {
         case SortAttribute.SUBJECT_NAME:
@@ -439,8 +423,7 @@ public class AuthzSubjectManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public String getEmailById(Integer id)
-        throws NamingException, FinderException {
+    public String getEmailById(Integer id) {
         AuthzSubject subject = getSubjectDAO().findById(id);
         return subject.getEmailAddress();
     }
@@ -452,8 +435,7 @@ public class AuthzSubjectManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public String getEmailByName(String userName)
-        throws NamingException, FinderException {
+    public String getEmailByName(String userName) {
         AuthzSubject subject = getSubjectDAO().findByName(userName);
         return subject.getEmailAddress();
     }
@@ -464,8 +446,7 @@ public class AuthzSubjectManagerEJBImpl
      * @ejb:transaction type="REQUIRED"
      */
     public ConfigResponse getUserPrefs(AuthzSubjectValue who, Integer subjId)
-        throws NamingException, FinderException, PermissionException,
-               EncodingException {
+        throws PermissionException, EncodingException {
         // users can always see their own prefs.
         if(!who.getId().equals(subjId)) { 
             // check that the caller can see users
@@ -492,8 +473,7 @@ public class AuthzSubjectManagerEJBImpl
      */
     public void setUserPrefs(AuthzSubjectValue who, Integer subjId,
                              ConfigResponse prefs) 
-        throws NamingException, EncodingException, FinderException,
-               PermissionException {
+        throws EncodingException, PermissionException {
 
         // check to see if the user attempting the modification
         // is the same as the one being modified
@@ -591,8 +571,7 @@ public class AuthzSubjectManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public AuthzSubjectValue getOverlord() 
-        throws NamingException, FinderException {
+    public AuthzSubjectValue getOverlord() {
         if (overlord == null) {
             overlord = getSubjectDAO().findById(
                 new Integer(AuthzConstants.overlordId)).getAuthzSubjectValue();
@@ -607,8 +586,7 @@ public class AuthzSubjectManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public AuthzSubjectValue getRoot() 
-        throws NamingException, FinderException {
+    public AuthzSubjectValue getRoot() {
         if (root == null) {
             root = getSubjectDAO().findById(AuthzConstants.rootSubjectId)
                     .getAuthzSubjectValue();

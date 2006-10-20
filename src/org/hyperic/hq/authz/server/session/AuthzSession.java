@@ -39,6 +39,11 @@ import javax.ejb.SessionContext;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.authz.AuthzSubject;
+import org.hyperic.hq.authz.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectLocalHome;
@@ -75,14 +80,10 @@ import org.hyperic.hq.authz.shared.RoleLocalHome;
 import org.hyperic.hq.authz.shared.RolePK;
 import org.hyperic.hq.authz.shared.RoleUtil;
 import org.hyperic.hq.authz.shared.RoleValue;
-import org.hyperic.hq.authz.values.OwnedResourceGroupValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * This is the parent class for all Authz Session Beans
@@ -198,10 +199,9 @@ public abstract class AuthzSession {
                                       AuthzConstants.overlordDsn);
     }
 
-    protected ResourceTypeLocal getRootResourceType()
-        throws NamingException, FinderException {
-           return getResourceTypeHome()
-                .findByName(AuthzConstants.typeResourceTypeName); 
+    protected ResourceType getRootResourceType() {
+       return DAOFactory.getDAOFactory().getResourceTypeDAO()
+            .findByName(AuthzConstants.typeResourceTypeName); 
     }
 
     /**
@@ -357,6 +357,14 @@ public abstract class AuthzSession {
         } catch (NamingException e) {
             throw new SystemException(e);
         }
+    }
+
+    protected AuthzSubject lookupSubjectPojo(AuthzSubjectValue subject) {
+        return lookupSubjectPojo(subject.getId());
+    }
+
+    protected AuthzSubject lookupSubjectPojo(Integer id) {
+        return DAOFactory.getDAOFactory().getAuthzSubjectDAO().findById(id);
     }
 
     protected ResourceTypeLocal lookupType(ResourceTypeValue type)
