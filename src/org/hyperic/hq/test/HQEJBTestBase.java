@@ -28,10 +28,20 @@ package org.hyperic.hq.test;
 import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.common.shared.ProductProperties;
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
 import org.mockejb.SessionBeanDescriptor;
+import org.mockejb.jndi.MockContextFactory;
 
 public abstract class HQEJBTestBase    
     extends MockBeanTestBase 
@@ -44,20 +54,27 @@ public abstract class HQEJBTestBase
     }
     
     private Class[] getUsedSessionBeans() {
-        return new Class[] { RegisteredTriggerManagerEJBImpl.class,
-                             AuthzSubjectManagerEJBImpl.class,
-                             ResourceManagerEJBImpl.class };
+        return new Class[] { 
+            RegisteredTriggerManagerEJBImpl.class,
+            AlertDefinitionManagerEJBImpl.class,
+            PlatformManagerEJBImpl.class,
+            AuthzSubjectManagerEJBImpl.class,
+            ResourceManagerEJBImpl.class            
+        };
     }
 
     public void setUp() 
         throws Exception
     {
         if (_initialized) {
+            // We need to have this here, because for some reason the
+            // properties are getting nuked after a test run.
+            MockContextFactory.setAsInitial();
             _session = Util.getSessionFactory().openSession();
             DAOFactory.setMockSession(_session);
             return;
         }
-        
+
         super.setUp();
 
         // Deploy the session beans into the MockEJB converter.  We have to
@@ -87,9 +104,11 @@ public abstract class HQEJBTestBase
 
         _session = Util.getSessionFactory().openSession();
         DAOFactory.setMockSession(_session);
+        _initialized = true;
     }
 
     public void tearDown() throws Exception {
         _session.disconnect();
     }
+    
 }
