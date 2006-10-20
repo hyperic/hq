@@ -481,8 +481,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         try {
             AuthzSubjectValue who = manager.getSubject(sessionId.intValue());
             return getAuthzSubjectManager().getUserPrefs(who, subjectId);
-        } catch (FinderException e) {
-            throw new ApplicationException(e);
         } catch (EncodingException e) {
             throw new ApplicationException(e);
         } catch (Exception e) {
@@ -508,12 +506,8 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
             getAuthzSubjectManager().setUserPrefs(who, subjectId, prefs);
             prefs = getUserPrefs(sessionId, subjectId);
             // log.debug("LOADED PREFS=" + prefs);
-        } catch (FinderException e) {
-            throw new ApplicationException(e);
         } catch (EncodingException e) {
             throw new ApplicationException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
         }
     }
 
@@ -525,12 +519,8 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     public String getEmailByName(Integer sessionId, String userName) 
         throws FinderException, SessionTimeoutException,
                SessionNotFoundException {
-        try {
-            AuthzSubjectValue who = manager.getSubject(sessionId.intValue());
-            return getAuthzSubjectManager().getEmailByName(userName);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        AuthzSubjectValue who = manager.getSubject(sessionId.intValue());
+        return getAuthzSubjectManager().getEmailByName(userName);
     }
 
     /**
@@ -541,12 +531,8 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     public String getEmailById(Integer sessionId, Integer userId) 
         throws FinderException, SessionTimeoutException,
                SessionNotFoundException {
-        try {
-            AuthzSubjectValue who = manager.getSubject(sessionId.intValue());
-            return getAuthzSubjectManager().getEmailById(userId);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        AuthzSubjectValue who = manager.getSubject(sessionId.intValue());
+        return getAuthzSubjectManager().getEmailById(userId);
     }
 
     /** @ejb:create-method */
