@@ -425,15 +425,6 @@ public abstract class AuthzSession {
         return pks;
     }
 
-    protected OperationLocal lookupOperation (ResourceTypeLocal type, 
-        String opName) throws FinderException {
-        try {
-            return getOperationHome().findByTypeAndName(type, opName);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-    }
-
     /**
      * Get a list of ResourceGroupPK's a user has viewResourceGroup permission
      * for (or owns)
