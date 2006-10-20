@@ -28,18 +28,19 @@ package org.hyperic.dao;
 import org.hibernate.Session;
 import org.hyperic.hibernate.dao.AgentDAO;
 import org.hyperic.hibernate.dao.ApplicationDAO;
+import org.hyperic.hibernate.dao.AuthzSubjectDAO;
 import org.hyperic.hibernate.dao.ConfigResponseDAO;
 import org.hyperic.hibernate.dao.CpropDAO;
 import org.hyperic.hibernate.dao.CpropKeyDAO;
 import org.hyperic.hibernate.dao.HibernateDAOFactory;
 import org.hyperic.hibernate.dao.HibernateMockDAOFactory;
 import org.hyperic.hibernate.dao.PlatformDAO;
-import org.hyperic.hibernate.dao.ServerDAO;
-import org.hyperic.hibernate.dao.ServiceDAO;
-import org.hyperic.hibernate.dao.TriggerDAO;
-import org.hyperic.hibernate.dao.ServiceTypeDAO;
-import org.hyperic.hibernate.dao.ServerTypeDAO;
 import org.hyperic.hibernate.dao.PlatformTypeDAO;
+import org.hyperic.hibernate.dao.ServerDAO;
+import org.hyperic.hibernate.dao.ServerTypeDAO;
+import org.hyperic.hibernate.dao.ServiceDAO;
+import org.hyperic.hibernate.dao.ServiceTypeDAO;
+import org.hyperic.hibernate.dao.TriggerDAO;
 import org.hyperic.hibernate.dao.BaselineDAO;
 import org.hyperic.hibernate.dao.CategoryDAO;
 
@@ -62,6 +63,7 @@ public abstract class DAOFactory
     public abstract ServiceDAO getServiceDAO();
     public abstract TriggerDAO getTriggerDAO();
     public abstract ServiceTypeDAO getServiceTypeDAO();
+    public abstract AuthzSubjectDAO getAuthzSubjectDAO();
 
     // Measurement DAOs
     public abstract BaselineDAO getBaselineDAO();
