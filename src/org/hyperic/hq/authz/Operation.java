@@ -36,7 +36,7 @@ import org.hyperic.hq.authz.shared.OperationValue;
 public class Operation extends AuthzNamedEntity implements Serializable {
 
     // Fields
-     private ResourceType resourceTypeId;
+     private ResourceType resourceType;
      private Integer cid;
      private Collection roles;
 
@@ -56,18 +56,18 @@ public class Operation extends AuthzNamedEntity implements Serializable {
     public Operation(String name, ResourceType resourceTypeId, Integer cid,
                      Collection roles) {
         super(name);
-        this.resourceTypeId = resourceTypeId;
+        this.resourceType = resourceTypeId;
         this.cid = cid;
         this.roles = roles;
     }
     
    
-    public ResourceType getResourceTypeId() {
-        return this.resourceTypeId;
+    public ResourceType getResourceType() {
+        return this.resourceType;
     }
     
-    public void setResourceTypeId(ResourceType resourceTypeId) {
-        this.resourceTypeId = resourceTypeId;
+    public void setResourceType(ResourceType resourceTypeId) {
+        this.resourceType = resourceTypeId;
     }
     public Integer getCid() {
         return this.cid;
@@ -107,11 +107,11 @@ public class Operation extends AuthzNamedEntity implements Serializable {
         return ((this.getName() == castOther.getName()) ||
                 (this.getName() != null && castOther.getName() != null &&
                         this.getName().equals(castOther.getName()))) &&
-               ((this.getResourceTypeId() == castOther.getResourceTypeId()) ||
-                        (this.getResourceTypeId() != null &&
-                         castOther.getResourceTypeId() != null &&
-                         this.getResourceTypeId()
-                         .equals(castOther.getResourceTypeId())));
+               ((this.getResourceType() == castOther.getResourceType()) ||
+                        (this.getResourceType() != null &&
+                         castOther.getResourceType() != null &&
+                         this.getResourceType()
+                         .equals(castOther.getResourceType())));
     }
    
    public int hashCode() {

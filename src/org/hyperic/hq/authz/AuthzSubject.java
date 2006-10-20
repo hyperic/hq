@@ -42,9 +42,9 @@ public class AuthzSubject extends AuthzNamedEntity
      private String smsAddress;
      private String phoneNumber;
      private String department;
-     private boolean factive;
-     private boolean fsystem;
-     private Resource resourceId;
+     private boolean active;
+     private boolean system;
+     private Resource resource;
      private Collection roles;
      private Collection userConfigs;
      
@@ -78,9 +78,9 @@ public class AuthzSubject extends AuthzNamedEntity
         this.smsAddress = smsAddress;
         this.phoneNumber = phoneNumber;
         this.department = department;
-        this.factive = factive;
-        this.fsystem = fsystem;
-        this.resourceId = resourceId;
+        this.active = factive;
+        this.system = fsystem;
+        this.resource = resourceId;
         this.roles = roles;
         this.userConfigs = userConfigs;
     }
@@ -148,26 +148,26 @@ public class AuthzSubject extends AuthzNamedEntity
     public void setDepartment(String val) {
         department = val;
     }
-    public boolean isFactive() {
-        return factive;
+    public boolean isActive() {
+        return active;
     }
     
-    public void setFactive(boolean val) {
-        factive = val;
+    public void setActive(boolean val) {
+        active = val;
     }
-    public boolean isFsystem() {
-        return fsystem;
-    }
-    
-    public void setFsystem(boolean val) {
-        fsystem = val;
-    }
-    public Resource getResourceId() {
-        return resourceId;
+    public boolean isSystem() {
+        return system;
     }
     
-    public void setResourceId(Resource val) {
-        resourceId = val;
+    public void setSystem(boolean val) {
+        system = val;
+    }
+    public Resource getResource() {
+        return resource;
+    }
+    
+    public void setResource(Resource val) {
+        resource = val;
     }
     public Collection getRoles() {
         return roles;
@@ -185,7 +185,7 @@ public class AuthzSubject extends AuthzNamedEntity
     }
 
     public AuthzSubjectValue getAuthzSubjectValue() {
-        authzSubjectValue.setActive(isFactive());
+        authzSubjectValue.setActive(isActive());
         authzSubjectValue.setAuthDsn(getDsn());
         authzSubjectValue.setDepartment(getDepartment());
         authzSubjectValue.setEmailAddress(getEmailAddress());
@@ -195,13 +195,13 @@ public class AuthzSubject extends AuthzNamedEntity
         authzSubjectValue.setPhoneNumber(getPhoneNumber());
         authzSubjectValue.setSMSAddress(getSmsAddress());
         authzSubjectValue.setSortName(getSortName());
-        authzSubjectValue.setSystem(isFsystem());
+        authzSubjectValue.setSystem(isSystem());
         
         return authzSubjectValue;
     }
 
     public void setAuthzSubjectValue(AuthzSubjectValue authzSubjectValue) {
-        setFactive(authzSubjectValue.getActive());
+        setActive(authzSubjectValue.getActive());
         setDsn(authzSubjectValue.getAuthDsn());
         setDepartment(authzSubjectValue.getDepartment());
         setEmailAddress(authzSubjectValue.getEmailAddress());
@@ -211,7 +211,7 @@ public class AuthzSubject extends AuthzNamedEntity
         setPhoneNumber(authzSubjectValue.getPhoneNumber());
         setSmsAddress(authzSubjectValue.getSMSAddress());
         setSortName(authzSubjectValue.getSortName());
-        setFsystem(authzSubjectValue.getSystem());        
+        setSystem(authzSubjectValue.getSystem());        
     }
     
     public boolean isRoot() {
@@ -240,9 +240,9 @@ public class AuthzSubject extends AuthzNamedEntity
         result = 37*result + ((getSortName() != null) ?
                 getSortName().hashCode() : 0);
 
-        result = 37*result + (isFactive() ? 0 : 1);
+        result = 37*result + (isActive() ? 0 : 1);
 
-        result = 37*result + (isFsystem() ? 0 : 1);
+        result = 37*result + (isSystem() ? 0 : 1);
 
         result = 37*result + ((getDsn() != null) ? getDsn().hashCode() : 0);
 

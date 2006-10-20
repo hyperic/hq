@@ -34,8 +34,8 @@ import org.hyperic.hq.authz.shared.ResourceTypeValue;
 public class ResourceType extends AuthzNamedEntity implements Serializable {
 
     private Integer cid;
-    private Integer resourceId;
-    private boolean fsystem;
+    private Resource resource;
+    private boolean system;
     private Collection operations;
     private Collection resources;
 
@@ -53,13 +53,13 @@ public class ResourceType extends AuthzNamedEntity implements Serializable {
     }
 
     /** full constructor */
-    public ResourceType(String name, Integer cid, Integer resourceId,
+    public ResourceType(String name, Integer cid, Resource resource,
                         boolean fsystem, Collection operations,
                         Collection resources) {
         super(name);
         this.cid = cid;
-        this.resourceId = resourceId;
-        this.fsystem = fsystem;
+        this.resource = resource;
+        this.system = fsystem;
         this.operations = operations;
         this.resources = resources;
     }
@@ -72,20 +72,20 @@ public class ResourceType extends AuthzNamedEntity implements Serializable {
         cid = val;
     }
 
-    public Integer getResourceId() {
-        return resourceId;
+    public Resource getResource() {
+        return resource;
     }
 
-    public void setResourceId(Integer val) {
-        resourceId = val;
+    public void setResource(Resource val) {
+        resource = val;
     }
 
-    public boolean isFsystem() {
-        return fsystem;
+    public boolean isSystem() {
+        return system;
     }
 
-    public void setFsystem(boolean val) {
-        fsystem = val;
+    public void setSystem(boolean val) {
+        system = val;
     }
 
     public Collection getOperations() {
@@ -107,7 +107,7 @@ public class ResourceType extends AuthzNamedEntity implements Serializable {
     public ResourceTypeValue getResourceTypeValue() {
         resourceTypeValue.setId(getId());
         resourceTypeValue.setName(getName());
-        resourceTypeValue.setSystem(isFsystem());
+        resourceTypeValue.setSystem(isSystem());
         
         // Clear out the operation values first
         resourceTypeValue.removeAllOperationValues();
@@ -123,7 +123,7 @@ public class ResourceType extends AuthzNamedEntity implements Serializable {
     public void setResourceTypeValue(ResourceTypeValue val) {
         setId(val.getId());
         setName(val.getName());
-        setFsystem(val.getSystem());
+        setSystem(val.getSystem());
     }
 
     public boolean equals(Object other) {
@@ -143,7 +143,7 @@ public class ResourceType extends AuthzNamedEntity implements Serializable {
 
     public int hashCode() {
       int result = super.hashCode();
-      result = 37*result + (isFsystem() ? 0 : 1);
+      result = 37*result + (isSystem() ? 0 : 1);
 
       result = 37*result + ((getOperations() != null) ?
               getOperations().hashCode() : 0);
