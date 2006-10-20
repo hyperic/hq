@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
 import javax.ejb.FinderException;
@@ -42,16 +43,22 @@ import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.Util;
+import org.hyperic.hibernate.dao.AuthzSubjectDAO;
+import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.AuthzSubjectLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectLocalHome;
+import org.hyperic.hq.authz.shared.AuthzSubjectPK;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceValue;
-import org.hyperic.hq.authz.shared.AuthzSubjectLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectLocalHome;
-import org.hyperic.hq.authz.shared.AuthzSubjectPK;
-import org.hyperic.hq.authz.shared.AuthzSubjectUtil;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -61,8 +68,6 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /** Session bean to manipulate Subjects
  *
@@ -78,6 +83,10 @@ import org.apache.commons.logging.LogFactory;
 public class AuthzSubjectManagerEJBImpl
     extends AuthzSession implements SessionBean {
 
+    private AuthzSubjectDAO getSubjectDAO() {
+        return DAOFactory.getDAOFactory().getAuthzSubjectDAO();
+    }
+    
     protected static final Log log
         = LogFactory.getLog(AuthzSubjectManagerEJBImpl.class.getName());
 
@@ -99,45 +108,42 @@ public class AuthzSubjectManagerEJBImpl
      * @param subject The subject to be created.
      * @return Value-object for the new Subject.
      * @exception PermissionException whoami may not perform createSubject on the rootResource ResourceType.
+     * @throws CreateException 
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
+     * @ejb:transaction type="REQUIRES"
      */
     public AuthzSubjectPK createSubject(AuthzSubjectValue whoami,
                                         AuthzSubjectValue subject)
-        throws CreateException, NamingException, FinderException,
-               PermissionException {
-        AuthzSubjectLocalHome subjectLome = getSubjectHome();
-
+        throws FinderException, PermissionException, CreateException {
+        /* XXX restore after ResourceType conversion
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         pm.check(whoami.getId(), getRootResourceType(),
                  AuthzConstants.rootResourceId,
                  AuthzConstants.subjectOpCreateSubject);
-
+         */
+        AuthzSubjectDAO dao = getSubjectDAO();
         // Make sure there's not already a system subject with that name
         try {
-            subjectLome.findByAuth(subject.getName(),
-                                   AuthzConstants.overlordDsn);
-            throw new CreateException("A system user already exists with " +
-                                      subject.getName());
-        } catch (FinderException e) {
+            AuthzSubject existing =
+                dao.findByAuth(subject.getName(), AuthzConstants.overlordDsn);
+            if (existing != null)
+                throw new CreateException("A system user already exists with " +
+                                          subject.getName());
+        } catch (ObjectNotFoundException e) {
             // continue, we expected not to have found an existing user
         }
         
-        AuthzSubjectLocal whoamiLocal =
-            subjectLome.findByAuth(whoami.getName(), whoami.getAuthDsn());
+        AuthzSubject whoamiPojo =
+            dao.findByAuth(whoami.getName(), whoami.getAuthDsn());
 
-        AuthzSubjectLocal subjectLocal =
-            subjectLome.create(whoamiLocal, subject);
+        AuthzSubject subjectPojo = dao.create(whoamiPojo, subject);
+        // Flush the session so that we can do direct SQL
+        dao.getSession().flush();
+        
+        this.insertUserPrefs(dao.getSession().connection(),
+                             subjectPojo.getId());
 
-        try {
-            this.insertUserPrefs(subject.getId());
-        } catch (Exception e) {
-            rollback();
-            // Just in case...
-            throw new SystemException(e);
-        }
-
-        return (AuthzSubjectPK)subjectLocal.getPrimaryKey();
+        return new AuthzSubjectPK(subjectPojo.getId());
     }
 
 
@@ -198,40 +204,38 @@ public class AuthzSubjectManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void removeSubject(AuthzSubjectValue whoami,
-                              Integer subject)
+    public void removeSubject(AuthzSubjectValue whoami, Integer subject)
         throws NamingException, FinderException, 
                RemoveException, PermissionException {
-        AuthzSubjectLocalHome lome = getSubjectHome();
-
-        AuthzSubjectPK currentUserPK = whoami.getPrimaryKey();
-        AuthzSubjectPK userToDeletePK = new AuthzSubjectPK(subject);
-        AuthzSubjectLocal userToDelete = null;
-
         // no removing of the root user!
         if (subject.equals(AuthzConstants.rootSubjectId)) {
             throw new RemoveException("Root user can not be deleted");
         }
 
-        if ( currentUserPK.equals(userToDeletePK) ) {
-            // XXX Should we do anything special for the "suicide" case?
-            // Perhaps a log message?
-            lome.remove(currentUserPK);
-            return;
+        AuthzSubjectDAO dao = getSubjectDAO();
+        AuthzSubject toDelete = dao.findById(subject);
+
+        String name = toDelete.getName();
+        // XXX Should we do anything special for the "suicide" case?
+        // Perhaps a log message?
+        if ( !whoami.getId().equals(subject) ) {
+            /* XXX restore after ResourceType conversion
+            PermissionManager pm = PermissionManagerFactory.getInstance(); 
+            pm.check(whoami.getId(), getRootResourceType().getId(),
+                     AuthzConstants.rootResourceId,
+                     AuthzConstants.perm_removeSubject);
+
+            */
         }
 
-        userToDelete = lome.findByPrimaryKey(userToDeletePK);
-        String name = userToDelete.getName();
+        deleteUserPrefs(dao.getSession().connection(), subject);
 
-        PermissionManager pm = PermissionManagerFactory.getInstance(); 
-        pm.check(whoami.getId(), getRootResourceType().getId(),
-                 AuthzConstants.rootResourceId,
-                 AuthzConstants.perm_removeSubject);
+        dao.remove(toDelete);
 
-        deleteUserPrefs(subject);
-        lome.remove(userToDeletePK);
         // remove from cache
         VOCache.getInstance().removeSubject(name);
+        return;
+
     }
 
     /** Get the Resource entity associated with this Subject.
@@ -250,13 +254,15 @@ public class AuthzSubjectManagerEJBImpl
      * @exception PermissionException whoami does not have the viewSubject
      * permission in any of its roles.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="REQUIRED"
      */
     public AuthzSubjectValue findSubjectById(AuthzSubjectValue whoami,
-        Integer id)
+                                             Integer id)
         throws NamingException, FinderException, PermissionException {
 
-        AuthzSubjectLocal sub = getSubjectHome().findById(id);
+        AuthzSubject sub = getSubjectDAO().findById(id);
+        
+        /* XXX restore after ResourceType conversion
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         // users can see their own entries without requiring special permission
         if(!whoami.getId().equals(id)) {
@@ -264,6 +270,7 @@ public class AuthzSubjectManagerEJBImpl
                      AuthzConstants.rootResourceId,
                      AuthzConstants.perm_viewSubject);
         }
+        */
         return sub.getAuthzSubjectValue();
     }
 
@@ -272,35 +279,23 @@ public class AuthzSubjectManagerEJBImpl
      * @exception PermissionException whoami does not have the viewSubject
      * permission in any of its roles.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="REQUIRED"
      */
     public AuthzSubjectValue findSubjectByName(AuthzSubjectValue whoami,
         String name)
         throws FinderException, PermissionException {
         // look for the subject in the cache
         AuthzSubjectValue vo;
-        try {
-            AuthzSubjectLocal sub =
-                getSubjectHome().findByName(name);
-            PermissionManager pm = PermissionManagerFactory.getInstance(); 
-            // skip this check if the user is requesting his own entity,
-            // as happens in the case of login
-            if(!whoami.getName().equals(name)) {
-                pm.check(whoami.getId(), getRootResourceType().getId(),
-                         AuthzConstants.rootResourceId,
-                         AuthzConstants.perm_viewSubject);
-            }
-            vo = VOCache.getInstance().getAuthzSubject(name);
-            if(vo == null) {
-                // not in cache. Put it in there
-                vo = getSubjectHome().findByName(name).getAuthzSubjectValue();
-                VOCache cache = VOCache.getInstance();
-                synchronized(cache.getSubjectLock()) {
-                    cache.put(name, vo);
-                }
-            }
-        } catch (NamingException e) {
-            throw new SystemException(e);
+        vo = VOCache.getInstance().getAuthzSubject(name);
+        if(vo == null) {
+            AuthzSubject sub = getSubjectDAO().findByName(name);
+
+            // not in cache. Put it in there
+            vo = sub.getAuthzSubjectValue();
+            VOCache cache = VOCache.getInstance();
+            synchronized(cache.getSubjectLock()) {
+                cache.put(name, vo);
+            }            
         }
         return vo;
     }
@@ -310,18 +305,18 @@ public class AuthzSubjectManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
-    public PageList getAllSubjects(AuthzSubjectValue whoami,
-                               PageControl pc)
+    public PageList getAllSubjects(AuthzSubjectValue whoami, PageControl pc)
         throws NamingException, FinderException, PermissionException {
         Collection subjects;
         pc = PageControl.initDefaults(pc, SortAttribute.SUBJECT_NAME);
-        int attr = pc.getSortattribute();
-        AuthzSubjectLocalHome subLocalHome = getSubjectHome();
         PageList plist = new PageList();
-        int totalSize = 0;
+        
+        AuthzSubjectDAO dao = getSubjectDAO();
         // if a user does not have permission to view subjects, 
         // all they can see is their own entry.
-        AuthzSubjectLocal whoEJB = lookupSubject(whoami);
+        AuthzSubject who = dao.findById(whoami.getId());
+
+        /* XXX restore after ResourceType conversion
         try {
             PermissionManager pm = PermissionManagerFactory.getInstance(); 
             pm.check(whoami.getId(), getRootResourceType(),
@@ -329,56 +324,40 @@ public class AuthzSubjectManagerEJBImpl
                      AuthzConstants.subjectOpViewSubject);
         } catch (PermissionException e) {
             // return a list with only the one entry.
-            plist.add(whoEJB.getAuthzSubjectValue());
+            plist.add(who.getAuthzSubjectValue());
             plist.setTotalSize(1);
             return plist;
         }
+        */
 
-        switch (attr) {
+        switch (pc.getSortattribute()) {
         case SortAttribute.SUBJECT_NAME:
-            if (pc.isDescending())
-                if (whoEJB.isRoot()) 
-                    subjects = subLocalHome.findAllRoot_orderName_desc();
-                else
-                    subjects = subLocalHome.findAll_orderName_desc();
+            if (who.isRoot())
+                subjects = dao.findAllRoot_orderName(pc.isAscending());
             else
-                if (whoEJB.isRoot()) 
-                    subjects = subLocalHome.findAllRoot_orderName_asc();
-                else
-                    subjects = subLocalHome.findAll_orderName_asc();
+                subjects = dao.findAll_orderName(pc.isAscending());
             break;
 
         case SortAttribute.FIRST_NAME:
-            if (pc.isDescending())
-                if (whoEJB.isRoot()) 
-                    subjects = subLocalHome.findAllRoot_orderFirstName_desc();
-                else
-                    subjects = subLocalHome.findAll_orderFirstName_desc();
+            if (who.isRoot())
+                subjects = dao.findAllRoot_orderFirstName(pc.isAscending());
             else
-                if (whoEJB.isRoot()) 
-                    subjects = subLocalHome.findAllRoot_orderFirstName_asc();
-                else
-                    subjects = subLocalHome.findAll_orderFirstName_asc();
+                subjects = dao.findAll_orderFirstName(pc.isAscending());
             break;
 
         case SortAttribute.LAST_NAME:
-            if (pc.isDescending())
-                if (whoEJB.isRoot()) 
-                    subjects = subLocalHome.findAllRoot_orderLastName_desc();
-                else
-                    subjects = subLocalHome.findAll_orderLastName_desc();
+            if (who.isRoot())
+                subjects = dao.findAllRoot_orderLastName(pc.isAscending());
             else
-                if (whoEJB.isRoot()) 
-                    subjects = subLocalHome.findAllRoot_orderLastName_asc();
-                else
-                    subjects = subLocalHome.findAll_orderLastName_asc();
+                subjects = dao.findAll_orderLastName(pc.isAscending());
             break;
 
         default:
-            throw new FinderException("Unrecognized sort attribute: " + attr);
+            throw new FinderException("Unrecognized sort attribute: " +
+                                      pc.getSortattribute());
         }                
         
-        plist.setTotalSize(((List)subjects).size());
+        plist.setTotalSize(subjects.size());
         return subjectPager.seek(subjects, pc.getPagenum(), pc.getPagesize() );
     }
 
@@ -458,13 +437,11 @@ public class AuthzSubjectManagerEJBImpl
      * @param id id of the subject.
      * @return The e-mail address of the subject
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="REQUIRED"
      */
     public String getEmailById(Integer id)
         throws NamingException, FinderException {
-        AuthzSubjectLocalHome subjectLome = getSubjectHome();
-        AuthzSubjectLocal subject =
-            subjectLome.findByPrimaryKey(new AuthzSubjectPK(id));
+        AuthzSubject subject = getSubjectDAO().findById(id);
         return subject.getEmailAddress();
     }
 
@@ -473,20 +450,18 @@ public class AuthzSubjectManagerEJBImpl
      * @param name Name of the subjects.
      * @return The e-mail address of the subject
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="REQUIRED"
      */
     public String getEmailByName(String userName)
         throws NamingException, FinderException {
-        AuthzSubjectLocalHome subjectLome = getSubjectHome();
-        AuthzSubjectLocal subject =
-            subjectLome.findByName(userName);
+        AuthzSubject subject = getSubjectDAO().findByName(userName);
         return subject.getEmailAddress();
     }
 
     /**
      * Get the Preferences for a specified user
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="REQUIRED"
      */
     public ConfigResponse getUserPrefs(AuthzSubjectValue who, Integer subjId)
         throws NamingException, FinderException, PermissionException,
@@ -500,7 +475,9 @@ public class AuthzSubjectManagerEJBImpl
                      AuthzConstants.subjectOpViewSubject);
         }
 
-        byte[] bytes = selectUserPrefs(subjId);
+        byte[] bytes =
+            selectUserPrefs(getSubjectDAO().getSession().connection(),
+                            subjId);
         if(bytes == null) {
             return new ConfigResponse(); 
         } else {
@@ -534,20 +511,17 @@ public class AuthzSubjectManagerEJBImpl
         = "INSERT INTO EAM_USER_CONFIG_RESP "
         + "(ID, SUBJECT_ID, PREF_RESPONSE) "
         + "VALUES (?,?,NULL)";
-    private void insertUserPrefs(Integer subjId) {
-        Connection conn = null;
+    private void insertUserPrefs(Connection conn, Integer subjId) {
         PreparedStatement ps = null;
         try {
-            conn = this.getDBConn();
             ps = conn.prepareStatement(SQL_PREFS_INSERT);
             ps.setInt(1, subjId.intValue());
             ps.setInt(2, subjId.intValue());
             ps.executeUpdate();
-
         } catch (SQLException e) {
             throw new SystemException(e);
         } finally {
-            DBUtil.closeJDBCObjects(log, conn, ps, null);
+            DBUtil.closeStatement(log, ps);
         }
     }
     
@@ -574,15 +548,12 @@ public class AuthzSubjectManagerEJBImpl
     
     private static final String SQL_PREFS_SELECT 
         = "SELECT PREF_RESPONSE FROM EAM_USER_CONFIG_RESP WHERE ID=?";
-    private byte[] selectUserPrefs (Integer subjId) {
-
-        Connection        conn = null;
+    private byte[] selectUserPrefs (Connection conn, Integer subjId) {
         PreparedStatement ps   = null;
         ResultSet         rs   = null;
         byte[]            data = null;
 
         try {
-            conn = this.getDBConn();
             ps = conn.prepareStatement(SQL_PREFS_SELECT);
             ps.setInt(1, subjId.intValue());
             rs = ps.executeQuery();
@@ -592,47 +563,39 @@ public class AuthzSubjectManagerEJBImpl
         } catch (SQLException e) {
             throw new SystemException(e);
         } finally {
-            DBUtil.closeJDBCObjects(log, conn, ps, rs);
+            DBUtil.closeJDBCObjects(log, null, ps, rs);
         }
         return data;
     }
 
     private static final String SQL_PREFS_DELETE 
         = "DELETE FROM EAM_USER_CONFIG_RESP WHERE ID=?";
-    private void deleteUserPrefs(Integer subjId) {
-
-        Connection        conn = null;
+    private void deleteUserPrefs(Connection conn, Integer subjId) {
         PreparedStatement ps   = null;
 
         try {
-            conn = getDBConn();
             ps = conn.prepareStatement(SQL_PREFS_DELETE);
             ps.setInt(1,subjId.intValue());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new SystemException(e);
         } finally {
-            DBUtil.closeJDBCObjects(log, conn, ps, null);
+            DBUtil.closeStatement(log, ps);
         }
     }
-
     /**
      * Get the overlord spider subject value. THe overlord is the systems
      * anonymous user and should be used for non-authz operations
      * that require a subject value as one of the params
      * @return the overlord
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="REQUIRED"
      */
     public AuthzSubjectValue getOverlord() 
         throws NamingException, FinderException {
         if (overlord == null) {
-            overlord = AuthzSubjectUtil.getLocalHome()
-                            .findByPrimaryKey(
-                                new AuthzSubjectPK(
-                                    new Integer(
-                                        AuthzConstants.overlordId)))
-                                            .getAuthzSubjectValue();
+            overlord = getSubjectDAO().findById(
+                new Integer(AuthzConstants.overlordId)).getAuthzSubjectValue();
         }
         return overlord;
     }
@@ -642,16 +605,13 @@ public class AuthzSubjectManagerEJBImpl
      * unrestricted user which can log in.
      * @return the overlord
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="REQUIRED"
      */
     public AuthzSubjectValue getRoot() 
         throws NamingException, FinderException {
         if (root == null) {
-            root = AuthzSubjectUtil.getLocalHome()
-                            .findByPrimaryKey(
-                                new AuthzSubjectPK( 
-                                        AuthzConstants.rootSubjectId))
-                                            .getAuthzSubjectValue();
+            root = getSubjectDAO().findById(AuthzConstants.rootSubjectId)
+                    .getAuthzSubjectValue();
         }
         return root;
     }
