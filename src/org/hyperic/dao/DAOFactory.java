@@ -37,6 +37,7 @@ import org.hyperic.hibernate.dao.CpropDAO;
 import org.hyperic.hibernate.dao.CpropKeyDAO;
 import org.hyperic.hibernate.dao.HibernateDAOFactory;
 import org.hyperic.hibernate.dao.HibernateMockDAOFactory;
+import org.hyperic.hibernate.dao.MonitorableTypeDAO;
 import org.hyperic.hibernate.dao.OperationDAO;
 import org.hyperic.hibernate.dao.PlatformDAO;
 import org.hyperic.hibernate.dao.PlatformTypeDAO;
@@ -76,6 +77,7 @@ public abstract class DAOFactory
     // Measurement DAOs
     public abstract BaselineDAO getBaselineDAO();
     public abstract CategoryDAO getCategoryDAO();
+    public abstract MonitorableTypeDAO getMonitorableTypeDAO();
 
     public static ThreadLocal defaultSession = new ThreadLocal();
 

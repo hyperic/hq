@@ -136,4 +136,9 @@ public class HibernateDAOFactory extends DAOFactory
     public OperationDAO getOperationDAO() {
         return new OperationDAO(getCurrentSession());
     }
+
+    public MonitorableTypeDAO getMonitorableTypeDAO()
+    {
+        return new MonitorableTypeDAO(getCurrentSession());
+    }
 }
