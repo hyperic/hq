@@ -281,7 +281,7 @@
       <column name="TICKS"  default="0" />
     </property>
 
-    <property name="weight" type="double">
+    <property name="weight" type="float">
       <column name="WEIGHT" default="0" />
     </property>
 
