@@ -150,9 +150,7 @@ public class PermissionManagerImpl
                                          String[] opArr)
         throws FinderException
     {
-        AuthzSubjectLocal subjLoc;
         ResourceLocal[] resLocArr;
-        OperationLocal[] opLocArr;
 
         if (resArr == null || opArr == null ||
             resArr.length != opArr.length) {
@@ -161,15 +159,12 @@ public class PermissionManagerImpl
                                                "of operations");
         }
 
-        subjLoc = lookupSubject(whoami);
         resLocArr = new ResourceLocal[resArr.length];
-        opLocArr = new OperationLocal[opArr.length];
 
-        for (int x=0;x<opLocArr.length;x++) {
+        for (int x = 0; x < resLocArr.length; x++) {
             resLocArr[x] = lookupResource(resArr[x]);
-            opLocArr[x] = lookupOperation(resLocArr[x].getResourceType(),
-                                           opArr[x]);
         }
+        
         Collection coll = 
             getResourceHome().findScopeByOperationBatch(resLocArr);
         return (ResourceValue[])this.fromLocals(coll, 
