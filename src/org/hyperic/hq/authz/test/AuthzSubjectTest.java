@@ -1,13 +1,14 @@
 package org.hyperic.hq.authz.test;
 
-import org.hibernate.Session;
-import org.hyperic.hibernate.Util;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectPK;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceManagerUtil;
+import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.test.HQEJBTestBase;
 import org.hyperic.util.pager.PageControl;
@@ -15,7 +16,10 @@ import org.hyperic.util.pager.PageControl;
 public class AuthzSubjectTest 
     extends HQEJBTestBase
 {
+    private static final String BOGUS_NAME = "foobar";
+    
     AuthzSubjectManagerLocal zMan = null;
+    AuthzSubjectValue overlord = null;
     
     public AuthzSubjectTest(String string) {
         super(string);
@@ -25,6 +29,7 @@ public class AuthzSubjectTest
         super.setUp();
 
         zMan = AuthzSubjectManagerUtil.getLocalHome().create();
+        overlord = zMan.getOverlord();
     }
 
     public Class[] getUsedSessionBeans() {
@@ -32,15 +37,13 @@ public class AuthzSubjectTest
     }
  
     public void testSystemSubjects() throws Exception {
-        AuthzSubjectValue overlord = zMan.getOverlord();
-        assertEquals(overlord.getId().intValue(), AuthzConstants.overlordId);
+        assertEquals(overlord.getId(), AuthzConstants.overlordId);
         
         AuthzSubjectValue root = zMan.getRoot();
         assertEquals(root.getId(), AuthzConstants.rootSubjectId);
     }
     
     public void testSimpleCreate() throws Exception {
-        AuthzSubjectValue overlord = zMan.getOverlord();
         int numSubjects = zMan.getAllSubjects(overlord,
                                               PageControl.PAGE_ALL).size();
 
@@ -48,7 +51,7 @@ public class AuthzSubjectTest
         subject.setName("foo");
         subject.setFirstName("Foo");
         subject.setLastName("Bar");
-        subject.setEmailAddress("foobar");
+        subject.setEmailAddress(BOGUS_NAME);
         subject.setAuthDsn(HQConstants.ApplicationName);
 
         AuthzSubjectPK pk = zMan.createSubject(overlord, subject);
@@ -68,8 +71,8 @@ public class AuthzSubjectTest
         assertEquals(pk.getId(), subject.getId());
         
         // Check the bogus email
-        assertEquals("foobar", zMan.getEmailById(pk.getId()));
-        assertEquals("foobar", zMan.getEmailByName("foo"));
+        assertEquals(BOGUS_NAME, zMan.getEmailById(pk.getId()));
+        assertEquals(BOGUS_NAME, zMan.getEmailByName("foo"));
         
         // Now delete it
         zMan.removeSubject(overlord, pk.getId());
@@ -78,5 +81,22 @@ public class AuthzSubjectTest
                      zMan.getAllSubjects(overlord,
                                          PageControl.PAGE_ALL).size());
         
+    }
+    
+    public void testResourceType() throws Exception {
+        ResourceManagerLocal rman = ResourceManagerUtil.getLocalHome().create();
+        ResourceTypeValue rt =
+            rman.findResourceTypeByName(AuthzConstants.subjectResourceTypeName);
+        assertEquals(AuthzConstants.subjectResourceTypeName, rt.getName());
+        
+        rt = new ResourceTypeValue();
+        rt.setSystem(false);
+        rt.setName(BOGUS_NAME);
+        rman.createResourceType(overlord, rt, null);
+
+        rt = rman.findResourceTypeByName(BOGUS_NAME);
+        assertEquals(BOGUS_NAME, rt.getName());
+        
+        rman.removeResourceType(overlord, rt);
     }
 }
