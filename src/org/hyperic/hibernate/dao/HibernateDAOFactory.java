@@ -141,4 +141,14 @@ public class HibernateDAOFactory extends DAOFactory
     {
         return new MonitorableTypeDAO(getCurrentSession());
     }
+    
+    public RawMeasurementDAO getRawMeasurementDAO()
+    {
+        return new RawMeasurementDAO(getCurrentSession());
+    }
+
+    public DerivedMeasurementDAO getDerivedMeasurementDAO()
+    {
+        return new DerivedMeasurementDAO(getCurrentSession());
+    }
 }
