@@ -127,8 +127,7 @@ public final class AuthzConstants {
     public static final String typeResourceTypeName =
         "covalentAuthzRootResourceType";
     public static final String roleResourceTypeName = "covalentAuthzRole";
-    public static final int overlordId = 0;
-    public static final Integer overlordIdInteger = new Integer(0);
+    public static final Integer overlordId = new Integer(0);
     public static final String overlordName = "admin";
     public static final String overlordDsn = "covalentAuthzInternalDsn";
     public static final String authzResourceGroupName =
@@ -169,7 +168,7 @@ public final class AuthzConstants {
     public static final Integer     authzLocation       =  new Integer(309);
 
     public static boolean isOverlord(Integer subject) {
-        return subject.equals(AuthzConstants.overlordIdInteger);
+        return subject.equals(AuthzConstants.overlordId);
     }
     public static boolean isOverlord(AuthzSubjectValue subject) {
         return isOverlord(subject.getId());
