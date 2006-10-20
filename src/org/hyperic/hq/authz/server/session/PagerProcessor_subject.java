@@ -25,8 +25,9 @@
 
 package org.hyperic.hq.authz.server.session;
 
-import org.hyperic.util.pager.PagerProcessor;
+import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectLocal;
+import org.hyperic.util.pager.PagerProcessor;
 
 public class PagerProcessor_subject implements PagerProcessor {
  
@@ -37,6 +38,9 @@ public class PagerProcessor_subject implements PagerProcessor {
         try {
             if ( o instanceof AuthzSubjectLocal) {
                 return ((AuthzSubjectLocal) o).getAuthzSubjectValue();
+            }
+            else if (o instanceof AuthzSubject) {
+                return ((AuthzSubject) o).getAuthzSubjectValue();
             }
         } catch (Exception e) {
             throw new IllegalStateException("Error converting to Subject: "
