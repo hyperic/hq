@@ -29,6 +29,7 @@ import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
 import org.mockejb.SessionBeanDescriptor;
 
@@ -44,7 +45,8 @@ public abstract class HQEJBTestBase
     
     private Class[] getUsedSessionBeans() {
         return new Class[] { RegisteredTriggerManagerEJBImpl.class,
-                             AuthzSubjectManagerEJBImpl.class };
+                             AuthzSubjectManagerEJBImpl.class,
+                             ResourceManagerEJBImpl.class };
     }
 
     public void setUp() 
