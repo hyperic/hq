@@ -80,7 +80,8 @@ import org.hyperic.util.pager.SortAttribute;
  * 
  * @ejb:util generate="physical"
  */
-public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean {
+public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
+{
 
     private Pager resourcePager = null;
     private Pager resourceTypePager = null;
@@ -448,20 +449,19 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean 
      * @param whoami The current running user.
      * @param resource This Resource.
      * @param newOwner The new owner.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami does not own the resource.
+     * @throws PermissionException whoami does not own the resource.
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
     public void setResourceOwner(AuthzSubjectValue whoami, ResourceValue res,
                                  AuthzSubjectValue newOwner)
-        throws NamingException, FinderException, PermissionException {
-        Resource resLocal = lookupResourcePojo(res);
+        throws PermissionException {
+        Resource resource = lookupResourcePojo(res);
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
 
-        if (pm.hasAdminPermission(whoami) || resLocal.isOwner(whoami.getId())) {
-            resLocal.setOwner(lookupSubjectPojo(newOwner));
+        if (pm.hasAdminPermission(whoami) ||
+            getResourceDAO().isOwner(resource, whoami.getId())) {
+            resource.setOwner(lookupSubjectPojo(newOwner));
         }
         else {
             throw new PermissionException("Only an owner or admin may " +

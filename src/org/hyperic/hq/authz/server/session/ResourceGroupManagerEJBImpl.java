@@ -42,6 +42,11 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hibernate.dao.ResourceDAO;
+import org.hyperic.hibernate.dao.ResourceGroupDAO;
+import org.hyperic.hq.authz.Resource;
+import org.hyperic.hq.authz.ResourceGroup;
+import org.hyperic.hq.authz.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -55,7 +60,6 @@ import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
-import org.hyperic.hq.authz.shared.ResourceTypeLocal;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleLocal;
@@ -188,24 +192,21 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      * @param whoami user requesting to find the group
      * @param name The name of the role you're looking for.
      * @return The value-object of the role of the given name.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami does not have viewResourceGroup
+     * @throws PermissionException whoami does not have viewResourceGroup
      * on the requested group
      * @ejb:interface-method
      * @ejb:transaction type="NOTSUPPORTED"
      */
     public ResourceGroupValue findResourceGroupByName(AuthzSubjectValue whoami,
                                                       String name)
-        throws NamingException, FinderException, PermissionException
-    {
-        ResourceGroupLocal groupLocal = getGroupHome().findByName(name);
+        throws PermissionException {
+        ResourceGroup resGroup = getResourceGroupDAO().findByName(name);
         PermissionManager pm = PermissionManagerFactory.getInstance();
         pm.check(whoami.getId(),
-                 groupLocal.getResource().getResourceType(),
-                 groupLocal.getId(),
+                 resGroup.getResource().getResourceType(),
+                 resGroup.getId(),
                  AuthzConstants.groupOpViewResourceGroup);
-        return groupLocal.getResourceGroupValue();
+        return resGroup.getResourceGroupValue();
     }
 
     /**
@@ -265,29 +266,27 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      * @param whoami The current running user.
      * @param group The group.
      * @param resources The resources to associate with the group.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
-     * @exception PermissionException whoami does not own the resources.
+     * @throws PermissionException whoami does not own the resources.
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
     public void addResources(AuthzSubjectValue whoami,
                              ResourceGroupValue group,
                              ResourceValue[] resources)
-        throws FinderException, NamingException, PermissionException {
-        AuthzSubjectLocal whoamiLocal =
-            getSubjectHome().findByPrimaryKey(whoami.getPrimaryKey());
-        Set rLocals = this.toLocals(resources);
-        ResourceGroupLocal groupLocal =
-            getGroupHome().findByName(group.getName());
-        groupLocal.setWhoami(whoamiLocal);
+        throws PermissionException {
+        ResourceGroupDAO grpDao = getResourceGroupDAO();
+        ResourceGroup resGroup = grpDao.findByName(group.getName());
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         pm.check(whoami.getId(),
                  AuthzConstants.authzGroup,
                  group.getId(),
                  AuthzConstants.perm_modifyResourceGroup);
 
-        groupLocal.addResources(rLocals);
+        ResourceDAO resDao = getResourceDAO();
+        for (int i = 0; i < resources.length; i++) {
+            Resource resource = resDao.findById(resources[i].getId());
+            grpDao.addResource(resGroup, resource);
+        }
     }
 
     /**
@@ -296,6 +295,7 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      * @param resourceGroup - the group you want to modify
      * @param resId - resource Id
      * @param resourceType - the type of resource
+     * @throws PermissionException 
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
@@ -303,28 +303,21 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
                                           ResourceGroupValue group,
                                           Integer instId, 
                                           ResourceTypeValue type)
-        throws FinderException, NamingException, PermissionException
-    {
-        AuthzSubjectLocal whoamiLocal =
-            getSubjectHome().findByPrimaryKey(whoami.getPrimaryKey());
-        ResourceGroupLocal groupLocal =
-            getGroupHome().findByName(group.getName());
-        ResourceGroupPK groupPk = (ResourceGroupPK)groupLocal.getPrimaryKey();
-        groupLocal.setWhoami(whoamiLocal);
+        throws PermissionException {
+        ResourceGroupDAO dao = getResourceGroupDAO();
+        ResourceGroup resGroup = dao.findByName(group.getName());
 
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         pm.check(whoami.getId(),
                  AuthzConstants.authzGroup,
-                 groupPk.getId(),
+                 resGroup.getId(),
                  AuthzConstants.perm_modifyResourceGroup);
 
         // now look up the resource by type and id
-        ResourceTypeLocal typeLocal =
-            getResourceTypeHome().findByName(type.getName());
-        ResourceLocal resource = getResourceHome().findByInstanceId(typeLocal, 
-            instId);
-        groupLocal.addResource(resource);
-        return groupLocal.getResourceGroupValue();
+        ResourceType resType = getResourceTypeDAO().findByName(type.getName());
+        Resource resource = getResourceDAO().findByInstanceId(resType, instId);
+        dao.addResource(resGroup, resource);
+        return resGroup.getResourceGroupValue();
     }
  
     /**
@@ -339,44 +332,46 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      */
     public void removeResources(AuthzSubjectValue whoami,
                                 ResourceGroupValue group,
-                                ResourceValue[] resources)
+                                ResourceValue[] resVals)
         throws FinderException, NamingException, PermissionException {
-        Set rLocals = this.toLocals(resources);
-        ResourceGroupLocal groupLocal =
-            getGroupHome().findByName(group.getName());
-        ResourceGroupPK groupPk = (ResourceGroupPK)groupLocal.getPrimaryKey();
+        ResourceGroupDAO grpDao = getResourceGroupDAO();
+        ResourceGroup groupLocal = grpDao.findByName(group.getName());
 
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         pm.check(whoami.getId(),
                  AuthzConstants.authzGroup,
-                 groupPk.getId(),
+                 groupLocal.getId(),
                  AuthzConstants.perm_modifyResourceGroup);
-        groupLocal.removeResources(rLocals);
+        
+        ResourceDAO resDao = getResourceDAO();
+        Resource[] resources = new Resource[resVals.length];
+        for (int i = 0; i < resVals.length; i++) {
+            resources[i] = resDao.findById(resVals[i].getId());
+        }
+        grpDao.removeResources(groupLocal, resources);
     }
 
     /**
      * Disassociate all resources from this group.
      * @param whoami The current running user.
      * @param group The group.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
+     * @throws PermissionException 
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
     public void removeAllResources(AuthzSubjectValue whoami,
                                    ResourceGroupValue group)
-        throws FinderException, NamingException, PermissionException
-    {
-        ResourceGroupLocal groupLocal =
-            getGroupHome().findByName(group.getName());
+        throws PermissionException {
+        ResourceGroupDAO dao = getResourceGroupDAO();
+        ResourceGroup resGroup = dao.findByName(group.getName());
 
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         pm.check(whoami.getId(),
                  AuthzConstants.authzGroup,
-                 ((ResourceGroupPK)groupLocal.getPrimaryKey()).getId(),
+                 resGroup.getId(),
                  AuthzConstants.perm_modifyResourceGroup);
 
-        groupLocal.removeAllResources();
+        dao.removeAllResources(resGroup);
     }
 
     /**

@@ -44,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.dao.AuthzSubjectDAO;
 import org.hyperic.hibernate.dao.ResourceDAO;
+import org.hyperic.hibernate.dao.ResourceGroupDAO;
 import org.hyperic.hibernate.dao.ResourceTypeDAO;
 import org.hyperic.hq.authz.AuthzNamedEntity;
 import org.hyperic.hq.authz.AuthzSubject;
@@ -122,6 +123,10 @@ public abstract class AuthzSession {
 
     protected ResourceDAO getResourceDAO() {
         return DAOFactory.getDAOFactory().getResourceDAO();
+    }
+
+    protected ResourceGroupDAO getResourceGroupDAO() {
+        return DAOFactory.getDAOFactory().getResourceGroupDAO();
     }
 
     protected AuthzSubjectDAO getSubjectDAO() {
@@ -228,11 +233,6 @@ public abstract class AuthzSession {
         throws NamingException, FinderException {
         return DAOFactory.getDAOFactory().getAuthzSubjectDAO()
             .findByAuth(name, authDsn).getAuthzSubjectValue();
-    }
-
-    protected ResourceGroupLocal findRootResourceGroup()
-        throws NamingException, FinderException {
-        return getGroupHome().findByName(AuthzConstants.authzResourceGroupName);
     }
 
     protected Set toLocals(Object[] values)
