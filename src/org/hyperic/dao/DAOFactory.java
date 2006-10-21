@@ -23,7 +23,7 @@
  * USA.
  */
 
- package org.hyperic.dao;
+package org.hyperic.dao;
 
 import org.hibernate.Session;
 import org.hyperic.hibernate.dao.AgentDAO;
@@ -48,6 +48,7 @@ import org.hyperic.hibernate.dao.PlatformTypeDAO;
 import org.hyperic.hibernate.dao.ResourceDAO;
 import org.hyperic.hibernate.dao.RawMeasurementDAO;
 import org.hyperic.hibernate.dao.ResourceTypeDAO;
+import org.hyperic.hibernate.dao.ScheduleRevNumDAO;
 import org.hyperic.hibernate.dao.RoleDAO;
 import org.hyperic.hibernate.dao.ServerDAO;
 import org.hyperic.hibernate.dao.ServerTypeDAO;
@@ -92,6 +93,7 @@ public abstract class DAOFactory
     public abstract MeasurementTemplateDAO getMeasurementTemplateDAO();
     public abstract MeasurementArgDAO getMeasurementArgDAO();
     public abstract MetricProblemDAO getMetricProblemDAO();
+    public abstract ScheduleRevNumDAO getScheduleRevNumDAO();
 
     public static ThreadLocal defaultSession = new ThreadLocal();
 

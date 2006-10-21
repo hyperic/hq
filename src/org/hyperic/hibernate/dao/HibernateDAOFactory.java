@@ -174,5 +174,10 @@ public class HibernateDAOFactory extends DAOFactory
     {
         return new MetricProblemDAO(getCurrentSession());
     }
+
+    public ScheduleRevNumDAO getScheduleRevNumDAO()
+    {
+        return new ScheduleRevNumDAO(getCurrentSession());
+    }
 }
 
