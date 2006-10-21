@@ -44,6 +44,7 @@ public class AuthzSubjectDAO extends HibernateDAO
     public AuthzSubject create(AuthzSubject creator,
                                AuthzSubjectValue createInfo) {
         AuthzSubject res = new AuthzSubject(createInfo);
+        // XXX create resource for owner
         save(res);
         return res;
     }
@@ -159,11 +160,12 @@ public class AuthzSubjectDAO extends HibernateDAO
     public Collection findByNotRoleId_orderName(Integer roleId, boolean asc)
     {
         return getSession()
-            .createQuery("from AuthzSubject where userId not in " +
+            .createQuery("from AuthzSubject s where s.userId not in " +
                          "(select s2.userId from AuthzSubject s2 join " +
                          "fetch s2.roles r where r.id = ? ) and " +
-                         "system = false order by sortName " +
+                         "s.system = false order by s.sortName " +
                          (asc ? "asc" : "desc"))
+            .setInteger(0, roleId.intValue())
             .list();
     }
 
@@ -173,6 +175,7 @@ public class AuthzSubjectDAO extends HibernateDAO
             .createQuery("from AuthzSubject join fetch roles r " +
                          "WHERE r.size = 0 and system = false " +
                          "order by sortName " + (asc ? "asc" : "desc"))
+            .setInteger(0, roleId.intValue())
             .list();
     }
 }

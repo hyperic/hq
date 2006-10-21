@@ -25,61 +25,77 @@
 
 package org.hyperic.hibernate.dao;
 
-import java.io.Serializable;
 import java.util.Collection;
 
 import org.hibernate.Session;
 import org.hyperic.hq.authz.AuthzSubject;
+import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.ResourceType;
-import org.hyperic.hq.authz.shared.ResourceTypeValue;
+import org.hyperic.hq.authz.shared.ResourceValue;
 
 /**
- * CRUD methods, finders, etc. for ResourceType
+ * CRUD methods, finders, etc. for Resource
  */
-public class ResourceTypeDAO extends HibernateDAO
+public class ResourceDAO extends HibernateDAO
 {
-    public ResourceTypeDAO(Session session) {
-        super(ResourceType.class, session);
+    public ResourceDAO(Session session) {
+        super(Resource.class, session);
     }
 
-    public ResourceType create(AuthzSubject creator,
-                               ResourceTypeValue createInfo) {
-        ResourceType res = new ResourceType(createInfo);
+    public Resource create(AuthzSubject creator, ResourceValue createInfo) {
+        Resource res = new Resource(createInfo);
+        res.setOwner(creator);
         // XXX create resource for owner
         save(res);
         return res;
-    }
-
-    public ResourceType findById(Integer id) {
-        return (ResourceType) super.findById(id);
     }
 
     public Collection findAll() {
         return (Collection) super.findAll();
     }
 
-    public void save(ResourceType entity) {
+    public Resource findById(Integer id) {
+        return (Resource) super.findById(id);
+    }
+
+    public void save(Resource entity) {
         super.save(entity);
     }
 
-    public ResourceType merge(ResourceType entity) {
-        return (ResourceType) super.merge(entity);
+    public Resource merge(Resource entity) {
+        return (Resource) super.merge(entity);
     }
 
-    public void remove(AuthzSubject whoami, ResourceType entity) {
-        // XXX need to check against owner
+    public void remove(Resource entity) {
         super.remove(entity);
     }
 
-    public void evict(ResourceType entity) {
+    public void evict(Resource entity) {
         super.evict(entity);
     }
 
-    public ResourceType findByName(String name)
-    {
-        String sql = "from ResourceType where name=?";
-        return (ResourceType)getSession().createQuery(sql)
-            .setString(0, name)
+    public Resource findByInstanceId(ResourceType type, Integer id) {            
+        String sql = "from Resource where instanceId = ? and" +
+                     " resourceType = ?";
+        return (Resource)getSession().createQuery(sql)
+            .setInteger(0, id.intValue())
+            .setEntity(1, type)
             .uniqueResult();
+    }
+    
+    public Collection findByOwner(AuthzSubject owner) {
+        String sql = "from Resource where owner = ?";
+        return getSession().createQuery(sql)
+                .setEntity(0, owner)
+                .list();
+    }
+    
+    public Collection findByOwnerAndType(AuthzSubject owner,
+                                         ResourceType type ) {
+        String sql ="from Resource where owner = ? and resourceType = ?";
+        return getSession().createQuery(sql)
+            .setEntity(0, owner)
+            .setEntity(0, type)
+            .list();
     }
 }
