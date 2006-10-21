@@ -75,7 +75,7 @@
       <column name="MODIFIED_BY" length="100" />
     </property>
 
-    <many-to-one name="resourceId" class="Resource" unique="true">
+    <many-to-one name="resource" class="Resource" unique="true">
       <column name="RESOURCE_ID" index="EAM_RES_GROUP_RES_KEY" />
     </many-to-one>
 
