@@ -27,17 +27,21 @@ package org.hyperic.hibernate.dao;
 
 import java.util.Collection;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.ResourceType;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceValue;
 
 /**
  * CRUD methods, finders, etc. for Resource
  */
-public class ResourceDAO extends HibernateDAO
-{
+public class ResourceDAO extends HibernateDAO {
+    Log log = LogFactory.getLog(ResourceDAO.class);
+    
     public ResourceDAO(Session session) {
         super(Resource.class, session);
     }
@@ -72,6 +76,27 @@ public class ResourceDAO extends HibernateDAO
 
     public void evict(Resource entity) {
         super.evict(entity);
+    }
+
+    public boolean isOwner(Resource entity, Integer possibleOwner) {
+        boolean is = false;
+
+        if (possibleOwner == null) {
+            log.error("possible Owner is NULL. " +
+                    "This is probably not what you want.");
+            /* XXX throw exception instead */
+        } else {
+            /* overlord owns every thing */
+            if (is = possibleOwner.equals(AuthzConstants.overlordId)
+                    == false) {
+                if (log.isDebugEnabled() && possibleOwner != null) {
+                    log.debug("User is " + possibleOwner +
+                              " owner is " + entity.getOwner().getId());
+                }
+                is = (possibleOwner.equals(entity.getOwner().getId()));
+            }
+        }
+        return is;
     }
 
     public Resource findByInstanceId(ResourceType type, Integer id) {            

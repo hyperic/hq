@@ -133,6 +133,10 @@ public class HibernateDAOFactory extends DAOFactory
         return new ResourceDAO(getCurrentSession());
     }
 
+    public ResourceGroupDAO getResourceGroupDAO() {
+        return new ResourceGroupDAO(getCurrentSession());
+    }
+
     public ResourceTypeDAO getResourceTypeDAO() {
         return new ResourceTypeDAO(getCurrentSession());
     }

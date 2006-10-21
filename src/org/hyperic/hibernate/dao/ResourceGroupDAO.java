@@ -69,6 +69,21 @@ public class ResourceGroupDAO extends HibernateDAO
     public void remove(ResourceGroup entity) {
         super.remove(entity);
     }
+    
+    public void addResource(ResourceGroup entity, Resource res) {
+        entity.getResources().add(res);
+    }
+    
+    public void removeAllResources(ResourceGroup entity) {
+        entity.getResources().clear();
+    }
+
+    public void removeResources(ResourceGroup entity, Resource[] resources) {
+        Collection resCol = entity.getResources();
+        for (int i = 0; i < resources.length; i++) {
+            resCol.remove(resources[i]);
+        }
+    }
 
     public void evict(ResourceGroup entity) {
         super.evict(entity);
