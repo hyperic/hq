@@ -598,6 +598,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             } catch (PermissionException e) {
                 throw e;
             }
+        } catch (ObjectNotFoundException e) {
+            throw new CreateException("Unable to find PlatformType: " + e.getMessage());
         } catch (FinderException e) {
             throw new CreateException("Unable to find PlatformType: " + e.getMessage());
         } catch (NamingException e) {
@@ -853,26 +855,15 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     public PlatformValue getPlatformByName(AuthzSubjectValue subject,
                                            String name)
         throws PlatformNotFoundException, PermissionException {
-        try {
-            Platform p = getPlatformDAO().findByName(name);
-            if (p == null) {
-                throw new PlatformNotFoundException("platform " + name +
-                                                    " not found");
-            }
-            PlatformValue platformValue =
-                PlatformVOHelperUtil.getLocalHome().create()
-                    .getPlatformValue(p.getPrimaryKey());
-            // now check if the user can see this at all
-            checkViewPermission(subject, platformValue.getEntityId());
-            return platformValue;
-        } catch (FinderException e) {
+        Platform p = getPlatformDAO().findByName(name);
+        if (p == null) {
             throw new PlatformNotFoundException("platform " + name +
-                                                " not found", e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
+                                                " not found");
         }
+        PlatformValue platformValue = p.getPlatformValue();
+        // now check if the user can see this at all
+        checkViewPermission(subject, platformValue.getEntityId());
+        return platformValue;
     }
 
     /**
@@ -882,58 +873,40 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     public PlatformValue getPlatformByCertDN(AuthzSubjectValue subject,
                                              String certDN)
         throws PlatformNotFoundException, PermissionException {
-        try {
-            Platform p = getPlatformDAO().findByCertDN(certDN);
-            if (p == null) {
-                throw new PlatformNotFoundException(
-                    "Platform with certdn " + certDN + " not found");
-            }
-            PlatformValue platformValue = PlatformVOHelperUtil.getLocalHome()
-                .create().getPlatformValue(p.getPrimaryKey());
-            // now check if the user can see this at all
-            checkViewPermission(subject, platformValue.getEntityId());
-            return platformValue;
-        } catch (CreateException e) {
-            throw new SystemException(e);               
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (FinderException e) {
-            throw new PlatformNotFoundException("Platform with certdn " 
-                + certDN + " not found");           
+        Platform p = getPlatformDAO().findByCertDN(certDN);
+        if (p == null) {
+            throw new PlatformNotFoundException(
+                "Platform with certdn " + certDN + " not found");
         }
+        PlatformValue platformValue = p.getPlatformValue();
+        // now check if the user can see this at all
+        checkViewPermission(subject, platformValue.getEntityId());
+        return platformValue;
     }
 
     /**
      * Get the platform that has the specified Fqdn
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public PlatformValue getPlatformByFqdn(AuthzSubjectValue subject,
                                            String fqdn)
         throws PlatformNotFoundException, PermissionException {
-        try {
-            Platform p = getPlatformDAO().findByFQDN(fqdn);
-            if (p == null) {
-                throw new PlatformNotFoundException("Platform with fqdn "
-                                                    + fqdn + " not found");
-            }
-            PlatformValue platformValue = PlatformVOHelperUtil.getLocalHome()
-                .create().getPlatformValue(p.getPrimaryKey());
-            // now check if the user can see this at all
-            checkViewPermission(subject, platformValue.getEntityId());
-            return platformValue;
-        } catch (CreateException e) {
-            throw new SystemException(e);               
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (FinderException e) {
-            throw new PlatformNotFoundException("Platform with fqdn " 
-                + fqdn + " not found");           
-        }            
+        Platform p = getPlatformDAO().findByFQDN(fqdn);
+        if (p == null) {
+            throw new PlatformNotFoundException("Platform with fqdn "
+                                                + fqdn + " not found");
+        }
+        PlatformValue platformValue = p.getPlatformValue();
+        // now check if the user can see this at all
+        checkViewPermission(subject, platformValue.getEntityId());
+        return platformValue;
     }
 
     /**
      * Get the Collection of platforms that have the specified Ip address
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public Collection getPlatformByIpAddr(AuthzSubjectValue subject,
                                           String address)
@@ -945,6 +918,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get the platform by agent token
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public PlatformPK getPlatformPkByAgentToken(AuthzSubjectValue subject,
                                                 String agentToken)
@@ -963,6 +937,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * Get the platform that hosts the server that provides the 
      * specified service.
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      * @param subject The subject trying to list services.
      * @param serviceId service ID.
      * @return the Platform
@@ -970,33 +945,22 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     public PlatformValue getPlatformByService ( AuthzSubjectValue subject,
                                                 Integer serviceId ) 
         throws PlatformNotFoundException, PermissionException {
-        try {
-            Platform p = getPlatformDAO().findByServiceId(serviceId);
-            if (p == null) {
-                throw new PlatformNotFoundException(
-                    "platform for service " + serviceId + " not found");
-            }
-            PlatformValue platformValue =
-                PlatformVOHelperUtil.getLocalHome().create()
-                    .getPlatformValue(p.getPrimaryKey());
-            
-            // now check if the user can see this at all
-            checkViewPermission(subject, platformValue.getEntityId());
-            return platformValue;
-        } catch (FinderException e) {
-            throw new PlatformNotFoundException("platform for service " +
-                                                serviceId + " not found", e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
+        Platform p = getPlatformDAO().findByServiceId(serviceId);
+        if (p == null) {
+            throw new PlatformNotFoundException(
+                "platform for service " + serviceId + " not found");
         }
+        PlatformValue platformValue = p.getPlatformValue();
+        // now check if the user can see this at all
+        checkViewPermission(subject, platformValue.getEntityId());
+        return platformValue;
     }
     
     /**
      * Get the platform ID that hosts the server that provides the 
      * specified service.
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      * @param subject The subject trying to list services.
      * @param serviceId service ID.
      * @return the Platform
@@ -1015,6 +979,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get the platform for a server.
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      * @param subject The subject trying to list services.
      * @param serverId Server ID.
      */
@@ -1061,6 +1026,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get the platforms for a list of servers.
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      * @param subject The subject trying to list services.
      * @param serverId Server ID.
      */
@@ -1323,8 +1289,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             existing.setMTime(new Long(System.currentTimeMillis()));
             this.trimStrings(existing);
 
-            PlatformDAO pdao = getPlatformDAO();
-            Platform plat = pdao.findByPrimaryKey(pk);
+            Platform plat = getPlatformDAO().findByPrimaryKey(pk);
 
             if (existing.getCpuCount() == null) {
                 //cpu count is no longer an option in the UI
@@ -1413,7 +1378,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                         log.error("Cannot remove from AIQueue", e);
                     }
                 }
-                pdao.updatePlatform(existing);
+                getPlatformDAO().updatePlatform(existing);
                 // flush the cache
                 VOCache.getInstance().removePlatform(existing.getId());
                 return true;

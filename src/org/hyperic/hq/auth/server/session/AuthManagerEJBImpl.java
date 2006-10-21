@@ -58,6 +58,7 @@ import org.hyperic.dao.DAOFactory;
 
 import org.jboss.security.Util;
 import org.jboss.security.auth.callback.UsernamePasswordHandler;
+import org.hibernate.ObjectNotFoundException;
 
 /** The AuthManger
  *
@@ -147,11 +148,7 @@ public class AuthManagerEJBImpl implements SessionBean {
                 if (!subject.getActive()) {
                     throw new LoginException("User account has been disabled.");
                 }
-
-            } catch (NamingException ne) {
-                throw new SystemException("Unable to contact authorization " +
-                                             "system", ne);
-            } catch (FinderException fe) {
+            } catch (ObjectNotFoundException fe) {
                 // User not found, check to make sure the standard JDBC JAAS
                 // provider is being used before creating the authz resources.
                 if (!config.getProperty(HQConstants.JAASProvider).
@@ -213,23 +210,18 @@ public class AuthManagerEJBImpl implements SessionBean {
             AuthzSubjectManagerLocal subjMgrLocal = 
                     AuthzSubjectManagerUtil.getLocalHome().create();
         
-            AuthzSubjectValue subject = null;
-            try {
-                subject = subjMgrLocal.findSubjectByAuth(user, appName);
-                if (!subject.getActive()) {
-                    throw new LoginException("User account has been disabled.");
-                }    
-            } catch (NamingException ne) {
-                throw new SystemException("Unable to contact authorization " +
-                                          "system", ne);
+            AuthzSubjectValue subject =
+                subjMgrLocal.findSubjectByAuth(user, appName);
+            if (!subject.getActive()) {
+                throw new LoginException("User account has been disabled.");
             }
-    
+
             return mgr.put(subject, 30000);     // 30 seconds only
         } catch (NamingException e) {
             throw new SystemException("Naming Error in getSessionId", e);
         } catch (CreateException e) {
             throw new SystemException("CreateException in getSessionId", e);
-        } catch (FinderException e) {
+        } catch (ObjectNotFoundException e) {
             throw new ApplicationException(
                 "Unable to find Overlord User to create authz user entry", e);
         } 

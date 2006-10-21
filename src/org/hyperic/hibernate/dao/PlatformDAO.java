@@ -281,6 +281,9 @@ public class PlatformDAO extends HibernateDAO
             platform.setAgent(agentLocal);
         }
         save(platform);
+        // it is a good idea to
+        // flush the Session here
+        getSession().flush();
     }
 
     private void removeAIp(Collection coll, IpValue ipv)
@@ -393,8 +396,8 @@ public class PlatformDAO extends HibernateDAO
                      " join p.servers s " +
                      " join s.services sv " +
                      "where " +
-                     " p.id = s.platform.id and " +
-                     " s.id = sv.server.id and " +
+//                     " p.id = s.platform.id and " +
+//                     " s.id = sv.server.id and " +
                      " sv.id = ?";
         return (Platform)getSession()
             .createQuery(sql)
@@ -456,6 +459,11 @@ public class PlatformDAO extends HibernateDAO
             .list();
     }
 
+    /**
+     * @deprecated use findById()
+     * @param pk
+     * @return
+     */
     public Platform findByPrimaryKey(PlatformPK pk)
     {
         return findById(pk.getId());

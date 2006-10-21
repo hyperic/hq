@@ -379,11 +379,19 @@ public class AgentManagerEJBImpl
                 case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
                     platformLocal =
                         platformLocalHome.findByServiceId(aID.getId());
+                    if (platformLocal == null) {
+                        throw new AgentNotFoundException(
+                            "Agent not found: " + aID);
+                    }
                     platformId = platformLocal.getId();
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER :
                     platformLocal =
                         platformLocalHome.findByServerId(aID.getId());
+                    if (platformLocal == null) {
+                        throw new AgentNotFoundException(
+                            "Agent not found: " + aID);
+                    }
                     platformId = platformLocal.getId();
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM :

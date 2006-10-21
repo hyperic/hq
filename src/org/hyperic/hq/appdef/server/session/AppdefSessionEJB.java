@@ -579,7 +579,7 @@ public abstract class AppdefSessionEJB
      * @param subject 
      * @param appdefEntityId - what
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public void checkViewPermission(AuthzSubjectValue subject,
                                     AppdefEntityID id)

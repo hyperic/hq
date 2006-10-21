@@ -91,6 +91,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
+import org.hibernate.ObjectNotFoundException;
 
 /**
  * This is the parent class for all Authz Session Beans
@@ -231,9 +232,14 @@ public abstract class AuthzSession {
      * @ejb:transaction type="Required"
      */
     public AuthzSubjectValue findSubjectByAuth(String name, String authDsn)
-        throws NamingException, FinderException {
-        return DAOFactory.getDAOFactory().getAuthzSubjectDAO()
-            .findByAuth(name, authDsn).getAuthzSubjectValue();
+    {
+         AuthzSubject subject = DAOFactory.getDAOFactory().getAuthzSubjectDAO()
+            .findByAuth(name, authDsn);
+        if (subject == null) {
+            throw new ObjectNotFoundException(
+                name, "Can't find subject: name="+name+",authDsn="+authDsn);
+        }
+        return subject.getAuthzSubjectValue();
     }
 
     protected Set toLocals(Object[] values)

@@ -591,7 +591,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @param action One of the AIQueueConstants.Q_DECISION_XXX constants
      * indicating what to do with the platforms, ips and servers.
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public void processQueue ( int sessionID, 
                                List platformList, 

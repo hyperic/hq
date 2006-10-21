@@ -304,7 +304,7 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
     
     /** Unschedule metrics of multiple appdef entities
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      * @param agentEnt the entity whose agent will be contacted for the unschedule
      * @param entIds the entity IDs whose metrics should be unscheduled
      * @throws MeasurementUnscheduleException if an error occurs
