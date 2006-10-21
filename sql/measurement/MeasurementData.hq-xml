@@ -118,6 +118,10 @@
       </key-property>
     </composite-id>
 
+    <version name="_version_" type="long">
+      <column name="VERSION_COL" default="0" />
+    </version>
+
     <property name="type" type="integer">
       <column name="TYPE" not-null="true" />
     </property>
