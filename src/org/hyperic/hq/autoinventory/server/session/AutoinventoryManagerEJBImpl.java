@@ -39,8 +39,12 @@ import javax.ejb.SessionBean;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.appdef.shared.AIAppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformLocal;
@@ -78,13 +82,9 @@ import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.appdef.AgentType;
-import org.hyperic.hq.authz.shared.AuthzSubjectLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectLocalHome;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocalHome;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
-import org.hyperic.hq.authz.shared.AuthzSubjectUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
@@ -113,10 +113,6 @@ import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.dao.DAOFactory;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * This class is responsible for managing Autoinventory objects in autoinventory
@@ -822,9 +818,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     private AuthzSubjectValue getOverlord () throws AutoinventoryException {
         AuthzSubjectValue subject;
         try {
-            AuthzSubjectLocalHome sslh = getAuthzSubjectLocalHome();
-            AuthzSubjectLocal sslocal = sslh.findById(new Integer(0));
-            subject = sslocal.getAuthzSubjectValue();
+            subject = getAuthzSubjectManagerLocalHome().create().findOverlord();
         } catch ( Exception e ) {
             throw new AutoinventoryException("Error looking up subject", e);
         }
@@ -858,20 +852,6 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         return aiqLocal;
     }
     protected AIQueueManagerLocal aiqLocal;
-
-    /**
-     * If we ever have more than this single session EJB, this method
-     * ought to be placed in a superclass, kinda like appdef has the
-     * AppdefSessionEJB as a base class for all other appdef session EJBs.
-     */
-    protected AuthzSubjectLocalHome getAuthzSubjectLocalHome() 
-        throws NamingException {
-        if(subjectLHome == null) {
-            subjectLHome = AuthzSubjectUtil.getLocalHome();
-        }
-        return subjectLHome;
-    }
-    protected AuthzSubjectLocalHome subjectLHome;
 
     protected ServerConfigManagerLocalHome getServerConfigManagerLocalHome() 
         throws NamingException {
