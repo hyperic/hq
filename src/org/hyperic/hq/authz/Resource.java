@@ -30,6 +30,7 @@ import java.util.Collection;
 
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.hq.authz.shared.ResourceTypeValue;
 
 public class Resource extends AuthzNamedEntity implements Serializable {
 
@@ -157,6 +158,7 @@ public class Resource extends AuthzNamedEntity implements Serializable {
         setId(val.getId());
         setInstanceId(val.getInstanceId());
         setName(val.getName());
+        setResourceType(new ResourceType(val.getResourceTypeValue()));
         setSortName(val.getSortName());
         setSystem(val.getSystem());
     }
