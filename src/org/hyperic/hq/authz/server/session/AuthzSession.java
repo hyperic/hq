@@ -49,6 +49,7 @@ import org.hyperic.hibernate.dao.ResourceTypeDAO;
 import org.hyperic.hq.authz.AuthzNamedEntity;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.Resource;
+import org.hyperic.hq.authz.ResourceGroup;
 import org.hyperic.hq.authz.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectLocal;
@@ -492,15 +493,29 @@ public abstract class AuthzSession {
     /** 
      * Filter a collection of groupLocal objects to only include those viewable
      * by the specified user
+     * @throws FinderException 
+     * @throws NamingException 
+     * @throws PermissionException 
      */
     protected Collection filterViewableGroups(AuthzSubjectValue who,
-        Collection groups) throws NamingException, FinderException, 
-                                  PermissionException {
+                                              Collection groups)
+        throws PermissionException, NamingException, FinderException {
         // finally scope down to only the ones the user can see
         List viewable = getViewableGroupPKs(who);
         for(Iterator i = groups.iterator(); i.hasNext();) {
-            ResourceGroupLocal aEJB = (ResourceGroupLocal)i.next();
-            if(!viewable.contains((ResourceGroupPK)aEJB.getPrimaryKey())) {
+            Object resGrp = i.next();
+            
+            ResourceGroupPK resGrpPk;
+            if (resGrp instanceof ResourceGroup) {
+                resGrpPk =
+                    new ResourceGroupPK(((ResourceGroup) resGrp).getId());
+            }
+            else {
+                resGrpPk = (ResourceGroupPK)
+                    ((ResourceGroupLocal) resGrp).getPrimaryKey();
+            }
+            
+            if (!viewable.contains(resGrpPk)) {
                 i.remove();
             }
         }
