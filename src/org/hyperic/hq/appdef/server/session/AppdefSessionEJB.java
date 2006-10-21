@@ -336,19 +336,12 @@ public abstract class AppdefSessionEJB
                                        ResourceValue res)
         throws RemoveException, FinderException {
         log.debug("Removing authz resource: " + res + " by: " + subject);
-        try {
-            ResourceManagerLocal rm = getResourceManager();
-            rm.removeResource(subject, res);
-            
-            // Who knows what groups this will affect.  Takes too long to figure
-            // out which groups, so just tell VOCache to delete them all
-            VOCache.getInstance().removeAllGroups();
-        } catch (RemoveException e) {
-            rollback();
-            throw e;
-        } catch (NamingException e) {
-        	throw new SystemException(e);
-        }
+        ResourceManagerLocal rm = getResourceManager();
+        rm.removeResource(subject, res);
+        
+        // Who knows what groups this will affect.  Takes too long to figure
+        // out which groups, so just tell VOCache to delete them all
+        VOCache.getInstance().removeAllGroups();
     }
 
     /**
