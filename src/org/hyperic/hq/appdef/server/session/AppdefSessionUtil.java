@@ -91,7 +91,6 @@ public abstract class AppdefSessionUtil {
     private ResourceManagerLocal        rmLocal;
     private ServerManagerLocalHome      serverMgrLHome;
     private ServiceManagerLocalHome     serviceMgrLHome;
-    private AuthzSubjectLocalHome      subjectLHome;
     private CPropManagerLocal           cpropLocal;
 
     protected CPropManagerLocal getCPropMgrLocal(){
@@ -298,19 +297,6 @@ public abstract class AppdefSessionUtil {
             aiqServerLHome = AIServerUtil.getLocalHome();
         }
         return aiqServerLHome;
-    }
-
-    /**
-     * Get the LocalHome reference for the AuthzSubject
-     * @return AuthzSubjectLocalHome
-     */
-    protected AuthzSubjectLocalHome getAuthzSubjectLocalHome()
-        throws NamingException 
-    {
-        if(subjectLHome == null) {
-            subjectLHome = AuthzSubjectUtil.getLocalHome();
-        }
-        return subjectLHome;
     }
 
     /**
