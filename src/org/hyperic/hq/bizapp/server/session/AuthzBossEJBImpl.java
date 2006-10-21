@@ -328,21 +328,17 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     private void resetResourceOwnership(int sessionId,
                                         AuthzSubjectValue currentOwner) 
         throws FinderException, UpdateException, PermissionException {
-        try {
-            // first look up the resources by owner
-            ResourceValue[] resources
-                = getResourceManager().findResourceByOwner(currentOwner);
-            AuthzSubjectValue root = getAuthzSubjectManager().getRoot();
-            for(int i = 0; i < resources.length; i++) {
-                ResourceValue aRes = resources[i];
-                String resType = aRes.getResourceTypeValue().getName();    
-                if(resType.equals(AuthzConstants.roleResourceTypeName)) {
-                    getResourceManager().setResourceOwner(
-                        this.getOverlord(), aRes, root);
-                }
+        // first look up the resources by owner
+        ResourceValue[] resources
+            = getResourceManager().findResourceByOwner(currentOwner);
+        AuthzSubjectValue root = getAuthzSubjectManager().getRoot();
+        for(int i = 0; i < resources.length; i++) {
+            ResourceValue aRes = resources[i];
+            String resType = aRes.getResourceTypeValue().getName();    
+            if(resType.equals(AuthzConstants.roleResourceTypeName)) {
+                getResourceManager().setResourceOwner(
+                    this.getOverlord(), aRes, root);
             }
-        } catch (NamingException e) {
-            throw new SystemException(e);
         }
     }
                             

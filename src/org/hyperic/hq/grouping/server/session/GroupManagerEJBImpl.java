@@ -38,6 +38,8 @@ import javax.ejb.RemoveException;
 import javax.ejb.SessionContext;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -61,9 +63,6 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /** *********************************************************
   * GroupManager provides "management level" support for group
@@ -161,11 +160,6 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             log.error("GroupManager caught underlying finder exc "+
                           "with findResourceTypeByName(): "+fe.getMessage());
             throw new GroupCreationException (fe.getMessage());
-        }
-        catch (NamingException ne) {
-            log.error("Caught NamingException in resource group manager",ne);
-            throw new SystemException ("Caught NamingException "+
-                "in resource group manager");
         }
         return retVal;
     }
