@@ -40,6 +40,11 @@ import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hibernate.dao.PlatformDAO;
+import org.hyperic.hq.appdef.Ip;
+import org.hyperic.hq.appdef.Platform;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AIIpLocal;
 import org.hyperic.hq.appdef.shared.AIIpLocalHome;
@@ -68,10 +73,7 @@ import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.appdef.Platform;
-import org.hyperic.hq.appdef.Ip;
-import org.hyperic.hq.authz.shared.AuthzSubjectLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectLocalHome;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceValue;
@@ -80,11 +82,6 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
-import org.hyperic.hibernate.dao.PlatformDAO;
-import org.hyperic.hibernate.Util;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * This class is responsible for managing the various autoinventory
@@ -204,57 +201,13 @@ public class AIQueueManagerEJBImpl
     public AIPlatformValue syncQueue ( AIPlatformValue aiplatform, 
                                        boolean isApproval ) 
         throws NamingException, CreateException, 
-               FinderException, RemoveException, SystemException {
+               FinderException, RemoveException {
 
         // Act as admin for now
-        AuthzSubjectLocalHome sslh = getAuthzSubjectLocalHome();
-        AuthzSubjectLocal sslocal = sslh.findById(new Integer(0));
-        AuthzSubjectValue subject = sslocal.getAuthzSubjectValue();
-
+        AuthzSubjectValue subject =
+            AuthzSubjectManagerUtil.getLocalHome().create().findOverlord();
+            
         return queue(subject, aiplatform, true, isApproval, false);
-    }
-
-    /**
-     * Looks for an IP in the list of AI data.
-     * @param aiips A list of AIIpValues to search.
-     * @param match The AIIpValue to look for.
-     * @return The AIIpValue that matches by IP address, or null if there 
-     * is no match.
-     */
-    private AIIpValue findAIIp ( List aiips, AIIpValue match ) {
-
-        AIIpValue aiip;
-        String matchAddr = match.getAddress();
-
-        for ( int i=0; i<aiips.size(); i++ ) {
-            aiip = (AIIpValue) aiips.get(i);
-            if ( aiip.getAddress().equals(matchAddr) ) return aiip;
-        }
-        return null;
-    }
-
-    /**
-     * Given a list of AIServerValue objects, find the one that matches the
-     * <code>match</code> object by install path, and remove it from the list.
-     * If no match is found, return null.
-     * @param aiservers A list of AIServerValue objects to search for a match.
-     * @param match The server to search for.
-     * @return The AIServerValue object (from the aiservers list) representing 
-     * the server that matched.  This object is also removed from the aiservers
-     * list.  If there was no match, null is returned.
-     */
-    private AIServerValue findAndRemoveAIServer ( List aiservers, AIServerLocal match ) {
-
-        String aiidMatch = match.getAutoinventoryIdentifier();
-        AIServerValue aiserver;
-        for ( int i=0; i<aiservers.size(); i++ ) {
-            aiserver = (AIServerValue) aiservers.get(i);
-            if ( aiserver.getAutoinventoryIdentifier().equals(aiidMatch) ) {
-                aiservers.remove(i);
-                return aiserver;
-            }
-        }
-        return null;
     }
 
     /**
