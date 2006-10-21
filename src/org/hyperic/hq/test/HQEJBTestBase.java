@@ -26,9 +26,12 @@
 package org.hyperic.hq.test;
 
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.PlatformVOHelperEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServerVOHelperEJBImpl;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
@@ -55,11 +58,13 @@ public abstract class HQEJBTestBase
     
     private Class[] getUsedSessionBeans() {
         return new Class[] { 
+            AuthzSubjectManagerEJBImpl.class,
             RegisteredTriggerManagerEJBImpl.class,
             AlertDefinitionManagerEJBImpl.class,
             PlatformManagerEJBImpl.class,
-            AuthzSubjectManagerEJBImpl.class,
-            ResourceManagerEJBImpl.class            
+            ResourceManagerEJBImpl.class,
+            PlatformVOHelperEJBImpl.class,
+            ServerVOHelperEJBImpl.class,
         };
     }
 
@@ -107,8 +112,40 @@ public abstract class HQEJBTestBase
         _initialized = true;
     }
 
+    public interface TransactionBlock {
+        public void run() throws Exception;        
+    }
+    
+    protected void runInTransaction(TransactionBlock block) 
+        throws Exception
+    {
+        Transaction t = _session.beginTransaction();
+        try {
+            block.run();
+        } finally {
+            t.commit();
+        }
+    }
+    
     public void tearDown() throws Exception {
         _session.disconnect();
     }
     
+    protected AuthzSubjectValue getOverlord() 
+        throws Exception 
+    {
+        return AuthzSubjectManagerUtil.getLocalHome().create().getOverlord(); 
+    }
+    
+    protected AlertDefinitionManagerLocal getAlertDefManager() 
+        throws Exception 
+    {
+        return AlertDefinitionManagerUtil.getLocalHome().create();
+    }
+    
+    protected PlatformManagerLocal getPlatformManager() 
+        throws Exception
+    {
+        return PlatformManagerUtil.getLocalHome().create();
+    }
 }
