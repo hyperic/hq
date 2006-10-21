@@ -28,32 +28,32 @@ package org.hyperic.hq.measurement;
 public class SrnId implements java.io.Serializable {
 
     // Fields    
-    private Integer _appdefType;
-    private Integer _instanceId;
+    private int _appdefType;
+    private int _instanceId;
 
     // Constructors
     public SrnId() {
     }
     
-    public SrnId(Integer appdefType, Integer instanceId) {
+    public SrnId(int appdefType, int instanceId) {
         _appdefType = appdefType;
         _instanceId = instanceId;
     }
    
     // Property accessors
-    public Integer getAppdefType() {
+    public int getAppdefType() {
         return _appdefType;
     }
     
-    public void setAppdefType(Integer appdefType) {
+    public void setAppdefType(int appdefType) {
         _appdefType = appdefType;
     }
 
-    public Integer getInstanceId() {
+    public int getInstanceId() {
         return _instanceId;
     }
     
-    public void setInstanceId(Integer instanceId) {
+    public void setInstanceId(int  instanceId) {
         _instanceId = instanceId;
     }
 
@@ -62,18 +62,17 @@ public class SrnId implements java.io.Serializable {
         if (other == null) return false;
         if (!(other instanceof SrnId)) return false;
         SrnId castOther = (SrnId)other;
-        return (getAppdefType().intValue() == 
-                castOther.getAppdefType().intValue()) &&
-            (getInstanceId().intValue() == 
-             castOther.getInstanceId().intValue());
+
+        return (getAppdefType() == castOther.getAppdefType()) &&
+            (getInstanceId() == castOther.getInstanceId());
     }
 
     public int hashCode()
     {
         int result = 17;
 
-        result = 37 * result + getAppdefType().intValue();
-        result = 37 * result + getInstanceId().intValue();
+        result = 37 * result + getAppdefType();
+        result = 37 * result + getInstanceId();
         return result;
     }
 }
