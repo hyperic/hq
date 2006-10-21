@@ -161,5 +161,10 @@ public class HibernateDAOFactory extends DAOFactory
     {
         return new MeasurementArgDAO(getCurrentSession());
     }
+
+    public MetricProblemDAO getMetricProblemDAO()
+    {
+        return new MetricProblemDAO(getCurrentSession());
+    }
 }
 
