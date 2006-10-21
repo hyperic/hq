@@ -45,8 +45,10 @@ import org.hyperic.hibernate.dao.MonitorableTypeDAO;
 import org.hyperic.hibernate.dao.OperationDAO;
 import org.hyperic.hibernate.dao.PlatformDAO;
 import org.hyperic.hibernate.dao.PlatformTypeDAO;
+import org.hyperic.hibernate.dao.ResourceDAO;
 import org.hyperic.hibernate.dao.RawMeasurementDAO;
 import org.hyperic.hibernate.dao.ResourceTypeDAO;
+import org.hyperic.hibernate.dao.RoleDAO;
 import org.hyperic.hibernate.dao.ServerDAO;
 import org.hyperic.hibernate.dao.ServerTypeDAO;
 import org.hyperic.hibernate.dao.ServiceDAO;
@@ -76,8 +78,10 @@ public abstract class DAOFactory
     
     // Authz DAOs
     public abstract AuthzSubjectDAO getAuthzSubjectDAO();
-    public abstract ResourceTypeDAO getResourceTypeDAO();
     public abstract OperationDAO    getOperationDAO();
+    public abstract ResourceTypeDAO getResourceTypeDAO();
+    public abstract ResourceDAO     getResourceDAO();
+    public abstract RoleDAO         getRoleDAO();
 
     // Measurement DAOs
     public abstract BaselineDAO getBaselineDAO();
