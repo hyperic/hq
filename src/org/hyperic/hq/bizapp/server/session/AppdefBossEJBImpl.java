@@ -3305,8 +3305,6 @@ public class AppdefBossEJBImpl
             }
         } catch (CreateException e) {
             throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
         }
     }
 
