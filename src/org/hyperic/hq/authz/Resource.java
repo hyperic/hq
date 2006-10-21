@@ -28,16 +28,11 @@ package org.hyperic.hq.authz;
 import java.io.Serializable;
 import java.util.Collection;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceValue;
 
 public class Resource extends AuthzNamedEntity implements Serializable {
 
-    private Log log = LogFactory.getLog(Resource.class);
-    
     // Fields
     private ResourceType resourceType;
     private Integer instanceId;
@@ -112,27 +107,6 @@ public class Resource extends AuthzNamedEntity implements Serializable {
         owner = val;
     }
 
-    public boolean isOwner(Integer possibleOwner) {
-        boolean is = false;
-
-        if (possibleOwner == null) {
-            log.error("possible Owner is NULL. " +
-                    "This is probably not what you want.");
-            /* XXX throw exception instead */
-        } else {
-            /* overlord owns every thing */
-            if (is = possibleOwner.equals(AuthzConstants.overlordId)
-                    == false) {
-                if (log.isDebugEnabled() && possibleOwner != null) {
-                    log.debug("User is " + possibleOwner +
-                              " owner is " + getOwner().getId());
-                }
-                is = (possibleOwner.equals(getOwner().getId()));
-            }
-        }
-        return is;
-    }
-
     public String getSortName() {
         return sortName;
     }
@@ -195,22 +169,6 @@ public class Resource extends AuthzNamedEntity implements Serializable {
         setName(val.getName());
         setSortName(val.getSortName());
         setSystem(val.getSystem());
-
-        Integer ownerId = val.getAuthzSubjectValue().getId();
-        if (getOwner() == null ||
-            !getOwner().getId().equals(ownerId)) {
-            AuthzSubject subject = DAOFactory.getDAOFactory()
-                    .getAuthzSubjectDAO().findById(ownerId);
-            setOwner(subject);
-        }
-        
-        Integer typeId = val.getResourceTypeValue().getId();
-        if (getResourceType() == null ||
-            !getResourceType().getId().equals(typeId)) {
-            ResourceType type = DAOFactory.getDAOFactory().getResourceTypeDAO()
-                .findById(typeId);
-            setResourceType(type);
-        }
     }
 
     public Object getValueObject() {

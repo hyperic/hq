@@ -44,7 +44,7 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
     private long ctime;
     private long mtime;
     private String modifiedBy;
-    private Resource resourceId;
+    private Resource resource;
     private Collection resources;
     private Collection roles;
 
@@ -83,7 +83,7 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
         this.ctime = ctime;
         this.mtime = mtime;
         this.modifiedBy = modifiedBy;
-        this.resourceId = resourceId;
+        this.resource = resourceId;
         this.resources = resources;
         this.roles = roles;
     }
@@ -93,7 +93,7 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
     }
 
     public void setCid(Integer val) {
-        this.cid = val;
+        cid = val;
     }
 
     public String getSortName() {
@@ -101,7 +101,7 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
     }
 
     public void setSortName(String val) {
-        this.sortName = val;
+        sortName = val;
     }
 
     public String getDescription() {
@@ -109,7 +109,7 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
     }
 
     public void setDescription(String val) {
-        this.description = val;
+        description = val;
     }
 
     public String getLocation() {
@@ -117,7 +117,7 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
     }
 
     public void setLocation(String val) {
-        this.location = val;
+        location = val;
     }
 
     public boolean isSystem() {
@@ -125,7 +125,7 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
     }
 
     public void setSystem(boolean val) {
-        this.system = val;
+        system = val;
     }
 
     public Integer getGroupType() {
@@ -133,7 +133,7 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
     }
 
     public void setGroupType(Integer val) {
-        this.groupType = val;
+        groupType = val;
     }
 
     public Integer getGroupEntType() {
@@ -141,7 +141,7 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
     }
 
     public void setGroupEntType(Integer val) {
-        this.groupEntType = val;
+        groupEntType = val;
     }
 
     public Integer getGroupEntResType() {
@@ -149,7 +149,7 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
     }
 
     public void setGroupEntResType(Integer val) {
-        this.groupEntResType = val;
+        groupEntResType = val;
     }
 
     public Integer getClusterId() {
@@ -157,7 +157,7 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
     }
 
     public void setClusterId(Integer val) {
-        this.clusterId = val;
+        clusterId = val;
     }
 
     public long getCtime() {
@@ -165,7 +165,7 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
     }
 
     public void setCtime(long val) {
-        this.ctime = val;
+        ctime = val;
     }
 
     public long getMtime() {
@@ -173,7 +173,7 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
     }
 
     public void setMtime(long val) {
-        this.mtime = val;
+        mtime = val;
     }
 
     public String getModifiedBy() {
@@ -181,15 +181,15 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
     }
 
     public void setModifiedBy(String val) {
-        this.modifiedBy = val;
+        modifiedBy = val;
     }
 
-    public Resource getResourceId() {
-        return resourceId;
+    public Resource getResource() {
+        return resource;
     }
 
-    public void setResourceId(Resource val) {
-        this.resourceId = val;
+    public void setResource(Resource val) {
+        resource = val;
     }
 
     public Collection getResources() {
@@ -197,7 +197,7 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
     }
 
     public void setResources(Collection val) {
-        this.resources = val;
+        resources = val;
     }
 
     public Collection getRoles() {
@@ -205,7 +205,7 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
     }
 
     public void setRoles(Collection val) {
-        this.roles = val;
+        roles = val;
     }
 
     public ResourceGroupValue getResourceGroupValue() {
@@ -213,7 +213,7 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
     }
 
     public void setResourceGroupValue(ResourceGroupValue val) {
-        this.resourceGroupValue = val;
+        resourceGroupValue = val;
     }
 
     public Object getValueObject() {
@@ -229,9 +229,9 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
             return false;
         ResourceGroup castOther = (ResourceGroup) other;
 
-        return ((this.getName() == castOther.getName()) ||
-                (this.getName() != null
-                && castOther.getName() != null && this.getName()
+        return ((getName() == castOther.getName()) ||
+                (getName() != null
+                && castOther.getName() != null && getName()
                 .equals(castOther.getName())));
     }
 
