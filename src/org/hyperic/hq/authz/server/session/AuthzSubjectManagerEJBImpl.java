@@ -46,7 +46,6 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.dao.AuthzSubjectDAO;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -81,10 +80,6 @@ import org.hyperic.util.pager.SortAttribute;
 public class AuthzSubjectManagerEJBImpl
     extends AuthzSession implements SessionBean {
 
-    private AuthzSubjectDAO getSubjectDAO() {
-        return DAOFactory.getDAOFactory().getAuthzSubjectDAO();
-    }
-    
     protected static final Log log
         = LogFactory.getLog(AuthzSubjectManagerEJBImpl.class.getName());
 
@@ -232,10 +227,8 @@ public class AuthzSubjectManagerEJBImpl
      */
     public ResourceValue getSubjectResource(AuthzSubjectValue subject)
         throws NamingException, FinderException {
-        AuthzSubjectLocal local =
-            getSubjectHome().findByPrimaryKey(
-                subject.getPrimaryKey());
-        return local.getResource().getResourceValue();
+        AuthzSubject subj = getSubjectDAO().findById(subject.getId());
+        return subj.getResource().getResourceValue();
     }
 
     /** Find a subject by its id

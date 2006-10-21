@@ -44,6 +44,7 @@ import org.hyperic.hibernate.dao.OperationDAO;
 import org.hyperic.hibernate.dao.ResourceTypeDAO;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.Operation;
+import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectLocal;
@@ -57,7 +58,6 @@ import org.hyperic.hq.authz.shared.ResourceLocalHome;
 import org.hyperic.hq.authz.shared.ResourcePK;
 import org.hyperic.hq.authz.shared.ResourceTypeLocal;
 import org.hyperic.hq.authz.shared.ResourceTypePK;
-import org.hyperic.hq.authz.shared.ResourceTypeUtil;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceVOHelperUtil;
 import org.hyperic.hq.authz.shared.ResourceValue;
@@ -302,17 +302,16 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean 
                                      String name,
                                      boolean system)
         throws NamingException, CreateException, FinderException {
-        AuthzSubjectLocal whoamiLocal =
-            getSubjectHome().findByAuth(whoami.getName(),
-                                        whoami.getAuthDsn());
+        AuthzSubject owner =
+            getSubjectDAO().findByAuth(whoami.getName(),
+                                       whoami.getAuthDsn());
         ResourceValue res = new ResourceValue();
-        ResourceLocalHome resLome = getResourceHome();
         res.setInstanceId(instanceId);
         res.setName(name);
         res.setResourceTypeValue(rtv);
         res.setSystem(system);
-        ResourceLocal ejb = resLome.create(whoamiLocal, res);
-        return (ResourcePK)ejb.getPrimaryKey();
+        Resource resource = getResourceDAO().create(owner, res);
+        return new ResourcePK(resource.getId());
     }
     
     /**
@@ -423,8 +422,8 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean 
      */
     public void saveResource(ResourceValue res)
         throws NamingException, FinderException {
-        ResourceLocal resLocal = this.lookupResource(res);
-        resLocal.setResourceValue(res);
+        Resource resource = this.lookupResourcePojo(res);
+        resource.setResourceValue(res);
         VOCache.getInstance().removeResource(res.getId());
     }
 
@@ -438,14 +437,10 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean 
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
-    public void removeResource(AuthzSubjectValue whoami, ResourceValue res)
-        throws NamingException, FinderException, RemoveException {
-        ResourceLocal reso =
-            getResourceHome().findByPrimaryKey(res.getPrimaryKey());
-        AuthzSubjectLocal who =
-            getSubjectHome().findByPrimaryKey(whoami.getPrimaryKey());
-        reso.remove();
+    public void removeResource(AuthzSubjectValue whoami, ResourceValue res) {
+        Resource reso = getResourceDAO().findById(res.getId());
         VOCache.getInstance().removeResource(res.getId());
+        getResourceDAO().remove(reso);
     }
 
     /**
@@ -462,12 +457,11 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean 
     public void setResourceOwner(AuthzSubjectValue whoami, ResourceValue res,
                                  AuthzSubjectValue newOwner)
         throws NamingException, FinderException, PermissionException {
-        ResourceLocal resLocal = this.lookupResource(res);
+        Resource resLocal = lookupResourcePojo(res);
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
 
-        if (pm.hasAdminPermission(whoami) ||
-            resLocal.isOwner(whoami.getId())) {
-            resLocal.setOwner(this.lookupSubject(newOwner));
+        if (pm.hasAdminPermission(whoami) || resLocal.isOwner(whoami.getId())) {
+            resLocal.setOwner(lookupSubjectPojo(newOwner));
         }
         else {
             throw new PermissionException("Only an owner or admin may " +
@@ -620,11 +614,11 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean 
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
-    public ResourceValue[] findResourceByOwner(AuthzSubjectValue value)
-        throws NamingException, FinderException {
-        AuthzSubjectLocal owner =
-            getSubjectHome().findByPrimaryKey(value.getPrimaryKey());
-        return (ResourceValue[])this.fromLocals(getResourceHome().findByOwner(owner), org.hyperic.hq.authz.shared.ResourceValue.class);
+    public ResourceValue[] findResourceByOwner(AuthzSubjectValue value) {
+        AuthzSubject owner = getSubjectDAO().findById(value.getId());
+        return (ResourceValue[]) this
+                .fromPojos(getResourceDAO().findByOwner(owner),
+                           org.hyperic.hq.authz.shared.ResourceValue.class);
     }
     /**
      * Gets all the Resources of a particular type owned by the given Subject.
@@ -637,17 +631,12 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean 
      * @ejb:transaction type="SUPPORTS"
      */
     public ResourceValue[] findResourceByOwnerAndType(AuthzSubjectValue subjVal,
-                                                      String resTypeName )
-                                              throws NamingException,
-                                                     FinderException {
-
-        AuthzSubjectLocal subjLoc =
-            getSubjectHome().findByPrimaryKey(subjVal.getPrimaryKey());
-        ResourceTypeLocal rtLoc = ResourceTypeUtil.
-            getLocalHome().findByName(resTypeName);
-        return (ResourceValue[])this.fromLocals(
-            getResourceHome().findByOwnerAndType(subjLoc,rtLoc),
-              org.hyperic.hq.authz.shared.ResourceValue.class);
+                                                      String resTypeName ) {
+        AuthzSubject subj = getSubjectDAO().findById(subjVal.getId());
+        ResourceType resType = getResourceTypeDAO().findByName(resTypeName);
+        return (ResourceValue[])this.fromPojos(
+            getResourceDAO().findByOwnerAndType(subj,resType),
+            org.hyperic.hq.authz.shared.ResourceValue.class);
     }
 
     public void setSessionContext(javax.ejb.SessionContext ctx) { }

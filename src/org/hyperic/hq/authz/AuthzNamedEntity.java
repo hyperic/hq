@@ -45,6 +45,8 @@ public abstract class AuthzNamedEntity extends PersistedObject {
         this.name = name;
     }
     
+    public abstract Object getValueObject();
+    
     public int hashCode() {
         int result = 17;
         result = 37*result + ((getName() != null) ? getName().hashCode() : 0);

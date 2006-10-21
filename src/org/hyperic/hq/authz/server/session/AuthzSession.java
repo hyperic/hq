@@ -42,7 +42,12 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.dao.AuthzSubjectDAO;
+import org.hyperic.hibernate.dao.ResourceDAO;
+import org.hyperic.hibernate.dao.ResourceTypeDAO;
+import org.hyperic.hq.authz.AuthzNamedEntity;
 import org.hyperic.hq.authz.AuthzSubject;
+import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectLocal;
@@ -110,6 +115,18 @@ public abstract class AuthzSession {
     protected ResourceManagerLocalHome resourceMgrHome;
 
     protected SessionContext ctx;
+
+    protected ResourceTypeDAO getResourceTypeDAO() {
+        return DAOFactory.getDAOFactory().getResourceTypeDAO();
+    }
+
+    protected ResourceDAO getResourceDAO() {
+        return DAOFactory.getDAOFactory().getResourceDAO();
+    }
+
+    protected AuthzSubjectDAO getSubjectDAO() {
+        return DAOFactory.getDAOFactory().getAuthzSubjectDAO();
+    }
 
     /** now the home cache methods **/
     protected ResourceLocalHome getResourceHome() {
@@ -193,12 +210,6 @@ public abstract class AuthzSession {
                                  AuthzConstants.overlordDsn);
     }
 
-    protected AuthzSubjectLocal findOverlordEJB()
-        throws NamingException, FinderException {
-        return getSubjectHome().findByAuth(AuthzConstants.overlordName,
-                                      AuthzConstants.overlordDsn);
-    }
-
     protected ResourceType getRootResourceType() {
        return DAOFactory.getDAOFactory().getResourceTypeDAO()
             .findByName(AuthzConstants.typeResourceTypeName); 
@@ -215,8 +226,8 @@ public abstract class AuthzSession {
      */
     public AuthzSubjectValue findSubjectByAuth(String name, String authDsn)
         throws NamingException, FinderException {
-        return getSubjectHome().findByAuth(name, authDsn)
-            .getAuthzSubjectValue();
+        return DAOFactory.getDAOFactory().getAuthzSubjectDAO()
+            .findByAuth(name, authDsn).getAuthzSubjectValue();
     }
 
     protected ResourceGroupLocal findRootResourceGroup()
@@ -288,6 +299,23 @@ public abstract class AuthzSession {
         return locals;
     }
 
+    protected Object[] fromPojos(Collection pojos, Class c) {
+        Object[] values = new Object[pojos.size()];
+        
+        int i = 0;
+        for (Iterator it = pojos.iterator(); it.hasNext(); i++) {
+            AuthzNamedEntity ent = (AuthzNamedEntity) it.next();
+            values[i] = ent.getValueObject();
+            
+            // Verify that it's the expected class
+            if (!c.isInstance(values[i]))
+                log.error("Invalid type: " + values[i].getClass() +
+                          " when expecting " + c);
+        }
+        
+        return values;
+    }
+    
     protected Object[] fromLocals(Collection locals, Class c) {
         Object[] values = null;
         Iterator it = locals.iterator();
@@ -386,21 +414,34 @@ public abstract class AuthzSession {
     protected ResourceLocal lookupResource(ResourceValue resource)
         throws FinderException {
         if (resource.getId() == null) {
-            return this.lookupResourceByInstance(resource.getResourceTypeValue()
-                .getName(),resource.getInstanceId());
+            String typeName = resource.getResourceTypeValue().getName();
+            ResourceTypeLocal typeLocal;
+            try {
+                typeLocal = getResourceTypeHome()
+                    .findByName(typeName);
+            } catch (NamingException e) {
+                throw new SystemException(e);
+            }
+            return getResourceHome().findByInstanceId(typeLocal,
+                                                      resource.getInstanceId());
         } 
         return getResourceHome().findByPrimaryKey(resource.getPrimaryKey());
     }
 
-    protected ResourceLocal lookupResourceByInstance(String resTypeName, 
-        Integer instId) throws FinderException {
-        try {
-            ResourceTypeLocal typeLocal =
-                getResourceTypeHome().findByName(resTypeName);
-            return getResourceHome().findByInstanceId(typeLocal,instId);
-        } catch (NamingException e) {
-            throw new SystemException(e);
+    protected Resource lookupResourcePojoByInstance(String resTypeName,
+                                                    Integer instId) {
+        ResourceType type = getResourceTypeDAO().findByName(resTypeName);
+        return getResourceDAO().findByInstanceId(type, instId);
+    }
+
+    protected Resource lookupResourcePojo(ResourceValue resource) {
+        if (resource.getId() == null) {
+            ResourceType type = getResourceTypeDAO()
+                .findByName(resource.getResourceTypeValue().getName());
+            return getResourceDAO().findByInstanceId(type,
+                                                     resource.getInstanceId());
         }
+        return getResourceDAO().findById(resource.getId());
     }
 
     /**

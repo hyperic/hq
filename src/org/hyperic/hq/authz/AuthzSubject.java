@@ -54,6 +54,7 @@ public class AuthzSubject extends AuthzNamedEntity
 
     /** default constructor */
     public AuthzSubject() {
+        super();
     }
 
 	/** minimal constructor */
@@ -214,6 +215,10 @@ public class AuthzSubject extends AuthzNamedEntity
         setSystem(authzSubjectValue.getSystem());        
     }
     
+    public Object getValueObject() {
+        return getAuthzSubjectValue();
+    }
+
     public boolean isRoot() {
         return getId().equals(AuthzConstants.rootSubjectId);
     }

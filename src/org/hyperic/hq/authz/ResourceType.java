@@ -45,6 +45,7 @@ public class ResourceType extends AuthzNamedEntity implements Serializable {
 
     /** default constructor */
     public ResourceType() {
+        super();
     }
 
     /** minimal constructor */
@@ -124,6 +125,10 @@ public class ResourceType extends AuthzNamedEntity implements Serializable {
         setId(val.getId());
         setName(val.getName());
         setSystem(val.getSystem());
+    }
+
+    public Object getValueObject() {
+        return getResourceTypeValue();
     }
 
     public boolean equals(Object other) {

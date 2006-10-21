@@ -46,6 +46,7 @@ public class Operation extends AuthzNamedEntity implements Serializable {
 
     /** default constructor */
     public Operation() {
+        super();
     }
 
 	/** minimal constructor */
@@ -95,6 +96,10 @@ public class Operation extends AuthzNamedEntity implements Serializable {
         setId(val.getId());
         setName(val.getName());
     }   
+
+   public Object getValueObject() {
+        return getOperationValue();
+    }
 
    public boolean equals(Object other) {
         if ((this == other))
