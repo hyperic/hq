@@ -42,7 +42,7 @@
       <column name="LOCATION" not-null="false" length="100" />
     </property>
 
-    <property name="fsystem" type="boolean">
+    <property name="system" type="boolean">
       <column name="FSYSTEM" not-null="false" dialect="PostgreSQL" default="false"/>
       <column name="FSYSTEM" not-null="false" dialect="Oracle, Oracle9" default="0"/>
     </property>

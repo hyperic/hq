@@ -21,7 +21,7 @@
     </version>
 
     <properties name="resourceTypeInstance" unique="true">
-      <many-to-one name="resourceTypeId" class="ResourceType" >
+      <many-to-one name="resourceType" class="ResourceType" >
         <column name="RESOURCE_TYPE_ID" index="EAM_RESOURCE_INSTANCE_KEY, EAM_RESOURCE_IDX_TYPE" unique="false" not-null="false" />
       </many-to-one>
 
@@ -34,9 +34,9 @@
       <column name="CID" not-null="false" />
     </property>
 
-    <property name="subjectId" type="integer">
+    <many-to-one name="owner" class="AuthzSubject">
       <column name="SUBJECT_ID" index="EAM_RESOURCE_OWNER_ID" not-null="false"/>
-    </property>
+    </many-to-one>
 
     <property name="name" type="string">
       <column name="NAME" not-null="false" length="200" />
@@ -46,7 +46,7 @@
       <column name="SORT_NAME" not-null="false" length="200"/>
     </property>
 
-    <property name="fsystem" type="boolean">
+    <property name="system" type="boolean">
       <column name="FSYSTEM" not-null="false" dialect="PostgreSQL" default="false"/>
       <column name="FSYSTEM" not-null="false" dialect="Oracle, Oracle9" default="0"/>
     </property>
