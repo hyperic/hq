@@ -60,6 +60,7 @@ import org.hyperic.hibernate.dao.ServiceClusterDAO;
 import org.hyperic.hibernate.dao.AppServiceDAO;
 import org.hyperic.hibernate.dao.AppSvcDependencyDAO;
 import org.hyperic.hibernate.dao.ApplicationTypeDAO;
+import org.hyperic.hibernate.dao.PrincipalDAO;
 
 public abstract class DAOFactory
 {
@@ -85,6 +86,9 @@ public abstract class DAOFactory
     public abstract ServiceClusterDAO getServiceClusterDAO();
     public abstract ServiceDAO getServiceDAO();
     public abstract ServiceTypeDAO getServiceTypeDAO();
+
+    // Auth DAO
+    public abstract PrincipalDAO getPrincipalDAO();
 
     // Event DAOs
     public abstract TriggerDAO getTriggerDAO();

@@ -41,11 +41,9 @@ import javax.naming.NamingException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
-import org.hyperic.hq.auth.shared.PrincipalsLocal;
-import org.hyperic.hq.auth.shared.PrincipalsLocalHome;
-import org.hyperic.hq.auth.shared.PrincipalsUtil;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.Principal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -55,6 +53,8 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
 import org.hyperic.util.ConfigPropertyException;
+import org.hyperic.hibernate.dao.PrincipalDAO;
+import org.hyperic.dao.DAOFactory;
 
 import org.jboss.security.Util;
 import org.jboss.security.auth.callback.UsernamePasswordHandler;
@@ -251,8 +251,8 @@ public class AuthManagerEJBImpl implements SessionBean {
                         String username, String password)
         throws NamingException, CreateException
     {
-        PrincipalsLocalHome lhome = PrincipalsUtil.getLocalHome();
-        PrincipalsLocal local = lhome.create(username, password);
+        PrincipalDAO lhome = DAOFactory.getDAOFactory().getPrincipalDAO();
+        lhome.create(username, password);
     }
     
     /**
@@ -278,8 +278,8 @@ public class AuthManagerEJBImpl implements SessionBean {
                 AuthzSubjectManagerUtil.getLocalHome().create()
                     .checkModifyUsers(subject);
             }
-            PrincipalsLocalHome lhome = PrincipalsUtil.getLocalHome();
-            PrincipalsLocal local = lhome.findByUsername(username);
+            PrincipalDAO lhome = DAOFactory.getDAOFactory().getPrincipalDAO();
+            Principal local = lhome.findByUsername(username);
             // hash the password as is done in ejbCreate. Fixes 4661
             String hash = Util.createPasswordHash("MD5", "base64",
                                               null, null, password);
@@ -306,9 +306,9 @@ public class AuthManagerEJBImpl implements SessionBean {
     public void deleteUser(AuthzSubjectValue subject, String username)
         throws NamingException, FinderException, RemoveException
     {
-        PrincipalsLocalHome lhome = PrincipalsUtil.getLocalHome();
-        PrincipalsLocal local = lhome.findByUsername(username);
-        local.remove();
+        PrincipalDAO lhome = DAOFactory.getDAOFactory().getPrincipalDAO();
+        Principal local = lhome.findByUsername(username);
+        lhome.remove(local);
     }
 
     /**
@@ -320,18 +320,12 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @exception FinderException
      *
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
     public boolean isUser(AuthzSubjectValue subject, String username)
-        throws NamingException
     {
-        try {
-            PrincipalsLocalHome lhome = PrincipalsUtil.getLocalHome();
-            return lhome.findByUsername(username) != null;
-        }
-        catch (FinderException e) {
-            return false;
-        }
+        PrincipalDAO lhome = DAOFactory.getDAOFactory().getPrincipalDAO();
+        return lhome.findByUsername(username) != null;
     }
 
     /**
@@ -342,18 +336,18 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @exception FinderException
      *
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
     public Collection getAllUsers(AuthzSubjectValue subject)
         throws NamingException, FinderException
     {
-        PrincipalsLocalHome lhome = PrincipalsUtil.getLocalHome();
+        PrincipalDAO lhome = DAOFactory.getDAOFactory().getPrincipalDAO();
         
         Collection principals = lhome.findAllUsers();
         Collection users = new ArrayList();
         
         for (Iterator i = principals.iterator(); i.hasNext();) {
-            PrincipalsLocal p = (PrincipalsLocal)i.next();
+            Principal p = (Principal)i.next();
             users.add(p.getPrincipal());
         }
         

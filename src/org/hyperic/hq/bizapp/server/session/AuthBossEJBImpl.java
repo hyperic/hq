@@ -169,11 +169,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
         throws SessionTimeoutException, SessionNotFoundException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
-        try {
-            return getAuthManager().isUser(subject, username);
-        } catch (NamingException e) {
-            throw new SystemException("NamingException in isUser", e);
-        }
+        return getAuthManager().isUser(subject, username);
     }
 
     /**
