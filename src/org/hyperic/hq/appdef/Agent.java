@@ -137,19 +137,7 @@ public class Agent extends AppdefBean
                  address.equals(o.getAddress())))
                &&
                (port == o.getPort() || (port!=null && o.getPort()!=null &&
-                                        port.equals(o.getPort())))
-               &&
-               (authToken == o.getAuthToken() ||
-                (authToken!=null && o.getAuthToken()!=null &&
-                 authToken.equals(o.getAuthToken())))
-               &&
-               (agentToken == o.getAgentToken() ||
-                (agentToken!=null && o.getAgentToken()!=null &&
-                 agentToken.equals(o.getAgentToken())))
-               &&
-               (version == o.getVersion() ||
-                (version!=null && o.getVersion()!=null &&
-                 version.equals(o.getVersion())));
+                                        port.equals(o.getPort())));
     }
 
     public int hashCode()
@@ -158,9 +146,6 @@ public class Agent extends AppdefBean
 
         result = 37*result + (address!=null ? address.hashCode() : 0);
         result = 37*result + (port!=null ? port.hashCode() : 0);
-        result = 37*result + (authToken!=null ? authToken.hashCode() : 0);
-        result = 37*result + (agentToken!=null ? agentToken.hashCode() : 0);
-        result = 37*result + (version!=null ? version.hashCode() : 0);
 
         return result;
     }

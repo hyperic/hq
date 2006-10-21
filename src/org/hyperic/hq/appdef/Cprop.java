@@ -25,15 +25,13 @@
 
 package org.hyperic.hq.appdef;
 
-import java.io.Serializable;
+import org.hyperic.hibernate.PersistedObject;
 
 /**
  *
  */
-public class Cprop implements Serializable
+public class Cprop extends PersistedObject
 {
-    private Integer id;
-    private long _version_;
     private Integer key;
     private Integer appdefId;
     private Integer valueIdx;
@@ -47,27 +45,6 @@ public class Cprop implements Serializable
     public Cprop()
     {
         super();
-    }
-
-    // Property accessors
-    public Integer getId()
-    {
-        return this.id;
-    }
-
-    private void setId(Integer id)
-    {
-        this.id = id;
-    }
-
-    public long get_version_()
-    {
-        return this._version_;
-    }
-
-    private void set_version_(long _version_)
-    {
-        this._version_ = _version_;
     }
 
     public Integer getKey()
@@ -110,23 +87,31 @@ public class Cprop implements Serializable
         this.propValue = propValue;
     }
 
-    // TODO: fix equals and hashCode
-    public boolean equals(Object other)
+    public boolean equals(Object obj)
     {
-        if ((this == other)) return true;
-        if ((other == null)) return false;
-        if (!(other instanceof Cprop)) return false;
-        Cprop castOther = (Cprop) other;
-
-        return ((this.getKey() == castOther.getKey()) || (this.getKey() != null && castOther.getKey() != null && this.getKey().equals(castOther.getKey())))
-               && ((this.getAppdefId() == castOther.getAppdefId()) || (this.getAppdefId() != null && castOther.getAppdefId() != null && this.getAppdefId().equals(castOther.getAppdefId())))
-               && ((this.getValueIdx() == castOther.getValueIdx()) || (this.getValueIdx() != null && castOther.getValueIdx() != null && this.getValueIdx().equals(castOther.getValueIdx())));
+        if (!super.equals(obj) || !(obj instanceof Cprop)) {
+            return false;
+        }
+        Cprop o = (Cprop)obj;
+        return (key==o.getKey() || (key!=null && o.getKey()!=null &&
+                                    key.equals(o.getKey())))
+               &&
+               (appdefId==o.getAppdefId() ||
+                (appdefId!=null && o.getAppdefId()!=null &&
+                 appdefId.equals(o.getAppdefId())))
+               &&
+               (valueIdx==o.getValueIdx() ||
+                (valueIdx!=null && o.getValueIdx()!=null &&
+                 valueIdx.equals(o.getValueIdx())));
     }
 
     public int hashCode()
     {
-        int result = 17;
+        int result = super.hashCode();
 
+        result = 37*result + (key!=null ? key.hashCode() : 0);
+        result = 37*result + (appdefId!=null ? appdefId.hashCode() : 0);
+        result = 37*result + (valueIdx!=null ? valueIdx.hashCode() : 0);
 
         return result;
     }

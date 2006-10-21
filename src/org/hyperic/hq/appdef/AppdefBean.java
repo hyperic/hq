@@ -50,6 +50,12 @@ public abstract class AppdefBean
         super();
     }
 
+    protected AppdefBean(Integer id)
+    {
+        super();
+        setId(id);
+    }
+
     public long getCreationTime()
     {
         return creationTime != null ? creationTime.longValue() : 0;

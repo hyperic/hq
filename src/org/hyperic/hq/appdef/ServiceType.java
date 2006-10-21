@@ -210,20 +210,6 @@ public class ServiceType extends AppdefResourceType
         if (!super.equals(obj) || !(obj instanceof ServiceType)) {
             return false;
         }
-        ServiceType o = (ServiceType)obj;
-        return
-            ((plugin!=o.getPlugin()) ||
-             (plugin!=null && o.getPlugin()!=null && plugin.equals(o)))
-            &&
-            (isInternal == o.isIsInternal());
-    }
-
-    public int hashCode()
-    {
-        int result = super.hashCode();
-
-        result = 37*result + (plugin != null ? plugin.hashCode() : 0);
-        result = 37*result + (isInternal ? 0 : 1);
-        return result;
+        return true;
     }
 }

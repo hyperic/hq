@@ -31,8 +31,8 @@ import java.util.Iterator;
 
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 
-public class ResourceType extends AuthzNamedEntity implements Serializable {
-
+public class ResourceType extends AuthzNamedEntity implements Serializable
+{
     private Integer cid;
     private Resource resource;
     private boolean system;
@@ -115,7 +115,7 @@ public class ResourceType extends AuthzNamedEntity implements Serializable {
         if (getOperations() != null) {
             for (Iterator it = getOperations().iterator(); it.hasNext(); ) {
                 Operation op = (Operation) it.next();
-                resourceTypeValue.addOperationValue(op.getOperationValue());            
+                resourceTypeValue.addOperationValue(op.getOperationValue());
             }
         }
         return resourceTypeValue;

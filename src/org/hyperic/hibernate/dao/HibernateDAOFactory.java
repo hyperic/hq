@@ -66,6 +66,21 @@ public class HibernateDAOFactory extends DAOFactory
         return new ApplicationDAO(getCurrentSession());
     }
 
+    public ApplicationTypeDAO getApplicationTypeDAO()
+    {
+        return new ApplicationTypeDAO(getCurrentSession());
+    }
+
+    public AppServiceDAO getAppServiceDAO()
+    {
+        return new AppServiceDAO(getCurrentSession());
+    }
+
+    public AppSvcDependencyDAO getAppSvcDepencyDAO()
+    {
+        return new AppSvcDependencyDAO(getCurrentSession());
+    }
+
     public ConfigResponseDAO getConfigResponseDAO()
     {
         return new ConfigResponseDAO(getCurrentSession());
@@ -94,6 +109,11 @@ public class HibernateDAOFactory extends DAOFactory
     public ServerDAO getServerDAO()
     {
         return new ServerDAO(getCurrentSession());
+    }
+
+    public ServiceClusterDAO getServiceClusterDAO()
+    {
+        return new ServiceClusterDAO(getCurrentSession());
     }
 
     public ServerTypeDAO getServerTypeDAO()

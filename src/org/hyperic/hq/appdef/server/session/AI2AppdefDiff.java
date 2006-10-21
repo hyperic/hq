@@ -44,10 +44,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigResponseValue;
-import org.hyperic.hq.appdef.shared.IpLocal;
 import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformTypePK;
-import org.hyperic.hq.appdef.shared.ServerLocal;
 import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIIpValue;
@@ -56,6 +54,7 @@ import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.ServerTypePK;
 import org.hyperic.hq.appdef.Platform;
 import org.hyperic.hq.appdef.Ip;
+import org.hyperic.hq.appdef.Server;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -379,7 +378,7 @@ public class AI2AppdefDiff {
             log.debug("AI2AppdefDiff: doServerDiffs:" +
                      " appdefServers=" + StringUtil.listToString(appdefServers) +
                      " scannedServers=" + StringUtil.listToString(scannedServers));
-        ServerLocal appdefServer;
+        Server appdefServer;
         AIServerValue scannedServer;
         Iterator i = scannedServers.iterator();
         while ( i.hasNext() ) {
@@ -516,14 +515,14 @@ public class AI2AppdefDiff {
      * @return The appdefServer if it was found, null if it was not.  If the
      * appdefServer was found, it is also removed from the appdefServers list.
      */
-    private ServerLocal findAndRemoveAppdefServer ( AIServerValue scannedServer,
-                                                    List appdefServers ) {
+    private Server findAndRemoveAppdefServer ( AIServerValue scannedServer,
+                                               List appdefServers ) {
         // Is the appdef server in the scan state?
         String aiid = scannedServer.getAutoinventoryIdentifier();
         int size = appdefServers.size();
-        ServerLocal appdefServer;
+        Server appdefServer;
         for (int i=0; i<size; i++ ) {
-            appdefServer = (ServerLocal) appdefServers.get(i);
+            appdefServer = (Server) appdefServers.get(i);
             if ( appdefServer.getAutoinventoryIdentifier().equals(aiid) ) {
 
                 // Found a match based on aiid, remove it from

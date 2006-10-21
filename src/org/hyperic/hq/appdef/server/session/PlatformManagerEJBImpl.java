@@ -35,7 +35,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -50,7 +49,6 @@ import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AgentPK;
-import org.hyperic.hq.appdef.shared.AppServiceLocal;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -59,10 +57,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEvent;
 import org.hyperic.hq.appdef.shared.AppdefGroupManagerUtil;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.hq.appdef.shared.ApplicationLocal;
-import org.hyperic.hq.appdef.shared.ApplicationLocalHome;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.ApplicationPK;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformLightValue;
@@ -73,7 +68,6 @@ import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformVOHelperUtil;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServiceLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
@@ -82,6 +76,8 @@ import org.hyperic.hq.appdef.Server;
 import org.hyperic.hq.appdef.Platform;
 import org.hyperic.hq.appdef.Service;
 import org.hyperic.hq.appdef.PlatformType;
+import org.hyperic.hq.appdef.AppService;
+import org.hyperic.hq.appdef.Application;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -101,6 +97,7 @@ import org.hyperic.util.pager.Pager;
 import org.hyperic.hibernate.dao.PlatformDAO;
 import org.hyperic.hibernate.dao.PlatformTypeDAO;
 import org.hyperic.hibernate.dao.ConfigResponseDAO;
+import org.hyperic.hibernate.dao.ApplicationDAO;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.ObjectNotFoundException;
 
@@ -1152,21 +1149,16 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                                                 PageControl pc ) 
         throws ApplicationNotFoundException, PlatformNotFoundException, 
                PermissionException {
-        ApplicationLocalHome appLocalHome;
-        try {
-            appLocalHome = getApplicationLocalHome();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-        
-        ApplicationLocal appLocal;
+        ApplicationDAO appLocalHome = getApplicationDAO();
+
+        Application appLocal;
         Collection serviceCollection;
         Iterator it;
         Collection platCollection;
 
         try {
-            appLocal = appLocalHome.findByPrimaryKey(new ApplicationPK(appId));
-        } catch(FinderException e){
+            appLocal = appLocalHome.findById(appId);
+        } catch(ObjectNotFoundException e){
             throw new ApplicationNotFoundException(appId, e);
         }
 
@@ -1180,13 +1172,14 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         serviceCollection = appLocal.getAppServices();
         it = serviceCollection.iterator();
         while (it != null && it.hasNext()) {
-            AppServiceLocal appService = (AppServiceLocal) it.next();
+            AppService appService = (AppService) it.next();
 
             if (appService.getIsCluster()) {
-                Set services = appService.getServiceCluster().getServices();
+                Collection services =
+                    appService.getServiceCluster().getServices();
 
                 for (Iterator i = services.iterator(); i.hasNext();) {
-                    ServiceLocal service = (ServiceLocal)i.next();
+                    Service service = (Service)i.next();
                     PlatformValue pValue = 
                         getPlatformByService(subject, service.getId());
                     if (!platCollection.contains(pValue))

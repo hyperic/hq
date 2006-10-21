@@ -25,7 +25,15 @@
 
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.shared.ServicePK;
+import org.hyperic.hq.appdef.shared.ServiceClusterPK;
+import org.hyperic.hq.appdef.shared.ApplicationValue;
+import org.hyperic.hq.appdef.shared.ApplicationPK;
+
 import java.util.Collection;
+import java.util.Set;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 
 /**
  *
@@ -34,7 +42,7 @@ public class Application extends AppdefResource
 {
     private String engContact;
     private String opsContact;
-    private String busContact;
+    private String businessContact;
     private ApplicationType applicationType;
     private Collection appServices;
 
@@ -44,6 +52,12 @@ public class Application extends AppdefResource
     public Application()
     {
         super();
+    }
+
+    public Application(Integer id)
+    {
+        super();
+        setId(id);
     }
 
     public String getEngContact()
@@ -66,14 +80,14 @@ public class Application extends AppdefResource
         this.opsContact = opsContact;
     }
 
-    public String getBusContact()
+    public String getBusinessContact()
     {
-        return this.busContact;
+        return this.businessContact;
     }
 
-    public void setBusContact(String busContact)
+    public void setBusinessContact(String businessContact)
     {
-        this.busContact = busContact;
+        this.businessContact = businessContact;
     }
 
     public ApplicationType getApplicationType()
@@ -94,5 +108,109 @@ public class Application extends AppdefResource
     public void setAppServices(Collection appServices)
     {
         this.appServices = appServices;
+    }
+
+    public AppService addEntryPoint(ServicePK aService)
+    {
+        throw new UnsupportedOperationException(
+            "use AppServiceDAO.createService()");
+    }
+
+    public AppService addServiceCluster(ServiceClusterPK aClusterPK)
+    {
+        throw new UnsupportedOperationException(
+            "use AppServiceDAO.createService()");
+    }
+
+    public AppService addService(ServicePK aService)
+    {
+        throw new UnsupportedOperationException(
+            "use AppServiceDAO.createService()");
+    }
+
+    public Set getAppServiceSnapshot()
+    {
+        if (getAppServices() == null) {
+            return new LinkedHashSet();
+        }
+        return new LinkedHashSet(getAppServices());
+    }
+
+    private ApplicationValue applicationValue = new ApplicationValue();
+    /**
+     * @deprecated use (this) Application object instead
+     * @return
+     */
+    public ApplicationValue getApplicationValue()
+    {
+        applicationValue.setName(getName());
+        applicationValue.setSortName(getSortName());
+        applicationValue.setModifiedBy(getModifiedBy());
+        applicationValue.setOwner(getOwner());
+        applicationValue.setLocation(getLocation());
+        applicationValue.setEngContact(getEngContact());
+        applicationValue.setOpsContact(getOpsContact());
+        applicationValue.setBusinessContact(getBusinessContact());
+        applicationValue.setDescription(getDescription());
+        applicationValue.setId(getId());
+        applicationValue.setMTime(getMTime());
+        applicationValue.setCTime(getCTime());
+        applicationValue.removeAllAppServiceValues();
+        if (getAppServices() != null) {
+            Iterator iAppServiceValue = getAppServices().iterator();
+            while (iAppServiceValue.hasNext()){
+                applicationValue.addAppServiceValue(
+                    ((AppService)iAppServiceValue.next()).getAppServiceValue() );
+            }
+        }
+        applicationValue.cleanAppServiceValue();
+        if ( getApplicationType() != null )
+            applicationValue.setApplicationType(
+                getApplicationType().getApplicationTypeValue() );
+        else
+            applicationValue.setApplicationType( null );
+        return applicationValue;
+    }
+
+    public ApplicationValue getApplicationValueObject()
+    {
+        ApplicationValue vo = new ApplicationValue();
+        vo.setName(getName());
+        vo.setSortName(getSortName());
+        vo.setModifiedBy(getModifiedBy());
+        vo.setOwner(getOwner());
+        vo.setLocation(getLocation());
+        vo.setEngContact(getEngContact());
+        vo.setOpsContact(getOpsContact());
+        vo.setBusinessContact(getBusinessContact());
+        vo.setDescription(getDescription());
+        vo.setId(getId());
+        vo.setMTime(getMTime());
+        vo.setCTime(getCTime());
+        if ( getApplicationType() != null )
+            vo.setApplicationType(
+                getApplicationType().getApplicationTypeValue() );
+        else
+            vo.setApplicationType( null );
+        return vo;
+    }
+
+    private ApplicationPK pkey = new ApplicationPK();
+    /**
+     * @deprecated use getId()
+     * @return
+     */
+    public ApplicationPK getPrimaryKey()
+    {
+        pkey.setId(getId());
+        return pkey;
+    }
+
+    public boolean equals(Object obj)
+    {
+        if (!super.equals(obj) || !(obj instanceof Application)) {
+            return false;
+        }
+        return true;
     }
 }

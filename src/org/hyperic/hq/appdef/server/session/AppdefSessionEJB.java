@@ -49,10 +49,8 @@ import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceLocal;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.ApplicationLocal;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationPK;
-import org.hyperic.hq.appdef.shared.ApplicationTypeLocal;
 import org.hyperic.hq.appdef.shared.ApplicationTypePK;
 import org.hyperic.hq.appdef.shared.ApplicationVOHelperUtil;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
@@ -75,6 +73,8 @@ import org.hyperic.hq.appdef.Service;
 import org.hyperic.hq.appdef.ServiceType;
 import org.hyperic.hq.appdef.Platform;
 import org.hyperic.hq.appdef.PlatformType;
+import org.hyperic.hq.appdef.Application;
+import org.hyperic.hq.appdef.ApplicationType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -400,22 +400,22 @@ public abstract class AppdefSessionEJB
 
     /**
      * Find a ApplicationTypeLocal by primary key
-     * @return ApplicationTypeLocal
+     * @return ApplicationType
      */
-    protected ApplicationTypeLocal findApplicationTypeByPK(ApplicationTypePK pk)
+    protected ApplicationType findApplicationTypeByPK(ApplicationTypePK pk)
         throws FinderException, NamingException {
-            return getApplicationTypeLocalHome().findByPrimaryKey(pk);
+            return getApplicationTypeDAO().findByPrimaryKey(pk);
     }
 
     /**
      * Find a ApplicationLocal by primary key
-     * @return ApplicationLocal
+     * @return Application
      */
-    protected ApplicationLocal findApplicationByPK(ApplicationPK pk)
+    protected Application findApplicationByPK(ApplicationPK pk)
         throws ApplicationNotFoundException, NamingException {
         try {
-            return getApplicationLocalHome().findByPrimaryKey(pk);
-        } catch (FinderException e) {
+            return getApplicationDAO().findByPrimaryKey(pk);
+        } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(pk.getId(), e);
         }
     }
@@ -1366,8 +1366,8 @@ public abstract class AppdefSessionEJB
                     
                 return service.getServiceValue();
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                ApplicationLocal app =
-                    this.findApplicationByPK(new ApplicationPK(intID));
+                Application app =
+                    findApplicationByPK(new ApplicationPK(intID));
 
                 return ApplicationVOHelperUtil.getLocalHome().create()
                             .getApplicationValue(app);

@@ -201,30 +201,6 @@ public class PlatformType extends AppdefResourceType
         if (!super.equals(obj) || !(obj instanceof PlatformType)) {
             return false;
         }
-        PlatformType o = (PlatformType)obj;
-        return (os==o.getOs() || (os!=null && o.getOs()!=null &&
-                                  os.equals(o.getOs())))
-               &&
-               (osVersion==o.getOsVersion() ||
-                (osVersion!=null && o.getOsVersion()!=null &&
-                 osVersion.equals(o.getOsVersion())))
-               &&
-               (arch==o.getArch() || (arch!=null && o.getArch()!=null &&
-                                      arch.equals(o.getArch())))
-               &&
-               (plugin==o.getArch() || (plugin!=null && o.getPlugin()!=null &&
-                                        plugin.equals(o.getPlugin())));
-    }
-
-    public int hashCode()
-    {
-        int result = super.hashCode();
-
-        result = 37*result + (os != null ? os.hashCode() : 0);
-        result = 37*result + (osVersion != null ? osVersion.hashCode() : 0);
-        result = 37*result + (arch != null ? arch.hashCode() : 0);
-        result = 37*result + (plugin != null ? plugin.hashCode() : 0);
-        
-        return result;
+        return true;
     }
 }

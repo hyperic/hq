@@ -45,9 +45,6 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.shared.AppServiceLocal;
-import org.hyperic.hq.appdef.shared.AppServiceLocalHome;
-import org.hyperic.hq.appdef.shared.AppServiceUtil;
 import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
 import org.hyperic.hq.appdef.shared.AppSvcClustIncompatSvcException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
@@ -57,25 +54,17 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEvent;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.hq.appdef.shared.ApplicationLocal;
-import org.hyperic.hq.appdef.shared.ApplicationLocalHome;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationPK;
-import org.hyperic.hq.appdef.shared.ConfigResponsePK;
-import org.hyperic.hq.appdef.shared.ConfigResponseUtil;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
-import org.hyperic.hq.appdef.shared.ServiceClusterLocal;
-import org.hyperic.hq.appdef.shared.ServiceClusterLocalHome;
 import org.hyperic.hq.appdef.shared.ServiceClusterPK;
-import org.hyperic.hq.appdef.shared.ServiceClusterUtil;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceLightValue;
-import org.hyperic.hq.appdef.shared.ServiceLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ServiceTypePK;
@@ -84,11 +73,13 @@ import org.hyperic.hq.appdef.shared.ServiceVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.appdef.shared.ServiceUtil;
 import org.hyperic.hq.appdef.Service;
 import org.hyperic.hq.appdef.ServiceType;
 import org.hyperic.hq.appdef.ServerType;
 import org.hyperic.hq.appdef.Server;
+import org.hyperic.hq.appdef.AppService;
+import org.hyperic.hq.appdef.Application;
+import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -108,6 +99,10 @@ import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.hibernate.dao.ServiceDAO;
 import org.hyperic.hibernate.dao.ServiceTypeDAO;
 import org.hyperic.hibernate.dao.ServerTypeDAO;
+import org.hyperic.hibernate.dao.AppServiceDAO;
+import org.hyperic.hibernate.dao.ApplicationDAO;
+import org.hyperic.hibernate.dao.ConfigResponseDAO;
+import org.hyperic.hibernate.dao.ServiceClusterDAO;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.ObjectNotFoundException;
 
@@ -896,7 +891,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 if (o instanceof Service) {
                     thisSvcTypeId = ((Service)o).getServiceType().getId();
                 } else {
-                    ServiceClusterLocal cluster = (ServiceClusterLocal)o;
+                    ServiceCluster cluster = (ServiceCluster)o;
                     thisSvcTypeId = cluster.getServiceType().getId();
                 }                
                 // first, if they specified a server type, then filter on it
@@ -946,8 +941,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                     retVal.add(o);
                 }
             }
-            else if (o instanceof ServiceClusterLocal) {
-                ServiceClusterLocal aCluster = (ServiceClusterLocal)o;
+            else if (o instanceof ServiceCluster) {
+                ServiceCluster aCluster = (ServiceCluster)o;
                 AppdefEntityID clusterId = new AppdefEntityID(
                     AppdefEntityConstants.APPDEF_TYPE_GROUP,aCluster.getGroupId());
                 if (viewableEntityIds != null &&
@@ -1294,77 +1289,54 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         throws PermissionException, ApplicationNotFoundException,
                ServiceNotFoundException {
 
-        ApplicationLocalHome appLocalHome;
-        ApplicationLocal appLocal;
         try {
             // we only look up the application to validate
             // the appId param
-            appLocalHome   = getApplicationLocalHome();
-            appLocal = appLocalHome.findByPrimaryKey(new ApplicationPK(appId));
-        } catch (FinderException e) {
+            getApplicationDAO().findById(appId);
+        } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(appId, e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } 
+        }
 
-        AppServiceLocalHome appServLocHome;
-        Collection appServiceCollection; 
-        try {
-            appServLocHome = AppServiceUtil.getLocalHome();
-            pc = PageControl.initDefaults (pc, SortAttribute.SERVICE_NAME);
+        Collection appServiceCollection;
+        AppServiceDAO appServLocHome =
+            DAOFactory.getDAOFactory().getAppServiceDAO();
+        pc = PageControl.initDefaults (pc, SortAttribute.SERVICE_NAME);
 
-            switch (pc.getSortattribute()) {
-                case SortAttribute.SERVICE_NAME :
-                    if ( pc.isAscending() )
-                        appServiceCollection = appServLocHome
-                            .findByApplication_orderSvcName_asc(appId);
-                    else
-                        appServiceCollection = appServLocHome
-                            .findByApplication_orderSvcName_desc(appId);
-                    break;
-                case SortAttribute.RESOURCE_NAME :
-                    if ( pc.isAscending() )
-                        appServiceCollection = appServLocHome
-                            .findByApplication_orderSvcName_asc(appId);
-                    else
-                        appServiceCollection = appServLocHome
-                            .findByApplication_orderSvcName_desc(appId);
-                    break;
-                case SortAttribute.SERVICE_TYPE :
-                    if ( pc.isAscending() )
-                        appServiceCollection = appServLocHome
-                            .findByApplication_orderSvcType_asc(appId);
-                    else
-                        appServiceCollection = appServLocHome
-                            .findByApplication_orderSvcType_desc(appId);
-                    break;
-                default: 
-                    throw new IllegalArgumentException("Unsupported sort " +
-                                                       "attribute ["+ pc.getSortattribute() +
-                                                       "] on PageControl : " + pc);
-            } 
-
-
-        } catch (FinderException e) {
+        switch (pc.getSortattribute()) {
+        case SortAttribute.SERVICE_NAME :
+            appServiceCollection = appServLocHome
+                .findByApplication_orderSvcName(appId,pc.isAscending());
+            break;
+        case SortAttribute.RESOURCE_NAME :
+            appServiceCollection = appServLocHome
+                .findByApplication_orderSvcName(appId,pc.isAscending());
+            break;
+        case SortAttribute.SERVICE_TYPE :
+            appServiceCollection = appServLocHome
+                .findByApplication_orderSvcType(appId,pc.isAscending());
+            break;
+        default:
+            throw new IllegalArgumentException("Unsupported sort " +
+                                               "attribute ["+ pc.getSortattribute() +
+                                               "] on PageControl : " + pc);
+        }
+        if (appServiceCollection.size() == 0) {
             throw new ServiceNotFoundException("No (viewable) services " +
                                                "associated with application " +
                                                appId);
-        } catch (NamingException e) {
-            throw new SystemException(e);
         }
 
-        AppServiceLocal appService;
+        AppService appService;
         Iterator i = appServiceCollection.iterator();
         List services = new ArrayList();
         while ( i.hasNext() ) {
-            appService = (AppServiceLocal) i.next();
+            appService = (AppService) i.next();
             if ( appService.getIsCluster() ) {
                 services.add(appService.getServiceCluster());
             } else {
                 services.add(appService.getService());
             }
         }
-
         return this.filterAndPage(services, subject, svcTypeId, pc);
    }
 
@@ -1399,17 +1371,12 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         if (typeId == null)
             typeId = APPDEF_RES_TYPE_UNDEFINED;
 
-        ApplicationLocalHome appLocalHome;
-        try {
-            appLocalHome = getApplicationLocalHome();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        ApplicationDAO appLocalHome = getApplicationDAO();
 
-        ApplicationLocal appLocal;
+        Application appLocal;
         try {
             appLocal = appLocalHome.findByPrimaryKey(new ApplicationPK(appId));
-        } catch(FinderException e){
+        } catch(ObjectNotFoundException e){
             throw new ApplicationNotFoundException(appId, e);
         }
 
@@ -1417,7 +1384,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         Collection appSvcCollection = appLocal.getAppServices();
         Iterator it = appSvcCollection.iterator();
         while (it != null && it.hasNext()) {
-            AppServiceLocal appService = (AppServiceLocal) it.next();
+            AppService appService = (AppService) it.next();
 
             if (appService.getIsCluster()) {
                 svcCollection.addAll(
@@ -1482,14 +1449,14 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             for (Iterator iter = serviceInventory.iterator(); iter.hasNext();) {
                 Object o = iter.next();
                 // applications can have both clusters and services
-                if (o instanceof ServiceLocal) {
-                    ServiceLocal service = (ServiceLocal) o;
+                if (o instanceof Service) {
+                    Service service = (Service) o;
                     // servers will only have these
                     servicePKs.add(service.getPrimaryKey());
                 } else {
                     // this only happens when entId is for an application and
                     // a cluster is bound to it
-                    ServiceClusterLocal cluster = (ServiceClusterLocal) o;
+                    ServiceCluster cluster = (ServiceCluster) o;
                     AppdefEntityID groupId = 
                         new AppdefEntityID(
                             AppdefEntityConstants.APPDEF_TYPE_GROUP, 
@@ -1528,61 +1495,57 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         AuthzSubjectValue subject, Integer appId, PageControl pc)
         throws ApplicationNotFoundException, ServiceNotFoundException {
         
-        ApplicationLocalHome appLocalHome;
-        AppServiceLocalHome appServLocHome;
+        ApplicationDAO appLocalHome;
+        AppServiceDAO appServLocHome;
         List appServiceCollection;
-        ApplicationLocal appLocal;
+        Application appLocal;
 
         try {
-            appLocalHome = getApplicationLocalHome();
-            appServLocHome = AppServiceUtil.getLocalHome();
+            appLocalHome = getApplicationDAO();
+            appServLocHome = DAOFactory.getDAOFactory().getAppServiceDAO();
             appLocal = appLocalHome.findByPrimaryKey(new ApplicationPK(appId));
-        } catch (FinderException e) {
+        } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(appId, e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
         }
         // appServiceCollection = appLocal.getAppServices();
 
-        try {
-            pc = PageControl.initDefaults(pc, SortAttribute.SERVICE_NAME);
+        pc = PageControl.initDefaults(pc, SortAttribute.SERVICE_NAME);
 
-            switch (pc.getSortattribute()) {
-                case SortAttribute.SERVICE_NAME :
-                case SortAttribute.RESOURCE_NAME :
-                    appServiceCollection =
-                        appServLocHome.findByApplication_orderName(appId);
-                    break;
-                case SortAttribute.SERVICE_TYPE :
-                    appServiceCollection =
-                        appServLocHome.findByApplication_orderType(appId);
-                    break;
-                default :
-                    throw new IllegalArgumentException(
-                        "Unsupported sort attribute [" + pc.getSortattribute() +
-                        "] on PageControl : " + pc);
-            }
-
-            if (pc.isDescending())
-                Collections.reverse(appServiceCollection);
-        } catch (FinderException e) {
+        switch (pc.getSortattribute()) {
+        case SortAttribute.SERVICE_NAME :
+        case SortAttribute.RESOURCE_NAME :
+            appServiceCollection =
+                appServLocHome.findByApplication_orderName(appId);
+            break;
+        case SortAttribute.SERVICE_TYPE :
+            appServiceCollection =
+                appServLocHome.findByApplication_orderType(appId);
+            break;
+        default :
+            throw new IllegalArgumentException(
+                "Unsupported sort attribute [" + pc.getSortattribute() +
+                "] on PageControl : " + pc);
+        }
+        if (appServiceCollection.size() == 0) {
             throw new ServiceNotFoundException(
                 "No (viewable) services "
-                    + "associated with application "
-                    + appId);
+                + "associated with application "
+                + appId);
         }
+        if (pc.isDescending())
+            Collections.reverse(appServiceCollection);
 
         // XXX Call to authz, get the collection of all services
         // that we are allowed to see.
         // OR, alternatively, find everything, and then call out
-        // to authz in batches to find out which ones we are 
+        // to authz in batches to find out which ones we are
         // allowed to return.
 
-        AppServiceLocal appService;
+        AppService appService;
         Iterator i = appServiceCollection.iterator();
         List services = new ArrayList();
         while (i.hasNext()) {
-            appService = (AppServiceLocal) i.next();
+            appService = (AppService) i.next();
             if (appService.getIsCluster()) {
                 services.add(appService.getServiceCluster());
             } else {
@@ -1848,7 +1811,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void removeService(AuthzSubjectValue subj, ServiceLocal service,
+    public void removeService(AuthzSubjectValue subj, Service service,
                               boolean deep)
         throws RemoveException, FinderException, PermissionException {
 
@@ -1856,8 +1819,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         Integer serviceId = pk.getId();
         try {
             // find any children
-            Collection childSvcs =
-                ServiceUtil.getLocalHome().findByParent(serviceId);
+            Collection childSvcs = getServiceDAO().findByParent(serviceId);
             if ( !deep && childSvcs.size() > 0) {
                 throw new RemoveException(
                     "Service can not be removed since it has children");
@@ -1871,8 +1833,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             ResourceValue serviceRv = getServiceResourceValue(pk);
             // remove any child services
             for(Iterator i = childSvcs.iterator(); i.hasNext();) {
-                ServiceLocal child = (ServiceLocal)i.next();
-                Integer childId = ((ServicePK)child.getPrimaryKey()).getId();
+                Service child = (Service)i.next();
+                Integer childId = child.getId();
                 this.removeService(subj, childId, deep);
             }
 
@@ -1885,14 +1847,14 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             VOCache.getInstance().removeService(serviceId);
             VOCache.getInstance().removeServer(serverId);
             // remove from appdef
-            service.remove();
+            getServiceDAO().remove(service);
 
             // remove the config response
             if (cid != null) {
                 try {
-                    ConfigResponseUtil.getLocalHome()
-                        .findByPrimaryKey(new ConfigResponsePK(cid)).remove();
-                } catch (FinderException e) {
+                    ConfigResponseDAO cdao = getConfigResponseDAO();
+                    cdao.remove(cdao.findById(cid));
+                } catch (ObjectNotFoundException e) {
                     // OK, no config response, just log it
                     log.warn("Invalid config ID " + cid);
                 }
@@ -1915,78 +1877,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * A removeService method that takes a ServiceLocal.  This is called by
-     * ServerManager.removeServer when cascading a delete onto services.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
-     */
-    public void removeService(AuthzSubjectValue subj, Service service,
-                              boolean deep) 
-        throws RemoveException, FinderException, PermissionException {
-
-        ServicePK pk = service.getPrimaryKey();
-        Integer serviceId = pk.getId();
-        try {
-            // find any children
-            Collection childSvcs =
-                getServiceDAO().findByParent(serviceId);
-            if ( !deep && childSvcs.size() > 0) {
-                throw new RemoveException(
-                    "Service can not be removed since it has children");
-            }
-            ServerPK serverPk = service.getServer().getPrimaryKey();
-            Integer serverId = serverPk.getId();
-
-            // validate permission needs removeService on the service
-            // to succeed
-            checkRemovePermission(subj, service.getEntityId());
-            ResourceValue serviceRv = getServiceResourceValue(pk);
-            // remove any child services
-            for(Iterator i = childSvcs.iterator(); i.hasNext();) {
-                Service child = (Service)i.next();
-                Integer childId = child.getId();
-                this.removeService(subj, childId, deep);
-            }
-
-            // keep the configresponseId so we can remove it later
-            Integer cid = service.getConfigResponseId();
-
-            // remove from authz
-            this.removeAuthzResource(subj, serviceRv); 
-            // remove vo from service cache, and from server cache
-            VOCache.getInstance().removeService(serviceId);
-            VOCache.getInstance().removeServer(serverId);
-            // remove from appdef
-            getServiceDAO().remove(service);
-
-            // remove the config response
-            if (cid != null) {
-                try {
-                    ConfigResponseUtil.getLocalHome()
-                        .findByPrimaryKey(new ConfigResponsePK(cid)).remove();
-                } catch (FinderException e) {
-                    // OK, no config response, just log it
-                    log.warn("Invalid config ID " + cid);
-                }
-            }
-
-            // remove custom properties
-            deleteCustomProperties(AppdefEntityConstants.APPDEF_TYPE_SERVICE, 
-                                   serviceId.intValue());
-            
-            // Send service deleted event
-            sendAppdefEvent(subj, new AppdefEntityID(pk),
-                            AppdefEvent.ACTION_DELETE);
-        } catch (CreateException e) {
-            log.error("Unable to getServiceResourceValue", e);
-            throw new RemoveException("Unable to getServiceResourceValue: "
-                + e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-    }
-    
-    /**
      * Create a service cluster from a set of service Ids
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
@@ -1997,37 +1887,26 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         throws AppSvcClustDuplicateAssignException, 
                AppSvcClustIncompatSvcException, CreateException {
         // TODO check authz createCluster operation 
-        ServiceClusterLocal clusterEJB;
-        try {
-            clusterEJB =
-                ServiceClusterUtil.getLocalHome().create(cluster, serviceIdList);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }             
-        return (ServiceClusterPK)clusterEJB.getPrimaryKey();  
+        ServiceCluster clusterEJB =
+            getServiceClusterDAO().create(cluster, serviceIdList);
+        return clusterEJB.getPrimaryKey();
     }
     
     /**
      * @param serviceIdList - the list of service id's which comprise the updated cluster
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * @ejb:transaction type="RequiresNew"
      */
     public void updateCluster(AuthzSubjectValue subj,
-                                             ServiceClusterValue cluster,
-                                             List serviceIdList)
-        throws AppSvcClustDuplicateAssignException, 
+                              ServiceClusterValue cluster,
+                              List serviceIdList)
+        throws AppSvcClustDuplicateAssignException,
                AppSvcClustIncompatSvcException,
                FinderException, PermissionException { 
         // find the cluster
-        ServiceClusterLocal clusterEJB;
-        try {
-            clusterEJB =
-                ServiceClusterUtil.getLocalHome().findByPrimaryKey(
-                    cluster.getPrimaryKey());
-            clusterEJB.updateCluster(cluster, serviceIdList);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        ServiceCluster clusterEJB =
+            getServiceClusterDAO().findById(cluster.getId());
+        clusterEJB.updateCluster(cluster, serviceIdList);
     }
     
     /**
@@ -2036,15 +1915,11 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      */
     public void removeCluster(AuthzSubjectValue subj, Integer clusterId)
         throws RemoveException, FinderException, PermissionException {
-        try {
-            ServiceClusterLocal clusterLoc = ServiceClusterUtil.getLocalHome()
-                .findByPrimaryKey(new ServiceClusterPK(clusterId));
-            // XXX - Authz chex needed?
-            //checkRemovePermission(subj, clusterLoc.getEntityId());
-            clusterLoc.remove();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        ServiceCluster clusterLoc =
+            getServiceClusterDAO().findById(clusterId);
+        // XXX - Authz chex needed?
+        //checkRemovePermission(subj, clusterLoc.getEntityId());
+        getServiceClusterDAO().remove(clusterLoc);
     }
     
     /**
@@ -2052,16 +1927,10 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @ejb:transaction type="Required"
      */
     public ServiceClusterValue getClusterById(AuthzSubjectValue subj,
-                                              Integer clusterId)
+                                              Integer cid)
         throws FinderException, PermissionException {
         // TODO authz        
-        try {
-            return ServiceClusterUtil.getLocalHome()
-                .findByPrimaryKey(new ServiceClusterPK(clusterId))
-                    .getServiceClusterValue();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        return getServiceClusterDAO().findById(cid).getServiceClusterValue();
     }
     
     /**
@@ -2103,8 +1972,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     public PageList getAllServiceClusters(AuthzSubjectValue subject, PageControl pc)
         throws FinderException, PermissionException {
         try {
-            ServiceClusterLocalHome clusterLocalHome = 
-                ServiceClusterUtil.getLocalHome();
+            ServiceClusterDAO clusterLocalHome = getServiceClusterDAO();
 
             Collection clusters = null;
             Collection toBePaged = new ArrayList();
@@ -2121,18 +1989,12 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
             switch( pc.getSortattribute() ) {
                 case SortAttribute.RESOURCE_NAME:
-                    if(pc != null && pc.isDescending()) {
-                        clusters = clusterLocalHome.findAll_orderName_desc();
-                    } else {
-                        clusters = clusterLocalHome.findAll_orderName_asc();
-                    }
+                    clusters =
+                        clusterLocalHome.findAll_orderName(!pc.isDescending());
                     break;
                 case SortAttribute.SERVICE_NAME:
-                    if(pc != null && pc.isDescending()) {
-                        clusters = clusterLocalHome.findAll_orderName_desc();
-                    } else {
-                        clusters = clusterLocalHome.findAll_orderName_asc();
-                    }
+                    clusters =
+                        clusterLocalHome.findAll_orderName(!pc.isDescending());
                     break;
                 default:
                     clusters = clusterLocalHome.findAll();
@@ -2140,7 +2002,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             }
             // only page cluster if id is assigned to viewable (service) group
             for(Iterator i = clusters.iterator(); i.hasNext();) {
-                ServiceClusterLocal aCluster = (ServiceClusterLocal)i.next();
+                ServiceCluster aCluster = (ServiceCluster)i.next();
                 // only page cluster if it is viewable.
                 for (int x=0;x<viewableGroups.size();x++) {
                     AppdefGroupValue thisGroup = 

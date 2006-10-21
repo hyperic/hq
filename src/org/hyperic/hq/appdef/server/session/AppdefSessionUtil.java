@@ -35,6 +35,9 @@ import org.hyperic.hibernate.dao.PlatformDAO;
 import org.hyperic.hibernate.dao.PlatformTypeDAO;
 import org.hyperic.hibernate.dao.AgentTypeDAO;
 import org.hyperic.hibernate.dao.AgentDAO;
+import org.hyperic.hibernate.dao.ApplicationDAO;
+import org.hyperic.hibernate.dao.ApplicationTypeDAO;
+import org.hyperic.hibernate.dao.ServiceClusterDAO;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AIServerLocalHome;
@@ -45,14 +48,10 @@ import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocalHome;
 import org.hyperic.hq.appdef.shared.AppdefGroupManagerUtil;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.appdef.shared.ApplicationLocalHome;
 import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
 import org.hyperic.hq.appdef.shared.ApplicationManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ApplicationManagerUtil;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.ApplicationTypeLocalHome;
-import org.hyperic.hq.appdef.shared.ApplicationTypeUtil;
-import org.hyperic.hq.appdef.shared.ApplicationUtil;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.CPropManagerUtil;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
@@ -82,10 +81,8 @@ import javax.naming.NamingException;
 public abstract class AppdefSessionUtil {
     private AIQueueManagerLocal         aiqManagerLocal;
     private AIServerLocalHome           aiqServerLHome;
-    private ApplicationLocalHome        appLHome;
     private ApplicationManagerLocalHome appMgrLHome;
     private AppdefGroupManagerLocalHome grpMgrLHome;
-    private ApplicationTypeLocalHome    appTypeLHome;
     private ConfigManagerLocal          configMgrL;
     private PlatformManagerLocalHome    platformMgrLHome;
     private ResourceManagerLocal        rmLocal;
@@ -125,9 +122,14 @@ public abstract class AppdefSessionUtil {
         return DAOFactory.getDAOFactory().getAgentTypeDAO();
     }
 
-    protected ConfigResponseDAO getConfigResponseLocalHome()
+    protected ConfigResponseDAO getConfigResponseDAO()
     {
         return DAOFactory.getDAOFactory().getConfigResponseDAO();
+    }
+
+    protected ServiceClusterDAO getServiceClusterDAO()
+    {
+        return DAOFactory.getDAOFactory().getServiceClusterDAO();
     }
 
     protected ApplicationManagerLocal getApplicationMgrLocal() {
@@ -262,28 +264,20 @@ public abstract class AppdefSessionUtil {
 
     /**
      * Get the LocalHome reference for the ApplicationType
-     * @return ApplicationTypeLocalHome
+     * @return ApplicationTypeDAO
      */
-    protected ApplicationTypeLocalHome getApplicationTypeLocalHome()
-        throws NamingException 
+    protected ApplicationTypeDAO getApplicationTypeDAO()
     {
-        if(appTypeLHome == null) {
-            appTypeLHome = ApplicationTypeUtil.getLocalHome();
-        }
-        return appTypeLHome;
+        return DAOFactory.getDAOFactory().getApplicationTypeDAO();
     }
 
     /**
      * Get the LocalHome reference for the Application
      * @return ApplicationLocalHome
      */
-    protected ApplicationLocalHome getApplicationLocalHome()
-        throws NamingException 
+    protected ApplicationDAO getApplicationDAO()
     {
-        if(appLHome == null) {
-            appLHome = ApplicationUtil.getLocalHome();
-        }
-        return appLHome;
+        return DAOFactory.getDAOFactory().getApplicationDAO();
     }
 
     /**

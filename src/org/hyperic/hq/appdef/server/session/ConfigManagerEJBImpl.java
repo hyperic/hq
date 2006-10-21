@@ -60,7 +60,6 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerTypeInfo;
@@ -741,7 +740,7 @@ public class ConfigManagerEJBImpl
         // Update the config response
         if (configWasUpdated) {
             ConfigResponseDB cLocal
-                = getConfigResponseLocalHome()
+                = getConfigResponseDAO()
                 .findByPrimaryKey(existing.getPrimaryKey());
             cLocal.setConfigResponseValue(existing);
         

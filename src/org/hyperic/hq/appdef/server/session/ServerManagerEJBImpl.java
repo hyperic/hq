@@ -47,39 +47,34 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.shared.AppServiceLocal;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEvent;
-import org.hyperic.hq.appdef.shared.ApplicationLocal;
-import org.hyperic.hq.appdef.shared.ApplicationLocalHome;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.ApplicationPK;
 import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
-import org.hyperic.hq.appdef.shared.ServerLocal;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.ServerTypePK;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.ServiceLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.appdef.shared.ServerUtil;
 import org.hyperic.hq.appdef.Service;
 import org.hyperic.hq.appdef.ServiceType;
 import org.hyperic.hq.appdef.Server;
 import org.hyperic.hq.appdef.ServerType;
 import org.hyperic.hq.appdef.PlatformType;
 import org.hyperic.hq.appdef.Platform;
+import org.hyperic.hq.appdef.AppService;
+import org.hyperic.hq.appdef.Application;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -99,6 +94,7 @@ import org.hyperic.hibernate.dao.ServerDAO;
 import org.hyperic.hibernate.dao.ConfigResponseDAO;
 import org.hyperic.hibernate.dao.ServerTypeDAO;
 import org.hyperic.hibernate.dao.PlatformTypeDAO;
+import org.hyperic.hibernate.dao.ApplicationDAO;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.ObjectNotFoundException;
 
@@ -213,15 +209,12 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     public void removeServer(AuthzSubjectValue subject, Integer id,
                              boolean deep) 
         throws ServerNotFoundException, RemoveException, PermissionException {
-        ServerPK pk = new ServerPK(id);
 
+        Server server;
         // find it
-        ServerLocal server;
         try {
-            server = ServerUtil.getLocalHome().findByPrimaryKey(pk);
-        } catch (FinderException e) {
-            throw new ServerNotFoundException(id);
-        } catch (NamingException e) {
+            server = getServerDAO().findById(id);
+        } catch (ObjectNotFoundException e) {
             throw new ServerNotFoundException(id);
         }
         removeServer(subject, server, deep);
@@ -234,7 +227,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @ejb:transaction type="REQUIRED"
      */
     public void removeServer (AuthzSubjectValue subject,
-                              ServerLocal server, boolean deep)
+                              Server server, boolean deep)
         throws ServerNotFoundException, RemoveException, PermissionException {
         ServerPK pk = (ServerPK)server.getPrimaryKey();
         Integer id = pk.getId();
@@ -274,10 +267,9 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             this.removeAuthzResource(subject, rv);
             // remove the server and platform vo's from the cache
             VOCache.getInstance().removeServer(id);
-            VOCache.getInstance().removePlatform(
-                ((ServerPK)server.getPlatform().getPrimaryKey()).getId());
+            VOCache.getInstance().removePlatform(server.getPlatform().getId());
             // remove it
-            server.remove();
+            getServerDAO().remove(server);
 
             // remove the config response
             if (cid != null) {
@@ -1296,18 +1288,16 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                PermissionException {
         Iterator it;
         List authzPks;
-        ApplicationLocalHome appLocalHome;
-        ApplicationLocal appLocal;
+        Application appLocal;
         Collection appServiceCollection;
         HashMap serverCollection;
     
         try {
-            appLocalHome = getApplicationLocalHome();
+            ApplicationDAO appLocalHome = getApplicationDAO();
             
             try {
-                appLocal =
-                    appLocalHome.findByPrimaryKey(new ApplicationPK(appId));
-            } catch(FinderException exc){
+                appLocal = appLocalHome.findById(appId);
+            } catch(ObjectNotFoundException exc){
                 throw new ApplicationNotFoundException(appId, exc);
             }
             
@@ -1332,14 +1322,14 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     
         while (it.hasNext()) {
     
-            AppServiceLocal appService = (AppServiceLocal) it.next();
+            AppService appService = (AppService) it.next();
 
             if ( appService.getIsCluster() ) {
-                Set services = appService.getServiceCluster().getServices();
+                Collection services = appService.getServiceCluster().getServices();
                 Iterator serviceIterator = services.iterator();
                 while ( serviceIterator.hasNext() ) {
-                    ServiceLocal service = (ServiceLocal)serviceIterator.next();
-                    ServerLocal server = service.getServer();
+                    Service service = (Service)serviceIterator.next();
+                    Server server = service.getServer();
                     
                     // Don't bother with entire cluster if type is platform svc
                     if (server.getServerType().getVirtual())
@@ -1354,10 +1344,9 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                     serverCollection.put(serverId, server);
                 }
             } else {
-                ServerLocal server = appService.getService().getServer();
+                Server server = appService.getService().getServer();
                 if (!server.getServerType().getVirtual()) {
-                    Integer serverId = ((ServerPK)
-                            server.getPrimaryKey()).getId();
+                    Integer serverId = server.getId();
                     
                     if (serverCollection.containsKey(serverId))
                         continue;
@@ -1369,7 +1358,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     
         for(Iterator i = serverCollection.entrySet().iterator(); i.hasNext();) {
             Map.Entry entry = (Map.Entry) i.next();
-            ServerLocal aServer = (ServerLocal) entry.getValue();
+            Server aServer = (Server) entry.getValue();
             
             // first, if they specified a server type, then filter on it
             if(servTypeId != APPDEF_RES_TYPE_UNDEFINED && 
@@ -1377,7 +1366,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 i.remove();
             }
             // otherwise, remove the server if its not viewable
-            else if(!authzPks.contains((ServerPK)aServer.getPrimaryKey())) {
+            else if(!authzPks.contains(aServer.getPrimaryKey())) {
                 i.remove();
             }
         } 
@@ -1450,7 +1439,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         Integer[] ids = new Integer[servers.size()];
         Iterator it = servers.iterator();
         for (int i = 0; it.hasNext(); i++) {
-            ServerLocal server = (ServerLocal) it.next();
+            Server server = (Server) it.next();
             ids[i] = server.getId();
         }
 

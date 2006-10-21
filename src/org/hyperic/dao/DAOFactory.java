@@ -56,6 +56,10 @@ import org.hyperic.hibernate.dao.ServerTypeDAO;
 import org.hyperic.hibernate.dao.ServiceDAO;
 import org.hyperic.hibernate.dao.ServiceTypeDAO;
 import org.hyperic.hibernate.dao.TriggerDAO;
+import org.hyperic.hibernate.dao.ServiceClusterDAO;
+import org.hyperic.hibernate.dao.AppServiceDAO;
+import org.hyperic.hibernate.dao.AppSvcDependencyDAO;
+import org.hyperic.hibernate.dao.ApplicationTypeDAO;
 
 public abstract class DAOFactory
 {
@@ -64,9 +68,13 @@ public abstract class DAOFactory
 
     public static int DEFAULT = HIBERNATE;
 
+    // Appdef DAOs
     public abstract AgentDAO getAgentDAO();
     public abstract AgentTypeDAO getAgentTypeDAO();
     public abstract ApplicationDAO getApplicationDAO();
+    public abstract ApplicationTypeDAO getApplicationTypeDAO();
+    public abstract AppServiceDAO getAppServiceDAO();
+    public abstract AppSvcDependencyDAO getAppSvcDepencyDAO();
     public abstract ConfigResponseDAO getConfigResponseDAO();
     public abstract CpropDAO getCpropDAO();
     public abstract CpropKeyDAO getCpropKeyDAO();
@@ -74,10 +82,13 @@ public abstract class DAOFactory
     public abstract PlatformTypeDAO getPlatformTypeDAO();
     public abstract ServerDAO getServerDAO();
     public abstract ServerTypeDAO getServerTypeDAO();
+    public abstract ServiceClusterDAO getServiceClusterDAO();
     public abstract ServiceDAO getServiceDAO();
-    public abstract TriggerDAO getTriggerDAO();
     public abstract ServiceTypeDAO getServiceTypeDAO();
-    
+
+    // Event DAOs
+    public abstract TriggerDAO getTriggerDAO();
+
     // Authz DAOs
     public abstract AuthzSubjectDAO  getAuthzSubjectDAO();
     public abstract OperationDAO     getOperationDAO();

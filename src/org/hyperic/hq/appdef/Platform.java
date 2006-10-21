@@ -425,5 +425,12 @@ public class Platform extends AppdefResource
         return new LinkedHashSet(getIps());
     }
 
+    public boolean equals(Object obj)
+    {
+        if (!super.equals(obj) || !(obj instanceof Platform)) {
+            return false;
+        }
+        return true;
+    }
 
 }

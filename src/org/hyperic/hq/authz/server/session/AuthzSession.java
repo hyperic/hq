@@ -207,7 +207,7 @@ public abstract class AuthzSession {
     /** 
      * @return The value-object of the overlord
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
     public AuthzSubjectValue findOverlord()
         throws NamingException, FinderException {
@@ -227,7 +227,7 @@ public abstract class AuthzSession {
      * are defined externally.
      * @return The value-object of the subject of the given name and authenticating source.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
     public AuthzSubjectValue findSubjectByAuth(String name, String authDsn)
         throws NamingException, FinderException {

@@ -91,6 +91,14 @@ public abstract class HibernateDAO
             .intValue();
     }
 
+    public int size(Collection coll)
+    {
+        return ((Integer)getSession()
+            .createFilter(coll, "select count(*)")
+            .uniqueResult())
+            .intValue();
+    }
+
     protected void evict(Object entity)
     {
         getSession().evict(entity);

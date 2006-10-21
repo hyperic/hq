@@ -48,20 +48,6 @@
       <column name="VALIDATIONERR" index="CRESP_ERR" not-null="false" length="512" />
     </property>
 
-    <bag name="platforms" table="EAM_PLATFORM">
-      <key column="CONFIG_RESPONSE_ID" />
-      <one-to-many class="Platform" />
-    </bag>
-
-    <bag name="servers" table="EAM_SERVER">
-      <key column="CONFIG_RESPONSE_ID" />
-      <one-to-many class="Server" />
-    </bag>
-
-    <bag name="services" table="EAM_SERVICE">
-      <key column="CONFIG_RESPONSE_ID" />
-      <one-to-many class="Service" />
-    </bag>
   </class>
 
 </hibernate-mapping>

@@ -30,8 +30,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.ApplicationLocal;
-import org.hyperic.hq.appdef.shared.ApplicationPK;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.PlatformLightValue;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
@@ -42,6 +40,7 @@ import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceLightValue;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
+import org.hyperic.hq.appdef.Application;
 
 import org.hyperic.hq.common.shared.ProductProperties;
 
@@ -88,8 +87,8 @@ public abstract class VOCache {
 
     /** ApplicationValue Cache APIs **/
     
-    public ApplicationValue getApplication(ApplicationLocal ejb) {
-        return getApplication(((ApplicationPK)ejb.getPrimaryKey()).getId()); 
+    public ApplicationValue getApplication(Application ejb) {
+        return getApplication(ejb.getId());
     }
     
     public abstract ApplicationValue getApplication(Integer id);

@@ -27,17 +27,15 @@ package org.hyperic.hq.appdef;
 
 import org.hyperic.hq.appdef.shared.CPropKeyValue;
 import org.hyperic.hq.appdef.shared.CPropKeyPK;
+import org.hyperic.hibernate.PersistedObject;
 
-import java.io.Serializable;
 import java.util.Collection;
 
 /**
  *
  */
-public class CpropKey implements Serializable
+public class CpropKey extends PersistedObject
 {
-    private Integer id;
-    private long _version_;
     private Integer appdefType;
     private Integer appdefTypeId;
     private String key;
@@ -61,27 +59,6 @@ public class CpropKey implements Serializable
     public CpropKey()
     {
         super();
-    }
-
-    // Property accessors
-    public Integer getId()
-    {
-        return this.id;
-    }
-
-    private void setId(Integer id)
-    {
-        this.id = id;
-    }
-
-    public long get_version_()
-    {
-        return this._version_;
-    }
-
-    public void set_version_(long _version_)
-    {
-        this._version_ = _version_;
     }
 
     public Integer getAppdefType()
@@ -135,7 +112,7 @@ public class CpropKey implements Serializable
         _value.setAppdefTypeId(appdefTypeId == null ? 0 : appdefTypeId.intValue());
         _value.setDescription(description == null ? "" : description);
         _value.setKey(key == null ? "" : key);
-        _value.setId(id);
+        _value.setId(getId());
         return _value;
     }
 
@@ -146,23 +123,31 @@ public class CpropKey implements Serializable
         return _pkey;
     }
 
-    // TODO: fix equals and hashCode
-    public boolean equals(Object other)
+    public boolean equals(Object obj)
     {
-        if ((this == other)) return true;
-        if ((other == null)) return false;
-        if (!(other instanceof CpropKey)) return false;
-        CpropKey castOther = (CpropKey) other;
-
-        return ((this.getAppdefType() == castOther.getAppdefType()) || (this.getAppdefType() != null && castOther.getAppdefType() != null && this.getAppdefType().equals(castOther.getAppdefType())))
-               && ((this.getAppdefTypeId() == castOther.getAppdefTypeId()) || (this.getAppdefTypeId() != null && castOther.getAppdefTypeId() != null && this.getAppdefTypeId().equals(castOther.getAppdefTypeId())))
-               && ((this.getKey() == castOther.getKey()) || (this.getKey() != null && castOther.getKey() != null && this.getKey().equals(castOther.getKey())));
+        if (!super.equals(obj) || !(obj instanceof CpropKey)) {
+            return false;
+        }
+        CpropKey o = (CpropKey)obj;
+        return (key==o.getKey() || (key!=null && o.getKey()!=null &&
+                                    key.equals(o.getKey())))
+               &&
+               (appdefType==o.getAppdefType() ||
+                (appdefType!=null && o.getAppdefType()!=null &&
+                 appdefType.equals(o.getAppdefType())))
+               &&
+               (appdefTypeId==o.getAppdefTypeId() ||
+                (appdefTypeId!=null && o.getAppdefTypeId()!=null &&
+                 appdefTypeId.equals(o.getAppdefTypeId())));
     }
 
     public int hashCode()
     {
         int result = 17;
 
+        result = 37*result + (key!=null ? key.hashCode() : 0);
+        result = 37*result + (appdefType!=null ? appdefType.hashCode() : 0);
+        result = 37*result + (appdefTypeId!=null ? appdefTypeId.hashCode() : 0);
 
         return result;
     }

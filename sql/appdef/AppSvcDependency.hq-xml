@@ -7,7 +7,7 @@
 <hibernate-mapping
   package="org.hyperic.hq.appdef">
 
-  <class name="ServiceDepMap" table="EAM_SERVICE_DEP_MAP">
+  <class name="AppSvcDependency" table="EAM_SERVICE_DEP_MAP">
     <id name="id" type="integer">
       <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />
@@ -24,7 +24,7 @@
       <column name="MTIME" not-null="false" />
     </property>
 
-    <many-to-one name="appService" class="AppService">
+    <many-to-one name="appService" unique="true" class="AppService">
       <column name="APPSERVICE_ID" not-null="false" />
     </many-to-one>
 

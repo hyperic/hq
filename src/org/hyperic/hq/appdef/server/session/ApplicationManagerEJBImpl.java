@@ -37,9 +37,6 @@ import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
-import org.hyperic.hq.appdef.shared.AppServiceLocal;
-import org.hyperic.hq.appdef.shared.AppServicePK;
-import org.hyperic.hq.appdef.shared.AppServiceUtil;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -48,13 +45,8 @@ import org.hyperic.hq.appdef.shared.AppdefEvent;
 import org.hyperic.hq.appdef.shared.AppdefGroupManagerUtil;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.hq.appdef.shared.ApplicationLocal;
-import org.hyperic.hq.appdef.shared.ApplicationLocalHome;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationPK;
-import org.hyperic.hq.appdef.shared.ApplicationTypeLocal;
-import org.hyperic.hq.appdef.shared.ApplicationTypePK;
-import org.hyperic.hq.appdef.shared.ApplicationTypeUtil;
 import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationUtil;
 import org.hyperic.hq.appdef.shared.ApplicationVOHelperUtil;
@@ -66,6 +58,9 @@ import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
+import org.hyperic.hq.appdef.Application;
+import org.hyperic.hq.appdef.AppService;
+import org.hyperic.hq.appdef.ApplicationType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -77,9 +72,13 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.dao.AppServiceDAO;
+import org.hyperic.hibernate.dao.ApplicationDAO;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
 
 /**
  * This class is responsible for managing Application objects in appdef
@@ -107,16 +106,11 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
      */
     public List getAllApplicationTypes(AuthzSubjectValue who) 
         throws FinderException {
-        Collection ejbs;
-        try {
-            ejbs = ApplicationTypeUtil.getLocalHome().findAll();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-        
+        Collection ejbs = getApplicationTypeDAO().findAll();
+
         ArrayList list = new ArrayList(ejbs.size());
         for(Iterator i = ejbs.iterator(); i.hasNext();) {
-            ApplicationTypeLocal appType = (ApplicationTypeLocal)i.next();
+            ApplicationType appType = (ApplicationType)i.next();
             list.add(appType.getApplicationTypeValue());
         }
         return list;
@@ -129,14 +123,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
      */
     public ApplicationTypeValue findApplicationTypeById(Integer id)
         throws FinderException {
-        ApplicationTypeLocal appType;
-        try {
-            appType =
-                ApplicationTypeUtil.getLocalHome().findByPrimaryKey(
-                    new ApplicationTypePK(id));
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        ApplicationType appType = getApplicationTypeDAO().findById(id);
         return appType.getApplicationTypeValue();
     }
 
@@ -182,7 +169,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
             // set modified by
             newApp.setModifiedBy(subject.getName());
             // call the create
-            ApplicationLocal application = getApplicationLocalHome().create(newApp); 
+            Application application = getApplicationDAO().create(newApp);
             // AUTHZ CHECK
             createAuthzApplication(application, subject);
             // now add the services
@@ -191,21 +178,14 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
                 log.debug("Adding service: " + aService + " to application");
                 application.addService(aService.getPrimaryKey());
             }
-            return (ApplicationPK)application.getPrimaryKey(); 
-        } catch (NamingException e) {
-            rollback();
-            log.error("Unable to get LocalHome", e);
-            throw new SystemException("Unable to get LocalHome " + e.getMessage());
+            return application.getPrimaryKey();
         } catch (FinderException e) {
-            rollback();
             log.error("Unable to find dependent object", e);
             throw new CreateException("Unable to find dependent object: " +
                                       e.getMessage());
         } catch (CreateException e) {
-            rollback();
             throw e;
         } catch (ValidationException e) {
-            rollback();
             throw e;
         }
     }
@@ -224,7 +204,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
                PermissionException, UpdateException, 
                AppdefDuplicateNameException, FinderException {
         try {
-            ApplicationLocal app = ApplicationUtil.getLocalHome().
+            Application app = getApplicationDAO().
                 findByPrimaryKey(newValue.getPrimaryKey());
             checkModifyPermission(subject, app.getEntityId());
             newValue.setModifiedBy(subject.getName());
@@ -251,7 +231,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
                 rv.setName(newValue.getName());
                 updateAuthzResource(rv);
             }
-            app.setApplicationValue(newValue);
+            getApplicationDAO().setApplicationValue(app, newValue);
             // flush the cache
             VOCache.getInstance().removeApplication(app.getId());
             return getApplicationById(subject, app.getId());
@@ -271,13 +251,13 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
                PermissionException, RemoveException {
         try {
             ApplicationPK pk = new ApplicationPK(id);
-            ApplicationLocal app = 
-                ApplicationUtil.getLocalHome().findByPrimaryKey(pk);
+            Application app =
+                getApplicationDAO().findById(id);
             checkRemovePermission(caller, app.getEntityId());
             VOCache.getInstance().removeApplication(id);
             this.removeAuthzResource(caller, 
                 getApplicationResourceValue(new ApplicationPK(id)));
-            app.remove();
+            getApplicationDAO().remove(app);
 
             // Send service deleted event
             sendAppdefEvent(caller, new AppdefEntityID(pk),
@@ -305,27 +285,21 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
      */
     public void removeAppService(AuthzSubjectValue caller, Integer appId, 
         Integer appServiceId)
-        throws ApplicationException, ApplicationNotFoundException, 
+        throws ApplicationException, ApplicationNotFoundException,
                PermissionException {
         try {
-            ApplicationLocal app = 
-                ApplicationUtil.getLocalHome().findByPrimaryKey(
-                    new ApplicationPK(appId));
+            Application app =
+                DAOFactory.getDAOFactory().getApplicationDAO().findById(appId);
             checkModifyPermission(caller, app.getEntityId());
 
-            AppServicePK pk = new AppServicePK (appServiceId);
-            AppServiceLocal appSvcLoc = AppServiceUtil
-                .getLocalHome().findByPrimaryKey(pk);                
-            appSvcLoc.remove();
+            AppServiceDAO appSvcdao =
+                DAOFactory.getDAOFactory().getAppServiceDAO();
+            AppService appSvcLoc = appSvcdao.findById(appServiceId);
+            appSvcdao.remove(appSvcLoc);
             // flush cache
             VOCache.getInstance().removeApplication(appId);
-        } catch(RemoveException e) {
-            throw new ApplicationException ("Unable to remove application "+
-                                               "service:" + appServiceId,e);
-        } catch (FinderException e) {
+        } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(appId);
-        } catch (NamingException e) {
-            throw new SystemException(e);
         }
     }
 
@@ -345,8 +319,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
         try {
             ApplicationPK aPK = new ApplicationPK(appId);
             // first lookup the service
-            ApplicationLocal appEJB = getApplicationLocalHome()
-                .findByPrimaryKey(aPK);
+            Application appEJB = getApplicationDAO().findById(appId);
             // check if the caller can modify this service
             checkModifyPermission(who, appEJB.getEntityId());
             // now get its authz resource
@@ -389,14 +362,12 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
                PermissionException {
         try {
             // find the app
-            ApplicationLocal app = getApplicationLocalHome()
-                .findByPrimaryKey(pk);
+            Application app = getApplicationDAO()
+                .findById(pk.getId());
             checkViewPermission(subject, app.getEntityId());
-            return app.getDependencyTree();
-        } catch (FinderException e) {
+            return getApplicationDAO().getDependencyTree(app);
+        } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(pk.getId());
-        } catch (NamingException e) {
-            throw new SystemException(e);
         }
     }
 
@@ -413,14 +384,12 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
         ApplicationPK pk = depTree.getApplication().getPrimaryKey();
         try {
             // find the app
-            ApplicationLocal app = getApplicationLocalHome()
+            Application app = getApplicationDAO()
                 .findByPrimaryKey(pk);
             checkModifyPermission(subject, app.getEntityId());
-            app.setDependencyTree(depTree);
-        } catch (FinderException e) {
+            getApplicationDAO().setDependencyTree(app, depTree);
+        } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(pk.getId());
-        } catch (NamingException e) {
-            throw new SystemException(e);
         }
     }
 
@@ -435,12 +404,13 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
         throws ApplicationNotFoundException,
                PermissionException {
         try {
-            ApplicationLocal app = getApplicationLocalHome().findByName(name);
+            Application app = getApplicationDAO().findByName(name);
+            if (app == null) {
+                throw new ApplicationNotFoundException(name);
+            }
             checkViewPermission(subject, app.getEntityId());
             return ApplicationVOHelperUtil.getLocalHome().create()
                     .getApplicationValue(app);
-        } catch (FinderException e) {
-            throw new ApplicationNotFoundException(name, e);
         } catch (NamingException e) {
             throw new SystemException(e);
         } catch (CreateException e) {
@@ -458,12 +428,11 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
         throws ApplicationNotFoundException,
                PermissionException {
         try {
-            ApplicationLocal app = ApplicationUtil.getLocalHome()
-                .findByPrimaryKey(new ApplicationPK(id));
+            Application app = getApplicationDAO().findById(id);
             checkViewPermission(subject, app.getEntityId());
             return ApplicationVOHelperUtil.getLocalHome().create()
                     .getApplicationValue(app);
-        } catch (FinderException e) {
+        } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(id, e);
         } catch (NamingException e) {
             throw new SystemException(e);
@@ -504,7 +473,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
             }
             for(Iterator i = apps.iterator(); i.hasNext();) {
                 ApplicationPK appPk = 
-                    (ApplicationPK) ((ApplicationLocal)i.next()).getPrimaryKey();
+                    (ApplicationPK) ((Application)i.next()).getPrimaryKey();
                 if(!authzPks.contains(appPk)) {
                     i.remove();
                 }
@@ -527,21 +496,17 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
         throws ApplicationNotFoundException,
                PermissionException {
         // find the application
-        ApplicationLocal app;
+        Application app;
         try {
-            app =
-                ApplicationUtil.getLocalHome().findByPrimaryKey(
-                    new ApplicationPK(appId));
-        } catch (FinderException e) {
+            app = getApplicationDAO().findById(appId);
+        } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(appId);
-        } catch (NamingException e) {
-            throw new SystemException(e);
         }
         checkViewPermission(subject, app.getEntityId());
         Collection ejbs = app.getAppServices();
         List appSvc = new ArrayList(ejbs.size());
         for(Iterator i = ejbs.iterator(); i.hasNext();) {
-            AppServiceLocal aEJB = (AppServiceLocal)i.next();
+            AppService aEJB = (AppService)i.next();
             appSvc.add(aEJB.getAppServiceValue());
         }
         return appSvc;
@@ -561,12 +526,10 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
                AppdefGroupNotFoundException, 
                PermissionException {
         try {
-            ApplicationPK appPk = new ApplicationPK(appId);
-            ApplicationLocal app = ApplicationUtil.getLocalHome()
-                .findByPrimaryKey(appPk);
+            Application app = getApplicationDAO().findById(appId);
             checkModifyPermission(subject, app.getEntityId());
             for(Iterator i = app.getAppServices().iterator();i.hasNext();) {
-                AppServiceLocal appSvc = (AppServiceLocal)i.next();
+                AppService appSvc = (AppService)i.next();
                 AppdefEntityID anId = null;
                 if(appSvc.getIsCluster()) {
                     Integer groupId = appSvc.getServiceCluster().getGroupId();
@@ -599,7 +562,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
             }
             // flush cache
             VOCache.getInstance().removeApplication(appId);
-        } catch (FinderException e) {
+        } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(appId);
         } catch (NamingException e) {
             throw new SystemException(e);
@@ -648,31 +611,20 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
      */
     private Collection getApplicationsByPlatform(PageControl pc, Integer id) 
         throws FinderException {
-        ApplicationLocalHome appLocalHome;
-        try {
-            appLocalHome = getApplicationLocalHome();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        ApplicationDAO  appLocalHome = getApplicationDAO();
         Collection apps;
         pc = PageControl.initDefaults(pc,SortAttribute.RESOURCE_NAME);
         switch (pc.getSortattribute()) {
             case SortAttribute.RESOURCE_NAME:
-                if (pc.isAscending()) {
-                   apps = appLocalHome.findByPlatformId_orderName_asc(id);
-                } else {
-                    apps = appLocalHome.findByPlatformId_orderName_desc(id);
-                }
+                apps =
+                    appLocalHome.findByPlatformId_orderName(id,pc.isAscending());
                 break;
             case SortAttribute.OWNER_NAME:
-                if (pc.isAscending()) {
-                   apps = appLocalHome.findByPlatformId_orderOwner_asc(id);
-                } else {
-                    apps = appLocalHome.findByPlatformId_orderOwner_desc(id);
-                }
+                apps =
+                    appLocalHome.findByPlatformId_orderOwner(id,pc.isAscending());
                 break;
             default :
-                apps = appLocalHome.findByPlatformId_orderName_asc(id);
+                apps = appLocalHome.findByPlatformId_orderName(id, true);
         }
         return apps;
     }
@@ -682,31 +634,20 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
      */
     private Collection getApplicationsByServer(PageControl pc, Integer id) 
         throws FinderException {
-        ApplicationLocalHome appLocalHome;
-        try {
-            appLocalHome = getApplicationLocalHome();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        ApplicationDAO appLocalHome = getApplicationDAO();
         Collection apps;
         pc = PageControl.initDefaults(pc,SortAttribute.RESOURCE_NAME);
         switch (pc.getSortattribute()) {
             case SortAttribute.RESOURCE_NAME:
-                if (pc.isAscending()) {
-                   apps = appLocalHome.findByServerId_orderName_asc(id);
-                } else {
-                    apps = appLocalHome.findByServerId_orderName_desc(id);
-                }
+                apps =
+                    appLocalHome.findByServerId_orderName(id,pc.isAscending());
                 break;
             case SortAttribute.OWNER_NAME:
-                if (pc.isAscending()) {
-                   apps = appLocalHome.findByServerId_orderOwner_asc(id);
-                } else {
-                    apps = appLocalHome.findByServerId_orderOwner_desc(id);
-                }
+                apps =
+                    appLocalHome.findByServerId_orderOwner(id,pc.isAscending());
                 break;
             default :
-                apps = appLocalHome.findByServerId_orderName_asc(id);
+                apps = appLocalHome.findByServerId_orderName(id, true);
         }
         return apps;
     }
@@ -716,13 +657,8 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
      */
     private Collection getApplicationsByService(PageControl pc, Integer id) 
         throws FinderException, AppdefEntityNotFoundException {
-        ApplicationLocalHome appLocalHome;
-        try {
-            appLocalHome = getApplicationLocalHome();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-        
+        ApplicationDAO appLocalHome = getApplicationDAO();
+
         // We need to look up the service so that we can see if we need to 
         // look up its cluster, too
         ServiceValue service = (ServiceValue) getResource(
@@ -734,11 +670,8 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
         pc = PageControl.initDefaults(pc,SortAttribute.RESOURCE_NAME);
         switch (pc.getSortattribute()) {
             case SortAttribute.OWNER_NAME:
-                if (pc.isAscending()) {
-                    apps = appLocalHome.findByServiceId_orderOwner_asc(id);
-                 } else {
-                     apps = appLocalHome.findByServiceId_orderOwner_desc(id);
-                 }
+                apps =
+                    appLocalHome.findByServiceId_orderOwner(id,pc.isAscending());
                 break;
             case SortAttribute.RESOURCE_NAME:
             default :
@@ -768,13 +701,8 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
                                               PageControl pc) 
         throws AppdefEntityNotFoundException, PermissionException,
                FinderException {
-        ApplicationLocalHome appLocalHome;
-        try {
-            appLocalHome = getApplicationLocalHome();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-        
+        ApplicationDAO appLocalHome = getApplicationDAO();
+
         // We need to look up the service so that we can see if we need to 
         // look up its cluster, too
         AppdefGroupValue group = GroupUtil.getGroup(subject, resource);
@@ -863,7 +791,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
         Integer[] ids = new Integer[apps.size()];
         int ind = 0;
         for (Iterator i = apps.iterator(); i.hasNext(); ind++) {
-            ApplicationLocal app = (ApplicationLocal) i.next();
+            Application app = (Application) i.next();
             ids[ind] = app.getId();
         }
         return ids;
@@ -912,7 +840,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
      * @param application - the application 
      * @param subject - the user creating
      */
-    private void createAuthzApplication(ApplicationLocal app,
+    private void createAuthzApplication(Application app,
                                         AuthzSubjectValue subject)
         throws CreateException, FinderException, PermissionException {
         
@@ -923,18 +851,10 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
             log.debug("User has permission to create application. " + 
                 "Adding authzresource");
         try {
-            ApplicationPK pk = (ApplicationPK)app.getPrimaryKey();
+            ApplicationPK pk = app.getPrimaryKey();
             createAuthzResource(subject, getApplicationResourceType(), pk.getId(),
                                 app.getName());
         } catch (CreateException e) {
-        	log.error("Unable to create authz resource for application: " 
-        			+ app.getName(), e);
-            try {
-            	app.remove();
-            } catch (RemoveException f) {
-            	log.error("Unable to rollback application.", f);
-            	throw new CreateException(f.getMessage());
-            }
             throw e;
         }
     }

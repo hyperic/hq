@@ -25,6 +25,10 @@
 
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.shared.ApplicationTypePK;
+import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
+import org.hyperic.hq.appdef.shared.ServiceTypePK;
+
 import java.util.Collection;
 
 /**
@@ -32,7 +36,7 @@ import java.util.Collection;
  */
 public class ApplicationType extends AppdefResourceType
 {
-    private Collection services;
+    private Collection serviceTypes;
     private Collection applications;
 
     /**
@@ -43,15 +47,20 @@ public class ApplicationType extends AppdefResourceType
         super();
     }
 
-    // Property accessors
-    public Collection getServices()
+    public ApplicationType(Integer id)
     {
-        return this.services;
+        super(id);
     }
 
-    public void setServices(Collection services)
+    // Property accessors
+    public Collection getServiceTypes()
     {
-        this.services = services;
+        return this.serviceTypes;
+    }
+
+    public void setServiceTypes(Collection serviceTypes)
+    {
+        this.serviceTypes = serviceTypes;
     }
 
     public Collection getApplications()
@@ -62,5 +71,48 @@ public class ApplicationType extends AppdefResourceType
     public void setApplications(Collection applications)
     {
         this.applications = applications;
+    }
+
+    private ApplicationTypePK pkey = new ApplicationTypePK();
+    /**
+     * @deprecated use getId()
+     * @return
+     */
+    public ApplicationTypePK getPrimaryKey()
+    {
+        pkey.setId(getId());
+        return pkey;
+    }
+
+    public boolean equals(Object obj)
+    {
+        if (!super.equals(obj) || !(obj instanceof ApplicationType)) {
+            return false;
+        }
+        return true;
+    }
+
+    private ApplicationTypeValue applicationTypeValue =
+        new ApplicationTypeValue();
+    /**
+     * legacy EJB DTO pattern
+     * @deprecated use (this) ApplicationType object instead
+     * @return
+     */
+    public ApplicationTypeValue getApplicationTypeValue()
+    {
+        applicationTypeValue.setName(getName());
+        applicationTypeValue.setSortName(getSortName());
+        applicationTypeValue.setDescription(getDescription());
+        applicationTypeValue.setId(getId());
+        applicationTypeValue.setMTime(getMTime());
+        applicationTypeValue.setCTime(getCTime());
+        return applicationTypeValue;
+    }
+
+    public boolean supportsServiceType(ServiceTypePK stPK)
+    {
+        throw new UnsupportedOperationException(
+            "use ApplicationTypeDAO.supportsServiceType()");
     }
 }

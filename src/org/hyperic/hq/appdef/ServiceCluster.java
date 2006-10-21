@@ -25,10 +25,15 @@
 
 package org.hyperic.hq.appdef;
 
-import org.hyperic.hq.appdef.shared.ServiceTypePK;
 import org.hyperic.hq.appdef.shared.ServiceClusterPK;
+import org.hyperic.hq.appdef.shared.ApplicationPK;
+import org.hyperic.hq.appdef.shared.ServicePK;
+import org.hyperic.hq.appdef.shared.ServiceClusterValue;
+import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
+import org.hyperic.hq.appdef.shared.AppSvcClustIncompatSvcException;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  *
@@ -61,6 +66,7 @@ public class ServiceCluster extends AppdefBean
     public void setName(String name)
     {
         this.name = name;
+        setSortName(name);
     }
 
     public String getSortName()
@@ -70,7 +76,7 @@ public class ServiceCluster extends AppdefBean
 
     public void setSortName(String sortName)
     {
-        this.sortName = sortName;
+        this.sortName = (sortName!=null ? sortName.toUpperCase() : null);
     }
 
     public String getDescription()
@@ -123,20 +129,22 @@ public class ServiceCluster extends AppdefBean
         this.services = services;
     }
 
-    // fix equals and hashCode
-    public boolean equals(Object other)
+    public boolean equals(Object obj)
     {
-        if ((this == other)) return true;
-        if ((other == null)) return false;
-        if (!(other instanceof ServiceCluster)) return false;
-        ServiceCluster castOther = (ServiceCluster) other;
-
-        return ((this.getName() == castOther.getName()) || (this.getName() != null && castOther.getName() != null && this.getName().equals(castOther.getName())));
+        if (!super.equals(obj) || !(obj instanceof ServiceCluster)) {
+            return false;
+        }
+        ServiceCluster o = (ServiceCluster)obj;
+        return (name==o.getName() || (name!=null && o.getName()!=null &&
+                                      name.equals(o.getName())));
     }
 
     public int hashCode()
     {
-        int result = 17;
+        int result = super.hashCode();
+
+        result = 37*result + (name != null ? name.hashCode() : 0);
+        
         return result;
     }
 
@@ -150,5 +158,104 @@ public class ServiceCluster extends AppdefBean
     {
         pkey.setId(getId());
         return pkey;
+    }
+
+    public AppSvcDependency addDependentService(ApplicationPK appPK,
+                                                ServicePK depPK)
+    {
+        throw new UnsupportedOperationException(
+            "use AppServiceDAO.addDependentService()");
+    }
+
+    public AppSvcDependency addDependentServiceCluster(ApplicationPK appPK,
+                                                       ServiceClusterPK depPK)
+    {
+        throw new UnsupportedOperationException(
+            "use AppServiceDAO.addDependentServiceCluster()");
+    }
+
+    public void addService(Integer serviceId)
+    {
+        throw new UnsupportedOperationException(
+            "use ServiceClusterDAO.addService()");
+    }
+
+    public void removeService(Integer serviceId)
+    {
+        throw new UnsupportedOperationException(
+            "use ServiceClusterDAO.removeService()");
+    }
+
+    public void updateCluster(ServiceClusterValue serviceCluster,
+                              List serviceIds)
+    {
+        throw new UnsupportedOperationException(
+            "use ServiceClusterDAO.updateCluster()");
+    }
+
+    private ServiceClusterValue serviceClusterValue = new ServiceClusterValue();
+    /**
+     * legacy EJB DTO pattern
+     * @deprecated use (this) ServiceCluster object instead
+     * @return
+     */
+    public ServiceClusterValue getServiceClusterValue()
+    {
+        serviceClusterValue.setName(getName());
+        serviceClusterValue.setDescription(getDescription());
+        serviceClusterValue.setGroupId(getGroupId());
+        serviceClusterValue.setOwner("");
+        serviceClusterValue.setModifiedBy("");
+        serviceClusterValue.setLocation("");
+        serviceClusterValue.setId(getId());
+        serviceClusterValue.setMTime(getMTime());
+        serviceClusterValue.setCTime(getCTime());
+        if ( getServiceType() != null )
+            serviceClusterValue.setServiceType(
+                getServiceType().getServiceTypeValue() );
+        else
+            serviceClusterValue.setServiceType( null );
+        return serviceClusterValue;
+    }
+
+    public void setServiceClusterValue(ServiceClusterValue val)
+    {
+        setName( val.getName() );
+        setSortName( val.getSortName() );
+        setDescription( val.getDescription() );
+        setGroupId( val.getGroupId() );
+
+        if (val.getServiceType() != null) {
+            ServiceType st = new ServiceType();
+            st.setId(val.getServiceType().getId());
+            setServiceType(st);
+        }
+    }
+
+    /**
+     * Validate a new service to be added to this cluster. This enforces
+     * service type compatibility as well as only allowing services to be in
+     * one cluster at a time
+     */
+    public void validateMemberService(Service aService)
+        throws AppSvcClustDuplicateAssignException,
+               AppSvcClustIncompatSvcException
+    {
+        // validate its not assigned to a cluster already or if it is
+        // its assigned to this cluster.
+        if(aService.getServiceCluster() != null &&
+           !aService.getServiceCluster().equals(this)) {
+            throw new AppSvcClustDuplicateAssignException ("Service: "
+                + aService.getId()
+                + " is already assigned to a cluster");
+        }
+        // validate compatibility
+        if(!getServiceType().equals(aService.getServiceType())) {
+            throw new AppSvcClustIncompatSvcException("Service: "+ aService.getId()
+
+                + " has type: " + aService.getServiceType().getName()
+                + " which does not match the clusters service type: "
+                + this.getServiceType());
+        }
     }
 }

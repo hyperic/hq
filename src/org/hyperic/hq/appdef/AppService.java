@@ -25,10 +25,13 @@
 
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.shared.AppServiceValue;
+import org.hyperic.hq.appdef.shared.AppServicePK;
+
 import java.util.Collection;
 
 /**
- *
+ * Pojo for hibernate hbm mapping file
  */
 public class AppService extends AppdefBean
 {
@@ -37,9 +40,9 @@ public class AppService extends AppdefBean
     private Application application;
     private boolean isCluster;
     private String modifiedBy;
-    private boolean fentryPoint;
+    private boolean isEntryPoint;
     private ServiceType serviceType;
-    private Collection dependents;
+    private Collection appSvcDependencies;
 
     /**
      * default constructor
@@ -47,6 +50,11 @@ public class AppService extends AppdefBean
     public AppService()
     {
         super();
+    }
+
+    public AppService(Integer id)
+    {
+        super(id);
     }
 
     public Service getService()
@@ -84,6 +92,15 @@ public class AppService extends AppdefBean
         return this.isCluster;
     }
 
+    /**
+     * @deprecated use isIsCluster()
+     * @return
+     */
+    public boolean getIsCluster()
+    {
+        return isIsCluster();
+    }
+
     public void setIsCluster(boolean isCluster)
     {
         this.isCluster = isCluster;
@@ -99,14 +116,23 @@ public class AppService extends AppdefBean
         this.modifiedBy = modifiedBy;
     }
 
-    public boolean isFentryPoint()
+    public boolean isEntryPoint()
     {
-        return this.fentryPoint;
+        return this.isEntryPoint;
     }
 
-    public void setFentryPoint(boolean fentryPoint)
+    /**
+     * @deprecated use isEntryPoint()
+     * @return
+     */
+    public boolean getIsEntryPoint()
     {
-        this.fentryPoint = fentryPoint;
+        return isEntryPoint();
+    }
+
+    public void setIsEntryPoint(boolean entryPoint)
+    {
+        this.isEntryPoint = entryPoint;
     }
 
     public ServiceType getServiceType()
@@ -119,43 +145,110 @@ public class AppService extends AppdefBean
         this.serviceType = serviceType;
     }
 
-    public Collection getDependents()
+    public Collection getAppSvcDependencies()
     {
-        return this.dependents;
+        return this.appSvcDependencies;
     }
 
-    public void setDependents(Collection dependents)
+    public void setAppSvcDependencies(Collection dependents)
     {
-        this.dependents = dependents;
+        this.appSvcDependencies = dependents;
     }
 
-    // TODO: fix equals and hashCode
-    public boolean equals(Object other)
+    public boolean equals(Object obj)
     {
-        if ((this == other)) return true;
-        if ((other == null)) return false;
-        if (!(other instanceof AppService)) return false;
-        AppService castOther = (AppService) other;
-
-        return ((this.getService() == castOther.getService()) ||
-                (this.getService() != null &&
-                 castOther.getService() != null &&
-                 this.getService().equals(castOther.getService())))
-               && ((this.getServiceCluster() == castOther.getServiceCluster()) ||
-                   (this.getServiceCluster() != null &&
-                    castOther.getServiceCluster() != null &&
-                    this.getServiceCluster().equals(castOther.getServiceCluster())))
-               && ((this.getApplication() == castOther.getApplication()) ||
-                   (this.getApplication() != null &&
-                    castOther.getApplication() != null &&
-                    this.getApplication().equals(castOther.getApplication())));
+        if (!super.equals(obj) || !(obj instanceof AppService)) {
+            return false;
+        }
+        AppService o = (AppService)obj;
+        return (service == o.getService() ||
+                (service!=null && o.getService()!=null &&
+                 service.equals(o.getService())))
+               &&
+               (serviceCluster == o.getServiceCluster() ||
+                (serviceCluster!=null && o.getServiceCluster()!=null &&
+                 serviceCluster.equals(o.getServiceCluster())))
+               &&
+               (application == o.getApplication() ||
+                (application!=null && o.getApplication()!=null &&
+                 application.equals(o.getApplication())));
     }
 
     public int hashCode()
     {
-        int result = 17;
+        int result = super.hashCode();
 
+        result = 37*result + (service!=null ? service.hashCode() : 0);
+        result = 37*result + (application!=null ? application.hashCode() : 0);
+        result = 37*result + (serviceCluster!=null?serviceCluster.hashCode():0);
 
         return result;
+    }
+
+    private AppServiceValue appServiceValue = new AppServiceValue();
+    /**
+     * @deprecated use (this) AppService object instead
+     */
+    public AppServiceValue getAppServiceValue()
+    {
+        appServiceValue.setIsCluster(getIsCluster());
+        appServiceValue.setIsEntryPoint(getIsEntryPoint());
+        appServiceValue.setId(getId());
+        appServiceValue.setMTime(getMTime());
+        appServiceValue.setCTime(getCTime());
+        if ( getService() != null )
+            appServiceValue.setService(
+                getService().getServiceLightValue() );
+        else
+            appServiceValue.setService( null );
+        if ( getServiceCluster() != null )
+            appServiceValue.setServiceCluster(
+                getServiceCluster().getServiceClusterValue() );
+        else
+            appServiceValue.setServiceCluster( null );
+        if ( getServiceType() != null )
+            appServiceValue.setServiceType(
+                getServiceType().getServiceTypeValue() );
+        else
+            appServiceValue.setServiceType( null );
+        return appServiceValue;
+    }
+
+    public void setAppServiceValue(AppServiceValue value)
+    {
+        setIsCluster( value.getIsCluster() );
+        setIsEntryPoint( value.getIsEntryPoint() );
+
+        if (value.getService() != null)
+        {
+            Service s = new Service();
+            s.setId(value.getService().getId());
+            setService(s);
+        }
+
+        if (value.getServiceCluster() != null)
+        {
+            ServiceCluster sc = new ServiceCluster();
+            sc.setId(value.getServiceCluster().getId());
+            setServiceCluster(sc);
+        }
+
+        if (value.getServiceType() != null)
+        {
+            ServiceType st = new ServiceType();
+            st.setId(value.getServiceType().getId());
+            setServiceType(st);
+        }
+    }
+
+    private AppServicePK pkey = new AppServicePK();
+    /**
+     * @deprecated use getId();
+     * @return
+     */
+    public AppServicePK getPrimaryKey()
+    {
+        pkey.setId(getId());
+        return pkey;
     }
 }

@@ -25,29 +25,15 @@
 
 package org.hyperic.hq.appdef;
 
-import org.hyperic.hq.appdef.shared.AppSvcDependencyLocal;
-import org.hyperic.hq.appdef.shared.ApplicationPK;
 import org.hyperic.hq.appdef.shared.ServicePK;
-import org.hyperic.hq.appdef.shared.ServiceClusterPK;
 import org.hyperic.hq.appdef.shared.ServiceLightValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
-import org.hyperic.hq.appdef.shared.ServerLocal;
-import org.hyperic.hq.appdef.shared.ServiceClusterLocal;
-import org.hyperic.hq.appdef.shared.ServiceTypeLocal;
-import org.hyperic.hq.appdef.shared.ServiceClusterLocalHome;
-import org.hyperic.hq.appdef.shared.ServiceClusterUtil;
-import org.hyperic.hq.appdef.shared.AppServiceLocal;
-import org.hyperic.hq.appdef.shared.AppServiceUtil;
-import org.hyperic.hq.appdef.shared.AppSvcDependencyUtil;
 import org.hyperic.hibernate.dao.ServiceTypeDAO;
 import org.hyperic.dao.DAOFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 
-import javax.naming.NamingException;
-import javax.ejb.FinderException;
-import javax.ejb.CreateException;
 import java.util.Collection;
 
 /**
@@ -73,6 +59,12 @@ public class Service extends AppdefResource
     public Service()
     {
         super();
+    }
+
+    public Service(Integer id)
+    {
+        super();
+        setId(id);
     }
 
     public boolean isAutodiscoveryZombie()
@@ -243,86 +235,6 @@ public class Service extends AppdefResource
         this.appServices = appServices;
     }
 
-    public AppSvcDependencyLocal addDependentService(ApplicationPK appPK,
-                                                     ServicePK depPK)
-        throws NamingException, CreateException
-    {
-        // first we see if we can find an existing AppService object
-        // if we cant, we add it
-        AppServiceLocal appSvc = null;
-        AppServiceLocal depSvc = null;
-        // look for the app service for **this** Service
-        try {
-            appSvc = AppServiceUtil.getLocalHome()
-                .findByAppAndService(appPK.getId(), this.getId());
-        } catch (FinderException e) {
-            // didnt find it... create it.
-            log.debug(
-                "Creating new app service object for Application: "
-                + appPK.getId() + " Service: " + getId());
-            appSvc =
-                AppServiceUtil.getLocalHome().create(
-                    new ServicePK(getId()), appPK, true);
-        }
-        // try to find the app service for the dependent service
-        try {
-            depSvc = AppServiceUtil.getLocalHome()
-                .findByAppAndService(appPK.getId(), depPK.getId());
-        } catch (FinderException e) {
-            log.debug(
-                "Creating new dependent app service object for Application: "
-                + appPK.getId() + " Service: " + getId());
-            // dependent services are not allowed to be entry points
-            // at least not here ;)
-            depSvc =
-                AppServiceUtil.getLocalHome().create(depPK, appPK, false);
-        }
-        // now we add the dependency
-        AppSvcDependencyLocal  appDep =
-            AppSvcDependencyUtil.getLocalHome().create(appSvc, depSvc);
-        return appDep;
-    }
-
-    public AppSvcDependencyLocal addDependentServiceCluster(ApplicationPK appPK,
-                                                            ServiceClusterPK depPK)
-        throws NamingException, CreateException
-    {
-        // first we see if we can find an existing AppService object
-        // if we cant, we add it
-        AppServiceLocal appSvc = null;
-        AppServiceLocal depSvc = null;
-        // look for the app service for **this** Service
-        try {
-            appSvc = AppServiceUtil.getLocalHome()
-                .findByAppAndService(appPK.getId(), this.getId());
-        } catch (FinderException e) {
-            // didnt find it... create it.
-            log.debug(
-                "Creating new app service object for Application: "
-                + appPK.getId() + " Service: " + getId());
-            appSvc =
-                AppServiceUtil.getLocalHome().create(
-                    new ServicePK(getId()), appPK, true);
-        }
-        // try to find the app service for the dependent service
-        try {
-            depSvc = AppServiceUtil.getLocalHome()
-                .findByAppAndCluster(appPK.getId(), depPK.getId());
-        } catch (FinderException e) {
-            log.debug(
-                "Creating new dependent app service object for Application: "
-                + appPK.getId() + " ServiceCluster: " + getId());
-            // dependent services are not allowed to be entry points
-            // at least not here ;)
-            depSvc =
-                AppServiceUtil.getLocalHome().create(depPK, appPK);
-        }
-        // now we add the dependency
-        AppSvcDependencyLocal  appDep =
-            AppSvcDependencyUtil.getLocalHome().create(appSvc, depSvc);
-        return appDep;
-    }
-
     private ServiceLightValue serviceLightValue = new ServiceLightValue();
     /**
      * legacy EJB DTO pattern
@@ -391,32 +303,13 @@ public class Service extends AppdefResource
         else
             serviceValue.setServer( null );
         if ( getServiceCluster() != null ) {
-            // temporarily rely on EJB until
-            // it is hibernized
-            try {
-                ServiceClusterLocalHome shome =
-                    ServiceClusterUtil.getLocalHome();
-                ServiceClusterLocal sc =
-                    shome.findByPrimaryKey(getServiceCluster().getPrimaryKey());
-                serviceValue.setServiceCluster(
-                    sc.getServiceClusterValue());
-            } catch(NamingException ignore) {
-            } catch (javax.ejb.FinderException e) {
-            }
+            serviceValue.setServiceCluster(
+                getServiceCluster().getServiceClusterValue());
         }
         else
             serviceValue.setServiceCluster( null );
         if ( getServiceType() != null ) {
-            // temporarily rely on EJB until
-            // it is hibernized
-            try {
-                ServiceTypeDAO shome =
-                    DAOFactory.getDAOFactory().getServiceTypeDAO();
-                ServiceType st =
-                    shome.findById(getServiceType().getId());
-                serviceValue.setServiceType(st.getServiceTypeValue());
-            } catch (ObjectNotFoundException e) {
-            }
+            serviceValue.setServiceType(getServiceType().getServiceTypeValue());
         }
         else
             serviceValue.setServiceType( null );
@@ -446,33 +339,6 @@ public class Service extends AppdefResource
             (getEndUserRt() == obj.getEndUserRt()) &&
             (getServiceRt() == obj.getServiceRt());
         return matches;
-    }
-
-    public void setServer(ServerLocal server)
-    {
-        if (server != null) {
-            Server s = new Server();
-            s.setId(server.getId());
-            setServer(s);
-        }
-    }
-
-    public void setServiceCluster(ServiceClusterLocal serviceCluster)
-    {
-        if (serviceCluster != null) {
-            ServiceCluster s = new ServiceCluster();
-            s.setId(serviceCluster.getId());
-            setServiceCluster(s);
-        }
-    }
-
-    public void setServiceType(ServiceTypeLocal serviceType)
-    {
-        if (serviceType != null) {
-            ServiceType s = new ServiceType();
-            s.setId(serviceType.getId());
-            setServiceType(s);
-        }
     }
 
     /**
@@ -514,23 +380,6 @@ public class Service extends AppdefResource
         if (!super.equals(obj) || !(obj instanceof Service)) {
             return false;
         }
-        Service o = (Service)obj;
-        return
-            (autodiscoveryZombie==o.isAutodiscoveryZombie())
-            &&
-            (serviceRt==o.isServiceRt())
-            &&
-            (endUserRt==o.isEndUserRt());
-    }
-
-    public int hashCode()
-    {
-        int result=super.hashCode();
-
-        result = 37*result + (autodiscoveryZombie ? 0 : 1);
-        result = 37*result + (serviceRt ? 0 : 1);
-        result = 37*result + (endUserRt ? 0 : 1);
-        
-        return result;
+        return true;
     }
 }

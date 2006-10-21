@@ -53,7 +53,9 @@
       <one-to-many class="AppService" />
     </bag>
 
-    <bag name="services" table="EAM_SERVICE">
+    <bag name="services" table="EAM_SERVICE"
+         cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
+         inverse="true" lazy="true">
       <key column="SVC_CLUSTER_ID" />
       <one-to-many class="Service" />
     </bag>

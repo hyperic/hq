@@ -74,9 +74,7 @@ public abstract class PersistedObject
         PersistedObject o = (PersistedObject)obj;
         return
             ((_id == o.getId()) ||
-             (_id!=null && o.getId()!=null && _id.equals(o.getId())))
-            &&
-            (_version_ == o.get_version_());
+             (_id!=null && o.getId()!=null && _id.equals(o.getId())));
     }
 
     public int hashCode()
@@ -84,7 +82,6 @@ public abstract class PersistedObject
         int result = 17;
 
         result = 37*result + (_id != null ? _id.hashCode() : 0);
-        result = 37*result + (int)(_version_ ^ (_version_ >>> 32));
 
         return result;
     }

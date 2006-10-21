@@ -33,10 +33,10 @@ import org.hyperic.hq.appdef.PlatformType;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
+import org.hyperic.hq.appdef.Application;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.AgentPK;
-import org.hyperic.hq.appdef.shared.ApplicationLocal;
 import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.dao.DAOFactory;
@@ -128,7 +128,7 @@ public class PlatformDAO extends HibernateDAO
         return p;
     }
 
-    public Platform newPlatform(PlatformValue pv)
+    private Platform newPlatform(PlatformValue pv)
     {
         Platform p = new Platform();
 
@@ -412,7 +412,7 @@ public class PlatformDAO extends HibernateDAO
         return findByCertdn(dn);
     }
 
-    public Collection findByApplication(ApplicationLocal app)
+    public Collection findByApplication(Application app)
     {
         String sql = "select distinct p from Platform p " +
                      " join p.servers s " +

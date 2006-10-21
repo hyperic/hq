@@ -45,9 +45,6 @@ public class ConfigResponseDB implements Serializable
     private byte[] responseTimeResponse;
     private boolean userManaged;
     private String validationError;
-    private Collection platforms;
-    private Collection servers;
-    private Collection services;
 
     // Constructors
 
@@ -157,36 +154,6 @@ public class ConfigResponseDB implements Serializable
     public void setValidationError(String validationErr)
     {
         this.validationError = validationErr;
-    }
-
-    public Collection getPlatforms()
-    {
-        return this.platforms;
-    }
-
-    public void setPlatforms(Collection platforms)
-    {
-        this.platforms = platforms;
-    }
-
-    public Collection getServers()
-    {
-        return this.servers;
-    }
-
-    public void setServers(Collection servers)
-    {
-        this.servers = servers;
-    }
-
-    public Collection getServices()
-    {
-        return this.services;
-    }
-
-    public void setServices(Collection services)
-    {
-        this.services = services;
     }
 
     private ConfigResponseValue _value = new ConfigResponseValue();

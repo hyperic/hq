@@ -42,7 +42,6 @@ import java.util.ArrayList;
 
 /**
  * Pojo for hibernate hbm mapping file
- * TODO: fix equals and hashCode()
  */
 public class Server extends AppdefResource
 {
@@ -69,7 +68,8 @@ public class Server extends AppdefResource
 
     public Service createService(ServiceValue sv)
     {
-        throw new UnsupportedOperationException("use ServerDAO.createService()");
+        throw new UnsupportedOperationException(
+            "use ServiceDAO.createService()");
     }
 
     // Property accessors
@@ -481,38 +481,6 @@ public class Server extends AppdefResource
         if (!super.equals(obj) || !(obj instanceof Server)) {
             return false;
         }
-        Server o = (Server)obj;
-        return
-            (runtimeAutodiscovery==o.isRuntimeAutodiscovery())
-            &&
-            (wasAutodiscovered==o.isWasAutodiscovered())
-            &&
-            (servicesAutomanaged==o.isServicesAutomanaged())
-            &&
-            (autodiscoveryZombie==o.isAutodiscoveryZombie())
-            &&
-            ((installPath==o.getInstallPath()) ||
-             (installPath!=null && o.getInstallPath()!=null &&
-              installPath.equals(o.getInstallPath())))
-            &&
-            ((autoinventoryIdentifier==o.getAutoinventoryIdentifier()) ||
-             (autoinventoryIdentifier!=null &&
-              o.getAutoinventoryIdentifier()!=null &&
-              autoinventoryIdentifier.equals(o.getAutoinventoryIdentifier())));
-    }
-
-    public int hashCode()
-    {
-        int result = super.hashCode();
-
-        result = 37*result + (runtimeAutodiscovery ? 0 : 1);
-        result = 37*result + (wasAutodiscovered ? 0 : 1);
-        result = 37*result + (servicesAutomanaged ? 0 : 1);
-        result = 37*result + (autodiscoveryZombie ? 0 : 1);
-        result = 37*result + (installPath != null ? installPath.hashCode() : 0);
-        result = 37*result + (autoinventoryIdentifier != null
-                              ? autoinventoryIdentifier.hashCode()
-                              : 0);
-        return result;
+        return true;
     }
 }

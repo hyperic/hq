@@ -184,4 +184,12 @@ public class ServerType extends AppdefResourceType
         }
         return new LinkedHashSet(getServiceTypes());
     }
+
+    public boolean equals(Object obj)
+    {
+        if (!super.equals(obj) || !(obj instanceof ServerType)) {
+            return false;
+        }
+        return true;
+    }
 }

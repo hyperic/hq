@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.appdef;
 
+import java.io.Serializable;
+
 /**
  *
  */
@@ -40,6 +42,11 @@ public abstract class AppdefResourceType extends AppdefBean
     public AppdefResourceType()
     {
         super();
+    }
+
+    public AppdefResourceType(Integer id)
+    {
+        super(id);
     }
 
     public String getName()
@@ -85,11 +92,7 @@ public abstract class AppdefResourceType extends AppdefBean
         AppdefResourceType a = (AppdefResourceType)o;
         return
             ((name==a.getName()) || (name!=null && a.getName()!=null &&
-                                     name.equals(a.getName())))
-            &&
-            ((description==a.getDescription()) ||
-             (description!=null && a.getDescription()!=null &&
-              description.equals(a.getDescription())));
+                                     name.equals(a.getName())));
     }
 
     public int hashCode()
@@ -97,7 +100,6 @@ public abstract class AppdefResourceType extends AppdefBean
         int result = super.hashCode();
 
         result = 37*result + (name!=null ? name.hashCode() : 0);
-        result = 37*result + (description!=null ? description.hashCode() : 0);
 
         return result;
     }

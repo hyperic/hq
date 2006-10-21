@@ -143,23 +143,7 @@ public abstract class AppdefResource extends AppdefBean
         AppdefResource o = (AppdefResource)obj;
         return
             ((name==o.getName()) ||
-             (name!=null && o.getName()!=null && name.equals(o.getName())))
-            &&
-            ((description==o.getDescription()) ||
-             (description!=null && o.getDescription()!=null &&
-              description.equals(o.getDescription())))
-            &&
-            ((modifiedBy==o.getModifiedBy()) ||
-             (modifiedBy!=null && o.getModifiedBy()!=null &&
-              modifiedBy.equals(o.getModifiedBy())))
-            &&
-            ((owner==o.getOwner()) ||
-             (owner!=null && o.getOwner()!=null &&
-              owner.equals(o.getOwner())))
-            &&
-            ((location==o.getLocation()) ||
-             (location!=null && o.getLocation()!=null &&
-              location.equals(o.getLocation())));
+             (name!=null && o.getName()!=null && name.equals(o.getName())));
     }
 
     public int hashCode()
@@ -167,10 +151,6 @@ public abstract class AppdefResource extends AppdefBean
         int result = super.hashCode();
 
         result = 37*result +(name != null ? name.hashCode() : 0);
-        result = 37*result +(description != null ? description.hashCode() : 0);
-        result = 37*result +(modifiedBy != null ? modifiedBy.hashCode() : 0);
-        result = 37*result +(owner != null ? owner.hashCode() : 0);
-        result = 37*result +(location != null ? location.hashCode() : 0);
 
         return result;
     }

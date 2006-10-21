@@ -48,7 +48,7 @@
       <column name="MODIFIED_BY" not-null="false" length="100" />
     </property>
 
-    <property name="fentryPoint" type="boolean">
+    <property name="isEntryPoint" type="boolean">
       <column name="FENTRY_POINT" not-null="true" dialect="PostgreSQL" default="true" />
       <column name="FENTRY_POINT" not-null="true" dialect="Oracle, Oracle9" default="1" />
     </property>
@@ -57,9 +57,11 @@
       <column name="SERVICE_TYPE_ID" not-null="false" />
     </many-to-one>
 
-    <bag name="dependents" table="EAM_SERVICE_DEP_MAP" cascade="save-update,delete,evict,merge,persist" inverse="true">
+    <bag name="appSvcDependencies" table="EAM_SERVICE_DEP_MAP"
+         cascade="save-update,delete,evict,merge,persist,all-delete-orphan"
+         inverse="true" lazy="true">
       <key column="APPSERVICE_ID" />
-      <one-to-many class="ServiceDepMap" />
+      <one-to-many class="AppSvcDependency" />
     </bag>
   </class>
 

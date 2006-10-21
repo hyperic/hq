@@ -25,12 +25,14 @@
 
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.shared.AppSvcDependencyPK;
+
 import java.io.Serializable;
 
 /**
  *
  */
-public class ServiceDepMap implements Serializable
+public class AppSvcDependency implements Serializable
 {
     private Integer id;
     private long creationTime;
@@ -41,7 +43,7 @@ public class ServiceDepMap implements Serializable
     /**
      * default constructor
      */
-    public ServiceDepMap()
+    public AppSvcDependency()
     {
         super();
     }
@@ -97,5 +99,14 @@ public class ServiceDepMap implements Serializable
         this.dependentService = dependentService;
     }
 
-
+    private AppSvcDependencyPK pkey = new AppSvcDependencyPK();
+    /**
+     * @deprecated use getId()
+     * @return
+     */
+    public AppSvcDependencyPK getPrimaryKey()
+    {
+        pkey.setId(getId());
+        return pkey;
+    }
 }

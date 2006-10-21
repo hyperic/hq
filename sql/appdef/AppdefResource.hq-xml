@@ -78,7 +78,7 @@
         <column name="PLATFORM_TYPE_ID" not-null="false" />
       </many-to-one>
 
-      <many-to-one name="configResponse" class="ConfigResponseDB">
+      <many-to-one name="configResponse" unique="true" class="ConfigResponseDB">
         <column name="CONFIG_RESPONSE_ID" not-null="false" />
       </many-to-one>
 
@@ -87,14 +87,14 @@
       </many-to-one>
 
       <bag name="ips" table="EAM_IP"
-           cascade="save-update,delete,persist,merge,evict,delete-orphan"
+           cascade="save-update,delete,persist,merge,evict,all-delete-orphan"
            inverse="true" lazy="false">
         <key column="PLATFORM_ID" />
         <one-to-many class="Ip" />
       </bag>
 
       <bag name="servers" table="EAM_SERVER"
-           cascade="save-update,delete,evict,persist,merge"
+           cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
            inverse="true" lazy="true">
         <key column="PLATFORM_ID" />
         <one-to-many class="Server" />
@@ -142,12 +142,12 @@
         <column name="SERVER_TYPE_ID" not-null="false" />
       </many-to-one>
 
-      <many-to-one name="configResponse" class="ConfigResponseDB">
+      <many-to-one name="configResponse" unique="true" class="ConfigResponseDB">
         <column name="CONFIG_RESPONSE_ID" not-null="false" />
       </many-to-one>
 
       <bag name="services" table="EAM_SERVICE"
-           cascade="save-update,delete,evict,persist,merge"
+           cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
            inverse="true" lazy="true">
         <key column="SERVER_ID" />
         <one-to-many class="Service" />
@@ -191,12 +191,12 @@
         <column name="SVC_CLUSTER_ID" not-null="false" />
       </many-to-one>
 
-      <many-to-one name="configResponse" class="ConfigResponseDB">
+      <many-to-one name="configResponse" unique="true" class="ConfigResponseDB">
         <column name="CONFIG_RESPONSE_ID" not-null="false" />
       </many-to-one>
 
       <bag name="appServices" table="EAM_APP_SERVICE"
-           cascade="save-update,delete,evict,persist,merge"
+           cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
            inverse="true" lazy="true">
         <key column="SERVICE_ID" />
         <one-to-many class="AppService" />
@@ -220,7 +220,7 @@
         <column name="OPS_CONTACT" not-null="false" length="100" />
       </property>
 
-      <property name="busContact" type="string">
+      <property name="businessContact" type="string">
         <column name="BUS_CONTACT" not-null="false" length="100" />
       </property>
 
@@ -229,7 +229,7 @@
       </many-to-one>
 
       <bag name="appServices" table="EAM_APP_SERVICE"
-           cascade="save-update,delete,evict,persist,merge"
+           cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
            inverse="true" lazy="true">
         <key column="APPLICATION_ID" />
         <one-to-many class="AppService" />

@@ -28,23 +28,17 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.NoSuchObjectLocalException;
 import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
-import org.hyperic.hq.appdef.shared.IpLocal;
-import org.hyperic.hq.appdef.shared.ApplicationLocal;
 import org.hyperic.hq.appdef.shared.ApplicationPK;
-import org.hyperic.hq.appdef.shared.ApplicationTypeLocal;
-import org.hyperic.hq.appdef.shared.ApplicationTypePK;
-import org.hyperic.hq.appdef.shared.ApplicationTypeUtil;
 import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
-import org.hyperic.hq.appdef.shared.ApplicationUtil;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
-import org.hyperic.hq.appdef.shared.AppServiceLocal;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
+import org.hyperic.hq.appdef.AppService;
+import org.hyperic.hq.appdef.Application;
 import org.hyperic.hq.common.SystemException;
 
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -70,7 +64,7 @@ public class ApplicationVOHelperEJBImpl extends AppdefSessionEJB
     /**
      * Get a value object for this application
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
     public ApplicationValue getApplicationValue(ApplicationPK apk) throws FinderException,
         NamingException {
@@ -78,19 +72,19 @@ public class ApplicationVOHelperEJBImpl extends AppdefSessionEJB
             if(vo != null) {
                 return vo;
             }
-            ApplicationLocal ejb = ApplicationUtil.getLocalHome().findByPrimaryKey(apk);
+            Application ejb = getApplicationDAO().findByPrimaryKey(apk);
             return getApplicationValue(ejb);
     }
                 
     /**
      * Get a value object for this application
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
-    public ApplicationValue getApplicationValue(ApplicationLocal ejb)
+    public ApplicationValue getApplicationValue(Application ejb)
         throws NamingException {
         ApplicationValue vo = VOCache.getInstance()
-            .getApplication(((ApplicationPK)ejb.getPrimaryKey()).getId());
+            .getApplication(ejb.getId());
         if(vo != null) {
             log.debug("Returning cached application: " + vo.getId());
             return vo;            
@@ -101,7 +95,7 @@ public class ApplicationVOHelperEJBImpl extends AppdefSessionEJB
     /**
      * synchronized method to do the actual retrieval of the valie object
      */
-    private ApplicationValue getApplicationValueImpl(ApplicationLocal ejb)
+    private ApplicationValue getApplicationValueImpl(Application ejb)
         throws NamingException {
         VOCache cache = VOCache.getInstance();
         ApplicationValue vo;
@@ -118,7 +112,7 @@ public class ApplicationVOHelperEJBImpl extends AppdefSessionEJB
             Iterator asIt = ejb.getAppServiceSnapshot().iterator();
             while (asIt.hasNext()){
                 try {
-                    vo.addAppServiceValue( ((AppServiceLocal)asIt.next()).getAppServiceValue() );
+                    vo.addAppServiceValue( ((AppService)asIt.next()).getAppServiceValue() );
                 } catch (NoSuchObjectLocalException e) {
                 // the app service was removed during our iteration
                 // not a problem.

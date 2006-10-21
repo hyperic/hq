@@ -116,21 +116,28 @@ public class Ip extends AppdefBean
         return ipValue;
     }
 
-    // TODO: fix equals and hashCode
-    public boolean equals(Object other)
+    public boolean equals(Object obj)
     {
-        if ((this == other)) return true;
-        if ((other == null)) return false;
-        if (!(other instanceof Ip)) return false;
-        Ip castOther = (Ip) other;
-
-        return ((this.getPlatform() == castOther.getPlatform()) || (this.getPlatform() != null && castOther.getPlatform() != null && this.getPlatform().equals(castOther.getPlatform())))
-               && ((this.getAddress() == castOther.getAddress()) || (this.getAddress() != null && castOther.getAddress() != null && this.getAddress().equals(castOther.getAddress())));
+        if (!super.equals(obj) || !(obj instanceof Ip)) {
+            return false;
+        }
+        Ip o = (Ip) obj;
+        return ((platform == o.getPlatform()) ||
+                (platform != null && o.getPlatform() != null &&
+                 platform.equals(o.getPlatform())))
+               &&
+               ((address == o.getAddress()) ||
+                (address != null && o.getAddress() != null &&
+                 address.equals(o.getAddress())));
     }
 
     public int hashCode()
     {
-        int result = 17;
+        int result = super.hashCode();
+
+        result = 37*result + (platform != null ? platform.hashCode() : 0);
+        result = 37*result + (address != null ? address.hashCode() : 0);
+
         return result;
     }
 }

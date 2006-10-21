@@ -27,13 +27,11 @@ package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.util.pager.PagerProcessor;
 
-import org.hyperic.hq.appdef.shared.AppServiceLocal;
-import org.hyperic.hq.appdef.shared.ServiceLocal;
-import org.hyperic.hq.appdef.shared.ServiceClusterLocal;
-import org.hyperic.hq.appdef.shared.ServiceTypeLocal;
 import org.hyperic.hq.appdef.shared.ServiceVOHelperUtil;
 import org.hyperic.hq.appdef.Service;
 import org.hyperic.hq.appdef.ServiceType;
+import org.hyperic.hq.appdef.AppService;
+import org.hyperic.hq.appdef.ServiceCluster;
 
 public class PagerProcessor_service implements PagerProcessor {
 
@@ -46,11 +44,11 @@ public class PagerProcessor_service implements PagerProcessor {
                 return ServiceVOHelperUtil.getLocalHome().create()
                     .getServiceValue((Service)o);
             }
-            if ( o instanceof AppServiceLocal ) {
-                return ((AppServiceLocal) o).getAppServiceValue();
+            if ( o instanceof AppService) {
+                return ((AppService) o).getAppServiceValue();
             }
-            if ( o instanceof ServiceClusterLocal ) {
-                return ((ServiceClusterLocal) o).getServiceClusterValue();
+            if ( o instanceof ServiceCluster) {
+                return ((ServiceCluster) o).getServiceClusterValue();
             }
             if ( o instanceof ServiceType) {
                 return ServiceVOHelperUtil.getLocalHome().create()

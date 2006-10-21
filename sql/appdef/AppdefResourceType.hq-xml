@@ -46,7 +46,7 @@
     </property>
 
     <union-subclass name="ApplicationType" table="EAM_APPLICATION_TYPE">
-      <bag name="services" table="EAM_APP_TYPE_SERVICE_TYPE_MAP">
+      <bag name="serviceTypes" table="EAM_APP_TYPE_SERVICE_TYPE_MAP">
         <key column="APPLICATION_TYPE_ID" not-null="false" />
         <many-to-many class="ServiceType" column="SERVICE_TYPE_ID" />
       </bag>
