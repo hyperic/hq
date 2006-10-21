@@ -118,7 +118,7 @@ public class Ip extends AppdefBean
 
     public boolean equals(Object obj)
     {
-        if (!super.equals(obj) || !(obj instanceof Ip)) {
+        if (!(obj instanceof Ip) || !super.equals(obj)) {
             return false;
         }
         Ip o = (Ip) obj;

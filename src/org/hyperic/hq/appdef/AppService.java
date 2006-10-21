@@ -157,7 +157,7 @@ public class AppService extends AppdefBean
 
     public boolean equals(Object obj)
     {
-        if (!super.equals(obj) || !(obj instanceof AppService)) {
+        if (!(obj instanceof AppService) || !super.equals(obj)) {
             return false;
         }
         AppService o = (AppService)obj;

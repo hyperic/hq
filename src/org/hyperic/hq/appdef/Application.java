@@ -208,9 +208,6 @@ public class Application extends AppdefResource
 
     public boolean equals(Object obj)
     {
-        if (!super.equals(obj) || !(obj instanceof Application)) {
-            return false;
-        }
-        return true;
+        return (obj instanceof Application) && super.equals(obj);
     }
 }

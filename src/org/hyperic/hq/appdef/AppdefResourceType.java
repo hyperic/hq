@@ -86,7 +86,7 @@ public abstract class AppdefResourceType extends AppdefBean
 
     public boolean equals(Object o)
     {
-        if (!super.equals(o) || !(o instanceof AppdefResourceType)) {
+        if (!(o instanceof AppdefResourceType) || !super.equals(o)) {
             return false;
         }
         AppdefResourceType a = (AppdefResourceType)o;

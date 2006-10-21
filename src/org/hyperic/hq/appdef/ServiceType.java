@@ -207,9 +207,6 @@ public class ServiceType extends AppdefResourceType
 
     public boolean equals(Object obj)
     {
-        if (!super.equals(obj) || !(obj instanceof ServiceType)) {
-            return false;
-        }
-        return true;
+        return (obj instanceof ServiceType) && super.equals(obj);
     }
 }

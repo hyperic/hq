@@ -27,6 +27,7 @@ package org.hyperic.hq.appdef;
 
 import org.hyperic.hq.appdef.shared.ConfigResponseValue;
 import org.hyperic.hq.appdef.shared.ConfigResponsePK;
+import org.hyperic.hibernate.PersistedObject;
 
 import java.util.Collection;
 import java.io.Serializable;
@@ -34,10 +35,8 @@ import java.io.Serializable;
 /**
  *
  */
-public class ConfigResponseDB implements Serializable
+public class ConfigResponseDB extends PersistedObject
 {
-    private Integer id;
-    private long _version_;
     private byte[] productResponse;
     private byte[] controlResponse;
     private byte[] measurementResponse;
@@ -54,27 +53,6 @@ public class ConfigResponseDB implements Serializable
     public ConfigResponseDB()
     {
         super();
-    }
-
-    // Property accessors
-    public Integer getId()
-    {
-        return this.id;
-    }
-
-    public void setId(Integer id)
-    {
-        this.id = id;
-    }
-
-    private void set_version_(long _version_)
-    {
-        this._version_ = _version_;
-    }
-
-    public long get_version_()
-    {
-        return this._version_;
     }
 
     public byte[] getProductResponse()
@@ -193,9 +171,12 @@ public class ConfigResponseDB implements Serializable
      */
     public ConfigResponsePK getPrimaryKey()
     {
-        _pkey.setId(id);
+        _pkey.setId(getId());
         return _pkey;
     }
 
-    // TODO: add equals and hashCode()
+    public boolean equals(Object obj)
+    {
+        return (obj instanceof ConfigResponseDB) && super.equals(obj);
+    }
 }

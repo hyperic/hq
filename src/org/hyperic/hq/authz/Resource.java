@@ -38,7 +38,6 @@ public class Resource extends AuthzNamedEntity implements Serializable {
     private Integer instanceId;
     private Integer cid;
     private AuthzSubject owner;
-    private String sortName;
     private boolean system;
     private Collection resourceGroups;
     private Collection group;
@@ -60,7 +59,7 @@ public class Resource extends AuthzNamedEntity implements Serializable {
 
     /** full constructor */
     public Resource(ResourceType resourceTypeId, Integer instanceId,
-            Integer cid, AuthzSubject subjectId, String name, String sortName,
+            Integer cid, AuthzSubject subjectId, String name,
             boolean fsystem, Collection resourceGroups, Collection group,
             Collection roles) {
         super(name);
@@ -68,7 +67,6 @@ public class Resource extends AuthzNamedEntity implements Serializable {
         this.instanceId = instanceId;
         this.cid = cid;
         this.owner = subjectId;
-        this.sortName = sortName;
         this.system = fsystem;
         this.resourceGroups = resourceGroups;
         this.group = group;
@@ -105,14 +103,6 @@ public class Resource extends AuthzNamedEntity implements Serializable {
 
     public void setOwner(AuthzSubject val) {
         owner = val;
-    }
-
-    public String getSortName() {
-        return sortName;
-    }
-
-    public void setSortName(String val) {
-        sortName = val;
     }
 
     public boolean isSystem() {
@@ -175,42 +165,28 @@ public class Resource extends AuthzNamedEntity implements Serializable {
         return getResourceValue();
     }
 
-    public boolean equals(Object other) {
-        if ((this == other))
-            return true;
-        if ((other == null))
+    public boolean equals(Object obj)
+    {
+        if (!(obj instanceof Resource) || !super.equals(obj)) {
             return false;
-        if (!(other instanceof Resource))
-            return false;
-        Resource castOther = (Resource) other;
-
-        return ((getResourceType() == castOther.getResourceType()) || (this
-                .getResourceType() != null
-                && castOther.getResourceType() != null && this
-                .getResourceType().equals(castOther.getResourceType())))
-                && ((getInstanceId() == castOther.getInstanceId()) || (this
-                        .getInstanceId() != null
-                        && castOther.getInstanceId() != null && this
-                        .getInstanceId().equals(castOther.getInstanceId())));
+        }
+        Resource o = (Resource)obj;
+        return
+            ((resourceType==o.getResourceType()) ||
+             (resourceType!=null && o.getResourceType()!=null &&
+              resourceType.equals(o.getResourceType())))
+            &&
+            ((instanceId==o.getInstanceId()) ||
+             (instanceId!=null && o.getInstanceId()!=null &&
+              instanceId.equals(o.getInstanceId())));
     }
 
     public int hashCode() {
         int result = super.hashCode();
-        result = 37 * result
-                + ((getSortName() != null) ? getSortName().hashCode() : 0);
 
-        result = 37 * result
-                + ((getInstanceId() != null) ? getInstanceId().hashCode() : 0);
+        result = 37*result + (resourceType != null ? resourceType.hashCode() : 0);
+        result = 37*result + (instanceId != null ? instanceId.hashCode() : 0);
 
-        result = 37 * result + (system ? 0 : 1);
-
-        result = 37 * result
-                + ((getResourceType() != null) ? getResourceType()
-                        .hashCode() : 0);
-        result = 37 * result
-                + ((getOwner() != null) ? getOwner()
-                        .hashCode() : 0);
         return result;
     }
-
 }

@@ -34,9 +34,7 @@ public class Role extends AuthzNamedEntity implements java.io.Serializable {
 
     // Fields    
 
-     private String name;
      private Integer cid;
-     private String sortName;
      private String description;
      private boolean system;
      private Resource resource;
@@ -65,7 +63,6 @@ public class Role extends AuthzNamedEntity implements java.io.Serializable {
                 Collection operations, Collection subjects) {
         super(name);
         this.cid = cid;
-        this.sortName = sortName;
         this.description = description;
         this.system = fsystem;
         this.resource = resourceId;
@@ -75,13 +72,6 @@ public class Role extends AuthzNamedEntity implements java.io.Serializable {
     }
     
    
-    public String getName() {
-        return name;
-    }
-    
-    public void setName(String val) {
-        name = val;
-    }
     public Integer getCid() {
         return cid;
     }
@@ -89,13 +79,7 @@ public class Role extends AuthzNamedEntity implements java.io.Serializable {
     public void setCid(Integer val) {
         cid = val;
     }
-    public String getSortName() {
-        return sortName;
-    }
-    
-    public void setSortName(String val) {
-        sortName = val;
-    }
+
     public String getDescription() {
         return description;
     }
@@ -170,34 +154,10 @@ public class Role extends AuthzNamedEntity implements java.io.Serializable {
         return getRoleValue();
     }
 
-    public boolean equals(Object other) {
-         if ( (this == other ) ) return true;
-		 if ( (other == null ) ) return false;
-		 if ( !(other instanceof Role) ) return false;
-		 Role castOther = ( Role ) other; 
-         
-		 return ((getName() == castOther.getName()) ||
-                 (getName() != null
-                && castOther.getName() != null && getName()
-                .equals(castOther.getName())));
+    public boolean equals(Object obj)
+    {
+        return (obj instanceof Role) && super.equals(obj);
     }
-   
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 37 * result +
-                ((getSortName() != null) ? getSortName().hashCode() : 0);
-
-        result = 37 * result + (isSystem() ? 0 : 1);
-
-        result = 37 * result +
-                ((getDescription() != null) ? getDescription().hashCode() : 0);
-
-        result = 37 * result +
-                ((getOperations() != null) ? getOperations().hashCode() : 0);
-        return result;
-   }   
-
-
 }
 
 

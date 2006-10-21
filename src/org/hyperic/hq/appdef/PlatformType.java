@@ -198,9 +198,6 @@ public class PlatformType extends AppdefResourceType
 
     public boolean equals(Object obj)
     {
-        if (!super.equals(obj) || !(obj instanceof PlatformType)) {
-            return false;
-        }
-        return true;
+        return (obj instanceof PlatformType) && super.equals(obj);
     }
 }

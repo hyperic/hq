@@ -131,28 +131,9 @@ public class ResourceType extends AuthzNamedEntity implements Serializable
         return getResourceTypeValue();
     }
 
-    public boolean equals(Object other) {
-        if ((this == other))
-            return true;
-        if ((other == null))
-            return false;
-        if (!(other instanceof ResourceType))
-            return false;
-        ResourceType castOther = (ResourceType) other;
 
-        return ((getName() == castOther.getName()) ||
-                (getName() != null && castOther.getName() != null
-                        && getName()
-                .equals(castOther.getName())));
+    public boolean equals(Object obj)
+    {
+        return (obj instanceof ResourceType) && super.equals(obj);
     }
-
-    public int hashCode() {
-      int result = super.hashCode();
-      result = 37*result + (isSystem() ? 0 : 1);
-
-      result = 37*result + ((getOperations() != null) ?
-              getOperations().hashCode() : 0);
-      return result;
-    }
-
 }

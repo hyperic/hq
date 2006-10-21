@@ -131,7 +131,7 @@ public class ServiceCluster extends AppdefBean
 
     public boolean equals(Object obj)
     {
-        if (!super.equals(obj) || !(obj instanceof ServiceCluster)) {
+        if (!(obj instanceof ServiceCluster) || !super.equals(obj)) {
             return false;
         }
         ServiceCluster o = (ServiceCluster)obj;

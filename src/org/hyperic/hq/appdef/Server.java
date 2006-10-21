@@ -478,9 +478,6 @@ public class Server extends AppdefResource
 
     public boolean equals(Object obj)
     {
-        if (!super.equals(obj) || !(obj instanceof Server)) {
-            return false;
-        }
-        return true;
+        return (obj instanceof Server) && super.equals(obj);
     }
 }

@@ -101,28 +101,25 @@ public class Operation extends AuthzNamedEntity implements Serializable {
         return getOperationValue();
     }
 
-   public boolean equals(Object other) {
-        if ((this == other))
-            return true;
-        if ((other == null))
+    public boolean equals(Object obj)
+    {
+        if (!(obj instanceof Operation) || !super.equals(obj)) {
             return false;
-        if (!(other instanceof Operation))
-            return false;
-        Operation castOther = (Operation) other;
-
-        return ((getName() == castOther.getName()) ||
-                (getName() != null && castOther.getName() != null &&
-                        getName().equals(castOther.getName()))) &&
-               ((getResourceType() == castOther.getResourceType()) ||
-                        (getResourceType() != null &&
-                         castOther.getResourceType() != null &&
-                         getResourceType()
-                         .equals(castOther.getResourceType())));
+        }
+        Operation o = (Operation)obj;
+        return
+            ((resourceType==o.getResourceType()) ||
+             (resourceType!=null && o.getResourceType()!=null &&
+              resourceType.equals(o.getResourceType())));
     }
-   
-   public int hashCode() {
-       return super.hashCode();
-   }
+
+    public int hashCode() {
+        int result = super.hashCode();
+
+        result = 37*result + (resourceType!=null ? resourceType.hashCode():0);
+
+        return result;
+    }
 }
 
 

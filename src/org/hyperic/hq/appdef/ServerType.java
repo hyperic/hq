@@ -187,9 +187,6 @@ public class ServerType extends AppdefResourceType
 
     public boolean equals(Object obj)
     {
-        if (!super.equals(obj) || !(obj instanceof ServerType)) {
-            return false;
-        }
-        return true;
+        return (obj instanceof ServerType) && super.equals(obj);
     }
 }

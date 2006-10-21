@@ -377,9 +377,6 @@ public class Service extends AppdefResource
 
     public boolean equals(Object obj)
     {
-        if (!super.equals(obj) || !(obj instanceof Service)) {
-            return false;
-        }
-        return true;
+        return (obj instanceof Service) && super.equals(obj);
     }
 }

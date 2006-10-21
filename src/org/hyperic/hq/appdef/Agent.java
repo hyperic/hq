@@ -128,7 +128,7 @@ public class Agent extends AppdefBean
 
     public boolean equals(Object obj)
     {
-        if (!super.equals(obj) || !(obj instanceof Agent)) {
+        if (!(obj instanceof Agent) || !super.equals(obj)) {
             return false;
         }
         Agent o = (Agent)obj;

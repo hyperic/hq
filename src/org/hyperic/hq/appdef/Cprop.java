@@ -89,7 +89,7 @@ public class Cprop extends PersistedObject
 
     public boolean equals(Object obj)
     {
-        if (!super.equals(obj) || !(obj instanceof Cprop)) {
+        if (!(obj instanceof Cprop) || !super.equals(obj)) {
             return false;
         }
         Cprop o = (Cprop)obj;

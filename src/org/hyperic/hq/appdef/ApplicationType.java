@@ -86,10 +86,7 @@ public class ApplicationType extends AppdefResourceType
 
     public boolean equals(Object obj)
     {
-        if (!super.equals(obj) || !(obj instanceof ApplicationType)) {
-            return false;
-        }
-        return true;
+        return (obj instanceof ApplicationType) && super.equals(obj);
     }
 
     private ApplicationTypeValue applicationTypeValue =

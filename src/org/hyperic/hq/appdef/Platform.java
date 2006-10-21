@@ -427,10 +427,7 @@ public class Platform extends AppdefResource
 
     public boolean equals(Object obj)
     {
-        if (!super.equals(obj) || !(obj instanceof Platform)) {
-            return false;
-        }
-        return true;
+        return (obj instanceof Platform) && super.equals(obj);
     }
 
 }

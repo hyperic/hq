@@ -127,7 +127,7 @@ public abstract class AppdefBean
 
     public boolean equals(Object obj)
     {
-        if (!super.equals(obj) || !(obj instanceof AppdefBean)) {
+        if (!(obj instanceof AppdefBean) || !super.equals(obj)) {
             return false;
         }
         AppdefBean o = (AppdefBean)obj;

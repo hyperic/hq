@@ -125,7 +125,7 @@ public class CpropKey extends PersistedObject
 
     public boolean equals(Object obj)
     {
-        if (!super.equals(obj) || !(obj instanceof CpropKey)) {
+        if (!(obj instanceof CpropKey) || !super.equals(obj)) {
             return false;
         }
         CpropKey o = (CpropKey)obj;

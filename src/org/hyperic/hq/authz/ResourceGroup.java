@@ -33,7 +33,6 @@ import org.hyperic.hq.authz.shared.ResourceGroupValue;
 public class ResourceGroup extends AuthzNamedEntity implements Serializable {
 
     private Integer cid;
-    private String sortName;
     private String description;
     private String location;
     private boolean system;
@@ -63,7 +62,7 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
     }
 
     /** full constructor */
-    public ResourceGroup(String name, Integer cid, String sortName,
+    public ResourceGroup(String name, Integer cid,
                          String description, String location, boolean fsystem,
                          Integer groupType, Integer groupEntType,
                          Integer groupEntResType, Integer clusterId,
@@ -72,7 +71,6 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
                          Collection roles) {
         super(name);
         this.cid = cid;
-        this.sortName = sortName;
         this.description = description;
         this.location = location;
         this.system = fsystem;
@@ -94,14 +92,6 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
 
     public void setCid(Integer val) {
         cid = val;
-    }
-
-    public String getSortName() {
-        return sortName;
-    }
-
-    public void setSortName(String val) {
-        sortName = val;
     }
 
     public String getDescription() {
@@ -219,55 +209,10 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
     public Object getValueObject() {
         return getResourceGroupValue();
     }
-    
-    public boolean equals(Object other) {
-        if ((this == other))
-            return true;
-        if ((other == null))
-            return false;
-        if (!(other instanceof ResourceGroup))
-            return false;
-        ResourceGroup castOther = (ResourceGroup) other;
 
-        return ((getName() == castOther.getName()) ||
-                (getName() != null
-                && castOther.getName() != null && getName()
-                .equals(castOther.getName())));
+
+    public boolean equals(Object obj)
+    {
+        return (obj instanceof ResourceGroup) && super.equals(obj);
     }
-
-    public int hashCode() {
-        int result = super.hashCode();
-        
-        result = 37*result +
-            ((getSortName() != null) ? getSortName().hashCode() : 0);
-
-        result = 37*result + (isSystem() ? 0 : 1);
-
-        result = 37*result +
-            (getGroupType() != null ? getGroupType().hashCode() : 0);
-
-        result = 37*result +
-            (getGroupEntType() != null ? getGroupEntType().hashCode() : 0);
-
-        result = 37*result +
-            (getGroupEntResType() != null ? getGroupEntResType().hashCode() :0);
-
-        result = 37*result +
-            (getClusterId() != null ? getClusterId().hashCode() : 0);
-
-        result = 37*result +
-            ((getDescription() != null) ? getDescription().hashCode() : 0);
-
-        result = 37*result +
-            ((getLocation() != null) ? getLocation().hashCode() : 0);
-
-        result = 37*result +
-            ((getModifiedBy() != null) ? getModifiedBy().hashCode() : 0);
-
-        result = 37*result + (new Long(getMtime())).hashCode();
-
-        result = 37*result + (new Long(getCtime())).hashCode();
-        return result;
-    }
-
 }

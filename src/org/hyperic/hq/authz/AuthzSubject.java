@@ -35,7 +35,6 @@ public class AuthzSubject extends AuthzNamedEntity
 
     private String dsn;
      private Integer cid;
-     private String sortName;
      private String firstName;
      private String lastName;
      private String emailAddress;
@@ -63,7 +62,7 @@ public class AuthzSubject extends AuthzNamedEntity
     }
     
     /** full constructor */
-    public AuthzSubject(String name, String dsn, Integer cid, String sortName,
+    public AuthzSubject(String name, String dsn, Integer cid,
                         String firstName, String lastName, String emailAddress,
                         String smsAddress, String phoneNumber,
                         String department, boolean factive, boolean fsystem,
@@ -72,7 +71,6 @@ public class AuthzSubject extends AuthzNamedEntity
         super(name);
         this.dsn = dsn;
         this.cid = cid;
-        this.sortName = sortName;
         this.firstName = firstName;
         this.lastName = lastName;
         this.emailAddress = emailAddress;
@@ -100,13 +98,7 @@ public class AuthzSubject extends AuthzNamedEntity
     public void setCid(Integer val) {
         cid = val;
     }
-    public String getSortName() {
-        return sortName;
-    }
-    
-    public void setSortName(String val) {
-        sortName = val;
-    }
+
     public String getFirstName() {
         return firstName;
     }
@@ -223,51 +215,21 @@ public class AuthzSubject extends AuthzNamedEntity
         return getId().equals(AuthzConstants.rootSubjectId);
     }
 
-    public boolean equals(Object other) {
-        if ((this == other))
-            return true;
-        if ((other == null))
+    public boolean equals(Object obj)
+    {
+        if (!(obj instanceof AuthzSubject) || !super.equals(obj)) {
             return false;
-        if (!(other instanceof AuthzSubject))
-            return false;
-        AuthzSubject castOther = (AuthzSubject) other;
-
-        return ((getName() == castOther.getName()) || (getName() != null
-                && castOther.getName() != null && getName()
-                .equals(castOther.getName())))
-                && ((getDsn() == castOther.getDsn()) || (getDsn() != null
-                        && castOther.getDsn() != null && getDsn()
-                        .equals(castOther.getDsn())));
+        }
+        AuthzSubject o = (AuthzSubject)obj;
+        return
+            ((dsn==o.getDsn()) ||
+             (dsn!=null && o.getDsn()!=null && dsn.equals(o.getDsn())));
     }
-   
+
     public int hashCode() {
         int result = super.hashCode();
-        result = 37*result + ((getSortName() != null) ?
-                getSortName().hashCode() : 0);
 
-        result = 37*result + (isActive() ? 0 : 1);
-
-        result = 37*result + (isSystem() ? 0 : 1);
-
-        result = 37*result + ((getDsn() != null) ? getDsn().hashCode() : 0);
-
-        result = 37*result + ((getEmailAddress() != null) ?
-                getEmailAddress().hashCode() : 0);
-
-        result = 37*result + ((getSmsAddress() != null) ?
-                getSmsAddress().hashCode() : 0);
-
-        result = 37*result + ((getFirstName() != null) ?
-                getFirstName().hashCode() : 0);
-
-        result = 37*result + ((getLastName() != null) ?
-                getLastName().hashCode() : 0);
-
-        result = 37*result + ((getPhoneNumber() != null) ?
-                getPhoneNumber().hashCode() : 0);
-
-        result = 37*result + ((getDepartment() != null) ?
-                getDepartment().hashCode() : 0);
+        result = 37*result + (dsn != null ? dsn.hashCode() : 0);
 
         return result;
     }
