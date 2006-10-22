@@ -108,6 +108,15 @@ public class ResourceDAO extends HibernateDAO {
             .uniqueResult();
     }
     
+    public Resource findByInstanceId(Integer typeId, Integer id) {            
+        String sql = "from Resource where instanceId = ? and" +
+                     " resourceType.id = ?";
+        return (Resource)getSession().createQuery(sql)
+            .setInteger(0, id.intValue())
+            .setInteger(1, typeId.intValue())
+            .uniqueResult();
+    }
+    
     public Collection findByOwner(AuthzSubject owner) {
         String sql = "from Resource where owner = ?";
         return getSession().createQuery(sql)
