@@ -25,27 +25,24 @@
 
 package org.hyperic.hq.authz.server.session;
 
-import java.util.Iterator;
 import java.util.Collection;
+import java.util.Iterator;
 
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 import javax.naming.NamingException;
 
-import org.hyperic.hq.authz.server.session.VOCache;
-import org.hyperic.hq.authz.shared.ResourceLocal;
-import org.hyperic.hq.authz.shared.ResourcePK;
-import org.hyperic.hq.authz.shared.ResourceUtil;
-import org.hyperic.hq.authz.shared.ResourceValue;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.authz.Resource;
+import org.hyperic.hq.authz.shared.OperationLocal;
+import org.hyperic.hq.authz.shared.ResourceTypeLocal;
 import org.hyperic.hq.authz.shared.ResourceTypePK;
 import org.hyperic.hq.authz.shared.ResourceTypeUtil;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
-import org.hyperic.hq.authz.shared.ResourceTypeLocal;
-import org.hyperic.hq.authz.shared.OperationLocal;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.authz.shared.ResourceValue;
 
 /**
  *
@@ -55,6 +52,8 @@ import org.apache.commons.logging.LogFactory;
  *      view-type="local"
  *      type="Stateless"
  * @ejb:util generate="physical"
+ * 
+ * @ejb:transaction type="REQUIRED" 
  */
 public class ResourceVOHelperEJBImpl extends AuthzSession 
     implements SessionBean {
@@ -66,54 +65,57 @@ public class ResourceVOHelperEJBImpl extends AuthzSession
     /**
      * Get the resource value object
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS" 
      */    
-    public ResourceValue getResourceValue(ResourcePK pk) 
+    public ResourceValue getResourceValue(Integer id) 
         throws FinderException, NamingException {
-        ResourceValue vo = VOCache.getInstance().getResource(pk.getId());
+        ResourceValue vo = VOCache.getInstance().getResource(id);
         if(vo != null) {
             log.debug("Returning cached instance for resource: " + vo.getId());
             return vo;            
         }
 
-        ResourceLocal ejb = ResourceUtil.getLocalHome().findByPrimaryKey(pk);
-        return getResourceValueImpl(ejb);
+        Resource pojo= DAOFactory.getDAOFactory().getResourceDAO().findById(id);
+        return getResourceValueImpl(pojo);
     }
             
     /**
      * Get the server value object
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS" 
      */    
-    public ResourceValue getResourceValue(ResourceLocal ejb) 
-        throws FinderException, NamingException {
-        ResourcePK pk = (ResourcePK)ejb.getPrimaryKey();
-        ResourceValue vo = VOCache.getInstance().getResource(pk.getId());
+    public ResourceValue getResourceValue(Resource pojo)  {
+        ResourceValue vo = VOCache.getInstance().getResource(pojo.getId());
         if(vo != null) {
             log.debug("Returning cached instance for resource: " + vo.getId());
             return vo;            
         }
-        return getResourceValueImpl(ejb);
+        return getResourceValueImpl(pojo);
     }
 
     /**
      * Sunchronized VO retrieval
      */
-    private ResourceValue getResourceValueImpl(ResourceLocal ejb) 
-        throws FinderException, NamingException {
+    private ResourceValue getResourceValueImpl(Resource pojo) {
         VOCache cache = VOCache.getInstance();
         ResourceValue vo;
         synchronized(cache.getResourceLock()) {
-            ResourcePK pk = (ResourcePK)ejb.getPrimaryKey();
-            vo = cache.getResource(pk.getId());
+            vo = cache.getResource(pojo.getId());
             if(vo != null) {
-                log.debug("Returning cached instance for resource: " + vo.getId());
+                log.debug("Returning cached instance for resource: " +
+                          vo.getId());
                 return vo;
             }
-            vo = ejb.getResourceValueObject();
-            // now do the resource type... this needs its own invocation to avoid
-            // self deadlocks
-            vo.setResourceTypeValue(getResourceTypeValue(ejb.getResourceType().getName()));
+            vo = pojo.getResourceValue();
+            
+            // now do the resource type... this needs its own invocation to
+            // avoid self deadlocks
+            ResourceTypeValue tvo = cache.getResourceType(
+                pojo.getResourceType().getName());
+            if(tvo == null) {
+                tvo = pojo.getResourceType().getResourceTypeValue();
+                cache.put(tvo.getName(), tvo);
+            }
+
+            vo.setResourceTypeValue(tvo);
             cache.put(vo.getId(), vo);
         }
         return vo;
@@ -126,7 +128,8 @@ public class ResourceVOHelperEJBImpl extends AuthzSession
      */
     public ResourceTypeValue getResourceTypeValue(ResourceTypePK pk)
         throws FinderException, NamingException {
-        ResourceTypeLocal ejb = ResourceTypeUtil.getLocalHome().findByPrimaryKey(pk);
+        ResourceTypeLocal ejb =
+            ResourceTypeUtil.getLocalHome().findByPrimaryKey(pk);
         return getResourceTypeValue(ejb.getName());
     }
 
@@ -139,7 +142,8 @@ public class ResourceVOHelperEJBImpl extends AuthzSession
         throws FinderException, NamingException {
         ResourceTypeValue vo = VOCache.getInstance().getResourceType(name);
         if(vo != null) {
-            log.debug("Returning cached instance for resource type: " + vo.getId());
+            log.debug("Returning cached instance for resource type: " +
+                      vo.getId());
             return vo;
         }
         return getResourceTypeValueImpl(name);
@@ -155,18 +159,20 @@ public class ResourceVOHelperEJBImpl extends AuthzSession
         synchronized(cache.getResourceTypeLock()) {
             vo = VOCache.getInstance().getResourceType(name);
             if(vo != null) {
-                log.debug("Returning cached instance for resource type: " + vo.getId());
+                log.debug("Returning cached instance for resource type: " +
+                          vo.getId());
                 return vo;
             }
-        /**
-            Instead of fetching these one by one, we're gonna go ahead and get them all
-            since this data never changes
-        **/
+            /**
+             * Instead of fetching these one by one, we're gonna go ahead and
+             * get them all since this data never changes
+             */
             Collection rts = ResourceTypeUtil.getLocalHome().findAll();
             for(Iterator j = rts.iterator(); j.hasNext();) {
                 ResourceTypeLocal anEjb = (ResourceTypeLocal)j.next();
                 ResourceTypeValue aVo = anEjb.getResourceTypeValueObject();
-                for(Iterator i = anEjb.getOperationsSnapshot().iterator(); i.hasNext();) {
+                for(Iterator i = anEjb.getOperationsSnapshot().iterator();
+                    i.hasNext();) {
                     OperationLocal opEjb = (OperationLocal)i.next();
                     aVo.addOperationValue(opEjb.getOperationValue());
                 }
