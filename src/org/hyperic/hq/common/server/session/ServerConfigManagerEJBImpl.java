@@ -43,14 +43,14 @@ import javax.naming.NamingException;
 
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.ConfigPropertyLocal;
-import org.hyperic.hq.common.shared.ConfigPropertyLocalHome;
-import org.hyperic.hq.common.shared.ConfigPropertyUtil;
+import org.hyperic.hq.common.ConfigProperty;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.timer.StopWatch;
+import org.hyperic.hibernate.dao.ConfigPropertyDAO;
+import org.hyperic.dao.DAOFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -99,7 +99,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * the NULL prefix.
      * @return Properties
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
     public Properties getConfig() throws ConfigPropertyException {
 
@@ -111,7 +111,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * @param prefix The prefix of the configuration to retrieve.
      * @return Properties
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
     public Properties getConfig(String prefix) throws ConfigPropertyException {
 
@@ -127,14 +127,15 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
                 }
             }
             
-            ConfigPropertyLocalHome ccLH = ConfigPropertyUtil.getLocalHome();
+            ConfigPropertyDAO ccLH =
+                DAOFactory.getDAOFactory().getConfigPropertyDAO();
             Collection allProps = getProps(ccLH, prefix);
             Properties props = new Properties();
             String key;
 
             // iterate over ejbs'
             for(Iterator i = allProps.iterator(); i.hasNext();) {
-                ConfigPropertyLocal ejb = (ConfigPropertyLocal)i.next();
+                ConfigProperty ejb = (ConfigProperty)i.next();
                 key = ejb.getKey();
                 // check if the key has a value
                 if (ejb.getValue() != null && ejb.getValue().length() != 0) {
@@ -159,8 +160,6 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             return props;
         } catch (FinderException e) {
             throw new ConfigPropertyException("Unable to find config property");
-        } catch (NamingException e) {
-            throw new SystemException("Naming error while in getConfig", e);
         }
     }
 
@@ -197,12 +196,13 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
         Properties tempProps = new Properties();
         tempProps.putAll(newProps);
         try {
-            ConfigPropertyLocalHome ccLH = ConfigPropertyUtil.getLocalHome();
+            ConfigPropertyDAO ccLH =
+                DAOFactory.getDAOFactory().getConfigPropertyDAO();
             // get all properties
             allProps = getProps(ccLH, prefix);
             // iterate over ejbs
             for(Iterator i = allProps.iterator(); i.hasNext();) {
-                ConfigPropertyLocal ejb = (ConfigPropertyLocal)i.next();
+                ConfigProperty ejb = (ConfigProperty)i.next();
 
                 // check if the props object has a key matching
                 key = ejb.getKey();
@@ -212,7 +212,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
                     // delete null values from prefixed properties
                     if ( prefix != null &&
                          (propValue == null || propValue.equals("NULL")) ) {
-                        ejb.remove();
+                        ccLH.remove(ejb);
                     } else {
                         // non-prefixed properties never get deleted.
                         ejb.setValue(propValue);
@@ -241,16 +241,8 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
                 // otherwise, we should have bombed out above
                 ServerConfigCache.getInstance().setProperties(newProps);
             }
-        } catch (CreateException e) {
-            throw new ApplicationException("Unable to create config property",
-                                           e);
-        } catch (RemoveException e) {
-            throw new ApplicationException("Unable to remove config property",
-                                           e);
         } catch (FinderException e) {
             throw new ApplicationException("Unable to find config property", e);
-        } catch (NamingException e) {
-            throw new SystemException("Naming error while in setConfig", e);
         }
     }
 
@@ -406,7 +398,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
         }
     }
 
-    private Collection getProps(ConfigPropertyLocalHome ccLH, 
+    private Collection getProps(ConfigPropertyDAO ccLH,
                                 String prefix) throws FinderException {
         if ( prefix == null ) {
             return ccLH.findAll();
