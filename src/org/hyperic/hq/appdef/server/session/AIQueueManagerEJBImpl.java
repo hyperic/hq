@@ -597,7 +597,7 @@ public class AIQueueManagerEJBImpl
                     aiserversToRemove.add(aiserver);
                 } else if (!isPurgeAction) {
                     AIPlatformPK pk = 
-                        (AIPlatformPK)aiserver.getAIPlatform().getPrimaryKey();
+                        aiserver.getAIPlatform().getPrimaryKey();
                     aiplatformsToResync.put(pk.getId(), marker);
                 }
             }
@@ -615,8 +615,11 @@ public class AIQueueManagerEJBImpl
             }
             // See above note about bug 6898, now we remove
             // approved servers from the queue
-            for (i=0; i<aiserversToRemove.size(); i++) {
-                getAIServerDAO().remove(((AIServer)aiserversToRemove.get(i)));
+            Collection servers = aiplatform.getAIServers();
+            if (servers != null) {
+                for (i=0; i<aiserversToRemove.size(); i++) {
+                    servers.remove(aiserversToRemove.get(i));
+                }
             }
             // Send create messages out
             for (i=0; i<createdResources.size(); i++) {
