@@ -54,7 +54,6 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceLocal;
-import org.hyperic.hq.authz.shared.ResourceLocalHome;
 import org.hyperic.hq.authz.shared.ResourcePK;
 import org.hyperic.hq.authz.shared.ResourceTypeLocal;
 import org.hyperic.hq.authz.shared.ResourceTypePK;
@@ -79,6 +78,7 @@ import org.hyperic.util.pager.SortAttribute;
  *      type="Stateless"
  * 
  * @ejb:util generate="physical"
+ * @ejb:transaction type="REQUIRED"
  */
 public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
 {
@@ -133,11 +133,10 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @exception FinderException Unable to find a given or dependent entities.
      * @exception RemoveException Unable to delete the specified entity.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeResourceType(AuthzSubjectValue whoami,
                                    ResourceTypeValue type)
-        throws NamingException, FinderException, RemoveException {
+        throws RemoveException {
         ResourceTypeDAO dao = DAOFactory.getDAOFactory().getResourceTypeDAO();
         ResourceType rt = dao.findById(type.getId());
         // flush VOCache
@@ -155,12 +154,11 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @exception FinderException Unable to find a given or dependent entities.
      * @exception PermissionException whoami may not perform modifyResourceType on this role.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void saveResourceType(AuthzSubjectValue whoami,
                                  ResourceTypeValue type)
-        throws NamingException, FinderException, PermissionException {
-        ResourceTypeLocal typeLocal = this.lookupType(type);
+        throws PermissionException {
+        ResourceType typeLocal = getResourceTypeDAO().findById(type.getId());
 
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         pm.check(whoami.getId(),
@@ -179,7 +177,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @exception NamingException
      * @exception PermissionException whoami may not perform addOperation on this type.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void addOperations(AuthzSubjectValue whoami,
                               ResourceTypeValue type,
@@ -200,7 +197,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @exception NamingException
      * @exception PermissionException whoami may not perform removeOperation on this type.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeOperations(AuthzSubjectValue whoami,
                                  ResourceTypeValue type,
@@ -220,7 +216,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @exception NamingException
      * @exception PermissionException whoami may not perform removeOperation on this type.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeAllOperations(AuthzSubjectValue whoami,
                                     ResourceTypeValue type)
@@ -240,7 +235,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @exception FinderException Unable to find a given or dependent entities.
      * @exception PermissionException whoami is not allowed to perform setOperations on this type.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void setOperations(AuthzSubjectValue whoami, ResourceTypeValue type,
                               OperationValue[] operations)
@@ -266,7 +260,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @exception NamingException
      * @exception FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public ResourceTypeValue findResourceTypeByName(String name)
         throws FinderException {
@@ -326,8 +319,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     public ResourceValue getResourceTypeResource(ResourceTypeValue type)
         throws FinderException {
         try {
-            ResourceTypeLocal local= getResourceTypeHome().findByPrimaryKey(
-                type.getPrimaryKey());
+            ResourceType local= getResourceTypeDAO().findById(type.getId());
             return ResourceVOHelperUtil.getLocalHome().create()
                     .getResourceValue(local.getResource());
         } catch (CreateException e) {
@@ -342,22 +334,18 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param type The ResourceType of the Resource you're looking for.
      * @param instanceId Your ID for the resource you're looking for.
      * @return The value-object of the Resource of the given ID.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
+     * @throws NamingException 
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public ResourceValue findResourceByInstanceId(ResourceTypeValue type,
-                                                  Integer instanceId)
-        throws FinderException {
+                                                  Integer instanceId) {
         try {    
-            ResourceLocalHome resHome = getResourceHome();
             return ResourceVOHelperUtil.getLocalHome().create()
-                .getResourceValue(resHome.findByInstanceId(type.getId(),
-                                        instanceId));
-        } catch (NamingException e) {
-            throw new SystemException(e);                                        
+                .getResourceValue(getResourceDAO()
+                                  .findByInstanceId(type.getId(), instanceId));                                  
         } catch (CreateException e) {
+            throw new SystemException(e);
+        } catch (NamingException e) {
             throw new SystemException(e);
         }
     }
@@ -372,13 +360,12 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @ejb:transaction type="NOTSUPPORTED"
      */
     public ResourceValue findResourceById(Integer id)
-        throws NamingException, FinderException {
+        throws FinderException {
         try {    
-            ResourcePK pk = new ResourcePK(id);
             return ResourceVOHelperUtil.getLocalHome().create()
-                .getResourceValue(pk);
+                    .getResourceValue(id);
         } catch (NamingException e) {
-            throw new SystemException(e);                                        
+            throw new SystemException(e);
         } catch (CreateException e) {
             throw new SystemException(e);
         }
@@ -392,19 +379,16 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @exception NamingException
      * @exception FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public ResourceValue findResourceByTypeAndInstanceId(String type,
                                                   Integer instanceId)
         throws FinderException {
-        try {    
-            ResourceLocalHome resHome = getResourceHome();
-            ResourceTypeValue typeVal =
-                ResourceVOHelperUtil.getLocalHome().create()
-                    .getResourceTypeValue(type);
+        try {
+            ResourceType resType = getResourceTypeDAO().findByName(type);
             return ResourceVOHelperUtil.getLocalHome().create()
-                .getResourceValue(resHome.findByInstanceId(typeVal.getId(),
-                                                           instanceId));
+                .getResourceValue(getResourceDAO()
+                                  .findByInstanceId(resType.getId(),
+                                                    instanceId));
         } catch (NamingException e) {
             throw new SystemException(e);                                        
         } catch (CreateException e) {
@@ -419,7 +403,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @exception NamingException
      * @exception FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void saveResource(ResourceValue res)
         throws NamingException, FinderException {
@@ -451,7 +434,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param newOwner The new owner.
      * @throws PermissionException whoami does not own the resource.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void setResourceOwner(AuthzSubjectValue whoami, ResourceValue res,
                                  AuthzSubjectValue newOwner)
