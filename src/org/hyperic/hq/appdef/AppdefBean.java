@@ -132,7 +132,9 @@ public abstract class AppdefBean
         }
         AppdefBean o = (AppdefBean)obj;
         return
-            (creationTime!=null && o.getCTime()!=null && creationTime.equals(o));
+            ((creationTime == o.getCTime()) ||
+             (creationTime!=null && o.getCTime()!=null &&
+              creationTime.equals(o)));
     }
 
     public int hashCode()

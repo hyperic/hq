@@ -27,22 +27,22 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.List;
 
-import org.hyperic.hq.appdef.shared.AIIpLocal;
-import org.hyperic.hq.appdef.shared.AIPlatformLocal;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
-import org.hyperic.hq.appdef.shared.AIServerLocal;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.autoinventory.AIPlatform;
+import org.hyperic.hq.autoinventory.AIIp;
+import org.hyperic.hq.autoinventory.AIServer;
 
 import org.apache.commons.logging.Log;
 
 public interface AIQResourceVisitor {
 
-    public void visitPlatform ( AIPlatformLocal aiplatform,
+    public void visitPlatform ( AIPlatform aiplatform,
                                 AuthzSubjectValue subject, 
                                 Log log, 
                                 PlatformManagerLocal pmLocal,
@@ -51,13 +51,13 @@ public interface AIQResourceVisitor {
                                 List createdResources) 
         throws AIQApprovalException, PermissionException;
 
-    public void visitIp ( AIIpLocal aiip,
+    public void visitIp ( AIIp aiip,
                           AuthzSubjectValue subject, 
                           Log log, 
                           PlatformManagerLocal pmLocal )
         throws AIQApprovalException, PermissionException;
 
-    public void visitServer ( AIServerLocal aiserver,
+    public void visitServer ( AIServer aiserver,
                               AuthzSubjectValue subject, 
                               Log log, 
                               PlatformManagerLocal pmLocal,

@@ -39,12 +39,9 @@ import java.util.LinkedHashSet;
 /**
  * Pojo for hibernate hbm mapping file
  */
-public class Platform extends AppdefResource
+public class Platform extends PlatformBase
 {
-    private String fqdn;
-    private String certdn;
     private String commentText;
-    private Integer cpuCount;
     private PlatformType platformType;
     private ConfigResponseDB configResponse;
     private Agent agent;
@@ -59,26 +56,6 @@ public class Platform extends AppdefResource
         super();
     }
 
-    public String getFqdn()
-    {
-        return this.fqdn;
-    }
-
-    public void setFqdn(String fqDN)
-    {
-        this.fqdn = fqDN;
-    }
-
-    public String getCertdn()
-    {
-        return this.certdn;
-    }
-
-    public void setCertdn(String certDN)
-    {
-        this.certdn = certDN;
-    }
-
     public String getCommentText()
     {
         return this.commentText;
@@ -87,16 +64,6 @@ public class Platform extends AppdefResource
     public void setCommentText(String comment)
     {
         this.commentText = comment;
-    }
-
-    public Integer getCpuCount()
-    {
-        return this.cpuCount;
-    }
-
-    public void setCpuCount(Integer cpuCount)
-    {
-        this.cpuCount = cpuCount;
     }
 
     public PlatformType getPlatformType()

@@ -30,16 +30,12 @@ import java.util.List;
 import javax.ejb.CreateException;
 
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
-import org.hyperic.hq.appdef.shared.AIIpLocal;
 import org.hyperic.hq.appdef.shared.AIIpPK;
 import org.hyperic.hq.appdef.shared.AIIpValue;
-import org.hyperic.hq.appdef.shared.AIPlatformLocal;
 import org.hyperic.hq.appdef.shared.AIPlatformPK;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
-import org.hyperic.hq.appdef.shared.AIServerLocal;
-import org.hyperic.hq.appdef.shared.AIServerPK;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -64,6 +60,9 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.autoinventory.AIPlatform;
+import org.hyperic.hq.autoinventory.AIIp;
+import org.hyperic.hq.autoinventory.AIServer;
 
 import org.apache.commons.logging.Log;
 
@@ -86,7 +85,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
         }
     }
 
-    public void visitPlatform ( AIPlatformLocal aiplatform,
+    public void visitPlatform ( AIPlatform aiplatform,
                                 AuthzSubjectValue subject, 
                                 Log log, 
                                 PlatformManagerLocal pmLocal,
@@ -285,7 +284,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
         }
     }
 
-    public void visitIp ( AIIpLocal aiip,
+    public void visitIp ( AIIp aiip,
                           AuthzSubjectValue subject, 
                           Log log, 
                           PlatformManagerLocal pmLocal )
@@ -296,7 +295,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
         log.info("(approve) visiting ip: " + id + 
                  " addr=" + aiip.getAddress());
 
-        AIPlatformLocal aiplatform;
+        AIPlatform aiplatform;
         AIPlatformValue aiplatformValue;
         IpValue ipValue;
         IpValue[] ipValues;
@@ -463,7 +462,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
         }
     }
 
-    public void visitServer ( AIServerLocal aiserver,
+    public void visitServer ( AIServer aiserver,
                               AuthzSubjectValue subject, 
                               Log log, 
                               PlatformManagerLocal pmLocal,
@@ -473,12 +472,12 @@ public class AIQRV_approve implements AIQResourceVisitor {
                               List createdResources  )
         throws AIQApprovalException, PermissionException {
         
-        Integer id = ((AIServerPK)aiserver.getPrimaryKey()).getId();
+        Integer id = aiserver.getId();
 
         log.info("(approve) visiting server: " + id
                  + " AIID=" + aiserver.getAutoinventoryIdentifier());
         
-        AIPlatformLocal aiplatform;
+        AIPlatform aiplatform;
         AIPlatformValue aiplatformValue;
         PlatformValue existingPlatformValue;
         ServerLightValue serverLightValue = null;
@@ -728,7 +727,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
     //XXX these might belong in AIConversionUtil
     private static void setCustomProperties(Log log,
-                                            AIPlatformLocal aiplatform,
+                                            AIPlatform aiplatform,
                                             PlatformValue platform,
                                             CPropManagerLocal cpropMgr) {
         try {
@@ -743,7 +742,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
     }
 
     private static void setCustomProperties(Log log,
-                                            AIServerLocal aiserver,
+                                            AIServer aiserver,
                                             ServerValue server,
                                             CPropManagerLocal cpropMgr) {
         try {

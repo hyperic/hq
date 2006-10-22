@@ -28,19 +28,19 @@
       <column name="DESCRIPTION" not-null="false" length="300" />
     </property>
 
-    <property name="os" type="string">
+    <property name="platformTypeName" type="string">
       <column name="OS" not-null="false" length="80" />
     </property>
 
     <property name="osversion" type="string">
-      <column name="OSVERSION" not-null="false" length="80" />
+      <column name="OSVERSION"     not-null="false" length="80" />
     </property>
 
     <property name="arch" type="string">
       <column name="ARCH" not-null="false" length="80" />
     </property>
 
-    <property name="fqDN" type="string">
+    <property name="fqdn" type="string">
       <column name="FQDN" index="AIQ_PLATFORM_FQDN" not-null="true" length="200" />
     </property>
 
@@ -48,7 +48,7 @@
       <column name="AGENTTOKEN" index="AIQ_PLATFORM_AGENTTOKEN" not-null="true" length="100" />
     </property>
 
-    <property name="certDN" type="string">
+    <property name="certdn" type="string">
       <column name="CERTDN" index="AIQ_PLATFORM_CERTDN" not-null="false" length="200" />
     </property>
 
@@ -120,12 +120,16 @@
       <column name="MEASUREMENT_CONFIG" not-null="false" />
     </property>
 
-    <bag name="aiips" table="EAM_AIQ_IP">
+    <bag name="AIIps" table="EAM_AIQ_IP"
+         cascade="save-update,delete,persist,merge,evict,all-delete-orphan"
+         inverse="true" lazy="true">
       <key column="AIQ_PLATFORM_ID" />
       <one-to-many class="AIIp" />
     </bag>
 
-    <bag name="aiservers" table="EAM_AIQ_SERVER">
+    <bag name="AIServers" table="EAM_AIQ_SERVER"
+         cascade="save-update,delete,persist,merge,evict,all-delete-orphan"
+         inverse="true" lazy="true">
       <key column="AIQ_PLATFORM_ID" />
       <one-to-many class="AIServer" />
     </bag>

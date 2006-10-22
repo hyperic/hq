@@ -43,17 +43,14 @@ import java.util.ArrayList;
 /**
  * Pojo for hibernate hbm mapping file
  */
-public class Server extends AppdefResource
+public class Server extends ServerBase
 {
     private static Log log = LogFactory.getLog(Server.class);
 
     private Platform platform;
-    private String autoinventoryIdentifier;
     private boolean runtimeAutodiscovery;
     private boolean wasAutodiscovered;
-    private boolean servicesAutomanaged;
     private boolean autodiscoveryZombie;
-    private String installPath;
     private ServerType serverType;
     private ConfigResponseDB configResponse;
     private Collection services;
@@ -64,6 +61,12 @@ public class Server extends AppdefResource
     public Server()
     {
         super();
+    }
+
+    public Server(Integer id)
+    {
+        super();
+        setId(id);
     }
 
     public Service createService(ServiceValue sv)
@@ -81,16 +84,6 @@ public class Server extends AppdefResource
     public void setPlatform(Platform platform)
     {
         this.platform = platform;
-    }
-
-    public String getAutoinventoryIdentifier()
-    {
-        return this.autoinventoryIdentifier;
-    }
-
-    public void setAutoinventoryIdentifier(String autoinventoryIdentifier)
-    {
-        this.autoinventoryIdentifier = autoinventoryIdentifier;
     }
 
     public boolean isRuntimeAutodiscovery()
@@ -113,16 +106,6 @@ public class Server extends AppdefResource
         this.wasAutodiscovered = wasAutodiscovered;
     }
 
-    public boolean isServicesAutomanaged()
-    {
-        return this.servicesAutomanaged;
-    }
-
-    public void setServicesAutomanaged(boolean servicesAutomanaged)
-    {
-        this.servicesAutomanaged = servicesAutomanaged;
-    }
-
     public boolean isAutodiscoveryZombie()
     {
         return this.autodiscoveryZombie;
@@ -131,16 +114,6 @@ public class Server extends AppdefResource
     public void setAutodiscoveryZombie(boolean autodiscoveryZombie)
     {
         this.autodiscoveryZombie = autodiscoveryZombie;
-    }
-
-    public String getInstallPath()
-    {
-        return this.installPath;
-    }
-
-    public void setInstallPath(String installPath)
-    {
-        this.installPath = installPath;
     }
 
     public ServerType getServerType()
@@ -467,17 +440,24 @@ public class Server extends AppdefResource
         return isAutodiscoveryZombie();
     }
 
-    /**
-     * @deprecated use isServicesAutomanaged()
-     * @return
-     */
-    public boolean getServicesAutomanaged()
-    {
-        return isServicesAutomanaged();
-    }
-
     public boolean equals(Object obj)
     {
-        return (obj instanceof Server) && super.equals(obj);
+        if (!(obj instanceof Server) || !super.equals(obj)) {
+            return false;
+        }
+        Server o = (Server)obj;
+        return
+            ((platform == o.getPlatform()) ||
+             (platform!=null && o.getPlatform()!=null &&
+              platform.equals(o.getPlatform())));
+    }
+
+    public int hashCode()
+    {
+        int result = super.hashCode();
+
+        result = 37*result + (platform != null ? platform.hashCode() : 0);
+
+        return result;
     }
 }

@@ -208,5 +208,26 @@ public class HibernateDAOFactory extends DAOFactory
     {
         return new ScheduleRevNumDAO(getCurrentSession());
     }
+
+    // Autoinventory DAOs
+    public AIPlatformDAO getAIPlatformDAO()
+    {
+        return new AIPlatformDAO(getCurrentSession());
+    }
+
+    public AIServerDAO getAIServerDAO()
+    {
+        return new AIServerDAO(getCurrentSession());
+    }
+
+    public AIServiceDAO getAIServiceDAO()
+    {
+        return new AIServiceDAO(getCurrentSession());
+    }
+
+    public AIIpDAO getAIIpDAO()
+    {
+        return new AIIpDAO(getCurrentSession());
+    }
 }
 

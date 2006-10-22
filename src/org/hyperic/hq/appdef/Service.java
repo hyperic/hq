@@ -377,6 +377,22 @@ public class Service extends AppdefResource
 
     public boolean equals(Object obj)
     {
-        return (obj instanceof Service) && super.equals(obj);
+        if (!(obj instanceof Service) || !super.equals(obj)) {
+            return false;
+        }
+        Service o = (Service)obj;
+        return
+            ((server == o.getServer()) ||
+             (server!=null && o.getServer()!=null &&
+              server.equals(o.getServer())));
+    }
+
+    public int hashCode()
+    {
+        int result = super.hashCode();
+
+        result = 37*result + (server != null ? server.hashCode() : 0);
+
+        return result;
     }
 }

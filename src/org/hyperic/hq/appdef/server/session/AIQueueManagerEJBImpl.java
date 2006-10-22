@@ -35,7 +35,6 @@ import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
-import javax.ejb.ObjectNotFoundException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.naming.NamingException;
@@ -43,25 +42,18 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.dao.PlatformDAO;
-import org.hyperic.hq.appdef.Ip;
+import org.hyperic.hibernate.dao.AIPlatformDAO;
+import org.hyperic.hibernate.dao.AIServerDAO;
+import org.hyperic.hibernate.dao.AIIpDAO;
 import org.hyperic.hq.appdef.Platform;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
-import org.hyperic.hq.appdef.shared.AIIpLocal;
-import org.hyperic.hq.appdef.shared.AIIpLocalHome;
 import org.hyperic.hq.appdef.shared.AIIpPK;
-import org.hyperic.hq.appdef.shared.AIIpUtil;
 import org.hyperic.hq.appdef.shared.AIIpValue;
-import org.hyperic.hq.appdef.shared.AIPlatformLocal;
-import org.hyperic.hq.appdef.shared.AIPlatformLocalHome;
 import org.hyperic.hq.appdef.shared.AIPlatformPK;
-import org.hyperic.hq.appdef.shared.AIPlatformUtil;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
-import org.hyperic.hq.appdef.shared.AIServerLocal;
-import org.hyperic.hq.appdef.shared.AIServerLocalHome;
-import org.hyperic.hq.appdef.shared.AIServerUtil;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
@@ -78,10 +70,15 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.autoinventory.AIPlatform;
+import org.hyperic.hq.autoinventory.AIServer;
+import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.hyperic.dao.DAOFactory;
+import org.hibernate.ObjectNotFoundException;
 
 /**
  * This class is responsible for managing the various autoinventory
@@ -130,7 +127,7 @@ public class AIQueueManagerEJBImpl
         // log.info("AIQmgr.queue: starting...(PLATFORM=" + aiplatform + ", updateServers=" + updateServers + ")");
         // log.info("AIQmgr.queue: aiplatform.getAIIpValues=" + StringUtil.arrayToString(aiplatform.getAIIpValues()));
 
-        AIPlatformLocalHome aiplatformLH = getAIPlatformLocalHome();
+        AIPlatformDAO aiplatformLH = getAIPlatformDAO();
         PlatformDAO pmLH = getPlatformDAO();
         AIQueueManagerLocal aiqLocal = getAIQManagerLocal();
         ConfigManagerLocal crmLocal = getConfigMgrLocal();
@@ -149,7 +146,7 @@ public class AIQueueManagerEJBImpl
         // nuke the queue entry.
         if ( revisedAIplatform == null ) {
             // log.info("AIQmgr.queue (post appdef-diff): aiplatform=NULL");
-            AIPlatformLocal aiplatformLocal;
+            AIPlatform aiplatformLocal;
             aiplatformLocal =
                 aiplatformLH.findByPrimaryKey(aiplatform.getPrimaryKey());
             removeFromQueue(aiplatformLocal);
@@ -265,15 +262,15 @@ public class AIQueueManagerEJBImpl
         try {
             if ( showIgnored ) {
                 if (showAlreadyProcessed) {
-                    queue = getAIPlatformLocalHome().findAllIncludingProcessed();
+                    queue = getAIPlatformDAO().findAllIncludingProcessed();
                 } else {
-                    queue = getAIPlatformLocalHome().findAll();
+                    queue = getAIPlatformDAO().findAll();
                 }
             } else {
                 if (showAlreadyProcessed) {
-                    queue = getAIPlatformLocalHome().findAllNotIgnoredIncludingProcessed();
+                    queue = getAIPlatformDAO().findAllNotIgnoredIncludingProcessed();
                 } else {
-                    queue = getAIPlatformLocalHome().findAllNotIgnored();
+                    queue = getAIPlatformDAO().findAllNotIgnored();
                 }
             }
 
@@ -290,13 +287,13 @@ public class AIQueueManagerEJBImpl
             // If the aiplatform is not new, then make sure the user has 
             // view permissions on the platform that backs the aiplatform.
             Iterator iter = queue.iterator();
-            AIPlatformLocal aipLocal;
+            AIPlatform aipLocal;
             PlatformValue pValue;
             AppdefResourcePermissions arp;
             AppdefEntityID aid;
             PlatformPK ppk;
             while (iter.hasNext()) {
-                aipLocal = (AIPlatformLocal) iter.next();
+                aipLocal = (AIPlatform) iter.next();
                 pValue = null;
                 if (aipLocal.getQueueStatus() != AIQueueConstants.Q_STATUS_ADDED) {
                     try {
@@ -362,17 +359,11 @@ public class AIQueueManagerEJBImpl
         throws NamingException, CreateException, 
                FinderException, RemoveException, SystemException {
 
-        AIPlatformLocal aiplatform;
+        AIPlatform aiplatform;
         AIPlatformValue aiplatformValue;
 
-        try {
-            // XXX Do authz check
-            aiplatform = getAIPlatformLocalHome().findByPrimaryKey(
-                new AIPlatformPK(new Integer(aiplatformID)));
-        } catch(NamingException exc){
-            throw new SystemException(exc);
-        }
-        aiplatformValue = aiplatform.getAIPlatformValue(); 
+        aiplatform = getAIPlatformDAO().findById(new Integer(aiplatformID));
+        aiplatformValue = aiplatform.getAIPlatformValue();
 
         aiplatformValue = syncQueue(aiplatformValue, false);
 
@@ -390,22 +381,18 @@ public class AIQueueManagerEJBImpl
                FinderException, RemoveException, SystemException {
 
         Collection aiplatforms;
-        AIPlatformLocal aiplatform = null;
+        AIPlatform aiplatform = null;
         AIPlatformValue aiplatformValue = null;
 
         // XXX Do authz check
-        try {
-            aiplatforms = getAIPlatformLocalHome().findByFQDN(fqdn);
-        } catch(NamingException exc){
-            throw new SystemException(exc);
-        }
+        aiplatforms = getAIPlatformDAO().findByFQDN(fqdn);
 
         Iterator i = aiplatforms.iterator();
         while ( i.hasNext() ) {
             if ( aiplatform != null ) {
                 throw new SystemException("Multiple platforms matched fqdn.");
             }
-            aiplatform = (AIPlatformLocal) i.next();
+            aiplatform = (AIPlatform) i.next();
             aiplatformValue = aiplatform.getAIPlatformValue();
         }
 
@@ -425,17 +412,12 @@ public class AIQueueManagerEJBImpl
                                             int serverID ) 
         throws SystemException, FinderException {
 
-        AIServerLocal aiserver;
+        AIServer aiserver;
         AIServerValue aiserverValue;
 
-        try {
-            // XXX Do authz check
-            aiserver = 
-                getAIServerLocalHome().findById(new Integer(serverID));
-        } catch(NamingException exc){
-            throw new SystemException(exc);
-        }
-        aiserverValue = aiserver.getAIServerValue(); 
+        aiserver =
+            getAIServerDAO().findById(new Integer(serverID));
+        aiserverValue = aiserver.getAIServerValue();
         return aiserverValue;
     }
 
@@ -448,17 +430,13 @@ public class AIQueueManagerEJBImpl
                                               String name ) 
         throws SystemException, FinderException {
 
-        AIServerLocal aiserver = null;
-        AIServerValue aiserverValue = null;
-
         // XXX Do authz check
-        try {
-            aiserver = getAIServerLocalHome().findByName(name);
-        } catch(NamingException exc){
-            throw new SystemException(exc);
+        AIServer aiserver = getAIServerDAO().findByName(name);
+        if (aiserver == null) {
+            throw new FinderException("can't find server:" + name);
         }
 
-        aiserverValue = aiserver.getAIServerValue();
+        AIServerValue aiserverValue = aiserver.getAIServerValue();
         return aiserverValue;
     }
 
@@ -471,17 +449,8 @@ public class AIQueueManagerEJBImpl
                                             int ipID ) 
         throws SystemException, FinderException {
 
-        AIIpLocal aiip;
-        AIIpValue aiipValue;
-
-        try {
-            // XXX Do authz check
-            aiip = getAIIpLocalHome().findByPrimaryKey(
-                new AIIpPK(new Integer(ipID)));
-        } catch(NamingException exc){
-            throw new SystemException(exc);
-        }
-        aiipValue = aiip.getAIIpValue(); 
+        AIIp aiip = getAIIpDAO().findById(new Integer(ipID));
+        AIIpValue aiipValue = aiip.getAIIpValue();
         return aiipValue;
     }
 
@@ -494,17 +463,13 @@ public class AIQueueManagerEJBImpl
                                          String address ) 
         throws SystemException, FinderException {
 
-        AIIpLocal aiip = null;
-        AIIpValue aiipValue = null;
-
         // XXX Do authz check
-        try {
-            aiip = getAIIpLocalHome().findByAddress(address);
-        } catch(NamingException exc){
-            throw new SystemException(exc);
+        AIIp aiip = getAIIpDAO().findByAddress(address);
+        if (aiip == null) {
+            throw new FinderException("Can't find ip: "+address);
         }
 
-        aiipValue = aiip.getAIIpValue();
+        AIIpValue aiipValue = aiip.getAIIpValue();
         return aiipValue;
     }
 
@@ -547,18 +512,18 @@ public class AIQueueManagerEJBImpl
         List aiserversToRemove = new ArrayList();
         Object marker = new Object();
 
-        AIPlatformLocalHome aiplatformLH = getAIPlatformLocalHome();
-        AIIpLocalHome aiipLH = getAIIpLocalHome();
-        AIServerLocalHome aiserverLH = getAIServerLocalHome();
+        AIPlatformDAO aiplatformLH = getAIPlatformDAO();
+        AIIpDAO aiipLH = getAIIpDAO();
+        AIServerDAO aiserverLH = getAIServerDAO();
 
         PlatformManagerLocal pmLocal = getPlatformMgrLocal();
         ServerManagerLocal smLocal = getServerMgrLocal();
         ConfigManagerLocal configMgr = getConfigMgrLocal();
         CPropManagerLocal cpropMgr = getCPropMgrLocal();
 
-        AIPlatformLocal aiplatform = null;
-        AIServerLocal aiserver = null;
-        AIIpLocal aiip = null;
+        AIPlatform aiplatform = null;
+        AIServer aiserver = null;
+        AIIp aiip = null;
         List createdResources = new ArrayList();
 
         // Create our visitor based on the action
@@ -574,7 +539,7 @@ public class AIQueueManagerEJBImpl
                 }
                 try {
                     aiplatform =
-                        aiplatformLH.findByPrimaryKey(new AIPlatformPK(id));
+                        aiplatformLH.findById(id);
                 } catch ( ObjectNotFoundException e ) {
                     if (isPurgeAction) continue;
                     else throw e;
@@ -603,7 +568,7 @@ public class AIQueueManagerEJBImpl
                 visitor.visitIp(aiip, subject, log, pmLocal);
                 if (!isPurgeAction) {
                     AIPlatformPK pk = 
-                        (AIPlatformPK)aiip.getAIPlatform().getPrimaryKey();
+                       aiip.getAIPlatform().getPrimaryKey();
                     aiplatformsToResync.put(pk.getId(), marker);
                 }
             }
@@ -651,7 +616,7 @@ public class AIQueueManagerEJBImpl
             // See above note about bug 6898, now we remove
             // approved servers from the queue
             for (i=0; i<aiserversToRemove.size(); i++) {
-                ((AIServerLocal) aiserversToRemove.get(i)).remove();
+                getAIServerDAO().remove(((AIServer)aiserversToRemove.get(i)));
             }
             // Send create messages out
             for (i=0; i<createdResources.size(); i++) {
@@ -667,10 +632,11 @@ public class AIQueueManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void removeFromQueue ( AIPlatformLocal aiplatform ) throws RemoveException {
+    public void removeFromQueue ( AIPlatform aiplatform ) throws RemoveException {
         // Remove the platform, this should recursively remove all queued 
         // servers and IPs
-        aiplatform.remove();
+        DAOFactory.getDAOFactory().getAIPlatformDAO()
+        .remove(aiplatform);
     }
 
     /**
@@ -682,11 +648,10 @@ public class AIQueueManagerEJBImpl
         throws FinderException, NamingException, CreateException,
                PermissionException,PlatformNotFoundException
     {
-        AIPlatformLocal aiplatform;
+        AIPlatform aiplatform;
 
         // XXX Do authz check
-        aiplatform = getAIPlatformLocalHome().findByPrimaryKey(
-                             new AIPlatformPK(new Integer(aiPlatformID)));
+        aiplatform = getAIPlatformDAO().findById(new Integer(aiPlatformID));
         return getPlatformByAI(subject, aiplatform);
     }
 
@@ -708,9 +673,9 @@ public class AIQueueManagerEJBImpl
         // the same platform.  In the future, we are probably going
         // to need to do better.
         for (Iterator i = ips.iterator(); i.hasNext(); ) {
-            Ip qip = (Ip) i.next();
+            AIIp qip = (AIIp) i.next();
             
-            String address = qip.getIpValue().getAddress();
+            String address = qip.getAddress();
             // XXX This is a hack that we need to get rid of
             // at some point.  The idea is simple.  Every platform
             // has the localhost address.  So, if we are looking
@@ -723,8 +688,7 @@ public class AIQueueManagerEJBImpl
                 continue;
             }
                 
-            AIIpLocal addr = getAIIpLocalHome().findByAddress(address);
-            AIPlatformLocal aiplatform = addr.getAIPlatform();
+            AIPlatform aiplatform = qip.getAIPlatform();
             return aiplatform.getAIPlatformValue();
         }
 
@@ -736,11 +700,11 @@ public class AIQueueManagerEJBImpl
      * @ejb:interface-method
      */
     public PlatformValue getPlatformByAI(AuthzSubjectValue subject, 
-                                         AIPlatformLocal aipLocal)
+                                         AIPlatform aipLocal)
         throws FinderException, CreateException, NamingException,
                PermissionException, PlatformNotFoundException
     {
-        Set ips;
+        Collection ips;
         PlatformValue pValue;
 
         ips = aipLocal.getAIIps();
@@ -751,9 +715,9 @@ public class AIQueueManagerEJBImpl
         // the same platform.  In the future, we are probably going
         // to need to do better.
         for (Iterator i = ips.iterator(); i.hasNext(); ) {
-            AIIpLocal qip = (AIIpLocal) i.next();
+            AIIp qip = (AIIp) i.next();
             
-            String address = qip.getAIIpValue().getAddress();
+            String address = qip.getAddress();
             // XXX This is a hack that we need to get rid of
             // at some point.  The idea is simple.  Every platform
             // has the localhost address.  So, if we are looking
@@ -800,30 +764,13 @@ public class AIQueueManagerEJBImpl
     public void ejbActivate () {}
     public void ejbPassivate() {}
 
-    protected AIPlatformLocalHome getAIPlatformLocalHome() 
-        throws NamingException {
-        if(aiplatformLHome == null) {
-            aiplatformLHome = AIPlatformUtil.getLocalHome();
-        }
-        return aiplatformLHome;
+    protected AIPlatformDAO getAIPlatformDAO()
+    {
+        return DAOFactory.getDAOFactory().getAIPlatformDAO();
     }
-    protected AIPlatformLocalHome aiplatformLHome;
 
-    protected AIIpLocalHome getAIIpLocalHome() 
-        throws NamingException {
-        if(aiipLHome == null) {
-            aiipLHome = AIIpUtil.getLocalHome();
-        }
-        return aiipLHome;
+    protected AIIpDAO getAIIpDAO()
+    {
+        return DAOFactory.getDAOFactory().getAIIpDAO();
     }
-    protected AIIpLocalHome aiipLHome;
-
-    protected AIServerLocalHome getAIServerLocalHome() 
-        throws NamingException {
-        if(aiserverLHome == null) {
-            aiserverLHome = AIServerUtil.getLocalHome();
-        }
-        return aiserverLHome;
-    }
-    protected AIServerLocalHome aiserverLHome;
 }

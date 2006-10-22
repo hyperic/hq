@@ -61,6 +61,10 @@ import org.hyperic.hibernate.dao.AppServiceDAO;
 import org.hyperic.hibernate.dao.AppSvcDependencyDAO;
 import org.hyperic.hibernate.dao.ApplicationTypeDAO;
 import org.hyperic.hibernate.dao.PrincipalDAO;
+import org.hyperic.hibernate.dao.AIPlatformDAO;
+import org.hyperic.hibernate.dao.AIServerDAO;
+import org.hyperic.hibernate.dao.AIServiceDAO;
+import org.hyperic.hibernate.dao.AIIpDAO;
 
 public abstract class DAOFactory
 {
@@ -86,6 +90,12 @@ public abstract class DAOFactory
     public abstract ServiceClusterDAO getServiceClusterDAO();
     public abstract ServiceDAO getServiceDAO();
     public abstract ServiceTypeDAO getServiceTypeDAO();
+
+    // Autoinventory DAOs
+    public abstract AIPlatformDAO getAIPlatformDAO();
+    public abstract AIServerDAO getAIServerDAO();
+    public abstract AIServiceDAO getAIServiceDAO();
+    public abstract AIIpDAO getAIIpDAO();
 
     // Auth DAO
     public abstract PrincipalDAO getPrincipalDAO();

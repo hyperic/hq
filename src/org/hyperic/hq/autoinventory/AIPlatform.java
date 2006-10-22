@@ -25,30 +25,27 @@
 
 package org.hyperic.hq.autoinventory;
 
-import org.hyperic.hq.appdef.AppdefBean;
+import org.hyperic.hq.appdef.PlatformBase;
+import org.hyperic.hq.appdef.shared.AIPlatformValue;
+import org.hyperic.hq.appdef.shared.AIPlatformPK;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  *
  */
-public class AIPlatform extends AppdefBean
+public class AIPlatform extends PlatformBase
 {
-    private String name;
-    private String description;
-    private String os;
+    private String platformTypeName;
     private String osversion;
     private String arch;
-    private String fqDN;
     private String agentToken;
-    private String certDN;
     private Integer queueStatus;
     private long diff;
     private boolean ignored;
-    private long lastApproved;
-    private String location;
+    private Long lastApproved;
     private Integer cpuSpeed;
-    private Integer cpuCount;
     private Integer ram;
     private String gateway;
     private String dhcpServer;
@@ -65,36 +62,37 @@ public class AIPlatform extends AppdefBean
      */
     public AIPlatform()
     {
+        super();
     }
 
-    public String getName()
+    public AIPlatform(AIPlatformValue apv)
     {
-        return this.name;
+        super();
+        setFqdn(apv.getFqdn());
+        setCertdn(apv.getCertdn());
+        setQueueStatus(apv.getQueueStatus());
+        setDescription(apv.getDescription());
+        setDiff(apv.getDiff());
+        setPlatformTypeName(apv.getPlatformTypeName());
+        setLastApproved(new Long(0));
+        setIgnored(false);
+        setName(apv.getName());
+        setAgentToken (apv.getAgentToken());
+        setCpuCount   (apv.getCpuCount());
+        setCustomProperties(apv.getCustomProperties());
+        setProductConfig(apv.getProductConfig());
+        setMeasurementConfig(apv.getMeasurementConfig());
+        setControlConfig(apv.getControlConfig());
     }
 
-    public void setName(String name)
+    public String getPlatformTypeName()
     {
-        this.name = name;
+        return this.platformTypeName;
     }
 
-    public String getDescription()
+    public void setPlatformTypeName(String platformTypeName)
     {
-        return this.description;
-    }
-
-    public void setDescription(String description)
-    {
-        this.description = description;
-    }
-
-    public String getOs()
-    {
-        return this.os;
-    }
-
-    public void setOs(String os)
-    {
-        this.os = os;
+        this.platformTypeName = platformTypeName;
     }
 
     public String getOsversion()
@@ -117,16 +115,6 @@ public class AIPlatform extends AppdefBean
         this.arch = arch;
     }
 
-    public String getFqDN()
-    {
-        return this.fqDN;
-    }
-
-    public void setFqDN(String fqDN)
-    {
-        this.fqDN = fqDN;
-    }
-
     public String getAgentToken()
     {
         return this.agentToken;
@@ -137,24 +125,23 @@ public class AIPlatform extends AppdefBean
         this.agentToken = agentToken;
     }
 
-    public String getCertDN()
+    public int getQueueStatus()
     {
-        return this.certDN;
-    }
-
-    public void setCertDN(String certDN)
-    {
-        this.certDN = certDN;
-    }
-
-    public Integer getQueueStatus()
-    {
-        return this.queueStatus;
+        return queueStatus != null ? queueStatus.intValue() : 0;
     }
 
     public void setQueueStatus(Integer queueStatus)
     {
         this.queueStatus = queueStatus;
+    }
+
+    /**
+     * @depreated use setQueueStatus(Integer)
+     * @param queueStatus
+     */
+    public void setQueueStatus(int queueStatus)
+    {
+        setQueueStatus(new Integer(queueStatus));
     }
 
     public long getDiff()
@@ -167,9 +154,23 @@ public class AIPlatform extends AppdefBean
         this.diff = diff;
     }
 
+    public void setDiff(Long diff)
+    {
+        this.diff = diff != null ? diff.longValue() : 0L;
+    }
+
     public boolean isIgnored()
     {
         return this.ignored;
+    }
+
+    /**
+     * @deprecated use isIgnored()
+     * @return
+     */
+    public boolean getIgnored()
+    {
+        return isIgnored();
     }
 
     public void setIgnored(boolean ignored)
@@ -179,22 +180,12 @@ public class AIPlatform extends AppdefBean
 
     public long getLastApproved()
     {
-        return this.lastApproved;
+        return lastApproved != null ? lastApproved.longValue() : 0L;
     }
 
-    public void setLastApproved(long lastApproved)
+    public void setLastApproved(Long lastApproved)
     {
         this.lastApproved = lastApproved;
-    }
-
-    public String getLocation()
-    {
-        return this.location;
-    }
-
-    public void setLocation(String location)
-    {
-        this.location = location;
     }
 
     public Integer getCpuSpeed()
@@ -205,16 +196,6 @@ public class AIPlatform extends AppdefBean
     public void setCpuSpeed(Integer cpuSpeed)
     {
         this.cpuSpeed = cpuSpeed;
-    }
-
-    public Integer getCpuCount()
-    {
-        return this.cpuCount;
-    }
-
-    public void setCpuCount(Integer cpuCount)
-    {
-        this.cpuCount = cpuCount;
     }
 
     public Integer getRam()
@@ -297,23 +278,88 @@ public class AIPlatform extends AppdefBean
         this.measurementConfig = measurementConfig;
     }
 
-    public Collection getAiips()
+    public Collection getAIIps()
     {
         return this.aiips;
     }
 
-    public void setAiips(Collection aiips)
+    public void setAIIps(Collection aiips)
     {
         this.aiips = aiips;
     }
 
-    public Collection getAiservers()
+    public Collection getAIServers()
     {
         return this.aiservers;
     }
 
-    public void setAiservers(Collection aiservers)
+    public void setAIServers(Collection aiservers)
     {
         this.aiservers = aiservers;
+    }
+
+    private AIPlatformValue aipValue = new AIPlatformValue();
+    /**
+     * @deprecated use (this) AIPlatformValue object
+     * @return
+     */
+    public AIPlatformValue getAIPlatformValue()
+    {
+        aipValue.setAgentToken(
+            (getAgentToken() == null) ? "" : getAgentToken());
+        aipValue.setQueueStatus(getQueueStatus());
+        aipValue.setCustomProperties(getCustomProperties());
+        aipValue.setProductConfig(getProductConfig());
+        aipValue.setControlConfig(getControlConfig());
+        aipValue.setMeasurementConfig(getMeasurementConfig());
+        aipValue.setDiff(getDiff());
+        aipValue.setIgnored(getIgnored());
+        aipValue.setPlatformTypeName(
+            (getPlatformTypeName() == null) ? "" : getPlatformTypeName());
+        aipValue.setLastApproved(new Long(getLastApproved()));
+        aipValue.setCertdn(getCertdn());
+        aipValue.setFqdn(getFqdn());
+        aipValue.setName(getName());
+        aipValue.setLocation(getLocation());
+        aipValue.setDescription(getDescription());
+        aipValue.setCpuCount(getCpuCount());
+        aipValue.setId(getId());
+        aipValue.setMTime(getMTime());
+        aipValue.setCTime(getCTime());
+        aipValue.removeAllAIIpValues();
+        if (getAIIps() != null) {
+            Iterator iAIIpValue = getAIIps().iterator();
+            while (iAIIpValue.hasNext()){
+                aipValue.addAIIpValue(
+                    ((AIIp)iAIIpValue.next()).getAIIpValue() );
+            }
+            aipValue.cleanAIIpValue();
+        }
+        aipValue.removeAllAIServerValues();
+        if (getAIServers() != null) {
+            Iterator iAIServerValue = getAIServers().iterator();
+            while (iAIServerValue.hasNext()){
+                aipValue.addAIServerValue(
+                    ((AIServer)iAIServerValue.next()).getAIServerValue() );
+            }
+            aipValue.cleanAIServerValue();
+        }
+        return aipValue;
+    }
+
+    private AIPlatformPK pkey = new AIPlatformPK();
+    /**
+     * @deprecated use getId()
+     * @return
+     */
+    public AIPlatformPK getPrimaryKey()
+    {
+        pkey.setId(getId());
+        return pkey;
+    }
+
+    public boolean equals(Object obj)
+    {
+        return (obj instanceof AIPlatform) && super.equals(obj);
     }
 }

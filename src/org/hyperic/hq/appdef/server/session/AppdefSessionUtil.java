@@ -38,6 +38,7 @@ import org.hyperic.hibernate.dao.AgentDAO;
 import org.hyperic.hibernate.dao.ApplicationDAO;
 import org.hyperic.hibernate.dao.ApplicationTypeDAO;
 import org.hyperic.hibernate.dao.ServiceClusterDAO;
+import org.hyperic.hibernate.dao.AIServerDAO;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AIServerLocalHome;
@@ -284,13 +285,9 @@ public abstract class AppdefSessionUtil {
      * Get the LocalHome reference for the AIServer 
      * @return AIServerLocalHome
      */
-    protected AIServerLocalHome getAIServerLocalHome()
-        throws NamingException 
+    protected AIServerDAO getAIServerDAO()
     {
-        if(aiqServerLHome == null) {
-            aiqServerLHome = AIServerUtil.getLocalHome();
-        }
-        return aiqServerLHome;
+        return DAOFactory.getDAOFactory().getAIServerDAO();
     }
 
     /**

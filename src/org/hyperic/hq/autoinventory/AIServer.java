@@ -25,21 +25,18 @@
 
 package org.hyperic.hq.autoinventory;
 
-import org.hyperic.hq.appdef.AppdefBean;
+import org.hyperic.hq.appdef.ServerBase;
+import org.hyperic.hq.appdef.shared.AIServerValue;
+import org.hyperic.hq.appdef.shared.AIServerPK;
 
 /**
  *
  */
-public class AIServer extends AppdefBean
+public class AIServer extends ServerBase
 {
-    private AIPlatform aiqPlatformId;
-    private String autoInventoryIdentifier;
-    private String name;
-    private String description;
+    private AIPlatform aIPlatform;
     private Character active;
     private String serverTypeName;
-    private String installPath;
-    private boolean servicesAutoManaged;
     private byte[] customProperties;
     private byte[] productConfig;
     private byte[] controlConfig;
@@ -57,44 +54,20 @@ public class AIServer extends AppdefBean
         super();
     }
 
-    public AIPlatform getAiqPlatformId()
+    public AIServer(AIServerValue sv)
     {
-        return this.aiqPlatformId;
+        super();
+        setAIServerValue(sv);
     }
 
-    public void setAiqPlatformId(AIPlatform aiqPlatformId)
+    public AIPlatform getAIPlatform()
     {
-        this.aiqPlatformId = aiqPlatformId;
+        return this.aIPlatform;
     }
 
-    public String getAutoInventoryIdentifier()
+    public void setAIPlatform(AIPlatform aIPlatform)
     {
-        return this.autoInventoryIdentifier;
-    }
-
-    public void setAutoInventoryIdentifier(String autoInventoryIdentifier)
-    {
-        this.autoInventoryIdentifier = autoInventoryIdentifier;
-    }
-
-    public String getName()
-    {
-        return this.name;
-    }
-
-    public void setName(String name)
-    {
-        this.name = name;
-    }
-
-    public String getDescription()
-    {
-        return this.description;
-    }
-
-    public void setDescription(String description)
-    {
-        this.description = description;
+        this.aIPlatform = aIPlatform;
     }
 
     public Character getActive()
@@ -115,26 +88,6 @@ public class AIServer extends AppdefBean
     public void setServerTypeName(String serverTypeName)
     {
         this.serverTypeName = serverTypeName;
-    }
-
-    public String getInstallPath()
-    {
-        return this.installPath;
-    }
-
-    public void setInstallPath(String installPath)
-    {
-        this.installPath = installPath;
-    }
-
-    public boolean isServicesAutoManaged()
-    {
-        return this.servicesAutoManaged;
-    }
-
-    public void setServicesAutoManaged(boolean servicesAutoManaged)
-    {
-        this.servicesAutoManaged = servicesAutoManaged;
     }
 
     public byte[] getCustomProperties()
@@ -167,12 +120,12 @@ public class AIServer extends AppdefBean
         this.controlConfig = controlConfig;
     }
 
-    public byte[] getResponseTime_Config()
+    public byte[] getResponseTimeConfig()
     {
         return this.responseTime_Config;
     }
 
-    public void setResponseTime_Config(byte[] responseTime_Config)
+    public void setResponseTimeConfig(byte[] responseTime_Config)
     {
         this.responseTime_Config = responseTime_Config;
     }
@@ -187,14 +140,23 @@ public class AIServer extends AppdefBean
         this.measurementConfig = measurementConfig;
     }
 
-    public Integer getQueueStatus()
+    public int getQueueStatus()
     {
-        return this.queueStatus;
+        return queueStatus != null ? queueStatus.intValue() : 0;
     }
 
     public void setQueueStatus(Integer queueStatus)
     {
         this.queueStatus = queueStatus;
+    }
+
+    /**
+     * @deprecated use setQueueStatus(Integer)
+     * @param queueStatus
+     */
+    public void setQueueStatus(int queueStatus)
+    {
+        setQueueStatus(new Integer(queueStatus));
     }
 
     public long getDiff()
@@ -212,27 +174,101 @@ public class AIServer extends AppdefBean
         return this.ignored;
     }
 
+    /**
+     * @deprecated use isIgnored()
+     * @return
+     */
+    public boolean getIgnored()
+    {
+        return isIgnored();
+    }
+
     public void setIgnored(boolean ignored)
     {
         this.ignored = ignored;
     }
 
-    // TODO: equals and hashCode
-    public boolean equals(Object other)
+    private AIServerValue aIServerValue = new AIServerValue();
+    /**
+     * legacy EJB DTO pattern
+     * @deprecated use (this) AIServer object instead
+     * @return
+     */
+    public AIServerValue getAIServerValue()
     {
-        if ((this == other)) return true;
-        if ((other == null)) return false;
-        if (!(other instanceof AIServer)) return false;
-        AIServer castOther = (AIServer) other;
+        aIServerValue.setQueueStatus(getQueueStatus());
+        aIServerValue.setCustomProperties(getCustomProperties());
+        aIServerValue.setProductConfig(getProductConfig());
+        aIServerValue.setControlConfig(getControlConfig());
+        aIServerValue.setMeasurementConfig(getMeasurementConfig());
+        aIServerValue.setResponseTimeConfig(getResponseTimeConfig());
+        aIServerValue.setDiff(getDiff());
+        aIServerValue.setIgnored(isIgnored());
+        aIServerValue.setServerTypeName(
+            (getServerTypeName() == null) ? "" : getServerTypeName());
+        aIServerValue.setName(getName());
+        aIServerValue.setAutoinventoryIdentifier(getAutoinventoryIdentifier());
+        aIServerValue.setInstallPath(getInstallPath());
+        aIServerValue.setDescription(getDescription());
+        aIServerValue.setServicesAutomanaged(isServicesAutomanaged());
+        aIServerValue.setId(getId());
+        aIServerValue.setMTime(getMTime());
+        aIServerValue.setCTime(getCTime());
+        return aIServerValue;
+    }
 
-        return ((this.getAiqPlatformId() == castOther.getAiqPlatformId()) || (this.getAiqPlatformId() != null && castOther.getAiqPlatformId() != null && this.getAiqPlatformId().equals(castOther.getAiqPlatformId())))
-               && ((this.getAutoInventoryIdentifier() == castOther.getAutoInventoryIdentifier()) || (this.getAutoInventoryIdentifier() != null && castOther.getAutoInventoryIdentifier() != null && this.getAutoInventoryIdentifier().equals(castOther.getAutoInventoryIdentifier())));
+    public void setAIServerValue(AIServerValue valueHolder)
+    {
+        setQueueStatus( valueHolder.getQueueStatus() );
+        setCustomProperties( valueHolder.getCustomProperties() );
+        setProductConfig( valueHolder.getProductConfig() );
+        setControlConfig( valueHolder.getControlConfig() );
+        setMeasurementConfig( valueHolder.getMeasurementConfig() );
+        setResponseTimeConfig( valueHolder.getResponseTimeConfig() );
+        setDiff( valueHolder.getDiff() );
+        setIgnored( valueHolder.getIgnored() );
+        setServerTypeName( valueHolder.getServerTypeName() );
+        setName( valueHolder.getName() );
+        setAutoinventoryIdentifier( valueHolder.getAutoinventoryIdentifier() );
+        setInstallPath( valueHolder.getInstallPath() );
+        setDescription( valueHolder.getDescription() );
+        setServicesAutomanaged( valueHolder.getServicesAutomanaged() );
+    }
+
+    private AIServerPK pkey = new AIServerPK();
+    /**
+     * @deprecated use getId()
+     * @return
+     */
+    public AIServerPK getPrimaryKey()
+    {
+        pkey.setId(getId());
+        return pkey;
+    }
+
+    public boolean equals(Object obj)
+    {
+        if (!(obj instanceof AIServer) || !super.equals(obj)) {
+            return false;
+        }
+        AIServer o = (AIServer)obj;
+        return
+            ((autoinventoryIdentifier == o.getAutoinventoryIdentifier()) ||
+             (autoinventoryIdentifier!=null && o.getAutoinventoryIdentifier()!=null &&
+              autoinventoryIdentifier.equals(o.getAutoinventoryIdentifier())))
+            &&
+            ((aIPlatform == o.getAIPlatform()) ||
+             (aIPlatform!=null && o.getAIPlatform()!=null &&
+              aIPlatform.equals(o.getAIPlatform())));
     }
 
     public int hashCode()
     {
-        int result = 17;
+        int result = super.hashCode();
 
+        result = 37*result +(autoinventoryIdentifier != null ?
+                             autoinventoryIdentifier.hashCode() : 0);
+        result = 37*result + (aIPlatform != null ? aIPlatform.hashCode() : 0);
 
         return result;
     }

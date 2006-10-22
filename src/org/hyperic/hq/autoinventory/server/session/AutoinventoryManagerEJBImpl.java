@@ -47,9 +47,6 @@ import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.appdef.shared.AIAppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AIIpValue;
-import org.hyperic.hq.appdef.shared.AIPlatformLocal;
-import org.hyperic.hq.appdef.shared.AIPlatformLocalHome;
-import org.hyperic.hq.appdef.shared.AIPlatformUtil;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
@@ -93,6 +90,7 @@ import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.hyperic.hq.autoinventory.ScanState;
 import org.hyperic.hq.autoinventory.ScanStateCore;
+import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerLocal;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerUtil;
@@ -137,7 +135,6 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     private AutoinventoryPluginManager aiPluginManager;
     private AIScheduleManagerLocal     aiScheduleManager;
     private ProductManagerLocal        productManager;
-    private AIPlatformLocalHome        aipLocalHome;
     private javax.ejb.SessionContext   sessionCtx;
 
     private InitialContext getInitialContext() {
@@ -431,13 +428,13 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
         // Is there an already-approved platform with this agent token?  If so,
         // re-call using the other startScan method
-        AIPlatformLocal aipLocal;
-        try {
-            aipLocal = aipLocalHome.findByAgentToken(agentToken);
-        } catch (FinderException e) {
+        AIPlatform aipLocal =
+            DAOFactory.getDAOFactory()
+                .getAIPlatformDAO().findByAgentToken(agentToken);
+        if (aipLocal == null) {
             throw new AutoinventoryException("No platform in auto-discovery "
                                              + "queue with agentToken="
-                                             + agentToken, e);
+                                             + agentToken);
         }
         PlatformValue pValue;
         try {
@@ -796,7 +793,6 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             this.aiPluginManager = 
                 (AutoinventoryPluginManager)productManager.
                 getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
-            this.aipLocalHome = AIPlatformUtil.getLocalHome();
 
         } catch (Exception e) {
             this.log.error("Unable to initialize session beans: " +

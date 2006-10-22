@@ -29,13 +29,9 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import javax.ejb.CreateException;
-import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.naming.NamingException;
 
-import org.hyperic.hq.appdef.shared.AIPlatformLocal;
-import org.hyperic.hq.appdef.shared.AIPlatformLocalHome;
-import org.hyperic.hq.appdef.shared.AIPlatformPK;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
@@ -52,6 +48,8 @@ import org.hyperic.hq.appdef.shared.miniResourceTree.MiniServiceNode;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.autoinventory.AIPlatform;
+import org.hyperic.hibernate.dao.AIPlatformDAO;
 
 import org.apache.commons.logging.Log;
 
@@ -85,7 +83,7 @@ public class AIQSynchronizer {
     public AIPlatformValue sync (Log log,
                                  AuthzSubjectValue subject,
                                  AIQueueManagerLocal aiqMgr,
-                                 AIPlatformLocalHome aiPlatformLH,
+                                 AIPlatformDAO aiPlatformLH,
                                  AIPlatformValue aiPlatform,
                                  boolean updateServers,
                                  boolean isApproval,
@@ -93,7 +91,7 @@ public class AIQSynchronizer {
         throws CreateException, RemoveException, NamingException {
 
         // Is there an entry in the queue for this platform?
-        AIPlatformLocal existingQplatform;
+        AIPlatform existingQplatform;
 
         existingQplatform = AIQSynchronizer.getAIQPlatform(log,
                                                            aiPlatformLH, 
@@ -107,13 +105,14 @@ public class AIQSynchronizer {
                 // Not in the queue, so nothing to do.
 
             } else {
-                Integer existingId = ((AIPlatformPK)existingQplatform.getPrimaryKey()).getId();
+                Integer existingId = existingQplatform.getId();
                 // Leave it in the queue in case something changes later
                 // aiqMgr.removeFromQueue(existingQplatform);
-                existingQplatform.updateQueueState(aiPlatform, 
-                                                   updateServers,
-                                                   isApproval,
-                                                   isReport);
+                aiPlatformLH.updateQueueState(existingQplatform,
+                                              aiPlatform,
+                                              updateServers,
+                                              isApproval,
+                                              isReport);
                 // FIXME why set id again?!?
                 aiPlatform.setId(existingId);
             }
@@ -129,16 +128,17 @@ public class AIQSynchronizer {
             if ( existingQplatform == null ) {
                 // No existing queued platform, so we'll queue everything up.
                 log.info("AIQmgr: Queueing new platform: " + aiPlatform.getFqdn());
-                AIPlatformLocal newQPlatform = aiPlatformLH.create(aiPlatform);
+                AIPlatform newQPlatform = aiPlatformLH.create(aiPlatform);
                 AIPlatformValue newQPlatformValue
                     = newQPlatform.getAIPlatformValue();
                 return newQPlatformValue;
             } else {
                 log.info("AIQmgr: Updating existing platform: " + aiPlatform.getFqdn());
-                existingQplatform.updateQueueState(aiPlatform, 
-                                                   updateServers,
-                                                   isApproval,
-                                                   isReport);
+                aiPlatformLH.updateQueueState(existingQplatform,
+                                              aiPlatform,
+                                              updateServers,
+                                              isApproval,
+                                              isReport);
 
                 // sending an update event
                 // only if there is an approval action actually taking place
@@ -212,40 +212,37 @@ public class AIQSynchronizer {
         }
     }
 
-    public static AIPlatformLocal getAIQPlatform ( Log log,
-                                                   AIPlatformLocalHome aiPlatformLH,
-                                                   AIPlatformValue aiPlatformValue )
+    public static AIPlatform getAIQPlatform ( Log log,
+                                              AIPlatformDAO aiPlatformLH,
+                                              AIPlatformValue aiPlatformValue )
         throws SystemException {
 
         // Is there another platform in the queue with the same certdn?
-        AIPlatformLocal aiPlatform = null;
+        AIPlatform aiPlatform = null;
         String certdn = aiPlatformValue.getCertdn();
         String fqdn = aiPlatformValue.getFqdn();
         Collection fqdnMatches = null;
         // Try FQDN first
-        try {
-            fqdnMatches = aiPlatformLH.findByFQDN(fqdn);
-        } catch ( FinderException fe ) {
-            log.warn("FindByFQDN failed: " + fe, fe);
+        fqdnMatches = aiPlatformLH.findByFQDN(fqdn);
+        if (fqdnMatches.size() == 0) {
+            log.warn("FindByFQDN failed: "+fqdn);
         }
-
         if (fqdnMatches == null || fqdnMatches.size() != 1) {
-            try {
-                aiPlatform = aiPlatformLH.findByCertDN(certdn);
-                return aiPlatform;
-            } catch (FinderException fe) {
+            aiPlatform = aiPlatformLH.findByCertDN(certdn);
+            if (aiPlatform == null) {
                 // Hope that we actually found some by FQDN
                 if (fqdnMatches == null || fqdnMatches.size() == 0)
-                    log.warn("FindByFQDN and FindByCertDN both failed: " + fe.getMessage());
+                    log.warn("FindByFQDN and FindByCertDN both failed: "+certdn);
                 else
                     log.warn("Multiple platforms matched FQDN: " +
                              fqdn + " [" + fqdnMatches + "]");
                 return null;
             }
+            return aiPlatform;
         }
 
         Iterator i = fqdnMatches.iterator();
-        return (AIPlatformLocal) i.next();
+        return (AIPlatform) i.next();
     }
 
 }

@@ -25,16 +25,16 @@
 
 package org.hyperic.hq.autoinventory;
 
-import org.hyperic.hq.appdef.AppdefBean;
 import org.hyperic.hq.appdef.Server;
+import org.hyperic.hq.appdef.AppdefResource;
+import org.hyperic.hq.appdef.shared.AIServiceValue;
+import org.hyperic.hq.appdef.shared.AIServicePK;
 
 /**
- *
+ * Pojo for hibernate hbm mapping file
  */
-public class AIService extends AppdefBean
+public class AIService extends AppdefResource
 {
-    private String name;
-    private String description;
     private String serviceTypeName;
     private Integer queueStatus;
     private long diff;
@@ -54,24 +54,10 @@ public class AIService extends AppdefBean
         super();
     }
 
-    public String getName()
+    public AIService(AIServiceValue sv)
     {
-        return this.name;
-    }
-
-    public void setName(String name)
-    {
-        this.name = name;
-    }
-
-    public String getDescription()
-    {
-        return this.description;
-    }
-
-    public void setDescription(String description)
-    {
-        this.description = description;
+        super();
+        setAIServiceValue(sv);
     }
 
     public String getServiceTypeName()
@@ -172,5 +158,85 @@ public class AIService extends AppdefBean
     public void setServer(Server server)
     {
         this.server = server;
+    }
+
+    private AIServiceValue aIServiceValue = new AIServiceValue();
+    /**
+     * legacy EJB DTO pattern
+     * @deprecated use (this) AIService object instead
+     * @return
+     */
+    public AIServiceValue getAIServiceValue()
+    {
+        aIServiceValue.setServerId(getServerId());
+        aIServiceValue.setServiceTypeName(
+            (getServiceTypeName() == null) ? "" : getServiceTypeName());
+        aIServiceValue.setCustomProperties(getCustomProperties());
+        aIServiceValue.setProductConfig(getProductConfig());
+        aIServiceValue.setControlConfig(getControlConfig());
+        aIServiceValue.setMeasurementConfig(getMeasurementConfig());
+        aIServiceValue.setResponseTimeConfig(getResponseTimeConfig());
+        aIServiceValue.setName(getName());
+        aIServiceValue.setDescription(getDescription());
+        aIServiceValue.setId(getId());
+        aIServiceValue.setMTime(getMTime());
+        aIServiceValue.setCTime(getCTime());
+        return aIServiceValue;
+    }
+
+    public void setAIServiceValue(AIServiceValue valueHolder)
+    {
+        setServiceTypeName( valueHolder.getServiceTypeName() );
+        setCustomProperties( valueHolder.getCustomProperties() );
+        setProductConfig( valueHolder.getProductConfig() );
+        setControlConfig( valueHolder.getControlConfig() );
+        setMeasurementConfig( valueHolder.getMeasurementConfig() );
+        setResponseTimeConfig( valueHolder.getResponseTimeConfig() );
+        setName( valueHolder.getName() );
+        setDescription( valueHolder.getDescription() );
+    }
+
+    public int getServerId()
+    {
+        return
+            getServer() != null && getServer().getId() != null ?
+            getServer().getId().intValue() : 0;
+    }
+
+    public void setServerId(int server)
+    {
+        setServer(new Server(new Integer(server)));
+    }
+
+    private AIServicePK pkey = new AIServicePK();
+    /**
+     * @deprecated use getId()
+     * @return
+     */
+    public AIServicePK getPrimaryKey()
+    {
+        pkey.setId(getId());
+        return pkey;
+    }
+
+    public boolean equals(Object obj)
+    {
+        if (!(obj instanceof AIService) || !super.equals(obj)) {
+            return false;
+        }
+        AIService o = (AIService)obj;
+        return
+            ((server == o.getServer()) ||
+             (server!=null && o.getServer()!=null &&
+              server.equals(o.getServer())));
+    }
+
+    public int hashCode()
+    {
+        int result = super.hashCode();
+
+        result = 37*result + (server != null ? server.hashCode() : 0);
+
+        return result;
     }
 }

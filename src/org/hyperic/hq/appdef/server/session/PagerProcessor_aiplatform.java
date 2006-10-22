@@ -28,10 +28,10 @@ package org.hyperic.hq.appdef.server.session;
 import org.hyperic.util.pager.PagerProcessorExt;
 import org.hyperic.util.pager.PagerEventHandler;
 
-import org.hyperic.hq.appdef.shared.AIPlatformLocal;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
+import org.hyperic.hq.autoinventory.AIPlatform;
 
 public class PagerProcessor_aiplatform implements PagerProcessorExt {
 
@@ -51,9 +51,9 @@ public class PagerProcessor_aiplatform implements PagerProcessorExt {
 
         if ( o == null ) return null;
         try {
-            if ( o instanceof AIPlatformLocal ) {
+            if ( o instanceof AIPlatform) {
                 // Resync to appdef
-                AIPlatformLocal aiplatform = (AIPlatformLocal) o;
+                AIPlatform aiplatform = (AIPlatform) o;
                 AIPlatformValue value = aiplatform.getAIPlatformValue();
                 value = aiqManagerLocal.syncQueue(value, false);
                 return value;

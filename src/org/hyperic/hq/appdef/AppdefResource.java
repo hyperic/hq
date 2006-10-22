@@ -134,24 +134,4 @@ public abstract class AppdefResource extends AppdefBean
         }
         return appdefEntityId;
     }
-
-    public boolean equals(Object obj)
-    {
-        if (!(obj instanceof AppdefResource) || !super.equals(obj)) {
-            return false;
-        }
-        AppdefResource o = (AppdefResource)obj;
-        return
-            ((name==o.getName()) ||
-             (name!=null && o.getName()!=null && name.equals(o.getName())));
-    }
-
-    public int hashCode()
-    {
-        int result = super.hashCode();
-
-        result = 37*result +(name != null ? name.hashCode() : 0);
-
-        return result;
-    }
 }

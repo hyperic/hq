@@ -25,13 +25,8 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.util.pager.PagerProcessorExt;
-import org.hyperic.util.pager.PagerEventHandler;
 
-import org.hyperic.hq.appdef.shared.AIPlatformLocal;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
-import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 
 public class PagerProcessor_aiplatform_excludePlaceholders 

@@ -83,24 +83,4 @@ public abstract class AppdefResourceType extends AppdefBean
     {
         this.description = description;
     }
-
-    public boolean equals(Object o)
-    {
-        if (!(o instanceof AppdefResourceType) || !super.equals(o)) {
-            return false;
-        }
-        AppdefResourceType a = (AppdefResourceType)o;
-        return
-            ((name==a.getName()) || (name!=null && a.getName()!=null &&
-                                     name.equals(a.getName())));
-    }
-
-    public int hashCode()
-    {
-        int result = super.hashCode();
-
-        result = 37*result + (name!=null ? name.hashCode() : 0);
-
-        return result;
-    }
 }

@@ -25,17 +25,16 @@
 
 package org.hyperic.hq.autoinventory;
 
-import org.hyperic.hq.appdef.AppdefBean;
+import org.hyperic.hq.appdef.IpBase;
+import org.hyperic.hq.appdef.shared.AIIpValue;
+import org.hyperic.hq.appdef.shared.AIIpPK;
 
 /**
- *
+ * Pojo for hibernate hbm mapping file
  */
-public class AIIp extends AppdefBean
+public class AIIp extends IpBase
 {
-    private AIPlatform aiqPlatformId;
-    private String address;
-    private String netmask;
-    private String macAddress;
+    private AIPlatform aIPlatform;
     private Integer queueStatus;
     private long diff;
     private boolean ignored;
@@ -48,54 +47,39 @@ public class AIIp extends AppdefBean
         super();
     }
 
-    public AIPlatform getAiqPlatformId()
+    public AIIp(AIIpValue ipv)
     {
-        return this.aiqPlatformId;
+        super();
+        setAIIpValue(ipv);
     }
 
-    public void setAiqPlatformId(AIPlatform aiqPlatformId)
+    public AIPlatform getAIPlatform()
     {
-        this.aiqPlatformId = aiqPlatformId;
+        return this.aIPlatform;
     }
 
-    public String getAddress()
+    public void setAIPlatform(AIPlatform aIPlatform)
     {
-        return this.address;
+        this.aIPlatform = aIPlatform;
     }
 
-    public void setAddress(String address)
+    public int getQueueStatus()
     {
-        this.address = address;
-    }
-
-    public String getNetmask()
-    {
-        return this.netmask;
-    }
-
-    public void setNetmask(String netmask)
-    {
-        this.netmask = netmask;
-    }
-
-    public String getMacAddress()
-    {
-        return this.macAddress;
-    }
-
-    public void setMacAddress(String macAddress)
-    {
-        this.macAddress = macAddress;
-    }
-
-    public Integer getQueueStatus()
-    {
-        return this.queueStatus;
+        return queueStatus != null ? queueStatus.intValue() : 0;
     }
 
     public void setQueueStatus(Integer queueStatus)
     {
         this.queueStatus = queueStatus;
+    }
+
+    /**
+     * @deprecated use setQueueStatus(Integer)
+     * @param queueStatus
+     */
+    public void setQueueStatus(int queueStatus)
+    {
+        setQueueStatus(new Integer(queueStatus));
     }
 
     public long getDiff()
@@ -113,27 +97,81 @@ public class AIIp extends AppdefBean
         return this.ignored;
     }
 
+    /**
+     * @deprecated use isIgnored()
+     * @return
+     */
+    public boolean getIgnored()
+    {
+        return isIgnored();
+    }
+
     public void setIgnored(boolean ignored)
     {
         this.ignored = ignored;
     }
 
-    // TODO: fix equals and hashCode
-    public boolean equals(Object other)
+    private AIIpValue aIIpValue = new AIIpValue();
+    /**
+     * legacy EJB DTO pattern
+     * @deprecated use (this) AIIp object instead
+     * @return
+     */
+    public AIIpValue getAIIpValue()
     {
-        if ((this == other)) return true;
-        if ((other == null)) return false;
-        if (!(other instanceof AIIp)) return false;
-        AIIp castOther = (AIIp) other;
+        aIIpValue.setQueueStatus(getQueueStatus());
+        aIIpValue.setDiff(getDiff());
+        aIIpValue.setIgnored(getIgnored());
+        aIIpValue.setAddress(getAddress());
+        aIIpValue.setMACAddress(getMACAddress());
+        aIIpValue.setNetmask(getNetmask());
+        aIIpValue.setId(getId());
+        aIIpValue.setMTime(getMTime());
+        aIIpValue.setCTime(getCTime());
+        return aIIpValue;
+    }
 
-        return ((this.getAiqPlatformId() == castOther.getAiqPlatformId()) || (this.getAiqPlatformId() != null && castOther.getAiqPlatformId() != null && this.getAiqPlatformId().equals(castOther.getAiqPlatformId())))
-               && ((this.getAddress() == castOther.getAddress()) || (this.getAddress() != null && castOther.getAddress() != null && this.getAddress().equals(castOther.getAddress())));
+    /**
+     * @deprecated
+     * @param valueHolder
+     */
+    public void setAIIpValue(AIIpValue valueHolder)
+    {
+        setQueueStatus( valueHolder.getQueueStatus() );
+        setDiff( valueHolder.getDiff() );
+        setIgnored( valueHolder.getIgnored() );
+        setAddress( valueHolder.getAddress() );
+        setMACAddress( valueHolder.getMACAddress() );
+        setNetmask( valueHolder.getNetmask() );
+    }
+
+    private AIIpPK pkey = new AIIpPK();
+    /**
+     * @deprecated use getId()
+     * @return
+     */
+    public AIIpPK getPrimaryKey()
+    {
+        pkey.setId(getId());
+        return pkey;
+    }
+
+    public boolean equals(Object obj)
+    {
+        if (!(obj instanceof AIIp) || !super.equals(obj)) {
+            return false;
+        }
+        AIIp o = (AIIp) obj;
+        return ((aIPlatform == o.getAIPlatform()) ||
+                (aIPlatform != null && o.getAIPlatform() != null &&
+                 aIPlatform.equals(o.getAIPlatform())));
     }
 
     public int hashCode()
     {
-        int result = 17;
+        int result = super.hashCode();
 
+        result = 37*result + (aIPlatform != null ? aIPlatform.hashCode() : 0);
 
         return result;
     }

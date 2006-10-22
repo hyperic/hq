@@ -16,24 +16,24 @@
       </generator>
     </id>
 
-    <natural-id mutable="false">
-      <many-to-one name="aiqPlatformId" class="AIPlatform">
+    <version name="_version_" type="long">
+      <column name ="VERSION_COL" default="0" />
+    </version>
+
+    <properties name="aIIpId">
+      <many-to-one name="AIPlatform" class="AIPlatform">
         <column name="AIQ_PLATFORM_ID" index="AIQ_IP_IDX" not-null="false" />
       </many-to-one>
       <property name="address" type="string">
         <column name="ADDRESS" index="AIQ_IP_IDX" not-null="true" length="64" />
       </property>
-    </natural-id>
-
-    <version name="_version_" type="long">
-      <column name ="VERSION_COL" default="0" />
-    </version>
+    </properties>
 
     <property name="netmask" type="string">
       <column name="NETMASK" not-null="false" length="64"/>
     </property>
 
-    <property name="macAddress" type="string">
+    <property name="MACAddress" type="string">
       <column name="MAC_ADDRESS" not-null="false" length="64" />
     </property>
 

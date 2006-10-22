@@ -25,17 +25,12 @@
 
 package org.hyperic.hq.appdef;
 
-import org.hyperic.hq.appdef.shared.IpValue;
-
 /**
  *
  */
-public class Ip extends AppdefBean
+public class Ip extends IpBase
 {
     private Platform platform;
-    private String address;
-    private String netmask;
-    private String MACAddress;
 
     /**
      * default constructor
@@ -55,67 +50,6 @@ public class Ip extends AppdefBean
         this.platform = platform;
     }
 
-    public String getAddress()
-    {
-        return this.address;
-    }
-
-    public void setAddress(String address)
-    {
-        this.address = address;
-    }
-
-    public String getNetmask()
-    {
-        return this.netmask;
-    }
-
-    public void setNetmask(String netmask)
-    {
-        this.netmask = netmask;
-    }
-
-    public String getMACAddress()
-    {
-        return this.MACAddress;
-    }
-
-    public void setMACAddress(String MACAddress)
-    {
-        this.MACAddress = MACAddress;
-    }
-
-    /**
-     * convenience method for copying simple values
-     * from the legacy EJB Value Object
-     *
-     * @deprecated
-     * @param valueHolder
-     */
-    public void setIpValue(IpValue valueHolder)
-    {
-        setAddress( valueHolder.getAddress() );
-        setNetmask( valueHolder.getNetmask() );
-        setMACAddress( valueHolder.getMACAddress() );
-    }
-
-    private IpValue ipValue = new IpValue();
-    /**
-     * legacy EJB DTO pattern
-     * @deprecated use (this) Ip Object instead
-     * @return
-     */
-    public IpValue getIpValue()
-    {
-        ipValue.setAddress(getAddress());
-        ipValue.setNetmask(getNetmask());
-        ipValue.setMACAddress(getMACAddress());
-        ipValue.setId(getId());
-        ipValue.setMTime(getMTime());
-        ipValue.setCTime(getCTime());
-        return ipValue;
-    }
-
     public boolean equals(Object obj)
     {
         if (!(obj instanceof Ip) || !super.equals(obj)) {
@@ -124,11 +58,7 @@ public class Ip extends AppdefBean
         Ip o = (Ip) obj;
         return ((platform == o.getPlatform()) ||
                 (platform != null && o.getPlatform() != null &&
-                 platform.equals(o.getPlatform())))
-               &&
-               ((address == o.getAddress()) ||
-                (address != null && o.getAddress() != null &&
-                 address.equals(o.getAddress())));
+                 platform.equals(o.getPlatform())));
     }
 
     public int hashCode()
@@ -136,7 +66,6 @@ public class Ip extends AppdefBean
         int result = super.hashCode();
 
         result = 37*result + (platform != null ? platform.hashCode() : 0);
-        result = 37*result + (address != null ? address.hashCode() : 0);
 
         return result;
     }

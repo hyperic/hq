@@ -25,23 +25,19 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.RemoveException;
-
-import org.hyperic.hq.appdef.shared.AIIpLocal;
-import org.hyperic.hq.appdef.shared.AIPlatformLocal;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
-import org.hyperic.hq.appdef.shared.AIServerLocal;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.autoinventory.AIPlatform;
+import org.hyperic.hq.autoinventory.AIIp;
+import org.hyperic.hq.autoinventory.AIServer;
+import org.hyperic.dao.DAOFactory;
 
 import org.apache.commons.logging.Log;
 
@@ -51,7 +47,7 @@ import org.apache.commons.logging.Log;
  */
 public class AIQRV_purge implements AIQResourceVisitor {
 
-    public void visitPlatform ( AIPlatformLocal aiplatform,
+    public void visitPlatform ( AIPlatform aiplatform,
                                 AuthzSubjectValue subject, 
                                 Log log, 
                                 PlatformManagerLocal pmLocal,
@@ -62,49 +58,22 @@ public class AIQRV_purge implements AIQResourceVisitor {
 
         log.info("(purge) visiting platform: " + aiplatform.getId()
                  + " fqdn=" + aiplatform.getFqdn());
-        try {
-            // Remove ips and servers on the platform
-            Iterator iter;
-
-            iter = aiplatform.getAIIps().iterator();
-            List ips = new ArrayList();
-            while (iter.hasNext()) {
-                ips.add(iter.next());
-            }
-            for (int i=0; i<ips.size(); i++) {
-                ((AIIpLocal) ips.get(i)).remove();
-            }
-
-            iter = aiplatform.getAIServers().iterator();
-            List servers = new ArrayList();
-            while (iter.hasNext()) {
-                servers.add(iter.next());
-            }
-            for (int i=0; i<servers.size(); i++) {
-                ((AIServerLocal) servers.get(i)).remove();
-            }
-
-            aiplatform.remove();
-        } catch (RemoveException e) {
-            throw new SystemException("Error removing aiplatform: " + e, e);
-        }
+        DAOFactory.getDAOFactory().getAIPlatformDAO()
+            .remove(aiplatform);
     }
 
-    public void visitIp ( AIIpLocal aiip,
+    public void visitIp ( AIIp aiip,
                           AuthzSubjectValue subject, 
                           Log log, 
                           PlatformManagerLocal pmLocal )
         throws AIQApprovalException, PermissionException {
         log.info("(purge) visiting ip: " + aiip.getId()
                  + " addr=" + aiip.getAddress());
-        try {
-            aiip.remove();
-        } catch (RemoveException e) {
-            log.warn("Error removing aiip: " + e, e);
-        }
+        DAOFactory.getDAOFactory().getAIIpDAO()
+            .remove(aiip);
     }
 
-    public void visitServer ( AIServerLocal aiserver,
+    public void visitServer ( AIServer aiserver,
                               AuthzSubjectValue subject, 
                               Log log, 
                               PlatformManagerLocal pmLocal,
@@ -115,10 +84,7 @@ public class AIQRV_purge implements AIQResourceVisitor {
         throws AIQApprovalException, PermissionException {
         log.info("(purge) visiting server: " + aiserver.getId()
                  + " AIID=" + aiserver.getAutoinventoryIdentifier());
-        try {
-            aiserver.remove();
-        } catch (RemoveException e) {
-            log.warn("Error removing aiserver: " + e, e);
-        }
+        DAOFactory.getDAOFactory().getAIServerDAO()
+            .remove(aiserver);
     }
 }
