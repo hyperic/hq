@@ -51,6 +51,10 @@ public class OperationDAO extends HibernateDAO
         return (Collection) super.findAll();
     }
 
+    public Operation findId(Integer id) {
+        return (Operation) super.findById(id);
+    }
+
     public void save(Operation entity) {
         super.save(entity);
     }
