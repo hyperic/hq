@@ -241,8 +241,7 @@ public abstract class AppdefSessionEJB
     protected void updateAuthzResource(ResourceValue rv)
         throws NamingException, UpdateException {
         try {
-            ResourceManagerUtil.getLocalHome().create()
-                .saveResource(rv); 
+            ResourceManagerUtil.getLocalHome().create().saveResource(rv); 
         } catch (CreateException e) {
             throw new UpdateException(e);
         } catch (FinderException e) {
@@ -258,8 +257,8 @@ public abstract class AppdefSessionEJB
     protected ResourceValue getAuthzResource(ResourceTypeValue rtV,
     										 Integer id)
         throws FinderException {
-            ResourceManagerLocal rm = getResourceManager();
-            return rm.findResourceByInstanceId(rtV, id); 
+        ResourceManagerLocal rm = getResourceManager();
+        return rm.findResourceByInstanceId(rtV, id);
     }
 
     /**
@@ -268,24 +267,23 @@ public abstract class AppdefSessionEJB
      * @return ResourceTypeValue
      */
     protected ResourceTypeValue getAuthzResourceType(AppdefEntityID id)
-        throws NamingException, FinderException {
-            int type = id.getType();
-            Integer instanceId = id.getId();
-            switch(type) {
-                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    return getPlatformResourceType();
-                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    return getServerResourceType();
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    return getServiceResourceType();
-                case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                    return getApplicationResourceType();
-                case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                    return getGroupResourceType();
-                default:
-                    throw new InvalidAppdefTypeException("Type: " + 
-                        type + " unknown");
-            }
+        throws FinderException {
+        int type = id.getType();
+        switch(type) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                return getPlatformResourceType();
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                return getServerResourceType();
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                return getServiceResourceType();
+            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                return getApplicationResourceType();
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                return getGroupResourceType();
+            default:
+                throw new InvalidAppdefTypeException("Type: " + 
+                    type + " unknown");
+        }
     }
         
     /**
@@ -1104,7 +1102,7 @@ public abstract class AppdefSessionEJB
      * @return ResourceTypeValue
      */
      public ResourceTypeValue getGroupResourceType()
-         throws NamingException, FinderException {
+         throws FinderException {
          if (groupRTV != null) {
              return groupRTV;
          }
