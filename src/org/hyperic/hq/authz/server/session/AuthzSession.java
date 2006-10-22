@@ -43,6 +43,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.dao.AuthzSubjectDAO;
+import org.hyperic.hibernate.dao.OperationDAO;
 import org.hyperic.hibernate.dao.ResourceDAO;
 import org.hyperic.hibernate.dao.ResourceGroupDAO;
 import org.hyperic.hibernate.dao.ResourceTypeDAO;
@@ -138,6 +139,10 @@ public abstract class AuthzSession {
 
     protected RoleDAO getRoleDAO() {
         return DAOFactory.getDAOFactory().getRoleDAO();
+    }
+
+    protected OperationDAO getOperationDAO() {
+        return DAOFactory.getDAOFactory().getOperationDAO();
     }
 
     /** now the home cache methods **/
@@ -311,6 +316,41 @@ public abstract class AuthzSession {
         return locals;
     }
 
+    protected Set toPojos(Object[] vals) {
+        final int OPER_HASH = OperationValue.class.hashCode();
+        final int SUBJ_HASH = AuthzSubjectValue.class.hashCode();
+
+        Set ret = new HashSet();
+        if (vals == null || vals.length == 0) {
+            return ret;
+        }
+        
+        int hashCode = vals[0].hashCode();
+        
+        OperationDAO operDao = null;
+        AuthzSubjectDAO subjDao = null;
+        for (int i = 0; i < vals.length; i++) {
+            if (hashCode == OPER_HASH) {
+                if (operDao == null) {
+                    operDao = getOperationDAO();
+                }
+                ret.add(operDao.findId(((OperationValue) vals[i]).getId()));
+            }
+            else if (hashCode == SUBJ_HASH) {
+                if (subjDao == null) {
+                    subjDao = getSubjectDAO();
+                }
+                ret.add(subjDao.findById(((AuthzSubjectValue)vals[i]).getId()));
+            }
+            else {
+                log.error("Invalid type.");
+            }
+
+        }
+                
+        return ret;
+    }
+    
     protected Object[] fromPojos(Collection pojos, Class c) {
         Object[] values = new Object[pojos.size()];
         
