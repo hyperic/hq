@@ -46,6 +46,7 @@ import org.hyperic.hibernate.dao.AuthzSubjectDAO;
 import org.hyperic.hibernate.dao.ResourceDAO;
 import org.hyperic.hibernate.dao.ResourceGroupDAO;
 import org.hyperic.hibernate.dao.ResourceTypeDAO;
+import org.hyperic.hibernate.dao.RoleDAO;
 import org.hyperic.hq.authz.AuthzNamedEntity;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.Resource;
@@ -135,6 +136,10 @@ public abstract class AuthzSession {
         return DAOFactory.getDAOFactory().getAuthzSubjectDAO();
     }
 
+    protected RoleDAO getRoleDAO() {
+        return DAOFactory.getDAOFactory().getRoleDAO();
+    }
+
     /** now the home cache methods **/
     protected ResourceLocalHome getResourceHome() {
         try {
@@ -154,7 +159,7 @@ public abstract class AuthzSession {
         return resTypeHome;
     }
 
-    protected ResourceGroupLocalHome getGroupHome() throws NamingException {
+    private ResourceGroupLocalHome getGroupHome() throws NamingException {
         if (groupHome == null) {
             groupHome = ResourceGroupUtil.getLocalHome();
         }
@@ -550,11 +555,5 @@ public abstract class AuthzSession {
     
     protected SessionContext getSessionContext() {
         return this.ctx;
-    }
-    
-    protected void rollback() {
-        if(!getSessionContext().getRollbackOnly()) {
-            getSessionContext().setRollbackOnly();
-        }
     }
 }
