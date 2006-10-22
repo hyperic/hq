@@ -5,39 +5,38 @@
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping
-  package="org.hyperic.hq.common.shared.pojo">
+  package="org.hyperic.hq.common">
 
   <class name="ConfigProperty" table="EAM_CONFIG_PROPS">
     <id name="id" type="integer">
-      <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />
       <generator class="sequence">
         <param name="sequence">EAM_CONFIG_PROPS_ID_SEQ</param>
       </generator>
     </id>
 
-    <natural-id mutable="true">
-      <property name="prefix" type="string">
-        <column name="PREFIX" not-null="false" index="EAM_CONFIGURATION_KEY_INDX" length="80" />
-      </property>
-      <property name="propKey" type="string">
-        <column name="PROPKEY" not-null="false" index="EAM_CONFIGURATION_KEY_INDX" length="80" />
-      </property>
-    </natural-id>
-
     <version name="_version_" type="long">
       <column name="VERSION_COL" default="0" />
     </version>
 
-    <property name="propValue" type="string">
+    <properties name="configPropertyId" unique="true">
+      <property name="prefix" type="string">
+        <column name="PREFIX" not-null="false" index="EAM_CONFIGURATION_KEY_INDX" length="80" />
+      </property>
+      <property name="key" type="string">
+        <column name="PROPKEY" not-null="false" index="EAM_CONFIGURATION_KEY_INDX" length="80" />
+      </property>
+    </properties>
+
+    <property name="value" type="string">
       <column name="PROPVALUE" length="300" />
     </property>
 
-    <property name="defaultPropValue" type="string">
+    <property name="defaultValue" type="string">
       <column name="DEFAULT_PROPVALUE" length="300" />
     </property>
 
-    <property name="freadOnly" type="boolean">
+    <property name="readOnly" type="boolean">
       <column name="FREAD_ONLY" dialect="PostgreSQL" default="false" />
       <column name="FREAD_ONLY" dialect="Oracle, Oracle9" default="0" />
     </property>

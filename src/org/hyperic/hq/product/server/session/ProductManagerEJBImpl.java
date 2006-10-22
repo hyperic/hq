@@ -55,7 +55,6 @@ import org.hyperic.hq.appdef.shared.CPropManagerLocalHome;
 import org.hyperic.hq.appdef.shared.CPropManagerUtil;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocalHome;
 import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
@@ -67,16 +66,16 @@ import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.hq.product.TypeInfo;
+import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.pluginxml.PluginData;
 import org.hyperic.hq.product.server.MBeanUtil;
-import org.hyperic.hq.product.shared.PluginLocal;
-import org.hyperic.hq.product.shared.PluginLocalHome;
-import org.hyperic.hq.product.shared.PluginUtil;
 import org.hyperic.hq.product.shared.PluginValue;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.timer.StopWatch;
+import org.hyperic.hibernate.dao.PluginDAO;
+import org.hyperic.dao.DAOFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -101,7 +100,6 @@ public class ProductManagerEJBImpl
     private ConfigManagerLocalHome     configManagerLocalHome;
     private CPropManagerLocalHome      cPropManagerLocalHome;
     private TemplateManagerLocalHome   templateManagerLocalHome;
-    private PluginLocalHome            pluginLocalHome;
 
     /*
      * There is once instance of the ProductPluginDeployer service
@@ -202,24 +200,14 @@ public class ProductManagerEJBImpl
         return manager.getConfigSchema(name, info, baseResponse);
     }
 
-    private void updateEJBPlugin(PluginLocalHome plHome, PluginInfo pInfo)
-        throws CreateException
+    private void updateEJBPlugin(PluginDAO plHome, PluginInfo pInfo)
     {
-        PluginLocal ejbPlugin;
-
-        try {
-            ejbPlugin = plHome.findByName(pInfo.name);
+        Plugin ejbPlugin = plHome.findByName(pInfo.name);
+        if (ejbPlugin == null) {
+            plHome.create(pInfo.name, pInfo.jar, pInfo.md5);
+        } else {
             ejbPlugin.setPath(pInfo.jar);
             ejbPlugin.setMD5(pInfo.md5);
-            ejbPlugin.setCtime(System.currentTimeMillis());
-        } catch(FinderException exc){
-            try {
-                plHome.create(pInfo.name, pInfo.jar, pInfo.md5);
-            } catch(CreateException cexc){
-                throw new CreateException("Unable to create entry for plugin "+
-                                          "'" + pInfo.name + "': " + 
-                                          cexc.getMessage());
-            }
         }
     }
 
@@ -251,16 +239,13 @@ public class ProductManagerEJBImpl
                CreateException, RemoveException
     {
         ProductPlugin pplugin = (ProductPlugin) this.ppm.getPlugin(pluginName);
-        PluginLocalHome plHome = this.getPluginLocalHome();
+        PluginDAO plHome = getPluginDAO();
         PluginValue ejbPlugin;
         PluginInfo pInfo;
 
         pInfo = this.ppm.getPluginInfo(pluginName);
-        try {
-            ejbPlugin = plHome.findByName(pluginName).getPluginValue();
-        } catch(FinderException exc){
-            ejbPlugin = null;
-        }
+        Plugin plugin = plHome.findByName(pluginName);
+        ejbPlugin = plugin != null ?plugin.getPluginValue() : null;
 
         if(ejbPlugin != null &&
            pInfo.name.equals(ejbPlugin.getName()) &&
@@ -376,13 +361,7 @@ public class ProductManagerEJBImpl
         return this.templateManagerLocalHome.create();
     }
 
-    private PluginLocalHome getPluginLocalHome(){
-        try {
-            if(this.pluginLocalHome == null)
-                this.pluginLocalHome = PluginUtil.getLocalHome();
-        } catch(NamingException exc){
-            throw new SystemException(exc);
-        }
-        return this.pluginLocalHome;
+    private PluginDAO getPluginDAO(){
+        return DAOFactory.getDAOFactory().getPluginDAO();
     }
 }

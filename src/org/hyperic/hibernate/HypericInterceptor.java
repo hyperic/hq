@@ -28,6 +28,7 @@ package org.hyperic.hibernate;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.type.Type;
 import org.hyperic.hq.appdef.AppdefBean;
+import org.hyperic.hq.product.Plugin;
 
 import java.io.Serializable;
 
@@ -42,7 +43,9 @@ public class HypericInterceptor extends EmptyInterceptor
     public boolean onFlushDirty(Object entity, Serializable id, Object[] currentState, Object[] previousState, String[] propertyNames, Type[] types)
     {
         if (entity instanceof AppdefBean) {
-            return processAppdefBean((AppdefBean)entity, id, currentState, propertyNames, types);
+            return updateTimestamp(currentState, propertyNames);
+        } else if (entity instanceof Plugin) {
+            return updateTimestamp(currentState, propertyNames);
         }
         return false;
     }
@@ -50,15 +53,11 @@ public class HypericInterceptor extends EmptyInterceptor
     public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types)
     {
         if (entity instanceof AppdefBean) {
-            return processAppdefBean((AppdefBean)entity, id, state, propertyNames, types);
+            return updateTimestamp(state, propertyNames);
+        } else if (entity instanceof Plugin) {
+            return updateTimestamp(state, propertyNames);
         }
         return false;
-    }
-
-    private boolean processAppdefBean(AppdefBean appdef, Serializable id, Object[] state, String[] propertyNames, Type[] types)
-    {
-        boolean modified = updateTimestamp(state, propertyNames);
-        return modified;
     }
 
     private boolean updateTimestamp(Object[] state, String[] propertyNames)

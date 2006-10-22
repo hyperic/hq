@@ -239,5 +239,17 @@ public class HibernateDAOFactory extends DAOFactory
     {
         return new AIScheduleDAO(getCurrentSession());
     }
+
+    // Common DAO
+    public ConfigPropertyDAO getConfigPropertyDAO()
+    {
+        return new ConfigPropertyDAO(getCurrentSession());
+    }
+
+    // Plugin DAO
+    public PluginDAO getPluginDAO()
+    {
+        return new PluginDAO(getCurrentSession());
+    }
 }
 

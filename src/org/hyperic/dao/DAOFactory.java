@@ -67,6 +67,8 @@ import org.hyperic.hibernate.dao.AIServiceDAO;
 import org.hyperic.hibernate.dao.AIIpDAO;
 import org.hyperic.hibernate.dao.AIHistoryDAO;
 import org.hyperic.hibernate.dao.AIScheduleDAO;
+import org.hyperic.hibernate.dao.ConfigPropertyDAO;
+import org.hyperic.hibernate.dao.PluginDAO;
 
 public abstract class DAOFactory
 {
@@ -106,6 +108,12 @@ public abstract class DAOFactory
 
     // Event DAOs
     public abstract TriggerDAO getTriggerDAO();
+
+    // Common DAO
+    public abstract ConfigPropertyDAO getConfigPropertyDAO();
+
+    // Plugin DAO
+    public abstract PluginDAO getPluginDAO();
 
     // Authz DAOs
     public abstract AuthzSubjectDAO  getAuthzSubjectDAO();
