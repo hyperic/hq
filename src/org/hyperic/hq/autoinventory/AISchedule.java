@@ -25,15 +25,22 @@
 
 package org.hyperic.hq.autoinventory;
 
-import java.io.Serializable;
+import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
+import org.hyperic.hq.autoinventory.shared.AISchedulePK;
+import org.hyperic.hq.scheduler.ScheduleValue;
+
+import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
 
 /**
- *
+ * Pojo for hibernate mapping file
  */
-public class AISchedule implements Serializable
+public class AISchedule extends PersistedObject
 {
-    private Integer id;
-    private long _version_;
     private Integer entityType;
     private Integer entityId;
     private String subject;
@@ -55,25 +62,6 @@ public class AISchedule implements Serializable
     }
 
     // Property accessors
-    public Integer getId()
-    {
-        return this.id;
-    }
-
-    private void setId(Integer id)
-    {
-        this.id = id;
-    }
-
-    public long get_version_()
-    {
-        return this._version_;
-    }
-
-    private void set_version_(long _version_)
-    {
-        this._version_ = _version_;
-    }
 
     public Integer getEntityType()
     {
@@ -183,5 +171,92 @@ public class AISchedule implements Serializable
     public void setConfig(byte[] config)
     {
         this.config = config;
+    }
+
+    private AIScheduleValue aIScheduleValue = new AIScheduleValue();
+    /**
+     * legacy EJB DTO pattern
+     * @deprecated use (this) AISchedule object
+     * @return
+     */
+    public AIScheduleValue getAIScheduleValue()
+    {
+        try {
+            aIScheduleValue.setId(getId());
+            aIScheduleValue.setEntityType(getEntityType());
+            aIScheduleValue.setEntityId(getEntityId());
+            aIScheduleValue.setSubject(
+                (getSubject() == null) ? "" : getSubject());
+            aIScheduleValue.setScheduleValue(getScheduleValue());
+            aIScheduleValue.setScheduleValueBytes(getScheduleValueBytes());
+            aIScheduleValue.setTriggerName(
+                (getTriggerName() == null) ? "" : getTriggerName());
+            aIScheduleValue.setJobName(
+                (getJobName() == null) ? "" : getJobName());
+            aIScheduleValue.setNextFireTime(getNextFireTime());
+            aIScheduleValue.setJobOrderData(
+                (getJobOrderData() == null) ? "" : getJobOrderData());
+            aIScheduleValue.setScanName(
+                (getScanName() == null) ? "" : getScanName());
+            aIScheduleValue.setScanDesc(
+            (getScanDesc() == null) ? "" : getScanDesc());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return aIScheduleValue;
+    }
+
+    public void setAIScheduleValue(AIScheduleValue valueHolder)
+    {
+        try {
+            setEntityType( valueHolder.getEntityType() );
+            setEntityId( valueHolder.getEntityId() );
+            setSubject( valueHolder.getSubject() );
+            setScheduleValue( valueHolder.getScheduleValue() );
+            setScheduleValueBytes( valueHolder.getScheduleValueBytes() );
+            setTriggerName( valueHolder.getTriggerName() );
+            setJobName( valueHolder.getJobName() );
+            setNextFireTime( valueHolder.getNextFireTime() );
+            setJobOrderData( valueHolder.getJobOrderData() );
+            setScanName( valueHolder.getScanName() );
+            setScanDesc( valueHolder.getScanDesc() );
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public ScheduleValue getScheduleValue()
+    throws IOException, ClassNotFoundException
+    {
+        ByteArrayInputStream is =
+            new ByteArrayInputStream(getScheduleValueBytes());
+        ObjectInputStream o = new ObjectInputStream(is);
+
+        ScheduleValue schedule = (ScheduleValue)o.readObject();
+
+        return schedule;
+    }
+
+    public void setScheduleValue(ScheduleValue schedule) throws IOException
+    {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        ObjectOutputStream o = new ObjectOutputStream(os);
+        o.writeObject(schedule);
+        o.flush();
+        os.close();
+
+        setScheduleValueBytes(os.toByteArray());
+    }
+
+    private AISchedulePK pkey = new AISchedulePK();
+    /**
+     * @deprecated use getId()
+     * @return
+     */
+    public AISchedulePK getPrimaryKey()
+    {
+        pkey.setId(getId());
+        return pkey;
     }
 }

@@ -26,7 +26,7 @@
 package org.hyperic.hq.autoinventory.server.session;
 
 import org.hyperic.util.pager.PagerProcessor;
-import org.hyperic.hq.autoinventory.shared.AIHistoryLocal;
+import org.hyperic.hq.autoinventory.AIHistory;
 
 public class PagerProcessor_ai_history implements PagerProcessor {
  
@@ -35,8 +35,8 @@ public class PagerProcessor_ai_history implements PagerProcessor {
     public Object processElement(Object o) {
         if (o == null) return null;
         try {
-            if (o instanceof AIHistoryLocal) {
-                return ((AIHistoryLocal)o).getAIHistoryValue();
+            if (o instanceof AIHistory) {
+                return ((AIHistory)o).getAIHistoryValue();
             }
         } catch (Exception e) {
             throw new IllegalStateException("Error converting to " +

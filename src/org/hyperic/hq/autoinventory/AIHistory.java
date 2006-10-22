@@ -25,15 +25,16 @@
 
 package org.hyperic.hq.autoinventory;
 
-import java.io.Serializable;
+import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.autoinventory.shared.AIHistoryValue;
+import org.hyperic.hq.autoinventory.shared.AIHistoryPK;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 
 /**
- *
+ * Pojo for hibernate hbm mapping file
  */
-public class AIHistory implements Serializable
+public class AIHistory extends PersistedObject
 {
-    private Integer id;
-    private long _version_;
     private Integer groupId;
     private Integer batchId;
     private Integer entityType;
@@ -59,27 +60,13 @@ public class AIHistory implements Serializable
         super();
     }
 
+    public AIHistory(AIHistoryValue av)
+    {
+        super();
+        setAIHistoryValue(av);
+    }
+
     // Property accessors
-    public Integer getId()
-    {
-        return this.id;
-    }
-
-    private void setId(Integer id)
-    {
-        this.id = id;
-    }
-
-    private void set_version_(long _version_)
-    {
-        this._version_ = _version_;
-    }
-
-    public long get_version_()
-    {
-        return this._version_;
-    }
-
     public Integer getGroupId()
     {
         return this.groupId;
@@ -135,9 +122,19 @@ public class AIHistory implements Serializable
         return this.scheduled;
     }
 
+    public Boolean getScheduled()
+    {
+        return new Boolean(isScheduled());
+    }
+
     public void setScheduled(boolean scheduled)
     {
         this.scheduled = scheduled;
+    }
+
+    public void setScheduled(Boolean scheduled)
+    {
+        setScheduled(scheduled.booleanValue());
     }
 
     public long getDateScheduled()
@@ -238,5 +235,105 @@ public class AIHistory implements Serializable
     public void setConfig(byte[] config)
     {
         this.config = config;
+    }
+
+    public String getEntityName()
+    {
+        AppdefEntityID id = new AppdefEntityID(getEntityType().intValue(),
+                                               getEntityId().intValue());
+        return id.toString();
+    }
+
+    public void setEntityName()
+    {
+        // no op
+    }
+
+    private AIHistoryValue aIHistoryValue =  new AIHistoryValue();
+    /**
+     * legacy DTO pattern
+     * @deprecated use (this) AIHistory object
+     * @return
+     */
+    public AIHistoryValue getAIHistoryValue()
+    {
+        try {
+            aIHistoryValue.setId(getId());
+            aIHistoryValue.setGroupId(getGroupId());
+            aIHistoryValue.setBatchId(getBatchId());
+            aIHistoryValue.setEntityType(getEntityType());
+            aIHistoryValue.setEntityId(getEntityId());
+            aIHistoryValue.setEntityName(
+                (getEntityName() == null) ? "" : getEntityName());
+            aIHistoryValue.setSubject(
+                (getSubject() == null) ? "" : getSubject());
+            aIHistoryValue.setScheduled(getScheduled());
+            aIHistoryValue.setDateScheduled(getDateScheduled());
+            aIHistoryValue.setStartTime(getStartTime());
+            aIHistoryValue.setEndTime(getEndTime());
+            aIHistoryValue.setDuration(getDuration());
+            aIHistoryValue.setMessage(
+                (getMessage() == null) ? "" : getMessage());
+            aIHistoryValue.setDescription(
+                (getDescription() == null) ? "" : getDescription());
+            aIHistoryValue.setStatus(
+                (getStatus() == null) ? "" : getStatus());
+            aIHistoryValue.setScanName(
+                (getScanName() == null) ? "" : getScanName());
+            aIHistoryValue.setScanDesc(
+                (getScanDesc() == null) ? "" : getScanDesc());
+            aIHistoryValue.setConfig(getConfig());
+            aIHistoryValue.setConfigObj(getConfigObj());
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+        return aIHistoryValue;
+    }
+
+    public void setAIHistoryValue(AIHistoryValue valueHolder)
+    {
+        try {
+            setGroupId( valueHolder.getGroupId() );
+            setBatchId( valueHolder.getBatchId() );
+            setEntityType( valueHolder.getEntityType() );
+            setEntityId( valueHolder.getEntityId() );
+            setSubject( valueHolder.getSubject() );
+            setScheduled( valueHolder.getScheduled() );
+            setDateScheduled( valueHolder.getDateScheduled() );
+            setStartTime( valueHolder.getStartTime() );
+            setEndTime( valueHolder.getEndTime() );
+            setDuration( valueHolder.getDuration() );
+            setMessage( valueHolder.getMessage() );
+            setDescription( valueHolder.getDescription() );
+            setStatus( valueHolder.getStatus() );
+            setScanName( valueHolder.getScanName() );
+            setScanDesc( valueHolder.getScanDesc() );
+            setConfig( valueHolder.getConfig() );
+            setConfigObj( valueHolder.getConfigObj() );
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public ScanConfigurationCore getConfigObj() throws AutoinventoryException
+    {
+        return ScanConfigurationCore.deserialize(getConfig());
+    }
+
+    public void setConfigObj(ScanConfigurationCore core)
+    throws AutoinventoryException
+    {
+        setConfig(core.serialize());
+    }
+
+    private AIHistoryPK pkey = new AIHistoryPK();
+    /**
+     * @deprecated use getId()
+     * @return
+     */
+    public AIHistoryPK getPrimaryKey()
+    {
+        pkey.setId(getId());
+        return pkey;
     }
 }

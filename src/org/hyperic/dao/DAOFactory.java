@@ -65,6 +65,8 @@ import org.hyperic.hibernate.dao.AIPlatformDAO;
 import org.hyperic.hibernate.dao.AIServerDAO;
 import org.hyperic.hibernate.dao.AIServiceDAO;
 import org.hyperic.hibernate.dao.AIIpDAO;
+import org.hyperic.hibernate.dao.AIHistoryDAO;
+import org.hyperic.hibernate.dao.AIScheduleDAO;
 
 public abstract class DAOFactory
 {
@@ -96,6 +98,8 @@ public abstract class DAOFactory
     public abstract AIServerDAO getAIServerDAO();
     public abstract AIServiceDAO getAIServiceDAO();
     public abstract AIIpDAO getAIIpDAO();
+    public abstract AIHistoryDAO getAIHistoryDAO();
+    public abstract AIScheduleDAO getAIScheduleDAO();
 
     // Auth DAO
     public abstract PrincipalDAO getPrincipalDAO();

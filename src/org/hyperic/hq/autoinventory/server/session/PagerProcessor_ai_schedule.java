@@ -30,10 +30,11 @@ import java.util.Date;
 import org.hyperic.util.pager.PagerProcessorExt;
 import org.hyperic.util.pager.PagerEventHandler;
 
-import org.hyperic.hq.autoinventory.shared.AIScheduleLocal;
+import org.hyperic.hq.autoinventory.AISchedule;
 
 import org.hyperic.hq.scheduler.shared.SchedulerLocal;
 import org.hyperic.hq.scheduler.shared.SchedulerUtil;
+import org.hyperic.dao.DAOFactory;
 
 import org.quartz.Trigger;
 
@@ -48,10 +49,10 @@ public class PagerProcessor_ai_schedule implements PagerProcessorExt {
     public Object processElement(Object o) {
         if (o == null) return null;
         try {
-            if (o instanceof AIScheduleLocal) {
+            if (o instanceof AISchedule) {
                 SchedulerLocal scheduler = 
                     SchedulerUtil.getLocalHome().create();
-                AIScheduleLocal s = (AIScheduleLocal)o;
+                AISchedule s = (AISchedule)o;
                 Trigger trigger;
                 try {
                     trigger =
@@ -60,7 +61,8 @@ public class PagerProcessor_ai_schedule implements PagerProcessorExt {
                     if (trigger == null) {
                         // Job no longer exists
                         try {
-                            s.remove();
+                            DAOFactory.getDAOFactory().getAIScheduleDAO()
+                                .remove(s);
                             return null;
                         } catch (Exception e) {
                         // Ignore RemoveException

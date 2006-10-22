@@ -53,16 +53,12 @@ import org.hyperic.hq.appdef.shared.PlatformManagerLocalHome;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.autoinventory.shared.AIScheduleLocal;
-import org.hyperic.hq.autoinventory.shared.AIScheduleLocalHome;
 import org.hyperic.hq.autoinventory.shared.AISchedulePK;
-import org.hyperic.hq.autoinventory.shared.AIScheduleUtil;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
-import org.hyperic.hq.autoinventory.shared.AIHistoryLocalHome;
-import org.hyperic.hq.autoinventory.shared.AIHistoryUtil;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
+import org.hyperic.hq.autoinventory.AISchedule;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.scheduler.ScheduleValue;
@@ -76,6 +72,9 @@ import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.SortAttribute;
+import org.hyperic.hibernate.dao.AIScheduleDAO;
+import org.hyperic.hibernate.dao.AIHistoryDAO;
+import org.hyperic.dao.DAOFactory;
 
 /** 
  * Manager for dealing with scheduled autoinventory scans.
@@ -171,8 +170,8 @@ public class AIScheduleManagerEJBImpl
                DuplicateAIScanNameException, ScheduleWillNeverFireException
     {
         // Scheduled jobs are persisted in the autoinventory subsystem
-        AIScheduleLocalHome aiScheduleLocalHome =
-            AIScheduleUtil.getLocalHome();
+        AIScheduleDAO asdao =
+            DAOFactory.getDAOFactory().getAIScheduleDAO();
 
         // find the os for the platform
         PlatformValue pValue = null;
@@ -249,15 +248,15 @@ public class AIScheduleManagerEJBImpl
                 }
                 this.scheduler.scheduleJob(jobDetail, trigger);
 
-                checkUniqueName(aiScheduleLocalHome, scanName);
-                AIScheduleLocal aiLoc = 
-                    aiScheduleLocalHome.create(id,
-                                           subject.getName(),
-                                           scanName, scanDesc, 
-                                           schedule,
-                                           nextFire.getTime(),
-                                           triggerName,
-                                           jobName);
+                checkUniqueName(asdao, scanName);
+                AISchedule aiLoc =
+                    asdao.create(id,
+                                 subject.getName(),
+                                 scanName, scanDesc,
+                                 schedule,
+                                 nextFire.getTime(),
+                                 triggerName,
+                                 jobName);
                 configBlob.setId(aiLoc.getId());
                 configBlob.setBlobData(scanConfig.serialize());
                 configBlob.update();
@@ -283,14 +282,14 @@ public class AIScheduleManagerEJBImpl
                 }
                 this.scheduler.scheduleJob(jobDetail, trigger);
 
-                checkUniqueName(aiScheduleLocalHome, scanName);
-                AIScheduleLocal aiLoc = 
-                    aiScheduleLocalHome.create(id, subject.getName(), 
-                                           scanName, scanDesc,
-                                           schedule,
-                                           nextFire.getTime(),
-                                           triggerName,
-                                           jobName);
+                checkUniqueName(asdao, scanName);
+                AISchedule aiLoc =
+                    asdao.create(id, subject.getName(),
+                                 scanName, scanDesc,
+                                 schedule,
+                                 nextFire.getTime(),
+                                 triggerName,
+                                 jobName);
                 configBlob.setId(aiLoc.getId());
                 configBlob.setBlobData(scanConfig.serialize());
                 configBlob.update();
@@ -318,8 +317,8 @@ public class AIScheduleManagerEJBImpl
                                       AppdefEntityID id, PageControl pc)
         throws NamingException, FinderException, CreateException
     {
-        AIScheduleLocalHome sl =
-            AIScheduleUtil.getLocalHome();
+        AIScheduleDAO sl =
+            DAOFactory.getDAOFactory().getAIScheduleDAO();
         Collection schedule;
 
         // default the sorting to the next fire time
@@ -329,12 +328,9 @@ public class AIScheduleManagerEJBImpl
         int sortAttr = pc.getSortattribute();
         switch(sortAttr) {
           case SortAttribute.CONTROL_NEXTFIRE:
-            if (pc.isAscending())
-                schedule = sl.findByEntityFireTimeAsc(id.getType(),
-                                                      id.getID());
-            else
-                schedule = sl.findByEntityFireTimeDesc(id.getType(),
-                                                       id.getID());
+              schedule = sl.findByEntityFireTime(id.getType(),
+                                                 id.getID(),
+                                                 pc.isAscending());
             break;
 
           default:
@@ -359,7 +355,7 @@ public class AIScheduleManagerEJBImpl
                                             Integer id)
         throws NamingException, FinderException, CreateException
     {
-        AIScheduleLocalHome sl = AIScheduleUtil.getLocalHome();
+        AIScheduleDAO sl = DAOFactory.getDAOFactory().getAIScheduleDAO();
 
         AIScheduleValue aiVo = sl.findById(id).getAIScheduleValue();
 
@@ -389,7 +385,7 @@ public class AIScheduleManagerEJBImpl
                                    AppdefEntityID id, PageControl pc)
         throws NamingException, FinderException
     {
-        AIHistoryLocalHome histLH = AIHistoryUtil.getLocalHome();
+        AIHistoryDAO histLH = DAOFactory.getDAOFactory().getAIHistoryDAO();
         Collection hist;
 
         // default the sorting to the date started
@@ -398,36 +394,24 @@ public class AIScheduleManagerEJBImpl
         int sortAttr = pc.getSortattribute();
         switch(sortAttr) {
           case SortAttribute.CONTROL_STATUS:
-            if (pc.isAscending())
-                hist = histLH.findByEntityStatusAsc(id.getType(),
-                                                    id.getID());
-            else
-                hist = histLH.findByEntityStatusDesc(id.getType(),
-                                                     id.getID());
+              hist = histLH.findByEntityStatus(id.getType(),
+                                               id.getID(),
+                                               pc.isAscending());
             break;
           case SortAttribute.CONTROL_STARTED:
-            if (pc.isAscending())
-                hist = histLH.findByEntityStartTimeAsc(id.getType(),
-                                                       id.getID());
-            else
-                hist = histLH.findByEntityStartTimeDesc(id.getType(),
-                                                        id.getID());
+              hist = histLH.findByEntityStartTime(id.getType(),
+                                                  id.getID(),
+                                                  pc.isAscending());
             break;
           case SortAttribute.CONTROL_ELAPSED:
-            if (pc.isAscending())
-                hist = histLH.findByEntityDurationAsc(id.getType(),
-                                                      id.getID());
-            else
-                hist = histLH.findByEntityDurationDesc(id.getType(),
-                                                       id.getID());
+              hist = histLH.findByEntityDuration(id.getType(),
+                                                 id.getID(),
+                                                 pc.isAscending());
             break;
           case SortAttribute.CONTROL_DATESCHEDULED:
-            if (pc.isAscending())
-                hist = histLH.findByEntityDateScheduledAsc(id.getType(),
-                                                           id.getID());
-            else
-                hist = histLH.findByEntityDateScheduledDesc(id.getType(),
-                                                            id.getID());
+              hist = histLH.findByEntityDateScheduled(id.getType(),
+                                                      id.getID(),
+                                                      pc.isAscending());
             break;
           case SortAttribute.CONTROL_ENTITYNAME:
             // No need to sort since all will have the same name
@@ -454,16 +438,16 @@ public class AIScheduleManagerEJBImpl
                             Integer ids[])
         throws NamingException, AutoinventoryException
     {
-        AIScheduleLocalHome aiScheduleLocalHome
-            = AIScheduleUtil.getLocalHome();
-        AIScheduleLocal aiScheduleLocal;
+        AIScheduleDAO asdao
+            = DAOFactory.getDAOFactory().getAIScheduleDAO();
+        AISchedule aiScheduleLocal;
 
         for (int i = 0; i < ids.length; i++) { 
             try {
                 AISchedulePK pk = new AISchedulePK(ids[i]);
-                aiScheduleLocal = aiScheduleLocalHome.findByPrimaryKey(pk);
+                aiScheduleLocal = asdao.findByPrimaryKey(pk);
                 this.scheduler.deleteJob(aiScheduleLocal.getJobName(), GROUP);
-                aiScheduleLocal.remove();
+                asdao.remove(aiScheduleLocal);
             } catch (Exception e) {
                 throw new AutoinventoryException("Unable to remove job: " +
                                                  e.getMessage());
@@ -471,18 +455,14 @@ public class AIScheduleManagerEJBImpl
         }
     }
 
-    public void checkUniqueName ( AIScheduleLocalHome aiScheduleLocalHome,
+    public void checkUniqueName ( AIScheduleDAO aiScheduleLocalHome,
                                   String scanName ) 
         throws DuplicateAIScanNameException {
 
         // Ensure that the name is not a duplicate.
-        try {
-            AIScheduleLocal aisl = aiScheduleLocalHome.findByScanName(scanName);
-            if ( aisl != null ) {
-                throw new DuplicateAIScanNameException(scanName);
-            }
-        } catch (FinderException e) {
-            // it's ok, then unique constraint will be OK
+        AISchedule aisl = aiScheduleLocalHome.findByScanName(scanName);
+        if ( aisl != null ) {
+            throw new DuplicateAIScanNameException(scanName);
         }
         return;
     }

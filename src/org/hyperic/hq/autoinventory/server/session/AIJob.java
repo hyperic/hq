@@ -41,13 +41,12 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
+import org.hyperic.hq.autoinventory.AIHistory;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
-import org.hyperic.hq.autoinventory.shared.AIHistoryLocal;
-import org.hyperic.hq.autoinventory.shared.AIHistoryLocalHome;
-import org.hyperic.hq.autoinventory.shared.AIHistoryPK;
-import org.hyperic.hq.autoinventory.shared.AIHistoryUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.scheduler.server.session.BaseJob;
+import org.hyperic.hibernate.dao.AIHistoryDAO;
+import org.hyperic.dao.DAOFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,7 +69,6 @@ public abstract class AIJob extends BaseJob {
     public static final String PROP_SCANDESC = "scanDesc";
 
     protected Log log = LogFactory.getLog(AIJob.class);
-    protected AIHistoryLocalHome aiHistoryLocalHome;
 
     /**
      * Do a control command on a single appdef entity
@@ -90,16 +88,16 @@ public abstract class AIJob extends BaseJob {
         throws AutoinventoryException
     {
         long startTime = System.currentTimeMillis();
-        AIHistoryLocal commandHistory = null;
+        AIHistory commandHistory = null;
         String errorMsg = null;
 
         try {
             AICommandsClient client = AIUtil.getClient(id);
-            commandHistory = 
+            commandHistory =
                 createHistory(id, groupId, batchId,
-                              subject.getName(), 
+                              subject.getName(),
                               scanConfig, scanName, scanDesc,
-                              scheduled, startTime, startTime, 
+                              scheduled, startTime, startTime,
                               dateScheduled.getTime(),
                               AIScheduleManagerEJBImpl.STATUS_STARTED,
                               null);
@@ -127,11 +125,9 @@ public abstract class AIJob extends BaseJob {
                 this.log.error("Unable to execute command: " + errorMsg);
             
                 // Add the failed job to the history
-                try {
-                    if (commandHistory != null)
-                        commandHistory.remove();
-                } catch (RemoveException exc) {
-                    this.log.error("Unable to remove failed job history");
+                if (commandHistory != null) {
+                    DAOFactory.getDAOFactory().getAIHistoryDAO()
+                        .remove(commandHistory);
                 }
 
                 try {
@@ -156,36 +152,34 @@ public abstract class AIJob extends BaseJob {
         return commandHistory.getId();
     }
 
-    protected AIHistoryLocal createHistory(AppdefEntityID id,
-                                           Integer groupId,
-                                           Integer batchId,
-                                           String subjectName,
-                                           ScanConfigurationCore config,
-                                           String scanName,
-                                           String scanDesc,
-                                           Boolean scheduled,
-                                           long startTime,
-                                           long stopTime,
-                                           long scheduleTime,
-                                           String status, 
-                                           String errorMessage)
+    protected AIHistory createHistory(AppdefEntityID id,
+                                      Integer groupId,
+                                      Integer batchId,
+                                      String subjectName,
+                                      ScanConfigurationCore config,
+                                      String scanName,
+                                      String scanDesc,
+                                      Boolean scheduled,
+                                      long startTime,
+                                      long stopTime,
+                                      long scheduleTime,
+                                      String status,
+                                      String errorMessage)
         throws CreateException, NamingException, AutoinventoryException
     {
-        return getHistoryLocalHome().create(id, groupId, batchId, subjectName,
-                                            config, scanName, scanDesc,
-                                            scheduled, startTime,
-                                            stopTime, scheduleTime,
-                                            status, null /*description*/, 
-                                            errorMessage);
+        return getHistoryDAO().create(id, groupId, batchId, subjectName,
+                                      config, scanName, scanDesc,
+                                      scheduled, startTime,
+                                      stopTime, scheduleTime,
+                                      status, null /*description*/,
+                                      errorMessage);
     }
 
     protected void updateHistory(Integer jobId, long endTime,
                                  String status, String message)
         throws FinderException, CreateException, NamingException
     {
-        AIHistoryPK pk = new AIHistoryPK(jobId);
-        AIHistoryLocal local =
-            getHistoryLocalHome().findByPrimaryKey(pk);
+        AIHistory local = getHistoryDAO().findById(jobId);
 
         local.setEndTime(endTime);
         local.setDuration(endTime - local.getStartTime());
@@ -193,11 +187,9 @@ public abstract class AIJob extends BaseJob {
         local.setMessage(message);
     }
 
-    protected AIHistoryLocalHome getHistoryLocalHome ()
-        throws CreateException, NamingException {
-        if (aiHistoryLocalHome == null)
-            aiHistoryLocalHome = AIHistoryUtil.getLocalHome();
-        return aiHistoryLocalHome;
+    protected AIHistoryDAO getHistoryDAO()
+    {
+        return DAOFactory.getDAOFactory().getAIHistoryDAO();
     }
 
     // Public interface for quartz 

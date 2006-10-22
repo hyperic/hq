@@ -229,5 +229,15 @@ public class HibernateDAOFactory extends DAOFactory
     {
         return new AIIpDAO(getCurrentSession());
     }
+
+    public AIHistoryDAO getAIHistoryDAO()
+    {
+        return new AIHistoryDAO(getCurrentSession());
+    }
+
+    public AIScheduleDAO getAIScheduleDAO()
+    {
+        return new AIScheduleDAO(getCurrentSession());
+    }
 }
 

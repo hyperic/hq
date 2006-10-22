@@ -31,10 +31,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.naming.NamingException;
-
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -214,7 +210,7 @@ public class AIScanGroupJob extends AIJob {
         throws NamingException, FinderException, CreateException
     {
         AIHistoryPK pk = new AIHistoryPK(jobId);
-        AIHistoryLocalHome home = getHistoryLocalHome(); 
+        AIHistoryLocalHome home = getHistoryDAO(); 
         AIHistoryLocal local = home.findByPrimaryKey(pk);
 
         return local.getAIHistoryValue();
