@@ -136,18 +136,10 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             retVal.setOwner         ( subject.getName() );
 
            // Here's where we add our own group resource to our group.
-            ResourceManagerLocal rmLoc = getResourceManager();
-            ResourceTypeValue typeVal = rmLoc.findResourceTypeByName(
-                authzResourceGroupName);
             ResourceValue resVal =
-                rmLoc.findResourceByInstanceId(typeVal,rgVo.getId());
-            rgmLoc.addResource(subject,rgVo,rgVo.getId(),typeVal);
-
-        }
-        catch (CreateException e) {
-            log.error("Caught entity CreateException creating ResourceGroup",e);
-            throw new GroupCreationException ("Caught entity CreateException "+
-                                              "creating ResourceGroup", e);
+                getResourceByInstanceId(authzResourceGroupName, rgVo.getId());
+            rgmLoc.addResource(subject, rgVo, rgVo.getId(),
+                               resVal.getResourceTypeValue());
         }
         catch (PermissionException pe) {
             // This should NOT occur. Anyone can create groups.
@@ -513,25 +505,10 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             // First, remove existing resources...
             rgmLoc.removeResourceGroup(subject,rgVo);
         }
-        catch (FinderException e) {
-            log.error("Caught FinderException. Group doesn't exist");
-            throw new GroupNotFoundException ("Couldn't delete non-"+
-                                              "existent group.");
-        }
-        catch (RemoveException e) {
-            log.error("Caught RemoveException on EJB remove.");
-            throw new SystemException ("Caught exception during "+
-                                          "removal of group.");
-        }
         catch (PermissionException pe) {
             log.error("GroupManager caught PermissionException: "+
                       pe.getMessage());
             throw pe;
-        }
-        catch (NamingException ne) {
-            log.error("Caught NamingException in resource group manager",ne);
-            throw new SystemException ("Caught NamingException "+
-                "in resource group manager");
         }
     }
 
@@ -567,10 +544,6 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             log.error("Unable to find resource group to change owner.");
             throw new GroupNotFoundException ("Unable to lookup ResourceGroup" +
                                               " for ownership change");
-        }
-        catch (NamingException e) {
-            log.error("Unable to lookup GroupManagerLocalHome");
-            throw new SystemException("Unable to lookup GroupManagerLocalHome");
         }
         return groupVo;
     }
