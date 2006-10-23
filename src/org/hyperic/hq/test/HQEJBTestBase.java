@@ -43,6 +43,9 @@ import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
+import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
+import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
+import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
 import org.mockejb.SessionBeanDescriptor;
 import org.mockejb.jndi.MockContextFactory;
 
@@ -58,13 +61,14 @@ public abstract class HQEJBTestBase
     
     private Class[] getUsedSessionBeans() {
         return new Class[] { 
-            AuthzSubjectManagerEJBImpl.class,
-            RegisteredTriggerManagerEJBImpl.class,
             AlertDefinitionManagerEJBImpl.class,
+            AuthzSubjectManagerEJBImpl.class,
             PlatformManagerEJBImpl.class,
-            ResourceManagerEJBImpl.class,
             PlatformVOHelperEJBImpl.class,
+            RegisteredTriggerManagerEJBImpl.class,
+            ResourceManagerEJBImpl.class,
             ServerVOHelperEJBImpl.class,
+            TemplateManagerEJBImpl.class,
         };
     }
 
@@ -147,5 +151,11 @@ public abstract class HQEJBTestBase
         throws Exception
     {
         return PlatformManagerUtil.getLocalHome().create();
+    }
+
+    protected TemplateManagerLocal getTemplateManager()
+        throws Exception
+    {
+        return TemplateManagerUtil.getLocalHome().create();
     }
 }
