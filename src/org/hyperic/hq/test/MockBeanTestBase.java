@@ -83,6 +83,9 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
         _password  = System.getProperty("hq.jdbc.password");
         _server    = System.getProperty("hq.jdbc.server");
 
+        if (_dsMapping == null)
+            _dsMapping = DS_POSTGRESQL;
+
         if (_database == null)
             _database = "hq";
             
