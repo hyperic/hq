@@ -525,7 +525,7 @@ public abstract class AppdefSessionEJB
      * @param subject
      * @throws PermissionException
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public void checkCreatePlatformPermission(AuthzSubjectValue subject)
         throws PermissionException {
@@ -614,7 +614,7 @@ public abstract class AppdefSessionEJB
      * @param appdefEntityId - what
      * @param subject - who
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public void checkControlPermission(AuthzSubjectValue subject,
                                        AppdefEntityID id)
@@ -648,7 +648,7 @@ public abstract class AppdefSessionEJB
      * @param appdefEntityId - what
      * @param subject - who
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public void checkRemovePermission(AuthzSubjectValue subject,
                                       AppdefEntityID id)
@@ -682,7 +682,7 @@ public abstract class AppdefSessionEJB
      * @param appdefEntityId - what
      * @param subject - who
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public void checkMonitorPermission(AuthzSubjectValue subject,
                                        AppdefEntityID id)
@@ -713,7 +713,7 @@ public abstract class AppdefSessionEJB
     /**
      * Check for manage alerts permission for a given resource
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public void checkAlertingPermission(AuthzSubjectValue subject,
                                         AppdefEntityID id)
@@ -748,7 +748,7 @@ public abstract class AppdefSessionEJB
      * Check the scope of alertable resources for a give subject
      * @return a list of AppdefEntityIds
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public List checkAlertingScope(AuthzSubjectValue subj) {
         List entityIds = new ArrayList();
@@ -1089,7 +1089,7 @@ public abstract class AppdefSessionEJB
      * @param ejb - the Server EJB
      * @return ResourceValue
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public ResourceValue getServerResourceValue(ServerPK pk)
         throws NamingException, FinderException, CreateException {
@@ -1115,7 +1115,7 @@ public abstract class AppdefSessionEJB
      * @param ejb - the Platform EJB
      * @return ResourceValue
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public ResourceValue getPlatformResourceValue(PlatformPK pk)
         throws NamingException, FinderException, CreateException
@@ -1128,7 +1128,7 @@ public abstract class AppdefSessionEJB
      * Get the AUTHZ ResourceValue for a Service
      * @param ctx
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public ResourceValue getServiceResourceValue(ServicePK pk)
         throws NamingException, FinderException, CreateException
@@ -1141,7 +1141,7 @@ public abstract class AppdefSessionEJB
      * Get the AUTHZ ResourceValue for a Application
      * @param ctx
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public ResourceValue getApplicationResourceValue(ApplicationPK pk)
         throws NamingException, FinderException, CreateException
@@ -1428,7 +1428,7 @@ public abstract class AppdefSessionEJB
     /**
      * Send an Appdef event
      *
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      * @ejb:interface-method
      */
     public void sendAppdefEvent(AuthzSubjectValue subject,
