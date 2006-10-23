@@ -178,6 +178,8 @@
           <include name="**/*Test.java"/>
         </fileset>
       </batchtest>
+      <sysproperty key="hq.example.plugins" value="${hq.home}/plugins/examples"/>
+      <sysproperty key="pdk.dir" value="${pdk.dir}"/>
       <sysproperty key="hq.server.ds-mapping" value="${hq.server.ds-mapping}"/>
       <sysproperty key="hq.jdbc.url" value="${hq.jdbc.url}"/>
       <sysproperty key="hq.jdbc.name" value="${hq.jdbc.name}"/>
