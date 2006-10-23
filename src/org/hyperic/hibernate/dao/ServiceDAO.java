@@ -229,9 +229,9 @@ public class ServiceDAO extends HibernateDAO
 
     public Collection findByPlatform_orderName(Integer id, boolean asc)
     {
-        String sql="select sv from Platform p " +
-                   " join fetch p.servers s " +
-                   " join fetch s.services sv "+
+        String sql="select sv from Service sv " +
+                   " join fetch sv.server s " +
+                   " join fetch s.platform p "+
                    "where p.id=?" +
                    "order by s.sortName " +
                    (asc ? "asc" : "desc");
@@ -262,10 +262,10 @@ public class ServiceDAO extends HibernateDAO
 
     public Collection findByPlatform_orderType(Integer id, boolean asc)
     {
-        String sql="select sv from Platform p " +
-                   " join fetch p.servers s " +
-                   " join fetch s.serviceType st " +
-                   " join fetch s.services sv "+
+        String sql="select sv from Service sv " +
+                   " join fetch sv.server s " +
+                   " join fetch s.serverType st " +
+                   " join fetch s.platform p "+
                    "where p.id=?" +
                    "order by st.sortName "+
                    (asc ? "asc" : "desc") +
@@ -300,12 +300,12 @@ public class ServiceDAO extends HibernateDAO
                                                       boolean b,
                                                       boolean asc)
     {
-        String sql="select sv from Platform p " +
-                   " join fetch p.servers s " +
+        String sql="select sv from Service sv " +
+                   " join fetch sv.server s " +
                    " join fetch s.serverType st " +
-                   " join fetch s.services sv "+
-                   "where p.id=? and " +
-                   "      st.virtual=? " +
+                   " join fetch s.platform p " +
+                   "where p.id=? " +
+                   " and st.virtual=? " +
                    "order by sv.sortName " +
                    (asc ? "asc" : "desc");
         return getSession().createQuery(sql)
