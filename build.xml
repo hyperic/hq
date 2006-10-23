@@ -161,16 +161,7 @@
     <property name="init-taskdefs.notrequired" value="true"/>
   </target>
 
-  <!-- test-init is used to setup properties for the tests.  Needed to
-       override things for MockEJB -->
-  <target name="test-init">
-    <property name="hibernate.transaction.manager_lookup_class"
-              value=""/>
-    <property name="hq.jta.UserTransaction"
-              value="javax.transaction.UserTransaction"/>
-  </target>
-
-  <target name="test" depends="test-init,init,init-taskdefs">
+  <target name="test" depends="init,init-taskdefs">
     <junit reloading="no" fork="no" printsummary="yes" haltonerror="no">
       <classpath>
         <path refid="alljars"/>
