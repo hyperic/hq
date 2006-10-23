@@ -38,6 +38,16 @@ import javax.ejb.SessionContext;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.dao.BaselineDAO;
+import org.hyperic.hibernate.dao.CategoryDAO;
+import org.hyperic.hibernate.dao.DerivedMeasurementDAO;
+import org.hyperic.hibernate.dao.MeasurementArgDAO;
+import org.hyperic.hibernate.dao.MeasurementTemplateDAO;
+import org.hyperic.hibernate.dao.MetricProblemDAO;
+import org.hyperic.hibernate.dao.MonitorableTypeDAO;
+import org.hyperic.hibernate.dao.RawMeasurementDAO;
+import org.hyperic.hibernate.dao.ScheduleRevNumDAO;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentManagerUtil;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
@@ -89,9 +99,8 @@ import org.hyperic.hq.scheduler.shared.SchedulerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-/** This is the base class to Measurement Session EJB's
- *
- *
+/** 
+ *This is the base class to Measurement Session EJB's
  */
 public abstract class SessionEJB {
     private static final Log log = LogFactory.getLog(SessionEJB.class);
@@ -127,6 +136,42 @@ public abstract class SessionEJB {
 
     // Every SessionBean has its own context
     protected SessionContext ctx = null;
+
+    protected BaselineDAO getBaselineDAO() {
+        return DAOFactory.getDAOFactory().getBaselineDAO();
+    }
+
+    protected CategoryDAO getCategoryDAO() {
+        return DAOFactory.getDAOFactory().getCategoryDAO();
+    }
+
+    protected DerivedMeasurementDAO getDerivedMeasurementDAO() {
+        return DAOFactory.getDAOFactory().getDerivedMeasurementDAO();
+    }
+
+    protected MeasurementArgDAO getMeasurementArgDAO() {
+        return DAOFactory.getDAOFactory().getMeasurementArgDAO();
+    }
+
+    protected MeasurementTemplateDAO getMeasurementTemplateDAO() {
+        return DAOFactory.getDAOFactory().getMeasurementTemplateDAO();
+    }
+
+    protected MetricProblemDAO getMetricProblemDAO() {
+        return DAOFactory.getDAOFactory().getMetricProblemDAO();
+    }
+    
+    protected MonitorableTypeDAO getMonitorableTypeDAO() {
+        return DAOFactory.getDAOFactory().getMonitorableTypeDAO();
+    }
+
+    protected RawMeasurementDAO getRawMeasurementDAO() {
+        return DAOFactory.getDAOFactory().getRawMeasurementDAO();
+    }
+    
+    protected ScheduleRevNumDAO getScheduleRevNumDAO() {
+        return DAOFactory.getDAOFactory().getScheduleRevNumDAO();
+    }
 
     // Exposed accessor methods
     protected TemplateManagerLocal getTemplateMan(){
