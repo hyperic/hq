@@ -96,12 +96,12 @@ import org.hyperic.hq.authz.shared.ResourceValue;
  *      unchecked="true"
  *      result-type-mapping="Local"
  *
- * @ejb:finder signature="java.util.Collection findViewableSvcRes_orderName(org.hyperic.hq.authz.shared.AuthzSubjectLocal user, java.lang.Boolean fSystem)"
+ * @ejb:finder signature="java.util.Collection findViewableSvcRes_orderName(java.lang.Integer uid, java.lang.Boolean fSystem)"
  *      query=""
  *      unchecked="true"
  *      result-type-mapping="Local"
  * @jboss:declared-sql 
-        signature="java.util.Collection findViewableSvcRes_orderName(org.hyperic.hq.authz.shared.AuthzSubjectLocal user, java.lang.Boolean fSystem)"
+        signature="java.util.Collection findViewableSvcRes_orderName(java.lang.Integer uid, java.lang.Boolean fSystem)"
  *      distinct="true"
  *      additional-columns=", EAM_RESOURCE.sort_name"
  *      from=",     EAM_SUBJECT_ROLE_MAP srm,
@@ -113,8 +113,8 @@ import org.hyperic.hq.authz.shared.ResourceValue;
                 AND rom.role_id = rgm.role_id 
                 AND rgm.resource_group_id = rgrm.resource_group_id 
                 AND rgrm.resource_id = EAM_RESOURCE.id 
-                AND ( srm.subject_id = {0.id} OR 
-                      EAM_RESOURCE.subject_id = {0.id})
+                AND ( srm.subject_id = {0} OR 
+                      EAM_RESOURCE.subject_id = {0})
                 AND EAM_RESOURCE.resource_type_id in (
                       SELECT rt.id FROM EAM_RESOURCE_TYPE rt
                       WHERE rt.name = 'covalentEAMService' or rt.name='covalentAuthzResourceGroup')
