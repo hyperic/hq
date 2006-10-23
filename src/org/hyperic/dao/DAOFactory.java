@@ -75,7 +75,7 @@ public abstract class DAOFactory
     public static final int HIBERNATE = 1;
     public static final int HIBERNATE_MOCKTEST = 2;
 
-    public static int DEFAULT = HIBERNATE;
+    protected static int DEFAULT = HIBERNATE;
 
     // Appdef DAOs
     public abstract AgentDAO getAgentDAO();
