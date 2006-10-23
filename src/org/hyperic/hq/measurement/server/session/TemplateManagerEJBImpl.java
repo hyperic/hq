@@ -91,9 +91,7 @@ import org.hyperic.util.pager.Pager;
 
 /** The TemplateManagerEJB class is a stateless session bean that can be
  *  used to interact with Template EJB's
- * <p>
  *
- * </p>
  * @ejb:bean name="TemplateManager"
  *      jndi-name="ejb/measurement/TemplateManager"
  *      local-jndi-name="LocalTemplateManager"
@@ -135,15 +133,10 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    ///////////////////////////////////////
-    // operations
-
-    /** <p>
+    /**
      * Create a RawMeasurement Template
-     * </p><p>
      *
      * @return a MeasurementTemplate ID
-     * </p>
      * @ejb:interface-method
      */
     public MeasurementTemplateValue createTemplate(AuthzSubjectValue subject,
@@ -157,12 +150,10 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                               (MeasurementArgValue[])null);
     }
 
-    /** <p>
+    /**
      * Create a DerivedMeasurement Template
-     * </p><p>
      *
      * @return a MeasurementTemplate ID
-     * </p>
      * @ejb:interface-method
      */
     public MeasurementTemplateValue createTemplate(AuthzSubjectValue subject,
@@ -225,12 +216,10 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    /** <p>
+    /**
      * Get a measurement template
-     * </p><p>
      *
      * @return a MeasurementTemplate value
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
@@ -245,12 +234,10 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    /** <p>
+    /**
      * Look up a measurement template (for testing)
-     * </p><p>
      *
      * @return a MeasurementTemplate value
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
@@ -280,15 +267,12 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         return null;
     }
 
-    /** <p>
+    /**
      * Look up a measurement templates for an array of template IDs
-     * </p><p>
      *
      * @throws FinderException if no measurement templates are found.
-     *
      * @return a MeasurementTemplate value
      * 
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
@@ -305,13 +289,10 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         return valuePager.seek(mts, pc);
     }
 
-    /** <p>
+    /**
      * Look up a measurement templates for an array of template IDs
-     * </p><p>
      *
      * @return a list of MeasurementTemplate values
-     * 
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
@@ -324,17 +305,14 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    /** <p>
+    /**
      * Look up a measurement templates for a monitorable
      * and agent type.  All resources must have measurement templates.
      * otherwise, throw FinderException
-     * </p><p>
      *
      * @throws FinderException if no measurement templates are found.
      *
      * @return a MeasurementTemplate value
-     * 
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
@@ -380,16 +358,13 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    /** <p>
+    /**
      * Look up a measurement templates for a monitorable type and filtered
      * by categories and keyword.
-     * </p><p>
      *
      * @throws FinderException if no measurement templates are found.
-     *
      * @return a MeasurementTemplate value
      * 
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
@@ -472,13 +447,10 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    /** <p>
+    /**
      * Look up a measurement template IDs for a monitorable type.
-     * </p><p>
      *
      * @return an array of ID values
-     * 
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
@@ -500,14 +472,11 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         return ids;
     }
 
-    /** <p>
+    /**
      * Look up default measurement templates for a monitorable
      * and agent type.
-     * </p><p>
      *
      * @return a MeasurementTemplate value
-     * 
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
@@ -529,14 +498,11 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         return mtList;
     }
 
-    /** <p>
+    /**
      * Look up designated measurement templates for a monitorable
      * and agent type.
-     * </p><p>
      *
      * @return a MeasurementTemplate value
-     * 
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
@@ -585,12 +551,10 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         this.getRmMan().removeMeasurements(tmplId);
     }
 
-    /** <p>
+    /**
      * Remove a measurement template
-     * </p><p>
      *
      * @return a MeasurementTemplate value
-     * </p>
      * @ejb:interface-method
      */
     public void removeTemplate(AuthzSubjectValue subject, Integer tid)
@@ -606,12 +570,10 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    /** <p>
+    /**
      * Get the Product Monitoring Configuration
-     * </p><p>
      *
      * @return A String of HTML help.
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
@@ -995,7 +957,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                     tStmt.execute();
                     tStmt.close();
                     
-                    
                     // Next, create the derived measurement
                     int derivedid = (int)IDGeneratorFactory.
                         getNextId("TemplateManagerEJBImpl",
@@ -1086,9 +1047,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    ///////////////////////////////////////
-    // EJB operations
-
     /**
      * @see javax.ejb.SessionBean#ejbCreate()
      * @ejb:create-method
@@ -1130,5 +1088,4 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         throws EJBException, RemoteException {
         this.ctx = ctx;
     }
-
-} // end TemplateManager
+}
