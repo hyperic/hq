@@ -121,9 +121,11 @@ public class PlatformDAO extends HibernateDAO
                 p.getId(), "duplicate platform found with name: "+pv.getName());
         }
         p = newPlatform(pv);
-        Agent ag = new Agent();
-        ag.setId(agent.getId());
-        p.setAgent(ag);
+        if (agent != null) {
+            Agent ag = new Agent();
+            ag.setId(agent.getId());
+            p.setAgent(ag);
+        }
         save(p);
         return p;
     }
