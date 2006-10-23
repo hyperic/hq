@@ -36,7 +36,7 @@ public class MonitorableType extends PersistedObject
     // Fields    
      private String _name;
      private Integer _cid;
-     private Integer _appdefType;
+     private int _appdefType;
      private String _plugin;
      private Collection _measurementTemplates;
 
@@ -44,13 +44,13 @@ public class MonitorableType extends PersistedObject
     public MonitorableType() {
     }
 
-    public MonitorableType(String name, Integer appdefType, String plugin) {
+    public MonitorableType(String name, int appdefType, String plugin) {
         _name = name;
         _appdefType = appdefType;
         _plugin = plugin;
     }
 
-    public MonitorableType(String name, Integer cid, Integer appdefType,
+    public MonitorableType(String name, Integer cid, int appdefType,
                            String plugin, Collection measurementTemplates) {
         _name = name;
         _cid = cid;
@@ -76,11 +76,11 @@ public class MonitorableType extends PersistedObject
         _cid = cid;
     }
 
-    public Integer getAppdefType() {
+    public int getAppdefType() {
         return _appdefType;
     }
     
-    public void setAppdefType(Integer appdefType) {
+    public void setAppdefType(int appdefType) {
         _appdefType = appdefType;
     }
 
@@ -125,7 +125,7 @@ public class MonitorableType extends PersistedObject
         MonitorableTypeValue mtype = new MonitorableTypeValue();
         mtype.setId(getId());
         mtype.setName(getName());
-        mtype.setAppdefType(getAppdefType().intValue());
+        mtype.setAppdefType(getAppdefType());
         mtype.setPlugin(getPlugin());
 
         return mtype;

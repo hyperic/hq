@@ -60,7 +60,7 @@ public class MonitorableTypeDAO extends HibernateDAO
         super.remove(entity);
     }
 
-    public MonitorableType create(String name, Integer appdefType,
+    public MonitorableType create(String name, int appdefType,
                                   String plugin) {
         MonitorableType mt = new MonitorableType();
 
