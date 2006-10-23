@@ -126,10 +126,10 @@ public class ResourceDAO extends HibernateDAO {
     
     public Collection findByOwnerAndType(AuthzSubject owner,
                                          ResourceType type ) {
-        String sql ="from Resource where owner = ? and resourceType = ?";
+        String sql = "from Resource where owner = ? and resourceType = ?";
         return getSession().createQuery(sql)
             .setEntity(0, owner)
-            .setEntity(0, type)
+            .setEntity(1, type)
             .list();
     }
 }
