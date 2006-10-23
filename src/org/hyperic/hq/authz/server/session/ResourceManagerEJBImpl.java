@@ -47,7 +47,6 @@ import org.hyperic.hq.authz.Operation;
 import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.OperationValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -55,7 +54,6 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceLocal;
 import org.hyperic.hq.authz.shared.ResourcePK;
-import org.hyperic.hq.authz.shared.ResourceTypeLocal;
 import org.hyperic.hq.authz.shared.ResourceTypePK;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceVOHelperUtil;
@@ -67,7 +65,9 @@ import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 
 /**
- * Use this session bean to manipulate Resources, ResourceTypes and ResourceGroups. That is to say, Resources and their derivatives. Alteratively you can say, anything enity that starts with the word Resource.
+ * Use this session bean to manipulate Resources, ResourceTypes and
+ * ResourceGroups. That is to say, Resources and their derivatives.
+ * Alteratively you can say, anything enity that starts with the word Resource.
  *
  * All arguments and return values are value-objects.
  *
@@ -158,13 +158,13 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     public void saveResourceType(AuthzSubjectValue whoami,
                                  ResourceTypeValue type)
         throws PermissionException {
-        ResourceType typeLocal = getResourceTypeDAO().findById(type.getId());
+        ResourceType resType = getResourceTypeDAO().findById(type.getId());
 
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         pm.check(whoami.getId(),
-                 typeLocal.getResource().getResourceType(), typeLocal.getId(),
+                 resType.getResource().getResourceType(), resType.getId(),
                  AuthzConstants.typeOpModifyResourceType);
-        typeLocal.setResourceTypeValue(type);
+        resType.setResourceTypeValue(type);
         VOCache.getInstance().removeResourceType(type.getName());
     }
 
@@ -181,11 +181,10 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     public void addOperations(AuthzSubjectValue whoami,
                               ResourceTypeValue type,
                               OperationValue[] operations)
-        throws FinderException, NamingException, PermissionException {
-        Set opLocals = this.toLocals(operations);
-        ResourceTypeLocal typeLocal = this.lookupType(type);
-        typeLocal.setWhoami(this.lookupSubject(whoami));
-        typeLocal.addOperations(opLocals);
+        throws PermissionException {
+        ResourceType resType = getResourceTypeDAO().findById(type.getId());
+        Collection rtOps = resType.getOperations();
+        rtOps.addAll(toPojos(operations));
     }
 
     /**
@@ -201,11 +200,15 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     public void removeOperations(AuthzSubjectValue whoami,
                                  ResourceTypeValue type,
                                  OperationValue[] operations)
-        throws FinderException, NamingException, PermissionException {
-        Set opLocals = this.toLocals(operations);
-        ResourceTypeLocal typeLocal = this.lookupType(type);
-        typeLocal.setWhoami(this.lookupSubject(whoami));
-        typeLocal.removeOperations(opLocals);
+        throws PermissionException {
+        Set opPojos = toPojos(operations);
+        ResourceType resType = getResourceTypeDAO().findById(type.getId());
+        for (Iterator it = resType.getOperations().iterator(); it.hasNext(); ) {
+            Operation oper = (Operation) it.next();
+            if (opPojos.contains(oper)) {
+                it.remove();
+            }
+        }
     }
 
     /**
@@ -219,10 +222,9 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      */
     public void removeAllOperations(AuthzSubjectValue whoami,
                                     ResourceTypeValue type)
-        throws FinderException, NamingException, PermissionException {
-        ResourceTypeLocal typeLocal = this.lookupType(type);
-        typeLocal.setWhoami(this.lookupSubject(whoami));
-        typeLocal.removeAllOperations();
+        throws PermissionException {
+        ResourceType resType = getResourceTypeDAO().findById(type.getId());
+        resType.getOperations().clear();
     }
 
     /**
@@ -240,17 +242,17 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                               OperationValue[] operations)
         throws NamingException, CreateException, FinderException,
                PermissionException {
-        ResourceTypeLocal typeLocal = this.lookupType(type);
-        Set opLocals = this.toLocals(operations);
+        ResourceType resType = getResourceTypeDAO().findById(type.getId());
+        Set opPojos = toPojos(operations);
 
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         pm.check(whoami.getId(),
-                 typeLocal.getResource().getResourceType(), typeLocal.getId(),
+                 resType.getResource().getResourceType(), resType.getId(),
                  AuthzConstants.typeOpAddOperation);
         pm.check(whoami.getId(),
-                 typeLocal.getResource().getResourceType(), typeLocal.getId(),
+                 resType.getResource().getResourceType(), resType.getId(),
                  AuthzConstants.typeOpRemoveOperation);
-        typeLocal.setOperations(opLocals);
+        resType.setOperations(opPojos);
     }
 
     /**
@@ -550,8 +552,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         Collection resources;
 
         try {
-            AuthzSubjectLocal subjectLoc = getSubjectHome()
-                .findByPrimaryKey(subject.getPrimaryKey());
+            AuthzSubject subj = getSubjectDAO().findById(subject.getId());
 
             pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
 
@@ -560,8 +561,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
             switch(pc.getSortattribute()) {
                 case SortAttribute.RESOURCE_NAME:
                 default:
-                    resources = pm.findServiceResources(subjectLoc,
-                                                        Boolean.FALSE);
+                    resources = pm.findServiceResources(subj, Boolean.FALSE);
                     break;
             }
         } catch (NamingException e) {
