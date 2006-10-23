@@ -302,10 +302,10 @@ public class ServiceDAO extends HibernateDAO
     {
         String sql="select sv from Platform p " +
                    " join fetch p.servers s " +
-                   " join fetch s.serviceType st " +
+                   " join fetch s.serverType st " +
                    " join fetch s.services sv "+
-                   "where p.id=? and" +
-                   "      st.virtual=?" +
+                   "where p.id=? and " +
+                   "      st.virtual=? " +
                    "order by sv.sortName " +
                    (asc ? "asc" : "desc");
         return getSession().createQuery(sql)
