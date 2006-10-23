@@ -41,6 +41,7 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.ResourceType;
 import org.hyperic.hq.authz.server.session.AuthzSession;
 import org.hyperic.hq.common.SystemException;
@@ -313,8 +314,7 @@ public class PermissionManagerImpl
         return getResourceHome().findInGroup_orderName_asc(groupId, fsystem);
     }
 
-    public Collection findServiceResources(AuthzSubjectLocal subject,
-                                           Boolean fsystem)
+    public Collection findServiceResources(AuthzSubject subj, Boolean fsystem)
         throws NamingException, FinderException
     {
         return getResourceHome().findSvcRes_orderName(fsystem);

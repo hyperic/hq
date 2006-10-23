@@ -33,6 +33,7 @@ import java.util.List;
 import javax.ejb.FinderException;
 import javax.naming.NamingException;
 
+import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.ResourceType;
 import org.hyperic.hq.authz.server.session.PagerProcessor_operation;
 import org.hyperic.util.pager.PageControl;
@@ -239,7 +240,6 @@ public interface PermissionManager {
                                         Integer groupId, Boolean fsystem)
         throws NamingException, FinderException;
 
-    public Collection findServiceResources(AuthzSubjectLocal subject,
-                                           Boolean fsystem)
+    public Collection findServiceResources(AuthzSubject subj, Boolean fsystem)
         throws NamingException, FinderException;
 }
