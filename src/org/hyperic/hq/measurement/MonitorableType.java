@@ -28,6 +28,7 @@ package org.hyperic.hq.measurement;
 import java.util.Collection;
 
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.measurement.shared.MonitorableTypeValue;
 
 public class MonitorableType extends PersistedObject
     implements java.io.Serializable {
@@ -113,5 +114,20 @@ public class MonitorableType extends PersistedObject
     public int hashCode() {
         int result = 17;
         return result;
-    }   
+    }
+
+    /**
+     * Legacy EJB DTO pattern
+     * @deprecated Use (this) MonitorableType object instead
+     */
+    public MonitorableTypeValue getMonitorableTypeValue() {
+
+        MonitorableTypeValue mtype = new MonitorableTypeValue();
+        mtype.setId(getId());
+        mtype.setName(getName());
+        mtype.setAppdefType(getAppdefType().intValue());
+        mtype.setPlugin(getPlugin());
+
+        return mtype;
+    }
 }

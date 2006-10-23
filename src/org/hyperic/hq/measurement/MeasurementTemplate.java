@@ -29,6 +29,8 @@ import java.util.Collection;
 
 import org.hyperic.hibernate.PersistedObject;
 
+import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+
 public class MeasurementTemplate extends PersistedObject
     implements java.io.Serializable {
 
@@ -270,6 +272,32 @@ public class MeasurementTemplate extends PersistedObject
             coll.add(a);
         }
     }
+
+    /**
+     * Legacy EJB DTO pattern
+     * @deprecated Use (this) MeasurementTemplate object instead
+     */
+    public MeasurementTemplateValue getMeasurementTemplateValue() {
+        MeasurementTemplateValue value = new MeasurementTemplateValue();
+        value.setId(getId());
+        value.setName(getName());
+        value.setAlias(getAlias());
+        value.setUnits(getUnits());
+        value.setCollectionType(getCollectionType().intValue());
+        value.setDefaultOn(isDefaultOn());
+        value.setDefaultInterval(getDefaultInterval());
+        value.setDesignate(isDesignate());
+        value.setTemplate(getTemplate());
+        value.setExpressionData(getExpressionData());
+        value.setPlugin(getPlugin());
+        value.setCtime(getCtime());
+        value.setMtime(getMtime());
+
+        MonitorableType mt = getMonitorableType();
+        value.setMonitorableType(mt.getMonitorableTypeValue());
+        Category cat = getCategory();
+        value.setCategory(cat.getCategoryValue());
+
+        return value;
+    }
 }
-
-

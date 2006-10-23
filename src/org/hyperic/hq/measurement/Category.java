@@ -28,6 +28,7 @@ package org.hyperic.hq.measurement;
 import java.util.Collection;
 
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.measurement.shared.CategoryValue;
 
 public class Category extends PersistedObject
     implements java.io.Serializable {
@@ -90,6 +91,15 @@ public class Category extends PersistedObject
         int result = 17;
         return result;
     }   
+
+    /**
+     * Legacy EJB DTO pattern
+     * @deprecated Use (this) Category object instead
+     */
+    public CategoryValue getCategoryValue() {
+        CategoryValue category = new CategoryValue();
+        category.setId(getId());
+        category.setName(getName());
+        return category;
+    }
 }
-
-
