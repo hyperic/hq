@@ -25,8 +25,8 @@
 
 package org.hyperic.hq.autoinventory;
 
-import org.hyperic.hq.appdef.Server;
-import org.hyperic.hq.appdef.AppdefResource;
+import org.hyperic.hq.appdef.server.session.AppdefResource;
+import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
 import org.hyperic.hq.appdef.shared.AIServicePK;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;

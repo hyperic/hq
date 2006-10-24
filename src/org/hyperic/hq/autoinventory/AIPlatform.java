@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.autoinventory;
 
-import org.hyperic.hq.appdef.PlatformBase;
+import org.hyperic.hq.appdef.server.session.PlatformBase;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIPlatformPK;
 
