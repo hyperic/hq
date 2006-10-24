@@ -33,7 +33,7 @@ public class HibernateDAOFactory extends DAOFactory
 {
     private static SessionFactory sessionFactory;
 
-    protected Session getCurrentSession()
+    public  Session getCurrentSession()
     {
         if (sessionFactory == null) {
             synchronized(this) {
@@ -250,6 +250,14 @@ public class HibernateDAOFactory extends DAOFactory
     public PluginDAO getPluginDAO()
     {
         return new PluginDAO(getCurrentSession());
+    }
+
+    public ActionDAO getActionDAO() {
+        return new ActionDAO(getCurrentSession());
+    }
+
+    public AlertDefinitionDAO getAlertDefinitionDAO() {
+        return new AlertDefinitionDAO(getCurrentSession());
     }
 }
 

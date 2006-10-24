@@ -26,11 +26,11 @@
 package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
-import org.hyperic.hq.appdef.Application;
 import org.hyperic.hq.appdef.AppService;
-import org.hyperic.hq.appdef.ApplicationType;
 import org.hyperic.hq.appdef.AppSvcDependency;
-import org.hyperic.hq.appdef.Service;
+import org.hyperic.hq.appdef.server.session.Application;
+import org.hyperic.hq.appdef.server.session.ApplicationType;
+import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.ApplicationPK;

@@ -26,7 +26,7 @@
 package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
-import org.hyperic.hq.appdef.ServerType;
+import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerTypePK;
 

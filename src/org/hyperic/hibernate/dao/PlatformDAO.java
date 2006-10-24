@@ -28,12 +28,11 @@ package org.hyperic.hibernate.dao;
 import org.hibernate.Session;
 import org.hibernate.NonUniqueObjectException;
 import org.hibernate.ObjectNotFoundException;
-import org.hyperic.hq.appdef.Platform;
-import org.hyperic.hq.appdef.PlatformType;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
-import org.hyperic.hq.appdef.Application;
+import org.hyperic.hq.appdef.server.session.Application;
+import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.AgentPK;
@@ -67,6 +66,7 @@ public class PlatformDAO extends HibernateDAO {
 
     public void save(Platform entity) {
         super.save(entity);
+        getSession().flush();  // XXX: Flush so VOCache will work
     }
 
     public void remove(Platform entity) {

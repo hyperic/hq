@@ -2,10 +2,10 @@ package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
 import org.hyperic.hq.appdef.AppService;
-import org.hyperic.hq.appdef.Service;
-import org.hyperic.hq.appdef.Application;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.AppSvcDependency;
+import org.hyperic.hq.appdef.server.session.Application;
+import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ApplicationPK;
 import org.hyperic.hq.appdef.shared.ServiceClusterPK;

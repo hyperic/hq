@@ -1,8 +1,8 @@
 package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
-import org.hyperic.hq.appdef.ApplicationType;
-import org.hyperic.hq.appdef.ServiceType;
+import org.hyperic.hq.appdef.server.session.ApplicationType;
+import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationTypePK;
 import org.hyperic.hq.appdef.shared.ServiceTypePK;

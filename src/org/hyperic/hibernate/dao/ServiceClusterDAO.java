@@ -2,7 +2,7 @@ package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
 import org.hyperic.hq.appdef.ServiceCluster;
-import org.hyperic.hq.appdef.Service;
+import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
 import org.hyperic.hq.appdef.shared.AppSvcClustIncompatSvcException;

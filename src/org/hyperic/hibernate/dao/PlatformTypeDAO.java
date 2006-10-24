@@ -26,15 +26,12 @@
 package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
-import org.hyperic.hq.appdef.PlatformType;
+import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 
 import java.util.Collection;
 
-/**
- *
- */
 public class PlatformTypeDAO extends HibernateDAO
 {
     public PlatformTypeDAO(Session session)
@@ -52,26 +49,17 @@ public class PlatformTypeDAO extends HibernateDAO
         super.evict(entity);
     }
 
-    public PlatformType merge(PlatformType entity)
-    {
-        return (PlatformType)super.merge(entity);
-    }
-
     public void save(PlatformType entity)
     {
         super.save(entity);
     }
 
-    public void remove(PlatformType entity)
-    {
+    public void remove(PlatformType entity) {
         super.remove(entity);
     }
 
-    public PlatformType create(PlatformTypeValue pvalue)
-    {
-        PlatformType pt = new PlatformType();
-        pt.setName(pvalue.getName());
-        pt.setPlugin(pvalue.getPlugin());
+    public PlatformType create(PlatformTypeValue pvalue) {
+        PlatformType pt = new PlatformType(pvalue);
         save(pt);
         return pt;
     }
