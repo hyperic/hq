@@ -1,5 +1,8 @@
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+
 /*
 * NOTE: This copyright does *not* cover user programs that use HQ
 * program services by normal system calls through the application
@@ -61,6 +64,13 @@ public abstract class ServerBase extends AppdefResource
     public void setServicesAutomanaged(boolean servicesAutomanaged)
     {
         this.servicesAutomanaged = servicesAutomanaged;
+    }
+
+    public AppdefEntityID getEntityId()
+    {
+        return new AppdefEntityID(
+            AppdefEntityConstants.APPDEF_TYPE_SERVER,
+            getId().intValue());
     }
 
     /**

@@ -119,19 +119,5 @@ public abstract class AppdefResource extends AppdefBean
      * Get the appdefEntityId for this platform
      * legacy code from EJB entity bean
      */
-    public AppdefEntityID getEntityId() {
-        if(appdefEntityId == null) {
-            appdefEntityId = new AppdefEntityID(
-                        AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
-                        getId().intValue());
-        } else if (!appdefEntityId.getId().equals(getId())) {
-            // Sometimes the id object can get stale if this entity bean is
-            // being reused from the bean pool and was previously used by
-            // a different object.
-            appdefEntityId = new AppdefEntityID(
-                        AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
-                        getId().intValue());
-        }
-        return appdefEntityId;
-    }
+    public abstract AppdefEntityID getEntityId();
 }

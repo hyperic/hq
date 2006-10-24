@@ -29,6 +29,8 @@ import org.hyperic.hq.appdef.Server;
 import org.hyperic.hq.appdef.AppdefResource;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
 import org.hyperic.hq.appdef.shared.AIServicePK;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 
 /**
  * Pojo for hibernate hbm mapping file
@@ -58,6 +60,13 @@ public class AIService extends AppdefResource
     {
         super();
         setAIServiceValue(sv);
+    }
+
+    public AppdefEntityID getEntityId()
+    {
+        return new AppdefEntityID(
+            AppdefEntityConstants.APPDEF_TYPE_SERVICE,
+            getId().intValue());
     }
 
     public String getServiceTypeName()

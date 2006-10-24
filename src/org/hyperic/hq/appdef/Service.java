@@ -28,6 +28,8 @@ package org.hyperic.hq.appdef;
 import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ServiceLightValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hibernate.dao.ServiceTypeDAO;
 import org.hyperic.dao.DAOFactory;
 import org.apache.commons.logging.Log;
@@ -65,6 +67,13 @@ public class Service extends AppdefResource
     {
         super();
         setId(id);
+    }
+
+    public AppdefEntityID getEntityId()
+    {
+        return new AppdefEntityID(
+            AppdefEntityConstants.APPDEF_TYPE_SERVICE,
+            getId().intValue());
     }
 
     public boolean isAutodiscoveryZombie()

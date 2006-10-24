@@ -29,6 +29,8 @@ import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ServiceClusterPK;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.ApplicationPK;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 
 import java.util.Collection;
 import java.util.Set;
@@ -58,6 +60,13 @@ public class Application extends AppdefResource
     {
         super();
         setId(id);
+    }
+
+    public AppdefEntityID getEntityId()
+    {
+        return new AppdefEntityID(
+            AppdefEntityConstants.APPDEF_TYPE_APPLICATION,
+            getId().intValue());
     }
 
     public String getEngContact()
