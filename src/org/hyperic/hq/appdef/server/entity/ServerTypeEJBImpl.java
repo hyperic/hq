@@ -265,21 +265,6 @@ implements EntityBean {
     public abstract void setPlatformTypes(java.util.Set platformTypes);
 
     /**
-     * Create a service type for this server type   
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
-    public ServiceType createServiceType(ServiceTypeValue stv)
-    {
-        // first create the service type
-        ServiceType stl =
-            DAOFactory.getDAOFactory().getServiceTypeDAO().create(stv);
-        // now set the server type to this
-        stl.setServerType((ServerTypeLocal)this.getSelfLocal());
-        return stl;
-    }
-    
-    /**
      * Get the non-cmr'd ServerTypeValue object
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"

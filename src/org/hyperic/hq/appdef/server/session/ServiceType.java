@@ -25,10 +25,8 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.appdef.TierType;
 import org.hyperic.hq.appdef.shared.ServiceTypePK;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
-import org.hyperic.hq.appdef.shared.ServerTypeLocal;
 
 import java.util.Collection;
 
@@ -40,7 +38,7 @@ public class ServiceType extends AppdefResourceType
     private String plugin;
     private boolean isInternal;
     private ServerType serverType;
-    private TierType tierType;
+    private String tierType;
     private Collection applicationTypes;
     private Collection appServices;
     private Collection services;
@@ -95,12 +93,12 @@ public class ServiceType extends AppdefResourceType
         this.serverType = serverType;
     }
 
-    public TierType getTierType()
+    public String getTierType()
     {
         return this.tierType;
     }
 
-    public void setTierType(TierType tierType)
+    public void setTierType(String tierType)
     {
         this.tierType = tierType;
     }
@@ -190,20 +188,6 @@ public class ServiceType extends AppdefResourceType
         setIsInternal( val.getIsInternal() );
         setModifiedTime(val.getMTime());
         setCreationTime(val.getCTime());
-    }
-
-    /**
-     * legacy EJB setter
-     * @deprecated use setServerType(ServerType) instead
-     * @param serverType
-     */
-    public void setServerType(ServerTypeLocal serverType)
-    {
-        if (serverType != null && serverType.getId() != null) {
-            ServerType st = new ServerType();
-            st.setId(serverType.getId());
-            setServerType(st);
-        }
     }
 
     public boolean equals(Object obj)
