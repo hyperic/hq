@@ -52,7 +52,11 @@ public class NetifDetector
         for (int i=0; i<ifNames.length; i++) {
             String name = ifNames[i];
             NetInterfaceConfig ifconfig;
-            
+
+            if (name.indexOf(':') != -1) {
+                continue; //filter out virtual ips
+            }
+
             try {
                 ifconfig = sigar.getNetInterfaceConfig(name);
             } catch (SigarException e) {
