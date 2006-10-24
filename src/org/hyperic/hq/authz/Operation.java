@@ -26,6 +26,7 @@
 package org.hyperic.hq.authz;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -39,7 +40,7 @@ public class Operation extends AuthzNamedEntity implements Serializable {
     // Fields
      private ResourceType resourceType;
      private Integer cid;
-     private Collection roles;
+     private Collection roles = new ArrayList();
 
      private OperationValue operationValue = new OperationValue();
      

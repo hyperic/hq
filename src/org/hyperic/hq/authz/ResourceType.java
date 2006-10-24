@@ -26,6 +26,7 @@
 package org.hyperic.hq.authz;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -37,8 +38,8 @@ public class ResourceType extends AuthzNamedEntity implements Serializable
     private Integer cid;
     private Resource resource;
     private boolean system;
-    private Collection operations;
-    private Collection resources;
+    private Collection operations = new ArrayList();
+    private Collection resources = new ArrayList();
 
     private ResourceTypeValue resourceTypeValue = new ResourceTypeValue();
 

@@ -25,13 +25,15 @@
 
 package org.hyperic.hq.authz;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
 import org.hyperic.hq.authz.shared.RoleValue;
 
-public class Role extends AuthzNamedEntity implements java.io.Serializable {
+public class Role extends AuthzNamedEntity implements Serializable {
 
     // Fields    
 
@@ -39,9 +41,9 @@ public class Role extends AuthzNamedEntity implements java.io.Serializable {
      private String description;
      private boolean system;
      private Resource resource;
-     private Collection resourceGroups;
-     private Collection operations;
-     private Collection subjects;
+     private Collection resourceGroups = new ArrayList();
+     private Collection operations = new ArrayList();
+     private Collection subjects = new ArrayList();
 
      private RoleValue roleValue = new RoleValue();
      

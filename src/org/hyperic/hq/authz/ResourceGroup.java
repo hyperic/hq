@@ -26,6 +26,7 @@
 package org.hyperic.hq.authz;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -45,8 +46,8 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
     private long mtime;
     private String modifiedBy;
     private Resource resource;
-    private Collection resources;
-    private Collection roles;
+    private Collection resources = new ArrayList();
+    private Collection roles = new ArrayList();
 
     private ResourceGroupValue resourceGroupValue = new ResourceGroupValue();
 

@@ -46,8 +46,8 @@ public class AuthzSubject extends AuthzNamedEntity
      private boolean active;
      private boolean system;
      private Resource resource;
-     private Collection roles;
-     private Collection userConfigs;
+     private Collection roles = new ArrayList();
+     private Collection userConfigs = new ArrayList();
      
      private AuthzSubjectValue authzSubjectValue = new AuthzSubjectValue();
 
