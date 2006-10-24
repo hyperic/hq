@@ -231,10 +231,11 @@ public class ServerDAO extends HibernateDAO
     public List findByPlatformAndType_orderName(Integer id, Integer tid,
                                                 Boolean isVirtual)
     {
-        String sql="from Server where platform.id=? and " +
-                   "serverType.id=? " +
-                   "serverType.virtual=? " +
-                   "order by sortName";
+        String sql="from Server s join fetch s.serverType st " +
+                   "where s.platform.id=? and " +
+                   "st.id=? and " +
+                   "st.virtual=? " +
+                   "order by s.sortName";
         return getSession().createQuery(sql)
             .setInteger(0, id.intValue())
             .setInteger(1, tid.intValue())
