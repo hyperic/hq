@@ -26,6 +26,7 @@
 package org.hyperic.hibernate.dao;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.hibernate.Session;
 
@@ -84,5 +85,17 @@ public class MeasurementTemplateDAO extends HibernateDAO
 
         save(mt);
         return mt;
+    }
+
+    public List findTemplates(Integer ids[]) {
+        StringBuffer buf = 
+            new StringBuffer("from MeasurementTemplate where id IN (");
+        int len = ids.length;
+        for (int i = 0; i < len - 1; i++) {
+            buf.append(ids[i] + ", ");
+        }
+        buf.append(ids[len - 1] + ")");
+
+        return getSession().createQuery(buf.toString()).list();
     }
 }
