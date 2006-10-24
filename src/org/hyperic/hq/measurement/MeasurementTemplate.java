@@ -39,7 +39,7 @@ public class MeasurementTemplate extends PersistedObject
     private String _name;
     private String _alias;
     private String _units;
-    private Integer _collectionType;
+    private int _collectionType;
     private boolean _defaultOn;
     private long _defaultInterval;
     private boolean _designate;
@@ -58,7 +58,7 @@ public class MeasurementTemplate extends PersistedObject
     }
 
     public MeasurementTemplate(String name, String alias,
-                               Integer collectionType, boolean defaultOn,
+                               int collectionType, boolean defaultOn,
                                long defaultInterval, boolean designate,
                                String template, long ctime, long mtime) {
         _name = name;
@@ -73,7 +73,7 @@ public class MeasurementTemplate extends PersistedObject
     }
 
     public MeasurementTemplate(String name, String alias,
-                               String units, Integer collectionType, 
+                               String units, int collectionType, 
                                boolean defaultOn, long defaultInterval, 
                                boolean designate, String template,
                                String plugin, byte[] expressionData, 
@@ -133,11 +133,11 @@ public class MeasurementTemplate extends PersistedObject
         _units = units;
     }
 
-    public Integer getCollectionType() {
+    public int getCollectionType() {
         return _collectionType;
     }
 
-    public void setCollectionType(Integer collectionType) {
+    public void setCollectionType(int collectionType) {
         _collectionType = collectionType;
     }
 
@@ -265,7 +265,7 @@ public class MeasurementTemplate extends PersistedObject
         value.setName(getName());
         value.setAlias(getAlias());
         value.setUnits(getUnits());
-        value.setCollectionType(getCollectionType().intValue());
+        value.setCollectionType(getCollectionType());
         value.setDefaultOn(isDefaultOn());
         value.setDefaultInterval(getDefaultInterval());
         value.setDesignate(isDesignate());

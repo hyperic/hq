@@ -73,7 +73,7 @@ public class MeasurementTemplateDAO extends HibernateDAO
         mt.setName(lite.getName()); 
         mt.setAlias(lite.getAlias());
         mt.setUnits(lite.getUnits());
-        mt.setCollectionType(new Integer(lite.getCollectionType()));
+        mt.setCollectionType(lite.getCollectionType());
         mt.setDefaultOn(lite.getDefaultOn());
         mt.setDefaultInterval(lite.getDefaultInterval());
         mt.setDesignate(lite.getDesignate());
