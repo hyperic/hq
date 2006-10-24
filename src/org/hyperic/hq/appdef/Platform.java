@@ -23,8 +23,11 @@
  * USA. 
  */
 
-package org.hyperic.hq.appdef;
+package org.hyperic.hq.appdef.server.session;
 
+import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -61,7 +64,7 @@ public class Platform extends PlatformBase
         return this.commentText;
     }
 
-    public void setCommentText(String comment)
+    void setCommentText(String comment)
     {
         this.commentText = comment;
     }

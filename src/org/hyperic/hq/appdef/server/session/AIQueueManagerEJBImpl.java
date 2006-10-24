@@ -45,7 +45,6 @@ import org.hyperic.hibernate.dao.PlatformDAO;
 import org.hyperic.hibernate.dao.AIPlatformDAO;
 import org.hyperic.hibernate.dao.AIServerDAO;
 import org.hyperic.hibernate.dao.AIIpDAO;
-import org.hyperic.hq.appdef.Platform;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AIIpPK;
 import org.hyperic.hq.appdef.shared.AIIpValue;

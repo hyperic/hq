@@ -23,7 +23,7 @@
  * USA. 
  */
 
-package org.hyperic.hq.appdef;
+package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.appdef.shared.ApplicationTypePK;
 import org.hyperic.hq.appdef.shared.ApplicationTypeValue;

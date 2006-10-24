@@ -28,8 +28,6 @@ package org.hyperic.hq.appdef.server.session;
 import org.hyperic.util.pager.PagerProcessor;
 
 import org.hyperic.hq.appdef.shared.ServiceVOHelperUtil;
-import org.hyperic.hq.appdef.Service;
-import org.hyperic.hq.appdef.ServiceType;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ServiceCluster;
 

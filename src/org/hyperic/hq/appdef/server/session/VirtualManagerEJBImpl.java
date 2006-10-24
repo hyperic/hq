@@ -37,6 +37,7 @@ import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -91,16 +92,16 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
     private final String SERVER_VIEW   = "EAM_VIRT_SVR_VIEW";
     private final String SERVICE_VIEW  = "EAM_VIRT_SVC_VIEW";
     
-    private PlatformVOHelperLocal platHelper = null;
     private ServerVOHelperLocal   svrHelper  = null;
     private ServiceVOHelperLocal  svcHelper  = null;
     
     private PlatformValue getPlatformValue(AuthzSubjectValue subject, Integer id)
         throws CreateException, NamingException, FinderException,
-               PermissionException {
-        if (platHelper == null)
-            platHelper = PlatformVOHelperUtil.getLocalHome().create();
-        PlatformValue platform = platHelper.getPlatformValue(new PlatformPK(id));
+               PermissionException 
+    {
+        Platform p = DAOFactory.getDAOFactory().getPlatformDAO().findById(id);
+        
+        PlatformValue platform = p.getPlatformValue();
         checkViewPermission(subject, platform.getEntityId());
         return platform;
     }

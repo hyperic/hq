@@ -27,8 +27,6 @@ package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.appdef.shared.ServerVOHelperLocal;
 import org.hyperic.hq.appdef.shared.ServerVOHelperUtil;
-import org.hyperic.hq.appdef.ServerType;
-import org.hyperic.hq.appdef.Server;
 import org.hyperic.util.pager.PagerProcessor;
 
 public class PagerProcessor_server implements PagerProcessor {

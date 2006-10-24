@@ -40,6 +40,9 @@ import javax.ejb.SessionContext;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -58,7 +61,6 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformTypePK;
-import org.hyperic.hq.appdef.shared.PlatformVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.ServerTypePK;
@@ -67,14 +69,6 @@ import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ServiceTypePK;
 import org.hyperic.hq.appdef.shared.UpdateException;
-import org.hyperic.hq.appdef.Server;
-import org.hyperic.hq.appdef.ServerType;
-import org.hyperic.hq.appdef.Service;
-import org.hyperic.hq.appdef.ServiceType;
-import org.hyperic.hq.appdef.Platform;
-import org.hyperic.hq.appdef.PlatformType;
-import org.hyperic.hq.appdef.Application;
-import org.hyperic.hq.appdef.ApplicationType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -93,10 +87,12 @@ import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.SortAttribute;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.server.session.PlatformType;
+import org.hyperic.hq.appdef.server.session.ServerType;
+import org.hyperic.hq.appdef.server.session.ServiceType;
 
 /**
  * Parent abstract class of all appdef session ejbs
@@ -1350,8 +1346,7 @@ public abstract class AppdefSessionEJB
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 Platform plat = 
                     this.findPlatformByPK(new PlatformPK(intID));
-                return PlatformVOHelperUtil.getLocalHome().create()
-                            .getPlatformValue(plat);
+                return plat.getPlatformValue();
             
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                 Server serv = 

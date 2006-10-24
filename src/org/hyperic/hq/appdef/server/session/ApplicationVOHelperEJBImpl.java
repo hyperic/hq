@@ -38,7 +38,6 @@ import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
 import org.hyperic.hq.appdef.AppService;
-import org.hyperic.hq.appdef.Application;
 import org.hyperic.hq.common.SystemException;
 
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -47,6 +46,8 @@ import org.hyperic.hq.authz.shared.ResourceValue;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.Application;
+
 
 /**
  * @ejb:bean name="ApplicationVOHelper"

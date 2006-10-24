@@ -23,9 +23,11 @@
  * USA. 
  */
 
-package org.hyperic.hq.appdef;
+package org.hyperic.hq.appdef.server.session;
 
 import java.io.Serializable;
+
+import org.hyperic.hq.appdef.AppdefBean;
 
 /**
  *

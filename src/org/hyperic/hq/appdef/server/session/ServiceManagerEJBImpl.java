@@ -73,12 +73,7 @@ import org.hyperic.hq.appdef.shared.ServiceVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.appdef.Service;
-import org.hyperic.hq.appdef.ServiceType;
-import org.hyperic.hq.appdef.ServerType;
-import org.hyperic.hq.appdef.Server;
 import org.hyperic.hq.appdef.AppService;
-import org.hyperic.hq.appdef.Application;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -105,6 +100,12 @@ import org.hyperic.hibernate.dao.ConfigResponseDAO;
 import org.hyperic.hibernate.dao.ServiceClusterDAO;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.server.session.PlatformType;
+import org.hyperic.hq.appdef.server.session.ServerType;
+import org.hyperic.hq.appdef.server.session.ServiceType;
 
 /**
  * This class is responsible for managing Server objects in appdef

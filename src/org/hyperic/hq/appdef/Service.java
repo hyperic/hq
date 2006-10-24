@@ -23,8 +23,10 @@
  * USA. 
  */
 
-package org.hyperic.hq.appdef;
+package org.hyperic.hq.appdef.server.session;
 
+import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ServiceLightValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;

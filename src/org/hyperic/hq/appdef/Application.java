@@ -23,8 +23,9 @@
  * USA. 
  */
 
-package org.hyperic.hq.appdef;
+package org.hyperic.hq.appdef.server.session;
 
+import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ServiceClusterPK;
 import org.hyperic.hq.appdef.shared.ApplicationValue;

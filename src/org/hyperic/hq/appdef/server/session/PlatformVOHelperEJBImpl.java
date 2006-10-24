@@ -51,12 +51,10 @@ import org.hyperic.hq.appdef.shared.ServerTypePK;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerVOHelperLocal;
 import org.hyperic.hq.appdef.shared.ServerVOHelperUtil;
-import org.hyperic.hq.appdef.Platform;
-import org.hyperic.hq.appdef.Server;
-import org.hyperic.hq.appdef.PlatformType;
-import org.hyperic.hq.appdef.ServerType;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.PlatformType;
 
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -92,38 +90,6 @@ public class PlatformVOHelperEJBImpl extends AppdefSessionEJB
         + " A.VERSION, A.CTIME, A.MTIME, T.NAME, T.SORT_NAME, T.ID, T.MTIME, T.CTIME "
         + " FROM EAM_AGENT A, EAM_AGENT_TYPE T WHERE A.ID = ? AND A.AGENT_TYPE_ID = T.ID ";
     
-    /**
-     * Get a value object for this platform
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
-     */
-    public PlatformValue getPlatformValue(PlatformPK ppk) throws FinderException,
-        NamingException {
-            PlatformValue vo = VOCache.getInstance().getPlatform(ppk.getId());
-            if(vo != null) {
-                return vo;
-            }
-            Platform ejb = getPlatformDAO().findByPrimaryKey(ppk);
-            return getPlatformValue(ejb);
-    }
-                
-    /**
-     * Get a value object for this platform
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
-     */
-    public PlatformValue getPlatformValue(Platform ejb) throws
-        NamingException {
-        // first see if its in the cache
-        PlatformValue pv = VOCache.getInstance()
-            .getPlatform(ejb.getId());
-        if (pv != null) {
-            log.debug("Returning cached instance for platform: " + pv.getId());
-            return pv;
-        }
-        return (PlatformValue)getPlatformValueImpl(ejb, false);
-    }
-
     /**
      * @ejb:interface-method
      * @ejb:transaction type="Required"

@@ -23,27 +23,21 @@
  * USA. 
  */
 
-package org.hyperic.hq.appdef;
+package org.hyperic.hq.appdef.server.session;
 
-import org.hibernate.NonUniqueObjectException;
-import org.hibernate.ObjectNotFoundException;
-import org.hyperic.dao.DAOFactory;
-import org.hyperic.hibernate.dao.AgentDAO;
-import org.hyperic.hibernate.dao.ConfigResponseDAO;
-import org.hyperic.hibernate.dao.PlatformTypeDAO;
-import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.AgentPK;
-import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.PlatformTypeValue;
-import org.hyperic.hq.appdef.shared.PlatformTypePK;
-
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Set;
+
+import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.appdef.shared.AIPlatformValue;
+import org.hyperic.hq.appdef.shared.PlatformTypePK;
+import org.hyperic.hq.appdef.shared.PlatformTypeValue;
+import org.hyperic.hq.appdef.shared.PlatformValue;
 
 public class PlatformType extends AppdefResourceType {
     private String            _os;
@@ -55,14 +49,19 @@ public class PlatformType extends AppdefResourceType {
     private PlatformTypePK    _pkey = new PlatformTypePK();
     private PlatformTypeValue _platformTypeValue = new PlatformTypeValue();
 
-    public PlatformType() {
+    protected PlatformType() {
     }
 
+    public PlatformType(PlatformTypeValue ptv) {
+        setName(ptv.getName());
+        setPlugin(ptv.getPlugin());
+    }
+    
     public String getOs() {
         return _os;
     }
 
-    public void setOs(String os) {
+    protected void setOs(String os) {
         _os = os;
     }
 
@@ -70,7 +69,7 @@ public class PlatformType extends AppdefResourceType {
         return _osVersion;
     }
 
-    public void setOsVersion(String osVersion) {
+    protected void setOsVersion(String osVersion) {
         _osVersion = osVersion;
     }
 
@@ -78,7 +77,7 @@ public class PlatformType extends AppdefResourceType {
         return _arch;
     }
 
-    public void setArch(String arch) {
+    protected void setArch(String arch) {
         _arch = arch;
     }
 
@@ -86,7 +85,7 @@ public class PlatformType extends AppdefResourceType {
         return _plugin;
     }
 
-    public void setPlugin(String plugin) {
+    protected void setPlugin(String plugin) {
         _plugin = plugin;
     }
 
@@ -101,70 +100,44 @@ public class PlatformType extends AppdefResourceType {
     public Collection getPlatforms() {
         return Collections.unmodifiableCollection(_platforms);
     }
+    
+    protected Collection getPlatformBag() {
+        return _platforms;
+    }
 
-    protected void setPlatforms(Collection platforms) {
+    protected void setPlatformBag(Collection platforms) {
         _platforms = platforms;
     }
 
-    private Platform findByName(String name) {
-        return DAOFactory.getDAOFactory().getPlatformDAO().findByName(name);
-    }
-    
-    private ConfigResponseDAO getConfigDAO() {
-        return DAOFactory.getDAOFactory().getConfigResponseDAO();
-    }
-
-    private AgentDAO getAgentDAO() {
-        return DAOFactory.getDAOFactory().getAgentDAO();
+    private void registerNewPlatform(Platform p) {
+        _platforms.add(p);
     }
     
     /**
      * Create a new platform based on the AI platform value.
      */
-    public Platform create(AIPlatformValue aip, String initialOwner) {
-        Platform p = findByName(aip.getName());
-
-        if (p != null) {
-            throwDupPlatform(p.getId(), aip.getName());
-        }
-
-        ConfigResponseDB config = getConfigDAO().createPlatform();
-
-        p = copyAIPlatformValue(aip);
+    protected Platform create(AIPlatformValue aip, String initialOwner,
+                              ConfigResponseDB config, Agent agent) 
+    {
+        Platform p = copyAIPlatformValue(aip);
         p.setPlatformType(this);
         p.setConfigResponse(config);
         p.setModifiedBy(initialOwner);
         p.setOwner(initialOwner);
-        Agent agent = getAgentDAO().findByAgentToken(aip.getAgentToken());
-        
-        if (agent == null) {
-            throw new ObjectNotFoundException(aip.getId(),
-                                              "Unable to find agent: " +
-                                              aip.getAgentToken());
-                                              
-        }
-
         p.setAgent(agent);
-        _platforms.add(p);
+        registerNewPlatform(p);
         return p;
     }
 
-    public Platform create(PlatformValue pv, AgentPK agent) {
-        Platform p = findByName(pv.getName());
-
-        if (p != null) {
-            throwDupPlatform(p.getId(), pv.getName());
-        }
-
-        p = newPlatform(pv);
-        if (agent != null) {
-            p.setAgent(getAgentDAO().findById(agent.getId()));
-        }
-        return p;
+    protected Platform create(PlatformValue pv, Agent agent, 
+                              ConfigResponseDB config) 
+    {
+        return newPlatform(pv, config, agent);
     }
 
-    public Platform create(PlatformType ptype, AIPlatformValue aip, 
-                           AgentPK agent)
+    /*
+    protected Platform create(PlatformType ptype, AIPlatformValue aip, 
+                              AgentPK agent)
     {
         AgentDAO aDAO = DAOFactory.getDAOFactory().getAgentDAO();
         Platform p = findByName(aip.getName());
@@ -175,11 +148,10 @@ public class PlatformType extends AppdefResourceType {
         p = copyAIPlatformValue(aip);
         p.setPlatformType(ptype);
         p.setAgent(aDAO.findById(agent.getId()));
-        _platforms.add(p);
+        registerNewPlatform(p);
         return p;
     }
 
-    /*
     public Platform create(PlatformType ptype, PlatformValue pv, 
                            AgentPK agent)
     {
@@ -197,11 +169,6 @@ public class PlatformType extends AppdefResourceType {
     }
     */
 
-    private void throwDupPlatform(Serializable id, String platName) {
-        throw new NonUniqueObjectException(id, "duplicate platform found " + 
-                                           "with name: " + platName);
-    }
-                                  
     private Platform copyAIPlatformValue(AIPlatformValue aip) {
         Platform p = new Platform();
 
@@ -215,8 +182,9 @@ public class PlatformType extends AppdefResourceType {
         return p;
     }
     
-    private Platform newPlatform(PlatformValue pv) {
-        ConfigResponseDAO crDAO = getConfigDAO(); 
+    private Platform newPlatform(PlatformValue pv, ConfigResponseDB config,
+                                 Agent agent) 
+    {
         Platform p = new Platform();
 
         p.setName(pv.getName());
@@ -227,23 +195,11 @@ public class PlatformType extends AppdefResourceType {
         p.setLocation(pv.getLocation());
         p.setModifiedBy(pv.getModifiedBy());
         p.setOwner(pv.getOwner());
-
-        // If these fks are invalid, Hibernate will throw
-        // exception
-        if (pv.getConfigResponseId() != null) {
-            p.setConfigResponse(crDAO.findById(pv.getConfigResponseId()));
-        } else {
-            p.setConfigResponse(crDAO.createPlatform());
-        }
-        
         p.setPlatformType(this);
-        _platforms.add(p);
-        
-        if (pv.getAgent() != null) {
-            AgentDAO aDAO = DAOFactory.getDAOFactory().getAgentDAO();
-            p.setAgent(aDAO.findById(pv.getAgent().getId()));
-        }
+        p.setAgent(agent);
         p.setIps(pv.getAddedIpValues());
+
+        registerNewPlatform(p);
         return p;
     }
 

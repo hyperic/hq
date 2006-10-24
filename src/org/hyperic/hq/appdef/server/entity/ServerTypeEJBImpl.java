@@ -36,13 +36,13 @@ import javax.ejb.EntityBean;
 import javax.ejb.RemoveException;
 import javax.naming.NamingException;
 
+import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.ServerTypeLocal;
 import org.hyperic.hq.appdef.shared.ServerTypePK;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceTypeLocal;
 import org.hyperic.hq.appdef.shared.ServiceTypeUtil;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
-import org.hyperic.hq.appdef.ServiceType;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.dao.ServiceTypeDAO;
 

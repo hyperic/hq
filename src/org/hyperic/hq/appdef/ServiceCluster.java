@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.ServiceClusterPK;
 import org.hyperic.hq.appdef.shared.ApplicationPK;
 import org.hyperic.hq.appdef.shared.ServicePK;

@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.server.session.Platform;
+
 /**
  *
  */

@@ -28,12 +28,13 @@ package org.hyperic.hq.appdef.server.entity;
 import javax.ejb.*;
 import java.rmi.RemoteException;
 import java.util.*;
+
+import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationTypePK;
 import org.hyperic.hq.appdef.shared.ServiceTypePK;
 import org.hyperic.hq.appdef.shared.ServiceTypeLocal;
 import org.hyperic.hq.appdef.shared.ServiceTypeUtil;
-import org.hyperic.hq.appdef.ServiceType;
 import org.hyperic.dao.DAOFactory;
 
 import org.apache.commons.logging.Log;
