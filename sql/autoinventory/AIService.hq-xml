@@ -72,7 +72,8 @@
       <column name="RESPONSETIME_CONFIG" not-null="false" />
     </property>
 
-    <many-to-one name="server" class="org.hyperic.hq.appdef.Server">
+    <many-to-one name="server" 
+                 class="org.hyperic.hq.appdef.server.session.Server">
       <column name="SERVER_ID" not-null="false" />
     </many-to-one>
   </class>
