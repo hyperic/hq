@@ -36,9 +36,9 @@ import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
@@ -139,6 +139,10 @@ public abstract class HQEJBTestBase
         throws Exception 
     {
         return AuthzSubjectManagerUtil.getLocalHome().create().getOverlord(); 
+    }
+    
+    protected AuthzSubjectManagerLocal getAuthzManager() throws Exception {
+        return AuthzSubjectManagerUtil.getLocalHome().create();
     }
     
     protected AlertDefinitionManagerLocal getAlertDefManager() 
