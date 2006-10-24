@@ -100,22 +100,6 @@ public class MonitorableType extends PersistedObject
         _measurementTemplates = measurementTemplates;
     }
 
-    public boolean equals(Object other) {
-        if ((this == other)) return true;
-        if ((other == null)) return false;
-        if (!(other instanceof MonitorableType)) return false;
-        MonitorableType castOther = (MonitorableType) other; 
-        
-        return ((getName() == castOther.getName()) || 
-                (getName() != null && castOther.getName() != null && 
-                 getName().equals(castOther.getName())));
-    }
-   
-    public int hashCode() {
-        int result = 17;
-        return result;
-    }
-
     /**
      * Legacy EJB DTO pattern
      * @deprecated Use (this) MonitorableType object instead

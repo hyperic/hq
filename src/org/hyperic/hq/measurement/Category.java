@@ -76,22 +76,6 @@ public class Category extends PersistedObject
         _measurementTemplates = measurementTemplates;
     }
 
-    public boolean equals(Object other) {
-        if ((this == other)) return true;
-        if ((other == null)) return false;
-        if (!(other instanceof Category)) return false;
-        Category castOther = (Category) other; 
-        
-        return ((getName()==castOther.getName()) || 
-                (getName() != null && castOther.getName() != null &&
-                 getName().equals(castOther.getName())));
-    }
-   
-    public int hashCode() {
-        int result = 17;
-        return result;
-    }   
-
     /**
      * Legacy EJB DTO pattern
      * @deprecated Use (this) Category object instead

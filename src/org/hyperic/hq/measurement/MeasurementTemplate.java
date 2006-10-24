@@ -237,24 +237,6 @@ public class MeasurementTemplate extends PersistedObject
         _measurementArgs = measurementArgs;
     }
 
-    public boolean equals(Object other) {
-        if ((this == other)) return true;
-        if ((other == null)) return false;
-        if (!(other instanceof MeasurementTemplate)) return false;
-        MeasurementTemplate castOther = (MeasurementTemplate) other; 
-        
-        return ((getId() == castOther.getId()) ||
-                (getId() != null && castOther.getId() != null &&
-                 getId().equals(castOther.getId())));
-    }
-   
-    public int hashCode() {
-        int result = 17;
-        
-        result = 37 * result + (getId() == null ? 0 : getId().hashCode());
-        return result;
-    }   
-
     public void addMeasurement(Measurement m)
     {
         Collection coll = getMeasurements();

@@ -115,24 +115,6 @@ public class MeasurementArg extends PersistedObject
     public void setTemplateArg(MeasurementTemplate templateArg) {
         _templateArg = templateArg;
     }
-
-    public boolean equals(Object other) {
-        if ((this == other)) return true;
-        if ((other == null)) return false;
-        if (!(other instanceof MeasurementArg)) return false;
-        MeasurementArg castOther = (MeasurementArg) other; 
-        
-        return ((getId() == castOther.getId()) || 
-                (getId() != null && castOther.getId() != null &&
-                 getId().equals(castOther.getId())));
-    }
-   
-    public int hashCode() {
-        int result = 17;
-        
-        result = 37 * result + ( getId() == null ? 0 : getId().hashCode());
-        return result;
-    }   
 }
 
 

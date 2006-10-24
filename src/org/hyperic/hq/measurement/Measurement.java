@@ -77,26 +77,4 @@ public class Measurement extends PersistedObject
     public void setMtime(long mtime) {
         _mtime = mtime;
     }
-
-    /**
-     * XXX: Fix equals & hashCode
-     */
-    public boolean equals(Object other) {
-        if ((this == other)) return true;
-        if ((other == null)) return false;
-        if (!(other instanceof Measurement)) return false;
-        Measurement castOther = (Measurement) other; 
-         
-        return (getInstanceId() == castOther.getInstanceId()) || 
-            (getInstanceId() != null && castOther.getInstanceId() != null &&
-             getInstanceId().equals(castOther.getInstanceId())) &&
-            ((this.getTemplate() == castOther.getTemplate()) ||
-             (getTemplate() != null && castOther.getTemplate() != null &&
-              getTemplate().equals(castOther.getTemplate())));
-    }
-   
-   public int hashCode() {
-         int result = 17;
-         return result;
-   }   
 }

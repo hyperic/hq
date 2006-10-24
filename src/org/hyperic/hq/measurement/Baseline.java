@@ -107,26 +107,6 @@ public class Baseline extends PersistedObject
     public void setMaxExpectedVal(double maxExpectedVal) {
         _maxExpectedVal = maxExpectedVal;
     }
-
-    /**
-     * XXX: Fix equals & hashCode
-     */
-    public boolean equals(Object other) {
-        if ((this == other)) return true;
-        if ((other == null )) return false;
-        if (!(other instanceof Baseline)) return false;
-        Baseline b = (Baseline)other; 
-         
-        return ((getDerivedMeasurement() == b.getDerivedMeasurement()) ||
-                (getDerivedMeasurement() != null &&
-                 b.getDerivedMeasurement() != null &&
-                 getDerivedMeasurement().equals(b.getDerivedMeasurement())));
-    }
-   
-    public int hashCode() {
-        int result = 17;
-        return result;
-    }   
 }
 
 
