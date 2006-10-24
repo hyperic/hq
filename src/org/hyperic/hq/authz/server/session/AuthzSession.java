@@ -338,7 +338,7 @@ public abstract class AuthzSession {
                 if (operDao == null) {
                     operDao = getOperationDAO();
                 }
-                ret.add(operDao.findId(((OperationValue) vals[i]).getId()));
+                ret.add(operDao.findById(((OperationValue) vals[i]).getId()));
             }
             else if (hashCode == SUBJ_HASH) {
                 if (subjDao == null) {

@@ -25,7 +25,6 @@
 
 package org.hyperic.hibernate.dao;
 
-import java.util.Collection;
 
 import org.hibernate.Session;
 import org.hyperic.hq.authz.Operation;
@@ -47,11 +46,7 @@ public class OperationDAO extends HibernateDAO
         return res;
     }
 
-    public Collection findAll() {
-        return (Collection) super.findAll();
-    }
-
-    public Operation findId(Integer id) {
+    public Operation findById(Integer id) {
         return (Operation) super.findById(id);
     }
 
@@ -73,8 +68,8 @@ public class OperationDAO extends HibernateDAO
 
     public Operation findByTypeAndName(ResourceType type, String name)
     {            
-        String sql = "from ResourceType r join fetch operations o " +
-                     "where r.id = ? and o.name = ?";
+        String sql = "from Operation o join fetch o.resourceType rt " +
+                     "where rt.id=? and o.name=?";
         return (Operation)getSession().createQuery(sql)
             .setInteger(0, type.getId().intValue())
             .setString(1, name)
