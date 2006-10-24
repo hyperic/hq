@@ -26,11 +26,10 @@
 package org.hyperic.hq.authz;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceValue;
-import org.hyperic.hq.authz.shared.ResourceTypeValue;
 
 public class Resource extends AuthzNamedEntity implements Serializable {
 
@@ -41,7 +40,7 @@ public class Resource extends AuthzNamedEntity implements Serializable {
     private AuthzSubject owner;
     private boolean system;
     private Collection resourceGroups;
-    private Collection group;
+    private Collection groups;
     private Collection roles;
 
     private ResourceValue resourceValue = new ResourceValue();
@@ -70,7 +69,7 @@ public class Resource extends AuthzNamedEntity implements Serializable {
         this.owner = subjectId;
         this.system = fsystem;
         this.resourceGroups = resourceGroups;
-        this.group = group;
+        this.groups = group;
         this.roles = roles;
     }
 
@@ -115,29 +114,65 @@ public class Resource extends AuthzNamedEntity implements Serializable {
     }
 
     public Collection getResourceGroups() {
-        return resourceGroups;
+        return new ArrayList(resourceGroups);
     }
 
     public void setResourceGroups(Collection val) {
         resourceGroups = val;
     }
 
-    public Collection getGroup() {
-        return group;
+    public void addResourceGroup(ResourceGroup group) {
+        resourceGroups.add(group);
+    }
+    
+    public void removeResourceGroup(ResourceGroup group) {
+        resourceGroups.remove(group);
+    }
+    
+    public void removeAllResourceGroups() {
+        resourceGroups.clear();
+    }
+    
+    public Collection getGroups() {
+        return new ArrayList(groups);
     }
 
-    public void setGroup(Collection val) {
-        group = val;
+    public void setGroups(Collection val) {
+        groups = val;
     }
 
+    public void addGroup(ResourceGroup group) {
+        groups.add(group);
+    }
+    
+    public void removeGroup(ResourceGroup group) {
+        groups.remove(group);
+    }
+    
+    public void removeAllGroups() {
+        groups.clear();
+    }
+    
     public Collection getRoles() {
-        return roles;
+        return new ArrayList(roles);
     }
 
     public void setRoles(Collection val) {
         roles = val;
     }
 
+    public void addRole(Role role) {
+        roles.add(role);
+    }
+    
+    public void removeRole(Role role) {
+        roles.remove(role);
+    }
+    
+    public void removeAllRoles() {
+        roles.clear();
+    }
+    
     public ResourceValue getResourceValue() {
         resourceValue.setId(getId());
         resourceValue.setAuthzSubjectValue(getOwner().getAuthzSubjectValue());

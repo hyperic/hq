@@ -56,7 +56,7 @@
       <many-to-many class="ResourceGroup" column="RESOURCE_GROUP_ID" />
     </bag>
 
-    <bag name="group" table="EAM_RESOURCE_GROUP">
+    <bag name="groups" table="EAM_RESOURCE_GROUP">
       <key column="RESOURCE_ID" />
       <one-to-many class="ResourceGroup" />
     </bag>
