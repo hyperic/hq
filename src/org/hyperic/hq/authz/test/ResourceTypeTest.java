@@ -2,22 +2,18 @@ package org.hyperic.hq.authz.test;
 
 import javax.ejb.FinderException;
 
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
+import org.hyperic.hq.test.HQEJBTestBase;
 
-public class ResourceTypeTest extends AuthzTestBase {
+public class ResourceTypeTest extends HQEJBTestBase {
+    private static final String BOGUS_NAME="foobar";
 
     public ResourceTypeTest(String testName) {
         super(testName);
-    }
-
-    public Class[] getUsedSessionBeans() {
-        return new Class[] { AuthzSubjectManagerEJBImpl.class,
-                             ResourceManagerEJBImpl.class };
     }
 
     public void testResourceType() throws Exception {
@@ -25,6 +21,8 @@ public class ResourceTypeTest extends AuthzTestBase {
         ResourceTypeValue rt =
             rman.findResourceTypeByName(AuthzConstants.subjectResourceTypeName);
         assertEquals(AuthzConstants.subjectResourceTypeName, rt.getName());
+
+        AuthzSubjectValue overlord = getOverlord();
         
         rt = new ResourceTypeValue();
         rt.setSystem(false);
