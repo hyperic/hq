@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.authz;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -101,29 +102,67 @@ public class Role extends AuthzNamedEntity implements java.io.Serializable {
     public void setResource(Resource resourceId) {
         resource = resourceId;
     }
+
     public Collection getResourceGroups() {
-        return resourceGroups;
+        return new ArrayList(resourceGroups);
     }
-    
+
     public void setResourceGroups(Collection val) {
         resourceGroups = val;
     }
-    public Collection getOperations() {
-        return operations;
+
+    public void addResourceGroup(ResourceGroup group) {
+        resourceGroups.add(group);
     }
     
+    public void removeResourceGroup(ResourceGroup group) {
+        resourceGroups.remove(group);
+    }
+    
+    public void removeAllResourceGroups() {
+        resourceGroups.clear();
+    }
+    
+    public Collection getOperations() {
+        return new ArrayList(operations);
+    }
+
     public void setOperations(Collection val) {
         operations = val;
     }
+
+    public void addOperation(Resource oper) {
+        operations.add(oper);
+    }
+    
+    public void removeOperation(Resource oper) {
+        operations.remove(oper);
+    }
+    
+    public void removeAllOperations() {
+        operations.clear();
+    }
+    
     public Collection getSubjects() {
-        return subjects;
+        return new ArrayList(subjects);
     }
     
     public void setSubjects(Collection val) {
         subjects = val;
     }
 
-
+    public void addOperation(AuthzSubject subj) {
+        subjects.add(subj);
+    }
+    
+    public void removeOperation(AuthzSubject subj) {
+        subjects.remove(subj);
+    }
+    
+    public void removeAllSubjects() {
+        subjects.clear();
+    }
+    
     public RoleValue getRoleValue() {
         roleValue.setDescription(getDescription());
         roleValue.setId(getId());

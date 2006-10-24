@@ -26,6 +26,7 @@
 package org.hyperic.hq.authz;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -90,21 +91,45 @@ public class ResourceType extends AuthzNamedEntity implements Serializable
     }
 
     public Collection getOperations() {
-        return operations;
+        return new ArrayList(operations);
     }
 
     public void setOperations(Collection val) {
         operations = val;
     }
 
+    public void addOperation(Resource oper) {
+        operations.add(oper);
+    }
+    
+    public void removeOperation(Resource oper) {
+        operations.remove(oper);
+    }
+    
+    public void removeAllOperations() {
+        operations.clear();
+    }
+    
     public Collection getResources() {
-        return resources;
+        return new ArrayList(resources);
     }
 
     public void setResources(Collection val) {
         resources = val;
     }
 
+    public void addResource(Resource resource) {
+        resources.add(resource);
+    }
+    
+    public void removeResource(Resource resource) {
+        resources.remove(resource);
+    }
+    
+    public void removeAllResources() {
+        resources.clear();
+    }
+    
     public ResourceTypeValue getResourceTypeValue() {
         resourceTypeValue.setId(getId());
         resourceTypeValue.setName(getName());
