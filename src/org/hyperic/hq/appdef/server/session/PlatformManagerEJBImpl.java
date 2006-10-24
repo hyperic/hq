@@ -445,7 +445,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             // fall through, will validate later
         }
         
-        Platform platform = null;
+        Platform platform;
         
         try {
             this.trimStrings(pValue);
@@ -459,12 +459,11 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             // set the modified by to the person creating 
             pValue.setModifiedBy(subject.getName());
             // call the create
-            platform = pType.createPlatform(pValue, agent);
+            platform = pType.create(pValue, agent);
             // AUTHZ CHECK
             // in order to succeed subject has to be in a role 
             // which allows creating of authz resources
-            createAuthzPlatform(pValue.getName(),
-                                platform.getId(),
+            createAuthzPlatform(pValue.getName(), platform.getId(),
                                 subject);
 
             // platforms get configured as part of their creation
@@ -569,42 +568,38 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      */
     public PlatformPK createPlatform(AuthzSubjectValue subject, 
                                      AIPlatformValue aipValue)
-        throws CreateException,ApplicationException
+        throws ApplicationException, CreateException
     {
-        try {
-            if(log.isDebugEnabled()) {
-                log.debug("Begin createPlatform(ai): " + aipValue);
-            }
-            try {
-                this.counter.addCPUs(aipValue.getCpuCount().intValue());
-            } catch (ApplicationException e) {
-                throw e;
-            }
-
-            try {
-                // call the create
-                Platform platform =
-                    getPlatformDAO().create(aipValue, subject.getName());
-                // AUTHZ CHECK
-                // in order to succeed subject has to be in a role 
-                // which allows creating of authz resources
-                createAuthzPlatform(aipValue.getName(), 
-                                    platform.getId(),
-                                    subject);
-                // Platforms get configured as part of their creation
-                return platform.getPrimaryKey();
-            } catch (CreateException e) {
-                throw e;
-            } catch (PermissionException e) {
-                throw e;
-            }
-        } catch (ObjectNotFoundException e) {
-            throw new CreateException("Unable to find PlatformType: " + e.getMessage());
-        } catch (FinderException e) {
-            throw new CreateException("Unable to find PlatformType: " + e.getMessage());
-        } catch (NamingException e) {
-            throw new CreateException("Unable to get LocalHome " + e.getMessage());
+        if (log.isDebugEnabled()) {
+            log.debug("Begin createPlatform(ai): " + aipValue);
         }
+
+        this.counter.addCPUs(aipValue.getCpuCount().intValue());
+
+        PlatformTypeDAO ptDAO = 
+            DAOFactory.getDAOFactory().getPlatformTypeDAO();
+        PlatformType platType = ptDAO.findByName(aipValue.getName()); 
+            
+        if (platType == null) {
+            throw new SystemException("Unable to find PlatformType [" + 
+                                      platType.getName() + "]");
+        }
+            
+        // call the create
+        Platform platform = platType.create(aipValue, subject.getName());
+        
+        // AUTHZ CHECK
+        // in order to succeed subject has to be in a role 
+        // which allows creating of authz resources
+        // TODO:  Cleanup exception handling here
+        try {
+            createAuthzPlatform(aipValue.getName(), platform.getId(), 
+                                subject);
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
+        // Platforms get configured as part of their creation
+        return platform.getPrimaryKey();
     }
 
     /**
