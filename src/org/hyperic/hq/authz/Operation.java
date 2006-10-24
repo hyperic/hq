@@ -28,7 +28,6 @@ package org.hyperic.hq.authz;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 import org.hyperic.hq.authz.shared.OperationValue;
 
@@ -73,7 +72,6 @@ public class Operation extends AuthzNamedEntity implements Serializable {
     public void setResourceType(ResourceType resourceTypeId) {
         resourceType = resourceTypeId;
     }
-    
     public Integer getCid() {
         return cid;
     }
@@ -81,27 +79,14 @@ public class Operation extends AuthzNamedEntity implements Serializable {
     public void setCid(Integer val) {
         cid = val;
     }
-    
     public Collection getRoles() {
-        return Collections.unmodifiableCollection(roles);
+        return roles;
     }
     
     public void setRoles(Collection val) {
         roles = val;
     }
 
-    public void addRole(Role role) {
-        roles.add(role);
-    }
-    
-    public void removeRole(Role role) {
-        roles.remove(role);
-    }
-    
-    public void removeAllRoles() {
-        roles.clear();
-    }
-    
     public OperationValue getOperationValue() {
         operationValue.setId(getId());
         operationValue.setName(getName());

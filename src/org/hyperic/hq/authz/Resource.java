@@ -28,7 +28,6 @@ package org.hyperic.hq.authz;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 import org.hyperic.hq.authz.shared.ResourceValue;
 
@@ -115,7 +114,7 @@ public class Resource extends AuthzNamedEntity implements Serializable {
     }
 
     public Collection getResourceGroups() {
-        return Collections.unmodifiableCollection(resourceGroups);
+        return new ArrayList(resourceGroups);
     }
 
     public void setResourceGroups(Collection val) {
@@ -135,7 +134,7 @@ public class Resource extends AuthzNamedEntity implements Serializable {
     }
     
     public Collection getGroups() {
-        return Collections.unmodifiableCollection(groups);
+        return new ArrayList(groups);
     }
 
     public void setGroups(Collection val) {
@@ -155,7 +154,7 @@ public class Resource extends AuthzNamedEntity implements Serializable {
     }
     
     public Collection getRoles() {
-        return Collections.unmodifiableCollection(roles);
+        return new ArrayList(roles);
     }
 
     public void setRoles(Collection val) {

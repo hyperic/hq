@@ -16,7 +16,7 @@ public class ResourceTypeTest extends HQEJBTestBase {
         super(testName);
     }
 
-    public void testSimpleCreate() throws Exception {
+    public void testResourceType() throws Exception {
         ResourceManagerLocal rman = ResourceManagerUtil.getLocalHome().create();
         ResourceTypeValue rt =
             rman.findResourceTypeByName(AuthzConstants.subjectResourceTypeName);

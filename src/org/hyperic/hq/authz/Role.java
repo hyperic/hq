@@ -28,7 +28,6 @@ package org.hyperic.hq.authz;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 
 import org.hyperic.hq.authz.shared.RoleValue;
@@ -104,67 +103,29 @@ public class Role extends AuthzNamedEntity implements Serializable {
     public void setResource(Resource resourceId) {
         resource = resourceId;
     }
-
     public Collection getResourceGroups() {
-        return Collections.unmodifiableCollection(resourceGroups);
+        return resourceGroups;
     }
-
+    
     public void setResourceGroups(Collection val) {
         resourceGroups = val;
     }
-
-    public void addResourceGroup(ResourceGroup group) {
-        resourceGroups.add(group);
-    }
-    
-    public void removeResourceGroup(ResourceGroup group) {
-        resourceGroups.remove(group);
-    }
-    
-    public void removeAllResourceGroups() {
-        resourceGroups.clear();
-    }
-    
     public Collection getOperations() {
-        return Collections.unmodifiableCollection(operations);
+        return operations;
     }
-
+    
     public void setOperations(Collection val) {
         operations = val;
     }
-
-    public void addOperation(Resource oper) {
-        operations.add(oper);
-    }
-    
-    public void removeOperation(Resource oper) {
-        operations.remove(oper);
-    }
-    
-    public void removeAllOperations() {
-        operations.clear();
-    }
-    
     public Collection getSubjects() {
-        return Collections.unmodifiableCollection(subjects);
+        return subjects;
     }
     
     public void setSubjects(Collection val) {
         subjects = val;
     }
 
-    public void addOperation(AuthzSubject subj) {
-        subjects.add(subj);
-    }
-    
-    public void removeOperation(AuthzSubject subj) {
-        subjects.remove(subj);
-    }
-    
-    public void removeAllSubjects() {
-        subjects.clear();
-    }
-    
+
     public RoleValue getRoleValue() {
         roleValue.setDescription(getDescription());
         roleValue.setId(getId());

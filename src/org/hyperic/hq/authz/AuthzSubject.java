@@ -27,7 +27,6 @@ package org.hyperic.hq.authz;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -164,29 +163,15 @@ public class AuthzSubject extends AuthzNamedEntity
     public void setResource(Resource val) {
         resource = val;
     }
-    
     public Collection getRoles() {
-        return Collections.unmodifiableCollection(roles);
+        return roles;
     }
     
     public void setRoles(Collection val) {
         roles = val;
     }
-    
-    public void addRole(Role role) {
-        roles.add(role);
-    }
-    
-    public void removeRole(Role role) {
-        roles.remove(role);
-    }
-    
-    public void removeAllRoles() {
-        roles.clear();
-    }
-    
     public Collection getUserConfigs() {
-        return Collections.unmodifiableCollection(userConfigs);
+        return userConfigs;
     }
     
     public void setUserConfigs(Collection val) {
