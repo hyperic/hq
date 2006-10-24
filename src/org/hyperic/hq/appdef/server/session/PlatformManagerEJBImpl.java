@@ -578,11 +578,11 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
         PlatformTypeDAO ptDAO = 
             DAOFactory.getDAOFactory().getPlatformTypeDAO();
-        PlatformType platType = ptDAO.findByName(aipValue.getName()); 
+        PlatformType platType = ptDAO.findByName(aipValue.getPlatformTypeName());
             
         if (platType == null) {
             throw new SystemException("Unable to find PlatformType [" + 
-                                      platType.getName() + "]");
+                                      aipValue.getName() + "]");
         }
             
         // call the create
