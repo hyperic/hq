@@ -98,4 +98,25 @@ public class MeasurementTemplateDAO extends HibernateDAO
 
         return getSession().createQuery(buf.toString()).list();
     }
+
+    public List findTemplatesByMonitorableType(String type) {
+        String sql = 
+            "from MeasurementTemplate t " +
+            "join fetch t.monitorableType mt " +
+            "where mt.name=?";
+        return getSession().createQuery(sql).
+            setString(0, type).list();
+    }
+
+    public List findTemplatesByMonitorableTypeAndCategory(String type,
+                                                          String cat) {
+        String sql = 
+            "from MeasurementTemplate t " +
+            "join fetch t.monitorableType mt " +
+            "join fetch t.category cat " +
+            "where mt.name=? and cat.name=?";
+        return getSession().createQuery(sql)
+            .setString(0, type)
+            .setString(1, cat).list();
+    }        
 }
