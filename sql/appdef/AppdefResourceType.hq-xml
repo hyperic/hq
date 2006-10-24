@@ -119,12 +119,13 @@
         <column name="FINTERNAL" />
       </property>
 
+      <!-- remove reference to a deleted object: TierType -->
+      <property name="tierType" type="string">
+        <column name="TIER_TYPE_ID" />
+      </property>
+
       <many-to-one name="serverType" class="ServerType">
         <column name="SERVER_TYPE_ID" />
-      </many-to-one>
-
-      <many-to-one name="tierType" class="org.hyperic.hq.appdef.TierType">
-        <column name="TIER_TYPE_ID" />
       </many-to-one>
 
       <bag name="applicationTypes" table="EAM_APP_TYPE_SERVICE_TYPE_MAP" >
