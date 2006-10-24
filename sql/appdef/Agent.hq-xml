@@ -54,7 +54,7 @@
 
     <bag name="platforms" table="EAM_PLATFORM" lazy="true">
       <key column="AGENT_ID" />
-      <one-to-many class="Platform" />
+      <one-to-many class="org.hyperic.hq.appdef.server.session.Platform" />
     </bag>
   </class>
 

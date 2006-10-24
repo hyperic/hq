@@ -21,7 +21,8 @@
     </version>
 
     <properties name="ipId" unique="true">
-      <many-to-one name="platform" class="Platform">
+      <many-to-one name="platform" 
+                   class="org.hyperic.hq.appdef.server.session.Platform">
         <column name="PLATFORM_ID" index="EAM_IP_IDX" not-null="false" />
       </many-to-one>
       <property name="address" type="string">

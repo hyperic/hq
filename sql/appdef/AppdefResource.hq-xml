@@ -4,9 +4,7 @@
       "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
-<hibernate-mapping
-    package="org.hyperic.hq.appdef">
-
+<hibernate-mapping package="org.hyperic.hq.appdef.server.session">
   <class name="AppdefResource" abstract="true">
     <meta attribute="scope-class" inherit="false">public abstract</meta>
     <id name="id" type="integer">
@@ -74,15 +72,17 @@
         <column name="CPU_COUNT" not-null="false" />
       </property>
 
-      <many-to-one name="platformType" class="PlatformType">
+      <many-to-one name="platformType" cascade="save-update" 
+                   class="PlatformType">
         <column name="PLATFORM_TYPE_ID" not-null="false" />
       </many-to-one>
 
-      <many-to-one name="configResponse" unique="true" class="ConfigResponseDB">
+      <many-to-one name="configResponse" unique="true" 
+                   class="org.hyperic.hq.appdef.ConfigResponseDB">
         <column name="CONFIG_RESPONSE_ID" not-null="false" />
       </many-to-one>
 
-      <many-to-one name="agent" class="Agent">
+      <many-to-one name="agent" class="org.hyperic.hq.appdef.Agent">
         <column name="AGENT_ID" not-null="false" />
       </many-to-one>
 
@@ -90,7 +90,7 @@
            cascade="save-update,delete,persist,merge,evict,all-delete-orphan"
            inverse="true" lazy="false">
         <key column="PLATFORM_ID" />
-        <one-to-many class="Ip" />
+        <one-to-many class="org.hyperic.hq.appdef.Ip" />
       </bag>
 
       <bag name="servers" table="EAM_SERVER"
@@ -142,7 +142,8 @@
         <column name="SERVER_TYPE_ID" not-null="false" />
       </many-to-one>
 
-      <many-to-one name="configResponse" unique="true" class="ConfigResponseDB">
+      <many-to-one name="configResponse" unique="true" 
+                   class="org.hyperic.hq.appdef.ConfigResponseDB">
         <column name="CONFIG_RESPONSE_ID" not-null="false" />
       </many-to-one>
 
@@ -187,11 +188,13 @@
         <column name="SERVICE_TYPE_ID" not-null="false" />
       </many-to-one>
 
-      <many-to-one name="serviceCluster" class="ServiceCluster">
+      <many-to-one name="serviceCluster" 
+                   class="org.hyperic.hq.appdef.ServiceCluster">
         <column name="SVC_CLUSTER_ID" not-null="false" />
       </many-to-one>
 
-      <many-to-one name="configResponse" unique="true" class="ConfigResponseDB">
+      <many-to-one name="configResponse" unique="true" 
+                   class="org.hyperic.hq.appdef.ConfigResponseDB">
         <column name="CONFIG_RESPONSE_ID" not-null="false" />
       </many-to-one>
 
@@ -199,7 +202,7 @@
            cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
            inverse="true" lazy="true">
         <key column="SERVICE_ID" />
-        <one-to-many class="AppService" />
+        <one-to-many class="org.hyperic.hq.appdef.AppService" />
       </bag>
     </union-subclass>
 
@@ -232,7 +235,7 @@
            cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
            inverse="true" lazy="true">
         <key column="APPLICATION_ID" />
-        <one-to-many class="AppService" />
+        <one-to-many class="org.hyperic.hq.appdef.AppService" />
       </bag>
     </union-subclass>
 

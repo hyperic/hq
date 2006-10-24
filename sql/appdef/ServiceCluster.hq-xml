@@ -44,7 +44,8 @@
       <column name="MTIME" not-null="false" />
     </property>
 
-    <many-to-one name="serviceType" class="ServiceType">
+    <many-to-one name="serviceType" 
+                 class="org.hyperic.hq.appdef.server.session.ServiceType">
       <column name="SERVICE_TYPE_ID" />
     </many-to-one>
 
@@ -57,7 +58,7 @@
          cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
          inverse="true" lazy="true">
       <key column="SVC_CLUSTER_ID" />
-      <one-to-many class="Service" />
+      <one-to-many class="org.hyperic.hq.appdef.server.session.Service" />
     </bag>
   </class>
 

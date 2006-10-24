@@ -21,13 +21,15 @@
     </version>
 
     <properties name="appServiceId" unique="true">
-      <many-to-one name="service" class="Service">
+      <many-to-one name="service" 
+                   class="org.hyperic.hq.appdef.server.session.Service">
         <column name="SERVICE_ID" index="EAM_SERVICE_KEY" not-null="false" />
       </many-to-one>
       <many-to-one name="serviceCluster" class="ServiceCluster">
         <column name="CLUSTER_ID" index="EAM_SERVICE_KEY" not-null="false" />
       </many-to-one>
-      <many-to-one name="application" class="Application">
+      <many-to-one name="application" 
+                   class="org.hyperic.hq.appdef.server.session.Application">
         <column name="APPLICATION_ID" index="EAM_SERVICE_KEY" not-null="false" />
       </many-to-one>
     </properties>
@@ -53,7 +55,8 @@
       <column name="FENTRY_POINT" not-null="true" dialect="Oracle, Oracle9" default="1" />
     </property>
 
-    <many-to-one name="serviceType" class="ServiceType">
+    <many-to-one name="serviceType" 
+                 class="org.hyperic.hq.appdef.server.session.ServiceType">
       <column name="SERVICE_TYPE_ID" not-null="false" />
     </many-to-one>
 

@@ -4,9 +4,7 @@
       "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
-<hibernate-mapping
-    package="org.hyperic.hq.appdef">
-
+<hibernate-mapping package="org.hyperic.hq.appdef.server.session">
   <class name="AppdefResourceType" abstract="true">
     <meta attribute="scope-class" inherit="false">public abstract</meta>
     <id name="id" type="integer">
@@ -80,7 +78,7 @@
         <many-to-many class="ServerType" column="SERVER_TYPE_ID" />
       </bag>
 
-      <bag name="platforms" inverse="true" table="EAM_PLATFORM">
+      <bag name="platformBag" inverse="true" table="EAM_PLATFORM">
         <key column="PLATFORM_TYPE_ID" />
         <one-to-many class="Platform" />
       </bag>
@@ -125,7 +123,7 @@
         <column name="SERVER_TYPE_ID" />
       </many-to-one>
 
-      <many-to-one name="tierType" class="TierType">
+      <many-to-one name="tierType" class="org.hyperic.hq.appdef.TierType">
         <column name="TIER_TYPE_ID" />
       </many-to-one>
 
@@ -136,7 +134,7 @@
 
       <bag name="appServices" table="EAM_APP_SERVICE">
         <key column="SERVICE_TYPE_ID" />
-        <one-to-many class="AppService" />
+        <one-to-many class="org.hyperic.hq.appdef.AppService" />
       </bag>
 
       <bag name="services" table="EAM_SERVICE">
@@ -146,7 +144,7 @@
 
       <bag name="serviceClusters" table="EAM_SVC_CLUSTER">
         <key column="SERVICE_TYPE_ID" />
-        <one-to-many class="ServiceCluster" />
+        <one-to-many class="org.hyperic.hq.appdef.ServiceCluster" />
       </bag>
     </union-subclass>
 

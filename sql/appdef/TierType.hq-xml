@@ -42,7 +42,7 @@
 
     <bag name="serviceTypes" table="EAM_SERVICE_TYPE">
       <key column="TIER_TYPE_ID" />
-      <one-to-many class="ServiceType" />
+      <one-to-many class="org.hyperic.hq.appdef.server.session.ServiceType" />
     </bag>
   </class>
 
