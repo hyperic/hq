@@ -92,8 +92,12 @@ public class PlatformType extends AppdefResourceType {
     public Collection getServerTypes() {
         return Collections.unmodifiableCollection(_serverTypes);
     }
+    
+    protected Collection getServerTypesBag() {
+        return _serverTypes;
+    }
 
-    protected void setServerTypes(Collection servers) {
+    protected void setServerTypesBag(Collection servers) {
         _serverTypes = servers;
     }
 
