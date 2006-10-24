@@ -53,6 +53,7 @@ public abstract class HQEJBTestBase
     extends MockBeanTestBase 
 {
     private static boolean _initialized = false;
+    private static long    _uniqVal = System.currentTimeMillis();
     private Session _session;
     
     public HQEJBTestBase(String testName) {
@@ -72,6 +73,14 @@ public abstract class HQEJBTestBase
         };
     }
 
+    /**
+     * Get a unique value during the test invocation.  This is useful to 
+     * generate unique names for things which ... must have unique names 
+     */
+    protected long getUniq() {
+        return _uniqVal++;
+    }
+    
     public void setUp() 
         throws Exception
     {
