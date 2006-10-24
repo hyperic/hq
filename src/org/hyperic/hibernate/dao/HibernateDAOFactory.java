@@ -251,13 +251,5 @@ public class HibernateDAOFactory extends DAOFactory
     {
         return new PluginDAO(getCurrentSession());
     }
-
-    public ActionDAO getActionDAO() {
-        return new ActionDAO(getCurrentSession());
-    }
-
-    public AlertDefinitionDAO getAlertDefinitionDAO() {
-        return new AlertDefinitionDAO(getCurrentSession());
-    }
 }
 
