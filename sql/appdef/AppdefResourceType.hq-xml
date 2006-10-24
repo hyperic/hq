@@ -80,7 +80,7 @@
         <many-to-many class="ServerType" column="SERVER_TYPE_ID" />
       </bag>
 
-      <bag name="platforms" table="EAM_PLATFORM">
+      <bag name="platforms" inverse="true" table="EAM_PLATFORM">
         <key column="PLATFORM_TYPE_ID" />
         <one-to-many class="Platform" />
       </bag>
