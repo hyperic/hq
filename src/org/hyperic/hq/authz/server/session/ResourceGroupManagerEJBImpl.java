@@ -43,7 +43,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.dao.ResourceDAO;
 import org.hyperic.hibernate.dao.ResourceGroupDAO;
-import org.hyperic.hibernate.dao.RoleDAO;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.ResourceGroup;
@@ -57,7 +56,6 @@ import org.hyperic.hq.authz.shared.ResourceGroupLocal;
 import org.hyperic.hq.authz.shared.ResourceGroupPK;
 import org.hyperic.hq.authz.shared.ResourceGroupUtil;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
-import org.hyperic.hq.authz.shared.ResourceLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
@@ -139,38 +137,12 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
         groupLocal = getResourceGroupDAO().create(whoamiLocal, group);
         
         /* associated resources */
-        groupLocal.setResources(toResourceList(resources));
+        groupLocal.setResources(toPojos(resources));
         
         /* associated roles */
-        groupLocal.setRoles(toRoleList(roles));
+        groupLocal.setRoles(toPojos(roles));
 
         return groupLocal.getResourceGroupValue();
-    }
-
-    /** Convert arry of RoleValue's to Role's
-     * @param roles
-     * @return a list of Role's
-     */
-    private List toRoleList(RoleValue[] roles) {
-        RoleDAO dao = getRoleDAO();
-        List roleList = new ArrayList(roles.length);
-        for (int i = 0; i < roles.length; i++) {
-            roleList.add(dao.findById(roles[i].getId()));
-        }
-        return roleList;
-    }
-
-    /** Convert array of ResourceValue's to Resource's
-     * @param resources
-     * @return a list of Resource's
-     */
-    private List toResourceList(ResourceValue[] resources) {
-        ResourceDAO dao = getResourceDAO();
-        List resList = new ArrayList(resources.length);
-        for (int i = 0; i < resources.length; i++) {
-            resList.add(dao.findById(resources[i].getId()));
-        }
-        return resList;
     }
 
     /**
@@ -396,7 +368,7 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
                  groupLocal.getId(),
                  AuthzConstants.groupOpModifyResourceGroup);
 
-        groupLocal.setResources(toResourceList(resources));
+        groupLocal.setResources(toPojos(resources));
     }
 
     /**

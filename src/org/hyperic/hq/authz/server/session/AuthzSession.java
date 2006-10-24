@@ -319,6 +319,8 @@ public abstract class AuthzSession {
     protected Set toPojos(Object[] vals) {
         final int OPER_HASH = OperationValue.class.hashCode();
         final int SUBJ_HASH = AuthzSubjectValue.class.hashCode();
+        final int RES_HASH  = ResourceValue.class.hashCode();
+        final int ROLE_HASH = RoleValue.class.hashCode();
 
         Set ret = new HashSet();
         if (vals == null || vals.length == 0) {
@@ -329,6 +331,8 @@ public abstract class AuthzSession {
         
         OperationDAO operDao = null;
         AuthzSubjectDAO subjDao = null;
+        ResourceDAO resDao = null;
+        RoleDAO roleDao = null;
         for (int i = 0; i < vals.length; i++) {
             if (hashCode == OPER_HASH) {
                 if (operDao == null) {
@@ -341,6 +345,18 @@ public abstract class AuthzSession {
                     subjDao = getSubjectDAO();
                 }
                 ret.add(subjDao.findById(((AuthzSubjectValue)vals[i]).getId()));
+            }
+            else if (hashCode == RES_HASH) {
+                if (resDao == null) {
+                    resDao = getResourceDAO();
+                }
+                ret.add(resDao.findById(((ResourceValue) vals[i]).getId()));
+            }
+            else if (hashCode == ROLE_HASH) {
+                if (roleDao == null) {
+                    roleDao = getRoleDAO();
+                }
+                ret.add(roleDao.findById(((RoleValue) vals[i]).getId()));
             }
             else {
                 log.error("Invalid type.");
