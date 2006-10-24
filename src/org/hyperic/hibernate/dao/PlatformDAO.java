@@ -48,172 +48,32 @@ import java.util.Iterator;
 /**
  * CRUD methods, finders, etc. for Platform
  */
-public class PlatformDAO extends HibernateDAO
-{
-    public PlatformDAO(Session session)
-    {
+public class PlatformDAO extends HibernateDAO {
+    public PlatformDAO(Session session) {
         super(Platform.class, session);
     }
 
-    public Platform findById(Integer id)
-    {
+    public Platform findById(Integer id) {
         return (Platform)super.findById(id);
     }
 
-    public void evict(Platform entity)
-    {
+    public void evict(Platform entity) {
         super.evict(entity);
     }
 
-    public Platform merge(Platform entity)
-    {
+    public Platform merge(Platform entity) {
         return (Platform)super.merge(entity);
     }
 
-    public void save(Platform entity)
-    {
+    public void save(Platform entity) {
         super.save(entity);
     }
 
-    public void remove(Platform entity)
-    {
+    public void remove(Platform entity) {
         super.remove(entity);
     }
 
-    public Platform create(AIPlatformValue aip, String initialOwner)
-    {
-        Platform p = findByName(aip.getName());
-        if (p != null) {
-            throw new NonUniqueObjectException(
-                p.getId(),"duplicate platform found with name: "+aip.getName());
-        }
-        PlatformType pType = DAOFactory.getDAOFactory().getPlatformTypeDAO()
-            .findByName(aip.getPlatformTypeName());
-        if (pType == null) {
-            throw new ObjectNotFoundException(
-                aip.getId(),"Unable to find PlatformType: "+
-                            aip.getPlatformTypeName());
-        }
-        ConfigResponseDB config =
-            DAOFactory.getDAOFactory().getConfigResponseDAO().createPlatform();
-        // find platformtype
-        p = copyAIPlatformValue(aip);
-        p.setPlatformType(pType);
-        p.setConfigResponse(config);
-        p.setModifiedBy(initialOwner);
-        p.setOwner(initialOwner);
-        Agent agent = DAOFactory.getDAOFactory().getAgentDAO()
-                .findByAgentToken(aip.getAgentToken());
-        if (agent == null) {
-            throw new ObjectNotFoundException(
-                aip.getId(),"Unable to find agent: "+aip.getAgentToken());
-        }
-        p.setAgent(agent);
-        save(p);
-        return p;
-    }
-
-    public Platform create(PlatformValue pv, AgentPK agent)
-    {
-        Platform p = findByName(pv.getName());
-        if (p != null) {
-            throw new NonUniqueObjectException(
-                p.getId(), "duplicate platform found with name: "+pv.getName());
-        }
-        p = newPlatform(pv);
-        if (agent != null) {
-            Agent ag = new Agent();
-            ag.setId(agent.getId());
-            p.setAgent(ag);
-        }
-        save(p);
-        return p;
-    }
-
-    private Platform newPlatform(PlatformValue pv)
-    {
-        Platform p = new Platform();
-
-        p.setName(pv.getName());
-        p.setCertdn(pv.getCertdn());
-        p.setCommentText(pv.getCommentText());
-        p.setCpuCount(pv.getCpuCount());
-        p.setFqdn(pv.getFqdn());
-        p.setLocation(pv.getLocation());
-        p.setModifiedBy(pv.getModifiedBy());
-        p.setOwner(pv.getOwner());
-
-        // If these fks are invalid, Hibernate will throw
-        // exception
-        if (pv.getConfigResponseId() != null) {
-            ConfigResponseDB cr = new ConfigResponseDB();
-            cr.setId(pv.getConfigResponseId());
-            p.setConfigResponse(cr);
-        } else {
-            ConfigResponseDB config =
-                DAOFactory.getDAOFactory().getConfigResponseDAO()
-                    .createPlatform();
-            p.setConfigResponse(config);
-        }
-        if (pv.getPlatformType() != null) {
-            PlatformType pt = new PlatformType();
-            pt.setId(pv.getPlatformType().getId());
-            p.setPlatformType(pt);
-        }
-        if (pv.getAgent() != null) {
-            Agent ag = new Agent();
-            ag.setId(pv.getAgent().getId());
-            p.setAgent(ag);
-        }
-        p.setIps(pv.getAddedIpValues());
-        return p;
-    }
-
-    public Platform create(PlatformType ptype, AIPlatformValue aip, AgentPK agent)
-    {
-        Platform p = findByName(aip.getName());
-        if (p != null) {
-            throw new NonUniqueObjectException(
-                p.getId(),"duplicate platform found with name: "+aip.getName());
-        }
-        p = copyAIPlatformValue(aip);
-        p.setPlatformType(ptype);
-        Agent ag = new Agent();
-        ag.setId(agent.getId());
-        p.setAgent(ag);
-        save(p);
-        return p;
-    }
-
-    public Platform create(PlatformType ptype, PlatformValue pv, AgentPK agent)
-    {
-        Platform p = findByName(pv.getName());
-        if (p != null) {
-            throw new NonUniqueObjectException(
-                p.getId(), "duplicate platform found with name: "+pv.getName());
-        }
-        p = newPlatform(pv);
-        p.setPlatformType(ptype);
-        Agent ag = new Agent();
-        ag.setId(agent.getId());
-        p.setAgent(ag);
-        save(p);
-        return p;
-    }
-
-    private Platform copyAIPlatformValue(AIPlatformValue aip)
-    {
-        Platform p = new Platform();
-        p.setCertdn(aip.getCertdn());
-        p.setFqdn(aip.getFqdn());
-        p.setName(aip.getName());
-        p.setDescription(aip.getDescription());
-        p.setCommentText("");
-        p.setLocation("");
-        p.setCpuCount(aip.getCpuCount());
-        return p;
-    }
-
+ 
     /**
      * A method to update a platform based on a PlatformValue object
      * Ideally, this should be done via the xdoclet generated setPlatformValue
