@@ -83,6 +83,10 @@ public abstract class HQEJBTestBase
         return _uniqVal++;
     }
     
+    protected void refresh(Object o) {
+        _session.refresh(o);
+    }
+    
     public void setUp() 
         throws Exception
     {
