@@ -12,19 +12,27 @@ import org.hyperic.hq.test.HQEJBTestBase;
 public class ResourceTypeTest extends HQEJBTestBase {
     private static final String BOGUS_NAME="foobar";
 
+    private ResourceManagerLocal rman;
+    
     public ResourceTypeTest(String testName) {
         super(testName);
     }
 
-    public void testResourceType() throws Exception {
-        ResourceManagerLocal rman = ResourceManagerUtil.getLocalHome().create();
+    public void setUp() throws Exception {
+        super.setUp();
+        rman = ResourceManagerUtil.getLocalHome().create();
+    }
+
+    public void testSimpleFind() throws Exception {
         ResourceTypeValue rt =
             rman.findResourceTypeByName(AuthzConstants.subjectResourceTypeName);
         assertEquals(AuthzConstants.subjectResourceTypeName, rt.getName());
-
+    }
+    
+    public void testSimpleCreate() throws Exception {
         AuthzSubjectValue overlord = getOverlord();
         
-        rt = new ResourceTypeValue();
+        ResourceTypeValue rt = new ResourceTypeValue();
         rt.setSystem(false);
         rt.setName(BOGUS_NAME);
         rman.createResourceType(overlord, rt, null);
