@@ -43,6 +43,7 @@ import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.SessionFactoryImplementor;
 
 import java.sql.Connection;
+import java.util.Properties;
 
 /**
  * from hibernate caveat emptor with modifications to optimize initial 
@@ -58,7 +59,8 @@ public class Util {
     private static SessionFactory sessionFactory;
 
     static {
-        // Create the initial SessionFactory from the default configuration 
+        boolean mocktest = System.getProperty("hq.mocktest") != null;
+        // Create the initial SessionFactory from the default configuration
         // files
         try {
             // Replace with Configuration() if you don't use annotations 
@@ -67,6 +69,17 @@ public class Util {
 
             // Read not only hibernate.properties, but also hibernate.cfg.xml
             configuration.configure("META-INF/hibernate.cfg.xml");
+            if (mocktest) {
+                // set the proper hibernate configuration for mockejb test
+                Properties prop = configuration.getProperties();
+                prop.remove(Environment.TRANSACTION_MANAGER_STRATEGY);
+                String jta = System.getProperty(Environment.USER_TRANSACTION);
+                if (jta == null) {
+                    jta = "javax.transaction.UserTransaction";
+                }
+                prop.setProperty(Environment.USER_TRANSACTION, jta);
+                configuration.setProperties(prop);
+            }
 
             // Set global interceptor from configuration
             setInterceptor(configuration, null);
