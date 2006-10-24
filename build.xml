@@ -162,6 +162,7 @@
   </target>
 
   <target name="test" depends="init,init-taskdefs">
+    <mkdir dir="${junitResults.dir}"/>
     <junit reloading="no" fork="no" printsummary="yes" haltonerror="no">
       <classpath>
         <path refid="alljars"/>
@@ -173,7 +174,7 @@
         </path>
       </classpath>
       <formatter type="plain"/>
-      <batchtest todir="${basedir}">
+      <batchtest todir="${junitResults.dir}">
         <fileset dir="src">
           <include name="**/*Test.java"/>
         </fileset>
