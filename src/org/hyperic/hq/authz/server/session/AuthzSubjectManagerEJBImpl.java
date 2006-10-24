@@ -132,8 +132,7 @@ public class AuthzSubjectManagerEJBImpl
         // Flush the session so that we can do direct SQL
         dao.getSession().flush();
         
-        this.insertUserPrefs(dao.getSession().connection(),
-                             subjectPojo.getId());
+        this.insertUserPrefs(subjectPojo.getId());
 
         return new AuthzSubjectPK(subjectPojo.getId());
     }
@@ -211,7 +210,7 @@ public class AuthzSubjectManagerEJBImpl
                      AuthzConstants.perm_removeSubject);
         }
 
-        deleteUserPrefs(dao.getSession().connection(), subject);
+        deleteUserPrefs(subject);
 
         dao.remove(toDelete);
 
@@ -450,8 +449,7 @@ public class AuthzSubjectManagerEJBImpl
         }
 
         byte[] bytes =
-            selectUserPrefs(getSubjectDAO().getSession().connection(),
-                            subjId);
+            selectUserPrefs(subjId);
         if(bytes == null) {
             return new ConfigResponse(); 
         } else {
@@ -484,9 +482,10 @@ public class AuthzSubjectManagerEJBImpl
         = "INSERT INTO EAM_USER_CONFIG_RESP "
         + "(ID, SUBJECT_ID, PREF_RESPONSE) "
         + "VALUES (?,?,NULL)";
-    private void insertUserPrefs(Connection conn, Integer subjId) {
+    private void insertUserPrefs(Integer subjId) {
         PreparedStatement ps = null;
         try {
+            Connection conn = getSubjectDAO().getSession().connection();
             ps = conn.prepareStatement(SQL_PREFS_INSERT);
             ps.setInt(1, subjId.intValue());
             ps.setInt(2, subjId.intValue());
@@ -495,6 +494,7 @@ public class AuthzSubjectManagerEJBImpl
             throw new SystemException(e);
         } finally {
             DBUtil.closeStatement(log, ps);
+            getSubjectDAO().getSession().disconnect();
         }
     }
     
@@ -521,12 +521,13 @@ public class AuthzSubjectManagerEJBImpl
     
     private static final String SQL_PREFS_SELECT 
         = "SELECT PREF_RESPONSE FROM EAM_USER_CONFIG_RESP WHERE ID=?";
-    private byte[] selectUserPrefs (Connection conn, Integer subjId) {
+    private byte[] selectUserPrefs (Integer subjId) {
         PreparedStatement ps   = null;
         ResultSet         rs   = null;
         byte[]            data = null;
 
         try {
+            Connection conn = getSubjectDAO().getSession().connection();
             ps = conn.prepareStatement(SQL_PREFS_SELECT);
             ps.setInt(1, subjId.intValue());
             rs = ps.executeQuery();
@@ -537,16 +538,18 @@ public class AuthzSubjectManagerEJBImpl
             throw new SystemException(e);
         } finally {
             DBUtil.closeJDBCObjects(log, null, ps, rs);
+            getSubjectDAO().getSession().disconnect();
         }
         return data;
     }
 
     private static final String SQL_PREFS_DELETE 
         = "DELETE FROM EAM_USER_CONFIG_RESP WHERE ID=?";
-    private void deleteUserPrefs(Connection conn, Integer subjId) {
+    private void deleteUserPrefs(Integer subjId) {
         PreparedStatement ps   = null;
 
         try {
+            Connection conn = getSubjectDAO().getSession().connection();
             ps = conn.prepareStatement(SQL_PREFS_DELETE);
             ps.setInt(1,subjId.intValue());
             ps.executeUpdate();
@@ -554,6 +557,7 @@ public class AuthzSubjectManagerEJBImpl
             throw new SystemException(e);
         } finally {
             DBUtil.closeStatement(log, ps);
+            getSubjectDAO().getSession().disconnect();
         }
     }
     /**
