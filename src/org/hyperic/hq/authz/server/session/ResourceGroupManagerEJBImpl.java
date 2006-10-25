@@ -260,7 +260,7 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
         ResourceDAO resDao = getResourceDAO();
         for (int i = 0; i < resources.length; i++) {
             Resource resource = resDao.findById(resources[i].getId());
-            grpDao.addResource(resGroup, resource);
+            resGroup.addResource(resource);
         }
     }
 
@@ -290,7 +290,7 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
         // now look up the resource by type and id
         ResourceType resType = getResourceTypeDAO().findByName(type.getName());
         Resource resource = getResourceDAO().findByInstanceId(resType, instId);
-        dao.addResource(resGroup, resource);
+        resGroup.addResource(resource);
         return resGroup.getResourceGroupValue();
     }
  
