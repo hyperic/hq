@@ -28,13 +28,15 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
+import org.hyperic.hq.events.server.session.AlertConditionDAO;
+import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
 
-public class HibernateDAOFactory extends DAOFactory
-{
+public class HibernateDAOFactory extends DAOFactory {
     private static SessionFactory sessionFactory;
 
-    public  Session getCurrentSession()
-    {
+    public Session getCurrentSession() {
+        // XXX:  DCL problem here.  Fix it if we encounter strange bugs later,
+        //       since politically, we can't change this now.  *sigh*
         if (sessionFactory == null) {
             synchronized(this) {
                 // Cache session factory, we cache it because hibernate 
@@ -47,82 +49,78 @@ public class HibernateDAOFactory extends DAOFactory
         return sessionFactory.getCurrentSession();
     }
 
-    public HibernateDAOFactory()
-    {
+    public HibernateDAOFactory() {
     }
 
-    public AgentDAO getAgentDAO()
-    {
+    public ActionDAO getActionDAO() {
+        return new ActionDAO(getCurrentSession());
+    }
+
+    public AlertDefinitionDAO getAlertDefDAO() {
+        return new AlertDefinitionDAO(getCurrentSession());
+    }
+    
+    public AlertConditionDAO getAlertConditionDAO() {
+        return new AlertConditionDAO(getCurrentSession());
+    }
+
+    public AgentDAO getAgentDAO() {
         return new AgentDAO(getCurrentSession());
     }
 
-    public AgentTypeDAO getAgentTypeDAO()
-    {
+    public AgentTypeDAO getAgentTypeDAO() {
         return new AgentTypeDAO(getCurrentSession());
     }
 
-    public ApplicationDAO getApplicationDAO()
-    {
+    public ApplicationDAO getApplicationDAO() {
         return new ApplicationDAO(getCurrentSession());
     }
 
-    public ApplicationTypeDAO getApplicationTypeDAO()
-    {
+    public ApplicationTypeDAO getApplicationTypeDAO() {
         return new ApplicationTypeDAO(getCurrentSession());
     }
 
-    public AppServiceDAO getAppServiceDAO()
-    {
+    public AppServiceDAO getAppServiceDAO() {
         return new AppServiceDAO(getCurrentSession());
     }
 
-    public AppSvcDependencyDAO getAppSvcDepencyDAO()
-    {
+    public AppSvcDependencyDAO getAppSvcDepencyDAO() {
         return new AppSvcDependencyDAO(getCurrentSession());
     }
 
-    public ConfigResponseDAO getConfigResponseDAO()
-    {
+    public ConfigResponseDAO getConfigResponseDAO() {
         return new ConfigResponseDAO(getCurrentSession());
     }
 
-    public CpropDAO getCpropDAO()
-    {
+    public CpropDAO getCpropDAO() {
         return new CpropDAO(getCurrentSession());
     }
 
-    public CpropKeyDAO getCpropKeyDAO()
-    {
+    public CpropKeyDAO getCpropKeyDAO() {
         return new CpropKeyDAO(getCurrentSession());
     }
 
-    public PlatformDAO getPlatformDAO()
-    {
+    public PlatformDAO getPlatformDAO() {
         return new PlatformDAO(getCurrentSession());
     }
 
-    public PlatformTypeDAO getPlatformTypeDAO()
-    {
+    public PlatformTypeDAO getPlatformTypeDAO() {
         return new PlatformTypeDAO(getCurrentSession());
     }
 
-    public ServerDAO getServerDAO()
-    {
+    public ServerDAO getServerDAO() {
         return new ServerDAO(getCurrentSession());
     }
 
-    public ServiceClusterDAO getServiceClusterDAO()
-    {
+    public ServiceClusterDAO getServiceClusterDAO() {
         return new ServiceClusterDAO(getCurrentSession());
     }
 
-    public ServerTypeDAO getServerTypeDAO()
-    {
+    public ServerTypeDAO getServerTypeDAO() {
         return new ServerTypeDAO(getCurrentSession());
     }
 
-    public ServiceDAO getServiceDAO()
-    {
+    public ServiceDAO getServiceDAO() {
         return new ServiceDAO(getCurrentSession());
     }
 
@@ -130,8 +128,7 @@ public class HibernateDAOFactory extends DAOFactory
         return new TriggerDAO(getCurrentSession());
     }
 
-    public ServiceTypeDAO getServiceTypeDAO()
-    {
+    public ServiceTypeDAO getServiceTypeDAO() {
         return new ServiceTypeDAO(getCurrentSession());
     }
 
@@ -139,18 +136,15 @@ public class HibernateDAOFactory extends DAOFactory
         return new AuthzSubjectDAO(getCurrentSession());
     }
 
-    public BaselineDAO getBaselineDAO()
-    {
+    public BaselineDAO getBaselineDAO() {
         return new BaselineDAO(getCurrentSession());
     }
 
-    public CategoryDAO getCategoryDAO()
-    {
+    public CategoryDAO getCategoryDAO() {
         return new CategoryDAO(getCurrentSession());
     }
 
-    public PrincipalDAO getPrincipalDAO()
-    {
+    public PrincipalDAO getPrincipalDAO() {
         return new PrincipalDAO(getCurrentSession());
     }
 
@@ -174,81 +168,63 @@ public class HibernateDAOFactory extends DAOFactory
         return new OperationDAO(getCurrentSession());
     }
 
-    public MonitorableTypeDAO getMonitorableTypeDAO()
-    {
+    public MonitorableTypeDAO getMonitorableTypeDAO() {
         return new MonitorableTypeDAO(getCurrentSession());
     }
     
-    public RawMeasurementDAO getRawMeasurementDAO()
-    {
+    public RawMeasurementDAO getRawMeasurementDAO() {
         return new RawMeasurementDAO(getCurrentSession());
     }
 
-    public DerivedMeasurementDAO getDerivedMeasurementDAO()
-    {
+    public DerivedMeasurementDAO getDerivedMeasurementDAO() {
         return new DerivedMeasurementDAO(getCurrentSession());
     }
 
-    public MeasurementTemplateDAO getMeasurementTemplateDAO()
-    {
+    public MeasurementTemplateDAO getMeasurementTemplateDAO() {
         return new MeasurementTemplateDAO(getCurrentSession());
     }
 
-    public MeasurementArgDAO getMeasurementArgDAO()
-    {
+    public MeasurementArgDAO getMeasurementArgDAO() {
         return new MeasurementArgDAO(getCurrentSession());
     }
 
-    public MetricProblemDAO getMetricProblemDAO()
-    {
+    public MetricProblemDAO getMetricProblemDAO() {
         return new MetricProblemDAO(getCurrentSession());
     }
 
-    public ScheduleRevNumDAO getScheduleRevNumDAO()
-    {
+    public ScheduleRevNumDAO getScheduleRevNumDAO() {
         return new ScheduleRevNumDAO(getCurrentSession());
     }
 
-    // Autoinventory DAOs
-    public AIPlatformDAO getAIPlatformDAO()
-    {
+    public AIPlatformDAO getAIPlatformDAO() {
         return new AIPlatformDAO(getCurrentSession());
     }
 
-    public AIServerDAO getAIServerDAO()
-    {
+    public AIServerDAO getAIServerDAO() {
         return new AIServerDAO(getCurrentSession());
     }
 
-    public AIServiceDAO getAIServiceDAO()
-    {
+    public AIServiceDAO getAIServiceDAO() {
         return new AIServiceDAO(getCurrentSession());
     }
 
-    public AIIpDAO getAIIpDAO()
-    {
+    public AIIpDAO getAIIpDAO() {
         return new AIIpDAO(getCurrentSession());
     }
 
-    public AIHistoryDAO getAIHistoryDAO()
-    {
+    public AIHistoryDAO getAIHistoryDAO() {
         return new AIHistoryDAO(getCurrentSession());
     }
 
-    public AIScheduleDAO getAIScheduleDAO()
-    {
+    public AIScheduleDAO getAIScheduleDAO() {
         return new AIScheduleDAO(getCurrentSession());
     }
 
-    // Common DAO
-    public ConfigPropertyDAO getConfigPropertyDAO()
-    {
+    public ConfigPropertyDAO getConfigPropertyDAO() {
         return new ConfigPropertyDAO(getCurrentSession());
     }
 
-    // Plugin DAO
-    public PluginDAO getPluginDAO()
-    {
+    public PluginDAO getPluginDAO() {
         return new PluginDAO(getCurrentSession());
     }
 }
