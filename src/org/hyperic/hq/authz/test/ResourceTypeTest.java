@@ -1,14 +1,11 @@
 package org.hyperic.hq.authz.test;
 
-import javax.ejb.FinderException;
-
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.test.HQEJBTestBase;
-import org.hyperic.hq.test.HQEJBTestBase.TransactionBlock;
 
 public class ResourceTypeTest extends HQEJBTestBase {
     private static final String BOGUS_NAME="foobar";
