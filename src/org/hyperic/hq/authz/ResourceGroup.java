@@ -200,11 +200,36 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
     }
 
     public ResourceGroupValue getResourceGroupValue() {
+        resourceGroupValue.setClusterId(getClusterId().intValue());
+        resourceGroupValue.setCTime(new Long(getCtime()));
+        resourceGroupValue.setDescription(getDescription());
+        resourceGroupValue.setGroupEntResType(getGroupEntResType().intValue());
+        resourceGroupValue.setGroupEntType(getGroupEntType().intValue());
+        resourceGroupValue.setGroupType(getGroupType().intValue());
+        resourceGroupValue.setId(getId());
+        resourceGroupValue.setLocation(getLocation());
+        resourceGroupValue.setModifiedBy(getModifiedBy());
+        resourceGroupValue.setMTime(new Long(getMtime()));
+        resourceGroupValue.setName(getName());
+        resourceGroupValue.setSortName(getSortName());
+        resourceGroupValue.setSystem(isSystem());        
         return resourceGroupValue;
     }
 
     public void setResourceGroupValue(ResourceGroupValue val) {
-        resourceGroupValue = val;
+        setClusterId(new Integer(val.getClusterId()));
+        setCtime(val.getCTime().longValue());
+        setDescription(val.getDescription());
+        setGroupEntResType(new Integer(val.getGroupEntResType()));
+        setGroupEntType(new Integer(val.getGroupEntType()));
+        setGroupType(new Integer(val.getGroupType()));
+        setId(val.getId());
+        setLocation(val.getLocation());
+        setModifiedBy(val.getModifiedBy());
+        setMtime(val.getMTime().longValue());
+        setName(val.getName());
+        setSortName(val.getSortName());
+        setSystem(val.getSystem());        
     }
 
     public Object getValueObject() {
