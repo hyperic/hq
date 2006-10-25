@@ -81,7 +81,9 @@
       <many-to-many class="Role" column="ROLE_ID" />
     </bag>
 
-    <bag name="userConfigs" table="EAM_USER_CONFIG_RESP">
+    <bag name="userConfigs" table="EAM_USER_CONFIG_RESP"
+         cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
+         inverse="true">
       <key column="SUBJECT_ID" />
       <one-to-many class="UserConfigResp" />
     </bag>

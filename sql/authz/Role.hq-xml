@@ -20,11 +20,9 @@
       <column name ="VERSION_COL" default="0" />
     </version>
 
-    <properties name="roleName" unique="true">
-      <property name="name" type="string">
-        <column name="NAME" not-null="true" length="100" />
-      </property>
-    </properties>
+    <property name="name" type="string" unique="true">
+      <column name="NAME" not-null="true" length="100" />
+    </property>
 
     <property name="cid" type="integer">
       <column name="CID" index="EAM_ROLE_CID_IDX" not-null="false" />
@@ -57,7 +55,8 @@
       <many-to-many class="Operation" column="OPERATION_ID" />
     </bag>
 
-    <bag name="subjects" table="EAM_SUBJECT_ROLE_MAP">
+    <bag name="subjects" table="EAM_SUBJECT_ROLE_MAP"
+        inverse="true">
       <key column="ROLE_ID" />
       <many-to-many class="AuthzSubject" column="SUBJECT_ID" />
     </bag>

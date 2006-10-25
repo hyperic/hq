@@ -27,9 +27,13 @@ package org.hyperic.hibernate.dao;
 
 
 import org.hibernate.Session;
+import org.hibernate.HibernateException;
 import org.hyperic.hq.authz.Operation;
 import org.hyperic.hq.authz.ResourceType;
+import org.hyperic.hq.authz.Role;
 import org.hyperic.hq.authz.shared.OperationValue;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.dao.DAOFactory;
 
 /**
  * CRUD methods, finders, etc. for Operation
@@ -42,6 +46,13 @@ public class OperationDAO extends HibernateDAO
 
     public Operation create(OperationValue createInfo) {
         Operation res = new Operation(createInfo);
+        DAOFactory factory = DAOFactory.getDAOFactory();
+        Role rootRole=factory.getRoleDAO().findById(AuthzConstants.rootRoleId);
+        if (rootRole == null) {
+            throw new IllegalArgumentException("role id not found "+
+                                               AuthzConstants.rootRoleId);
+        }
+        rootRole.getOperations().add(res);
         save(res);
         return res;
     }

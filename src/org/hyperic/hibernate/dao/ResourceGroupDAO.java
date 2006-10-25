@@ -28,12 +28,14 @@ package org.hyperic.hibernate.dao;
 import java.util.Collection;
 
 import org.hibernate.Session;
+import org.hibernate.HibernateException;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.ResourceGroup;
 import org.hyperic.hq.authz.ResourceType;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
+import org.hyperic.hq.authz.shared.ResourceGroupLocalHome;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceValue;
 
 /**
@@ -49,27 +51,31 @@ public class ResourceGroupDAO extends HibernateDAO
                                 ResourceGroupValue createInfo) {
         return create(creator, createInfo, false);
     }
-    
+
     public ResourceGroup create(AuthzSubject creator,
                                 ResourceGroupValue createInfo,
                                 boolean isSystem) {
         ResourceGroup resGrp = new ResourceGroup(createInfo);
         save(resGrp);
-        
+
         // We have to create a new resource
         ResourceValue resValue = new ResourceValue();
-        
+
         ResourceType resType = new ResourceTypeDAO(getSession())
             .findByName(AuthzConstants.groupResourceTypeName);
+        if (resType == null) {
+            throw new IllegalArgumentException("ResourceType not found " +
+                                               AuthzConstants.groupResourceTypeName);
+        }
         resValue.setResourceTypeValue(resType.getResourceTypeValue());
-        
+
         resValue.setInstanceId(resGrp.getId());
         resValue.setName(resGrp.getName());
         resValue.setSystem(isSystem);
         Resource resource =
             new ResourceDAO(getSession()).create(creator, resValue);
         resGrp.setResource(resource);
-        
+
         return resGrp;
     }
 
@@ -87,6 +93,10 @@ public class ResourceGroupDAO extends HibernateDAO
 
     public void remove(ResourceGroup entity) {
         super.remove(entity);
+    }
+    
+    public void addResource(ResourceGroup entity, Resource res) {
+        entity.getResources().add(res);
     }
     
     public void removeAllResources(ResourceGroup entity) {

@@ -79,12 +79,14 @@
       <column name="RESOURCE_ID" index="EAM_RES_GROUP_RES_KEY" />
     </many-to-one>
 
-    <bag name="resources" table="EAM_RES_GRP_RES_MAP">
+    <bag name="resources" table="EAM_RES_GRP_RES_MAP"
+         inverse="true">
       <key column="RESOURCE_GROUP_ID"/>
       <many-to-many class="Resource" column="RESOURCE_ID" />
     </bag>
 
-    <bag name="roles" table="EAM_ROLE_RESOURCE_GROUP_MAP" inverse="true">
+    <bag name="roles" table="EAM_ROLE_RESOURCE_GROUP_MAP"
+         inverse="true">
       <key column="RESOURCE_GROUP_ID" />
       <many-to-many class="Role" column="ROLE_ID" />
     </bag>

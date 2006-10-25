@@ -25,15 +25,17 @@
 
 package org.hyperic.hibernate.dao;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 import org.hibernate.Session;
+import org.hibernate.HibernateException;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.ResourceGroup;
 import org.hyperic.hq.authz.ResourceType;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceValue;
 
 /**
@@ -52,9 +54,13 @@ public class ResourceTypeDAO extends HibernateDAO
 
         // We have to create a new resource
         ResourceValue resValue = new ResourceValue();
-        
+
         ResourceType typeResType = new ResourceTypeDAO(getSession())
             .findByName(AuthzConstants.typeResourceTypeName);
+        if (typeResType == null) {
+            throw new IllegalArgumentException("Resource Type not found: " +
+                                               AuthzConstants.typeResourceTypeName);
+        }
         resValue.setResourceTypeValue(typeResType.getResourceTypeValue());
 
         resValue.setInstanceId(resType.getId());
@@ -62,9 +68,13 @@ public class ResourceTypeDAO extends HibernateDAO
         Resource resource =
             new ResourceDAO(getSession()).create(creator, resValue);
         resType.setResource(resource);
-        
+
         ResourceGroup authzGroup = new ResourceGroupDAO(getSession())
             .findByName(AuthzConstants.authzResourceGroupName);
+        if (authzGroup == null) {
+            throw new IllegalArgumentException("Resource Group not found: " +
+                                               AuthzConstants.authzResourceGroupName);
+        }
         resource.addResourceGroup(authzGroup);
 
         return resType;
@@ -72,10 +82,6 @@ public class ResourceTypeDAO extends HibernateDAO
 
     public ResourceType findById(Integer id) {
         return (ResourceType) super.findById(id);
-    }
-
-    public Collection findAll() {
-        return (Collection) super.findAll();
     }
 
     public void save(ResourceType entity) {

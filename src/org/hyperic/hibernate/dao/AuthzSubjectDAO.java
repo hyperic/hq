@@ -27,18 +27,15 @@ package org.hyperic.hibernate.dao;
 
 import java.util.Collection;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.naming.NamingException;
-
 import org.hibernate.Session;
+import org.hibernate.HibernateException;
 import org.hyperic.hq.authz.AuthzSubject;
-import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.ResourceType;
 import org.hyperic.hq.authz.Role;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.dao.DAOFactory;
 
 /**
  * CRUD methods, finders, etc. for AuthzSubject
@@ -55,21 +52,28 @@ public class AuthzSubjectDAO extends HibernateDAO
         AuthzSubject subject = new AuthzSubject(createInfo);
         save(subject);
 
-        ResourceType resType = (new ResourceTypeDAO(getSession()))
-            .findByName(AuthzConstants.subjectResourceTypeName);
+        DAOFactory daoFactory = DAOFactory.getDAOFactory();
 
-        ResourceValue resValue = new ResourceValue();   
-        resValue.setResourceTypeValue(resType.getResourceTypeValue());
-        resValue.setInstanceId(subject.getId());
-        Resource resource =
-            new ResourceDAO(getSession()).create(creator, resValue);
-        subject.setResource(resource);
-        
-        // add the resource creator role to the user
-        Role creatorRole = new RoleDAO(getSession())
-            .findByName(AuthzConstants.creatorRoleName);
-        subject.addRole(creatorRole);
-
+        // XXX create resource for owner
+        ResourceTypeDAO rtdao = daoFactory.getResourceTypeDAO();
+        ResourceType rt =
+            rtdao.findByName(AuthzConstants.subjectResourceTypeName);
+        if (rt == null) {
+            throw new IllegalArgumentException("resource type not found " +
+                                               AuthzConstants.subjectResourceTypeName);
+        }
+        ResourceValue rValue = new ResourceValue();
+        rValue.setResourceTypeValue(rt.getResourceTypeValue());
+        rValue.setInstanceId(subject.getId());
+        subject.setResource(daoFactory.getResourceDAO().create(creator, rValue));
+        Role role = daoFactory.getRoleDAO().findByName(
+            AuthzConstants.creatorRoleName);
+        if (role == null) {
+            throw new IllegalArgumentException("role not found " +
+                                               AuthzConstants.creatorRoleName);
+        }
+        subject.getRoles().add(role);
+        save(subject);
         return subject;
     }
 

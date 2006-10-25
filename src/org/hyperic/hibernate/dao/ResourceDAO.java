@@ -26,20 +26,22 @@
 package org.hyperic.hibernate.dao;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
+import org.hibernate.HibernateException;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.Resource;
-import org.hyperic.hq.authz.ResourceGroup;
 import org.hyperic.hq.authz.ResourceType;
+import org.hyperic.hq.authz.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.hq.authz.shared.ResourceTypeValue;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.dao.DAOFactory;
 
 /**
  * CRUD methods, finders, etc. for Resource
@@ -47,7 +49,7 @@ import org.hyperic.hq.authz.shared.ResourceValue;
 public class ResourceDAO extends HibernateDAO
 {
     Log log = LogFactory.getLog(ResourceDAO.class);
-    
+
     public ResourceDAO(Session session) {
         super(Resource.class, session);
     }
@@ -59,15 +61,15 @@ public class ResourceDAO extends HibernateDAO
         if (typeValue == null) {
             // XXX - decide what exception to throw here
             // throw new CreateException("Null resourceType given.");
-            return null;
+            throw new IllegalArgumentException(
+                "ResourceTypevValue is not defined");
         }
-
         Resource resource = new Resource(createInfo);
-        
+
         ResourceType resType =
             new ResourceTypeDAO(getSession()).findById(typeValue.getId());
         resource.setResourceType(resType);
-        
+
         /* set owner */
         AuthzSubjectValue ownerValue = createInfo.getAuthzSubjectValue();
         if (ownerValue != null) {
@@ -82,8 +84,12 @@ public class ResourceDAO extends HibernateDAO
            anonymous, priviledged operation */
         ResourceGroup authzGroup = new ResourceGroupDAO(getSession())
             .findByName(AuthzConstants.rootResourceGroupName);
+        if (authzGroup == null) {
+            throw new IllegalArgumentException("can not find Resource Group: "+
+                                               AuthzConstants.rootResourceGroupName);
+        }
         resource.addResourceGroup(authzGroup);
-        
+
         return resource;
     }
 

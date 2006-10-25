@@ -46,7 +46,9 @@
       <one-to-many class="Operation" />
     </bag>
 
-    <bag name="resources" table="EAM_RESOURCE">
+    <bag name="resources" table="EAM_RESOURCE"
+         cascade="save-update,delete,persist,merge,evict,all-delete-orphan"
+         inverse="true" lazy="false">
       <key column="RESOURCE_TYPE_ID" />
       <one-to-many class="Resource" />
     </bag>
