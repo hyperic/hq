@@ -23,7 +23,7 @@
  * USA. 
  */
 
-package org.hyperic.hq.events;
+package org.hyperic.hq.events.server.session;
 
 import org.hyperic.hibernate.PersistedObject;
 

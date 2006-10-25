@@ -23,9 +23,10 @@
  * USA. 
  */
 
-package org.hyperic.hq.events;
+package org.hyperic.hq.events.server.session;
 
 import java.io.Serializable;
+
 
 /**
  * This class is currently not really used.  It has been auto-generated, and

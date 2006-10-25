@@ -22,18 +22,19 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.events;
+package org.hyperic.hq.events.server.session;
 
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.util.ArrayUtil;
 
 public class RegisteredTrigger 
     extends PersistedObject
 {
-    private String                 _className;
-    private byte[]                 _config;
-    private long                   _frequency;
-    private AlertDefinition        _alertDef;
+    private String           _className;
+    private byte[]           _config;
+    private long             _frequency;
+    private AlertDefinition  _alertDef;
     
     private RegisteredTriggerValue _valueObj;
     
@@ -44,9 +45,9 @@ public class RegisteredTrigger
         setRegisteredTriggerValue(val);
     }
     
-    public void setRegisteredTriggerValue(RegisteredTriggerValue val) {
+    protected void setRegisteredTriggerValue(RegisteredTriggerValue val) {
         setClassname(val.getClassname());
-        setConfig(val.getConfig());
+        setConfig(ArrayUtil.clone(val.getConfig()));
         setFrequency(val.getFrequency());
     }
     
@@ -68,33 +69,30 @@ public class RegisteredTrigger
     }
 
     public byte[] getConfig() {
-        // XXX -- We're returning a mutable array.  The proper thing to do 
-        //        is clone it
-        return _config;
+        return ArrayUtil.clone(_config);
     }
 
     public long getFrequency() {
         return _frequency;
     }
 
-    public void setClassname(String className) {
+    protected void setClassname(String className) {
         _className = className;
     }
 
-    public void setConfig(byte[] config) {
-        // XXX -- Should be cloning the byte array here
+    protected void setConfig(byte[] config) {
         _config = config;
     }
 
     public void setFrequency(long frequency) {
         _frequency = frequency;
     }
-    
+
     public AlertDefinition getAlertDef() {
         return _alertDef;
     }
     
-    public void setAlertDef(AlertDefinition def) {
+    protected void setAlertDef(AlertDefinition def) {
         _alertDef = def;
     }
 }
