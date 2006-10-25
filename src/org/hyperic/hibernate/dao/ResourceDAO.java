@@ -26,6 +26,7 @@
 package org.hyperic.hibernate.dao;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -33,12 +34,12 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.Resource;
+import org.hyperic.hq.authz.ResourceGroup;
 import org.hyperic.hq.authz.ResourceType;
-import org.hyperic.hq.authz.Operation;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
-
-import javax.ejb.FinderException;
 
 /**
  * CRUD methods, finders, etc. for Resource
@@ -52,11 +53,40 @@ public class ResourceDAO extends HibernateDAO
     }
 
     public Resource create(AuthzSubject creator, ResourceValue createInfo) {
-        Resource res = new Resource(createInfo);
-        res.setOwner(creator);
-        // XXX create resource for owner
-        save(res);
-        return res;
+        /* set resource type */
+        ResourceTypeValue typeValue = createInfo.getResourceTypeValue();
+
+        if (typeValue == null) {
+            // XXX - decide what exception to throw here
+            // throw new CreateException("Null resourceType given.");
+            return null;
+        }
+
+        Resource resource = new Resource(createInfo);
+        
+        ResourceType resType = (new ResourceTypeDAO(getSession()))
+            .findByName(AuthzConstants.groupResourceTypeName);
+        resource.setResourceType(resType);
+        
+        /* set owner */
+        AuthzSubjectValue ownerValue = createInfo.getAuthzSubjectValue();
+        if (ownerValue != null) {
+            creator = (new AuthzSubjectDAO(getSession()))
+                .findById(ownerValue.getId());
+        }
+        resource.setOwner(creator);
+
+        /* add it to the root resourcegroup */
+        /* This is done as the overlord, since it is meant to be an
+           anonymous, priviledged operation */
+        ResourceGroup authzGroup = (new ResourceGroupDAO(getSession()))
+            .findByName(AuthzConstants.rootResourceGroupName);        
+        Set groups = new HashSet(1);
+        groups.add(authzGroup);
+        resource.setResourceGroups(groups);
+        
+        save(resource);
+        return resource;
     }
 
     public Resource findById(Integer id) {
