@@ -31,8 +31,10 @@ import org.hibernate.Session;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.ResourceGroup;
+import org.hyperic.hq.authz.ResourceType;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
-import org.hyperic.hq.authz.shared.ResourceGroupLocalHome;
+import org.hyperic.hq.authz.shared.ResourceValue;
 
 /**
  * CRUD methods, finders, etc. for Resource
@@ -45,10 +47,26 @@ public class ResourceGroupDAO extends HibernateDAO
 
     public ResourceGroup create(AuthzSubject creator,
                                 ResourceGroupValue createInfo) {
-        ResourceGroup res = new ResourceGroup(createInfo);
-        // XXX create ResourceGroup for owner
-        save(res);
-        return res;
+        ResourceGroup resGrp = new ResourceGroup(createInfo);
+        save(resGrp);
+        
+        // We have to create a new resource
+        ResourceValue resValue = new ResourceValue();
+        
+        ResourceType resType = (new ResourceTypeDAO(getSession()))
+            .findByName(AuthzConstants.groupResourceTypeName);
+        resValue.setResourceTypeValue(resType.getResourceTypeValue());
+        
+        resValue.setInstanceId(resGrp.getId());
+        resValue.setName(resGrp.getName());
+        if (resValue.getName() != null)
+            resValue.setSortName(resValue.getName().toUpperCase());
+        resValue.setSystem(resGrp.isSystem());
+        Resource resource =
+            (new ResourceDAO(getSession())).create(creator, resValue);
+        resGrp.setResource(resource);
+        
+        return resGrp;
     }
 
     public ResourceGroup findById(Integer id) {
