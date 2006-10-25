@@ -26,6 +26,7 @@
 package org.hyperic.dao;
 
 import org.hibernate.Session;
+import org.hyperic.hibernate.dao.ActionDAO;
 import org.hyperic.hibernate.dao.AgentDAO;
 import org.hyperic.hibernate.dao.AgentTypeDAO;
 import org.hyperic.hibernate.dao.ApplicationDAO;
@@ -69,6 +70,8 @@ import org.hyperic.hibernate.dao.AIHistoryDAO;
 import org.hyperic.hibernate.dao.AIScheduleDAO;
 import org.hyperic.hibernate.dao.ConfigPropertyDAO;
 import org.hyperic.hibernate.dao.PluginDAO;
+import org.hyperic.hq.events.server.session.AlertConditionDAO;
+import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
 
 public abstract class DAOFactory
 {
@@ -77,6 +80,8 @@ public abstract class DAOFactory
 
     protected static int DEFAULT = HIBERNATE;
 
+    public abstract Session getCurrentSession();
+    
     // Appdef DAOs
     public abstract AgentDAO getAgentDAO();
     public abstract AgentTypeDAO getAgentTypeDAO();
@@ -107,8 +112,11 @@ public abstract class DAOFactory
     public abstract PrincipalDAO getPrincipalDAO();
 
     // Event DAOs
-    public abstract TriggerDAO getTriggerDAO();
-
+    public abstract ActionDAO          getActionDAO();
+    public abstract AlertDefinitionDAO getAlertDefDAO();
+    public abstract AlertConditionDAO  getAlertConditionDAO();
+    public abstract TriggerDAO         getTriggerDAO();
+    
     // Common DAO
     public abstract ConfigPropertyDAO getConfigPropertyDAO();
 
