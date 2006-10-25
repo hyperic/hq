@@ -64,8 +64,8 @@ public class ResourceDAO extends HibernateDAO
 
         Resource resource = new Resource(createInfo);
         
-        ResourceType resType = (new ResourceTypeDAO(getSession()))
-            .findByName(AuthzConstants.groupResourceTypeName);
+        ResourceType resType =
+            new ResourceTypeDAO(getSession()).findById(typeValue.getId());
         resource.setResourceType(resType);
         
         /* set owner */
@@ -75,17 +75,15 @@ public class ResourceDAO extends HibernateDAO
                 .findById(ownerValue.getId());
         }
         resource.setOwner(creator);
+        save(resource);
 
         /* add it to the root resourcegroup */
         /* This is done as the overlord, since it is meant to be an
            anonymous, priviledged operation */
-        ResourceGroup authzGroup = (new ResourceGroupDAO(getSession()))
-            .findByName(AuthzConstants.rootResourceGroupName);        
-        Set groups = new HashSet(1);
-        groups.add(authzGroup);
-        resource.setResourceGroups(groups);
+        ResourceGroup authzGroup = new ResourceGroupDAO(getSession())
+            .findByName(AuthzConstants.rootResourceGroupName);
+        resource.addResourceGroup(authzGroup);
         
-        save(resource);
         return resource;
     }
 

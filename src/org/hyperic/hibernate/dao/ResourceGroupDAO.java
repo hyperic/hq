@@ -47,23 +47,27 @@ public class ResourceGroupDAO extends HibernateDAO
 
     public ResourceGroup create(AuthzSubject creator,
                                 ResourceGroupValue createInfo) {
+        return create(creator, createInfo, false);
+    }
+    
+    public ResourceGroup create(AuthzSubject creator,
+                                ResourceGroupValue createInfo,
+                                boolean isSystem) {
         ResourceGroup resGrp = new ResourceGroup(createInfo);
         save(resGrp);
         
         // We have to create a new resource
         ResourceValue resValue = new ResourceValue();
         
-        ResourceType resType = (new ResourceTypeDAO(getSession()))
+        ResourceType resType = new ResourceTypeDAO(getSession())
             .findByName(AuthzConstants.groupResourceTypeName);
         resValue.setResourceTypeValue(resType.getResourceTypeValue());
         
         resValue.setInstanceId(resGrp.getId());
         resValue.setName(resGrp.getName());
-        if (resValue.getName() != null)
-            resValue.setSortName(resValue.getName().toUpperCase());
-        resValue.setSystem(resGrp.isSystem());
+        resValue.setSystem(isSystem);
         Resource resource =
-            (new ResourceDAO(getSession())).create(creator, resValue);
+            new ResourceDAO(getSession()).create(creator, resValue);
         resGrp.setResource(resource);
         
         return resGrp;
@@ -83,10 +87,6 @@ public class ResourceGroupDAO extends HibernateDAO
 
     public void remove(ResourceGroup entity) {
         super.remove(entity);
-    }
-    
-    public void addResource(ResourceGroup entity, Resource res) {
-        entity.getResources().add(res);
     }
     
     public void removeAllResources(ResourceGroup entity) {

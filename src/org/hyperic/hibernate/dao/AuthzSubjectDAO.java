@@ -27,9 +27,18 @@ package org.hyperic.hibernate.dao;
 
 import java.util.Collection;
 
+import javax.ejb.CreateException;
+import javax.ejb.FinderException;
+import javax.naming.NamingException;
+
 import org.hibernate.Session;
 import org.hyperic.hq.authz.AuthzSubject;
+import org.hyperic.hq.authz.Resource;
+import org.hyperic.hq.authz.ResourceType;
+import org.hyperic.hq.authz.Role;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.ResourceValue;
 
 /**
  * CRUD methods, finders, etc. for AuthzSubject
@@ -43,10 +52,25 @@ public class AuthzSubjectDAO extends HibernateDAO
 
     public AuthzSubject create(AuthzSubject creator,
                                AuthzSubjectValue createInfo) {
-        AuthzSubject res = new AuthzSubject(createInfo);
-        // XXX create resource for owner
-        save(res);
-        return res;
+        AuthzSubject subject = new AuthzSubject(createInfo);
+        save(subject);
+
+        ResourceType resType = (new ResourceTypeDAO(getSession()))
+            .findByName(AuthzConstants.subjectResourceTypeName);
+
+        ResourceValue resValue = new ResourceValue();   
+        resValue.setResourceTypeValue(resType.getResourceTypeValue());
+        resValue.setInstanceId(subject.getId());
+        Resource resource =
+            new ResourceDAO(getSession()).create(creator, resValue);
+        subject.setResource(resource);
+        
+        // add the resource creator role to the user
+        Role creatorRole = new RoleDAO(getSession())
+            .findByName(AuthzConstants.creatorRoleName);
+        subject.addRole(creatorRole);
+
+        return subject;
     }
 
     public AuthzSubject findById(Integer id)

@@ -26,10 +26,17 @@
 package org.hyperic.hibernate.dao;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 import org.hibernate.Session;
 import org.hyperic.hq.authz.AuthzSubject;
+import org.hyperic.hq.authz.Resource;
+import org.hyperic.hq.authz.ResourceGroup;
+import org.hyperic.hq.authz.ResourceType;
 import org.hyperic.hq.authz.Role;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.ResourceGroupValue;
+import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleValue;
 
 /**
@@ -42,10 +49,50 @@ public class RoleDAO extends HibernateDAO
     }
 
     public Role create(AuthzSubject creator, RoleValue createInfo) {
-        Role res = new Role(createInfo);
-        // XXX create resource based on owner
-        save(res);
-        return res;
+        Role role = new Role(createInfo);
+        // Save it at this point to get an ID
+        save(role);
+
+        ResourceType resType = (new ResourceTypeDAO(getSession()))
+            .findByName(AuthzConstants.roleResourceTypeName);
+
+        ResourceValue rValue = new ResourceValue();
+        rValue.setResourceTypeValue(resType.getResourceTypeValue());
+        rValue.setInstanceId(role.getId());
+        Resource myResource =
+            (new ResourceDAO(getSession())).create(creator, rValue);
+        role.setResource(myResource);
+
+
+        ResourceGroupDAO resourceGroupDAO = new ResourceGroupDAO(getSession());
+        HashSet groups = new HashSet(2);
+        
+        /**
+         Add the Authz Resource Group to every role.
+         This is done here so that the roles are always able
+         to operate on root types such as Subjects, Roles, and Groups
+        **/
+        ResourceGroup authzGroup = resourceGroupDAO
+            .findByName(AuthzConstants.authzResourceGroupName);
+        groups.add(authzGroup);
+
+        /** 
+         Create a group which will contain only the resource for the
+         Role we're creating, this is done so that role permissions 
+         can be granted to members of the role. 
+         Fix for Bug #5219
+        **/
+        ResourceGroupValue grpVal = new ResourceGroupValue();
+        grpVal.setName(AuthzConstants.privateRoleGroupName + role.getId());
+        grpVal.setSystem(true);
+        ResourceGroup group = resourceGroupDAO.create(creator, grpVal, true);
+        // add our resource
+        group.addResource(myResource);
+        groups.add(group);
+
+        role.setResourceGroups(groups);
+
+        return role;
     }
 
     public Collection findAll() {
