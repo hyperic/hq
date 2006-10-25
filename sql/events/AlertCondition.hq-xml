@@ -4,7 +4,7 @@
       "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
-<hibernate-mapping package="org.hyperic.hq.events">
+<hibernate-mapping package="org.hyperic.hq.events.server.session">
 
   <class name="AlertCondition" table="EAM_ALERT_CONDITION">
     <id name="id" type="integer">
@@ -47,15 +47,20 @@
       <column name="OPTION_STATUS" length="25" />
     </property>
 
-    <many-to-one name="alertDefinitionId" class="AlertDefinition">
+    <!--
+    <many-to-one name="alertDefinition" class="AlertDefinition">
       <column name="ALERT_DEFINITION_ID" />
     </many-to-one>
-
-    <property name="tiggerId" type="integer">
-      <column name="TRIGGER_ID" />
+    -->
+    <property name="alertDefinition" type="int">
+      <column name="ALERT_DEFINITION_ID" />
     </property>
 
-    <bag name="alertConditions" table="EAM_ALERT_CONDITION_LOG">
+    <many-to-one name="trigger" class="RegisteredTrigger">
+      <column name="TRIGGER_ID" />
+    </many-to-one>
+
+    <bag name="logEntriesBag" table="EAM_ALERT_CONDITION_LOG">
       <key column="CONDITION_ID" />
       <one-to-many class="AlertConditionLog" />
     </bag>

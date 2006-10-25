@@ -4,7 +4,7 @@
       "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
-<hibernate-mapping package="org.hyperic.hq.events">
+<hibernate-mapping package="org.hyperic.hq.events.server.session">
 
   <class name="Action" table="EAM_ACTION">
     <id name="id" type="integer">
@@ -27,15 +27,15 @@
       <column name="CONFIG" />
     </property>
 
-    <property name="parentId" type="integer">
+    <many-to-one name="parent" class="Action">
       <column name="PARENT_ID" />
-    </property>
+    </many-to-one>
 
-    <many-to-one name="alertDefinitionId" class="AlertDefinition">
+    <many-to-one name="alertDefinition" class="AlertDefinition">
       <column name="ALERT_DEFINITION_ID" />
     </many-to-one>
 
-    <bag name="alertActions" table="EAM_ALERT_ACTION_LOG">
+    <bag name="logEntriesBag" table="EAM_ALERT_ACTION_LOG">
       <key column="ACTION_ID" />
       <one-to-many class="AlertActionLog" />
     </bag>

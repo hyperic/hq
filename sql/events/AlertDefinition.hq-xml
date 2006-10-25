@@ -4,7 +4,7 @@
       "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
-<hibernate-mapping package="org.hyperic.hq.events">
+<hibernate-mapping package="org.hyperic.hq.events.server.session">
 
   <class name="AlertDefinition" table="EAM_ALERT_DEFINITION">
     <id name="id" type="integer">
@@ -31,16 +31,16 @@
       <column name="MTIME" not-null="true" />
     </property>
 
-    <property name="parentId" type="integer">
+    <many-to-one name="parent" class="AlertDefinition">
       <column name="PARENT_ID" />
-    </property>
+    </many-to-one>
 
     <property name="description" type="string">
       <column name="DESCRIPTION" not-null="false" length="250" />
     </property>
 
     <property name="priority" type="integer">
-      <column name="PRIORITY" index="ALERT_DEF_CHILD_IDX" not-null="true" default="1" />
+      <column name="PRIORITY" index="ALERT_DEF_CHILD_IDX" not-null="true" />
     </property>
 
     <property name="appdefId" type="integer">
@@ -52,8 +52,7 @@
     </property>
 
     <property name="enabled" type="boolean">
-      <column name="ENABLED" not-null="true" dialect="PostgreSQL" default="true" />
-      <column name="ENABLED" not-null="true" dialect="Oracle, Oracle9" default="1" />
+      <column name="ENABLED" not-null="true"/>
     </property>
 
     <property name="frequencyType" type="integer">
@@ -69,45 +68,41 @@
     </property>
 
     <property name="willRecover" type="boolean">
-      <column name="WILL_RECOVER" not-null="true" dialect="PostgreSQL" default="false" />
-      <column name="WILL_RECOVER" not-null="true" dialect="Oracle, Oracle9" default="0" />
+      <column name="WILL_RECOVER" not-null="true" />
     </property>
 
     <property name="notifyFiltered" type="boolean">
-      <column name="NOTIFY_FILTERED" not-null="true" dialect="PostgreSQL" default="false" />
-      <column name="NOTIFY_FILTERED" not-null="true" dialect="Oracle, Oracle9" default="0" />
+      <column name="NOTIFY_FILTERED" not-null="true" />
     </property>
 
     <property name="controlFiltered" type="boolean">
-      <column name="CONTROL_FILTERED" not-null="true" dialect="PostgreSQL" default="false" />
-      <column name="CONTROL_FILTERED" not-null="true" dialect="Oracle, Oracle9" default="0" />
+      <column name="CONTROL_FILTERED" not-null="true" />
     </property>
 
-    <property name="actOnTriggerId" type="integer">
+    <many-to-one name="actOnTrigger" class="RegisteredTrigger">
       <column name="ACT_ON_TRIGGER_ID" />
-    </property>
+    </many-to-one>
 
     <property name="deleted" type="boolean">
-      <column name="DELETED" not-null="true" dialect="PostgreSQL" default="false" />
-      <column name="DELETED" not-null="true" dialect="Oracle, Oracle9" default="0" />
+      <column name="DELETED" not-null="true" />
     </property>
 
-    <bag name="actions" table="EAM_ACTION">
+    <bag name="actionsBag" table="EAM_ACTION">
       <key column="ALERT_DEFINITION_ID" />
       <one-to-many class="Action" />
     </bag>
 
-    <bag name="alerts" table="EAM_ALERT">
+    <bag name="alertsBag" table="EAM_ALERT">
       <key column="ALERT_DEFINITION_ID" />
       <one-to-many class="Alert" />
     </bag>
 
-    <bag name="alertConditions" table="EAM_ALERT_CONDITION">
+    <bag name="conditionsBag" table="EAM_ALERT_CONDITION">
       <key column="ALERT_DEFINITION_ID" />
       <one-to-many class="AlertCondition" />
     </bag>
 
-    <bag name="triggers" table="EAM_REGISTERED_TRIGGER">
+    <bag name="triggersBag" table="EAM_REGISTERED_TRIGGER">
       <key column="ALERT_DEFINITION_ID" />
       <one-to-many class="RegisteredTrigger" />
     </bag>

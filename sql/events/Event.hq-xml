@@ -4,8 +4,7 @@
       "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
-<hibernate-mapping
-  package="org.hyperic.hq.events">
+<hibernate-mapping package="org.hyperic.hq.events.server.session">
 
   <class name="Event" table="EAM_EVENT">
     <id name="id" type="long">
@@ -28,7 +27,7 @@
       <column name="CTIME" not-null="true" />
     </property>
 
-    <bag name="triggerEvents" table="EAM_TRIGGER_EVENT">
+    <bag name="triggerEventsBag" table="EAM_TRIGGER_EVENT">
       <key column="EVENT_ID" />
       <one-to-many class="TriggerEvent" />
     </bag>
