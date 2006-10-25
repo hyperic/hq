@@ -73,6 +73,10 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
     private String _password;
     private String _server;
 
+    static {
+        System.setProperty("hq.mocktest", "true");
+    }
+
     public MockBeanTestBase(String testName){
         super(testName);
         

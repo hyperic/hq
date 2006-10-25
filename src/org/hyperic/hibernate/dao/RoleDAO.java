@@ -29,7 +29,6 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.hibernate.Session;
-import org.hibernate.HibernateException;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.Role;
 import org.hyperic.hq.authz.ResourceType;
@@ -39,13 +38,11 @@ import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
-import org.hyperic.dao.DAOFactory;
 
 /**
  * CRUD methods, finders, etc. for Role
  */
-public class RoleDAO extends HibernateDAO
-{
+public class RoleDAO extends HibernateDAO {
     public RoleDAO(Session session) {
         super(Role.class, session);
     }
@@ -127,7 +124,7 @@ public class RoleDAO extends HibernateDAO
 
     public Role findByName(String name)
     {            
-        String sql = "from ResourceType where name = ?";
+        String sql = "from Role where name=?";
         return (Role)getSession().createQuery(sql)
             .setString(0, name)
             .uniqueResult();
@@ -152,11 +149,61 @@ public class RoleDAO extends HibernateDAO
                                                        Integer sid, boolean asc)
     {
         return getSession()
-            .createQuery("from Role r fetch join subjects s " +
-                         "where system = ? and s.id = ? order by sortName " +
+            .createQuery("from Role r join fetch r.subjects s " +
+                         "where r.system = ? and s.subject.id = ? " +
+                         "order by r.sortName " +
                          (asc ? "asc" : "desc"))
             .setBoolean(0, system)
             .setInteger(1, sid.intValue())
+            .list();
+    }
+
+
+    public Collection findBySystemAndSubject_orderMember(boolean system,
+                                                         Integer sid,
+                                                         boolean asc)
+    {
+        return getSession()
+            .createQuery("from Role r join fetch r.subjects s " +
+                         "where r.system = ? and s.subject.id = ? " +
+                         "order by r.sortName " +
+                         (asc ? "asc" : "desc"))
+            .setBoolean(0, system)
+            .setInteger(1, sid.intValue())
+            .list();
+    }
+
+    public Collection findBySystemAndAvailableForSubject_orderName(
+        boolean system, Integer sid, boolean asc) {
+        return getSession()
+            .createQuery("from Role r join fetch r.subjects s " +
+                         "where system = ? and s.subject.id = ? and " +
+                         "r.id != s.role.id order by r.sortName " +
+                         (asc ? "asc" : "desc"))
+            .setBoolean(0, system)
+            .setInteger(1, sid.intValue())
+            .list();
+    }
+
+    public Role findAvailableRoleForSubject(Integer roleId,
+                                            Integer subjectid) {
+        return (Role)getSession()
+            .createQuery("from Role r join fetch r.subjects s " +
+                         "where r.id = ? and s.subject.id = ? and " +
+                         "r.id != s.role.id ")
+            .setInteger(0, roleId.intValue())
+            .setInteger(1, subjectid.intValue())
+            .uniqueResult();
+    }
+
+    public Collection findAvailableForGroup(boolean system, Integer groupId)
+    {
+        return getSession()
+            .createQuery("from Role r join fetch r.resourceGroups rg " +
+                         "where r.system = ? and rg.resourceGroup.id = ? and " +
+                         "r.id != rg.role.id order by r.sortName ")
+            .setBoolean(0, system)
+            .setInteger(1, groupId.intValue())
             .list();
     }
 }
