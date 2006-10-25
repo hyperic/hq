@@ -709,7 +709,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         for (Iterator it = alertdefs.iterator(); it.hasNext(); ) {
             AlertDefinitionValue ad = (AlertDefinitionValue) it.next();
             canManageAlerts(subject, ad);
-            action = getActMan().createAction(action);
+            action = getActMan().createAction(ad, action);
             
             // Create an array out with the new action
             ActionValue[] actions = ad.getActions();
@@ -859,11 +859,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         throws SessionNotFoundException, SessionTimeoutException
     {
         AuthzSubjectValue subject = this.manager.getSubject(sessionId);
-        try {
-            return getActMan().getActionsForAlert(alertId);
-        } catch (FinderException e) {
-            throw new SystemException(e);
-        }
+
+        return getActMan().getActionsForAlert(alertId.intValue());
     }
 
     /**
@@ -873,8 +870,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * @ejb:transaction type="REQUIRED"
      */
     public void updateAction(int sessionID, ActionValue aval)
-        throws SessionNotFoundException, SessionTimeoutException, 
-               FinderException {
+        throws SessionNotFoundException, SessionTimeoutException 
+    {
         AuthzSubjectValue subject = this.manager.getSubject(sessionID);
         getActMan().updateAction(aval);
     }
