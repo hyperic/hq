@@ -25,9 +25,8 @@
 
 package org.hyperic.hq.authz;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.ArrayList;
 
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -134,7 +133,7 @@ public class Resource extends AuthzNamedEntity
 
     public Collection getResourceGroups()
     {
-        return Collections.unmodifiableCollection(resourceGroups);
+        return resourceGroups;
     }
 
     public void setResourceGroups(Collection val)
