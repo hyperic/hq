@@ -350,6 +350,11 @@ public class ArrayUtil {
         return r;
     }
     
+    /**
+     * Clone a byte array, maintaining awareness of null arrays
+     * @param orig Byte array to clone (can be null)
+     * @return a clone of the array (or null if the argument was null)
+     */
     public static byte[] clone(byte[] orig) {
         if (orig == null)
             return null;
