@@ -266,7 +266,6 @@ public class AuthzSubject extends AuthzNamedEntity
         setName(authzSubjectValue.getName());
         setPhoneNumber(authzSubjectValue.getPhoneNumber());
         setSMSAddress(authzSubjectValue.getSMSAddress());
-        setSortName(authzSubjectValue.getSortName());
         setSystem(authzSubjectValue.getSystem());
     }
 

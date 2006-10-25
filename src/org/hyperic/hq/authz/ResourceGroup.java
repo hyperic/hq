@@ -296,7 +296,6 @@ public class ResourceGroup extends AuthzNamedEntity
         setModifiedBy(val.getModifiedBy());
         setMtime(val.getMTime());
         setName(val.getName());
-        setSortName(val.getSortName());
         setSystem(val.getSystem());        
     }
 

@@ -180,7 +180,6 @@ public class Resource extends AuthzNamedEntity
         setInstanceId(val.getInstanceId());
         setName(val.getName());
         setResourceType(new ResourceType(val.getResourceTypeValue()));
-        setSortName(val.getSortName());
         setSystem(val.getSystem());
     }
 

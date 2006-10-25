@@ -149,7 +149,6 @@ public class Role extends AuthzNamedEntity
         setId(val.getId());
         setName(val.getName());
         setDescription(val.getDescription());
-        setSortName(val.getSortName());
         setSystem(val.getSystem());
     }
 
