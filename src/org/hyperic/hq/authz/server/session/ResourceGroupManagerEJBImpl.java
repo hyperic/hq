@@ -67,6 +67,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.hibernate.ObjectNotFoundException;
 
 /**
  * Use this session bean to manipulate ResourceGroups,
@@ -181,8 +182,11 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      */
     public ResourceGroupValue findResourceGroupByName(AuthzSubjectValue whoami,
                                                       String name)
-        throws PermissionException {
+        throws PermissionException, FinderException {
         ResourceGroup resGroup = getResourceGroupDAO().findByName(name);
+        if (resGroup == null) {
+            throw new FinderException("resource group not found");
+        }
         PermissionManager pm = PermissionManagerFactory.getInstance();
         pm.check(whoami.getId(),
                  resGroup.getResource().getResourceType(),
