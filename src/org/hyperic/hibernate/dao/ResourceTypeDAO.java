@@ -63,11 +63,9 @@ public class ResourceTypeDAO extends HibernateDAO
             new ResourceDAO(getSession()).create(creator, resValue);
         resType.setResource(resource);
         
-        
-        ResourceGroupDAO resourceGroupDAO = new ResourceGroupDAO(getSession());
-        ResourceGroup authzGroup =
-            resourceGroupDAO.findByName(AuthzConstants.authzResourceGroupName);
-        authzGroup.addResource(resource);
+        ResourceGroup authzGroup = new ResourceGroupDAO(getSession())
+            .findByName(AuthzConstants.authzResourceGroupName);
+        resource.addResourceGroup(authzGroup);
 
         return resType;
     }
