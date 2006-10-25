@@ -25,13 +25,11 @@
 
 package org.hyperic.hq.authz;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
-import org.hyperic.hq.authz.shared.ResourceTypeLocal;
 
 public class ResourceType extends AuthzNamedEntity
 {
