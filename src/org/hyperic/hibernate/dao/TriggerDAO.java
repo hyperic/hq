@@ -33,7 +33,7 @@ import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 
 import org.hibernate.Session;
-import org.hyperic.hq.events.RegisteredTrigger;
+import org.hyperic.hq.events.server.session.RegisteredTrigger;
 import org.hyperic.hq.events.shared.RegisteredTriggerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerLocalHome;
 import org.hyperic.hq.events.shared.RegisteredTriggerPK;
