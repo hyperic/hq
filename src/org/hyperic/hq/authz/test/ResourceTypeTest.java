@@ -8,6 +8,7 @@ import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.test.HQEJBTestBase;
+import org.hyperic.hq.test.HQEJBTestBase.TransactionBlock;
 
 public class ResourceTypeTest extends HQEJBTestBase {
     private static final String BOGUS_NAME="foobar";
@@ -30,22 +31,30 @@ public class ResourceTypeTest extends HQEJBTestBase {
     }
     
     public void testSimpleCreate() throws Exception {
-        AuthzSubjectValue overlord = getOverlord();
+        final AuthzSubjectValue overlord = getOverlord();
         
-        ResourceTypeValue rt = new ResourceTypeValue();
-        rt.setSystem(false);
-        rt.setName(BOGUS_NAME);
-        rman.createResourceType(overlord, rt, null);
+        runInTransaction(new TransactionBlock() {
+            public void run() throws Exception {
+                ResourceTypeValue rt = new ResourceTypeValue();
+                rt.setSystem(false);
+                rt.setName(BOGUS_NAME);
+                rman.createResourceType(overlord, rt, null);
+            }
+        });
     
-        rt = rman.findResourceTypeByName(BOGUS_NAME);
-        assertEquals(BOGUS_NAME, rt.getName());
-        
-        rman.removeResourceType(overlord, rt);
+        runInTransaction(new TransactionBlock() {
+            public void run() throws Exception {
+                ResourceTypeValue rt = rman.findResourceTypeByName(BOGUS_NAME);
+                assertEquals(BOGUS_NAME, rt.getName());
+                
+                rman.removeResourceType(overlord, rt);
+            }
+        });
         
         try {
-            rt = rman.findResourceTypeByName(BOGUS_NAME);
+            ResourceTypeValue rt = rman.findResourceTypeByName(BOGUS_NAME);
             assertTrue(false);
-        } catch (FinderException e) {
+        } catch (Exception e) {
         }
     }
 }
