@@ -32,6 +32,7 @@ import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.ResourceGroup;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
+import org.hyperic.hq.authz.shared.ResourceGroupLocalHome;
 
 /**
  * CRUD methods, finders, etc. for Resource
@@ -48,10 +49,6 @@ public class ResourceGroupDAO extends HibernateDAO
         // XXX create ResourceGroup for owner
         save(res);
         return res;
-    }
-
-    public Collection findAll() {
-        return (Collection) super.findAll();
     }
 
     public ResourceGroup findById(Integer id) {
@@ -99,8 +96,8 @@ public class ResourceGroupDAO extends HibernateDAO
     public Collection findByRoleIdAndSystem_orderName(Integer roleId,
                                                          boolean system,
                                                          boolean asc) {            
-        String sql = "from ResourceGroup g join fetch roles r " +
-                     "where r.id = ? and g.system = ? order by sortName " +
+        String sql = "from ResourceGroup g join fetch g.roles r " +
+                     "where r.id = ? and g.system = ? order by g.sortName " +
                      (asc ? "asc" : "desc");
         return getSession().createQuery(sql)
             .setInteger(0, roleId.intValue())

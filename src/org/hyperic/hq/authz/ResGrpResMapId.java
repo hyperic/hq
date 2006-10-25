@@ -27,18 +27,18 @@ public class ResGrpResMapId  implements java.io.Serializable {
     
    
     // Property accessors
-    public Resource getResourceId() {
+    public Resource getResource() {
         return this.resourceId;
     }
     
-    public void setResourceId(Resource resourceId) {
+    public void setResource(Resource resourceId) {
         this.resourceId = resourceId;
     }
-    public ResourceGroup getResourceGroupId() {
+    public ResourceGroup getResourceGroup() {
         return this.resourceGroupId;
     }
     
-    public void setResourceGroupId(ResourceGroup resourceGroupId) {
+    public void setResourceGroup(ResourceGroup resourceGroupId) {
         this.resourceGroupId = resourceGroupId;
     }
 

@@ -54,11 +54,6 @@ public class AuthzSubjectDAO extends HibernateDAO
         return (AuthzSubject)super.findById(id);
     }
 
-    public Collection findAll()
-    {
-        return (Collection)super.findAll();
-    }
-
     public void save(AuthzSubject entity)
     {
         super.save(entity);
@@ -81,7 +76,7 @@ public class AuthzSubjectDAO extends HibernateDAO
 
     public AuthzSubject findByAuth(String name, String dsn)
     {
-        String sql = "from AuthzSubject s where s.name=? and s.dsn=?";
+        String sql = "from AuthzSubject s where s.name=? and s.authDsn=?";
         return (AuthzSubject)getSession().createQuery(sql)
             .setString(0, name)
             .setString(1, dsn)

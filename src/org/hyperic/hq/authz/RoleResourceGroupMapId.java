@@ -27,18 +27,18 @@ public class RoleResourceGroupMapId  implements java.io.Serializable {
     
    
     // Property accessors
-    public Role getRoleId() {
+    public Role getRole() {
         return this.roleId;
     }
     
-    public void setRoleId(Role roleId) {
+    public void setRole(Role roleId) {
         this.roleId = roleId;
     }
-    public ResourceGroup getResourceGroupId() {
+    public ResourceGroup getResourceGroup() {
         return this.resourceGroupId;
     }
     
-    public void setResourceGroupId(ResourceGroup resourceGroupId) {
+    public void setResourceGroup(ResourceGroup resourceGroupId) {
         this.resourceGroupId = resourceGroupId;
     }
 }

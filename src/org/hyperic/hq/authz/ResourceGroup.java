@@ -25,13 +25,13 @@
 
 package org.hyperic.hq.authz;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 
-public class ResourceGroup extends AuthzNamedEntity implements Serializable {
+public class ResourceGroup extends AuthzNamedEntity
+{
 
     private Integer cid;
     private String description;
@@ -52,24 +52,33 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
 
     // Constructors
 
-    /** default constructor */
-    public ResourceGroup() {
+    /**
+     * default constructor
+     */
+    public ResourceGroup()
+    {
         super();
     }
 
-    /** minimal constructor */
-    public ResourceGroup(ResourceGroupValue val) {
+    /**
+     * minimal constructor
+     */
+    public ResourceGroup(ResourceGroupValue val)
+    {
         setResourceGroupValue(val);
     }
 
-    /** full constructor */
+    /**
+     * full constructor
+     */
     public ResourceGroup(String name, Integer cid,
                          String description, String location, boolean fsystem,
                          Integer groupType, Integer groupEntType,
                          Integer groupEntResType, Integer clusterId,
                          long ctime, long mtime, String modifiedBy,
                          Resource resourceId, Collection resources,
-                         Collection roles) {
+                         Collection roles)
+    {
         super(name);
         this.cid = cid;
         this.description = description;
@@ -87,119 +96,177 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
         this.roles = roles;
     }
 
-    public Integer getCid() {
+    public Integer getCid()
+    {
         return cid;
     }
 
-    public void setCid(Integer val) {
+    public void setCid(Integer val)
+    {
         cid = val;
     }
 
-    public String getDescription() {
+    public String getDescription()
+    {
         return description;
     }
 
-    public void setDescription(String val) {
+    public void setDescription(String val)
+    {
         description = val;
     }
 
-    public String getLocation() {
+    public String getLocation()
+    {
         return location;
     }
 
-    public void setLocation(String val) {
+    public void setLocation(String val)
+    {
         location = val;
     }
 
-    public boolean isSystem() {
+    public boolean isSystem()
+    {
         return system;
     }
 
-    public void setSystem(boolean val) {
+    public void setSystem(boolean val)
+    {
         system = val;
     }
 
-    public Integer getGroupType() {
+    public Integer getGroupType()
+    {
         return groupType;
     }
 
-    public void setGroupType(Integer val) {
+    public void setGroupType(Integer val)
+    {
         groupType = val;
     }
 
-    public Integer getGroupEntType() {
+    public Integer getGroupEntType()
+    {
         return groupEntType;
     }
 
-    public void setGroupEntType(Integer val) {
+    public void setGroupEntType(Integer val)
+    {
         groupEntType = val;
     }
 
-    public Integer getGroupEntResType() {
+    public Integer getGroupEntResType()
+    {
         return groupEntResType;
     }
 
-    public void setGroupEntResType(Integer val) {
+    public void setGroupEntResType(Integer val)
+    {
         groupEntResType = val;
     }
 
-    public Integer getClusterId() {
+    public Integer getClusterId()
+    {
         return clusterId;
     }
 
-    public void setClusterId(Integer val) {
+    public void setClusterId(Integer val)
+    {
         clusterId = val;
     }
 
-    public long getCtime() {
+    public long getCtime()
+    {
         return ctime;
     }
 
-    public void setCtime(long val) {
-        ctime = val;
+    public void setCtime(Long val)
+    {
+        ctime = val != null ? val.longValue() : 0;
     }
 
-    public long getMtime() {
+    public long getMtime()
+    {
         return mtime;
     }
 
-    public void setMtime(long val) {
-        mtime = val;
+    public void setMtime(Long val)
+    {
+        mtime = val != null ? val.longValue() : 0;
     }
 
-    public String getModifiedBy() {
+    public String getModifiedBy()
+    {
         return modifiedBy;
     }
 
-    public void setModifiedBy(String val) {
+    public void setModifiedBy(String val)
+    {
         modifiedBy = val;
     }
 
-    public Resource getResource() {
+    public Resource getResource()
+    {
         return resource;
     }
 
-    public void setResource(Resource val) {
+    public void setResource(Resource val)
+    {
         resource = val;
     }
 
-    public Collection getResources() {
+    public Collection getResources()
+    {
         return resources;
     }
 
-    public void setResources(Collection val) {
+    public void setResources(Collection val)
+    {
         resources = val;
     }
 
-    public Collection getRoles() {
-        return roles;
+    public void addResource(Resource resource)
+    {
+        resources.add(resource);
     }
 
-    public void setRoles(Collection val) {
+    public void removeResource(Resource resource)
+    {
+        resources.remove(resource);
+    }
+
+    public void removeAllResources()
+    {
+        resources.clear();
+    }
+
+    public Collection getRoles()
+    {
+        return roles;
+    }
+    public void setRoles(Collection val)
+    {
         roles = val;
     }
 
-    public ResourceGroupValue getResourceGroupValue() {
+    public void addRole(Role role)
+    {
+        roles.add(role);
+    }
+
+    public void removeRole(Role role)
+    {
+        roles.remove(role);
+    }
+
+    public void removeAllRoles()
+    {
+        roles.clear();
+    }
+
+    public ResourceGroupValue getResourceGroupValue()
+    {
         resourceGroupValue.setClusterId(getClusterId().intValue());
         resourceGroupValue.setCTime(new Long(getCtime()));
         resourceGroupValue.setDescription(getDescription());
@@ -216,9 +283,10 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
         return resourceGroupValue;
     }
 
-    public void setResourceGroupValue(ResourceGroupValue val) {
+    public void setResourceGroupValue(ResourceGroupValue val)
+    {
         setClusterId(new Integer(val.getClusterId()));
-        setCtime(val.getCTime().longValue());
+        setCtime(val.getCTime());
         setDescription(val.getDescription());
         setGroupEntResType(new Integer(val.getGroupEntResType()));
         setGroupEntType(new Integer(val.getGroupEntType()));
@@ -226,16 +294,16 @@ public class ResourceGroup extends AuthzNamedEntity implements Serializable {
         setId(val.getId());
         setLocation(val.getLocation());
         setModifiedBy(val.getModifiedBy());
-        setMtime(val.getMTime().longValue());
+        setMtime(val.getMTime());
         setName(val.getName());
         setSortName(val.getSortName());
         setSystem(val.getSystem());        
     }
 
-    public Object getValueObject() {
+    public Object getValueObject()
+    {
         return getResourceGroupValue();
     }
-
 
     public boolean equals(Object obj)
     {

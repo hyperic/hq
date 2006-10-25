@@ -25,7 +25,7 @@
         <column name="NAME" index="EAM_SUBJECT_AUTH_KEY" not-null="true" length="100" />
       </property>
 
-      <property name="dsn" type="string">
+      <property name="authDsn" type="string">
         <column name="DSN" index="EAM_SUBJECT_AUTH_KEY" not-null="true" length="100" />
       </property>
     </properties>
@@ -50,7 +50,7 @@
       <column name="EMAIL_ADDRESS" length="100"/>
     </property>
 
-    <property name="smsAddress" type="string">
+    <property name="SMSAddress" type="string">
       <column name="SMS_ADDRESS" length="100"/>
     </property>
 
@@ -89,11 +89,11 @@
 
   <class name="AuthzSubjRoleMap" table="EAM_SUBJECT_ROLE_MAP">
     <composite-id name="id" class="AuthzSubjRoleMapId">
-      <key-many-to-one name="roleId" class="Role">
+      <key-many-to-one name="role" class="Role">
         <column name="ROLE_ID" not-null="true" />
       </key-many-to-one>
 
-      <key-many-to-one name="subjectId" class="AuthzSubject">
+      <key-many-to-one name="subject" class="AuthzSubject">
         <column name="SUBJECT_ID" not-null="true" />
       </key-many-to-one>
     </composite-id>

@@ -3576,6 +3576,7 @@ public class AppdefBossEJBImpl
     /**
      * Get the appdef inventory summary visible to a user
      * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
     public AppdefInventorySummary getInventorySummary(int sessionId)
         throws SessionNotFoundException, SessionTimeoutException 

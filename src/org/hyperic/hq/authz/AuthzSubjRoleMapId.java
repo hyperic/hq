@@ -10,8 +10,8 @@ public class AuthzSubjRoleMapId  implements java.io.Serializable {
 
     // Fields    
 
-     private Role roleId;
-     private AuthzSubject subjectId;
+     private Role role;
+     private AuthzSubject subject;
 
      // Constructors
 
@@ -21,25 +21,25 @@ public class AuthzSubjRoleMapId  implements java.io.Serializable {
 
     /** full constructor */
     public AuthzSubjRoleMapId(Role roleId, AuthzSubject subjectId) {
-        this.roleId = roleId;
-        this.subjectId = subjectId;
+        this.role = roleId;
+        this.subject = subjectId;
     }
     
    
     // Property accessors
-    public Role getRoleId() {
-        return this.roleId;
+    public Role getRole() {
+        return this.role;
     }
     
-    public void setRoleId(Role roleId) {
-        this.roleId = roleId;
+    public void setRole(Role role) {
+        this.role = role;
     }
-    public AuthzSubject getSubjectId() {
-        return this.subjectId;
+    public AuthzSubject getSubject() {
+        return this.subject;
     }
     
-    public void setSubjectId(AuthzSubject subjectId) {
-        this.subjectId = subjectId;
+    public void setSubject(AuthzSubject subject) {
+        this.subject = subject;
     }
 
 

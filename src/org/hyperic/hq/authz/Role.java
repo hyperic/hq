@@ -32,7 +32,8 @@ import java.util.Iterator;
 
 import org.hyperic.hq.authz.shared.RoleValue;
 
-public class Role extends AuthzNamedEntity implements Serializable {
+public class Role extends AuthzNamedEntity
+{
 
     // Fields    
 

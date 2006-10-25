@@ -56,60 +56,6 @@
       <many-to-many class="ResourceGroup" column="RESOURCE_GROUP_ID" />
     </bag>
 
-    <bag name="groups" table="EAM_RESOURCE_GROUP">
-      <key column="RESOURCE_ID" />
-      <one-to-many class="ResourceGroup" />
-    </bag>
-
-    <bag name="roles" table="EAM_ROLE">
-      <key column="RESOURCE_ID" />
-      <one-to-many class="Role" />
-    </bag>
-  </class>
-
-  <class name="ResourceType" table="EAM_RESOURCE_TYPE">
-    <id name="id" type="integer">
-      <meta attribute="scope-set">private</meta>
-      <column name="ID" not-null="true" />
-      <generator class="sequence">
-        <param name="sequence">EAM_RESOURCE_TYPE_ID_SEQ</param>
-      </generator>
-    </id>
-
-    <version name="_version_" type="long">
-      <column name ="VERSION_COL" default="0" />
-    </version>
-
-    <properties name="resTypeName" unique="true">
-      <property name="name" type="string">
-        <column name="NAME" index="EAM_RES_TYPE_NAME_KEY" not-null="true" length="100" />
-      </property>
-    </properties>
-
-    <property name="cid" type="integer">
-      <column name="CID" index="EAM_RESOURCE_TYPE_CID_IDX" not-null="false" />
-    </property>
-
-    <many-to-one name="resource" class="Resource">
-      <column name="RESOURCE_ID" index="EAM_RESOURCE_TYPE_RESOURCE_KEY" not-null="false"/>
-    </many-to-one>
-
-    <property name="system" type="boolean">
-      <column name="FSYSTEM" not-null="false" dialect="PostgreSQL" default="false"/>
-      <column name="FSYSTEM" not-null="false" dialect="Oracle, Oracle9" default="0"/>
-    </property>
-
-    <bag name="operations" table="EAM_OPERATION"
-         cascade="save-update,delete,persist,merge,evict,all-delete-orphan"
-         inverse="true" lazy="false">
-      <key column="RESOURCE_TYPE_ID" />
-      <one-to-many class="Operation" />
-    </bag>
-
-    <bag name="resources" table="EAM_RESOURCE">
-      <key column="RESOURCE_TYPE_ID" />
-      <one-to-many class="Resource" />
-    </bag>
   </class>
 
 </hibernate-mapping>

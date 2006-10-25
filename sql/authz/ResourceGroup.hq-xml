@@ -92,11 +92,11 @@
 
   <class name="ResGrpResMap" table="EAM_RES_GRP_RES_MAP">
     <composite-id name="id" class="ResGrpResMapId">
-      <key-many-to-one name="resourceId" class="Resource">
+      <key-many-to-one name="resource" class="Resource">
         <column name="RESOURCE_ID" not-null="true" />
       </key-many-to-one>
 
-      <key-many-to-one name="resourceGroupId" class="ResourceGroup">
+      <key-many-to-one name="resourceGroup" class="ResourceGroup">
         <column name="RESOURCE_GROUP_ID" not-null="true" />
       </key-many-to-one>
     </composite-id>

@@ -65,11 +65,11 @@
 
   <class name="RoleResourceGroupMap" table="EAM_ROLE_RESOURCE_GROUP_MAP">
     <composite-id name="id" class="RoleResourceGroupMapId">
-      <key-many-to-one name="roleId" class="Role">
+      <key-many-to-one name="role" class="Role">
         <column name="ROLE_ID" not-null="true" />
       </key-many-to-one>
 
-      <key-many-to-one name="resourceGroupId" class="ResourceGroup">
+      <key-many-to-one name="resourceGroup" class="ResourceGroup">
         <column name="RESOURCE_GROUP_ID" not-null="true" />
       </key-many-to-one>
     </composite-id>

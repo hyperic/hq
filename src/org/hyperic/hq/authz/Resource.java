@@ -25,13 +25,18 @@
 
 package org.hyperic.hq.authz;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-public class Resource extends AuthzNamedEntity implements Serializable {
+public class Resource extends AuthzNamedEntity
+{
+    public static final Log log = LogFactory.getLog(Resource.class);
 
     // Fields
     private ResourceType resourceType;
@@ -40,28 +45,34 @@ public class Resource extends AuthzNamedEntity implements Serializable {
     private AuthzSubject owner;
     private boolean system;
     private Collection resourceGroups = new ArrayList();
-    private Collection groups = new ArrayList();
-    private Collection roles = new ArrayList();
 
     private ResourceValue resourceValue = new ResourceValue();
 
     // Constructors
 
-    /** default constructor */
-    public Resource() {
+    /**
+     * default constructor
+     */
+    public Resource()
+    {
         super();
     }
-    
-    /** minimal constructor */
-    public Resource(ResourceValue val) {
+
+    /**
+     * minimal constructor
+     */
+    public Resource(ResourceValue val)
+    {
         setResourceValue(val);
     }
 
-    /** full constructor */
+    /**
+     * full constructor
+     */
     public Resource(ResourceType resourceTypeId, Integer instanceId,
-            Integer cid, AuthzSubject subjectId, String name,
-            boolean fsystem, Collection resourceGroups, Collection group,
-            Collection roles) {
+                    Integer cid, AuthzSubject subjectId, String name,
+                    boolean fsystem, Collection resourceGroups)
+    {
         super(name);
         this.resourceType = resourceTypeId;
         this.instanceId = instanceId;
@@ -69,118 +80,92 @@ public class Resource extends AuthzNamedEntity implements Serializable {
         this.owner = subjectId;
         this.system = fsystem;
         this.resourceGroups = resourceGroups;
-        this.groups = group;
-        this.roles = roles;
     }
 
-    public ResourceType getResourceType() {
+    public ResourceType getResourceType()
+    {
         return resourceType;
     }
 
-    public void setResourceType(ResourceType resourceTypeId) {
+    public void setResourceType(ResourceType resourceTypeId)
+    {
         resourceType = resourceTypeId;
     }
 
-    public Integer getInstanceId() {
+    public Integer getInstanceId()
+    {
         return instanceId;
     }
 
-    public void setInstanceId(Integer val) {
+    public void setInstanceId(Integer val)
+    {
         instanceId = val;
     }
 
-    public Integer getCid() {
+    public Integer getCid()
+    {
         return cid;
     }
 
-    public void setCid(Integer val) {
+    public void setCid(Integer val)
+    {
         cid = val;
     }
 
-    public AuthzSubject getOwner() {
+    public AuthzSubject getOwner()
+    {
         return owner;
     }
 
-    public void setOwner(AuthzSubject val) {
+    public void setOwner(AuthzSubject val)
+    {
         owner = val;
     }
 
-    public boolean isSystem() {
+    public boolean isSystem()
+    {
         return system;
     }
 
-    public void setSystem(boolean fsystem) {
+    public void setSystem(boolean fsystem)
+    {
         system = fsystem;
     }
 
-    public Collection getResourceGroups() {
-        return new ArrayList(resourceGroups);
+    public Collection getResourceGroups()
+    {
+        return Collections.unmodifiableCollection(resourceGroups);
     }
 
-    public void setResourceGroups(Collection val) {
+    public void setResourceGroups(Collection val)
+    {
         resourceGroups = val;
     }
 
-    public void addResourceGroup(ResourceGroup group) {
+    public void addResourceGroup(ResourceGroup group)
+    {
         resourceGroups.add(group);
     }
-    
-    public void removeResourceGroup(ResourceGroup group) {
+
+    public void removeResourceGroup(ResourceGroup group)
+    {
         resourceGroups.remove(group);
     }
-    
-    public void removeAllResourceGroups() {
+
+    public void removeAllResourceGroups()
+    {
         resourceGroups.clear();
     }
-    
-    public Collection getGroups() {
-        return new ArrayList(groups);
-    }
 
-    public void setGroups(Collection val) {
-        groups = val;
-    }
-
-    public void addGroup(ResourceGroup group) {
-        groups.add(group);
-    }
-    
-    public void removeGroup(ResourceGroup group) {
-        groups.remove(group);
-    }
-    
-    public void removeAllGroups() {
-        groups.clear();
-    }
-    
-    public Collection getRoles() {
-        return new ArrayList(roles);
-    }
-
-    public void setRoles(Collection val) {
-        roles = val;
-    }
-
-    public void addRole(Role role) {
-        roles.add(role);
-    }
-    
-    public void removeRole(Role role) {
-        roles.remove(role);
-    }
-    
-    public void removeAllRoles() {
-        roles.clear();
-    }
-    
-    public ResourceValue getResourceValue() {
+    public ResourceValue getResourceValue()
+    {
         resourceValue.setId(getId());
         resourceValue.setAuthzSubjectValue(getOwner().getAuthzSubjectValue());
         resourceValue.setInstanceId(getInstanceId());
         resourceValue.setName(getName());
         resourceValue.setSortName(getSortName());
         resourceValue.setSystem(isSystem());
-        
+
         // Resource type of a resource should never change
         if (resourceValue.getResourceTypeValue() == null)
             resourceValue
@@ -189,7 +174,8 @@ public class Resource extends AuthzNamedEntity implements Serializable {
         return resourceValue;
     }
 
-    public void setResourceValue(ResourceValue val) {
+    public void setResourceValue(ResourceValue val)
+    {
         setId(val.getId());
         setInstanceId(val.getInstanceId());
         setName(val.getName());
@@ -198,8 +184,45 @@ public class Resource extends AuthzNamedEntity implements Serializable {
         setSystem(val.getSystem());
     }
 
-    public Object getValueObject() {
+    public Object getValueObject()
+    {
         return getResourceValue();
+    }
+
+    public ResourceValue getResourceValueObject()
+    {
+        ResourceValue vo = new ResourceValue();
+        vo.setSortName(getSortName());
+        vo.setInstanceId(getInstanceId());
+        vo.setSystem(isSystem());
+        vo.setName((getName() == null) ? "" : getName());
+        vo.setId(getId());
+        if ( getOwner() != null )
+            vo.setAuthzSubjectValue( getOwner().getAuthzSubjectValue() );
+        else
+            vo.setAuthzSubjectValue( null );
+        return vo;
+    }
+
+    public boolean isOwner(Integer possibleOwner)
+    {
+        boolean is = false;
+
+        if (possibleOwner == null) {
+            log.error("possible Owner is NULL. This is probably not what you want.");
+            /* XXX throw exception instead */
+        } else {
+            /* overlord owns every thing */
+            if (is = possibleOwner.equals(AuthzConstants.overlordId)
+                    == false) {
+                if (log.isDebugEnabled() && possibleOwner != null) {
+                    log.debug("User is " + possibleOwner +
+                              " owner is " + getOwner().getId());
+                }
+                is = (possibleOwner.equals(getOwner().getId()));
+            }
+        }
+        return is;
     }
 
     public boolean equals(Object obj)
@@ -207,22 +230,24 @@ public class Resource extends AuthzNamedEntity implements Serializable {
         if (!(obj instanceof Resource) || !super.equals(obj)) {
             return false;
         }
-        Resource o = (Resource)obj;
+        Resource o = (Resource) obj;
         return
-            ((resourceType==o.getResourceType()) ||
-             (resourceType!=null && o.getResourceType()!=null &&
+            ((resourceType == o.getResourceType()) ||
+             (resourceType != null && o.getResourceType() != null &&
               resourceType.equals(o.getResourceType())))
             &&
-            ((instanceId==o.getInstanceId()) ||
-             (instanceId!=null && o.getInstanceId()!=null &&
+            ((instanceId == o.getInstanceId()) ||
+             (instanceId != null && o.getInstanceId() != null &&
               instanceId.equals(o.getInstanceId())));
     }
 
-    public int hashCode() {
+    public int hashCode()
+    {
         int result = super.hashCode();
 
-        result = 37*result + (resourceType != null ? resourceType.hashCode() : 0);
-        result = 37*result + (instanceId != null ? instanceId.hashCode() : 0);
+        result =
+            37 * result + (resourceType != null ? resourceType.hashCode() : 0);
+        result = 37 * result + (instanceId != null ? instanceId.hashCode() : 0);
 
         return result;
     }

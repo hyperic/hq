@@ -27,23 +27,28 @@ package org.hyperic.hq.authz;
 
 import org.hyperic.hibernate.PersistedObject;
 
-public abstract class AuthzNamedEntity extends PersistedObject {
+public abstract class AuthzNamedEntity extends PersistedObject
+{
     private String name;
     private String sortName;
-    
-    protected AuthzNamedEntity() {
+
+    protected AuthzNamedEntity()
+    {
     }
-    
-    protected AuthzNamedEntity(String name) {
+
+    protected AuthzNamedEntity(String name)
+    {
         this.name = name;
         setSortName(name);
     }
-    
-    public String getName() {
+
+    public String getName()
+    {
         return name;
     }
-    
-    public void setName(String name) {
+
+    public void setName(String name)
+    {
         this.name = name;
         setSortName(name);
     }
@@ -53,7 +58,7 @@ public abstract class AuthzNamedEntity extends PersistedObject {
         return sortName;
     }
 
-    public void setSortName(String sortName)
+    protected void setSortName(String sortName)
     {
         this.sortName = sortName != null ? sortName.toUpperCase() : null;
     }
@@ -65,16 +70,17 @@ public abstract class AuthzNamedEntity extends PersistedObject {
         if (!(obj instanceof AuthzNamedEntity) || !super.equals(obj)) {
             return false;
         }
-        AuthzNamedEntity o = (AuthzNamedEntity)obj;
+        AuthzNamedEntity o = (AuthzNamedEntity) obj;
         return
-            ((name==o.getName()) ||
-             (name!=null && o.getName()!=null && name.equals(o.getName())));
+            ((name == o.getName()) ||
+             (name != null && o.getName() != null && name.equals(o.getName())));
     }
-    
-    public int hashCode() {
+
+    public int hashCode()
+    {
         int result = super.hashCode();
 
-        result = 37*result + (name != null ? name.hashCode() : 0);
+        result = 37 * result + (name != null ? name.hashCode() : 0);
 
         return result;
     }

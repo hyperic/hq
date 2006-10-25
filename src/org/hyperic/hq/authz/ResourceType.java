@@ -31,8 +31,9 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
+import org.hyperic.hq.authz.shared.ResourceTypeLocal;
 
-public class ResourceType extends AuthzNamedEntity implements Serializable
+public class ResourceType extends AuthzNamedEntity
 {
     private Integer cid;
     private Resource resource;
@@ -131,7 +132,6 @@ public class ResourceType extends AuthzNamedEntity implements Serializable
     public Object getValueObject() {
         return getResourceTypeValue();
     }
-
 
     public boolean equals(Object obj)
     {

@@ -12,11 +12,16 @@ public class ResourceGroupTest extends HQEJBTestBase {
     }
 
     public void testSimpleFind() throws Exception {
-        ResourceGroupManagerLocal rman =
-            ResourceGroupManagerUtil.getLocalHome().create();
-        ResourceGroupValue resGrp =
-            rman.findResourceGroupByName(getOverlord(),
-                                         AuthzConstants.rootResourceGroupName);
-        assertEquals(AuthzConstants.rootResourceGroupName, resGrp.getName());
+        runInTransaction(
+            new TransactionBlock() {
+                public void run() throws Exception {
+                    ResourceGroupManagerLocal rman =
+                        ResourceGroupManagerUtil.getLocalHome().create();
+                    ResourceGroupValue resGrp =
+                        rman.findResourceGroupByName(getOverlord(),
+                                                     AuthzConstants.rootResourceGroupName);
+                    assertEquals(AuthzConstants.rootResourceGroupName, resGrp.getName());
+                }
+            });
     }
 }

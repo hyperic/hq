@@ -27,29 +27,29 @@ package org.hyperic.hq.authz;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 
 public class AuthzSubject extends AuthzNamedEntity
-    implements java.io.Serializable {
+{
 
     private String dsn;
-     private Integer cid;
-     private String firstName;
-     private String lastName;
-     private String emailAddress;
-     private String smsAddress;
-     private String phoneNumber;
-     private String department;
-     private boolean active;
-     private boolean system;
-     private Resource resource;
-     private Collection roles = new ArrayList();
-     private Collection userConfigs = new ArrayList();
-     
-     private AuthzSubjectValue authzSubjectValue = new AuthzSubjectValue();
+    private Integer cid;
+    private String firstName;
+    private String lastName;
+    private String emailAddress;
+    private String smsAddress;
+    private String phoneNumber;
+    private String department;
+    private boolean active;
+    private boolean system;
+    private Resource resource;
+    private Collection roles = new ArrayList();
+    private Collection userConfigs = new ArrayList();
 
+    private AuthzSubjectValue authzSubjectValue = new AuthzSubjectValue();
      // Constructors
 
     /** default constructor */
@@ -61,7 +61,7 @@ public class AuthzSubject extends AuthzNamedEntity
     public AuthzSubject(AuthzSubjectValue val) {
         setAuthzSubjectValue(val);
     }
-    
+
     /** full constructor */
     public AuthzSubject(String name, String dsn, Integer cid,
                         String firstName, String lastName, String emailAddress,
@@ -84,135 +84,199 @@ public class AuthzSubject extends AuthzNamedEntity
         this.roles = roles;
         this.userConfigs = userConfigs;
     }
-       
-    public String getDsn() {
+
+    public String getAuthDsn()
+    {
         return dsn;
     }
-    
-    public void setDsn(String val) {
+
+    public void setAuthDsn(String val)
+    {
         dsn = val;
     }
-    public Integer getCid() {
+
+    public Integer getCid()
+    {
         return cid;
     }
-    
-    public void setCid(Integer val) {
+
+    public void setCid(Integer val)
+    {
         cid = val;
     }
 
-    public String getFirstName() {
+    public String getFirstName()
+    {
         return firstName;
     }
-    
-    public void setFirstName(String val) {
+
+    public void setFirstName(String val)
+    {
         firstName = val;
     }
-    public String getLastName() {
+
+    public String getLastName()
+    {
         return lastName;
     }
-    
-    public void setLastName(String val) {
+
+    public void setLastName(String val)
+    {
         lastName = val;
     }
-    public String getEmailAddress() {
+
+    public String getEmailAddress()
+    {
         return emailAddress;
     }
-    
-    public void setEmailAddress(String val) {
+
+    public void setEmailAddress(String val)
+    {
         emailAddress = val;
     }
-    public String getSmsAddress() {
+
+    public String getSMSAddress()
+    {
         return smsAddress;
     }
-    
-    public void setSmsAddress(String val) {
+
+    public void setSMSAddress(String val)
+    {
         smsAddress = val;
     }
-    public String getPhoneNumber() {
+
+    public String getPhoneNumber()
+    {
         return phoneNumber;
     }
-    
-    public void setPhoneNumber(String val) {
+
+    public void setPhoneNumber(String val)
+    {
         phoneNumber = val;
     }
-    public String getDepartment() {
+
+    public String getDepartment()
+    {
         return department;
     }
-    
-    public void setDepartment(String val) {
+
+    public void setDepartment(String val)
+    {
         department = val;
     }
-    public boolean isActive() {
+
+    public boolean isActive()
+    {
         return active;
     }
-    
-    public void setActive(boolean val) {
+
+    public boolean getActive()
+    {
+        return isActive();
+    }
+
+    public void setActive(boolean val)
+    {
         active = val;
     }
-    public boolean isSystem() {
+
+    public boolean isSystem()
+    {
         return system;
     }
-    
-    public void setSystem(boolean val) {
+
+    public boolean getSystem()
+    {
+        return isSystem();
+    }
+
+    public void setSystem(boolean val)
+    {
         system = val;
     }
-    public Resource getResource() {
+
+    public Resource getResource()
+    {
         return resource;
     }
-    
-    public void setResource(Resource val) {
+
+    public void setResource(Resource val)
+    {
         resource = val;
     }
     public Collection getRoles() {
         return roles;
     }
-    
-    public void setRoles(Collection val) {
+
+    public void setRoles(Collection val)
+    {
         roles = val;
     }
-    public Collection getUserConfigs() {
+
+    public void addRole(Role role)
+    {
+        roles.add(role);
+    }
+
+    public void removeRole(Role role)
+    {
+        roles.remove(role);
+    }
+
+    public void removeAllRoles()
+    {
+        roles.clear();
+    }
+
+    public Collection getUserConfigs()
+    {
         return userConfigs;
     }
-    
-    public void setUserConfigs(Collection val) {
+
+    public void setUserConfigs(Collection val)
+    {
         userConfigs = val;
     }
 
-    public AuthzSubjectValue getAuthzSubjectValue() {
+    public AuthzSubjectValue getAuthzSubjectValue()
+    {
         authzSubjectValue.setActive(isActive());
-        authzSubjectValue.setAuthDsn(getDsn());
+        authzSubjectValue.setAuthDsn(getAuthDsn());
         authzSubjectValue.setDepartment(getDepartment());
         authzSubjectValue.setEmailAddress(getEmailAddress());
         authzSubjectValue.setFirstName(getFirstName());
         authzSubjectValue.setId(getId());
         authzSubjectValue.setName(getName());
         authzSubjectValue.setPhoneNumber(getPhoneNumber());
-        authzSubjectValue.setSMSAddress(getSmsAddress());
+        authzSubjectValue.setSMSAddress(getSMSAddress());
         authzSubjectValue.setSortName(getSortName());
         authzSubjectValue.setSystem(isSystem());
-        
+
         return authzSubjectValue;
     }
 
-    public void setAuthzSubjectValue(AuthzSubjectValue authzSubjectValue) {
+    public void setAuthzSubjectValue(AuthzSubjectValue authzSubjectValue)
+    {
         setActive(authzSubjectValue.getActive());
-        setDsn(authzSubjectValue.getAuthDsn());
+        setAuthDsn(authzSubjectValue.getAuthDsn());
         setDepartment(authzSubjectValue.getDepartment());
         setEmailAddress(authzSubjectValue.getEmailAddress());
         setFirstName(authzSubjectValue.getFirstName());
         setId(authzSubjectValue.getId());
         setName(authzSubjectValue.getName());
         setPhoneNumber(authzSubjectValue.getPhoneNumber());
-        setSmsAddress(authzSubjectValue.getSMSAddress());
+        setSMSAddress(authzSubjectValue.getSMSAddress());
         setSortName(authzSubjectValue.getSortName());
-        setSystem(authzSubjectValue.getSystem());        
+        setSystem(authzSubjectValue.getSystem());
     }
-    
-    public Object getValueObject() {
+
+    public Object getValueObject()
+    {
         return getAuthzSubjectValue();
     }
 
-    public boolean isRoot() {
+    public boolean isRoot()
+    {
         return getId().equals(AuthzConstants.rootSubjectId);
     }
 
@@ -221,16 +285,18 @@ public class AuthzSubject extends AuthzNamedEntity
         if (!(obj instanceof AuthzSubject) || !super.equals(obj)) {
             return false;
         }
-        AuthzSubject o = (AuthzSubject)obj;
+        AuthzSubject o = (AuthzSubject) obj;
         return
-            ((dsn==o.getDsn()) ||
-             (dsn!=null && o.getDsn()!=null && dsn.equals(o.getDsn())));
+            ((dsn == o.getAuthDsn()) ||
+             (dsn != null && o.getAuthDsn() != null &&
+              dsn.equals(o.getAuthDsn())));
     }
 
-    public int hashCode() {
+    public int hashCode()
+    {
         int result = super.hashCode();
 
-        result = 37*result + (dsn != null ? dsn.hashCode() : 0);
+        result = 37 * result + (dsn != null ? dsn.hashCode() : 0);
 
         return result;
     }

@@ -26,6 +26,7 @@
 package org.hyperic.hibernate.dao;
 
 import java.util.Collection;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,13 +34,17 @@ import org.hibernate.Session;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.ResourceType;
+import org.hyperic.hq.authz.Operation;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceValue;
+
+import javax.ejb.FinderException;
 
 /**
  * CRUD methods, finders, etc. for Resource
  */
-public class ResourceDAO extends HibernateDAO {
+public class ResourceDAO extends HibernateDAO
+{
     Log log = LogFactory.getLog(ResourceDAO.class);
     
     public ResourceDAO(Session session) {
@@ -52,10 +57,6 @@ public class ResourceDAO extends HibernateDAO {
         // XXX create resource for owner
         save(res);
         return res;
-    }
-
-    public Collection findAll() {
-        return (Collection) super.findAll();
     }
 
     public Resource findById(Integer id) {
@@ -101,10 +102,10 @@ public class ResourceDAO extends HibernateDAO {
 
     public Resource findByInstanceId(ResourceType type, Integer id) {            
         String sql = "from Resource where instanceId = ? and" +
-                     " resourceType = ?";
+                     " resourceType.id = ?";
         return (Resource)getSession().createQuery(sql)
             .setInteger(0, id.intValue())
-            .setEntity(1, type)
+            .setInteger(1, type.getId().intValue())
             .uniqueResult();
     }
     
@@ -118,18 +119,125 @@ public class ResourceDAO extends HibernateDAO {
     }
     
     public Collection findByOwner(AuthzSubject owner) {
-        String sql = "from Resource where owner = ?";
+        String sql = "from Resource where owner.id = ?";
         return getSession().createQuery(sql)
-                .setEntity(0, owner)
+                .setInteger(0, owner.getId().intValue())
                 .list();
     }
     
     public Collection findByOwnerAndType(AuthzSubject owner,
                                          ResourceType type ) {
-        String sql = "from Resource where owner = ? and resourceType = ?";
+        String sql = "from Resource where owner.id = ? and resourceType.id = ?";
         return getSession().createQuery(sql)
-            .setEntity(0, owner)
-            .setEntity(1, type)
+            .setInteger(0, owner.getId().intValue())
+            .setInteger(1, type.getId().intValue())
             .list();
     }
+
+    public Collection findViewableSvcRes_orderName(Integer user,
+                                                   Boolean fSystem)
+    {
+        String sql="from Resource r " +
+                   " join fetch r.resourceGroups rg " +
+                   " join fetch rg.roles role " +
+                   " join fetch role.subjects subj " +
+                   " join fetch role.operations op " +
+                   " join fetch r.resourceType rt " +
+                   "where " +
+                   "  r.system=? and " +
+                   "  (subj.id=? or r.owner.id=?) and " +
+                   "  (rt.name='covalentEAMService' or " +
+                   "   rt.name='covalentAuthzResourceGroup') and " +
+                   "  (op.name='viewService' or " +
+                   "   op.name='viewResourceGroup') and " +
+                   "  rg.groupType = 15 and " +
+                   "  (rg.groupType != 15 or rg.clusterId!=-1) " +
+                   "order by r.sortName ";
+        return getSession().createQuery(sql)
+            .setInteger(0, user.intValue())
+            .setInteger(1, user.intValue())
+            .setBoolean(2, fSystem.booleanValue())
+            .list();
+    }
+
+    public Collection findSvcRes_orderName(Boolean fSystem)
+    {
+        String sql="from Resource r " +
+                   " join fetch r.resourceGroups rg " +
+                   " join fetch rg.roles role " +
+                   " join fetch role.operations op " +
+                   " join fetch r.resourceType rt " +
+                   "where " +
+                   "  r.system=? and " +
+                   "  (rt.name='covalentEAMService' or " +
+                   "   rt.name='covalentAuthzResourceGroup') and " +
+                   "  (op.name='viewService' or " +
+                   "   op.name='viewResourceGroup') and " +
+                   "  rg.groupType = 15 and " +
+                   "  (rg.groupType != 15 or rg.clusterId!=-1) " +
+                   "order by r.sortName ";
+        return getSession().createQuery(sql)
+            .setBoolean(0, fSystem.booleanValue())
+            .list();
+    }
+
+    public Collection findInGroupAuthz_orderName(Integer userId,
+                                                 Integer groupId,
+                                                 Boolean fSystem)
+    {
+        String sql="from Resource r " +
+                   " join fetch r.resourceGroups rg " +
+                   " join fetch rg.roles role " +
+                   " join fetch role.subjects subj " +
+                   " join fetch role.operations op " +
+                   "where " +
+                   " r.system=? and " +
+                   " (subj.id=? or " +
+                   "  r.owner.id=? or " +
+                   "  subj.authDsn = 'covalentAuthzInternalDsn') and " +
+                   " op.resourceType.id = r.resourceType.id and " +
+                   " (op.name = 'viewPlatform' or " +
+                   "  op.name = 'viewServer' or " +
+                   "  op.name = 'viewService' or " +
+                   "  op.name = 'viewApplication' or " +
+                   "  op.name = 'viewApplication' or " +
+                   "  (op.name='viewResourceGroup' and " +
+                   "    not r.instanceId ='viewResourceGroup') )" +
+                   " order by r.sortName ";
+        return getSession().createQuery(sql)
+            .setInteger(0, userId.intValue())
+            .setInteger(1, groupId.intValue())
+            .setBoolean(2, fSystem.booleanValue())
+            .list();
+    }
+
+    public Collection findInGroup_orderName(Integer groupId,
+                                            Boolean fSystem)
+    {
+        String sql="from Resource r " +
+                   " join fetch r.resourceGroups rg " +
+                   " join fetch rg.roles role " +
+                   " join fetch role.subjects subj " +
+                   " join fetch role.operations op " +
+                   "where " +
+                   " r.system=? and " +
+                   " rg.resourceGroup.id=? and " +
+                   " (subj.id=1 or r.owner.id=1 or " +
+                   "  subj.authDsn = 'covalentAuthzInternalDsn') and " +
+                   " op.resourceType.id = r.resourceType.id and " +
+                   " (op.name = 'viewPlatform' or " +
+                   "  op.name = 'viewServer' or " +
+                   "  op.name = 'viewService' or " +
+                   "  op.name = 'viewApplication' or " +
+                   "  op.name = 'viewApplication' or " +
+                   "  (op.name='viewResourceGroup' and " +
+                   "    not r.instanceId=?) )" +
+                   " order by r.sortName ";
+        return getSession().createQuery(sql)
+            .setBoolean(0, fSystem.booleanValue())
+            .setInteger(1, groupId.intValue())
+            .setInteger(2, groupId.intValue())
+            .list();
+    }
+
 }
