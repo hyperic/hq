@@ -44,6 +44,8 @@ import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
+import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
+import org.hyperic.hq.events.shared.RegisteredTriggerManagerUtil;
 import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
@@ -81,6 +83,14 @@ public abstract class HQEJBTestBase
      */
     protected long getUniq() {
         return _uniqVal++;
+    }
+    
+    protected long u() {
+        return getUniq();
+    }
+    
+    protected String u(Object o) {
+        return o.toString() + getUniq();
     }
     
     protected void refresh(Object o) {
@@ -166,6 +176,12 @@ public abstract class HQEJBTestBase
         return AlertDefinitionManagerUtil.getLocalHome().create();
     }
     
+    protected RegisteredTriggerManagerLocal getTriggerManager() 
+        throws Exception 
+    {
+        return RegisteredTriggerManagerUtil.getLocalHome().create();
+    }
+
     protected PlatformManagerLocal getPlatformManager() 
         throws Exception
     {
