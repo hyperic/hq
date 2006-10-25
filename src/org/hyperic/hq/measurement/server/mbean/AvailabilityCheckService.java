@@ -31,6 +31,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -44,7 +45,22 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
+import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.appdef.shared.ServerLightValue;
+import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerManagerUtil;
+import org.hyperic.hq.appdef.shared.ServerNotFoundException;
+import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.appdef.shared.ServiceLightValue;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
@@ -156,7 +172,8 @@ public class AvailabilityCheckService
         }
 
         if (log.isDebugEnabled())
-            log.debug("AvailabilityCheckService.hit()");
+            log.debug("AvailabilityCheckService.hit() at " + lDate + "(" +
+                      current + ")");
         
         if (fill == null) {
             try {
@@ -195,10 +212,24 @@ public class AvailabilityCheckService
             log.debug("Total of " + dmList.size() +
                       " availability metrics to check");
             
-        // Now check every derived measurement    
+        // First check every platform derived measurement
+        HashMap availMap = new HashMap();
+        ArrayList downPlatforms = new ArrayList();
+        
+        // Let's be safe and reset the time to current
+        current = System.currentTimeMillis();
         for (Iterator it = dmList.iterator(); it.hasNext(); ) {
             DerivedMeasurementValue dmVo =
                 (DerivedMeasurementValue) it.next();
+            
+            AppdefEntityID aeid =
+                new AppdefEntityID(dmVo.getAppdefType(), dmVo.getInstanceId());
+                                                 
+            if (dmVo.getAppdefType() !=
+                AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
+                availMap.put(aeid, dmVo);
+                continue;
+            }
 
             // End is at least more than 1/2 interval away
             long end = TimingVoodoo.closestTime(
@@ -211,6 +242,10 @@ public class AvailabilityCheckService
             long begin = Math.max(end - maxInterval,
                                   dmVo.getMtime() + dmVo.getInterval());
             begin = TimingVoodoo.roundDownTime(begin, dmVo.getInterval());
+
+            if (log.isDebugEnabled())
+                log.debug("Check metric ID: " + dmVo.getId() +
+                          " from " + begin + " to " + end);
 
             // If our time range is negative, then we just wait until next
             if (end < begin)
@@ -228,6 +263,10 @@ public class AvailabilityCheckService
             // Go through the data and add missing data points
             MetricValue mval;
             for (int i = 0; i < theMissing.length; i++) {
+                if (log.isDebugEnabled())
+                    log.debug("Metric ID: " + dmVo.getId() +
+                              " missing data at " + theMissing[i]);
+
                 // Insert the missing data point
                 mval = new MetricValue(
                     MeasurementConstants.AVAIL_DOWN, theMissing[i]);
@@ -241,8 +280,8 @@ public class AvailabilityCheckService
                     theMissing[theMissing.length - 1] + 1) != null)
                     continue;
                 
-                AppdefEntityID aeid = new AppdefEntityID(
-                    dmVo.getAppdefType(), dmVo.getInstanceId());
+                downPlatforms.add(aeid);
+                
                 ScheduleRevNumValue srn = srnCache.getSRN(aeid);
                 
                 if (srn == null)
@@ -261,6 +300,112 @@ public class AvailabilityCheckService
                     srn.setLastReported(theMissing[0]);
                 }
             }
+        }
+        
+        // Now check the servers and services
+        try {
+            PlatformManagerLocal platMan =
+                PlatformManagerUtil.getLocalHome().create();
+
+            ServerManagerLocal svrMan =
+                ServerManagerUtil.getLocalHome().create();
+
+            AuthzSubjectManagerLocal authzMan =
+                AuthzSubjectManagerUtil.getLocalHome().create();
+            AuthzSubjectValue overlord = authzMan.getOverlord();
+            ArrayList metrics = new ArrayList();
+            for (Iterator it = downPlatforms.iterator(); it.hasNext(); ) {
+                AppdefEntityID platId = (AppdefEntityID) it.next();
+                
+                try {
+                    PlatformValue platform =
+                        platMan.getPlatformById(overlord, platId.getId());
+                    
+                    // Go through the servers and services
+                    ServerLightValue[] servers = platform.getServerValues();
+                    for (int svrIdx = 0; svrIdx < servers.length; svrIdx++) {
+                        Object dmv =
+                            availMap.remove(servers[svrIdx].getEntityId());
+                        if (dmv != null)
+                            metrics.add(dmv);
+                        
+                        // Find the services
+                        ServerValue server = svrMan.getServerById(overlord,
+                                                 servers[svrIdx].getId());
+                        
+                        ServiceLightValue[] services =
+                            server.getServiceValues();
+                        for (int svcIdx = 0; svcIdx < services.length;
+                             svcIdx++) {
+                            dmv =
+                                availMap.remove(services[svcIdx].getEntityId());
+                            
+                            if (dmv != null)
+                                metrics.add(dmv);
+                        }
+                    }
+                } catch (PlatformNotFoundException e) {
+                    log.error("Unable to find plaform " + platId);
+                } catch (ServerNotFoundException e) {
+                    log.error("Unable to find server for platform " + platId);
+                }
+                
+            }
+            
+            // Go through the server and service metrics and backfill them
+            for (Iterator it = metrics.iterator(); it.hasNext(); ) {
+                DerivedMeasurementValue dmVo =
+                    (DerivedMeasurementValue) it.next();
+                
+                // End is at least more than 1/2 interval away
+                long end = TimingVoodoo.closestTime(
+                    current - dmVo.getInterval(), dmVo.getInterval());
+
+                // We have to get at least the measurement interval
+                long maxInterval = Math.max(this.interval, dmVo.getInterval());
+                
+                // Begin is maximum of mbean interval or measurement create time
+                long begin = Math.max(end - maxInterval,
+                                      dmVo.getMtime() + dmVo.getInterval());
+                begin = TimingVoodoo.roundDownTime(begin, dmVo.getInterval());
+
+                if (log.isDebugEnabled())
+                    log.debug("Check metric ID: " + dmVo.getId() +
+                              " from " + begin + " to " + end);
+
+                // If our time range is negative, then we just wait until next
+                if (end < begin)
+                    continue;
+                                                       
+                long[] theMissing;
+                try {
+                    theMissing = this.getDataMan().getMissingDataTimestamps(
+                            dmVo.getId(), dmVo.getInterval(), begin, end);
+                } catch (DataNotAvailableException e) {
+                    log.error("Failed in AvailabilityCheckService", e);
+                    continue;
+                }
+                
+                // Go through the data and add missing data points
+                MetricValue mval;
+                for (int i = 0; i < theMissing.length; i++) {
+                    if (log.isDebugEnabled())
+                        log.debug("Metric ID: " + dmVo.getId() +
+                                  " missing data at " + theMissing[i]);
+
+                    // Insert the missing data point
+                    mval = new MetricValue(
+                        MeasurementConstants.AVAIL_DOWN, theMissing[i]);
+                    this.getDataMan().addData(dmVo.getId(), mval, false);
+                }
+            }
+        } catch (CreateException e) {
+            log.error("Unable to create PlatformManager");
+        } catch (NamingException e) {
+            log.error("Unable to lookup PlatformManager");
+        } catch (PermissionException e) {
+            log.error("The overlord does not have permission to lookup " +
+                      "platform", e);
         }
     }
     
