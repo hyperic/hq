@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.events.server.session;
 
-import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -39,13 +38,15 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import javax.ejb.CreateException;
-import javax.ejb.EJBException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 import javax.naming.NamingException;
 
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.dao.ActionDAO;
+import org.hyperic.hibernate.dao.TriggerDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
@@ -94,15 +95,20 @@ import org.hyperic.util.pager.SortAttribute;
  * @ejb:transaction type="REQUIRED"
  *
  */
-public class AlertDefinitionManagerEJBImpl extends SessionEJB
-    implements SessionBean {
+public class AlertDefinitionManagerEJBImpl 
+    extends SessionEJB
+    implements SessionBean 
+{
     private final String logCtx =
-        "org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl";
+        AlertDefinitionManagerEJBImpl.class.getName();
     private final String VALUE_PROCESSOR =
-        "org.hyperic.hq.events.server.session.PagerProcessor_events";
+        PagerProcessor_events.class.getName();
 
-    private SessionContext ctx = null;
-    private Pager valuePager = null;
+    private Pager valuePager;
+    
+    private AlertDefinitionDAO getAlertDefDAO() {
+        return DAOFactory.getDAOFactory().getAlertDefDAO();
+    }
     
     private AlertDefinitionLocalHome adHome = null;    
     private AlertDefinitionLocalHome getADHome() {
@@ -154,8 +160,8 @@ public class AlertDefinitionManagerEJBImpl extends SessionEJB
      */
     private void deleteAlertDefinition(AlertDefinitionLocal alertdef,   
                                        boolean force)
-        throws RemoveException {
-        
+        throws RemoveException 
+    {
         // If this is a child alert definition, do not delete it unless forced
         if (!force && (alertdef.getParentId() != null &&
                        alertdef.getParentId().intValue() != 0))
@@ -195,73 +201,70 @@ public class AlertDefinitionManagerEJBImpl extends SessionEJB
     ///////////////////////////////////////
     // operations
 
-    /** Create a new alert definition
+    /** 
+     * Create a new alert definition
+     * 
      * @ejb:interface-method
      */
-    public AlertDefinitionValue createAlertDefinition(
-        AlertDefinitionValue adval)
+    public AlertDefinitionValue createAlertDefinition(AlertDefinitionValue a)
         throws AlertDefinitionCreateException, ActionCreateException,
-               FinderException {
-        ArrayList clocals = null;
-        AlertConditionValue[] conds = adval.getConditions();
-        if (conds.length > 0) {
-            clocals = new ArrayList();
-            for (int i = 0; i < conds.length; i++) {
-                // Create new condition
-                try {
-                    clocals.add(this.getAcHome().create(conds[i]));
-                } catch (CreateException e) {
-                    throw new AlertConditionCreateException(conds[i], e);
-                }
-            }
+               FinderException 
+    {
+        AlertDefinition res = new AlertDefinition();
+        TriggerDAO tDAO = DAOFactory.getDAOFactory().getTriggerDAO();
+        ActionDAO aDAO = DAOFactory.getDAOFactory().getActionDAO();
+        AlertDefinitionDAO adDAO = DAOFactory.getDAOFactory().getAlertDefDAO();
+        
+        // The following is duplicated out of what the EJBImpl did.  Makes sense
+        a.cleanAction();
+        a.cleanCondition();
+        a.cleanTrigger();
+        res.setAlertDefinitionValue(a);
+        
+        // Create new conditions
+        AlertConditionValue[] conds = a.getConditions();
+        for (int i = 0; i < conds.length; i++) {
+            RegisteredTrigger trigger = tDAO.findById(conds[i].getTriggerId());
+
+            res.createCondition(conds[i], trigger);
         }
                 
-        // Set actions
-        ArrayList alocals = null;
-        ActionValue[] actions = adval.getActions();
-        if (actions.length > 0) {
-            alocals = new ArrayList();
-            for (int i = 0; i < actions.length; i++) {
-                // Create new action
-                try {
-                    alocals.add(this.getActionHome().create(actions[i]));
-                } catch (CreateException e) {
-                    throw new ActionCreateException(e);
-                }
-            }
+        // Create actions
+        ActionValue[] actions = a.getActions();
+        for (int i = 0; i < actions.length; i++) {
+            Action parent = null;
+            
+            if (actions[i].getParentId() != null)
+                parent = aDAO.findById(actions[i].getParentId());
+            
+            res.createAction(actions[i], parent);
         }
         
         // Set triggers
-        ArrayList tlocals = null;
-        RegisteredTriggerValue[] triggers = adval.getTriggers();
-        if (triggers.length > 0) {
-            // Set act on trigger as the last trigger
-            Integer lastId = triggers[triggers.length - 1].getId();
-            adval.setActOnTriggerId(lastId.intValue());
+        RegisteredTriggerValue[] triggers = a.getTriggers();
+        if (triggers.length == 0) {
+            throw new IllegalArgumentException("Need at least 1 trigger to " +
+                                               "create an alert def");
+        }
+
+        // Set act on trigger as the last trigger
+        Integer lastId = triggers[triggers.length - 1].getId();
+        RegisteredTrigger actOnTrigger = tDAO.findById(lastId);
+        res.setActOnTrigger(actOnTrigger);
         
-            RegisteredTriggerLocalHome rtHome;
+        for (int i = 0; i < triggers.length; i++) {
+            RegisteredTrigger trig;
             
-            try {
-                rtHome = RegisteredTriggerUtil.getLocalHome();
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        
-            tlocals = new ArrayList();
-            for (int i = 0; i < triggers.length; i++) {
-                // Triggers were already created by bizapp
-                tlocals.add(rtHome.findByPrimaryKey(
-                    new RegisteredTriggerPK(triggers[i].getId())));
-            }
+            // Triggers were already created by bizapp, so we only need
+            // to add them to our list
+            trig = tDAO.findById(triggers[i].getId());
+            res.addTrigger(trig);
         }
-                
-        try {
-            AlertDefinitionLocal alert =
-                getADHome().create(adval, clocals, tlocals, alocals);
-            return alert.getAlertDefinitionValue();
-        } catch (CreateException e) {
-            throw new AlertDefinitionCreateException(e);
-        }
+
+        // Alert definitions are the root of the cascade relationship, so
+        // we must explicitly save them
+        adDAO.save(res);
+        return res.getAlertDefinitionValue();
     }
 
     /**
@@ -643,20 +646,22 @@ public class AlertDefinitionManagerEJBImpl extends SessionEJB
         }
     }
 
-    /** Get list of all alert conditions
+    /** 
+     * Get list of all alert conditions
+     * 
+     * @return a PageList of {@link AlertDefinitionValue} objects
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
     public PageList findAllAlertDefinitions() {
-        ArrayList vals = new ArrayList();
-        try {
-            List ads = getADHome().findAll();
-            for (Iterator i = ads.iterator(); i.hasNext(); ) {
-                AlertDefinitionLocal alert = (AlertDefinitionLocal) i.next();
-                vals.add(alert.getAlertDefinitionValue());
-            }
-        } catch (FinderException e) {
-            // No triggers found, just return an empty list, then
+        List vals = new ArrayList();
+        
+        for (Iterator i = getAlertDefDAO().findAll().iterator(); 
+             i.hasNext(); ) 
+        {
+            AlertDefinition a = (AlertDefinition)i.next();
+        
+            vals.add(a.getAlertDefinitionValue());
         }
         return new PageList(vals, vals.size());
     }
@@ -849,17 +854,12 @@ public class AlertDefinitionManagerEJBImpl extends SessionEJB
     /**
      * @see javax.ejb.SessionBean#ejbRemove()
      */
-    public void ejbRemove() {
-        this.ctx = null;
-    }
+    public void ejbRemove() {}
 
     /**
      * @see javax.ejb.SessionBean#setSessionContext(SessionContext)
      */
-    public void setSessionContext(SessionContext ctx)
-        throws EJBException, RemoteException {
-        this.ctx = ctx;
-    }
+    public void setSessionContext(SessionContext ctx) {}
 
 }   // end AlertDefinitionManagerEJB
 

@@ -29,20 +29,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
+
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
-import javax.naming.NamingException;
 
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.events.ActionCreateException;
-import org.hyperic.hq.events.shared.ActionLocal;
-import org.hyperic.hq.events.shared.ActionLocalHome;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.dao.ActionDAO;
 import org.hyperic.hq.events.shared.ActionPK;
-import org.hyperic.hq.events.shared.ActionUtil;
 import org.hyperic.hq.events.shared.ActionValue;
+import org.hyperic.hq.events.shared.AlertDefinitionValue;
 
 /** 
  * The action manager.
@@ -56,63 +51,51 @@ import org.hyperic.hq.events.shared.ActionValue;
  */
 
 public class ActionManagerEJBImpl implements SessionBean {
-
     public ActionManagerEJBImpl() {}
 
-    private ActionLocalHome actHome = null;
-    private ActionLocalHome getActHome() {
-        if (actHome == null) {
-            try {
-                actHome = ActionUtil.getLocalHome();
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
-        return actHome;
+    private ActionDAO getActHome() {
+        return DAOFactory.getDAOFactory().getActionDAO();
     }
-    
+
+    private AlertDefinitionDAO getAlertDefHome() {
+        return DAOFactory.getDAOFactory().getAlertDefDAO();
+    }
+
     /**
      * Get a collection of all actions
      *
+     * @return a collection of {@link ActionValue}s
+     *
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public Collection getAllActions() {
-        ActionLocalHome actionHome;
-        ArrayList actionValues;
-
-        actionValues = new ArrayList();
-
-        try {
-            Collection actions = getActHome().findAll();
-            actionValues.addAll( _actionsToActionValues(actions) );
-        } catch (FinderException e) {
-            // No actions found, just return an empty list, then
-        }
-
-        return actionValues;
+        return actionsToActionValues(getActHome().findAll());
     }
 
     /**
-     * Get actions for a given alert id.
+     * Get all the actions for a given alert
      *
+     * @return a collection of {@link ActionValue}s
+     *
+     * TODO -- This is as-yet untested -- JMT
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
-    public List getActionsForAlert(Integer aid) throws FinderException {
-        Collection actions = getActHome().findByAlertId(aid);
-        return _actionsToActionValues(actions);
+    public List getActionsForAlert(int alertId) {
+        Collection actions = getActHome().findByAlertId(alertId);
+        
+        return actionsToActionValues(actions);
     }
+    
+    private List actionsToActionValues(Collection actions) {
+        List res = new ArrayList(actions.size());
 
-    private List _actionsToActionValues(Collection actions) {
-        ArrayList actionValues = new ArrayList( actions.size() );
-
-        for (Iterator it=actions.iterator(); it.hasNext();) {
-            ActionLocal action = (ActionLocal)it.next();
-            actionValues.add( action.getActionValue() );
+        for (Iterator i=actions.iterator(); i.hasNext();) {
+            Action action = (Action)i.next();
+            
+            res.add(action.getActionValue());
         }
 
-        return actionValues;
+        return res;
     }
 
     /**
@@ -122,14 +105,17 @@ public class ActionManagerEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public ActionValue createAction(ActionValue val)
-        throws ActionCreateException {
-        try {
-            ActionLocal action = getActHome().create(val);
-            return action.getActionValue();
-        } catch (CreateException e) {
-            throw new ActionCreateException(e);
-        }
+    public ActionValue createAction(AlertDefinitionValue def, ActionValue val) {
+        AlertDefinition aDef;
+        Action res, parent;
+        
+        parent = val.getParentId() == null ? null :
+            getActHome().findById(val.getParentId());
+            
+        aDef = getAlertDefHome().findById(def.getId());
+        res = aDef.createAction(val, parent);
+        
+        return res.getActionValue();
     }
 
     /**
@@ -139,42 +125,27 @@ public class ActionManagerEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public ActionValue updateAction(ActionValue val) throws FinderException {
+    public ActionValue updateAction(ActionValue val) { 
+        ActionDAO aDao = getActHome();
         // First update the primary action
-        ActionLocal action =
-            getActHome().findByPrimaryKey(new ActionPK(val.getId()));
+        Action action = aDao.findByPrimaryKey(new ActionPK(val.getId()));
+            
         action.setActionValue(val);
 
-        // Then find and update the child actions
-        try {
-            Collection children = getActHome().findChildrenActions(val.getId());
+        // Then find and update the child actions.
+
+        /* It would be nice to have a more explicit method that
+           does this kind of update.  XXX -- JMT */ 
+        Collection children = aDao.getChildren(action);
             
-            val.setParentId(val.getId());
-            for (Iterator it = children.iterator(); it.hasNext(); ) {
-                ActionLocal act = (ActionLocal) it.next();
-                act.setActionValue(val);
-            }
-        } catch (FinderException e) {
-            // Ignore, there are no children
+        val.setParentId(val.getId());
+        for (Iterator i = children.iterator(); i.hasNext(); ) {
+            Action act = (Action) i.next();
+
+            act.setActionValue(val);
         }
         
         return action.getActionValue();
-    }
-
-    /**
-     * Delete an action.
-     *
-     * @ejb:interface-method
-     */
-    public void deleteAction(int actionID)
-        throws FinderException, RemoveException {
-        ActionLocalHome actionHome;
-        ActionLocal local;
-        ActionPK pk;
-
-        pk         = new ActionPK(new Integer(actionID));
-        local      = getActHome().findByPrimaryKey(pk);
-        local.remove();
     }
 
     public void ejbCreate() {}

@@ -35,7 +35,6 @@ import javax.ejb.SessionContext;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.dao.TriggerDAO;
-import org.hyperic.hq.events.RegisteredTrigger;
 import org.hyperic.hq.events.ext.RegisteredTriggerEvent;
 import org.hyperic.hq.events.shared.RegisteredTriggerPK;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
