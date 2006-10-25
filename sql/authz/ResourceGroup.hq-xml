@@ -20,11 +20,9 @@
       <column name ="VERSION_COL" default="0" />
     </version>
 
-    <properties name="resGrpName" unique="true">
-      <property name="name" type="string">
-        <column name="NAME" index="EAM_RES_GROUP_NAME" not-null="true" length="100" />
-      </property>
-    </properties>
+    <property name="name" type="string" unique="true">
+      <column name="NAME" index="EAM_RES_GROUP_NAME" not-null="true" length="100" />
+    </property>
 
     <property name="cid" type="integer">
       <column name="CID" index="EAM_RES_GROUP_CID_IDX" not-null="false" />
