@@ -48,6 +48,7 @@ public class ResourceGroupDAO extends HibernateDAO
     public ResourceGroup create(AuthzSubject creator,
                                 ResourceGroupValue createInfo) {
         ResourceGroup resGrp = new ResourceGroup(createInfo);
+        save(resGrp);
         
         // We have to create a new resource
         ResourceValue resValue = new ResourceValue();
@@ -65,7 +66,6 @@ public class ResourceGroupDAO extends HibernateDAO
             (new ResourceDAO(getSession())).create(creator, resValue);
         resGrp.setResource(resource);
         
-        save(resGrp);
         return resGrp;
     }
 
