@@ -349,4 +349,11 @@ public class ArrayUtil {
     
         return r;
     }
+    
+    public static byte[] clone(byte[] orig) {
+        if (orig == null)
+            return null;
+
+        return (byte[])orig.clone();
+    }
 }
