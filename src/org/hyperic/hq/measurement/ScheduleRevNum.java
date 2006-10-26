@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.measurement;
 
-public class ScheduleRevNum  implements java.io.Serializable {
+public class ScheduleRevNum implements java.io.Serializable {
 
     // Fields    
     private SrnId _id;
@@ -36,7 +36,6 @@ public class ScheduleRevNum  implements java.io.Serializable {
     private boolean _pending;
     
     // Constructors
-
     public ScheduleRevNum() {
     }
 
@@ -103,23 +102,25 @@ public class ScheduleRevNum  implements java.io.Serializable {
         _pending = pending;
     }
 
-    public boolean equals(Object other) {
-        if ((this == other)) return true;
-        if ((other == null)) return false;
-        if (!(other instanceof ScheduleRevNum)) return false;
-        ScheduleRevNum castOther = (ScheduleRevNum) other; 
-        
-        return ((getId() == castOther.getId()) || 
-                (getId() != null && castOther.getId() != null &&
-                 getId().equals(castOther.getId())));
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof ScheduleRevNum)) {
+            return false;
+        }
+        ScheduleRevNum o = (ScheduleRevNum)obj;
+        return _id == o.getId() ||
+               (_id != null && o.getId() != null && _id.equals(o.getId()));
     }
-   
+
     public int hashCode() {
         int result = 17;
-        
-        result = 37 * result + (getId() == null ? 0 : getId().hashCode());
+
+        result = 37*result + (_id != null ? _id.hashCode() : 0);
+
         return result;
-    }   
+    }
 }
 
 
