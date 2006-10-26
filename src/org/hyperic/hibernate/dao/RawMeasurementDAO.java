@@ -25,6 +25,8 @@
 
 package org.hyperic.hibernate.dao;
 
+import java.util.List;
+
 import org.hibernate.Session;
 
 import org.hyperic.hq.measurement.RawMeasurement;
@@ -55,8 +57,19 @@ public class RawMeasurementDAO extends HibernateDAO
         super.save(entity);
     }
 
+    public void remove(Integer id) {
+        RawMeasurement m = findById(id);
+        remove(m);
+    }
+    
     public void remove(RawMeasurement entity) {
         super.remove(entity);
+    }
+
+    public RawMeasurement update(RawMeasurement m, String dsn) {
+        m.setDsn(dsn);
+        save(m);
+        return m;
     }
 
     public RawMeasurement create(Integer instanceId, MeasurementTemplate mt,
@@ -64,5 +77,50 @@ public class RawMeasurementDAO extends HibernateDAO
         RawMeasurement rm = new RawMeasurement(instanceId, mt, dsn);
         save(rm);
         return rm;
+    }
+
+    public List findByInstance(int appdefType, int appdefId) {
+        String sql =
+            "from RawMeasurement m " +
+            "join fetch m.template as t " +
+            "join fetch t.monitorableType as mt " +
+            "where mt.appdefType = ? and m.instanceId = ? " +
+            "and t.measurementArgs is empty";
+
+        return getSession().createQuery(sql)
+            .setInteger(0, appdefType)
+            .setInteger(1, appdefId).list();
+    }
+
+    public RawMeasurement findByDsnForInstance(String dsn, Integer id) {
+        String sql =
+            "from RawMeasurement m " +
+            "where m.dsn = ? and m.instanceId = ?";
+        
+        return (RawMeasurement)getSession().createQuery(sql)
+            .setString(0, dsn)
+            .setInteger(1, id.intValue()).uniqueResult();
+    }
+
+    public RawMeasurement findByTemplateForInstance(Integer tid,
+                                                    Integer instanceId) {
+        String sql =
+            "from RawMeasurement m " +
+            "join fetch m.template as t " +
+            "where t.id = ? and m.instanceId = ?";
+
+        return (RawMeasurement)getSession().createQuery(sql)
+            .setInteger(0, tid.intValue())
+            .setInteger(1, instanceId.intValue()).uniqueResult();
+    }
+
+    public List findByTemplate(Integer id) {
+        String sql =
+            "from RawMeasurement m " +
+            "join fetch m.template as t " +
+            "where t.id = ?";
+
+        return getSession().createQuery(sql)
+            .setInteger(0, id.intValue()).list();
     }
 }
