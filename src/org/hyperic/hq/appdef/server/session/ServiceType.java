@@ -38,7 +38,6 @@ public class ServiceType extends AppdefResourceType
     private String plugin;
     private boolean isInternal;
     private ServerType serverType;
-    private String tierType;
     private Collection applicationTypes;
     private Collection appServices;
     private Collection services;
@@ -91,16 +90,6 @@ public class ServiceType extends AppdefResourceType
     public void setServerType(ServerType serverType)
     {
         this.serverType = serverType;
-    }
-
-    public String getTierType()
-    {
-        return this.tierType;
-    }
-
-    public void setTierType(String tierType)
-    {
-        this.tierType = tierType;
     }
 
     public Collection getApplicationTypes()

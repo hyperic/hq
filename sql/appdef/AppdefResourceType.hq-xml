@@ -119,11 +119,6 @@
         <column name="FINTERNAL" />
       </property>
 
-      <!-- remove reference to a deleted object: TierType -->
-      <property name="tierType" type="string">
-        <column name="TIER_TYPE_ID" />
-      </property>
-
       <many-to-one name="serverType" class="ServerType">
         <column name="SERVER_TYPE_ID" />
       </many-to-one>

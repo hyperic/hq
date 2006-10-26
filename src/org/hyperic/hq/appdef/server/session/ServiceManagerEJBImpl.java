@@ -272,10 +272,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             List serviceLocals = getServiceDAO().findByName(name);
 
             int numServices = serviceLocals.size();
-            if (numServices == 0) {
-                throw new ServiceNotFoundException("Service '" +
-                                                   name + "' not found");
-            }
 
             List services = new ArrayList();
             for (int i = 0; i < numServices; i++) {
@@ -1097,9 +1093,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             // find any children
         Collection childSvcs =
             getServiceDAO().findByParentAndType(serviceId, svcTypeId);
-        if (childSvcs.size() == 0) {
-            throw new ServiceNotFoundException(serviceId);
-        }
         return this.filterAndPage(childSvcs, subject, svcTypeId, pc);
     }
 
@@ -1115,9 +1108,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         // find any children
         Collection childSvcs =
             getServiceDAO().findByParentAndType(serviceId, svcTypeId);
-        if (childSvcs.size() == 0) {
-            throw new ServiceNotFoundException(serviceId);
-        }
         
         List viewables = this.filterUnviewable(subject, childSvcs);
              
@@ -1172,9 +1162,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         pc = PageControl.initDefaults(pc, SortAttribute.SERVICE_NAME);
         Collection allServices = getServiceDAO()
             .findPlatformServices_orderName(platId,true,pc.isAscending());
-        if (allServices.size() == 0) {
-            throw new PlatformNotFoundException(platId);
-        }
         return this.filterAndPage(allServices, subject, typeId, pc);
     }
     
@@ -1194,10 +1181,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             
         Collection allServices = getServiceDAO()
             .findPlatformServices_orderName(platId,true,pc.isAscending());
-        if (allServices.size() == 0) {
-            throw new PlatformNotFoundException(platId);
-        }
-
         HashMap retMap = new HashMap();
             
         // Map all services by type ID
@@ -1255,9 +1238,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             break;
         default:
             throw new IllegalArgumentException("Invalid sort attribute");
-        }
-        if (allServices.size() == 0) {
-            throw new PlatformNotFoundException(platId);
         }
         return this.filterAndPage(allServices, subject, svcTypeId, pc);
     }
@@ -1321,12 +1301,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                                                "attribute ["+ pc.getSortattribute() +
                                                "] on PageControl : " + pc);
         }
-        if (appServiceCollection.size() == 0) {
-            throw new ServiceNotFoundException("No (viewable) services " +
-                                               "associated with application " +
-                                               appId);
-        }
-
         AppService appService;
         Iterator i = appServiceCollection.iterator();
         List services = new ArrayList();
@@ -1945,9 +1919,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         // TODO AUTHZ
         Collection clustSvcs = DAOFactory.getDAOFactory().getServiceDAO()
             .findByCluster(clusterId);
-        if (clustSvcs.size() == 0) {
-            throw new FinderException(clusterId + "");
-        }
         PageList page = new PageList();
         page.setTotalSize(clustSvcs.size());
         for(Iterator i = clustSvcs.iterator(); i.hasNext();) {
