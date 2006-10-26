@@ -35,6 +35,8 @@ import org.hyperic.hq.measurement.shared.MeasurementTemplateLocal;
 import org.hyperic.hq.measurement.server.session.DMValueCache;
 import org.hyperic.util.pager.PagerProcessor;
 
+import org.hyperic.hq.measurement.MeasurementTemplate;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -49,20 +51,19 @@ public class PagerProcessor_measurement implements PagerProcessor {
     }
 
     public Object processElement(Object o) {
-        if (debug) {
-            log.debug("PagerProcessor_dm: processElement starting");
-        }
         if (o == null) {
-            if (debug) {
-                log.debug(
-                    "PagerProcessor_dm: processElement returning null for element");
-            }
             return null;
         }
+
+        // Pojo object processing, this is all going away soon.
+        if (o instanceof MeasurementTemplate) {
+            return ((MeasurementTemplate)o).getMeasurementTemplateValue();
+        }
+
         if (!(o instanceof EJBLocalObject)) {
             return o;
         }
-        
+
         // EJB Local object processing
         if (o instanceof DerivedMeasurementLocal) {
             if (debug) {
