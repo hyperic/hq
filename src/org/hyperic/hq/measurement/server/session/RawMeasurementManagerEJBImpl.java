@@ -31,31 +31,25 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.CreateException;
 import javax.ejb.EJBException;
-import javax.ejb.FinderException;
-import javax.ejb.NoSuchEntityException;
-import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
+import org.hyperic.hibernate.dao.RawMeasurementDAO;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.measurement.MeasurementCreateException;
+import org.hyperic.hq.measurement.MeasurementTemplate;
+import org.hyperic.hq.measurement.RawMeasurement;
 import org.hyperic.hq.measurement.ext.MonitorFactory;
 import org.hyperic.hq.measurement.ext.MonitorInterface;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.monitor.MonitorCreateException;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateLocal;
-import org.hyperic.hq.measurement.shared.MeasurementTemplatePK;
-import org.hyperic.hq.measurement.shared.RawMeasurementLocal;
-import org.hyperic.hq.measurement.shared.RawMeasurementPK;
 import org.hyperic.hq.measurement.shared.RawMeasurementValue;
 import org.hyperic.hq.product.MetricInvalidException;
 import org.hyperic.hq.product.MetricValue;
@@ -72,6 +66,8 @@ import org.apache.commons.logging.LogFactory;
  *      local-jndi-name="LocalRawMeasurementManager"
  *      view-type="local"
  *      type="Stateless"
+ *
+ * @ejb:transaction type="REQUIRED"
  *
  * @jboss:create-table false
  * @jboss:remove-table false
@@ -96,31 +92,24 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
      *
      * @return a RawMeasurement 
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public RawMeasurementValue createMeasurement(Integer templateId,
                                                  Integer instanceId,
                                                  ConfigResponse config)
         throws MeasurementCreateException {
-        String tmpl = null;
+     
         try {
-            MeasurementTemplatePK mtPk = new MeasurementTemplatePK(templateId);
-            MeasurementTemplateLocal mt = getMtHome().findByPrimaryKey(mtPk);
-
-            // Translate the DSN
-            tmpl = mt.getTemplate();
+            MeasurementTemplate mt = 
+                getMeasurementTemplateDAO().findById(templateId);
+            String tmpl = mt.getTemplate();
             String dsn = translate(tmpl, config);
 
-            RawMeasurementLocal m = getRmHome().create(mt, instanceId, dsn);
-            return m.getRawMeasurementValue();
-        } catch (FinderException e) {
-            throw new MeasurementCreateException(templateId);
+            RawMeasurement rm = getRawMeasurementDAO().create(instanceId, mt,
+                                                              dsn);
+            return rm.getRawMeasurementValue();
         } catch (MetricInvalidException e) {
             throw new MeasurementCreateException("Invalid DSN generated", e);
-        } catch (CreateException e) {
-            throw new MeasurementCreateException(e);
         }
-
     }
 
     /**
@@ -128,25 +117,23 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
      *
      * @return a RawMeasurement 
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public void updateMeasurements(AppdefEntityID id,
                                    ConfigResponse config)
         throws MeasurementCreateException {
         String tmpl = null;
         try {
-            Collection mcol = getRmHome().findByInstance(id.getType(),
-                                                         id.getID());
+            Collection mcol = 
+                getRawMeasurementDAO().findByInstance(id.getType(),
+                                                      id.getID());
 
             for (Iterator i = mcol.iterator(); i.hasNext();) {
-                RawMeasurementLocal rm = (RawMeasurementLocal) i.next();
+                RawMeasurement rm = (RawMeasurement) i.next();
 
                 // Translate the DSN
                 tmpl = rm.getTemplate().getTemplate();
-                rm.setDsn(translate(tmpl, config));
+                getRawMeasurementDAO().update(rm, translate(tmpl, config));
             }
-        } catch (FinderException e) {
-            // There's nothing to update
         } catch (MetricInvalidException e) {
             throw new MeasurementCreateException("Invalid DSN generated", e);
         }
@@ -157,19 +144,10 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
      *
      * @return a RawMeasurement value
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public RawMeasurementValue getMeasurement(Integer mid) {
-        try {
-            RawMeasurementPK pkey = new RawMeasurementPK(mid);
-            RawMeasurementLocal rm = getRmHome().findByPrimaryKey(pkey);
-            return rm.getRawMeasurementValue();
-        } catch (FinderException e) {
-            // Not a problem
-            log.debug( "Harmless FinderException: " + e.getMessage() );
-        }
-
-        return null;
+        RawMeasurement rm = getRawMeasurementDAO().findById(mid);
+        return rm.getRawMeasurementValue();
     }
 
     /**
@@ -181,7 +159,6 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
      * @param config Configuration to check
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void checkConfiguration(AuthzSubjectValue subject,
                                    AppdefEntityID entity, 
@@ -217,17 +194,6 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
             throw new InvalidConfigException("Invalid configuration: " +
                                              exc.getMessage(), exc);
         }
-
-        /* That's right, it is controversial, so comment it out
-        // Perform controversial availability check
-        if(entry.availIndex != -1 &&
-           mVals[entry.availIndex].getValue() != MeasurementConstants.AVAIL_UP)
-        {
-            throw new InvalidConfigException("Invalid configuration: " +
-                                             "Resource reports that it is " +
-                                             "unavailable");
-        }
-        */
     }
 
     /**
@@ -266,7 +232,6 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
      * Get the live measurement value
      * @param mID Raw measurement to get the value of
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public MetricValue[] getLiveMeasurementValues(Integer[] mids)
         throws LiveMeasurementException, PermissionException  {
@@ -296,19 +261,10 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
      *
      * @return a RawMeasurement value
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
-    public RawMeasurementValue findMeasurement(String dsn, Integer iid) {
-        try {
-            RawMeasurementLocal rm =
-                getRmHome().findByDsnForInstance(dsn, iid);
-            return rm.getRawMeasurementValue();
-        } catch (FinderException e) {
-            // Not a problem
-            log.debug( "Harmless FinderException: " + e.getMessage() );
-        }
-
-        return null;
+    public RawMeasurementValue findMeasurement(String dsn, Integer id) {
+        RawMeasurement rm = getRawMeasurementDAO().findByDsnForInstance(dsn, id);
+        return rm.getRawMeasurementValue();
     }
 
     /**
@@ -316,23 +272,12 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
      *
      * @return a RawMeasurement value
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
-    public RawMeasurementValue findMeasurement(Integer tid, Integer instanceId){
-        try {
-            RawMeasurementLocal rm =
-                getRmHome().findByTemplateForInstance(tid, instanceId);
-            return rm.getRawMeasurementValue();
-        } catch (FinderException e) {
-            // Not a problem
-            log.debug( "Harmless FinderException: " + e.getMessage() );
-        } catch (NoSuchEntityException e) {
-            // Must be the template is missing
-            log.debug("Template does not exist for raw metric: template ID(" +
-                      tid + ") instance ID(" + instanceId + ")", e);
-        }
-
-        return null;
+    public RawMeasurementValue findMeasurement(Integer tid, 
+                                               Integer instanceId) {
+        RawMeasurement rm = 
+            getRawMeasurementDAO().findByTemplateForInstance(tid, instanceId);
+        return rm.getRawMeasurementValue();
     }
 
     /**
@@ -340,21 +285,15 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
      *
      * @return a list of RawMeasurement value
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public List findMeasurements(AppdefEntityID id) {
         ArrayList mlist = new ArrayList();
-        try {
-            Collection mcol = getRmHome().findByInstance(id.getType(),
-                                                         id.getID());
-
-            for (Iterator i = mcol.iterator(); i.hasNext();) {
-                RawMeasurementLocal rm = (RawMeasurementLocal) i.next();
-                mlist.add(rm.getRawMeasurementValue());
-            }
-        } catch (FinderException e) {
-            // Not a problem
-            log.debug( "Harmless FinderException: " + e.getMessage() );
+        
+        Collection mcol = getRawMeasurementDAO().findByInstance(id.getType(),
+                                                                id.getID());
+        for (Iterator i = mcol.iterator(); i.hasNext();) {
+            RawMeasurement rm = (RawMeasurement) i.next();
+            mlist.add(rm.getRawMeasurementValue());
         }
 
         return mlist;
@@ -364,38 +303,22 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
      * Remove a measurement 
      *
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
-    public void removeMeasurement(Integer mid) throws RemoveException {
-        try {
-            RawMeasurementPK pk = new RawMeasurementPK(mid);
-            RawMeasurementLocal m = getRmHome().findByPrimaryKey(pk);
-            m.remove();
-        } catch (FinderException e) {
-            // Not a problem
-            log.debug( "Harmless FinderException: " + e.getMessage() );
-        }
+    public void removeMeasurement(Integer mid) {
+        getRawMeasurementDAO().remove(mid);
     }
 
     /**
      * Remove all measurements for an instance
      *
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
-    public void removeMeasurements(AppdefEntityID id) throws RemoveException {
-        try {
-            // First find them, then delete them
-            Collection mcol = getRmHome().findByInstance(id.getType(),
-                                                         id.getID());
-
-            for (Iterator i = mcol.iterator(); i.hasNext();) {
-                RawMeasurementLocal m = (RawMeasurementLocal) i.next();
-                m.remove();
-            }
-        } catch (FinderException e) {
-            // Not a problem
-            log.debug( "Harmless FinderException: " + e.getMessage() );
+    public void removeMeasurements(AppdefEntityID id) {
+        RawMeasurementDAO dao = getRawMeasurementDAO();
+        Collection mcol = dao.findByInstance(id.getType(), id.getID());
+        for (Iterator i = mcol.iterator(); i.hasNext();) {
+            RawMeasurement rm = (RawMeasurement) i.next();
+            dao.remove(rm);
         }
     }
 
@@ -403,20 +326,14 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
      * Remove all measurements for a template ID
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
      */
-    public void removeMeasurements(Integer tid) throws RemoveException {
-        try {
-            // First find them, then delete them
-            Collection mcol = getRmHome().findByTemplate(tid);
+    public void removeMeasurements(Integer tid) {
+        RawMeasurementDAO dao = getRawMeasurementDAO();
+        Collection mcol = dao.findByTemplate(tid);
 
-            for (Iterator i = mcol.iterator(); i.hasNext();) {
-                RawMeasurementLocal m = (RawMeasurementLocal) i.next();
-                m.remove();
-            }
-        } catch (FinderException e) {
-            // Not a problem
-            log.debug( "Harmless FinderException: " + e.getMessage() );
+        for (Iterator i = mcol.iterator(); i.hasNext();) {
+            RawMeasurement m = (RawMeasurement) i.next();
+            dao.remove(m);
         }
     }
 
