@@ -26,14 +26,10 @@
 package org.hyperic.hibernate.dao;
 
 import java.util.Collection;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
-import org.hibernate.HibernateException;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.ResourceType;
@@ -43,7 +39,6 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.dao.DAOFactory;
 
 /**
  * CRUD methods, finders, etc. for Resource
@@ -185,7 +180,7 @@ public class ResourceDAO extends HibernateDAO
         // before we do anything else.
         // Note: this should be refactored to use named queries so
         // that we can perform "fetch" optimization outside of the code
-        String sql="from Resource r " +
+        String sql="select distinct r from Resource r " +
                    " join fetch r.resourceGroups rg " +
                    " join fetch rg.roles role " +
                    " join fetch role.subjects subj " +
@@ -210,7 +205,7 @@ public class ResourceDAO extends HibernateDAO
 
     public Collection findSvcRes_orderName(Boolean fSystem)
     {
-        String sql="from Resource r " +
+        String sql="select distinct r from Resource r " +
                    " join fetch r.resourceGroups rg " +
                    " join fetch rg.roles role " +
                    " join fetch role.operations op " +
@@ -233,7 +228,7 @@ public class ResourceDAO extends HibernateDAO
                                                  Integer groupId,
                                                  Boolean fSystem)
     {
-        String sql="from Resource r " +
+        String sql="select distinct r from Resource r " +
                    " join fetch r.resourceGroups rg " +
                    " join fetch rg.roles role " +
                    " join fetch role.subjects subj " +
@@ -262,7 +257,7 @@ public class ResourceDAO extends HibernateDAO
     public Collection findInGroup_orderName(Integer groupId,
                                             Boolean fSystem)
     {
-        String sql="from Resource r " +
+        String sql="select distinct r from Resource r " +
                    " join fetch r.resourceGroups rg " +
                    " join fetch rg.roles role " +
                    " join fetch role.subjects subj " +
