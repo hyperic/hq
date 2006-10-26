@@ -28,6 +28,7 @@ package org.hyperic.hibernate.dao;
 import java.util.Collection;
 import java.util.Set;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,6 +38,7 @@ import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.ResourceType;
 import org.hyperic.hq.authz.ResourceGroup;
+import org.hyperic.hq.authz.Operation;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
@@ -171,6 +173,18 @@ public class ResourceDAO extends HibernateDAO
     public Collection findViewableSvcRes_orderName(Integer user,
                                                    Boolean fSystem)
     {
+        // we use join fetch here to produce a single
+        // outer join => the strategy here is to rely on
+        // the database query optimizer to optimize the query
+        // If the database is too slow, only then
+        // we should remove the "fetch" clause
+        // and let hibernate issue multiple selects to
+        // fetch association subgraph.
+        // The important point is we should first give the
+        // opportunity to the database to do the "query" optimization
+        // before we do anything else.
+        // Note: this should be refactored to use named queries so
+        // that we can perform "fetch" optimization outside of the code
         String sql="from Resource r " +
                    " join fetch r.resourceGroups rg " +
                    " join fetch rg.roles role " +
@@ -274,4 +288,55 @@ public class ResourceDAO extends HibernateDAO
             .list();
     }
 
+    public Collection findScopeByOperationBatch(AuthzSubject subjLoc,
+                                                Resource[] resLocArr,
+                                                Operation[] opLocArr)
+    {
+        StringBuffer sb = new StringBuffer();
+
+        sb.append ("SELECT DISTINCT r " )
+            .append ( "FROM Resource r      " )
+            .append ( "  join fetch r.resourceGroups g" )
+            .append ( "  join fetch g.roles e         " )
+            .append ( "  join fetch e.operations o    " )
+            .append ( "  join fetch e.subjects s       " )
+            .append ( "    WHERE s.id = ?         " )
+            .append ( "          AND (          " );
+
+        for (int x=0; x< resLocArr.length ; x++) {
+            if (x>1) sb.append(" OR ");
+            sb.append(" (o.id=")
+                .append(opLocArr[x].getId())
+                .append(" AND r.id=")
+                .append(resLocArr[x].getId())
+                .append(") ");
+        }
+        sb.append(")");
+        return getSession().createQuery(sb.toString())
+            .setInteger(0, subjLoc.getId().intValue())
+            .list();
+    }
+
+    public Collection findScopeByOperationBatch(Resource[] resLocArr)
+    {
+        StringBuffer sb = new StringBuffer();
+
+        sb.append ("SELECT DISTINCT r " )
+            .append ( "FROM Resource r "      )
+            .append ( "  join fetch r.resourceGroups g " )
+            .append ( "WHERE "              );
+
+        for (int x = 0; x < resLocArr.length; x++) {
+            if (x > 0)
+                sb.append(" OR ");
+            sb.append(" r.id=")
+                .append(resLocArr[x].getId());
+        }
+        if (log.isDebugEnabled()) {
+            log.debug ("findScopeByOperationBatch() [query=" +
+                       sb.toString() + "]");
+        }
+        return getSession().createQuery(sb.toString())
+            .list();
+    }
 }

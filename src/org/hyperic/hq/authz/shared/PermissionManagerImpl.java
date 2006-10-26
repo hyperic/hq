@@ -43,6 +43,9 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.ResourceType;
+import org.hyperic.hq.authz.Role;
+import org.hyperic.hq.authz.Operation;
+import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.server.session.AuthzSession;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.StringUtil;
@@ -93,10 +96,6 @@ public class PermissionManagerImpl
         }
     }
 
-    public void check(Integer subject, ResourceTypeLocal type,
-                      Integer instanceId, String operation)
-        throws PermissionException {}
-
     public void check(Integer subject, ResourceType type, Integer instanceId,
                       String operation)
         throws PermissionException {}
@@ -120,13 +119,16 @@ public class PermissionManagerImpl
     {
         log.debug("Checking Scope for Operation: " + opName +
                   " subject: " + subj);
-        ResourceTypeLocal resTypeBean = getResourceTypeHome()
+        ResourceType resTypeBean = getResourceTypeDAO()
             .findByName(resType);
-        OperationLocal opEJB = getOperationHome().findByTypeAndName( 
-            resTypeBean, opName);
-
-        return findOperationScopeBySubject(subj, ((OperationPK)opEJB.
-                                                  getPrimaryKey()).getId(),pc);
+        if (resTypeBean != null) {
+            Operation opEJB = getOperationDAO().findByTypeAndName(
+                resTypeBean, opName);
+            if (opEJB != null) {
+                return findOperationScopeBySubject(subj, opEJB.getId(),pc);
+            }
+        }
+        return new PageList();
     }
 
     public PageList findOperationScopeBySubject(AuthzSubjectValue subj,
@@ -147,7 +149,7 @@ public class PermissionManagerImpl
                                          String[] opArr)
         throws FinderException
     {
-        ResourceLocal[] resLocArr;
+        Resource[] resLocArr;
 
         if (resArr == null || opArr == null ||
             resArr.length != opArr.length) {
@@ -156,14 +158,14 @@ public class PermissionManagerImpl
                                                "of operations");
         }
 
-        resLocArr = new ResourceLocal[resArr.length];
+        resLocArr = new Resource[resArr.length];
 
         for (int x = 0; x < resLocArr.length; x++) {
             resLocArr[x] = lookupResource(resArr[x]);
         }
         
         Collection coll = 
-            getResourceHome().findScopeByOperationBatch(resLocArr);
+            getResourceDAO().findScopeByOperationBatch(resLocArr);
         return (ResourceValue[])this.fromLocals(coll, 
             org.hyperic.hq.authz.shared.ResourceValue.class);
 
@@ -292,8 +294,7 @@ public class PermissionManagerImpl
 
     public List getAllOperations(AuthzSubjectValue subject, PageControl pc)
         throws NamingException, PermissionException, FinderException {
-        RoleLocal rootRole = RoleUtil.getLocalHome()
-            .findByPrimaryKey(new RolePK(AuthzConstants.rootRoleId));
+        Role rootRole = getRoleDAO().findById(AuthzConstants.rootRoleId);
         Set ops = new HashSet();
         ops.addAll(rootRole.getOperations());
         pc = PageControl.initDefaults(pc, SortAttribute.OPERATION_NAME);
@@ -303,7 +304,7 @@ public class PermissionManagerImpl
         } catch (Exception e) {
             return null;
         }
-        return operationPager.seek((Collection) ops, pc.getPagenum(),
+        return operationPager.seek(ops, pc.getPagenum(),
                                    pc.getPagesize());
     }
 
@@ -311,12 +312,12 @@ public class PermissionManagerImpl
                                         Integer groupId, Boolean fsystem)
         throws NamingException, FinderException
     {
-        return getResourceHome().findInGroup_orderName_asc(groupId, fsystem);
+        return getResourceDAO().findInGroup_orderName(groupId, fsystem);
     }
 
     public Collection findServiceResources(AuthzSubject subj, Boolean fsystem)
         throws NamingException, FinderException
     {
-        return getResourceHome().findSvcRes_orderName(fsystem);
+        return getResourceDAO().findSvcRes_orderName(fsystem);
     }
 }

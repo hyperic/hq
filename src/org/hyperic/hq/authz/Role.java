@@ -25,15 +25,15 @@
 
 package org.hyperic.hq.authz;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
 import org.hyperic.hq.authz.shared.RoleValue;
+import org.hyperic.hq.authz.shared.RolePK;
+import org.hyperic.hq.authz.values.OwnedRoleValue;
 
-public class Role extends AuthzNamedEntity
-{
+public class Role extends AuthzNamedEntity {
 
     // Fields    
 
@@ -60,21 +60,6 @@ public class Role extends AuthzNamedEntity
         setRoleValue(val);
     }
     
-    /** full constructor */
-    public Role(String name, Integer cid, String sortName, String description,
-                boolean fsystem, Resource resourceId, Collection resourceGroups,
-                Collection operations, Collection subjects) {
-        super(name);
-        this.cid = cid;
-        this.description = description;
-        this.system = fsystem;
-        this.resource = resourceId;
-        this.resourceGroups = resourceGroups;
-        this.operations = operations;
-        this.subjects = subjects;
-    }
-    
-   
     public Integer getCid() {
         return cid;
     }
@@ -159,6 +144,24 @@ public class Role extends AuthzNamedEntity
     public boolean equals(Object obj)
     {
         return (obj instanceof Role) && super.equals(obj);
+    }
+
+    public OwnedRoleValue getOwnedRoleValue() {
+        OwnedRoleValue orv = new OwnedRoleValue(this.getRoleValue(),
+                                                this.getResource().getOwner()
+                                                    .getAuthzSubjectValue());
+        return orv;
+    }
+
+    private RolePK pkey = new RolePK();
+    /**
+     * @deprecated use getId()
+     * @return
+     */
+    public RolePK getPrimaryKey()
+    {
+        pkey.setId(getId());
+        return pkey;
     }
 }
 

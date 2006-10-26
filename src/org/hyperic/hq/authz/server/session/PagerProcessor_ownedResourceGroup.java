@@ -26,8 +26,8 @@
 package org.hyperic.hq.authz.server.session;
 
 import org.hyperic.util.pager.PagerProcessor;
-import org.hyperic.hq.authz.shared.ResourceGroupLocal;
 import org.hyperic.hq.authz.values.OwnedResourceGroupValue;
+import org.hyperic.hq.authz.ResourceGroup;
 
 public class PagerProcessor_ownedResourceGroup implements PagerProcessor {
  
@@ -36,8 +36,8 @@ public class PagerProcessor_ownedResourceGroup implements PagerProcessor {
     public Object processElement(Object o) {
         if (o == null) return null;
         try {
-            if ( o instanceof ResourceGroupLocal) {
-                ResourceGroupLocal group = (ResourceGroupLocal)o;
+            if ( o instanceof ResourceGroup) {
+                ResourceGroup group = (ResourceGroup)o;
                 return new OwnedResourceGroupValue(group.getResourceGroupValue(), 
 						   group.getResource().getOwner().getAuthzSubjectValue());
             }

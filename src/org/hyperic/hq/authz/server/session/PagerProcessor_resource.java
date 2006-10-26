@@ -26,7 +26,6 @@
 package org.hyperic.hq.authz.server.session;
 
 import org.hyperic.hq.authz.Resource;
-import org.hyperic.hq.authz.shared.ResourceLocal;
 import org.hyperic.hq.authz.shared.ResourcePK;
 import org.hyperic.hq.authz.shared.ResourceVOHelperUtil;
 import org.hyperic.util.pager.PagerProcessor;
@@ -38,11 +37,6 @@ public class PagerProcessor_resource implements PagerProcessor {
     public Object processElement(Object o) {
         if (o == null) return null;
         try {
-            if ( o instanceof ResourceLocal) {
-                ResourcePK pk = (ResourcePK) ((ResourceLocal)o).getPrimaryKey();
-                return ResourceVOHelperUtil.getLocalHome().create()
-                    .getResourceValue(((ResourceLocal) o).getId());
-            }
             if ( o instanceof ResourcePK) {
                 return ResourceVOHelperUtil.getLocalHome().create()
                     .getResourceValue(((ResourcePK) o).getId());

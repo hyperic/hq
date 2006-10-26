@@ -28,13 +28,11 @@ package org.hyperic.hibernate.dao;
 import java.util.Collection;
 
 import org.hibernate.Session;
-import org.hibernate.HibernateException;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.ResourceGroup;
 import org.hyperic.hq.authz.ResourceType;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
-import org.hyperic.hq.authz.shared.ResourceGroupLocalHome;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceValue;
 
@@ -151,4 +149,22 @@ public class ResourceGroupDAO extends HibernateDAO
             .setInteger(0, roleId.intValue())
             .list();
     }
+
+    public Collection findContaining_orderName(Integer instanceId,
+                                               Integer typeId,
+                                               boolean asc)
+    {
+
+        String sql="from Resource r " +
+                   " join fetch r.resourceGroups rg " +
+                   "where r.instanceId=? and " +
+                   " r.resourceType.id=? " +
+                   "order by rg.sortName " +
+                   (asc ? "asc" : "desc");
+        return getSession().createQuery(sql)
+            .setInteger(0, instanceId.intValue())
+            .setInteger(1, typeId.intValue())
+            .list();
+    }
+
 }

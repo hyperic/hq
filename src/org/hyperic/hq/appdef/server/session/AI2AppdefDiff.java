@@ -57,6 +57,7 @@ import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.hibernate.dao.PlatformDAO;
+import org.hyperic.dao.DAOFactory;
 
 /**
  * A utility class for calculating queue status and diff for an AIPlatform.
@@ -591,9 +592,10 @@ public class AI2AppdefDiff {
         String certdn = aiPlatform.getCertdn();
         String fqdn = aiPlatform.getFqdn();
         // First try to find by fqdn
-        Platform platform = pmLH.findByFQDN(fqdn);
+        PlatformDAO pdao = DAOFactory.getDAOFactory().getPlatformDAO();
+        Platform platform = pdao.findByFQDN(fqdn);
         if (platform == null) {
-            platform = pmLH.findByCertDN(certdn);
+            platform = pdao.findByCertDN(certdn);
             if (platform == null) {
                 if (log.isDebugEnabled()) {
                     log.debug("FindByCertDN failed: ");

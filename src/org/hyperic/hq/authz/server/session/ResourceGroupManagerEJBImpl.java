@@ -47,27 +47,24 @@ import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.ResourceGroup;
 import org.hyperic.hq.authz.ResourceType;
+import org.hyperic.hq.authz.Role;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.authz.shared.ResourceGroupLocal;
 import org.hyperic.hq.authz.shared.ResourceGroupPK;
-import org.hyperic.hq.authz.shared.ResourceGroupUtil;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
-import org.hyperic.hq.authz.shared.RoleLocal;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
-import org.hibernate.ObjectNotFoundException;
 
 /**
  * Use this session bean to manipulate ResourceGroups,
@@ -208,7 +205,7 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
                                   ResourceGroupValue group)
         throws NamingException, FinderException, PermissionException
     {
-        ResourceGroupLocal groupLocal = this.lookupGroup(group);
+        ResourceGroup groupLocal = lookupGroup(group);
         PermissionManager pm = PermissionManagerFactory.getInstance();
         pm.check(whoami.getId(),
                  groupLocal.getResource().getResourceType(),
@@ -461,24 +458,22 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
             Collection incGroups;
             switch (pc.getSortattribute()) {
             case SortAttribute.RESOURCE_NAME:
-                if (pc.isAscending()) {
-                    incGroups = ResourceGroupUtil.getLocalHome()
-                        .findContaining_orderName_asc(resource.getInstanceId(),
-                            resource.getResourceTypeValue().getId());
-                } else {
-                    incGroups = ResourceGroupUtil.getLocalHome()
-                        .findContaining_orderName_desc(resource.getInstanceId(),
-                            resource.getResourceTypeValue().getId());
-                }
+                incGroups = getResourceGroupDAO()
+                    .findContaining_orderName(
+                        resource.getInstanceId(),
+                        resource.getResourceTypeValue().getId(),
+                        pc.isAscending());
                 break;
             default:
-                incGroups = ResourceGroupUtil.getLocalHome()
-                    .findContaining_orderName_asc(resource.getInstanceId(),
-                        resource.getResourceTypeValue().getId());
+                incGroups = getResourceGroupDAO()
+                    .findContaining_orderName(
+                        resource.getInstanceId(),
+                        resource.getResourceTypeValue().getId(),
+                        true);
             }
 
             for (Iterator i=incGroups.iterator();i.hasNext();) {
-                ResourceGroupLocal rgLoc = (ResourceGroupLocal) i.next();
+                ResourceGroup rgLoc = (ResourceGroup) i.next();
                 if (authGroupIds.contains(rgLoc.getId())) {
                     toBePaged.add(rgLoc);
                 }
@@ -583,12 +578,12 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
         throws FinderException, NamingException, PermissionException {
         Set roleLocals = this.toLocals(roles);
         Iterator it = roleLocals.iterator();
-        ResourceGroupLocal groupLocal = this.lookupGroup(group);
+        ResourceGroup groupLocal = lookupGroup(group);
 
         while (it != null && it.hasNext()) {
-            RoleLocal role = (RoleLocal)it.next();
-            role.setWhoami(this.lookupSubject(whoami));
-            role.addResourceGroup(groupLocal);
+            Role role = (Role)it.next();
+//            role.setWhoami(lookupSubject(whoami));
+            role.getResourceGroups().add(groupLocal);
         }
     }
 
@@ -608,12 +603,12 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
         throws FinderException, NamingException, PermissionException {
         Set roleLocals = this.toLocals(roles);
         Iterator it = roleLocals.iterator();
-        ResourceGroupLocal groupLocal = this.lookupGroup(group);
+        ResourceGroup groupLocal = lookupGroup(group);
 
         while (it != null && it.hasNext()) {
-            RoleLocal role = (RoleLocal)it.next();
-            role.setWhoami(this.lookupSubject(whoami));
-            role.removeResourceGroup(groupLocal);
+            Role role = (Role)it.next();
+//            role.setWhoami(this.lookupSubject(whoami));
+            role.getResourceGroups().remove(groupLocal);
         }
     }
 
@@ -629,8 +624,8 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
     public void removeAllRoles(AuthzSubjectValue whoami,
                                ResourceGroupValue group)
         throws FinderException, NamingException, PermissionException {
-        ResourceGroupLocal groupLocal = this.lookupGroup(group);
-        removeRoles(whoami, group, (RoleValue[])this.fromLocals(groupLocal.getRoles(), org.hyperic.hq.authz.shared.RoleValue.class));
+        ResourceGroup groupLocal = lookupGroup(group);
+        removeRoles(whoami, group, (RoleValue[])fromLocals(groupLocal.getRoles(), org.hyperic.hq.authz.shared.RoleValue.class));
     }
 
     /**
@@ -670,7 +665,7 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
     public RoleValue[] getRoles(AuthzSubjectValue whoami,
                                 ResourceGroupValue groupValue)
         throws NamingException, FinderException, PermissionException {
-        ResourceGroupLocal groupLocal = this.lookupGroup(groupValue);
+        ResourceGroup groupLocal = lookupGroup(groupValue);
         /**
          This is no longer required. Viewing dependent entities is
          done based on whether or not you can see the group

@@ -42,7 +42,6 @@ import org.hyperic.hibernate.dao.AIServerDAO;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AIServerLocalHome;
-import org.hyperic.hq.appdef.shared.AIServerUtil;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
@@ -68,18 +67,10 @@ import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
-import org.hyperic.hq.authz.shared.AuthzSubjectLocalHome;
-import org.hyperic.hq.authz.shared.AuthzSubjectUtil;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.product.TypeInfo;
-import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.PlatformType;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.ServerType;
-import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.server.session.ServiceType;
 
 
 import javax.ejb.CreateException;
@@ -88,7 +79,6 @@ import javax.naming.NamingException;
 
 public abstract class AppdefSessionUtil {
     private AIQueueManagerLocal         aiqManagerLocal;
-    private AIServerLocalHome           aiqServerLHome;
     private ApplicationManagerLocalHome appMgrLHome;
     private AppdefGroupManagerLocalHome grpMgrLHome;
     private ConfigManagerLocal          configMgrL;

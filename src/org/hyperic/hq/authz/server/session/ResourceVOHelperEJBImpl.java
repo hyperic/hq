@@ -37,10 +37,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.Resource;
-import org.hyperic.hq.authz.shared.OperationLocal;
-import org.hyperic.hq.authz.shared.ResourceTypeLocal;
+import org.hyperic.hq.authz.ResourceType;
+import org.hyperic.hq.authz.Operation;
 import org.hyperic.hq.authz.shared.ResourceTypePK;
-import org.hyperic.hq.authz.shared.ResourceTypeUtil;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 
@@ -124,12 +123,12 @@ public class ResourceVOHelperEJBImpl extends AuthzSession
     /**
      * Get the resource type value object
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
     public ResourceTypeValue getResourceTypeValue(ResourceTypePK pk)
         throws FinderException, NamingException {
-        ResourceTypeLocal ejb =
-            ResourceTypeUtil.getLocalHome().findByPrimaryKey(pk);
+        ResourceType ejb =
+            getResourceTypeDAO().findById(pk.getId());
         return getResourceTypeValue(ejb.getName());
     }
 
@@ -167,13 +166,13 @@ public class ResourceVOHelperEJBImpl extends AuthzSession
              * Instead of fetching these one by one, we're gonna go ahead and
              * get them all since this data never changes
              */
-            Collection rts = ResourceTypeUtil.getLocalHome().findAll();
+            Collection rts = getResourceTypeDAO().findAll();
             for(Iterator j = rts.iterator(); j.hasNext();) {
-                ResourceTypeLocal anEjb = (ResourceTypeLocal)j.next();
-                ResourceTypeValue aVo = anEjb.getResourceTypeValueObject();
-                for(Iterator i = anEjb.getOperationsSnapshot().iterator();
+                ResourceType anEjb = (ResourceType)j.next();
+                ResourceTypeValue aVo = anEjb.getResourceTypeValue();
+                for(Iterator i = anEjb.getOperations().iterator();
                     i.hasNext();) {
-                    OperationLocal opEjb = (OperationLocal)i.next();
+                    Operation opEjb = (Operation)i.next();
                     aVo.addOperationValue(opEjb.getOperationValue());
                 }
                 cache.put(aVo.getName(), aVo);

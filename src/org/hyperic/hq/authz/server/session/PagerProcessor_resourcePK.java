@@ -25,7 +25,8 @@
 
 package org.hyperic.hq.authz.server.session;
 
-import org.hyperic.hq.authz.shared.ResourceLocal;
+import org.hyperic.hq.authz.Resource;
+import org.hyperic.hq.authz.shared.ResourcePK;
 import org.hyperic.util.pager.PagerProcessor;
 
 public class PagerProcessor_resourcePK implements PagerProcessor {
@@ -35,8 +36,8 @@ public class PagerProcessor_resourcePK implements PagerProcessor {
     public Object processElement(Object o) {
         if (o == null) return null;
         try {
-            if ( o instanceof ResourceLocal) {
-                return ((ResourceLocal)o).getPrimaryKey();
+            if ( o instanceof Resource) {
+                return new ResourcePK(((Resource)o).getId());
             }
         } catch (Exception e) {
             throw new IllegalStateException("Error converting to ResourceValue: "

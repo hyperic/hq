@@ -26,7 +26,6 @@
 package org.hyperic.hq.authz.server.session;
 
 import org.hyperic.hq.authz.Operation;
-import org.hyperic.hq.authz.shared.OperationLocal;
 import org.hyperic.util.pager.PagerProcessor;
 
 public class PagerProcessor_operation implements PagerProcessor {
@@ -36,10 +35,7 @@ public class PagerProcessor_operation implements PagerProcessor {
     public Object processElement(Object o) {
         if (o == null) return null;
         try {
-            if ( o instanceof OperationLocal) {
-                return ((OperationLocal) o).getOperationValue();
-            }
-            else if ( o  instanceof Operation ) {
+            if ( o  instanceof Operation ) {
                 return ((Operation) o).getOperationValue();
             }
         } catch (Exception e) {

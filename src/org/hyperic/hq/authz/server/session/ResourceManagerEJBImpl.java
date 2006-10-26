@@ -52,7 +52,6 @@ import org.hyperic.hq.authz.shared.OperationValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.authz.shared.ResourceLocal;
 import org.hyperic.hq.authz.shared.ResourcePK;
 import org.hyperic.hq.authz.shared.ResourceTypePK;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
@@ -459,12 +458,12 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param subject
      * @param pc Paging information for the request
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS" 
+     * @ejb:transaction type="Required"
      */
     public List getAllResourceTypes(AuthzSubjectValue subject, PageControl pc)
         throws NamingException, CreateException, FinderException,
             PermissionException {
-        Collection resTypes = getResourceTypeHome().findAll();
+        Collection resTypes = getResourceTypeDAO().findAll();
         pc = PageControl.initDefaults(pc, SortAttribute.RESTYPE_NAME);
         return resourceTypePager.seek(resTypes, pc.getPagenum(), pc.getPagesize());
     }
@@ -476,7 +475,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param subject
      * @return Map of resource values
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED" 
+     * @ejb:transaction type="Required"
      */
     public List findViewableInstances(AuthzSubjectValue subject,
                                       String typeName, 
@@ -499,7 +498,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param subject
      * @return Map of resource values
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED" 
+     * @ejb:transaction type="Required" 
      */
     public Map findAllViewableInstances(AuthzSubjectValue subject)
         throws FinderException {
@@ -571,7 +570,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         // TODO: Move filtering into EJBQL
         ArrayList ordResources = new ArrayList(resources.size());
         for (Iterator it = resources.iterator(); it.hasNext();) {
-            ResourceLocal res = (ResourceLocal) it.next();
+            Resource res = (Resource) it.next();
             
             if (resourceName != null &&
                 res.getName().indexOf(resourceName) < 0)

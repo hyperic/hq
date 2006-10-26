@@ -88,7 +88,7 @@
 
       <bag name="ips" table="EAM_IP"
            cascade="save-update,delete,persist,merge,evict,all-delete-orphan"
-           inverse="true" lazy="false">
+           inverse="true" lazy="true">
         <key column="PLATFORM_ID" />
         <one-to-many class="org.hyperic.hq.appdef.Ip" />
       </bag>

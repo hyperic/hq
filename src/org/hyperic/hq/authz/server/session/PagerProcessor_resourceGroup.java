@@ -26,7 +26,6 @@
 package org.hyperic.hq.authz.server.session;
 
 import org.hyperic.hq.authz.ResourceGroup;
-import org.hyperic.hq.authz.shared.ResourceGroupLocal;
 import org.hyperic.util.pager.PagerProcessor;
 
 public class PagerProcessor_resourceGroup implements PagerProcessor {
@@ -36,10 +35,7 @@ public class PagerProcessor_resourceGroup implements PagerProcessor {
     public Object processElement(Object o) {
         if (o == null) return null;
         try {
-            if ( o instanceof ResourceGroupLocal) {
-                return ((ResourceGroupLocal) o).getResourceGroupValue();
-            }
-            else if ( o instanceof ResourceGroup ) {
+            if ( o instanceof ResourceGroup ) {
                 return ((ResourceGroup) o).getResourceGroupValue();
             }
         } catch (Exception e) {

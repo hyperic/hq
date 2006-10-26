@@ -31,6 +31,7 @@ import org.hyperic.hq.appdef.shared.AIPlatformPK;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.ArrayList;
 
 /**
  *
@@ -54,8 +55,8 @@ public class AIPlatform extends PlatformBase
     private byte[] productConfig;
     private byte[] controlConfig;
     private byte[] measurementConfig;
-    private Collection aiips;
-    private Collection aiservers;
+    private Collection aiips = new ArrayList();
+    private Collection aiservers =  new ArrayList();
 
     /**
      * default constructor
@@ -327,23 +328,19 @@ public class AIPlatform extends PlatformBase
         aipValue.setMTime(getMTime());
         aipValue.setCTime(getCTime());
         aipValue.removeAllAIIpValues();
-        if (getAIIps() != null) {
-            Iterator iAIIpValue = getAIIps().iterator();
-            while (iAIIpValue.hasNext()){
-                aipValue.addAIIpValue(
-                    ((AIIp)iAIIpValue.next()).getAIIpValue() );
-            }
-            aipValue.cleanAIIpValue();
+        Iterator iAIIpValue = getAIIps().iterator();
+        while (iAIIpValue.hasNext()){
+            aipValue.addAIIpValue(
+                ((AIIp)iAIIpValue.next()).getAIIpValue() );
         }
+        aipValue.cleanAIIpValue();
         aipValue.removeAllAIServerValues();
-        if (getAIServers() != null) {
-            Iterator iAIServerValue = getAIServers().iterator();
-            while (iAIServerValue.hasNext()){
-                aipValue.addAIServerValue(
-                    ((AIServer)iAIServerValue.next()).getAIServerValue() );
-            }
-            aipValue.cleanAIServerValue();
+        Iterator iAIServerValue = getAIServers().iterator();
+        while (iAIServerValue.hasNext()){
+            aipValue.addAIServerValue(
+                ((AIServer)iAIServerValue.next()).getAIServerValue() );
         }
+        aipValue.cleanAIServerValue();
         return aipValue;
     }
 
