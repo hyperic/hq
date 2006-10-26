@@ -26,9 +26,11 @@
 package org.hyperic.hq.measurement;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 import org.hyperic.hibernate.PersistedObject;
 
+import org.hyperic.hq.measurement.shared.MeasurementArgValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 
 public class MeasurementTemplate extends PersistedObject
@@ -279,6 +281,12 @@ public class MeasurementTemplate extends PersistedObject
         value.setMonitorableType(mt.getMonitorableTypeValue());
         Category cat = getCategory();
         value.setCategory(cat.getCategoryValue());
+
+        for (Iterator i = _measurementArgs.iterator(); i.hasNext(); ) {
+            MeasurementArg arg = (MeasurementArg)i.next();
+            MeasurementArgValue val = arg.getMeasurementArgValue();
+            value.addMeasurementArg(val);
+        }
 
         return value;
     }
