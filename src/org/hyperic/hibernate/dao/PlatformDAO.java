@@ -314,7 +314,13 @@ public class PlatformDAO extends HibernateDAO {
 
     public Collection findByIpAddr(String addr)
     {
-        String sql = "from Platform p join fetch p.ips ip where ip.address=?";
+        // here we do not to use 'fetch' join as fetch joins have a
+        // side effect of also initializing the collection with the
+        // result ips retrieved from the query.  That is the ips collection
+        // in the 'fetch' join will have only one entry in this instance.
+        // That entry being the the row from eam_ip table with eam_ip.address
+        // to the 'addr' passed to this method.
+        String sql = "from Platform p join p.ips ip where ip.address=?";
         return getSession()
             .createQuery(sql)
             .setString(0, addr)

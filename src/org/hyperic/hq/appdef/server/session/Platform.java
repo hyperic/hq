@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.ArrayList;
 
 /**
  * Pojo for hibernate hbm mapping file
@@ -48,8 +49,8 @@ public class Platform extends PlatformBase
     private PlatformType platformType;
     private ConfigResponseDB configResponse;
     private Agent agent;
-    private Collection ips;
-    private Collection servers;
+    private Collection ips = new ArrayList();
+    private Collection servers =  new ArrayList();
 
     /**
      * default constructor
@@ -229,10 +230,6 @@ public class Platform extends PlatformBase
      */
     public Set getServerSnapshot()
     {
-        Collection servers = getServers();
-        if(servers == null) {
-            return new LinkedHashSet();
-        }
         return new LinkedHashSet(servers);
     }
 
@@ -294,22 +291,16 @@ public class Platform extends PlatformBase
         platformValue.setMTime(getMTime());
         platformValue.setCTime(getCTime());
         platformValue.removeAllIpValues();
-        Collection ips = getIps();
-        if (ips != null) {
-            Iterator iIpValue = ips.iterator();
-            while (iIpValue.hasNext()){
-                platformValue.addIpValue( ((Ip)iIpValue.next()).getIpValue() );
-            }
+        Iterator iIpValue = getIps().iterator();
+        while (iIpValue.hasNext()){
+            platformValue.addIpValue( ((Ip)iIpValue.next()).getIpValue() );
         }
         platformValue.cleanIpValue();
         platformValue.removeAllServerValues();
-        Collection servers = getServers();
-        if (servers != null) {
-            Iterator iServerValue = servers.iterator();
-            while (iServerValue.hasNext()){
-                platformValue.addServerValue(
-                    ((Server)iServerValue.next()).getServerLightValue());
-            }
+        Iterator iServerValue = getServers().iterator();
+        while (iServerValue.hasNext()){
+            platformValue.addServerValue(
+                ((Server)iServerValue.next()).getServerLightValue());
         }
         platformValue.cleanServerValue();
         if ( getPlatformType() != null )
@@ -349,12 +340,9 @@ public class Platform extends PlatformBase
         platformLightValue.setMTime(getMTime());
         platformLightValue.setCTime(getCTime());
         platformLightValue.removeAllIpValues();
-        Collection ips = getIps();
-        if (ips != null) {
-            Iterator iIpValue = ips.iterator();
-            while (iIpValue.hasNext()){
-                platformLightValue.addIpValue( ((Ip)iIpValue.next()).getIpValue() );
-            }
+        Iterator iIpValue = getIps().iterator();
+        while (iIpValue.hasNext()){
+            platformLightValue.addIpValue( ((Ip)iIpValue.next()).getIpValue() );
         }
         platformLightValue.cleanIpValue();
         if ( getPlatformType() != null )
@@ -389,9 +377,6 @@ public class Platform extends PlatformBase
      */
     public Set getIpSnapshot()
     {
-        if (getIps() == null) {
-            return new LinkedHashSet();
-        }
         return new LinkedHashSet(getIps());
     }
 
