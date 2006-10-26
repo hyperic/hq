@@ -66,50 +66,41 @@ import org.apache.commons.logging.LogFactory;
 
 /** The RawMeasurementManagerEJB class is a stateless session bean that can be
  *  used to interact with RawMeasurement EJB's
- * <p>
  *
- * </p>
  * @ejb:bean name="RawMeasurementManager"
  *      jndi-name="ejb/measurement/RawMeasurementManager"
  *      local-jndi-name="LocalRawMeasurementManager"
  *      view-type="local"
  *      type="Stateless"
  *
- *
  * @jboss:create-table false
  * @jboss:remove-table false
- *      
  */
 public class RawMeasurementManagerEJBImpl extends SessionEJB
     implements SessionBean {
     private final Log log = LogFactory.getLog("org.hyperic.hq.measurement.server.session.RawMeasurementManagerEJBImpl");
 
-    ///////////////////////////////////////
-    // operations
-    
     /**
      * Translate a template string into a DSN
      */
-    private String translate(String tmpl, ConfigResponse protoProps){
+    private String translate(String tmpl, ConfigResponse config){
         try {
-            return getMPM().translate(tmpl, protoProps);
+            return getMPM().translate(tmpl, config);
         } catch (org.hyperic.hq.product.PluginNotFoundException e) {
             return tmpl;
         }
     }
 
-    /** <p>
+    /**
      * Create a Measurement object based on a template
-     * </p><p>
      *
      * @return a RawMeasurement 
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
     public RawMeasurementValue createMeasurement(Integer templateId,
                                                  Integer instanceId,
-                                                 ConfigResponse protoProps)
+                                                 ConfigResponse config)
         throws MeasurementCreateException {
         String tmpl = null;
         try {
@@ -118,7 +109,7 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
 
             // Translate the DSN
             tmpl = mt.getTemplate();
-            String dsn = translate(tmpl, protoProps);
+            String dsn = translate(tmpl, config);
 
             RawMeasurementLocal m = getRmHome().create(mt, instanceId, dsn);
             return m.getRawMeasurementValue();
@@ -130,20 +121,17 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
             throw new MeasurementCreateException(e);
         }
 
-    } // end create        
+    }
 
-
-    /** <p>
+    /**
      * Update a Measurement object based on new properties
-     * </p><p>
      *
      * @return a RawMeasurement 
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
     public void updateMeasurements(AppdefEntityID id,
-                                   ConfigResponse protoProps)
+                                   ConfigResponse config)
         throws MeasurementCreateException {
         String tmpl = null;
         try {
@@ -155,23 +143,19 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
 
                 // Translate the DSN
                 tmpl = rm.getTemplate().getTemplate();
-                rm.setDsn(translate(tmpl, protoProps));               
+                rm.setDsn(translate(tmpl, config));
             }
         } catch (FinderException e) {
             // There's nothing to update
         } catch (MetricInvalidException e) {
             throw new MeasurementCreateException("Invalid DSN generated", e);
         }
+    }
 
-    } // end create        
-
-
-    /** <p>
+    /**
      * Look up a raw measurement EJB
-     * </p><p>
      *
      * @return a RawMeasurement value
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
@@ -259,9 +243,8 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
      *
      * @return A list of MetricValue objects for each DSN passed
      */
-    private MetricValue[] 
-        getLiveMeasurementValues(AppdefEntityID entity,
-                                 String[] dsns)
+    private MetricValue[] getLiveMeasurementValues(AppdefEntityID entity,
+                                                   String[] dsns)
         throws LiveMeasurementException, PermissionException {
         try {
             MonitorInterface monitor;
@@ -308,12 +291,10 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
         return this.getLiveMeasurementValues(entity, dsns);
     }
 
-    /** <p>
+    /**
      * Look up a raw measurement EJB
-     * </p><p>
      *
      * @return a RawMeasurement value
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
@@ -330,12 +311,10 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
         return null;
     }
 
-    /** <p>
+    /**
      * Look up a raw measurement EJB
-     * </p><p>
      *
      * @return a RawMeasurement value
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
@@ -356,12 +335,10 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
         return null;
     }
 
-    /** <p>
+    /**
      * Look up a list of raw measurement EJB
-     * </p><p>
      *
      * @return a list of RawMeasurement value
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
@@ -443,9 +420,6 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    ///////////////////////////////////////
-    // EJB operations
-
     /**
      * @see javax.ejb.SessionBean#ejbCreate()
      * @ejb:create-method
@@ -481,5 +455,4 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
         throws EJBException, RemoteException {
         this.ctx = ctx;
     }
-
-} // end RawMeasurementManager
+}
