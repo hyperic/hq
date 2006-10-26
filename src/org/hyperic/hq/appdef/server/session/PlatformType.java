@@ -201,7 +201,7 @@ public class PlatformType extends AppdefResourceType {
         p.setOwner(pv.getOwner());
         p.setPlatformType(this);
         p.setAgent(agent);
-        p.setIps(pv.getAddedIpValues());
+        p.getIps().addAll(pv.getAddedIpValues());
 
         registerNewPlatform(p);
         return p;
