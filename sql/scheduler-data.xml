@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Covalent.DBSetup name="scheduler-schema.xml"
+                  notice="DBSetup, Copyright (C) 2002, Covalent Technologies, Inc., All Rights Reserved.">
+
+  <table name="EAM_QRTZ_LOCKS">
+    <column name="LOCK_NAME" primarykey="true" type="VARCHAR2" size="40" required="true"/>
+    <data LOCK_NAME="TRIGGER_ACCESS" />
+    <data LOCK_NAME="JOB_ACCESS" />
+    <data LOCK_NAME="CALENDAR_ACCESS" />
+    <data LOCK_NAME="STATE_ACCESS" />
+    <data LOCK_NAME="MISFIRE_ACCESS" />
+  </table>
+
+</Covalent.DBSetup>
