@@ -43,6 +43,7 @@ import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -80,6 +81,8 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerCreateException;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggerEvent;
+import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
 import org.hyperic.hq.events.server.session.RegisteredTriggerNotifier;
 import org.hyperic.hq.events.shared.ActionManagerLocal;
 import org.hyperic.hq.events.shared.ActionManagerUtil;
@@ -132,10 +135,15 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     private AlertDefinitionManagerLocal   alDefMan        = null;
     private AlertManagerLocal             alertMan        = null;
     private ActionManagerLocal            actMan          = null;
+
     public EventsBossEJBImpl() {
         this.manager = SessionManager.getInstance();
     }
 
+    private AlertDefinitionDAO getAlertDefDAO() {
+        return DAOFactory.getDAOFactory().getAlertDefDAO();
+    }
+    
     private RegisteredTriggerManagerLocal getRTM() {
         if (triggerMan == null) {
             try {
@@ -708,21 +716,11 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         // check that the user can actually manage alerts for this resource
         for (Iterator it = alertdefs.iterator(); it.hasNext(); ) {
             AlertDefinitionValue ad = (AlertDefinitionValue) it.next();
+            AlertDefinition def = getAlertDefDAO().findById(ad.getId());
+            
             canManageAlerts(subject, ad);
-            action = getActMan().createAction(ad, action);
-            
-            // Create an array out with the new action
-            ActionValue[] actions = ad.getActions();
-            Integer[] aids = new Integer[actions.length + 1];
-            for (int i = 0; i < actions.length; i++) {
-                aids[i] = actions[i].getId();
-            }
-            
-            // Lastly, add the new one
-            aids[actions.length] = action.getId();
-            
-            // Now set the actions
-            getADM().updateAlertDefinitionActions(ad.getId(), aids);
+
+            getADM().addAction(def, action);
 
             if (action.getParentId() == null) {
                 action.setParentId(action.getId());
