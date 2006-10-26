@@ -31,9 +31,15 @@
       <column name="MTIME" not-null="true" />
     </property>
 
+    <!-- Self-referential relationship for alertdef to its children -->
     <many-to-one name="parent" class="AlertDefinition">
       <column name="PARENT_ID" />
     </many-to-one>
+
+    <bag name="childrenBag" inverse="true">
+      <key column="PARENT_ID" />
+      <one-to-many class="AlertDefinition" />
+    </bag>
 
     <property name="description" type="string">
       <column name="DESCRIPTION" not-null="false" length="250" />
