@@ -97,12 +97,9 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.quartz.SchedulerException;
 
-
 /** The DerivedMeasurementManagerEJB class is a stateless session bean that can
  * be used to interact with DerivedMeasurement EJB's
- * <p>
  *
- * </p>
  * @ejb:bean name="DerivedMeasurementManager"
  *      jndi-name="ejb/measurement/DerivedMeasurementManager"
  *      local-jndi-name="LocalDerivedMeasurementManager"
@@ -114,7 +111,6 @@ import org.quartz.SchedulerException;
  * Note: Don't use primary key for lookup, since DerivedMeasurement and
  * RawMeasurement share the same table, and EJB doesn't know which is which.
  * Use findById() instead.
- *
  */
 public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     implements SessionBean {
@@ -171,9 +167,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
 
         return mproc;
     }
-
-    ///////////////////////////////////////
-    // operations
 
     private DerivedMeasurementValue updateMeasurementInterval(Integer tid,
                                                               Integer iid,
@@ -266,9 +259,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    /** <p>
+    /**
      * Look up a derived measurement's appdef entity ID
-     * </p><p>
      */
     private AppdefEntityID getAppdefEntityId(DerivedMeasurementLocal dm) {
         AppdefEntityID aid =
@@ -320,9 +312,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    /** <p>
+    /**
      * Create Measurement objects based their templates
-     * </p><p>
      *
      * @param templates   List of Integer template IDs to add
      * @param id          instance ID (appdef resource) the templates are for
@@ -330,7 +321,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @param protoProps  Configuration data for the instance
      *
      * @return a List of the associated DerivedMeasurementValue objects
-     * </p>
      * @ejb:transaction type="REQUIRESNEW"
      * @ejb:interface-method
      */
@@ -475,18 +465,16 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         
         this.sendAgentSchedule(id);
         return dmList;
-    } // end create
+    }
 
-    /** <p>
+    /**
      * Create Measurement objects based their templates and default intervals
-     * </p><p>
      *
      * @param templates   List of Integer template IDs to add
      * @param id          instance ID (appdef resource) the templates are for
      * @param protoProps  Configuration data for the instance
      *
      * @return a List of the associated DerivedMeasurementValue objects
-     * </p>
      * @ejb:interface-method
      */
     public List createMeasurements(AuthzSubjectValue subject, 
@@ -509,11 +497,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         return this.createMeasurements(subject, id, templates, intervals,props);
     }
 
-    /** <p>
+    /**
      * Create Measurement objects for an appdef entity based on default
      * templates.  This method will only create them if there currently no
      * metrics enabled for the appdef entity.
-     * </p><p>
      *
      * @param subject     Spider subject
      * @param id          appdef entity ID of the resource
@@ -521,7 +508,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @param props       Configuration data for the instance
      *
      * @return a List of the associated DerivedMeasurementValue objects
-     * </p>
      * @ejb:interface-method
      */
     public List createDefaultMeasurements(AuthzSubjectValue subject, 
@@ -566,9 +552,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
     
-    /** <p>
+    /**
      * Create Measurement object based on its template
-     * </p><p>
      *
      * @param template    Integer template ID to add
      * @param id          Appdef ID the templates are for
@@ -576,7 +561,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @param protoProps  Configuration data for the instance
      *
      * @return an associated DerivedMeasurementValue object
-     * </p>
      * @ejb:interface-method
      */
     public DerivedMeasurementValue createMeasurement(AuthzSubjectValue subject,
@@ -597,9 +581,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         return (DerivedMeasurementValue) dmvs.get(0);
     }
 
-    /** <p>
+    /**
      * Update the derived measurements of a resource
-     * </p>
      * @ejb:interface-method
      */
     public void updateMeasurements(AuthzSubjectValue subject,
@@ -633,12 +616,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    /** <p>
+    /**
      * Update a derived measurement
-     * </p><p>
      *
      * @return a DerivedMeasurement value
-     * </p>
      * @ejb:interface-method
      */
     public DerivedMeasurementValue updateMeasurement(
@@ -880,7 +861,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * and an alias.
      *
      * @return a DerivedMeasurement value
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
@@ -906,12 +886,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    /** <p>
+    /**
      * Look up a derived measurement EJB
-     * </p><p>
      *
      * @return a DerivedMeasurement value
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
@@ -962,14 +940,16 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 }
             }
 
-            log.info("Getting live measurements for " + mids.length + " measurements");
+            log.info("Getting live measurements for " + mids.length +
+                     " measurements");
             try {
                 getLiveMeasurementValues(subject, mids);
             } catch (LiveMeasurementException e) {
                 log.info("Resource " + id + " reports it is unavailable, setting " +
                          "measurement ID " + availMeasurement + " to DOWN");
                 if (availMeasurement != null) {
-                    MetricValue val = new MetricValue(MeasurementConstants.AVAIL_DOWN);
+                    MetricValue val =
+                        new MetricValue(MeasurementConstants.AVAIL_DOWN);
                     DataManagerLocal dataMan = getDataMan();
                     dataMan.addData(availMeasurement, val, true);
                 }
@@ -1077,12 +1057,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    /** <p>
+    /**
      * Count of metrics enabled for a particular entity
-     * </p><p>
      *
      * @return a list of DerivedMeasurement value
-     * </p>
      * @ejb:interface-method
      */
     public int getEnabledMetricsCount(AuthzSubjectValue subject,
@@ -1096,12 +1074,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    /** <p>
+    /**
      * Look up a derived measurement EJB
-     * </p><p>
      *
      * @return a DerivedMeasurement value
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
@@ -1127,13 +1103,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-
-    /** <p>
+    /**
      * Look up a list of derived measurement EJBs for a template and instances
-     * </p><p>
      *
      * @return a list of DerivedMeasurement value
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
@@ -1150,12 +1123,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         return results;
     }
 
-    /** <p>
+    /**
      * Look up a list of derived measurement EJBs for a template and instances
-     * </p><p>
      *
      * @return a list of DerivedMeasurement value
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
@@ -1172,12 +1143,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         return (Integer[]) results.toArray(new Integer[0]);
     }
 
-    /** <p>
+    /**
      * Look up a list of derived measurement EJBs for a category
-     * </p><p>
      *
      * @return a list of DerivedMeasurement value
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
@@ -1210,12 +1179,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    /** <p>
+    /**
      * Look up a list of derived measurement EJBs for a category
-     * </p><p>
      *
      * @return a list of DerivedMeasurement value
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
@@ -1248,12 +1215,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    /** <p>
+    /**
      * Look up a list of designated measurement EJBs for an entity
-     * </p><p>
      *
      * @return a list of DerivedMeasurement value
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="NOTSUPPORTED"
      */
@@ -1269,13 +1234,11 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    /** <p>
+    /**
      * Look up a list of designated measurement EJBs for an entity for
      * a category
-     * </p><p>
      *
      * @return a list of DerivedMeasurement value
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="NOTSUPPORTED"
      */
@@ -1293,9 +1256,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    /** <p>
+    /**
      * Look up an availability measurement EJBs for an instance
-     * </p><p>
      * @throws MeasurementNotFoundException
      * @ejb:interface-method
      * @ejb:transaction type="NOTSUPPORTED"
@@ -1325,12 +1287,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    /** <p>
+    /**
      * Look up a list of derived measurement EJBs for a category
-     * </p><p>
      *
      * @return a list of DerivedMeasurement value
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="NOTSUPPORTED"
      */
@@ -1379,13 +1339,11 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         return midMap;
     }
 
-    /** <p>
+    /**
      * Look up a list of derived measurement EJBs for a category.  Used by
      * the AvailabilityCheckService
-     * </p><p>
      *
      * @return a list of DerivedMeasurement value
-     * </p>
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
@@ -1399,16 +1357,15 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    /** <p>
+    /**
      * Look up a list of derived metric intervals for template IDs.
-     * </p><p>
      *
      * @return a map keyed by template ID and values of metric intervals
      * There is no entry if a metric is disabled or does not exist for the
      * given entity or entities.  However, if there are multiple entities, and
      * the intervals differ or some enabled/not enabled, then the value will
      * be "0" to denote varying intervals.
-     * </p>
+     *
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
@@ -1474,9 +1431,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    /** <p>
+    /**
      * Set the interval of Measurements based their ID's
-     * </p><p>
      *
      * @param templates   List of Integer template IDs to add
      * @param id          instance ID (appdef resource) the templates are for
@@ -1484,7 +1440,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @param protoProps  Configuration data for the instance
      *
      * @return a List of the associated DerivedMeasurementValue objects
-     * </p>
      * @ejb:interface-method
      */
     public void enableMeasurements(AuthzSubjectValue subject,
@@ -1560,9 +1515,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     } // end enable
 
-    /** <p>
+    /**
      * Set the interval of Measurements based their template ID's
-     * </p><p>
      *
      * @param templates   List of Integer template IDs to add
      * @param id          instance ID (appdef resource) the templates are for
@@ -1570,7 +1524,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @param protoProps  Configuration data for the instance
      *
      * @return a List of the associated DerivedMeasurementValue objects
-     * </p>
      * @ejb:interface-method
      */
     public void enableMeasurements(AuthzSubjectValue subject,
@@ -1595,12 +1548,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     } // end enable
 
-    /** <p>
+    /**
      * Disable all derived measurement EJBs for an instance
-     * </p><p>
      *
      * @return a list of DerivedMeasurement value
-     * </p>
      * @ejb:interface-method
      */
     public void disableMeasurements(AuthzSubjectValue subject,
@@ -1636,12 +1587,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    /** <p>
+    /**
      * Disable all derived measurement EJBs for an instance
-     * </p><p>
      *
      * @return a list of DerivedMeasurement value
-     * </p>
      * @ejb:interface-method
      */
     public void disableMeasurements(AuthzSubjectValue subject, Integer[] mids)
@@ -1726,11 +1675,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     public void ejbCreate() throws CreateException {
         try {
             valuePager = Pager.getPager(VALUE_PROCESSOR);
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             throw new CreateException("Could not create value pager:" + e);
         }
     }
-
 
     /**
      * @see javax.ejb.SessionBean#ejbPostCreate()
@@ -1761,5 +1709,4 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         throws EJBException, RemoteException {
         this.ctx = ctx;
     }
-
-} // end DerivedMeasurementManager
+}
