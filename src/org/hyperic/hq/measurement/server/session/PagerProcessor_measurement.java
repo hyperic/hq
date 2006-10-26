@@ -66,13 +66,10 @@ public class PagerProcessor_measurement implements PagerProcessor {
 
         // EJB Local object processing
         if (o instanceof DerivedMeasurementLocal) {
-            if (debug) {
-                log.debug(
-                    "PagerProcessor_dm: processElement converting DerivedMeasurementLocal to value object");
-            }
             try {
                 DerivedMeasurementLocal dmEjb = (DerivedMeasurementLocal)o;
-                DerivedMeasurementPK pk = (DerivedMeasurementPK)dmEjb.getPrimaryKey();
+                DerivedMeasurementPK pk =
+                    (DerivedMeasurementPK)dmEjb.getPrimaryKey();
                 DerivedMeasurementValue dmv = cache.get(pk.getId());
                 if(dmv == null) {
                     dmv = dmEjb.getDerivedMeasurementValue();
@@ -80,41 +77,34 @@ public class PagerProcessor_measurement implements PagerProcessor {
                 }
                 return dmv;
             } catch (Exception e) {
-                throw new IllegalStateException(
-                    "Error converting to DerivedMeasurementValue: " + e);
+                throw new IllegalStateException("Error converting to " +
+                                                "DerivedMeasurementValue: " +
+                                                e);
             }
         }
         if (o instanceof MeasurementTemplateLocal) {
-            if (debug) {
-                log.debug(
-                    "PagerProcessor_dm: processElement converting MeasurementTemplateLocal to value object");
-            }
             try {
-                return ((MeasurementTemplateLocal) o)
+                return ((MeasurementTemplateLocal)o)
                     .getMeasurementTemplateValue();
             } catch (Exception e) {
-                throw new IllegalStateException(
-                    "Error converting to MeasurementTemplateValue: " + e);
+                throw new IllegalStateException("Error converting to " +
+                                                "MeasurementTemplateValue: " +
+                                                e);
             }
         }
         if (o instanceof BaselineLocal) {
-            if (debug) {
-                log.debug(
-                    "PagerProcessor_bl: processElement converting BaselineLocal to value object");
-            }
             try {
-                return ((BaselineLocal) o).getBaselineValue();
+                return ((BaselineLocal)o).getBaselineValue();
             } catch (Exception e) {
                 if (log.isDebugEnabled())
                     log.debug("Error converting to BaselineValue", e);
-                throw new IllegalStateException(
-                    "Error converting to BaselineValue: " + e);
+                throw new IllegalStateException("Error converting to " +
+                                                "BaselineValue: " + e);
             }
         }
 
         if (debug) {
-            log.debug("PagerProcessor_dm: processElement not processing object " +
-                      o.getClass());
+            log.debug("Not processing object " + o.getClass());
         }
         return o;
     }
