@@ -56,7 +56,6 @@ import org.hyperic.hibernate.dao.ServerDAO;
 import org.hyperic.hibernate.dao.ServerTypeDAO;
 import org.hyperic.hibernate.dao.ServiceDAO;
 import org.hyperic.hibernate.dao.ServiceTypeDAO;
-import org.hyperic.hibernate.dao.TriggerDAO;
 import org.hyperic.hibernate.dao.ServiceClusterDAO;
 import org.hyperic.hibernate.dao.AppServiceDAO;
 import org.hyperic.hibernate.dao.AppSvcDependencyDAO;
@@ -70,8 +69,11 @@ import org.hyperic.hibernate.dao.AIHistoryDAO;
 import org.hyperic.hibernate.dao.AIScheduleDAO;
 import org.hyperic.hibernate.dao.ConfigPropertyDAO;
 import org.hyperic.hibernate.dao.PluginDAO;
+import org.hyperic.hq.events.server.session.AlertActionLogDAO;
 import org.hyperic.hq.events.server.session.AlertConditionDAO;
+import org.hyperic.hq.events.server.session.AlertConditionLogDAO;
 import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
+import org.hyperic.hq.events.server.session.TriggerDAO;
 
 public abstract class DAOFactory
 {
@@ -112,10 +114,12 @@ public abstract class DAOFactory
     public abstract PrincipalDAO getPrincipalDAO();
 
     // Event DAOs
-    public abstract ActionDAO          getActionDAO();
-    public abstract AlertDefinitionDAO getAlertDefDAO();
-    public abstract AlertConditionDAO  getAlertConditionDAO();
-    public abstract TriggerDAO         getTriggerDAO();
+    public abstract ActionDAO            getActionDAO();
+    public abstract AlertDefinitionDAO   getAlertDefDAO();
+    public abstract AlertConditionDAO    getAlertConditionDAO();
+    public abstract TriggerDAO           getTriggerDAO();
+    public abstract AlertActionLogDAO    getAlertActionLogDAO();
+    public abstract AlertConditionLogDAO getAlertConditionLogDAO();
     
     // Common DAO
     public abstract ConfigPropertyDAO getConfigPropertyDAO();
