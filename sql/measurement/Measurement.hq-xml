@@ -40,21 +40,6 @@
     </property>
 
     <subclass name="DerivedMeasurement" extends="Measurement" discriminator-value="D">
-      <meta attribute="class-code"><![CDATA[
-      private Baseline baseline;
-      public void setBaseline(Baseline b)
-      {
-          if (b != null) {
-              b.setDerivedMeasurement(this);
-          }
-          this.baseline = b;
-      }
-
-      public Baseline getBaseline()
-      {
-          return this.baseline;
-      }
-      ]]></meta>
       <property name="enabled" type="boolean">
         <column name="ENABLED" not-null="true" dialect="PostgreSQL" default="true"/>
         <column name="ENABLED" not-null="true" dialect="Oracle, Oracle9" default="1"/>
@@ -65,11 +50,6 @@
       <property name="formula" type="string">
         <column name="DSN" length="500" />
       </property>
-      <one-to-one name="baseline" fetch="join" class="Baseline"
-                  property-ref="derivedMeasurement"
-                  cascade="save-update,delete,merge,evict" >
-        <meta attribute="gen-property">false</meta>
-      </one-to-one>
     </subclass>
 
     <subclass name="RawMeasurement" extends="Measurement" discriminator-value="R">
@@ -83,26 +63,6 @@
 
   <!-- one to N relationship with measurementBL measurement -->
   <class name="MeasurementTemplate" table="EAM_MEASUREMENT_TEMPL">
-    <meta attribute="class-code"><![CDATA[
-      public void addMeasurement(Measurement m)
-      {
-          Collection coll = getMeasurements();
-          if (m != null && coll != null) {
-              m.setTemplate(this);
-              coll.add(m);
-          }
-      }
-
-      public void addTemplateArg(MeasurementArg a)
-      {
-          Collection coll = getMeasurementArgs();
-          if (a != null && coll != null) {
-              a.setTemplateArg(this);
-              coll.add(a);
-          }
-      }
-    ]]></meta>
-
     <id name="id" type="integer">
       <meta attribute="use-in-equals">true</meta>
       <column name="ID" not-null="true" />
@@ -301,24 +261,6 @@
 
   <class name="ScheduleRevNum" table="EAM_SRN">
     <composite-id name="id" class="SrnId">
-      <meta attribute="use-in-equals">true</meta>
-      <meta attribute="class-code"><![CDATA[
-        public boolean equals(Object other)
-        {
-            if (this == other) return true;
-            if (other == null) return false;
-            if (!(other instanceof SrnId)) return false;
-            SrnId castOther = (SrnId)other;
-            return this.getAppdefType().intValue() == castOther.getAppdefType().intValue() &&
-                   this.getInstanceId().intValue() == castOther.getInstanceId().intValue();
-        }
-
-        public int hashCode()
-        {
-            return 17;
-        }
-      ]]></meta>
-
       <key-property name="appdefType" type="integer">
         <column name="APPDEF_TYPE" not-null="true" />
       </key-property>

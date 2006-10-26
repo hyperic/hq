@@ -239,24 +239,6 @@ public class MeasurementTemplate extends PersistedObject
         _measurementArgs = measurementArgs;
     }
 
-    public void addMeasurement(Measurement m)
-    {
-        Collection coll = getMeasurements();
-        if (m != null && coll != null) {
-            m.setTemplate(this);
-            coll.add(m);
-        }
-    }
-    
-    public void addTemplateArg(MeasurementArg a)
-    {
-        Collection coll = getMeasurementArgs();
-        if (a != null && coll != null) {
-            a.setTemplateArg(this);
-            coll.add(a);
-        }
-    }
-
     /**
      * Legacy EJB DTO pattern
      * @deprecated Use (this) MeasurementTemplate object instead

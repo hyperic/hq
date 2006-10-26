@@ -32,7 +32,6 @@ public class DerivedMeasurement extends Measurement
     private boolean _enabled;
     private long _interval;
     private String _formula;
-    private Baseline _baseline;
 
     // Constructors
     public DerivedMeasurement() {
@@ -67,18 +66,5 @@ public class DerivedMeasurement extends Measurement
     
     public void setFormula(String formula) {
         _formula = formula;
-    }
-
-    public void setBaseline(Baseline b)
-    {
-        if (b != null) {
-            b.setDerivedMeasurement(this);
-        }
-        _baseline = b;
-    }
-
-    public Baseline getBaseline()
-    {
-        return _baseline;
     }
 }
