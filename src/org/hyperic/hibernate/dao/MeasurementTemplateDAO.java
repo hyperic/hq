@@ -51,8 +51,16 @@ public class MeasurementTemplateDAO extends HibernateDAO
         return (MeasurementTemplate)super.findById(id);
     }
 
-    public void remove(MeasurementTemplate entity) {
-        super.remove(entity);
+    /**
+     * Remove a raw template and it's associated derived measurement
+     */
+    public void remove(MeasurementTemplate mt) {
+        // Lookup derived template
+        MeasurementTemplate dmt =  
+            findByArgAndTemplate(mt.getId(), 
+                                 MeasurementConstants.TEMPL_IDENTITY); 
+        super.remove(dmt);
+        super.remove(mt);
     }
 
     public MeasurementTemplate create(MeasurementTemplateLiteValue lite,
