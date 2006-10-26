@@ -24,10 +24,12 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.Session;
 import org.hyperic.hibernate.dao.HibernateDAO;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.shared.AlertDefinitionPK;
 
 public class AlertDefinitionDAO extends HibernateDAO {
@@ -63,17 +65,59 @@ public class AlertDefinitionDAO extends HibernateDAO {
             .list();
     }
     
-    public List findChildAlertDefinition(Integer id) {
-        String sql = "from AlertDefinition d where d.parent = ? AND " + 
+    /**
+     * Find all alert defs for a given appdef entity.  All the alert defs
+     * must be a child of the passed def
+     * @param ent      Entity to find alert defs for
+     * @param parentId ID of the parent
+     */
+    public List findChildAlertDefs(AppdefEntityID ent, Integer parentId){
+        String sql = "FROM AlertDefinition a WHERE " + 
+            "a.appdefType = :appdefType AND a.appdefId = :appdefId " +
+            "AND a.deleted = false AND a.parent = :parent";
+        
+        return getSession().createQuery(sql)
+            .setInteger("appdefType", ent.getType())
+            .setInteger("appdefId", ent.getID())
+            .setInteger("parent", parentId.intValue())
+            .list();
+    }
+
+    /**
+     * Find an alert definition where the ActOnTrigger is the passed value
+     * @param trigger Act On Trigger used by the alert def
+     */
+    public AlertDefinition getFromTrigger(RegisteredTrigger trigger) {
+        String sql = "FROM AlertDefinition a WHERE " +
+            "a.actOnTrigger = :trigger AND enabled = true AND deleted = false";
+
+        return (AlertDefinition)getSession().createQuery(sql)
+            .setParameter("trigger", trigger)
+            .uniqueResult();
+    }
+    
+    public List findChildAlertDefinitions(AlertDefinition def) {
+        String sql = "from AlertDefinition d where d.parent = :parent AND " + 
             "d.deleted = false";
 
         return getSession().createQuery(sql)
-            .setInteger(0, id.intValue())
+            .setParameter("parent", def)
             .list();
     }
-    
+
     public AlertDefinition findById(Integer id) {
         return (AlertDefinition)super.findById(id);
+    }
+    
+    public List findByAppdefEntityType(AppdefEntityID id) {
+        String sql = "from AlertDefinition a where a.appdefType = :aType " +
+            "and a.appdefId = :aId and a.deleted = false and " +
+            "a.parent = 0 order by a.name";
+        
+        return getSession().createQuery(sql)
+            .setInteger("aType", id.getType())
+            .setInteger("aId", id.getID())
+            .list();
     }
     
     void save(AlertDefinition alert) {

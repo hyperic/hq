@@ -25,7 +25,9 @@
 
 package org.hyperic.hq.events.server.session;
 
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.events.shared.AlertConditionLogValue;
 
 public class AlertConditionLog  
     extends PersistedObject
@@ -34,30 +36,60 @@ public class AlertConditionLog
     private Alert          _alert;
     private AlertCondition _condition;
 
+    private AlertConditionLogValue _valueObj;
+    
     protected AlertConditionLog() {
     }
 
-    public String getValue() {
+    protected String getValue() {
         return _value;
     }
     
-    public void setValue(String value) {
+    protected void setValue(String value) {
         _value = value;
     }
 
-    public Alert getAlert() {
+    protected Alert getAlert() {
         return _alert;
     }
     
-    public void setAlert(Alert alert) {
+    protected void setAlert(Alert alert) {
         _alert = alert;
     }
 
-    public AlertCondition getCondition() {
+    protected AlertCondition getCondition() {
         return _condition;
     }
     
-    public void setCondition(AlertCondition condition) {
+    protected void setCondition(AlertCondition condition) {
         _condition = condition;
+    }
+
+    public AlertConditionLogValue getAlertConditionLogValue() {
+      if (_valueObj == null) {
+          _valueObj = new AlertConditionLogValue();
+      }
+
+      _valueObj.setId(getId());
+      _valueObj.setValue(getValue() == null ? "" : getValue());
+      if (getCondition() != null)
+          _valueObj.setCondition(getCondition().getAlertConditionValue());
+      else
+          _valueObj.setCondition(null);
+
+      return _valueObj;
+    }
+
+    protected void setAlertConditionLogValue(AlertConditionLogValue val) {
+        setValue(val.getValue());
+        if (val.getCondition() != null) {
+            AlertConditionDAO acDAO = 
+                DAOFactory.getDAOFactory().getAlertConditionDAO();
+            AlertCondition ac = acDAO.findById(val.getCondition().getId());
+
+            setCondition(ac);
+        } else {
+            setCondition(null);
+        }
     }
 }

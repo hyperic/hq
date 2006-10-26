@@ -33,9 +33,10 @@ import java.util.Iterator;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hibernate.dao.ActionDAO;
-import org.hyperic.hibernate.dao.TriggerDAO;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
+import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 
@@ -46,6 +47,7 @@ public class AlertDefinition
     private long              _ctime;
     private long              _mtime;
     private AlertDefinition   _parent;
+    private Collection        _children;
     private String            _description;
     private int               _priority;  // XXX -- Needs to default to 1
     private int               _appdefId;
@@ -64,8 +66,8 @@ public class AlertDefinition
     private Collection        _actions = new ArrayList();
     private Collection        _alerts;    // List of fired alerts?  -- XXX
 
-    private AlertDefinitionValue _value;
-
+    private AlertDefinitionValue      _value;
+    private AlertDefinitionBasicValue _basicValue;
     
     protected AlertDefinition() {
     }
@@ -92,6 +94,14 @@ public class AlertDefinition
     
     protected void removeTrigger(RegisteredTrigger t) {
         _triggers.remove(t);
+    }
+
+    protected void clearActions() {
+        _actions.clear();
+    }
+    
+    protected void clearConditions() {
+        _conditions.clear();
     }
     
     protected void addCondition(AlertCondition c) {
@@ -142,6 +152,18 @@ public class AlertDefinition
         _parent = parent;
     }
 
+    public Collection getChildren() {
+        return Collections.unmodifiableCollection(_children);
+    }
+    
+    protected Collection getChildrenBag() {
+        return _children;
+    }
+    
+    protected void setChildrenBag(Collection c) {
+        _children = c;
+    }
+    
     public String getDescription() {
         return _description;
     }
@@ -298,6 +320,15 @@ public class AlertDefinition
         _triggers = triggers;
     }
     
+    public boolean isResourceTypeDefinition() {
+        return getParent() != null && 
+               getParent().getId().equals(new Integer(0));
+    }
+
+    public AppdefEntityID getAppdefEntityId() {
+        return new AppdefEntityID(getAppdefType(), getAppdefId());
+    }
+    
     public AlertDefinitionValue getAlertDefinitionValue() {
         if (_value == null)
             _value = new AlertDefinitionValue();
@@ -346,10 +377,8 @@ public class AlertDefinition
         return _value;
     }
 
-    protected void setAlertDefinitionValue(AlertDefinitionValue val) {
+    protected void setAlertDefinitionValueNoRels(AlertDefinitionValue val) {
         AlertDefinitionDAO aDAO = DAOFactory.getDAOFactory().getAlertDefDAO();
-        AlertConditionDAO cDAO = DAOFactory.getDAOFactory().getAlertConditionDAO();
-        ActionDAO actDAO = DAOFactory.getDAOFactory().getActionDAO();
         TriggerDAO tDAO = DAOFactory.getDAOFactory().getTriggerDAO();
         
         setName(val.getName());
@@ -370,6 +399,14 @@ public class AlertDefinition
         setRange(val.getRange());
         setActOnTrigger(tDAO.findById(new Integer(val.getActOnTriggerId())));
         setDeleted(val.getDeleted());
+    }
+
+    protected void setAlertDefinitionValue(AlertDefinitionValue val) {
+        AlertConditionDAO cDAO = DAOFactory.getDAOFactory().getAlertConditionDAO();
+        ActionDAO actDAO = DAOFactory.getDAOFactory().getActionDAO();
+        TriggerDAO tDAO = DAOFactory.getDAOFactory().getTriggerDAO();
+        
+        setAlertDefinitionValueNoRels(val);
 
         for (Iterator i=val.getAddedTriggers().iterator(); i.hasNext(); ) {
             RegisteredTriggerValue tVal = (RegisteredTriggerValue)i.next();
@@ -412,5 +449,53 @@ public class AlertDefinition
             
             removeAction(a);
         }
+    }
+    
+    protected AlertDefinitionBasicValue getAlertDefinitionBasicValue() {
+        if (_basicValue == null) {
+            _basicValue = new AlertDefinitionBasicValue();
+        }
+
+        _basicValue.setId(getId());
+        _basicValue.setName(getName() == null ? "" : getName());
+        _basicValue.setCtime(getCtime());
+        _basicValue.setMtime(getMtime());        
+        _basicValue.setParentId(getParent() == null ? null : 
+                                getParent().getId());
+        _basicValue.setDescription(getDescription());
+        _basicValue.setEnabled(isEnabled());
+        _basicValue.setWillRecover(isWillRecover());
+        _basicValue.setNotifyFiltered(isNotifyFiltered());
+        _basicValue.setControlFiltered(isControlFiltered());
+        _basicValue.setPriority(getPriority());
+        _basicValue.setAppdefId(getAppdefId());
+        _basicValue.setAppdefType(getAppdefType());
+        _basicValue.setFrequencyType(getFrequencyType());
+        _basicValue.setCount(getCount());
+        _basicValue.setRange(getRange());
+        _basicValue.setActOnTriggerId(getActOnTrigger().getId().intValue());
+        _basicValue.setDeleted(isDeleted());
+
+        _basicValue.removeAllTriggers();
+        for (Iterator i=getTriggers().iterator(); i.hasNext(); ) {
+            RegisteredTrigger t = (RegisteredTrigger)i.next();
+            _basicValue.addTrigger(t.getRegisteredTriggerValue());
+        }
+        _basicValue.cleanTrigger();
+
+        _basicValue.removeAllConditions();
+        for (Iterator i=getConditions().iterator(); i.hasNext(); ) {
+            AlertCondition c = (AlertCondition)i.next();
+            _basicValue.addCondition(c.getAlertConditionValue());
+        }
+        _basicValue.cleanCondition();
+        
+        _basicValue.removeAllActions();
+        for (Iterator i=getActions().iterator(); i.hasNext(); ) {
+            Action a = (Action)i.next();
+            _basicValue.addAction(a.getActionValue());
+        }
+        _basicValue.cleanAction();
+        return _basicValue;
     }
 }

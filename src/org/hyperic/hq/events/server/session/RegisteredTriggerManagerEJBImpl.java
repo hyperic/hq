@@ -34,7 +34,6 @@ import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hibernate.dao.TriggerDAO;
 import org.hyperic.hq.events.ext.RegisteredTriggerEvent;
 import org.hyperic.hq.events.shared.RegisteredTriggerPK;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
@@ -55,7 +54,11 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
     private TriggerDAO getTriggerDAO(){
         return DAOFactory.getDAOFactory().getTriggerDAO();
     }
-    
+
+    private AlertDefinitionDAO getAlertDefDAO(){
+        return DAOFactory.getDAOFactory().getAlertDefDAO();
+    }
+
     private RegisteredTrigger getRegisteredTrigger(Integer trigId) {
         return getTriggerDAO().findByPrimaryKey(new RegisteredTriggerPK(trigId));
     }
@@ -135,7 +138,8 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
      * @ejb:transaction type="REQUIRED"
      */
     public void deleteAlertDefinitionTriggers(Integer adId) {
-        Collection triggers = getTriggerDAO().findTriggersByAlertDef(adId);
+        AlertDefinition def = getAlertDefDAO().findById(adId);
+        Collection triggers = new ArrayList(def.getTriggers());
         RegisteredTriggerValue[] vals =
             new RegisteredTriggerValue[triggers.size()];
 

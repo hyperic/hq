@@ -25,7 +25,10 @@
 
 package org.hyperic.hq.events.server.session;
 
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hibernate.dao.ActionDAO;
+import org.hyperic.hq.events.shared.AlertActionLogValue;
 
 public class AlertActionLog  
     extends PersistedObject
@@ -34,30 +37,53 @@ public class AlertActionLog
     private Alert  _alert;
     private Action _action;
 
+    private AlertActionLogValue _valueObj;
+
+    
     protected AlertActionLog() {
     }
    
-    public String getDetail() {
+    protected String getDetail() {
         return _detail;
     }
     
-    public void setDetail(String detail) {
+    protected void setDetail(String detail) {
         _detail = detail;
     }
     
-    public Alert getAlert() {
+    protected Alert getAlert() {
         return _alert;
     }
     
-    public void setAlert(Alert alert) {
+    protected void setAlert(Alert alert) {
         _alert = alert;
     }
     
-    public Action getAction() {
+    protected Action getAction() {
         return _action;
     }
     
-    public void setAction(Action action) {
+    protected void setAction(Action action) {
         _action = action;
+    }
+    
+    public AlertActionLogValue getAlertActionLogValue() {
+        if (_valueObj == null) {
+            _valueObj = new AlertActionLogValue();
+        }
+
+        _valueObj.setId(getId());
+        _valueObj.setDetail(getDetail() == null ? "" : getDetail());
+        _valueObj.setActionId(getAction().getId());
+        return _valueObj;
+    }
+
+    protected void setAlertActionLogValue(AlertActionLogValue val) {
+        ActionDAO aDao = DAOFactory.getDAOFactory().getActionDAO();
+        Action action;
+
+        action = aDao.findById(val.getActionId());
+        setDetail(val.getDetail());
+        setAction(action);
     }
 }

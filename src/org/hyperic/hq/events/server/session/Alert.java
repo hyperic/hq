@@ -27,8 +27,13 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.events.shared.AlertActionLogValue;
+import org.hyperic.hq.events.shared.AlertConditionLogValue;
+import org.hyperic.hq.events.shared.AlertValue;
 
 public class Alert 
     extends PersistedObject
@@ -38,6 +43,8 @@ public class Alert
     private Collection      _actions;
     private Collection      _conditions;
     private Collection      _userAlerts;
+
+    private AlertValue      _alertVal;
 
     protected Alert() {
     }
@@ -70,6 +77,14 @@ public class Alert
         _actions = actions;
     }
     
+    private void addActionLog(AlertActionLog aal) {
+        _actions.add(aal);
+    }
+    
+    private void removeActionLog(AlertActionLog aal) {
+        _actions.remove(aal);
+    }
+
     public Collection getConditions() {
         return Collections.unmodifiableCollection(_conditions);
     }
@@ -82,6 +97,14 @@ public class Alert
         _conditions = conditions;
     }
     
+    private void addConditionLog(AlertConditionLog acl) {
+        _conditions.add(acl);
+    }
+    
+    private void removeConditionLog(AlertConditionLog acl) {
+        _conditions.remove(acl);
+    }
+    
     public Collection getUserAlerts() {
         return Collections.unmodifiableCollection(_userAlerts);
     }
@@ -92,5 +115,69 @@ public class Alert
     
     protected void setUserAlertsBag(Collection userAlerts) {
         _userAlerts = userAlerts;
+    }
+    
+
+    public org.hyperic.hq.events.shared.AlertValue getAlertValue() {
+        if (_alertVal == null) 
+            _alertVal = new AlertValue();
+
+        _alertVal.setId(getId());
+        _alertVal.setAlertDefId(getAlertDef().getId());
+        _alertVal.setCtime(getCtime());
+
+        _alertVal.removeAllConditionLogs();
+      
+        for (Iterator i=getConditions().iterator(); i.hasNext(); ) {
+            AlertConditionLog l = (AlertConditionLog)i.next();
+          
+            _alertVal.addConditionLog(l.getAlertConditionLogValue());
+        }
+        _alertVal.cleanConditionLog();
+
+        _alertVal.removeAllActionLogs();
+        for (Iterator i=getActions().iterator(); i.hasNext(); ) {
+            AlertActionLog l = (AlertActionLog)i.next();
+          
+            _alertVal.addActionLog(l.getAlertActionLogValue());
+        }
+        _alertVal.cleanActionLog();
+      
+        return _alertVal;
+    }
+
+    protected void setAlertValue(AlertValue val) {
+        DAOFactory daoFactory = DAOFactory.getDAOFactory();
+        AlertDefinitionDAO aDao = daoFactory.getAlertDefDAO();
+        AlertDefinition def = aDao.findById(val.getAlertDefId());
+        AlertActionLogDAO alDao = daoFactory.getAlertActionLogDAO();
+        AlertConditionLogDAO aclDao = daoFactory.getAlertConditionLogDAO();
+        
+        setAlertDef(def);
+        setCtime(val.getCtime());
+
+        for (Iterator i=val.getAddedConditionLogs().iterator(); i.hasNext(); ){
+            AlertConditionLogValue lv = (AlertConditionLogValue)i.next();
+
+            addConditionLog(aclDao.findById(lv.getId()));
+        }
+        
+        for (Iterator i=val.getRemovedConditionLogs().iterator(); i.hasNext();){
+            AlertConditionLogValue lv = (AlertConditionLogValue)i.next();
+
+            removeConditionLog(aclDao.findById(lv.getId()));
+        }
+
+        for (Iterator i=val.getAddedActionLogs().iterator(); i.hasNext(); ) {
+            AlertActionLogValue lv = (AlertActionLogValue)i.next();
+            
+            addActionLog(alDao.findById(lv.getId()));
+        }
+        
+        for (Iterator i=val.getRemovedActionLogs().iterator(); i.hasNext(); ) {
+            AlertActionLogValue lv = (AlertActionLogValue)i.next();
+            
+            removeActionLog(alDao.findById(lv.getId()));
+        }
     }
 }

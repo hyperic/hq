@@ -30,7 +30,6 @@ import java.util.Collections;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hibernate.dao.TriggerDAO;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 
 public class AlertCondition  

@@ -50,13 +50,13 @@ public class PagerProcessor_events implements PagerProcessor {
             return null;
         }
         try {
-            if ( o instanceof AlertLocal ) {
+            if ( o instanceof Alert) {
                 if(debug) {
                     log.debug("PagerProcessor_dm: ZZZZ processElement converting AlertLocal to value object");
                 }
-                return ((AlertLocal) o).getAlertValue();
+                return ((Alert) o).getAlertValue();
             }
-            else if ( o instanceof AlertDefinitionLocal ) {
+            else if ( o instanceof AlertDefinition) {
                 if(debug) {
                     log.debug("PagerProcessor_dm: ZZZZ processElement converting AlertDefinitionLocal to value object");
                 }
