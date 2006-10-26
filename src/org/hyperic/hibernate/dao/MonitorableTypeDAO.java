@@ -44,18 +44,6 @@ public class MonitorableTypeDAO extends HibernateDAO
         return (MonitorableType)super.findById(id);
     }
 
-    public void evict(MonitorableType entity) {
-        super.evict(entity);
-    }
-
-    public MonitorableType merge(MonitorableType entity) {
-        return (MonitorableType)super.merge(entity);
-    }
-
-    public void save(MonitorableType entity) {
-        super.save(entity);
-    }
-
     public void remove(MonitorableType entity) {
         super.remove(entity);
     }

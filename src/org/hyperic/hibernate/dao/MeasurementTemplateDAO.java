@@ -51,18 +51,6 @@ public class MeasurementTemplateDAO extends HibernateDAO
         return (MeasurementTemplate)super.findById(id);
     }
 
-    public void evict(MeasurementTemplate entity) {
-        super.evict(entity);
-    }
-
-    public MeasurementTemplate merge(MeasurementTemplate entity) {
-        return (MeasurementTemplate)super.merge(entity);
-    }
-
-    public void save(MeasurementTemplate entity) {
-        super.save(entity);
-    }
-
     public void remove(MeasurementTemplate entity) {
         super.remove(entity);
     }
