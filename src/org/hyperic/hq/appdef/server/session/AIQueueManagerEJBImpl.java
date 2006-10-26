@@ -64,6 +64,7 @@ import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -675,7 +676,7 @@ public class AIQueueManagerEJBImpl
         // the same platform.  In the future, we are probably going
         // to need to do better.
         for (Iterator i = ips.iterator(); i.hasNext(); ) {
-            AIIp qip = (AIIp) i.next();
+            Ip qip = (Ip) i.next();
             
             String address = qip.getAddress();
             // XXX This is a hack that we need to get rid of
@@ -689,8 +690,8 @@ public class AIQueueManagerEJBImpl
                     i.hasNext()) {
                 continue;
             }
-                
-            AIPlatform aiplatform = qip.getAIPlatform();
+            AIIp addr = getAIIpDAO().findByAddress(address);
+            AIPlatform aiplatform = addr.getAIPlatform();
             return aiplatform.getAIPlatformValue();
         }
 
