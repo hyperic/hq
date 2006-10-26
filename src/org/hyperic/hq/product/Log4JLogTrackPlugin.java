@@ -67,7 +67,7 @@ public class Log4JLogTrackPlugin
                 String level = (String)it.next();
                 int idx;
                 if ((idx = line.indexOf(level)) != -1) {
-                    this.level = line.substring(idx, line.indexOf(' ', idx));
+                    this.level = line.substring(idx, idx + level.length());
                     this.message = line;
                     
                     return true;
