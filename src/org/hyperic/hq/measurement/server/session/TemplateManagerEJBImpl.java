@@ -49,6 +49,13 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.hibernate.Session;
+import org.hibernate.id.IdentifierGenerator;
+import org.hibernate.impl.SessionFactoryImpl;
+import org.hibernate.impl.SessionImpl;
+import org.hyperic.hibernate.Util;
+import org.hyperic.hibernate.dao.MeasurementTemplateDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -56,35 +63,29 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.measurement.Category;
+import org.hyperic.hq.measurement.MeasurementArg;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.MeasurementTemplate;
+import org.hyperic.hq.measurement.MonitorableType;
 import org.hyperic.hq.measurement.SRNCreateException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.server.mbean.SRNCache;
-import org.hyperic.hq.measurement.shared.CategoryLocal;
-import org.hyperic.hq.measurement.shared.CategoryLocalHome;
-import org.hyperic.hq.measurement.shared.CategoryUtil;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementLocalHome;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementUtil;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
-import org.hyperic.hq.measurement.shared.MeasurementArgLocal;
 import org.hyperic.hq.measurement.shared.MeasurementArgValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateLiteValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateLocal;
 import org.hyperic.hq.measurement.shared.MeasurementTemplatePK;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
-import org.hyperic.hq.measurement.shared.MonitorableTypeLocal;
-import org.hyperic.hq.measurement.shared.MonitorableTypeLocalHome;
-import org.hyperic.hq.measurement.shared.MonitorableTypeUtil;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerUtil;
 import org.hyperic.hq.measurement.shared.ScheduleRevNumValue;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.TypeInfo;
-import org.hyperic.util.ConfigPropertyException;
-import org.hyperic.util.jdbc.DBUtil;
-import org.hyperic.util.jdbc.IDGeneratorFactory;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -109,17 +110,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         
     private Pager valuePager = null;
 
-    MonitorableTypeLocalHome mtHome = null;
-    private MonitorableTypeLocalHome getMTHome() {
-        try {
-            if (mtHome == null)
-                mtHome = MonitorableTypeUtil.getLocalHome();
-            return mtHome;
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-    }
-    
     RawMeasurementManagerLocal rmMan = null;
     private RawMeasurementManagerLocal getRmMan() {
         try {
@@ -134,25 +124,8 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
-     * Create a RawMeasurement Template
-     *
-     * @return a MeasurementTemplate ID
-     * @ejb:interface-method
-     */
-    public MeasurementTemplateValue createTemplate(AuthzSubjectValue subject,
-                                                   String name, String alias,
-                                                   String type, String template)
-        throws FinderException, CreateException {
-        return createTemplate(subject, name, alias, type,
-                              (String)null, template, 
-                              MeasurementConstants.UNITS_NONE, 
-                              MeasurementConstants.COLL_TYPE_DYNAMIC,
-                              (MeasurementArgValue[])null);
-    }
-
-    /**
      * Create a DerivedMeasurement Template
-     *
+     * @todo This needs to support Designate and DefaultOn
      * @return a MeasurementTemplate ID
      * @ejb:interface-method
      */
@@ -165,55 +138,38 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                                                    int collectionType,
                                                    MeasurementArgValue[] args)
         throws CreateException {
-        try {
-            // Get the MonitorableType
-            MonitorableTypeLocal t = this.getMTHome().findByName(type);
 
-            // get the category
-            CategoryLocal catLoc = null;
-            if (catName!=null) {
-                CategoryLocalHome cHome = CategoryUtil.getLocalHome();
-                catLoc = cHome.findByName(catName);
-            }
-
-            ArrayList lis = null;
-
-            if (args != null) {
-                // First create the LineItems
-                lis = new ArrayList();
-                for (int i = 0; i < args.length; i++) {
-                    MeasurementTemplatePK pk =
-                        new MeasurementTemplatePK(args[i].getId());
-
-                    MeasurementTemplateLocal arg =
-                        getMtHome().findByPrimaryKey(pk);
-
-                    // Create the line item
-                    MeasurementArgLocal li =
-                        getLiHome().create(new Integer(i+1), arg,
-                                           args[i].getTicks(),
-                                           args[i].getWeight(),
-                                           args[i].getPrevious());
-                    lis.add(li);
-                }
-            }
-
-            // create
-            MeasurementTemplateLiteValue lite =
-                new MeasurementTemplateLiteValue(null, name, alias, units, 
-                           collectionType, false, 
-                           MeasurementConstants.INTERVAL_DEFAULT_MILLIS,
-                           false, template, null, null);
-            MeasurementTemplateLocal mt = getMtHome().create(lite, t, catLoc,
-                                                             lis);
-            return mt.getMeasurementTemplateValue();
-        } catch (NamingException e) {
-            log.debug("NamingException", e);
-            throw new CreateException("NamingException: " + e);
-        } catch (FinderException e) {
-            log.debug("FinderException", e);
-            throw new CreateException("FinderException: " + e);
+        MonitorableType t = getMonitorableTypeDAO().findByName(type);
+        Category cat = null;
+        if (catName != null) { 
+           cat = getCategoryDAO().findByName(catName);
         }
+        
+        ArrayList lis = null;
+            
+        if (args != null) {
+            lis = new ArrayList();
+            for (int i = 0; i < args.length; i++) {
+                MeasurementTemplate arg =
+                    getMeasurementTemplateDAO().findById(args[i].getId());
+                MeasurementArg li =
+                    getMeasurementArgDAO().create(new Integer(i+1), arg,
+                                                  args[i].getTicks(),
+                                                  args[i].getWeight(),
+                                                  args[i].getPrevious());
+                lis.add(li);
+            }
+        }
+        
+        MeasurementTemplateLiteValue lite =
+            new MeasurementTemplateLiteValue(null, name, alias, units, 
+                                             collectionType, false, 
+                                             MeasurementConstants.
+                                             INTERVAL_DEFAULT_MILLIS,
+                                             false, template, null, null);
+        MeasurementTemplate mt =
+            getMeasurementTemplateDAO().create(lite, t, cat, lis);
+        return mt.getMeasurementTemplateValue();
     }
 
     /**
@@ -221,50 +177,10 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      *
      * @return a MeasurementTemplate value
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
-    public MeasurementTemplateValue getTemplate(Integer tmplId)
-        throws TemplateNotFoundException {
-        try {
-            MeasurementTemplateLocal mt =
-                getMtHome().findByPrimaryKey(new MeasurementTemplatePK(tmplId));
-            return mt.getMeasurementTemplateValue();
-        } catch (FinderException e) {
-            throw new TemplateNotFoundException(tmplId, e);
-        }
-    }
-
-    /**
-     * Look up a measurement template (for testing)
-     *
-     * @return a MeasurementTemplate value
-     * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
-     */
-    public MeasurementTemplateValue findTemplate(String name, boolean derived) {
-        try {
-            Collection tmpls = getMtHome().findByName(name);
-            for (Iterator it = tmpls.iterator(); it.hasNext(); ) {
-                MeasurementTemplateLocal mt =
-                    (MeasurementTemplateLocal) it.next();
-                    
-                if (derived) {
-                    if (mt.getMeasurementArgs() != null &&
-                        mt.getMeasurementArgs().size() > 0)
-                        return mt.getMeasurementTemplateValue();
-                }
-                else {
-                    if (mt.getMeasurementArgs() == null ||
-                        mt.getMeasurementArgs().size() == 0)
-                        return mt.getMeasurementTemplateValue();
-                }
-            }
-        } catch (FinderException e) {
-            // Not a problem
-            log.debug("FinderException", e);
-        }
-    
-        return null;
+    public MeasurementTemplateValue getTemplate(Integer id) {
+       MeasurementTemplate m = getMeasurementTemplateDAO().findById(id);
+       return m.getMeasurementTemplateValue();
     }
 
     /**
@@ -274,12 +190,11 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      * @return a MeasurementTemplate value
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public PageList getTemplates(Integer[] ids, PageControl pc)
         throws TemplateNotFoundException {
-        List mts = this.findTemplates(ids);
-        
+        List mts = getMeasurementTemplateDAO().findTemplates(ids);
+
         if (ids.length != mts.size())
             throw new TemplateNotFoundException("Could not look up " + ids);
 
@@ -290,161 +205,127 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
-     * Look up a measurement templates for an array of template IDs
-     *
-     * @return a list of MeasurementTemplate values
-     * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
-     */
-    public List findTemplates(Integer[] ids) {
-        try {
-            Collection locals = this.getMtHome().findByIds(ids);
-            return valuePager.seek(locals, PageControl.PAGE_ALL);
-        } catch (FinderException e) {
-            return new ArrayList(0);
-        }
-    }
-
-    /**
-     * Look up a measurement templates for a monitorable
-     * and agent type.  All resources must have measurement templates.
-     * otherwise, throw FinderException
-     *
-     * @throws FinderException if no measurement templates are found.
+     * Look up a measurement templates for a monitorable type and
+     * category.
      *
      * @return a MeasurementTemplate value
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public PageList findTemplates(String type, String cat,
                                   Integer[] excludeIds, PageControl pc) {
-        try {
-            List mts;
-            if (cat == null || Arrays.binarySearch(
-                MeasurementConstants.VALID_CATEGORIES, cat) < 0) {
-                mts = this.getMtHome().findDerivedByMonitorableType(type);
-            } else {
-                mts = this.getMtHome().findDerivedByMonitorableTypeAndCategory(
-                    type, cat);
-            }
+        MeasurementTemplateDAO dao = getMeasurementTemplateDAO();
 
-            // Create a HashSet of the excludes
-            List includes;
-            if (excludeIds == null) {
-                includes = mts;
-            }
-            else {
-                HashSet excludes = new HashSet(Arrays.asList(excludeIds));
-                includes = new ArrayList();
-                for (Iterator it = mts.iterator(); it.hasNext(); ) {
-                    MeasurementTemplateLocal tmpl =
-                        (MeasurementTemplateLocal) it.next();
-                    if (!excludes.contains(tmpl.getId()))
-                        includes.add(tmpl);
-                }
-            }
-            
-            // init defaults, not using sort column
-            pc = PageControl.initDefaults(pc, -1);
-            if (pc.getSortorder() == PageControl.SORT_DESC)
-                Collections.reverse(includes);
-            
-            return valuePager.seek(includes, pc);
+        List templates;
+        if (cat == null) {
+            templates = dao.findTemplatesByMonitorableType(type);
+        } else {
+            templates = dao.findTemplatesByMonitorableTypeAndCategory(type,
+                                                                      cat);
         }
-        catch (FinderException e) {
-            // Not a problem
-            log.debug("No templates found for " + type, e);
+
+        if (templates == null) {
             return new PageList();
         }
+
+        // Handle excludes
+        List includes;
+        if (excludeIds == null) {
+            includes = templates;
+        } else {
+            HashSet excludes = new HashSet(Arrays.asList(excludeIds));
+            includes = new ArrayList();
+            for (Iterator it = templates.iterator(); it.hasNext(); ) {
+                MeasurementTemplate tmpl =
+                    (MeasurementTemplate)it.next();
+                if (!excludes.contains(tmpl.getId()))
+                    includes.add(tmpl);
+            }
+        }
+        
+        pc = PageControl.initDefaults(pc, -1);
+        if (pc.getSortorder() == PageControl.SORT_DESC)
+            Collections.reverse(includes);
+        
+        return valuePager.seek(includes, pc);
     }
 
     /**
      * Look up a measurement templates for a monitorable type and filtered
      * by categories and keyword.
      *
-     * @throws FinderException if no measurement templates are found.
      * @return a MeasurementTemplate value
-     * 
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public List findTemplates(String type, long filters, String keyword) {
-        try {
-            List mts;
+        MeasurementTemplateDAO dao = getMeasurementTemplateDAO();
+        List mts;
             
-            if ((filters & MeasurementConstants.FILTER_AVAIL) == 0 ||
-                (filters & MeasurementConstants.FILTER_UTIL)  == 0 ||
-                (filters & MeasurementConstants.FILTER_THRU)  == 0 ||
-                (filters & MeasurementConstants.FILTER_PERF)  == 0) {
-                mts = new ArrayList();
+        if ((filters & MeasurementConstants.FILTER_AVAIL) == 0 ||
+            (filters & MeasurementConstants.FILTER_UTIL)  == 0 ||
+            (filters & MeasurementConstants.FILTER_THRU)  == 0 ||
+            (filters & MeasurementConstants.FILTER_PERF)  == 0) {
+            mts = new ArrayList();
                 
-                // Go through each filter
-                if ((filters & MeasurementConstants.FILTER_AVAIL) > 0) 
-                    mts.addAll(this.getMtHome()
-                        .findDerivedByMonitorableTypeAndCategory(
-                            type, MeasurementConstants.CAT_AVAILABILITY));
-
-                if ((filters & MeasurementConstants.FILTER_UTIL) > 0) 
-                    mts.addAll(this.getMtHome()
-                        .findDerivedByMonitorableTypeAndCategory(
-                            type, MeasurementConstants.CAT_UTILIZATION));
-
-                if ((filters & MeasurementConstants.FILTER_THRU) > 0) 
-                    mts.addAll(this.getMtHome()
-                        .findDerivedByMonitorableTypeAndCategory(
-                            type, MeasurementConstants.CAT_THROUGHPUT));
-
-                if ((filters & MeasurementConstants.FILTER_PERF) > 0) 
-                    mts.addAll(this.getMtHome()
-                        .findDerivedByMonitorableTypeAndCategory(
-                            type, MeasurementConstants.CAT_PERFORMANCE));
+            // Go through each filter
+            if ((filters & MeasurementConstants.FILTER_AVAIL) > 0) {
+                mts.addAll(dao.findTemplatesByMonitorableTypeAndCategory(type,
+                               MeasurementConstants.CAT_AVAILABILITY));
             }
-            else {
-                mts = this.getMtHome().findDerivedByMonitorableType(type);
+            if ((filters & MeasurementConstants.FILTER_UTIL) > 0) {
+                mts.addAll(dao.findTemplatesByMonitorableTypeAndCategory(type,
+                               MeasurementConstants.CAT_UTILIZATION));
             }
-    
-            // Now check the other filter types
-            for (Iterator it = mts.iterator(); it.hasNext(); ) {
-                MeasurementTemplateLocal tmpl =
-                    (MeasurementTemplateLocal) it.next();
-
-                // First, keyword
-                if (keyword != null && keyword.length() > 0) {
-                    if (tmpl.getName().indexOf(keyword) < 0) {
-                        it.remove();
-                        continue;
-                    }
-                }
-
-                switch (tmpl.getCollectionType()) {
-                    case MeasurementConstants.COLL_TYPE_DYNAMIC:
-                        if ((filters & MeasurementConstants.FILTER_DYN) == 0)
-                            it.remove();
-                        break;
-                    case MeasurementConstants.COLL_TYPE_STATIC:
-                        if ((filters & MeasurementConstants.FILTER_STATIC) == 0)
-                            it.remove();
-                        break;
-                    case MeasurementConstants.COLL_TYPE_TRENDSUP:
-                        if ((filters&MeasurementConstants.FILTER_TREND_UP) == 0)
-                            it.remove();
-                        break;
-                    case MeasurementConstants.COLL_TYPE_TRENDSDOWN:
-                        if ((filters&MeasurementConstants.FILTER_TREND_DN) == 0)
-                            it.remove();
-                        break;
-                    default:
-                        break;
-                }
+            if ((filters & MeasurementConstants.FILTER_THRU) > 0) {
+                mts.addAll(dao.findTemplatesByMonitorableTypeAndCategory(type,
+                               MeasurementConstants.CAT_THROUGHPUT));
             }
-
-            return valuePager.seek(mts, PageControl.PAGE_ALL);
+            if ((filters & MeasurementConstants.FILTER_PERF) > 0) {
+                mts.addAll(dao.findTemplatesByMonitorableTypeAndCategory(type,
+                               MeasurementConstants.CAT_PERFORMANCE));
+            }
+        } else {
+            mts = dao.findTemplatesByMonitorableType(type);
         }
-        catch (FinderException e) {
-            // Not a problem
-            log.debug("No templates found for " + type, e);
+
+        if (mts == null) {
             return new PageList();
         }
+    
+        // Check filter types
+        for (Iterator it = mts.iterator(); it.hasNext(); ) {
+            MeasurementTemplate tmpl = (MeasurementTemplate)it.next();
+
+            // First, keyword
+            if (keyword != null && keyword.length() > 0) {
+                if (tmpl.getName().indexOf(keyword) < 0) {
+                    it.remove();
+                    continue;
+                }
+            }
+
+            switch (tmpl.getCollectionType()) {
+            case MeasurementConstants.COLL_TYPE_DYNAMIC:
+                if ((filters & MeasurementConstants.FILTER_DYN) == 0)
+                    it.remove();
+                break;
+            case MeasurementConstants.COLL_TYPE_STATIC:
+                if ((filters & MeasurementConstants.FILTER_STATIC) == 0)
+                    it.remove();
+                break;
+            case MeasurementConstants.COLL_TYPE_TRENDSUP:
+                if ((filters&MeasurementConstants.FILTER_TREND_UP) == 0)
+                    it.remove();
+                break;
+            case MeasurementConstants.COLL_TYPE_TRENDSDOWN:
+                if ((filters&MeasurementConstants.FILTER_TREND_DN) == 0)
+                    it.remove();
+                break;
+            default:
+                break;
+            }
+        }
+        
+        return valuePager.seek(mts, PageControl.PAGE_ALL);
     }
 
     /**
@@ -452,21 +333,20 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      *
      * @return an array of ID values
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public Integer[] findTemplateIds(String type) {
-        List mts;
-        try {
-            mts = this.getMtHome().findDerivedByMonitorableType(type);
-        } catch (FinderException e) {
-            // No templates found for this type
+        List mts = getMeasurementTemplateDAO().
+            findTemplatesByMonitorableType(type);
+
+        if (mts == null) {
             return new Integer[0];
         }
+
         Integer[] ids = new Integer[mts.size()];
         Iterator it = mts.iterator();
         for (int i = 0; it.hasNext(); i++) {
-            MeasurementTemplateLocal tmpl =
-                (MeasurementTemplateLocal) it.next();
+            MeasurementTemplate tmpl =
+                (MeasurementTemplate) it.next();
             ids[i] = tmpl.getId();
         }
         return ids;
@@ -478,22 +358,19 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      *
      * @return a MeasurementTemplate value
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public List findDefaultTemplates(String mtype, int atype) {
-        ArrayList mtList = new ArrayList();
-        try {
-            Collection mts =
-                getMtHome().findDefaultsByMonitorableType(mtype, atype);
-            for (Iterator i = mts.iterator(); i.hasNext();) {
-                MeasurementTemplateLocal mt =
-                    (MeasurementTemplateLocal) i.next();
-                mtList.add(mt.getMeasurementTemplateValue());
-            }
+        List mts = getMeasurementTemplateDAO().
+            findDefaultsByMonitorableType(mtype, atype);
+        if (mts == null) {
+            return new ArrayList();
         }
-        catch (FinderException e) {
-            // Not a problem
-            log.debug("No default templates found for " + mtype, e);
+        
+        ArrayList mtList = new ArrayList();
+        for (Iterator i = mts.iterator(); i.hasNext();) {
+            MeasurementTemplate mt =
+                (MeasurementTemplate)i.next();
+            mtList.add(mt.getMeasurementTemplateValue());
         }
         return mtList;
     }
@@ -504,22 +381,19 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      *
      * @return a MeasurementTemplate value
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public List findDesignatedTemplates(String mtype, int atype) {
-        ArrayList mtList = new ArrayList();
-        try {
-            Collection mts =
-                getMtHome().findDesignatedByMonitorableType(mtype, atype);
-            for (Iterator i = mts.iterator(); i.hasNext();) {
-                MeasurementTemplateLocal mt =
-                    (MeasurementTemplateLocal) i.next();
-                mtList.add(mt.getMeasurementTemplateValue());
-            }
+        List mts = getMeasurementTemplateDAO().
+            findDesignatedByMonitorableType(mtype, atype);
+        if (mts == null) {
+            return new ArrayList();
         }
-        catch (FinderException e) {
-            // Not a problem
-            log.debug("No default templates found for " + mtype, e);
+        
+        ArrayList mtList = new ArrayList();
+        for (Iterator i = mts.iterator(); i.hasNext();) {
+            MeasurementTemplate mt =
+                (MeasurementTemplate)i.next();
+            mtList.add(mt.getMeasurementTemplateValue());
         }
         return mtList;
     }
@@ -527,27 +401,19 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
     /** List of all monitorable types
      * @return List of monitorable types
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public List findMonitorableTypes() {
-        List retVal = new ArrayList();
-        try {
-            Collection types = this.getMTHome().findAll();
-            for (Iterator i = types.iterator(); i.hasNext(); ) {
-                MonitorableTypeLocal mtl = (MonitorableTypeLocal) i.next();
-                retVal.add(mtl.getMonitorableTypeValue());
-            }
-        } catch (FinderException e) {
-            // No problem
+        List monitorableTypes = new ArrayList();
+
+        Collection types = getMonitorableTypeDAO().findAll();
+        for (Iterator i = types.iterator(); i.hasNext(); ) {
+            MonitorableType mt = (MonitorableType)i.next();
+            monitorableTypes.add(mt.getMonitorableTypeValue());
         }
-        return retVal;
+        return monitorableTypes;
     }
 
     private void removeMeasurements(Integer tmplId) throws RemoveException {
-        if (log.isDebugEnabled())
-            log.debug("removeMeasurements() for " + tmplId);
-
-        // Remove the measurement instances in a new transaction
         this.getRmMan().removeMeasurements(tmplId);
     }
 
@@ -557,17 +423,9 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      * @return a MeasurementTemplate value
      * @ejb:interface-method
      */
-    public void removeTemplate(AuthzSubjectValue subject, Integer tid)
-        throws RemoveException {
-        try {
-            // Look up template
-            MeasurementTemplateLocal t =
-                getMtHome().findByPrimaryKey(new MeasurementTemplatePK(tid));
-            t.remove();
-        } catch (FinderException e) {
-            // Not a problem
-            log.debug("FinderException", e);
-        }
+    public void removeTemplate(AuthzSubjectValue subject, Integer tid) {
+        MeasurementTemplate t = getMeasurementTemplateDAO().findById(tid);
+        getMeasurementTemplateDAO().remove(t);
     }
 
     /**
@@ -575,7 +433,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      *
      * @return A String of HTML help.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public String getMonitoringHelp(AuthzSubjectValue subject,
                                     AppdefEntityValue entityVal,
@@ -601,12 +458,11 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             
             long current = System.currentTimeMillis();
 
-            // XXX this whole thing may need to be moved to directSQL...
             for (int i = 0; i < templIds.length; i++) {
                 MeasurementTemplatePK pk =
                     new MeasurementTemplatePK(templIds[i]);
                 MeasurementTemplateLocal ejb = getMtHome().findByPrimaryKey(pk);
-                
+
                 if (interval != ejb.getDefaultInterval())
                     ejb.setDefaultInterval(interval);
                 
@@ -720,23 +576,20 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
     }
     
     /**
-     * Get the MonitorableType id, creating it if it does not exist
+     * Get the MonitorableType id, creating it if it does not exist.
+     *
+     * @todo: This should just return the pojo and be named getMonitorableType.
      *
      * @ejb:interface-method
      */
-    public Integer getMonitorableTypeId(String pluginName, TypeInfo info)
-        throws CreateException {
-        MonitorableTypeLocal t;
-
-        try {
-            t = this.getMTHome().findByName(info.getName());
-        } catch (FinderException exc) {
+    public Integer getMonitorableTypeId(String pluginName, TypeInfo info) {
+        MonitorableType t = getMonitorableTypeDAO().findByName(info.getName());
+        
+        if (t == null) {
             int a, e;
-
-            // Create it
             e = info.getType();
             a = AppdefEntityConstants.entityInfoTypeToAppdefType(e);
-            t = getMTHome().create(info.getName(), a, pluginName);
+            t = getMonitorableTypeDAO().create(info.getName(), a, pluginName);
         }
       
         return t.getId();
@@ -755,7 +608,8 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                                Integer monitorableTypeId,
                                MeasurementInfo[] tmpls)
         throws CreateException, RemoveException {
-        // Make sure we have this monitorable type
+
+        MeasurementTemplateDAO dao = getMeasurementTemplateDAO();
 
         // Organize the templates first
         HashMap tmap = new HashMap();
@@ -763,117 +617,23 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             tmap.put(tmpls[i].getAlias(), tmpls[i]);
         }
         
-        // See if the templates already exist
-        try {
-            if (log.isDebugEnabled())
-                log.debug("updateTemplates() fetch templates for " +pluginName);
+        Collection mts = dao.findRawByMonitorableType(monitorableTypeId);
+        
+        for (Iterator i = mts.iterator(); i.hasNext();) {
+            MeasurementTemplate mt =
+                (MeasurementTemplate) i.next();
             
-            Collection mts =
-                getMtHome().findRawByMonitorableType(monitorableTypeId);
+            // See if this is in the list
+            MeasurementInfo info =
+                (MeasurementInfo) tmap.remove(mt.getAlias());
 
-            ArrayList toDelete = new ArrayList();
-            
-            long current = System.currentTimeMillis();
-            for (Iterator i = mts.iterator(); i.hasNext();) {
-                MeasurementTemplateLocal mt =
-                    (MeasurementTemplateLocal) i.next();
-
-                // See if this is in the list
-                MeasurementInfo info =
-                    (MeasurementInfo) tmap.remove(mt.getAlias());
-
-                if (info == null) {
-                    // Remove the templates dependent on this
-                    Collection ts =
-                        getMtHome().findByMeasurementArg(mt.getId());
-
-                    if (log.isDebugEnabled())
-                        log.debug("updateTemplates() removing " + ts.size() +
-                                  " dependent templates for " + mt.getId());
-                    
-                    for (Iterator it = ts.iterator(); it.hasNext();) {
-                        MeasurementTemplateLocal dm =
-                            (MeasurementTemplateLocal)it.next();
-                        
-                        removeMeasurements(dm.getId());
-                        toDelete.add(dm);
-                    }
-
-                    // Now remove this template
-                    if (log.isDebugEnabled())
-                        log.debug("updateTemplates() removing raw template " +
-                                  mt.getId());
-                    
-                    removeMeasurements(mt.getId());
-                    toDelete.add(mt);
-                }
-                else {
-                    // Make sure everything is correct
-                    if (log.isDebugEnabled())
-                        log.debug("updateTemplates() updating raw metric " +
-                                  mt.getId());
-                    
-                    mt.setTemplate(info.getTemplate());
-                    mt.setCollectionType(info.getCollectionType());
-                    mt.setPlugin(pluginName);
-
-                    // Check category
-                    CategoryLocal cat = null;
-                    String category = info.getCategory();
-                    if (!category.equals(mt.getCategory().getName())) {
-                        // Load the category with the correct name and set it
-                        try {
-                            cat = getCaHome().findByName(category);
-                        } catch (FinderException e) {
-                            cat = getCaHome().create(category);
-                        }
-                        mt.setCategory(cat);
-                    }
-
-                    // Set the following in the derived
-                    List dmts = this.getMtHome().findByArgAndTemplate(
-                        mt.getId(), MeasurementConstants.TEMPL_IDENTITY);
-                    
-                    // We should theoretically only get one
-                    if (dmts.size() > 0) {
-                        MeasurementTemplateLocal dmt =
-                            (MeasurementTemplateLocal) dmts.get(0);
-                                      
-                        if (log.isDebugEnabled())
-                            log.debug("updateTemplates() updating derived " +
-                                      "metric " + dmt.getId());
-
-                        dmt.setAlias(info.getAlias());
-                        dmt.setDesignate(info.isIndicator());
-                        dmt.setUnits(info.getUnits());
-                        dmt.setCollectionType(info.getCollectionType());
-
-                        // Only change the intervals if user has not changed 
-                        // them
-                        if (dmt.getMtime() <= dmt.getCtime()) {
-                            dmt.setDefaultOn(info.isDefaultOn());
-                            dmt.setDefaultInterval(info.getInterval());
-                            dmt.setCtime(current);
-                            dmt.setMtime(current);
-                        }
-
-                        if (cat != null)
-                            dmt.setCategory(cat);
-                    }
-                }
+            if (info == null) {
+                dao.remove(mt);
+            } else {
+                dao.update(mt, pluginName, info);
             }
-
-            // Delete the old templates
-            for (Iterator it = toDelete.iterator(); it.hasNext(); ) {
-                MeasurementTemplateLocal mt =
-                    (MeasurementTemplateLocal) it.next();
-                mt.remove();
-            }
-        } catch (FinderException e) {
-            // Not a problem
-            log.debug("FinderException", e);
         }
-
+        
         return tmap;
     }
 
@@ -887,33 +647,41 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      */
     public void createTemplates(String pluginName, Map toAdd)
         throws CreateException {
-        // Add the new metrics
+        // Add the new templates
         Connection conn = null;
         PreparedStatement tStmt = null;
         PreparedStatement aStmt = null;
-        try {
-            conn =
-                DBUtil.getConnByContext(getInitialContext(), 
-                                        DATASOURCE_NAME);
 
-            final String templatesql = 
-                "INSERT INTO EAM_MEASUREMENT_TEMPL " +
-                "(id, name, alias, units, collection_type," +
-                " default_on, default_interval, designate," +
-                " monitorable_type_id, category_id, template," +
-                " plugin, ctime, mtime) " +
+        SessionFactoryImpl sessionFactory =
+            (SessionFactoryImpl)Util.getSessionFactory();
+        Session session =
+            getMeasurementTemplateDAO().getSession();
+        try {
+            IdentifierGenerator tmplIdGenerator =
+                sessionFactory
+                .getEntityPersister(MeasurementTemplate.class.getName())
+                .getIdentifierGenerator();
+
+            IdentifierGenerator argIdGenerator =
+                sessionFactory
+                .getEntityPersister(MeasurementArg.class.getName())
+                .getIdentifierGenerator();
+
+            conn = session.connection();
+
+            final String templatesql = "INSERT INTO EAM_MEASUREMENT_TEMPL " +
+                "(id, name, alias, units, collection_type, default_on, " +
+                "default_interval, designate, monitorable_type_id, " +
+                "category_id, template, plugin, ctime, mtime) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             
-            final String argsql =
-                "INSERT INTO EAM_MEASUREMENT_ARG " +
-                "(id, measurement_template_id," +
-                " measurement_template_arg_id," +
-                " placement, ticks, weight, previous) " +
+            final String argsql = "INSERT INTO EAM_MEASUREMENT_ARG " +
+                "(id, measurement_template_id, measurement_template_arg_id, " +
+                "placement, ticks, weight, previous) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
-            
+
             long current = System.currentTimeMillis();
             
-            HashMap cats = new HashMap();
             for (Iterator i = toAdd.keySet().iterator(); i.hasNext();) {
                 Integer monitorableTypeId = (Integer)i.next();
                 Map newMetrics = (Map)toAdd.get(monitorableTypeId);
@@ -921,26 +689,17 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                 for (Iterator j = newMetrics.values().iterator(); j.hasNext();){
                     MeasurementInfo info = (MeasurementInfo)j.next();
 
-                    // XXX: This sucks, consider removing this entity bean.
-                    CategoryLocal cat =
-                        (CategoryLocal) cats.get(info.getCategory());
+                    Category cat = getCategoryDAO().findByName(info.getCategory());
                     if (cat == null) {
-                        try {
-                            cat = getCaHome().findByName(info.getCategory());
-                        } catch (FinderException e) {
-                            cat = getCaHome().create(info.getCategory());
-                        }
-                        cats.put(info.getCategory(), cat);
+                        cat = getCategoryDAO().create(info.getCategory());
                     }
-                    
-                    // First create the raw measurement
-                    int rawid = (int)IDGeneratorFactory.
-                        getNextId("TemplateManagerEJBImpl",
-                                  "EAM_MEASUREMENT_TEMPL_ID_SEQ",
-                                  DATASOURCE_NAME);
+
                     int col = 1;
+                    Integer rawid = (Integer)tmplIdGenerator.
+                        generate((SessionImpl)session, new MeasurementTemplate());
+
                     tStmt = conn.prepareStatement(templatesql);
-                    tStmt.setInt(col++, rawid);
+                    tStmt.setInt(col++, rawid.intValue());
                     tStmt.setString(col++, info.getName());
                     tStmt.setString(col++, info.getAlias());
                     tStmt.setString(col++, info.getUnits());
@@ -956,15 +715,14 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                     tStmt.setLong(col++, current);
                     tStmt.execute();
                     tStmt.close();
+
+                    Integer derivedid = (Integer)tmplIdGenerator.
+                        generate((SessionImpl)session, new MeasurementTemplate());
                     
                     // Next, create the derived measurement
-                    int derivedid = (int)IDGeneratorFactory.
-                        getNextId("TemplateManagerEJBImpl",
-                                  "EAM_MEASUREMENT_TEMPL_ID_SEQ",
-                                  DATASOURCE_NAME);
                     col = 1;
                     tStmt = conn.prepareStatement(templatesql);
-                    tStmt.setInt(col++, derivedid);
+                    tStmt.setInt(col++, derivedid.intValue());
                     tStmt.setString(col++, info.getName());
                     tStmt.setString(col++, info.getAlias());
                     tStmt.setString(col++, info.getUnits());
@@ -981,16 +739,15 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                     tStmt.execute();
                     tStmt.close();
                 
+                    Integer argid = (Integer)argIdGenerator.
+                        generate((SessionImpl)session, new MeasurementArg());
+
                     // Lastly, create the line item
-                    int aid = (int)IDGeneratorFactory.
-                        getNextId("TemplateManagerEJBImpl",
-                                  "EAM_MEASUREMENT_ARG_ID_SEQ",
-                                  DATASOURCE_NAME);
                     col = 1;
                     aStmt = conn.prepareStatement(argsql);
-                    aStmt.setInt(col++, aid);
-                    aStmt.setInt(col++, derivedid);
-                    aStmt.setInt(col++, rawid);
+                    aStmt.setInt(col++, argid.intValue());
+                    aStmt.setInt(col++, derivedid.intValue());
+                    aStmt.setInt(col++, rawid.intValue());
                     aStmt.setInt(col++, 1);
                     aStmt.setInt(col++, 0);
                     aStmt.setFloat(col++, 0f);
@@ -1002,13 +759,8 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         } catch (SQLException e) {
             this.log.error("Unable to add measurements for: " +
                            pluginName, e);
-        } catch (NamingException e) {
-            throw new SystemException("Naming error while adding " +
-                                      "measurements", e);
-        } catch (ConfigPropertyException e) {
-            throw new CreateException("Unable to get sequence: " + e);
         } finally {
-            DBUtil.closeJDBCObjects(log, conn, null, null);
+            session.disconnect();
         }
     }
  
@@ -1054,8 +806,8 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
     public void ejbCreate() throws CreateException {
         try {
             valuePager = Pager.getPager(VALUE_PROCESSOR);
-        } catch ( Exception e ) {
-            throw new CreateException("Could not create value pager:" + e);
+        } catch (Exception e) {
+            throw new CreateException("Could not create value pager: " + e);
         }
     }
 

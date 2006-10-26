@@ -1552,12 +1552,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId);
 
         MeasurementTemplateValue tmpl = null;
-        try {
-            tmpl = this.getTemplateManager().getTemplate(tid);
-        } catch (TemplateNotFoundException e) {
-            throw new MeasurementNotFoundException("Invalid template: " + tid);
-        }
-
+        tmpl = this.getTemplateManager().getTemplate(tid);
+            
         List metrics = getMetricsForResource(subject, aid, tmpl);
         if (metrics == null || metrics.size() == 0) {
             throw new MeasurementNotFoundException(
@@ -1637,15 +1633,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                         boolean returnNulls, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
                DataNotAvailableException, AppdefEntityNotFoundException,
-               PermissionException, MeasurementNotFoundException {
+               PermissionException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
     
         MeasurementTemplateValue tmpl = null;
-        try {
-            tmpl = this.getTemplateManager().getTemplate(tid);
-        } catch (TemplateNotFoundException e) {
-            throw new MeasurementNotFoundException("Invalid template: " + tid);
-        }
+        tmpl = this.getTemplateManager().getTemplate(tid);
 
         // Find the measurement IDs of the members in the autogroup for the
         // template
@@ -1871,18 +1863,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     public List findMetricMetadata(int sessionId, AppdefEntityID aid,
                                    AppdefEntityTypeID ctype, Integer tid)
         throws SessionNotFoundException, SessionTimeoutException,
-               GroupNotCompatibleException, MeasurementNotFoundException,
+               GroupNotCompatibleException,
                AppdefEntityNotFoundException, ApplicationNotFoundException,
                TemplateNotFoundException, PermissionException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         
         // Get the template
-        try {
-            this.getTemplateManager().getTemplate(tid);
-        } catch (TemplateNotFoundException e) {
-            throw new MeasurementNotFoundException("Invalid template: " + tid);
-        }
-
+        this.getTemplateManager().getTemplate(tid);
+        
         List entities;
 
         if (aid.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
@@ -2119,11 +2107,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         MeasurementTemplateValue tmpl = null;
 
-        try {
-            tmpl = this.getTemplateManager().getTemplate(tid);
-        } catch (TemplateNotFoundException e) {
-            throw new MeasurementNotFoundException("Invalid template: " + tid);
-        }
+        tmpl = this.getTemplateManager().getTemplate(tid);
 
         List pruned = new ArrayList();
         for (int i=0; i<resources.length; ++i) {
