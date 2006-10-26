@@ -663,6 +663,8 @@
                  description="Server Built"/>
        <property name="serverAdmin"
                  description="Server Admin"/>
+       <property name="mpm"
+                 description="Server MPM"/>
     </properties>
 
     <plugin type="autoinventory"
