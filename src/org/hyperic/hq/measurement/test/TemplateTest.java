@@ -101,7 +101,7 @@ public class TemplateTest
     /**
      * Test metric template insertion
      */
-    private void createTemplates() throws Exception {
+    protected void createTemplates() throws Exception {
 
         TemplateManagerLocal manager = getTemplateManager();
 
@@ -222,7 +222,7 @@ public class TemplateTest
         }
     }
 
-    private void cleanup() throws Exception {
+    protected void cleanup() throws Exception {
 
         TemplateManagerLocal manager = getTemplateManager();
         AuthzSubjectValue subject = getOverlord();
