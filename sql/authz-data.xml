@@ -30,16 +30,16 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
 -->
 
     <table name="EAM_RESOURCE_TYPE">
-        <data ID="0" CID="0" NAME="covalentAuthzRootResourceType"/>
-        <data ID="1" CID="1" NAME="covalentAuthzSubject"/>
-        <data ID="2" CID="2" NAME="covalentAuthzRole"/>
-        <data ID="3" CID="3" NAME="covalentAuthzResourceGroup"/>
+        <data ID="0" CID="0" NAME="covalentAuthzRootResourceType" FSYSTEM="FALSE"/>
+        <data ID="1" CID="1" NAME="covalentAuthzSubject" FSYSTEM="FALSE"/>
+        <data ID="2" CID="2" NAME="covalentAuthzRole" FSYSTEM="FALSE"/>
+        <data ID="3" CID="3" NAME="covalentAuthzResourceGroup" FSYSTEM="FALSE"/>
     </table>
 
     <table name="EAM_SUBJECT">
         <data ID="0" CID="0" NAME="admin" DSN="covalentAuthzInternalDsn"
               FIRST_NAME="System" LAST_NAME="User" DEPARTMENT="Administration" 
-              FSYSTEM="TRUE" />
+              FSYSTEM="TRUE" FACTIVE="TRUE"/>
     </table>
 
     <table name="EAM_RESOURCE_GROUP">
@@ -164,10 +164,10 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
          will start with 3xx -->
     <!-- APPDEF RESOURCE TYPES -->
     <table name="EAM_RESOURCE_TYPE">
-        <data ID="301" CID="301" NAME="covalentEAMPlatform"/>
-        <data ID="303" CID="303" NAME="covalentEAMServer"/>
-        <data ID="305" CID="305" NAME="covalentEAMService"/>
-        <data ID="308" CID="308" NAME="covalentEAMApplication"/>
+        <data ID="301" CID="301" NAME="covalentEAMPlatform" FSYSTEM="FALSE"/>
+        <data ID="303" CID="303" NAME="covalentEAMServer" FSYSTEM="FALSE"/>
+        <data ID="305" CID="305" NAME="covalentEAMService" FSYSTEM="FALSE"/>
+        <data ID="308" CID="308" NAME="covalentEAMApplication" FSYSTEM="FALSE"/>
     </table>
 
     <table name="EAM_RESOURCE">
@@ -297,7 +297,7 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
     <table name="EAM_SUBJECT">
         <data ID="1" CID="1" NAME="@@@ADMINUSERNAME@@@" FIRST_NAME="HQ"
               LAST_NAME="Administrator" EMAIL_ADDRESS="@@@ADMINEMAIL@@@"
-              DSN="CAM" FSYSTEM="TRUE" />
+              DSN="CAM" FSYSTEM="TRUE" FACTIVE="TRUE" />
     </table>
 
     <!-- add a resource for the root subject -->
