@@ -1815,6 +1815,14 @@ has already been defined.
                            select max(id) as rid from eam_service_type) r)
                      )
         </statement>
+        <statement desc="drop default value constraint on eam_cprop"
+                   targetDB="postgresql">
+            alter table eam_cprop alter column id drop default
+        </statement>
+        <statement desc="drop default value constraint on eam_cprop"
+                   targetDB="postgresql">
+            alter table eam_fired_trigger alter column id drop default
+        </statement>
       </schema-directSQL>
     </schemaSpec>
 

@@ -282,18 +282,9 @@ public class CPropManagerEJBImpl
                     .append("INSERT INTO ")
                     .append(CPROP_TABLE);
 
-                if (dialect instanceof Oracle9Dialect) {
-                    // Only do this for Oracle until we figure out
-                    // the best schema migration path for Postgres.
-                    //
-                    // There is a existing nextval function
-                    // defined as a default value constraint on the
-                    // id column in the eam_cprop table for postgres.
-                    // Need to figure what to do with the default
-                    // value constraint on schema migration to 3.0
-                    //
-                    // For Oracle, the constraint is defined as a trigger
-                    // which can be dropped on schema migration to 3.0
+                // if the dialect supports sequences, then
+                // use sequence generator
+                if (dialect.supportsSequences()) {
                     sql.append(" (id,keyid,appdef_id,value_idx,PROPVALUE) VALUES (")
                         .append(dialect.getSelectSequenceNextValString(CPROP_SEQUENCE))
                         .append(", ?, ?, ?, ?)");
