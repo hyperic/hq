@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.measurement;
 
+import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
+
 public class DerivedMeasurement extends Measurement
     implements java.io.Serializable {
 
@@ -66,5 +68,22 @@ public class DerivedMeasurement extends Measurement
     
     public void setFormula(String formula) {
         _formula = formula;
+    }
+
+    public DerivedMeasurementValue getDerivedMeasurementValue() {
+        MonitorableType mt = getTemplate().getMonitorableType();
+
+        DerivedMeasurementValue val = new DerivedMeasurementValue();
+        val.setId(getId());
+        val.setEnabled(isEnabled());
+        val.setInterval(getInterval());
+        val.setFormula(getFormula());
+        val.setAppdefType(mt.getAppdefType());
+        val.setInstanceId(getInstanceId());
+        val.setMtime(getMtime());
+        val.setTemplate(getTemplate().getMeasurementTemplateValue());
+        //val.setBaseline(getBaseline().getBaselineValue());
+
+        return val;
     }
 }
