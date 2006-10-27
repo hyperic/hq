@@ -90,17 +90,15 @@ import org.apache.commons.logging.LogFactory;
  *      view-type="local"
  *      type="Stateless"
  * 
- * @ejb:transaction type="SUPPORTS"
+ * @ejb:transaction type="REQUIRED"
  */
-
 public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
-    private final String logCtx = AlertManagerEJBImpl.class.getName();
-    private final Log log = LogFactory.getLog(logCtx);
+    private final String _logCtx = AlertManagerEJBImpl.class.getName();
+    private final Log    _log = LogFactory.getLog(_logCtx);
     private final String VALUE_PROCESSOR =
         PagerProcessor_events.class.getName();
 
-    private SessionContext ctx = null;
-    private Pager valuePager = null;
+    private Pager          valuePager;
     
     private AlertLocalHome ahome = null;
     private AlertLocalHome getAHome() {
@@ -131,10 +129,7 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
     /**
      * Create a new alert
      *
-     * @return an AlertValue
-     *
      * @ejb:interface-method
-     * @ejb:transalert-type="REQUIRESNEW"
      */
     public AlertValue createAlert(AlertValue val) throws AlertCreateException {
         try {
@@ -151,7 +146,6 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
      * @return an AlertValue
      *
      * @ejb:interface-method
-     * @ejb:transalert-type="REQUIRESNEW"
      */
     public AlertValue updateAlert(AlertValue val) throws AlertCreateException {
         if (!val.idHasBeenSet())
@@ -220,7 +214,6 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
     
     /** Remove alerts
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void deleteAlerts(Integer[] ids) throws RemoveException {
 
@@ -237,7 +230,6 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
 
     /** Remove alerts for an appdef entity
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public int deleteAlerts(AppdefEntityID id) throws RemoveException {
         // Find the collection of alerts
@@ -253,7 +245,6 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
 
     /** Remove alerts for an alert definition
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public int deleteAlerts(Integer defId) throws RemoveException {
         // Find the collection of alerts
@@ -268,7 +259,6 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
 
     /** Remove alerts for a range of time
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public int deleteAlerts(long begin, long end) throws RemoveException {
         int count = 0;
@@ -542,7 +532,7 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
                     altLocal = getAHome().findByPrimaryKey(pk);
                 } catch (FinderException fe) {
                     // Ignore and continue
-                    log.error("Bad user " + uid + " alert " + pk.getId());
+                    _log.error("Bad user " + uid + " alert " + pk.getId());
                     continue;
                 }
                 
@@ -556,13 +546,13 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
 
             }
         } catch (SQLException e) {
-            log.error("SQLException determining if alert definition is enabled",
+            _log.error("SQLException determining if alert definition is enabled",
                       e);
             throw new SystemException(e);
         } catch (NamingException e) {
             throw new SystemException(e);
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(_logCtx, conn, stmt, rs);
         }
         
         return result;
@@ -572,7 +562,6 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
      * Add a reference to an alert for a user
      *
      * @ejb:interface-method
-     * @ejb:transalert-type="REQUIRESNEW"
      */
     public void addSubjectAlert(Integer uid, Integer aid)
         throws CreateException, FinderException {
@@ -601,7 +590,7 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
                             ua2.remove();
                         } catch (RemoveException e) {
                             // Leave it, then
-                            log.error("User alert for subject " + uid + " has "+
+                            _log.error("User alert for subject " + uid + " has "+
                                       "null alert ID and cannot be removed", e);
                         }
                 }
@@ -631,13 +620,7 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     public void ejbRemove() {}
-
     public void ejbActivate() {}
-
     public void ejbPassivate() {}
-
-    public void setSessionContext(SessionContext ctx)
-        throws EJBException, RemoteException {
-        this.ctx = ctx;
-    }
+    public void setSessionContext(SessionContext ctx) {}
 }

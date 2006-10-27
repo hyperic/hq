@@ -64,6 +64,8 @@ public class AlertDefTest
         int numDefs = aMan.findAllAlertDefinitions().size();
         aInfo = aMan.createAlertDefinition(aInfo);
         assertEquals(numDefs + 1, aMan.findAllAlertDefinitions().size());
+        assertEquals(1, aInfo.getTriggers().length);
+        assertEquals(0, aInfo.getConditions().length);
     }
 
     public void testSimple() throws Exception {

@@ -25,10 +25,6 @@
 
 package org.hyperic.hq.events.server.session;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -49,14 +45,10 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.dao.ActionDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.events.ActionCreateException;
 import org.hyperic.hq.events.AlertConditionCreateException;
 import org.hyperic.hq.events.AlertDefinitionCreateException;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.shared.ActionLocal;
-import org.hyperic.hq.events.shared.ActionLocalHome;
-import org.hyperic.hq.events.shared.ActionPK;
 import org.hyperic.hq.events.shared.ActionUtil;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionLocal;
@@ -100,12 +92,10 @@ public class AlertDefinitionManagerEJBImpl
     extends SessionEJB
     implements SessionBean 
 {
-    private final String logCtx =
-        AlertDefinitionManagerEJBImpl.class.getName();
     private final String VALUE_PROCESSOR =
         PagerProcessor_events.class.getName();
 
-    private Pager valuePager;
+    private Pager _valuePager;
     
     private AlertDefinitionDAO getAlertDefDAO() {
         return DAOFactory.getDAOFactory().getAlertDefDAO();
@@ -119,17 +109,6 @@ public class AlertDefinitionManagerEJBImpl
         return DAOFactory.getDAOFactory().getTriggerDAO();
     }
 
-    private AlertDefinitionLocalHome adHome = null;    
-    private AlertDefinitionLocalHome getADHome() {
-        try {
-            if (adHome == null)
-                adHome = AlertDefinitionUtil.getLocalHome();
-            return adHome;
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-    }
-
     private AlertManagerLocal alertMan = null;
     private AlertManagerLocal getAlertMan() {
         try {
@@ -138,28 +117,6 @@ public class AlertDefinitionManagerEJBImpl
             return alertMan;
         } catch (CreateException e) {
             throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-    }
-
-    ActionLocalHome actHome = null;
-    private ActionLocalHome getActionHome() {
-        try {
-            if (actHome == null)
-                actHome = ActionUtil.getLocalHome();
-            return actHome;
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-    }
-
-    AlertConditionLocalHome acHome = null;
-    private AlertConditionLocalHome getAcHome() {
-        try {
-            if (acHome == null)
-                acHome = AlertConditionUtil.getLocalHome();
-            return acHome;
         } catch (NamingException e) {
             throw new SystemException(e);
         }
@@ -444,6 +401,7 @@ public class AlertDefinitionManagerEJBImpl
         throws RemoveException 
     {
         RegisteredTriggerManagerLocal rtm;
+        AlertDefinitionDAO aDao = getAlertDefDAO();
         
         try {
             rtm = RegisteredTriggerManagerUtil.getLocalHome().create();
@@ -453,13 +411,7 @@ public class AlertDefinitionManagerEJBImpl
             throw new SystemException(e);
         }
         
-        List adefs;
-        try {
-            adefs = getADHome().findByAppdefEntity(aeid.getType(),
-                                                   aeid.getID());
-        } catch (FinderException e) {
-            return;
-        }
+        List adefs = aDao.findByAppdefEntity(aeid.getType(), aeid.getID());
         
         // Get rid of their triggers first
         for (Iterator i = adefs.iterator(); i.hasNext(); ) {
@@ -653,7 +605,7 @@ public class AlertDefinitionManagerEJBImpl
         if (pc.getSortorder() == PageControl.SORT_DESC)
             Collections.reverse(adefs);
 
-        return valuePager.seek(adefs, pc.getPagenum(), pc.getPagesize());
+        return _valuePager.seek(adefs, pc.getPagenum(), pc.getPagesize());
     }
 
     /** 
@@ -676,7 +628,7 @@ public class AlertDefinitionManagerEJBImpl
         if (pc.getSortorder() == PageControl.SORT_DESC)
             Collections.reverse(adefs);
 
-        return valuePager.seek(adefs, pc.getPagenum(), pc.getPagesize());
+        return _valuePager.seek(adefs, pc.getPagenum(), pc.getPagesize());
     }
 
     /** 
@@ -687,7 +639,7 @@ public class AlertDefinitionManagerEJBImpl
         AlertDefinition def = getAlertDefDAO().findById(id);
         
         PageControl pc = PageControl.PAGE_ALL;
-        return valuePager.seek(def.getChildren(), pc.getPagenum(), 
+        return _valuePager.seek(def.getChildren(), pc.getPagenum(), 
                                pc.getPagesize());
     }
 
@@ -744,7 +696,7 @@ public class AlertDefinitionManagerEJBImpl
      */
     public void ejbCreate() throws CreateException {
         try {
-            valuePager = Pager.getPager(VALUE_PROCESSOR);
+            _valuePager = Pager.getPager(VALUE_PROCESSOR);
         } catch ( Exception e ) {
             throw new CreateException("Could not create value pager:" + e);
         }

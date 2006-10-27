@@ -78,17 +78,11 @@ public abstract class AbstractTrigger implements TriggerInterface {
     
     private static boolean systemReady = false;
 
-    private static MBeanServer mServer = null;
-    private static ObjectName readyManName = null; 
+    private static MBeanServer mServer;
+    private static ObjectName readyManName;
 
-    /** Holds value of property triggerValue.  set the default property 
-     * 
-	 */
     private RegisteredTriggerValue triggerValue = new RegisteredTriggerValue();
     
-	/**
-	 * Constructor for AbstractTrigger.
-	 */
 	public AbstractTrigger() {
 		super();
         
@@ -140,11 +134,6 @@ public abstract class AbstractTrigger implements TriggerInterface {
     }
     
     /** The utility method which fires the actions of a trigger
-     * @param message the message to include in the action(s)
-     * @throws org.hyperic.hq.events.ext.ActionExecuteException if an action throws an exception during execution
-     * @throws NamingException if EJB lookup fails
-     * @throws CreateException if EJB creation fails
-     * @return if the actions actually fired
      */    
     protected void fireActions(TriggerFiredEvent event)
         throws ActionExecuteException, AlertCreateException {
@@ -310,10 +299,6 @@ public abstract class AbstractTrigger implements TriggerInterface {
         alman.updateAlert(alert);
     }   
     
-    /** Getter for property id.
-     * @return Value of property id.
-     *
-     */
     public Integer getId() {
         if (this.triggerValue == null)
             return new Integer(0);
@@ -321,10 +306,6 @@ public abstract class AbstractTrigger implements TriggerInterface {
         return this.triggerValue.getId();
     }
     
-    /** Getter for property frequency.
-     * @return Value of property frequency.
-     *
-     */
     public long getFrequency() {
         if (this.triggerValue == null)
             return 0;
@@ -332,20 +313,11 @@ public abstract class AbstractTrigger implements TriggerInterface {
         return this.triggerValue.getFrequency();
     }
     
-    /** Getter for property triggerValue.
-     * @return Value of property triggerValue.
-     *
-     */
     public RegisteredTriggerValue getTriggerValue() {
         return this.triggerValue;
     }
     
-    /** Setter for property triggerValue.
-     * @param triggerValue New value of property triggerValue.
-     *
-     */
     public void setTriggerValue(RegisteredTriggerValue triggerValue) {
         this.triggerValue = triggerValue;
     }
-    
 }
