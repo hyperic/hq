@@ -164,17 +164,17 @@ public class MultiConditionTrigger
             String srange   = triggerData.getValue(CFG_TIME_RANGE);
             String sdurable = triggerData.getValue(CFG_DURABLE);
 
-            String delimiters = (this.AND + this.OR);
+            String delimiters = (AND + OR);
             StringTokenizer st = new StringTokenizer(stids, delimiters, true);
-            this.triggerIds = new HashSet();
-            this.orTriggerIds  = new HashMap();
-            ArrayList andTriggerIds = new ArrayList();
+            triggerIds = new HashSet();
+            orTriggerIds  = new HashMap();
+            ArrayList andTrigIds = new ArrayList();
             int i = 0;
             while (st.hasMoreTokens()) {
                 boolean bAnd = true;
                 String tok = st.nextToken();
-                if (tok.equals(this.AND) || tok.equals(this.OR)) {
-                    bAnd = tok.equals(this.AND);
+                if (tok.equals(AND) || tok.equals(OR)) {
+                    bAnd = tok.equals(AND);
                     tok = st.nextToken();
                 }
 
@@ -182,7 +182,7 @@ public class MultiConditionTrigger
 
                 if (bAnd) {
                     // Put it in the AND list
-                    andTriggerIds.add(tid);
+                    andTrigIds.add(tid);
                     i++;
                 } else {
                     // Put it in the OR list
@@ -193,8 +193,8 @@ public class MultiConditionTrigger
                 triggerIds.add(tid);
             }
 
-            this.andTriggerIds = (Integer[]) andTriggerIds.toArray(
-                    new Integer[andTriggerIds.size()]);
+            andTriggerIds = (Integer[]) andTrigIds.toArray(
+                    new Integer[andTrigIds.size()]);
 
             // Turn timerange into milliseconds
             setTimeRange(Long.parseLong(srange) * 1000);
@@ -364,7 +364,7 @@ public class MultiConditionTrigger
                     }
                     else {
                         // Well, we know we ain't firing
-                        this.notFired();
+                        notFired();
                         fulfilled.remove(tracked.getInstanceId());
                     }
                 }
@@ -462,15 +462,15 @@ public class MultiConditionTrigger
     *
     */
    public HashSet getTriggerIds() {
-       return this.triggerIds;
+       return triggerIds;
    }
 
    /** Setter for property andTriggerIds.
     * @param triggerIds New value of property triggerIds.
     *
     */
-   public void setTriggerIds(HashSet triggerIds) {
-       this.triggerIds = triggerIds;
+   public void setTriggerIds(HashSet val) {
+       triggerIds = val;
    }
 
     /** Getter for property andTriggerIds.
@@ -478,15 +478,15 @@ public class MultiConditionTrigger
     *
     */
    public Integer[] getAndTriggerIds() {
-       return this.andTriggerIds;
+       return andTriggerIds;
    }
 
    /** Setter for property andTriggerIds.
     * @param andTriggerIds New value of property andTriggerIds.
     *
     */
-   public void setAndTriggerIds(Integer[] andTriggerIds) {
-       this.andTriggerIds = andTriggerIds;
+   public void setAndTriggerIds(Integer[] val) {
+       andTriggerIds = val;
    }
 
     /** Getter for property orTriggerIds.
@@ -494,15 +494,15 @@ public class MultiConditionTrigger
     *
     */
    public Map getOrTriggerIds() {
-       return this.orTriggerIds;
+       return orTriggerIds;
    }
 
    /** Setter for property orTriggerIds.
     * @param orTriggerIds New value of property orTriggerIds.
     *
     */
-   public void setTriggerIds(Map orTriggerIds) {
-       this.orTriggerIds = orTriggerIds;
+   public void setTriggerIds(Map val) {
+       orTriggerIds = val;
    }
 
     /** Getter for property timeRange.
@@ -510,15 +510,15 @@ public class MultiConditionTrigger
      *
      */
     public long getTimeRange() {
-        return this.timeRange;
+        return timeRange;
     }
     
     /** Setter for property timeRange.
      * @param timeRange New value of property timeRange.
      *
      */
-    public void setTimeRange(long timeRange) {
-        this.timeRange = timeRange;
+    public void setTimeRange(long val) {
+        timeRange = val;
     }
     
     /**
@@ -533,8 +533,8 @@ public class MultiConditionTrigger
      * Sets the durable.
      * @param durable The durable to set
      */
-    public void setDurable(boolean durable) {
-        this.durable = durable;
+    public void setDurable(boolean val) {
+        durable = val;
     }
 
 }

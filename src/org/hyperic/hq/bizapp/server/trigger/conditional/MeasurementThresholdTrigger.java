@@ -56,7 +56,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class MeasurementThresholdTrigger extends AbstractTrigger
     implements RegisterableTriggerInterface, ConditionalTriggerInterface {
-    private Log log = LogFactory.getLog(this.getClass().getName());
+    private Log log = LogFactory.getLog(getClass().getName());
     
     static {
         // Register the trigger/condition
@@ -89,7 +89,7 @@ public class MeasurementThresholdTrigger extends AbstractTrigger
      * @see org.hyperic.hq.events.shared.RegisteredTriggerValue#getInterestedInstanceIDs()
      */
     public Integer[] getInterestedInstanceIDs(Class c){
-        return new Integer[] { this.metricId };
+        return new Integer[] { metricId };
     }
 
     /**
@@ -138,8 +138,8 @@ public class MeasurementThresholdTrigger extends AbstractTrigger
         ConfigResponse triggerData;
         String soperator, sthreshold, smeasID;
         Integer measID;
-        int operator;
-        double threshold;
+        int oper;
+        double thresh;
 
         // Set the trigger value
         setTriggerValue(tval);
@@ -161,7 +161,7 @@ public class MeasurementThresholdTrigger extends AbstractTrigger
                 CFG_ID + " = '" + smeasID + "'");
         }
 
-        operator = getOperator(soperator);
+        oper = getOperator(soperator);
 
         try {
             measID = new Integer(smeasID);
@@ -171,16 +171,16 @@ public class MeasurementThresholdTrigger extends AbstractTrigger
         }
 
         try {
-            threshold = Double.parseDouble(sthreshold);
+            thresh = Double.parseDouble(sthreshold);
         } catch(NumberFormatException exc){
             throw new InvalidTriggerDataException("Threshold, '" +
                                                   sthreshold +
                                                   "' is not a valid number");
         }
 
-        this.operator      = operator;
-        this.threshold     = threshold;
-        this.metricId = measID;
+        operator  = oper;
+        threshold = thresh;
+        metricId  = measID;
     }
 
     /**
@@ -233,20 +233,20 @@ public class MeasurementThresholdTrigger extends AbstractTrigger
         compVal = val.getValue();
 
         if (log.isDebugEnabled())
-            log.debug("Operator is " + this.operator);
+            log.debug("Operator is " + operator);
         
-        if(this.operator == OPER_LE)
-            fire = compVal <= this.threshold;
-        else if(this.operator == OPER_LT)
-            fire = compVal < this.threshold;
-        else if(this.operator == OPER_EQ)
-            fire = compVal == this.threshold;
-        else if(this.operator == OPER_GT)
-            fire = compVal > this.threshold;
-        else if(this.operator ==  OPER_GE)
-            fire = compVal >= this.threshold;
-        else if(this.operator ==  OPER_NE)
-            fire = compVal != this.threshold;
+        if(operator == OPER_LE)
+            fire = compVal <= threshold;
+        else if(operator == OPER_LT)
+            fire = compVal < threshold;
+        else if(operator == OPER_EQ)
+            fire = compVal == threshold;
+        else if(operator == OPER_GT)
+            fire = compVal > threshold;
+        else if(operator ==  OPER_GE)
+            fire = compVal >= threshold;
+        else if(operator ==  OPER_NE)
+            fire = compVal != threshold;
         else {
             // Wow -- we should never get here -- throw an assertion
             throw new RuntimeException("Invalid threshold operation!");
@@ -254,15 +254,15 @@ public class MeasurementThresholdTrigger extends AbstractTrigger
 
         // Don't do any more if condition was unmet
         if (fire == false) {
-            this.notFired();
+            notFired();
             return;
         }
         
         try {
             TriggerFiredEvent tfe = new TriggerFiredEvent(getId(), event);
             tfe.setMessage("Metric(" + metricId + ") value " + val + " "
-                           + OPER_STRS[this.operator] + " " + this.threshold);
-            this.fireActions(tfe);
+                           + OPER_STRS[operator] + " " + threshold);
+            fireActions(tfe);
         } catch (AlertCreateException exc) {
             throw new ActionExecuteException(exc);
         } catch (ActionExecuteException exc) {
@@ -284,8 +284,8 @@ public class MeasurementThresholdTrigger extends AbstractTrigger
      * Sets the threshold.
      * @param threshold The threshold to set
      */
-    public void setThreshold(double threshold) {
-        this.threshold = threshold;
+    public void setThreshold(double val) {
+        threshold = val;
     }
 
     /**
@@ -300,8 +300,8 @@ public class MeasurementThresholdTrigger extends AbstractTrigger
      * Sets the operator.
      * @param operator The operator to set
      */
-    public void setOperator(int operator) {
-        this.operator = operator;
+    public void setOperator(int val) {
+        operator = val;
     }
 
     /**
@@ -316,8 +316,8 @@ public class MeasurementThresholdTrigger extends AbstractTrigger
      * Sets the metricId.
      * @param metricId The metricId to set
      */
-    public void setMeasurementID(Integer metricId) {
-        this.metricId = metricId;
+    public void setMeasurementID(Integer val) {
+        metricId = val;
     }
 
 }

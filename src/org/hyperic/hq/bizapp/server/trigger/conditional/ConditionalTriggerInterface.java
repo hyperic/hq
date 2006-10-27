@@ -27,11 +27,9 @@ package org.hyperic.hq.bizapp.server.trigger.conditional;
 
 import java.util.HashMap;
 
-
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.ConditionalTriggerSchema;
 import org.hyperic.hq.events.AlertConfigLoader;
-import org.hyperic.hq.events.AlertConfigLoader.ConfigClassesInitializer;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;

@@ -52,8 +52,7 @@ import org.hyperic.util.config.InvalidOptionValueException;
  * A simple trigger which fires if a control event occurs.
  */
 
-public class CustomPropertyTrigger
-    extends AbstractTrigger
+public class CustomPropertyTrigger extends AbstractTrigger
     implements RegisterableTriggerInterface, ConditionalTriggerInterface {
     static {
         // Register the trigger/condition
@@ -123,7 +122,7 @@ public class CustomPropertyTrigger
             triggerData = ConfigResponse.decode(tval.getConfig());
             sType       = triggerData.getValue(CFG_TYPE);
             sID         = triggerData.getValue(CFG_ID);
-            this.customProperty = triggerData.getValue(CFG_NAME);
+            customProperty = triggerData.getValue(CFG_NAME);
         } catch (EncodingException e) {
             throw new InvalidTriggerDataException(e);
         }
@@ -136,8 +135,8 @@ public class CustomPropertyTrigger
         }
 
         try {
-            this.id = new AppdefEntityID(Integer.parseInt(sType),
-                                         Integer.parseInt(sID));
+            id = new AppdefEntityID(Integer.parseInt(sType),
+                                    Integer.parseInt(sID));
         } catch(NumberFormatException exc){
             throw new InvalidTriggerDataException(
                 "Instance type: " + sType + " or id: " + sID +
@@ -151,8 +150,7 @@ public class CustomPropertyTrigger
     public void processEvent(AbstractEvent e)
         throws EventTypeException, ActionExecuteException {
         CPropChangeEvent event;
-        boolean fire;
-
+        
         if(!(e instanceof CPropChangeEvent)){
             throw new EventTypeException("Invalid event type passed, " +
                                          "expected CPropChangeEvent");

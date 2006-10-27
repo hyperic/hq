@@ -58,16 +58,12 @@ import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.units.FormattedNumber;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /** 
  * The ValueChangeTrigger is a simple trigger which fires when a new
  * MeasurementEvent's value does not match the previous stored in the tracker
  */
 
-public class ValueChangeTrigger
-    extends AbstractTrigger
+public class ValueChangeTrigger extends AbstractTrigger
     implements RegisterableTriggerInterface, ConditionalTriggerInterface {
     static {
         // Register the trigger/condition
@@ -81,12 +77,9 @@ public class ValueChangeTrigger
 
     private Object            lock = new Object();
     private Integer           measurementId;
-    private Log               log;
     private MeasurementEvent  last = null;
 
-    public ValueChangeTrigger() {
-        this.log = LogFactory.getLog(ValueChangeTrigger.class);
-    }
+    public ValueChangeTrigger() {}
 
     public ConfigSchema getConfigSchema() {
         return ConditionalTriggerSchema
@@ -122,8 +115,8 @@ public class ValueChangeTrigger
 
         try {
             ConfigResponse triggerData =
-                ConfigResponse.decode(this.getConfigSchema(), tval.getConfig());
-            this.measurementId = Integer.valueOf(triggerData.getValue(CFG_ID));
+                ConfigResponse.decode(getConfigSchema(), tval.getConfig());
+            measurementId = Integer.valueOf(triggerData.getValue(CFG_ID));
         } catch(InvalidOptionException exc){
             throw new InvalidTriggerDataException(exc);
         } catch(InvalidOptionValueException exc){
@@ -160,7 +153,7 @@ public class ValueChangeTrigger
      *
      */
     public Integer[] getInterestedInstanceIDs(Class c){
-        return new Integer[] { this.measurementId };
+        return new Integer[] { measurementId };
     }
 
     /** 
@@ -171,7 +164,6 @@ public class ValueChangeTrigger
     public void processEvent(AbstractEvent event)
         throws EventTypeException, ActionExecuteException
     {
-        StringBuffer message = new StringBuffer();
         MeasurementEvent me;
         Collection events;
 
@@ -181,14 +173,14 @@ public class ValueChangeTrigger
                 "Invalid event type passed, expected MeasurementEvent");
 
         me = (MeasurementEvent) event;
-        if(!me.getInstanceId().equals(this.measurementId))
+        if(!me.getInstanceId().equals(measurementId))
             throw new EventTypeException(
                 "Invalid instance ID passed (" + me.getInstanceId() +
-                ") expected " + this.measurementId);
+                ") expected " + measurementId);
 
         TriggerFiredEvent myEvent = null;
         
-        synchronized (this.lock) {
+        synchronized (lock) {
             EventTrackerLocal eTracker;
             
             try {
@@ -204,7 +196,7 @@ public class ValueChangeTrigger
                 try {
                     // Now find out if there was a previous event
                     events =
-                        eTracker.getReferencedEventStreams(this.getId());
+                        eTracker.getReferencedEventStreams(getId());
 
                     if (events.size() > 0) {
                         // We only need the first event
@@ -223,7 +215,7 @@ public class ValueChangeTrigger
             // If we still have nothing
             if (last == null) {
                 try {
-                    eTracker.addReference(this.getId(), me, 0);
+                    eTracker.addReference(getId(), me, 0);
                     last = me;      // Update the last reference
                 } catch (SQLException e) {
                     throw new ActionExecuteException
@@ -246,7 +238,7 @@ public class ValueChangeTrigger
                 myEvent.setMessage( sb.toString() );
 
                 try {
-                    eTracker.updateReference(this.getId(), last.getId(),
+                    eTracker.updateReference(getId(), last.getId(),
                                                   me, 0);
                     last = me;      // Update the last reference
                 } catch (IOException e) {
@@ -269,7 +261,7 @@ public class ValueChangeTrigger
         }
         else {
             // Now send a NotFired event
-            this.notFired();
+            notFired();
         }
     }
 

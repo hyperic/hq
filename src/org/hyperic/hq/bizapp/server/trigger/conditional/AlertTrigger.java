@@ -57,9 +57,6 @@ import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /** The EscalateTrigger is a specialized trigger that can combine multiple
  * conditions and only fire actions when all conditions have been met
  *
@@ -71,8 +68,6 @@ public class AlertTrigger extends AbstractTrigger
         ConditionalTriggerInterface.MAP_COND_TRIGGER.put(
             new Integer(EventConstants.TYPE_ALERT), AlertTrigger.class);
     }
-
-    private final Log log = LogFactory.getLog(AlertTrigger.class);
 
     /** Holds value of property eTracker. */
     private EventTrackerLocal eTracker;
@@ -105,8 +100,8 @@ public class AlertTrigger extends AbstractTrigger
         }
 
         try {
-            TriggerFiredEvent tfe = new TriggerFiredEvent(this.getId(), event);            
-            this.fireActions(tfe);
+            TriggerFiredEvent tfe = new TriggerFiredEvent(getId(), event);            
+            fireActions(tfe);
         } catch (AlertCreateException e) {
             throw new ActionExecuteException(e);
         } catch (ActionExecuteException e) {
@@ -148,7 +143,7 @@ public class AlertTrigger extends AbstractTrigger
     public Integer[] getInterestedInstanceIDs(Class c) {
         // Ask the sub triggers what they are interested in
         if (c.equals(AlertFiredEvent.class))
-            return new Integer[] { this.watchId };
+            return new Integer[] { watchId };
         
         return null;
     }
@@ -184,10 +179,10 @@ public class AlertTrigger extends AbstractTrigger
      */
     public EventTrackerLocal getETracker()
         throws NamingException, CreateException {
-        if (this.eTracker == null)
-            this.eTracker = EventTrackerUtil.getLocalHome().create();
+        if (eTracker == null)
+            eTracker = EventTrackerUtil.getLocalHome().create();
 
-        return this.eTracker;
+        return eTracker;
     }
     
     /** Getter for property after.
@@ -195,15 +190,15 @@ public class AlertTrigger extends AbstractTrigger
      *
      */
     public long getAfter() {
-        return this.after;
+        return after;
     }
     
     /** Setter for property after.
      * @param after New value of property after.
      *
      */
-    public void setAfter(long after) {
-        this.after = after;
+    public void setAfter(long val) {
+        after = val;
     }
     
      /** Getter for property timeRange.
@@ -211,15 +206,15 @@ public class AlertTrigger extends AbstractTrigger
      *
      */
     public long getTimeRange() {
-        return this.timeRange;
+        return timeRange;
     }
     
     /** Setter for property timeRange.
      * @param timeRange New value of property timeRange.
      *
      */
-    public void setTimeRange(long timeRange) {
-        this.timeRange = timeRange;
+    public void setTimeRange(long val) {
+        timeRange = val;
     }
     
     /** Getter for property watchId.
@@ -227,15 +222,15 @@ public class AlertTrigger extends AbstractTrigger
      *
      */
     public Integer getWatchId() {
-        return this.watchId;
+        return watchId;
     }
     
     /** Setter for property watchId.
      * @param watchId New value of property watchId.
      *
      */
-    public void setWatchId(Integer watchId) {
-        this.watchId = watchId;
+    public void setWatchId(Integer val) {
+        watchId = val;
     }
 
     /* (non-Javadoc)
