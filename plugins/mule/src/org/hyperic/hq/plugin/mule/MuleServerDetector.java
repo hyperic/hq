@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.management.ObjectName;
+
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.jmx.MxServerDetector;
 import org.hyperic.hq.product.jmx.MxUtil;
@@ -82,6 +84,9 @@ public class MuleServerDetector extends MxServerDetector {
                 getLog().error("Error parsing: " + configFile, e);
             }
         }
+        else {
+            getLog().debug(configFile + " does not exist");
+        }
     }
 
     protected List getServerProcessList() {
@@ -95,6 +100,20 @@ public class MuleServerDetector extends MxServerDetector {
         }
 
         return procs;
+    }
+
+    private boolean isMuleDomain(ConfigResponse config) {
+        final String serverInfo =
+            "Mule:type=org.mule.ManagementContext,name=MuleServerInfo";
+
+        try {
+            ObjectName name = new ObjectName(serverInfo);
+            MxUtil.getMBeanServer(config.toProperties()).
+                getAttribute(name, "ServerId");
+            return true;
+        } catch (Exception e) {}        
+
+        return false;
     }
 
     protected void setProductConfig(ServerResource server,
@@ -112,5 +131,12 @@ public class MuleServerDetector extends MxServerDetector {
         }
 
         super.setProductConfig(server, config);
+
+        //1.3   uses Mule:
+        //1.3.1 uses Mule.$serverId:
+        if (isMuleDomain(config)) {
+            config.setValue(PROP_DOMAIN, DOMAIN_PREFIX);
+            server.setProductConfig(config);
+        }
     }
 }
