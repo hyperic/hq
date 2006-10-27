@@ -48,9 +48,6 @@ import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.config.LongConfigOption;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /** 
  * The CounterTrigger is a simple trigger which fires when a certain 
  * number of events have occurred within a given time window.
@@ -61,15 +58,11 @@ public class CounterTrigger extends AbstractTrigger
 {
     private static final String CFG_COUNT      = "count";
 
-    private Object  lock = new Object();
     private Integer triggerId;
     private int     count;
     private long    timeRange;
-    private Log     log;
-
-    public CounterTrigger(){
-        this.log = LogFactory.getLog(CounterTrigger.class);
-    }
+    
+    public CounterTrigger() {}
 
     public ConfigSchema getConfigSchema() {
         ConfigSchema res = new ConfigSchema();
@@ -132,14 +125,14 @@ public class CounterTrigger extends AbstractTrigger
 
         try {
             ConfigResponse triggerData =
-                ConfigResponse.decode(this.getConfigSchema(),
+                ConfigResponse.decode(getConfigSchema(),
                                       tval.getConfig());
 
-            this.triggerId = 
+            triggerId = 
                 Integer.valueOf(triggerData.getValue(CFG_TRIGGER_ID));
-            this.count =
+            count =
                 Integer.parseInt(triggerData.getValue(CFG_COUNT));
-            this.timeRange =
+            timeRange =
                 Long.parseLong(triggerData.getValue(CFG_TIME_RANGE)) * 1000;
         } catch(InvalidOptionException exc){
             throw new InvalidTriggerDataException(exc);
@@ -177,7 +170,7 @@ public class CounterTrigger extends AbstractTrigger
      *
      */
     public Integer[] getInterestedInstanceIDs(Class c){
-        return new Integer[] { this.triggerId };
+        return new Integer[] { triggerId };
     }
 
     /** 
@@ -197,10 +190,10 @@ public class CounterTrigger extends AbstractTrigger
                                          "expected TriggerFiredEvent");
 
         tfe = (TriggerFiredEvent) event;
-        if(!tfe.getInstanceId().equals(this.triggerId))
+        if(!tfe.getInstanceId().equals(triggerId))
             throw new EventTypeException("Invalid instance ID passed (" +
                                          tfe.getInstanceId() + ") expected " +
-                                         this.triggerId);
+                                         triggerId);
 
         EventTrackerLocal eTracker;
         
@@ -214,7 +207,7 @@ public class CounterTrigger extends AbstractTrigger
 
         try {
             // Now find out if we have the specified # within the interval
-            events = eTracker.getReferencedEventStreams(this.getId());
+            events = eTracker.getReferencedEventStreams(getId());
         } catch(Exception exc){
             throw new ActionExecuteException("Failed to get referenced " +
                                              "streams: " + exc);
@@ -223,7 +216,7 @@ public class CounterTrigger extends AbstractTrigger
         /* Make sure we only write once (either delete or add) in this function
            otherwise, we have to make sure that things are in the same
            user transaction, which is a pain */
-        if ((events.size() + 1) >= this.count){
+        if ((events.size() + 1) >= count){
             try {
                 // Get ready to fire, reset EventTracker
                 eTracker.deleteReference(getId());
@@ -234,9 +227,9 @@ public class CounterTrigger extends AbstractTrigger
 
             TriggerFiredEvent myEvent = new TriggerFiredEvent(getId(), event);
 
-            myEvent.setMessage("Event " + this.triggerId + " occurred " +
+            myEvent.setMessage("Event " + triggerId + " occurred " +
                                events.size() + " times within " +
-                               this.timeRange / 1000 + " seconds");
+                               timeRange / 1000 + " seconds");
             try {
                 super.fireActions(myEvent);
             } catch(Exception exc){
@@ -247,14 +240,14 @@ public class CounterTrigger extends AbstractTrigger
         else {
             // Throw it into the event tracker
             try {
-                eTracker.addReference(this.getId(), tfe, this.timeRange);
+                eTracker.addReference(getId(), tfe, timeRange);
             } catch(Exception exc){
                 throw new ActionExecuteException(
                     "Error adding event reference: " + exc);
             }
             
             // Now send a NotFired event
-            this.notFired();
+            notFired();
         }
     }
 }

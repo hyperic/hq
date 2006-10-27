@@ -75,7 +75,7 @@ public class DurationTrigger extends AbstractTrigger
     private boolean       savedInit  = false;
 
     public DurationTrigger(){
-        this.log = LogFactory.getLog(DurationTrigger.class);
+        log = LogFactory.getLog(DurationTrigger.class);
     }
 
     public ConfigSchema getConfigSchema() {
@@ -135,14 +135,14 @@ public class DurationTrigger extends AbstractTrigger
 
         try {
             ConfigResponse triggerData =
-                ConfigResponse.decode(this.getConfigSchema(),
+                ConfigResponse.decode(getConfigSchema(),
                                       tval.getConfig());
 
-            this.triggerId = 
+            triggerId = 
                 Integer.valueOf(triggerData.getValue(CFG_TRIGGER_ID));
-            this.count =
+            count =
                 Long.parseLong(triggerData.getValue(CFG_COUNT)) * 1000;
-            this.timeRange =
+            timeRange =
                 Long.parseLong(triggerData.getValue(CFG_TIME_RANGE)) * 1000;
         } catch(InvalidOptionException exc){
             throw new InvalidTriggerDataException(exc);
@@ -188,7 +188,7 @@ public class DurationTrigger extends AbstractTrigger
         }
         
         // Same set for both fired and not fired
-        return new Integer[] { this.triggerId };
+        return new Integer[] { triggerId };
     }
 
     /** 
@@ -218,10 +218,10 @@ public class DurationTrigger extends AbstractTrigger
 
         tfe = (AbstractEvent) event;
         if (!(tfe instanceof HeartBeatEvent) &&
-            !tfe.getInstanceId().equals(this.triggerId))
+            !tfe.getInstanceId().equals(triggerId))
             throw new EventTypeException("Invalid instance ID passed (" +
                                          tfe.getInstanceId() + ") expected " +
-                                         this.triggerId);
+                                         triggerId);
 
         // Let's see if we might fire, if we have some saved data
         if (savedInit) {
@@ -241,7 +241,7 @@ public class DurationTrigger extends AbstractTrigger
             }
         }
         
-        synchronized (this.lock) {
+        synchronized (lock) {
             EventTrackerLocal eTracker;
             
             try {
@@ -257,12 +257,12 @@ public class DurationTrigger extends AbstractTrigger
             
             try {
                 // Now find out if we have the specified # within the interval
-                events = eTracker.getReferencedEventStreams(this.getId());
+                events = eTracker.getReferencedEventStreams(getId());
                 savedInit = true;   // We've looked up previously saved events
                 savedTotal = 0;
                 
                 if (log.isDebugEnabled())
-                    log.debug("Look up events for trigger: " + this.getId());
+                    log.debug("Look up events for trigger: " + getId());
 
                 if (events.size() > 0) {
                     // Get the last event
@@ -316,10 +316,10 @@ public class DurationTrigger extends AbstractTrigger
                             total += (tfe.getTimestamp() - lastTick);
                         
                         // Not enough time
-                        if (total < this.count) {
+                        if (total < count) {
                             // Now send a NotFired event
                             if (!(tfe instanceof HeartBeatEvent)) {
-                                this.notFired();
+                                notFired();
                                 savedTotal = total;
                             }
                         } else {
@@ -331,7 +331,7 @@ public class DurationTrigger extends AbstractTrigger
                     track = !(tfe instanceof HeartBeatEvent) &&
                             !(last.getClass().equals(tfe.getClass()));
                 } else {
-                    this.notFired();
+                    notFired();
                     savedLast = null;
 
                     // Track if this is the very first fired event
@@ -352,13 +352,13 @@ public class DurationTrigger extends AbstractTrigger
             if (track) {
                 // Throw it into the event tracker with a buffer of 30 seconds
                 try {
-                    eTracker.addReference(this.getId(), tfe,
-                                          this.timeRange + 30000);
+                    eTracker.addReference(getId(), tfe,
+                                          timeRange + 30000);
                     savedLast = tfe;
                     
                     if (log.isDebugEnabled())
                         log.debug("Save last " + tfe.getClass() + " for id: " +
-                                  this.getId());
+                                  getId());
                 } catch (Exception exc) {
                     throw new ActionExecuteException(
                         "Error adding event reference: " + exc);
@@ -386,9 +386,9 @@ public class DurationTrigger extends AbstractTrigger
         TriggerFiredEvent myEvent =
             new TriggerFiredEvent(getId(), rootEvent);
 
-        myEvent.setMessage("Event " + this.triggerId + " occurred " +
-                           this.count / 1000 + " seconds within " +
-                           this.timeRange / 1000 + " seconds");
+        myEvent.setMessage("Event " + triggerId + " occurred " +
+                           count / 1000 + " seconds within " +
+                           timeRange / 1000 + " seconds");
         try {
             super.fireActions(myEvent);
         } catch (Exception exc) {

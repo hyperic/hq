@@ -59,17 +59,13 @@ import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.config.IntegerConfigOption;
 import org.hyperic.util.config.LongConfigOption;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /** The AvertTrigger is a specialized trigger that can combine multiple
  * conditions and only fire actions when all conditions have been met
  *
  */
 public class AvertTrigger extends AbstractTrigger
     implements RegisterableTriggerInterface {
-    private final Log log = LogFactory.getLog(AvertTrigger.class);
-
+    
     public static String CFG_INIT_TRIGGER  = "initTrigger";
     public static String CFG_AVERT_TRIGGER = "avertTrigger";
     public static String CFG_TIME_RANGE    = "timeRange";
@@ -111,7 +107,7 @@ public class AvertTrigger extends AbstractTrigger
                         etracker.deleteReference(getId());
 
                         // Send a NotFired event
-                        this.notFired();
+                        notFired();
                         return;
                     } else if (!getInitId().equals(event.getInstanceId())) {
                         // We don't do anything
@@ -223,7 +219,7 @@ public class AvertTrigger extends AbstractTrigger
     public Integer[] getInterestedInstanceIDs(Class c) {
         // Ask the sub triggers what they are interested in
         if (c.equals(TriggerFiredEvent.class)) {
-            return new Integer[] { this.initId, this.avertId };
+            return new Integer[] { initId, avertId };
         } else if (c.equals(HeartBeatEvent.class)) {
             // Want all of heartbeats
             return new Integer[] { RegisteredTriggers.KEY_ALL };
@@ -268,15 +264,15 @@ public class AvertTrigger extends AbstractTrigger
      *
      */
     public long getTimeRange() {
-        return this.timeRange;
+        return timeRange;
     }
     
     /** Setter for property timeRange.
      * @param timeRange New value of property timeRange.
      *
      */
-    public void setTimeRange(long timeRange) {
-        this.timeRange = timeRange;
+    public void setTimeRange(long val) {
+        timeRange = val;
     }
     
     /** Getter for property initId.
@@ -284,15 +280,15 @@ public class AvertTrigger extends AbstractTrigger
      *
      */
     public Integer getInitId() {
-        return this.initId;
+        return initId;
     }
     
     /** Setter for property initId.
      * @param initId New value of property initId.
      *
      */
-    public void setInitId(Integer initId) {
-        this.initId = initId;
+    public void setInitId(Integer val) {
+        initId = val;
     }
     
     /** Getter for property avertId.
@@ -300,15 +296,15 @@ public class AvertTrigger extends AbstractTrigger
      *
      */
     public Integer getAvertId() {
-        return this.avertId;
+        return avertId;
     }
     
     /** Setter for property avertId.
      * @param avertId New value of property avertId.
      *
      */
-    public void setAvertId(Integer avertId) {
-        this.avertId = avertId;
+    public void setAvertId(Integer val) {
+        avertId = val;
     }
     
 }

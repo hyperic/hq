@@ -56,17 +56,13 @@ import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.config.IntegerConfigOption;
 import org.hyperic.util.config.LongConfigOption;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /** The EscalateTrigger is a specialized trigger that can combine multiple
  * conditions and only fire actions when all conditions have been met
  *
  */
 public class EscalateTrigger extends AbstractTrigger
     implements RegisterableTriggerInterface {
-    private final Log log = LogFactory.getLog(EscalateTrigger.class);
-
+    
     private static String CFG_WATCH      = "watch";
     private static String CFG_AFTER      = "after";
     private static String CFG_TIME_RANGE = "timeRange";
@@ -103,7 +99,7 @@ public class EscalateTrigger extends AbstractTrigger
         TriggerFiredEvent tfe = null;
 
         try {
-            synchronized (this.lock) {
+            synchronized (lock) {
                 EventTrackerLocal eTracker =
                     EventTrackerUtil.getLocalHome().create();
 
@@ -162,7 +158,7 @@ public class EscalateTrigger extends AbstractTrigger
         }
         else {
             // Now send a NotFired event
-            this.notFired();
+            notFired();
         }
     }
 
@@ -205,7 +201,7 @@ public class EscalateTrigger extends AbstractTrigger
     public Integer[] getInterestedInstanceIDs(Class c) {
         // Ask the sub triggers what they are interested in
         if (c.equals(TriggerFiredEvent.class))
-            return new Integer[] { this.watchId };
+            return new Integer[] { watchId };
         
         return null;
     }
@@ -244,15 +240,15 @@ public class EscalateTrigger extends AbstractTrigger
      *
      */
     public long getAfter() {
-        return this.after;
+        return after;
     }
     
     /** Setter for property after.
      * @param after New value of property after.
      *
      */
-    public void setAfter(long after) {
-        this.after = after;
+    public void setAfter(long val) {
+        after = val;
     }
     
      /** Getter for property timeRange.
@@ -260,15 +256,15 @@ public class EscalateTrigger extends AbstractTrigger
      *
      */
     public long getTimeRange() {
-        return this.timeRange;
+        return timeRange;
     }
     
     /** Setter for property timeRange.
      * @param timeRange New value of property timeRange.
      *
      */
-    public void setTimeRange(long timeRange) {
-        this.timeRange = timeRange;
+    public void setTimeRange(long val) {
+        timeRange = val;
     }
     
     /** Getter for property watchId.
@@ -276,15 +272,15 @@ public class EscalateTrigger extends AbstractTrigger
      *
      */
     public Integer getWatchId() {
-        return this.watchId;
+        return watchId;
     }
     
     /** Setter for property watchId.
      * @param watchId New value of property watchId.
      *
      */
-    public void setWatchId(Integer watchId) {
-        this.watchId = watchId;
+    public void setWatchId(Integer val) {
+        watchId = val;
     }
     
 }

@@ -50,9 +50,6 @@ import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.config.LongConfigOption;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /** 
  * The CounterTrigger is a simple trigger which fires when a certain 
  * number of events have occurred within a given time window.
@@ -60,16 +57,12 @@ import org.apache.commons.logging.LogFactory;
 
 public class ConstantDurationTrigger extends AbstractTrigger
     implements RegisterableTriggerInterface, FrequencyTriggerInterface {
-    private static final String CFG_COUNT      = "count";
-
+    
     private Object  lock = new Object();
     private Integer triggerId;
     private long    timeRange;
-    private Log     log;
-
-    public ConstantDurationTrigger() {
-        this.log = LogFactory.getLog(ConstantDurationTrigger.class);
-    }
+    
+    public ConstantDurationTrigger() {}
 
     public ConfigSchema getConfigSchema() {
         ConfigSchema res = new ConfigSchema();
@@ -122,12 +115,12 @@ public class ConstantDurationTrigger extends AbstractTrigger
 
         try {
             ConfigResponse triggerData =
-                ConfigResponse.decode(this.getConfigSchema(),
+                ConfigResponse.decode(getConfigSchema(),
                                       tval.getConfig());
 
-            this.triggerId = 
+            triggerId = 
                 Integer.valueOf(triggerData.getValue(CFG_TRIGGER_ID));
-            this.timeRange =
+            timeRange =
                 Long.parseLong(triggerData.getValue(CFG_TIME_RANGE)) * 1000;
         } catch(InvalidOptionException exc){
             throw new InvalidTriggerDataException(exc);
@@ -167,7 +160,7 @@ public class ConstantDurationTrigger extends AbstractTrigger
      */
     public Integer[] getInterestedInstanceIDs(Class c) {
         // Same set for both fired and not fired
-        return new Integer[] { this.triggerId };
+        return new Integer[] { triggerId };
     }
 
     /** 
@@ -177,7 +170,6 @@ public class ConstantDurationTrigger extends AbstractTrigger
      */
     public void processEvent(AbstractEvent event)
         throws EventTypeException, ActionExecuteException {
-        StringBuffer message = new StringBuffer();
         AbstractEvent tfe;
         List events;
 
@@ -189,13 +181,13 @@ public class ConstantDurationTrigger extends AbstractTrigger
                 "or TriggerNotFiredEvent");
 
         tfe = (AbstractEvent) event;
-        if(!tfe.getInstanceId().equals(this.triggerId))
+        if(!tfe.getInstanceId().equals(triggerId))
             throw new EventTypeException("Invalid instance ID passed (" +
                                          tfe.getInstanceId() + ") expected " +
-                                         this.triggerId);
+                                         triggerId);
 
         TriggerFiredEvent myEvent = null;
-        synchronized (this.lock) {
+        synchronized (lock) {
             EventTrackerLocal eTracker;
             
             try {
@@ -213,7 +205,7 @@ public class ConstantDurationTrigger extends AbstractTrigger
                 else {
                     // Now find out if we have a long enough duration
                     events =
-                        eTracker.getReferencedEventStreams(this.getId());
+                        eTracker.getReferencedEventStreams(getId());
 
                     if (events.size() > 0) {
                         // We only need the first event
@@ -227,13 +219,13 @@ public class ConstantDurationTrigger extends AbstractTrigger
                             tfe.getTimestamp() - last.getTimestamp();
                         
                         // See if we've exceeded the time range
-                        if (duration >= this.timeRange)
+                        if (duration >= timeRange)
                             myEvent = new TriggerFiredEvent(getId(), event);
                     }
                     
                     // Track it in the event tracker for twice the time range
-                    eTracker.addReference(this.getId(), tfe,
-                                               this.timeRange * 2);
+                    eTracker.addReference(getId(), tfe,
+                                               timeRange * 2);
                 }
             } catch (Exception exc) {
                 throw new ActionExecuteException(
@@ -241,7 +233,7 @@ public class ConstantDurationTrigger extends AbstractTrigger
             }
 
             if (myEvent == null) {            
-                this.notFired();
+                notFired();
                 return;
             }
             
@@ -253,8 +245,8 @@ public class ConstantDurationTrigger extends AbstractTrigger
                     "Failed to delete referenced" + " events: " + exc);
             }
 
-            myEvent.setMessage("Event " + this.triggerId + " occurred " +
-                               " for " + this.timeRange / 1000 +" seconds");
+            myEvent.setMessage("Event " + triggerId + " occurred " +
+                               " for " + timeRange / 1000 +" seconds");
             try {
                 super.fireActions(myEvent);
             } catch (Exception exc) {

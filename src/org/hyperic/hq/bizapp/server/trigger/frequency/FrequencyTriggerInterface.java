@@ -29,13 +29,6 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
 
-/**
- * Created by IntelliJ IDEA.
- * User: charles
- * Date: Jan 20, 2003
- * Time: 3:19:48 PM
- * To change this template use Options | File Templates.
- */
 public interface FrequencyTriggerInterface {
     public static final String CFG_TRIGGER_ID = "triggerId";
     public static final String CFG_TIME_RANGE = "timeRange";
@@ -49,7 +42,6 @@ public interface FrequencyTriggerInterface {
      * @throws InvalidOptionException
      * @throws InvalidOptionValueException
      */
-    public ConfigResponse getConfigResponse(Integer tid,
-                                            long range, long count)
+    public ConfigResponse getConfigResponse(Integer tid, long range, long count)
         throws InvalidOptionException, InvalidOptionValueException;
 }
