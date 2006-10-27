@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.measurement;
 
+import org.hyperic.hq.measurement.shared.BaselineValue;
+
 import org.hyperic.hibernate.PersistedObject;
 
 public class Baseline extends PersistedObject
@@ -57,8 +59,7 @@ public class Baseline extends PersistedObject
         _minExpectedVal = minExpectedVal;
         _maxExpectedVal = maxExpectedVal;
     }
-    
-   
+
     // Property accessors
     public DerivedMeasurement getDerivedMeasurement() {
         return _derivedMeasurement;
@@ -106,6 +107,18 @@ public class Baseline extends PersistedObject
     
     public void setMaxExpectedVal(double maxExpectedVal) {
         _maxExpectedVal = maxExpectedVal;
+    }
+
+    public BaselineValue getBaselineValue() {
+        BaselineValue b = new BaselineValue();
+        b.setId(getId());
+        b.setMeasurementId(getDerivedMeasurement().getId());
+        b.setComputeTime(getComputeTime());
+        b.setUserEntered(isUserEntered());
+        b.setMean(new Double(getMean()));
+        b.setMinExpectedValue(new Double(getMinExpectedVal()));
+        b.setMaxExpectedValue(new Double(getMaxExpectedVal()));
+        return b;
     }
 }
 
