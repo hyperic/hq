@@ -42,7 +42,7 @@ public class Resource extends AuthzNamedEntity
     private Integer instanceId;
     private Integer cid;
     private AuthzSubject owner;
-    private boolean system;
+    private boolean system = false;
     private Collection resourceGroups = new ArrayList();
 
     private ResourceValue resourceValue = new ResourceValue();

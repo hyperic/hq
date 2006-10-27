@@ -47,8 +47,7 @@
     </property>
 
     <property name="system" type="boolean">
-      <column name="FSYSTEM" not-null="false" dialect="PostgreSQL" default="false"/>
-      <column name="FSYSTEM" not-null="false" dialect="Oracle, Oracle9" default="0"/>
+      <column name="FSYSTEM" not-null="false" />
     </property>
 
     <bag name="resourceGroups" table="EAM_RES_GRP_RES_MAP">
