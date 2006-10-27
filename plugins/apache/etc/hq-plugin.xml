@@ -822,6 +822,10 @@ ExtendedStatus On
   <server name="Apache"
           version="2.2"
           include="2.0">
+
+    <scan registry="SOFTWARE\Apache Software Foundation\Apache\2.2.*">
+      <include name="ServerRoot"/>
+    </scan>
   </server>
 
   <server name="Apache-ERS"

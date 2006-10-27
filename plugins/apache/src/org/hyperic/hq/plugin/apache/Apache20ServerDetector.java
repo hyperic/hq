@@ -53,7 +53,21 @@ public class Apache20ServerDetector
             path = path.substring(0, path.length()-1);
         }
 
-        String binary = path + "/bin/Apache.exe";
+        String binary = null;
+
+        for (int i=0; i<WIN32_EXES.length; i++) {
+            File exe =
+                new File(path, "/bin/" + WIN32_EXES[i] + ".exe");
+
+            if (exe.exists()) {
+                binary = exe.getPath();
+                break;
+            }
+        }
+        if (binary == null){
+            return null;
+        }
+
         return getServerList(path, current.getSubKeyName(),
                              ApacheBinaryInfo.getInfo(binary));
     }
