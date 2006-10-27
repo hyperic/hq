@@ -629,6 +629,82 @@
   ]]>
   </help>
 
+  <server name="Apache httpd"
+          platforms="Unix,Win32">
+
+    <property name="DEFAULT_CONF_FILE"
+              value="conf/httpd.conf"/>
+
+    <property name="DEFAULT_LOG_FILE"
+              value="logs/error_log"/>
+
+    <!-- override default url.path -->
+    <property name="path" value="/server-status"/>
+
+    <config include="url"/>
+
+    <properties>
+       <property name="version"
+                 description="Apache Version"/>
+       <property name="exe"
+                 description="Server Executable"/>
+       <property name="serverTokens"
+                 description="Server Tokens"/>
+       <property name="built"
+                 description="Server Built"/>
+       <property name="serverAdmin"
+                 description="Server Admin"/>
+    </properties>
+
+    <plugin type="log_track"
+            class="ApacheErrorLogPlugin"/>
+
+    <plugin type="config_track"
+            class="ApacheConfigTrackPlugin"/>
+
+    <plugin type="control"
+            class="ApacheControlPlugin"/>
+
+    <actions include="start,stop,restart,graceful,startssl,configtest"/>
+
+    <plugin type="control"
+            platform="Win32"
+            class="org.hyperic.hq.product.Win32ControlPlugin"/>
+
+    <actions platform="Win32"
+             include="start,stop,restart"/>
+
+    <config type="control" platform="Win32">
+      <option name="service_name"
+              default="Apache2"
+              description="Apache Service Name"/>
+    </config>
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+    <plugin type="collector"
+            class="ApacheStatusCollector"/>
+
+    <metrics include="apache-status"/>
+
+    <help>
+    <![CDATA[
+The mod_status module must be installed to monitor this server type.
+Example Apache configuration:
+<pre>
+ExtendedStatus On
+&lt;Location /server-status&gt;
+    SetHandler server-status
+    Order deny,allow
+    Deny from all
+    Allow from localhost
+&lt;/Location&gt;
+</pre>
+    ]]>
+    </help>
+  </server>
+
   <server name="Apache"
           description="Web Server"
           version="1.3"
@@ -802,81 +878,5 @@
     <scan>
       <include name="/**/${VERSION_FILE}"/>
     </scan>
-  </server>
-
-  <server name="Apache httpd"
-          platforms="Unix,Win32">
-
-    <property name="DEFAULT_CONF_FILE"
-              value="conf/httpd.conf"/>
-
-    <property name="DEFAULT_LOG_FILE"
-              value="logs/error_log"/>
-
-    <!-- override default url.path -->
-    <property name="path" value="/server-status"/>
-
-    <config include="url"/>
-
-    <properties>
-       <property name="version"
-                 description="Apache Version"/>
-       <property name="exe"
-                 description="Server Executable"/>
-       <property name="serverTokens"
-                 description="Server Tokens"/>
-       <property name="built"
-                 description="Server Built"/>
-       <property name="serverAdmin"
-                 description="Server Admin"/>
-    </properties>
-
-    <plugin type="log_track"
-            class="ApacheErrorLogPlugin"/>
-
-    <plugin type="config_track"
-            class="ApacheConfigTrackPlugin"/>
-
-    <plugin type="control"
-            class="ApacheControlPlugin"/>
-
-    <actions include="start,stop,restart,graceful,startssl,configtest"/>
-
-    <plugin type="control"
-            platform="Win32"
-            class="org.hyperic.hq.product.Win32ControlPlugin"/>
-
-    <actions platform="Win32"
-             include="start,stop,restart"/>
-
-    <config type="control" platform="Win32">
-      <option name="service_name"
-              default="Apache2"
-              description="Apache Service Name"/>
-    </config>
-
-    <plugin type="measurement"
-            class="org.hyperic.hq.product.MeasurementPlugin"/>
-
-    <plugin type="collector"
-            class="ApacheStatusCollector"/>
-
-    <metrics include="apache-status"/>
-
-    <help>
-    <![CDATA[
-The mod_status module must be installed to monitor this server type.
-Example Apache configuration:
-<pre>
-ExtendedStatus On
-&lt;Location /server-status&gt;
-    SetHandler server-status
-    Order deny,allow
-    Deny from all
-    Allow from localhost
-&lt;/Location&gt;
-</pre>
-    ]]>
-    </help>
   </server>
 </plugin>
