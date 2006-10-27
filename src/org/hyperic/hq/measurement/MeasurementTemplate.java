@@ -42,9 +42,9 @@ public class MeasurementTemplate extends PersistedObject
     private String _alias;
     private String _units;
     private int _collectionType;
-    private boolean _defaultOn;
+    private boolean _defaultOn = false;
     private long _defaultInterval;
-    private boolean _designate;
+    private boolean _designate = false;
     private String _template;
     private String _plugin;
     private byte[] _expressionData;

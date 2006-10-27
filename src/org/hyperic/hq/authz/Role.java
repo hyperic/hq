@@ -35,20 +35,17 @@ import org.hyperic.hq.authz.values.OwnedRoleValue;
 
 public class Role extends AuthzNamedEntity {
 
-    // Fields    
+    // Fields
+    private Integer cid;
+    private String description;
+    private boolean system = false;
+    private Resource resource;
+    private Collection resourceGroups = new ArrayList();
+    private Collection operations = new ArrayList();
+    private Collection subjects = new ArrayList();
+    private RoleValue roleValue = new RoleValue();
 
-     private Integer cid;
-     private String description;
-     private boolean system;
-     private Resource resource;
-     private Collection resourceGroups = new ArrayList();
-     private Collection operations = new ArrayList();
-     private Collection subjects = new ArrayList();
-
-     private RoleValue roleValue = new RoleValue();
-     
-     // Constructors
-
+    // Constructors
     /** default constructor */
     public Role() {
         super();

@@ -31,7 +31,7 @@ public class DerivedMeasurement extends Measurement
     implements java.io.Serializable {
 
     // Fields    
-    private boolean _enabled;
+    private boolean _enabled = true;
     private long _interval;
     private String _formula;
 

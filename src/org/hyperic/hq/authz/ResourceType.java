@@ -35,7 +35,7 @@ public class ResourceType extends AuthzNamedEntity
 {
     private Integer cid;
     private Resource resource;
-    private boolean system;
+    private boolean system = false;
     private Collection operations = new ArrayList();
     private Collection resources = new ArrayList();
 

@@ -43,7 +43,7 @@ public class AppService extends AppdefBean
     private Application application;
     private boolean isCluster;
     private String modifiedBy;
-    private boolean isEntryPoint;
+    private boolean isEntryPoint = true;
     private ServiceType serviceType;
     private Collection appSvcDependencies;
 

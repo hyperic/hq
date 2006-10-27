@@ -36,7 +36,7 @@ public class ResourceGroup extends AuthzNamedEntity
     private Integer cid;
     private String description;
     private String location;
-    private boolean system;
+    private boolean system = false;
     private Integer groupType;
     private Integer groupEntType;
     private Integer groupEntResType;

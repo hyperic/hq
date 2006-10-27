@@ -33,7 +33,7 @@ public class Baseline extends PersistedObject
     // Fields
     private DerivedMeasurement _derivedMeasurement;
     private long _computeTime;
-    private boolean _userEntered;
+    private boolean _userEntered = false;
     private double _mean;
     private double _minExpectedVal;
     private double _maxExpectedVal;

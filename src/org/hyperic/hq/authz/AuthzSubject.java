@@ -43,8 +43,8 @@ public class AuthzSubject extends AuthzNamedEntity
     private String smsAddress;
     private String phoneNumber;
     private String department;
-    private boolean active;
-    private boolean system;
+    private boolean active = true;
+    private boolean system = false;
     private Resource resource;
     private Collection roles = new ArrayList();
     private Collection userConfigs = new ArrayList();

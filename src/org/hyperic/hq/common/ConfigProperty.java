@@ -38,7 +38,7 @@ public class ConfigProperty extends PersistedObject
     private String key;
     private String value;
     private String defaultValue;
-    private boolean readOnly;
+    private boolean readOnly = false;
 
     // Constructors
 
