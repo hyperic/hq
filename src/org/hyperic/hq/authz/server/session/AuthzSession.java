@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import java.lang.reflect.Array;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.dao.AuthzSubjectDAO;
 import org.hyperic.hibernate.dao.OperationDAO;
@@ -50,11 +52,11 @@ import org.hyperic.hibernate.dao.ResourceTypeDAO;
 import org.hyperic.hibernate.dao.RoleDAO;
 import org.hyperic.hq.authz.AuthzNamedEntity;
 import org.hyperic.hq.authz.AuthzSubject;
+import org.hyperic.hq.authz.Operation;
 import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.ResourceGroup;
 import org.hyperic.hq.authz.ResourceType;
 import org.hyperic.hq.authz.Role;
-import org.hyperic.hq.authz.Operation;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocalHome;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
@@ -77,7 +79,6 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
-import org.hibernate.ObjectNotFoundException;
 
 /**
  * This is the parent class for all Authz Session Beans
@@ -299,7 +300,7 @@ public abstract class AuthzSession {
     }
     
     protected Object[] fromPojos(Collection pojos, Class c) {
-        Object[] values = new Object[pojos.size()];
+        Object[] values = (Object[]) Array.newInstance(c, pojos.size());
         
         int i = 0;
         for (Iterator it = pojos.iterator(); it.hasNext(); i++) {
