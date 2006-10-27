@@ -41,8 +41,7 @@
 
     <subclass name="DerivedMeasurement" extends="Measurement" discriminator-value="D">
       <property name="enabled" type="boolean">
-        <column name="ENABLED" not-null="true" dialect="PostgreSQL" default="true"/>
-        <column name="ENABLED" not-null="true" dialect="Oracle, Oracle9" default="1"/>
+        <column name="ENABLED" not-null="true" />
       </property>
       <property name="interval" type="long">
         <column name="COLL_INTERVAL" />
@@ -96,8 +95,7 @@
     </property>
 
     <property name="defaultOn" type="boolean">
-      <column name="DEFAULT_ON" not-null="true" dialect="PostgreSQL" default="false" />
-      <column name="DEFAULT_ON" not-null="true" dialect="Oracle, Oracle9" default="0" />
+      <column name="DEFAULT_ON" not-null="true" />
     </property>
 
     <property name="defaultInterval" type="long">
@@ -105,8 +103,7 @@
     </property>
 
     <property name="designate" type="boolean">
-      <column name="DESIGNATE" not-null="true" dialect="PostgreSQL" default="false" />
-      <column name="DESIGNATE" not-null="true" dialect="Oracle, Oracle9" default="0" />
+      <column name="DESIGNATE" not-null="true" />
     </property>
 
     <property name="template" type="string">

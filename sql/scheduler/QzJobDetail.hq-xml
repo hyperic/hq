@@ -32,8 +32,7 @@
     </property>
 
     <property name="isDurable" type="boolean">
-      <column name="IS_DURABLE" not-null="true" dialect="PostgreSQL" default="false" />
-      <column name="IS_DURABLE" not-null="true" dialect="Oracle, Oracle9" default="0" />
+      <column name="IS_DURABLE" not-null="true" />
     </property>
 
     <property name="isVolatile" type="boolean">
@@ -41,13 +40,11 @@
     </property>
 
     <property name="isStateful" type="boolean">
-      <column name="IS_STATEFUL" not-null="true" dialect="PostgreSQL" default="false" />
-      <column name="IS_STATEFUL" not-null="true" dialect="Oracle, Oracle9" default="0" />
+      <column name="IS_STATEFUL" not-null="true" />
     </property>
 
     <property name="requestsRecovery" type="boolean">
-      <column name="REQUESTS_RECOVERY" not-null="true" dialect="PostgreSQL" default="false" />
-      <column name="REQUESTS_RECOVERY" not-null="true" dialect="Oracle, Oracle9" default="0" />
+      <column name="REQUESTS_RECOVERY" not-null="true" />
     </property>
 
     <property name="jobData" lazy="true" type="binary">

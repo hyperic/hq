@@ -37,8 +37,7 @@
     </property>
 
     <property name="readOnly" type="boolean">
-      <column name="FREAD_ONLY" dialect="PostgreSQL" default="false" />
-      <column name="FREAD_ONLY" dialect="Oracle, Oracle9" default="0" />
+      <column name="FREAD_ONLY" not-null="false" />
     </property>
 
   </class>

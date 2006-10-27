@@ -31,8 +31,7 @@
     </property>
 
     <property name="userEntered" type="boolean">
-      <column name="USER_ENTERED" not-null="true" dialect="PostgreSQL" default="false" />
-      <column name="USER_ENTERED" not-null="true" dialect="Oracle, Oracle9" default="0" />
+      <column name="USER_ENTERED" not-null="true" />
     </property>
 
     <property name="mean" type="double">
