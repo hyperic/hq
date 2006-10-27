@@ -219,14 +219,8 @@ public abstract class AppdefSessionEJB
         if (log.isDebugEnabled())
             log.debug("Creating Authz Resource Type: " + resTypeVal +
                       " id: " + id + " by: " + who);
-        try {
-        	getResourceManager().createResource(who, resTypeVal, id,
-                                                name, fsystem);
-        } catch (FinderException e) {
-        	throw new SystemException(e);
-        } catch (NamingException e) {
-        	throw new SystemException(e);
-        }
+        getResourceManager().createResource(who, resTypeVal, id,
+                                            name, fsystem);
     }
 
     /**
@@ -239,8 +233,6 @@ public abstract class AppdefSessionEJB
         try {
             ResourceManagerUtil.getLocalHome().create().saveResource(rv); 
         } catch (CreateException e) {
-            throw new UpdateException(e);
-        } catch (FinderException e) {
             throw new UpdateException(e);
         }
     }

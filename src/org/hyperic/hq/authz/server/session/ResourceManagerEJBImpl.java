@@ -134,8 +134,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @ejb:interface-method
      */
     public void removeResourceType(AuthzSubjectValue whoami,
-                                   ResourceTypeValue type)
-        throws RemoveException {
+                                   ResourceTypeValue type) {
         ResourceTypeDAO dao = DAOFactory.getDAOFactory().getResourceTypeDAO();
         ResourceType rt = dao.findById(type.getId());
         // flush VOCache
@@ -280,8 +279,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     public ResourcePK createResource(AuthzSubjectValue whoami,
                                      ResourceTypeValue rtv,
                                      Integer instanceId,
-                                     String name)
-        throws NamingException, CreateException, FinderException {
+                                     String name) {
         return createResource(whoami, rtv, instanceId, name, false);
     }
     
@@ -295,8 +293,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                      ResourceTypeValue rtv,
                                      Integer instanceId,
                                      String name,
-                                     boolean system)
-        throws NamingException, CreateException, FinderException {
+                                     boolean system) {
         AuthzSubject owner =
             getSubjectDAO().findByAuth(whoami.getName(),
                                        whoami.getAuthDsn());
@@ -405,8 +402,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @exception FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
      */
-    public void saveResource(ResourceValue res)
-        throws NamingException, FinderException {
+    public void saveResource(ResourceValue res) {
         Resource resource = this.lookupResourcePojo(res);
         resource.setResourceValue(res);
         VOCache.getInstance().removeResource(res.getId());
@@ -460,12 +456,11 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public List getAllResourceTypes(AuthzSubjectValue subject, PageControl pc)
-        throws NamingException, CreateException, FinderException,
-            PermissionException {
+    public List getAllResourceTypes(AuthzSubjectValue subject, PageControl pc) {
         Collection resTypes = getResourceTypeDAO().findAll();
         pc = PageControl.initDefaults(pc, SortAttribute.RESTYPE_NAME);
-        return resourceTypePager.seek(resTypes, pc.getPagenum(), pc.getPagesize());
+        return resourceTypePager.seek(resTypes, pc.getPagenum(),
+                                      pc.getPagesize());
     }
 
     /**
@@ -500,38 +495,27 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @ejb:interface-method
      * @ejb:transaction type="Required" 
      */
-    public Map findAllViewableInstances(AuthzSubjectValue subject)
-        throws FinderException {
+    public Map findAllViewableInstances(AuthzSubjectValue subject) {
         // First get all resource types
         HashMap resourceMap = new HashMap();
     
-        try {
-            Collection resTypes =
-                this.getAllResourceTypes(subject, PageControl.PAGE_ALL);
-            for (Iterator it = resTypes.iterator(); it.hasNext(); ) {
-                ResourceTypeValue type = (ResourceTypeValue) it.next();
-    
-                String typeName = type.getName();
-                        
-                // Now fetch list by the type
-                List ids = this.findViewableInstances(subject, 
-                                                      typeName, 
-                                                      null, 
-                                                      PageControl.PAGE_ALL);
-                if (ids.size() > 0)
-                    resourceMap.put(typeName, ids);
-            }
-        
-            return resourceMap;
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (PermissionException e) {
-            // Swallow permission exception and return empty map, because we
-            // should only return things the subject can view
-            return resourceMap;
+        Collection resTypes =
+            getAllResourceTypes(subject, PageControl.PAGE_ALL);
+        for (Iterator it = resTypes.iterator(); it.hasNext(); ) {
+            ResourceTypeValue type = (ResourceTypeValue) it.next();
+   
+            String typeName = type.getName();
+                    
+            // Now fetch list by the type
+            List ids = this.findViewableInstances(subject, 
+                                                  typeName, 
+                                                  null, 
+                                                  PageControl.PAGE_ALL);
+            if (ids.size() > 0)
+                resourceMap.put(typeName, ids);
         }
+      
+        return resourceMap;
     }
 
     /**

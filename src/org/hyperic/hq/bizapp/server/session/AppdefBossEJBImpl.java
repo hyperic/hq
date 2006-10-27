@@ -2662,50 +2662,45 @@ public class AppdefBossEJBImpl
     {
         List appentResources = new ArrayList();
 
-        try {
-            ResourceManagerLocal resMgr = getResourceManager();
+        ResourceManagerLocal resMgr = getResourceManager();
 
-            if (appdefTypeId != APPDEF_TYPE_UNDEFINED) {
-                String authzResType = 
-                    AppdefUtil.appdefTypeIdToAuthzTypeStr(appdefTypeId);
+        if (appdefTypeId != APPDEF_TYPE_UNDEFINED) {
+            String authzResType = 
+                AppdefUtil.appdefTypeIdToAuthzTypeStr(appdefTypeId);
 
-                List instanceIds =
-                    resMgr.findViewableInstances(subject, authzResType, rName, 
-                                                 pc);
-                
-                for (Iterator i = instanceIds.iterator(); i.hasNext(); ) {
-                    appentResources.add(new AppdefEntityID(appdefTypeId, 
-                                                           (Integer)i.next()));
-                }
-            } else {
-                Map authzResources = resMgr.findAllViewableInstances(subject);
-                for (Iterator it = authzResources.entrySet().iterator();
-                     it.hasNext(); ) 
-                {
-                    Map.Entry entry = (Map.Entry) it.next();
-                    
-                    int appdefType;
-                    try {
-                        String typeName = (String) entry.getKey();
-                        appdefType = AppdefUtil.resNameToAppdefTypeId(typeName);
-                    } catch (InvalidAppdefTypeException e) {
-                        // ignore type
-                        continue;
-                    }
-                    
-                    List instIds = (List) entry.getValue();
-                    
-                    Iterator instIdsIt = instIds.iterator();
-                    for (int i = 0; instIdsIt.hasNext(); i++) {
-                        Integer instId = (Integer) instIdsIt.next();
-                        appentResources.add(new AppdefEntityID(appdefType, 
-                                                               instId));
-                    }
-                 }
+            List instanceIds =
+                resMgr.findViewableInstances(subject, authzResType, rName, 
+                                             pc);
+            
+            for (Iterator i = instanceIds.iterator(); i.hasNext(); ) {
+                appentResources.add(new AppdefEntityID(appdefTypeId, 
+                                                       (Integer)i.next()));
             }
-        } catch (FinderException e) {
-            log.debug("Caught harmless exception finding viewable "+
-                       "resources:"+e.getMessage());
+        } else {
+            Map authzResources = resMgr.findAllViewableInstances(subject);
+            for (Iterator it = authzResources.entrySet().iterator();
+                 it.hasNext(); ) 
+            {
+                Map.Entry entry = (Map.Entry) it.next();
+                
+                int appdefType;
+                try {
+                    String typeName = (String) entry.getKey();
+                    appdefType = AppdefUtil.resNameToAppdefTypeId(typeName);
+                } catch (InvalidAppdefTypeException e) {
+                    // ignore type
+                    continue;
+                }
+                
+                List instIds = (List) entry.getValue();
+                
+                Iterator instIdsIt = instIds.iterator();
+                for (int i = 0; instIdsIt.hasNext(); i++) {
+                    Integer instId = (Integer) instIdsIt.next();
+                    appentResources.add(new AppdefEntityID(appdefType, 
+                                                           instId));
+                }
+             }
         }
         return appentResources;
     }
