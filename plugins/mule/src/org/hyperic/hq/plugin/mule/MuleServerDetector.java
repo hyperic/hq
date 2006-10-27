@@ -1,19 +1,35 @@
 package org.hyperic.hq.plugin.mule;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.jmx.MxServerDetector;
+import org.hyperic.hq.product.jmx.MxUtil;
+import org.hyperic.util.config.ConfigResponse;
+import org.w3c.dom.Document;
 
 public class MuleServerDetector extends MxServerDetector {
     private static final String URL_EXPR =
         "//property[@name=\"connectorServerUrl\"]/@value";
+
+    private static final String ID_EXPR =
+        "/mule-configuration/@id";
 
     private static final String PROP_WRAPPER_PID =
         "-Dwrapper.pid=";
 
     private static final String PROP_WRAPPER_CWD =
         "wrapper.working.dir=";
+
+    private static final String PROP_DOMAIN = "domain";
+
+    private static final String DOMAIN_PREFIX = "Mule";
+
+    private Map _ids = new HashMap();
 
     //attempt to find the xml config file for this server
     //1.3 has a wrapper parent process with the working.dir
@@ -55,9 +71,15 @@ public class MuleServerDetector extends MxServerDetector {
         }
 
         if (configFile.exists()) {
-            String url = getXPathValue(configFile, URL_EXPR);
-            if ((url != null) && (url.length() != 0)) {
+            try {
+                Document doc = getDocument(configFile);
+                String url = getXPathValue(doc, URL_EXPR);
                 process.setURL(url);
+                getLog().debug(configFile + " jmx.url=" + url);
+                String id = getXPathValue(doc, ID_EXPR);
+                _ids.put(url, id);
+            } catch (IOException e) {
+                getLog().error("Error parsing: " + configFile, e);
             }
         }
     }
@@ -73,5 +95,22 @@ public class MuleServerDetector extends MxServerDetector {
         }
 
         return procs;
+    }
+
+    protected void setProductConfig(ServerResource server,
+                                    ConfigResponse config) {
+
+        String url = config.getValue(MxUtil.PROP_JMX_URL);
+        String id = (String)_ids.get(url);
+        if (id == null) {
+            //Using the default jmx service url
+            id = (String)_ids.get(null);
+        }
+        if (id != null) {
+            config.setValue(PROP_DOMAIN,
+                            DOMAIN_PREFIX + "." + id);
+        }
+
+        super.setProductConfig(server, config);
     }
 }
