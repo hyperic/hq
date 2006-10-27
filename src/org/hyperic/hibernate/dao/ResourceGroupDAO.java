@@ -122,7 +122,7 @@ public class ResourceGroupDAO extends HibernateDAO
     public Collection findByRoleIdAndSystem_orderName(Integer roleId,
                                                          boolean system,
                                                          boolean asc) {            
-        String sql = "from ResourceGroup g join fetch g.roles r " +
+        String sql = "select g from ResourceGroup g join fetch g.roles r " +
                      "where r.id = ? and g.system = ? order by g.sortName " +
                      (asc ? "asc" : "desc");
         return getSession().createQuery(sql)
@@ -141,7 +141,8 @@ public class ResourceGroupDAO extends HibernateDAO
     public Collection findByNotRoleId_orderName(Integer roleId, boolean asc)
     {
         return getSession()
-            .createQuery("from ResourceGroup g where g.id not in " +
+            .createQuery("select disctinct g from ResourceGroup g " +
+                         "where g.id not in " +
                          "(select g2.id from ResourceGroup g2 join " +
                          "fetch g2.roles r where r.id = ? ) and " +
                          "g.system = false order by g.sortName " +
@@ -155,8 +156,8 @@ public class ResourceGroupDAO extends HibernateDAO
                                                boolean asc)
     {
 
-        String sql="from Resource r " +
-                   " join fetch r.resourceGroups rg " +
+        String sql="select distinct rg from ResourceGroup rg " +
+                   " join fetch rg.resources r " +
                    "where r.instanceId=? and " +
                    " r.resourceType.id=? " +
                    "order by rg.sortName " +

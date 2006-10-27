@@ -476,7 +476,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         Collection serviceTypes =
             getServiceTypeDAO().findByServerType_orderName(serverTypeId, true);
         if (serviceTypes.size() == 0) {
-            throw new SystemException(serverTypeId+"");
+            return new PageList();
         }
         return valuePager.seek(serviceTypes, pc);
     }
@@ -491,7 +491,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         Collection serviceTypes = getServiceTypeDAO()
                 .findVirtualServiceTypesByPlatform(platformId.intValue());
         if (serviceTypes.size() == 0) {
-            throw new SystemException(platformId+"");
+            return new PageList();
         }
         return valuePager.seek(serviceTypes, pc);
     }
@@ -996,11 +996,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             }
             break;
         }
-        if (services.size() == 0) {
-            throw new ServiceNotFoundException(
-                "No services found for server " +
-                serverId + " of type " + svcTypeId);
-        }
         // Reverse the list if descending
         if (pc != null && pc.isDescending()) {
             Collections.reverse(services);
@@ -1028,11 +1023,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         else {
             services = getServiceDAO()
                 .findByServerAndType_orderName(serverId, svcTypeId);
-        }
-        if (services.size() == 0) {
-            throw new ServiceNotFoundException(
-                "No services found for server " +
-                serverId + " of type " + svcTypeId);
         }
 
         // Filter the unviewables
