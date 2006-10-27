@@ -207,4 +207,8 @@
     <column name="RECOVERER" type="VARCHAR2" size="80" required="false"/>
   </table>
 
+  <table name="EAM_QRTZ_LOCKS">
+    <column name="LOCK_NAME" primarykey="true" type="VARCHAR2" size="40" required="true"/>
+  </table>
+
 </Covalent.DBSetup>

@@ -3,7 +3,6 @@
                   notice="DBSetup, Copyright (C) 2002, Covalent Technologies, Inc., All Rights Reserved.">
 
   <table name="EAM_QRTZ_LOCKS">
-    <column name="LOCK_NAME" primarykey="true" type="VARCHAR2" size="40" required="true"/>
     <data LOCK_NAME="TRIGGER_ACCESS" />
     <data LOCK_NAME="JOB_ACCESS" />
     <data LOCK_NAME="CALENDAR_ACCESS" />
