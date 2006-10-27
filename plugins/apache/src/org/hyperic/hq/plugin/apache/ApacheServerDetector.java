@@ -71,8 +71,16 @@ public class ApacheServerDetector
         "State.Name.eq=httpd2-prefork,State.Name.Pne=$1",
     };
 
+    private static final String SERVICE_ARGS =
+        ",Args.1.Peq=-k,Args.2.Peq=runservice";
+
+    static final String[] WIN32_EXES = {
+        "Apache", "httpd"
+    };
+
     static final String[] PTQL_QUERIES_WIN32 = {
-        "State.Name.eq=Apache,Args.1.Peq=-k,Args.2.Peq=runservice",
+        "State.Name.eq=" + WIN32_EXES[0] + SERVICE_ARGS,
+        "State.Name.eq=" + WIN32_EXES[1] + SERVICE_ARGS,
     };
 
     private static Log log = LogFactory.getLog("ApacheServerDetector");
