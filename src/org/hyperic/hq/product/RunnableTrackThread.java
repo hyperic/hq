@@ -115,7 +115,11 @@ class RunnableTrackThread implements Runnable {
                  it.hasNext();)
             {
                 Runnable watcher = (Runnable)it.next();
-                watcher.run();
+                try {
+                    watcher.run();
+                } catch (Exception e) {
+                    log.error("Unexpected exception: " + e, e);
+                }
             }
         }
     }
