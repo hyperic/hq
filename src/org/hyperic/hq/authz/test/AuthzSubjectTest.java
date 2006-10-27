@@ -38,9 +38,6 @@ public class AuthzSubjectTest extends HQEJBTestBase {
         subject.setAuthDsn(HQConstants.ApplicationName);
 
         AuthzSubjectPK pk = zMan.createSubject(overlord, subject);
-        System.out.println("Trigger: " + pk);
-        System.out.println("All: " + zMan.getAllSubjects(overlord,
-                                                         PageControl.PAGE_ALL));
         assertEquals(numSubjects + 1,
                      zMan.getAllSubjects(overlord,
                                          PageControl.PAGE_ALL).size());
