@@ -82,7 +82,7 @@ public class PrincipalDAO extends HibernateDAO
 
     public Principal findByUsername(String s)
     {
-        String sql = "from Principals where principal=?";
+        String sql = "from Principal where principal=?";
         return (Principal)getSession().createQuery(sql)
             .setString(0, s)
             .uniqueResult();

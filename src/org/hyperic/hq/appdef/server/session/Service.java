@@ -165,10 +165,12 @@ public class Service extends AppdefResource
      */
     public void setParentId(Integer parentId)
     {
-        if (parentId != null) {
+        if (parentId != null && parentId.intValue() != 0) {
             Service s = new Service();
             s.setId(parentId);
             setParentService(s);
+        } else {
+            setParentService(null);
         }
     }
 
