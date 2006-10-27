@@ -60,7 +60,7 @@ class ServerTag
     
     ProductTag product;
     PlatformTag platform = null;
-    boolean isIncluded = false;
+    boolean isIncluded;
     private HashMap serverMap;
     private TypeBuilder builder;
     private String[][] platformTypes;
@@ -156,6 +156,7 @@ class ServerTag
     }
 
     public void startTag() {
+        this.isIncluded = false;
         this.builder = new TypeBuilder();
     }
 
