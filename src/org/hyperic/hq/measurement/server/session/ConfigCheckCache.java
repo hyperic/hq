@@ -52,7 +52,7 @@ import org.apache.commons.logging.LogFactory;
  */
 class ConfigCheckCache {
 
-    private final Log log = LogFactory.getLog(ConfigCheckCache.class.getName());
+    private final Log log = LogFactory.getLog(ConfigCheckCache.class);
     public static final int SAMPLE_SIZE = 4;
     public static final String availCat = MeasurementConstants.CAT_AVAILABILITY;
 

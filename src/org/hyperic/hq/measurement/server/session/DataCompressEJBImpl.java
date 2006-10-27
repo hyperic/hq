@@ -72,7 +72,7 @@ public class DataCompressEJBImpl
     extends SessionEJB 
     implements SessionBean {
 
-    private final String logCtx = "DataCompress";
+    private static final String logCtx = DataCompressEJBImpl.class.getName();
     private final Log log = LogFactory.getLog(logCtx);
 
     // For purging alerts

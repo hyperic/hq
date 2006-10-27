@@ -75,8 +75,7 @@ public class ReportProcessorEJBImpl
     extends SessionEJB 
     implements SessionBean 
 {
-    private final Log log = 
-        LogFactory.getLog(ReportProcessorEJBImpl.class.getName());
+    private final Log log = LogFactory.getLog(ReportProcessorEJBImpl.class);
 
     private Integer debugId = null;
     

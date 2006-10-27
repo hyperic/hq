@@ -74,7 +74,8 @@ import org.apache.commons.logging.LogFactory;
  */
 public class RawMeasurementManagerEJBImpl extends SessionEJB
     implements SessionBean {
-    private final Log log = LogFactory.getLog("org.hyperic.hq.measurement.server.session.RawMeasurementManagerEJBImpl");
+    private final Log log =
+        LogFactory.getLog(RawMeasurementManagerEJBImpl.class);
 
     /**
      * Translate a template string into a DSN

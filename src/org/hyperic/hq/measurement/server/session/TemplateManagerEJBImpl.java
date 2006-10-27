@@ -102,8 +102,7 @@ import org.hyperic.util.pager.Pager;
  * @ejb:transaction type="REQUIRED"
  */
 public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
-    private final Log log = LogFactory.getLog(
-        "org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl");
+    private final Log log = LogFactory.getLog(TemplateManagerEJBImpl.class);
 
     protected final String VALUE_PROCESSOR =
         PagerProcessor_measurement.class.getName();

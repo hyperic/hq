@@ -64,9 +64,8 @@ import org.apache.commons.logging.LogFactory;
  * configured for metric collectiom but have no metrics turned on.
  */
 public class ResourcesWithoutDataHelper {
-
     private final String logCtx = ResourcesWithoutDataHelper.class.getName();
-    private final Log    log    = LogFactory.getLog(logCtx);
+    private final Log log = LogFactory.getLog(logCtx);
 
     private InitialContext    initialContext = null;
     private static final SRNCache srnCache = SRNCache.getInstance();

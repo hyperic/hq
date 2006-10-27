@@ -63,7 +63,7 @@ import org.apache.commons.logging.LogFactory;
 public class TrackerManagerEJBImpl extends SessionEJB 
     implements SessionBean {
 
-    private final Log log = LogFactory.getLog(this.getClass().getName());
+    private final Log log = LogFactory.getLog(TrackerManagerEJBImpl.class);
 
     /**
      * @ejb:create-method

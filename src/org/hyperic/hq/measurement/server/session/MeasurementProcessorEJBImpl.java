@@ -88,10 +88,11 @@ import org.quartz.SchedulerException;
  */
 public class MeasurementProcessorEJBImpl extends SessionEJB 
     implements SessionBean {
-    private static final String logCtx =
-        "org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl";
-    private final Log log           = LogFactory.getLog(logCtx);
-    private static Log timingLog    = LogFactory.getLog("timingLog");
+    private static final String logCtx = 
+        MeasurementProcessorEJBImpl.class.getName();
+    private final Log log = LogFactory.getLog(logCtx);
+    private static Log timingLog =
+        LogFactory.getLog(MeasurementConstants.MEA_TIMING_LOG);
 
     // Instance variables
     private QueueConnection qConn = null;

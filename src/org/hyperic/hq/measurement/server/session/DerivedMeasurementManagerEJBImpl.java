@@ -114,8 +114,8 @@ import org.quartz.SchedulerException;
  */
 public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     implements SessionBean {
-    private final Log log = LogFactory.getLog(
-        "org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl");
+    private final Log log =
+        LogFactory.getLog(DerivedMeasurementManagerEJBImpl.class);
 
     protected final String VALUE_PROCESSOR =
         PagerProcessor_measurement.class.getName();

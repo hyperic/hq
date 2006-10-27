@@ -45,7 +45,7 @@ import org.apache.commons.logging.LogFactory;
  * of derived measurement values for message processing.
  */
 public class DMValueCache {
-    private static Log log = LogFactory.getLog(DMValueCache.class.getName());
+    private static Log log = LogFactory.getLog(DMValueCache.class);
     private static DMValueCache singleton = new DMValueCache();
     
     private static MBeanServer mServer = null;

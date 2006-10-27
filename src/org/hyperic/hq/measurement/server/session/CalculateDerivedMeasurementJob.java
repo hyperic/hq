@@ -69,10 +69,10 @@ public class CalculateDerivedMeasurementJob
     public static final String SCHEDULE_PREFIX = "interval.";
     public static final int MAX_ATTEMPTS_RECENT = 3;
 
-    protected Log log       = LogFactory.getLog
-        ( CalculateDerivedMeasurementJob.class.getName() );
-    protected Log timingLog = LogFactory.getLog
-        (MeasurementConstants.MEA_TIMING_LOG);
+    protected Log log =
+        LogFactory.getLog(CalculateDerivedMeasurementJob.class);
+    protected Log timingLog =
+        LogFactory.getLog(MeasurementConstants.MEA_TIMING_LOG);
 
     private Integer measurementId = null;
     private DerivedMeasurementValue measurement;

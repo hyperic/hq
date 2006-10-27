@@ -84,7 +84,7 @@ import org.hyperic.util.timer.StopWatch;
  */
 public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private final String logCtx = DataManagerEJBImpl.class.getName();
-    private final Log    log    = LogFactory.getLog(logCtx);
+    private final Log log = LogFactory.getLog(logCtx);
 
     private final long MINUTE   = 60000;
     
