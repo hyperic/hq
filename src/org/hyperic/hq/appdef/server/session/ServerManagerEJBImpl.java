@@ -837,9 +837,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                     .findByPlatform_orderName(platId, Boolean.FALSE);
             }
         }
-        if (servers.size() == 0) {
-            throw new PlatformNotFoundException(platId);
-        }
         for(Iterator i = servers.iterator(); i.hasNext();) {
             Server aServer = (Server)i.next();
             
