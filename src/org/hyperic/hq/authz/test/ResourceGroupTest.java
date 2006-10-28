@@ -1,5 +1,7 @@
 package org.hyperic.hq.authz.test;
 
+import java.util.Random;
+
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -15,7 +17,8 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
 public class ResourceGroupTest extends HQEJBTestBase {
-    private static String BOGUS_NAME = "foobar";
+    private final int RANDOM_ID = (new Random()).nextInt(10000);
+    private final String BOGUS_NAME = "foobar " + RANDOM_ID;
     
     private ResourceGroupManagerLocal rman;
     
@@ -98,7 +101,7 @@ public class ResourceGroupTest extends HQEJBTestBase {
                     remg.findResourceTypeByName(AuthzConstants.platformResType);
                 assertEquals(AuthzConstants.platformResType, rtv.getName());
                 ResourcePK pk = remg.createResource(overlord, rtv,
-                                                    new Integer(9999),
+                                                    new Integer(RANDOM_ID),
                                                     "Platform " + BOGUS_NAME);
                 rman.addResource(overlord, resGrp, pk.getId(), rtv);
             }
