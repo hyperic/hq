@@ -248,14 +248,19 @@ public class DaemonDetector
     protected List getProcessResources(ConfigResponse platformConfig)
         throws PluginException {
 
+        List servers = new ArrayList();
+
         String query = getProcessQuery();
         if (query == null) {
-            log.debug("no PROC_QUERY defined for: " +
+            log.debug("No PROC_QUERY defined for: " +
                       getTypeInfo().getName());
-            return null;
+            return servers;
+        }
+        else {
+            log.debug("Using PROC_QUERY=" + query + " for " +
+                      getTypeInfo().getName());
         }
 
-        List servers = new ArrayList();
         long[] pids = getPids(query);
 
         log.debug("'" + query + "' matched " +
@@ -273,7 +278,7 @@ public class DaemonDetector
 
             servers.add(newServerResource(pid, exe));
         }
-        
+
         return servers;
     }
 }
