@@ -12,6 +12,7 @@ import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.authz.shared.ResourcePK;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
+import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.test.HQEJBTestBase;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -40,37 +41,7 @@ public class ResourceGroupTest extends HQEJBTestBase {
         assertEquals(AuthzConstants.rootResourceGroupName, resGrp.getName());
     }
 
-    public void testSimpleCreate() throws Exception {
-        final AuthzSubjectValue overlord = getOverlord();
-        
-        // Create the bogus resource group
-        runInTransaction(new TransactionBlock() {
-            public void run() throws Exception {
-                ResourceGroupValue resGrp = new ResourceGroupValue();
-                resGrp.setName(BOGUS_NAME);
-                resGrp.setGroupEntResType(
-                    AppdefEntityConstants.APPDEF_TYPE_PLATFORM);
-                resGrp.setGroupType(
-                    AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS);
-                resGrp = rman.createResourceGroup(overlord, resGrp, null, null);
-                assertEquals(BOGUS_NAME, resGrp.getName());
-            }
-        });
-        
-        // Now look up the resource group that we just created
-        final ResourceGroupValue resGrp =
-            rman.findResourceGroupByName(overlord, BOGUS_NAME);
-        assertNotNull(resGrp);
-        
-        // Now delete it
-        runInTransaction(new TransactionBlock() {
-            public void run() throws Exception {
-                rman.removeResourceGroup(overlord, resGrp);
-            }
-        });
-    }
-    
-    public void testSimpleAdd() throws Exception {
+    public void testAdd() throws Exception {
         final AuthzSubjectValue overlord = getOverlord();
         
         // Create the bogus resource group
@@ -103,7 +74,13 @@ public class ResourceGroupTest extends HQEJBTestBase {
                 ResourcePK pk = remg.createResource(overlord, rtv,
                                                     new Integer(RANDOM_ID),
                                                     "Platform " + BOGUS_NAME);
-                rman.addResource(overlord, resGrp, pk.getId(), rtv);
+                
+                // Now we have to find the resource
+                ResourceValue resource = remg.findResourceById(pk.getId());
+                assertNotNull(resource);
+                
+                rman.addResource(overlord, resGrp, resource.getInstanceId(),
+                                 rtv);
             }
         });
         
