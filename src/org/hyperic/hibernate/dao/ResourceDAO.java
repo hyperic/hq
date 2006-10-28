@@ -264,7 +264,7 @@ public class ResourceDAO extends HibernateDAO
                    " join fetch role.operations op " +
                    "where " +
                    " r.system=? and " +
-                   " rg.resourceGroup.id=? and " +
+                   " rg.id=? and " +
                    " (subj.id=1 or r.owner.id=1 or " +
                    "  subj.authDsn = 'covalentAuthzInternalDsn') and " +
                    " op.resourceType.id = r.resourceType.id and " +
