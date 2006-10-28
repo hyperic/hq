@@ -37,7 +37,7 @@
       <one-to-many class="AlertConditionLog" />
     </bag>
 
-    <bag name="userAlertsBag" table="EAM_USER_ALERT">
+    <bag name="userAlertsBag" table="EAM_USER_ALERT" cascade="all-delete-orphan">
       <key column="ALERT_ID" />
       <one-to-many class="UserAlert" />
     </bag>
