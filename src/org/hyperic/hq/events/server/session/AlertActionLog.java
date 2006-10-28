@@ -43,6 +43,12 @@ public class AlertActionLog
     protected AlertActionLog() {
     }
    
+    protected AlertActionLog(Alert alert, String detail, Action action) {
+        _detail = detail;
+        _alert  = alert;
+        _action = action;
+    }
+    
     protected String getDetail() {
         return _detail;
     }

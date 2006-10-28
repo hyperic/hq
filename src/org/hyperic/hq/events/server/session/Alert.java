@@ -49,6 +49,39 @@ public class Alert
     protected Alert() {
     }
 
+    protected Alert(AlertDefinition def, AlertValue val) {
+        val.cleanConditionLog();
+        val.cleanActionLog();
+        
+        // Now just set the entire value object
+        setAlertValue(val);
+
+        setAlertDef(def);
+    }
+    
+    protected UserAlert createUserAlert(Integer userId) {
+        UserAlert ua = new UserAlert(this, userId);
+        
+        _userAlerts.add(ua);
+        return ua;
+    }
+    
+    protected AlertActionLog createActionLog(String detail, Action action) {
+        AlertActionLog res = new AlertActionLog(this, detail, action);
+        
+        _actions.add(res);
+        return res;
+    }
+    
+    protected AlertConditionLog createConditionLog(String value,
+                                                   AlertCondition cond)
+    {
+        AlertConditionLog res = new AlertConditionLog(this, value, cond);
+
+        _conditions.add(res);
+        return res;
+    }
+    
     public long getCtime() {
         return _ctime;
     }

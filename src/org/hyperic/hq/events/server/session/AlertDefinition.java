@@ -38,6 +38,7 @@ import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 
 public class AlertDefinition 
@@ -85,6 +86,13 @@ public class AlertDefinition
         Action res = new Action(this, actVal, parent);
         
         _actions.add(res);
+        return res;
+    }
+    
+    protected Alert createAlert(AlertValue val) {
+        Alert res = new Alert(this, val);
+        
+        _alerts.add(res);
         return res;
     }
     

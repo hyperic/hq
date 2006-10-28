@@ -29,11 +29,16 @@ import org.hyperic.hibernate.PersistedObject;
 
 public class UserAlert extends PersistedObject {
     private Integer _userId;
-    private Alert   _alertId;
+    private Alert   _alert;
 
     protected UserAlert() {
     }
 
+    protected UserAlert(Alert owner, Integer userId) {
+        _alert  = owner;
+        _userId = userId;
+    }
+    
     public Integer getUserId() {
         return _userId;
     }
@@ -42,11 +47,11 @@ public class UserAlert extends PersistedObject {
         _userId = userId;
     }
     
-    public Alert getAlertId() {
-        return _alertId;
+    public Alert getAlert() {
+        return _alert;
     }
     
-    protected void setAlertId(Alert alertId) {
-        _alertId = alertId;
+    protected void setAlert(Alert alert) {
+        _alert = alert;
     }
 }

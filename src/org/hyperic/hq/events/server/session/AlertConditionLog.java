@@ -25,13 +25,14 @@
 
 package org.hyperic.hq.events.server.session;
 
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 
 public class AlertConditionLog  
     extends PersistedObject
 {
+    public static final int MAX_LOG_LENGTH = 250;
+    
     private String         _value;
     private Alert          _alert;
     private AlertCondition _condition;
@@ -39,6 +40,17 @@ public class AlertConditionLog
     private AlertConditionLogValue _valueObj;
     
     protected AlertConditionLog() {
+    }
+
+    protected AlertConditionLog(Alert alert, String value, 
+                                AlertCondition condition)
+    {
+        if (value != null && value.length() >= MAX_LOG_LENGTH)
+            value = value.substring(0, MAX_LOG_LENGTH);
+        
+        setValue(value);
+        setAlert(alert);
+        setCondition(condition);
     }
 
     protected String getValue() {
@@ -66,30 +78,17 @@ public class AlertConditionLog
     }
 
     public AlertConditionLogValue getAlertConditionLogValue() {
-      if (_valueObj == null) {
-          _valueObj = new AlertConditionLogValue();
-      }
-
-      _valueObj.setId(getId());
-      _valueObj.setValue(getValue() == null ? "" : getValue());
-      if (getCondition() != null)
-          _valueObj.setCondition(getCondition().getAlertConditionValue());
-      else
-          _valueObj.setCondition(null);
-
-      return _valueObj;
-    }
-
-    protected void setAlertConditionLogValue(AlertConditionLogValue val) {
-        setValue(val.getValue());
-        if (val.getCondition() != null) {
-            AlertConditionDAO acDAO = 
-                DAOFactory.getDAOFactory().getAlertConditionDAO();
-            AlertCondition ac = acDAO.findById(val.getCondition().getId());
-
-            setCondition(ac);
-        } else {
-            setCondition(null);
+        if (_valueObj == null) {
+            _valueObj = new AlertConditionLogValue();
         }
+
+        _valueObj.setId(getId());
+        _valueObj.setValue(getValue() == null ? "" : getValue());
+        if (getCondition() != null)
+            _valueObj.setCondition(getCondition().getAlertConditionValue());
+        else
+            _valueObj.setCondition(null);
+
+        return _valueObj;
     }
 }
