@@ -185,13 +185,9 @@ public class DataCompressEJBImpl
         // Purge alerts
         log.info("Purging alerts older than " +
                  TimeUtil.toString(now - this.purgeAlert));
-        try {
-            int alertsDeleted =
-                getAlertManager().deleteAlerts(0, now - this.purgeAlert);
-            log.info("Done (Deleted " + alertsDeleted + " alerts)");
-        } catch (RemoveException e) {
-            log.error("Unable to purge alerts: " + e.getMessage(), e);
-        }
+        int alertsDeleted =
+            getAlertManager().deleteAlerts(0, now - this.purgeAlert);
+        log.info("Done (Deleted " + alertsDeleted + " alerts)");
     }
 
     /**
