@@ -31,8 +31,10 @@ import org.hyperic.hibernate.Util;
 import org.hyperic.hq.events.server.session.AlertActionLogDAO;
 import org.hyperic.hq.events.server.session.AlertConditionDAO;
 import org.hyperic.hq.events.server.session.AlertConditionLogDAO;
+import org.hyperic.hq.events.server.session.AlertDAO;
 import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
 import org.hyperic.hq.events.server.session.TriggerDAO;
+import org.hyperic.hq.events.server.session.UserAlertDAO;
 
 public class HibernateDAOFactory extends DAOFactory {
     private static SessionFactory sessionFactory;
@@ -237,6 +239,14 @@ public class HibernateDAOFactory extends DAOFactory {
     
     public AlertConditionLogDAO getAlertConditionLogDAO() {
         return new AlertConditionLogDAO(getCurrentSession());
+    }
+    
+    public AlertDAO getAlertDAO() {
+        return new AlertDAO(getCurrentSession());
+    }
+    
+    public UserAlertDAO getUserAlertDAO() {
+        return new UserAlertDAO(getCurrentSession());
     }
 }
 
