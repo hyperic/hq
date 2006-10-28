@@ -34,7 +34,6 @@ import java.util.List;
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
 import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 import javax.ejb.SessionContext;
 import javax.naming.NamingException;
 
@@ -231,11 +230,6 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
                           fe.getMessage());
             throw new GroupNotFoundException("The specified group "+
                           "does not exist.",fe);
-        }
-        catch (NamingException ne) {
-            log.error("Caught NamingException in resource group manager",ne);
-            throw new SystemException ("Caught NamingException "+
-                "in resource group manager");
         }
         return retVal;
     }
@@ -460,11 +454,6 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             log.error("GroupManager caught PermissionException: "+
                       pe.getMessage(),pe);
             throw pe;
-        }
-        catch (NamingException ne) {
-            log.error("Caught NamingException in resource group manager",ne);
-            throw new SystemException ("Caught NamingException "+
-                "in resource group manager");
         }
     }
 

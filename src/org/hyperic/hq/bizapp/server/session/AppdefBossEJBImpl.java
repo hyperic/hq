@@ -3099,14 +3099,8 @@ public class AppdefBossEJBImpl
         int oriPageSize = pc.getPagesize();
         pc.setPagesize( PageControl.SIZE_UNLIMITED );
 
-        try {
-            authzResources = getResourceManager()
-                .findViewableSvcResources(subject, resourceName, pc);
-        } catch (FinderException e) {
-            // only happens when subject doesn't exist.
-            throw new PermissionException("Unable to find the authorized " +
-                                          "subject");
-        }
+        authzResources = getResourceManager()
+            .findViewableSvcResources(subject, resourceName, pc);
 
         pc.setPagesize( oriPageSize );
 
