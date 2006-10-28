@@ -23,7 +23,7 @@
       <column name="USER_ID" not-null="true" index="USER_ALERT_IDX" />
     </property>
 
-    <many-to-one name="alertId" class="Alert">
+    <many-to-one name="alert" class="Alert">
       <column name="ALERT_ID" />
     </many-to-one>
   </class>
