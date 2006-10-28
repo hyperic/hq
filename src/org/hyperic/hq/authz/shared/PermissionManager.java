@@ -221,9 +221,7 @@ public interface PermissionManager {
         throws SQLException;
 
     public Collection getGroupResources(Integer subjectId,
-                                        Integer groupId, Boolean fsystem)
-        throws NamingException, FinderException;
+                                        Integer groupId, Boolean fsystem);
 
-    public Collection findServiceResources(AuthzSubject subj, Boolean fsystem)
-        throws NamingException, FinderException;
+    public Collection findServiceResources(AuthzSubject subj, Boolean fsystem);
 }

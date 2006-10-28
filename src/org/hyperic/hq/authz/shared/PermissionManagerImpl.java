@@ -309,15 +309,11 @@ public class PermissionManagerImpl
     }
 
     public Collection getGroupResources(Integer subjectId,
-                                        Integer groupId, Boolean fsystem)
-        throws NamingException, FinderException
-    {
+                                        Integer groupId, Boolean fsystem) {
         return getResourceDAO().findInGroup_orderName(groupId, fsystem);
     }
 
-    public Collection findServiceResources(AuthzSubject subj, Boolean fsystem)
-        throws NamingException, FinderException
-    {
+    public Collection findServiceResources(AuthzSubject subj, Boolean fsystem) {
         return getResourceDAO().findSvcRes_orderName(fsystem);
     }
 }
