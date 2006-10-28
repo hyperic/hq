@@ -184,74 +184,11 @@ public abstract class AuthzSession {
         return subject.getAuthzSubjectValue();
     }
 
-    protected Set toLocals(Object[] values)
-        throws NamingException, FinderException {
-        Set locals = new HashSet();
-        boolean isOperation = false;
-        boolean isResource = false;
-        boolean isResourceGroup = false;
-        boolean isRole = false;
-        boolean isAuthzSubject = false;
-
-        OperationDAO opLome = null;
-        ResourceDAO rLome = null;
-        ResourceGroupDAO groupLome = null;
-        AuthzSubjectDAO subjectLome = null;
-        RoleDAO roleLome = null;
-        if (values != null && (values.length > 0)) {
-            int counter = 0;
-            Object value = values[0];
-            if (value instanceof
-                org.hyperic.hq.authz.shared.OperationValue) {
-                opLome = getOperationDAO();
-                isOperation = true;
-            } else if (value instanceof
-                       org.hyperic.hq.authz.shared.ResourceValue) {
-                rLome = getResourceDAO();
-                isResource = true;
-            } else if (value instanceof
-                       org.hyperic.hq.authz.shared.ResourceGroupValue) {
-                groupLome = getResourceGroupDAO();
-                isResourceGroup = true;
-            } else if (value instanceof
-                       org.hyperic.hq.authz.shared.RoleValue) {
-                roleLome = getRoleDAO();
-                isRole = true;
-            } else if (value instanceof
-                       org.hyperic.hq.authz.shared.AuthzSubjectValue) {
-                subjectLome = getSubjectDAO();
-                isAuthzSubject = true;
-            } else {
-                log.error("Invalid type.");
-            }
-            for (counter = 0; counter < values.length; counter++) {
-                if (isOperation) {
-                    OperationValue op = (OperationValue)values[counter];
-                    locals.add(opLome.findById(op.getId()));
-                } else if (isResource) {
-                    ResourceValue r = (ResourceValue)values[counter];
-                    locals.add(rLome.findById(r.getId()));
-                } else if (isResourceGroup) {
-                    ResourceGroupValue group = (ResourceGroupValue)values[counter];
-                    locals.add(groupLome.findById(group.getId()));
-                } else if (isRole) {
-                    RoleValue role = (RoleValue)values[counter];
-                    locals.add(roleLome.findById(role.getId()));
-                } else if (isAuthzSubject) {
-                    AuthzSubjectValue subject = (AuthzSubjectValue)values[counter];
-                    locals.add(subjectLome.findById(subject.getId()));
-                } else {
-                    log.error("Invalid type.");
-                }
-            }
-        }
-        return locals;
-    }
-
     protected Set toPojos(Object[] vals) {
         final int OPER_HASH = OperationValue.class.hashCode();
         final int SUBJ_HASH = AuthzSubjectValue.class.hashCode();
         final int RES_HASH  = ResourceValue.class.hashCode();
+        final int GRP_HASH  = ResourceGroupValue.class.hashCode();
         final int ROLE_HASH = RoleValue.class.hashCode();
 
         Set ret = new HashSet();
@@ -265,6 +202,7 @@ public abstract class AuthzSession {
         AuthzSubjectDAO subjDao = null;
         ResourceDAO resDao = null;
         RoleDAO roleDao = null;
+        ResourceGroupDAO resGrpDao = null;
         for (int i = 0; i < vals.length; i++) {
             if (hashCode == OPER_HASH) {
                 if (operDao == null) {
@@ -289,6 +227,13 @@ public abstract class AuthzSession {
                     roleDao = getRoleDAO();
                 }
                 ret.add(roleDao.findById(((RoleValue) vals[i]).getId()));
+            }
+            else if (hashCode == GRP_HASH) {
+                if (resGrpDao == null) {
+                    resGrpDao = getResourceGroupDAO();
+                }
+                ret.add(resGrpDao.findById(
+                    ((ResourceGroupValue) vals[i]).getId()));
             }
             else {
                 log.error("Invalid type.");
@@ -369,13 +314,11 @@ public abstract class AuthzSession {
         return values;
     }
 
-    protected AuthzSubject lookupSubject(AuthzSubjectValue subject)
-        throws FinderException {
+    protected AuthzSubject lookupSubject(AuthzSubjectValue subject) {
         return getSubjectDAO().findById(subject.getId());
     }
 
-    protected AuthzSubject lookupSubject(Integer id)
-        throws FinderException {
+    protected AuthzSubject lookupSubject(Integer id) {
         return getSubjectDAO().findById(id);
     }
 
@@ -387,23 +330,19 @@ public abstract class AuthzSession {
         return DAOFactory.getDAOFactory().getAuthzSubjectDAO().findById(id);
     }
 
-    protected ResourceType lookupType(ResourceTypeValue type)
-        throws NamingException, FinderException {
+    protected ResourceType lookupType(ResourceTypeValue type) {
         return getResourceTypeDAO().findById(type.getId());
     }
 
-    protected ResourceGroup lookupGroup(ResourceGroupValue group)
-        throws NamingException, FinderException {
+    protected ResourceGroup lookupGroup(ResourceGroupValue group) {
         return getResourceGroupDAO().findById(group.getId());
     }
 
-    protected ResourceGroup lookupGroup(Integer id)
-        throws NamingException, FinderException {
+    protected ResourceGroup lookupGroup(Integer id) {
         return getResourceGroupDAO().findById(id);
     }
 
-    protected Resource lookupResource(ResourceValue resource)
-        throws FinderException {
+    protected Resource lookupResource(ResourceValue resource) {
         if (resource.getId() == null) {
             String typeName = resource.getResourceTypeValue().getName();
             ResourceType typeLocal = getResourceTypeDAO().findByName(typeName);
@@ -434,8 +373,7 @@ public abstract class AuthzSession {
      * for (or owns)
      */
     protected List getViewableRolePKs(AuthzSubjectValue who) 
-        throws NamingException, PermissionException,
-               FinderException {
+        throws NamingException, PermissionException, FinderException {
         PermissionManager pm = PermissionManagerFactory.getInstance();
         List roleIds = 
             pm.findOperationScopeBySubject(who,
@@ -454,11 +392,12 @@ public abstract class AuthzSession {
     /**
      * Get a list of ResourceGroupPK's a user has viewResourceGroup permission
      * for (or owns)
+     * @throws NamingException 
+     * @throws FinderException 
+     * @throws PermissionException 
      */
-    protected List getViewableGroupPKs(AuthzSubjectValue who) 
-        throws NamingException, PermissionException,
-               FinderException {
-        
+    protected List getViewableGroupPKs(AuthzSubjectValue who)
+        throws PermissionException, FinderException, NamingException {
         PermissionManager pm = PermissionManagerFactory.getInstance();         
         List groupIds = 
             pm.findOperationScopeBySubject(who,
@@ -477,13 +416,16 @@ public abstract class AuthzSession {
     /** 
      * Filter a collection of groupLocal objects to only include those viewable
      * by the specified user
+     * @throws NamingException 
      * @throws FinderException 
+     * @throws PermissionException 
+     * @ 
      * @throws NamingException 
      * @throws PermissionException 
      */
     protected Collection filterViewableGroups(AuthzSubjectValue who,
                                               Collection groups)
-        throws PermissionException, NamingException, FinderException {
+        throws PermissionException, FinderException, NamingException {
         // finally scope down to only the ones the user can see
         List viewable = getViewableGroupPKs(who);
         for(Iterator i = groups.iterator(); i.hasNext();) {

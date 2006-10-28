@@ -530,25 +530,20 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      */
     public PageList findViewableSvcResources(AuthzSubjectValue subject,
                                              String resourceName,
-                                             PageControl pc)
-        throws FinderException {
+                                             PageControl pc) {
         Collection resources;
 
-        try {
-            AuthzSubject subj = getSubjectDAO().findById(subject.getId());
+        AuthzSubject subj = getSubjectDAO().findById(subject.getId());
 
-            pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
+        pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
 
-            PermissionManager pm = PermissionManagerFactory.getInstance(); 
+        PermissionManager pm = PermissionManagerFactory.getInstance(); 
 
-            switch(pc.getSortattribute()) {
-                case SortAttribute.RESOURCE_NAME:
-                default:
-                    resources = pm.findServiceResources(subj, Boolean.FALSE);
-                    break;
-            }
-        } catch (NamingException e) {
-            throw new SystemException(e);
+        switch(pc.getSortattribute()) {
+            case SortAttribute.RESOURCE_NAME:
+            default:
+                resources = pm.findServiceResources(subj, Boolean.FALSE);
+                break;
         }
         
         // TODO: Move filtering into EJBQL
