@@ -44,7 +44,8 @@
       <column name="RESOURCE_ID"/>
     </many-to-one>
 
-    <bag name="resourceGroups" table="EAM_ROLE_RESOURCE_GROUP_MAP">
+    <bag name="resourceGroups" table="EAM_ROLE_RESOURCE_GROUP_MAP"
+         inverse="true">
       <key column="ROLE_ID" />
       <many-to-many class="ResourceGroup" column="RESOURCE_GROUP_ID" />
     </bag>

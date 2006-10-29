@@ -228,6 +228,7 @@ public class ResourceGroup extends AuthzNamedEntity
 
     public void addResource(Resource resource)
     {
+        resource.getResourceGroups().add(this);
         resources.add(resource);
     }
 
@@ -252,6 +253,7 @@ public class ResourceGroup extends AuthzNamedEntity
 
     public void addRole(Role role)
     {
+        role.getResourceGroups().add(this);
         roles.add(role);
     }
 

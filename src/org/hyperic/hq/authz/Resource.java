@@ -143,6 +143,7 @@ public class Resource extends AuthzNamedEntity
 
     public void addResourceGroup(ResourceGroup group)
     {
+        group.getResources().add(this);
         resourceGroups.add(group);
     }
 

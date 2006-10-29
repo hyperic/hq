@@ -37,6 +37,7 @@ import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceVOHelperEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -75,6 +76,7 @@ public abstract class HQEJBTestBase
             ResourceManagerEJBImpl.class,
             ResourceGroupManagerEJBImpl.class,
             ServerVOHelperEJBImpl.class,
+            ResourceVOHelperEJBImpl.class,
             TemplateManagerEJBImpl.class,
         };
     }

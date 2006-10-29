@@ -277,6 +277,7 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
                                           ResourceTypeValue type)
         throws PermissionException {
         ResourceGroupDAO dao = getResourceGroupDAO();
+        // reassociate group to session
         ResourceGroup resGroup = dao.findByName(group.getName());
 
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
@@ -375,7 +376,7 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      * @param pc Paging information for the request
      * @return list of authorized resources in this group.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="Required"
      */
     public PageList getResources(AuthzSubjectValue whoami,
                                  ResourceGroupValue groupValue,

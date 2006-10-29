@@ -50,7 +50,8 @@
       <column name="FSYSTEM" not-null="false" />
     </property>
 
-    <bag name="resourceGroups" table="EAM_RES_GRP_RES_MAP">
+    <bag name="resourceGroups" table="EAM_RES_GRP_RES_MAP"
+         inverse="true">
       <key column="RESOURCE_ID"/>
       <many-to-many class="ResourceGroup" column="RESOURCE_GROUP_ID" />
     </bag>
