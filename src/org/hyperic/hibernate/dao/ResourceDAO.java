@@ -255,6 +255,7 @@ public class ResourceDAO extends HibernateDAO
                    " (subj.id=? or " +
                    "  r.owner.id=? or " +
                    "  subj.authDsn = 'covalentAuthzInternalDsn') and " +
+                   " op.resourceType.id = r.resourceType.id and " +
                    " (" +
                    "  op.name = 'viewPlatform' or " +
                    "  op.name = 'viewServer' or " +
