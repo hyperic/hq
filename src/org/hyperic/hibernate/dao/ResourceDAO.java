@@ -276,7 +276,7 @@ public class ResourceDAO extends HibernateDAO
                    "where " +
                    " r.system=? and " +
                    " rg.id=? and " +
-                   " (subj.id=1 or r.owner.id=0 or " +
+                   " (subj.id=1 or r.owner.id=1 or " +
                    "  subj.authDsn = 'covalentAuthzInternalDsn') " +
                    " and (op.name = 'viewPlatform' or " +
                    "  op.name = 'viewServer' or " +
