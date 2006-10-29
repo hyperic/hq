@@ -75,7 +75,7 @@ public class ResourceTypeDAO extends HibernateDAO
             throw new IllegalArgumentException("Resource Group not found: " +
                                                AuthzConstants.authzResourceGroupName);
         }
-        resource.addResourceGroup(authzGroup);
+        authzGroup.addResource(resource);
 
         return resType;
     }

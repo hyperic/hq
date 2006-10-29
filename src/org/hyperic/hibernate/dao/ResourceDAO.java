@@ -26,6 +26,7 @@
 package org.hyperic.hibernate.dao;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,6 +40,7 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.dao.DAOFactory;
 
 /**
  * CRUD methods, finders, etc. for Resource
@@ -85,7 +87,7 @@ public class ResourceDAO extends HibernateDAO
             throw new IllegalArgumentException("can not find Resource Group: "+
                                                AuthzConstants.rootResourceGroupName);
         }
-        resource.addResourceGroup(authzGroup);
+        authzGroup.addResource(resource);
 
         return resource;
     }
@@ -103,6 +105,15 @@ public class ResourceDAO extends HibernateDAO
     }
 
     public void remove(Resource entity) {
+        // remove resource from all resourceGroups
+        ResourceGroupDAO dao = DAOFactory.getDAOFactory().getResourceGroupDAO();
+        for(Iterator i=entity.getResourceGroups().iterator(); i.hasNext();) {
+            ResourceGroup rg = (ResourceGroup)i.next();
+            ResourceGroup resourceGroup =
+                dao.findById(rg.getId());
+            resourceGroup.getResources().remove(entity);
+        }
+        entity.getResourceGroups().clear();
         super.remove(entity);
     }
 
@@ -259,22 +270,21 @@ public class ResourceDAO extends HibernateDAO
     {
         String sql="select distinct r from Resource r " +
                    " join fetch r.resourceGroups rg " +
-                   " join fetch rg.roles role " +
-                   " join fetch role.subjects subj " +
-                   " join fetch role.operations op " +
+                   " left join fetch rg.roles role " +
+                   " left join fetch role.subjects subj " +
+                   " left join fetch role.operations op " +
                    "where " +
                    " r.system=? and " +
                    " rg.id=? and " +
-                   " (subj.id=1 or r.owner.id=1 or " +
-                   "  subj.authDsn = 'covalentAuthzInternalDsn') and " +
-                   " op.resourceType.id = r.resourceType.id and " +
-                   " (op.name = 'viewPlatform' or " +
+                   " (subj.id=1 or r.owner.id=0 or " +
+                   "  subj.authDsn = 'covalentAuthzInternalDsn') " +
+                   " and (op.name = 'viewPlatform' or " +
                    "  op.name = 'viewServer' or " +
                    "  op.name = 'viewService' or " +
                    "  op.name = 'viewApplication' or " +
                    "  op.name = 'viewApplication' or " +
-                   "  (op.name='viewResourceGroup' and " +
-                   "    not r.instanceId=?) )" +
+                   "  ( op.name='viewResourceGroup' and " +
+                   "     not r.instanceId=? ) )" +
                    " order by r.sortName ";
         return getSession().createQuery(sql)
             .setBoolean(0, fSystem.booleanValue())

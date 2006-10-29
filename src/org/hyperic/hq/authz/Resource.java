@@ -141,22 +141,6 @@ public class Resource extends AuthzNamedEntity
         resourceGroups = val;
     }
 
-    public void addResourceGroup(ResourceGroup group)
-    {
-        group.getResources().add(this);
-        resourceGroups.add(group);
-    }
-
-    public void removeResourceGroup(ResourceGroup group)
-    {
-        resourceGroups.remove(group);
-    }
-
-    public void removeAllResourceGroups()
-    {
-        resourceGroups.clear();
-    }
-
     public ResourceValue getResourceValue()
     {
         resourceValue.setId(getId());

@@ -35,6 +35,7 @@ import org.hyperic.hq.authz.ResourceType;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.dao.DAOFactory;
 
 /**
  * CRUD methods, finders, etc. for Resource
@@ -90,6 +91,15 @@ public class ResourceGroupDAO extends HibernateDAO
     }
 
     public void remove(ResourceGroup entity) {
+        // remove all roles
+        entity.getRoles().clear();
+        // remove all resources
+        entity.getResources().clear();
+
+        // remove this resourceGroup itself
+        DAOFactory.getDAOFactory().
+            getResourceDAO().remove(entity.getResource());
+        
         super.remove(entity);
     }
     
