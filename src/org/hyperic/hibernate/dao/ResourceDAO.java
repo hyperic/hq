@@ -193,16 +193,18 @@ public class ResourceDAO extends HibernateDAO
         // that we can perform "fetch" optimization outside of the code
         String sql="select distinct r from Resource r " +
                    " join fetch r.resourceGroups rg " +
-                   " join fetch rg.roles role " +
-                   " join fetch role.subjects subj " +
-                   " join fetch role.operations op " +
-                   " join fetch r.resourceType rt " +
+                   " left join fetch rg.roles role " +
+                   " left join fetch role.subjects subj " +
+                   " left join fetch role.operations op " +
+                   " left join fetch r.resourceType rt " +
                    "where " +
                    "  r.system=? and " +
                    "  (subj.id=? or r.owner.id=?) and " +
-                   "  (rt.name='covalentEAMService' or " +
+                   "  (rt.name = null or " +
+                   "   rt.name='covalentEAMService' or " +
                    "   rt.name='covalentAuthzResourceGroup') and " +
-                   "  (op.name='viewService' or " +
+                   "  (op.name = null or" +
+                   "   op.name='viewService' or " +
                    "   op.name='viewResourceGroup') and " +
                    "  rg.groupType = 15 and " +
                    "  (rg.groupType != 15 or rg.clusterId!=-1) " +
@@ -218,15 +220,17 @@ public class ResourceDAO extends HibernateDAO
     {
         String sql="select distinct r from Resource r " +
                    " join fetch r.resourceGroups rg " +
-                   " join fetch rg.roles role " +
-                   " join fetch role.operations op " +
-                   " join fetch r.resourceType rt " +
+                   " left join fetch rg.roles role " +
+                   " left join fetch role.operations op " +
+                   " left join fetch r.resourceType rt " +
                    "where " +
                    "  r.system=? and " +
-                   "  (rt.name='covalentEAMService' or " +
-                   "   rt.name='covalentAuthzResourceGroup') and " +
-                   "  (op.name='viewService' or " +
-                   "   op.name='viewResourceGroup') and " +
+                   "  (rt.name = null or " +
+                   "   rt.name = 'covalentEAMService' or " +
+                   "   rt.name = 'covalentAuthzResourceGroup') and " +
+                   "  (op.name = null or " +
+                   "   op.name = 'viewService' or " +
+                   "   op.name = 'viewResourceGroup') and " +
                    "  rg.groupType = 15 and " +
                    "  (rg.groupType != 15 or rg.clusterId!=-1) " +
                    "order by r.sortName ";
@@ -241,16 +245,16 @@ public class ResourceDAO extends HibernateDAO
     {
         String sql="select distinct r from Resource r " +
                    " join fetch r.resourceGroups rg " +
-                   " join fetch rg.roles role " +
-                   " join fetch role.subjects subj " +
-                   " join fetch role.operations op " +
+                   " left join fetch rg.roles role " +
+                   " left join fetch role.subjects subj " +
+                   " left join fetch role.operations op " +
                    "where " +
                    " r.system=? and " +
                    " (subj.id=? or " +
                    "  r.owner.id=? or " +
                    "  subj.authDsn = 'covalentAuthzInternalDsn') and " +
-                   " op.resourceType.id = r.resourceType.id and " +
-                   " (op.name = 'viewPlatform' or " +
+                   " (op.name = null or " +
+                   "  op.name = 'viewPlatform' or " +
                    "  op.name = 'viewServer' or " +
                    "  op.name = 'viewService' or " +
                    "  op.name = 'viewApplication' or " +
