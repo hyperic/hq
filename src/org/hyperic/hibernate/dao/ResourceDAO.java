@@ -244,12 +244,14 @@ public class ResourceDAO extends HibernateDAO
                                                  Boolean fSystem)
     {
         String sql="select distinct r from Resource r " +
+                   " join fetch r.resourceGroups rgg" +
                    " join fetch r.resourceGroups rg " +
-                   " left join fetch rg.roles role " +
-                   " left join fetch role.subjects subj " +
-                   " left join fetch role.operations op " +
+                   " join fetch rg.roles role " +
+                   " join fetch role.subjects subj " +
+                   " join fetch role.operations op " +
                    "where " +
                    " r.system=? and " +
+                   " rgg.id=? and " +
                    " (subj.id=? or " +
                    "  r.owner.id=? or " +
                    "  subj.authDsn = 'covalentAuthzInternalDsn') and " +
@@ -260,12 +262,14 @@ public class ResourceDAO extends HibernateDAO
                    "  op.name = 'viewApplication' or " +
                    "  op.name = 'viewApplication' or " +
                    "  (op.name='viewResourceGroup' and " +
-                   "    not r.instanceId ='viewResourceGroup') )" +
+                   "    not r.instanceId = ?) )" +
                    " order by r.sortName ";
         return getSession().createQuery(sql)
-            .setInteger(0, userId.intValue())
+            .setBoolean(0, fSystem.booleanValue())
             .setInteger(1, groupId.intValue())
-            .setBoolean(2, fSystem.booleanValue())
+            .setInteger(2, userId.intValue())
+            .setInteger(3, userId.intValue())
+            .setInteger(4, groupId.intValue())
             .list();
     }
 
@@ -273,25 +277,24 @@ public class ResourceDAO extends HibernateDAO
                                             Boolean fSystem)
     {
         String sql="select distinct r from Resource r " +
+                   " join fetch r.resourceGroups rgg" +
                    " join fetch r.resourceGroups rg " +
-                   " left join fetch rg.roles role " +
-                   " left join fetch role.subjects subj " +
-                   " left join fetch role.operations op " +
+                   " join fetch rg.roles role " +
+                   " join fetch role.subjects subj " +
+                   " join fetch role.operations op " +
                    "where " +
                    " r.system=? and " +
-                   " rg.id=? and " +
-                   " (subj.id=1 or r.owner.id=1 or r.owner.id=0 or " +
-                   "  subj.authDsn = 'covalentAuthzInternalDsn') " +
-                   " and (" +
-                   "     op.name = null " +
-                   "  or op.name = 'viewPlatform' " +
-                   "  or op.name = 'viewServer' " +
-                   "  or op.name = 'viewService' " +
-                   "  or op.name = 'viewApplication' " +
-                   "  or op.name = 'viewApplication' " +
-                   "  or (op.name='viewResourceGroup' and " +
-                   "     not r.instanceId=?)" +
-                   ")" +
+                   " rgg.id=? and " +
+                   " (subj.id=1 or r.owner.id=1 or " +
+                   "  subj.authDsn = 'covalentAuthzInternalDsn') and " +
+                   " op.resourceType.id = r.resourceType.id and " +
+                   " (op.name = 'viewPlatform' or " +
+                   "  op.name = 'viewServer' or " +
+                   "  op.name = 'viewService' or " +
+                   "  op.name = 'viewApplication' or " +
+                   "  op.name = 'viewApplication' or " +
+                   "  (op.name='viewResourceGroup' and " +
+                   "    not r.instanceId=?) )" +
                    " order by r.sortName ";
         return getSession().createQuery(sql)
             .setBoolean(0, fSystem.booleanValue())
