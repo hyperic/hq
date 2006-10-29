@@ -276,15 +276,18 @@ public class ResourceDAO extends HibernateDAO
                    "where " +
                    " r.system=? and " +
                    " rg.id=? and " +
-                   " (subj.id=1 or r.owner.id=1 or " +
+                   " (subj.id=1 or r.owner.id=1 or r.owner.id=0 or " +
                    "  subj.authDsn = 'covalentAuthzInternalDsn') " +
-                   " and (op.name = 'viewPlatform' or " +
-                   "  op.name = 'viewServer' or " +
-                   "  op.name = 'viewService' or " +
-                   "  op.name = 'viewApplication' or " +
-                   "  op.name = 'viewApplication' or " +
-                   "  ( op.name='viewResourceGroup' and " +
-                   "     not r.instanceId=? ) )" +
+                   " and (" +
+                   "     op.name = null " +
+                   "  or op.name = 'viewPlatform' " +
+                   "  or op.name = 'viewServer' " +
+                   "  or op.name = 'viewService' " +
+                   "  or op.name = 'viewApplication' " +
+                   "  or op.name = 'viewApplication' " +
+                   "  or (op.name='viewResourceGroup' and " +
+                   "     not r.instanceId=?)" +
+                   ")" +
                    " order by r.sortName ";
         return getSession().createQuery(sql)
             .setBoolean(0, fSystem.booleanValue())
