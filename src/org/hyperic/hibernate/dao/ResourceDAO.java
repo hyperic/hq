@@ -200,10 +200,10 @@ public class ResourceDAO extends HibernateDAO
                    "where " +
                    "  r.system=? and " +
                    "  (subj.id=? or r.owner.id=?) and " +
-                   "  (rt.name = null or " +
+                   "  (" +
                    "   rt.name='covalentEAMService' or " +
                    "   rt.name='covalentAuthzResourceGroup') and " +
-                   "  (op.name = null or" +
+                   "  (" +
                    "   op.name='viewService' or " +
                    "   op.name='viewResourceGroup') and " +
                    "  rg.groupType = 15 and " +
@@ -225,10 +225,10 @@ public class ResourceDAO extends HibernateDAO
                    " left join fetch r.resourceType rt " +
                    "where " +
                    "  r.system=? and " +
-                   "  (rt.name = null or " +
+                   "  (" +
                    "   rt.name = 'covalentEAMService' or " +
                    "   rt.name = 'covalentAuthzResourceGroup') and " +
-                   "  (op.name = null or " +
+                   "  (" +
                    "   op.name = 'viewService' or " +
                    "   op.name = 'viewResourceGroup') and " +
                    "  rg.groupType = 15 and " +
@@ -255,7 +255,7 @@ public class ResourceDAO extends HibernateDAO
                    " (subj.id=? or " +
                    "  r.owner.id=? or " +
                    "  subj.authDsn = 'covalentAuthzInternalDsn') and " +
-                   " (op.name = null or " +
+                   " (" +
                    "  op.name = 'viewPlatform' or " +
                    "  op.name = 'viewServer' or " +
                    "  op.name = 'viewService' or " +
@@ -296,6 +296,7 @@ public class ResourceDAO extends HibernateDAO
                    "  (op.name='viewResourceGroup' and " +
                    "    not r.instanceId=?) )" +
                    " order by r.sortName ";
+
         return getSession().createQuery(sql)
             .setBoolean(0, fSystem.booleanValue())
             .setInteger(1, groupId.intValue())
