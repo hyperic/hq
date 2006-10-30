@@ -86,6 +86,7 @@ public class DerivedMeasurement extends Measurement
 
     public DerivedMeasurementValue getDerivedMeasurementValue() {
         MonitorableType mt = getTemplate().getMonitorableType();
+        Baseline b = getBaseline();
 
         DerivedMeasurementValue val = new DerivedMeasurementValue();
         val.setId(getId());
@@ -96,7 +97,9 @@ public class DerivedMeasurement extends Measurement
         val.setInstanceId(getInstanceId());
         val.setMtime(getMtime());
         val.setTemplate(getTemplate().getMeasurementTemplateValue());
-        val.setBaseline(getBaseline().getBaselineValue());
+        if (b != null) {
+            val.setBaseline(b.getBaselineValue());
+        }
 
         return val;
     }
