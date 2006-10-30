@@ -9,6 +9,8 @@ import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
@@ -47,27 +49,48 @@ public class AlertDefTest
         ppk = pMan.createPlatform(getOverlord(), ptpk, pVal, null);
         pVal = pMan.getPlatformById(getOverlord(), ppk.getId());
         
-        // Create trigger
-        RegisteredTriggerValue tInfo = new RegisteredTriggerValue();
-        tInfo.setClassname("java.lang.Integer");
-        tInfo.setConfig(new byte[0]);
-        tInfo.setFrequency(100);
-        tInfo = rMan.createTrigger(tInfo);
-        
         // Create alert def
         AlertDefinitionValue aInfo = new AlertDefinitionValue();
         aInfo.setAppdefId(pVal.getId().intValue());
         aInfo.setAppdefType(AppdefEntityConstants.APPDEF_TYPE_PLATFORM);
-        aInfo.addTrigger(tInfo);
         aInfo.setName(u("fubar"));
 
+        addCondition(aInfo, addTrigger(aInfo));
+        
         int numDefs = aMan.findAllAlertDefinitions().size();
         aInfo = aMan.createAlertDefinition(aInfo);
         assertEquals(numDefs + 1, aMan.findAllAlertDefinitions().size());
         assertEquals(1, aInfo.getTriggers().length);
-        assertEquals(0, aInfo.getConditions().length);
+        assertEquals(1,  aInfo.getConditions().length);
+    }
+    
+    private RegisteredTriggerValue addTrigger(AlertDefinitionValue adef) 
+        throws Exception 
+    {
+        RegisteredTriggerValue trig = new RegisteredTriggerValue();
+        
+        trig.setClassname(u("my.trigger.class"));
+        trig.setConfig(new byte[0]);
+        trig.setFrequency(100);
+
+        trig = getTriggerManager().createTrigger(trig);
+        adef.addTrigger(trig);
+        return trig;
     }
 
+    private void addCondition(AlertDefinitionValue adef, 
+                              RegisteredTriggerValue trigger) 
+    {
+        AlertConditionValue acv = new AlertConditionValue();
+
+        acv.setType(EventConstants.TYPE_THRESHOLD);
+        acv.setTriggerId(trigger.getId());
+        acv.setName("Measurement Name");
+        acv.setComparator("=");
+
+        adef.addCondition(acv);
+    }
+    
     public void testSimple() throws Exception {
         TransactionBlock trans = new TransactionBlock() {
             public void run() throws Exception {
