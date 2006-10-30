@@ -3,6 +3,7 @@ package org.hyperic.hq.authz.test;
 import java.util.Random;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.authz.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
@@ -34,7 +35,7 @@ public class ResourceGroupTest extends HQEJBTestBase {
 
     public void testSimpleFind() throws Exception {
         rman = ResourceGroupManagerUtil.getLocalHome().create();
-        ResourceGroupValue resGrp = rman
+        ResourceGroup resGrp = rman
                 .findResourceGroupByName(
                                          getOverlord(),
                                          AuthzConstants.rootResourceGroupName);
@@ -59,7 +60,7 @@ public class ResourceGroupTest extends HQEJBTestBase {
         });
         
         // Now look up the resource group that we just created
-        final ResourceGroupValue resGrp =
+        final ResourceGroup resGrp =
             rman.findResourceGroupByName(overlord, BOGUS_NAME);
         assertNotNull(resGrp);
         
@@ -79,20 +80,22 @@ public class ResourceGroupTest extends HQEJBTestBase {
                 ResourceValue resource = remg.findResourceById(pk.getId());
                 assertNotNull(resource);
                 
-                rman.addResource(overlord, resGrp, resource.getInstanceId(),
-                                 rtv);
+                rman.addResource(overlord, resGrp.getResourceGroupValue(),
+                                 resource.getInstanceId(), rtv);
             }
         });
         
         // Look up the group again
-        PageList resources = rman.getResources(overlord, resGrp,
+        PageList resources = rman.getResources(overlord,
+                                               resGrp.getResourceGroupValue(),
                                                PageControl.PAGE_ALL);
         assertEquals(1, resources.size());
 
         // Now delete it
         runInTransaction(new TransactionBlock() {
             public void run() throws Exception {
-                rman.removeResourceGroup(overlord, resGrp);
+                rman.removeResourceGroup(overlord,
+                                         resGrp.getResourceGroupValue());
             }
         });
     }

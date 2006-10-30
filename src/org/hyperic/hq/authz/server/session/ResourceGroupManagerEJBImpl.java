@@ -131,6 +131,7 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
         throws PermissionException {
         ResourceGroup groupLocal;
 		AuthzSubject whoamiLocal = getSubjectDAO().findById(whoami.getId());
+        group.setModifiedBy(whoamiLocal.getName());
         groupLocal = getResourceGroupDAO().create(whoamiLocal, group);
         
         /* associated resources */
@@ -154,7 +155,7 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      * operation for requested group.
      * @ejb:interface-method
      */
-    public ResourceGroupValue findResourceGroupById(AuthzSubjectValue whoami,
+    public ResourceGroup findResourceGroupById(AuthzSubjectValue whoami,
                                                     Integer id)
         throws PermissionException {
         ResourceGroup groupLocal = getResourceGroupDAO().findById(id);
@@ -164,7 +165,7 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
                  groupLocal.getResource().getResourceType(),
                  groupLocal.getId(),
                  AuthzConstants.groupOpViewResourceGroup);
-        return groupLocal.getResourceGroupValue();
+        return groupLocal;
     }
 
     /**
@@ -176,7 +177,7 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      * on the requested group
      * @ejb:interface-method
      */
-    public ResourceGroupValue findResourceGroupByName(AuthzSubjectValue whoami,
+    public ResourceGroup findResourceGroupByName(AuthzSubjectValue whoami,
                                                       String name)
         throws PermissionException, FinderException {
         ResourceGroup resGroup = getResourceGroupDAO().findByName(name);
@@ -188,7 +189,7 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
                  resGroup.getResource().getResourceType(),
                  resGroup.getId(),
                  AuthzConstants.groupOpViewResourceGroup);
-        return resGroup.getResourceGroupValue();
+        return resGroup;
     }
 
     /**

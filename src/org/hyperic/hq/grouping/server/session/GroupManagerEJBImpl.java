@@ -39,6 +39,8 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.authz.Resource;
+import org.hyperic.hq.authz.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -180,7 +182,7 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
      *         a particular group.
      * @throws GroupNotFoundException when group is non-existent.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="REQUIRED"
      */
     public GroupValue findGroup (AuthzSubjectValue subject, GroupValue retVal,
                                  PageControl pc)
@@ -188,7 +190,7 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
         try {
             ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
 
-            ResourceGroupValue rgVo;
+            ResourceGroup rgVo;
             if (retVal.getName () != null) {
                 rgVo = rgmLoc.findResourceGroupByName(subject,
                                                       retVal.getName());
@@ -202,27 +204,25 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             retVal.setName              ( rgVo.getName() );
             retVal.setDescription       ( rgVo.getDescription() );
             retVal.setLocation          ( rgVo.getLocation() );
-            retVal.setGroupType         ( rgVo.getGroupType() );
+            retVal.setGroupType         ( rgVo.getGroupType().intValue() );
             retVal.setSubject           ( subject );
-            retVal.setGroupEntType      ( rgVo.getGroupEntType() );
-            retVal.setGroupEntResType   ( rgVo.getGroupEntResType() );
-            retVal.setClusterId         ( rgVo.getClusterId() );
-            retVal.setMTime             ( rgVo.getMTime() );
-            retVal.setCTime             ( rgVo.getCTime() );
+            retVal.setGroupEntType      ( rgVo.getGroupEntType().intValue() );
+            retVal.setGroupEntResType   ( rgVo.getGroupEntResType().intValue() );
+            retVal.setClusterId         ( rgVo.getClusterId().intValue() );
+            retVal.setMTime             ( new Long(rgVo.getMtime()) );
+            retVal.setCTime             ( new Long(rgVo.getCtime()) );
             retVal.setModifiedBy        ( rgVo.getModifiedBy() );
             retVal.setOwner             ( fetchGroupOwner(rgVo.getId()) );
 
             /* Add the group members*/
-            PageList resList = rgmLoc.getResources(subject, rgVo, pc);
-
-            for (Iterator i = resList.iterator(); i.hasNext();) {
-                ResourceValue resVo = (ResourceValue) i.next();
+            for (Iterator i = rgVo.getResources().iterator(); i.hasNext();) {
+                Resource resVo = (Resource) i.next();
                 GroupEntry ge =
                     new GroupEntry(resVo.getInstanceId(),
-                                   resVo.getResourceTypeValue().getName());
+                                   resVo.getResourceType().getName());
                 retVal.addEntry(ge);
             }
-            retVal.setTotalSize( resList.getTotalSize() );
+            retVal.setTotalSize( rgVo.getResources().size() );
         }
         catch (FinderException fe) {
             log.debug("GroupManager caught underlying finder exc "+
@@ -232,24 +232,6 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
                           "does not exist.",fe);
         }
         return retVal;
-    }
-
-    /**
-     *  Lookup and return all groups that include a resource.
-     * 
-     * @param spider subject
-     * @param GroupValue for filtering
-     * @param PageControl for paging
-     * @return PageList
-     * @throws FinderException
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
-     */
-    public PageList findAllGroups (AuthzSubjectValue subject,
-                                   GroupValue gv, PageControl pc)
-        throws  GroupNotFoundException, PermissionException,
-                CloneNotSupportedException {
-        return findAllGroups(subject,gv,null,pc);
     }
 
     /**
@@ -285,10 +267,9 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             List toBePaged = new ArrayList();
 
             for (Iterator i=rgList.iterator();i.hasNext();) {
-                ResourceGroupValue rgVo =
-                    (ResourceGroupValue) i.next();
+                ResourceGroupValue rgVo = (ResourceGroupValue) i.next();
 
-                //  Filter out the system group entries.
+                // Filter out the system group entries.
                 if (rgVo.getSystem())
                     continue;
 
@@ -377,8 +358,9 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
             
             // First, lookup the group to preserve non-updatable fields
-            ResourceGroupValue rgVo = 
-                rgmLoc.findResourceGroupById(subject, groupVo.getId() );
+            ResourceGroup rg = rgmLoc.findResourceGroupById(subject,
+                                                            groupVo.getId());
+            ResourceGroupValue rgVo = rg.getResourceGroupValue();
 
             // If they've changed the group name then we need to ensure
             // they haven't chosen one that already exists. Perform a 
@@ -404,18 +386,16 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             rgmLoc.saveResourceGroup(subject,rgVo);
 
             // Fetch existing entries
-            PageList resList = rgmLoc.getResources(subject,rgVo, 
-                PageControl.PAGE_ALL);
-
+            Collection resList = rg.getResources();
 
             // Now apply deletions
             Iterator iter = resList.iterator();
             List resToDel = new ArrayList();
             while (iter.hasNext()) {
-                ResourceValue resVo = (ResourceValue) iter.next();
+                Resource resVo = (Resource) iter.next();
                 GroupEntry ent =
                     new GroupEntry(resVo.getInstanceId(),
-                                   resVo.getResourceTypeValue().getName());
+                                   resVo.getResourceType().getName());
 
                 if (!groupVo.existsEntry(ent)) {
                     resToDel.add(resVo);
@@ -424,8 +404,13 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             
             // only call remove if there's stuff to delete
             if(!resToDel.isEmpty()) {
-                ResourceValue[] resToDelArr = (ResourceValue[])
-                    resToDel.toArray(new ResourceValue[]{});
+                ResourceValue[] resToDelArr =
+                    new ResourceValue[resToDel.size()];
+                int i = 0;
+                for (Iterator it = resToDel.iterator(); it.hasNext(); i++) {
+                    Resource res = (Resource) it.next();
+                    resToDelArr[i] = res.getResourceValue();
+                }
                 rgmLoc.removeResources(subject,rgVo,resToDelArr);
             }
             // now apply additions
@@ -457,13 +442,14 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
         }
     }
 
-    private boolean resourceListContainsGroupEntry (List list, GroupEntry ge) {
+    private boolean resourceListContainsGroupEntry(Collection list,
+                                                   GroupEntry ge) {
         try {
             Iterator i=list.iterator();
             while (i.hasNext()) {
-                ResourceValue rv = (ResourceValue) i.next();
+                Resource rv = (Resource) i.next();
                 if (rv.getInstanceId().intValue() == ge.getId().intValue() &&
-                    rv.getResourceTypeValue().getName().equals(ge.getType()))
+                    rv.getResourceType().getName().equals(ge.getType()))
                     return true;
             }
         } catch (Exception e) {
