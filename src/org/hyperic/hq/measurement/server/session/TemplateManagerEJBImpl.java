@@ -64,6 +64,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.Category;
+import org.hyperic.hq.measurement.DerivedMeasurement;
 import org.hyperic.hq.measurement.MeasurementArg;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementTemplate;
@@ -71,9 +72,6 @@ import org.hyperic.hq.measurement.MonitorableType;
 import org.hyperic.hq.measurement.SRNCreateException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.server.mbean.SRNCache;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementLocal;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementLocalHome;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementUtil;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementArgValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateLiteValue;
@@ -452,36 +450,33 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
     public void updateTemplateDefaultInterval(Integer[] templIds, long interval) 
         throws TemplateNotFoundException {
         try {
-            DerivedMeasurementLocalHome dmHome =
-                DerivedMeasurementUtil.getLocalHome();
-            
             long current = System.currentTimeMillis();
 
             for (int i = 0; i < templIds.length; i++) {
-                MeasurementTemplatePK pk =
-                    new MeasurementTemplatePK(templIds[i]);
-                MeasurementTemplateLocal ejb = getMtHome().findByPrimaryKey(pk);
-
-                if (interval != ejb.getDefaultInterval())
-                    ejb.setDefaultInterval(interval);
+                MeasurementTemplate template =
+                    getMeasurementTemplateDAO().findById(templIds[i]);
                 
-                if (!ejb.getDefaultOn())
-                    ejb.setDefaultOn(interval != 0);
-                    
-                ejb.setMtime(current);
+                if (interval != template.getDefaultInterval())
+                    template.setDefaultInterval(interval);
+            
+                if (!template.isDefaultOn())
+                    template.setDefaultOn(interval != 0);
+            
+                template.setMtime(current);
                 
-                List metrics = dmHome.findByTemplate(templIds[i]);
+                List metrics =
+                    getDerivedMeasurementDAO().findByTemplate(templIds[i]);
                 DMValueCache cache = DMValueCache.getInstance();
                 SRNCache srnCache = SRNCache.getInstance();
+                
                 for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-                    DerivedMeasurementLocal dm =
-                        (DerivedMeasurementLocal) it.next();
+                    DerivedMeasurement dm = (DerivedMeasurement)it.next();
                     
                     if (dm.getInterval() != interval)
                         dm.setInterval(interval);
                     
-                    if (ejb.getDefaultOn() != dm.getEnabled())
-                        dm.setEnabled(ejb.getDefaultOn());
+                    if (template.isDefaultOn() != dm.isEnabled())
+                        dm.setEnabled(template.isDefaultOn());
                     
                     dm.setMtime(current);
                     
@@ -491,14 +486,17 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                         dmval.setEnabled(true);
                         dmval.setMtime(current);
                     }
-                    
-                    AppdefEntityID aeid = new AppdefEntityID(dm.getAppdefType(),
-                                                             dm.getInstanceId());
+
+                    AppdefEntityID aeid = 
+                        new AppdefEntityID(dm.getAppdefType(),
+                                           dm.getInstanceId());
                     ScheduleRevNumValue srn = srnCache.getSRN(aeid);
                     if (srn != null) {  // Increment SRN only if not null
                         try {
-                            srnCache.beginIncrementSRN(
-                                aeid, Math.min(interval, srn.getMinInterval()));
+                            srnCache.beginIncrementSRN(aeid,
+                                                       Math.min(interval, 
+                                                                srn.
+                                                                getMinInterval()));
                         } catch (SRNCreateException e) {
                             log.error("Should not be creating SRNs", e);
                         } finally {
@@ -509,8 +507,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             }
         } catch (FinderException e) {
             throw new TemplateNotFoundException(e.getMessage());
-        } catch (NamingException e) {
-            throw new SystemException(e);
         }
     }
     
@@ -522,26 +518,23 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
     public void enableTemplateByDefault(Integer[] templIds, boolean on) 
         throws TemplateNotFoundException {
         try {
-            DerivedMeasurementLocalHome dmHome =
-                DerivedMeasurementUtil.getLocalHome();
-            
             long current = System.currentTimeMillis();
-
+        
             for (int i = 0; i < templIds.length; i++) {
-                MeasurementTemplatePK pk =
-                    new MeasurementTemplatePK(templIds[i]);
-                MeasurementTemplateLocal ejb = getMtHome().findByPrimaryKey(pk);
-                ejb.setDefaultOn(on);
-                ejb.setMtime(current);
+                MeasurementTemplate template =
+                    getMeasurementTemplateDAO().findById(templIds[i]);
 
-                List metrics = dmHome.findByTemplate(templIds[i]);
+                template.setDefaultOn(on);
+                template.setMtime(current);
+                
+                List metrics =
+                    getDerivedMeasurementDAO().findByTemplate(templIds[i]);
                 DMValueCache cache = DMValueCache.getInstance();
                 SRNCache srnCache = SRNCache.getInstance();
                 for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-                    DerivedMeasurementLocal dm =
-                        (DerivedMeasurementLocal) it.next();
+                    DerivedMeasurement dm = (DerivedMeasurement)it.next();
                     
-                    if (dm.getEnabled() == on || dm.getInterval() == 0)
+                    if (dm.isEnabled() == on || dm.getInterval() == 0)
                         continue;
                     
                     dm.setEnabled(on);
@@ -553,12 +546,13 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                         dmval.setMtime(current);
                     }
                     
-                    AppdefEntityID aeid = new AppdefEntityID(dm.getAppdefType(),
-                                                             dm.getInstanceId());
+                    AppdefEntityID aeid =
+                        new AppdefEntityID(dm.getAppdefType(),
+                                           dm.getInstanceId());
                     ScheduleRevNumValue srn = srnCache.getSRN(aeid);
                     try {
                         long minInterval = (srn == null) ? dmval.getInterval() :
-                                                           srn.getMinInterval();
+                            srn.getMinInterval();
                         srnCache.beginIncrementSRN(aeid, minInterval);
                     } catch (SRNCreateException e) {
                         log.error("Should not be creating SRNs", e);
@@ -569,8 +563,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             }
         } catch (FinderException e) {
             throw new TemplateNotFoundException(e.getMessage());
-        } catch (NamingException e) {
-            throw new SystemException(e);
         }
     }
     

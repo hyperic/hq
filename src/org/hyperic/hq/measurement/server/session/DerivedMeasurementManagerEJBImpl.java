@@ -222,9 +222,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * Look up a derived measurement's appdef entity ID
      */
     private AppdefEntityID getAppdefEntityId(DerivedMeasurement dm) {
-        // This is no good
-        int type = dm.getTemplate().getMonitorableType().getAppdefType();
-        return new AppdefEntityID(type, dm.getInstanceId());
+        return new AppdefEntityID(dm.getAppdefType(), dm.getInstanceId());
     }
 
     private void sendAgentSchedule(AppdefEntityID aid) {
@@ -1295,10 +1293,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                                        "raw measurement");
             }
 
-            AppdefEntityID id =
-                new AppdefEntityID(dm.getTemplate().
-                                   getMonitorableType().getAppdefType(),
-                                   dm.getInstanceId().intValue());
+            AppdefEntityID id = getAppdefEntityId(dm);
 
             HashSet tids;
             if (resMap.containsKey(id)) {

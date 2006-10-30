@@ -71,21 +71,22 @@ public class DerivedMeasurement extends Measurement
         _formula = formula;
     }
 
-    public void setBaseline(Baseline b)
-    {
+    public void setBaseline(Baseline b) {
         if (b != null) {
             b.setDerivedMeasurement(this);
         }
         _baseline = b;
     }
 
-    public Baseline getBaseline()
-    {
+    public Baseline getBaseline() {
         return _baseline;
     }
 
+    public int getAppdefType() {
+        return getTemplate().getMonitorableType().getAppdefType();
+    }
+
     public DerivedMeasurementValue getDerivedMeasurementValue() {
-        MonitorableType mt = getTemplate().getMonitorableType();
         Baseline b = getBaseline();
 
         DerivedMeasurementValue val = new DerivedMeasurementValue();
@@ -93,7 +94,7 @@ public class DerivedMeasurement extends Measurement
         val.setEnabled(isEnabled());
         val.setInterval(getInterval());
         val.setFormula(getFormula());
-        val.setAppdefType(mt.getAppdefType());
+        val.setAppdefType(getAppdefType());
         val.setInstanceId(getInstanceId());
         val.setMtime(getMtime());
         val.setTemplate(getTemplate().getMeasurementTemplateValue());
