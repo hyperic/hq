@@ -169,7 +169,8 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
     {
         ConfigCheckCache cache = ConfigCheckCache.instance();
         ConfigCheckCacheEntry entry
-            = cache.getMetricsToCheck(subject, entity, getMtHome());
+            = cache.getMetricsToCheck(subject, entity,
+                                      getMeasurementTemplateDAO());
 
         // there are no metric templates, just return
         if (entry.isEmpty()) {

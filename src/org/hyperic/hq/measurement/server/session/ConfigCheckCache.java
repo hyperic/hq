@@ -31,17 +31,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.FinderException;
-
+import org.hyperic.hibernate.dao.MeasurementTemplateDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.measurement.MeasurementArg;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.shared.MeasurementArgLocal;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateLocal;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateLocalHome;
+import org.hyperic.hq.measurement.MeasurementTemplate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,10 +60,9 @@ class ConfigCheckCache {
 
     private Map cache = new HashMap();
 
-    public ConfigCheckCacheEntry getMetricsToCheck
-        (AuthzSubjectValue s,
-         AppdefEntityID id, 
-         MeasurementTemplateLocalHome mtHome) 
+    public ConfigCheckCacheEntry getMetricsToCheck(AuthzSubjectValue s,
+                                                   AppdefEntityID id, 
+                                                   MeasurementTemplateDAO dao) 
         throws AppdefEntityNotFoundException, PermissionException {
 
         String mType = (new AppdefEntityValue(id, s)).getMonitorableType();
@@ -75,11 +72,9 @@ class ConfigCheckCache {
         }
         if (entry != null) return entry;
 
-        List templates;
-        try {
-            templates =
-                mtHome.findDefaultsByMonitorableType(mType, id.getType());
-        } catch (FinderException e) {
+        List templates =
+                dao.findDefaultsByMonitorableType(mType, id.getType());
+        if (templates.size() == 0) {
             String msg = "No default templates for monitorable type " + mType;
             log.error(msg);
             return updateCache(mType, ConfigCheckCacheEntry.EMPTY);
@@ -88,21 +83,20 @@ class ConfigCheckCache {
         List dsnList = new ArrayList(SAMPLE_SIZE);
         int idx = 0;
         int availIdx = -1;
-        MeasurementTemplateLocal template;
+        MeasurementTemplate template;
         for (int i=0; i<templates.size(); i++) {
 
-            template = (MeasurementTemplateLocal) templates.get(i);
+            template = (MeasurementTemplate)templates.get(i);
             
             if (template.getCategory().getName().equals(availCat) &&
-                template.getDesignate()) {
+                template.isDesignate()) {
                 availIdx = idx;
             }
             
             // Need to get the raw measurements
             Collection args = template.getMeasurementArgs();
-            MeasurementArgLocal arg =
-                (MeasurementArgLocal) args.iterator().next();
-            template = arg.getMeasurementTemplateArg();
+            MeasurementArg arg = (MeasurementArg)args.iterator().next();
+            template = arg.getTemplateArg();
 
             if (idx == availIdx
                 || (availIdx == -1 && idx < (SAMPLE_SIZE-1))
