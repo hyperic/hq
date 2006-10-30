@@ -93,22 +93,22 @@
       <column name="DELETED" not-null="true" />
     </property>
 
-    <bag name="actionsBag" table="EAM_ACTION">
+    <bag name="actionsBag" table="EAM_ACTION" inverse="true">
       <key column="ALERT_DEFINITION_ID" />
       <one-to-many class="Action" />
     </bag>
 
-    <bag name="alertsBag" table="EAM_ALERT">
+    <bag name="alertsBag" table="EAM_ALERT" inverse="true">
       <key column="ALERT_DEFINITION_ID" />
       <one-to-many class="Alert" />
     </bag>
 
-    <bag name="conditionsBag" table="EAM_ALERT_CONDITION">
+    <bag name="conditionsBag" table="EAM_ALERT_CONDITION" inverse="true">
       <key column="ALERT_DEFINITION_ID" />
       <one-to-many class="AlertCondition" />
     </bag>
 
-    <bag name="triggersBag" table="EAM_REGISTERED_TRIGGER">
+    <bag name="triggersBag" table="EAM_REGISTERED_TRIGGER" inverse="true">
       <key column="ALERT_DEFINITION_ID" />
       <one-to-many class="RegisteredTrigger" />
     </bag>
