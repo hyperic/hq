@@ -117,6 +117,16 @@ public class DerivedMeasurementDAO extends HibernateDAO
             .setInteger(1, iid.intValue()).uniqueResult();
     }
 
+    public List findByTemplate(Integer id) {
+        String sql =
+            "from DerivedMeasurement m " +
+            "join fetch m.template as t " +
+            "where t.id=?";
+
+        return getSession().createQuery(sql)
+            .setInteger(0, id.intValue()).list();
+    }
+
     public List findByInstance(int type, int id) {
         String sql =
             "from DerivedMeasurement m " +
