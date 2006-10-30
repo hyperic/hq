@@ -170,6 +170,25 @@ public class RuntimeReportProcessor {
                     + ", reported by serverId="+appdefServers[i].getId()+") into appdef...");
             for (j=0; j<aiplatforms.length; j++) {
                 if(aiplatforms[j] != null) {
+                    if (aiplatforms[j].getAgentToken() == null) {
+                        // reassociate agent to the auto discoverred platform
+                        // one situation this condition occurs is when
+                        // 1. platform is deleted from the ui
+                        // 2. agent for that platform is stopped and started
+                        //
+                        // BTW: there is lot more going on here, then
+                        // just setting the agent token. As of today,
+                        // inventory rediscovery is supported only if
+                        // the "data" directory on the agent is deleted
+                        // prior to restarting the agent.  That is, the
+                        // supported operation is
+                        // 1. platform is deleted from the ui
+                        // 2. stop the agent
+                        // 3. delete the "data" directory on the agent
+                        // 4. start the agent.
+
+                        aiplatforms[j].setAgentToken(agentToken);
+                    }
                     mergePlatformIntoInventory(subject, aiplatforms[j],
                                                appdefServers[i], 
                                                platformMgr,

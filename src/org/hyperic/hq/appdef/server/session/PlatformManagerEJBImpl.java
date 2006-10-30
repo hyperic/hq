@@ -603,7 +603,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         }
             
         // call the create
-        ConfigResponseDB config = getConfigResponseDAO().createPlatform();
         Agent agent = getAgentDAO().findByAgentToken(aipValue.getAgentToken());
         
         if (agent == null) {
@@ -611,6 +610,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                                               "Unable to find agent: " +
                                               aipValue.getAgentToken());
         }
+        ConfigResponseDB config = getConfigResponseDAO().createPlatform();
 
         Platform platform = platType.create(aipValue, subject.getName(),
                                             config, agent);

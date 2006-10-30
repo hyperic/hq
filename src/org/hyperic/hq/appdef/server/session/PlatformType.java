@@ -183,7 +183,16 @@ public class PlatformType extends AppdefResourceType {
         p.setCommentText("");
         p.setLocation("");
         p.setCpuCount(aip.getCpuCount());
+        fixName(p);
         return p;
+    }
+
+    private void fixName(Platform p) {
+        // if name is not set then set it to fqdn (assuming it is set of course)
+        String name = p.getName();
+        if (name == null || "".equals(name.trim())) {
+            p.setName(p.getFqdn());
+        }
     }
     
     private Platform newPlatform(PlatformValue pv, ConfigResponseDB config,
