@@ -36,7 +36,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.naming.InitialContext;
@@ -44,93 +43,79 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.dao.ScheduleRevNumDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.measurement.SRN;
 import org.hyperic.hq.measurement.SRNCreateException;
-import org.hyperic.hq.measurement.shared.ScheduleRevNumLocal;
-import org.hyperic.hq.measurement.shared.ScheduleRevNumLocalHome;
-import org.hyperic.hq.measurement.shared.ScheduleRevNumPK;
-import org.hyperic.hq.measurement.shared.ScheduleRevNumUtil;
+import org.hyperic.hq.measurement.ScheduleRevNum;
+import org.hyperic.hq.measurement.SrnId;
 import org.hyperic.hq.measurement.shared.ScheduleRevNumValue;
 import org.hyperic.util.jdbc.DBUtil;
 
 /**
- *
  * The cache class that keeps track of resources and their SRNs
  */
 public class SRNCache {
     protected Log log = LogFactory.getLog(SRNCache.class.getName());
 
-    private static SRNCache singleton = null;
+    private static SRNCache _singleton = null;
+    private HashMap _cache = null;
+    private InitialContext _ic = null;
+
+    protected SRNCache() {}
+
+    protected ScheduleRevNumDAO getScheduleRevNumDAO() {
+        return DAOFactory.getDAOFactory().getScheduleRevNumDAO();
+    }
+
+    private Connection getConnection() throws SQLException {
+        try {
+            if (_ic == null) {
+                _ic = new InitialContext();
+            }
+
+            return DBUtil.getConnByContext(_ic, HQConstants.DATASOURCE);
+        } catch (NamingException e) {
+            throw new SystemException(e);
+        }
+    }
 
     /**
      * Return singleton instance and initialize if necessary
      */    
     public static SRNCache getInstance() {
-        if (singleton == null) {
-            singleton = (SRNCache) ProductProperties
-                    .getPropertyInstance("hyperic.hq.metric.srncache");
+        if (_singleton == null) {
+            _singleton = (SRNCache) ProductProperties
+                .getPropertyInstance("hyperic.hq.metric.srncache");
             
-            if (singleton == null)
-                singleton = new SRNCache();
+            if (_singleton == null)
+                _singleton = new SRNCache();
             
-            singleton.init();
+            _singleton.init();
         }
-        return singleton;
+        return _singleton;
     }
 
     /**
      * Only return singleton instance only if it's already initialized
      */    
     public static SRNCache getInitializedInstance() {
-        return singleton;
+        return _singleton;
     }
 
-    private HashMap cache = null;
-    private InitialContext ic = null;
-    private ScheduleRevNumLocalHome srnHome = null;
-    
-    protected SRNCache() {}
-    
-    private ScheduleRevNumLocalHome getSRNHome() {
-        while (srnHome == null) {
-            try {
-                srnHome = ScheduleRevNumUtil.getLocalHome();
-            } catch (NamingException e) {
-                try {
-                    this.log.debug(
-                        "ScheduleRevNum not yet deployed, wait 5 seconds");
-                    Thread.sleep(5000);
-                } catch (InterruptedException e1) {
-                    this.log.debug("Sleep thread interrupted");
-                }
-            }
-        }
-        return srnHome;
-    }
-    
-    private Connection getConnection() throws SQLException {
-        try {
-            if (ic == null) {
-                ic = new InitialContext();
-            }
-
-            return DBUtil.getConnByContext(ic, HQConstants.DATASOURCE);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-    }
-    
     private PreparedStatement getMinIntervalsStmt(Connection conn)
         throws SQLException {
         return conn.prepareStatement(
             "SELECT appdef_type, instance_id, min(coll_interval)" +
             " FROM EAM_MEASUREMENT m, EAM_MONITORABLE_TYPE mt," +
             "      EAM_MEASUREMENT_TEMPL t" +
-            " WHERE enabled = " + DBUtil.getBooleanValue(true, conn) + " AND " +            "      template_id = t.id AND monitorable_type_id = mt.id" +
+            " WHERE enabled = " + DBUtil.getBooleanValue(true, conn) + " AND " +
+            "      template_id = t.id AND monitorable_type_id = mt.id" +
             " GROUP BY appdef_type, instance_id");
     }
     
@@ -192,15 +177,15 @@ public class SRNCache {
     }
 
     private synchronized boolean init() {
-        if (cache != null)
+        if (_cache != null)
             return true;
 
         log.debug("Initializing SRN Cache");
         
         // Create the new cache
-        this.cache = new HashMap();
+        _cache = new HashMap();
         
-        synchronized (this.cache) {
+        synchronized (_cache) {
             long current = System.currentTimeMillis();
             
             Connection conn = null;
@@ -209,7 +194,7 @@ public class SRNCache {
 
             // Look up the minimum intervals from the database            
             try {                    
-                conn = this.getConnection();
+                conn = getConnection();
                 
                 try {
                     stmt = this.getSRNStmt(conn);
@@ -232,13 +217,13 @@ public class SRNCache {
                         // won't try to reschedule
                         srnVal.setMinInterval(current);
 
-                        cache.put(eid, srnVal);
+                        _cache.put(eid, srnVal);
                     }
                 } finally {
                     DBUtil.closeJDBCObjects(this, null, stmt, rs);
                 }
     
-                if (cache.size() == 0) {
+                if (_cache.size() == 0) {
                     log.debug("Create SRN values from entities");
 
                     // Create SRNs from the database
@@ -247,9 +232,9 @@ public class SRNCache {
                         rs = stmt.executeQuery();
                         
                         while (rs.next()) {
-                            ScheduleRevNumLocal srn =
-                                this.getSRNHome().create(rs.getInt(1),
-                                                         rs.getInt(2));
+                            ScheduleRevNum srn =
+                                getScheduleRevNumDAO().create(rs.getInt(1),
+                                                              rs.getInt(2));
                             
                             ScheduleRevNumValue srnVal =
                                 srn.getScheduleRevNumValue();
@@ -262,11 +247,8 @@ public class SRNCache {
                                 new AppdefEntityID(srnVal.getAppdefType(),
                                                    srnVal.getInstanceId());
                             
-                            cache.put(eid, srnVal);
+                            _cache.put(eid, srnVal);
                         }
-                    } catch (CreateException e) {
-                        this.log.debug("Unable to create new SRNs");
-                        throw new SystemException(e);
                     } finally {
                         DBUtil.closeJDBCObjects(this, null, stmt, rs);
                     }
@@ -285,9 +267,9 @@ public class SRNCache {
                     AppdefEntityID eid =
                         new AppdefEntityID(rs.getInt(1), rs.getInt(2));
                     
-                    if (cache.containsKey(eid)) {
+                    if (_cache.containsKey(eid)) {
                         ScheduleRevNumValue srn =
-                            (ScheduleRevNumValue) cache.get(eid);
+                            (ScheduleRevNumValue) _cache.get(eid);
                         srn.setMinInterval(rs.getLong(3));
                     }
                 }
@@ -314,17 +296,15 @@ public class SRNCache {
     public ScheduleRevNumValue removeSRN(AppdefEntityID eid)
         throws FinderException, RemoveException {
         ScheduleRevNumValue srnVal;
-        synchronized (cache) {
-            srnVal = (ScheduleRevNumValue) this.cache.remove(eid);
+        synchronized (_cache) {
+            srnVal = (ScheduleRevNumValue) _cache.remove(eid);
         }
 
         if (srnVal != null) {
             // Update the local EJB
-            ScheduleRevNumLocal srnLocal =
-                getSRNHome().findByPrimaryKey(
-                    new ScheduleRevNumPK(eid.getType(), eid.getID()));
-            srnLocal.remove();
-            
+            SrnId srnId = new SrnId(eid.getType(), eid.getID());
+            ScheduleRevNum srn = getScheduleRevNumDAO().findById(srnId);
+            getScheduleRevNumDAO().remove(srn);
             srnVal.setSRN(0);
         }
         
@@ -339,24 +319,18 @@ public class SRNCache {
      * @throws SRNCreateException
      */
     public int beginIncrementSRN(AppdefEntityID eid, long newMin)
-        throws FinderException, SRNCreateException {
+        throws FinderException, SRNCreateException
+    {
         ScheduleRevNumValue srnVal;
 
         boolean update = false;
-        synchronized (cache) {
+        synchronized (_cache) {
             srnVal = getSRN(eid);
             if (srnVal == null) {
-                try {
-                    // Create new EJB
-                    ScheduleRevNumLocal srnLocal =
-                        getSRNHome().create(eid.getType(), eid.getID());
-                    srnVal = srnLocal.getScheduleRevNumValue();
-                } catch (CreateException e) {
-                    this.log.debug("Could not create new SRN for " + eid);
-                    throw new SRNCreateException(eid, e);
-                }
-    
-                this.cache.put(eid, srnVal);
+                ScheduleRevNum srn = 
+                    getScheduleRevNumDAO().create(eid.getType(), eid.getID());
+                srnVal = srn.getScheduleRevNumValue();
+                _cache.put(eid, srnVal);
             }
             else {
                 int srn = srnVal.getSRN();
@@ -374,8 +348,7 @@ public class SRNCache {
             PreparedStatement stmt = null;
             
             try {
-                conn = this.getConnection();
-                
+                conn = getConnection();
                 stmt = setSRNStmt(conn);
                 
                 int i = 1;
@@ -406,7 +379,7 @@ public class SRNCache {
                 Connection conn = null;
                 PreparedStatement stmt = null;
                 try {            
-                    conn = this.getConnection();
+                    conn = getConnection();
                     stmt = this.getMinIntervalStmt(conn);
     
                     // Set minInterval
@@ -528,8 +501,8 @@ public class SRNCache {
         
         // Convert values to array to avoid synchronization problem
         Object[] values = null;
-        synchronized(cache) {
-            values = cache.values().toArray();
+        synchronized(_cache) {
+            values = _cache.values().toArray();
         }
         
         ArrayList toReschedule = new ArrayList();
@@ -561,7 +534,7 @@ public class SRNCache {
     public ScheduleRevNumValue refreshSRN(AppdefEntityID eid) {
         ScheduleRevNumValue srnVal =
             new ScheduleRevNumValue(eid.getType(), eid.getID(), 0, 0, 0, false);
-        
+
         // Look it up then
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -579,11 +552,11 @@ public class SRNCache {
             DBUtil.closeJDBCObjects(this, conn, stmt, null);
         }
         
-        cache.put(eid, srnVal);
+        _cache.put(eid, srnVal);
         return srnVal;
     }
     
     public ScheduleRevNumValue getSRN(AppdefEntityID eid) {
-        return (ScheduleRevNumValue) this.cache.get(eid);
+        return (ScheduleRevNumValue) _cache.get(eid);
     }
 }
