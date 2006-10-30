@@ -78,6 +78,7 @@ public abstract class HQEJBTestBase
             ServerVOHelperEJBImpl.class,
             ResourceVOHelperEJBImpl.class,
             TemplateManagerEJBImpl.class,
+            ResourceVOHelperEJBImpl.class,
         };
     }
 
