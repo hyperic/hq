@@ -836,19 +836,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
     }
 
-    /** Update the measurement - set the min/max expected range values
-     * @param mValue measurement id
-     * @ejb:interface-method
-     */
-    public DerivedMeasurementValue updateMeasurement(
-        int sessionID, DerivedMeasurementValue mValue)
-        throws SessionTimeoutException, SessionNotFoundException,
-               MeasurementNotFoundException {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-        return this.getDerivedMeasurementManager().updateMeasurement(subject,
-                                                                      mValue);
-    }
-
     /** Update the measurements - set the interval
      * @param mValue measurement id
      * @ejb:interface-method
