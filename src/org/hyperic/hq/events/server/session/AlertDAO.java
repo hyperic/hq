@@ -122,7 +122,7 @@ public class AlertDAO extends HibernateDAO {
 
     public List findBySubject(Integer userId) {
         String sql = "from Alert a, UserAlert ua " + 
-            "where ua.alertId = a.id and ua.userId = :userId";
+            "where ua.alert = a.id and ua.userId = :userId";
         
         return getSession().createQuery(sql)
             .setInteger("userId", userId.intValue())
