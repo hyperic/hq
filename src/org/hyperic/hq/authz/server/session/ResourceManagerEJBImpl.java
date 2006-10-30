@@ -526,7 +526,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param page control
      * @return PageList of resource values
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED" 
+     * @ejb:transaction type="Required" 
      */
     public PageList findViewableSvcResources(AuthzSubjectValue subject,
                                              String resourceName,

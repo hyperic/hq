@@ -306,7 +306,7 @@ public class ResourceDAO extends HibernateDAO
     }
 
     public Collection findScopeByOperationBatch(AuthzSubject subjLoc,
-                                                Resource[] resLocArr,
+                                                ResourceValue[] resLocArr,
                                                 Operation[] opLocArr)
     {
         StringBuffer sb = new StringBuffer();
