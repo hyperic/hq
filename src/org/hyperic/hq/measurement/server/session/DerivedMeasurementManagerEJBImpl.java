@@ -39,7 +39,6 @@ import java.util.Map;
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
 import javax.ejb.FinderException;
-import javax.ejb.NoSuchEntityException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
@@ -47,17 +46,22 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.hyperic.hibernate.dao.DerivedMeasurementDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.measurement.DerivedMeasurement;
 import org.hyperic.hq.measurement.EvaluationException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
+import org.hyperic.hq.measurement.MeasurementTemplate;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
+import org.hyperic.hq.measurement.RawMeasurement;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.ext.MetricOperationEvent;
 import org.hyperic.hq.measurement.ext.depgraph.DerivedNode;
@@ -67,26 +71,15 @@ import org.hyperic.hq.measurement.ext.depgraph.InvalidGraphException;
 import org.hyperic.hq.measurement.ext.depgraph.Node;
 import org.hyperic.hq.measurement.ext.depgraph.RawNode;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
-import org.hyperic.hq.measurement.shared.BaselineLocal;
-import org.hyperic.hq.measurement.shared.BaselineUtil;
-import org.hyperic.hq.measurement.shared.BaselineValue;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementLocal;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerUtil;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementPK;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateLocal;
-import org.hyperic.hq.measurement.shared.MeasurementTemplatePK;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.MonitorableTypeValue;
-import org.hyperic.hq.measurement.shared.RawMeasurementLocal;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocalHome;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerUtil;
-import org.hyperic.hq.measurement.shared.RawMeasurementPK;
 import org.hyperic.hq.measurement.shared.RawMeasurementValue;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
@@ -107,10 +100,6 @@ import org.quartz.SchedulerException;
  *      type="Stateless"
  * 
  * @ejb:transaction type="REQUIRED"
- * 
- * Note: Don't use primary key for lookup, since DerivedMeasurement and
- * RawMeasurement share the same table, and EJB doesn't know which is which.
- * Use findById() instead.
  */
 public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     implements SessionBean {
@@ -121,22 +110,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         PagerProcessor_measurement.class.getName();
      
     private Pager valuePager = null;
-
-    private DerivedMeasurementManagerLocal dmMan = null;
-    private DerivedMeasurementManagerLocal getDMManager() {
-        try {
-            if (dmMan == null) {
-                dmMan =
-                    DerivedMeasurementManagerUtil.getLocalHome().create();
-            }
-    
-            return dmMan;
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
-    }
 
     private RawMeasurementManagerLocal rmMan = null;
     private RawMeasurementManagerLocal getRmMan() {
@@ -171,49 +144,48 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     private DerivedMeasurementValue updateMeasurementInterval(Integer tid,
                                                               Integer iid,
                                                               long interval)
-        throws FinderException {
+        throws FinderException
+    {
         long current = System.currentTimeMillis();
+
+        DerivedMeasurement m = 
+            getDerivedMeasurementDAO().findByTemplateForInstance(tid, iid);
+        if (m == null) {
+            // Fix me
+            throw new FinderException();
+        }
+
+        getDerivedMeasurementDAO().update(m, interval);
+
+        DerivedMeasurementValue dmVal = m.getDerivedMeasurementValue();
+        DMValueCache.getInstance().put(dmVal);
         
-        DerivedMeasurementLocal dmLoc = this.getDmHome().
-            findByTemplateForInstance(tid, iid);
-        dmLoc.setInterval(interval);
-        dmLoc.setEnabled(interval != 0);
-        dmLoc.setMtime(current);
-        
-        /* XXX
-         * Manually update the derived measurement value object, because
-         * the CMP does not appear to expire the cache when setting the local
-         * object.
-         */
-        DerivedMeasurementValue dmv = dmLoc.getDerivedMeasurementValue();
-        dmv.setInterval(interval);
-        dmv.setEnabled(interval != 0);
-        dmv.setMtime(current);
-        
-        DMValueCache.getInstance().put(dmv);
-        
-        return dmv;
+        return dmVal;
     }
 
     private Integer getIdByTemplateAndInstance(Integer tid,
-                                               Integer instanceId)
+                                               Integer iid)
         throws FinderException {
-        DerivedMeasurementLocal dmLoc = getDmHome().
-            findByTemplateForInstance(tid, instanceId);
-        return ((DerivedMeasurementPK) dmLoc.getPrimaryKey()).getId();
+        
+        DerivedMeasurement m =
+            getDerivedMeasurementDAO().findByTemplateForInstance(tid, iid);
+        if (m == null) {
+            // Fix me
+            throw new FinderException();
+        }
+
+        return m.getId();
     }
 
     private Integer getRawIdByTemplateAndInstance(Integer tid, Integer iid) {
-        try {
-            RawMeasurementLocal rawLoc = getRmHome().
-                findByTemplateForInstance(tid, iid);
-            return ((RawMeasurementPK)rawLoc.getPrimaryKey()).getId();
-        } catch (FinderException fe) {
+        RawMeasurement m =
+            getRawMeasurementDAO().findByTemplateForInstance(tid, iid);
+        if (m == null) {
             return null;
         }
+        return m.getId();
     }
 
-    // Create RM or blow chunks
     private RawMeasurementValue createRawMeasurement(Integer instanceId, 
                                                      Integer templateId,
                                                      ConfigResponse props)
@@ -221,52 +193,38 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         return getRmMan().createMeasurement(templateId, instanceId, props);
     }
 
-    // Create DM or blow chunks.
-    private DerivedMeasurementValue createDerivedMeasurement(
-        AppdefEntityID id, MeasurementTemplateValue mtVal, long interval)
-        throws MeasurementCreateException, TemplateNotFoundException {
-            
-        DerivedMeasurementValue retVal              = null;
-        MonitorableTypeValue    monTypeVal          = null;
-        Integer                 instanceId          = id.getId();
-        
-        monTypeVal = mtVal.getMonitorableType();
-        if(monTypeVal.getAppdefType() != id.getType() )
-            throw new MeasurementCreateException(
-                "Appdef entity (" + id + ")/template type (ID: " +
-                mtVal.getId() + ") mismatch");
+    private DerivedMeasurementValue 
+        createDerivedMeasurement(AppdefEntityID id, MeasurementTemplateValue mtVal,
+                                 long interval)
+        throws MeasurementCreateException
+    {
+        Integer instanceId = id.getId();
+        MonitorableTypeValue monTypeVal = mtVal.getMonitorableType();
 
-        try {
-            MeasurementTemplateLocal mtLoc = getMtHome().findByPrimaryKey
-                ( new MeasurementTemplatePK( mtVal.getId() ) );
-            
-            DerivedMeasurementLocal dmLoc =
-                getDmHome().create(mtLoc, instanceId, interval);
-            
-            if (interval == 0)
-                dmLoc.setEnabled(false);
-            
-            retVal = dmLoc.getDerivedMeasurementValue();
-            
-            DMValueCache.getInstance().put(retVal);
-            
-            return retVal;
-        } catch (FinderException e) {
-            throw new TemplateNotFoundException(mtVal.getId(), e);
-        } catch (CreateException e) {
-            throw new MeasurementCreateException(
-                "createDerivedMeasurement() failed", e);
+        if(monTypeVal.getAppdefType() != id.getType()) {
+            throw new MeasurementCreateException("Appdef entity (" + id + ")" +
+                                                 "/template type (ID: " +
+                                                 mtVal.getId() + ") mismatch");
         }
+        
+        MeasurementTemplate mt = 
+            getMeasurementTemplateDAO().findById(mtVal.getId());
+        DerivedMeasurement dm =
+            getDerivedMeasurementDAO().create(instanceId, mt, interval);
+        
+        DerivedMeasurementValue dmValue = dm.getDerivedMeasurementValue();
+        DMValueCache.getInstance().put(dmValue);
+        
+        return dmValue;
     }
 
     /**
      * Look up a derived measurement's appdef entity ID
      */
-    private AppdefEntityID getAppdefEntityId(DerivedMeasurementLocal dm) {
-        AppdefEntityID aid =
-            new AppdefEntityID(dm.getAppdefType(), dm.getInstanceId());
-        
-        return aid;
+    private AppdefEntityID getAppdefEntityId(DerivedMeasurement dm) {
+        // This is no good
+        int type = dm.getTemplate().getMonitorableType().getAppdefType();
+        return new AppdefEntityID(type, dm.getInstanceId());
     }
 
     private void sendAgentSchedule(AppdefEntityID aid) {
@@ -321,12 +279,12 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @param protoProps  Configuration data for the instance
      *
      * @return a List of the associated DerivedMeasurementValue objects
-     * @ejb:transaction type="REQUIRESNEW"
      * @ejb:interface-method
      */
     public List createMeasurements(AppdefEntityID id, Integer[] templates,
                                    long[] intervals, ConfigResponse props)
-        throws MeasurementCreateException, TemplateNotFoundException {
+        throws MeasurementCreateException, TemplateNotFoundException
+    {
         Integer instanceId = id.getId();
         ArrayList dmList   = new ArrayList();
 
@@ -359,8 +317,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 DerivedMeasurementValue argDmVal = null;
     
                 // first handle simple IDENTITY derived case
-                if ( MeasurementConstants.TEMPL_IDENTITY.equals(
-                        derivedTemplateValue.getTemplate() ) ) {
+                if (MeasurementConstants.TEMPL_IDENTITY.
+                    equals(derivedTemplateValue.getTemplate() ) ) {
                     RawNode rawNode = (RawNode)
                         derivedNode.getOutgoing().iterator().next();
                     MeasurementTemplateValue rawTemplateValue =
@@ -387,8 +345,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                     // raw and derived and make note to schedule raw
                     DerivedMeasurementValue dmVal;
                     try {
-                        dmVal = this.updateMeasurementInterval(
-                            dTemplateId, instanceId, interval);
+                        dmVal = updateMeasurementInterval(dTemplateId,
+                                                          instanceId, interval);
                     } catch (FinderException e) {
                         dmVal =
                             createDerivedMeasurement(id, derivedTemplateValue,
@@ -409,14 +367,16 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                         if (node instanceof DerivedNode) {
                             DerivedMeasurementValue dmVal;
                             try {
-                                dmVal = this.updateMeasurementInterval(
-                                        templArg.getId(), instanceId, interval);
+                                dmVal = 
+                                    updateMeasurementInterval(templArg.getId(),
+                                                              instanceId,
+                                                              interval);
                             } catch (FinderException e) {
                                 dmVal = createDerivedMeasurement(id, templArg,
                                                                  interval);
                             }
 
-                            if ( dTemplateId.equals( templArg.getId() ) ) {
+                            if (dTemplateId.equals(templArg.getId())) {
                                 argDmVal = dmVal;
                             }
                         } else {
@@ -430,17 +390,17 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                                      templArg.getId(),
                                                      props);
                             }
-                        } // end if template arg is DM else RM
-                    } // end while template args has next
-                } // else not an identity passthroughs
+                        }
+                    }
+                }
 
                 dmList.add(argDmVal);
-            } // for each DM template arg
+            }
         } catch (InvalidGraphException e) {
             throw new MeasurementCreateException("InvalidGraphException:", e);
         }
         return dmList;
-    } // end create
+    }
 
     /**
      * @ejb:interface-method
@@ -449,12 +409,13 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                    AppdefEntityID id, Integer[] templates,
                                    long[] intervals, ConfigResponse props)
         throws PermissionException, MeasurementCreateException,
-               TemplateNotFoundException {
+               TemplateNotFoundException
+    {
+
         // Authz check
         super.checkModifyPermission(subject, id);        
 
-        List dmList = this.getDMManager().createMeasurements(
-            id, templates, intervals, props);
+        List dmList = createMeasurements(id, templates, intervals, props);
         
         // Make sure that the cache does not have outdated derived measurements
         DMValueCache cache = DMValueCache.getInstance();
@@ -480,21 +441,15 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     public List createMeasurements(AuthzSubjectValue subject, 
                                    AppdefEntityID id, Integer[] templates,
                                    ConfigResponse props)
-        throws TemplateNotFoundException, PermissionException,
-               MeasurementCreateException {
+        throws PermissionException, MeasurementCreateException, TemplateNotFoundException {
         long[] intervals = new long[templates.length];
         for (int i = 0; i < templates.length; i++) {
-            try {
-                MeasurementTemplateLocal tmpl =
-                    this.getMtHome().findByPrimaryKey(
-                        new MeasurementTemplatePK(templates[i]));
-                intervals[i] = tmpl.getDefaultInterval();
-            } catch (FinderException e) {
-                throw new TemplateNotFoundException(templates[i]);
-            }
+            MeasurementTemplate tmpl =
+                getMeasurementTemplateDAO().findById(templates[i]);
+            intervals[i] = tmpl.getDefaultInterval();
         }
         
-        return this.createMeasurements(subject, id, templates, intervals,props);
+        return createMeasurements(subject, id, templates, intervals,props);
     }
 
     /**
@@ -517,39 +472,30 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         throws TemplateNotFoundException, PermissionException,
                MeasurementCreateException {
         // We're going to make sure there aren't metrics already
-        List dms =
-            this.findMeasurements(subject, id, null, PageControl.PAGE_ALL);
+        List dms = findMeasurements(subject, id, null, PageControl.PAGE_ALL);
         if (dms.size() != 0) {
             return dms;
         }
 
         // Find the templates
-        try {
-            Collection mts =
-                this.getMtHome().findDerivedByMonitorableType(mtype);
-
-            Integer[] tids = new Integer[mts.size()];
-            long[] intervals = new long[mts.size()];
+        Collection mts =
+            getMeasurementTemplateDAO().findTemplatesByMonitorableType(mtype);
+        
+        Integer[] tids = new Integer[mts.size()];
+        long[] intervals = new long[mts.size()];
             
-            Iterator it = mts.iterator();
-            for (int i = 0; it.hasNext(); i++) {
-                MeasurementTemplateLocal tmpl =
-                    (MeasurementTemplateLocal) it.next();
-                tids[i] =
-                    ((MeasurementTemplatePK) tmpl.getPrimaryKey()).getId();
+        Iterator it = mts.iterator();
+        for (int i = 0; it.hasNext(); i++) {
+            MeasurementTemplate tmpl = (MeasurementTemplate)it.next();
+            tids[i] = tmpl.getId();
                 
-                if (tmpl.getDefaultOn())
-                    intervals[i] = tmpl.getDefaultInterval();
-                else
-                    intervals[i] = 0;
-            }
-
-            return this.createMeasurements(subject, id, tids, intervals, props);
-        } catch (FinderException e) {
-            // No measurements to enable, return empty list
-            log.debug("No default metrics to enable for " + id);
-            return new ArrayList(0);
+            if (tmpl.isDefaultOn())
+                intervals[i] = tmpl.getDefaultInterval();
+            else
+                intervals[i] = 0;
         }
+
+        return createMeasurements(subject, id, tids, intervals, props);
     }
     
     /**
@@ -567,16 +513,17 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                                      Integer template,
                                                      AppdefEntityID id,
                                                      long interval,
-                                                     ConfigResponse protoProps)
-        throws PermissionException, TemplateNotFoundException,
-               MeasurementCreateException {
+                                                     ConfigResponse config)
+        throws PermissionException, MeasurementCreateException,
+               TemplateNotFoundException
+    {
         // Authz check
         super.checkModifyPermission(subject, id);
 
-        List dmvs = this.createMeasurements(subject, id,
-                                            new Integer[] { template },
-                                            new long[]    { interval },
-                                            protoProps);
+        List dmvs = createMeasurements(subject, id,
+                                       new Integer[] { template },
+                                       new long[]    { interval },
+                                       config);
         
         return (DerivedMeasurementValue) dmvs.get(0);
     }
@@ -587,85 +534,29 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      */
     public void updateMeasurements(AuthzSubjectValue subject,
                                    AppdefEntityID id, ConfigResponse props)
-        throws PermissionException, MeasurementCreateException {
+        throws PermissionException, MeasurementCreateException
+    {
+        // Update all of the raw measurements first
         try {
-            // Update all of the raw measurements first
             getRmMan().updateMeasurements(id, props);
             
             // Now see which derived measurements need to be rescheduled
-            List mcol = getDmHome().findByInstance(id.getType(), id.getID());
+            List mcol = getDerivedMeasurementDAO().findByInstance(id.getType(),
+                                                                  id.getID());
             
-            for (Iterator i = mcol.iterator(); i.hasNext(); ) {
-                DerivedMeasurementLocal dmLocal =
-                    (DerivedMeasurementLocal) i.next();
-
-                if (dmLocal.getEnabled()) {
+            for (Iterator i = mcol.iterator(); i.hasNext();) {
+                DerivedMeasurement dm = (DerivedMeasurement)i.next();
+                if (dm.isEnabled()) {
                     // A little short-cut.  We just end up looking up the
                     // derived measurement twice.
-                    createMeasurement(subject, ((MeasurementTemplatePK)
-                        dmLocal.getTemplate().getPrimaryKey()).getId(),
-                        id, dmLocal.getInterval(), props);
+                    Integer tid = dm.getTemplate().getId();
+                    createMeasurement(subject, tid, id, dm.getInterval(), props);
                 }
             }
-        } catch (FinderException e) {
-            // No measurements to update
         } catch (TemplateNotFoundException e) {
             // Would not happen since we're creating measurements with the
             // template that we just looked up
             this.log.error(e);
-        }
-    }
-
-    /**
-     * Update a derived measurement
-     *
-     * @return a DerivedMeasurement value
-     * @ejb:interface-method
-     */
-    public DerivedMeasurementValue updateMeasurement(
-        AuthzSubjectValue subject, DerivedMeasurementValue dmValue)
-        throws MeasurementNotFoundException {
-        try {
-            DerivedMeasurementLocal dm = getDmHome().findById(dmValue.getId());
-            
-            // make sure that baseline's updated as well
-            if (dmValue.getBaseline() != null) {
-                BaselineValue bval = dmValue.getBaseline();
-                
-                // Make sure the baseline has the right measurement ID
-                bval.setMeasurementId(dm.getId());
-                
-                BaselineLocal blocal = dm.getBaseline();
-                
-                if (blocal == null) {
-                    try {
-                        // Have to create a baseline
-                        blocal = BaselineUtil.getLocalHome().create();
-                        dm.setBaseline(blocal);
-                    } catch (CreateException e) {
-                        throw new SystemException(e);
-                    } catch (NamingException e) {
-                        throw new SystemException(e);
-                    }
-                }
-                
-                blocal.setBaselineValue(dmValue.getBaseline());
-                dmValue.setBaseline(blocal.getBaselineValue());
-            }
-            else {
-                dm.setBaseline(null);
-            }
-
-            // now saved the value
-            dm.setDerivedMeasurementValue(dmValue);
-            dmValue = dm.getDerivedMeasurementValue();
-
-            // Must also update DMV in cache
-            DMValueCache.getInstance().put(dmValue);
-
-            return dmValue;
-        } catch (FinderException e) {
-            throw new MeasurementNotFoundException(dmValue.getId(), e);
         }
     }
 
@@ -688,28 +579,23 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      */
     public void removeMeasurement(AuthzSubjectValue subject, Integer mid)
         throws RemoveException, PermissionException {
-        // Try DerivedMeasurement
-        try {
-            DerivedMeasurementLocal m = getDmHome().findById(mid);
-            
-            // Check removal permission
-            AppdefEntityID aid = this.getAppdefEntityId(m);
-            super.checkDeletePermission(subject, aid);
-            
-            Integer[] mids = new Integer[] { mid };
-            
-            // Remove the measurement        
-            m.remove();
 
-            // Now unschedule the DerivedMeasurment
-            this.unscheduleJobs(mids);
-            this.sendAgentSchedule(aid);
+        DerivedMeasurement m = getDerivedMeasurementDAO().findById(mid);
+        
+        // Check removal permission
+        AppdefEntityID aid = getAppdefEntityId(m);
+        super.checkDeletePermission(subject, aid);
+        
+        Integer[] mids = new Integer[] { mid };
             
-            sendRemovedMetricsEvent(mids);
-        } catch (FinderException e) {
-            // Not a problem
-            log.debug("FinderException", e);
-        }
+        // Remove the measurement        
+        getDerivedMeasurementDAO().remove(m);
+        
+        // Now unschedule the DerivedMeasurment
+        this.unscheduleJobs(mids);
+        this.sendAgentSchedule(aid);
+        
+        sendRemovedMetricsEvent(mids);
     }
 
     /**
@@ -725,7 +611,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         
         try {
             // First find them, then delete them
-            List mcol = getDmHome().findByInstance(id.getType(), id.getID());
+            List mcol =
+                getDerivedMeasurementDAO().findByInstance(id.getType(), id.getID());
 
             HashSet tidSet = null;
             if (tids != null) {
@@ -734,23 +621,22 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             
             List toUnschedule = new ArrayList();
             for (Iterator it = mcol.iterator(); it.hasNext(); ) {
-                DerivedMeasurementLocal m = (DerivedMeasurementLocal) it.next();
+                DerivedMeasurement m = (DerivedMeasurement)it.next();
 
                 // Check to see if we need to remove this one
-                if (tidSet != null && !tidSet.contains(((MeasurementTemplatePK)
-                        m.getTemplate().getPrimaryKey()).getId()))
+                if (tidSet != null && 
+                    !tidSet.contains(m.getTemplate().getId()))
                     continue;
 
-                Integer mid =
-                    ((DerivedMeasurementPK) m.getPrimaryKey()).getId();
+                Integer mid = m.getId();
                 
                 toUnschedule.add(mid);
-                m.remove();
+                getDerivedMeasurementDAO().remove(m);
             }
 
             // Now unschedule the DerivedMeasurments
-            this.unscheduleJobs(
-                (Integer[]) toUnschedule.toArray(new Integer[0]));
+            this.unscheduleJobs((Integer[])toUnschedule.
+                                toArray(new Integer[0]));
             
             // Check to see if this is a total removal operation
             if (tids == null) {
@@ -765,9 +651,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             Integer[] mids = (Integer[])
                 toUnschedule.toArray(new Integer[toUnschedule.size()]);
             sendRemovedMetricsEvent(mids);
-        } catch (FinderException e) {
-            // Not a problem
-            log.debug("FinderException", e);
         } catch (MeasurementUnscheduleException e) {
             log.error("Error unscheduling metrics for entity: " + id, e);
         }
@@ -782,31 +665,22 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                    AppdefEntityID agentEnt,
                                    AppdefEntityID[] entIds)
         throws RemoveException, PermissionException {
-        
+        DerivedMeasurementDAO dao = getDerivedMeasurementDAO();
         List toUnschedule = new ArrayList();
 
         for (int i = 0; i < entIds.length; i++) {
             // Authz check
             super.checkDeletePermission(subject, entIds[i]);
             
-            try {
-                // First find them, then delete them
-                List mcol = getDmHome().findByInstance(entIds[i].getType(),
-                                                       entIds[i].getID());
+            // First find them, then delete them
+            List mcol = dao.findByInstance(entIds[i].getType(),
+                                           entIds[i].getID());
 
-                for (Iterator it = mcol.iterator(); it.hasNext(); ) {
-                    DerivedMeasurementLocal m =
-                        (DerivedMeasurementLocal) it.next();
+            for (Iterator it = mcol.iterator(); it.hasNext(); ) {
+                DerivedMeasurement m = (DerivedMeasurement)it.next();
 
-                    Integer mid =
-                        ((DerivedMeasurementPK) m.getPrimaryKey()).getId();
-
-                    toUnschedule.add(mid);
-                    m.remove();
-                }
-            } catch (FinderException e) {
-                // Not a problem
-                log.debug("FinderException", e);
+                toUnschedule.add(m.getId());
+                dao.remove(m);
             }
         }
 
@@ -831,59 +705,54 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      */
     public void removeMeasurements(AuthzSubjectValue subject, Integer[] mids)
         throws RemoveException, PermissionException {
-        try {
-            AppdefEntityID aid = null;
-            for (int i = 0; i < mids.length; i++) {
-                DerivedMeasurementLocal m = this.getDmHome().findById(mids[i]);
-
-                // Check removal permission
-                if (aid == null) {
-                    aid = this.getAppdefEntityId(m);
-                    super.checkDeletePermission(subject, aid);
-                }
-
-                m.remove();
+        DerivedMeasurementDAO dao = getDerivedMeasurementDAO();
+        AppdefEntityID aid = null;
+        for (int i = 0; i < mids.length; i++) {
+            DerivedMeasurement m = dao.findById(mids[i]);
+            
+            // Check removal permission
+            if (aid == null) {
+                aid = getAppdefEntityId(m);
+                checkDeletePermission(subject, aid);
             }
 
-            // Now unschedule the DerivedMeasurments
-            this.unscheduleJobs(mids);
-            this.sendAgentSchedule(aid);
-            
-            sendRemovedMetricsEvent(mids);
-        } catch (FinderException e) {
-            // Not a problem
-            log.debug("FinderException", e);
+            dao.remove(m);
         }
+
+        // Now unschedule the DerivedMeasurments
+        this.unscheduleJobs(mids);
+        this.sendAgentSchedule(aid);
+            
+        sendRemovedMetricsEvent(mids);
     }
 
     /** 
-     * Look up a derived measurement for an instance
+     * Look up a derived measurement for an instance and an alias
      * and an alias.
      *
      * @return a DerivedMeasurement value
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
      */
     public DerivedMeasurementValue getMeasurement(AuthzSubjectValue subject,
                                                   AppdefEntityID id,
                                                   String alias)
         throws MeasurementNotFoundException {
-        try {
-            DerivedMeasurementLocal meas =
-                this.getDmHome().findByAliasAndID(alias, id.getType(),
-                                                  id.getID());
-            
-            DMValueCache cache = DMValueCache.getInstance();
-            DerivedMeasurementValue dmv = cache.get(meas.getId());
-            if (dmv == null) {
-                dmv = meas.getDerivedMeasurementValue();
-                cache.put(dmv);
-            }
-            return dmv;
-        } catch (FinderException e) {
-            throw new MeasurementNotFoundException(
-                alias + " for " + id + " not found.", e);
+
+        DerivedMeasurement m = 
+            getDerivedMeasurementDAO().findByAliasAndID(alias, id.getType(),
+                                                        id.getID());
+        if (m == null) {
+            throw new MeasurementNotFoundException(alias + " for " + id + 
+                                                   " not found.");
         }
+
+        DMValueCache cache = DMValueCache.getInstance();
+        DerivedMeasurementValue dmv = cache.get(m.getId());
+        if (dmv == null) {
+            dmv = m.getDerivedMeasurementValue();
+            cache.put(dmv);
+        }
+        return dmv;
     }
 
     /**
@@ -891,20 +760,19 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      *
      * @return a DerivedMeasurement value
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
      */
     public DerivedMeasurementValue getMeasurement(Integer mid)
         throws MeasurementNotFoundException {
         DMValueCache cache = DMValueCache.getInstance();
         DerivedMeasurementValue dmv = cache.get(mid);
         if (dmv == null) {
-            try {
-                DerivedMeasurementLocal dm = getDmHome().findById(mid);
-                dmv = dm.getDerivedMeasurementValue();
-                cache.put(dmv);
-            } catch (FinderException e) {
-                throw new MeasurementNotFoundException(mid, e);
+            DerivedMeasurement dm =
+                getDerivedMeasurementDAO().findById(mid);
+            if (dm == null) {
+                throw new MeasurementNotFoundException(mid);
             }
+            dmv = dm.getDerivedMeasurementValue();
+            cache.put(dmv);
         }
         return dmv;
     }
@@ -913,50 +781,44 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * Get the live measurement values for a given resource.
      * @param id The id of the resource
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public void getLiveMeasurementValues(AuthzSubjectValue subject,
                                          AppdefEntityID id)
         throws EvaluationException, PermissionException,
                LiveMeasurementException, MeasurementNotFoundException
     {
+        List mcol = 
+            getDerivedMeasurementDAO().findByInstance(id.getType(),
+                                                      id.getID(),
+                                                      true);
+        Integer[] mids = new Integer[mcol.size()];
+        Integer availMeasurement = null; // For insert of AVAIL down
+        Iterator it = mcol.iterator();
+
+        for (int i = 0; it.hasNext(); i++) {
+            DerivedMeasurement dm = (DerivedMeasurement)it.next();
+            mids[i] = dm.getId();
+            
+            MeasurementTemplate template = dm.getTemplate();
+
+            if (template.getAlias().equals(Metric.ATTR_AVAIL)) {
+                availMeasurement = dm.getId();
+            }
+        }
+
+        log.info("Getting live measurements for " + mids.length +
+                 " measurements");
         try {
-            List mcol = getDmHome().findByInstance(id.getType(), id.getID(),
-                                                   true);
-            Integer[] mids = new Integer[mcol.size()];
-            Integer availMeasurement = null; // For insert of AVAIL down
-            Iterator it = mcol.iterator();
-
-            for (int i = 0; it.hasNext(); i++) {
-                DerivedMeasurementLocal dm =
-                    (DerivedMeasurementLocal) it.next();
-                DerivedMeasurementPK pk =
-                    (DerivedMeasurementPK) dm.getPrimaryKey(); 
-                mids[i] = pk.getId();
-                
-                MeasurementTemplateLocal template = dm.getTemplate();
-                if (template.getAlias().equals(Metric.ATTR_AVAIL)) {
-                    availMeasurement = pk.getId();
-                }
+            getLiveMeasurementValues(subject, mids);
+        } catch (LiveMeasurementException e) {
+            log.info("Resource " + id + " reports it is unavailable, setting " +
+                     "measurement ID " + availMeasurement + " to DOWN");
+            if (availMeasurement != null) {
+                MetricValue val =
+                    new MetricValue(MeasurementConstants.AVAIL_DOWN);
+                DataManagerLocal dataMan = getDataMan();
+                dataMan.addData(availMeasurement, val, true);
             }
-
-            log.info("Getting live measurements for " + mids.length +
-                     " measurements");
-            try {
-                getLiveMeasurementValues(subject, mids);
-            } catch (LiveMeasurementException e) {
-                log.info("Resource " + id + " reports it is unavailable, setting " +
-                         "measurement ID " + availMeasurement + " to DOWN");
-                if (availMeasurement != null) {
-                    MetricValue val =
-                        new MetricValue(MeasurementConstants.AVAIL_DOWN);
-                    DataManagerLocal dataMan = getDataMan();
-                    dataMan.addData(availMeasurement, val, true);
-                }
-            }
-        } catch (FinderException e) {
-            // Shouldn't happen
-            log.error("Unable to find measurements for: " + id, e);
         }
     }
 
@@ -965,10 +827,9 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * the same agent connection
      * @param mtype the name of the monitorable type
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
-    public MetricValue[] getLiveMeasurementValues(
-        AuthzSubjectValue subject, Integer[] mids)
+    public MetricValue[] getLiveMeasurementValues(AuthzSubjectValue subject,
+                                                  Integer[] mids)
         throws EvaluationException, PermissionException,
                LiveMeasurementException, MeasurementNotFoundException {
         try {
@@ -986,8 +847,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 dms[i] = this.getMeasurement(mids[i]);
                 
                 if (!dms[i].getEnabled())
-                    throw new LiveMeasurementException(
-                        "Metric ID: " + mids[i] + " is not currently enabled");
+                    throw new LiveMeasurementException("Metric ID: " +
+                                                       mids[i] + 
+                                                       " is not currently " +
+                                                       "enabled");
                 
                 // Now get the IDs
                 Integer[] metIds = getArgumentIds(dms[i]);
@@ -1065,13 +928,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      */
     public int getEnabledMetricsCount(AuthzSubjectValue subject,
                                       AppdefEntityID id) {
-        try {
-            List mcol = getDmHome().findByInstance(id.getType(), id.getID(),
-                                                   true);
-            return mcol.size();
-        } catch (FinderException e) {
-            return 0;
-        }
+        List mcol = 
+            getDerivedMeasurementDAO().findByInstance(id.getType(), id.getID(),
+                                                      true);
+        return mcol.size();
     }
 
     /**
@@ -1079,28 +939,29 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      *
      * @return a DerivedMeasurement value
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
      */
     public DerivedMeasurementValue findMeasurement(AuthzSubjectValue subject,
                                                    Integer tid, Integer iid)
-        throws MeasurementNotFoundException {
-        try {
-            DerivedMeasurementLocal dm =
-                getDmHome().findByTemplateForInstance(tid, iid);
+        throws MeasurementNotFoundException
+    {
+        DerivedMeasurement dm =
+            getDerivedMeasurementDAO().findByTemplateForInstance(tid, iid);
             
-            DMValueCache cache = DMValueCache.getInstance();
-            DerivedMeasurementValue dmv = cache.get(dm.getId());
-            if (dmv == null) {
-                // Save it in cache
-                dmv = dm.getDerivedMeasurementValue();
-                cache.put(dmv);
-            }
-            
-            return dmv;
-        } catch (FinderException e) {
-            throw new MeasurementNotFoundException(
-                "No measurement found for " + iid + " with template " + tid);
+        if (dm == null) {
+            throw new MeasurementNotFoundException("No measurement found " +
+                                                   "for " + iid + " with " +
+                                                   "template " + tid);
         }
+        
+        DMValueCache cache = DMValueCache.getInstance();
+        DerivedMeasurementValue dmv = cache.get(dm.getId());
+        if (dmv == null) {
+            // Save it in cache
+            dmv = dm.getDerivedMeasurementValue();
+            cache.put(dmv);
+        }
+        
+        return dmv;
     }
 
     /**
@@ -1108,14 +969,13 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      *
      * @return a list of DerivedMeasurement value
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public List findMeasurements(AuthzSubjectValue subject, Integer tid,
                                  Integer[] ids) {
         ArrayList results = new ArrayList();
         for (int i = 0; i < ids.length; i++) {
             try {
-                results.add(this.findMeasurement(subject, tid, ids[i])); 
+                results.add(findMeasurement(subject, tid, ids[i])); 
             } catch (MeasurementNotFoundException e) {
                 continue;
             }
@@ -1128,7 +988,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      *
      * @return a list of DerivedMeasurement value
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public Integer[] findMeasurementIds(AuthzSubjectValue subject, Integer tid,
                                         Integer[] ids) {
@@ -1148,7 +1007,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      *
      * @return a list of DerivedMeasurement value
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
      */
     public PageList findMeasurements(AuthzSubjectValue subject,
                                      AppdefEntityID id, String cat,
@@ -1184,7 +1042,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      *
      * @return a list of DerivedMeasurement value
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
      */
     public PageList findMeasurements(AuthzSubjectValue subject,
                                      AppdefEntityID id, boolean enabled,
@@ -1220,7 +1077,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      *
      * @return a list of DerivedMeasurement value
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public List findDesignatedMeasurements(AuthzSubjectValue subject,
                                            AppdefEntityID id) {
@@ -1240,7 +1096,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      *
      * @return a list of DerivedMeasurement value
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public List findDesignatedMeasurements(AuthzSubjectValue subject,
                                            AppdefEntityID id,
@@ -1260,31 +1115,23 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * Look up an availability measurement EJBs for an instance
      * @throws MeasurementNotFoundException
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
-    public DerivedMeasurementValue getAvailabilityMeasurement(
-            AuthzSubjectValue subject, AppdefEntityID id)
-        throws MeasurementNotFoundException {
-        try {
-            List mlocals = this.getDmHome().findDesignatedByInstanceForCategory(
-                id.getType(), id.getID(),
-                MeasurementConstants.CAT_AVAILABILITY);
-            
-            // We know there is only want one metric
-            for (Iterator it = mlocals.iterator(); it.hasNext(); ) {
-                DerivedMeasurementLocal dm =
-                    (DerivedMeasurementLocal) it.next();
-                // We'll check for the right template
-                if (dm.getTemplate().getAlias().equalsIgnoreCase(
-                        MeasurementConstants.CAT_AVAILABILITY))
-                    return dm.getDerivedMeasurementValue();
-            }
-            
-            throw new FinderException("No metric found");
-        } catch (FinderException e) {
-            throw new MeasurementNotFoundException(
-                "No availability metric found for " + id);
+    public DerivedMeasurementValue getAvailabilityMeasurement(AuthzSubjectValue
+                                                              subject,
+                                                              AppdefEntityID id)
+        throws MeasurementNotFoundException
+    {
+        List mlocals = getDerivedMeasurementDAO().
+            findDesignatedByInstanceForCategory(id.getType(), id.getID(),
+            MeasurementConstants.CAT_AVAILABILITY);
+        
+        if (mlocals.size() == 0) {
+            throw new MeasurementNotFoundException("No availability metric " +
+                                                   "found for " + id);
         }
+
+        DerivedMeasurement dm = (DerivedMeasurement)mlocals.get(0);
+        return dm.getDerivedMeasurementValue();
     }
 
     /**
@@ -1292,48 +1139,50 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      *
      * @return a list of DerivedMeasurement value
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public Map findDesignatedMeasurementIds(AuthzSubjectValue subject,
                                             AppdefEntityID[] ids, String cat)
         throws MeasurementNotFoundException {
+
         Map midMap = new HashMap();
         for (int i = 0; i < ids.length; i++) {
             AppdefEntityID id = ids[i];
             try {
                 List metrics =
-                    this.getDmHome().findDesignatedByInstanceForCategory(
-                        id.getType(), id.getID(), cat);
+                    this.getDerivedMeasurementDAO().
+                    findDesignatedByInstanceForCategory(id.getType(),
+                                                        id.getID(), cat);
 
                 if (metrics.size() == 0)
                     throw new FinderException("No metrics found");
                 
-                DerivedMeasurementLocal dm = null;
+                DerivedMeasurement dm = null;
                 if (metrics.size() > 1 &&
                     MeasurementConstants.CAT_AVAILABILITY.equals(cat)) {
                     // We'll check for the right template
                     for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-                        DerivedMeasurementLocal dmIt =
-                            (DerivedMeasurementLocal) it.next();
-                        if (dmIt.getTemplate().getAlias().compareToIgnoreCase(
-                                MeasurementConstants.CAT_AVAILABILITY) == 0) {
+                        DerivedMeasurement dmIt =(DerivedMeasurement) it.next();
+                        if (dmIt.getTemplate().getAlias().
+                            compareToIgnoreCase(
+                            MeasurementConstants.CAT_AVAILABILITY) == 0) {
                             dm = dmIt;
                             break;
                         }
                     }
                 }
 
-                if (dm == null)
+                if (dm == null) {
                     // We'll take the first one
-                    dm = (DerivedMeasurementLocal) metrics.get(0);
+                    dm = (DerivedMeasurement) metrics.get(0);
+                }
 
-                midMap.put(id,
-                           ((DerivedMeasurementPK) dm.getPrimaryKey()).getId());
+                midMap.put(id, dm.getId());
+                
             } catch (FinderException e) {
                 // Throw an exception if we're only looking for one measurement
                 if (ids.length == 1)
                     throw new MeasurementNotFoundException(
-                        cat + " metric for " + id + " not found");
+                                                           cat + " metric for " + id + " not found");
             }
         }
         return midMap;
@@ -1345,7 +1194,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      *
      * @return a list of DerivedMeasurement value
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
      */
     public List findEnabledMeasurements(String cat) {
         try {
@@ -1367,40 +1215,33 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * be "0" to denote varying intervals.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public Map findMetricIntervals(AuthzSubjectValue subject,
                                    Integer[] eids, Integer[] tids) {
         HashMap intervals = new HashMap(tids.length);
         for (int a = 0; a < eids.length; a++) {
             for (int i = 0; i < tids.length; i++) {
-                try {
-                    DerivedMeasurementLocal dmLocal = getDmHome()
-                        .findByTemplateForInstance(tids[i], eids[a]);
-                    
-                    if (intervals.containsKey(tids[i])) {
-                        // Compare with existing value
-                        if (!intervals.get(tids[i]).equals(
-                                new Long(dmLocal.getInterval())))
-                            intervals.put(tids[i], new Long(0));
-                    }
-                    else {
-                        // There's no point if measurement is disabled
-                        if (!dmLocal.getEnabled()) {
-                            continue;
-                        }
 
-                        // Not the first one, so there must have been others
-                        // that were disabled
-                        if (a > 0)
+                DerivedMeasurement dm = getDerivedMeasurementDAO()
+                    .findByTemplateForInstance(tids[i], eids[a]);
+                    
+                if (intervals.containsKey(tids[i])) {
+                    // Compare with existing value
+                    if (!intervals.get(tids[i]).
+                        equals(new Long(dm.getInterval())))
                             intervals.put(tids[i], new Long(0));
-                        else
-                            intervals.put(tids[i],
-                                          new Long(dmLocal.getInterval()));
+                } else {
+                    // There's no point if measurement is disabled
+                    if (!dm.isEnabled()) {
+                        continue;
                     }
-                } catch (FinderException e) {
-                    // Not a problem
-                    continue;
+                    
+                    // Not the first one, so there must have been others
+                    // that were disabled
+                    if (a > 0)
+                        intervals.put(tids[i], new Long(0));
+                    else
+                        intervals.put(tids[i], new Long(dm.getInterval()));
                 }
             }
         }
@@ -1414,21 +1255,14 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
-    public void enableMeasurement(DerivedMeasurementPK pk, boolean enabled)
+    public void enableMeasurement(DerivedMeasurement m, boolean enabled)
         throws MeasurementNotFoundException {
-        try {
-            DerivedMeasurementLocal dm = this.getDmHome().findByPrimaryKey(pk);
-            dm.setEnabled(enabled);
-    
-            // Must also update DMV in cache
-            DMValueCache cache = DMValueCache.getInstance();
-            DerivedMeasurementValue dmv = cache.get(pk.getId());
-            if (dmv != null)
-                dmv.setEnabled(enabled);
-        } catch (FinderException e) {
-            throw new MeasurementNotFoundException(
-                "No measurement found for primary key: " + pk);
-        }
+
+        getDerivedMeasurementDAO().update(m, enabled);
+
+        // Must also update DMV in cache
+        DMValueCache cache = DMValueCache.getInstance();
+        cache.put(m.getDerivedMeasurementValue());
     }
 
     /**
@@ -1451,49 +1285,32 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         HashMap resMap = new HashMap();
         
         // Get the list of measurements
-        Collection measurements;
-        try {
-            measurements = this.getDmHome().findByIds(mids);
-        } catch (FinderException e1) {
-            // This should not happen
-            throw new MeasurementNotFoundException(
-                "Invalid IDs: " + StringUtil.arrayToString(mids));
-        }
+        Collection measurements =
+            getDerivedMeasurementDAO().findByIds(mids);
         
         for (Iterator it = measurements.iterator(); it.hasNext(); ) {
-            DerivedMeasurementLocal dm = (DerivedMeasurementLocal) it.next();
-
-            // Check to make sure this is a derived measurement
-            try {
-                Collection col = dm.getTemplate().getMeasurementArgs();
-                boolean check = col.size() > 0;
-            } catch (NoSuchEntityException e) {
-                throw new MeasurementNotFoundException(
-                    "Measurement ID is not a valid measurement: " + dm.getId());
-            } catch (NullPointerException e) {
-                throw new MeasurementNotFoundException(
-                    "Measurement ID is a raw measurement: " + dm.getId());
+            DerivedMeasurement dm = (DerivedMeasurement)it.next();
+            if (dm.getTemplate().getMeasurementArgs() == null) {
+                throw new MeasurementNotFoundException(dm.getId() + " is a " +
+                                                       "raw measurement");
             }
 
             AppdefEntityID id =
-                new AppdefEntityID(
-                    dm.getTemplate().getMonitorableType().getAppdefType(),
-                    dm.getInstanceId().intValue());
+                new AppdefEntityID(dm.getTemplate().
+                                   getMonitorableType().getAppdefType(),
+                                   dm.getInstanceId().intValue());
 
             HashSet tids;
             if (resMap.containsKey(id)) {
-                tids = (HashSet) resMap.get(id);
-            }
-            else {
+                tids = (HashSet)resMap.get(id);
+            } else {
                 // Authz check
                 super.checkModifyPermission(subject, id);        
-
                 tids = new HashSet();
                 resMap.put(id, tids);
             }
                 
-            tids.add(((MeasurementTemplatePK)
-                    dm.getTemplate().getPrimaryKey()).getId());
+            tids.add(dm.getTemplate().getId());
         }
         
         for (Iterator it = resMap.entrySet().iterator(); it.hasNext(); ) {
@@ -1504,16 +1321,16 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             long[] intervals = new long[mtids.length];
             Arrays.fill(intervals, interval);
 
+            // A little short-cut.  We just end up looking up the derived
+            // measurement twice.
             try {
-                // A little short-cut.  We just end up looking up the derived
-                // measurement twice.
-                this.createMeasurements(subject, id, mtids, intervals, null);
+                createMeasurements(subject, id, mtids, intervals, null);
             } catch (TemplateNotFoundException e) {
                 // This shouldn't happen as the measurement is already created
                 throw new MeasurementNotFoundException("Template not found", e);
             }
         }
-    } // end enable
+    }
 
     /**
      * Set the interval of Measurements based their template ID's
@@ -1530,7 +1347,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                    AppdefEntityID[] aeids, Integer[] mtids,
                                    long interval)
         throws MeasurementNotFoundException, MeasurementCreateException,
-               PermissionException {
+               TemplateNotFoundException, PermissionException {
         
         long[] intervals = new long[mtids.length];
         Arrays.fill(intervals, interval);
@@ -1538,15 +1355,9 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         for (int i = 0; i < aeids.length; i++) {
             AppdefEntityID id = aeids[i];
 
-            try {
-                this.createMeasurements(subject, id, mtids, intervals, null);
-            } catch (TemplateNotFoundException e) {
-                // This shouldn't happen as the measurement is already created
-                throw new MeasurementNotFoundException(
-                    "Template " + mtids[i] + " is not found", e);
-            }
+            createMeasurements(subject, id, mtids, intervals, null);
         }
-    } // end enable
+    } 
 
     /**
      * Disable all derived measurement EJBs for an instance
@@ -1558,33 +1369,26 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                     AppdefEntityID id)
         throws PermissionException {
         // Authz check
-        super.checkModifyPermission(subject, id);        
+        checkModifyPermission(subject, id);        
 
-        try {
-            List mcol = getDmHome().findByInstance(id.getType(), id.getID());
-            Integer[] mids = new Integer[mcol.size()];
-            Iterator it = mcol.iterator();
-            for (int i = 0; it.hasNext(); i++) {
-                DerivedMeasurementLocal dm =
-                    (DerivedMeasurementLocal) it.next();
-                DerivedMeasurementPK pk =
-                    (DerivedMeasurementPK) dm.getPrimaryKey(); 
-                try {
-                    this.getDMManager().enableMeasurement(pk, false);
-                } catch (MeasurementNotFoundException e) {
-                    // This is quite impossible, as we have just looked it up
-                    throw new SystemException(e);
-                }
-                mids[i] = pk.getId();
+        List mcol = getDerivedMeasurementDAO().findByInstance(id.getType(),
+                                                              id.getID());
+        Integer[] mids = new Integer[mcol.size()];
+        Iterator it = mcol.iterator();
+        for (int i = 0; it.hasNext(); i++) {
+            DerivedMeasurement dm = (DerivedMeasurement)it.next();
+            try {
+                enableMeasurement(dm, false);
+            } catch (MeasurementNotFoundException e) {
+                // This is quite impossible, as we have just looked it up
+                throw new SystemException(e);
             }
-
-            // Now unschedule the DerivedMeasurment
-            this.unscheduleJobs(mids);
-            this.sendAgentSchedule(id);
-        } catch (FinderException e) {
-            // Not a problem
-            log.debug("FinderException", e);
+            mids[i] = dm.getId();
         }
+
+        // Now unschedule the DerivedMeasurment
+        this.unscheduleJobs(mids);
+        this.sendAgentSchedule(id);
     }
 
     /**
@@ -1597,21 +1401,22 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         throws PermissionException, MeasurementNotFoundException {
         AppdefEntityID aid = null;
         for (int i = 0; i < mids.length; i++) {
-            try {
-                DerivedMeasurementLocal m = this.getDmHome().findById(mids[i]);
-    
-                // Check removal permission
-                if (aid == null) {
-                    aid = this.getAppdefEntityId(m);
-                    super.checkModifyPermission(subject, aid);
-                }
-    
-                this.getDMManager().enableMeasurement(
-                    (DerivedMeasurementPK) m.getPrimaryKey(), false);
-            } catch (FinderException e) {
-                // Why are you passing a bad measurement ID?
-                throw new MeasurementNotFoundException(mids[i], e);
+            DerivedMeasurement m = 
+                getDerivedMeasurementDAO().findById(mids[i]);
+
+            if (m == null) {
+                throw new MeasurementNotFoundException("Measurement id " +
+                                                       mids[i] + " not " +
+                                                       "found");
             }
+
+            // Check removal permission
+            if (aid == null) {
+                aid = getAppdefEntityId(m);
+                checkModifyPermission(subject, aid);
+            }
+    
+            enableMeasurement(m, false);
         }
 
         // Now unschedule the DerivedMeasurment
@@ -1624,48 +1429,40 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      *
      * @ejb:interface-method
      */
-    public void disableMeasurements(
-        AuthzSubjectValue subject, AppdefEntityID id, Integer[] tids)
+    public void disableMeasurements(AuthzSubjectValue subject,
+                                    AppdefEntityID id, Integer[] tids)
         throws PermissionException {
         // Authz check
-        super.checkModifyPermission(subject, id);        
-        try {
-            List mcol = getDmHome().findByInstance(id.getType(), id.getID());
-            HashSet tidSet = null;
-            if (tids != null) {
-                tidSet = new HashSet(Arrays.asList(tids));
-            }            
-            
-            List toUnschedule = new ArrayList();
-            for (Iterator it = mcol.iterator(); it.hasNext(); ) {
-                DerivedMeasurementLocal dm =
-                    (DerivedMeasurementLocal) it.next();
-                // Check to see if we need to remove this one
-                if (tidSet != null && !tidSet.contains(((MeasurementTemplatePK)
-                        dm.getTemplate().getPrimaryKey()).getId()))
+        checkModifyPermission(subject, id);        
+
+        List mcol = getDerivedMeasurementDAO().findByInstance(id.getType(),
+                                                              id.getID());
+        HashSet tidSet = null;
+        if (tids != null) {
+            tidSet = new HashSet(Arrays.asList(tids));
+        }            
+        
+        List toUnschedule = new ArrayList();
+        for (Iterator it = mcol.iterator(); it.hasNext(); ) {
+            DerivedMeasurement dm = (DerivedMeasurement)it.next();
+            // Check to see if we need to remove this one
+            if (tidSet != null && 
+                !tidSet.contains(dm.getTemplate().getId()))
                     continue;
                 
-                DerivedMeasurementPK pk =
-                    (DerivedMeasurementPK) dm.getPrimaryKey();
-                
-                try {
-                    this.getDMManager().enableMeasurement(pk, false);
-                } catch (MeasurementNotFoundException e) {
-                    // This is quite impossible, we just looked it up
-                    throw new SystemException(e);
-                }
-                
-                toUnschedule.add(pk.getId());
+            try {
+                enableMeasurement(dm, false);
+            } catch (MeasurementNotFoundException e) {
+                // This is quite impossible, we just looked it up
+                throw new SystemException(e);
             }
-
-            // Now unschedule the DerivedMeasurment
-            this.unscheduleJobs(
-                    (Integer[]) toUnschedule.toArray(new Integer[0]));
-            this.sendAgentSchedule(id);
-        } catch (FinderException e) {
-            // Not a problem
-            log.debug("FinderException", e);
+            
+            toUnschedule.add(dm.getId());
         }
+
+        // Now unschedule the DerivedMeasurment
+        this.unscheduleJobs((Integer[])toUnschedule.toArray(new Integer[0]));
+        this.sendAgentSchedule(id);
     }
 
     /**
