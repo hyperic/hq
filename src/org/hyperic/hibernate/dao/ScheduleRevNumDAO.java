@@ -39,7 +39,7 @@ public class ScheduleRevNumDAO extends HibernateDAO
         super(ScheduleRevNum.class, session);
     }
 
-    public ScheduleRevNum findById(Integer id) {
+    public ScheduleRevNum findById(SrnId id) {
         return (ScheduleRevNum)super.findById(id);
     }
 
