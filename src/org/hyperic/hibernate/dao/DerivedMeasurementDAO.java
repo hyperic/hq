@@ -121,7 +121,7 @@ public class DerivedMeasurementDAO extends HibernateDAO
         String sql =
             "from DerivedMeasurement m " +
             "join fetch m.template at t " +
-            "join fetch m.template.monitorableType mt " +
+            "join fetch t.monitorableType mt " +
             "where mt.appdefType=? and m.instanceId=? and " +
             "m.interval is not null";
 
@@ -134,7 +134,7 @@ public class DerivedMeasurementDAO extends HibernateDAO
         String sql =
             "from DerivedMeasurement m " +
             "join fetch m.template at t " +
-            "join fetch m.template.monitorableType mt " +
+            "join fetch t.monitorableType mt " +
             "where mt.appdefType=? and m.instanceId=? and " +
             "m.enabled = ? and m.interval is not null";
 
@@ -150,7 +150,7 @@ public class DerivedMeasurementDAO extends HibernateDAO
         String sql =
             "from DerivedMeasurement m " +
             "join fetch m.tempalte as t " +
-            "join fetch m.monitorableType as mt " +
+            "join fetch t.monitorableType as mt " +
             "where t.alias = ? and mt.appdefType = ? " +
             "and m.instanceId = ? and m.interval is not null";
 
@@ -165,7 +165,7 @@ public class DerivedMeasurementDAO extends HibernateDAO
         String sql =
             "from DerivedMeasurement m " +
             "join fetch m.template as t " +
-            "join fetch m.monitorableType as mt " +
+            "join fetch t.monitorableType as mt " +
             "where m.instanceId = ? " +
             "and t.designate = true " +
             "and mt.appdefType = ? " +
