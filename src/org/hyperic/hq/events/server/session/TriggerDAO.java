@@ -37,6 +37,9 @@ public class TriggerDAO extends HibernateDAO {
     protected RegisteredTrigger create(RegisteredTriggerValue createInfo) {
         RegisteredTrigger res = new RegisteredTrigger(createInfo);
         save(res);
+
+        //  Set the new ID just in case someone wants to use it
+        createInfo.setId(res.getId());  
         return res;
     }
 
