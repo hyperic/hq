@@ -335,7 +335,7 @@ public class AlertDefinitionManagerEJBImpl
         }
 
         for (Iterator i = alertdefs.iterator(); i.hasNext(); ) {
-            AlertDefinitionLocal ad = (AlertDefinitionLocal) i.next();
+            AlertDefinition ad = (AlertDefinition) i.next();
 
             ad.setEnabled(enable);
             ad.setMtime(System.currentTimeMillis());
