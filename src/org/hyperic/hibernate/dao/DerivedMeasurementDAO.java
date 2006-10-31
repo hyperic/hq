@@ -152,6 +152,44 @@ public class DerivedMeasurementDAO extends HibernateDAO
             .setBoolean(2, enabled).list();
     }
 
+    public List findByInstanceForCategory(int type, int id, String cat) {
+        String sql =
+            "select m from DerivedMeasurement m " +
+            "join fetch m.template t " +
+            "join fetch t.monitorableType mt " +
+            "join fetch t.category c " +
+            "where mt.appdefType = ? and " +
+            "m.instanceId = ? and " +
+            "c.name = ? and " +
+            "m.interval is not null " +
+            "order by t.name";
+
+        return getSession().createQuery(sql)
+            .setInteger(0, type)
+            .setInteger(1, id)
+            .setString(2, cat).list();
+    }
+
+    public List findByInstanceForCategory(int type, int id, boolean enabled,
+                                          String cat) {
+        String sql =
+            "select m from DerivedMeasurement m " +
+            "join fetch m.template t " +
+            "join fetch t.monitorableType mt " +
+            "join fetch t.category c " +
+            "where mt.appdefType = ? and " +
+            "m.instanceId = ? and " +
+            "m.enabled = ? " +
+            "c.name = ? and " +
+            "m.interval is not null " +
+            "order by t.name";
+
+        return getSession().createQuery(sql)
+            .setInteger(0, type)
+            .setInteger(1, id)
+            .setString(2, cat).list();
+    }
+    
     public DerivedMeasurement findByAliasAndID(String alias,
                                                int appdefType, int appdefId) {
 
@@ -183,6 +221,21 @@ public class DerivedMeasurementDAO extends HibernateDAO
             .setInteger(0, iid)
             .setInteger(1, appdefType)
             .setString(2, cat).list();
+    }
+
+    public List findDesignatedByInstance(int type, int id) {
+        String sql =
+            "select m from DerivedMeasurement m " +
+            "join fetch m.template t " +
+            "join fetch t.monitorableType mt " +
+            "where m.instanceId = ? and " +
+            "mt.appdefType = ? and " +
+            "t.designate = true " +
+            "order by t.name";
+
+        return getSession().createQuery(sql)
+            .setInteger(0, id)
+            .setInteger(1, type).list();
     }
 
     public List findByRawExcludeIdentity(Integer rid) {
