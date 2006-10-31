@@ -1009,30 +1009,23 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     public PageList findMeasurements(AuthzSubjectValue subject,
                                      AppdefEntityID id, String cat,
                                      PageControl pc) {
-        try {
-            List mcol;
+        List mcol;
             
-            // See if category is valid
-            if (cat == null || Arrays.binarySearch(
-                MeasurementConstants.VALID_CATEGORIES, cat) < 0) {
-                mcol = getDmHome().findByInstance(id.getType(), id.getID(),
-                                                  true);
-            }
-            else {
-                mcol = getDmHome().findByInstanceForCategory(id.getType(), 
-                                                             id.getID(), true,
-                                                             cat);
-            }
-                
-            if (pc.getSortorder() == PageControl.SORT_DESC)
-                Collections.reverse(mcol);
-    
-            return valuePager.seek(mcol, pc);
-        } catch (FinderException e) {
-            // Not a problem
-            log.debug("FinderException", e);
-            return new PageList();
+        // See if category is valid
+        if (cat == null || Arrays.binarySearch(
+            MeasurementConstants.VALID_CATEGORIES, cat) < 0) {
+            mcol = getDerivedMeasurementDAO()
+                .findByInstance(id.getType(), id.getID(), true);
+        } else {
+            mcol = getDerivedMeasurementDAO()
+                .findByInstanceForCategory(id.getType(), id.getID(),
+                                           true, cat);
         }
+                
+        if (pc.getSortorder() == PageControl.SORT_DESC)
+            Collections.reverse(mcol);
+    
+        return valuePager.seek(mcol, pc);
     }
 
     /**
@@ -1044,30 +1037,24 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     public PageList findMeasurements(AuthzSubjectValue subject,
                                      AppdefEntityID id, boolean enabled,
                                      String cat, PageControl pc) {
-        try {
-            List mcol;
+        List mcol;
             
-            // See if category is valid
-            if (cat == null || Arrays.binarySearch(
-                MeasurementConstants.VALID_CATEGORIES, cat) < 0) {
-                mcol = getDmHome().findByInstance(id.getType(), id.getID(),
-                                                  enabled);
-            }
-            else {
-                mcol = getDmHome().findByInstanceForCategory(id.getType(), 
+        // See if category is valid
+        if (cat == null || Arrays.binarySearch(
+            MeasurementConstants.VALID_CATEGORIES, cat) < 0) {
+            mcol = getDerivedMeasurementDAO().findByInstance(id.getType(),
                                                              id.getID(),
-                                                             enabled, cat);
-            }
-            
-            if (pc.getSortorder() == PageControl.SORT_DESC)
-                Collections.reverse(mcol);
-    
-            return valuePager.seek(mcol, pc);
-        } catch (FinderException e) {
-            // Not a problem
-            log.debug("FinderException", e);
-            return new PageList();
+                                                             enabled);
+        } else {
+            mcol = getDerivedMeasurementDAO().
+                findByInstanceForCategory(id.getType(), id.getID(),
+                                          enabled, cat);
         }
+            
+        if (pc.getSortorder() == PageControl.SORT_DESC)
+            Collections.reverse(mcol);
+    
+        return valuePager.seek(mcol, pc);
     }
 
     /**
@@ -1078,14 +1065,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      */
     public List findDesignatedMeasurements(AuthzSubjectValue subject,
                                            AppdefEntityID id) {
-        try {
-            List mlocals = getDmHome().findDesignatedByInstance(id.getType(),
-                                                                id.getID());            
-            return this.valuePager.seek(mlocals, PageControl.PAGE_ALL);
-        } catch (FinderException e) {
-            // Not a problem
-            return new ArrayList();
-        }
+
+        List mlocals = getDerivedMeasurementDAO().
+            findDesignatedByInstance(id.getType(), id.getID());
+        return this.valuePager.seek(mlocals, PageControl.PAGE_ALL);
     }
 
     /**
@@ -1098,15 +1081,9 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     public List findDesignatedMeasurements(AuthzSubjectValue subject,
                                            AppdefEntityID id,
                                            String cat) {
-        try {
-            List mlocals =
-                getDmHome().findDesignatedByInstanceForCategory(
-                    id.getType(), id.getID(), cat);            
-            return this.valuePager.seek(mlocals, PageControl.PAGE_ALL);
-        } catch (FinderException e) {
-            // Not a problem
-            return new ArrayList();
-        }
+        List mlocals = getDerivedMeasurementDAO()
+            .findDesignatedByInstanceForCategory(id.getType(), id.getID(), cat);
+        return this.valuePager.seek(mlocals, PageControl.PAGE_ALL);
     }
 
     /**
