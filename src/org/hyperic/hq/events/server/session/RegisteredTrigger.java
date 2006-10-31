@@ -58,7 +58,7 @@ public class RegisteredTrigger
         _valueObj.setId(getId());
         _valueObj.setClassname(getClassname());
         // XXX -- Config is mutable here.  The proper thing to do is clone it
-        _valueObj.setConfig(getConfig());
+        _valueObj.setConfig(ArrayUtil.clone(getConfig()));
         _valueObj.setFrequency(getFrequency());
 
         return _valueObj;
