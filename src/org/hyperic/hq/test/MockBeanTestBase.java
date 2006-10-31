@@ -74,6 +74,9 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
     private String _server;
 
     static {
+        // set mocktest property in class static block
+        // to ensure hibernate configuration is set
+        // for mockejb testing (a bit of a hack)
         System.setProperty("hq.mocktest", "true");
     }
 
