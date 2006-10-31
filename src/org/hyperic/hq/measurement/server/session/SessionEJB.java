@@ -195,17 +195,6 @@ public abstract class SessionEJB {
         return this.ssmLocal;
     }
 
-    protected MeasurementTemplateLocalHome getMtHome() {
-        if (mtHome == null) {
-            try {
-                mtHome = MeasurementTemplateUtil.getLocalHome();
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
-        return mtHome;
-    }
-
     protected DerivedMeasurementLocalHome getDmHome() {
         if (dmHome == null) {
             try {
@@ -215,17 +204,6 @@ public abstract class SessionEJB {
             }
         }
         return dmHome;
-    }
-
-    protected CategoryLocalHome getCaHome() {
-        if (caHome == null) {
-            try {
-                caHome = CategoryUtil.getLocalHome();
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
-        return caHome;
     }
 
     protected DataManagerLocal getDataMan() {

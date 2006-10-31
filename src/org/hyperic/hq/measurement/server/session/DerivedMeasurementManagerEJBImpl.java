@@ -1164,23 +1164,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Look up a list of derived measurement EJBs for a category.  Used by
-     * the AvailabilityCheckService
-     *
-     * @return a list of DerivedMeasurement value
-     * @ejb:interface-method
-     */
-    public List findEnabledMeasurements(String cat) {
-        try {
-            List mlocals = getDmHome().findEnabledForCategory(cat);
-            return this.valuePager.seek(mlocals, PageControl.PAGE_ALL);
-        } catch (FinderException e) {
-            // Not a problem
-            return new ArrayList();
-        }
-    }
-
-    /**
      * Look up a list of derived metric intervals for template IDs.
      *
      * @return a map keyed by template ID and values of metric intervals

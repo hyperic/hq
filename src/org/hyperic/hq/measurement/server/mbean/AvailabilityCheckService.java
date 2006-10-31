@@ -25,24 +25,6 @@
 
 package org.hyperic.hq.measurement.server.mbean;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
-
-import javax.ejb.CreateException;
-import javax.management.MBeanRegistration;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -79,6 +61,22 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
+
+import javax.ejb.CreateException;
+import javax.management.MBeanRegistration;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * This job is responsible for filling in missing availabilty
@@ -449,40 +447,6 @@ public class AvailabilityCheckService
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
         }
         return dms;
-    }
-
-    /**
-     * Optimized method of retrieving enabled metrics
-     * @return List of Integer IDs
-     */
-    private List getEnabledMetrics(AppdefEntityID aeid) {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        List ids = new ArrayList();
-        try {
-            conn = DBUtil.getConnByContext(new InitialContext(), DATASOURCE);
-            String query =
-                StringUtil.replace(ENABLED_METRICS_SQL, "DB_TRUE_TOKEN", 
-                                   DBUtil.getBooleanValue(true, conn));
-            stmt = conn.prepareStatement(query);
-            
-            if (log.isDebugEnabled())
-                log.debug("Executing query: " + query);
-            
-            stmt.setInt(1, aeid.getID());
-            stmt.setInt(2, aeid.getType());
-            
-            rs = stmt.executeQuery();
-            while (rs.next())
-                ids.add(new Integer(rs.getInt(1)));
-        } catch (Exception e) {
-            log.error("Unable to get enabled availability measurements", e);
-            // gulp?
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
-        }
-        return ids;
     }
 
     /**
