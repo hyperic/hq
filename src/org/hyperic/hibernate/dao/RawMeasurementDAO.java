@@ -44,18 +44,6 @@ public class RawMeasurementDAO extends HibernateDAO
         return (RawMeasurement)super.findById(id);
     }
 
-    public void evict(RawMeasurement entity) {
-        super.evict(entity);
-    }
-
-    public RawMeasurement merge(RawMeasurement entity) {
-        return (RawMeasurement)super.merge(entity);
-    }
-
-    public void save(RawMeasurement entity) {
-        super.save(entity);
-    }
-
     public void remove(Integer id) {
         RawMeasurement m = findById(id);
         remove(m);

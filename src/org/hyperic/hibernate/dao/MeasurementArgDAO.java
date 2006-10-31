@@ -25,12 +25,9 @@
 
 package org.hyperic.hibernate.dao;
 
-import java.util.Collection;
-
 import org.hibernate.Session;
-
-import org.hyperic.hq.measurement.MeasurementTemplate;
 import org.hyperic.hq.measurement.MeasurementArg;
+import org.hyperic.hq.measurement.MeasurementTemplate;
 
 /**
  * CRUD methods, finders, etc. for MeasurementArg
@@ -43,18 +40,6 @@ public class MeasurementArgDAO extends HibernateDAO
 
     public MeasurementArg findById(Integer id) {
         return (MeasurementArg)super.findById(id);
-    }
-
-    public void evict(MeasurementArg entity) {
-        super.evict(entity);
-    }
-
-    public MeasurementArg merge(MeasurementArg entity) {
-        return (MeasurementArg)super.merge(entity);
-    }
-
-    public void save(MeasurementArg entity) {
-        super.save(entity);
     }
 
     public void remove(MeasurementArg entity) {

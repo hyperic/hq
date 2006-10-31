@@ -43,18 +43,6 @@ public class MetricProblemDAO extends HibernateDAO
         return (MetricProblem)super.findById(id);
     }
 
-    public void evict(MetricProblem entity) {
-        super.evict(entity);
-    }
-
-    public MetricProblem merge(MetricProblem entity) {
-        return (MetricProblem)super.merge(entity);
-    }
-
-    public void save(MetricProblem entity) {
-        super.save(entity);
-    }
-
     public void remove(MetricProblem entity) {
         super.remove(entity);
     }

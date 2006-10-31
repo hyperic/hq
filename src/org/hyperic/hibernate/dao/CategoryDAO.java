@@ -26,10 +26,7 @@
 package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
-
 import org.hyperic.hq.measurement.Category;
-
-import java.util.Collection;
 
 /**
  * CRUD methods, finders, etc. for Category
@@ -42,22 +39,6 @@ public class CategoryDAO extends HibernateDAO
 
     public Category findById(Integer id) {
         return (Category)super.findById(id);
-    }
-
-    public void evict(Category entity) {
-        super.evict(entity);
-    }
-
-    public Category merge(Category entity) {
-        return (Category)super.merge(entity);
-    }
-
-    public void save(Category entity) {
-        super.save(entity);
-    }
-
-    public void remove(Category entity) {
-        super.remove(entity);
     }
 
     public Category create(String name) {

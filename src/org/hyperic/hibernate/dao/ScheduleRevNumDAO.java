@@ -43,18 +43,6 @@ public class ScheduleRevNumDAO extends HibernateDAO
         return (ScheduleRevNum)super.findById(id);
     }
 
-    public void evict(ScheduleRevNum entity) {
-        super.evict(entity);
-    }
-
-    public ScheduleRevNum merge(ScheduleRevNum entity) {
-        return (ScheduleRevNum)super.merge(entity);
-    }
-
-    public void save(ScheduleRevNum entity) {
-        super.save(entity);
-    }
-
     public void remove(ScheduleRevNum entity) {
         super.remove(entity);
     }

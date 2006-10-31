@@ -42,14 +42,6 @@ public class BaselineDAO extends HibernateDAO
         return (Baseline)super.findById(id);
     }
 
-    public void evict(Baseline entity) {
-        super.evict(entity);
-    }
-
-    public Baseline merge(Baseline entity) {
-        return (Baseline)super.merge(entity);
-    }
-
     public void save(Baseline entity) {
         super.save(entity);
     }

@@ -44,18 +44,6 @@ public class DerivedMeasurementDAO extends HibernateDAO
         return (DerivedMeasurement)super.findById(id);
     }
 
-    public void evict(DerivedMeasurement entity) {
-        super.evict(entity);
-    }
-
-    public DerivedMeasurement merge(DerivedMeasurement entity) {
-        return (DerivedMeasurement)super.merge(entity);
-    }
-
-    public void save(DerivedMeasurement entity) {
-        super.save(entity);
-    }
-
     public void remove(DerivedMeasurement entity) {
         super.remove(entity);
     }
