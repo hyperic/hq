@@ -63,13 +63,15 @@ public class Alert
     protected UserAlert createUserAlert(Integer userId) {
         UserAlert ua = new UserAlert(this, userId);
         
+        save(ua);
         _userAlerts.add(ua);
         return ua;
     }
     
     protected AlertActionLog createActionLog(String detail, Action action) {
         AlertActionLog res = new AlertActionLog(this, detail, action);
-        
+    
+        save(res);
         _actions.add(res);
         return res;
     }
@@ -79,6 +81,7 @@ public class Alert
     {
         AlertConditionLog res = new AlertConditionLog(this, value, cond);
 
+        save(res);
         _conditions.add(res);
         return res;
     }

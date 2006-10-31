@@ -32,7 +32,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 
 public class AlertDAO extends HibernateDAO {
     public AlertDAO(Session session) {
-        super(AlertConditionLog.class, session);
+        super(Alert.class, session);
     }
 
     public Alert findById(Integer id) {

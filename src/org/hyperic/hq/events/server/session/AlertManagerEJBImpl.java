@@ -158,8 +158,6 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
         AlertDefinition def = getAlertDefDAO().findById(val.getAlertDefId());
         Alert alert = def.createAlert(val);
         
-        // Save it, because the callers require the ID of the new object
-        getAlertDAO().save(alert);
         return alert.getAlertValue();
     }
 
