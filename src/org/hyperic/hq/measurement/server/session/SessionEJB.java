@@ -67,6 +67,7 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.measurement.EvaluationException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.DerivedMeasurement;
+import org.hyperic.hq.measurement.RawMeasurement;
 import org.hyperic.hq.measurement.data.AggregateObjectMeasurementValue;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.server.express.ExpressionManager;
@@ -83,7 +84,6 @@ import org.hyperic.hq.measurement.shared.MeasurementArgLocalHome;
 import org.hyperic.hq.measurement.shared.MeasurementArgUtil;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateLocalHome;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateUtil;
-import org.hyperic.hq.measurement.shared.RawMeasurementLocal;
 import org.hyperic.hq.measurement.shared.RawMeasurementLocalHome;
 import org.hyperic.hq.measurement.shared.RawMeasurementUtil;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
@@ -357,13 +357,14 @@ public abstract class SessionEJB {
      */
     protected Integer[] getArgumentIds(DerivedMeasurementValue dm)
         throws FinderException {
-        Collection mcol = getRmHome().findByDerivedMeasurement(dm.getId());
+        Collection mcol = getRawMeasurementDAO().
+            findByDerivedMeasurement(dm.getId());
 
         // Now make an array the size of the raw measurements
         Integer[] rawIds = new Integer[mcol.size()];
         int ind = 0;
         for (Iterator i = mcol.iterator(); i.hasNext(); ind++) {
-            RawMeasurementLocal rm = (RawMeasurementLocal) i.next();
+            RawMeasurement rm = (RawMeasurement)i.next();
             rawIds[ind] = rm.getId();
         }
 
