@@ -25,17 +25,15 @@
 
 package org.hyperic.hq.measurement.ext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.dao.RawMeasurementDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ResourceEventInterface;
-import org.hyperic.hq.measurement.shared.RawMeasurementLocal;
-import org.hyperic.hq.measurement.shared.RawMeasurementLocalHome;
-import org.hyperic.hq.measurement.shared.RawMeasurementPK;
-import org.hyperic.hq.measurement.shared.RawMeasurementUtil;
+import org.hyperic.hq.measurement.RawMeasurement;
 import org.hyperic.hq.product.MetricValue;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class MeasurementEvent extends AbstractEvent
     implements java.io.Serializable, ResourceEventInterface {
@@ -78,14 +76,9 @@ public class MeasurementEvent extends AbstractEvent
         
         try {
             // Use RawMeasurement, because it will work for both
-            RawMeasurementLocalHome rmHome =
-                RawMeasurementUtil.getLocalHome();
-
-            RawMeasurementPK pkey =
-                new RawMeasurementPK(getInstanceId());
-
-            RawMeasurementLocal rm =
-                rmHome.findByPrimaryKey(pkey);
+            RawMeasurementDAO dao =
+                DAOFactory.getDAOFactory().getRawMeasurementDAO();
+            RawMeasurement rm = dao.findById(getInstanceId());
             int resourceId, resourceType;
 
             resourceId = rm.getInstanceId().intValue();
