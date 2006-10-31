@@ -42,7 +42,6 @@ import javax.naming.NamingException;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hibernate.dao.ActionDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.ActionCreateException;

@@ -32,7 +32,6 @@ import java.util.Iterator;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hibernate.dao.ActionDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;

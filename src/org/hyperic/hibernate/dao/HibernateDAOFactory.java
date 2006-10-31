@@ -28,6 +28,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
+import org.hyperic.hq.events.server.session.ActionDAO;
 import org.hyperic.hq.events.server.session.AlertActionLogDAO;
 import org.hyperic.hq.events.server.session.AlertConditionDAO;
 import org.hyperic.hq.events.server.session.AlertConditionLogDAO;

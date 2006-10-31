@@ -27,7 +27,6 @@ package org.hyperic.hq.events.server.session;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hibernate.dao.ActionDAO;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
 
 public class AlertActionLog  

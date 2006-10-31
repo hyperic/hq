@@ -22,13 +22,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hibernate.dao;
+package org.hyperic.hq.events.server.session;
 
 import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hyperic.hq.events.server.session.Action;
+import org.hyperic.hibernate.dao.HibernateDAO;
 import org.hyperic.hq.events.shared.ActionPK;
 
 public class ActionDAO extends HibernateDAO {

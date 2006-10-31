@@ -47,7 +47,6 @@ import javax.ejb.SessionContext;
 import javax.naming.NamingException;
 
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hibernate.dao.ActionDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;

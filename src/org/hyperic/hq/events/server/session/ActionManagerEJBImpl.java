@@ -34,7 +34,6 @@ import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hibernate.dao.ActionDAO;
 import org.hyperic.hq.events.shared.ActionPK;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
