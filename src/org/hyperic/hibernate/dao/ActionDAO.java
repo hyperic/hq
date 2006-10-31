@@ -54,7 +54,7 @@ public class ActionDAO extends HibernateDAO {
      */
     public List findByAlertId(int alertId) {
         String sql = "from Action a, AlertActionLog al " + 
-            "where a.id = al.actionId AND al.id = :alertId";
+            "where a.id = al.action AND al.id = :alertId";
         
         return getSession().createQuery(sql)
             .setInteger("alertId", alertId)
