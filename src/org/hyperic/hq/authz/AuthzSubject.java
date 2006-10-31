@@ -32,276 +32,212 @@ import java.util.Collections;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 
-public class AuthzSubject extends AuthzNamedEntity
-{
+public class AuthzSubject extends AuthzNamedEntity {
+    private String     _dsn;
+    private Integer    _cid;
+    private String     _firstName;
+    private String     _lastName;
+    private String     _emailAddress;
+    private String     _smsAddress;
+    private String     _phoneNumber;
+    private String     _department;
+    private boolean    _active = true;
+    private boolean    _system = false;
+    private Resource   _resource;
+    private Collection _roles = new ArrayList();
+    private Collection _userConfigs = new ArrayList();
 
-    private String dsn;
-    private Integer cid;
-    private String firstName;
-    private String lastName;
-    private String emailAddress;
-    private String smsAddress;
-    private String phoneNumber;
-    private String department;
-    private boolean active = true;
-    private boolean system = false;
-    private Resource resource;
-    private Collection roles = new ArrayList();
-    private Collection userConfigs = new ArrayList();
+    private AuthzSubjectValue _valueObj;
 
-    private AuthzSubjectValue authzSubjectValue = new AuthzSubjectValue();
-     // Constructors
-
-    /** default constructor */
-    public AuthzSubject() {
-        super();
+    protected AuthzSubject() {
     }
 
-	/** minimal constructor */
     public AuthzSubject(AuthzSubjectValue val) {
         setAuthzSubjectValue(val);
     }
 
-    /** full constructor */
-    public AuthzSubject(String name, String dsn, Integer cid,
-                        String firstName, String lastName, String emailAddress,
-                        String smsAddress, String phoneNumber,
-                        String department, boolean factive, boolean fsystem,
-                        Resource resourceId, Collection roles,
-                        Collection userConfigs) {
-        super(name);
-        this.dsn = dsn;
-        this.cid = cid;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.emailAddress = emailAddress;
-        this.smsAddress = smsAddress;
-        this.phoneNumber = phoneNumber;
-        this.department = department;
-        this.active = factive;
-        this.system = fsystem;
-        this.resource = resourceId;
-        this.roles = roles;
-        this.userConfigs = userConfigs;
+    public String getAuthDsn() {
+        return _dsn;
     }
 
-    public String getAuthDsn()
-    {
-        return dsn;
+    public void setAuthDsn(String val) {
+        _dsn = val;
     }
 
-    public void setAuthDsn(String val)
-    {
-        dsn = val;
+    public Integer getCid() {
+        return _cid;
     }
 
-    public Integer getCid()
-    {
-        return cid;
+    public void setCid(Integer val) {
+        _cid = val;
     }
 
-    public void setCid(Integer val)
-    {
-        cid = val;
+    public String getFirstName() {
+        return _firstName;
     }
 
-    public String getFirstName()
-    {
-        return firstName;
+    public void setFirstName(String val) {
+        _firstName = val;
     }
 
-    public void setFirstName(String val)
-    {
-        firstName = val;
+    public String getLastName() {
+        return _lastName;
     }
 
-    public String getLastName()
-    {
-        return lastName;
+    public void setLastName(String val) {
+        _lastName = val;
     }
 
-    public void setLastName(String val)
-    {
-        lastName = val;
+    public String getEmailAddress() {
+        return _emailAddress;
     }
 
-    public String getEmailAddress()
-    {
-        return emailAddress;
+    public void setEmailAddress(String val) {
+        _emailAddress = val;
     }
 
-    public void setEmailAddress(String val)
-    {
-        emailAddress = val;
+    public String getSMSAddress() {
+        return _smsAddress;
     }
 
-    public String getSMSAddress()
-    {
-        return smsAddress;
+    public void setSMSAddress(String val) {
+        _smsAddress = val;
     }
 
-    public void setSMSAddress(String val)
-    {
-        smsAddress = val;
+    public String getPhoneNumber() {
+        return _phoneNumber;
     }
 
-    public String getPhoneNumber()
-    {
-        return phoneNumber;
+    public void setPhoneNumber(String val) {
+        _phoneNumber = val;
     }
 
-    public void setPhoneNumber(String val)
-    {
-        phoneNumber = val;
+    public String getDepartment() {
+        return _department;
     }
 
-    public String getDepartment()
-    {
-        return department;
+    public void setDepartment(String val) {
+        _department = val;
     }
 
-    public void setDepartment(String val)
-    {
-        department = val;
+    public boolean isActive() {
+        return _active;
     }
 
-    public boolean isActive()
-    {
-        return active;
-    }
-
-    public boolean getActive()
-    {
+    public boolean getActive() {
         return isActive();
     }
 
-    public void setActive(boolean val)
-    {
-        active = val;
+    public void setActive(boolean val) {
+        _active = val;
     }
 
-    public boolean isSystem()
-    {
-        return system;
+    public boolean isSystem() {
+        return _system;
     }
 
-    public boolean getSystem()
-    {
+    public boolean getSystem() {
         return isSystem();
     }
 
-    public void setSystem(boolean val)
-    {
-        system = val;
+    public void setSystem(boolean val) {
+        _system = val;
     }
 
-    public Resource getResource()
-    {
-        return resource;
+    public Resource getResource() {
+        return _resource;
     }
 
-    public void setResource(Resource val)
-    {
-        resource = val;
+    public void setResource(Resource val) {
+        _resource = val;
     }
+
     public Collection getRoles() {
-        return roles;
+        return _roles;
     }
 
-    public void setRoles(Collection val)
-    {
-        roles = val;
+    public void setRoles(Collection val) {
+        _roles = val;
     }
 
-    public void addRole(Role role)
-    {
-        roles.add(role);
+    public void addRole(Role role) {
+        _roles.add(role);
     }
 
-    public void removeRole(Role role)
-    {
-        roles.remove(role);
+    public void removeRole(Role role) {
+        _roles.remove(role);
     }
 
-    public void removeAllRoles()
-    {
-        roles.clear();
+    public void removeAllRoles() {
+        _roles.clear();
     }
 
-    public Collection getUserConfigs()
-    {
-        return userConfigs;
+    public Collection getUserConfigs() {
+        return _userConfigs;
     }
 
-    public void setUserConfigs(Collection val)
-    {
-        userConfigs = val;
+    public void setUserConfigs(Collection val) {
+        _userConfigs = val;
     }
 
-    /**
-     * @deprecated use (this) AuthzSubject instead
-     */
-    public AuthzSubjectValue getAuthzSubjectValue()
-    {
-        authzSubjectValue.setActive(isActive());
-        authzSubjectValue.setAuthDsn(getAuthDsn());
-        authzSubjectValue.setDepartment(getDepartment());
-        authzSubjectValue.setEmailAddress(getEmailAddress());
-        authzSubjectValue.setFirstName(getFirstName());
-        authzSubjectValue.setId(getId());
-        authzSubjectValue.setName(getName());
-        authzSubjectValue.setPhoneNumber(getPhoneNumber());
-        authzSubjectValue.setSMSAddress(getSMSAddress());
-        authzSubjectValue.setSortName(getSortName());
-        authzSubjectValue.setSystem(isSystem());
+    public Object getValueObject() {
+        return getAuthzSubjectValue();
+    }
+    
+    public AuthzSubjectValue getAuthzSubjectValue() {
+        if (_valueObj == null) 
+            _valueObj = new AuthzSubjectValue();
 
-        return authzSubjectValue;
+        _valueObj.setSortName(getSortName());
+        _valueObj.setActive(getActive());
+        _valueObj.setSystem(getSystem());
+        _valueObj.setAuthDsn((getAuthDsn() == null) ? "" : getAuthDsn());
+        _valueObj.setEmailAddress((getEmailAddress() == null) ? "" : 
+                                  getEmailAddress());
+        _valueObj.setSMSAddress((getSMSAddress() == null) ? "" : 
+                                getSMSAddress());
+        _valueObj.setFirstName((getFirstName() == null) ? "" : getFirstName());
+        _valueObj.setLastName((getLastName() == null) ? "" : getLastName());
+        _valueObj.setPhoneNumber((getPhoneNumber() == null) ? "" : 
+                                 getPhoneNumber());
+        _valueObj.setDepartment((getDepartment() == null) ? "" : 
+                                getDepartment());
+        _valueObj.setName((getName() == null) ? "" : getName());
+        _valueObj.setId(getId());
+        return _valueObj;
     }
 
-    public void setAuthzSubjectValue(AuthzSubjectValue authzSubjectValue)
-    {
+    public void setAuthzSubjectValue(AuthzSubjectValue authzSubjectValue) {
         setActive(authzSubjectValue.getActive());
         setAuthDsn(authzSubjectValue.getAuthDsn());
         setDepartment(authzSubjectValue.getDepartment());
         setEmailAddress(authzSubjectValue.getEmailAddress());
         setFirstName(authzSubjectValue.getFirstName());
-        setId(authzSubjectValue.getId());
         setName(authzSubjectValue.getName());
         setPhoneNumber(authzSubjectValue.getPhoneNumber());
         setSMSAddress(authzSubjectValue.getSMSAddress());
         setSystem(authzSubjectValue.getSystem());
     }
 
-    public Object getValueObject()
-    {
-        return getAuthzSubjectValue();
-    }
-
-    public boolean isRoot()
-    {
+    public boolean isRoot() {
         return getId().equals(AuthzConstants.rootSubjectId);
     }
 
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         if (!(obj instanceof AuthzSubject) || !super.equals(obj)) {
             return false;
         }
         AuthzSubject o = (AuthzSubject) obj;
-        return
-            ((dsn == o.getAuthDsn()) ||
-             (dsn != null && o.getAuthDsn() != null &&
-              dsn.equals(o.getAuthDsn())));
+        return ((_dsn == o.getAuthDsn()) ||
+                 (_dsn != null && o.getAuthDsn() != null &&
+                  _dsn.equals(o.getAuthDsn())));
     }
 
-    public int hashCode()
-    {
+    public int hashCode() {
         int result = super.hashCode();
 
-        result = 37 * result + (dsn != null ? dsn.hashCode() : 0);
+        result = 37 * result + (_dsn != null ? _dsn.hashCode() : 0);
 
         return result;
     }
 }
-
-
