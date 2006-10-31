@@ -53,6 +53,8 @@ import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.SRN;
 import org.hyperic.hq.measurement.SRNCreateException;
 import org.hyperic.hq.measurement.TimingVoodoo;
+import org.hyperic.hq.measurement.DerivedMeasurement;
+import org.hyperic.hq.measurement.RawMeasurement;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.ext.MonitorFactory;
 import org.hyperic.hq.measurement.ext.MonitorInterface;
@@ -68,7 +70,6 @@ import org.hyperic.hq.measurement.server.mbean.SRNCache;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementPK;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
-import org.hyperic.hq.measurement.shared.RawMeasurementLocal;
 import org.hyperic.hq.measurement.shared.RawMeasurementValue;
 
 import org.apache.commons.logging.Log;
@@ -164,27 +165,20 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
                             new Integer(dn.getId()), e);
                     }
 
-                    if (dmval.getInterval() != interval || !dmval.getEnabled()){
-                        if ( log.isInfoEnabled() ) {
-                            log.info(
-                                "Updating interval for DerivedMeasurement from "
-                                + dmval.getInterval() + " to " + interval);
-                        }
-                        try {
-                            DerivedMeasurementPK pk =
-                                new DerivedMeasurementPK(dmval.getId());
-                            DerivedMeasurementLocal mlocal =
-                                getDmHome().findByPrimaryKey(pk);
-                            mlocal.setInterval(interval);
-                            mlocal.setEnabled(interval != 0);
-                            mlocal.setMtime(System.currentTimeMillis());
-                            // Update the derived measurement value
-                            dmval = mlocal.getDerivedMeasurementValue();
-                        } catch (FinderException e) {
-                            throw new MeasurementScheduleException(
-                                "Couldn't find derived measurement with id ",
-                                dmval.getId(), e);
-                        }
+                    if (dmval.getInterval() != interval ||
+                        !dmval.getEnabled()){
+                        log.info("Updating interval for DerivedMeasurement " +
+                                 "from " + dmval.getInterval() + " to " +
+                                 interval);
+
+                        DerivedMeasurement dm = getDerivedMeasurementDAO()
+                            .findById(dmval.getId());
+
+                        dm.setInterval(interval);
+                        dm.setEnabled(interval != 0);
+                        dm.setMtime(System.currentTimeMillis());
+                        // Update the derived measurement value
+                        dmval = dm.getDerivedMeasurementValue();
                     }
                     
                     // Do not continue if interval was 0
@@ -242,7 +236,7 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
         }
         
         logTime("schedule",scheduleTime);
-    } // end schedule
+    }
 
     private void unschedule(AgentValue aconn, AppdefEntityID[] entIds)
         throws MeasurementUnscheduleException, MonitorAgentException {
@@ -350,38 +344,35 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
         final String err = "Couldn't calculate derived measurement ";
         
         // Convert the Map of
-        // (rawId --> [retrievalTime0,retrievalTime1,...,retrievalTimeN])
+        // (rawId --> [retrievalTime0,...,retrievalTimeN])
         // into a Map of
-        // (derivedMeasValue --> [scheduledTime0,scheduledTime1,...,scheduledTimeN])
+        // (derivedMeasValue --> [scheduledTime0,...,scheduledTimeN])
         Map missedDerivedDataPoints = new HashMap();
-        for (Iterator it=oldDataPoints.entrySet().iterator(); it.hasNext();) {
+        for (Iterator it = oldDataPoints.entrySet().iterator();
+             it.hasNext();)
+        {
             Map.Entry entry = (Map.Entry)it.next();
             Integer rawId = (Integer)entry.getKey();
             List retrievalTimes = (List)entry.getValue();
 
-            try {
-                Collection dmsForRaw =
-                    getDmHome().findByRawExcludeIdentity(rawId);
-                for (Iterator jt = dmsForRaw.iterator(); jt.hasNext();) {
-                    DerivedMeasurementLocal dmBean =
-                        (DerivedMeasurementLocal) jt.next();
-                    List scheduledTimes = new ArrayList();
-                    for (Iterator kt = retrievalTimes.iterator();kt.hasNext();){
-                        long retrievalTime = ((Long) kt.next()).longValue();
-                        scheduledTimes.add(
-                            new Long(
-                                TimingVoodoo.roundDownTime(
-                                    retrievalTime,
-                                    dmBean.getInterval())));
+
+            Collection dmsForRaw =
+                getDerivedMeasurementDAO().findByRawExcludeIdentity(rawId);
+            for (Iterator jt = dmsForRaw.iterator(); jt.hasNext();) {
+                DerivedMeasurement dmBean = (DerivedMeasurement)jt.next();
+                List scheduledTimes = new ArrayList();
+                for (Iterator kt = retrievalTimes.iterator();
+                     kt.hasNext(); )
+                {
+                    long retrievalTime = ((Long)kt.next()).longValue();
+                    scheduledTimes.add(
+                        new Long(TimingVoodoo.roundDownTime(retrievalTime,
+                            dmBean.getInterval())));
                     }
                     missedDerivedDataPoints.put(
                         dmBean.getDerivedMeasurementValue(),
                         scheduledTimes);
                 }
-            } catch (FinderException e) {
-                log.debug("No DerivedMeasurements depend on this " + 
-                          "RawMeasurement: " + rawId);
-            }
         }
 
         // Iterate through the missed derived measurements and
@@ -525,19 +516,21 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
     private DerivedMeasurementValue getDMByTemplateAndInstance(Integer tid,
                                                                int instanceId)
         throws FinderException {
-        DerivedMeasurementValue retVal = null;
-        DerivedMeasurementLocal dmLoc =
-            getDmHome().findByTemplateForInstance(tid, new Integer(instanceId));
+        DerivedMeasurement dm = getDerivedMeasurementDAO().
+            findByTemplateForInstance(tid, new Integer(instanceId));
+        if (dm == null) {
+            throw new FinderException();
+        }
+        return dm.getDerivedMeasurementValue();
 
-        return dmLoc.getDerivedMeasurementValue();
     }
 
     private RawMeasurementValue getRMByTemplateAndInstance(Integer tid,
                                                            int instanceId)
         throws FinderException {
-        RawMeasurementLocal rawLoc =
-            getRmHome().findByTemplateForInstance(tid, new Integer(instanceId));
-        return rawLoc.getRawMeasurementValue();
+        RawMeasurement rm = getRawMeasurementDAO().
+            findByTemplateForInstance(tid, new Integer(instanceId));
+        return rm.getRawMeasurementValue();
     }
 
     private void logTime (String method, long start) {
@@ -601,5 +594,3 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
     }
 
 }
-
-// EOF

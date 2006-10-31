@@ -25,28 +25,17 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
-
-import javax.ejb.FinderException;
-
-import org.hyperic.hq.measurement.EvaluationException;
-import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.TimingVoodoo;
-import org.hyperic.hq.measurement.data.DataNotAvailableException;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementLocal;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementPK;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
-import org.hyperic.hq.measurement.shared.MeasurementArgValue;
-import org.hyperic.hq.measurement.shared.RawMeasurementLocal;
-import org.hyperic.hq.product.MetricValue;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.measurement.DerivedMeasurement;
+import org.hyperic.hq.measurement.EvaluationException;
+import org.hyperic.hq.measurement.MeasurementArg;
+import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.RawMeasurement;
+import org.hyperic.hq.measurement.TimingVoodoo;
+import org.hyperic.hq.measurement.data.DataNotAvailableException;
+import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
+import org.hyperic.hq.product.MetricValue;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
@@ -55,16 +44,25 @@ import org.quartz.SchedulerException;
 import org.quartz.SimpleTrigger;
 import org.quartz.StatefulJob;
 
+import javax.ejb.FinderException;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
+
 /**
  * This job is responsible for calculating derived measurements.
- *
  */
 public class CalculateDerivedMeasurementJob
     // we are not a session EJB, but we want the utility methods
     extends SessionEJB
     implements StatefulJob
 {
-    public static final String SCHEDULER_GROUP = "net.covalent.measurement.derived";
+    public static final String SCHEDULER_GROUP =
+        "net.covalent.measurement.derived";
     public static final String JOB_PREFIX = "calculate.";
     public static final String SCHEDULE_PREFIX = "interval.";
     public static final int MAX_ATTEMPTS_RECENT = 3;
@@ -106,7 +104,8 @@ public class CalculateDerivedMeasurementJob
             // try to calculate for the reservation time
             // if the dependent data is not there, add to missedCalculations
             if (! calculate(measurement, reservationTime) ) {
-                recentlyMissedCalculations.put( new Long(reservationTime), new Integer(1) );
+                recentlyMissedCalculations.put(new Long(reservationTime),
+                                               new Integer(1) );
             }
 
             // Quartz now requires string type properties. Store the recently
@@ -122,101 +121,103 @@ public class CalculateDerivedMeasurementJob
         logTime("execute",executeTimeBegin);
     }
 
-    //--------------------------------------------------------------------------
-    //-- private helpers
-    //--------------------------------------------------------------------------
-    // Don't know if there's a better/faster/more efficient way of doing this
-    // but what we're trying to accomplish is as follows:
-    // GOAL: DBFetch the data for each argument required to perform the evaluation
-    //       of the expression. This is admittedly a little convoluted since some
-    //       of the data we need belongs to the RM, other properties apply to
-    //       the instance of a RM as it applies to a DM, some data belongs
-    //       solely to the template and some data belongs to the tmp arguments.
+
+    /**
+     * Don't know if there is a better/faster/more efficient way of doing this
+     * but what we're trying to accompilish is as follows:
+     *
+     * DBFetch the data for each argument required to perform the evaluation
+     * of the expression.  This is admittedly a little convoluted since some
+     * of the data we need belongs to the RM, other properties apply to the
+     * instance of a RM as it applies to a DM, some data belongs solely to the
+     * template and some data belongs wo the tmp argument.
+     *
+     * @param measurement
+     * @param reqTime
+     * @return
+     * @throws FinderException
+     * @throws DataNotAvailableException
+     */
     private Map getMeasurementData(DerivedMeasurementValue measurement,
                                    long reqTime)
         throws FinderException, DataNotAvailableException {
         long    getDataStartTime = System.currentTimeMillis();
         Map     retVal          = new LinkedHashMap();
 
-        // Get our hands on the DM Local
-        DerivedMeasurementPK pk =
-            new DerivedMeasurementPK( measurement.getId() );
-        DerivedMeasurementLocal dmLocal = getDmHome().findByPrimaryKey(pk);
+        DerivedMeasurement dm =
+                getDerivedMeasurementDAO().findById(measurement.getId());
+        Collection col = dm.getTemplate().getMeasurementArgs();
 
-        // get an array of the DM's MeasurementArg VOs.
-        MeasurementArgValue[] dmMavArr =  dmLocal.getTemplate().
-                                          getMeasurementTemplateValue().
-                                          getMeasurementArgs();
-
-        // handle case of incomplete seed/registered templates with no arguments
-        if (dmMavArr == null) {
+        // Probably don't need this
+        if (col == null || col.size() == 0) {
             log.warn ("Invalid measurement template. All templates must have "+
-                      "at least one argument. (" +measurement.getId()+" )");
+                      "at least one argument. (" + measurement.getId() +" )");
             return retVal;
         }
 
         // Now take a spin around args using the (Raw Template) argument_id
         // and our instance id to lookup the actual RM.
-        for (int argIdx=0;argIdx<dmMavArr.length;argIdx++) {
+        for (Iterator i = col.iterator(); i.hasNext(); ) {
+            MeasurementArg dmMav = (MeasurementArg)i.next();
 
-            // The array of MeasurementArguementValues should always contain
-            // references to non-null MAV objects.
-            MeasurementArgValue dmMav = dmMavArr[argIdx];
             if (dmMav == null) {
-                throw new DataNotAvailableException( "Could not find an associated "+
-                           "MeasurementArgValue with this template "+
-                            dmMav.getId().intValue());
+                throw new DataNotAvailableException("Could not find an " +
+                    "associated MeasurementArgValue with this template "+
+                    dmMav.getId().intValue());
             }
 
             // Lookup the RawMeasurement's associated template.
-            RawMeasurementLocal rmLocal = getRmHome().
-                findByTemplateForInstance(dmMav.getMeasurementTemplateArg().getId(),
-                                          dmLocal.getInstanceId());
+            RawMeasurement rm = getRawMeasurementDAO().
+                findByTemplateForInstance(dmMav.getTemplateArg().getId(),
+                                          dm.getInstanceId());
 
-            if ( log.isDebugEnabled() ) {
-                if ( dmMav.getTicks() == null|| dmMav.getTicks().intValue()==0 ) {
-                    log.debug("This MeasurementArgValue is not an aggregate (ticks=null or 0)");
+            if (log.isDebugEnabled()) {
+                if (dmMav.getTicks() == null||
+                    dmMav.getTicks().intValue() == 0) {
+                    log.debug("This MeasurementArgValue is not an aggregate " +
+                        "(ticks=null or 0)");
                 } else {
-                    log.debug("This MeasurementArgValue is an aggregate (ticks=" +
-                               dmMav.getTicks().toString()+")" );
+                    log.debug("This MeasurementArgValue is an aggregate " +
+                        "(ticks=" + dmMav.getTicks().toString()+")" );
                 }
             }
 
             // Fetch the rows using datamanager.
-            MetricValue mv = null;
-            if (dmMav.getTicks() != null && dmMav.getTicks().intValue()>1)
-            { // If ticks is set, then we're an aggregate function.
+            MetricValue mv;
+            if (dmMav.getTicks() != null && dmMav.getTicks().intValue() > 1) {
+                // If ticks is set, then we're an aggregate function.
                 if (log.isDebugEnabled())
                     log.debug("DataManagerEJB.getTimedDataAggregate(" +
-                              rmLocal.getId() + "," + reqTime + "," +
-                              dmLocal.getInterval() + "," + dmMav.getTicks() +
+                              rm.getId() + "," + reqTime + "," +
+                              dm.getInterval() + "," + dmMav.getTicks() +
                               ")");
 
-                mv = getDataMan().getTimedDataAggregate(rmLocal.getId(),
+                mv = getDataMan().getTimedDataAggregate(rm.getId(),
                                                         reqTime,
-                                                        dmLocal.getInterval(),
+                                                        dm.getInterval(),
                                                         dmMav.getTicks()
-                                                             .intValue());
-            }
-            else   // Otherwise, we're a non-aggregate function
-            {
+                                                            .intValue());
+            } else {
+                // Otherwise, we're a non-aggregate function
+
                 // Set the interval marker ("prevVal") 0=now=current
                 int prevVal = (dmMav.getPrevious() == null) ? 0 :
-                                dmMav.getPrevious().intValue();
+                    dmMav.getPrevious().intValue();
 
-                // fetch/test the data
-                mv = getDataMan().getTimedData(rmLocal.getId(), reqTime,
-                                               dmLocal.getInterval(), prevVal);
+                // Fetch the data
+                mv = getDataMan().getTimedData(rm.getId(), reqTime,
+                                               dm.getInterval(), prevVal);
 
             }
 
             if (mv == null)
                 throw new DataNotAvailableException(
                     "DataManagerEJB.getTimedDataAggregate() couldn't locate " +
-                    "rows for RM: " + rmLocal.getId());
+                    "rows for RM: " + rm.getId());
 
             retVal.put(dmMav.getId(), mv);
         }
+
         logTime("getMeasurementData", getDataStartTime);
         return retVal;
     }
@@ -328,24 +329,21 @@ public class CalculateDerivedMeasurementJob
         recentlyMissedCalculations = 
             new MissedJobMap((String)dataMap.get("recentlyMissedCalculations"));
 
-        // the measurement
-        DerivedMeasurementPK pk = new DerivedMeasurementPK( measurementId );
         DMValueCache cache = DMValueCache.getInstance();
         try {
             // Get the measurement from the cache first
             measurement = cache.get(measurementId);
 
             // Verify that the measurement still exists
-            DerivedMeasurementLocal mlocal = getDmHome().findByPrimaryKey(pk);
+            DerivedMeasurement dm = getDerivedMeasurementDAO().
+                findById(measurementId);
+            if (dm == null) {
+                throw new FinderException("Measurement Template has been " +
+                                          "removed.");
+            }
 
             if (measurement == null) {
-                try {
-                    measurement = mlocal.getDerivedMeasurementValue();
-                } catch (NullPointerException e) {
-                    throw new FinderException(
-                        "Measurement Template has been removed");
-                }
-                cache.put(measurement);
+                cache.put(dm.getDerivedMeasurementValue());
             }
         } catch (FinderException e) {
             log.error("Derived measurement " + measurementId + " not found");
@@ -473,5 +471,3 @@ public class CalculateDerivedMeasurementJob
         }
     }
 }
-
-// EOF

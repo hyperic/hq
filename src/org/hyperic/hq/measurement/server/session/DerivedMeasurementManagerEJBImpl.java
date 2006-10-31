@@ -1255,7 +1255,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * transaction finalized before sending out messages
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
      */
     public void enableMeasurement(DerivedMeasurement m, boolean enabled)
         throws MeasurementNotFoundException {

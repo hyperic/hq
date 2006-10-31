@@ -66,6 +66,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.measurement.EvaluationException;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.DerivedMeasurement;
 import org.hyperic.hq.measurement.data.AggregateObjectMeasurementValue;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.server.express.ExpressionManager;
@@ -543,15 +544,13 @@ public abstract class SessionEJB {
                     log.debug("SessionEJB- caching expression");
 
                 // Store this expression's serialized class for future access.
-                DerivedMeasurementPK pk =
-                    new DerivedMeasurementPK(measurement.getId());
-                DerivedMeasurementLocal dmLocal =
-                    getDmHome().findByPrimaryKey(pk);
+                DerivedMeasurement dm =
+                    getDerivedMeasurementDAO().findById(measurement.getId());
 
                 if (log.isDebugEnabled())
                     log.debug("SessionEJB- Serialized Class Bytes:" +
                         expMgr.getExpressionBytes(measurement.getId()));
-                dmLocal.getTemplate().setExpressionData(
+                dm.getTemplate().setExpressionData(
                     expMgr.getExpressionBytes(measurement.getId()));
             }
 
