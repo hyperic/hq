@@ -25,20 +25,19 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import javax.ejb.EJBLocalObject;
-
-import org.hyperic.hq.measurement.shared.BaselineLocal;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementLocal;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementPK;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateLocal;
-import org.hyperic.hq.measurement.server.session.DMValueCache;
-import org.hyperic.util.pager.PagerProcessor;
-
-import org.hyperic.hq.measurement.MeasurementTemplate;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.measurement.DerivedMeasurement;
+import org.hyperic.hq.measurement.MeasurementTemplate;
+import org.hyperic.hq.measurement.RawMeasurement;
+import org.hyperic.hq.measurement.shared.BaselineLocal;
+import org.hyperic.hq.measurement.shared.DerivedMeasurementLocal;
+import org.hyperic.hq.measurement.shared.DerivedMeasurementPK;
+import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
+import org.hyperic.hq.measurement.shared.MeasurementTemplateLocal;
+import org.hyperic.util.pager.PagerProcessor;
+
+import javax.ejb.EJBLocalObject;
 
 public class PagerProcessor_measurement implements PagerProcessor {
     private static final Log log =
@@ -58,6 +57,10 @@ public class PagerProcessor_measurement implements PagerProcessor {
         // Pojo object processing, this is all going away soon.
         if (o instanceof MeasurementTemplate) {
             return ((MeasurementTemplate)o).getMeasurementTemplateValue();
+        } else if (o instanceof DerivedMeasurement) {
+            return ((DerivedMeasurement)o).getDerivedMeasurementValue();
+        } else if (o instanceof RawMeasurement) {
+            return ((RawMeasurement)o).getRawMeasurementValue();
         }
 
         if (!(o instanceof EJBLocalObject)) {
