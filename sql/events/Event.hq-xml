@@ -27,7 +27,9 @@
       <column name="CTIME" not-null="true" />
     </property>
 
-    <bag name="triggerEventsBag" table="EAM_TRIGGER_EVENT">
+    <bag name="triggerEventsBag" table="EAM_TRIGGER_EVENT"
+         cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
+         inverse="true">
       <key column="EVENT_ID" />
       <one-to-many class="TriggerEvent" />
     </bag>

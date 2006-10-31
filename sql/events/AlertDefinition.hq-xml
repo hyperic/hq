@@ -93,22 +93,30 @@
       <column name="DELETED" not-null="true" />
     </property>
 
-    <bag name="actionsBag" table="EAM_ACTION" inverse="true">
+    <bag name="actionsBag" table="EAM_ACTION"
+         cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
+         inverse="true">
       <key column="ALERT_DEFINITION_ID" />
       <one-to-many class="Action" />
     </bag>
 
-    <bag name="alertsBag" table="EAM_ALERT" inverse="true">
+    <bag name="alertsBag" table="EAM_ALERT"
+         cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
+         inverse="true">
       <key column="ALERT_DEFINITION_ID" />
       <one-to-many class="Alert" />
     </bag>
 
-    <bag name="conditionsBag" table="EAM_ALERT_CONDITION" inverse="true">
+    <bag name="conditionsBag" table="EAM_ALERT_CONDITION"
+         cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
+         inverse="true">
       <key column="ALERT_DEFINITION_ID" />
       <one-to-many class="AlertCondition" />
     </bag>
 
-    <bag name="triggersBag" table="EAM_REGISTERED_TRIGGER" inverse="true">
+    <bag name="triggersBag" table="EAM_REGISTERED_TRIGGER"
+         cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
+         inverse="true">
       <key column="ALERT_DEFINITION_ID" />
       <one-to-many class="RegisteredTrigger" />
     </bag>
