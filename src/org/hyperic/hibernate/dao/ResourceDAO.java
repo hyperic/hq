@@ -250,10 +250,10 @@ public class ResourceDAO extends HibernateDAO
                    " join fetch role.subjects subj " +
                    " join fetch role.operations op " +
                    "where " +
-                   " r.system=? and " +
-                   " rgg.id=? and " +
-                   " (subj.id=? or " +
-                   "  r.owner.id=? or " +
+                   " r.system = :system and " +
+                   " rgg.id = :groupId and " +
+                   " (subj.id = :subjectId or " +
+                   "  r.owner.id = :subjectId or " +
                    "  subj.authDsn = 'covalentAuthzInternalDsn') and " +
                    " op.resourceType.id = r.resourceType.id and " +
                    " (" +
@@ -263,14 +263,12 @@ public class ResourceDAO extends HibernateDAO
                    "  op.name = 'viewApplication' or " +
                    "  op.name = 'viewApplication' or " +
                    "  (op.name='viewResourceGroup' and " +
-                   "    not r.instanceId = ?) )" +
+                   "    not r.instanceId = :groupId) )" +
                    " order by r.sortName ";
         return getSession().createQuery(sql)
-            .setBoolean(0, fSystem.booleanValue())
-            .setInteger(1, groupId.intValue())
-            .setInteger(2, userId.intValue())
-            .setInteger(3, userId.intValue())
-            .setInteger(4, groupId.intValue())
+            .setBoolean("system", fSystem.booleanValue())
+            .setInteger("groupId", groupId.intValue())
+            .setInteger("subjectId", userId.intValue())
             .list();
     }
 
@@ -284,8 +282,8 @@ public class ResourceDAO extends HibernateDAO
                    " join fetch role.subjects subj " +
                    " join fetch role.operations op " +
                    "where " +
-                   " r.system=? and " +
-                   " rgg.id=? and " +
+                   " r.system = :system and " +
+                   " rgg.id = :groupId and " +
                    " (subj.id=1 or r.owner.id=1 or " +
                    "  subj.authDsn = 'covalentAuthzInternalDsn') and " +
                    " op.resourceType.id = r.resourceType.id and " +
@@ -295,13 +293,12 @@ public class ResourceDAO extends HibernateDAO
                    "  op.name = 'viewApplication' or " +
                    "  op.name = 'viewApplication' or " +
                    "  (op.name='viewResourceGroup' and " +
-                   "    not r.instanceId=?) )" +
+                   "    not r.instanceId = :groupId) )" +
                    " order by r.sortName ";
 
         return getSession().createQuery(sql)
-            .setBoolean(0, fSystem.booleanValue())
-            .setInteger(1, groupId.intValue())
-            .setInteger(2, groupId.intValue())
+            .setBoolean("system", fSystem.booleanValue())
+            .setInteger("groupId", groupId.intValue())
             .list();
     }
 
