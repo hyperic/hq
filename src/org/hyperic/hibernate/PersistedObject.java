@@ -27,6 +27,8 @@ package org.hyperic.hibernate;
 
 import java.io.Serializable;
 
+import org.hyperic.dao.DAOFactory;
+
 /**
  * Base class for all HQ persisted objects.
  * 
@@ -61,6 +63,15 @@ public abstract class PersistedObject
         _version_ = newVer;
     }
 
+    /**
+     * We provide this method to the Hibernate objects, in order to allow them
+     * to populate their IDs when new objects are created.  Should generally
+     * not be used.
+     */
+    protected void save(PersistedObject o) {
+        DAOFactory.getDAOFactory().getCurrentSession().save(o);
+    }
+    
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
