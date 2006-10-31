@@ -75,6 +75,7 @@ import org.hyperic.util.pager.SortAttribute;
  *      type="Stateless"
  * 
  * @ejb:util generate="physical"
+ * @ejb:transaction type="REQUIRED"
  */
 public class AuthzSubjectManagerEJBImpl
     extends AuthzSession implements SessionBean {
@@ -103,7 +104,6 @@ public class AuthzSubjectManagerEJBImpl
      * @throws CreateException 
      * @throws NamingException 
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AuthzSubjectPK createSubject(AuthzSubjectValue whoami,
                                         AuthzSubjectValue subject)
@@ -143,7 +143,6 @@ public class AuthzSubjectManagerEJBImpl
      * @exception FinderException Unable to find a given or dependent entities.
      * @exception PermissionException whoami may not perform modifySubject on this subject.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void saveSubject(AuthzSubjectValue whoami,
                             AuthzSubjectValue subject)
@@ -172,7 +171,6 @@ public class AuthzSubjectManagerEJBImpl
      * Check if a subject can modify users  
      * @param subject
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void checkModifyUsers(AuthzSubjectValue caller) 
         throws PermissionException {
@@ -187,7 +185,6 @@ public class AuthzSubjectManagerEJBImpl
      * @param whoami The current running user.
      * @param subject The ID of the subject to delete.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeSubject(AuthzSubjectValue whoami, Integer subject)
         throws RemoveException, PermissionException {
@@ -221,7 +218,6 @@ public class AuthzSubjectManagerEJBImpl
 
     /** Get the Resource entity associated with this Subject.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public ResourceValue getSubjectResource(AuthzSubjectValue subject)
         throws NamingException, FinderException {
@@ -233,7 +229,6 @@ public class AuthzSubjectManagerEJBImpl
      * @exception PermissionException whoami does not have the viewSubject
      * permission in any of its roles.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AuthzSubjectValue findSubjectById(AuthzSubjectValue whoami,
                                              Integer id)
@@ -256,7 +251,6 @@ public class AuthzSubjectManagerEJBImpl
      * @exception PermissionException whoami does not have the viewSubject
      * permission in any of its roles.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AuthzSubjectValue findSubjectByName(AuthzSubjectValue whoami,
         String name)
@@ -280,7 +274,6 @@ public class AuthzSubjectManagerEJBImpl
     /** 
      * List all subjects in the system
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public PageList getAllSubjects(AuthzSubjectValue whoami, PageControl pc)
         throws FinderException, PermissionException {
@@ -343,7 +336,6 @@ public class AuthzSubjectManagerEJBImpl
      *       empty array of ids is received.
      * @param ids the subject ids
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public PageList getSubjectsById(AuthzSubjectValue subject,
                                     Integer[] ids,
@@ -412,7 +404,6 @@ public class AuthzSubjectManagerEJBImpl
      * @param id id of the subject.
      * @return The e-mail address of the subject
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public String getEmailById(Integer id) {
         AuthzSubject subject = getSubjectDAO().findById(id);
@@ -424,7 +415,6 @@ public class AuthzSubjectManagerEJBImpl
      * @param name Name of the subjects.
      * @return The e-mail address of the subject
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public String getEmailByName(String userName) {
         AuthzSubject subject = getSubjectDAO().findByName(userName);
@@ -434,7 +424,6 @@ public class AuthzSubjectManagerEJBImpl
     /**
      * Get the Preferences for a specified user
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public ConfigResponse getUserPrefs(AuthzSubjectValue who, Integer subjId)
         throws PermissionException, EncodingException {
@@ -459,7 +448,6 @@ public class AuthzSubjectManagerEJBImpl
     /**
      * Set the Preferences for a specified user
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void setUserPrefs(AuthzSubjectValue who, Integer subjId,
                              ConfigResponse prefs) 
@@ -565,7 +553,6 @@ public class AuthzSubjectManagerEJBImpl
      * that require a subject value as one of the params
      * @return the overlord
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AuthzSubjectValue getOverlord() {
         if (overlord == null) {
@@ -580,7 +567,6 @@ public class AuthzSubjectManagerEJBImpl
      * unrestricted user which can log in.
      * @return the overlord
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AuthzSubjectValue getRoot() {
         if (root == null) {
