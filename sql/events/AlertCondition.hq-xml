@@ -47,14 +47,9 @@
       <column name="OPTION_STATUS" length="25" />
     </property>
 
-    <!--
     <many-to-one name="alertDefinition" class="AlertDefinition">
       <column name="ALERT_DEFINITION_ID" />
     </many-to-one>
-    -->
-    <property name="alertDefinition" type="int">
-      <column name="ALERT_DEFINITION_ID" />
-    </property>
 
     <many-to-one name="trigger" class="RegisteredTrigger">
       <column name="TRIGGER_ID" />
