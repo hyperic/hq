@@ -25,13 +25,11 @@
 
 package org.hyperic.hibernate.dao;
 
-import java.util.List;
-
 import org.hibernate.Session;
-
 import org.hyperic.hq.measurement.DerivedMeasurement;
 import org.hyperic.hq.measurement.MeasurementTemplate;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
+
+import java.util.List;
 
 /**
  * CRUD methods, finders, etc. for DerivedMeasurement
@@ -185,5 +183,22 @@ public class DerivedMeasurementDAO extends HibernateDAO
             .setInteger(0, iid)
             .setInteger(1, appdefType)
             .setString(2, cat).list();
+    }
+
+    public List findByRawExcludeIdentity(Integer rid) {
+        String sql =
+            "select distinct d from DerivedMeasurement d " +
+            "join fetch d.template t " +
+            "join fetch t.measurementArgs a, " +
+            "RawMeasurement r " +
+            "where d.interval is not null and " +
+            "d.instanceId = r.instanceId and " +
+            "a.template.id = r.template.id and " +
+            "r.id = ? and " +
+            "t.template <> ?";
+
+        return getSession().createQuery(sql)
+                .setInteger(0, rid.intValue())
+                .setString(1, "ARG1").list();
     }
 }
