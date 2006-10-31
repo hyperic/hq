@@ -48,7 +48,7 @@ public class AlertDefinition
     private long              _ctime;
     private long              _mtime;
     private AlertDefinition   _parent;
-    private Collection        _children;
+    private Collection        _children = new ArrayList();
     private String            _description;
     private int               _priority;  // XXX -- Needs to default to 1
     private int               _appdefId;
@@ -65,7 +65,8 @@ public class AlertDefinition
     private Collection        _conditions = new ArrayList();
     private Collection        _triggers = new ArrayList();
     private Collection        _actions = new ArrayList();
-    private Collection        _alerts;    // List of fired alerts?  -- XXX
+    private Collection        _alerts = new ArrayList();   
+                                       // List of fired alerts?  -- XXX
 
     private AlertDefinitionValue      _value;
     private AlertDefinitionBasicValue _basicValue;

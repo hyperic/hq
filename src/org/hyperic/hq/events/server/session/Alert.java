@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.events.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -40,9 +41,9 @@ public class Alert
 {
     private long            _ctime;
     private AlertDefinition _alertDefinition;
-    private Collection      _actions;
-    private Collection      _conditions;
-    private Collection      _userAlerts;
+    private Collection      _actions = new ArrayList();
+    private Collection      _conditions = new ArrayList();
+    private Collection      _userAlerts = new ArrayList();
 
     private AlertValue      _alertVal;
 
