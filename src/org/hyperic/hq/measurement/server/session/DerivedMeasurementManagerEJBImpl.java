@@ -1222,6 +1222,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
 
                 DerivedMeasurement dm = getDerivedMeasurementDAO()
                     .findByTemplateForInstance(tids[i], eids[a]);
+                if (dm == null) {
+                    // Preserve prior FinderException behaviour
+                    continue;
+                }
                     
                 if (intervals.containsKey(tids[i])) {
                     // Compare with existing value
