@@ -86,6 +86,11 @@ public class DerivedMeasurement extends Measurement
         return getTemplate().getMonitorableType().getAppdefType();
     }
 
+
+    /**
+     * Legacy EJB DTO pattern
+     * @deprecated Use (this) DerivedMeasurement object instead
+     */
     public DerivedMeasurementValue getDerivedMeasurementValue() {
         Baseline b = getBaseline();
 
