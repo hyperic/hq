@@ -267,6 +267,9 @@ public class ResourceGroup extends AuthzNamedEntity
         roles.clear();
     }
 
+    /**
+     * @deprecated use (this) ResourceGroup instead
+     */
     public ResourceGroupValue getResourceGroupValue()
     {
         resourceGroupValue.setClusterId(getClusterId().intValue());

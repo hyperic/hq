@@ -63,6 +63,9 @@ public abstract class AuthzNamedEntity extends PersistedObject
         this.sortName = sortName != null ? sortName.toUpperCase() : null;
     }
 
+    /**
+     * @deprecated use (this) Pojo instead
+     */
     public abstract Object getValueObject();
 
     public boolean equals(Object obj)

@@ -238,6 +238,9 @@ public class AuthzSubject extends AuthzNamedEntity
         userConfigs = val;
     }
 
+    /**
+     * @deprecated use (this) AuthzSubject instead
+     */
     public AuthzSubjectValue getAuthzSubjectValue()
     {
         authzSubjectValue.setActive(isActive());

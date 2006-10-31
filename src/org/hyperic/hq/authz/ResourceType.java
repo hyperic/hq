@@ -105,6 +105,9 @@ public class ResourceType extends AuthzNamedEntity
         resources = val;
     }
 
+    /**
+     * @deprecated use (this) ResourceType instead
+     */
     public ResourceTypeValue getResourceTypeValue() {
         resourceTypeValue.setId(getId());
         resourceTypeValue.setName(getName());

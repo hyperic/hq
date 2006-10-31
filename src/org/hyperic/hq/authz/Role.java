@@ -108,7 +108,9 @@ public class Role extends AuthzNamedEntity {
         subjects = val;
     }
 
-
+    /**
+     * @deprecated use (this) Role instead
+     */
     public RoleValue getRoleValue() {
         roleValue.setDescription(getDescription());
         roleValue.setId(getId());

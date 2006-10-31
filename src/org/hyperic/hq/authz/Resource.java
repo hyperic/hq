@@ -141,6 +141,9 @@ public class Resource extends AuthzNamedEntity
         resourceGroups = val;
     }
 
+    /**
+     * @deprecated use (this) Resource instead
+     */
     public ResourceValue getResourceValue()
     {
         resourceValue.setId(getId());
