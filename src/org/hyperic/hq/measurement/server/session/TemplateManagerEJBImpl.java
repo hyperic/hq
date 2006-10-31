@@ -75,8 +75,6 @@ import org.hyperic.hq.measurement.server.mbean.SRNCache;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementArgValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateLiteValue;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateLocal;
-import org.hyperic.hq.measurement.shared.MeasurementTemplatePK;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerUtil;
@@ -761,32 +759,27 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public void setDesignatedTemplates(String mType, Integer[] desigIds) {
-        try {
-            List derivedTemplates = 
-                this.getMtHome().findDerivedByMonitorableType(mType);
-            
-            HashSet designates = new HashSet();
-            designates.addAll(Arrays.asList(desigIds));
-            
-            for (Iterator i = derivedTemplates.iterator(); i.hasNext();) {
-                MeasurementTemplateLocal template =
-                    (MeasurementTemplateLocal) i.next();
 
-                // Never turn off Availability as an indicator
-                if (template.getAlias().equalsIgnoreCase(
-                        MeasurementConstants.CAT_AVAILABILITY))
+        List derivedTemplates = getMeasurementTemplateDAO()
+            .findDerivedByMonitorableType(mType);
+            
+        HashSet designates = new HashSet();
+        designates.addAll(Arrays.asList(desigIds));
+            
+        for (Iterator i = derivedTemplates.iterator(); i.hasNext();) {
+            MeasurementTemplate template = (MeasurementTemplate)i.next();
+
+            // Never turn off Availability as an indicator
+            if (template.getAlias().equalsIgnoreCase(
+                    MeasurementConstants.CAT_AVAILABILITY))
                     continue;
 
-                boolean designated = designates
-                    .contains(((MeasurementTemplatePK)
-                         template.getPrimaryKey()).getId());
+            boolean designated = designates
+                    .contains(template.getId());
 
-                if (designated != template.getDesignate()) {
-                    template.setDesignate(designated);
-                }
+            if (designated != template.isDesignate()) {
+                template.setDesignate(designated);
             }
-        } catch(FinderException exc){
-            log.debug("No designated templates found for " + mType, exc);
         }
     }
 

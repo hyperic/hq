@@ -25,11 +25,7 @@
 
 package org.hyperic.hibernate.dao;
 
-import java.util.Collection;
-import java.util.List;
-
 import org.hibernate.Session;
-
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.measurement.Category;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -37,6 +33,9 @@ import org.hyperic.hq.measurement.MeasurementTemplate;
 import org.hyperic.hq.measurement.MonitorableType;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateLiteValue;
 import org.hyperic.hq.product.MeasurementInfo;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * CRUD methods, finders, etc. for MeasurementTemplate
@@ -206,5 +205,17 @@ public class MeasurementTemplateDAO extends HibernateDAO
         return (MeasurementTemplate)getSession().createQuery(sql)
             .setInteger(0, tId.intValue())
             .setString(1, template).uniqueResult();
+    }
+
+    public List findDerivedByMonitorableType(String name) {
+        String sql =
+            "select distinct m from MeasurementTemplate m " +
+            "join fetch m.monitorableType mt " +
+            "where mt.name = ? and " +
+            "m.defaultInterval > 0 " +
+            "order by m.name asc ";
+
+        return getSession().createQuery(sql)
+            .setString(0, name).list();
     }
 }
