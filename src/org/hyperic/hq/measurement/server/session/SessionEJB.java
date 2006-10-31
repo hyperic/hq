@@ -77,15 +77,12 @@ import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.DataManagerUtil;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementLocalHome;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementPK;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementUtil;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementArgLocalHome;
-import org.hyperic.hq.measurement.shared.MeasurementArgUtil;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateLocalHome;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateUtil;
 import org.hyperic.hq.measurement.shared.RawMeasurementLocalHome;
-import org.hyperic.hq.measurement.shared.RawMeasurementUtil;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
 import org.hyperic.hq.product.MeasurementPluginManager;
@@ -207,29 +204,6 @@ public abstract class SessionEJB {
             }
         }
         return mtHome;
-    }
-
-    protected MeasurementArgLocalHome getLiHome() {
-        if (liHome == null) {
-            try {
-                liHome = MeasurementArgUtil.getLocalHome();
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
-
-        return liHome;
-    }
-
-    protected RawMeasurementLocalHome getRmHome() {
-        if (rmHome == null) {
-            try {
-                rmHome = RawMeasurementUtil.getLocalHome();
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
-        return rmHome;
     }
 
     protected DerivedMeasurementLocalHome getDmHome() {
