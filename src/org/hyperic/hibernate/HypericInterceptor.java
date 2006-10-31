@@ -37,10 +37,14 @@ import java.io.Serializable;
  *
  * One use case is to set creation and modified time on
  * on save, merge or collection cascades
+ *
+ * TODO:  Consolidate into regular UserTyped AuditInfo stylee 
  */
 public class HypericInterceptor extends EmptyInterceptor
 {
-    public boolean onFlushDirty(Object entity, Serializable id, Object[] currentState, Object[] previousState, String[] propertyNames, Type[] types)
+    public boolean onFlushDirty(Object entity, Serializable id, 
+                                Object[] currentState, Object[] previousState, 
+                                String[] propertyNames, Type[] types)
     {
         if (entity instanceof AppdefBean) {
             return updateTimestamp(currentState, propertyNames);
@@ -50,7 +54,8 @@ public class HypericInterceptor extends EmptyInterceptor
         return false;
     }
 
-    public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types)
+    public boolean onSave(Object entity, Serializable id, Object[] state, 
+                          String[] propertyNames, Type[] types)
     {
         if (entity instanceof AppdefBean) {
             return updateTimestamp(state, propertyNames);
@@ -60,18 +65,21 @@ public class HypericInterceptor extends EmptyInterceptor
         return false;
     }
 
-    private boolean updateTimestamp(Object[] state, String[] propertyNames)
-    {
+    private boolean updateTimestamp(Object[] state, String[] propertyNames) {
         boolean modified = false;
 
         for (int i = 0; i < propertyNames.length; i++) {
-            if ("creationTime".equals(propertyNames[i])) {
+            if ("creationTime".equals(propertyNames[i]) ||
+                "cTime".equals(propertyNames[i])) 
+            {
                 Long ctime = (Long)state[i];
                 if (ctime == null || ctime.longValue() == 0) {
                     state[i] = new Long(System.currentTimeMillis());
                     modified =  true;
                 }
-            } else if ("modifiedTime".equals(propertyNames[i])) {
+            } else if ("modifiedTime".equals(propertyNames[i]) ||
+                       "mTime".equals(propertyNames[i])) 
+            {
                 state[i] = new Long(System.currentTimeMillis());
                 modified =  true;
             }
