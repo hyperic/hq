@@ -113,10 +113,6 @@ widgetPropertiesListServices = getWidgetProperties('<c:out value="${widgetInstan
 <html:form action="/resource/application/inventory/RemoveServices">
 <html:hidden property="rid" value="${Resource.id}"/>
 <html:hidden property="type" value="${Resource.entityId.type}"/>
-<!--  GENERAL PROPERTIES TITLE -->
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="resource.application.inventory.ServicesTab"/>
-</tiles:insert>
 <!--  /  -->
 <!--  SERVICES CONTENTS -->
 <div id="listDiv">

@@ -126,10 +126,6 @@ groupsWidgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName
   </c:if>
 </c:url>
 
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="resource.common.inventory.groups.GroupsTab"/>
-</tiles:insert>
-
 <!--  GROUPS CONTENTS -->
 <div id="<c:out value="${widgetInstanceName}"/>Div">
 <display:table items="${groups}" var="group" action="${sgAction}" orderValue="sog" order="${param.sog}" sortValue="scg" sort="${param.scg}" pageValue="png" page="${param.png}" pageSizeValue="psg" pageSize="${param.psg}" width="100%" cellspacing="0" cellpadding="0">

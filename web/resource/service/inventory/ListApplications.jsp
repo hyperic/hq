@@ -65,10 +65,6 @@
 <hq:pageSize var="pageSize"/>
 <c:set var="widgetInstanceName" value="listApplications"/>
 
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="resource.service.inventory.ApplicationsTab"/>
-</tiles:insert>
-
 <div id="listDiv">
   <c:choose>
   <c:when test="${applicationCount > 0}">

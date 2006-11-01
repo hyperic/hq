@@ -35,12 +35,7 @@
 <tiles:importAttribute name="serviceCount"/>
 <tiles:importAttribute name="serviceTypeMap"/>
 
-<!--  GENERAL PROPERTIES TITLE -->
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="resource.server.inventory.ServiceCountsTab"/>
-</tiles:insert>
 <!--  /  -->
-
 
 <!--  SERVICE COUNTS CONTENTS -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">

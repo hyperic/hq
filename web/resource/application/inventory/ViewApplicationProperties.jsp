@@ -28,12 +28,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
-
-<!--  GENERAL PROPERTIES TITLE -->
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="resource.application.inventory.ApplicationProperties"/>
-</tiles:insert>
 <!--  /  -->
 
 

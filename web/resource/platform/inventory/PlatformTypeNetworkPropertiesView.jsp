@@ -35,10 +35,6 @@
 
 <c:set var="editUrl" value="/resource/platform/Inventory.do?mode=editType&rid=${platform.id}&type=${platform.entityId.type}"/>
 
-<!--  TYPE AND NETWORK PROPERTIES TITLE -->
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="resource.platform.inventory.TypeAndNetworkPropertiesTab"/>
-</tiles:insert>
 <!--  /  -->
 
 <!--  TYPE AND HOST PROPERTIES CONTENTS -->

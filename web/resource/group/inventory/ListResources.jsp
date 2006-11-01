@@ -97,35 +97,6 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 <html:hidden property="rid" value="${Resource.id}"/>
 <html:hidden property="type" value="${Resource.entityId.type}"/>
 
-<!--  RESOURCES, COMPATIBLE TITLE -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr>
-    <td class="BlockTitle" width="100%"><fmt:message key="resource.group.inventory.ResourcesTab"/>
-        <span class="BlockSubtitle">
-           <c:choose>
-              <c:when test="${Resource.groupType == CONST_ADHOC_PSS }"> 
-                <fmt:message key="resource.group.inventory.tab.Mixed"/>
-              </c:when>
-              <c:when test="${Resource.groupType == CONST_COMPAT_PS ||
-                              Resource.groupType == CONST_COMPAT_SVC}"> 
-                <fmt:message key="resource.group.inventory.tab.Compatible">
-                    <fmt:param value="${Resource.appdefResourceTypeValue.name}"/>
-                </fmt:message>
-              </c:when>
-              <c:when test="${Resource.groupType == CONST_ADHOC_APP }"> 
-                <fmt:message key="resource.group.inventory.tab.GroupOfApplication"/>
-              </c:when>
-              <c:otherwise> 
-                <fmt:message key="resource.group.inventory.tab.GroupOfGroup"/>
-              </c:otherwise>
-            </c:choose>              
-        </span>    
-   </td>
-    <td class="BlockTitle" align="right"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-  </tr>
-</table>
-<!--  /  -->
-
 <!--  RESOURCES, COMPATIBLE CONTENTS -->
 <div id="listDiv">
   <display:table var="resourceItem" cellspacing="0" cellpadding="0" width="100%" action="${tableAction}"

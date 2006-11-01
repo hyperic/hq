@@ -77,23 +77,48 @@ var pageData = new Array();
 <tiles:insert definition=".portlet.confirm"/>
 <tiles:insert definition=".portlet.error"/>
 
+<div id="propertiesAccordion">
+<div id="panel1">
+<div id="panelHeader" class="accordionTabTitleBar">
+<!--  GENERAL PROPERTIES TITLE -->
+  <fmt:message key="resource.common.inventory.props.GeneralPropertiesTab"/>
+</div>
+<div id="panelContent">
 <tiles:insert definition=".resource.common.inventory.generalProperties.view">
   <tiles:put name="resource" beanName="Resource"/>
   <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
   <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
 </tiles:insert>
-      &nbsp;<br>
+</div>
+</div>
+<div id="panel2">
+<div id="panelHeader" class="accordionTabTitleBar">
+<!--  TYPE AND HOST PROPERTIES TITLE -->
+  <fmt:message key="resource.server.inventory.TypeAndHostPropertiesTab"/>
+</div>
+<div id="panelContent">
 <tiles:insert page="/resource/server/inventory/ViewTypeAndHostProperties.jsp"/>
-&nbsp;<br>
+</div>
+</div>
 
 <!-- new -->
-
+<div id="panel3">
+<div id="panelHeader" class="accordionTabTitleBar">
+  <fmt:message key="resource.server.inventory.ServiceCountsTab"/>
+</div>
+<div id="panelContent">
 <tiles:insert definition=".resource.server.inventory.serviceCounts">
   <tiles:put name="serviceCount" beanName="NumChildResources"/>
   <tiles:put name="serviceTypeMap" beanName="ResourceTypeMap"/>
 </tiles:insert>
-      &nbsp;<br>
+</div>
+</div>
 
+<div id="panel4">
+<div id="panelHeader" class="accordionTabTitleBar">
+  <fmt:message key="resource.server.inventory.ServicesTab"/>
+</div>
+<div id="panelContent">
 <html:form action="/resource/server/inventory/RemoveServices">
 <input type="hidden" name="rid" value="<c:out value="${Resource.id}"/>"/>
 <input type="hidden" name="type" value="<c:out value="${entityId.type}"/>"/>
@@ -105,8 +130,14 @@ var pageData = new Array();
   <tiles:put name="autoInventory" beanName="autoInventory"/>
 </tiles:insert>
 </html:form>
+</div>
+</div>
 
-      &nbsp;<br>
+<div id="panel5">
+<div id="panelHeader" class="accordionTabTitleBar">
+  <fmt:message key="resource.common.inventory.groups.GroupsTab"/>
+</div>
+<div id="panelContent">
 <html:form action="/resource/server/inventory/RemoveGroups">
 <input type="hidden" name="rid" value="<c:out value="${Resource.id}"/>"/>
 <input type="hidden" name="type" value="<c:out value="${entityId.type}"/>"/>
@@ -116,9 +147,14 @@ var pageData = new Array();
   <tiles:put name="selfAction" beanName="selfAction"/>
 </tiles:insert>
 </html:form>
+</div>
+</div>
 
-      &nbsp;<br>
-
+<div id="panel6">
+<div id="panelHeader" class="accordionTabTitleBar">
+  <fmt:message key="resource.common.inventory.configProps.ConfigurationPropertiesTab"/>
+</div>
+<div id="panelContent">
 <tiles:insert definition=".resource.common.inventory.viewConfigProperties">
     <tiles:put name="resource" beanName="Resource"/>
     <tiles:put name="resourceType" beanName="entityId" beanProperty="type"/>
@@ -130,7 +166,12 @@ var pageData = new Array();
     <tiles:put name="controlConfigOptionsCount" beanName="controlConfigOptionsCount"/>
     <tiles:put name="autodiscoveryMessageServiceList" beanName="autodiscoveryMessageServiceList"/>
 </tiles:insert>
+</div>
+</div>
+</div>
 
-
+<script type="text/javascript">
+  onloads.push( accord );
+</script>
 
 <tiles:insert definition=".page.footer"/>

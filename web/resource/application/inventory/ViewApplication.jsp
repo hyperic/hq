@@ -82,13 +82,25 @@ var pageData = new Array();
 <tiles:insert definition=".portlet.confirm"/>
 <tiles:insert definition=".portlet.error"/>
 
+<div id="propertiesAccordion">
+<div id="panel1">
+<div id="panelHeader" class="accordionTabTitleBar">
+<!--  GENERAL PROPERTIES TITLE -->
+  <fmt:message key="resource.common.inventory.props.GeneralPropertiesTab"/>
+</div>
+<div id="panelContent">
 <tiles:insert definition=".resource.common.inventory.generalProperties.view">
   <tiles:put name="resource" beanName="Resource"/>
   <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
   <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
 </tiles:insert>
-      &nbsp;<br>
-
+</div>
+</div>
+<div id="panel2">
+<div id="panelHeader" class="accordionTabTitleBar">
+  <fmt:message key="resource.application.inventory.ApplicationProperties"/>
+</div>
+<div id="panelContent">
 <tiles:insert definition=".resource.application.inventory.applicationProperties.view">
   <tiles:put name="application" beanName="Resource"/>
 </tiles:insert>
@@ -97,15 +109,26 @@ var pageData = new Array();
   <tiles:put name="editUrl" beanName="editUrl"/>
 </tiles:insert>
 </c:if>
-      &nbsp;<br>
-
+</div>
+</div>
+<div id="panel3">
+<div id="panelHeader" class="accordionTabTitleBar">
+  <fmt:message key="resource.application.inventory.ServiceCountsTab"/>
+</div>
+<div id="panelContent">
 <tiles:insert definition=".resource.application.inventory.serviceCounts">
   <tiles:put name="serviceCount" beanName="NumChildResources"/>
   <tiles:put name="serviceTypeMap" beanName="ResourceTypeMap"/>
 </tiles:insert>
-      &nbsp;<br>
+</div>
+</div>
 
 <!-- services -->
+<div id="panel4">
+<div id="panelHeader" class="accordionTabTitleBar">
+  <fmt:message key="resource.application.inventory.ServicesTab"/>
+</div>
+<div id="panelContent">
 <tiles:insert definition=".resource.application.inventory.services">
   <tiles:put name="application" beanName="Resource"/>
   <tiles:put name="services" beanName="ChildResources"/>
@@ -113,8 +136,14 @@ var pageData = new Array();
   <tiles:put name="selfAction" beanName="selfAction"/>
 </tiles:insert>
 <!-- / -->
+</div>
+</div>
 
-      &nbsp;<br>
+<div id="panel4">
+<div id="panelHeader" class="accordionTabTitleBar">
+  <fmt:message key="resource.common.inventory.groups.GroupsTab"/>
+</div>
+<div id="panelContent">
 <html:form action="/resource/application/inventory/RemoveGroups">
 <html:hidden property="rid"/>
 <html:hidden property="type"/>
@@ -124,5 +153,12 @@ var pageData = new Array();
   <tiles:put name="selfAction" beanName="selfAction"/>
 </tiles:insert>
 </html:form>
+</div>
+</div>
+</div>
+
+<script type="text/javascript">
+  onloads.push( accord );
+</script>
 
 <tiles:insert definition=".page.footer"/>

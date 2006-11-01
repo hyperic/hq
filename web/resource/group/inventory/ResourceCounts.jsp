@@ -44,11 +44,6 @@
 <tiles:importAttribute name="resourceCount"/>
 <tiles:importAttribute name="resourceTypeMap" ignore="true"/>
 
-
-<!--  GENERAL PROPERTIES TITLE -->
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="resource.group.inventory.ResourceCountsTab"/>
-</tiles:insert>
 <!--  /  -->
 
 <!--  RESOURCE COUNTS CONTENTS -->

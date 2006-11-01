@@ -99,10 +99,6 @@ initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 <c:out value="wp"/> = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 </script>
 
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="resource.server.inventory.ServicesTab"/>
-</tiles:insert>
-
 <html:form action="/resource/platform/inventory/RemoveServices">
 <input type="hidden" name="rid" value="<c:out value="${Resource.id}"/>"/>
 <input type="hidden" name="type" value="1"/>

@@ -45,9 +45,6 @@
 <tiles:importAttribute name="controlConfigOptionsCount" ignore="true" />
 <tiles:importAttribute name="resourceNotControllable" ignore="true"/>
 
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="resource.common.inventory.configProps.ConfigurationPropertiesTab"/>
-</tiles:insert>
 <c:url var="editAction" value="/resource/${resource.entityId.typeName}/Inventory.do?mode=editConfig&rid=${resource.id}&type=${resourceType}"/>
 
 

@@ -98,10 +98,6 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 </script>
 
 <html:form action="/resource/server/inventory/RemoveService">
-<!--  GENERAL PROPERTIES TITLE -->
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="resource.server.inventory.ServicesTab"/>
-</tiles:insert>
 <!--  /  -->
 
 <tiles:insert page="View_FilterToolbar.jsp"/>

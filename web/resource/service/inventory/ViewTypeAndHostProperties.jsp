@@ -32,10 +32,6 @@
 
 <tiles:importAttribute name="ParentResource" ignore="true"/>
 
-<!--  GENERAL PROPERTIES TITLE -->
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="resource.server.inventory.TypeAndHostPropertiesTab"/>
-</tiles:insert>
 <!--  /  -->
 
 

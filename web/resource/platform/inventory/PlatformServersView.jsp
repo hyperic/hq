@@ -90,10 +90,6 @@ serversWidgetProperties = getWidgetProperties('<c:out value="${widgetInstanceNam
   </c:if>
 </c:url>
 
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="resource.platform.inventory.servers.ServersTab"/>
-</tiles:insert>
-
 <tiles:insert definition=".toolbar.filter.resource">
   <tiles:put name="defaultKey" value="resource.platform.inventory.servers.filter.AllServerTypes"/>
   <tiles:put name="filterAction" beanName="fsAction"/>

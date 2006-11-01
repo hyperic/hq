@@ -57,23 +57,42 @@ var pageData = new Array();
 <tiles:insert definition=".portlet.confirm"/>
 <tiles:insert definition=".portlet.error"/>
 
+<div id="propertiesAccordion">
+<div id="panel1">
+<div id="panelHeader" class="accordionTabTitleBar">
+<!--  GENERAL PROPERTIES TITLE -->
+  <fmt:message key="resource.common.inventory.props.GeneralPropertiesTab"/>
+</div>
+<div id="panelContent">
 <tiles:insert definition=".resource.common.inventory.generalProperties.view">
   <tiles:put name="resource" beanName="Resource"/>
   <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
   <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
 </tiles:insert>
-      &nbsp;<br>
+</div>
+</div>
+<div id="panel2">
+<div id="panelHeader" class="accordionTabTitleBar">
+<!--  TYPE AND NETWORK PROPERTIES TITLE -->
+  <fmt:message key="resource.platform.inventory.TypeAndNetworkPropertiesTab"/>
+</div>
+<div id="panelContent">
 <tiles:insert definition=".resource.platform.inventory.typeNetworkProperties.view">
   <tiles:put name="platform" beanName="Resource"/>
 </tiles:insert>
-      &nbsp;<br>
-
+</div>
+</div>
+<div id="panel3">
+<div id="panelHeader" class="accordionTabTitleBar">
+  <fmt:message key="resource.platform.inventory.ServerCountsTab"/>
+</div>
+<div id="panelContent">
 <tiles:insert definition=".resource.platform.inventory.serverCounts">
   <tiles:put name="serverCount" beanName="ChildResources" beanProperty="totalSize"/>
   <tiles:put name="serverTypeMap" beanName="ResourceTypeMap"/>
 </tiles:insert>
-      &nbsp;<br>
-
+</div>
+</div>
 <c:set var="svcAction" value="${selfAction}"/>
 <c:if test="${not empty param.fs}">
   <c:set var="svcAction" value="${svcAction}&fs=${param.fs}"/>
@@ -102,7 +121,11 @@ var pageData = new Array();
 <c:if test="${not empty param.scg}">
   <c:set var="svcAction" value="${svcAction}&scg=${param.scg}"/>
 </c:if>
-
+<div id="panel4">
+<div id="panelHeader" class="accordionTabTitleBar">
+  <fmt:message key="resource.server.inventory.ServicesTab"/>
+</div>
+<div id="panelContent">
 <tiles:insert definition=".resource.platform.inventory.services">
   <tiles:put name="services" beanName="Services"/>
   <tiles:put name="selfAction" beanName="svcAction"/>
@@ -111,8 +134,13 @@ var pageData = new Array();
     <tiles:put name="ctype" beanName="ctype"/>
   </c:if>
 </tiles:insert>
-
-      &nbsp;<br>
+</div>
+</div>
+<div id="panel5">
+<div id="panelHeader" class="accordionTabTitleBar">
+  <fmt:message key="resource.platform.inventory.servers.ServersTab"/>
+</div>
+<div id="panelContent">
 <html:form action="/resource/platform/inventory/RemoveServers">
 
 <c:set var="svrAction" value="${selfAction}"/>
@@ -158,8 +186,13 @@ var pageData = new Array();
 <html:hidden property="type"/>
 </html:form>
 
-      &nbsp;<br>
-
+</div>
+</div>
+<div id="panel6">
+<div id="panelHeader" class="accordionTabTitleBar">
+  <fmt:message key="resource.common.inventory.groups.GroupsTab"/>
+</div>
+<div id="panelContent">
 <html:form action="/resource/platform/inventory/RemoveGroups">
 
 <tiles:insert definition=".resource.common.inventory.groups">
@@ -171,8 +204,16 @@ var pageData = new Array();
 <html:hidden property="rid"/>
 <html:hidden property="type"/>
 
-      &nbsp;<br>
+</html:form>
 
+</div>
+</div>
+
+<div id="panel7">
+<div id="panelHeader" class="accordionTabTitleBar">
+  <fmt:message key="resource.common.inventory.configProps.ConfigurationPropertiesTab"/>
+</div>
+<div id="panelContent">
 <tiles:insert definition=".resource.common.inventory.viewConfigProperties">
     <tiles:put name="resource" beanName="Resource"/>
     <tiles:put name="resourceType" beanName="entityId" beanProperty="type"/>
@@ -183,11 +224,14 @@ var pageData = new Array();
     <tiles:put name="resourceNotControllable" value="true"/>
     <tiles:put name="agent" beanName="agent"/>
 </tiles:insert>    
-
-</html:form>
-
-<tiles:insert definition=".page.footer"/>
+</div>
+</div>
+</div>
 
 <script type="text/javascript">
   clearIfAnyChecked();
+
+  onloads.push( accord );
 </script>
+
+<tiles:insert definition=".page.footer"/>

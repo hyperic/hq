@@ -31,9 +31,6 @@
 <tiles:importAttribute name="serverCount"/>
 <tiles:importAttribute name="serverTypeMap"/>
 
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="resource.platform.inventory.ServerCountsTab"/>
-</tiles:insert>
 <!--  /  -->
 
 <!--  SERVER COUNTS CONTENTS -->

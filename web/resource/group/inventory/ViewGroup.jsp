@@ -93,34 +93,85 @@
 <tiles:insert definition=".portlet.confirm"/>
 <tiles:insert definition=".portlet.error"/>
 
+<div id="propertiesAccordion">
+<div id="panel1">
+<div id="panelHeader" class="accordionTabTitleBar">
+<!--  GENERAL PROPERTIES TITLE -->
+  <fmt:message key="resource.common.inventory.props.GeneralPropertiesTab"/>
+</div>
+<div id="panelContent">
 <tiles:insert definition=".resource.common.inventory.generalProperties.view">
   <tiles:put name="resource" beanName="Resource"/>
   <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
   <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
 </tiles:insert>
-      &nbsp;<br>
-
+</div>
+</div>
+<div id="panel2">
+<div id="panelHeader" class="accordionTabTitleBar">
+<!--  TYPE AND HOST PROPERTIES TITLE -->
+  <fmt:message key="resource.group.inventory.ResourceCountsTab"/>
+</div>
+<div id="panelContent">
 <!-- RESOURCE COUNTS SECTION -->
 <tiles:insert page="/resource/group/inventory/ResourceCounts.jsp">
     <tiles:put name="resourceCount" beanName="NumChildResources" />
     <tiles:put name="resourceTypeMap" beanName="ResourceTypeMap"/>
 </tiles:insert>
-&nbsp;<br>
-    
-<!-- LIST APPLICATIONS SECTION -->
+</div>
+</div>
+
 <c:if test="${not empty Applications}">
+<!-- LIST APPLICATIONS SECTION -->
+<div id="panel3">
+<div id="panelHeader" class="accordionTabTitleBar">
+  <fmt:message key="resource.service.inventory.ApplicationsTab"/>
+</div>
+<div id="panelContent">
   <tiles:insert definition=".resource.service.inventory.applications">
     <tiles:put name="service" beanName="Resource"/>
     <tiles:put name="applications" beanName="Applications"/>
     <tiles:put name="selfAction" beanName="selfAction"/>
   </tiles:insert>
-&nbsp;<br>
+</div>
+</div>
 </c:if>
 
 <!-- LIST RESOURCES SECTION -->
+<div id="panel4">
+<div id="panelHeader" class="accordionTabTitleBar">
+<!--  RESOURCES, COMPATIBLE TITLE -->
+<fmt:message key="resource.group.inventory.ResourcesTab"/>
+<span class="BlockSubtitle">
+           <c:choose>
+              <c:when test="${Resource.groupType == CONST_ADHOC_PSS }"> 
+                <fmt:message key="resource.group.inventory.tab.Mixed"/>
+              </c:when>
+              <c:when test="${Resource.groupType == CONST_COMPAT_PS ||
+                              Resource.groupType == CONST_COMPAT_SVC}"> 
+                <fmt:message key="resource.group.inventory.tab.Compatible">
+                    <fmt:param value="${Resource.appdefResourceTypeValue.name}"/>
+                </fmt:message>
+              </c:when>
+              <c:when test="${Resource.groupType == CONST_ADHOC_APP }"> 
+                <fmt:message key="resource.group.inventory.tab.GroupOfApplication"/>
+              </c:when>
+              <c:otherwise> 
+                <fmt:message key="resource.group.inventory.tab.GroupOfGroup"/>
+              </c:otherwise>
+            </c:choose>
+</span>
+<!--  /  -->
+</div>
+<div id="panelContent">
 <tiles:insert page="/resource/group/inventory/ListResources.jsp"/>
+</div>
+</div>
+</div>
 
-&nbsp;<br>
+<script type="text/javascript">
+  onloads.push( accord );
+</script>
 
 <!-- FOOTER SECTION -->
 <tiles:insert definition=".page.footer"/>

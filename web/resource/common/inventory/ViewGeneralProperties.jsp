@@ -59,10 +59,6 @@
   <hq:owner var="ownerStr" owner="${resourceOwner}"/>
 </c:if>
 
-<!--  TYPE AND NETWORK PROPERTIES TITLE -->
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="resource.common.inventory.props.GeneralPropertiesTab"/>
-</tiles:insert>
 <!--  /  -->
 
 <!--  TYPE AND HOST PROPERTIES CONTENTS -->
