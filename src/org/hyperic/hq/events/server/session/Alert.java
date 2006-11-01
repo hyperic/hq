@@ -155,7 +155,7 @@ public class Alert
     }
     
 
-    public org.hyperic.hq.events.shared.AlertValue getAlertValue() {
+    public AlertValue getAlertValue() {
         if (_alertVal == null) 
             _alertVal = new AlertValue();
 
