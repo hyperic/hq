@@ -89,7 +89,8 @@ import org.hibernate.ObjectNotFoundException;
  * @ejb:util generate="physical"
  * @ejb:transaction type="REQUIRED"
  */
-public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements SessionBean {
+public class ApplicationManagerEJBImpl extends AppdefSessionEJB
+    implements SessionBean {
 
     protected Log log = LogFactory.getLog("org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl");
 
@@ -849,9 +850,8 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB implements Sessi
             log.debug("User has permission to create application. " + 
                 "Adding authzresource");
         try {
-            ApplicationPK pk = app.getPrimaryKey();
-            createAuthzResource(subject, getApplicationResourceType(), pk.getId(),
-                                app.getName());
+            createAuthzResource(subject, getApplicationResourceType(),
+                                app.getId(), app.getName());
         } catch (CreateException e) {
             throw e;
         }
