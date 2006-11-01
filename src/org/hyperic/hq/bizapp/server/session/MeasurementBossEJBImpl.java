@@ -142,8 +142,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     implements SessionBean 
 {
     /** Static logging context */
-    protected Log log = LogFactory.getLog(
-           "org.hyperic.hq.bizapp.server.session.MeasurementBossEJBImpl");
+    protected Log log =
+        LogFactory.getLog(MeasurementBossEJBImpl.class.getName());
 
     private final ResourcesWithoutDataHelper resourcesWithoutDataHelper
         = ResourcesWithoutDataHelper.instance();
