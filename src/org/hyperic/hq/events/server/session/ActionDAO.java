@@ -44,23 +44,6 @@ public class ActionDAO extends HibernateDAO {
         return (Action)super.findById(id);
     }
     
-    /**
-     * Find all the actions which triggered the alert in the alert log
-     * -- Original EJBQL
-     * @ejb:finder signature="java.util.Collection findByAlertId(java.lang.Integer aid)"
-     * query="SELECT OBJECT(a) FROM Action AS a, Alert AS al, IN (al.actionLogs) AS l
-     *        WHERE a.id = l.actionId AND al.id = ?1"
-     * @return a collection of {@link Action}s
-     */
-    public List findByAlertId(int alertId) {
-        String sql = "from Action a, AlertActionLog al " + 
-            "where a.id = al.action AND al.id = :alertId";
-        
-        return getSession().createQuery(sql)
-            .setInteger("alertId", alertId)
-            .list();
-    }
-    
     // XXX -- This should be eliminated and we should have a bi-di relationsip
     //        on the actual Action object itself.  -- JMT
     public Collection getChildren(Action action) {
@@ -69,5 +52,18 @@ public class ActionDAO extends HibernateDAO {
         return getSession().createQuery(sql)
             .setParameter("parent", action)
             .list();
+    }
+    
+    /**
+     * Find all the actions which triggered the alert in the alert log
+     * @return a collection of {@link Action}s
+     */
+    public List findByAlert(Alert a) {
+        String sql = "select a from Action a, AlertActionLog al " + 
+            "where a.id = al.action AND al.alert = :alert";
+            
+        return getSession().createQuery(sql)
+              .setParameter("alert", a)
+              .list();
     }
 }
