@@ -74,7 +74,7 @@
 
       <many-to-one name="platformType" cascade="save-update" 
                    class="PlatformType">
-        <column name="PLATFORM_TYPE_ID" not-null="false" />
+        <column name="PLATFORM_TYPE_ID" not-null="true" />
       </many-to-one>
 
       <many-to-one name="configResponse" unique="true" 
@@ -139,7 +139,7 @@
       </property>
 
       <many-to-one name="serverType" class="ServerType">
-        <column name="SERVER_TYPE_ID" not-null="false" />
+        <column name="SERVER_TYPE_ID" not-null="true" />
       </many-to-one>
 
       <many-to-one name="configResponse" unique="true" 
@@ -185,7 +185,7 @@
       </many-to-one>
 
       <many-to-one name="serviceType" class="ServiceType">
-        <column name="SERVICE_TYPE_ID" not-null="false" />
+        <column name="SERVICE_TYPE_ID" not-null="true" />
       </many-to-one>
 
       <many-to-one name="serviceCluster" 
