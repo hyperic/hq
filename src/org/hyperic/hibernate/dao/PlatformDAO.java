@@ -258,8 +258,6 @@ public class PlatformDAO extends HibernateDAO {
                      " join p.servers s " +
                      " join s.services sv " +
                      "where " +
-//                     " p.id = s.platform.id and " +
-//                     " s.id = sv.server.id and " +
                      " sv.id = ?";
         return (Platform)getSession()
             .createQuery(sql)
@@ -284,8 +282,6 @@ public class PlatformDAO extends HibernateDAO {
                      " join s.services sv " +
                      " join sv.appServices asv " +
                      "where " +
-                     " p.id = s.platform.id and " +
-                     " s.id = sv.server.id and " +
                      " asv.appication.id = ?";
         return getSession()
             .createQuery(sql)
