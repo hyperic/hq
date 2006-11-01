@@ -341,7 +341,7 @@ function accord() {
                        hoverBg: '#70b5fa',
                        collapsedBg: '#BBBBBB',
                        collapsedTextColor: '#DDDDDD',
-                       borderColor: '#60a5ea',
+                       borderColor: '#60a5ea'
                      } );
 } 
 
