@@ -26,8 +26,9 @@
 package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
-
 import org.hyperic.hq.measurement.Baseline;
+
+import java.util.List;
 
 /**
  * CRUD methods, finders, etc. for Baseline
@@ -54,5 +55,36 @@ public class BaselineDAO extends HibernateDAO
         Baseline b = new Baseline();
         save(b);
         return b;
+    }
+
+    public Baseline findByMeasurementId(Integer mid) {
+        String sql = "from Baseline b where b.derivedMeasurement.id = ?";
+
+        return (Baseline)getSession().createQuery(sql)
+            .setInteger(0, mid.intValue()).uniqueResult();
+    }
+
+    public List findByInstance(int appdefType, int appdefId) {
+        String sql =
+            "select b from Baseline b " +
+            "where b.derivedMeasurement.appdefType = ? and " +
+            "b.derivedMeasurement.instanceId = ? and " +
+            "b.derivedMeasurement.interval is not null";
+
+        return getSession().createQuery(sql)
+            .setInteger(0, appdefType)
+            .setInteger(1, appdefId).list();
+    }
+
+    public Baseline findByTemplateForInstance(Integer mtId,
+                                              Integer instanceId) {
+        String sql =
+            "select b from Baseline b " +
+            "where b.derivedMeasurement.template.id = ? and " +
+            "b.derivedMeasurement.instanceId = ?";
+
+        return (Baseline)getSession().createQuery(sql)
+            .setInteger(0, mtId.intValue())
+            .setInteger(1, instanceId.intValue()).uniqueResult();
     }
 }
