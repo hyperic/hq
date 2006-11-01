@@ -1491,12 +1491,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 "Unsupported sort attribute [" + pc.getSortattribute() +
                 "] on PageControl : " + pc);
         }
-        if (appServiceCollection.size() == 0) {
-            throw new ServiceNotFoundException(
-                "No (viewable) services "
-                + "associated with application "
-                + appId);
-        }
         if (pc.isDescending())
             Collections.reverse(appServiceCollection);
 

@@ -165,12 +165,12 @@ public class AppServiceDAO extends HibernateDAO
             "select distinct a from " +
             "AppService a, Resource r, ResourceType t " +
             "where a.application.id=? and (" +
-            "r.resource_type.id=t.id AND t.name='covalentAuthzResourceGroup' "+
-            "AND a.cluster.id IN (" +
-            "SELECT id FROM ServiceCluster c where c.group.id = r.instance_id)"+
+            "r.resourceType.id=t.id AND t.name='covalentAuthzResourceGroup' "+
+            "AND a.serviceCluster.id IN (" +
+            "SELECT id FROM ServiceCluster c where c.groupId = r.instanceId)"+
             " OR " +
-            "(r.instance_id=a.service.id and " +
-            "r.resource_type.id=t.id AND t.name='covalentEAMService')))";
+            "(r.instanceId=a.service.id and " +
+            "r.resourceType.id=t.id AND t.name='covalentEAMService')))";
 
         return getSession().createQuery(sql)
             .setInteger(0, id.intValue())
