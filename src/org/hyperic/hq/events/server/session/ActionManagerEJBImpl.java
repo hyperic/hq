@@ -56,6 +56,10 @@ public class ActionManagerEJBImpl implements SessionBean {
         return DAOFactory.getDAOFactory().getActionDAO();
     }
 
+    private AlertDAO getAlertDAO() {
+        return DAOFactory.getDAOFactory().getAlertDAO();
+    }
+    
     private AlertDefinitionDAO getAlertDefHome() {
         return DAOFactory.getDAOFactory().getAlertDefDAO();
     }
@@ -75,12 +79,11 @@ public class ActionManagerEJBImpl implements SessionBean {
      * Get all the actions for a given alert
      *
      * @return a collection of {@link ActionValue}s
-     *
-     * TODO -- This is as-yet untested -- JMT
      * @ejb:interface-method
      */
     public List getActionsForAlert(int alertId) {
-        Collection actions = getActHome().findByAlertId(alertId);
+        Alert a = getAlertDAO().findById(new Integer(alertId)); 
+        Collection actions = getActHome().findByAlert(a);
         
         return actionsToActionValues(actions);
     }
