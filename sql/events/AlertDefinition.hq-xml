@@ -101,13 +101,6 @@
       <one-to-many class="Action" />
     </bag>
 
-    <bag name="alertsBag" table="EAM_ALERT"
-         cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
-         inverse="true">
-      <key column="ALERT_DEFINITION_ID" />
-      <one-to-many class="Alert" />
-    </bag>
-
     <bag name="conditionsBag" table="EAM_ALERT_CONDITION"
          cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
          inverse="true">
