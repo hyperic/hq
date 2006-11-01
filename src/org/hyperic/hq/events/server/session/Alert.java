@@ -41,9 +41,9 @@ public class Alert
 {
     private long            _ctime;
     private AlertDefinition _alertDefinition;
-    private Collection      _actions = new ArrayList();
-    private Collection      _conditions = new ArrayList();
-    private Collection      _userAlerts = new ArrayList();
+    private Collection      _actionLog    = new ArrayList();
+    private Collection      _conditionLog = new ArrayList();
+    private Collection      _userAlerts   = new ArrayList();
 
     private AlertValue      _alertVal;
 
@@ -72,7 +72,7 @@ public class Alert
         AlertActionLog res = new AlertActionLog(this, detail, action);
     
         save(res);
-        _actions.add(res);
+        _actionLog.add(res);
         return res;
     }
     
@@ -82,7 +82,7 @@ public class Alert
         AlertConditionLog res = new AlertConditionLog(this, value, cond);
 
         save(res);
-        _conditions.add(res);
+        _conditionLog.add(res);
         return res;
     }
     
@@ -102,44 +102,44 @@ public class Alert
         _alertDefinition = alertDefinition;
     }
 
-    public Collection getActions() {
-        return Collections.unmodifiableCollection(_actions);
+    public Collection getActionLog() {
+        return Collections.unmodifiableCollection(_actionLog);
     }
     
-    protected Collection getActionsBag() {
-        return _actions;
+    protected Collection getActionLogBag() {
+        return _actionLog;
     }
     
-    protected void setActionsBag(Collection actions) {
-        _actions = actions;
+    protected void setActionLogBag(Collection actionLog) {
+        _actionLog = actionLog;
     }
     
     private void addActionLog(AlertActionLog aal) {
-        _actions.add(aal);
+        _actionLog.add(aal);
     }
     
     private void removeActionLog(AlertActionLog aal) {
-        _actions.remove(aal);
+        _actionLog.remove(aal);
     }
 
-    public Collection getConditions() {
-        return Collections.unmodifiableCollection(_conditions);
+    public Collection getConditionLog() {
+        return Collections.unmodifiableCollection(_conditionLog);
     }
     
-    protected Collection getConditionsBag() {
-        return _conditions;
+    protected Collection getConditionLogBag() {
+        return _conditionLog;
     }
     
-    protected void setConditionsBag(Collection conditions) {
-        _conditions = conditions;
+    protected void setConditionLogBag(Collection conditionLog) {
+        _conditionLog = conditionLog;
     }
     
     private void addConditionLog(AlertConditionLog acl) {
-        _conditions.add(acl);
+        _conditionLog.add(acl);
     }
     
     private void removeConditionLog(AlertConditionLog acl) {
-        _conditions.remove(acl);
+        _conditionLog.remove(acl);
     }
     
     public Collection getUserAlerts() {
@@ -154,7 +154,6 @@ public class Alert
         _userAlerts = userAlerts;
     }
     
-
     public AlertValue getAlertValue() {
         if (_alertVal == null) 
             _alertVal = new AlertValue();
@@ -165,7 +164,7 @@ public class Alert
 
         _alertVal.removeAllConditionLogs();
       
-        for (Iterator i=getConditions().iterator(); i.hasNext(); ) {
+        for (Iterator i=getConditionLog().iterator(); i.hasNext(); ) {
             AlertConditionLog l = (AlertConditionLog)i.next();
           
             _alertVal.addConditionLog(l.getAlertConditionLogValue());
@@ -173,7 +172,7 @@ public class Alert
         _alertVal.cleanConditionLog();
 
         _alertVal.removeAllActionLogs();
-        for (Iterator i=getActions().iterator(); i.hasNext(); ) {
+        for (Iterator i=getActionLog().iterator(); i.hasNext(); ) {
             AlertActionLog l = (AlertActionLog)i.next();
           
             _alertVal.addActionLog(l.getAlertActionLogValue());
