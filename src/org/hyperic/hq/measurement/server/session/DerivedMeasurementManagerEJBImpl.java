@@ -81,6 +81,8 @@ import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocalHome;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerUtil;
 import org.hyperic.hq.measurement.shared.RawMeasurementValue;
+import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerUtil;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.StringUtil;
@@ -110,6 +112,26 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         PagerProcessor_measurement.class.getName();
      
     private Pager valuePager = null;
+
+    /**
+     * Needed for calls back into the manager that require setting up a new
+     * transaction. (i.e. creation of measurements.
+     */
+    private DerivedMeasurementManagerLocal dmMan = null;
+    private DerivedMeasurementManagerLocal getDMManager() {
+        try {
+            if (dmMan == null) {
+                dmMan =
+                    DerivedMeasurementManagerUtil.getLocalHome().create();
+            }
+
+            return dmMan;
+        } catch (NamingException e) {
+            throw new SystemException(e);
+        } catch (CreateException e) {
+            throw new SystemException(e);
+        }
+    }
 
     private RawMeasurementManagerLocal rmMan = null;
     private RawMeasurementManagerLocal getRmMan() {
@@ -277,6 +299,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @param protoProps  Configuration data for the instance
      *
      * @return a List of the associated DerivedMeasurementValue objects
+     * @ejb:transaction type="REQUIRESNEW"
      * @ejb:interface-method
      */
     public List createMeasurements(AppdefEntityID id, Integer[] templates,
@@ -396,6 +419,9 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             }
         } catch (InvalidGraphException e) {
             throw new MeasurementCreateException("InvalidGraphException:", e);
+        } finally {
+            // Force a flush to ensure the metrics are stored
+            getDerivedMeasurementDAO().getSession().flush();
         }
         return dmList;
     }
@@ -413,7 +439,9 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         // Authz check
         super.checkModifyPermission(subject, id);        
 
-        List dmList = createMeasurements(id, templates, intervals, props);
+        // Call back into ourselves to force a new transation to be created.
+        List dmList = getDMManager().createMeasurements(id, templates,
+                                                        intervals, props);
         
         // Make sure that the cache does not have outdated derived measurements
         DMValueCache cache = DMValueCache.getInstance();
@@ -729,6 +757,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * and an alias.
      *
      * @return a DerivedMeasurement value
+     * @ejb:transaction type="REQUIRESNEW"
      * @ejb:interface-method
      */
     public DerivedMeasurementValue getMeasurement(AuthzSubjectValue subject,
@@ -757,6 +786,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * Look up a derived measurement EJB
      *
      * @return a DerivedMeasurement value
+     * @ejb:transaction type="REQUIRESNEW"
      * @ejb:interface-method
      */
     public DerivedMeasurementValue getMeasurement(Integer mid)
@@ -936,6 +966,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * Look up a derived measurement EJB
      *
      * @return a DerivedMeasurement value
+     * @ejb:transaction type="REQUIRESNEW"
      * @ejb:interface-method
      */
     public DerivedMeasurementValue findMeasurement(AuthzSubjectValue subject,
@@ -1004,6 +1035,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * Look up a list of derived measurement EJBs for a category
      *
      * @return a list of DerivedMeasurement value
+     * @ejb:transaction type="REQUIRESNEW"
      * @ejb:interface-method
      */
     public PageList findMeasurements(AuthzSubjectValue subject,
@@ -1032,6 +1064,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * Look up a list of derived measurement EJBs for a category
      *
      * @return a list of DerivedMeasurement value
+     * @ejb:transaction type="REQUIRESNEW"
      * @ejb:interface-method
      */
     public PageList findMeasurements(AuthzSubjectValue subject,
@@ -1050,7 +1083,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 findByInstanceForCategory(id.getType(), id.getID(),
                                           enabled, cat);
         }
-            
+
         if (pc.getSortorder() == PageControl.SORT_DESC)
             Collections.reverse(mcol);
     
@@ -1336,7 +1369,9 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         for (int i = 0; it.hasNext(); i++) {
             DerivedMeasurement dm = (DerivedMeasurement)it.next();
             try {
-                enableMeasurement(dm, false);
+                // Call back into ourselves to force a new transation to be
+                // created.
+                getDMManager().enableMeasurement(dm, false);
             } catch (MeasurementNotFoundException e) {
                 // This is quite impossible, as we have just looked it up
                 throw new SystemException(e);
@@ -1373,8 +1408,9 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 aid = getAppdefEntityId(m);
                 checkModifyPermission(subject, aid);
             }
-    
-            enableMeasurement(m, false);
+            // Call back into ourselves to force a new transation to be
+            // created.
+            getDMManager().enableMeasurement(m, false);
         }
 
         // Now unschedule the DerivedMeasurment
@@ -1409,7 +1445,9 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                     continue;
                 
             try {
-                enableMeasurement(dm, false);
+                // Call back into ourselves to force a new transation to be
+                // created.
+                getDMManager().enableMeasurement(dm, false);
             } catch (MeasurementNotFoundException e) {
                 // This is quite impossible, we just looked it up
                 throw new SystemException(e);
