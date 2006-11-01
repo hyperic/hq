@@ -56,7 +56,8 @@ public class AlertDefinitionDAO extends HibernateDAO {
     private List findByAppdefEntity(int type, int id, String orderBy) {
         String sql = "from AlertDefinition d " + 
             "WHERE d.appdefType = ? AND d.appdefId = ? " +
-            "AND d.deleted = false AND d.parent != 0 AND d.parent IS NOT NULL "+
+            "AND d.deleted = false " + 
+            "AND (NOT d.parent = 0 OR d.parent IS NULL) "+
             "ORDER BY " + orderBy;
         
         return getSession().createQuery(sql)
@@ -97,8 +98,8 @@ public class AlertDefinitionDAO extends HibernateDAO {
     }
     
     public List findChildAlertDefinitions(AlertDefinition def) {
-        String sql = "from AlertDefinition d where d.parent = :parent AND " + 
-            "d.deleted = false";
+        String sql = "from AlertDefinition d where d.parent = :parent " + 
+            "AND d.deleted = false";
 
         return getSession().createQuery(sql)
             .setParameter("parent", def)
