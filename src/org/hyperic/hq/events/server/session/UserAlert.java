@@ -26,11 +26,14 @@
 package org.hyperic.hq.events.server.session;
 
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.events.shared.UserAlertValue;
 
 public class UserAlert extends PersistedObject {
-    private Integer _userId;
-    private Alert   _alert;
-
+    private Integer        _userId;
+    private Alert          _alert;
+    private UserAlertValue _valueObj;
+    
+    
     protected UserAlert() {
     }
 
@@ -53,5 +56,19 @@ public class UserAlert extends PersistedObject {
     
     protected void setAlert(Alert alert) {
         _alert = alert;
+    }
+    
+    public UserAlertValue getUserAlertValue() {
+        if (_valueObj == null)
+            _valueObj = new UserAlertValue();
+
+        _valueObj.setId(getId());
+        _valueObj.setUserId(getUserId());
+        if (getAlert() != null) 
+            _valueObj.setAlert(getAlert().getAlertValue());
+        else
+            _valueObj.setAlert(null);
+
+        return _valueObj;
     }
 }
