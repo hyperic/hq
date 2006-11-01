@@ -86,8 +86,9 @@ public class ServiceClusterDAO extends HibernateDAO
         sc.setGroupId(scv.getGroupId());
 
         Set services = new HashSet(serviceIds.size());
-        for(int i = 0; i < serviceIds.size(); i++) {
-            services.add(new Service((Integer)serviceIds.get(i)));
+        ServiceDAO dao = new ServiceDAO(getSession());
+        for (int i = 0; i < serviceIds.size(); i++) {
+            services.add(dao.findById((Integer) serviceIds.get(i)));
         }
         sc.setServices(services);
         
