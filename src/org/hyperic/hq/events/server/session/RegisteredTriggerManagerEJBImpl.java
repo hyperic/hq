@@ -60,7 +60,7 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
     }
 
     private RegisteredTrigger getRegisteredTrigger(Integer trigId) {
-        return getTriggerDAO().findByPrimaryKey(new RegisteredTriggerPK(trigId));
+        return getTriggerDAO().findById(trigId);
     }
     
     /**

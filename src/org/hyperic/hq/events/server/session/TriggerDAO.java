@@ -26,7 +26,6 @@ package org.hyperic.hq.events.server.session;
 
 import org.hibernate.Session;
 import org.hyperic.hibernate.dao.HibernateDAO;
-import org.hyperic.hq.events.shared.RegisteredTriggerPK;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 
 public class TriggerDAO extends HibernateDAO {
@@ -43,10 +42,6 @@ public class TriggerDAO extends HibernateDAO {
         return res;
     }
 
-    public RegisteredTrigger findByPrimaryKey(RegisteredTriggerPK pk) {
-        return findById(pk.getId());
-    }
-
     protected void remove(RegisteredTrigger trig) {
         if (trig.getAlertDef() != null) {
             trig.getAlertDef().removeTrigger(trig);
@@ -57,9 +52,5 @@ public class TriggerDAO extends HibernateDAO {
 
     public RegisteredTrigger findById(Integer id) {
         return (RegisteredTrigger)super.findById(id);
-    }
-
-    protected void save(RegisteredTrigger entity) {
-        super.save(entity);
     }
 }
