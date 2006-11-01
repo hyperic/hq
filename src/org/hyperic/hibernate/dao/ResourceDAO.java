@@ -26,21 +26,23 @@
 package org.hyperic.hibernate.dao;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
-import org.hyperic.hq.authz.AuthzSubject;
-import org.hyperic.hq.authz.Resource;
-import org.hyperic.hq.authz.ResourceType;
-import org.hyperic.hq.authz.ResourceGroup;
-import org.hyperic.hq.authz.Operation;
-import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.ResourceValue;
-import org.hyperic.hq.authz.shared.ResourceTypeValue;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.authz.AuthzSubject;
+import org.hyperic.hq.authz.Operation;
+import org.hyperic.hq.authz.Resource;
+import org.hyperic.hq.authz.ResourceGroup;
+import org.hyperic.hq.authz.ResourceType;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.ResourceTypeValue;
+import org.hyperic.hq.authz.shared.ResourceValue;
 
 /**
  * CRUD methods, finders, etc. for Resource
@@ -218,11 +220,11 @@ public class ResourceDAO extends HibernateDAO
 
     public Collection findSvcRes_orderName(Boolean fSystem)
     {
-        String sql="select distinct r from Resource r " +
+        String sql="select r from Resource r " +
                    " join fetch r.resourceGroups rg " +
-                   " left join fetch rg.roles role " +
-                   " left join fetch role.operations op " +
-                   " left join fetch r.resourceType rt " +
+                   " join fetch rg.roles role " +
+                   " join fetch role.operations op " +
+                   " join fetch r.resourceType rt " +
                    "where " +
                    "  r.system=? and " +
                    "  (" +
@@ -231,12 +233,28 @@ public class ResourceDAO extends HibernateDAO
                    "  (" +
                    "   op.name = 'viewService' or " +
                    "   op.name = 'viewResourceGroup') and " +
-                   "  rg.groupType = 15 and " +
-                   "  (rg.groupType != 15 or rg.clusterId!=-1) " +
+                   "   0 = (select count(*) from Resource r2 " +
+                   "        join fetch r.resourceGroups rg2 " +
+                   "        where r.id = r2.id and rg.groupType = 15 and" +
+                   "              rg.clusterId != -1) " +
                    "order by r.sortName ";
-        return getSession().createQuery(sql)
+        List resources = getSession().createQuery(sql)
             .setBoolean(0, fSystem.booleanValue())
             .list();
+        
+        // Hibernate's distinct does not work well with joins - do filter here
+        Integer lastId = null;  // Track the last one we looked at
+        for (Iterator it = resources.iterator(); it.hasNext(); ) {
+            Resource res = (Resource) it.next();
+            if (res.getId().equals(lastId)) {
+                it.remove();
+            }
+            else {
+                lastId = res.getId();
+            }
+        }
+        
+        return resources;
     }
 
     public Collection findInGroupAuthz_orderName(Integer userId,
