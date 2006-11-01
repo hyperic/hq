@@ -57,7 +57,7 @@ public class Alert
         // Now just set the entire value object
         setAlertValue(val);
 
-        setAlertDef(def);
+        setAlertDefinition(def);
     }
     
     protected UserAlert createUserAlert(Integer userId) {
@@ -94,11 +94,11 @@ public class Alert
         _ctime = ctime;
     }
     
-    public AlertDefinition getAlertDef() {
+    public AlertDefinition getAlertDefinition() {
         return _alertDefinition;
     }
     
-    protected void setAlertDef(AlertDefinition alertDefinition) {
+    protected void setAlertDefinition(AlertDefinition alertDefinition) {
         _alertDefinition = alertDefinition;
     }
 
@@ -160,7 +160,7 @@ public class Alert
             _alertVal = new AlertValue();
 
         _alertVal.setId(getId());
-        _alertVal.setAlertDefId(getAlertDef().getId());
+        _alertVal.setAlertDefId(getAlertDefinition().getId());
         _alertVal.setCtime(getCtime());
 
         _alertVal.removeAllConditionLogs();
@@ -190,7 +190,7 @@ public class Alert
         AlertActionLogDAO alDao = daoFactory.getAlertActionLogDAO();
         AlertConditionLogDAO aclDao = daoFactory.getAlertConditionLogDAO();
         
-        setAlertDef(def);
+        setAlertDefinition(def);
         setCtime(val.getCtime());
 
         for (Iterator i=val.getAddedConditionLogs().iterator(); i.hasNext(); ){

@@ -55,8 +55,8 @@ public class AlertDAO extends HibernateDAO {
 
     public List findByCreateTimeAndPriority(long begin, long end, int priority){
         String sql = "from Alert a where a.ctime between :begin and :end " + 
-            "and (a.alertDef.priority = :priority " + 
-            "     or a.alertDef.priority > :priority) " +
+            "and (a.alertDefinition.priority = :priority " +
+            "     or a.alertDefinition.priority > :priority) " +
             "order by a.ctime desc"; 
         
         return getSession().createQuery(sql)
@@ -69,8 +69,8 @@ public class AlertDAO extends HibernateDAO {
     public List findByAppdefEntityInRange(AppdefEntityID id, long begin,
                                           long end)
     {
-        String sql = "from Alert a where a.alertDef.appdefType = :aType " + 
-            "and a.alertDef.appdefId = :aId and a.ctime between :begin " + 
+        String sql = "from Alert a where a.alertDefinition.appdefType = :aType " +
+            "and a.alertDefinition.appdefId = :aId and a.ctime between :begin " +
             "and :end order by a.ctime desc";
         
         return getSession().createQuery(sql)
@@ -84,9 +84,9 @@ public class AlertDAO extends HibernateDAO {
     public List findByAppdefEntityInRangeSortByAlertDef(AppdefEntityID id,
                                                         long begin, long end)
     {
-        String sql = "from Alert a WHERE a.alertDef.appdefType = :aType " +
-            "and a.alertDef.appdefId = :aId and a.ctime between :begin " +  
-            "and :end order by a.alertDef.name DESC";
+        String sql = "from Alert a WHERE a.alertDefinition.appdefType = :aType " +
+            "and a.alertDefinition.appdefId = :aId and a.ctime between :begin " +
+            "and :end order by a.alertDefinition.name DESC";
         
         return getSession().createQuery(sql)
             .setInteger("aType", id.getType())
@@ -97,8 +97,8 @@ public class AlertDAO extends HibernateDAO {
     }
     
     private List findByEntity(AppdefEntityID id, String orderBy) {
-        String sql = "from Alert a WHERE a.alertDef.appdefType = :aType " +
-            "and a.alertDef.appdefId = :aId ORDER BY " + orderBy;
+        String sql = "from Alert a WHERE a.alertDefinition.appdefType = :aType " +
+            "and a.alertDefinition.appdefId = :aId ORDER BY " + orderBy;
         
         return getSession().createQuery(sql)
             .setInteger("aType", id.getType())
@@ -107,11 +107,11 @@ public class AlertDAO extends HibernateDAO {
     }
 
     public List findByAppdefEntitySortByAlertDef(AppdefEntityID id) {
-        return findByEntity(id, "a.alertDef.name DESC");
+        return findByEntity(id, "a.alertDefinition.name DESC");
     }
     
     public Alert findByAlertDefinitionAndCtime(AlertDefinition def, long ctime){
-        String sql = "from Alert a WHERE a.alertDef = :alertDef " +
+        String sql = "from Alert a WHERE a.alertDefinition = :alertDef " +
             "and a.ctime = :ctime";
         
         return (Alert)getSession().createQuery(sql)

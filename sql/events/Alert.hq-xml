@@ -23,7 +23,7 @@
       <column name="CTIME" not-null="true" index="ALERT_IDX_TIME" />
     </property>
 
-    <many-to-one name="alertDef" class="AlertDefinition">
+    <many-to-one name="alertDefinition" class="AlertDefinition">
       <column name="ALERT_DEFINITION_ID" index="ALERT_IDX_ALERTDEFINITION" />
     </many-to-one>
 

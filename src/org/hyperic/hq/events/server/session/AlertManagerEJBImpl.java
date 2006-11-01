@@ -25,21 +25,14 @@
 
 package org.hyperic.hq.events.server.session;
 
-import java.rmi.RemoteException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import javax.ejb.CreateException;
-import javax.ejb.EJBException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
@@ -49,32 +42,15 @@ import javax.naming.NamingException;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.events.AlertCreateException;
-import org.hyperic.hq.events.AlertNotFoundException;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.shared.AlertActionLogLocal;
-import org.hyperic.hq.events.shared.AlertActionLogLocalHome;
-import org.hyperic.hq.events.shared.AlertActionLogUtil;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
-import org.hyperic.hq.events.shared.AlertConditionLogLocal;
-import org.hyperic.hq.events.shared.AlertConditionLogLocalHome;
-import org.hyperic.hq.events.shared.AlertConditionLogUtil;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
-import org.hyperic.hq.events.shared.AlertDefinitionLocal;
-import org.hyperic.hq.events.shared.AlertDefinitionLocalHome;
-import org.hyperic.hq.events.shared.AlertDefinitionPK;
-import org.hyperic.hq.events.shared.AlertDefinitionUtil;
-import org.hyperic.hq.events.shared.AlertLocal;
 import org.hyperic.hq.events.shared.AlertLocalHome;
-import org.hyperic.hq.events.shared.AlertPK;
 import org.hyperic.hq.events.shared.AlertUtil;
 import org.hyperic.hq.events.shared.AlertValue;
-import org.hyperic.hq.events.shared.UserAlertLocal;
 import org.hyperic.hq.events.shared.UserAlertLocalHome;
 import org.hyperic.hq.events.shared.UserAlertUtil;
-import org.hyperic.util.collection.IntHashMap;
-import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -369,7 +345,7 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
         Iterator it = alerts.iterator();
         for (int i = 0; result.size() < count && it.hasNext(); i++) {
             Alert alert = (Alert) it.next();
-            AlertDefinition alertdef = alert.getAlertDef();
+            AlertDefinition alertdef = alert.getAlertDefinition();
             
             // Filter by appdef entity
             AppdefEntityID aeid = alertdef.getAppdefEntityId();
