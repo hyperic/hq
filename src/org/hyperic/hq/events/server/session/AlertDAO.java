@@ -121,19 +121,20 @@ public class AlertDAO extends HibernateDAO {
     }
 
     public List findBySubject(Integer userId) {
-        String sql = "from Alert a, UserAlert ua " + 
-            "where ua.alert = a.id and ua.userId = :userId";
+        String sql = "select a from Alert a " + 
+            " join a.userAlertsBag ua " + 
+            " where ua.userId = :userId";
         
         return getSession().createQuery(sql)
             .setInteger("userId", userId.intValue())
             .list();
     }
     
-    public void remove(Alert alert) {
+    protected void remove(Alert alert) {
         super.remove(alert);
     }
     
-    public void save(Alert alert) { 
+    protected void save(Alert alert) { 
         super.save(alert);
     }
 }
