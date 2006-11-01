@@ -8,7 +8,6 @@
 
   <class name="Action" table="EAM_ACTION">
     <id name="id" type="integer">
-      <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />
       <generator class="sequence">
         <param name="sequence">EAM_ACTION_ID_SEQ</param>
