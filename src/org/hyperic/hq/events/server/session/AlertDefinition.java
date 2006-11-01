@@ -64,8 +64,6 @@ public class AlertDefinition
     private Collection        _conditions = new ArrayList();
     private Collection        _triggers = new ArrayList();
     private Collection        _actions = new ArrayList();
-    private Collection        _alerts = new ArrayList();   
-                                       // List of fired alerts?  -- XXX
 
     private AlertDefinitionValue      _value;
     private AlertDefinitionBasicValue _basicValue;
@@ -95,7 +93,6 @@ public class AlertDefinition
         Alert res = new Alert(this, val);
         
         save(res);
-        _alerts.add(res);
         return res;
     }
     
@@ -293,18 +290,6 @@ public class AlertDefinition
 
     protected void setActionsBag(Collection actions) {
         _actions = actions;
-    }
-
-    public Collection getAlerts() {
-        return Collections.unmodifiableCollection(_alerts);
-    }
-    
-    protected Collection getAlertsBag() {
-        return _alerts;
-    }
-
-    protected void setAlertsBag(Collection alerts) {
-        _alerts = alerts;
     }
 
     public Collection getConditions() {
