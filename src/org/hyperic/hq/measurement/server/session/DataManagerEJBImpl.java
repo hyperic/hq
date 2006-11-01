@@ -2010,7 +2010,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Used for debugging leaking connections
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * @ejb:transaction type="REQUIRED"
      */
     public void leakConnection () throws SQLException, NamingException {
         DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
