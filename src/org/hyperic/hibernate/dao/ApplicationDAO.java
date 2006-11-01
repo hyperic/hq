@@ -241,7 +241,13 @@ public class ApplicationDAO extends HibernateDAO
 
     public Application create(ApplicationValue av)
     {
-        return null;
+        Application app = new Application();
+        setApplicationValue(app, av);
+        
+        // Save application so that it would have a valid ID
+        save(app);
+        
+        return app;
     }
 
     /**
