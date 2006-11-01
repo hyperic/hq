@@ -334,5 +334,16 @@ function moveElementDown(elem, root) {
 }
 /*--------------------------- END helpers for CSS stuff ------------------------------*/
 
+function accord() {
+  new Rico.Accordion( 'propertiesAccordion',
+                     { panelHeight: 300,
+                       expandedBg: '#60a5ea',
+                       hoverBg: '#70b5fa',
+                       collapsedBg: '#BBBBBB',
+                       collapsedTextColor: '#DDDDDD',
+                       borderColor: '#60a5ea',
+                     } );
+} 
+
 
 /*-- END functions.js --*/

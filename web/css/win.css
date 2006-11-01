@@ -39,7 +39,7 @@ A.NotBold:hover {color: #003399; font-weight: normal; text-decoration: underline
 
 /* BLOCK & LIST */
 .ListTitle, .BlockTitle {font-size: 12px; color: #ffffff; font-weight: bold; background-color: #60a5ea; padding: 3px;}
-.BlockSubtitle {font-size: 11px; color: #000000; font-weight: normal;}
+.BlockSubtitle {font-size: 11px; font-weight: normal;}
 .BlockBottomLine {background-color: #D5D8DE; padding: 0px;}
 
 /* BLOCK */
@@ -757,5 +757,14 @@ ul.boxy li {
 
 .dialog .title_window {
   -moz-user-select:none;
+}
+
+.accordionTabTitleBar {
+   font-size           : 12px;
+   padding             : 4px 6px 4px 6px;
+   border-style        : solid none solid none;
+   border-top-color    : #DDDDDD;
+   border-bottom-color : #666666;
+   border-width        : 1px 0px 1px 0px;
 }
 
