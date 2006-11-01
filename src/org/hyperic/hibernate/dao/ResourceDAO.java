@@ -210,9 +210,9 @@ public class ResourceDAO extends HibernateDAO
                    "  (rg.groupType != 15 or rg.clusterId!=-1) " +
                    "order by r.sortName ";
         return getSession().createQuery(sql)
-            .setInteger(0, user.intValue())
+            .setBoolean(0, fSystem.booleanValue())
             .setInteger(1, user.intValue())
-            .setBoolean(2, fSystem.booleanValue())
+            .setInteger(2, user.intValue())
             .list();
     }
 
