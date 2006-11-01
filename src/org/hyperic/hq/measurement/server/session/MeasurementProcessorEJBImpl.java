@@ -67,8 +67,6 @@ import org.hyperic.hq.measurement.ext.depgraph.RawNode;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.monitor.MonitorCreateException;
 import org.hyperic.hq.measurement.server.mbean.SRNCache;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementLocal;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementPK;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.RawMeasurementValue;
 

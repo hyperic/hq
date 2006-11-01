@@ -114,13 +114,6 @@ public abstract class SessionEJB {
     // Static Measurement plugin manager
     protected static MeasurementPluginManager mpm = null;
 
-    // Should only access these private variables through accessor methods
-    private static MeasurementTemplateLocalHome mtHome = null;
-    private static DerivedMeasurementLocalHome dmHome = null;
-    private static MeasurementArgLocalHome liHome = null;
-    private static RawMeasurementLocalHome rmHome = null;
-    private static CategoryLocalHome caHome = null;
-
     // SessionBeans are not static
     private DataManagerLocal dataMan = null;
     private AgentManagerLocal agentMan = null;
@@ -269,27 +262,6 @@ public abstract class SessionEJB {
             }
         }
         return ic;
-    }
-
-    /**
-     * A method to convert a list of Measurement EJBs to a
-     * list of their value object counterparts
-     * @param ejbList - list of EJB Local Interfaces
-     * @return valueList - list of transformed Value objects which
-     * will be empty if the conversion was not possible
-     */
-    protected List convertEJBListToValues(List ejbList) {
-        ArrayList valueList = new ArrayList();
-        Iterator ejbIt = ejbList.iterator();
-        while (ejbIt.hasNext()) {
-            Object ejbObj = ejbIt.next();
-            if (ejbObj instanceof DerivedMeasurementLocal) {
-                valueList.add(((DerivedMeasurementLocal) ejbObj)
-                    .getDerivedMeasurementValue());
-            }
-            // other cases....
-        }
-        return valueList;
     }
 
     /**
@@ -510,5 +482,4 @@ public abstract class SessionEJB {
                             start + "=" + (end - start));
         }
     }
-
-} // end SessionEJB
+}
