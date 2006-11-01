@@ -195,17 +195,6 @@ public abstract class SessionEJB {
         return this.ssmLocal;
     }
 
-    protected DerivedMeasurementLocalHome getDmHome() {
-        if (dmHome == null) {
-            try {
-                dmHome = DerivedMeasurementUtil.getLocalHome();
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
-        return dmHome;
-    }
-
     protected DataManagerLocal getDataMan() {
         if (dataMan == null) {
             try {
