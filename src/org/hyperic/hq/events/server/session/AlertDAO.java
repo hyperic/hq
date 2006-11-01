@@ -120,6 +120,18 @@ public class AlertDAO extends HibernateDAO {
             .uniqueResult();
     }
 
+    public List findByAlertDefinition(AlertDefinition def) {
+        String sql = "from Alert a WHERE a.alertDefinition = :alertDef";
+        
+        return getSession().createQuery(sql)
+            .setParameter("alertDef", def)
+            .list();
+    }
+    
+    public int countAlerts(AlertDefinition def) {
+        return size(findByAlertDefinition(def));
+    }
+    
     public List findBySubject(Integer userId) {
         String sql = "select a from Alert a " + 
             " join a.userAlertsBag ua " + 
