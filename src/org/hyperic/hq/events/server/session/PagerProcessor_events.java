@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.events.server.session;
 
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.shared.AlertDefinitionLocal;
 import org.hyperic.hq.events.shared.AlertLocal;
 import org.hyperic.util.pager.PagerProcessor;
@@ -34,42 +35,36 @@ import org.apache.commons.logging.LogFactory;
 public class PagerProcessor_events implements PagerProcessor {
     private static final Log log =
         LogFactory.getLog(PagerProcessor_events.class);
-    private static final boolean debug = log.isDebugEnabled();
 
     public PagerProcessor_events () {}
 
     public Object processElement ( Object o ) {
-        if(debug) {
-            log.debug("PagerProcessor_dm: ZZZZ processElement starting");
-        }
-        if ( o == null ) { 
-            if(debug) {
-                log.debug(
-                    "PagerProcessor_dm: ZZZZ processElement returning null for element");
-            }
+        log.debug("PagerProcessor_dm: ZZZZ processElement starting");
+
+        if (o == null) { 
+            log.debug("PagerProcessor_dm: ZZZZ processElement returning " + 
+                      "null for element");
             return null;
         }
+
         try {
-            if ( o instanceof Alert) {
-                if(debug) {
-                    log.debug("PagerProcessor_dm: ZZZZ processElement converting AlertLocal to value object");
-                }
+            if (o instanceof Alert) {
+                log.debug("PagerProcessor_dm: ZZZZ processElement " + 
+                          "converting AlertLocal to value object");
                 return ((Alert) o).getAlertValue();
+            } else if ( o instanceof AlertDefinition) {
+                log.debug("PagerProcessor_dm: ZZZZ processElement converting " +
+                          "AlertDefinitionLocal to value object");
+                return ((AlertDefinition) o).getAlertDefinitionValue();
             }
-            else if ( o instanceof AlertDefinition) {
-                if(debug) {
-                    log.debug("PagerProcessor_dm: ZZZZ processElement converting AlertDefinitionLocal to value object");
-                }
-                return ((AlertDefinitionLocal) o).getAlertDefinitionValue();
-            }
-        } catch ( Exception e ) {
-            throw new IllegalStateException("Error converting to value object: " + e);
+        } catch (Exception e) {
+            throw new SystemException("Error converting to value object: " + e,
+                                      e);
         }
         
-        if (debug) {
-            log.debug("PagerProcessor_dm: ZZZZ processElement not processing object " +
-                      o.getClass());
-        }
+        if (log.isDebugEnabled())
+            log.debug("PagerProcessor_dm: ZZZZ processElement not processing "+
+                      "object " + o.getClass());
         return o;
     }
 }
