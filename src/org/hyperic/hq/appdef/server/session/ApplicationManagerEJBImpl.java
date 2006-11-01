@@ -291,8 +291,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                 DAOFactory.getDAOFactory().getApplicationDAO().findById(appId);
             checkModifyPermission(caller, app.getEntityId());
 
-            AppServiceDAO appSvcdao =
-                DAOFactory.getDAOFactory().getAppServiceDAO();
+            AppServiceDAO appSvcdao = getAppServiceDAO();
             AppService appSvcLoc = appSvcdao.findById(appServiceId);
             appSvcdao.remove(appSvcLoc);
             // flush cache
@@ -300,6 +299,12 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(appId);
         }
+    }
+
+    private AppServiceDAO getAppServiceDAO() {
+        AppServiceDAO appSvcdao =
+            DAOFactory.getDAOFactory().getAppServiceDAO();
+        return appSvcdao;
     }
 
     /**
@@ -545,18 +550,21 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                 }
             }
             // iterate over the list, and create the individual entries
+            AppServiceDAO asDAO = getAppServiceDAO();
             for(int i=0; i < entityIds.size(); i++) {
                 AppdefEntityID id = (AppdefEntityID)entityIds.get(i);
-                if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVICE){
-                    app.addService(new ServicePK(id.getId()));
+                if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
+                    asDAO.create(new ServicePK(id.getId()),
+                                 app.getPrimaryKey(), false);
                 }
                 else if (id.getType() == 
                     AppdefEntityConstants.APPDEF_TYPE_GROUP) {
                     // look up the group so I can get the cluster id
                     AppdefGroupValue agv = AppdefGroupManagerUtil.getLocalHome()
                         .create().findGroup(subject, id);
-                    app.addServiceCluster(
-                        new ServiceClusterPK(new Integer(agv.getClusterId())));
+                    asDAO.create(
+                        new ServiceClusterPK(new Integer(agv.getClusterId())), 
+                        app.getPrimaryKey());
                 }
             }
             // flush cache
