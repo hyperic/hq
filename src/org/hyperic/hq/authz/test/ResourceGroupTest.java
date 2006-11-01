@@ -64,11 +64,12 @@ public class ResourceGroupTest extends HQEJBTestBase {
             rman.findResourceGroupByName(overlord, BOGUS_NAME);
         assertNotNull(resGrp);
         
+        final ResourceManagerLocal remg =
+            ResourceManagerUtil.getLocalHome().create();
+
         // Create a platform resource
         runInTransaction(new TransactionBlock() {
             public void run() throws Exception {
-                ResourceManagerLocal remg =
-                    ResourceManagerUtil.getLocalHome().create();
                 ResourceTypeValue rtv =
                     remg.findResourceTypeByName(AuthzConstants.platformResType);
                 assertEquals(AuthzConstants.platformResType, rtv.getName());
@@ -86,7 +87,7 @@ public class ResourceGroupTest extends HQEJBTestBase {
         });
         
         // Look up the group again
-        PageList resources = rman.getResources(overlord,
+        final PageList resources = rman.getResources(overlord,
                                                resGrp.getResourceGroupValue(),
                                                PageControl.PAGE_ALL);
         assertEquals(1, resources.size());
@@ -94,6 +95,9 @@ public class ResourceGroupTest extends HQEJBTestBase {
         // Now delete it
         runInTransaction(new TransactionBlock() {
             public void run() throws Exception {
+                ResourceValue res = (ResourceValue) resources.get(0);
+                remg.removeResource(overlord, res);
+                
                 rman.removeResourceGroup(overlord,
                                          resGrp.getResourceGroupValue());
             }
