@@ -88,11 +88,11 @@ public class RegisteredTrigger
         _frequency = frequency;
     }
 
-    public AlertDefinition getAlertDef() {
+    public AlertDefinition getAlertDefinition() {
         return _alertDef;
     }
     
-    protected void setAlertDef(AlertDefinition def) {
+    protected void setAlertDefinition(AlertDefinition def) {
         _alertDef = def;
     }
 }

@@ -43,10 +43,10 @@ public class TriggerDAO extends HibernateDAO {
     }
 
     protected void remove(RegisteredTrigger trig) {
-        if (trig.getAlertDef() != null) {
-            trig.getAlertDef().removeTrigger(trig);
+        if (trig.getAlertDefinition() != null) {
+            trig.getAlertDefinition().removeTrigger(trig);
         }
-        trig.setAlertDef(null);
+        trig.setAlertDefinition(null);
         super.remove(trig);
     }
 
