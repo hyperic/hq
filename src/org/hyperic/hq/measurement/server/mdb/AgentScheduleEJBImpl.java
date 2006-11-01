@@ -63,8 +63,7 @@ import org.apache.commons.logging.LogFactory;
 public class AgentScheduleEJBImpl
     implements MessageDrivenBean, MessageListener {
     private final Log log =
-        LogFactory.getLog(
-            "org.hyperic.hq.measurement.server.mdb.AgentScheduleEJBImpl");
+        LogFactory.getLog(AgentScheduleEJBImpl.class.getName());
     private final Log timingLog = LogFactory.getLog("timingLog.measurement");
 
     private MessageDrivenContext ctx = null;
