@@ -116,6 +116,15 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
     }
     
     /**
+     * Initialize the SRN cache within a transaction
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public void initializeSrnCache() {
+        SRNCache.getInstance();
+    }
+
+    /**
      * Schedule a DerivedMeasurement and all of its dependent
      * measurements to be collected and calculated.
      *
