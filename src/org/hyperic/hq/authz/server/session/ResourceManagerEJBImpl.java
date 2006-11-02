@@ -102,9 +102,9 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
-    public ResourceTypePK createResourceType(AuthzSubjectValue whoami,
-                                             ResourceTypeValue type,
-                                             OperationValue[] operations) {
+    public ResourceType createResourceType(AuthzSubjectValue whoami,
+                                           ResourceTypeValue type,
+                                           OperationValue[] operations) {
         AuthzSubject whoamiPojo = this.lookupSubjectPojo(whoami);
         ResourceType typePojo =
             DAOFactory.getDAOFactory().getResourceTypeDAO().create(whoamiPojo,
@@ -121,7 +121,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
             
             typePojo.setOperations(ops);
         }
-        return new ResourceTypePK(typePojo.getId());
+        return typePojo;
     }
 
     /**
@@ -278,11 +278,11 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
-    public ResourcePK createResource(AuthzSubjectValue whoami,
-                                     ResourceTypeValue rtv,
-                                     Integer instanceId,
-                                     String name,
-                                     boolean system) {
+    public Resource createResource(AuthzSubjectValue whoami,
+                                   ResourceTypeValue rtv,
+                                   Integer instanceId,
+                                   String name,
+                                   boolean system) {
         AuthzSubject owner =
             getSubjectDAO().findByAuth(whoami.getName(),
                                        whoami.getAuthDsn());
@@ -292,7 +292,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         res.setResourceTypeValue(rtv);
         res.setSystem(system);
         Resource resource = getResourceDAO().create(owner, res);
-        return new ResourcePK(resource.getId());
+        return resource;
     }
     
     /**

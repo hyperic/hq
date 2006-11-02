@@ -3,6 +3,7 @@ package org.hyperic.hq.authz.test;
 import java.util.Random;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -73,10 +74,10 @@ public class ResourceGroupTest extends HQEJBTestBase {
                 ResourceTypeValue rtv =
                     remg.findResourceTypeByName(AuthzConstants.platformResType);
                 assertEquals(AuthzConstants.platformResType, rtv.getName());
-                ResourcePK pk = remg.createResource(overlord, rtv,
-                                                    new Integer(RANDOM_ID),
-                                                    "Platform " + BOGUS_NAME,
-                                                    false);
+                Resource pk = remg.createResource(overlord, rtv,
+                                                  new Integer(RANDOM_ID),
+                                                  "Platform " + BOGUS_NAME,
+                                                  false);
                 
                 // Now we have to find the resource
                 ResourceValue resource = remg.findResourceById(pk.getId());
