@@ -71,9 +71,7 @@ import org.hyperic.util.timer.StopWatch;
 
 /** The DataManagerEJB class is a stateless session bean that can be
  *  used to retrieve measurement data points
- * <p>
  *
- * </p>
  * @ejb:bean name="DataManager"
  *      jndi-name="ejb/measurement/DataManager"
  *      local-jndi-name="LocalDataManager"
@@ -209,9 +207,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             throw new IllegalArgumentException(this.ERR_INTERVAL);
     }
     
-    /** <p>
+    /**
      * Save the new MetricValue to the database
-     * </p>
+     *
      * @param dp the new MetricValue
      * @ejb:interface-method
      */
@@ -219,12 +217,11 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         this.addData(mid, new MetricValue[] { dp }, overwrite);
     }
 
-    /** <p>
+    /**
      * Save the new MetricValue to the database
-     * </p>
+     *
      * @param dp the new MetricValue
      * @ejb:interface-method
-     * @ejb:transaction type="NEVER"
      */
     public void addData(Integer mid, MetricValue[] dpts, boolean overwrite)
     {
@@ -433,10 +430,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return storeAll;
     }
     
-    /** <p>
+    /**
      * Fetch the list of historical data points given
      * a start and stop time range
-     * </p>
+     *
      * @param id the id of the Derived Measurement
      * @param begin the start of the time range
      * @param end the end of the time range
@@ -587,10 +584,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    /** <p>
+    /**
      * Fetch the list of historical data points given
      * a start and stop time range and interval
-     * </p>
+     *
      * @param id the id of the Derived Measurement
      * @param beginTrack the start of the time range
      * @param end the end of the time range
@@ -853,10 +850,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
-     * <p>
+     *
      * Fetch a list of historical data points of a specific size Note: There is
      * no guarantee that the list will be the size requested. It may be smaller.
-     * </p>
      * 
      * @param id
      *            the id of the Derived Measurement
@@ -941,9 +937,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    /** <p>
+    /**
      * Fetch an array of timestamps for which there is missing data
-     * </p>
+     *
      * @param id the id of the Derived Measurement
      * @param begin the start of the time range
      * @param end the end of the time range
@@ -1010,10 +1006,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    /** <p>
+    /**
      * Fetch a set of data points for a single measurement that fall along a
      * given interval bounded by a range.
-     * </p>
+     *
      * @param id the id of the Derived Measurement
      * @param startTime the start time.
      * @param intervalInMs the interval length in ms (i.e. 60000 = 60 seconds)
@@ -1049,9 +1045,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
-     * <p>Fetch a data point around a particular interval. If there
+     * Fetch a data point around a particular interval. If there
      * are more than one record that falls in range, then the closest
-     * value to the interval will be used.</p>
+     * value to the interval will be used.
      *
      * @param id the id of the Derived Measurement
      * @param startTime start time.
@@ -1111,9 +1107,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             "No data available for " + id + " at " + startTime);
     }
 
-    /** <p>
+    /**
      * Fetch the list of data points given a request time
-     * </p>
+     *
      * @param id the id of the Derived Measurement
      * @param begin the start of the time range
      * @param end the end of the time range
@@ -1205,9 +1201,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return sqlBuf;
     }
     
-    /** <p>
+    /**
      * Fetch the most recent data point for particular DerivedMeasurements.
-     * </p>
+     *
      * @param id the id of the Derived Measurement
      * @return long value timestamp of last record.
      * @ejb:interface-method
@@ -1386,10 +1382,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    /** <p>
+    /**
      * Fetch a map of aggregate data values keyed by metric templates given
      * a start and stop time range
-     * </p>
+     *
      * @param id the id of the Derived Measurement
      * @param begin the start of the time range
      * @param end the end of the time range
@@ -1571,10 +1567,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    /** <p>
+    /**
      * Aggregate data across the given metric IDs, returning max, min, avg, and
      * count of number of unique metric IDs
-     * </p>
+     *
      * @param id the id of the Derived Measurement
      * @param begin the start of the time range
      * @param end the end of the time range
@@ -1670,10 +1666,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return result;
     }
 
-    /** <p>
+    /**
      * Fetch a map of aggregate data values keyed by metrics given
      * a start and stop time range
-     * </p>
+     *
      * @param id the id of the Derived Measurement
      * @param begin the start of the time range
      * @param end the end of the time range
@@ -1777,10 +1773,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    /** <p>
+    /**
      * Fetch a map of aggregate data values keyed by metrics given
      * a start and stop time range
-     * </p>
+     *
      * @param id the id of the Derived Measurement
      * @param begin the start of the time range
      * @param end the end of the time range
@@ -1879,10 +1875,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    /** <p>
+    /**
      * Fetch the list of instance ID's that have data in the given
      * start and stop time range and template IDs
-     * </p>
+     *
      * @param tids the template IDs
      * @param begin the start of the time range
      * @param end the end of the time range
@@ -1949,15 +1945,14 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    /** <p>
+    /**
      * Fetch the list of measurement ID's that have no data in the given time
      * range
-     * </p>
+     *
      * @param current the current time
      * @param cycles the number of intervals to use as time buffer
      * @return the list of measurement IDs
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public Integer[] getIdsWithoutData(long current, int cycles)
         throws DataNotAvailableException {
@@ -2010,14 +2005,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Used for debugging leaking connections
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void leakConnection () throws SQLException, NamingException {
         DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
     }
-
-    ///////////////////////////////////////
-    // EJB operations
 
     /**
      * @see javax.ejb.SessionBean#ejbCreate()
@@ -2064,5 +2055,4 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         // disable while this is broken
         // org.hyperic.hq.common.server.DBConnectionCounter.closeConnection(conn);
     }
-
-} // end DataManager
+}
