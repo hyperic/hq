@@ -30,31 +30,23 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.measurement.DerivedMeasurement;
 import org.hyperic.hq.measurement.MeasurementTemplate;
 import org.hyperic.hq.measurement.RawMeasurement;
-import org.hyperic.hq.measurement.shared.BaselineLocal;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementLocal;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementPK;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateLocal;
 import org.hyperic.util.pager.PagerProcessor;
 
 import javax.ejb.EJBLocalObject;
 
 public class PagerProcessor_measurement implements PagerProcessor {
-    private static final Log log =
+    private static final Log _log =
         LogFactory.getLog(PagerProcessor_measurement.class);
-    private static final boolean debug = log.isDebugEnabled();
-    private DMValueCache cache;
 
-    public PagerProcessor_measurement() {
-        cache = DMValueCache.getInstance();
-    }
+    public PagerProcessor_measurement() {}
 
     public Object processElement(Object o) {
         if (o == null) {
             return null;
         }
 
-        // Pojo object processing, this is all going away soon.
+        // Pojo object processing, this will all go away when the UI is
+        // converted to use measurement pojo's.
         if (o instanceof MeasurementTemplate) {
             return ((MeasurementTemplate)o).getMeasurementTemplateValue();
         } else if (o instanceof DerivedMeasurement) {
@@ -67,48 +59,8 @@ public class PagerProcessor_measurement implements PagerProcessor {
             return o;
         }
 
-        // EJB Local object processing
-        if (o instanceof DerivedMeasurementLocal) {
-            try {
-                DerivedMeasurementLocal dmEjb = (DerivedMeasurementLocal)o;
-                DerivedMeasurementPK pk =
-                    (DerivedMeasurementPK)dmEjb.getPrimaryKey();
-                DerivedMeasurementValue dmv = cache.get(pk.getId());
-                if(dmv == null) {
-                    dmv = dmEjb.getDerivedMeasurementValue();
-                    cache.put(dmv);
-                }
-                return dmv;
-            } catch (Exception e) {
-                throw new IllegalStateException("Error converting to " +
-                                                "DerivedMeasurementValue: " +
-                                                e);
-            }
-        }
-        if (o instanceof MeasurementTemplateLocal) {
-            try {
-                return ((MeasurementTemplateLocal)o)
-                    .getMeasurementTemplateValue();
-            } catch (Exception e) {
-                throw new IllegalStateException("Error converting to " +
-                                                "MeasurementTemplateValue: " +
-                                                e);
-            }
-        }
-        if (o instanceof BaselineLocal) {
-            try {
-                return ((BaselineLocal)o).getBaselineValue();
-            } catch (Exception e) {
-                if (log.isDebugEnabled())
-                    log.debug("Error converting to BaselineValue", e);
-                throw new IllegalStateException("Error converting to " +
-                                                "BaselineValue: " + e);
-            }
-        }
+        _log.error("Unhandled object " + o.getClass());
 
-        if (debug) {
-            log.debug("Not processing object " + o.getClass());
-        }
         return o;
     }
 }
