@@ -333,18 +333,6 @@ public class Server extends ServerBase
         return matches;
     }
 
-    /**
-     * @deprecated use setConfigResponse()
-     * @param crif
-     */
-    public void setConfigResponseId(Integer crif)
-    {
-        if (crif != null) {
-            ConfigResponseDB c = new ConfigResponseDB();
-            c.setId(crif);
-            setConfigResponse(c);
-        }
-    }
 
     /**
      * Validate a new service value object to be hosted by this server

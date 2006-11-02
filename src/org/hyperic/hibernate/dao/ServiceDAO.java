@@ -74,8 +74,7 @@ public class ServiceDAO extends HibernateDAO
         super.remove(entity);
     }
 
-    public Service create(ServiceValue sv, ServerPK parentPK)
-    {
+    public Service create(ServiceValue sv, Server parent) {
         ConfigResponseDB configResponse =
             DAOFactory.getDAOFactory().getConfigResponseDAO().create();
         
@@ -91,15 +90,13 @@ public class ServiceDAO extends HibernateDAO
         s.setParentId(sv.getParentId());
 
         if (sv.getServiceType() != null) {
-            ServiceType st = new ServiceType();
-            st.setId(sv.getServiceType().getId());
+            Integer stId = sv.getServiceType().getId();
+            ServiceType st = 
+                DAOFactory.getDAOFactory().getServiceTypeDAO().findById(stId);
             s.setServiceType(st);
         }
-        if (parentPK != null) {
-            Server server = new Server();
-            server.setId(parentPK.getId());
-            s.setServer(server);
-        }
+
+        s.setServer(parent);
         s.setConfigResponse(configResponse);
         save(s);
         return s;
@@ -111,7 +108,7 @@ public class ServiceDAO extends HibernateDAO
         // validate the service
         s.validateNewService(sv);
         // get the Service home
-        return create(sv, s.getPrimaryKey());
+        return create(sv, s);
     }
 
     public Collection findByParent(Integer parentId)

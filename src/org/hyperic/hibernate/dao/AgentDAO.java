@@ -69,17 +69,15 @@ public class AgentDAO extends HibernateDAO
         return (Agent)super.findById(id);
     }
 
-    public Agent create(AgentValue av, AgentType type)
-    {
+    public Agent create(AgentValue av, AgentType type) {
         Agent ag = new Agent();
+
         ag.setAddress(av.getAddress());
         ag.setPort(new Integer(av.getPort()));
         ag.setVersion(av.getVersion());
         ag.setAuthToken(av.getAuthToken());
         ag.setAgentToken(av.getAgentToken());
-        AgentType at = new AgentType();
-        at.setId(type.getId());
-        ag.setAgentType(at);
+        ag.setAgentType(type);
         save(ag);
         return ag;
     }

@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.appdef;
 
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.ServiceClusterPK;
@@ -42,6 +43,7 @@ import java.util.List;
  */
 public class ServiceCluster extends AppdefBean
 {
+    private String _foobar;
     private String name;
     private String sortName;
     private String description;
@@ -220,20 +222,20 @@ public class ServiceCluster extends AppdefBean
         return serviceClusterValue;
     }
 
-    public void setServiceClusterValue(ServiceClusterValue val)
-    {
-        setName( val.getName() );
-        setSortName( val.getSortName() );
-        setDescription( val.getDescription() );
-        setGroupId( val.getGroupId() );
+    public void setServiceClusterValue(ServiceClusterValue val) {
+        setName(val.getName());
+        setSortName(val.getSortName());
+        setDescription(val.getDescription());
+        setGroupId(val.getGroupId());
 
         if (val.getServiceType() != null) {
-            ServiceType st = new ServiceType();
-            st.setId(val.getServiceType().getId());
+            Integer stid = val.getServiceType().getId();
+            ServiceType st = 
+                DAOFactory.getDAOFactory().getServiceTypeDAO().findById(stid);
             setServiceType(st);
         }
     }
-
+    
     /**
      * Validate a new service to be added to this cluster. This enforces
      * service type compatibility as well as only allowing services to be in

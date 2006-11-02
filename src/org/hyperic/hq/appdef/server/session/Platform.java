@@ -171,17 +171,6 @@ public class Platform extends PlatformBase
     {
         return configResponse != null ?configResponse.getId() : null;
     }
-    /**
-     * legacy EJB accessor method
-     * @deprecated use setConfigResponse()
-     * @return
-     */
-    public void setConfigResponseId(Integer crif)
-    {
-        ConfigResponseDB c = new ConfigResponseDB();
-        c.setId(crif);
-        setConfigResponse(c);
-    }
 
     /**
      * Compare this entity to a value object

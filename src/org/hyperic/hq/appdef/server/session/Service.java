@@ -57,18 +57,7 @@ public class Service extends AppdefResource
     private ConfigResponseDB configResponse;
     private Collection appServices;
 
-    /**
-     * default constructor
-     */
-    public Service()
-    {
-        super();
-    }
-
-    public Service(Integer id)
-    {
-        super();
-        setId(id);
+    public Service() {
     }
 
     public AppdefEntityID getEntityId()
@@ -222,20 +211,6 @@ public class Service extends AppdefResource
     public void setConfigResponse(ConfigResponseDB configResponse)
     {
         this.configResponse = configResponse;
-    }
-
-    /**
-     * legacy EJB getter for configresponse id
-     * @deprecated use setConfigResponse() instead
-     * @return
-     */
-    public void setConfigResponseId(Integer crif)
-    {
-        if (crif != null) {
-            ConfigResponseDB c = new ConfigResponseDB();
-            c.setId(crif);
-            setConfigResponse(c);
-        }
     }
 
     public Collection getAppServices()

@@ -75,7 +75,7 @@ public class ServerDAO extends HibernateDAO
         super.remove(entity);
     }
 
-    public Server create(ServerValue sv)
+    public Server create(ServerValue sv, Platform p)
     {
         ConfigResponseDB configResponse = DAOFactory.getDAOFactory()
             .getConfigResponseDAO().create();
@@ -93,13 +93,11 @@ public class ServerDAO extends HibernateDAO
         s.setLocation(sv.getLocation());
         s.setModifiedBy(sv.getModifiedBy());
         s.setConfigResponse(configResponse);
-
-        Platform p = new Platform();
-        p.setId(sv.getPlatform().getId());
         s.setPlatform(p);
 
-        ServerType st = new ServerType();
-        st.setId(sv.getServerType().getId());
+        Integer stid = sv.getServerType().getId();
+        ServerType st = 
+            DAOFactory.getDAOFactory().getServerTypeDAO().findById(stid);
         s.setServerType(st);
         save(s);
         return s;
@@ -127,7 +125,7 @@ public class ServerDAO extends HibernateDAO
         sv.setPlatform(pv);
         // get the server home
         // create it
-        return create(sv);
+        return create(sv, p);
     }
 
     /**

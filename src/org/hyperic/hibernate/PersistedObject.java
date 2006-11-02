@@ -47,7 +47,7 @@ public abstract class PersistedObject
     private long    _version_;
 
     // XXX -- This is public for now, but should be made more private later
-    public void setId(Integer id) {
+    protected void setId(Integer id) {
         _id = id;
     }
 

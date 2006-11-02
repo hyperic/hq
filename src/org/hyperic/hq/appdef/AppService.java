@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.appdef;
 
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
@@ -217,34 +218,33 @@ public class AppService extends AppdefBean
         return appServiceValue;
     }
 
-    public void setAppServiceValue(AppServiceValue value)
-    {
+    public void setAppServiceValue(AppServiceValue value) {
         setIsCluster( value.getIsCluster() );
         setIsEntryPoint( value.getIsEntryPoint() );
 
-        if (value.getService() != null)
-        {
-            Service s = new Service();
-            s.setId(value.getService().getId());
+        if (value.getService() != null) {
+            Integer i = value.getService().getId();
+            Service s = DAOFactory.getDAOFactory().getServiceDAO().findById(i);
             setService(s);
         }
 
-        if (value.getServiceCluster() != null)
-        {
-            ServiceCluster sc = new ServiceCluster();
-            sc.setId(value.getServiceCluster().getId());
+        if (value.getServiceCluster() != null) {
+            Integer i = value.getServiceCluster().getId();
+            ServiceCluster sc = 
+                DAOFactory.getDAOFactory().getServiceClusterDAO().findById(i);
             setServiceCluster(sc);
         }
 
-        if (value.getServiceType() != null)
-        {
-            ServiceType st = new ServiceType();
-            st.setId(value.getServiceType().getId());
+        if (value.getServiceType() != null) {
+            Integer i = value.getServiceType().getId();
+            ServiceType st = 
+                DAOFactory.getDAOFactory().getServiceTypeDAO().findById(i);
             setServiceType(st);
         }
     }
 
     private AppServicePK pkey = new AppServicePK();
+
     /**
      * @deprecated use getId();
      * @return

@@ -498,23 +498,6 @@ public abstract class ServerEJBImpl
     }
     // HELPER METHODS
 
-    /**
-     * Create a Service instance hosted by this server.
-     * @ejb:interface-method
-     * @ejb:tranasaction type="REQUIRED"
-     * @param ServiceValue - the value object
-     * @throws CreateException -
-     * @throws ValidationException
-     */
-    public Service createService(ServiceValue sv)
-        throws CreateException, ValidationException {
-        // validate the service
-        this.validateNewService(sv);
-        // get the Service home
-        ServiceDAO sLHome =
-            DAOFactory.getDAOFactory().getServiceDAO();                // create it
-        return sLHome.create(sv, this.getPK());
-    }
 
     /**
      * Validate a new service value object to be hosted by this server
