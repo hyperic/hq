@@ -78,7 +78,7 @@ import org.quartz.SchedulerException;
  *  DerivedMeasurements to be scheduled, and RawMeasurements to be
  *  calculated.
  *
- *
+ * @ejb:transaction type="REQUIRED"
  * @ejb:bean name="MeasurementProcessor"
  *      jndi-name="ejb/measurement/MeasurementProcessor"
  *      local-jndi-name="LocalMeasurementProcessor"
@@ -97,9 +97,6 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
     private QueueConnection qConn = null;
     private QueueSession qSession = null;
 
-    ///////////////////////////////////////
-    // operations
-
     /**
      * Ping the agent to make sure it's up
      * @ejb:interface-method
@@ -116,7 +113,6 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
     /**
      * Initialize the SRN cache within a transaction
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void initializeSrnCache() {
         SRNCache.getInstance();
@@ -127,7 +123,6 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
      * measurements to be collected and calculated.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      *
      * @param measurement the measurement to be scheduled
      * @param g the graph for measurement
@@ -283,7 +278,6 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
     
     /** Unschedule metrics of multiple appdef entities
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      * @param agentEnt the entity whose agent will be contacted for the unschedule
      * @param entIds the entity IDs whose metrics should be unscheduled
      * @throws MeasurementUnscheduleException if an error occurs
@@ -306,7 +300,6 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
     
     /** Unschedule metrics of multiple appdef entities
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      * @param agentEnt the entity whose agent will be contacted for the unschedule
      * @param entIds the entity IDs whose metrics should be unscheduled
      * @throws MeasurementUnscheduleException if an error occurs
@@ -328,7 +321,6 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
 
     /** Unschedule a measurement
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      * @param measurement the measurement to be unscheduled
      * @throws MeasurementUnscheduleException if an error occurs
      */
@@ -412,9 +404,6 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
             }
         }
     }
-
-    ///////////////////////////////////////
-    // Private helpers
 
     private void scheduleRawMeasurements(AppdefEntityID entId,
                                          Map measurements, int srnVer)
@@ -547,10 +536,6 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
         }
     }
 
-
-    ///////////////////////////////////////
-    // EJB operations
-
     /**
      * @see javax.ejb.SessionBean#ejbCreate()
      * @ejb:create-method
@@ -599,5 +584,4 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
         throws EJBException, RemoteException {
         this.ctx = ctx;
     }
-
 }
