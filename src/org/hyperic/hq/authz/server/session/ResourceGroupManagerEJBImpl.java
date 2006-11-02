@@ -556,7 +556,7 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
         Iterator i = all.iterator();
         while (i.hasNext() && groups.size() < numToFind) {
             ResourceGroupValue g = (ResourceGroupValue) i.next();
-            if (index.contains(((ResourceGroupPK) g.getPrimaryKey()).getId()))
+            if (index.contains(g.getId()))
                 groups.add(g);
         }
 
