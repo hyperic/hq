@@ -49,7 +49,6 @@ import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hibernate.dao.AuthzSubjectDAO;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectPK;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -105,7 +104,7 @@ public class AuthzSubjectManagerEJBImpl
      * @throws NamingException 
      * @ejb:interface-method
      */
-    public AuthzSubjectPK createSubject(AuthzSubjectValue whoami,
+    public AuthzSubject createSubject(AuthzSubjectValue whoami,
                                         AuthzSubjectValue subject)
         throws FinderException, PermissionException, CreateException {
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
@@ -133,7 +132,7 @@ public class AuthzSubjectManagerEJBImpl
         
         this.insertUserPrefs(subjectPojo.getId());
 
-        return new AuthzSubjectPK(subjectPojo.getId());
+        return subjectPojo;
     }
 
 

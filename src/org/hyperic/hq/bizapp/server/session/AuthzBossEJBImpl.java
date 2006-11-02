@@ -43,6 +43,7 @@ import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -372,9 +373,9 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         // check for timeout
         AuthzSubjectValue whoami = manager.getSubject(sessionId.intValue());        
 
-        AuthzSubjectManagerLocal subject = getAuthzSubjectManager();
-        subject.createSubject(whoami, user);
-        return subject.findSubjectByAuth(user.getName(), user.getAuthDsn());
+        AuthzSubjectManagerLocal subjMan = getAuthzSubjectManager();
+        AuthzSubject subject = subjMan.createSubject(whoami, user);
+        return subject.getAuthzSubjectValue();
         
     }
 

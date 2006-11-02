@@ -1,9 +1,9 @@
 package org.hyperic.hq.authz.test;
 
 
+import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectPK;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.test.HQEJBTestBase;
@@ -30,32 +30,32 @@ public class AuthzSubjectTest extends HQEJBTestBase {
         int numSubjects = zMan.getAllSubjects(overlord,
                                               PageControl.PAGE_ALL).size();
 
-        AuthzSubjectValue subject = new AuthzSubjectValue();
-        subject.setName("foo");
-        subject.setFirstName("Foo");
-        subject.setLastName("Bar");
-        subject.setEmailAddress(BOGUS_NAME);
-        subject.setAuthDsn(HQConstants.ApplicationName);
+        AuthzSubjectValue subjVal = new AuthzSubjectValue();
+        subjVal.setName("foo");
+        subjVal.setFirstName("Foo");
+        subjVal.setLastName("Bar");
+        subjVal.setEmailAddress(BOGUS_NAME);
+        subjVal.setAuthDsn(HQConstants.ApplicationName);
 
-        AuthzSubjectPK pk = zMan.createSubject(overlord, subject);
+        AuthzSubject subject = zMan.createSubject(overlord, subjVal);
         assertEquals(numSubjects + 1,
                      zMan.getAllSubjects(overlord,
                                          PageControl.PAGE_ALL).size());
         
         // Look it up by name
-        subject = zMan.findSubjectByName(overlord, "foo");
-        assertEquals(pk.getId(), subject.getId());
+        subjVal = zMan.findSubjectByName(overlord, "foo");
+        assertEquals(subject.getId(), subjVal.getId());
         
         // Look it up by ID
-        subject = zMan.findSubjectById(overlord, subject.getId());
-        assertEquals(pk.getId(), subject.getId());
+        subjVal = zMan.findSubjectById(overlord, subjVal.getId());
+        assertEquals(subject.getId(), subjVal.getId());
         
         // Check the bogus email
-        assertEquals(BOGUS_NAME, zMan.getEmailById(pk.getId()));
+        assertEquals(BOGUS_NAME, zMan.getEmailById(subject.getId()));
         assertEquals(BOGUS_NAME, zMan.getEmailByName("foo"));
         
         // Now delete it
-        zMan.removeSubject(overlord, pk.getId());
+        zMan.removeSubject(overlord, subject.getId());
 
         assertEquals(numSubjects,
                      zMan.getAllSubjects(overlord,
