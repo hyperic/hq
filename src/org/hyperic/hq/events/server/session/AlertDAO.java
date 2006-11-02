@@ -129,7 +129,12 @@ public class AlertDAO extends HibernateDAO {
     }
     
     public int countAlerts(AlertDefinition def) {
-        return size(findByAlertDefinition(def));
+        String sql = "select count(*) from Alert a " +
+            "where a.alertDefinition = :alertDef";
+        
+        return ((Integer)getSession().createQuery(sql)
+                                     .setParameter("alertDef", def)
+                                     .uniqueResult()).intValue();
     }
     
     public List findBySubject(Integer userId) {
