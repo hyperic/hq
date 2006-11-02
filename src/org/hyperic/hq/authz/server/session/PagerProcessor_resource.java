@@ -37,10 +37,6 @@ public class PagerProcessor_resource implements PagerProcessor {
     public Object processElement(Object o) {
         if (o == null) return null;
         try {
-            if ( o instanceof ResourcePK) {
-                return ResourceVOHelperUtil.getLocalHome().create()
-                    .getResourceValue(((ResourcePK) o).getId());
-            }
             if (o instanceof Resource) {
                 return ResourceVOHelperUtil.getLocalHome().create()
                     .getResourceValue((Resource)o);
