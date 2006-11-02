@@ -218,20 +218,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     }
 
     /**
-     * Return the full <code>List</code> of
-     * <code>ResourceGroupValue</code> objects representing every
-     * resource type in the system that the user is allowed to view.
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
-    public List getAllResourceGroups(Integer sessionId)
-        throws NamingException, FinderException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException {
-        return getAllResourceGroups(sessionId, null);
-    }
-
-    /**
      * Return a sorted, paged <code>List</code> of
      * <code>ResourceGroupValue</code> objects corresponding to the
      * specified id values.
