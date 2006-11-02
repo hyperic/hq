@@ -27,8 +27,6 @@ package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
 import org.hyperic.hq.appdef.ConfigResponseDB;
-import org.hyperic.hq.appdef.AppSvcDependency;
-import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
@@ -36,8 +34,6 @@ import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.appdef.shared.AppSvcDependencyLocal;
-import org.hyperic.hq.appdef.shared.ApplicationPK;
 import org.hyperic.dao.DAOFactory;
 
 import java.util.Collection;

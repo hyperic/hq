@@ -48,7 +48,6 @@ import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationPK;
 import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
-import org.hyperic.hq.appdef.shared.ApplicationUtil;
 import org.hyperic.hq.appdef.shared.ApplicationVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.DependencyTree;
@@ -465,19 +464,17 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             }
             switch(attr) {
                 case SortAttribute.RESOURCE_NAME:
-                    if(pc != null && pc.isDescending()) {
-                        apps = ApplicationUtil.getLocalHome().findAll_orderName_desc();
-                    } else {
-                        apps = ApplicationUtil.getLocalHome().findAll_orderName_asc();
-                    } 
+                    if(pc != null) {
+                        apps = getApplicationDAO().findAll_orderName(!pc.isDescending());
+                    }
                     break;
                 default:
-                    apps = ApplicationUtil.getLocalHome().findAll();
+                    apps = getApplicationDAO().findAll();
                     break;
             }
             for(Iterator i = apps.iterator(); i.hasNext();) {
                 ApplicationPK appPk = 
-                    (ApplicationPK) ((Application)i.next()).getPrimaryKey();
+                    ((Application)i.next()).getPrimaryKey();
                 if(!authzPks.contains(appPk)) {
                     i.remove();
                 }

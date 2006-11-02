@@ -41,7 +41,6 @@ import org.hyperic.hibernate.dao.ServiceClusterDAO;
 import org.hyperic.hibernate.dao.AIServerDAO;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
-import org.hyperic.hq.appdef.shared.AIServerLocalHome;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
