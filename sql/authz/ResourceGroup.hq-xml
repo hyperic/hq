@@ -76,15 +76,15 @@
       <column name="RESOURCE_ID" index="EAM_RES_GROUP_RES_KEY" />
     </many-to-one>
 
-    <bag name="resources" table="EAM_RES_GRP_RES_MAP">
+    <set name="resources" table="EAM_RES_GRP_RES_MAP">
       <key column="RESOURCE_GROUP_ID"/>
       <many-to-many class="Resource" column="RESOURCE_ID" />
-    </bag>
+    </set>
 
-    <bag name="roles" table="EAM_ROLE_RESOURCE_GROUP_MAP">
+    <set name="roles" table="EAM_ROLE_RESOURCE_GROUP_MAP">
       <key column="RESOURCE_GROUP_ID" />
       <many-to-many class="Role" column="ROLE_ID" />
-    </bag>
+    </set>
   </class>
 
   <class name="ResGrpResMap" table="EAM_RES_GRP_RES_MAP">
