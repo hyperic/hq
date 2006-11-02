@@ -26,12 +26,10 @@
 package org.hyperic.hq.measurement.action;
 
 import javax.ejb.CreateException;
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionInterface;
@@ -40,28 +38,24 @@ import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
-import org.hyperic.hq.measurement.shared.MetricProblemLocalHome;
-import org.hyperic.hq.measurement.shared.MetricProblemUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
+import org.hyperic.hibernate.dao.MetricProblemDAO;
+import org.hyperic.dao.DAOFactory;
 
 /**
- *
  * Log the fact that an alert was generated due to some measurement
  */
 public class MetricAlertAction implements ActionInterface {
     private Log log = LogFactory.getLog(MetricAlertAction.class);
 
-    private MetricProblemLocalHome mpHome = null;
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.events.ActionInterface#execute(org.hyperic.hq.events.shared.AlertDefinitionValue, org.hyperic.hq.events.TriggerFiredEvent, java.lang.Integer)
-     */
     public String execute(AlertDefinitionBasicValue alertdef,
                           TriggerFiredEvent event, Integer alertId)
         throws ActionExecuteException {
+        MetricProblemDAO dao =
+            DAOFactory.getDAOFactory().getMetricProblemDAO();
         StringBuffer actLog = new StringBuffer();
 
         // Organize the events by trigger
@@ -71,22 +65,17 @@ public class MetricAlertAction implements ActionInterface {
             AbstractEvent[] events = firedEvents[i].getEvents();
             for (int j = 0; j < events.length; j++) {
                 if (events[j] instanceof MeasurementEvent) {
-                    try {
-                        mpHome.create(events[j].getInstanceId(),
-                                      events[j].getTimestamp(),
-                                      MeasurementConstants.PROBLEM_TYPE_ALERT,
-                                      alertId);
+                    dao.create(events[j].getInstanceId(),
+                               events[j].getTimestamp(),
+                               MeasurementConstants.PROBLEM_TYPE_ALERT,
+                               alertId);
 
-                        // Append to action log
-                        actLog.append("MeasurementAlert added for mid: ");
-                        actLog.append(events[j].getInstanceId());
-                        actLog.append(" aid: ");
-                        actLog.append(alertId);
-                        actLog.append("\n");
-                    } catch (CreateException e) {
-                        log.debug("Error creating MeasurementAlert", e);
-                        continue;
-                    }
+                    // Append to action log
+                    actLog.append("MeasurementAlert added for mid: ");
+                    actLog.append(events[j].getInstanceId());
+                    actLog.append(" aid: ");
+                    actLog.append(alertId);
+                    actLog.append("\n");
                 }
             }
         }
@@ -94,36 +83,19 @@ public class MetricAlertAction implements ActionInterface {
         return actLog.toString();
     }
 
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.events.ActionConfigInterface#getConfigSchema()
-     */
     public ConfigSchema getConfigSchema() {
         return new ConfigSchema();
     }
 
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.events.ActionConfigInterface#getConfigResponse()
-     */
+
     public ConfigResponse getConfigResponse()
         throws InvalidOptionException, InvalidOptionValueException {
         return new ConfigResponse();
     }
 
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.events.ActionConfigInterface#init(org.hyperic.util.config.ConfigResponse)
-     */
     public void init(ConfigResponse config) throws InvalidActionDataException {
-        // Do nothing with the config
-        try {
-            mpHome = MetricProblemUtil.getLocalHome();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
     }
 
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.events.ActionConfigInterface#getImplementor()
-     */
     public String getImplementor() {
         return MetricAlertAction.class.getName();
     }
@@ -137,5 +109,4 @@ public class MetricAlertAction implements ActionInterface {
         throws InvalidActionDataException {
         this.init(config);
     }
-
 }
