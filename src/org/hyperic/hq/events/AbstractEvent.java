@@ -31,67 +31,38 @@
 
 package org.hyperic.hq.events;
 
-/**Subsystems will extend the abstract Event class to be able to
+import java.io.Serializable;
+
+/**
+ * Subsystems will extend the abstract Event class to be able to
  * return a specific payload value.
- *
  */
-public abstract class AbstractEvent implements java.io.Serializable {
+public abstract class AbstractEvent implements Serializable {
+    private Long    _id;
+    private Integer _instanceId;
+    private long    _timestamp = System.currentTimeMillis();
     
-    /** Holds value of property id. */
-    private Long id = null;
-    
-    /** Holds value of property instanceId. */
-    private Integer instanceId = null;
-    
-    /** Holds value of property timestamp. */
-    private long timestamp = System.currentTimeMillis();
-    
-    /** Getter for property id.
-     * @return Value of property id.
-     *
-     */
     public Long getId() {
-        return this.id;
+        return _id;
     }
     
-    /** Setter for property id.
-     * @param id New value of property id.
-     *
-     */
     public void setId(Long id) {
-        this.id = id;
+        _id = id;
     }
     
-    /** Getter for property instanceId.
-     * @return Value of property instanceId.
-     *
-     */
     public Integer getInstanceId() {
-        return this.instanceId;
+        return _instanceId;
     }
     
-    /** Setter for property instanceId.
-     * @param instanceId New value of property instanceId.
-     *
-     */
     public void setInstanceId(Integer instanceId) {
-        this.instanceId = instanceId;
+        _instanceId = instanceId;
     }
     
-    /** Getter for property timestamp.
-     * @return Value of property timestamp.
-     *
-     */
     public long getTimestamp() {
-        return this.timestamp;
+        return _timestamp;
     }
     
-    /** Setter for property timestamp.
-     * @param timestamp New value of property timestamp.
-     *
-     */
     public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
+        _timestamp = timestamp;
     }
-    
 }
