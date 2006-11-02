@@ -83,6 +83,7 @@ import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.schedule.UnscheduledItemException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -186,6 +187,8 @@ public class MeasurementCommandsServer
         try {
             this.scheduleObject.unscheduleMeasurements(ent);
             this.schedStorage.deleteMeasurements(ent);
+        } catch(UnscheduledItemException exc){
+            // OK to ignore
         } catch(AgentStorageException exc){
             this.log.error("Unable to remove metrics for entity " + ent + 
                            " from storage: " + exc.getMessage());
@@ -224,6 +227,8 @@ public class MeasurementCommandsServer
       unscheduleMeasurements(UnscheduleMeasurements_args args)
         throws AgentRemoteException 
     {
+        UnscheduledItemException resExc = null;
+        AppdefEntityID failedEnt = null;
         int i, nEnts = args.getNumEntities();
 
         this.log.debug("Received unschedule request for " + nEnts + 
@@ -234,15 +239,28 @@ public class MeasurementCommandsServer
             this.log.debug("Deleting metrics for " + ent);
 
             try {
-                this.scheduleObject.unscheduleMeasurements(ent);
-                this.schedStorage.removeSRN(ent);
-                this.schedStorage.deleteMeasurements(ent);
+                try {
+                    this.scheduleObject.unscheduleMeasurements(ent);
+                    this.schedStorage.removeSRN(ent);
+                } catch(UnscheduledItemException exc){
+                    resExc    = exc;
+                    failedEnt = ent;
+                }
+
+                if(resExc == null){
+                        this.schedStorage.deleteMeasurements(ent);
+                }
             } catch(AgentStorageException exc){
-                this.log.error("Failed to delete measurement from storage", 
-                               exc);
+                this.log.error("Failed to delete measurement from storage");
             }
         }
         
+        if(resExc != null){
+            throw new AgentRemoteException("Failed to unschedule metrics " +
+                                           "for entity " + failedEnt + ": " +
+                                           resExc.getMessage());
+        }
+
         return new UnscheduleMeasurements_result();
     }
 

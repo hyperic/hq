@@ -23,24 +23,24 @@
  * USA.
  */
 
-package org.hyperic.hq.scheduler;
+package org.hyperic.util.schedule;
 
-import org.hyperic.util.schedule.ScheduleException;
+import org.hyperic.util.NestedException;
 
-public class ScheduleWillNeverFireException extends ScheduleException {
-    public ScheduleWillNeverFireException() {
+public class ScheduleException extends NestedException {
+    public ScheduleException() {
         super();
     }
 
-    public ScheduleWillNeverFireException(String s) {
+    public ScheduleException(String s) {
         super(s);
     }
 
-    public ScheduleWillNeverFireException(Throwable t) {
+    public ScheduleException(Throwable t) {
         super(t);
     }
 
-    public ScheduleWillNeverFireException(String s, Throwable t) {
+    public ScheduleException(String s, Throwable t) {
         super(s, t);
     }
 }

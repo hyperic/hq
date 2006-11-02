@@ -50,7 +50,10 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.util.collection.IntHashMap;
+import org.hyperic.util.schedule.EmptyScheduleException;
 import org.hyperic.util.schedule.Schedule;
+import org.hyperic.util.schedule.ScheduleException;
+import org.hyperic.util.schedule.UnscheduledItemException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -123,7 +126,9 @@ public class ScheduleThread
      *
      * @throws UnscheduledItemException indicating the passed ID was not found
      */
-    void unscheduleMeasurements(AppdefEntityID ent) {
+    void unscheduleMeasurements(AppdefEntityID ent)
+        throws UnscheduledItemException
+    {
         // Synchronize on the hash to make sure someone isn't trying to 
         // add to an entity when we are trying to delete it
         synchronized(this.entSchedule){
@@ -144,7 +149,13 @@ public class ScheduleThread
             for(int i=0; i<mIDList.size(); i++){
                 Long mID = (Long)mIDList.get(i);
 
-                this.schedule.unscheduleItem(mID.longValue());
+                try {
+                    this.schedule.unscheduleItem(mID.longValue());
+                } catch(UnscheduledItemException exc){
+                    throw new AgentAssertionException("Tried to unschedule " +
+                                                      "something which wasnt" +
+                                                      " scheduled");
+                }
             }
             
             this.entSchedule.remove(ent);
@@ -164,12 +175,23 @@ public class ScheduleThread
             Vector  mIDList;
             long    mID;
 
-            oldNextTime = this.schedule.getTimeOfNext();
-            if (oldNextTime == -1) 
+            try {
+                oldNextTime = this.schedule.getTimeOfNext();
+            } catch(EmptyScheduleException exc){
                 oldNextTime = 0;
+            }
 
-            mID = this.schedule.scheduleItem(meas, meas.getInterval(), 
-                                             true, true);
+            try {
+                mID = this.schedule.scheduleItem(meas, meas.getInterval(), 
+                                                 true, true);
+            } catch (ScheduleException e) {
+                //XXX: We continue through the schedule rather than bail with
+                //     an Exception.
+                log.error("Unable to schedule metric '" +
+                          logMetric(meas.getDSN()) + "', skipping. Cause is " +
+                          e.getMessage(), e);
+                return;
+            }
 
             mIDList = (Vector)this.entSchedule.get(meas.getEntity());
             if(mIDList == null){
@@ -178,10 +200,12 @@ public class ScheduleThread
             } 
             mIDList.add(new Long(mID));
             
-            newNextTime = this.schedule.getTimeOfNext();
-            if (newNextTime == -1) 
+            try {
+                newNextTime = this.schedule.getTimeOfNext();
+            } catch(EmptyScheduleException exc){
                 throw new AgentAssertionException("Schedule should have at " +
                                                   "least one entry");
+            }
         }
 
         // Check to see if we scheduled something sooner than the
@@ -283,12 +307,15 @@ public class ScheduleThread
             MetricValue data = null;
             List             items;
             long             timeToNext;
-            long schedNext = this.schedule.getTimeOfNext();
             
-            if (schedNext == -1)
+            try {
+                synchronized(this.entSchedule){
+                    timeToNext = this.schedule.getTimeOfNext() - 
+                        System.currentTimeMillis();
+                }
+            } catch(EmptyScheduleException exc){
                 timeToNext = ScheduleThread.POLL_PERIOD;
-            else 
-                timeToNext = schedNext - System.currentTimeMillis();
+            }
 
             if(timeToNext > 0){
                 //this.log.debug("Sleeping " + timeToNext +" to next batch");
@@ -305,18 +332,21 @@ public class ScheduleThread
                 if(this.schedule.getNumItems() == 0)
                     continue;
                 
-                if (System.currentTimeMillis() <
-                    this.schedule.getTimeOfNext()) 
-                {
-                    continue; // Not yet
-                }
-                items = this.schedule.consumeNextItems();
+                try {
+                    if (System.currentTimeMillis() <
+                        this.schedule.getTimeOfNext()) {
+                        continue; // Not yet
+                    }
+                    items = this.schedule.consumeNextItems();
 
-                if (retry.size() != 0) {
-                    log.debug("Retrying " + retry.size() +
-                              " items (MetricValue.FUTUREs)");
-                    items.addAll(retry);
-                    retry.clear();
+                    if (retry.size() != 0) {
+                        log.debug("Retrying " + retry.size() +
+                                  " items (MetricValue.FUTUREs)");
+                        items.addAll(retry);
+                        retry.clear();
+                    }
+                } catch(EmptyScheduleException exc){
+                    continue;
                 }
             }
 

@@ -42,7 +42,10 @@ import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.RawMeasurementValue;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.util.schedule.EmptyScheduleException;
 import org.hyperic.util.schedule.Schedule;
+import org.hyperic.util.schedule.ScheduleException;
+import org.hyperic.util.schedule.UnscheduledItemException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -89,70 +92,74 @@ public abstract class ScheduledMonitor
     /** Check the schedule to sleep and then wake up to do some measurements
      */
     public void scheduleMeasurements() {
-        long sleepTime = getSchedule().getTimeOfNext() -
-                         System.currentTimeMillis();
-        
         try {
-            if (sleepTime > 0)
-                Thread.sleep(sleepTime);
-        } catch (InterruptedException e) {
-            // Do nothing, let's just get the value now
-        }
-
-        // Don't want duplicates
-        HashMap measurements  = new HashMap();
-        HashMap markers       = new HashMap();
-        List scheduledItems = getSchedule().consumeNextItems();
-        for (Iterator i = scheduledItems.iterator(); i.hasNext();) {
-            ScheduledItem si = (ScheduledItem) i.next();
-            RawMeasurementValue[] rms = si.getRmvs();
-            for (int ind = 0; ind < rms.length; ind++) {
-                Integer rmId = rms[ind].getId();
-                if (measurements.containsKey(rmId))
-                    continue;
-
-                // Collection measurements
-                measurements.put(rmId, rms[ind]);
-                
-                // Lookup the marker
-                markers.put(rmId, si.getDmv().getId());
+            long sleepTime = getSchedule().getTimeOfNext() -
+                             System.currentTimeMillis();
+        
+            try {
+                if (sleepTime > 0)
+                    Thread.sleep(sleepTime);
+            } catch (InterruptedException e) {
+                // Do nothing, let's just get the value now
             }
-        }
-        
-        // Now get the unique values
-        Collection msCol = measurements.values();
-        RawMeasurementValue[] rmvs =
-            (RawMeasurementValue[]) msCol
-            .toArray(new RawMeasurementValue[msCol.size()]);
-        
-        MetricValue[] values = getValues(rmvs);
-        
-        try {   // Now send the report
-            MeasurementReportConstructor constr;
-            
-            constr = new MeasurementReportConstructor();
-            for (int i = 0; i < values.length; i++) {
-                Integer rmId = (Integer) markers.get(rmvs[i].getId());
-                constr.addDataPoint(rmId.intValue(),
-                                    rmvs[i].getId().intValue(), values[i]);
+
+            // Don't want duplicates
+            HashMap measurements  = new HashMap();
+            HashMap markers       = new HashMap();
+            List scheduledItems = getSchedule().consumeNextItems();
+            for (Iterator i = scheduledItems.iterator(); i.hasNext();) {
+                ScheduledItem si = (ScheduledItem) i.next();
+                RawMeasurementValue[] rms = si.getRmvs();
+                for (int ind = 0; ind < rms.length; ind++) {
+                    Integer rmId = rms[ind].getId();
+                    if (measurements.containsKey(rmId))
+                        continue;
+
+                    // Collection measurements
+                    measurements.put(rmId, rms[ind]);
+
+                    // Lookup the marker
+                    markers.put(rmId, si.getDmv().getId());
+                }
             }
-            
-            // Create a measurement report
-            MeasurementReport report = new MeasurementReport();
-            
-            report.setClientIdList(constr.constructDSNList());
-            sender.sendMessage(MeasurementConstants.REPORT_QUEUE, report);
-        } catch (Exception e) {
-            this.log.warn("Error sending measurement report", e);
-        }
-        
-        // Let's schedule the next one
-        long nextTime = getSchedule().getTimeOfNext();
-        
-        if (nextTime == -1)
+
+            // Now get the unique values
+            Collection msCol = measurements.values();
+            RawMeasurementValue[] rmvs =
+                (RawMeasurementValue[]) msCol
+                    .toArray(new RawMeasurementValue[msCol.size()]);
+
+            MetricValue[] values = getValues(rmvs);
+
+            try {   // Now send the report
+                MeasurementReportConstructor constr;
+
+                constr = new MeasurementReportConstructor();
+                for (int i = 0; i < values.length; i++) {
+                    Integer rmId = (Integer) markers.get(rmvs[i].getId());
+                    constr.addDataPoint(rmId.intValue(),
+                                        rmvs[i].getId().intValue(),
+                                        values[i]);
+                }
+
+                // Create a measurement report
+                MeasurementReport report = new MeasurementReport();
+
+                report.setClientIdList(constr.constructDSNList());
+                sender.sendMessage(MeasurementConstants.REPORT_QUEUE, report);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            // Let's schedule the next one
+            long nextTime = getSchedule().getTimeOfNext();
+
+            // Would have thrown EmptyScheduleException if there's nothing
+            sender.sendMessage(QNAME, this);
+        } catch (EmptyScheduleException e) {
+            // Nothing to do
             return;
-        
-        sender.sendMessage(QNAME, this);
+        }
     }
 
     /** Schedule the measurement to be retrieved at
@@ -167,9 +174,11 @@ public abstract class ScheduledMonitor
         // Keep track of the next time before we scheduled
         long before = 0;
         
-        before = getSchedule().getTimeOfNext();
-        if (before == -1)
-            before = 0; // No problem, empty schedule -- go with 0
+        try {
+            before = getSchedule().getTimeOfNext();
+        } catch (EmptyScheduleException e) {
+            // No problem, go with 0
+        }
 
         for(int i=0; i<schedule.length; i++){
             DerivedMeasurementValue dMetric = schedule[i].getDerivedMetric();
@@ -186,15 +195,28 @@ public abstract class ScheduledMonitor
                 // That's fine, no worries
             }
             
-            long sid = 
-                getSchedule().scheduleItem(new ScheduledItem(dMetric,
-                                                             rMetrics),
-                                           dMetric.getInterval(), true);
+            long sid;
+            try {
+                sid =
+                    getSchedule().scheduleItem(new ScheduledItem(dMetric,
+                                                                 rMetrics),
+                                               dMetric.getInterval(), true);
+            } catch (ScheduleException e) {
+                //XXX: We continue through the schedule rather than bail with
+                //     an Exception.
+                log.error("Unable to schedule metric '" +
+                          dMetric.getTemplate() + "', skipping. Cause is " +
+                          e.getMessage(), e);
+                return;
+            }
 
             // See if we changed the schedule
-            long after = getSchedule().getTimeOfNext();
-            if (after == -1)  // Empty schedule
-                after = 0;
+            long after = 0;
+            try {
+                after = getSchedule().getTimeOfNext();
+            } catch (EmptyScheduleException e) {
+                // Not likely, but go with 0
+            }
 
             // Save it for later
             Hashtable schedMap = this.getScheduleMap();
@@ -239,7 +261,11 @@ public abstract class ScheduledMonitor
                 for(Iterator j=hs.iterator(); j.hasNext(); ){
                     Long id = (Long)j.next();
                     
-                    getSchedule().unscheduleItem(id.longValue());
+                    try {
+                        getSchedule().unscheduleItem(id.longValue());
+                    } catch(UnscheduledItemException e){
+                        e.printStackTrace();
+                    }
                 }
 
                 schedMap.remove(schedule[i].getEntity());

@@ -23,24 +23,10 @@
  * USA.
  */
 
-package org.hyperic.hq.scheduler;
+package org.hyperic.util.schedule;
 
-import org.hyperic.util.schedule.ScheduleException;
-
-public class ScheduleWillNeverFireException extends ScheduleException {
-    public ScheduleWillNeverFireException() {
-        super();
-    }
-
-    public ScheduleWillNeverFireException(String s) {
-        super(s);
-    }
-
-    public ScheduleWillNeverFireException(Throwable t) {
-        super(t);
-    }
-
-    public ScheduleWillNeverFireException(String s, Throwable t) {
-        super(s, t);
+public class UnscheduledItemException extends Exception {
+    public UnscheduledItemException(String msg){
+	super(msg);
     }
 }

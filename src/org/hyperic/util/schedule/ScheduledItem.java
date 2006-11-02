@@ -71,22 +71,42 @@ public class ScheduledItem {
         return currentTime + interval - (currentTime % interval);
     }
 
+    /** 
+     * Getter for property obj.
+     * @return Value of property obj.
+     */
     public Object getObj() {
         return obj;
     }
     
+    /** 
+     * Getter for property interval.
+     * @return Value of property interval.
+     */
     public long getInterval() {
         return interval;
     }
     
+    /** 
+     * Getter for property nextTime.
+     * @return Value of property nextTime.
+     */
     public long getNextTime() {
         return nextTime;
     }
         
+    /** 
+     * Getter for property repeat.
+     * @return Value of property repeat.
+     */
     public boolean isRepeat() {
         return repeat;
     }
     
+    /** 
+     * Getter for property id.
+     * @return Value of property id.
+     */
     public long getId() {
         return id;
     }
@@ -95,6 +115,7 @@ public class ScheduledItem {
      * Step the nextTime attribute to the current nextTime plus the 
      * interval for which the object should repeat.
      */
+
     public void stepNextTime(){
         this.nextTime += this.interval;
     }
