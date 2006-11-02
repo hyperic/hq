@@ -208,9 +208,9 @@ public class ResourceDAO extends HibernateDAO
                      "   op.name = 'viewService' or " +
                      "   op.name = 'viewResourceGroup') and " +
                      "   0 = (select count(*) from Resource r2 " +
-                     "        join fetch r.resourceGroups rg2 " +
-                     "        where r.id = r2.id and rg.groupType = 15 and" +
-                     "              rg.clusterId != -1) " +
+                     "        join r2.resourceGroups rg2 " +
+                     "        where r.id = r2.id and rg2.groupType = 15 and" +
+                     "              rg2.clusterId != -1) " +
                      "order by r.sortName ";
         List resources =
             getSession().createQuery(sql)
@@ -248,9 +248,9 @@ public class ResourceDAO extends HibernateDAO
                    "   op.name = 'viewService' or " +
                    "   op.name = 'viewResourceGroup') and " +
                    "   0 = (select count(*) from Resource r2 " +
-                   "        join fetch r.resourceGroups rg2 " +
-                   "        where r.id = r2.id and rg.groupType = 15 and" +
-                   "              rg.clusterId != -1) " +
+                   "        join r2.resourceGroups rg2 " +
+                   "        where r.id = r2.id and rg2.groupType = 15 and" +
+                   "              rg2.clusterId != -1) " +
                    "order by r.sortName ";
         List resources =
             getSession().createQuery(sql)
