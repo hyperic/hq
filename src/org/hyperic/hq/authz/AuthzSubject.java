@@ -32,7 +32,7 @@ import java.util.Collections;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 
-public class AuthzSubject extends AuthzNamedEntity {
+public class AuthzSubject extends AuthzNamedBean {
     private String     _dsn;
     private Integer    _cid;
     private String     _firstName;

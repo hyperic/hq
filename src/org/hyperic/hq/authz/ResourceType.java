@@ -31,7 +31,7 @@ import java.util.Iterator;
 
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 
-public class ResourceType extends AuthzNamedEntity
+public class ResourceType extends AuthzNamedBean
 {
     private Integer cid;
     private Resource resource;

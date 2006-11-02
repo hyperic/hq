@@ -30,7 +30,7 @@ import java.util.Collection;
 
 import org.hyperic.hq.authz.shared.OperationValue;
 
-public class Operation extends AuthzNamedEntity
+public class Operation extends AuthzNamedBean
 {
 
     // Fields

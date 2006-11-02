@@ -50,7 +50,7 @@ import org.hyperic.hibernate.dao.ResourceDAO;
 import org.hyperic.hibernate.dao.ResourceGroupDAO;
 import org.hyperic.hibernate.dao.ResourceTypeDAO;
 import org.hyperic.hibernate.dao.RoleDAO;
-import org.hyperic.hq.authz.AuthzNamedEntity;
+import org.hyperic.hq.authz.AuthzNamedBean;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.Operation;
 import org.hyperic.hq.authz.Resource;
@@ -249,7 +249,7 @@ public abstract class AuthzSession {
         
         int i = 0;
         for (Iterator it = pojos.iterator(); it.hasNext(); i++) {
-            AuthzNamedEntity ent = (AuthzNamedEntity) it.next();
+            AuthzNamedBean ent = (AuthzNamedBean) it.next();
             values[i] = ent.getValueObject();
             
             // Verify that it's the expected class

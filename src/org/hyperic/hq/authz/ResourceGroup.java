@@ -30,7 +30,7 @@ import java.util.Collection;
 
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 
-public class ResourceGroup extends AuthzNamedEntity
+public class ResourceGroup extends AuthzNamedBean
 {
 
     private Integer cid;

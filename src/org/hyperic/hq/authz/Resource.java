@@ -33,7 +33,7 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class Resource extends AuthzNamedEntity
+public class Resource extends AuthzNamedBean
 {
     public static final Log log = LogFactory.getLog(Resource.class);
 

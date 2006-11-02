@@ -27,16 +27,16 @@ package org.hyperic.hq.authz;
 
 import org.hyperic.hibernate.PersistedObject;
 
-public abstract class AuthzNamedEntity extends PersistedObject
+public abstract class AuthzNamedBean extends PersistedObject
 {
     private String name;
     private String sortName;
 
-    protected AuthzNamedEntity()
+    protected AuthzNamedBean()
     {
     }
 
-    protected AuthzNamedEntity(String name)
+    protected AuthzNamedBean(String name)
     {
         this.name = name;
         setSortName(name);
@@ -70,10 +70,10 @@ public abstract class AuthzNamedEntity extends PersistedObject
 
     public boolean equals(Object obj)
     {
-        if (!(obj instanceof AuthzNamedEntity) || !super.equals(obj)) {
+        if (!(obj instanceof AuthzNamedBean) || !super.equals(obj)) {
             return false;
         }
-        AuthzNamedEntity o = (AuthzNamedEntity) obj;
+        AuthzNamedBean o = (AuthzNamedBean) obj;
         return
             ((name == o.getName()) ||
              (name != null && o.getName() != null && name.equals(o.getName())));
