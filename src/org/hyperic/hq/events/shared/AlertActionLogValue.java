@@ -8,7 +8,7 @@ import javax.ejb.CreateException;
 import javax.ejb.EntityBean;
 import javax.ejb.EntityContext;
 import javax.ejb.RemoveException;
-import org.hyperic.hq.events.shared.AlertActionLogPK;
+
 
 /**
  * Value object for AlertActionLog.
@@ -25,11 +25,9 @@ public class AlertActionLogValue
    private Integer actionId;
    private boolean actionIdHasBeenSet = false;
 
-   private org.hyperic.hq.events.shared.AlertActionLogPK pk;
 
    public AlertActionLogValue()
    {
-	  pk = new org.hyperic.hq.events.shared.AlertActionLogPK();
    }
 
    public AlertActionLogValue( Integer id,String detail,Integer actionId )
@@ -40,7 +38,6 @@ public class AlertActionLogValue
 	  detailHasBeenSet = true;
 	  this.actionId = actionId;
 	  actionIdHasBeenSet = true;
-	  pk = new org.hyperic.hq.events.shared.AlertActionLogPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -53,12 +50,6 @@ public class AlertActionLogValue
 	  this.actionId = otherValue.actionId;
 	  actionIdHasBeenSet = true;
 
-	  pk = new org.hyperic.hq.events.shared.AlertActionLogPK(this.getId());
-   }
-
-   public org.hyperic.hq.events.shared.AlertActionLogPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public Integer getId()
@@ -71,7 +62,6 @@ public class AlertActionLogValue
 	  this.id = id;
 	  idHasBeenSet = true;
 
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

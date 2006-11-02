@@ -30,15 +30,10 @@ import java.util.List;
 import org.hibernate.Session;
 import org.hyperic.hibernate.dao.HibernateDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.events.shared.AlertDefinitionPK;
 
 public class AlertDefinitionDAO extends HibernateDAO {
     public AlertDefinitionDAO(Session session) {
         super(AlertDefinition.class, session);
-    }
-
-    public AlertDefinition findByPrimaryKey(AlertDefinitionPK pk) {
-        return findById(pk.getId());
     }
 
     void remove(AlertDefinition def) {

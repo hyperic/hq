@@ -8,7 +8,6 @@ import javax.ejb.CreateException;
 import javax.ejb.EntityBean;
 import javax.ejb.EntityContext;
 import javax.ejb.RemoveException;
-import org.hyperic.hq.events.shared.RegisteredTriggerPK;
 
 /**
  * Value object for RegisteredTrigger.
@@ -27,11 +26,8 @@ public class RegisteredTriggerValue
    private long frequency;
    private boolean frequencyHasBeenSet = false;
 
-   private org.hyperic.hq.events.shared.RegisteredTriggerPK pk;
-
    public RegisteredTriggerValue()
    {
-	  pk = new org.hyperic.hq.events.shared.RegisteredTriggerPK();
    }
 
    public RegisteredTriggerValue( Integer id,String classname,byte[] config,long frequency )
@@ -44,7 +40,6 @@ public class RegisteredTriggerValue
 	  configHasBeenSet = true;
 	  this.frequency = frequency;
 	  frequencyHasBeenSet = true;
-	  pk = new org.hyperic.hq.events.shared.RegisteredTriggerPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -59,12 +54,6 @@ public class RegisteredTriggerValue
 	  this.frequency = otherValue.frequency;
 	  frequencyHasBeenSet = true;
 
-	  pk = new org.hyperic.hq.events.shared.RegisteredTriggerPK(this.getId());
-   }
-
-   public org.hyperic.hq.events.shared.RegisteredTriggerPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public Integer getId()
@@ -77,7 +66,6 @@ public class RegisteredTriggerValue
 	  this.id = id;
 	  idHasBeenSet = true;
 
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

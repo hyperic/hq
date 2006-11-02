@@ -34,7 +34,6 @@ import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.events.shared.ActionPK;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 
@@ -130,7 +129,7 @@ public class ActionManagerEJBImpl implements SessionBean {
     public ActionValue updateAction(ActionValue val) { 
         ActionDAO aDao = getActHome();
         // First update the primary action
-        Action action = aDao.findByPrimaryKey(new ActionPK(val.getId()));
+        Action action = aDao.findById(val.getId());
             
         action.setActionValue(val);
 

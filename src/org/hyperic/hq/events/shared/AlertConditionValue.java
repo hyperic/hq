@@ -8,7 +8,6 @@ import javax.ejb.CreateException;
 import javax.ejb.EntityBean;
 import javax.ejb.EntityContext;
 import javax.ejb.RemoveException;
-import org.hyperic.hq.events.shared.AlertConditionPK;
 
 /**
  * Value object for AlertCondition.
@@ -37,11 +36,9 @@ public class AlertConditionValue
    private Integer triggerId;
    private boolean triggerIdHasBeenSet = false;
 
-   private org.hyperic.hq.events.shared.AlertConditionPK pk;
 
    public AlertConditionValue()
    {
-	  pk = new org.hyperic.hq.events.shared.AlertConditionPK();
    }
 
    public AlertConditionValue( Integer id,int type,boolean required,int measurementId,String name,String comparator,double threshold,String option,Integer triggerId )
@@ -64,7 +61,6 @@ public class AlertConditionValue
 	  optionHasBeenSet = true;
 	  this.triggerId = triggerId;
 	  triggerIdHasBeenSet = true;
-	  pk = new org.hyperic.hq.events.shared.AlertConditionPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -89,12 +85,6 @@ public class AlertConditionValue
 	  this.triggerId = otherValue.triggerId;
 	  triggerIdHasBeenSet = true;
 
-	  pk = new org.hyperic.hq.events.shared.AlertConditionPK(this.getId());
-   }
-
-   public org.hyperic.hq.events.shared.AlertConditionPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public Integer getId()
@@ -107,7 +97,6 @@ public class AlertConditionValue
 	  this.id = id;
 	  idHasBeenSet = true;
 
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

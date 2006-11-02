@@ -8,7 +8,6 @@ import javax.ejb.CreateException;
 import javax.ejb.EntityBean;
 import javax.ejb.EntityContext;
 import javax.ejb.RemoveException;
-import org.hyperic.hq.events.shared.AlertPK;
 
 /**
  * Value object for Alert.
@@ -27,11 +26,8 @@ public class AlertValue
    private java.util.Collection ConditionLogs = new java.util.ArrayList();
    private java.util.Collection ActionLogs = new java.util.ArrayList();
 
-   private org.hyperic.hq.events.shared.AlertPK pk;
-
    public AlertValue()
    {
-	  pk = new org.hyperic.hq.events.shared.AlertPK();
    }
 
    public AlertValue( Integer id,Integer alertDefId,long ctime )
@@ -42,7 +38,6 @@ public class AlertValue
 	  alertDefIdHasBeenSet = true;
 	  this.ctime = ctime;
 	  ctimeHasBeenSet = true;
-	  pk = new org.hyperic.hq.events.shared.AlertPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -59,12 +54,6 @@ public class AlertValue
 	// TODO Clone is better no ?
 	  this.ActionLogs = otherValue.ActionLogs;
 
-	  pk = new org.hyperic.hq.events.shared.AlertPK(this.getId());
-   }
-
-   public org.hyperic.hq.events.shared.AlertPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public Integer getId()
@@ -77,7 +66,6 @@ public class AlertValue
 	  this.id = id;
 	  idHasBeenSet = true;
 
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

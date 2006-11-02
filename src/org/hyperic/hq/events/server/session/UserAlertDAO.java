@@ -28,7 +28,6 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.hyperic.hibernate.dao.HibernateDAO;
-import org.hyperic.hq.events.shared.AlertConditionPK;
 
 public class UserAlertDAO extends HibernateDAO {
     public UserAlertDAO(Session session) {

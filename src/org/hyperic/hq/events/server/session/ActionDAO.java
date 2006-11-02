@@ -28,15 +28,10 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.hyperic.hibernate.dao.HibernateDAO;
-import org.hyperic.hq.events.shared.ActionPK;
 
 public class ActionDAO extends HibernateDAO {
     public ActionDAO(Session session) {
         super(Action.class, session);
-    }
-
-    public Action findByPrimaryKey(ActionPK pk) {
-        return findById(pk.getId());
     }
 
     public Action findById(Integer id) {

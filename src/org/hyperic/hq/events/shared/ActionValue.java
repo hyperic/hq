@@ -8,7 +8,6 @@ import javax.ejb.CreateException;
 import javax.ejb.EntityBean;
 import javax.ejb.EntityContext;
 import javax.ejb.RemoveException;
-import org.hyperic.hq.events.shared.ActionPK;
 
 /**
  * Value object for Action.
@@ -27,11 +26,9 @@ public class ActionValue
    private Integer parentId;
    private boolean parentIdHasBeenSet = false;
 
-   private org.hyperic.hq.events.shared.ActionPK pk;
 
    public ActionValue()
    {
-	  pk = new org.hyperic.hq.events.shared.ActionPK();
    }
 
    public ActionValue( Integer id,String classname,byte[] config,Integer parentId )
@@ -44,7 +41,6 @@ public class ActionValue
 	  configHasBeenSet = true;
 	  this.parentId = parentId;
 	  parentIdHasBeenSet = true;
-	  pk = new org.hyperic.hq.events.shared.ActionPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -59,12 +55,6 @@ public class ActionValue
 	  this.parentId = otherValue.parentId;
 	  parentIdHasBeenSet = true;
 
-	  pk = new org.hyperic.hq.events.shared.ActionPK(this.getId());
-   }
-
-   public org.hyperic.hq.events.shared.ActionPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public Integer getId()
@@ -77,7 +67,6 @@ public class ActionValue
 	  this.id = id;
 	  idHasBeenSet = true;
 
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

@@ -8,7 +8,6 @@ import javax.ejb.CreateException;
 import javax.ejb.EntityBean;
 import javax.ejb.EntityContext;
 import javax.ejb.RemoveException;
-import org.hyperic.hq.events.shared.UserAlertPK;
 
 /**
  * Value object for UserAlert.
@@ -25,11 +24,9 @@ public class UserAlertValue
    private org.hyperic.hq.events.shared.AlertValue Alert;
    private boolean AlertHasBeenSet = false;
 
-   private org.hyperic.hq.events.shared.UserAlertPK pk;
 
    public UserAlertValue()
    {
-	  pk = new org.hyperic.hq.events.shared.UserAlertPK();
    }
 
    public UserAlertValue( Integer id,Integer userId )
@@ -38,7 +35,6 @@ public class UserAlertValue
 	  idHasBeenSet = true;
 	  this.userId = userId;
 	  userIdHasBeenSet = true;
-	  pk = new org.hyperic.hq.events.shared.UserAlertPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -52,12 +48,6 @@ public class UserAlertValue
 	  this.Alert = otherValue.Alert;
 	  AlertHasBeenSet = true;
 
-	  pk = new org.hyperic.hq.events.shared.UserAlertPK(this.getId());
-   }
-
-   public org.hyperic.hq.events.shared.UserAlertPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public Integer getId()
@@ -70,7 +60,6 @@ public class UserAlertValue
 	  this.id = id;
 	  idHasBeenSet = true;
 
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

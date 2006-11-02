@@ -10,8 +10,6 @@ import javax.ejb.EntityContext;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.naming.NamingException;
-import org.hyperic.hq.events.shared.AlertConditionLogPK;
-import org.hyperic.hq.events.shared.AlertConditionPK;
 
 /**
  * Value object for AlertConditionLog.
@@ -28,11 +26,8 @@ public class AlertConditionLogValue
    private org.hyperic.hq.events.shared.AlertConditionValue Condition;
    private boolean ConditionHasBeenSet = false;
 
-   private org.hyperic.hq.events.shared.AlertConditionLogPK pk;
-
    public AlertConditionLogValue()
    {
-	  pk = new org.hyperic.hq.events.shared.AlertConditionLogPK();
    }
 
    public AlertConditionLogValue( Integer id,String value )
@@ -41,7 +36,6 @@ public class AlertConditionLogValue
 	  idHasBeenSet = true;
 	  this.value = value;
 	  valueHasBeenSet = true;
-	  pk = new org.hyperic.hq.events.shared.AlertConditionLogPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -55,12 +49,6 @@ public class AlertConditionLogValue
 	  this.Condition = otherValue.Condition;
 	  ConditionHasBeenSet = true;
 
-	  pk = new org.hyperic.hq.events.shared.AlertConditionLogPK(this.getId());
-   }
-
-   public org.hyperic.hq.events.shared.AlertConditionLogPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public Integer getId()
@@ -73,7 +61,6 @@ public class AlertConditionLogValue
 	  this.id = id;
 	  idHasBeenSet = true;
 
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

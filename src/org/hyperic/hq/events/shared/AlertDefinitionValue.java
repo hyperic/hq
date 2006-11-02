@@ -9,7 +9,6 @@ import javax.ejb.CreateException;
 import javax.ejb.EntityBean;
 import javax.ejb.RemoveException;
 import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
-import org.hyperic.hq.events.shared.AlertDefinitionPK;
 
 /**
  * Value object for AlertDefinition.
@@ -59,11 +58,8 @@ public class AlertDefinitionValue
    private java.util.Collection Conditions = new java.util.ArrayList();
    private java.util.Collection Actions = new java.util.ArrayList();
 
-   private org.hyperic.hq.events.shared.AlertDefinitionPK pk;
-
    public AlertDefinitionValue()
    {
-	  pk = new org.hyperic.hq.events.shared.AlertDefinitionPK();
    }
 
    public AlertDefinitionValue( Integer id,String name,long ctime,long mtime,Integer parentId,java.lang.String description,boolean enabled,boolean willRecover,boolean notifyFiltered,boolean controlFiltered,int priority,int appdefId,int appdefType,int frequencyType,long count,long range,int actOnTriggerId,boolean deleted )
@@ -104,7 +100,6 @@ public class AlertDefinitionValue
 	  actOnTriggerIdHasBeenSet = true;
 	  this.deleted = deleted;
 	  deletedHasBeenSet = true;
-	  pk = new org.hyperic.hq.events.shared.AlertDefinitionPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -153,12 +148,6 @@ public class AlertDefinitionValue
 	// TODO Clone is better no ?
 	  this.Actions = otherValue.Actions;
 
-	  pk = new org.hyperic.hq.events.shared.AlertDefinitionPK(this.getId());
-   }
-
-   public org.hyperic.hq.events.shared.AlertDefinitionPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public Integer getId()
@@ -171,7 +160,6 @@ public class AlertDefinitionValue
 	  this.id = id;
 	  idHasBeenSet = true;
 
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){
