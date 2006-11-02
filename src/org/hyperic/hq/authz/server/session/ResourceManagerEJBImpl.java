@@ -273,17 +273,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     }
 
     /**
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
-     */
-    public ResourcePK createResource(AuthzSubjectValue whoami,
-                                     ResourceTypeValue rtv,
-                                     Integer instanceId,
-                                     String name) {
-        return createResource(whoami, rtv, instanceId, name, false);
-    }
-    
-    /**
      * Create a resource.
      * 
      * @ejb:interface-method
