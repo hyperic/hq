@@ -30,6 +30,13 @@
       <column name="PARENT_ID" />
     </many-to-one>
 
+    <bag name="childrenBag"
+         cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
+         inverse="true">
+      <key column="PARENT_ID" />
+      <one-to-many class="Action" />
+    </bag>
+
     <many-to-one name="alertDefinition" class="AlertDefinition">
       <column name="ALERT_DEFINITION_ID" />
     </many-to-one>

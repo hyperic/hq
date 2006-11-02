@@ -138,7 +138,7 @@ public class ActionManagerEJBImpl implements SessionBean {
 
         /* It would be nice to have a more explicit method that
            does this kind of update.  XXX -- JMT */ 
-        Collection children = aDao.getChildren(action);
+        Collection children = action.getChildren();
             
         val.setParentId(val.getId());
         for (Iterator i = children.iterator(); i.hasNext(); ) {

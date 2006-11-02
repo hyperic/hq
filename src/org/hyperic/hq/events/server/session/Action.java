@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.events.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -40,8 +41,9 @@ public class Action
     private byte[]          _config;
     private Action          _parent;
     private AlertDefinition _alertDef;
-    private Collection      _logEntries;
-
+    private Collection      _logEntries = new ArrayList();
+    private Collection      _children = new ArrayList();
+    
     private ActionValue     _valueObj;
     
     protected Action() {
@@ -53,6 +55,7 @@ public class Action
         _parent     = parent;
         _alertDef   = def;
         _logEntries = Collections.EMPTY_LIST;
+        _children   = Collections.EMPTY_LIST;
     }
     
     public String getClassName() {
@@ -87,6 +90,18 @@ public class Action
         _alertDef = alertDefinition;
     }
 
+    public Collection getChildren() {
+        return Collections.unmodifiableCollection(_children);
+    }
+    
+    protected Collection getChildrenBag() {
+        return _children;
+    }
+    
+    protected void setChildrenBag(Collection children) {
+        _children = children;
+    }
+    
     public Collection getLogEntries() {
         return Collections.unmodifiableCollection(_logEntries);
     }

@@ -24,7 +24,6 @@
  */
 package org.hyperic.hq.events.server.session;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -42,16 +41,6 @@ public class ActionDAO extends HibernateDAO {
 
     public Action findById(Integer id) {
         return (Action)super.findById(id);
-    }
-    
-    // XXX -- This should be eliminated and we should have a bi-di relationsip
-    //        on the actual Action object itself.  -- JMT
-    public Collection getChildren(Action action) {
-        String sql = "from Action a where a.parent = :parent";
-        
-        return getSession().createQuery(sql)
-            .setParameter("parent", action)
-            .list();
     }
     
     /**
