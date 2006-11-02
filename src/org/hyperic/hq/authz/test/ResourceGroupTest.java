@@ -75,7 +75,8 @@ public class ResourceGroupTest extends HQEJBTestBase {
                 assertEquals(AuthzConstants.platformResType, rtv.getName());
                 ResourcePK pk = remg.createResource(overlord, rtv,
                                                     new Integer(RANDOM_ID),
-                                                    "Platform " + BOGUS_NAME);
+                                                    "Platform " + BOGUS_NAME,
+                                                    false);
                 
                 // Now we have to find the resource
                 ResourceValue resource = remg.findResourceById(pk.getId());
