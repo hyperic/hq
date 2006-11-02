@@ -26,8 +26,6 @@
 package org.hyperic.hq.events.server.session;
 
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.events.shared.AlertDefinitionLocal;
-import org.hyperic.hq.events.shared.AlertLocal;
 import org.hyperic.util.pager.PagerProcessor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,11 +48,11 @@ public class PagerProcessor_events implements PagerProcessor {
         try {
             if (o instanceof Alert) {
                 log.debug("PagerProcessor_dm: ZZZZ processElement " + 
-                          "converting AlertLocal to value object");
+                          "converting Alert to value object");
                 return ((Alert) o).getAlertValue();
             } else if ( o instanceof AlertDefinition) {
                 log.debug("PagerProcessor_dm: ZZZZ processElement converting " +
-                          "AlertDefinitionLocal to value object");
+                          "AlertDefinition to value object");
                 return ((AlertDefinition) o).getAlertDefinitionValue();
             }
         } catch (Exception e) {

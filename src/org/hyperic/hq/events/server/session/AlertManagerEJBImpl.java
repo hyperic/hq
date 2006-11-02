@@ -46,11 +46,7 @@ import org.hyperic.hq.events.AlertCreateException;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
-import org.hyperic.hq.events.shared.AlertLocalHome;
-import org.hyperic.hq.events.shared.AlertUtil;
 import org.hyperic.hq.events.shared.AlertValue;
-import org.hyperic.hq.events.shared.UserAlertLocalHome;
-import org.hyperic.hq.events.shared.UserAlertUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -78,30 +74,6 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
 
     private Pager          valuePager;
     
-    private AlertLocalHome ahome = null;
-    private AlertLocalHome getAHome() {
-        if (ahome == null) {
-            try {
-                ahome = AlertUtil.getLocalHome();
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
-        return ahome;
-    }
-    
-    private UserAlertLocalHome uahome = null;
-    private UserAlertLocalHome getUAHome() {
-        if (uahome == null) {
-            try {
-                uahome = UserAlertUtil.getLocalHome();
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
-        return uahome;
-    }
-
     public AlertManagerEJBImpl() {}
 
     private AlertDefinitionDAO getAlertDefDAO() {
