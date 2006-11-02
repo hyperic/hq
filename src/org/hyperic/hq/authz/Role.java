@@ -151,17 +151,6 @@ public class Role extends AuthzNamedBean {
                                                     .getAuthzSubjectValue());
         return orv;
     }
-
-    private RolePK pkey = new RolePK();
-    /**
-     * @deprecated use getId()
-     * @return
-     */
-    public RolePK getPrimaryKey()
-    {
-        pkey.setId(getId());
-        return pkey;
-    }
 }
 
 
