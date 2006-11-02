@@ -26,7 +26,6 @@
 package org.hyperic.hibernate.dao;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -193,29 +192,44 @@ public class ResourceDAO extends HibernateDAO
         // before we do anything else.
         // Note: this should be refactored to use named queries so
         // that we can perform "fetch" optimization outside of the code
-        String sql="select distinct r from Resource r " +
-                   " join fetch r.resourceGroups rg " +
-                   " left join fetch rg.roles role " +
-                   " left join fetch role.subjects subj " +
-                   " left join fetch role.operations op " +
-                   " left join fetch r.resourceType rt " +
-                   "where " +
-                   "  r.system=? and " +
-                   "  (subj.id=? or r.owner.id=?) and " +
-                   "  (" +
-                   "   rt.name='covalentEAMService' or " +
-                   "   rt.name='covalentAuthzResourceGroup') and " +
-                   "  (" +
-                   "   op.name='viewService' or " +
-                   "   op.name='viewResourceGroup') and " +
-                   "  rg.groupType = 15 and " +
-                   "  (rg.groupType != 15 or rg.clusterId!=-1) " +
-                   "order by r.sortName ";
-        return getSession().createQuery(sql)
-            .setBoolean(0, fSystem.booleanValue())
-            .setInteger(1, user.intValue())
-            .setInteger(2, user.intValue())
-            .list();
+        String sql = "select r from Resource r " +
+                     " join fetch r.resourceGroups rg " +
+                     " join fetch rg.roles role " +
+                     " join fetch role.subjects subj " +
+                     " join fetch role.operations op " +
+                     " join fetch r.resourceType rt " +
+                     "where " +
+                     "  r.system = :system and " +
+                     "  (subj.id = :subjId or r.owner.id = :subjId) and " +
+                     "  (" +
+                     "   rt.name = 'covalentEAMService' or " +
+                     "   rt.name = 'covalentAuthzResourceGroup') and " +
+                     "  (" +
+                     "   op.name = 'viewService' or " +
+                     "   op.name = 'viewResourceGroup') and " +
+                     "   0 = (select count(*) from Resource r2 " +
+                     "        join fetch r.resourceGroups rg2 " +
+                     "        where r.id = r2.id and rg.groupType = 15 and" +
+                     "              rg.clusterId != -1) " +
+                     "order by r.sortName ";
+        List resources =
+            getSession().createQuery(sql)
+                        .setBoolean("system", fSystem.booleanValue())
+                        .setInteger("subjId", user.intValue())
+                        .list();
+
+        // Hibernate's distinct does not work well with joins - do filter here
+        Integer lastId = null; // Track the last one we looked at
+        for (Iterator it = resources.iterator(); it.hasNext();) {
+            Resource res = (Resource) it.next();
+            if (res.getId().equals(lastId)) {
+                it.remove();
+            } else {
+                lastId = res.getId();
+            }
+        }
+
+        return resources;
     }
 
     public Collection findSvcRes_orderName(Boolean fSystem)
@@ -226,7 +240,7 @@ public class ResourceDAO extends HibernateDAO
                    " join fetch role.operations op " +
                    " join fetch r.resourceType rt " +
                    "where " +
-                   "  r.system=? and " +
+                   "  r.system = ? and " +
                    "  (" +
                    "   rt.name = 'covalentEAMService' or " +
                    "   rt.name = 'covalentAuthzResourceGroup') and " +
@@ -238,9 +252,10 @@ public class ResourceDAO extends HibernateDAO
                    "        where r.id = r2.id and rg.groupType = 15 and" +
                    "              rg.clusterId != -1) " +
                    "order by r.sortName ";
-        List resources = getSession().createQuery(sql)
-            .setBoolean(0, fSystem.booleanValue())
-            .list();
+        List resources =
+            getSession().createQuery(sql)
+                        .setBoolean(0, fSystem.booleanValue())
+                        .list();
         
         // Hibernate's distinct does not work well with joins - do filter here
         Integer lastId = null;  // Track the last one we looked at
