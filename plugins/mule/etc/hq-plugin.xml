@@ -61,6 +61,9 @@
       <property name="Version"/>
     </properties>
 
+    <plugin type="control"
+            class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
+
     <actions include="start,stop"/>
 
     <metric name="Availability"
@@ -89,6 +92,9 @@
         <property name="Type"/>
       </properties>
 
+      <plugin type="control"
+              class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
+
       <actions include="disconnect,connect"/>
 
       <metric name="Availability"
@@ -111,6 +117,9 @@
       <properties>
         <property name="Protocol"/>
       </properties>
+
+      <plugin type="control"
+              class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
 
       <actions include="startConnector,stopConnector"/>
 
@@ -171,6 +180,9 @@
       <properties>
         <property name="MaxQueueSize" description="Max Queue Size"/>
       </properties>
+
+      <plugin type="control"
+              class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
 
       <actions include="pause,forceStop,resume,stop,start"/>
 
