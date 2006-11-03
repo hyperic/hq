@@ -143,7 +143,9 @@ public class MeasurementTemplateDAO extends HibernateDAO
             "select t from MeasurementTemplate t " +
             "join fetch t.monitorableType mt " +
             "join fetch t.category cat " +
-            "where mt.name=? and t.defaultInterval > 0 and cat.name=?";
+            "where mt.name=? and t.defaultInterval > 0 and cat.name=? " +
+            "order by t.name";
+        
         return getSession().createQuery(sql)
             .setString(0, type)
             .setString(1, cat).list();
