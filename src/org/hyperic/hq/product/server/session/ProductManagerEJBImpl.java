@@ -223,8 +223,8 @@ public class ProductManagerEJBImpl
         }
     }
 
-    //e.g. in ~/.cam/plugin.properties
-    //net.covalent.cam.plugins.system.forceUpdate=true
+    //e.g. in ~/.hq/plugin.properties
+    //hq.plugins.system.forceUpdate=true
     private boolean forceUpdate(String plugin) {
         String key =
             ProductPluginManager.getPropertyKey(plugin, "forceUpdate");
