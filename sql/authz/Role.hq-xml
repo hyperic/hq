@@ -50,10 +50,10 @@
       <many-to-many class="ResourceGroup" column="RESOURCE_GROUP_ID" />
     </bag>
 
-    <bag name="operations" table="EAM_ROLE_OPERATION_MAP">
+    <set name="operations" table="EAM_ROLE_OPERATION_MAP">
       <key column="ROLE_ID" />
       <many-to-many class="Operation" column="OPERATION_ID" />
-    </bag>
+    </set>
 
     <bag name="subjects" table="EAM_SUBJECT_ROLE_MAP"
         inverse="true">

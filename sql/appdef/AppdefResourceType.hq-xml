@@ -94,10 +94,10 @@
         <column name="FVIRTUAL" not-null="false" />
       </property>
 
-      <bag name="platformTypes" table="EAM_PLATFORM_SERVER_TYPE_MAP">
+      <set name="platformTypes" table="EAM_PLATFORM_SERVER_TYPE_MAP">
         <key column="SERVER_TYPE_ID" not-null="false" />
         <many-to-many class="PlatformType" column="PLATFORM_TYPE_ID" />
-      </bag>
+      </set>
 
       <bag name="servers" table="EAM_SERVER">
         <key column="SERVER_TYPE_ID" />
@@ -123,15 +123,15 @@
         <column name="SERVER_TYPE_ID" />
       </many-to-one>
 
-      <bag name="applicationTypes" table="EAM_APP_TYPE_SERVICE_TYPE_MAP">
+      <set name="applicationTypes" table="EAM_APP_TYPE_SERVICE_TYPE_MAP">
         <key column="SERVICE_TYPE_ID" not-null="false" />
         <many-to-many class="ApplicationType" column="APPLICATION_TYPE_ID" />
-      </bag>
+      </set>
 
-      <bag name="appServices" table="EAM_APP_SERVICE">
+      <set name="appServices" table="EAM_APP_SERVICE">
         <key column="SERVICE_TYPE_ID" />
         <one-to-many class="org.hyperic.hq.appdef.AppService" />
-      </bag>
+      </set>
 
       <bag name="services" table="EAM_SERVICE">
         <key column="SERVICE_TYPE_ID" />

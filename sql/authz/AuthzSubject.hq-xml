@@ -74,10 +74,10 @@
       <column name="RESOURCE_ID" index="EAM_SUBJECT_RESOURCE_KEY" />
     </many-to-one>
 
-    <bag name="roles" table="EAM_SUBJECT_ROLE_MAP">
+    <set name="roles" table="EAM_SUBJECT_ROLE_MAP">
       <key column="SUBJECT_ID" />
       <many-to-many class="Role" column="ROLE_ID" />
-    </bag>
+    </set>
 
     <bag name="userConfigs" table="EAM_USER_CONFIG_RESP"
          cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
