@@ -178,7 +178,6 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
 
                         dm.setInterval(interval);
                         dm.setEnabled(interval != 0);
-                        dm.setMtime(System.currentTimeMillis());
                         // Update the derived measurement value
                         dmval = dm.getDerivedMeasurementValue();
                     }
