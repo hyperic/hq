@@ -33,7 +33,6 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import javax.ejb.CreateException;
-import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
@@ -60,7 +59,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
-import org.hyperic.hibernate.dao.PlatformDAO;
+import org.hyperic.hq.dao.PlatformDAO;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

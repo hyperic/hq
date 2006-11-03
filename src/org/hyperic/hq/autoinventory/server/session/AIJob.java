@@ -30,7 +30,6 @@ import java.util.Date;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 import javax.naming.NamingException;
 
 import org.hyperic.hq.agent.AgentConnectionException;
@@ -45,7 +44,7 @@ import org.hyperic.hq.autoinventory.AIHistory;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.scheduler.server.session.BaseJob;
-import org.hyperic.hibernate.dao.AIHistoryDAO;
+import org.hyperic.hq.dao.AIHistoryDAO;
 import org.hyperic.dao.DAOFactory;
 
 import org.apache.commons.logging.Log;

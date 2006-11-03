@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.measurement.action;
 
-import javax.ejb.CreateException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -42,7 +40,7 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
-import org.hyperic.hibernate.dao.MetricProblemDAO;
+import org.hyperic.hq.dao.MetricProblemDAO;
 import org.hyperic.dao.DAOFactory;
 
 /**

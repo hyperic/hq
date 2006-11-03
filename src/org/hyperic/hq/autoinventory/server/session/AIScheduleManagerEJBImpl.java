@@ -71,8 +71,8 @@ import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.SortAttribute;
-import org.hyperic.hibernate.dao.AIScheduleDAO;
-import org.hyperic.hibernate.dao.AIHistoryDAO;
+import org.hyperic.hq.dao.AIScheduleDAO;
+import org.hyperic.hq.dao.AIHistoryDAO;
 import org.hyperic.dao.DAOFactory;
 
 /** 

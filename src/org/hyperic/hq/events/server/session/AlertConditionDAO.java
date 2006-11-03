@@ -25,7 +25,7 @@
 package org.hyperic.hq.events.server.session;
 
 import org.hibernate.Session;
-import org.hyperic.hibernate.dao.HibernateDAO;
+import org.hyperic.hq.dao.HibernateDAO;
 
 public class AlertConditionDAO extends HibernateDAO {
     public AlertConditionDAO(Session session) {

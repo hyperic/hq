@@ -40,8 +40,8 @@ import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hibernate.dao.OperationDAO;
-import org.hyperic.hibernate.dao.ResourceTypeDAO;
+import org.hyperic.hq.dao.OperationDAO;
+import org.hyperic.hq.dao.ResourceTypeDAO;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.Operation;
 import org.hyperic.hq.authz.Resource;

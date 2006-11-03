@@ -49,7 +49,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.autoinventory.AIPlatform;
-import org.hyperic.hibernate.dao.AIPlatformDAO;
+import org.hyperic.hq.dao.AIPlatformDAO;
 
 import org.apache.commons.logging.Log;
 

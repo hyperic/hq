@@ -67,8 +67,8 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hibernate.dao.AppServiceDAO;
-import org.hyperic.hibernate.dao.ApplicationDAO;
+import org.hyperic.hq.dao.AppServiceDAO;
+import org.hyperic.hq.dao.ApplicationDAO;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

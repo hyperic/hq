@@ -53,7 +53,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
 import org.hyperic.util.ConfigPropertyException;
-import org.hyperic.hibernate.dao.PrincipalDAO;
+import org.hyperic.hq.dao.PrincipalDAO;
 import org.hyperic.dao.DAOFactory;
 
 import org.jboss.security.Util;

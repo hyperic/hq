@@ -55,7 +55,7 @@ import org.hibernate.id.IdentifierGenerator;
 import org.hibernate.impl.SessionFactoryImpl;
 import org.hibernate.impl.SessionImpl;
 import org.hyperic.hibernate.Util;
-import org.hyperic.hibernate.dao.MeasurementTemplateDAO;
+import org.hyperic.hq.dao.MeasurementTemplateDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;

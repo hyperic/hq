@@ -35,7 +35,7 @@ import javax.ejb.EJBException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
-import org.hyperic.hibernate.dao.RawMeasurementDAO;
+import org.hyperic.hq.dao.RawMeasurementDAO;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;

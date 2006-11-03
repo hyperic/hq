@@ -8,8 +8,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hibernate.dao.MeasurementTemplateDAO;
-import org.hyperic.hibernate.dao.MonitorableTypeDAO;
+import org.hyperic.hq.dao.MeasurementTemplateDAO;
+import org.hyperic.hq.dao.MonitorableTypeDAO;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementTemplate;

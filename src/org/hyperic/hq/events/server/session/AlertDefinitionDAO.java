@@ -24,11 +24,10 @@
  */
 package org.hyperic.hq.events.server.session;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hyperic.hibernate.dao.HibernateDAO;
+import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 
 public class AlertDefinitionDAO extends HibernateDAO {

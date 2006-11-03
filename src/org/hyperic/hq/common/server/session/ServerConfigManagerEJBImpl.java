@@ -33,9 +33,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Properties;
 
-import javax.ejb.CreateException;
 import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 import javax.naming.InitialContext;
@@ -49,7 +47,7 @@ import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.timer.StopWatch;
-import org.hyperic.hibernate.dao.ConfigPropertyDAO;
+import org.hyperic.hq.dao.ConfigPropertyDAO;
 import org.hyperic.dao.DAOFactory;
 
 import org.apache.commons.logging.Log;

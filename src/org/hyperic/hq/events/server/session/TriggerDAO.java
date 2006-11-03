@@ -25,7 +25,7 @@
 package org.hyperic.hq.events.server.session;
 
 import org.hibernate.Session;
-import org.hyperic.hibernate.dao.HibernateDAO;
+import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 
 public class TriggerDAO extends HibernateDAO {

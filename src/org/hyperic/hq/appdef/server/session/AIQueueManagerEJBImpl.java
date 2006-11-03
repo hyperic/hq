@@ -40,10 +40,10 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hibernate.dao.PlatformDAO;
-import org.hyperic.hibernate.dao.AIPlatformDAO;
-import org.hyperic.hibernate.dao.AIServerDAO;
-import org.hyperic.hibernate.dao.AIIpDAO;
+import org.hyperic.hq.dao.PlatformDAO;
+import org.hyperic.hq.dao.AIPlatformDAO;
+import org.hyperic.hq.dao.AIServerDAO;
+import org.hyperic.hq.dao.AIIpDAO;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;

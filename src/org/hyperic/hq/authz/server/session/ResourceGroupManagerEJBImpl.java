@@ -41,8 +41,8 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hibernate.dao.ResourceDAO;
-import org.hyperic.hibernate.dao.ResourceGroupDAO;
+import org.hyperic.hq.dao.ResourceDAO;
+import org.hyperic.hq.dao.ResourceGroupDAO;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.ResourceGroup;

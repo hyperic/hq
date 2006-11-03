@@ -74,7 +74,7 @@ import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.timer.StopWatch;
-import org.hyperic.hibernate.dao.PluginDAO;
+import org.hyperic.hq.dao.PluginDAO;
 import org.hyperic.dao.DAOFactory;
 
 import org.apache.commons.logging.Log;

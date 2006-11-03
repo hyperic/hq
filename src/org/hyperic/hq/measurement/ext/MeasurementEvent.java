@@ -28,7 +28,7 @@ package org.hyperic.hq.measurement.ext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hibernate.dao.RawMeasurementDAO;
+import org.hyperic.hq.dao.RawMeasurementDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ResourceEventInterface;

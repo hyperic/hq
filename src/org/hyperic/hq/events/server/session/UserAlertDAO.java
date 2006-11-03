@@ -27,7 +27,7 @@ package org.hyperic.hq.events.server.session;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hyperic.hibernate.dao.HibernateDAO;
+import org.hyperic.hq.dao.HibernateDAO;
 
 public class UserAlertDAO extends HibernateDAO {
     public UserAlertDAO(Session session) {

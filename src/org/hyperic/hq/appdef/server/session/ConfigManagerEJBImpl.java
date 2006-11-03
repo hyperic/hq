@@ -67,7 +67,7 @@ import org.hyperic.util.math.MathUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hibernate.dao.ConfigResponseDAO;
+import org.hyperic.hq.dao.ConfigResponseDAO;
 import org.hyperic.hibernate.Util;
 
 import javax.ejb.CreateException;

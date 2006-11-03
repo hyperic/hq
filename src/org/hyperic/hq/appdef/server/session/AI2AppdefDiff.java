@@ -50,7 +50,7 @@ import org.hyperic.hq.appdef.Ip;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
-import org.hyperic.hibernate.dao.PlatformDAO;
+import org.hyperic.hq.dao.PlatformDAO;
 import org.hyperic.dao.DAOFactory;
 
 /**
