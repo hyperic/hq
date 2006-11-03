@@ -154,7 +154,7 @@ public class ProductPluginManager extends PluginManager {
     }
 
     /**
-     * Derive plugin name from *-plugin.{xml,jar} name
+     * Derive plugin name from file name-plugin.ext
      */
     public static String getNameFromFile(String file) {
         String name = new File(file).getName();
