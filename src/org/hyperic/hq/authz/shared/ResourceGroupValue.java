@@ -60,8 +60,9 @@ public class ResourceGroupValue
    private Integer id;
    private boolean idHasBeenSet = false;
 
-   public ResourceGroupValue() {
-    }
+   public ResourceGroupValue()
+   {
+   }
 
    public ResourceGroupValue( java.lang.String sortName,boolean system,int groupType,int groupEntType,int groupEntResType,int clusterId,String description,String location,String modifiedBy,Long mTime,Long cTime,String name,Integer id )
    {
