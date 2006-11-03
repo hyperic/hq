@@ -963,6 +963,20 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
+     * Lookup a derived measurement by id
+     * @ejb:interface-method 
+     */
+    public DerivedMeasurementValue findMeasurement(Integer mid)
+        throws MeasurementNotFoundException {
+        DerivedMeasurement dm = getDerivedMeasurementDAO().findById(mid);
+        if (dm != null) {
+            throw new MeasurementNotFoundException("No measurement found " +
+                                                   "for id=" + mid);
+        }
+        return dm.getDerivedMeasurementValue();
+    }
+
+    /**
      * Look up a derived measurement EJB
      *
      * @return a DerivedMeasurement value
