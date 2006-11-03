@@ -41,7 +41,6 @@ import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.CPropChangeEvent;
 import org.hyperic.hq.appdef.shared.CPropKeyExistsException;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
-import org.hyperic.hq.appdef.shared.CPropKeyPK;
 import org.hyperic.hq.appdef.shared.CPropKeyValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
@@ -243,8 +242,8 @@ public class CPropManagerEJBImpl
         cpHome = getCPropKeyDAO();
 
         try {
-            CPropKeyPK pk = propKey.getPrimaryKey();
-            final int keyId = pk.getId().intValue();
+            Integer pk = propKey.getId();
+            final int keyId = pk.intValue();
 
             conn = cpHome.getSession().connection();
                                     
@@ -358,8 +357,8 @@ public class CPropManagerEJBImpl
         propKey = this.getKey(aID, typeId, key);
         cpHome  = getCPropKeyDAO();
         try {
-            CPropKeyPK pk = propKey.getPrimaryKey();
-            final int keyId = pk.getId().intValue();
+            Integer pk = propKey.getId();
+            final int keyId = pk.intValue();
             StringBuffer buf = new StringBuffer();
             boolean didSomething;
 

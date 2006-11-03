@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -46,9 +45,7 @@ import org.hyperic.hibernate.dao.AIPlatformDAO;
 import org.hyperic.hibernate.dao.AIServerDAO;
 import org.hyperic.hibernate.dao.AIIpDAO;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
-import org.hyperic.hq.appdef.shared.AIIpPK;
 import org.hyperic.hq.appdef.shared.AIIpValue;
-import org.hyperic.hq.appdef.shared.AIPlatformPK;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
@@ -60,10 +57,10 @@ import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -148,7 +145,7 @@ public class AIQueueManagerEJBImpl
             // log.info("AIQmgr.queue (post appdef-diff): aiplatform=NULL");
             AIPlatform aiplatformLocal;
             aiplatformLocal =
-                aiplatformLH.findByPrimaryKey(aiplatform.getPrimaryKey());
+                aiplatformLH.findById(aiplatform.getId());
             removeFromQueue(aiplatformLocal);
             return null;
         }
@@ -291,7 +288,7 @@ public class AIQueueManagerEJBImpl
             PlatformValue pValue;
             AppdefResourcePermissions arp;
             AppdefEntityID aid;
-            PlatformPK ppk;
+            Integer ppk;
             while (iter.hasNext()) {
                 aipLocal = (AIPlatform) iter.next();
                 pValue = null;
@@ -314,8 +311,9 @@ public class AIQueueManagerEJBImpl
                     iter.remove();
 
                 } else if (pValue != null) {
-                    ppk = new PlatformPK(pValue.getId());
-                    aid = new AppdefEntityID(ppk);
+                    ppk = pValue.getId();
+                    aid = new AppdefEntityID(
+                        ppk, AppdefEntityConstants.APPDEF_TYPE_PLATFORM);
                     arp = getResourcePermissions(subject, aid);
                     if ( !arp.canModify() ) {
                         if (log.isDebugEnabled()) {
@@ -560,16 +558,16 @@ public class AIQueueManagerEJBImpl
                     continue;
                 }
                 try {
-                    aiip = aiipLH.findByPrimaryKey(new AIIpPK(id));
+                    aiip = aiipLH.findById(id);
                 } catch ( ObjectNotFoundException e ) {
                     if (isPurgeAction) continue;
                     else throw e;
                 }
                 visitor.visitIp(aiip, subject, log, pmLocal);
                 if (!isPurgeAction) {
-                    AIPlatformPK pk = 
-                       aiip.getAIPlatform().getPrimaryKey();
-                    aiplatformsToResync.put(pk.getId(), marker);
+                    Integer pk =
+                       aiip.getAIPlatform().getId();
+                    aiplatformsToResync.put(pk, marker);
                 }
             }
         }
@@ -596,9 +594,9 @@ public class AIQueueManagerEJBImpl
                     // (see bug 6898 for more info)
                     aiserversToRemove.add(aiserver);
                 } else if (!isPurgeAction) {
-                    AIPlatformPK pk = 
-                        aiserver.getAIPlatform().getPrimaryKey();
-                    aiplatformsToResync.put(pk.getId(), marker);
+                    Integer pk =
+                        aiserver.getAIPlatform().getId();
+                    aiplatformsToResync.put(pk, marker);
                 }
             }
         }
@@ -610,7 +608,7 @@ public class AIQueueManagerEJBImpl
             while ( iter.hasNext() ) { 
                 id = (Integer) iter.next();
                 aiplatform =
-                    aiplatformLH.findByPrimaryKey(new AIPlatformPK(id));
+                    aiplatformLH.findById(id);
                 syncQueue(aiplatform.getAIPlatformValue(), isApproveAction);
             }
             // See above note about bug 6898, now we remove
@@ -748,7 +746,7 @@ public class AIQueueManagerEJBImpl
             }
         }
         throw new PlatformNotFoundException("platform not found for ai platform: " +
-                                            ((AIPlatformPK)aipLocal.getPrimaryKey()).getId());
+                                            aipLocal.getId());
     }
         
     /**

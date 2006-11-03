@@ -55,14 +55,12 @@ import org.hyperic.hq.appdef.shared.AppdefEvent;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.ApplicationPK;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
-import org.hyperic.hq.appdef.shared.ServiceClusterPK;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceLightValue;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
@@ -1340,7 +1338,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
         Application appLocal;
         try {
-            appLocal = appLocalHome.findByPrimaryKey(new ApplicationPK(appId));
+            appLocal = appLocalHome.findById(appId);
         } catch(ObjectNotFoundException e){
             throw new ApplicationNotFoundException(appId, e);
         }
@@ -1468,7 +1466,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         try {
             appLocalHome = getApplicationDAO();
             appServLocHome = DAOFactory.getDAOFactory().getAppServiceDAO();
-            appLocal = appLocalHome.findByPrimaryKey(new ApplicationPK(appId));
+            appLocal = appLocalHome.findById(appId);
         } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(appId, e);
         }
@@ -1840,15 +1838,15 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
-    public ServiceClusterPK createCluster(AuthzSubjectValue subj,
-                                             ServiceClusterValue cluster,
-                                             List serviceIdList)
+    public Integer createCluster(AuthzSubjectValue subj,
+                                 ServiceClusterValue cluster,
+                                 List serviceIdList)
         throws AppSvcClustDuplicateAssignException, 
                AppSvcClustIncompatSvcException, CreateException {
         // TODO check authz createCluster operation 
         ServiceCluster clusterEJB =
             getServiceClusterDAO().create(cluster, serviceIdList);
-        return clusterEJB.getPrimaryKey();
+        return clusterEJB.getId();
     }
     
     /**

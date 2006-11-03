@@ -30,9 +30,7 @@ import java.util.List;
 import javax.ejb.CreateException;
 
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
-import org.hyperic.hq.appdef.shared.AIIpPK;
 import org.hyperic.hq.appdef.shared.AIIpValue;
-import org.hyperic.hq.appdef.shared.AIPlatformPK;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
@@ -44,7 +42,6 @@ import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformVOHelperLocal;
 import org.hyperic.hq.appdef.shared.PlatformVOHelperUtil;
 import org.hyperic.hq.appdef.shared.PlatformValue;
@@ -94,8 +91,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                 List createdResources ) 
         throws AIQApprovalException, PermissionException {
 
-        Integer id =
-            ((AIPlatformPK)aiplatform.getPrimaryKey()).getId();
+        Integer id = aiplatform.getId();
         
         log.info("(approve) visiting platform: " + id +
                  " fqdn=" + aiplatform.getFqdn());
@@ -136,11 +132,11 @@ public class AIQRV_approve implements AIQResourceVisitor {
             // Add the AI platform to appdef
             log.info("AIQ: calling to platform LH to create...");
             try {
-                PlatformPK pk =
+                Integer pk =
                     pmLocal.createPlatform(subject, aiplatformValue);
                 try {
                     newPlatformValue =
-                        pmLocal.getPlatformById(subject, pk.getId());
+                        pmLocal.getPlatformById(subject, pk);
 
                     appdefEntityId = new AppdefEntityID(
                             AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
@@ -290,7 +286,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                           PlatformManagerLocal pmLocal )
         throws AIQApprovalException, PermissionException {
 
-        Integer id = ((AIIpPK)aiip.getPrimaryKey()).getId();
+        Integer id = aiip.getId();
 
         log.info("(approve) visiting ip: " + id + 
                  " addr=" + aiip.getAddress());
@@ -541,7 +537,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                 serverTypePK
                     = new ServerTypePK(serverValue.getServerType().getId());
                 ServerPK pk = smLocal.createServer(subject, 
-                                                   existingPlatformValue.getPrimaryKey(),
+                                                   existingPlatformValue.getId(),
                                                    serverTypePK,
                                                    serverValue);
                 try {

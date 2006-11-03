@@ -44,11 +44,8 @@ public class PlatformLightValue
    private org.hyperic.hq.appdef.shared.PlatformTypeValue PlatformType;
    private boolean PlatformTypeHasBeenSet = false;
 
-   private org.hyperic.hq.appdef.shared.PlatformPK pk;
-
    public PlatformLightValue()
    {
-	  pk = new org.hyperic.hq.appdef.shared.PlatformPK();
    }
 
    public PlatformLightValue( java.lang.String sortName,java.lang.String commentText,java.lang.String modifiedBy,java.lang.String owner,java.lang.Integer configResponseId,java.lang.String certdn,java.lang.String fqdn,java.lang.String name,java.lang.String location,java.lang.String description,java.lang.Integer cpuCount,java.lang.Integer id,java.lang.Long mTime,java.lang.Long cTime )
@@ -81,7 +78,6 @@ public class PlatformLightValue
 	  mTimeHasBeenSet = true;
 	  this.cTime = cTime;
 	  cTimeHasBeenSet = true;
-	  pk = new org.hyperic.hq.appdef.shared.PlatformPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -121,12 +117,6 @@ public class PlatformLightValue
 	  this.PlatformType = otherValue.PlatformType;
 	  PlatformTypeHasBeenSet = true;
 
-	  pk = new org.hyperic.hq.appdef.shared.PlatformPK(this.getId());
-   }
-
-   public org.hyperic.hq.appdef.shared.PlatformPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public java.lang.String getSortName()
@@ -304,7 +294,6 @@ public class PlatformLightValue
 	  this.id = id;
 	  idHasBeenSet = true;
 
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

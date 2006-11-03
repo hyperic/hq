@@ -33,7 +33,6 @@ import javax.ejb.NoSuchObjectLocalException;
 import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
-import org.hyperic.hq.appdef.shared.ApplicationPK;
 import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
@@ -67,13 +66,13 @@ public class ApplicationVOHelperEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public ApplicationValue getApplicationValue(ApplicationPK apk) throws FinderException,
+    public ApplicationValue getApplicationValue(Integer apk) throws FinderException,
         NamingException {
-            ApplicationValue vo = VOCache.getInstance().getApplication(apk.getId());
+            ApplicationValue vo = VOCache.getInstance().getApplication(apk);
             if(vo != null) {
                 return vo;
             }
-            Application ejb = getApplicationDAO().findByPrimaryKey(apk);
+            Application ejb = getApplicationDAO().findById(apk);
             return getApplicationValue(ejb);
     }
                 
@@ -102,8 +101,7 @@ public class ApplicationVOHelperEJBImpl extends AppdefSessionEJB
         ApplicationValue vo;
         synchronized(cache.getApplicationLock()) {
             // try to get the VO again  
-            vo = VOCache.getInstance()
-                .getApplication(((ApplicationPK)ejb.getPrimaryKey()).getId());
+            vo = VOCache.getInstance().getApplication(ejb.getId());
             if(vo != null) {
                 log.debug("Returning cached application: " + vo.getId());
                 return vo;

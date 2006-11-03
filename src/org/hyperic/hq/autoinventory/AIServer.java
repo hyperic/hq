@@ -27,7 +27,6 @@ package org.hyperic.hq.autoinventory;
 
 import org.hyperic.hq.appdef.ServerBase;
 import org.hyperic.hq.appdef.shared.AIServerValue;
-import org.hyperic.hq.appdef.shared.AIServerPK;
 
 /**
  *
@@ -233,17 +232,6 @@ public class AIServer extends ServerBase
         setInstallPath( valueHolder.getInstallPath() );
         setDescription( valueHolder.getDescription() );
         setServicesAutomanaged( valueHolder.getServicesAutomanaged() );
-    }
-
-    private AIServerPK pkey = new AIServerPK();
-    /**
-     * @deprecated use getId()
-     * @return
-     */
-    public AIServerPK getPrimaryKey()
-    {
-        pkey.setId(getId());
-        return pkey;
     }
 
     public boolean equals(Object obj)

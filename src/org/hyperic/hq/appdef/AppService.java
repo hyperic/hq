@@ -30,7 +30,6 @@ import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
-import org.hyperic.hq.appdef.shared.AppServicePK;
 
 import java.util.Collection;
 
@@ -243,15 +242,4 @@ public class AppService extends AppdefBean
         }
     }
 
-    private AppServicePK pkey = new AppServicePK();
-
-    /**
-     * @deprecated use getId();
-     * @return
-     */
-    public AppServicePK getPrimaryKey()
-    {
-        pkey.setId(getId());
-        return pkey;
-    }
 }

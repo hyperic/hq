@@ -23,11 +23,8 @@ public class CPropKeyValue
    private String description;
    private boolean descriptionHasBeenSet = false;
 
-   private org.hyperic.hq.appdef.shared.CPropKeyPK pk;
-
    public CPropKeyValue()
    {
-	  pk = new org.hyperic.hq.appdef.shared.CPropKeyPK();
    }
 
    public CPropKeyValue( Integer id,int appdefType,int appdefTypeId,String key,String description )
@@ -42,7 +39,6 @@ public class CPropKeyValue
 	  keyHasBeenSet = true;
 	  this.description = description;
 	  descriptionHasBeenSet = true;
-	  pk = new org.hyperic.hq.appdef.shared.CPropKeyPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -59,12 +55,6 @@ public class CPropKeyValue
 	  this.description = otherValue.description;
 	  descriptionHasBeenSet = true;
 
-	  pk = new org.hyperic.hq.appdef.shared.CPropKeyPK(this.getId());
-   }
-
-   public org.hyperic.hq.appdef.shared.CPropKeyPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public Integer getId()
@@ -76,8 +66,6 @@ public class CPropKeyValue
    {
 	  this.id = id;
 	  idHasBeenSet = true;
-
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

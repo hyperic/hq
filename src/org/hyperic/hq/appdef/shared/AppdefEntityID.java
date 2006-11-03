@@ -87,11 +87,6 @@ public class AppdefEntityID
         this(entityType, entityID.intValue());
     }
 
-    public AppdefEntityID(PlatformPK platformPK){
-        this.entityType = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-        this.entityID   = platformPK.getId().intValue();
-    }
-
     public AppdefEntityID(ServerPK serverPK){
         this.entityType = AppdefEntityConstants.APPDEF_TYPE_SERVER;
         this.entityID   = serverPK.getId().intValue();
@@ -102,9 +97,9 @@ public class AppdefEntityID
         this.entityID   = servicePK.getId().intValue();
     }
 
-    public AppdefEntityID(ApplicationPK applicationPK){
-        this.entityType = AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
-        this.entityID   = applicationPK.getId().intValue();
+    public AppdefEntityID(Integer id, int type){
+        this.entityType = type;
+        this.entityID   = id.intValue();
     }
     
     public AppdefEntityID(ResourceValue rv) {
@@ -147,13 +142,6 @@ public class AppdefEntityID
         return new Integer(this.entityID);
     }
 
-    public ApplicationPK getApplicationPK(){
-        if(this.entityType != AppdefEntityConstants.APPDEF_TYPE_APPLICATION)
-            throw new IllegalArgumentException("Entity is not an application");
-
-        return new ApplicationPK(new Integer(this.entityID));
-    }
-
     public ServerPK getServerPK(){
         if(this.entityType != AppdefEntityConstants.APPDEF_TYPE_SERVER)
             throw new IllegalArgumentException("Entity is not a server");
@@ -166,34 +154,6 @@ public class AppdefEntityID
             throw new IllegalArgumentException("Entity is not a service");
 
         return new ServicePK(new Integer(this.entityID));
-    }
-
-    public PlatformPK getPlatformPK(){
-        if(this.entityType != AppdefEntityConstants.APPDEF_TYPE_PLATFORM)
-            throw new IllegalArgumentException("Entity is not a platform");
-
-        return new PlatformPK(new Integer(this.entityID));
-    }
-
-    public AIPlatformPK getAIPlatformPK(){
-        if(this.entityType != AppdefEntityConstants.APPDEF_TYPE_AIPLATFORM)
-            throw new IllegalArgumentException("Entity is not an aiplatform");
-
-        return new AIPlatformPK(new Integer(this.entityID));
-    }
-
-    public AIServerPK getAIServerPK(){
-        if(this.entityType != AppdefEntityConstants.APPDEF_TYPE_AISERVER)
-            throw new IllegalArgumentException("Entity is not an aiserver");
-
-        return new AIServerPK(new Integer(this.entityID));
-    }
-
-    public AIIpPK getAIIpPK(){
-        if(this.entityType != AppdefEntityConstants.APPDEF_TYPE_AIIP)
-            throw new IllegalArgumentException("Entity is not an aiip");
-
-        return new AIIpPK(new Integer(this.entityID));
     }
 
     public String getAppdefKey(){

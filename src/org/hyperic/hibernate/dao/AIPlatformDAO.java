@@ -5,7 +5,6 @@ import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.AIPlatformPK;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.util.StringUtil;
@@ -327,15 +326,5 @@ public class AIPlatformDAO extends HibernateDAO
             }
         }
         return null;
-    }
-
-    /**
-     * @deprecated use findById()
-     * @param pk
-     * @return
-     */
-    public AIPlatform findByPrimaryKey(AIPlatformPK pk)
-    {
-        return findById(pk.getId());
     }
 }

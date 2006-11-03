@@ -3,11 +3,6 @@ package org.hyperic.hibernate.dao;
 import org.hibernate.Session;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.appdef.shared.AIIpValue;
-import org.hyperic.hq.appdef.shared.AIIpPK;
-
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import java.io.Serializable;
 
 /*
 * NOTE: This copyright does *not* cover user programs that use HQ
@@ -89,13 +84,4 @@ public class AIIpDAO extends HibernateDAO
             .uniqueResult();
     }
 
-    /**
-     * @deprecated use findById()
-     * @param pk
-     * @return
-     */
-    public AIIp findByPrimaryKey(AIIpPK pk)
-    {
-        return findById(pk.getId());
-    }
 }

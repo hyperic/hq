@@ -31,11 +31,9 @@ public class AgentValue
    private org.hyperic.hq.appdef.shared.AgentTypeValue AgentType;
    private boolean AgentTypeHasBeenSet = false;
 
-   private org.hyperic.hq.appdef.shared.AgentPK pk;
 
    public AgentValue()
    {
-	  pk = new org.hyperic.hq.appdef.shared.AgentPK();
    }
 
    public AgentValue( String address,int port,String authToken,String agentToken,String version,java.lang.Integer id,java.lang.Long mTime,java.lang.Long cTime )
@@ -56,7 +54,6 @@ public class AgentValue
 	  mTimeHasBeenSet = true;
 	  this.cTime = cTime;
 	  cTimeHasBeenSet = true;
-	  pk = new org.hyperic.hq.appdef.shared.AgentPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -82,12 +79,6 @@ public class AgentValue
 	  this.AgentType = otherValue.AgentType;
 	  AgentTypeHasBeenSet = true;
 
-	  pk = new org.hyperic.hq.appdef.shared.AgentPK(this.getId());
-   }
-
-   public org.hyperic.hq.appdef.shared.AgentPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public String getAddress()
@@ -175,7 +166,6 @@ public class AgentValue
 	  this.id = id;
 	  idHasBeenSet = true;
 
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

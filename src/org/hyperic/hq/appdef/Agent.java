@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.appdef;
 
-import org.hyperic.hq.appdef.shared.AgentPK;
 import org.hyperic.hq.appdef.shared.AgentValue;
 
 import java.util.Collection;
@@ -175,17 +174,5 @@ public class Agent extends AppdefBean
         else
             agentValue.setAgentType( null );
         return agentValue;
-    }
-
-    private AgentPK _pkey = new AgentPK();
-    /**
-     * legacy EJB primary key accessor
-     * @return
-     * @deprecated
-     */
-    public AgentPK getPrimaryKey()
-    {
-        _pkey.setId(getId());
-        return _pkey;
     }
 }

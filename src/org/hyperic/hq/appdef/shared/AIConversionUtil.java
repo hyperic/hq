@@ -202,7 +202,8 @@ public class AIConversionUtil {
            FinderException {
 
         AppdefEntityID appdefID =
-            new AppdefEntityID(new PlatformPK(platformId));
+            new AppdefEntityID(
+                platformId, AppdefEntityConstants.APPDEF_TYPE_PLATFORM);
 
         configureResource(subject, log, appdefID,
                           productConfig, measurementConfig, controlConfig,

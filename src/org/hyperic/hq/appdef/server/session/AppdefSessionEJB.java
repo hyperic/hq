@@ -53,13 +53,10 @@ import org.hyperic.hq.appdef.shared.AppdefResourceLocal;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.ApplicationPK;
-import org.hyperic.hq.appdef.shared.ApplicationTypePK;
 import org.hyperic.hq.appdef.shared.ApplicationVOHelperUtil;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerPK;
@@ -306,12 +303,12 @@ public abstract class AppdefSessionEJB
      * Find a PlatformLocal by primary key
      * @return PlatformLocal
      */
-    protected Platform findPlatformByPK(PlatformPK pk)
+    protected Platform findPlatformByPK(Integer pk)
         throws PlatformNotFoundException, NamingException {
         try {            
-            return getPlatformDAO().findByPrimaryKey(pk);
+            return getPlatformDAO().findById(pk);
         } catch (ObjectNotFoundException e) {
-            throw new PlatformNotFoundException(pk.getId(), e);
+            throw new PlatformNotFoundException(pk, e);
         }
     }
 
@@ -388,21 +385,21 @@ public abstract class AppdefSessionEJB
      * Find a ApplicationTypeLocal by primary key
      * @return ApplicationType
      */
-    protected ApplicationType findApplicationTypeByPK(ApplicationTypePK pk)
+    protected ApplicationType findApplicationTypeByPK(Integer pk)
         throws FinderException, NamingException {
-            return getApplicationTypeDAO().findByPrimaryKey(pk);
+            return getApplicationTypeDAO().findById(pk);
     }
 
     /**
      * Find a ApplicationLocal by primary key
      * @return Application
      */
-    protected Application findApplicationByPK(ApplicationPK pk)
+    protected Application findApplicationByPK(Integer pk)
         throws ApplicationNotFoundException, NamingException {
         try {
-            return getApplicationDAO().findByPrimaryKey(pk);
+            return getApplicationDAO().findById(pk);
         } catch (ObjectNotFoundException e) {
-            throw new ApplicationNotFoundException(pk.getId(), e);
+            throw new ApplicationNotFoundException(pk, e);
         }
     }
 
@@ -430,14 +427,14 @@ public abstract class AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public PlatformPK getPlatformPkByServerPk(ServerPK serverPK)
+    public Integer getPlatformPkByServerPk(ServerPK serverPK)
     {
         // TODO refactor this using finder
         // find the Server and get its platform
         Server server = getServerDAO()
             .findByPrimaryKey(serverPK);
         // return the parent server's pk
-        return (server.getPlatform().getPrimaryKey());
+        return (server.getPlatform().getId());
     }
 
     /**
@@ -447,7 +444,7 @@ public abstract class AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public PlatformPK getPlatformPkByServicePk(ServicePK servicePK)
+    public Integer getPlatformPkByServicePk(ServicePK servicePK)
         throws NamingException, FinderException
     {
         // TODO refactor this using finder
@@ -456,7 +453,7 @@ public abstract class AppdefSessionEJB
         // find the Server and get its platform
         Server server = isvc.getServer();
         // return the parent server's pk
-        return (server.getPlatform().getPrimaryKey());
+        return (server.getPlatform().getId());
     }
 
     /**
@@ -1105,11 +1102,11 @@ public abstract class AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public ResourceValue getPlatformResourceValue(PlatformPK pk)
+    public ResourceValue getPlatformResourceValue(Integer pk)
         throws NamingException, FinderException, CreateException
     {
         return this.getAuthzResource(getPlatformResourceType(),
-                                     pk.getId());
+                                     pk);
     }
 
     /**
@@ -1131,11 +1128,11 @@ public abstract class AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public ResourceValue getApplicationResourceValue(ApplicationPK pk)
+    public ResourceValue getApplicationResourceValue(Integer  pk)
         throws NamingException, FinderException, CreateException
     {
         return this.getAuthzResource(getApplicationResourceType(),
-                                     pk.getId());
+                                     pk);
     }
 
     /**
@@ -1205,9 +1202,7 @@ public abstract class AppdefSessionEJB
                                            PageControl.PAGE_ALL);
         List keyList = new ArrayList(idList.size());
         for(int i=0; i < idList.size(); i++) {
-            ApplicationPK aPK = new ApplicationPK();
-            aPK.setId((Integer)idList.get(i));
-            keyList.add(aPK);
+            keyList.add(idList.get(i));
         }
         return keyList;
     }
@@ -1275,7 +1270,7 @@ public abstract class AppdefSessionEJB
         // viewable list
         for(Iterator i = ejbList.iterator(); i.hasNext();) {
             Platform aEJB = (Platform)i.next();
-            if(!viewable.contains(aEJB.getPrimaryKey())) {
+            if(!viewable.contains(aEJB.getId())) {
                 // remove the item, user cant see it
                 i.remove();
             }
@@ -1297,7 +1292,7 @@ public abstract class AppdefSessionEJB
         List pkList = new ArrayList(idList.size());
         for(int i=0; i < idList.size(); i++) {
             Integer id = (Integer)idList.get(i);
-            pkList.add(new PlatformPK(id));
+            pkList.add(id);
         }
         return pkList;
     }
@@ -1337,7 +1332,7 @@ public abstract class AppdefSessionEJB
             switch(id.getType()){
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 Platform plat = 
-                    this.findPlatformByPK(new PlatformPK(intID));
+                    this.findPlatformByPK(intID);
                 return plat.getPlatformValue();
             
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
@@ -1352,7 +1347,7 @@ public abstract class AppdefSessionEJB
                 return service.getServiceValue();
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                 Application app =
-                    findApplicationByPK(new ApplicationPK(intID));
+                    findApplicationByPK(intID);
 
                 return ApplicationVOHelperUtil.getLocalHome().create()
                             .getApplicationValue(app);

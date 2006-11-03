@@ -26,17 +26,11 @@
 package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
-import org.hibernate.NonUniqueObjectException;
-import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.AgentPK;
-import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.dao.DAOFactory;
 
@@ -324,13 +318,4 @@ public class PlatformDAO extends HibernateDAO {
             .list();
     }
 
-    /**
-     * @deprecated use findById()
-     * @param pk
-     * @return
-     */
-    public Platform findByPrimaryKey(PlatformPK pk)
-    {
-        return findById(pk.getId());
-    }
 }

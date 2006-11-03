@@ -39,7 +39,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
-import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.ServerTypePK;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -103,7 +102,7 @@ public class NewServerAction extends BaseAction {
             // server.setAutoinventoryIdentifier(newForm.getInstallPath());
             
             Integer platformId = RequestUtils.getResourceId(request);
-            PlatformPK ppk = new PlatformPK(platformId);
+            Integer ppk = platformId;
             ServerTypePK stPk = new ServerTypePK(newForm.getResourceType());
 
             log.trace("creating server [" + server.getName()

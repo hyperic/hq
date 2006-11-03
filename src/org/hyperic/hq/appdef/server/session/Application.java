@@ -27,9 +27,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.shared.ServicePK;
-import org.hyperic.hq.appdef.shared.ServiceClusterPK;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
-import org.hyperic.hq.appdef.shared.ApplicationPK;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 
@@ -126,7 +124,7 @@ public class Application extends AppdefResource
             "use AppServiceDAO.createService()");
     }
 
-    public AppService addServiceCluster(ServiceClusterPK aClusterPK)
+    public AppService addServiceCluster(Integer aClusterPK)
     {
         throw new UnsupportedOperationException(
             "use AppServiceDAO.createService()");
@@ -203,17 +201,6 @@ public class Application extends AppdefResource
         else
             vo.setApplicationType( null );
         return vo;
-    }
-
-    private ApplicationPK pkey = new ApplicationPK();
-    /**
-     * @deprecated use getId()
-     * @return
-     */
-    public ApplicationPK getPrimaryKey()
-    {
-        pkey.setId(getId());
-        return pkey;
     }
 
     public boolean equals(Object obj)

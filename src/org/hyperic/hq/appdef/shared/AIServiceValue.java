@@ -37,11 +37,8 @@ public class AIServiceValue
    private java.lang.Long cTime;
    private boolean cTimeHasBeenSet = false;
 
-   private org.hyperic.hq.appdef.shared.AIServicePK pk;
-
    public AIServiceValue()
    {
-	  pk = new org.hyperic.hq.appdef.shared.AIServicePK();
    }
 
    public AIServiceValue( int serverId,String serviceTypeName,byte[] customProperties,byte[] productConfig,byte[] controlConfig,byte[] measurementConfig,byte[] responseTimeConfig,java.lang.String name,java.lang.String description,java.lang.Integer id,java.lang.Long mTime,java.lang.Long cTime )
@@ -70,7 +67,6 @@ public class AIServiceValue
 	  mTimeHasBeenSet = true;
 	  this.cTime = cTime;
 	  cTimeHasBeenSet = true;
-	  pk = new org.hyperic.hq.appdef.shared.AIServicePK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -101,12 +97,6 @@ public class AIServiceValue
 	  this.cTime = otherValue.cTime;
 	  cTimeHasBeenSet = true;
 
-	  pk = new org.hyperic.hq.appdef.shared.AIServicePK(this.getId());
-   }
-
-   public org.hyperic.hq.appdef.shared.AIServicePK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public int getServerId()
@@ -253,8 +243,6 @@ public class AIServiceValue
    {
 	  this.id = id;
 	  idHasBeenSet = true;
-
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

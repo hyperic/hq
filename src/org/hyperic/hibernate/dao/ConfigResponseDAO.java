@@ -27,14 +27,13 @@ package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
 import org.hyperic.hq.appdef.ConfigResponseDB;
-import org.hyperic.hq.appdef.shared.ConfigResponsePK;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 
 /**
  * CRUD methods, finders, etc. for ConfigResponseDAO
  */
-public class ConfigResponseDAO extends HibernateDAO implements IConfigResponseDAO
+public class ConfigResponseDAO extends HibernateDAO
 {
     public ConfigResponseDAO(Session session)
     {
@@ -127,13 +126,4 @@ public class ConfigResponseDAO extends HibernateDAO implements IConfigResponseDA
             .uniqueResult();
     }
 
-    /**
-     * for legacy EJB Entity Bean access compatibility
-     * @param pk
-     * @return
-     */
-    public ConfigResponseDB findByPrimaryKey(ConfigResponsePK pk)
-    {
-        return findById(pk.getId());
-    }
 }

@@ -28,8 +28,6 @@ package org.hyperic.hq.appdef;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
-import org.hyperic.hq.appdef.shared.ServiceClusterPK;
-import org.hyperic.hq.appdef.shared.ApplicationPK;
 import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
@@ -152,27 +150,15 @@ public class ServiceCluster extends AppdefBean
         return result;
     }
 
-    private ServiceClusterPK pkey = new ServiceClusterPK();
-    /**
-     * legacy EJB primary key getter
-     * @deprecated use getId() instead
-     * @return
-     */
-    public ServiceClusterPK getPrimaryKey()
-    {
-        pkey.setId(getId());
-        return pkey;
-    }
-
-    public AppSvcDependency addDependentService(ApplicationPK appPK,
+    public AppSvcDependency addDependentService(Integer appPK,
                                                 ServicePK depPK)
     {
         throw new UnsupportedOperationException(
             "use AppServiceDAO.addDependentService()");
     }
 
-    public AppSvcDependency addDependentServiceCluster(ApplicationPK appPK,
-                                                       ServiceClusterPK depPK)
+    public AppSvcDependency addDependentServiceCluster(Integer appPK,
+                                                       Integer depPK)
     {
         throw new UnsupportedOperationException(
             "use AppServiceDAO.addDependentServiceCluster()");

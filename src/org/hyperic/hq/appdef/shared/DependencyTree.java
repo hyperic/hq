@@ -57,8 +57,8 @@ public class DependencyTree implements Serializable {
         return this.appValue;
     }
 
-    public ApplicationPK getAppPK() {
-        return this.getApplication().getPrimaryKey();
+    public Integer getAppPK() {
+        return this.getApplication().getId();
     }
 
     /**
@@ -168,8 +168,8 @@ public class DependencyTree implements Serializable {
                 DependencyNode aNode = (DependencyNode)nodes.get(i);
                 AppServiceValue appSvc = aNode.getAppService();
                 if(appSvc.getIsCluster() &&
-                   appSvc.getServiceCluster().getPrimaryKey()
-                    .equals(aCluster.getPrimaryKey())) {
+                   appSvc.getServiceCluster().getId()
+                    .equals(aCluster.getId())) {
                    return aNode;
                 }
             }

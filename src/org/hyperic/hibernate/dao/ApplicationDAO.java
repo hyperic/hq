@@ -33,7 +33,6 @@ import org.hyperic.hq.appdef.server.session.ApplicationType;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
-import org.hyperic.hq.appdef.shared.ApplicationPK;
 import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.appdef.shared.DependencyNode;
 import org.hyperic.dao.DAOFactory;
@@ -131,7 +130,6 @@ public class ApplicationDAO extends HibernateDAO
     public void setDependencyTree(Application a, DependencyTree newTree)
     {
         log.debug("Setting dependency tree for application: " + a.getName());
-        ApplicationPK appPk = new ApplicationPK(a.getId());
         List nodes = newTree.getNodes();
         AppSvcDependencyDAO adao =
             DAOFactory.getDAOFactory().getAppSvcDepencyDAO();
@@ -167,12 +165,12 @@ public class ApplicationDAO extends HibernateDAO
                 if(nodeAsv.getIsCluster()) {
 
                     if(depAsv.getIsCluster()) {
-                        scdao.findByPrimaryKey(
+                        scdao.findById(
                             aNode.getServiceClusterPK()).addDependentServiceCluster(
                                 newTree.getAppPK(),
-                                depAsv.getServiceCluster().getPrimaryKey());
+                                depAsv.getServiceCluster().getId());
                     } else {
-                        scdao.findByPrimaryKey(
+                        scdao.findById(
                             aNode.getServiceClusterPK()).addDependentService(
                                 newTree.getAppPK(),
                                 depAsv.getService().getPrimaryKey());
@@ -182,7 +180,7 @@ public class ApplicationDAO extends HibernateDAO
                         Service s = sdao.findByPrimaryKey(aNode.getServicePK());
                         asdao.addDependentServiceCluster(s,
                                 newTree.getAppPK(),
-                                depAsv.getServiceCluster().getPrimaryKey());
+                                depAsv.getServiceCluster().getId());
                     } else {
                         Service s = sdao.findByPrimaryKey(aNode.getServicePK());
                         asdao.addDependentService(s,
@@ -193,8 +191,8 @@ public class ApplicationDAO extends HibernateDAO
             }
             // finally set the entry point flag on the AppService
             boolean isEntryPoint = newTree.isEntryPoint(aNode.getAppService());
-            DAOFactory.getDAOFactory().getAppServiceDAO().findByPrimaryKey(
-                aNode.getAppService().getPrimaryKey())
+            DAOFactory.getDAOFactory().getAppServiceDAO().findById(
+                aNode.getAppService().getId())
                     .setIsEntryPoint(isEntryPoint);
         }
     }
@@ -458,10 +456,5 @@ public class ApplicationDAO extends HibernateDAO
         return getSession().createQuery(sql)
             .setInteger(0, pid.intValue())
             .list();
-    }
-
-    public Application findByPrimaryKey(ApplicationPK pk)
-    {
-        return findById(pk.getId());
     }
 }

@@ -28,7 +28,6 @@ package org.hyperic.hibernate.dao;
 import org.hibernate.Session;
 import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.appdef.shared.AgentTypeValue;
-import org.hyperic.hq.appdef.shared.AgentTypePK;
 
 /**
  * CRUD methods, finders, etc. for AgentType
@@ -79,10 +78,5 @@ public class AgentTypeDAO extends HibernateDAO
         return (AgentType)getSession().createQuery(sql)
             .setString(0, name.toLowerCase())
             .uniqueResult();
-    }
-
-    public AgentType findByPrimaryKey(AgentTypePK pk)
-    {
-        return findById(pk.getId());
     }
 }

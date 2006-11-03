@@ -162,27 +162,6 @@ public final class AppdefEntityConstants {
         }
     }
 
-    public static Class typeToClass(int type){
-        switch(type){
-        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            return PlatformPK.class;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            return ServerPK.class;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            return ServicePK.class;
-        case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-            return ApplicationPK.class;
-        case AppdefEntityConstants.APPDEF_TYPE_AIPLATFORM:
-            return AIPlatformPK.class;
-        case AppdefEntityConstants.APPDEF_TYPE_AISERVER:
-            return AIServerPK.class;
-        case AppdefEntityConstants.APPDEF_TYPE_AIIP:
-            return AIIpPK.class;
-        default:
-            throw new IllegalArgumentException("No PK for passed type");
-        }
-    }
-
     public static int entityInfoTypeToAppdefType(int entityInfoType){
         switch(entityInfoType){
         case TypeInfo.TYPE_PLATFORM:

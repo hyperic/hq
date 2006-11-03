@@ -49,11 +49,9 @@ public class PlatformValue
    private org.hyperic.hq.appdef.shared.AgentValue Agent;
    private boolean AgentHasBeenSet = false;
 
-   private org.hyperic.hq.appdef.shared.PlatformPK pk;
 
    public PlatformValue()
    {
-	  pk = new org.hyperic.hq.appdef.shared.PlatformPK();
    }
 
    public PlatformValue( java.lang.String sortName,java.lang.String commentText,java.lang.String modifiedBy,java.lang.String owner,java.lang.Integer configResponseId,java.lang.String certdn,java.lang.String fqdn,java.lang.String name,java.lang.String location,java.lang.String description,java.lang.Integer cpuCount,java.lang.Integer id,java.lang.Long mTime,java.lang.Long cTime )
@@ -86,7 +84,6 @@ public class PlatformValue
 	  mTimeHasBeenSet = true;
 	  this.cTime = cTime;
 	  cTimeHasBeenSet = true;
-	  pk = new org.hyperic.hq.appdef.shared.PlatformPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -131,12 +128,6 @@ public class PlatformValue
 	  this.Agent = otherValue.Agent;
 	  AgentHasBeenSet = true;
 
-	  pk = new org.hyperic.hq.appdef.shared.PlatformPK(this.getId());
-   }
-
-   public org.hyperic.hq.appdef.shared.PlatformPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public java.lang.String getSortName()
@@ -313,8 +304,6 @@ public class PlatformValue
    {
 	  this.id = id;
 	  idHasBeenSet = true;
-
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

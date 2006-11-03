@@ -108,7 +108,7 @@ public class NewPlatformAction extends BaseAction {
             PlatformValue newPlatform =
                 boss.createPlatform(sessionId.intValue(),
                                     platform, platformType.getPrimaryKey(),
-                                    agent.getPrimaryKey());
+                                    agent.getId());
 
             Integer platformId = newPlatform.getId();
             newForm.setRid(platformId);

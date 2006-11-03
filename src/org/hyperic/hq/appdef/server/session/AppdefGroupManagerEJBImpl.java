@@ -58,7 +58,6 @@ import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerUtil;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
-import org.hyperic.hq.appdef.shared.ServiceClusterPK;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
@@ -552,9 +551,9 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
         throws FinderException, AppSvcClustDuplicateAssignException,
                PermissionException, AppSvcClustIncompatSvcException {
         try {
-            ServiceClusterPK pk = 
+            Integer pk =
                 getServiceManager().createCluster(subject, clusterVo, svcList);
-            gv.setClusterId(pk.getId().intValue());
+            gv.setClusterId(pk.intValue());
         } catch (CreateException e) {
             throw new SystemException(e);
         }

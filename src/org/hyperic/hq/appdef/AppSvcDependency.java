@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.appdef;
 
-import org.hyperic.hq.appdef.shared.AppSvcDependencyPK;
-
 import java.io.Serializable;
 
 /**
@@ -99,14 +97,4 @@ public class AppSvcDependency implements Serializable
         this.dependentService = dependentService;
     }
 
-    private AppSvcDependencyPK pkey = new AppSvcDependencyPK();
-    /**
-     * @deprecated use getId()
-     * @return
-     */
-    public AppSvcDependencyPK getPrimaryKey()
-    {
-        pkey.setId(getId());
-        return pkey;
-    }
 }

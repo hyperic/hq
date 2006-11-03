@@ -2,7 +2,6 @@ package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
 import org.hyperic.hq.appdef.AppSvcDependency;
-import org.hyperic.hq.appdef.shared.AppSvcDependencyPK;
 import org.hyperic.hq.appdef.AppService;
 
 import java.util.Collection;
@@ -115,13 +114,4 @@ public class AppSvcDependencyDAO extends HibernateDAO
             .list();
     }
 
-    /**
-     * @deprecated use findById()
-     * @param pk
-     * @return
-     */
-    public AppSvcDependency findByPrimaryKey(AppSvcDependencyPK pk)
-    {
-        return findById(pk.getId());
-    }
 }

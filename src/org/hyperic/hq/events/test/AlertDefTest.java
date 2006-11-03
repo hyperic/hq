@@ -5,7 +5,6 @@ import org.apache.log4j.Logger;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
@@ -36,7 +35,7 @@ public class AlertDefTest
         // Create appdef entity to act on
         PlatformTypeValue ptInfo = new PlatformTypeValue();
         PlatformTypePK ptpk;
-        PlatformPK ppk;
+        Integer ppk;
         
         ptInfo.setName(u("My Platform Type"));
         ptInfo.setPlugin(null);
@@ -47,7 +46,7 @@ public class AlertDefTest
         pVal.setFqdn(u("My.fqdn.foo"));
         pVal.setCpuCount(new Integer(0));
         ppk = pMan.createPlatform(getOverlord(), ptpk, pVal, null);
-        pVal = pMan.getPlatformById(getOverlord(), ppk.getId());
+        pVal = pMan.getPlatformById(getOverlord(), ppk);
         
         // Create alert def
         AlertDefinitionValue aInfo = new AlertDefinitionValue();

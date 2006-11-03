@@ -52,7 +52,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEvent;
 import org.hyperic.hq.appdef.shared.MiniResourceValue;
-import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
@@ -321,7 +320,7 @@ public class LatherDispatcher
         agentVal.setAgentToken(agentToken);
 
         // Check the to see if it already exists
-        PlatformPK pk = null;
+        Integer pk = null;
         try {
             AgentValue origAgent =
                 this.getAgentManager().getAgent(agentIP, port);
@@ -362,14 +361,16 @@ public class LatherDispatcher
         if (pk != null)
             try {
                 PlatformValue platform = getPlatformManager()
-                    .getPlatformById(this.getOverlord(), pk.getId());
+                    .getPlatformById(this.getOverlord(), pk);
                 
                 // Send the agent the schedule
                 // Tell HQ we have a new agent starting.  This forces an update
                 // of the metric schedule.
-                getPlatformManager().sendAppdefEvent(this.getOverlord(), 
-                                                     new AppdefEntityID(pk),
-                                                     AppdefEvent.ACTION_UPDATE);
+                getPlatformManager().sendAppdefEvent(
+                    this.getOverlord(),
+                    new AppdefEntityID(
+                        pk, AppdefEntityConstants.APPDEF_TYPE_PLATFORM),
+                    AppdefEvent.ACTION_UPDATE);
                 
                 ServerLightValue[] servers = platform.getServerValues();
                 for (int i = 0; i < servers.length; i++) {

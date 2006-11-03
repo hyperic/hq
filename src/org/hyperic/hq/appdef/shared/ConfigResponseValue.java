@@ -29,11 +29,8 @@ public class ConfigResponseValue
    private String validationError;
    private boolean validationErrorHasBeenSet = false;
 
-   private org.hyperic.hq.appdef.shared.ConfigResponsePK pk;
-
    public ConfigResponseValue()
    {
-	  pk = new org.hyperic.hq.appdef.shared.ConfigResponsePK();
    }
 
    public ConfigResponseValue( Integer id,byte[] productResponse,byte[] controlResponse,byte[] measurementResponse,byte[] autoinventoryResponse,byte[] responseTimeResponse,boolean userManaged,String validationError )
@@ -54,7 +51,6 @@ public class ConfigResponseValue
 	  userManagedHasBeenSet = true;
 	  this.validationError = validationError;
 	  validationErrorHasBeenSet = true;
-	  pk = new org.hyperic.hq.appdef.shared.ConfigResponsePK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -77,12 +73,6 @@ public class ConfigResponseValue
 	  this.validationError = otherValue.validationError;
 	  validationErrorHasBeenSet = true;
 
-	  pk = new org.hyperic.hq.appdef.shared.ConfigResponsePK(this.getId());
-   }
-
-   public org.hyperic.hq.appdef.shared.ConfigResponsePK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public Integer getId()
@@ -95,7 +85,6 @@ public class ConfigResponseValue
 	  this.id = id;
 	  idHasBeenSet = true;
 
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

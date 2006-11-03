@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.appdef.shared.ApplicationTypePK;
 import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceTypePK;
 
@@ -71,17 +70,6 @@ public class ApplicationType extends AppdefResourceType
     public void setApplications(Collection applications)
     {
         this.applications = applications;
-    }
-
-    private ApplicationTypePK pkey = new ApplicationTypePK();
-    /**
-     * @deprecated use getId()
-     * @return
-     */
-    public ApplicationTypePK getPrimaryKey()
-    {
-        pkey.setId(getId());
-        return pkey;
     }
 
     public boolean equals(Object obj)

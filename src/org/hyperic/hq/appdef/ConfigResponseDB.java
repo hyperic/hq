@@ -26,11 +26,7 @@
 package org.hyperic.hq.appdef;
 
 import org.hyperic.hq.appdef.shared.ConfigResponseValue;
-import org.hyperic.hq.appdef.shared.ConfigResponsePK;
 import org.hyperic.hibernate.PersistedObject;
-
-import java.util.Collection;
-import java.io.Serializable;
 
 /**
  *
@@ -162,17 +158,6 @@ public class ConfigResponseDB extends PersistedObject
         setResponseTimeResponse( valueHolder.getResponseTimeResponse() );
         setUserManaged( valueHolder.getUserManaged() );
         setValidationError( valueHolder.getValidationError() );
-    }
-
-    private ConfigResponsePK _pkey = new ConfigResponsePK();
-    /**
-     * for legacy EJB Entity Bean compatibility
-     * @return
-     */
-    public ConfigResponsePK getPrimaryKey()
-    {
-        _pkey.setId(getId());
-        return _pkey;
     }
 
     public boolean equals(Object obj)

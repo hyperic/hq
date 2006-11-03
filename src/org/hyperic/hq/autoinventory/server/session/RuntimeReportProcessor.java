@@ -43,7 +43,6 @@ import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
@@ -268,8 +267,8 @@ public class RuntimeReportProcessor {
             // Add the platform
             log.info("Creating new platform: " + aiplatform);
             try {
-                PlatformPK pk = platformMgr.createPlatform(subject, aiplatform);
-                appdefPlatform = platformMgr.getPlatformById(subject, pk.getId());
+                Integer pk = platformMgr.createPlatform(subject, aiplatform);
+                appdefPlatform = platformMgr.getPlatformById(subject, pk);
             } catch (PlatformNotFoundException e) {
                 // should never happen
                 log.fatal("Failed to find platform we just created!", e);
@@ -431,7 +430,7 @@ public class RuntimeReportProcessor {
                 String serverOwnerName = platform.getOwner();
                 AuthzSubjectValue serverOwner
                     = subjectMgr.findSubjectByName(subject, serverOwnerName);
-                PlatformPK platformPK = new PlatformPK(platform.getId());
+                Integer platformPK = platform.getId();
                 ServerPK pk = serverMgr.createServer(serverOwner, 
                                                      platformPK,
                                                      serverTypePK, 

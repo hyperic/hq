@@ -27,7 +27,6 @@ package org.hyperic.hq.autoinventory;
 
 import org.hyperic.hq.appdef.server.session.PlatformBase;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.AIPlatformPK;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -342,17 +341,6 @@ public class AIPlatform extends PlatformBase
         }
         aipValue.cleanAIServerValue();
         return aipValue;
-    }
-
-    private AIPlatformPK pkey = new AIPlatformPK();
-    /**
-     * @deprecated use getId()
-     * @return
-     */
-    public AIPlatformPK getPrimaryKey()
-    {
-        pkey.setId(getId());
-        return pkey;
     }
 
     public boolean equals(Object obj)

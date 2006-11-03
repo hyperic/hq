@@ -55,11 +55,8 @@ public class AIPlatformValue
    private java.util.Collection AIIpValues = new java.util.HashSet();
    private Collection AIServerValues = new java.util.HashSet();
 
-   private org.hyperic.hq.appdef.shared.AIPlatformPK pk;
-
    public AIPlatformValue()
    {
-	  pk = new org.hyperic.hq.appdef.shared.AIPlatformPK();
    }
 
    public AIPlatformValue( String agentToken,int queueStatus,byte[] customProperties,byte[] productConfig,byte[] controlConfig,byte[] measurementConfig,long diff,boolean ignored,String platformTypeName,Long lastApproved,java.lang.String certdn,java.lang.String fqdn,java.lang.String name,java.lang.String location,java.lang.String description,java.lang.Integer cpuCount,java.lang.Integer id,java.lang.Long mTime,java.lang.Long cTime )
@@ -102,7 +99,6 @@ public class AIPlatformValue
 	  mTimeHasBeenSet = true;
 	  this.cTime = cTime;
 	  cTimeHasBeenSet = true;
-	  pk = new org.hyperic.hq.appdef.shared.AIPlatformPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -150,13 +146,6 @@ public class AIPlatformValue
 	  this.AIIpValues = otherValue.AIIpValues;
 	// TODO Clone is better no ?
 	  this.AIServerValues = otherValue.AIServerValues;
-
-	  pk = new org.hyperic.hq.appdef.shared.AIPlatformPK(this.getId());
-   }
-
-   public org.hyperic.hq.appdef.shared.AIPlatformPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public String getAgentToken()
@@ -408,8 +397,6 @@ public class AIPlatformValue
    {
 	  this.id = id;
 	  idHasBeenSet = true;
-
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

@@ -28,9 +28,7 @@ package org.hyperic.hibernate.dao;
 import org.hibernate.Session;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AgentType;
-import org.hyperic.hq.appdef.shared.AgentPK;
 import org.hyperic.hq.appdef.shared.AgentValue;
-import org.hyperic.hq.appdef.AgentType;
 
 import java.util.Collection;
 
@@ -109,13 +107,4 @@ public class AgentDAO extends HibernateDAO
             .list();
     }
 
-    /**
-     * @deprecated use findById()
-     * @param pk
-     * @return
-     */
-    public Agent findByPrimaryKey(AgentPK pk)
-    {
-        return findById(pk.getId());
-    }
 }

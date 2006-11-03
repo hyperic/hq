@@ -29,7 +29,6 @@ import java.util.List;
 
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
-import org.hyperic.hq.appdef.shared.AIServerPK;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
@@ -75,8 +74,8 @@ public class AIQRV_ignore implements AIQResourceVisitor {
                               List createdResources )
         throws AIQApprovalException, PermissionException {
 
-        AIServerPK pk = (AIServerPK)aiserver.getPrimaryKey();
-        log.info("(ignore) visiting server: " + pk.getId()
+        Integer pk = aiserver.getId();
+        log.info("(ignore) visiting server: " + pk
                  + " AIID=" + aiserver.getAutoinventoryIdentifier());
 
         // Only allow ignore of 'new' servers.

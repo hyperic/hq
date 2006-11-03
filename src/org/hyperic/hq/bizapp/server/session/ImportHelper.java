@@ -40,7 +40,6 @@ import javax.naming.NamingException;
 import org.hyperic.hq.agent.AgentCommandsAPI;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
-import org.hyperic.hq.appdef.shared.AgentPK;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
 import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
@@ -49,7 +48,6 @@ import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
@@ -58,16 +56,12 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
 import org.hyperic.hq.appdef.shared.ApplicationManagerUtil;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.ApplicationPK;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
-import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
-import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
@@ -236,7 +230,7 @@ class ImportHelper
         PlatformTypeValue pType;
         String typeName, name, fqdn, val;
         Integer iVal;
-        AgentPK agentPk;
+        Integer agentPk;
         int agtPort;
 
         name     = platform.getCapName();
@@ -284,7 +278,7 @@ class ImportHelper
             AgentValue agentVal;
 
             agentVal = this.agentMan.getAgent(agentInfo.getAddress(), agtPort);
-            agentPk  = agentVal.getPrimaryKey();
+            agentPk  = agentVal.getId();
         } catch(AgentNotFoundException exc){
             throw new BatchImportException("Error creating platform '" + 
                                            name + ": No agent was found for " +
@@ -295,10 +289,10 @@ class ImportHelper
 
         try {
             try {
-                PlatformPK pk  = this.platMan.createPlatform(this.subject, 
+                Integer pk  = this.platMan.createPlatform(this.subject, 
                                                     pType.getPrimaryKey(), 
                                                     aPlatform, agentPk);
-                aPlatform = this.platMan.getPlatformById(this.subject, pk.getId());
+                aPlatform = this.platMan.getPlatformById(this.subject, pk);
             } catch (PlatformNotFoundException e) {
                 throw new BatchImportException("Unable to find the platform " +
                                                " we just created");
@@ -363,8 +357,10 @@ class ImportHelper
         }
 
         this.platformCache.put(platform.getName(), aPlatform);
-        this.entIDCache.put(new AppdefEntityID(aPlatform.getPrimaryKey()), 
-                            (AppdefResourceValue)aPlatform);
+        this.entIDCache.put(
+            new AppdefEntityID(
+                aPlatform.getId(), AppdefEntityConstants.APPDEF_TYPE_PLATFORM),
+            aPlatform);
 
         buf.pushIndent();
         this.handleAllConfigs(aPlatform.getEntityId(), name, platform, buf);
@@ -429,7 +425,7 @@ class ImportHelper
 
         try {
             ServerPK pk  = this.servMan.createServer(this.subject,
-                                                plat.getPrimaryKey(),
+                                                plat.getId(),
                                                 sType.getPrimaryKey(),
                                                 aServer);
             try {
@@ -758,10 +754,10 @@ class ImportHelper
         }
 
         try {
-            ApplicationPK pk = this.appMan.createApplication(this.subject, aApp, 
-                                                 serviceList);
+            Integer pk = this.appMan.createApplication(this.subject, aApp,
+                                                       serviceList);
             try {
-                aApp = this.appMan.getApplicationById(this.subject, pk.getId());
+                aApp = this.appMan.getApplicationById(this.subject, pk);
             } catch (ApplicationNotFoundException e) {
                 throw new BatchImportException(
                     "Failed to find app we just created");

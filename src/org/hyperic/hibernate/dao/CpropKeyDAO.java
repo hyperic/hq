@@ -27,14 +27,13 @@ package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
 import org.hyperic.hq.appdef.CpropKey;
-import org.hyperic.hq.appdef.shared.CPropKeyPK;
 
 import java.util.Collection;
 
 /**
  * CRUD methods, finders, etc. for CpropKey
  */
-public class CpropKeyDAO extends HibernateDAO implements ICPropKeyDAO
+public class CpropKeyDAO extends HibernateDAO
 {
     public CpropKeyDAO(Session session)
     {
@@ -96,13 +95,4 @@ public class CpropKeyDAO extends HibernateDAO implements ICPropKeyDAO
             .uniqueResult();
     }
 
-    /**
-     * for legacy EJB Entity Bean compatibility.
-     * @param pk
-     * @return
-     */
-    public CpropKey findByPrimaryKey(CPropKeyPK pk)
-    {
-        return findById(pk.getId());
-    }
 }

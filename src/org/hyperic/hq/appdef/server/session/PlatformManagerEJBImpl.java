@@ -49,7 +49,6 @@ import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
-import org.hyperic.hq.appdef.shared.AgentPK;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -63,7 +62,6 @@ import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformLightValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformVOHelperUtil;
@@ -344,7 +342,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             // check to see that the user has the remove permission
             // on the platform
             ResourceValue platformRv = this.getPlatformResourceValue(
-                platform.getPrimaryKey());
+                platform.getId());
             this.checkRemovePermission(subject, platform.getEntityId());
             // remove the resources for any servers and services
             // on this host. This is done because the entity beans
@@ -379,8 +377,10 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
 
             // Send platform deleted event
-            sendAppdefEvent(subject, new AppdefEntityID(platform.getPrimaryKey()),
-                            AppdefEvent.ACTION_DELETE);
+            sendAppdefEvent(
+                subject, new AppdefEntityID(
+                platform.getId(), AppdefEntityConstants.APPDEF_TYPE_PLATFORM),
+                AppdefEvent.ACTION_DELETE);
         } catch (RemoveException e) {
             _log.debug("Error while removing Platform");
             rollback();
@@ -412,9 +412,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
-    public PlatformPK createPlatform(AuthzSubjectValue subject, 
-                                     PlatformTypePK ptpk, 
-                                     PlatformValue pValue, AgentPK agentPK)
+    public Integer createPlatform(AuthzSubjectValue subject,
+                                  PlatformTypePK ptpk,
+                                  PlatformValue pValue, Integer agentPK)
         throws CreateException, ValidationException, PermissionException,
                AppdefDuplicateNameException, AppdefDuplicateFQDNException,
                ApplicationException 
@@ -448,7 +448,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             Agent agent = null;
             
             if (agentPK != null)
-                agent = getAgentDAO().findByPrimaryKey(agentPK);
+                agent = getAgentDAO().findById(agentPK);
             
             if (pValue.getConfigResponseId() == null)
                 config = configDAO.createPlatform();
@@ -475,7 +475,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                                 subject);
 
             // platforms get configured as part of their creation
-            return platform.getPrimaryKey();
+            return platform.getId();
         } catch (FinderException e) {
             throw new CreateException("Unable to find PlatformType: "
                                       + ptpk + " : " + e.getMessage());
@@ -577,7 +577,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="RequiresNew"
      */
-    public PlatformPK createPlatform(AuthzSubjectValue subject, 
+    public Integer createPlatform(AuthzSubjectValue subject,
                                      AIPlatformValue aipValue)
         throws ApplicationException, CreateException
     {
@@ -627,7 +627,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             throw new SystemException(e);
         }
         // Platforms get configured as part of their creation
-        return platform.getPrimaryKey();
+        return platform.getId();
     }
 
     /**
@@ -936,8 +936,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public PlatformPK getPlatformPkByAgentToken(AuthzSubjectValue subject,
-                                                String agentToken)
+    public Integer getPlatformPkByAgentToken(AuthzSubjectValue subject,
+                                             String agentToken)
         throws FinderException, PermissionException, PlatformNotFoundException
     {
         Platform p = getPlatformDAO().findByAgentToken(agentToken);
@@ -945,8 +945,11 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             throw new PlatformNotFoundException(
                 "Platform with agent token " + agentToken + " not found");
         }
-        checkViewPermission(subject, new AppdefEntityID(p.getPrimaryKey()));
-        return p.getPrimaryKey();
+        checkViewPermission(
+            subject,
+            new AppdefEntityID(
+                p.getId(),AppdefEntityConstants.APPDEF_TYPE_PLATFORM));
+        return p.getId();
     }
 
     /**
@@ -1005,7 +1008,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         try {
             Server serverLocal = getServerDAO().findById(serverId);
             Platform p = serverLocal.getPlatform();
-            PlatformPK pk = p.getPrimaryKey();
             PlatformValue platformValue = p.getPlatformValue();
             checkViewPermission(subject, platformValue.getEntityId());
             return platformValue;
@@ -1077,7 +1079,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             rs = ps.executeQuery();
 
             while (rs.next()) {
-                platformIds.add(new PlatformPK(new Integer(rs.getInt(1))));
+                platformIds.add(new Integer(rs.getInt(1)));
             }
         } catch (SQLException e) {
             throw new SystemException("Error looking up servers by id: " + e, e);
@@ -1087,13 +1089,13 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
         ArrayList platforms = new ArrayList();
         for (Iterator it = platformIds.iterator(); it.hasNext();) {
-            PlatformPK pk = (PlatformPK) it.next();
+            Integer pk = (Integer) it.next();
             if(!authzPks.contains(pk))
                 continue;
             
             try {
                 Platform platform =
-                    getPlatformDAO().findByPrimaryKey(pk);
+                    getPlatformDAO().findById(pk);
                 
                 platforms.add(platform);
             } catch (ObjectNotFoundException e) {
@@ -1201,7 +1203,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             // viewable list
             for(Iterator i = platforms.iterator(); i.hasNext();) {
                 Platform aEJB = (Platform)i.next();
-                if(viewable.contains(aEJB.getPrimaryKey())) {
+                if(viewable.contains(aEJB.getId())) {
                     // remove the item, user cant see it
                     platIds.add(aEJB.getId());
                 }
@@ -1243,7 +1245,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             // viewable list
             for(Iterator i = platforms.iterator(); i.hasNext();) {
                 Platform aEJB = (Platform)i.next();
-                if(!viewable.contains(aEJB.getPrimaryKey())) {
+                if(!viewable.contains(aEJB.getId())) {
                     // remove the item, user cant see it
                     i.remove();
                 }
@@ -1290,7 +1292,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         throws UpdateException, PermissionException,
                AppdefDuplicateNameException, PlatformNotFoundException, 
                AppdefDuplicateFQDNException, ApplicationException {
-        PlatformPK pk = existing.getPrimaryKey();
         try {
             checkPermission(subject, getPlatformResourceType(),
                     existing.getId(), AuthzConstants.platformOpModifyPlatform);
@@ -1298,7 +1299,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             existing.setMTime(new Long(System.currentTimeMillis()));
             this.trimStrings(existing);
 
-            Platform plat = getPlatformDAO().findByPrimaryKey(pk);
+            Platform plat = getPlatformDAO().findById(existing.getId());
 
             if (existing.getCpuCount() == null) {
                 //cpu count is no longer an option in the UI
@@ -1330,7 +1331,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
                     // name has changed. Update authz resource table
                     ResourceValue rv =
-                        getAuthzResource(getPlatformResourceType(), pk.getId());
+                        getAuthzResource(getPlatformResourceType(), existing.getId());
                     rv.setName(existing.getName());
                     updateAuthzResource(rv);
                 }
@@ -1432,14 +1433,13 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                                     Integer platformId,
                                     AuthzSubjectValue newOwner)
         throws FinderException, PermissionException {
-        PlatformPK aPK = new PlatformPK(platformId);
         try {
             // first lookup the platform
-            Platform platEJB = getPlatformDAO().findByPrimaryKey(aPK);
+            Platform platEJB = getPlatformDAO().findById(platformId);
             // check if the caller can modify this platform
             checkModifyPermission(who, platEJB.getEntityId());
             // now get its authz resource
-            ResourceValue authzRes = getPlatformResourceValue(aPK);
+            ResourceValue authzRes = getPlatformResourceValue(platformId);
             // change the authz owner
             getResourceManager().setResourceOwner(who, authzRes, newOwner);
             // update the owner field in the appdef table -- YUCK

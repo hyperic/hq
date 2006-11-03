@@ -47,11 +47,8 @@ public class AIServerValue
    private java.lang.Long cTime;
    private boolean cTimeHasBeenSet = false;
 
-   private org.hyperic.hq.appdef.shared.AIServerPK pk;
-
    public AIServerValue()
    {
-	  pk = new org.hyperic.hq.appdef.shared.AIServerPK();
    }
 
    public AIServerValue( int queueStatus,byte[] customProperties,byte[] productConfig,byte[] controlConfig,byte[] measurementConfig,byte[] responseTimeConfig,long diff,boolean ignored,String serverTypeName,java.lang.String name,java.lang.String autoinventoryIdentifier,java.lang.String installPath,java.lang.String description,boolean servicesAutomanaged,java.lang.Integer id,java.lang.Long mTime,java.lang.Long cTime )
@@ -90,7 +87,6 @@ public class AIServerValue
 	  mTimeHasBeenSet = true;
 	  this.cTime = cTime;
 	  cTimeHasBeenSet = true;
-	  pk = new org.hyperic.hq.appdef.shared.AIServerPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -131,12 +127,6 @@ public class AIServerValue
 	  this.cTime = otherValue.cTime;
 	  cTimeHasBeenSet = true;
 
-	  pk = new org.hyperic.hq.appdef.shared.AIServerPK(this.getId());
-   }
-
-   public org.hyperic.hq.appdef.shared.AIServerPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public int getQueueStatus()
@@ -359,7 +349,6 @@ public class AIServerValue
 	  this.id = id;
 	  idHasBeenSet = true;
 
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

@@ -28,7 +28,6 @@ package org.hyperic.hq.appdef.server.session;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
-import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.PlatformLightValue;
@@ -118,18 +117,6 @@ public class Platform extends PlatformBase
     public void setServers(Collection servers)
     {
         this.servers = servers;
-    }
-
-    private PlatformPK pkey = new PlatformPK();
-    /**
-     * legacy EJB primary key getter
-     * @deprecated use getId() instead
-     * @return
-     */
-    public PlatformPK getPrimaryKey()
-    {
-        pkey.setId(getId());
-        return pkey;
     }
 
     public Server createServer(ServerValue sv)

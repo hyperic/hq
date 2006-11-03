@@ -31,11 +31,8 @@ public class AIIpValue
    private java.lang.Long cTime;
    private boolean cTimeHasBeenSet = false;
 
-   private org.hyperic.hq.appdef.shared.AIIpPK pk;
-
    public AIIpValue()
    {
-	  pk = new org.hyperic.hq.appdef.shared.AIIpPK();
    }
 
    public AIIpValue( int queueStatus,long diff,boolean ignored,java.lang.String address,java.lang.String mACAddress,java.lang.String netmask,java.lang.Integer id,java.lang.Long mTime,java.lang.Long cTime )
@@ -58,7 +55,6 @@ public class AIIpValue
 	  mTimeHasBeenSet = true;
 	  this.cTime = cTime;
 	  cTimeHasBeenSet = true;
-	  pk = new org.hyperic.hq.appdef.shared.AIIpPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -83,12 +79,6 @@ public class AIIpValue
 	  this.cTime = otherValue.cTime;
 	  cTimeHasBeenSet = true;
 
-	  pk = new org.hyperic.hq.appdef.shared.AIIpPK(this.getId());
-   }
-
-   public org.hyperic.hq.appdef.shared.AIIpPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public int getQueueStatus()
@@ -190,8 +180,6 @@ public class AIIpValue
    {
 	  this.id = id;
 	  idHasBeenSet = true;
-
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

@@ -54,7 +54,6 @@ import org.hyperic.hq.appdef.shared.AppdefEvent;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
@@ -143,7 +142,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="RequiresNew"
      */
-    public ServerPK createServer(AuthzSubjectValue subject, PlatformPK ppk,
+    public ServerPK createServer(AuthzSubjectValue subject, Integer ppk,
                                     ServerTypePK stpk, ServerValue sValue)
         throws CreateException, ValidationException, PermissionException,
                PlatformNotFoundException, AppdefDuplicateNameException {
@@ -175,12 +174,12 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // now do authz check
             createAuthzServer(sValue.getName(), 
                               server.getId(),
-                              ppk.getId(), 
+                              ppk,
                               serverType.getVirtual(), 
                               subject);
             // remove platform vo from the cache
             // since the server set has changed
-            VOCache.getInstance().removePlatform(ppk.getId());
+            VOCache.getInstance().removePlatform(ppk);
             return server.getPrimaryKey();
         } catch (CreateException e) {
             throw e;

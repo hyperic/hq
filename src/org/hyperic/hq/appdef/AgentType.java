@@ -26,7 +26,6 @@
 package org.hyperic.hq.appdef;
 
 import org.hyperic.hq.appdef.shared.AgentTypeValue;
-import org.hyperic.hq.appdef.shared.AgentTypePK;
 
 import java.util.Collection;
 
@@ -91,17 +90,6 @@ public class AgentType extends AppdefBean
         agentTypeValue.setMTime(getMTime());
         agentTypeValue.setCTime(getCTime());
         return agentTypeValue;
-    }
-
-    private AgentTypePK pkey = new AgentTypePK();
-    /**
-     * @deprecated use getId()
-     * @return
-     */
-    public AgentTypePK getPrimaryKey()
-    {
-        pkey.setId(getId());
-        return pkey;
     }
 
     public boolean equals(Object obj)

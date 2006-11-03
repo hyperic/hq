@@ -6,7 +6,6 @@ import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
 import org.hyperic.hq.appdef.shared.AppSvcClustIncompatSvcException;
-import org.hyperic.hq.appdef.shared.ServiceClusterPK;
 import org.hyperic.dao.DAOFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -127,16 +126,6 @@ public class ServiceClusterDAO extends HibernateDAO
         return (ServiceCluster)getSession().createQuery(sql)
             .setString(0, name)
             .uniqueResult();
-    }
-
-    /**
-     * @deprecated use findById()
-     * @param pk
-     * @return
-     */
-    public ServiceCluster findByPrimaryKey(ServiceClusterPK pk)
-    {
-        return findById(pk.getId());
     }
 
     /**

@@ -79,6 +79,7 @@ import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocalHome;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
@@ -443,16 +444,19 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
             // It does exist.  Call the other startScan method so that 
             // authz checks will apply
-            startScan(subject, new AppdefEntityID(pValue.getPrimaryKey()),
-                      scanConfig, null, null, null);
+            startScan(
+                subject, new AppdefEntityID(
+                pValue.getId(), AppdefEntityConstants.APPDEF_TYPE_PLATFORM
+            ),
+                scanConfig, null, null, null);
             return;
 
         } catch (PlatformNotFoundException e) {
             log.warn("startScan: no platform exists for queued AIPlatform: "
-                     + aipLocal.getPrimaryKey() + ": " + e);
+                     + aipLocal.getId() + ": " + e);
         } catch (Exception e) {
             log.error("startScan: error starting scan for AIPlatform: "
-                     + aipLocal.getPrimaryKey() + ": " + e, e);
+                     + aipLocal.getId() + ": " + e, e);
             throw new SystemException(e);
         }
         try {

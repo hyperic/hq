@@ -46,12 +46,10 @@ import org.hyperic.hq.appdef.shared.AppdefGroupManagerUtil;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.ApplicationPK;
 import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.DependencyTree;
-import org.hyperic.hq.appdef.shared.ServiceClusterPK;
 import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
@@ -138,9 +136,9 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
-    public ApplicationPK createApplication(AuthzSubjectValue subject, 
-                                              ApplicationValue newApp,
-                                              Collection services)
+    public Integer createApplication(AuthzSubjectValue subject,
+                                     ApplicationValue newApp,
+                                     Collection services)
         throws CreateException, ValidationException, PermissionException,
                AppdefDuplicateNameException
     {
@@ -176,7 +174,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                 log.debug("Adding service: " + aService + " to application");
                 application.addService(aService.getPrimaryKey());
             }
-            return application.getPrimaryKey();
+            return application.getId();
         } catch (FinderException e) {
             log.error("Unable to find dependent object", e);
             throw new CreateException("Unable to find dependent object: " +
@@ -202,8 +200,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                PermissionException, UpdateException, 
                AppdefDuplicateNameException, FinderException {
         try {
-            Application app = getApplicationDAO().
-                findByPrimaryKey(newValue.getPrimaryKey());
+            Application app = getApplicationDAO().findById(newValue.getId());
             checkModifyPermission(subject, app.getEntityId());
             newValue.setModifiedBy(subject.getName());
             newValue.setMTime(new Long(System.currentTimeMillis()));
@@ -248,17 +245,17 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         throws ApplicationNotFoundException,
                PermissionException, RemoveException {
         try {
-            ApplicationPK pk = new ApplicationPK(id);
             Application app =
                 getApplicationDAO().findById(id);
             checkRemovePermission(caller, app.getEntityId());
             VOCache.getInstance().removeApplication(id);
             this.removeAuthzResource(caller, 
-                getApplicationResourceValue(new ApplicationPK(id)));
+                getApplicationResourceValue(id));
             getApplicationDAO().remove(app);
 
             // Send service deleted event
-            sendAppdefEvent(caller, new AppdefEntityID(pk),
+            sendAppdefEvent(caller, new AppdefEntityID(
+                id, AppdefEntityConstants.APPDEF_TYPE_APPLICATION),
                             AppdefEvent.ACTION_DELETE);
         } catch(CreateException e) {
             throw new RemoveException("Unable to remove application:" + 
@@ -320,13 +317,12 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         throws ApplicationNotFoundException,
                PermissionException, CreateException {
         try {
-            ApplicationPK aPK = new ApplicationPK(appId);
             // first lookup the service
             Application appEJB = getApplicationDAO().findById(appId);
             // check if the caller can modify this service
             checkModifyPermission(who, appEJB.getEntityId());
             // now get its authz resource
-            ResourceValue authzRes = getApplicationResourceValue(aPK);
+            ResourceValue authzRes = getApplicationResourceValue(appId);
             // change the authz owner
             getResourceManager().setResourceOwner(who, authzRes, newOwner);
             // update the owner field in the appdef table -- YUCK
@@ -347,30 +343,18 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @param subject
      * @param appId
      */
-    public DependencyTree getServiceDepsForApp(AuthzSubjectValue subject,
-                                               Integer appId)
-        throws ApplicationNotFoundException, PermissionException {
-        return getServiceDepsForApp(subject, new ApplicationPK(appId));
-    }
-
-    /**
-     * Get the service dependency map for an application
-     * @ejb:interface-method
-     * @param subject
-     * @param applicationPK
-     */
     public DependencyTree getServiceDepsForApp(AuthzSubjectValue subject, 
-                                               ApplicationPK pk)
+                                               Integer pk)
         throws ApplicationNotFoundException,
                PermissionException {
         try {
             // find the app
             Application app = getApplicationDAO()
-                .findById(pk.getId());
+                .findById(pk);
             checkViewPermission(subject, app.getEntityId());
             return getApplicationDAO().getDependencyTree(app);
         } catch (ObjectNotFoundException e) {
-            throw new ApplicationNotFoundException(pk.getId());
+            throw new ApplicationNotFoundException(pk);
         }
     }
 
@@ -384,15 +368,15 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                                      DependencyTree depTree) 
         throws ApplicationNotFoundException, RemoveException, 
                PermissionException, CreateException {
-        ApplicationPK pk = depTree.getApplication().getPrimaryKey();
+        Integer pk = depTree.getApplication().getId();
         try {
             // find the app
             Application app = getApplicationDAO()
-                .findByPrimaryKey(pk);
+                .findById(pk);
             checkModifyPermission(subject, app.getEntityId());
             getApplicationDAO().setDependencyTree(app, depTree);
         } catch (ObjectNotFoundException e) {
-            throw new ApplicationNotFoundException(pk.getId());
+            throw new ApplicationNotFoundException(pk);
         }
     }
 
@@ -473,8 +457,8 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                     break;
             }
             for(Iterator i = apps.iterator(); i.hasNext();) {
-                ApplicationPK appPk = 
-                    ((Application)i.next()).getPrimaryKey();
+                Integer appPk =
+                    ((Application)i.next()).getId();
                 if(!authzPks.contains(appPk)) {
                     i.remove();
                 }
@@ -552,7 +536,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                 AppdefEntityID id = (AppdefEntityID)entityIds.get(i);
                 if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
                     asDAO.create(new ServicePK(id.getId()),
-                                 app.getPrimaryKey(), false);
+                                 app.getId(), false);
                 }
                 else if (id.getType() == 
                     AppdefEntityConstants.APPDEF_TYPE_GROUP) {
@@ -560,8 +544,8 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                     AppdefGroupValue agv = AppdefGroupManagerUtil.getLocalHome()
                         .create().findGroup(subject, id);
                     asDAO.create(
-                        new ServiceClusterPK(new Integer(agv.getClusterId())), 
-                        app.getPrimaryKey());
+                        new Integer(agv.getClusterId()),
+                        app.getId());
                 }
             }
             // flush cache

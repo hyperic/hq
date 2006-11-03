@@ -27,7 +27,6 @@ package org.hyperic.hq.autoinventory;
 
 import org.hyperic.hq.appdef.IpBase;
 import org.hyperic.hq.appdef.shared.AIIpValue;
-import org.hyperic.hq.appdef.shared.AIIpPK;
 
 /**
  * Pojo for hibernate hbm mapping file
@@ -143,17 +142,6 @@ public class AIIp extends IpBase
         setAddress( valueHolder.getAddress() );
         setMACAddress( valueHolder.getMACAddress() );
         setNetmask( valueHolder.getNetmask() );
-    }
-
-    private AIIpPK pkey = new AIIpPK();
-    /**
-     * @deprecated use getId()
-     * @return
-     */
-    public AIIpPK getPrimaryKey()
-    {
-        pkey.setId(getId());
-        return pkey;
     }
 
     public boolean equals(Object obj)

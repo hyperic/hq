@@ -44,7 +44,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigResponseValue;
-import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -215,8 +214,7 @@ public class AI2AppdefDiff {
         doPlatformAttrDiff(log, appdefPlatform, revisedAIplatform);
 
         if (aiplatform.customPropertiesHasBeenSet()) {
-            int id =
-                ((PlatformPK)appdefPlatform.getPrimaryKey()).getId().intValue();
+            int id = appdefPlatform.getId().intValue();
             AppdefEntityID aid = 
                 new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM, id);
             int type =

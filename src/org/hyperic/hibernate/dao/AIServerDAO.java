@@ -3,7 +3,6 @@ package org.hyperic.hibernate.dao;
 import org.hibernate.Session;
 import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.appdef.shared.AIServerValue;
-import org.hyperic.hq.appdef.shared.AIServerPK;
 
 import java.util.Collection;
 
@@ -105,13 +104,4 @@ public class AIServerDAO extends HibernateDAO
             .list();
     }
 
-    /**
-     * @deprecated use findById()
-     * @param pk
-     * @return
-     */
-    public AIServer findByPrimaryKey(AIServerPK pk)
-    {
-        return findById(pk.getId());
-    }
 }

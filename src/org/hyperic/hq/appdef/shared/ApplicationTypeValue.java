@@ -25,11 +25,8 @@ public class ApplicationTypeValue
    private java.lang.Long cTime;
    private boolean cTimeHasBeenSet = false;
 
-   private org.hyperic.hq.appdef.shared.ApplicationTypePK pk;
-
    public ApplicationTypeValue()
    {
-	  pk = new org.hyperic.hq.appdef.shared.ApplicationTypePK();
    }
 
    public ApplicationTypeValue( java.lang.String name,java.lang.String sortName,java.lang.String description,java.lang.Integer id,java.lang.Long mTime,java.lang.Long cTime )
@@ -46,7 +43,6 @@ public class ApplicationTypeValue
 	  mTimeHasBeenSet = true;
 	  this.cTime = cTime;
 	  cTimeHasBeenSet = true;
-	  pk = new org.hyperic.hq.appdef.shared.ApplicationTypePK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -65,12 +61,6 @@ public class ApplicationTypeValue
 	  this.cTime = otherValue.cTime;
 	  cTimeHasBeenSet = true;
 
-	  pk = new org.hyperic.hq.appdef.shared.ApplicationTypePK(this.getId());
-   }
-
-   public org.hyperic.hq.appdef.shared.ApplicationTypePK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public java.lang.String getName()
@@ -128,7 +118,6 @@ public class ApplicationTypeValue
 	  this.id = id;
 	  idHasBeenSet = true;
 
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

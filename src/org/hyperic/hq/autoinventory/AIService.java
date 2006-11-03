@@ -28,7 +28,6 @@ package org.hyperic.hq.autoinventory;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
-import org.hyperic.hq.appdef.shared.AIServicePK;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 
@@ -215,17 +214,6 @@ public class AIService extends AppdefResource
     public void setServerId(int server)
     {
         setServer(new Server(new Integer(server)));
-    }
-
-    private AIServicePK pkey = new AIServicePK();
-    /**
-     * @deprecated use getId()
-     * @return
-     */
-    public AIServicePK getPrimaryKey()
-    {
-        pkey.setId(getId());
-        return pkey;
     }
 
     public boolean equals(Object obj)

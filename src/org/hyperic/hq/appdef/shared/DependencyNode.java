@@ -74,8 +74,8 @@ public class DependencyNode implements Serializable {
         return getAppService().getService().getPrimaryKey();
     }
 
-    public ServiceClusterPK getServiceClusterPK() {
-        return getAppService().getServiceCluster().getPrimaryKey();
+    public Integer getServiceClusterPK() {
+        return getAppService().getServiceCluster().getId();
     }
 
     public Integer getId() {

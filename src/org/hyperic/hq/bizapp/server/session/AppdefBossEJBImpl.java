@@ -53,7 +53,6 @@ import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
-import org.hyperic.hq.appdef.shared.AgentPK;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
@@ -74,7 +73,6 @@ import org.hyperic.hq.appdef.shared.AppdefStatManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.ApplicationPK;
 import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.CPropKeyExistsException;
@@ -89,7 +87,6 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
@@ -1245,12 +1242,12 @@ public class AppdefBossEJBImpl
      * @param platTypePK - the type of platform
      * @return PlatformValue - the saved Value object
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public PlatformValue createPlatform(int sessionID,
                                         PlatformValue platformVal,
                                         PlatformTypePK platTypePK,
-                                        AgentPK agent)
+                                        Integer agent)
         throws NamingException, CreateException, ValidationException,
                SessionTimeoutException, SessionNotFoundException,
                PermissionException, AppdefDuplicateNameException ,
@@ -1259,11 +1256,11 @@ public class AppdefBossEJBImpl
         try {
             // Get the AuthzSubject for the user's session
             AuthzSubjectValue subject = manager.getSubject(sessionID);
-            PlatformPK pk =
+            Integer pk =
                 getPlatformManager().createPlatform(subject, platTypePK,
                                                     platformVal, agent);
             PlatformValue savedPlatform = 
-                getPlatformManager().getPlatformById(subject, pk.getId());
+                getPlatformManager().getPlatformById(subject, pk);
             return savedPlatform;
         } catch (CreateException e) {
             log.error("Unable to create platform. Rolling back", e);
@@ -1421,7 +1418,7 @@ public class AppdefBossEJBImpl
      * @ejb:transaction type="NOTSUPPORTED"
      */
     public ServerValue createServer(int sessionID, ServerValue serverVal,
-                                    PlatformPK platformPK,
+                                    Integer platformPK,
                                     ServerTypePK serverTypePK)
         throws NamingException, CreateException, ValidationException,
                SessionTimeoutException, SessionNotFoundException,
@@ -1447,7 +1444,7 @@ public class AppdefBossEJBImpl
      * @ejb:transaction type="NOTSUPPORTED"
      */
     public ServerValue createServer(int sessionID, ServerValue serverVal,
-                                    PlatformPK platformPK,
+                                    Integer platformPK,
                                     ServerTypePK serverTypePK, Map cProps)
         throws NamingException, CreateException, ValidationException,
                SessionTimeoutException, SessionNotFoundException,
@@ -1495,10 +1492,10 @@ public class AppdefBossEJBImpl
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         ApplicationManagerLocal appMan = getApplicationManager();
             
-        ApplicationPK pk =
+        Integer pk =
             appMan.createApplication(subject, appVal, services);
         try {
-            return appMan.getApplicationById(subject, pk.getId());
+            return appMan.getApplicationById(subject, pk);
         } catch (ApplicationNotFoundException e) {
             // Should never happen
             throw new SystemException("Could not find app we just created");
@@ -1947,7 +1944,7 @@ public class AppdefBossEJBImpl
         try {
             AuthzSubjectValue caller = manager.getSubject(sessionId);
             return getApplicationManager()
-                .getServiceDepsForApp(caller, new ApplicationPK(appId));
+                .getServiceDepsForApp(caller, appId);
         } catch (PermissionException e) {
             this.rollback();
             throw e;

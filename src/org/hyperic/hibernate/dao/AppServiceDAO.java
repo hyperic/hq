@@ -7,9 +7,6 @@ import org.hyperic.hq.appdef.AppSvcDependency;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.ServicePK;
-import org.hyperic.hq.appdef.shared.ApplicationPK;
-import org.hyperic.hq.appdef.shared.ServiceClusterPK;
-import org.hyperic.hq.appdef.shared.AppServicePK;
 import org.hyperic.dao.DAOFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -78,7 +75,7 @@ public class AppServiceDAO extends HibernateDAO
         super.remove(entity);
     }
 
-    public AppService create(ServicePK spk, ApplicationPK apk,
+    public AppService create(ServicePK spk, Integer apk,
                              boolean entryPoint)
     {
         // reassociate service
@@ -86,7 +83,7 @@ public class AppServiceDAO extends HibernateDAO
             .findById(spk.getId());
         // reassociate application
         Application ap = DAOFactory.getDAOFactory().getApplicationDAO()
-            .findById(apk.getId());
+            .findById(apk);
 
         AppService a = new AppService();
         a.setIsEntryPoint(entryPoint);
@@ -126,7 +123,7 @@ public class AppServiceDAO extends HibernateDAO
                                     boolean entryPoint)
     {
         // first create the AppService
-        return create(aService, new ApplicationPK(a.getId()), entryPoint);
+        return create(aService, a.getId(), entryPoint);
     }
 
     /**
@@ -134,20 +131,20 @@ public class AppServiceDAO extends HibernateDAO
      * @return appService
      */
     public AppService addServiceCluster(Application a,
-                                        ServiceClusterPK aClusterPK)
+                                        Integer aClusterPK)
     {
         // first create the AppService
-        return create(aClusterPK, new ApplicationPK(a.getId()));
+        return create(aClusterPK, a.getId());
     }
 
-    public AppService create(ServiceClusterPK cpk, ApplicationPK apk)
+    public AppService create(Integer cpk, Integer apk)
     {
         // reassociate service cluster
         ServiceCluster sc = DAOFactory.getDAOFactory().getServiceClusterDAO()
-            .findById(cpk.getId());
+            .findById(cpk);
         // reassociate application
         Application ap = DAOFactory.getDAOFactory().getApplicationDAO()
-            .findById(apk.getId());
+            .findById(apk);
 
         AppService a = new AppService();
         a.setIsCluster(true);
@@ -294,30 +291,25 @@ public class AppServiceDAO extends HibernateDAO
             .uniqueResult();
     }
 
-    public AppService findByPrimaryKey(AppServicePK pk)
-    {
-        return findById(pk.getId());
-    }
-
     public AppSvcDependency addDependentService(Service s,
-                                                ApplicationPK appPK,
+                                                Integer appPK,
                                                 ServicePK depPK)
     {
         // look for the app service for **this** Service
-        AppService appSvc = findByAppAndService(appPK.getId(), s.getId());
+        AppService appSvc = findByAppAndService(appPK, s.getId());
         if (appSvc == null) {
             // didnt find it... create it.
             log.debug(
                 "Creating new app service object for Application: "
-                + appPK.getId() + " Service: " + s.getId());
+                + appPK + " Service: " + s.getId());
             appSvc =create(new ServicePK(s.getId()), appPK, true);
         }
         // try to find the app service for the dependent service
-        AppService depSvc = findByAppAndService(appPK.getId(), depPK.getId());
+        AppService depSvc = findByAppAndService(appPK, depPK.getId());
         if (depSvc == null) {
             log.debug(
                 "Creating new dependent app service object for Application: "
-                + appPK.getId() + " Service: " + s.getId());
+                + appPK + " Service: " + s.getId());
             // dependent services are not allowed to be entry points
             // at least not here ;)
             depSvc = create(depPK, appPK, false);
@@ -329,27 +321,27 @@ public class AppServiceDAO extends HibernateDAO
     }
 
     public AppSvcDependency addDependentServiceCluster(Service s,
-                                                       ApplicationPK appPK,
-                                                       ServiceClusterPK depPK)
+                                                       Integer appPK,
+                                                       Integer depPK)
     {
         // first we see if we can find an existing AppService object
         // if we cant, we add it
 
         // look for the app service for **this** Service
-        AppService appSvc = findByAppAndService(appPK.getId(), s.getId());
+        AppService appSvc = findByAppAndService(appPK, s.getId());
         if (appSvc == null) {
             // didnt find it... create it.
             log.debug(
                 "Creating new app service object for Application: "
-                + appPK.getId() + " Service: " + s.getId());
+                + appPK + " Service: " + s.getId());
             appSvc = create(new ServicePK(s.getId()), appPK, true);
         }
         // try to find the app service for the dependent service
-        AppService depSvc = findByAppAndCluster(appPK.getId(), depPK.getId());
+        AppService depSvc = findByAppAndCluster(appPK, depPK);
         if (depSvc == null) {
             log.debug(
                 "Creating new dependent app service object for Application: "
-                + appPK.getId() + " ServiceCluster: " + s.getId());
+                + appPK + " ServiceCluster: " + s.getId());
             // dependent services are not allowed to be entry points
             // at least not here ;)
             depSvc = create(depPK, appPK);
@@ -364,22 +356,22 @@ public class AppServiceDAO extends HibernateDAO
      * add a dependent service of this cluster
      */
     public AppSvcDependency addDependentService(
-        ServiceCluster sc, ApplicationPK appPK, ServicePK depPK)
+        ServiceCluster sc, Integer appPK, ServicePK depPK)
     {
         // look for the app service for **this** cluster
-        AppService appSvc = findByAppAndCluster(appPK.getId(), sc.getId());
+        AppService appSvc = findByAppAndCluster(appPK, sc.getId());
         if (appSvc == null) {
             log.debug(
                 "Creating new app service object for Application: "
-                + appPK.getId() + " ServiceCluster: " + sc.getId());
-            appSvc = create(new ServiceClusterPK(sc.getId()), appPK);
+                + appPK + " ServiceCluster: " + sc.getId());
+            appSvc = create(sc.getId(), appPK);
         }
         // try to find the app service for the dependent service
-        AppService depSvc = findByAppAndService(appPK.getId(), depPK.getId());
+        AppService depSvc = findByAppAndService(appPK, depPK.getId());
         if (depSvc == null) {
             log.debug(
                 "Creating new dependent app service object for Application: "
-                + appPK.getId() + " Service: " + depPK.getId());
+                + appPK + " Service: " + depPK.getId());
             // dependent services are not allowed to be entry points
             // at least not here ;)
             depSvc = create(depPK, appPK, false);
@@ -394,23 +386,23 @@ public class AppServiceDAO extends HibernateDAO
      * add a dependent cluster of this cluster
      */
     public AppSvcDependency addDependentServiceCluster(
-        ServiceCluster sc, ApplicationPK appPK, ServiceClusterPK depPK)
+        ServiceCluster sc, Integer appPK, Integer depPK)
     {
         // look for the app service for **this** cluster
-        AppService appSvc = findByAppAndCluster(appPK.getId(), sc.getId());
+        AppService appSvc = findByAppAndCluster(appPK, sc.getId());
         if (appSvc == null) {
             // didnt find it... create it.
             log.debug(
                 "Creating new app service object for Application: "
-                + appPK.getId() + " ServiceCluster: " + sc.getId());
-            appSvc = create(new ServiceClusterPK(sc.getId()), appPK);
+                + appPK + " ServiceCluster: " + sc.getId());
+            appSvc = create(sc.getId(), appPK);
         }
         // try to find the app service for the dependent service
-        AppService depSvc = findByAppAndCluster(appPK.getId(), depPK.getId());
+        AppService depSvc = findByAppAndCluster(appPK, depPK);
         if (depSvc == null) {
             log.debug(
                 "Creating new dependent app service object for Application: "
-                + appPK.getId() + " ServiceCluster: " + depPK.getId());
+                + appPK+ " ServiceCluster: " + depPK);
             // dependent services are not allowed to be entry points
             // at least not here ;)
             depSvc = create(depPK, appPK);

@@ -26,7 +26,6 @@
 package org.hyperic.hq.appdef;
 
 import org.hyperic.hq.appdef.shared.CPropKeyValue;
-import org.hyperic.hq.appdef.shared.CPropKeyPK;
 import org.hyperic.hibernate.PersistedObject;
 
 import java.util.Collection;
@@ -114,13 +113,6 @@ public class CpropKey extends PersistedObject
         _value.setKey(key == null ? "" : key);
         _value.setId(getId());
         return _value;
-    }
-
-    private CPropKeyPK _pkey = new CPropKeyPK();
-    public CPropKeyPK getPrimaryKey()
-    {
-        _pkey.setId(getId());
-        return _pkey;
     }
 
     public boolean equals(Object obj)

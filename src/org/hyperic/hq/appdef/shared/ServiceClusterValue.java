@@ -35,11 +35,8 @@ public class ServiceClusterValue
    private org.hyperic.hq.appdef.shared.ServiceTypeValue ServiceType;
    private boolean ServiceTypeHasBeenSet = false;
 
-   private org.hyperic.hq.appdef.shared.ServiceClusterPK pk;
-
    public ServiceClusterValue()
    {
-	  pk = new org.hyperic.hq.appdef.shared.ServiceClusterPK();
    }
 
    public ServiceClusterValue( java.lang.String name,java.lang.String sortName,java.lang.String description,Integer groupId,String owner,String modifiedBy,String location,java.lang.Integer id,java.lang.Long mTime,java.lang.Long cTime )
@@ -64,7 +61,6 @@ public class ServiceClusterValue
 	  mTimeHasBeenSet = true;
 	  this.cTime = cTime;
 	  cTimeHasBeenSet = true;
-	  pk = new org.hyperic.hq.appdef.shared.ServiceClusterPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -94,12 +90,6 @@ public class ServiceClusterValue
 	  this.ServiceType = otherValue.ServiceType;
 	  ServiceTypeHasBeenSet = true;
 
-	  pk = new org.hyperic.hq.appdef.shared.ServiceClusterPK(this.getId());
-   }
-
-   public org.hyperic.hq.appdef.shared.ServiceClusterPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public java.lang.String getName()
@@ -217,7 +207,6 @@ public class ServiceClusterValue
 	  this.id = id;
 	  idHasBeenSet = true;
 
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

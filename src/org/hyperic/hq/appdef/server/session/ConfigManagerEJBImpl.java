@@ -39,7 +39,6 @@ import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocalHome;
 import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformPK;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ServerManagerUtil;
@@ -264,8 +263,7 @@ public class ConfigManagerEJBImpl
         try {
             switch(id.getType()){
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                Platform plat = 
-                    this.findPlatformByPK(new PlatformPK(intID));
+                Platform plat = findPlatformByPK(intID);
                 pname = plat.getPlatformType().getPlugin();
                 break;
 
@@ -737,8 +735,7 @@ public class ConfigManagerEJBImpl
         // Update the config response
         if (configWasUpdated) {
             ConfigResponseDB cLocal
-                = getConfigResponseDAO()
-                .findByPrimaryKey(existing.getPrimaryKey());
+                = getConfigResponseDAO().findById(existing.getId());
             cLocal.setConfigResponseValue(existing);
         
             if (appdefCreated) {

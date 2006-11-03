@@ -25,11 +25,8 @@ public class IpValue
    private java.lang.Long cTime;
    private boolean cTimeHasBeenSet = false;
 
-   private org.hyperic.hq.appdef.shared.IpPK pk;
-
    public IpValue()
    {
-	  pk = new org.hyperic.hq.appdef.shared.IpPK();
    }
 
    public IpValue( java.lang.String address,java.lang.String netmask,java.lang.String mACAddress,java.lang.Integer id,java.lang.Long mTime,java.lang.Long cTime )
@@ -46,7 +43,6 @@ public class IpValue
 	  mTimeHasBeenSet = true;
 	  this.cTime = cTime;
 	  cTimeHasBeenSet = true;
-	  pk = new org.hyperic.hq.appdef.shared.IpPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -65,12 +61,6 @@ public class IpValue
 	  this.cTime = otherValue.cTime;
 	  cTimeHasBeenSet = true;
 
-	  pk = new org.hyperic.hq.appdef.shared.IpPK(this.getId());
-   }
-
-   public org.hyperic.hq.appdef.shared.IpPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public java.lang.String getAddress()
@@ -128,7 +118,6 @@ public class IpValue
 	  this.id = id;
 	  idHasBeenSet = true;
 
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

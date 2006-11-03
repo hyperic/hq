@@ -28,7 +28,6 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.List;
 
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
-import org.hyperic.hq.appdef.shared.AIServerPK;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
@@ -74,8 +73,8 @@ public class AIQRV_unignore implements AIQResourceVisitor {
                               List createdResources  )
         throws AIQApprovalException, PermissionException {
 
-        AIServerPK pk = (AIServerPK)aiserver.getPrimaryKey();
-        log.info("(unignore) visiting server: " + pk.getId()
+        Integer pk = aiserver.getId();
+        log.info("(unignore) visiting server: " + pk
                  + " AIID=" + aiserver.getAutoinventoryIdentifier());
         aiserver.setIgnored(false);
     }
