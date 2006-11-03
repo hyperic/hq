@@ -28,6 +28,7 @@ package org.hyperic.hq.authz.server.session;
 import java.lang.reflect.Array;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -366,6 +367,27 @@ public abstract class AuthzSession {
     }
 
     /** 
+     * Get a list of RolePK's a user has viewRole permission
+     * for (or owns)
+     */
+    protected List getViewableRolePKs(AuthzSubjectValue who)
+        throws NamingException, PermissionException, FinderException {
+        PermissionManager pm = PermissionManagerFactory.getInstance();
+        List roleIds =
+            pm.findOperationScopeBySubject(who,
+                                           AuthzConstants.roleOpViewRole,
+                                           AuthzConstants.roleResourceTypeName,
+                                           PageControl.PAGE_ALL);
+        List pks = new ArrayList();
+        // now make ResourceGroupPKs out of em
+        for(int i = 0; i < roleIds.size(); i++) {
+            Integer id = (Integer)roleIds.get(i);
+            pks.add(id);
+        }
+        return pks;
+    }
+
+    /**
      * Filter a collection of groupLocal objects to only include those viewable
      * by the specified user
      * @throws NamingException 

@@ -26,7 +26,6 @@
 package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
-import org.hyperic.hq.auth.shared.PrincipalsPK;
 import org.hyperic.hq.auth.Principal;
 import org.jboss.security.Util;
 
@@ -91,15 +90,5 @@ public class PrincipalDAO extends HibernateDAO
     public Collection findAllUsers()
     {
         return findAll();
-    }
-
-    /**
-     * @deprecated use findById()
-     * @param pk
-     * @return
-     */
-    public Principal findByPrimaryKey(PrincipalsPK pk)
-    {
-        return findById(pk.getId());
     }
 }

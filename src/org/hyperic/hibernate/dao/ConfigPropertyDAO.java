@@ -2,7 +2,6 @@ package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
 import org.hyperic.hq.common.ConfigProperty;
-import org.hyperic.hq.common.shared.ConfigPropertyPK;
 
 import java.util.Collection;
 
@@ -83,15 +82,5 @@ public class ConfigPropertyDAO extends HibernateDAO
         return getSession().createQuery(sql)
             .setString(0, s)
             .list();
-    }
-
-    /**
-     * @deprecated use findById()
-     * @param pk
-     * @return
-     */
-    public ConfigProperty findByPrimaryKey(ConfigPropertyPK pk)
-    {
-        return findById(pk.getId());
     }
 }

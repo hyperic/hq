@@ -19,11 +19,8 @@ public class PrincipalsValue
    private String password;
    private boolean passwordHasBeenSet = false;
 
-   private org.hyperic.hq.auth.shared.PrincipalsPK pk;
-
    public PrincipalsValue()
    {
-	  pk = new org.hyperic.hq.auth.shared.PrincipalsPK();
    }
 
    public PrincipalsValue( Integer id,String principal,String password )
@@ -34,7 +31,6 @@ public class PrincipalsValue
 	  principalHasBeenSet = true;
 	  this.password = password;
 	  passwordHasBeenSet = true;
-	  pk = new org.hyperic.hq.auth.shared.PrincipalsPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -46,13 +42,6 @@ public class PrincipalsValue
 	  principalHasBeenSet = true;
 	  this.password = otherValue.password;
 	  passwordHasBeenSet = true;
-
-	  pk = new org.hyperic.hq.auth.shared.PrincipalsPK(this.getId());
-   }
-
-   public org.hyperic.hq.auth.shared.PrincipalsPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public Integer getId()
@@ -64,8 +53,6 @@ public class PrincipalsValue
    {
 	  this.id = id;
 	  idHasBeenSet = true;
-
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

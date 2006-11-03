@@ -2,7 +2,6 @@ package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
 import org.hyperic.hq.product.Plugin;
-import org.hyperic.hq.product.shared.PluginPK;
 
 /*
 * NOTE: This copyright does *not* cover user programs that use HQ
@@ -79,15 +78,5 @@ public class PluginDAO extends HibernateDAO
         return (Plugin)getSession().createQuery(sql)
             .setString(0, name)
             .uniqueResult();
-    }
-
-    /**
-     * @deprecated use findById()
-     * @param pk
-     * @return
-     */
-    public Plugin findByPrimaryKey(PluginPK pk)
-    {
-        return findById(pk.getId());
     }
 }

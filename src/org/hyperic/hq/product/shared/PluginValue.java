@@ -23,11 +23,8 @@ public class PluginValue
    private long ctime;
    private boolean ctimeHasBeenSet = false;
 
-   private org.hyperic.hq.product.shared.PluginPK pk;
-
    public PluginValue()
    {
-	  pk = new org.hyperic.hq.product.shared.PluginPK();
    }
 
    public PluginValue( Integer id,String name,String path,String mD5,long ctime )
@@ -42,7 +39,6 @@ public class PluginValue
 	  mD5HasBeenSet = true;
 	  this.ctime = ctime;
 	  ctimeHasBeenSet = true;
-	  pk = new org.hyperic.hq.product.shared.PluginPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -58,13 +54,6 @@ public class PluginValue
 	  mD5HasBeenSet = true;
 	  this.ctime = otherValue.ctime;
 	  ctimeHasBeenSet = true;
-
-	  pk = new org.hyperic.hq.product.shared.PluginPK(this.getId());
-   }
-
-   public org.hyperic.hq.product.shared.PluginPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public Integer getId()
@@ -76,8 +65,6 @@ public class PluginValue
    {
 	  this.id = id;
 	  idHasBeenSet = true;
-
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

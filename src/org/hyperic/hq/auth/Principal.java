@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.auth;
 
-import org.hyperic.hq.auth.shared.PrincipalsPK;
 import org.hyperic.hq.auth.shared.PrincipalsValue;
 import org.hyperic.hibernate.PersistedObject;
 
@@ -61,18 +60,6 @@ public class Principal extends PersistedObject
     public void setPassword(String password)
     {
         this.password = password;
-    }
-
-    private PrincipalsPK _pkey = new PrincipalsPK();
-    /**
-     * legacy EJB entity primary key accessor()
-     * @return
-     * @deprecated
-     */
-    public PrincipalsPK getPrimaryKey()
-    {
-        _pkey.setId(getId());
-        return _pkey;
     }
 
     private PrincipalsValue principalsValue = new PrincipalsValue();
