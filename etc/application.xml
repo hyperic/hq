@@ -20,10 +20,6 @@
   </module>
 
   <module>
-    <ejb>hq-entity.jar</ejb>
-  </module>
-
-  <module>
     <ejb>hq-session.jar</ejb>
   </module>
 
