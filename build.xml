@@ -289,7 +289,6 @@
     <mkdir dir="${ear.dir}/sigar_bin/lib" />
     <mkdir dir="${server.plugin.dir}" />
 
-    <mkdir dir="${ear.dir}/hq-entity.jar/META-INF" />
     <mkdir dir="${ear.dir}/hq-session.jar/META-INF" />
     <mkdir dir="${ear.dir}/hq-agent-session.jar/META-INF" />
     <mkdir dir="${ear.dir}/hq-message.jar/META-INF" />
@@ -299,9 +298,6 @@
     </copy>
     <copy todir="${ear.dir}/hq-agent-session.jar/META-INF" >
       <fileset dir="${build.dir}/dd/agent-session" includes="*" />
-    </copy>
-    <copy todir="${ear.dir}/hq-entity.jar/META-INF" >
-      <fileset dir="${build.dir}/dd/entity" includes="*" />
     </copy>
     <copy todir="${ear.dir}/hq-message.jar/META-INF" >
       <fileset dir="${build.dir}/dd/mdb" includes="*" />
@@ -1374,20 +1370,6 @@
     <copy tofile="${installer.dir}/data/hq-engine/jboss-service-events.xml"
           file="etc/jboss/events/sar/jboss-service.xml"/>
 
-    <!-- Templatize the jaws.xml file and put it in installer/data/hq-engine -->
-    <copy file="${build.dir}/hq.ear/hq-entity.jar/META-INF/jaws.xml"
- 		  todir="${installer.dir}/data/hq-engine"/>
-    <replace file="${installer.dir}/data/hq-engine/jaws.xml">
-      <replacefilter token="${hq.server.ds-mapping}" value="@@@server.database@@@"/>
-    </replace>
-
-    <!-- Templatize the jbosscmp file and put it in installer/data/hq-engine -->
-    <copy file="${build.dir}/hq.ear/hq-entity.jar/META-INF/jbosscmp-jdbc.xml"
- 		  todir="${installer.dir}/data/hq-engine"/>
-    <replace file="${installer.dir}/data/hq-engine/jbosscmp-jdbc.xml">
-      <replacefilter token="${hq.server.ds-mapping}" value="@@@server.database@@@"/>
-    </replace>
-
     <antcall target="chmod-exec">
       <param name="chmod.dir" value="${installer.dir}"/>
     </antcall>
@@ -1585,8 +1567,6 @@
     <copy toDir="${archive-ear-dir}">
       <fileset dir="${ear.dir}">
         <include name="**" />
-        <exclude name="**/hq-entity.jar/META-INF/jaws.xml" />
-        <exclude name="**/hq-entity.jar/META-INF/jbosscmp-jdbc.xml" />
       </fileset>
     </copy>
 
