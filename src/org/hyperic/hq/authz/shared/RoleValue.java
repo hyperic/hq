@@ -47,12 +47,8 @@ public class RoleValue
    private boolean idHasBeenSet = false;
    private Set OperationValues = new java.util.HashSet();
 
-   private org.hyperic.hq.authz.shared.RolePK pk;
-
-   public RoleValue()
-   {
-	  pk = new org.hyperic.hq.authz.shared.RolePK();
-   }
+   public RoleValue() {
+    }
 
    public RoleValue( java.lang.String sortName,boolean system,String description,String name,Integer id )
    {
@@ -66,7 +62,6 @@ public class RoleValue
 	  nameHasBeenSet = true;
 	  this.id = id;
 	  idHasBeenSet = true;
-	  pk = new org.hyperic.hq.authz.shared.RolePK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -84,13 +79,6 @@ public class RoleValue
 	  idHasBeenSet = true;
 	// TODO Clone is better no ?
 	  this.OperationValues = otherValue.OperationValues;
-
-	  pk = new org.hyperic.hq.authz.shared.RolePK(this.getId());
-   }
-
-   public org.hyperic.hq.authz.shared.RolePK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public java.lang.String getSortName()
@@ -162,8 +150,6 @@ public class RoleValue
    {
 	  this.id = id;
 	  idHasBeenSet = true;
-
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

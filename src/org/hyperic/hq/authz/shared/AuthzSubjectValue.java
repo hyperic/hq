@@ -58,12 +58,8 @@ public class AuthzSubjectValue
    private Integer id;
    private boolean idHasBeenSet = false;
 
-   private org.hyperic.hq.authz.shared.AuthzSubjectPK pk;
-
-   public AuthzSubjectValue()
-   {
-	  pk = new org.hyperic.hq.authz.shared.AuthzSubjectPK();
-   }
+   public AuthzSubjectValue() {
+    }
 
    public AuthzSubjectValue( java.lang.String sortName,boolean active,boolean system,String authDsn,String emailAddress,String sMSAddress,String firstName,String lastName,String phoneNumber,String department,String name,Integer id )
    {
@@ -91,7 +87,6 @@ public class AuthzSubjectValue
 	  nameHasBeenSet = true;
 	  this.id = id;
 	  idHasBeenSet = true;
-	  pk = new org.hyperic.hq.authz.shared.AuthzSubjectPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -121,13 +116,6 @@ public class AuthzSubjectValue
 	  nameHasBeenSet = true;
 	  this.id = otherValue.id;
 	  idHasBeenSet = true;
-
-	  pk = new org.hyperic.hq.authz.shared.AuthzSubjectPK(this.getId());
-   }
-
-   public org.hyperic.hq.authz.shared.AuthzSubjectPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public java.lang.String getSortName()
@@ -304,8 +292,6 @@ public class AuthzSubjectValue
    {
 	  this.id = id;
 	  idHasBeenSet = true;
-
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

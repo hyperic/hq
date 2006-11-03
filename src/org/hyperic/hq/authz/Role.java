@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.hyperic.hq.authz.shared.RoleValue;
-import org.hyperic.hq.authz.shared.RolePK;
 import org.hyperic.hq.authz.values.OwnedRoleValue;
 
 public class Role extends AuthzNamedBean {

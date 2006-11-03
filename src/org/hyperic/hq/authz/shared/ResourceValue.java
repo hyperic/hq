@@ -48,12 +48,8 @@ public class ResourceValue
    private org.hyperic.hq.authz.shared.AuthzSubjectValue AuthzSubjectValue;
    private boolean AuthzSubjectValueHasBeenSet = false;
 
-   private org.hyperic.hq.authz.shared.ResourcePK pk;
-
-   public ResourceValue()
-   {
-	  pk = new org.hyperic.hq.authz.shared.ResourcePK();
-   }
+   public ResourceValue() {
+    }
 
    public ResourceValue( java.lang.String sortName,Integer instanceId,boolean system,String name,Integer id )
    {
@@ -67,7 +63,6 @@ public class ResourceValue
 	  nameHasBeenSet = true;
 	  this.id = id;
 	  idHasBeenSet = true;
-	  pk = new org.hyperic.hq.authz.shared.ResourcePK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -89,13 +84,6 @@ public class ResourceValue
 	// TODO Clone is better no ?
 	  this.AuthzSubjectValue = otherValue.AuthzSubjectValue;
 	  AuthzSubjectValueHasBeenSet = true;
-
-	  pk = new org.hyperic.hq.authz.shared.ResourcePK(this.getId());
-   }
-
-   public org.hyperic.hq.authz.shared.ResourcePK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public java.lang.String getSortName()
@@ -167,8 +155,6 @@ public class ResourceValue
    {
 	  this.id = id;
 	  idHasBeenSet = true;
-
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

@@ -52,8 +52,6 @@ import org.hyperic.hq.authz.shared.OperationValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.authz.shared.ResourcePK;
-import org.hyperic.hq.authz.shared.ResourceTypePK;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceVOHelperUtil;
 import org.hyperic.hq.authz.shared.ResourceValue;

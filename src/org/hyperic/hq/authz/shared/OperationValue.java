@@ -38,12 +38,8 @@ public class OperationValue
    private Integer id;
    private boolean idHasBeenSet = false;
 
-   private org.hyperic.hq.authz.shared.OperationPK pk;
-
-   public OperationValue()
-   {
-	  pk = new org.hyperic.hq.authz.shared.OperationPK();
-   }
+   public OperationValue() {
+    }
 
    public OperationValue( String name,Integer id )
    {
@@ -51,7 +47,6 @@ public class OperationValue
 	  nameHasBeenSet = true;
 	  this.id = id;
 	  idHasBeenSet = true;
-	  pk = new org.hyperic.hq.authz.shared.OperationPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -61,13 +56,6 @@ public class OperationValue
 	  nameHasBeenSet = true;
 	  this.id = otherValue.id;
 	  idHasBeenSet = true;
-
-	  pk = new org.hyperic.hq.authz.shared.OperationPK(this.getId());
-   }
-
-   public org.hyperic.hq.authz.shared.OperationPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public String getName()
@@ -94,8 +82,6 @@ public class OperationValue
    {
 	  this.id = id;
 	  idHasBeenSet = true;
-
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

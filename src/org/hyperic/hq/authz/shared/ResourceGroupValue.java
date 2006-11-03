@@ -60,12 +60,8 @@ public class ResourceGroupValue
    private Integer id;
    private boolean idHasBeenSet = false;
 
-   private org.hyperic.hq.authz.shared.ResourceGroupPK pk;
-
-   public ResourceGroupValue()
-   {
-	  pk = new org.hyperic.hq.authz.shared.ResourceGroupPK();
-   }
+   public ResourceGroupValue() {
+    }
 
    public ResourceGroupValue( java.lang.String sortName,boolean system,int groupType,int groupEntType,int groupEntResType,int clusterId,String description,String location,String modifiedBy,Long mTime,Long cTime,String name,Integer id )
    {
@@ -95,7 +91,6 @@ public class ResourceGroupValue
 	  nameHasBeenSet = true;
 	  this.id = id;
 	  idHasBeenSet = true;
-	  pk = new org.hyperic.hq.authz.shared.ResourceGroupPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -127,13 +122,6 @@ public class ResourceGroupValue
 	  nameHasBeenSet = true;
 	  this.id = otherValue.id;
 	  idHasBeenSet = true;
-
-	  pk = new org.hyperic.hq.authz.shared.ResourceGroupPK(this.getId());
-   }
-
-   public org.hyperic.hq.authz.shared.ResourceGroupPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public java.lang.String getSortName()
@@ -325,8 +313,6 @@ public class ResourceGroupValue
    {
 	  this.id = id;
 	  idHasBeenSet = true;
-
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

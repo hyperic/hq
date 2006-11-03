@@ -43,12 +43,8 @@ public class ResourceTypeValue
    private boolean idHasBeenSet = false;
    private Set OperationValues = new java.util.HashSet();
 
-   private org.hyperic.hq.authz.shared.ResourceTypePK pk;
-
-   public ResourceTypeValue()
-   {
-	  pk = new org.hyperic.hq.authz.shared.ResourceTypePK();
-   }
+   public ResourceTypeValue() {
+    }
 
    public ResourceTypeValue( boolean system,String name,Integer id )
    {
@@ -58,7 +54,6 @@ public class ResourceTypeValue
 	  nameHasBeenSet = true;
 	  this.id = id;
 	  idHasBeenSet = true;
-	  pk = new org.hyperic.hq.authz.shared.ResourceTypePK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -72,13 +67,6 @@ public class ResourceTypeValue
 	  idHasBeenSet = true;
 	// TODO Clone is better no ?
 	  this.OperationValues = otherValue.OperationValues;
-
-	  pk = new org.hyperic.hq.authz.shared.ResourceTypePK(this.getId());
-   }
-
-   public org.hyperic.hq.authz.shared.ResourceTypePK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public boolean getSystem()
@@ -120,8 +108,6 @@ public class ResourceTypeValue
    {
 	  this.id = id;
 	  idHasBeenSet = true;
-
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){
