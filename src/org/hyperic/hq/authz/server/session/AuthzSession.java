@@ -67,7 +67,6 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocalHome;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerUtil;
-import org.hyperic.hq.authz.shared.ResourceGroupPK;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceManagerLocalHome;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
@@ -389,30 +388,6 @@ public abstract class AuthzSession {
         return pks;
     }
 
-    /**
-     * Get a list of ResourceGroupPK's a user has viewResourceGroup permission
-     * for (or owns)
-     * @throws NamingException 
-     * @throws FinderException 
-     * @throws PermissionException 
-     */
-    protected List getViewableGroupPKs(AuthzSubjectValue who)
-        throws PermissionException, FinderException, NamingException {
-        PermissionManager pm = PermissionManagerFactory.getInstance();         
-        List groupIds = 
-            pm.findOperationScopeBySubject(who,
-                                           AuthzConstants.groupOpViewResourceGroup,
-                                           AuthzConstants.groupResourceTypeName,
-                                           PageControl.PAGE_ALL);
-        List pks = new ArrayList();
-        // now make ResourceGroupPKs out of em
-        for(int i = 0; i < groupIds.size(); i++) {
-            Integer id = (Integer)groupIds.get(i);
-            pks.add(new ResourceGroupPK(id));
-        }
-        return pks;
-    }
-
     /** 
      * Filter a collection of groupLocal objects to only include those viewable
      * by the specified user
@@ -427,14 +402,16 @@ public abstract class AuthzSession {
                                               Collection groups)
         throws PermissionException, FinderException, NamingException {
         // finally scope down to only the ones the user can see
-        List viewable = getViewableGroupPKs(who);
+        PermissionManager pm = PermissionManagerFactory.getInstance();
+        List viewable = pm.findOperationScopeBySubject(who,
+           AuthzConstants.groupOpViewResourceGroup,
+           AuthzConstants.groupResourceTypeName,
+           PageControl.PAGE_ALL);
+        
         for(Iterator i = groups.iterator(); i.hasNext();) {
-            Object resGrp = i.next();
+            ResourceGroup resGrp = (ResourceGroup) i.next();
             
-            ResourceGroupPK resGrpPk;
-            resGrpPk =
-                new ResourceGroupPK(((ResourceGroup) resGrp).getId());
-            if (!viewable.contains(resGrpPk)) {
+            if (!viewable.contains(resGrp.getId())) {
                 i.remove();
             }
         }

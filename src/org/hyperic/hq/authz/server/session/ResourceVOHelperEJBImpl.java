@@ -28,18 +28,15 @@ package org.hyperic.hq.authz.server.session;
 import java.util.Collection;
 import java.util.Iterator;
 
-import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.authz.Operation;
 import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.ResourceType;
-import org.hyperic.hq.authz.Operation;
-import org.hyperic.hq.authz.shared.ResourceTypePK;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 
@@ -65,8 +62,7 @@ public class ResourceVOHelperEJBImpl extends AuthzSession
      * Get the resource value object
      * @ejb:interface-method
      */    
-    public ResourceValue getResourceValue(Integer id) 
-        throws FinderException, NamingException {
+    public ResourceValue getResourceValue(Integer id) {
         ResourceValue vo = VOCache.getInstance().getResource(id);
         if(vo != null) {
             log.debug("Returning cached instance for resource: " + vo.getId());
@@ -123,44 +119,24 @@ public class ResourceVOHelperEJBImpl extends AuthzSession
     /**
      * Get the resource type value object
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
-     */
-    public ResourceTypeValue getResourceTypeValue(ResourceTypePK pk)
-        throws FinderException, NamingException {
-        ResourceType ejb =
-            getResourceTypeDAO().findById(pk.getId());
-        return getResourceTypeValue(ejb.getName());
-    }
-
-    /**
-     * Get the resource type value object
-     * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
-    public ResourceTypeValue getResourceTypeValue(String name) 
-        throws FinderException, NamingException {
+    public ResourceTypeValue getResourceTypeValue(String name) {
         ResourceTypeValue vo = VOCache.getInstance().getResourceType(name);
         if(vo != null) {
             log.debug("Returning cached instance for resource type: " +
                       vo.getId());
             return vo;
         }
-        return getResourceTypeValueImpl(name);
-    }
-
-    /**
-     * Synchronized VO retrieval
-     */
-    private ResourceTypeValue getResourceTypeValueImpl(String name) 
-        throws FinderException, NamingException {
+        
         VOCache cache = VOCache.getInstance();
-        ResourceTypeValue vo;
+        ResourceTypeValue vo1;
         synchronized(cache.getResourceTypeLock()) {
-            vo = VOCache.getInstance().getResourceType(name);
-            if(vo != null) {
+            vo1 = VOCache.getInstance().getResourceType(name);
+            if(vo1 != null) {
                 log.debug("Returning cached instance for resource type: " +
-                          vo.getId());
-                return vo;
+                          vo1.getId());
+                return vo1;
             }
             /**
              * Instead of fetching these one by one, we're gonna go ahead and
@@ -177,11 +153,11 @@ public class ResourceVOHelperEJBImpl extends AuthzSession
                 }
                 cache.put(aVo.getName(), aVo);
                 if (aVo.getName().equals(name)) {
-                    vo = aVo;
+                    vo1 = aVo;
                 }
             }
         }
-        return vo;
+        return vo1;
     }
 
     public void ejbCreate() { }
