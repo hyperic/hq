@@ -30,6 +30,8 @@ import org.hibernate.type.Type;
 import org.hyperic.hq.appdef.AppdefBean;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.product.Plugin;
+import org.hyperic.hq.measurement.MeasurementTemplate;
+import org.hyperic.hq.measurement.Measurement;
 
 import java.io.Serializable;
 
@@ -46,7 +48,9 @@ public class HypericInterceptor extends EmptyInterceptor
     private boolean entHasTimestamp(Object o) {
         return o instanceof Plugin ||
                o instanceof AppdefBean ||
-               o instanceof AlertDefinition;
+               o instanceof AlertDefinition ||
+               o instanceof MeasurementTemplate ||
+               o instanceof Measurement;
     }
     
     public boolean onFlushDirty(Object entity, Serializable id, 
@@ -68,20 +72,20 @@ public class HypericInterceptor extends EmptyInterceptor
 
     private boolean updateTimestamp(Object[] state, String[] propertyNames) {
         boolean modified = false;
-
+        long ts = System.currentTimeMillis();
         for (int i = 0; i < propertyNames.length; i++) {
             if ("creationTime".equals(propertyNames[i]) ||
-                "cTime".equals(propertyNames[i])) 
+                "ctime".equals(propertyNames[i])) 
             {
                 Long ctime = (Long)state[i];
                 if (ctime == null || ctime.longValue() == 0) {
-                    state[i] = new Long(System.currentTimeMillis());
+                    state[i] = new Long(ts);
                     modified =  true;
                 }
             } else if ("modifiedTime".equals(propertyNames[i]) ||
-                       "mTime".equals(propertyNames[i])) 
+                       "mtime".equals(propertyNames[i]))
             {
-                state[i] = new Long(System.currentTimeMillis());
+                state[i] = new Long(ts);
                 modified =  true;
             }
         }
