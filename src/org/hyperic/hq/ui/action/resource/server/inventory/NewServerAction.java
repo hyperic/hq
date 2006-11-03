@@ -39,7 +39,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
-import org.hyperic.hq.appdef.shared.ServerTypePK;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.shared.SessionException;
@@ -103,7 +102,7 @@ public class NewServerAction extends BaseAction {
             
             Integer platformId = RequestUtils.getResourceId(request);
             Integer ppk = platformId;
-            ServerTypePK stPk = new ServerTypePK(newForm.getResourceType());
+            Integer stPk = newForm.getResourceType();
 
             log.trace("creating server [" + server.getName()
                                + "]" + " with attributes " + newForm);

@@ -47,11 +47,8 @@ public class ServerLightValue
    private org.hyperic.hq.appdef.shared.ServerTypeValue ServerType;
    private boolean ServerTypeHasBeenSet = false;
 
-   private org.hyperic.hq.appdef.shared.ServerPK pk;
-
    public ServerLightValue()
    {
-	  pk = new org.hyperic.hq.appdef.shared.ServerPK();
    }
 
    public ServerLightValue( java.lang.String sortName,boolean runtimeAutodiscovery,boolean wasAutodiscovered,boolean autodiscoveryZombie,java.lang.Integer configResponseId,java.lang.String modifiedBy,java.lang.String owner,java.lang.String location,java.lang.String name,java.lang.String autoinventoryIdentifier,java.lang.String installPath,java.lang.String description,boolean servicesAutomanaged,java.lang.Integer id,java.lang.Long mTime,java.lang.Long cTime )
@@ -88,7 +85,6 @@ public class ServerLightValue
 	  mTimeHasBeenSet = true;
 	  this.cTime = cTime;
 	  cTimeHasBeenSet = true;
-	  pk = new org.hyperic.hq.appdef.shared.ServerPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -130,12 +126,6 @@ public class ServerLightValue
 	  this.ServerType = otherValue.ServerType;
 	  ServerTypeHasBeenSet = true;
 
-	  pk = new org.hyperic.hq.appdef.shared.ServerPK(this.getId());
-   }
-
-   public org.hyperic.hq.appdef.shared.ServerPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public java.lang.String getSortName()
@@ -342,8 +332,6 @@ public class ServerLightValue
    {
 	  this.id = id;
 	  idHasBeenSet = true;
-
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

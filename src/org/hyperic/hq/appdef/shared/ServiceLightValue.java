@@ -43,11 +43,8 @@ public class ServiceLightValue
    private org.hyperic.hq.appdef.shared.ServiceTypeValue ServiceType;
    private boolean ServiceTypeHasBeenSet = false;
 
-   private org.hyperic.hq.appdef.shared.ServicePK pk;
-
    public ServiceLightValue()
    {
-	  pk = new org.hyperic.hq.appdef.shared.ServicePK();
    }
 
    public ServiceLightValue( java.lang.String sortName,boolean autodiscoveryZombie,boolean serviceRt,boolean endUserRt,java.lang.String modifiedBy,java.lang.String owner,java.lang.String location,java.lang.Integer configResponseId,Integer parentId,java.lang.String name,java.lang.String description,java.lang.Integer id,java.lang.Long mTime,java.lang.Long cTime )
@@ -80,7 +77,6 @@ public class ServiceLightValue
 	  mTimeHasBeenSet = true;
 	  this.cTime = cTime;
 	  cTimeHasBeenSet = true;
-	  pk = new org.hyperic.hq.appdef.shared.ServicePK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -117,13 +113,6 @@ public class ServiceLightValue
 	// TODO Clone is better no ?
 	  this.ServiceType = otherValue.ServiceType;
 	  ServiceTypeHasBeenSet = true;
-
-	  pk = new org.hyperic.hq.appdef.shared.ServicePK(this.getId());
-   }
-
-   public org.hyperic.hq.appdef.shared.ServicePK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public java.lang.String getSortName()
@@ -300,8 +289,6 @@ public class ServiceLightValue
    {
 	  this.id = id;
 	  idHasBeenSet = true;
-
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

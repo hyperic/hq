@@ -62,7 +62,6 @@ import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformLightValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformVOHelperUtil;
 import org.hyperic.hq.appdef.shared.PlatformValue;
@@ -218,7 +217,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get PlatformPluginName for an entity id.
      * There is no authz in this method because it is not needed.
-     * @param entityID
      * @return name of the plugin for the entity's platform
      * such as "Apache 2.0 Linux". It is used as to look up plugins
      * via a generic plugin manager.
@@ -291,19 +289,18 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Create a platform type
-     * @param PlatformTypeValue
      * @return PlatformTypeValue
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
-    public PlatformTypePK createPlatformType(AuthzSubjectValue subject,
-                                             PlatformTypeValue pType)
+    public Integer createPlatformType(AuthzSubjectValue subject,
+                                      PlatformTypeValue pType)
         throws CreateException, ValidationException 
     {
         if (_log.isDebugEnabled()) {
             _log.debug("Begin createPlatformType: " + pType);
         }
-        return getPlatformTypeDAO().create(pType).getPrimaryKey();
+        return getPlatformTypeDAO().create(pType).getId();
     }
 
     /**
@@ -379,7 +376,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             // Send platform deleted event
             sendAppdefEvent(
                 subject, new AppdefEntityID(
-                platform.getId(), AppdefEntityConstants.APPDEF_TYPE_PLATFORM),
+                AppdefEntityConstants.APPDEF_TYPE_PLATFORM, platform.getId()),
                 AppdefEvent.ACTION_DELETE);
         } catch (RemoveException e) {
             _log.debug("Error while removing Platform");
@@ -404,7 +401,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Create a Platform of a specified type
-     * @param PlatformPK - the pk of the platform hosting the server
      * @return PlatformValue - the saved value object
      * @exception CreateException - if it fails to add the platform
      * @exception ValidationException - if the subject is not allowed
@@ -413,7 +409,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @ejb:transaction type="REQUIRESNEW"
      */
     public Integer createPlatform(AuthzSubjectValue subject,
-                                  PlatformTypePK ptpk,
+                                  Integer ptpk,
                                   PlatformValue pValue, Integer agentPK)
         throws CreateException, ValidationException, PermissionException,
                AppdefDuplicateNameException, AppdefDuplicateFQDNException,
@@ -460,7 +456,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             validateNewPlatform(pValue);
             PlatformTypeDAO ptLHome =
                 DAOFactory.getDAOFactory().getPlatformTypeDAO();
-            PlatformType pType = ptLHome.findByPrimaryKey(ptpk);
+            PlatformType pType = ptLHome.findById(ptpk);
             // set the owner to the creating user
             pValue.setOwner(subject.getName());
             // set the modified by to the person creating 
@@ -657,7 +653,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get platform light value by id.  Does not check permission.
      * @ejb:interface-method
-     * @param Integer id
      */
     public PlatformLightValue getPlatformLightValue(Integer id)
         throws PlatformNotFoundException {
@@ -673,7 +668,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get platform by id.
      * @ejb:interface-method
-     * @param Integer id
      */
     public PlatformValue getPlatformById(AuthzSubjectValue subject, 
                                          Integer id)
@@ -689,7 +683,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get platform by AIPlatform.
      * @ejb:interface-method
-     * @param Integer id
      */
     public PlatformValue getPlatformByAIPlatform(AuthzSubjectValue subject, 
                                                  AIPlatformValue aiPlatform)
@@ -739,7 +732,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * permission exceptions, just PlatformNotFoundException.
      *
      * @ejb:interface-method
-     * @param Integer id
      */
     public MiniResourceValue getMiniPlatformById(AuthzSubjectValue subject,
                                                  Integer id)
@@ -802,7 +794,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * Get a platform by server.
      *
      * @ejb:interface-method
-     * @param Integer id
      */
     public MiniResourceValue getMiniPlatformByServer(
             AuthzSubjectValue subject, Integer id)
@@ -948,7 +939,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         checkViewPermission(
             subject,
             new AppdefEntityID(
-                p.getId(),AppdefEntityConstants.APPDEF_TYPE_PLATFORM));
+                AppdefEntityConstants.APPDEF_TYPE_PLATFORM, p.getId()));
         return p.getId();
     }
 
@@ -980,7 +971,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * specified service.
      * @ejb:interface-method
      * @ejb:transaction type="Required"
-     * @param subject The subject trying to list services.
      * @param serviceId service ID.
      * @return the Platform
      */
@@ -1020,7 +1010,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get the platform ID for a server.
      * @ejb:interface-method
-     * @param subject The subject trying to list services.
      * @param serverId Server ID.
      */
     public Integer getPlatformIdByServer ( Integer serverId ) 
@@ -1039,7 +1028,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      * @param subject The subject trying to list services.
-     * @param serverId Server ID.
      */
     public PageList getPlatformsByServers(AuthzSubjectValue subject,
                                           List sIDs) 
@@ -1113,9 +1101,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      *
      * @param subject The subject trying to list services.
      * @param appId Application ID.
-     * @param pagenum The page number to start listing.  First page is page zero.
-     * @param pagesize The size of the page (the number of items to return).
-     * @param sort The sort order.  XXX These sort constants are not yet defined,
      * but when they are, they should live somewhere in appdef/shared so that clients
      * can use them too.
      * @return A List of ApplicationValue objects representing all of the
@@ -1182,9 +1167,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      *
      * @param subject The subject trying to list servers.
-     * @param servTypeId server type id.
-     * @param platId platform id.
-     * @param pc The page control.
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
      */
@@ -1223,8 +1205,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      *
      * @param subject The subject trying to list servers.
-     * @param servTypeId server type id.
-     * @param platId platform id.
      * @param pc The page control.
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
@@ -1424,7 +1404,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Change platform owner
      * @param who
-     * @param platformID 
      * @param newOwner
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
@@ -1456,7 +1435,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Private method to validate a new PlatformValue object
-     * @param PlatformValue
      * @throws ValidationException
      */
     private void validateNewPlatform(PlatformValue pv)
@@ -1477,9 +1455,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Create the Authz resource and verify that the subject
      * has the createPlatform permission.
-     * @param platform - the platform which was saved
      * @param subject - the user creating
-     * @exception TODO 
      */
     private void createAuthzPlatform(String platName,
                                      Integer platId,
@@ -1497,7 +1473,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Update platform types
-     * @param PlatformTypeValue
      * @ejb:interface-method
      * @ejb:transaction type="RequiresNew"
      */

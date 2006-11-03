@@ -4,7 +4,6 @@ import org.hibernate.Session;
 import org.hyperic.hq.autoinventory.AIHistory;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
-import org.hyperic.hq.autoinventory.shared.AIHistoryPK;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 
 import javax.ejb.CreateException;
@@ -365,15 +364,5 @@ public class AIHistoryDAO extends HibernateDAO
             .setInteger(0, groupId)
             .setInteger(1, batchId)
             .list();
-    }
-
-    /**
-     * @deprecated use findById()
-     * @param pk
-     * @return
-     */
-    public AIHistory findByPrimaryKey(AIHistoryPK pk)
-    {
-        return findById(pk.getId());
     }
 }

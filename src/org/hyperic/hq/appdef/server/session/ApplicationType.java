@@ -26,7 +26,6 @@
 package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
-import org.hyperic.hq.appdef.shared.ServiceTypePK;
 
 import java.util.Collection;
 
@@ -95,9 +94,4 @@ public class ApplicationType extends AppdefResourceType
         return applicationTypeValue;
     }
 
-    public boolean supportsServiceType(ServiceTypePK stPK)
-    {
-        throw new UnsupportedOperationException(
-            "use ApplicationTypeDAO.supportsServiceType()");
-    }
 }

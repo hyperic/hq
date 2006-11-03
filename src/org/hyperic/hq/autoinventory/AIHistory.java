@@ -27,7 +27,6 @@ package org.hyperic.hq.autoinventory;
 
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.autoinventory.shared.AIHistoryValue;
-import org.hyperic.hq.autoinventory.shared.AIHistoryPK;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 
 /**
@@ -326,14 +325,4 @@ public class AIHistory extends PersistedObject
         setConfig(core.serialize());
     }
 
-    private AIHistoryPK pkey = new AIHistoryPK();
-    /**
-     * @deprecated use getId()
-     * @return
-     */
-    public AIHistoryPK getPrimaryKey()
-    {
-        pkey.setId(getId());
-        return pkey;
-    }
 }

@@ -39,11 +39,8 @@ public class AIScheduleValue
    private String scanDesc;
    private boolean scanDescHasBeenSet = false;
 
-   private org.hyperic.hq.autoinventory.shared.AISchedulePK pk;
-
    public AIScheduleValue()
    {
-	  pk = new org.hyperic.hq.autoinventory.shared.AISchedulePK();
    }
 
    public AIScheduleValue( Integer id,Integer entityType,Integer entityId,String subject,ScheduleValue scheduleValue,byte[] scheduleValueBytes,String triggerName,String jobName,long nextFireTime,String jobOrderData,String scanName,String scanDesc )
@@ -72,7 +69,6 @@ public class AIScheduleValue
 	  scanNameHasBeenSet = true;
 	  this.scanDesc = scanDesc;
 	  scanDescHasBeenSet = true;
-	  pk = new org.hyperic.hq.autoinventory.shared.AISchedulePK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -102,13 +98,6 @@ public class AIScheduleValue
 	  scanNameHasBeenSet = true;
 	  this.scanDesc = otherValue.scanDesc;
 	  scanDescHasBeenSet = true;
-
-	  pk = new org.hyperic.hq.autoinventory.shared.AISchedulePK(this.getId());
-   }
-
-   public org.hyperic.hq.autoinventory.shared.AISchedulePK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public Integer getId()
@@ -120,8 +109,6 @@ public class AIScheduleValue
    {
 	  this.id = id;
 	  idHasBeenSet = true;
-
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

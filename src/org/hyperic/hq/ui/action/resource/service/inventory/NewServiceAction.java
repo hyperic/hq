@@ -34,8 +34,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.ServerPK;
-import org.hyperic.hq.appdef.shared.ServiceTypePK;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
@@ -85,7 +83,7 @@ public class NewServiceAction extends BaseAction {
             service.setName(newForm.getName());
             service.setDescription(newForm.getDescription());
 
-            ServiceTypePK stPk = new ServiceTypePK(newForm.getResourceType());
+            Integer stPk = newForm.getResourceType();
             ServiceValue newService =
                 boss.createService(sessionId.intValue(), service, stPk, aeid);
               

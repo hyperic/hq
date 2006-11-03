@@ -87,21 +87,6 @@ public class AppdefEntityID
         this(entityType, entityID.intValue());
     }
 
-    public AppdefEntityID(ServerPK serverPK){
-        this.entityType = AppdefEntityConstants.APPDEF_TYPE_SERVER;
-        this.entityID   = serverPK.getId().intValue();
-    }
-
-    public AppdefEntityID(ServicePK servicePK){
-        this.entityType = AppdefEntityConstants.APPDEF_TYPE_SERVICE;
-        this.entityID   = servicePK.getId().intValue();
-    }
-
-    public AppdefEntityID(Integer id, int type){
-        this.entityType = type;
-        this.entityID   = id.intValue();
-    }
-    
     public AppdefEntityID(ResourceValue rv) {
         String rtName = rv.getResourceTypeValue().getName();
         this.entityID = rv.getInstanceId().intValue();
@@ -140,20 +125,6 @@ public class AppdefEntityID
 
     public Integer getId(){
         return new Integer(this.entityID);
-    }
-
-    public ServerPK getServerPK(){
-        if(this.entityType != AppdefEntityConstants.APPDEF_TYPE_SERVER)
-            throw new IllegalArgumentException("Entity is not a server");
-
-        return new ServerPK(new Integer(this.entityID));
-    }
-
-    public ServicePK getServicePK(){
-        if(this.entityType != AppdefEntityConstants.APPDEF_TYPE_SERVICE)
-            throw new IllegalArgumentException("Entity is not a service");
-
-        return new ServicePK(new Integer(this.entityID));
     }
 
     public String getAppdefKey(){

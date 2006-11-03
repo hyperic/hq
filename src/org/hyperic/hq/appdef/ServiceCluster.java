@@ -28,7 +28,6 @@ package org.hyperic.hq.appdef;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
-import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
 import org.hyperic.hq.appdef.shared.AppSvcClustIncompatSvcException;
@@ -151,7 +150,7 @@ public class ServiceCluster extends AppdefBean
     }
 
     public AppSvcDependency addDependentService(Integer appPK,
-                                                ServicePK depPK)
+                                                Integer depPK)
     {
         throw new UnsupportedOperationException(
             "use AppServiceDAO.addDependentService()");

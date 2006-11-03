@@ -48,12 +48,10 @@ import org.hyperic.hq.appdef.shared.PlatformVOHelperLocal;
 import org.hyperic.hq.appdef.shared.PlatformVOHelperUtil;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.ServerVOHelperLocal;
 import org.hyperic.hq.appdef.shared.ServerVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
-import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ServiceVOHelperLocal;
 import org.hyperic.hq.appdef.shared.ServiceVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ServiceValue;
@@ -110,7 +108,7 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
                PermissionException {
         if (svrHelper == null)
             svrHelper = ServerVOHelperUtil.getLocalHome().create();
-        ServerValue server = svrHelper.getServerValue(new ServerPK(id));
+        ServerValue server = svrHelper.getServerValue(id);
         checkViewPermission(subject, server.getEntityId());
         return server;
     }
@@ -120,7 +118,7 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
             PermissionException {
         if (svcHelper == null)
             svcHelper = ServiceVOHelperUtil.getLocalHome().create();
-        ServiceValue service = svcHelper.getServiceValue(new ServicePK(id));
+        ServiceValue service = svcHelper.getServiceValue(id);
         checkViewPermission(subject, service.getEntityId());
         return service;
     }

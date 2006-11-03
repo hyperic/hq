@@ -130,7 +130,6 @@ public class AIConversionUtil {
 
     /**
      * Generate a ServiceValue given an AIServiceValue.
-     * @param aiserver The AIServiceValue object.
      * @return an equivalent ServiceValue object.
      */
     public static ServiceValue convertAIServiceToService(AIServiceValue aiservice,
@@ -163,7 +162,8 @@ public class AIConversionUtil {
                FinderException {
 
         AppdefEntityID appdefID
-            = new AppdefEntityID(new ServicePK(serviceId));
+            = new AppdefEntityID(
+            AppdefEntityConstants.APPDEF_TYPE_SERVICE, serviceId);
         configureResource(subject, log, appdefID,
                           productConfig, measurementConfig, controlConfig,
                           rtConfig, userManaged, sendConfigEvent, configMgr);
@@ -182,7 +182,8 @@ public class AIConversionUtil {
                FinderException {
 
         AppdefEntityID appdefID
-            = new AppdefEntityID(new ServerPK(serverId));
+            = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER,
+                                 serverId);
         configureResource(subject, log, appdefID,
                           productConfig, measurementConfig, controlConfig,
                           null, userManaged, sendConfigEvent, configMgr);
@@ -203,7 +204,7 @@ public class AIConversionUtil {
 
         AppdefEntityID appdefID =
             new AppdefEntityID(
-                platformId, AppdefEntityConstants.APPDEF_TYPE_PLATFORM);
+                AppdefEntityConstants.APPDEF_TYPE_PLATFORM, platformId);
 
         configureResource(subject, log, appdefID,
                           productConfig, measurementConfig, controlConfig,

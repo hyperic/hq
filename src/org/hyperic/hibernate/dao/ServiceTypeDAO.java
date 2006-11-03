@@ -29,7 +29,6 @@ import org.hibernate.Session;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
-import org.hyperic.hq.appdef.shared.ServiceTypePK;
 
 import java.util.Collection;
 
@@ -150,17 +149,6 @@ public class ServiceTypeDAO extends HibernateDAO
         return getSession().createQuery(sql)
             .setInteger(0, platformId)
             .list();
-    }
-
-    /**
-     * legacy EJB primary key finder
-     * @deprecated use findById() instead/
-     * @param pk
-     * @return
-     */
-    public ServiceType findByPrimaryKey(ServiceTypePK pk)
-    {
-        return findById(pk.getId());
     }
 
 }

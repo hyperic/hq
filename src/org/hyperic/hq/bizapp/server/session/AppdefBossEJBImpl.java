@@ -87,20 +87,15 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServerPK;
-import org.hyperic.hq.appdef.shared.ServerTypePK;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
-import org.hyperic.hq.appdef.shared.ServicePK;
-import org.hyperic.hq.appdef.shared.ServiceTypePK;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
@@ -1246,7 +1241,7 @@ public class AppdefBossEJBImpl
      */
     public PlatformValue createPlatform(int sessionID,
                                         PlatformValue platformVal,
-                                        PlatformTypePK platTypePK,
+                                        Integer platTypePK,
                                         Integer agent)
         throws NamingException, CreateException, ValidationException,
                SessionTimeoutException, SessionNotFoundException,
@@ -1388,7 +1383,6 @@ public class AppdefBossEJBImpl
     /**
      * Private method to call the setCPropValue from a Map
      * @param subject  Subject setting the values
-     * @param entityID Entity to set the props for
      * @param cProps A map of String key/value pairs to set
      */
     private void setCPropValues(AuthzSubjectValue subject,
@@ -1415,11 +1409,11 @@ public class AppdefBossEJBImpl
      * @param serverTypePK - the type of server
      * @return ServerValue - the saved server
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public ServerValue createServer(int sessionID, ServerValue serverVal,
                                     Integer platformPK,
-                                    ServerTypePK serverTypePK)
+                                    Integer serverTypePK)
         throws NamingException, CreateException, ValidationException,
                SessionTimeoutException, SessionNotFoundException,
                PermissionException, AppdefDuplicateNameException
@@ -1441,11 +1435,11 @@ public class AppdefBossEJBImpl
      * @param cProps - the map with Custom Properties for the server
      * @return ServerValue - the saved server
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public ServerValue createServer(int sessionID, ServerValue serverVal,
                                     Integer platformPK,
-                                    ServerTypePK serverTypePK, Map cProps)
+                                    Integer serverTypePK, Map cProps)
         throws NamingException, CreateException, ValidationException,
                SessionTimeoutException, SessionNotFoundException,
                PermissionException, AppdefDuplicateNameException,
@@ -1457,10 +1451,10 @@ public class AppdefBossEJBImpl
 
             // Call into appdef to create the platform.
             ServerManagerLocal serverMan = getServerManager();
-            ServerPK pk = serverMan.createServer(subject, platformPK, 
+            Integer pk = serverMan.createServer(subject, platformPK,
                                                  serverTypePK, serverVal);
             ServerValue savedServer = serverMan.getServerById(subject, 
-                                                              pk.getId());
+                                                              pk);
             if (cProps != null) {
                 AppdefEntityID entityId = savedServer.getEntityId();
                 setCPropValues(subject, entityId, cProps);
@@ -1475,7 +1469,6 @@ public class AppdefBossEJBImpl
 
     /**
      * Create an application
-     * @param appTypePK - the Application type
      * @return ApplicationValue - the saved application
      * @ejb:interface-method
      * @ejb:transaction type="NOTSUPPORTED"
@@ -1507,10 +1500,10 @@ public class AppdefBossEJBImpl
      * @param aeid - the appdef entity ID
      * @return ServiceValue - the saved ServiceValue
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public ServiceValue createService(int sessionID, ServiceValue serviceVal,
-                                      ServiceTypePK serviceTypePK,
+                                      Integer serviceTypePK,
                                       AppdefEntityID aeid)
         throws SessionNotFoundException, SessionTimeoutException,
                ServerNotFoundException, PlatformNotFoundException,
@@ -1519,18 +1512,18 @@ public class AppdefBossEJBImpl
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         try {
-            ServerPK serverPK;
+            Integer serverPK;
             if (aeid.getType() == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
                 // Look up the platform's virtual server
                 List servers = getServerManager()
                     .getServersByPlatformServiceType(subject, aeid.getId(),
-                                                     serviceTypePK.getId());
+                                                     serviceTypePK);
                 
                 // There should only be 1 virtual server of this type
                 ServerValue server = (ServerValue) servers.get(0);
-                serverPK = server.getPrimaryKey();
+                serverPK = server.getId();
             } else {
-                serverPK = new ServerPK(aeid.getId());
+                serverPK = aeid.getId();
             }
             return createService(sessionID, serviceVal, serviceTypePK, 
                                  serverPK, null);
@@ -1548,12 +1541,12 @@ public class AppdefBossEJBImpl
      *            the server host
      * @return ServiceValue - the saved ServiceValue
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public ServiceValue createService(int sessionID,
                                       ServiceValue serviceVal,
-                                      ServiceTypePK serviceTypePK,
-                                      ServerPK serverPK)
+                                      Integer serviceTypePK,
+                                      Integer serverPK)
         throws NamingException, CreateException, ValidationException,
                SessionTimeoutException, SessionNotFoundException,
                PermissionException, AppdefDuplicateNameException
@@ -1575,12 +1568,12 @@ public class AppdefBossEJBImpl
      * @param cProps - the map with Custom Properties for the service
      * @return ServiceValue - the saved ServiceValue
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public ServiceValue createService(int sessionID,
                                       ServiceValue serviceVal,
-                                      ServiceTypePK serviceTypePK,
-                                      ServerPK serverPK, Map cProps)
+                                      Integer serviceTypePK,
+                                      Integer serverPK, Map cProps)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefDuplicateNameException, ValidationException,
                PermissionException, CreateException, CPropKeyNotFoundException
@@ -1589,11 +1582,11 @@ public class AppdefBossEJBImpl
             // Get the AuthzSubject for the user's session
             AuthzSubjectValue subject = manager.getSubject(sessionID);
             ServiceManagerLocal svcMan = getServiceManager();
-            ServicePK pk = svcMan.createService(subject, serverPK,
-                                                serviceTypePK, serviceVal);
+            Integer pk = svcMan.createService(subject, serverPK,
+                                              serviceTypePK, serviceVal);
             ServiceValue savedService;
             try {
-                savedService = svcMan.getServiceById(subject, pk.getId());
+                savedService = svcMan.getServiceById(subject, pk);
             } catch (ServiceNotFoundException e) {
                 throw new SystemException("Could not find service we " +
                                              " just created");
@@ -1912,7 +1905,6 @@ public class AppdefBossEJBImpl
 
     /**
      * Set the services used by an application
-     * @param List of appdefEntityIds
      * indicate whether the service is an entry point
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
@@ -2117,7 +2109,6 @@ public class AppdefBossEJBImpl
     /**
      * Remove an application service.
      * @param appId         - The application identifier.
-     * @param appServiceId  - The service identifier
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
@@ -2352,7 +2343,6 @@ public class AppdefBossEJBImpl
 
     /**
      * Lookup and return a group value object by its identifier.
-     * @param Integer represetning group identifier
      * @param pc - page control for group members
      * @throws AppdefGroupNotFoundException when group cannot be found.
      * @throws InvalidAppdefTypeException if group is compat and the appdef
@@ -2375,7 +2365,6 @@ public class AppdefBossEJBImpl
 
     /**
      * Lookup and return a list of group value objects by their identifiers.
-     * @param group identifier array
      * @return PageList of AppdefGroupValue objects
      * @throws AppdefGroupNotFoundException when group cannot be found.
      * @throws InvalidAppdefTypeException if group is compat and the appdef
@@ -2402,7 +2391,6 @@ public class AppdefBossEJBImpl
      * Produce list of all groups where caller is authorized
      * to modify. Include just those groups that are of types
      * other than "group of group".
-     * @param array list of group ids for removal.
      * @return List containing AppdefGroupValue.
      * @ejb:interface-method
      * 
@@ -2477,8 +2465,6 @@ public class AppdefBossEJBImpl
      * specified appdef entity. Apply group filter to remove unwanted
      * groups.
      * @param entity for use in group member filtering.
-     * @param array list of group ids for removal.
-     * @param an AppdefResourceTypeValue for filtering.
      * @return List containing AppdefGroupValue.
      * @ejb:interface-method
      * */
@@ -2547,7 +2533,6 @@ public class AppdefBossEJBImpl
      * to modify. Exclude any groups that contain the appdef entity id. Filter
      * out any unwanted groups specified by groupId array.
      * @param entity for use in group member filtering.
-     * @param array list of group ids for removal.
      * @return List containing AppdefGroupValue.
      * @ejb:interface-method
      * */
@@ -2713,8 +2698,6 @@ public class AppdefBossEJBImpl
      * @param appdefTypeId    - the id correponding to the type of entity.
      *                          example: group, platform, server, service
      *                          NOTE: A valid entity type id is now MANDATORY!
-     * @param groupEntityTypeId -the entity type of the members of a compatible
-     *                          group. (i.e. SERVER if group of tomcat servers)
      * @param appdefResTypeId - the id corresponding to the type of resource
      *                          example: linux, jboss, vhost
      * @param resourceName    - resource name (or name substring) to search for.
@@ -2815,8 +2798,6 @@ public class AppdefBossEJBImpl
      *                          example: linux, jboss, vhost
      * @param groupEntity     - the appdef entity of a group value who's
      *                          members are to be filtered out of result set.
-     * @param pendingEntityList a set of appdef entities to be filtered out
-     *                          of the result set.
      * @param resourceName    - resource name (or name substring) to search for.
      * @return page list of value objects that extend AppdefResourceValue
      * @ejb:interface-method
@@ -3010,8 +2991,6 @@ public class AppdefBossEJBImpl
      *                          valid values include: [SERVICE|GROUP]
      * @param appdefResTypeId - the id corresponding to the type of resource
      *                          example: linux, jboss, vhost
-     * @param pendingEntityList a set of appdef entities to be filtered out
-     *                          of the result set.
      * @param internalFlag    - show internal services (true) or
      *                          deployed services (false)
      * @return page list of value objects that extend AppdefResourceValue
@@ -3068,8 +3047,6 @@ public class AppdefBossEJBImpl
      *       inventory is found.
      *
      * @param sessionId       - valid auth token
-     * @param pendingEntityList a set of appdef entities to be filtered out
-     *                          of the result set.
      * @return page list of value objects that extend AppdefResourceValue
      * @ejb:interface-method
      * @ejb:transaction type="NOTSUPPORTED"

@@ -29,11 +29,8 @@ public class ServiceTypeValue
    private java.lang.Long cTime;
    private boolean cTimeHasBeenSet = false;
 
-   private org.hyperic.hq.appdef.shared.ServiceTypePK pk;
-
    public ServiceTypeValue()
    {
-	  pk = new org.hyperic.hq.appdef.shared.ServiceTypePK();
    }
 
    public ServiceTypeValue( java.lang.String name,java.lang.String sortName,java.lang.String description,java.lang.String plugin,boolean isInternal,java.lang.Integer id,java.lang.Long mTime,java.lang.Long cTime )
@@ -54,7 +51,6 @@ public class ServiceTypeValue
 	  mTimeHasBeenSet = true;
 	  this.cTime = cTime;
 	  cTimeHasBeenSet = true;
-	  pk = new org.hyperic.hq.appdef.shared.ServiceTypePK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -76,13 +72,6 @@ public class ServiceTypeValue
 	  mTimeHasBeenSet = true;
 	  this.cTime = otherValue.cTime;
 	  cTimeHasBeenSet = true;
-
-	  pk = new org.hyperic.hq.appdef.shared.ServiceTypePK(this.getId());
-   }
-
-   public org.hyperic.hq.appdef.shared.ServiceTypePK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public java.lang.String getName()
@@ -169,8 +158,6 @@ public class ServiceTypeValue
    {
 	  this.id = id;
 	  idHasBeenSet = true;
-
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

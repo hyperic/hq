@@ -57,14 +57,9 @@ import org.hyperic.hq.appdef.shared.ApplicationVOHelperUtil;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServerPK;
-import org.hyperic.hq.appdef.shared.ServerTypePK;
 import org.hyperic.hq.appdef.shared.ServerVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
-import org.hyperic.hq.appdef.shared.ServicePK;
-import org.hyperic.hq.appdef.shared.ServiceTypePK;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
@@ -331,21 +326,21 @@ public abstract class AppdefSessionEJB
      * Find a PlatformTypeLocal by primary key
      * @return PlatformTypeLocal
      */
-    protected PlatformType findPlatformTypeByPK(PlatformTypePK pk)
+    protected PlatformType findPlatformTypeByPK(Integer pk)
     {
-        return getPlatformTypeDAO().findByPrimaryKey(pk);
+        return getPlatformTypeDAO().findById(pk);
     }
 
     /**
      * Find a ServerLocal by primary key
      * @return ServerLocal
      */
-    protected Server findServerByPK(ServerPK pk)
+    protected Server findServerByPK(Integer pk)
         throws ServerNotFoundException, NamingException {
         try {
-            return getServerDAO().findByPrimaryKey(pk);
+            return getServerDAO().findById(pk);
         } catch (ObjectNotFoundException e) {
-            throw new ServerNotFoundException(pk.getId(), e);
+            throw new ServerNotFoundException(pk, e);
         }
     }
 
@@ -354,21 +349,21 @@ public abstract class AppdefSessionEJB
      * Find a ServerTypeLocal by primary key
      * @return ServerTypeLocal
      */
-    protected ServerType findServerTypeByPK(ServerTypePK pk)
+    protected ServerType findServerTypeByPK(Integer pk)
         throws FinderException, NamingException {
-            return getServerTypeDAO().findByPrimaryKey(pk);
+            return getServerTypeDAO().findById(pk);
     }
-
+ 
     /**
      * Find a ServiceLocal by primary key
      * @return ServiceLocal
      */
-    protected Service findServiceByPK(ServicePK pk)
+    protected Service findServiceByPK(Integer pk)
         throws ServiceNotFoundException, NamingException {
         try {
-            return getServiceDAO().findByPrimaryKey(pk);
+            return getServiceDAO().findById(pk);
         } catch (ObjectNotFoundException e) {
-            throw new ServiceNotFoundException(pk.getId(), e);
+            throw new ServiceNotFoundException(pk, e);
         }
     }
 
@@ -376,9 +371,9 @@ public abstract class AppdefSessionEJB
      * Find a ServiceTypeLocal by primary key
      * @return ServiceType
      */
-    protected ServiceType findServiceTypeByPK(ServiceTypePK pk)
+    protected ServiceType findServiceTypeByPK(Integer pk)
     {
-        return getServiceTypeDAO().findByPrimaryKey(pk);
+        return getServiceTypeDAO().findById(pk);
     }
 
     /**
@@ -427,12 +422,11 @@ public abstract class AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public Integer getPlatformPkByServerPk(ServerPK serverPK)
+    public Integer getPlatformPkByServerPk(Integer serverPK)
     {
         // TODO refactor this using finder
         // find the Server and get its platform
-        Server server = getServerDAO()
-            .findByPrimaryKey(serverPK);
+        Server server = getServerDAO().findById(serverPK);
         // return the parent server's pk
         return (server.getPlatform().getId());
     }
@@ -444,12 +438,12 @@ public abstract class AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public Integer getPlatformPkByServicePk(ServicePK servicePK)
+    public Integer getPlatformPkByServicePk(Integer servicePK)
         throws NamingException, FinderException
     {
         // TODO refactor this using finder
         // find the installed service
-        Service isvc = getServiceDAO().findByPrimaryKey(servicePK);
+        Service isvc = getServiceDAO().findById(servicePK);
         // find the Server and get its platform
         Server server = isvc.getServer();
         // return the parent server's pk
@@ -1076,10 +1070,10 @@ public abstract class AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public ResourceValue getServerResourceValue(ServerPK pk)
+    public ResourceValue getServerResourceValue(Integer pk)
         throws NamingException, FinderException, CreateException {
         return this.getAuthzResource(getServerResourceType(),
-                                     pk.getId());
+                                     pk);
     }
  
     /**
@@ -1115,11 +1109,11 @@ public abstract class AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public ResourceValue getServiceResourceValue(ServicePK pk)
+    public ResourceValue getServiceResourceValue(Integer pk)
         throws NamingException, FinderException, CreateException
     {
         return this.getAuthzResource(getServiceResourceType(),
-                                     pk.getId());
+                                     pk);
     }
 
     /**
@@ -1152,9 +1146,7 @@ public abstract class AppdefSessionEJB
         
         List keyList = new ArrayList(idList.size());
         for(int i=0; i < idList.size(); i++) {
-            ServicePK aPK = new ServicePK();
-            aPK.setId((Integer)idList.get(i));
-            keyList.add(aPK);
+            keyList.add(idList.get(i));
         }
         return keyList;
     }
@@ -1166,9 +1158,9 @@ public abstract class AppdefSessionEJB
         throws FinderException, NamingException, PermissionException {
         List idList = getViewableServices(whoami);
         for (int i=0;i<idList.size();i++) {
-            ServicePK pk = (ServicePK) idList.get(i);
+            Integer pk = (Integer) idList.get(i);
             idList.set(i,new AppdefEntityID(AppdefEntityConstants
-                .APPDEF_TYPE_SERVICE,pk.getId() ));
+                .APPDEF_TYPE_SERVICE,pk ));
         }
         PermissionManager pm = PermissionManagerFactory.getInstance();
         List viewableGroups = 
@@ -1229,9 +1221,7 @@ public abstract class AppdefSessionEJB
         log.debug("There are: " + idList.size() + " viewable servers");
         List keyList = new ArrayList(idList.size());
         for(int i=0; i < idList.size(); i++) {
-            ServerPK aPK = new ServerPK((Integer)idList.get(i));
-            log.debug("Adding ServerPK: " + aPK);
-            keyList.add(aPK);
+            keyList.add(idList.get(i));
         }
         return keyList;
     } 
@@ -1336,13 +1326,12 @@ public abstract class AppdefSessionEJB
                 return plat.getPlatformValue();
             
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                Server serv = 
-                    this.findServerByPK(new ServerPK(intID));
+                Server serv = findServerByPK(intID);
             
                 return ServerVOHelperUtil.getLocalHome().create()
                             .getServerValue(serv);
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                Service service = findServiceByPK(new ServicePK(intID));
+                Service service = findServiceByPK(intID);
                     
                 return service.getServiceValue();
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:

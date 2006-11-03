@@ -131,8 +131,8 @@ public class DependencyTree implements Serializable {
                 DependencyNode aNode = (DependencyNode)nodes.get(i);
                 AppServiceValue appSvc = aNode.getAppService();
                 if(!appSvc.getIsCluster() &&
-                   aNode.getAppService().getService().getPrimaryKey()
-                    .equals(aService.getPrimaryKey())) {
+                   aNode.getAppService().getService().getId()
+                    .equals(aService.getId())) {
                    return aNode;
                 }
             }
@@ -288,7 +288,6 @@ public class DependencyTree implements Serializable {
      * Returns a list of application services that on a given dependency
      * element
      * 
-     * @param nodes
      * @param services
      * @return List a list of AppServiceNodeBeans
      */

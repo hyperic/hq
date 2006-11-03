@@ -28,6 +28,7 @@ package org.hyperic.hq.authz;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.HashSet;
 
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.authz.values.OwnedRoleValue;
@@ -40,7 +41,7 @@ public class Role extends AuthzNamedBean {
     private boolean system = false;
     private Resource resource;
     private Collection resourceGroups = new ArrayList();
-    private Collection operations = new ArrayList();
+    private Collection operations = new HashSet();
     private Collection subjects = new ArrayList();
     private RoleValue roleValue = new RoleValue();
 

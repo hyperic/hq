@@ -369,7 +369,7 @@ public class LatherDispatcher
                 getPlatformManager().sendAppdefEvent(
                     this.getOverlord(),
                     new AppdefEntityID(
-                        pk, AppdefEntityConstants.APPDEF_TYPE_PLATFORM),
+                        AppdefEntityConstants.APPDEF_TYPE_PLATFORM, pk),
                     AppdefEvent.ACTION_UPDATE);
                 
                 ServerLightValue[] servers = platform.getServerValues();

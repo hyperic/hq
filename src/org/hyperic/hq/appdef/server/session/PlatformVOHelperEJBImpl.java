@@ -42,11 +42,9 @@ import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformLightValue;
-import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
-import org.hyperic.hq.appdef.shared.ServerTypePK;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerVOHelperLocal;
 import org.hyperic.hq.appdef.shared.ServerVOHelperUtil;
@@ -96,9 +94,9 @@ public class PlatformVOHelperEJBImpl extends AppdefSessionEJB
      * @ejb:transaction type="Required"
      *
      */
-    public PlatformTypeValue getPlatformTypeValue(PlatformTypePK pk) 
+    public PlatformTypeValue getPlatformTypeValue(Integer pk)
     {
-        PlatformType ejb = getPlatformTypeDAO().findByPrimaryKey(pk);
+        PlatformType ejb = getPlatformTypeDAO().findById(pk);
         return getPlatformTypeValue(ejb);
     }
     
@@ -144,8 +142,8 @@ public class PlatformVOHelperEJBImpl extends AppdefSessionEJB
                     ServerVOHelperUtil.getLocalHome().create();
                 while (serverIt.hasNext()) {
                     try {
-                        ServerTypePK stpk =
-                            ((ServerType)serverIt.next()).getPrimaryKey();
+                        Integer stpk =
+                            ((ServerType)serverIt.next()).getId();
                         ServerTypeValue stv = svo.getServerTypeValue(stpk);
                         vo.addServerTypeValue(stv);
                     } catch (NoSuchObjectLocalException e) {

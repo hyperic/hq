@@ -31,8 +31,6 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.Properties;
 
-import javax.ejb.FinderException;
-
 import org.apache.commons.logging.Log;
 
 import org.hyperic.hq.common.SystemException;
@@ -44,13 +42,10 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigResponseValue;
-import org.hyperic.hq.appdef.shared.PlatformTypePK;
-import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
-import org.hyperic.hq.appdef.shared.ServerTypePK;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
@@ -218,8 +213,7 @@ public class AI2AppdefDiff {
             AppdefEntityID aid = 
                 new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM, id);
             int type =
-                ((PlatformTypePK)appdefPlatform.getPlatformType().getPrimaryKey()).
-                    getId().intValue();
+                appdefPlatform.getPlatformType().getId().intValue();
             updateCprops(log, cpropMgr, aid, type,
                          aiplatform.getCustomProperties());
         }
@@ -439,7 +433,8 @@ public class AI2AppdefDiff {
                 }
                 
                 AppdefEntityID aID =
-                    new AppdefEntityID((ServerPK) appdefServer.getPrimaryKey());
+                    new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER,
+                                       appdefServer.getId());
                 boolean configChanged = false;
                 
                 // Look at configs
@@ -470,8 +465,7 @@ public class AI2AppdefDiff {
                 }
 
                 if (scannedServer.customPropertiesHasBeenSet()) {
-                    int type = ((ServerTypePK) appdefServer.getServerType()
-                        .getPrimaryKey()).getId().intValue();
+                    int type = appdefServer.getServerType().getId().intValue();
                     updateCprops(log, cpropMgr, aID, type,
                                  scannedServer.getCustomProperties());
                 }

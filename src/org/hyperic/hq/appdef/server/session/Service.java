@@ -27,7 +27,6 @@ package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.ServiceCluster;
-import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ServiceLightValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -349,18 +348,6 @@ public class Service extends AppdefResource
         setName( valueHolder.getName() );
         setModifiedTime( valueHolder.getMTime() );
         setCreationTime( valueHolder.getCTime() );
-    }
-
-    private ServicePK pkey = new ServicePK();
-    /**
-     * legacy EJB primary key getter
-     * @deprecated use getId() instead
-     * @return
-     */
-    public ServicePK getPrimaryKey()
-    {
-        pkey.setId(getId());
-        return pkey;
     }
 
     public boolean equals(Object obj)

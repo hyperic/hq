@@ -313,7 +313,7 @@ public class AIQueueManagerEJBImpl
                 } else if (pValue != null) {
                     ppk = pValue.getId();
                     aid = new AppdefEntityID(
-                        ppk, AppdefEntityConstants.APPDEF_TYPE_PLATFORM);
+                        AppdefEntityConstants.APPDEF_TYPE_PLATFORM, ppk);
                     arp = getResourcePermissions(subject, aid);
                     if ( !arp.canModify() ) {
                         if (log.isDebugEnabled()) {

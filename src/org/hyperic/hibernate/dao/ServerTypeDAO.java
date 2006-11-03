@@ -28,7 +28,6 @@ package org.hyperic.hibernate.dao;
 import org.hibernate.Session;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
-import org.hyperic.hq.appdef.shared.ServerTypePK;
 
 import java.util.Collection;
 
@@ -107,10 +106,5 @@ public class ServerTypeDAO extends HibernateDAO
         return getSession().createQuery(sql)
             .setString(0, plugin)
             .list();
-    }
-
-    public ServerType findByPrimaryKey(ServerTypePK pk)
-    {
-        return findById(pk.getId());
     }
 }

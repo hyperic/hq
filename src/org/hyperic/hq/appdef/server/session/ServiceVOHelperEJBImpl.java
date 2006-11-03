@@ -36,11 +36,8 @@ import javax.naming.NamingException;
 
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
-import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.ServerVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ServiceLightValue;
-import org.hyperic.hq.appdef.shared.ServicePK;
-import org.hyperic.hq.appdef.shared.ServiceTypePK;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
@@ -86,7 +83,7 @@ public class ServiceVOHelperEJBImpl extends AppdefSessionEJB implements
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public ServiceValue getServiceValue(ServicePK pk) throws FinderException,
+    public ServiceValue getServiceValue(Integer pk) throws FinderException,
             NamingException {
         return (ServiceValue) getServiceValueImpl(pk, false);
     }
@@ -97,7 +94,7 @@ public class ServiceVOHelperEJBImpl extends AppdefSessionEJB implements
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public ServiceLightValue getServiceLightValue(ServicePK pk)
+    public ServiceLightValue getServiceLightValue(Integer pk)
             throws FinderException, NamingException {
         return (ServiceLightValue) getServiceValueImpl(pk, true);
     }
@@ -110,7 +107,7 @@ public class ServiceVOHelperEJBImpl extends AppdefSessionEJB implements
      */
     public ServiceLightValue getServiceLightValue(Service ejb)
             throws FinderException, NamingException {
-        return getServiceLightValue(ejb.getPrimaryKey());
+        return getServiceLightValue(ejb.getId());
     }
 
     /**
@@ -122,10 +119,10 @@ public class ServiceVOHelperEJBImpl extends AppdefSessionEJB implements
     public ServiceValue getServiceValue(Service ejb)
             throws NamingException {
         try {
-            return getServiceValue(ejb.getPrimaryKey());
+            return getServiceValue(ejb.getId());
         } catch (FinderException e) {
             // This should never happen, as we have already gotten the local obj
-            log.error("ServiceLocal primary key " + ejb.getPrimaryKey()
+            log.error("ServiceLocal primary key " + ejb.getId()
                     + " invalid: ", e);
             return null;
         }
@@ -134,14 +131,14 @@ public class ServiceVOHelperEJBImpl extends AppdefSessionEJB implements
     /**
      * synchronized VO retrieval
      */
-    private AppdefResourceValue getServiceValueImpl(ServicePK servicePK,
+    private AppdefResourceValue getServiceValueImpl(Integer servicePK,
                                                     boolean getLightVO)
             throws NamingException {
         ServiceValue vo;
         ServiceLightValue lightVo;
         synchronized (cache.getServiceLock()) {
             if (getLightVO) {
-                lightVo = cache.getServiceLight(servicePK.getId());
+                lightVo = cache.getServiceLight(servicePK);
                 if (lightVo != null) {
                     log.debug("Returning cached service light: "
                             + lightVo.getId());
@@ -154,7 +151,7 @@ public class ServiceVOHelperEJBImpl extends AppdefSessionEJB implements
                 cache.put(lightVo.getId(), lightVo);
                 return lightVo;
             } else {
-                vo = cache.getService(servicePK.getId());
+                vo = cache.getService(servicePK);
                 if (vo != null) {
                     log.debug("Returning cached service: " + vo.getId());
                     return vo;
@@ -172,7 +169,7 @@ public class ServiceVOHelperEJBImpl extends AppdefSessionEJB implements
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public AppdefResourceValue getServiceValueDirectSQL(ServicePK pk,
+    public AppdefResourceValue getServiceValueDirectSQL(Integer pk,
                                                         boolean getLight) {
         Connection conn = null;
         PreparedStatement ps = null;
@@ -181,14 +178,14 @@ public class ServiceVOHelperEJBImpl extends AppdefSessionEJB implements
             log.debug("VOCache Miss! Retrieving ServiceValue from database");
             conn = Util.getConnection();
             ps = conn.prepareStatement(SERVICE_SQL);
-            ps.setInt(1, pk.getId().intValue());
+            ps.setInt(1, pk.intValue());
             rs = ps.executeQuery();
             rs.next();
             if (getLight) {
                 ServiceLightValue slv = new ServiceLightValue();
                 slv.setId(new Integer(rs.getInt(1)));
                 slv.setServiceType(getServiceTypeValue(
-                    new ServiceTypePK(new Integer(rs.getInt(3)))));
+                    new Integer(rs.getInt(3))));
                 slv.setName(rs.getString(5));
                 slv.setSortName(rs.getString(6));
                 slv.setDescription(rs.getString(7));
@@ -207,7 +204,7 @@ public class ServiceVOHelperEJBImpl extends AppdefSessionEJB implements
                 ServiceValue sv = new ServiceValue();
                 sv.setId(new Integer(rs.getInt(1)));
                 sv.setServiceType(getServiceTypeValue(
-                    new ServiceTypePK(new Integer(rs.getInt(3)))));
+                    new Integer(rs.getInt(3))));
                 sv.setName(rs.getString(5));
                 sv.setSortName(rs.getString(6));
                 sv.setDescription(rs.getString(7));
@@ -240,14 +237,14 @@ public class ServiceVOHelperEJBImpl extends AppdefSessionEJB implements
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public ServiceTypeValue getServiceTypeValue(ServiceTypePK pk)
+    public ServiceTypeValue getServiceTypeValue(Integer pk)
             throws FinderException, NamingException
     {
-        ServiceTypeValue vo = cache.getServiceType(pk.getId());
+        ServiceTypeValue vo = cache.getServiceType(pk);
         if (vo != null) {
             return vo;
         }
-        ServiceType ejb = getServiceTypeDAO().findById(pk.getId());
+        ServiceType ejb = getServiceTypeDAO().findById(pk);
         return getServiceTypeValueImpl(ejb);
     }
 

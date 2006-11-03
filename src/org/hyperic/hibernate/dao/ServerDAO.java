@@ -31,7 +31,6 @@ import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.PlatformLightValue;
 import org.hyperic.dao.DAOFactory;
@@ -247,10 +246,5 @@ public class ServerDAO extends HibernateDAO
         return getSession().createQuery(sql)
             .setString(0, name.toUpperCase())
             .list();
-    }
-
-    public Server findByPrimaryKey(ServerPK pk)
-    {
-        return findById(pk.getId());
     }
 }

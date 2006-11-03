@@ -766,13 +766,14 @@ public class AppdefEntityValue {
         
         AppdefEntityID[] servEntIds;
         if (this.id.getType() == AppdefEntityConstants.APPDEF_TYPE_APPLICATION){
-            ServicePK[] servicePKs =
+            Integer[] servicePKs =
                 sManager.getFlattenedServiceIdsByApplication(
-                    subject, this.id.getId());
+                    subject, id.getId());
             
             servEntIds = new AppdefEntityID[servicePKs.length];
             for (int i = 0; i < servicePKs.length; i++) {
-                servEntIds[i] = new AppdefEntityID(servicePKs[i]);
+                servEntIds[i] = new AppdefEntityID(
+                    AppdefEntityConstants.APPDEF_TYPE_SERVICE, servicePKs[i]);
             }
         }
         else {
@@ -781,7 +782,8 @@ public class AppdefEntityValue {
             Iterator it = services.iterator();
             for (int i = 0; it.hasNext(); i++) {
                 ServiceValue servVal = (ServiceValue) it.next();
-                servEntIds[i] = new AppdefEntityID(servVal.getPrimaryKey());
+                servEntIds[i] = new AppdefEntityID(
+                    AppdefEntityConstants.APPDEF_TYPE_SERVICE, servVal.getId());
             }
         }
         

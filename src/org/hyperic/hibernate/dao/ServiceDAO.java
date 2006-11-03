@@ -31,8 +31,6 @@ import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.ServiceValue;
-import org.hyperic.hq.appdef.shared.ServerPK;
-import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.dao.DAOFactory;
 
@@ -411,16 +409,5 @@ public class ServiceDAO extends HibernateDAO
                    "order by sortName " +
                    (asc ? "asc" : "desc");
         return getSession().createQuery(sql).list();
-    }
-
-    /**
-     * legacy EJB primary key finder
-     * @deprecated use findById() instead
-     * @param pk
-     * @return
-     */
-    public Service findByPrimaryKey(ServicePK pk)
-    {
-        return findById(pk.getId());
     }
 }

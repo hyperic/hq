@@ -53,7 +53,6 @@ import org.hyperic.hq.appdef.shared.PlatformManagerLocalHome;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.autoinventory.shared.AISchedulePK;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
@@ -444,8 +443,7 @@ public class AIScheduleManagerEJBImpl
 
         for (int i = 0; i < ids.length; i++) { 
             try {
-                AISchedulePK pk = new AISchedulePK(ids[i]);
-                aiScheduleLocal = asdao.findByPrimaryKey(pk);
+                aiScheduleLocal = asdao.findById(ids[i]);
                 this.scheduler.deleteJob(aiScheduleLocal.getJobName(), GROUP);
                 asdao.remove(aiScheduleLocal);
             } catch (Exception e) {

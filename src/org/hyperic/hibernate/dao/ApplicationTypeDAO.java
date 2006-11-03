@@ -4,7 +4,6 @@ import org.hibernate.Session;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
-import org.hyperic.hq.appdef.shared.ServiceTypePK;
 import org.hyperic.dao.DAOFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -88,13 +87,13 @@ public class ApplicationTypeDAO extends HibernateDAO
             .uniqueResult();
     }
 
-    public boolean supportsServiceType(ApplicationType at, ServiceTypePK stPK)
+    public boolean supportsServiceType(ApplicationType at, Integer stPK)
     {
         if (at.getServiceTypes() == null) {
             return false;
         }
         ServiceType serviceType = DAOFactory.getDAOFactory()
-            .getServiceTypeDAO().findById(stPK.getId());
+            .getServiceTypeDAO().findById(stPK);
         return at.getServiceTypes().contains(serviceType);
     }
 }

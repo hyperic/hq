@@ -48,8 +48,6 @@ import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServerPK;
-import org.hyperic.hq.appdef.shared.ServerTypePK;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
@@ -483,7 +481,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
         boolean foundServer;
         int i;
         AppdefEntityID appdefEntityId;
-        ServerTypePK serverTypePK;
+        Integer serverTypePK;
 
         // Get the aiplatform for this server
         aiplatform = aiserver.getAIPlatform();
@@ -534,14 +532,13 @@ public class AIQRV_approve implements AIQResourceVisitor {
             try {
                 serverValue = AIConversionUtil.convertAIServerToServer(aiserver.getAIServerValue(),
                                                                        smLocal);
-                serverTypePK
-                    = new ServerTypePK(serverValue.getServerType().getId());
-                ServerPK pk = smLocal.createServer(subject, 
-                                                   existingPlatformValue.getId(),
-                                                   serverTypePK,
-                                                   serverValue);
+                serverTypePK = serverValue.getServerType().getId();
+                Integer pk = smLocal.createServer(subject,
+                                                  existingPlatformValue.getId(),
+                                                  serverTypePK,
+                                                  serverValue);
                 try {
-                    serverValue = smLocal.getServerById(subject, pk.getId());
+                    serverValue = smLocal.getServerById(subject, pk);
                 } catch (ServerNotFoundException e) {
                     throw new SystemException("Could not find the server we" +
                                                  " just created");
@@ -549,7 +546,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
                 AppdefEntityID aID =
                     new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER,
-                                       pk.getId());
+                                       pk);
 
                 try {
                     AIConversionUtil.configureServer(subject,
@@ -696,11 +693,11 @@ public class AIQRV_approve implements AIQResourceVisitor {
         }
     }
 
-    private ServerTypePK findServerTypePK ( ServerManagerLocal smLocal,
+    private Integer findServerTypePK ( ServerManagerLocal smLocal,
                                             String name ) {
         try {
             ServerTypeValue stValue = smLocal.findServerTypeByName(name);
-            return stValue.getPrimaryKey();
+            return stValue.getId();
         } catch ( Exception e ) {
             throw new SystemException("Error looking up server type for "
                                          + "name: " + name + ": " + e, e);

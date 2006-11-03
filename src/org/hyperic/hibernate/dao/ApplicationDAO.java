@@ -173,19 +173,19 @@ public class ApplicationDAO extends HibernateDAO
                         scdao.findById(
                             aNode.getServiceClusterPK()).addDependentService(
                                 newTree.getAppPK(),
-                                depAsv.getService().getPrimaryKey());
+                                depAsv.getService().getId());
                     }
                 } else {
                     if(depAsv.getIsCluster()) {
-                        Service s = sdao.findByPrimaryKey(aNode.getServicePK());
+                        Service s = sdao.findById(aNode.getServicePK());
                         asdao.addDependentServiceCluster(s,
                                 newTree.getAppPK(),
                                 depAsv.getServiceCluster().getId());
                     } else {
-                        Service s = sdao.findByPrimaryKey(aNode.getServicePK());
+                        Service s = sdao.findById(aNode.getServicePK());
                         asdao.addDependentService(s,
                                 newTree.getAppPK(),
-                                depAsv.getService().getPrimaryKey());
+                                depAsv.getService().getId());
                     }
                 }
             }

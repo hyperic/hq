@@ -25,10 +25,11 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.appdef.shared.ServiceTypePK;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.ArrayList;
 
 /**
  *
@@ -38,10 +39,10 @@ public class ServiceType extends AppdefResourceType
     private String plugin;
     private boolean isInternal;
     private ServerType serverType;
-    private Collection applicationTypes;
-    private Collection appServices;
-    private Collection services;
-    private Collection serviceClusters;
+    private Collection applicationTypes = new HashSet();
+    private Collection appServices = new HashSet();
+    private Collection services = new ArrayList();
+    private Collection serviceClusters = new ArrayList();
 
     /**
      * default constructor
@@ -130,18 +131,6 @@ public class ServiceType extends AppdefResourceType
     public void setServiceClusters(Collection serviceClusters)
     {
         this.serviceClusters = serviceClusters;
-    }
-
-    private ServiceTypePK pkey = new ServiceTypePK();
-    /**
-     * legacy EJB primary key getter
-     * @deprecated use getId() instead
-     * @return
-     */
-    public ServiceTypePK getPrimaryKey()
-    {
-        pkey.setId(getId());
-        return pkey;
     }
 
     private ServiceTypeValue serviceTypeValue = new ServiceTypeValue();

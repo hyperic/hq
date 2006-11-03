@@ -40,14 +40,11 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformLightValue;
 import org.hyperic.hq.appdef.shared.PlatformVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
-import org.hyperic.hq.appdef.shared.ServerPK;
-import org.hyperic.hq.appdef.shared.ServerTypePK;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceLightValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
-import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ServiceVOHelperLocal;
 import org.hyperic.hq.appdef.shared.ServiceVOHelperUtil;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -93,13 +90,13 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public ServerValue getServerValue(ServerPK pk) 
+    public ServerValue getServerValue(Integer pk)
         throws FinderException, NamingException {
-        ServerValue vo = VOCache.getInstance().getServer(pk.getId());
+        ServerValue vo = VOCache.getInstance().getServer(pk);
         if(vo != null) {
             return vo;
         }
-        Server ejb = getServerDAO().findByPrimaryKey(pk);
+        Server ejb = getServerDAO().findById(pk);
         return getServerValue(ejb);
     }
             
@@ -123,9 +120,9 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public ServerLightValue getServerLightValue(ServerPK pk) 
+    public ServerLightValue getServerLightValue(Integer pk)
         throws FinderException, NamingException {
-        ServerLightValue vo = VOCache.getInstance().getServerLight(pk.getId());
+        ServerLightValue vo = VOCache.getInstance().getServerLight(pk);
         if(vo != null) {
             return vo;
         }
@@ -140,11 +137,11 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
     public ServerLightValue getServerLightValue(Server ejb)
         throws NamingException {
         try {
-            return this.getServerLightValue(ejb.getPrimaryKey());
+            return this.getServerLightValue(ejb.getId());
         } catch (FinderException e) {
             // Should never happen
             log.error("EJB passed for non-existent server entity: " +
-                    ((ServerPK) ejb.getPrimaryKey()).getId());
+                      ejb.getId());
             return null;
         }
     }
@@ -166,7 +163,7 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
     /**
      * Synchronized VO retrieval 
      */
-    private AppdefResourceValue getServerLightValueImpl(ServerPK spk)
+    private AppdefResourceValue getServerLightValueImpl(Integer spk)
         throws NamingException {
         VOCache cache = VOCache.getInstance();
         AppdefResourceValue vo;
@@ -177,7 +174,7 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
         return vo;
     } 
     
-    private AppdefResourceValue getServerValueDirectSQL(ServerPK pk, boolean getLight) {
+    private AppdefResourceValue getServerValueDirectSQL(Integer pk, boolean getLight) {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -185,13 +182,13 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
             log.debug("VOCache Miss! Retrieving ServerValue from database.");
             conn = Util.getConnection();
             ps = conn.prepareStatement(SERVER_SQL);
-            ps.setInt(1, pk.getId().intValue());
+            ps.setInt(1, pk.intValue());
             rs = ps.executeQuery();
             rs.next();
             if(getLight) {
                 ServerLightValue slv = new ServerLightValue();
                 slv.setId(new Integer(rs.getInt(1)));
-                slv.setServerType(getServerTypeValue(new ServerTypePK(new Integer(rs.getInt(3)))));
+                slv.setServerType(getServerTypeValue(new Integer(rs.getInt(3))));
                 slv.setName(rs.getString(4));
                 slv.setSortName(rs.getString(5));
                 slv.setDescription(rs.getString(6));
@@ -210,8 +207,7 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
             } else {
                 ServerValue sv = new ServerValue();
                 sv.setId(new Integer(rs.getInt(1)));
-                sv.setServerType(getServerTypeValue(
-                    new ServerTypePK(new Integer(rs.getInt(3)))));
+                sv.setServerType(getServerTypeValue(new Integer(rs.getInt(3))));
                 sv.setName(rs.getString(4));
                 sv.setSortName(rs.getString(5));
                 sv.setDescription(rs.getString(6));
@@ -244,13 +240,13 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public ServerTypeValue getServerTypeValue(ServerTypePK pk)
+    public ServerTypeValue getServerTypeValue(Integer pk)
         throws FinderException, NamingException {
-            ServerTypeValue vo = VOCache.getInstance().getServerType(pk.getId());
+            ServerTypeValue vo = VOCache.getInstance().getServerType(pk);
             if(vo != null) {
                 return vo;
             }
-            ServerType ejb = getServerTypeDAO().findById(pk.getId());
+            ServerType ejb = getServerTypeDAO().findById(pk);
             return getServerTypeValue(ejb);
     }
                         

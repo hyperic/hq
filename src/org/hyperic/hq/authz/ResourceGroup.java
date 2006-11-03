@@ -27,6 +27,7 @@ package org.hyperic.hq.authz;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 
@@ -45,8 +46,8 @@ public class ResourceGroup extends AuthzNamedBean
     private long mtime;
     private String modifiedBy;
     private Resource resource;
-    private Collection resources = new ArrayList();
-    private Collection roles = new ArrayList();
+    private Collection resources = new HashSet();
+    private Collection roles = new HashSet();
 
     private ResourceGroupValue resourceGroupValue = new ResourceGroupValue();
 

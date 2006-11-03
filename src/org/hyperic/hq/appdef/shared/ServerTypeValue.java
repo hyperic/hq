@@ -30,11 +30,8 @@ public class ServerTypeValue
    private boolean cTimeHasBeenSet = false;
    private java.util.Collection ServiceTypeValues = new java.util.HashSet();
 
-   private org.hyperic.hq.appdef.shared.ServerTypePK pk;
-
    public ServerTypeValue()
    {
-	  pk = new org.hyperic.hq.appdef.shared.ServerTypePK();
    }
 
    public ServerTypeValue( java.lang.String name,boolean virtual,java.lang.String sortName,java.lang.String description,java.lang.String plugin,java.lang.Integer id,java.lang.Long mTime,java.lang.Long cTime )
@@ -55,7 +52,6 @@ public class ServerTypeValue
 	  mTimeHasBeenSet = true;
 	  this.cTime = cTime;
 	  cTimeHasBeenSet = true;
-	  pk = new org.hyperic.hq.appdef.shared.ServerTypePK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -80,12 +76,6 @@ public class ServerTypeValue
 	// TODO Clone is better no ?
 	  this.ServiceTypeValues = otherValue.ServiceTypeValues;
 
-	  pk = new org.hyperic.hq.appdef.shared.ServerTypePK(this.getId());
-   }
-
-   public org.hyperic.hq.appdef.shared.ServerTypePK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public java.lang.String getName()
@@ -172,8 +162,6 @@ public class ServerTypeValue
    {
 	  this.id = id;
 	  idHasBeenSet = true;
-
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

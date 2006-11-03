@@ -43,12 +43,10 @@ import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ServerManagerUtil;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
-import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -269,12 +267,12 @@ public class ConfigManagerEJBImpl
 
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                 Server serv = 
-                    this.findServerByPK(new ServerPK(intID));
+                    this.findServerByPK(intID);
                 pname = serv.getServerType().getPlugin();
                 break;
 
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                Service service = findServiceByPK(new ServicePK(intID));
+                Service service = findServiceByPK(intID);
                 pname = service.getServiceType().getPlugin();
                 break;
 

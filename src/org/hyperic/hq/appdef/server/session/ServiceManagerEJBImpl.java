@@ -59,13 +59,10 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceLightValue;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
-import org.hyperic.hq.appdef.shared.ServicePK;
-import org.hyperic.hq.appdef.shared.ServiceTypePK;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ServiceValue;
@@ -142,16 +139,13 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Create a Service which runs on a given server
-     * @param ServerPK - the pk of the server hosting the service
-     * @param ServiceTypePK - the pk of the service type
-     * @param Service - the value object representation of the service
      * @return ServiceValue - the saved value object
      * @exception CreateException - if it fails to add the service
      * @ejb:interface-method
      * @ejb:transaction type="RequiresNew"
      */
-    public ServicePK createService(AuthzSubjectValue subject,
-        ServerPK spk, ServiceTypePK stpk, ServiceValue sValue)
+    public Integer createService(AuthzSubjectValue subject,
+        Integer spk, Integer stpk, ServiceValue sValue)
         throws CreateException, ValidationException, PermissionException,
                ServerNotFoundException, AppdefDuplicateNameException
     {
@@ -191,25 +185,18 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                     // now add the authz resource
                     createAuthzService(sValue.getName(), 
                                        service.getId(),
-                                       spk.getId(), 
+                                       spk,
                                        true, 
                                        subject);
                 }
             } catch (CreateException e) {
-                // failed to create authz, attempt to remove the service 
-//                try {
-//                    if(service != null) {
-//                        service.remove();
-//                    }
-//                } catch (RemoveException re) {}
-//                rollback();
                 throw e;
             }
             
             // remove the server vo from the cache 
             // since the service set has changed
-            VOCache.getInstance().removeServer(spk.getId());
-            return service.getPrimaryKey();
+            VOCache.getInstance().removeServer(spk);
+            return service.getId();
         } catch (FinderException e) {
             log.error("Unable to find ServiceType", e);
             throw new CreateException("Unable to find ServiceType: " 
@@ -224,7 +211,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             // a EAM_SERVICE record without its cooresponding EAM_RESOURCE record
             log.error("User: " + subject.getName() 
                 + " can not add services to server: " + spk);
-            rollback();
             throw e;
         }
     }
@@ -322,7 +308,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             int i = 0;
             for (Iterator it = services.iterator(); it.hasNext(); i++) {
                 Service aEJB = (Service) it.next();
-                if (viewable.contains(aEJB.getPrimaryKey())) {
+                if (viewable.contains(aEJB.getId())) {
                     // add the item, user can see it
                     serviceIds.add(aEJB.getId());
                 }
@@ -360,7 +346,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="RequiresNew"
      */
-    public ServiceTypePK createServiceType(AuthzSubjectValue subject,
+    public Integer createServiceType(AuthzSubjectValue subject,
         ServiceTypeValue stv, ServerTypeValue serverType) 
         throws CreateException, ValidationException {
         try {
@@ -370,14 +356,14 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             validateNewServiceType(stv, serverType);
             // first look up the parent server
             ServerType servType = getServerTypeDAO()
-                .findByPrimaryKey(serverType.getPrimaryKey());
+                .findById(serverType.getId());
             // now create the service type on it
 
             ServiceType stype =
                 getServiceTypeDAO().createServiceType(servType, stv);
             // flush the cache for the parent server type
             VOCache.getInstance().removeServerType(serverType.getId());
-            return stype.getPrimaryKey();
+            return stype.getId();
         } catch (ObjectNotFoundException e) {
             throw new CreateException("Unable to find Parent Server Type: " +
                                       e.getMessage());
@@ -395,7 +381,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         ServiceTypeValue typeV;
         try {
             typeV = ServiceVOHelperUtil.getLocalHome().create()
-                .getServiceTypeValue(new ServiceTypePK(id));
+                .getServiceTypeValue(id);
         } catch (NamingException e) {
             throw new SystemException(e);
         } catch (CreateException e) {
@@ -503,7 +489,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         throws ServiceNotFoundException, PermissionException {
         try {
             return ServiceVOHelperUtil.getLocalHome().create()
-                .getServiceLightValue(new ServicePK(id));
+                .getServiceLightValue(id);
         } catch (FinderException e) {
             throw new ServiceNotFoundException(id, e);
         } catch (NamingException e) {
@@ -521,8 +507,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         throws ServiceNotFoundException, PermissionException {
         try {
             ServiceValue service =
-                ServiceVOHelperUtil.getLocalHome().create().getServiceValue(
-                    new ServicePK(id));
+                ServiceVOHelperUtil.getLocalHome().create().getServiceValue(id);
             checkViewPermission(subject, service.getEntityId());
             return service;
         } catch (CreateException e) {
@@ -550,7 +535,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      *
      * @ejb:transaction type="Required"
      * @ejb:interface-method
-     * @param Integer id
      */
     public MiniResourceValue getMiniServiceById(AuthzSubjectValue subject,
                                                 Integer id)
@@ -765,7 +749,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         for(Iterator i = services.iterator(); i.hasNext();) {
             Service aService = (Service)i.next();
             // remove service if its not viewable
-            if(authzPks.contains(aService.getPrimaryKey())) {
+            if(authzPks.contains(aService.getId())) {
                 toBePaged.add(aService);
             }
         }
@@ -810,7 +794,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             for(Iterator i = services.iterator(); i.hasNext();) {
                 Service aService = (Service)i.next();
                 // remove service if its not viewable
-                if(authzPks.contains(aService.getPrimaryKey())) {
+                if(authzPks.contains(aService.getId())) {
                     toBePaged.add(aService);
                 }
             }
@@ -860,7 +844,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             for(Iterator i = services.iterator(); i.hasNext();) {
                 Service aService = (Service)i.next();
                 // remove service if its not viewable
-                if(authzPks.contains(aService.getPrimaryKey())) {
+                if(authzPks.contains(aService.getId())) {
                     toBePaged.add(aService);
                 }
             }
@@ -1397,7 +1381,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @return A List of ServiceValue objects representing all of the services
      *         that the given subject is allowed to view.
      */
-    public ServicePK[] getFlattenedServiceIdsByApplication(
+    public Integer[] getFlattenedServiceIdsByApplication(
         AuthzSubjectValue subject, Integer appId) 
         throws ServiceNotFoundException, PermissionException,
                ApplicationNotFoundException {
@@ -1415,7 +1399,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 if (o instanceof Service) {
                     Service service = (Service) o;
                     // servers will only have these
-                    servicePKs.add(service.getPrimaryKey());
+                    servicePKs.add(service.getId());
                 } else {
                     // this only happens when entId is for an application and
                     // a cluster is bound to it
@@ -1433,7 +1417,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                              memberIter.hasNext(); ) {
                             AppdefEntityID memberEntId =
                                 (AppdefEntityID) memberIter.next();
-                            servicePKs.add(memberEntId.getServicePK());                        
+                            servicePKs.add(memberEntId.getId());
                         }
                     } catch (PermissionException e) {
                         // User not allowed to see this group
@@ -1450,8 +1434,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                                                e);
         }
 
-        return (ServicePK[]) servicePKs.toArray(
-            new ServicePK[servicePKs.size()]);
+        return (Integer[]) servicePKs.toArray(
+            new Integer[servicePKs.size()]);
     }
 
     private List getUnflattenedServiceInventoryByApplication(
@@ -1540,8 +1524,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                AppdefDuplicateNameException, ServiceNotFoundException {
         try {
             Service service =
-                getServiceDAO().findByPrimaryKey(
-                    existing.getPrimaryKey());
+                getServiceDAO().findById(existing.getId());
             checkModifyPermission(subject, service.getEntityId());
             existing.setModifiedBy(subject.getName());
             existing.setMTime(new Long(System.currentTimeMillis()));
@@ -1577,13 +1560,12 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                                            AuthzSubjectValue newOwner)
         throws FinderException, PermissionException, CreateException {
         try {
-            ServicePK aPK = new ServicePK(serviceId);
             // first lookup the service
             Service serviceEJB = getServiceDAO().findById(serviceId);
             // check if the caller can modify this service
             checkModifyPermission(who, serviceEJB.getEntityId());
             // now get its authz resource
-            ResourceValue authzRes = getServiceResourceValue(aPK);
+            ResourceValue authzRes = getServiceResourceValue(serviceId);
             // change the authz owner
             getResourceManager().setResourceOwner(who, authzRes, newOwner);
             // update the owner field in the appdef table -- YUCK
@@ -1772,8 +1754,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                               boolean deep)
         throws RemoveException, FinderException, PermissionException {
 
-        ServicePK pk = (ServicePK) service.getPrimaryKey();
-        Integer serviceId = pk.getId();
+        Integer serviceId = service.getId();
         try {
             // find any children
             Collection childSvcs = getServiceDAO().findByParent(serviceId);
@@ -1781,13 +1762,12 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 throw new RemoveException(
                     "Service can not be removed since it has children");
             }
-            ServerPK serverPk = (ServerPK)service.getServer().getPrimaryKey();
-            Integer serverId = serverPk.getId();
+            Integer serverId = service.getServer().getId();
 
             // validate permission needs removeService on the service
             // to succeed
             checkRemovePermission(subj, service.getEntityId());
-            ResourceValue serviceRv = getServiceResourceValue(pk);
+            ResourceValue serviceRv = getServiceResourceValue(serviceId);
             // remove any child services
             for(Iterator i = childSvcs.iterator(); i.hasNext();) {
                 Service child = (Service)i.next();
@@ -1822,7 +1802,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                                    serviceId.intValue());
 
             // Send service deleted event
-            sendAppdefEvent(subj, new AppdefEntityID(pk),
+            sendAppdefEvent(subj, new AppdefEntityID(
+                AppdefEntityConstants.APPDEF_TYPE_SERVICE, serviceId),
                             AppdefEvent.ACTION_DELETE);
         } catch (CreateException e) {
             log.error("Unable to getServiceResourceValue", e);

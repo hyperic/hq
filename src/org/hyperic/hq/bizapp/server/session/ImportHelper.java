@@ -71,13 +71,11 @@ import org.hyperic.hq.appdef.shared.ServerManagerUtil;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.ServerPK;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
-import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -290,7 +288,7 @@ class ImportHelper
         try {
             try {
                 Integer pk  = this.platMan.createPlatform(this.subject, 
-                                                    pType.getPrimaryKey(), 
+                                                    pType.getId(), 
                                                     aPlatform, agentPk);
                 aPlatform = this.platMan.getPlatformById(this.subject, pk);
             } catch (PlatformNotFoundException e) {
@@ -359,7 +357,7 @@ class ImportHelper
         this.platformCache.put(platform.getName(), aPlatform);
         this.entIDCache.put(
             new AppdefEntityID(
-                aPlatform.getId(), AppdefEntityConstants.APPDEF_TYPE_PLATFORM),
+                AppdefEntityConstants.APPDEF_TYPE_PLATFORM, aPlatform.getId()),
             aPlatform);
 
         buf.pushIndent();
@@ -424,12 +422,12 @@ class ImportHelper
         aServer.setLocation(server.getLocation());
 
         try {
-            ServerPK pk  = this.servMan.createServer(this.subject,
-                                                plat.getId(),
-                                                sType.getPrimaryKey(),
-                                                aServer);
+            Integer pk  = this.servMan.createServer(this.subject,
+                                                    plat.getId(),
+                                                    sType.getId(),
+                                                    aServer);
             try {
-                aServer = this.servMan.getServerById(this.subject, pk.getId());
+                aServer = this.servMan.getServerById(this.subject, pk);
             } catch (ServerNotFoundException e) {
                 throw new BatchImportException("Could not find server we " +
                                                " just created");
@@ -485,7 +483,8 @@ class ImportHelper
             buf.popIndent();
         }
 
-        this.entIDCache.put(new AppdefEntityID(aServer.getPrimaryKey()), 
+        this.entIDCache.put(new AppdefEntityID(
+            AppdefEntityConstants.APPDEF_TYPE_SERVER, aServer.getId()),
                             (AppdefResourceValue)aServer);
 
         buf.pushIndent();
@@ -558,13 +557,13 @@ class ImportHelper
         }
 
         try {
-            ServicePK pk = this.serviceMan.createService(this.subject,
-                                                         server.getPrimaryKey(),
-                                                         sType.getPrimaryKey(),
-                                                         aService);
+            Integer pk = serviceMan.createService(this.subject,
+                                                  server.getId(),
+                                                  sType.getId(),
+                                                  aService);
             try {
-                aService = this.serviceMan.getServiceById(this.subject,
-                                                      pk.getId());
+                aService = serviceMan.getServiceById(this.subject,
+                                                     pk);
             } catch (ServiceNotFoundException e) {  
                 throw new BatchImportException("Could not find service we " +
                                                "just created");
@@ -622,8 +621,9 @@ class ImportHelper
                                            exc.getMessage());
         }
 
-        this.entIDCache.put(new AppdefEntityID(aService.getPrimaryKey()), 
-                            (AppdefResourceValue)aService);
+        entIDCache.put(new AppdefEntityID(
+            AppdefEntityConstants.APPDEF_TYPE_SERVICE, aService.getId()),
+                       (AppdefResourceValue)aService);
 
         buf.pushIndent();
         this.handleAllConfigs(aService.getEntityId(), name, service, buf);

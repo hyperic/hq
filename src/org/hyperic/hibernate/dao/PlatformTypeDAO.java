@@ -27,7 +27,6 @@ package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
 import org.hyperic.hq.appdef.server.session.PlatformType;
-import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 
 import java.util.Collection;
@@ -78,16 +77,5 @@ public class PlatformTypeDAO extends HibernateDAO
         return getSession().createQuery(sql)
             .setString(0, plugin)
             .list();
-    }
-
-    /**
-     * legacy EJB object finder by primary key
-     * @deprecated use findById()
-     * @param pk
-     * @return
-     */
-    public PlatformType findByPrimaryKey(PlatformTypePK pk)
-    {
-        return findById(pk.getId());
     }
 }

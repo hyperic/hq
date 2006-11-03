@@ -50,7 +50,6 @@ import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.DependencyTree;
-import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
@@ -172,7 +171,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             for(Iterator i = services.iterator(); i.hasNext();) {
                 ServiceValue aService = (ServiceValue)i.next();
                 log.debug("Adding service: " + aService + " to application");
-                application.addService(aService.getPrimaryKey());
+                application.addService(aService.getId());
             }
             return application.getId();
         } catch (FinderException e) {
@@ -255,7 +254,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
 
             // Send service deleted event
             sendAppdefEvent(caller, new AppdefEntityID(
-                id, AppdefEntityConstants.APPDEF_TYPE_APPLICATION),
+                AppdefEntityConstants.APPDEF_TYPE_APPLICATION, id),
                             AppdefEvent.ACTION_DELETE);
         } catch(CreateException e) {
             throw new RemoveException("Unable to remove application:" + 
@@ -535,8 +534,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             for(int i=0; i < entityIds.size(); i++) {
                 AppdefEntityID id = (AppdefEntityID)entityIds.get(i);
                 if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
-                    asDAO.create(new ServicePK(id.getId()),
-                                 app.getId(), false);
+                    asDAO.create(id.getId(), app.getId(), false);
                 }
                 else if (id.getType() == 
                     AppdefEntityConstants.APPDEF_TYPE_GROUP) {

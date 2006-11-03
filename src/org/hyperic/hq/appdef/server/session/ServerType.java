@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.appdef.shared.ServerTypePK;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 
@@ -34,6 +33,7 @@ import java.util.Set;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.HashSet;
+import java.util.ArrayList;
 
 /**
  *
@@ -42,9 +42,9 @@ public class ServerType extends AppdefResourceType
 {
     private String plugin;
     private boolean virtual;
-    private Collection platformTypes;
-    private Collection servers;
-    private Collection serviceTypes;
+    private Collection platformTypes = new HashSet();
+    private Collection servers = new ArrayList();
+    private Collection serviceTypes = new ArrayList();
 
     /**
      * default constructor
@@ -113,16 +113,6 @@ public class ServerType extends AppdefResourceType
     public void setServiceTypes(Collection serviceTypes)
     {
         this.serviceTypes = serviceTypes;
-    }
-
-    private ServerTypePK pkey=new ServerTypePK();
-    /**
-     * @deprecated use getId()
-     */
-    public ServerTypePK getPrimaryKey()
-    {
-        pkey.setId(getId());
-        return pkey;
     }
 
     public ServiceType createServiceType(ServiceTypeValue stv)

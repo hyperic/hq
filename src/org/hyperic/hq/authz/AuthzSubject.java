@@ -27,6 +27,7 @@ package org.hyperic.hq.authz;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -43,7 +44,7 @@ public class AuthzSubject extends AuthzNamedBean {
     private boolean    _active = true;
     private boolean    _system = false;
     private Resource   _resource;
-    private Collection _roles = new ArrayList();
+    private Collection _roles = new HashSet();
     private Collection _userConfigs = new ArrayList();
 
     private AuthzSubjectValue _valueObj;

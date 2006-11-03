@@ -70,8 +70,8 @@ public class DependencyNode implements Serializable {
         return getAppService().getIsCluster();
     }
 
-    public ServicePK getServicePK() {
-        return getAppService().getService().getPrimaryKey();
+    public Integer getServicePK() {
+        return getAppService().getService().getId();
     }
 
     public Integer getServiceClusterPK() {

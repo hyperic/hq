@@ -105,7 +105,7 @@ public class AuthzSubjectManagerEJBImpl
      * @ejb:interface-method
      */
     public AuthzSubject createSubject(AuthzSubjectValue whoami,
-                                        AuthzSubjectValue subject)
+                                      AuthzSubjectValue subject)
         throws FinderException, PermissionException, CreateException {
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         pm.check(whoami.getId(), getRootResourceType(),

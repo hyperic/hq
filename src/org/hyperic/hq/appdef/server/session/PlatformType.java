@@ -35,7 +35,6 @@ import java.util.Set;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 
@@ -46,7 +45,6 @@ public class PlatformType extends AppdefResourceType {
     private String            _plugin;
     private Collection        _serverTypes = new ArrayList();
     private Collection        _platforms = new ArrayList();
-    private PlatformTypePK    _pkey = new PlatformTypePK();
     private PlatformTypeValue _platformTypeValue = new PlatformTypeValue();
 
     protected PlatformType() {
@@ -260,14 +258,6 @@ public class PlatformType extends AppdefResourceType {
             return new LinkedHashSet();
         }
         return new LinkedHashSet(getServerTypes());
-    }
-
-    /**
-     * @deprecated use getId()
-     */
-    public PlatformTypePK getPrimaryKey() {
-        _pkey.setId(getId());
-        return _pkey;
     }
 
     public boolean equals(Object obj) {

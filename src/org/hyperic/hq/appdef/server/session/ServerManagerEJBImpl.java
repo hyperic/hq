@@ -54,12 +54,9 @@ import org.hyperic.hq.appdef.shared.AppdefEvent;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServerPK;
-import org.hyperic.hq.appdef.shared.ServerTypePK;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ServerValue;
@@ -134,16 +131,13 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Create a Server which runs on a given platform
-     * @param PlatformPK - the pk of the platform hosting the server
-     * @param ServerTypePK - the pk of the server type
-     * @param ServerValue - the value object representation of the server
      * @return ServerValue - the saved value object
      * @exception CreateException - if it fails to add the server
      * @ejb:interface-method
      * @ejb:transaction type="RequiresNew"
      */
-    public ServerPK createServer(AuthzSubjectValue subject, Integer ppk,
-                                    ServerTypePK stpk, ServerValue sValue)
+    public Integer createServer(AuthzSubjectValue subject, Integer ppk,
+                                Integer stpk, ServerValue sValue)
         throws CreateException, ValidationException, PermissionException,
                PlatformNotFoundException, AppdefDuplicateNameException {
         if(log.isDebugEnabled()) {
@@ -180,7 +174,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // remove platform vo from the cache
             // since the server set has changed
             VOCache.getInstance().removePlatform(ppk);
-            return server.getPrimaryKey();
+            return server.getId();
         } catch (CreateException e) {
             throw e;
         } catch (PermissionException e) {
@@ -228,8 +222,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     public void removeServer (AuthzSubjectValue subject,
                               Server server, boolean deep)
         throws ServerNotFoundException, RemoveException, PermissionException {
-        ServerPK pk = (ServerPK)server.getPrimaryKey();
-        Integer id = pk.getId();
+        Integer id = server.getId();
         try {
             // check to see if there are services installed on the
             // server
@@ -242,7 +235,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // check if the user has permission to remove it
             // user needs the removeServer permission on the server
             // to succeed
-            ResourceValue rv = this.getServerResourceValue(pk);
+            ResourceValue rv = this.getServerResourceValue(id);
             checkRemovePermission(subject, server.getEntityId());
             // remove the service resource entries and validate permissions
             Iterator servicesIt = services.iterator();
@@ -284,10 +277,11 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
             // remove custom properties
             deleteCustomProperties(AppdefEntityConstants.APPDEF_TYPE_SERVER, 
-                                   pk.getId().intValue());
+                                   id.intValue());
 
             // Send server deleted event
-            sendAppdefEvent(subject, new AppdefEntityID(pk),
+            sendAppdefEvent(subject, new AppdefEntityID(
+                AppdefEntityConstants.APPDEF_TYPE_SERVER, id),
                             AppdefEvent.ACTION_DELETE);
         } catch (NamingException e) {
             throw new SystemException(e);
@@ -298,15 +292,13 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Create a ServerType which is supported by a specific set of platform Types
-     * @param ServerTypeValue   
-     * @param platformTypeList 
      * @return ServerTypeValue
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
-    public ServerTypePK createServerType(AuthzSubjectValue subject,
-                                            ServerTypeValue stv,
-                                            List suppPlatTypes)
+    public Integer createServerType(AuthzSubjectValue subject,
+                                    ServerTypeValue stv,
+                                    List suppPlatTypes)
         throws CreateException, ValidationException {
         try {
             if(log.isDebugEnabled()) {
@@ -323,7 +315,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 // now find the ejb
                 PlatformType pType =
                     DAOFactory.getDAOFactory().getPlatformTypeDAO()
-                    .findByPrimaryKey(ptv.getPrimaryKey());
+                    .findById(ptv.getId());
                 // and add it to the set
                 ptSet.add(pType);
                 // flush the platform type from the cache
@@ -333,7 +325,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             sType.setPlatformTypes(ptSet);
             
             // and finally, return the primary key
-            return sType.getPrimaryKey();
+            return sType.getId();
         } catch (ObjectNotFoundException e) {
             throw new CreateException("Failed to look up a PlatformType: " +
                                       e.getMessage());
@@ -433,7 +425,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         ServerValue server;
         try {
             server = ServerVOHelperUtil.getLocalHome().create()
-                .getServerValue(new ServerPK(id));
+                .getServerValue(id);
         } catch (NamingException e) {
             throw new SystemException(e);
         } catch (CreateException e) {
@@ -498,7 +490,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         throws FinderException {
         ServerTypeValue sTypeV;
         try {
-            sTypeV = ServerVOHelperUtil.getLocalHome().create().getServerTypeValue(new ServerTypePK(id));
+            sTypeV = ServerVOHelperUtil.
+                getLocalHome().create().getServerTypeValue(id);
         } catch (NamingException e) {
             throw new SystemException(e);
         } catch (CreateException e) {
@@ -533,14 +526,12 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Get server lite value by id.  Does not check permission.
      * @ejb:interface-method
      * @ejb:transaction type="Required"
-     * @param Integer id
      */
     public ServerLightValue getServerLightValue(Integer id)
         throws ServerNotFoundException {
         try {
             ServerDAO serverLocalHome = getServerDAO();
-            Server server =
-                serverLocalHome.findByPrimaryKey(new ServerPK(id));
+            Server server = serverLocalHome.findById(id);
             return server.getServerLightValue();
         } catch (ObjectNotFoundException e) {
             throw new ServerNotFoundException(id, e);
@@ -575,7 +566,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             int i = 0;
             for (Iterator it = servers.iterator(); it.hasNext(); i++) {
                 Server aEJB = (Server) it.next();
-                if (viewable.contains(aEJB.getPrimaryKey())) {
+                if (viewable.contains(aEJB.getId())) {
                     // add the item, user can see it
                     serverIds.add(aEJB.getId());
                 }
@@ -594,14 +585,13 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Get server by id.
      * @ejb:interface-method
      * @ejb:transaction type="Required"
-     * @param Integer id
      */
     public ServerValue getServerById(AuthzSubjectValue subject, 
                                      Integer id)
         throws ServerNotFoundException, PermissionException {
         try {
             ServerValue serverValue = ServerVOHelperUtil.getLocalHome()
-                .create().getServerValue(new ServerPK(id));
+                .create().getServerValue(id);
             // now check if the user can see this at all
             // one would think that it makes more sense to check the
             // permission first, but if the resource doesnt exist, the
@@ -622,7 +612,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Get servers by name.
      * @ejb:interface-method
      * @ejb:transaction type="Required"
-     * @param Subject - who
      * @param name - name of server
      */
     public ServerValue[] getServersByName(AuthzSubjectValue subject, String name)
@@ -635,8 +624,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Get server by service.
      * @ejb:interface-method
      * @ejb:transaction type="Required"
-     * @param Subject - who
-     * @param service - Service ID for which to fetch the server
      */
     public ServerValue getServerByService(AuthzSubjectValue subject,
                                           Integer sID) 
@@ -649,7 +636,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             serviceLocal = getServiceDAO().findById(sID);
             
             serverValue = ServerVOHelperUtil.getLocalHome().create()
-                .getServerValue(serviceLocal.getServer().getPrimaryKey());
+                .getServerValue(serviceLocal.getServer().getId());
             
             // Make sure they're authorized to see it. Otherwise, we should
             // throw a not-found exception.
@@ -671,8 +658,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * returned list.
      * @ejb:interface-method
      * @ejb:transaction type="Required"
-     * @param Subject - who
-     * @param service - Service ID for which to fetch the server
      * @throws ServerNotFoundException
      */
     public PageList getServersByServices(AuthzSubjectValue subject, List sIDs) 
@@ -712,7 +697,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             rs = ps.executeQuery();
 
             while (rs.next()) {
-                serverIds.add(new ServerPK(new Integer(rs.getInt(1))));
+                serverIds.add(new Integer(rs.getInt(1)));
             }
         } catch (SQLException e) {
             throw new SystemException("Error looking up services by id: " + e,
@@ -723,12 +708,12 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
         ArrayList servers = new ArrayList();
         for (Iterator it = serverIds.iterator(); it.hasNext();) {
-            ServerPK pk = (ServerPK) it.next();
+            Integer pk = (Integer) it.next();
             if(!authzPks.contains(pk))
                 continue;
             
             try {
-                Server server = getServerDAO().findByPrimaryKey(pk);
+                Server server = getServerDAO().findById(pk);
                 servers.add(server);
             } catch (ObjectNotFoundException e) {
                 continue;
@@ -745,7 +730,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @ejb:transaction type="Required"
      *
      * @param subject The subject trying to list servers.
-     * @param PageControl  
      * @return A List of ServerValue objects representing all of the
      * servers that the given subject is allowed to view.
      */
@@ -786,7 +770,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                     break;
             }
             for(Iterator i = servers.iterator(); i.hasNext();) {
-                ServerPK sPK = ((Server)i.next()).getPrimaryKey();
+                Integer sPK = ((Server)i.next()).getId();
                 // remove server if its not viewable
                 if(!authzPks.contains(sPK)) {
                     i.remove();
@@ -846,7 +830,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 continue;
             
             // Remove the server if its not viewable
-            if (!authzPks.contains(aServer.getPrimaryKey())) {
+            if (!authzPks.contains(aServer.getId())) {
                 i.remove();
             }
         } 
@@ -919,9 +903,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      *
      * @param subject The subject trying to list servers.
-     * @param servTypeId server type id.
      * @param platId platform id.
-     * @param pc The page control.
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
      * @ejb:transaction type="Required"
@@ -965,7 +947,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
             List authzPks = getViewableServers(subject);        
             for(Iterator i = servers.iterator(); i.hasNext();) {
-                ServerPK sPK = ((Server) i.next()).getPrimaryKey();
+                Integer sPK = ((Server) i.next()).getId();
                 // remove server if its not viewable
                 if(!authzPks.contains(sPK))
                     i.remove();
@@ -998,7 +980,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      *
      * @ejb:transaction type="Required"
      * @ejb:interface-method
-     * @param Integer id
      */
     public MiniResourceValue getMiniServerById(AuthzSubjectValue subject,
                                                Integer id)
@@ -1066,7 +1047,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      *
      * @ejb:transaction type="Required"
      * @ejb:interface-method
-     * @param Integer id
      */
     public MiniResourceValue getMiniServerByService(AuthzSubjectValue subject,
                                                     Integer id)
@@ -1223,7 +1203,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @param subject The subject trying to list servers.
      * @param servTypeId server type id.
      * @param platId platform id.
-     * @param pc The page control.
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
      */
@@ -1244,7 +1223,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @param subject The subject trying to list servers.
      * @param servTypeId server type id.
      * @param platId platform id.
-     * @param pc The page control.
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
      */
@@ -1273,8 +1251,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      *
      * @param subject The subject trying to list servers.
      * @param appId Application id.
-     * @param pc The page control for this page list.
-     * @return A List of ServerValue objects representing servers that support 
+     * @return A List of ServerValue objects representing servers that support
      * the given application that the subject is allowed to view.
      */
     private Collection getServersByApplicationImpl(AuthzSubjectValue subject,
@@ -1331,8 +1308,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                     if (server.getServerType().getVirtual())
                         break;
 
-                    Integer serverId = ((ServerPK)
-                            server.getPrimaryKey()).getId();
+                    Integer serverId = server.getId();
                     
                     if (serverCollection.containsKey(serverId))
                         continue;
@@ -1362,7 +1338,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 i.remove();
             }
             // otherwise, remove the server if its not viewable
-            else if(!authzPks.contains(aServer.getPrimaryKey())) {
+            else if(!authzPks.contains(aServer.getId())) {
                 i.remove();
             }
         } 
@@ -1420,8 +1396,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      *
      * @param subject The subject trying to list servers.
      * @param appId Application id.
-     * @param pc The page control for this page list.
-     * @return A List of ServerValue objects representing servers that support 
+     * @return A List of ServerValue objects representing servers that support
      * the given application that the subject is allowed to view.
      */
     public Integer[] getServerIdsByApplication(AuthzSubjectValue subject,
@@ -1444,7 +1419,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Private method to validate a new ServerValue object
-     * @param ServerValue
      * @throws ValidationException
      */
     private void validateNewServer(ServerValue sv) throws ValidationException {
@@ -1482,7 +1456,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                AppdefDuplicateNameException, ServerNotFoundException {
         try {
             Server server =
-                getServerDAO().findByPrimaryKey(existing.getPrimaryKey());
+                getServerDAO().findById(existing.getId());
             checkModifyPermission(subject, server.getEntityId());
             existing.setModifiedBy(subject.getName());
             existing.setMTime(new Long(System.currentTimeMillis()));
@@ -1523,15 +1497,14 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                                          Integer serverId,
                                          AuthzSubjectValue newOwner)
         throws PermissionException, ServerNotFoundException {
-        ServerPK aPK = new ServerPK(serverId);
         Server serverEJB;
         try {
             // first lookup the server
-            serverEJB = getServerDAO().findByPrimaryKey(aPK);
+            serverEJB = getServerDAO().findById(serverId);
             // check if the caller can modify this server
             checkModifyPermission(who, serverEJB.getEntityId());
             // now get its authz resource
-            ResourceValue authzRes = getServerResourceValue(aPK);
+            ResourceValue authzRes = getServerResourceValue(serverId);
             // change the authz owner
             getResourceManager().setResourceOwner(who, authzRes, newOwner);
             // update the owner field in the appdef table -- YUCK
@@ -1552,7 +1525,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Update server types
-     * @param ServerTypeValue
      * @ejb:interface-method
      * @ejb:transaction type="RequiresNew"
      */
@@ -1676,8 +1648,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
             // expire the underlying platform types Bug# 9795
             for(Iterator pti = platSet.iterator(); pti.hasNext();) {
-                PlatformTypePK ptPk = ((PlatformType)pti.next()).getPrimaryKey();
-                cache.removePlatformType(ptPk.getId());
+                Integer ptPk = ((PlatformType)pti.next()).getId();
+                cache.removePlatformType(ptPk);
             }
         }
     }
@@ -1736,15 +1708,14 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get the AUTHZ ResourceValue for a Server
-     * @param ejb - the Server EJB
      * @return ResourceValue
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public ResourceValue getServerResourceValue(ServerPK pk)
+    public ResourceValue getServerResourceValue(Integer pk)
         throws FinderException, NamingException {
         return this.getAuthzResource(getServerResourceType(),
-            pk.getId());
+                                     pk);
     }
 
     /**

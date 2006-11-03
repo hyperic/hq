@@ -47,17 +47,13 @@ import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServerPK;
-import org.hyperic.hq.appdef.shared.ServerTypePK;
 import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.ServiceLightValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
-import org.hyperic.hq.appdef.shared.ServicePK;
-import org.hyperic.hq.appdef.shared.ServiceTypePK;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -354,7 +350,7 @@ public class RuntimeReportProcessor {
         int i;
         ServerLightValue appdefServerLight;
         ServerValue foundAppdefServer = null;
-        ServerTypePK serverTypePK;
+        Integer serverTypePK;
 
         // Does this server exist (by autoinventory identifier) ?
         String appdefServerAIID, aiServerAIID;
@@ -424,19 +420,19 @@ public class RuntimeReportProcessor {
                     log.debug("Converted aiserver into: " + foundAppdefServer);
                 }
                 serverTypePK
-                    = new ServerTypePK(foundAppdefServer.getServerType().getId());
+                    = foundAppdefServer.getServerType().getId();
                 
                 // The server will be owned by whomever owns the platform
                 String serverOwnerName = platform.getOwner();
                 AuthzSubjectValue serverOwner
                     = subjectMgr.findSubjectByName(subject, serverOwnerName);
                 Integer platformPK = platform.getId();
-                ServerPK pk = serverMgr.createServer(serverOwner, 
-                                                     platformPK,
-                                                     serverTypePK, 
-                                                     foundAppdefServer);
+                Integer pk = serverMgr.createServer(serverOwner,
+                                                    platformPK,
+                                                    serverTypePK,
+                                                    foundAppdefServer);
                 try {
-                    foundAppdefServer = serverMgr.getServerById(serverOwner, pk.getId());
+                    foundAppdefServer = serverMgr.getServerById(serverOwner, pk);
                 } catch (ServerNotFoundException e) {
                     log.fatal("Could not find server we just created", e);
                     throw new SystemException("Could not find server we"
@@ -651,19 +647,18 @@ public class RuntimeReportProcessor {
                 if(isRtEnabled(aiservice)) {
                     foundAppdefService.setServiceRt(true);
                 }
-                ServiceTypePK serviceTypePK
-                    = new ServiceTypePK(foundAppdefService.getServiceType().getId());
+                Integer serviceTypePK
+                    = foundAppdefService.getServiceType().getId();
                 String serviceOwnerName = server.getOwner();
                 AuthzSubjectValue serviceOwner
                     = subjectMgr.findSubjectByName(subject, serviceOwnerName);
-                ServerPK serverPK = new ServerPK(server.getId());
-                ServicePK pk  = serviceMgr.createService(serviceOwner, 
-                                                              serverPK,
-                                                              serviceTypePK,
-                                                              foundAppdefService);
+                Integer pk  = serviceMgr.createService(serviceOwner,
+                                                       server.getId(),
+                                                       serviceTypePK,
+                                                       foundAppdefService);
                 try {
                     foundAppdefService = serviceMgr.getServiceById(serviceOwner,
-                                                               pk.getId());
+                                                               pk);
                 } catch (ServiceNotFoundException e) {
                     log.fatal("Unable to find service we just created.", e);
                     throw new SystemException("Unable to find service we "
@@ -739,8 +734,8 @@ public class RuntimeReportProcessor {
                                               Integer serverId,
                                               AutoinventoryManagerLocal aiMgr,
                                               String agentToken ) {
-        ServerPK serverPK = new ServerPK(serverId);
-        AppdefEntityID aid = new AppdefEntityID(serverPK);
+        AppdefEntityID aid = new AppdefEntityID(
+            AppdefEntityConstants.APPDEF_TYPE_SERVER, serverId);
         log.info("Disabling RuntimeDiscovery for server: " + serverId);
         try {
             aiMgr.turnOffRuntimeDiscovery(subject, aid, agentToken);

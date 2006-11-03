@@ -28,11 +28,8 @@ public class PlatformTypeValue
    private boolean cTimeHasBeenSet = false;
    private java.util.Collection ServerTypeValues = new java.util.HashSet();
 
-   private org.hyperic.hq.appdef.shared.PlatformTypePK pk;
-
    public PlatformTypeValue()
    {
-	  pk = new org.hyperic.hq.appdef.shared.PlatformTypePK();
    }
 
    public PlatformTypeValue( java.lang.String sortName,java.lang.String name,java.lang.String description,java.lang.String plugin,java.lang.Integer id,java.lang.Long mTime,java.lang.Long cTime )
@@ -51,7 +48,6 @@ public class PlatformTypeValue
 	  mTimeHasBeenSet = true;
 	  this.cTime = cTime;
 	  cTimeHasBeenSet = true;
-	  pk = new org.hyperic.hq.appdef.shared.PlatformTypePK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -73,13 +69,6 @@ public class PlatformTypeValue
 	  cTimeHasBeenSet = true;
 	// TODO Clone is better no ?
 	  this.ServerTypeValues = otherValue.ServerTypeValues;
-
-	  pk = new org.hyperic.hq.appdef.shared.PlatformTypePK(this.getId());
-   }
-
-   public org.hyperic.hq.appdef.shared.PlatformTypePK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public java.lang.String getSortName()
@@ -151,8 +140,6 @@ public class PlatformTypeValue
    {
 	  this.id = id;
 	  idHasBeenSet = true;
-
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

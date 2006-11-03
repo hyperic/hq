@@ -27,7 +27,6 @@ package org.hyperic.hq.autoinventory;
 
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
-import org.hyperic.hq.autoinventory.shared.AISchedulePK;
 import org.hyperic.hq.scheduler.ScheduleValue;
 
 import java.io.IOException;
@@ -247,16 +246,5 @@ public class AISchedule extends PersistedObject
         os.close();
 
         setScheduleValueBytes(os.toByteArray());
-    }
-
-    private AISchedulePK pkey = new AISchedulePK();
-    /**
-     * @deprecated use getId()
-     * @return
-     */
-    public AISchedulePK getPrimaryKey()
-    {
-        pkey.setId(getId());
-        return pkey;
     }
 }

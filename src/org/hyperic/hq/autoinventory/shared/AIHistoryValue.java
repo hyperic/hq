@@ -53,11 +53,8 @@ public class AIHistoryValue
    private ScanConfigurationCore configObj;
    private boolean configObjHasBeenSet = false;
 
-   private org.hyperic.hq.autoinventory.shared.AIHistoryPK pk;
-
    public AIHistoryValue()
    {
-	  pk = new org.hyperic.hq.autoinventory.shared.AIHistoryPK();
    }
 
    public AIHistoryValue( Integer id,Integer groupId,Integer batchId,Integer entityType,Integer entityId,String entityName,String subject,Boolean scheduled,long dateScheduled,long startTime,long endTime,long duration,String message,String description,String status,String scanName,String scanDesc,byte[] config,ScanConfigurationCore configObj )
@@ -100,7 +97,6 @@ public class AIHistoryValue
 	  configHasBeenSet = true;
 	  this.configObj = configObj;
 	  configObjHasBeenSet = true;
-	  pk = new org.hyperic.hq.autoinventory.shared.AIHistoryPK(this.getId());
    }
 
    //TODO Cloneable is better than this !
@@ -144,13 +140,6 @@ public class AIHistoryValue
 	  configHasBeenSet = true;
 	  this.configObj = otherValue.configObj;
 	  configObjHasBeenSet = true;
-
-	  pk = new org.hyperic.hq.autoinventory.shared.AIHistoryPK(this.getId());
-   }
-
-   public org.hyperic.hq.autoinventory.shared.AIHistoryPK getPrimaryKey()
-   {
-	  return pk;
    }
 
    public Integer getId()
@@ -162,8 +151,6 @@ public class AIHistoryValue
    {
 	  this.id = id;
 	  idHasBeenSet = true;
-
-		 pk.setId(id);
    }
 
    public boolean idHasBeenSet(){

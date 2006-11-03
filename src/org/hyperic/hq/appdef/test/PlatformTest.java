@@ -4,7 +4,6 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.test.HQEJBTestBase;
@@ -21,7 +20,7 @@ public class PlatformTest
     {
         PlatformManagerLocal pMan = getPlatformManager();
         PlatformTypeValue pTypeVal;
-        PlatformTypePK ptpk;
+        Integer ptpk;
         PlatformType pType;
         PlatformValue pInfo;
         Integer ppk;
@@ -31,7 +30,7 @@ public class PlatformTest
         pTypeVal = new PlatformTypeValue();
         pTypeVal.setName("Kaboom" + getUniq());
         ptpk = pMan.createPlatformType(getOverlord(), pTypeVal);
-        pType = DAOFactory.getDAOFactory().getPlatformTypeDAO().findById(ptpk.getId());
+        pType = DAOFactory.getDAOFactory().getPlatformTypeDAO().findById(ptpk);
         
         // Create the platform value
         pInfo = new PlatformValue();

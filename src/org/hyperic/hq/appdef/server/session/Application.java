@@ -26,7 +26,6 @@
 package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.appdef.AppService;
-import org.hyperic.hq.appdef.shared.ServicePK;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -118,7 +117,7 @@ public class Application extends AppdefResource
         this.appServices = appServices;
     }
 
-    public AppService addEntryPoint(ServicePK aService)
+    public AppService addEntryPoint(Integer aService)
     {
         throw new UnsupportedOperationException(
             "use AppServiceDAO.createService()");
@@ -130,7 +129,7 @@ public class Application extends AppdefResource
             "use AppServiceDAO.createService()");
     }
 
-    public AppService addService(ServicePK aService)
+    public AppService addService(Integer aService)
     {
         throw new UnsupportedOperationException(
             "use AppServiceDAO.createService()");

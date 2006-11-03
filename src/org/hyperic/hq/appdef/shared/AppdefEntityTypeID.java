@@ -49,21 +49,6 @@ public class AppdefEntityTypeID extends AppdefEntityID implements Serializable {
         super(entityType, entityID);
     }
 
-    public AppdefEntityTypeID(PlatformTypePK platformPK) {
-        super(AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
-              platformPK.getId().intValue());
-    }
-
-    public AppdefEntityTypeID(ServerTypePK serverTypePK) {
-        super(AppdefEntityConstants.APPDEF_TYPE_SERVER,
-              serverTypePK.getId().intValue());
-    }
-
-    public AppdefEntityTypeID(ServiceTypePK serviceTypePK) {
-        super(AppdefEntityConstants.APPDEF_TYPE_SERVICE,
-              serviceTypePK.getId().intValue());
-    }
-    
     public AppdefResourceTypeValue getAppdefResourceTypeValue() {
         try {
             // GROOOAAAN

@@ -5,7 +5,6 @@ import org.apache.log4j.Logger;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.PlatformTypePK;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.events.EventConstants;
@@ -34,7 +33,7 @@ public class AlertDefTest
         
         // Create appdef entity to act on
         PlatformTypeValue ptInfo = new PlatformTypeValue();
-        PlatformTypePK ptpk;
+        Integer ptpk;
         Integer ppk;
         
         ptInfo.setName(u("My Platform Type"));

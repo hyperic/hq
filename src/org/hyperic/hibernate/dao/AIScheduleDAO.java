@@ -2,7 +2,6 @@ package org.hyperic.hibernate.dao;
 
 import org.hibernate.Session;
 import org.hyperic.hq.autoinventory.AISchedule;
-import org.hyperic.hq.autoinventory.shared.AISchedulePK;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.scheduler.ScheduleValue;
 
@@ -134,15 +133,5 @@ public class AIScheduleDAO extends HibernateDAO
             .setInteger(0, type)
             .setInteger(1, id)
             .list();
-    }
-
-    /**
-     * @deprecated use findById()
-     * @param pk
-     * @return
-     */
-    public AISchedule findByPrimaryKey(AISchedulePK pk)
-    {
-        return findById(pk.getId());
     }
 }
