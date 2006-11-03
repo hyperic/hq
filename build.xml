@@ -126,22 +126,15 @@
   <!-- Source common targets -->
   &util-build;
 
-  <target name="init" unless="init.notrequired">
+  <target name="init-props" unless="init-props.notrequired">
      <property file="${version.properties}" />
      <property name="release.comment" value="Development Build"/>
 
      <echo>${release.comment}, version: ${version}, build number: ${build}</echo>
-     <property name="init.notrequired" value="true"/>
+     <property name="init-props.notrequired" value="true"/>
   </target>
 
-  <target name="init-taskdefs" unless="init-taskdefs.notrequired">
-    <taskdef resource="net/sf/antcontrib/antcontrib.properties"
-             classpathref="alljars"/>
-    <taskdef name="for" classname="net.sf.antcontrib.logic.For"
-             classpathref="alljars"/>
-    <taskdef resource="org/hyperic/tools/ant/ant-tools.properties"
-             classpathref="custom-ant-tasks.path"/>
-      
+  <target name="init-internal-taskdefs" unless="init-internal-taskdefs.notrequired">
     <macrodef name="hq-javac">
       <attribute name="destdir"      default="${build.dir}/classes"/>
       <attribute name="source"       default="${hq.javac.source}"/>
@@ -157,7 +150,22 @@
         </javac>
       </sequential>
     </macrodef>
+    <property name="init-internal-taskdefs.notrequired" value="true"/>
+  </target>
 
+  <target name="init" depends="init-props,init-internal-taskdefs"
+          unless="init.notrequired">
+     <property name="init.notrequired" value="true"/>
+  </target>
+
+  <target name="init-taskdefs" unless="init-taskdefs.notrequired">
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties"
+             classpathref="alljars"/>
+    <taskdef name="for" classname="net.sf.antcontrib.logic.For"
+             classpathref="alljars"/>
+    <taskdef resource="org/hyperic/tools/ant/ant-tools.properties"
+             classpathref="custom-ant-tasks.path"/>
+      
     <property name="init-taskdefs.notrequired" value="true"/>
   </target>
 
@@ -192,7 +200,7 @@
     
   <!-- ==================== Compile java sources ==================== -->
   <target name="compile" description="Compile sources" 
-          depends="init,init-taskdefs">
+          depends="init">
     <mkdir dir="${build.dir}/classes" />
     <hq-javac>
       <classpath>
@@ -553,7 +561,7 @@
 
   <!-- ==================== UI packaging ==================== -->
   
-  <target name="compile-ui" depends="init,init-taskdefs">
+  <target name="compile-ui" depends="init">
     <!-- Compile all of the ui classes -->
 
     <hq-javac deprecation="${hq.remote-dev.deprecation}">
