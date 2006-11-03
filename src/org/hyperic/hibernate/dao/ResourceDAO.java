@@ -351,7 +351,7 @@ public class ResourceDAO extends HibernateDAO
             .append ( "          AND (          " );
 
         for (int x=0; x< resLocArr.length ; x++) {
-            if (x>1) sb.append(" OR ");
+            if (x>0) sb.append(" OR ");
             sb.append(" (o.id=")
                 .append(opLocArr[x].getId())
                 .append(" AND r.id=")

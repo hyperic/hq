@@ -79,7 +79,8 @@ public class OperationDAO extends HibernateDAO
 
     public Operation findByTypeAndName(ResourceType type, String name)
     {            
-        String sql = "from Operation o join fetch o.resourceType rt " +
+        String sql = "select o from Operation o " +
+                     "join fetch o.resourceType rt " +
                      "where rt.id=? and o.name=?";
         return (Operation)getSession().createQuery(sql)
             .setInteger(0, type.getId().intValue())
