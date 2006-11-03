@@ -28,6 +28,7 @@ package org.hyperic.hq.plugin.system;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.StringTokenizer;
 
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformResource;
@@ -52,11 +53,14 @@ public class SigarPlatformDetector extends PlatformDetector {
 
     private static final String PROP_NETWORK_CONNECTED =
         "platform.networkConnected";
+    private static final String PROP_PLATFORM_IP_IGNORE =
+        ProductPlugin.PROP_PLATFORM_IP + ".ignore";
 
     private String fqdn;
     private String ip;
     private boolean networkConnected;
     private PluginManager manager;
+    private Map ipIgnore = new HashMap();
 
     public void init(PluginManager manager) throws PluginException {
         super.init(manager);
@@ -69,6 +73,16 @@ public class SigarPlatformDetector extends PlatformDetector {
         //just for testing so we dont actually have to unplug network cable
         this.networkConnected =
             !"false".equals(props.getProperty(PROP_NETWORK_CONNECTED));
+
+        //allow filter via agent.properties in case there is an address
+        //collision in the inventory
+        String filter = props.getProperty(PROP_PLATFORM_IP_IGNORE);
+        if (filter != null) {
+            StringTokenizer tok = new StringTokenizer(filter, ",");
+            while (tok.hasMoreTokens()) {
+                this.ipIgnore.put(tok.nextToken(), Boolean.TRUE);
+            }
+        }
     }
 
     private void setValue(ConfigResponse cprops, String key, String value) {
@@ -131,6 +145,8 @@ public class SigarPlatformDetector extends PlatformDetector {
         HashMap ips = new HashMap();
         String fqdn = this.fqdn;
 
+        ips.putAll(this.ipIgnore);
+
         try {
             if (fqdn == null) {
                 fqdn = sigar.getFQDN();
@@ -176,6 +192,23 @@ public class SigarPlatformDetector extends PlatformDetector {
 
                 if (address.equals(NetFlags.ANY_ADDR)) {
                     continue; //skip "0.0.0.0"
+                }
+
+                if ((flags & NetFlags.IFF_LOOPBACK) > 0) {
+                    //XXX 127.0.0.1 is not useful, but keeping for now
+                    //to prevent "ip set changed" in the auto-inventory portlet
+                    if (!address.equals(NetFlags.LOOPBACK_ADDRESS)) {
+                        continue;
+                    }
+                }
+
+                if (isWin32()) {
+                    //XXX MS APIs do not flag this adapter as loopback
+                    //this hack should probably be in SIGAR
+                    final String MS_LOOPBACK = "Microsoft Loopback Adapter";
+                    if (MS_LOOPBACK.equals(ifconfig.getDescription())) {
+                        continue;
+                    }
                 }
 
                 if (!this.networkConnected) {
