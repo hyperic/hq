@@ -130,7 +130,7 @@ public class MeasurementTemplateDAO extends HibernateDAO
 
     public List findTemplatesByMonitorableType(String type) {
         String sql = 
-            "from MeasurementTemplate t " +
+            "select t from MeasurementTemplate t " +
             "join fetch t.monitorableType mt " +
             "where mt.name=? and t.defaultInterval > 0";
         return getSession().createQuery(sql).
@@ -140,7 +140,7 @@ public class MeasurementTemplateDAO extends HibernateDAO
     public List findTemplatesByMonitorableTypeAndCategory(String type,
                                                           String cat) {
         String sql = 
-            "from MeasurementTemplate t " +
+            "select t from MeasurementTemplate t " +
             "join fetch t.monitorableType mt " +
             "join fetch t.category cat " +
             "where mt.name=? and t.defaultInterval > 0 and cat.name=?";
@@ -151,7 +151,7 @@ public class MeasurementTemplateDAO extends HibernateDAO
 
     public List findDefaultsByMonitorableType(String mt, int appdefType) {
         String sql =
-            "from MeasurementTemplate t " +
+            "select t from MeasurementTemplate t " +
             "join fetch t.monitorableType mt " +
             "where mt.name=? and mt.appdefType=? " +
             "and t.defaultInterval > 0 and t.defaultOn = true " +
@@ -164,7 +164,7 @@ public class MeasurementTemplateDAO extends HibernateDAO
 
     public List findDesignatedByMonitorableType(String mt, int appdefType) {
         String sql =
-            "from MeasurementTemplate t " +
+            "select t from MeasurementTemplate t " +
             "join fetch t.monitorableType mt " +
             "where mt.name=? and mt.appdefType=? " +
             "and t.defaultInterval > 0 and t.designate = true " +
@@ -177,7 +177,7 @@ public class MeasurementTemplateDAO extends HibernateDAO
 
     public List findRawByMonitorableType(Integer mtId) {
         String sql =
-            "from MeasurementTemplate t " +
+            "select t from MeasurementTemplate t " +
             "join fetch t.monitorableType mt " +
             "where mt.id=? and t.defaultInterval=0";
 
@@ -187,7 +187,7 @@ public class MeasurementTemplateDAO extends HibernateDAO
 
     public List findByMeasurementArg(Integer tId) {
         String sql =
-            "from MeasurementTemplate t " +
+            "select t from MeasurementTemplate t " +
             "join fetch t.measurementArgs args " +
             "where args.templateArg.id=?";
 
@@ -198,7 +198,7 @@ public class MeasurementTemplateDAO extends HibernateDAO
     public MeasurementTemplate findByArgAndTemplate(Integer tId,
                                                     String template) {
         String sql =
-            "from MeasurementTemplate t " +
+            "select t from MeasurementTemplate t " +
             "join fetch t.measurementArgs args " +
             "where args.templateArg.id=? and t.template=?";
         
