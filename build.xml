@@ -218,12 +218,6 @@
         </dirset>
       </src>
       <exclude name="**/*_test.java" />
-      <exclude name="org/hyperic/hq/appdef/server/entity/**" />
-      <exclude name="org/hyperic/hq/auth/server/entity/**" />
-      <exclude name="org/hyperic/hq/authz/server/entity/**" />
-      <exclude name="org/hyperic/hq/autoinventory/server/entity/**" />
-      <exclude name="org/hyperic/hq/common/server/entity/**" />
-      <exclude name="org/hyperic/hq/product/server/entity/**" />
     </hq-javac>
 
     <!-- Copy resources -->
