@@ -18,8 +18,11 @@
 
   <property name="hq.home" location="." />
   
-  <!-- Default properties -->
+  <!-- Default build properties -->
   <property file="etc/build.properties" />
+
+  <!-- Hibernate properties -->
+  <property file="etc/hibernate.properties" />
 
   <!-- Version file -->
   <property name="version.properties" value="etc/version.properties"/>
