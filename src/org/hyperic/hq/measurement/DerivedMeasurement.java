@@ -109,4 +109,8 @@ public class DerivedMeasurement extends Measurement
 
         return val;
     }
+
+    public boolean equals(Object obj) {
+        return (obj instanceof DerivedMeasurement) && super.equals(obj);
+    }
 }

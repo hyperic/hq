@@ -15,19 +15,22 @@
     </id>
 
     <discriminator>
-      <column name="MEASUREMENT_CLASS" not-null="false" sql-type="character" length="1"/>
+      <column name="MEASUREMENT_CLASS" not-null="false" sql-type="character"
+              length="1"/>
     </discriminator>
 
     <version name="_version_" type="long">
       <column name="VERSION_COL" default="0" />
     </version>
 
-    <properties name="measurementId">
+    <properties name="measurementId" unique="true">
       <property name="instanceId" type="integer">
-        <column name="INSTANCE_ID" not-null="true" />
+        <column name="INSTANCE_ID" not-null="true"
+                index="MEASUREMENT_INSTANCE" />
       </property>
       <many-to-one name="template" fetch="join" class="MeasurementTemplate">
-        <column name="TEMPLATE_ID" not-null="false" index="MEASUREMENT_INSTANCE" />
+        <column name="TEMPLATE_ID" not-null="true"
+                index="MEASUREMENT_INSTANCE" />
       </many-to-one>
     </properties>
 
@@ -39,7 +42,8 @@
       <column name="MTIME" not-null="true" />
     </property>
 
-    <subclass name="DerivedMeasurement" extends="Measurement" discriminator-value="D">
+    <subclass name="DerivedMeasurement" extends="Measurement"
+              discriminator-value="D">
       <property name="enabled" type="boolean">
         <column name="ENABLED" />
       </property>
@@ -55,7 +59,8 @@
       </one-to-one>
     </subclass>
 
-    <subclass name="RawMeasurement" extends="Measurement" discriminator-value="R">
+    <subclass name="RawMeasurement" extends="Measurement"
+              discriminator-value="R">
       <property name="dsn" type="string">
         <column name="DSN" length="500" />
       </property>

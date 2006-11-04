@@ -77,4 +77,26 @@ public class Measurement extends PersistedObject
     public void setMtime(long mtime) {
         _mtime = mtime;
     }
+
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Measurement) || !super.equals(obj)) {
+            return false;
+        }
+        Measurement o = (Measurement)obj;
+        return ((_instanceId == o.getInstanceId() ||
+                 (_instanceId!=null && o.getInstanceId()!=null &&
+                  _instanceId.equals(o.getInstanceId()))))
+               &&
+               ((_template == o.getTemplate() ||
+                 (_template!=null && o.getTemplate()!=null &&
+                  _template.equals(o.getTemplate()))));
+    }
+
+    public int hashCode() {
+        int result = super.hashCode();
+
+        result = 37*result + (_instanceId != null ? _instanceId.hashCode(): 0);
+        result = 37*result + (_template != null ? _template.hashCode(): 0);
+        return result;
+    }
 }

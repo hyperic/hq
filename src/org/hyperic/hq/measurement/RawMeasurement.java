@@ -65,4 +65,8 @@ public class RawMeasurement extends Measurement
         value.setTemplate(getTemplate().getMeasurementTemplateValue());
         return value;
     }
+
+    public boolean equals(Object obj) {
+        return (obj instanceof RawMeasurement) && super.equals(obj);
+    }
 }
