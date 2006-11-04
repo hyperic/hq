@@ -25,12 +25,10 @@
 
     <properties name="measurementId" unique="true">
       <property name="instanceId" type="integer">
-        <column name="INSTANCE_ID" not-null="true"
-                index="MEASUREMENT_INSTANCE" />
+        <column name="INSTANCE_ID" not-null="true" />
       </property>
       <many-to-one name="template" fetch="join" class="MeasurementTemplate">
-        <column name="TEMPLATE_ID" not-null="true"
-                index="MEASUREMENT_INSTANCE" />
+        <column name="TEMPLATE_ID" not-null="true" />
       </many-to-one>
     </properties>
 
