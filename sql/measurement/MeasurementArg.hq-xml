@@ -45,7 +45,7 @@
 
     <!-- uni-directional lookup for template, only derived measurements have args defined -->
     <many-to-one name="templateArg" fetch="join" class="MeasurementTemplate">
-      <column name="MEASUREMENT_TEMPLATE_ARG_ID" />
+      <column name="MEASUREMENT_TEMPLATE_ARG_ID" index="MEASUREMENT_ARG_IDX" />
     </many-to-one>
   </class>
 
