@@ -670,7 +670,10 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
             long current = System.currentTimeMillis();
-            
+
+            // can assume this is called in a single thread
+            // This is called at hq server startup
+            HashMap cats = new HashMap();
             for (Iterator i = toAdd.keySet().iterator(); i.hasNext();) {
                 Integer monitorableTypeId = (Integer)i.next();
                 Map newMetrics = (Map)toAdd.get(monitorableTypeId);
@@ -678,9 +681,14 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                 for (Iterator j = newMetrics.values().iterator(); j.hasNext();){
                     MeasurementInfo info = (MeasurementInfo)j.next();
 
-                    Category cat = getCategoryDAO().findByName(info.getCategory());
+                    Category cat =
+                        (Category) cats.get(info.getCategory());
                     if (cat == null) {
-                        cat = getCategoryDAO().create(info.getCategory());
+                        cat = getCategoryDAO().findByName(info.getCategory());
+                        if (cat == null) {
+                            cat = getCategoryDAO().create(info.getCategory());
+                        }
+                        cats.put(info.getCategory(), cat);
                     }
 
                     int col = 1;
