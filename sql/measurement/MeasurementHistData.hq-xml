@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+      "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping
+  package="org.hyperic.hq.measurement">
+
+  <class name="MeasurementHistData" table="EAM_MEASUREMENT_DATA_1H" entity-name="MeasumentData1H">
+    <composite-id name="id" class="MeasurementDataId">
+      <meta attribute="use-in-equals">true</meta>
+      <key-property name="measurementId" type="integer">
+        <meta attribute="use-in-equals">true</meta>
+        <column name="MEASUREMENT_ID" not-null="true" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <meta attribute="use-in-equals">true</meta>
+        <column name="TIMESTAMP" index="MEASUREMENT_DATA_1H_TIME_IDX" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+
+    <property name="minValue" type="big_decimal">
+      <column name="MINVALUE" precision="24" scale="5" />
+    </property>
+
+    <property name="maxValue" type="big_decimal">
+      <column name="MAXVALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementHistData" entity-name="MeasurementData6H" table="EAM_MEASUREMENT_DATA_6H">
+    <composite-id name="id" class="MeasurementDataId">
+      <meta attribute="use-in-equals">true</meta>
+      <key-property name="measurementId" type="integer">
+        <meta attribute="use-in-equals">true</meta>
+        <column name="MEASUREMENT_ID" not-null="true" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <meta attribute="use-in-equals">true</meta>
+        <column name="TIMESTAMP" index="MEASUREMENT_DATA_6H_TIME_IDX" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+
+    <property name="minValue" type="big_decimal">
+      <column name="MINVALUE" precision="24" scale="5" />
+    </property>
+
+    <property name="maxValue" type="big_decimal">
+      <column name="MAXVALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementHistData" entity-name="MeasurementData1D" table="EAM_MEASUREMENT_DATA_1D">
+    <composite-id name="id" class="MeasurementDataId">
+      <meta attribute="use-in-equals">true</meta>
+      <key-property name="measurementId" type="integer">
+        <meta attribute="use-in-equals">true</meta>
+        <column name="MEASUREMENT_ID" not-null="true" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <meta attribute="use-in-equals">true</meta>
+        <column name="TIMESTAMP" index="MEASUREMENT_DATA_1D_TIME_IDX" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+
+    <property name="minValue" type="big_decimal">
+      <column name="MINVALUE" precision="24" scale="5" />
+    </property>
+
+    <property name="maxValue" type="big_decimal">
+      <column name="MAXVALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+</hibernate-mapping>

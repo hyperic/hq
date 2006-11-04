@@ -7,22 +7,30 @@
 <hibernate-mapping
   package="org.hyperic.hq.measurement">
 
-  <class name="MeasurementData" table="EAM_MEASUREMENT_DATA">
-    <!-- create an combined index -->
+  <class name="MetricProblem" table="EAM_METRIC_PROB">
+    <!-- move to EE only -->
     <composite-id name="id" class="MeasurementDataId">
       <meta attribute="use-in-equals">true</meta>
       <key-property name="measurementId" type="integer">
         <meta attribute="use-in-equals">true</meta>
-        <column name="MEASUREMENT_ID" not-null="true" />
+        <column name="MEASUREMENT_ID" index="METRIC_PROB_ID_IDX, METRIC_PROB_TIME_IDX" not-null="true" />
       </key-property>
       <key-property name="timestamp" type="long">
         <meta attribute="use-in-equals">true</meta>
-        <column name="TIMESTAMP" index="MEASUREMENT_DATA_TIME_IDX" not-null="true" />
+        <column name="TIMESTAMP" index="METRIC_PROB_TIME_IDX" not-null="true" />
       </key-property>
     </composite-id>
 
-    <property name="value" type="big_decimal">
-      <column name="VALUE" precision="24" scale="5" />
+    <version name="_version_" type="long">
+      <column name="VERSION_COL" default="0" />
+    </version>
+
+    <property name="type" type="integer">
+      <column name="TYPE" not-null="true" />
+    </property>
+
+    <property name="additional" type="integer">
+      <column name="ADDITIONAL" />
     </property>
   </class>
 
