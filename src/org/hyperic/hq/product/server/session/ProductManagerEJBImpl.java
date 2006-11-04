@@ -281,9 +281,6 @@ public class ProductManagerEJBImpl
         // Keep a list of templates to add
         HashMap toAdd = new HashMap();
 
-        // cache monitorable Id lookup
-        HashMap monIds = new HashMap();
-        
         for (int i = 0; i < entities.length; i++) {
             TypeInfo info = entities[i];
             
@@ -299,12 +296,8 @@ public class ProductManagerEJBImpl
             }
 
             if (measurements != null && measurements.length > 0) {
-                Integer monitorableTypeId = (Integer)monIds.get(info.getName());
-                if (monitorableTypeId == null) {
-                    monitorableTypeId =
-                        tMan.getMonitorableTypeId(pluginName, info);
-                    monIds.put(info.getName(), monitorableTypeId);
-                }
+                Integer monitorableTypeId =
+                    tMan.getMonitorableTypeId(pluginName, info);
                 Map newMeasurements = tMan.updateTemplates(pluginName, info,
                                                            monitorableTypeId,
                                                            measurements);
