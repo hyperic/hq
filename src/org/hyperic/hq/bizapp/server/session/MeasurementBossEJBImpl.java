@@ -189,12 +189,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         if (cats.size() == 1) {
             String cat = (String) cats.iterator().next();
             metrics =
-                this.getDerivedMeasurementManager().findDesignatedMeasurements(
+                getDerivedMeasurementManager().findDesignatedMeasurements(
                     subject, id, cat);
         }
         else {
             metrics =
-                this.getDerivedMeasurementManager().findDesignatedMeasurements(
+                getDerivedMeasurementManager().findDesignatedMeasurements(
                     subject, id);
             
             // Now iterate through and throw out the metrics we don't need
@@ -234,7 +234,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
               "[category="+category+"] [template="+template+"] [args="+
               args.toString()+"]");
     
-        TemplateManagerLocal tMan = this.getTemplateManager();
+        TemplateManagerLocal tMan = getTemplateManager();
             
         try {
             MeasurementTemplateValue mtv = 
@@ -254,7 +254,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                             long interval)
         throws TemplateNotFoundException,
                 SessionTimeoutException, SessionNotFoundException {
-        this.getTemplateManager().updateTemplateDefaultInterval(tids, interval);
+        getTemplateManager().updateTemplateDefaultInterval(tids, interval);
     }
 
     /**
@@ -266,7 +266,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws TemplateNotFoundException, SessionTimeoutException,
                SessionNotFoundException {
         String typeName = aetid.getAppdefResourceTypeValue().getName();
-        this.getTemplateManager().setDesignatedTemplates(typeName, tids);
+        getTemplateManager().setDesignatedTemplates(typeName, tids);
     }
 
     /** Delete a derived measurement template
@@ -276,7 +276,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionNotFoundException, SessionTimeoutException,
                RemoveException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        this.getTemplateManager().removeTemplate(subject, arg);
+        getTemplateManager().removeTemplate(subject, arg);
     }
 
     /** List of all monitorable types
@@ -286,7 +286,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     public List findMonitorableTypes(int sessionId)
         throws SessionNotFoundException, SessionTimeoutException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        return this.getTemplateManager().findMonitorableTypes();
+        return getTemplateManager().findMonitorableTypes();
     }
 
     /**
@@ -299,9 +299,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                              String category,
                                              PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionId);
+        AuthzSubjectValue subject = manager.getSubject(sessionId);
         String typeName = typeId.getAppdefResourceTypeValue().getName();
-        return this.getTemplateManager().findTemplates(typeName, 
+        return getTemplateManager().findTemplates(typeName, 
                                                        category, 
                                                        new Integer[]{}, 
                                                        pc);
@@ -315,8 +315,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     public PageList findMeasurementTemplates(int sessionId, String mtype,
                                              PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionId);
-        return this.getTemplateManager().findTemplates(mtype, null, null, pc);
+        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        return getTemplateManager().findTemplates(mtype, null, null, pc);
     }
 
     /** Retrieve list of measurement templates given specific IDs
@@ -343,8 +343,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                              PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException,
                TemplateNotFoundException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionId);
-        return this.getTemplateManager().getTemplates(ids, pc);
+        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        return getTemplateManager().getTemplates(ids, pc);
     }
 
     /** Retrieve list of available measurement templates applicable to an
@@ -360,13 +360,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                                       PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionId);
+        AuthzSubjectValue subject = manager.getSubject(sessionId);
     
         String mtype = null;
         
         // First get the list of measurements currently configured
         List measurements =
-            this.getDerivedMeasurementManager().findMeasurements(
+            getDerivedMeasurementManager().findMeasurements(
                 subject, id, null, PageControl.PAGE_ALL);
         
         // the excluded tempate id's might contain those that were previously
@@ -398,7 +398,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
     
         // Now fetch the list of templates
-        return this.getTemplateManager().findTemplates(mtype, cat, excludes,pc);
+        return getTemplateManager().findTemplates(mtype, cat, excludes,pc);
     }
 
     /** Retrieve list of available measurement templates applicable to an
@@ -417,7 +417,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException {    
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        List kids = this.getAGMemberIds(subject, id, ctype);
+        List kids = getAGMemberIds(subject, id, ctype);
         if (kids.isEmpty()) {
             log.debug("Entity: " + id + " has no children of type: " + ctype);
             return new ArrayList();
@@ -444,7 +444,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                                            Integer id)
         throws SessionNotFoundException, SessionTimeoutException,
                TemplateNotFoundException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionId);
+        AuthzSubjectValue subject = manager.getSubject(sessionId);
         return getTemplateManager().getTemplate(id);
     }
 
@@ -467,13 +467,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId);
     
         // Find the autogroup members
-        List entIds = this.getAGMemberIds(subject, new AppdefEntityID[] { aid },
+        List entIds = getAGMemberIds(subject, new AppdefEntityID[] { aid },
                                           ctype);
     
         for (Iterator it = entIds.iterator(); it.hasNext();) {
             AppdefEntityID aeId = (AppdefEntityID) it.next();
             try {
-                return this.getAvailabilityMetricTemplate(sessionId, aeId);
+                return getAvailabilityMetricTemplate(sessionId, aeId);
             } catch (MeasurementNotFoundException e) {
                 // continue;
             }
@@ -572,7 +572,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                SessionTimeoutException, AppdefEntityNotFoundException,
                PermissionException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        return this.getAvailabilityMetricTemplate(subject, aeid);
+        return getAvailabilityMetricTemplate(subject, aeid);
     }
 
     /**
@@ -588,7 +588,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionNotFoundException, SessionTimeoutException,
                MeasurementNotFoundException, AppdefEntityNotFoundException,
                PermissionException {
-        List metrics = this.getDesignatedMetrics(sessionId, id, cats);
+        List metrics = getDesignatedMetrics(sessionId, id, cats);
         
         ArrayList tmpls = new ArrayList(metrics.size());
         for (Iterator it = metrics.iterator(); it.hasNext(); ) {
@@ -616,7 +616,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         cats.add(MeasurementConstants.CAT_THROUGHPUT);
         cats.add(MeasurementConstants.CAT_PERFORMANCE);
     
-        return this.getDesignatedTemplates(sessionId, ids, cats);
+        return getDesignatedTemplates(sessionId, ids, cats);
     }
 
     /**
@@ -637,7 +637,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         TreeMap ret = new TreeMap();
         for (int i = 0; i < ids.length; i++) {
             try {
-                List metrics = this.getDesignatedTemplates(sessionId, ids[i], cats);
+                List metrics = getDesignatedTemplates(sessionId, ids[i], cats);
                 for (Iterator it = metrics.iterator(); it.hasNext(); ) {
                     MeasurementTemplateValue mtv =
                         (MeasurementTemplateValue) it.next();
@@ -668,12 +668,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         
         // Find the autogroup members
-        List entIds = this.getAGMemberIds(subject, aids, ctype);
+        List entIds = getAGMemberIds(subject, aids, ctype);
         
         for (Iterator it = entIds.iterator(); it.hasNext(); ) {
             AppdefEntityID aeId = (AppdefEntityID) it.next();
             try {
-                return this.getDesignatedTemplates(sessionId, aeId, cats);
+                return getDesignatedTemplates(sessionId, aeId, cats);
             } catch (MeasurementNotFoundException e) {
                 // continue;
             }
@@ -702,7 +702,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         
         // Find the default templates
         List templates =
-            this.getTemplateManager().findDefaultTemplates(mtype, id.getType());
+            getTemplateManager().findDefaultTemplates(mtype, id.getType());
         
         // Get the Template IDs
         Integer[] tids = new Integer[templates.size()];
@@ -712,7 +712,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             tids[i] = tmpl.getId();
         }
         
-        this.createMeasurements(sessionId, id, tids, 0);
+        createMeasurements(sessionId, id, tids, 0);
     }
 
     /** Create list of measurements for a resource
@@ -726,7 +726,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                ConfigFetchException, EncodingException, PermissionException,
                TemplateNotFoundException, AppdefEntityNotFoundException,
                GroupNotCompatibleException, MeasurementCreateException {
-        this.createMeasurements(sessionId, id, tids, 0);
+        createMeasurements(sessionId, id, tids, 0);
     }
 
     /** Create list of measurements for a resource
@@ -751,13 +751,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 AppdefEntityID aeid = (AppdefEntityID) it.next();
                 
                 if (interval > 0)
-                    this.createMeasurements(sessionId, aeid, tids, interval);
+                    createMeasurements(sessionId, aeid, tids, interval);
                 else
-                    this.createMeasurements(sessionId, aeid, tids);
+                    createMeasurements(sessionId, aeid, tids);
             }
         }
         else {
-            ConfigResponse mergedCR = this.getConfigManager()
+            ConfigResponse mergedCR = getConfigManager()
                 .getMergedConfigResponse(subject, 
                                          ProductPlugin.TYPE_MEASUREMENT, 
                                          id, true);
@@ -766,11 +766,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 long[] intervals = new long[tids.length];
                 Arrays.fill(intervals, interval);
     
-                this.getDerivedMeasurementManager().createMeasurements(
+                getDerivedMeasurementManager().createMeasurements(
                     subject, id, tids, intervals, mergedCR);
             }
             else {
-                this.getDerivedMeasurementManager().createMeasurements(
+                getDerivedMeasurementManager().createMeasurements(
                     subject, id, tids, mergedCR);
             }
         }
@@ -793,10 +793,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                TemplateNotFoundException, AppdefEntityNotFoundException,
                GroupNotCompatibleException, MeasurementCreateException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        List children = this.getAGMemberIds(subject, parentAeid, childType);
+        List children = getAGMemberIds(subject, parentAeid, childType);
         for(int i = 0; i < children.size(); i++) {
             AppdefEntityID aKid = (AppdefEntityID)children.get(i);
-            this.createMeasurements(sessionId, aKid, tids);
+            createMeasurements(sessionId, aKid, tids);
         }
     }
     
@@ -845,7 +845,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                MeasurementNotFoundException, MeasurementCreateException,
                PermissionException {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
-        this.getDerivedMeasurementManager().enableMeasurements(subject, mids,
+        getDerivedMeasurementManager().enableMeasurements(subject, mids,
                                                                interval);
     }
 
@@ -862,7 +862,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                TemplateNotFoundException, AppdefEntityNotFoundException,
                GroupNotCompatibleException, MeasurementCreateException,
                ConfigFetchException, PermissionException, EncodingException {
-        this.createMeasurements(sessionId, id, tids, interval);
+        createMeasurements(sessionId, id, tids, interval);
     }
     
     /**
@@ -884,11 +884,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                MeasurementCreateException, ConfigFetchException,
                PermissionException, EncodingException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        List kids = this.getAGMemberIds(subject, parentid, ctype);
+        List kids = getAGMemberIds(subject, parentid, ctype);
         for(int i = 0; i < kids.size(); i++) {
             // Do create, because we want to create or update
             AppdefEntityID kid = (AppdefEntityID)kids.get(i);
-            this.createMeasurements(sessionId, kid, tids, interval);
+            createMeasurements(sessionId, kid, tids, interval);
         }
     }
     
@@ -903,11 +903,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         
         // First remove all the Derived Measurements
-        this.getDerivedMeasurementManager().removeMeasurements(
+        getDerivedMeasurementManager().removeMeasurements(
             subject, id, new AppdefEntityID[] { id });
 
         // Then remove the Raw Measurements
-        this.getRawMeasurementManager().removeMeasurements(id);
+        getRawMeasurementManager().removeMeasurements(id);
     }
 
     /** Remove all measurements for multiple instances
@@ -922,13 +922,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         
         StopWatch timer = new StopWatch();
         // First remove all the Derived Measurements
-        this.getDerivedMeasurementManager().removeMeasurements(subject, ids[0],
+        getDerivedMeasurementManager().removeMeasurements(subject, ids[0],
                                                                ids);
         log.debug("Remove Derived Measurements timing: " + timer.reset());
 
         // Then remove the Raw Measurements
         for (int i = 0; i < ids.length; i++)
-            this.getRawMeasurementManager().removeMeasurements(ids[i]);
+            getRawMeasurementManager().removeMeasurements(ids[i]);
 
         log.debug("Remove Raw Measurements timing: " + timer.getElapsed());
     }
@@ -941,7 +941,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        this.getDerivedMeasurementManager().disableMeasurements(subject, id);
+        getDerivedMeasurementManager().disableMeasurements(subject, id);
     }
 
     /** 
@@ -954,7 +954,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                MeasurementNotFoundException, PermissionException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        this.getDerivedMeasurementManager().disableMeasurements(subject, mids);
+        getDerivedMeasurementManager().disableMeasurements(subject, mids);
     }
 
     /** Disable all measurements for a resource
@@ -972,7 +972,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId);
 
         if (id == null) {
-            this.getTemplateManager().enableTemplateByDefault(tids, false);
+            getTemplateManager().enableTemplateByDefault(tids, false);
         }
         else if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
             // Recursively do this for each of the group members
@@ -981,12 +981,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                                 PageControl.PAGE_ALL);
     
             for (Iterator it = grpMembers.iterator(); it.hasNext();) {
-                this.getDerivedMeasurementManager().disableMeasurements(
+                getDerivedMeasurementManager().disableMeasurements(
                     subject, (AppdefEntityID) it.next(), tids);
             }
         }
         else {
-            this.getDerivedMeasurementManager().disableMeasurements(
+            getDerivedMeasurementManager().disableMeasurements(
                 subject, id, tids);
         }
     }
@@ -1005,10 +1005,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                GroupNotCompatibleException, PermissionException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
     
-        List grpMembers = this.getAGMemberIds(subject, parentId, childType);
+        List grpMembers = getAGMemberIds(subject, parentId, childType);
     
         for (Iterator it = grpMembers.iterator(); it.hasNext();) {
-            this.getDerivedMeasurementManager().disableMeasurements(
+            getDerivedMeasurementManager().disableMeasurements(
                 subject, (AppdefEntityID) it.next(), tids);
         }
     }
@@ -1027,10 +1027,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                PermissionException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP)
-            return this.findGroupMeasurements(sessionId, id, null,
+            return findGroupMeasurements(sessionId, id, null,
                                               PageControl.PAGE_ALL).size();
     
-        return this.getDerivedMeasurementManager()
+        return getDerivedMeasurementManager()
                    .getEnabledMetricsCount(subject, id);
     }
 
@@ -1083,7 +1083,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     // Recursively call with the entry point
                     try {
                         metrics =
-                            this.getDesignatedMetrics(sessionId, id, cats);
+                            getDesignatedMetrics(sessionId, id, cats);
                         break;
                     } catch (MeasurementNotFoundException ignore) {
                         // No measurement to be used
@@ -1118,7 +1118,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             // Go through the group members and return the first measurement
             // that we find
             for (Iterator it = grpMembers.iterator(); it.hasNext(); ) {
-                metrics = this.findDesignatedMetrics(
+                metrics = findDesignatedMetrics(
                         subject, (AppdefEntityID) it.next(), cats);
     
                 if (metrics != null && metrics.size() > 0)
@@ -1126,7 +1126,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }
         }
         else {
-            metrics = this.findDesignatedMetrics(subject, id, cats);
+            metrics = findDesignatedMetrics(subject, id, cats);
         }
         
         // Make sure we have valid metrics
@@ -1153,7 +1153,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                MeasurementNotFoundException {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
-        return this.getDerivedMeasurementManager().getMeasurement(id);
+        return getDerivedMeasurementManager().getMeasurement(id);
     }
 
     /**
@@ -1166,7 +1166,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                MeasurementNotFoundException {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
-        return this.getDerivedMeasurementManager().getMeasurement(
+        return getDerivedMeasurementManager().getMeasurement(
             subject, id, alias);
     }
 
@@ -1180,7 +1180,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                EvaluationException, LiveMeasurementException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         Integer[] mids = new Integer[] { mid };
-        return this.getDerivedMeasurementManager()
+        return getDerivedMeasurementManager()
                     .getLiveMeasurementValues(subject, mids)[0];
     }
 
@@ -1236,7 +1236,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         List grpMembers =
             GroupUtil.getCompatGroupMembers(subject, gid, null, 
                                             PageControl.PAGE_ALL);
-        return this.findGroupMeasurements(sessionId, grpMembers, cat, pc);
+        return findGroupMeasurements(sessionId, grpMembers, cat, pc);
     }
     
     /*
@@ -1261,7 +1261,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     
             // Get the list of measurements for this resource
             PageList metrics =
-                this.getDerivedMeasurementManager().findMeasurements(
+                getDerivedMeasurementManager().findMeasurements(
                     subject, id, cat, PageControl.PAGE_ALL);
                 
             // Iterate through the measurements to get the interval
@@ -1299,7 +1299,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         
         PageList tmpls =
-            this.getTemplateManager().findTemplates(mtype, cat, null, pc);
+            getTemplateManager().findTemplates(mtype, cat, null, pc);
             
         PageList result = new PageList();
         for (Iterator it = tmpls.iterator(); it.hasNext(); ) {
@@ -1341,11 +1341,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                AppdefEntityNotFoundException {
         if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP)
             return (DerivedMeasurementValue)
-                this.findMeasurements(sessionId, tid,
+                findMeasurements(sessionId, tid,
                                       new AppdefEntityID[] { id }).get(0);
 
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        return this.getDerivedMeasurementManager().findMeasurement(subject, tid,
+        return getDerivedMeasurementManager().findMeasurement(subject, tid,
                                                                    id.getId());
     }
 
@@ -1360,10 +1360,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                AppdefEntityNotFoundException, GroupNotCompatibleException,
                PermissionException {
         if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP)
-            return this.findGroupMeasurements(sessionId, id, null, pc);
+            return findGroupMeasurements(sessionId, id, null, pc);
                    
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        return this.getDerivedMeasurementManager().findMeasurements(
+        return getDerivedMeasurementManager().findMeasurements(
             subject, id, null, pc);
     }
 
@@ -1390,7 +1390,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             
             if (type == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
                 try {
-                    Integer[] memIds = this.getGroupMemberIDs(subject,
+                    Integer[] memIds = getGroupMemberIDs(subject,
                                                               entIds[i]);
                     ids.addAll(Arrays.asList(memIds));
                 } catch (GroupNotCompatibleException e) {
@@ -1403,7 +1403,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 ids.add(entIds[i].getId());
             }
         }
-        return this.getDerivedMeasurementManager().findMeasurements(
+        return getDerivedMeasurementManager().findMeasurements(
             subject, tid, (Integer[]) ids.toArray(new Integer[0]));
     }
 
@@ -1423,8 +1423,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
            AppdefEntityNotFoundException, GroupNotCompatibleException,
            PermissionException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        return this.findGroupMeasurements(sessionId, 
-                                          this.getAGMemberIds(subject, 
+        return findGroupMeasurements(sessionId, 
+                                          getAGMemberIds(subject, 
                                                               parentId, 
                                                               childType), 
                                           cat, 
@@ -1442,14 +1442,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                PermissionException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP)
-            return this.findGroupMeasurements(sessionId, id, cat, pc);
+            return findGroupMeasurements(sessionId, id, cat, pc);
 
         AppdefEntityValue aeVal = new AppdefEntityValue(id, subject);
         String mtype = aeVal.getMonitorableType();
 
         IntHashMap dmvs = new IntHashMap();
         PageList enabledMetrics =
-            this.getDerivedMeasurementManager().findMeasurements(
+            getDerivedMeasurementManager().findMeasurements(
                 subject, id, true, cat, PageControl.PAGE_ALL);
         
         for (Iterator it = enabledMetrics.iterator(); it.hasNext(); ) {
@@ -1459,7 +1459,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
         // Create MetricConfigSummary beans
         PageList tmpls =
-            this.getTemplateManager().findTemplates(mtype, cat, null, pc);
+            getTemplateManager().findTemplates(mtype, cat, null, pc);
         ArrayList beans = new ArrayList(tmpls.size());
         for (Iterator it = tmpls.iterator(); it.hasNext(); ) {
             MeasurementTemplateValue mtv = (MeasurementTemplateValue) it.next();
@@ -1508,7 +1508,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId);
 
         DerivedMeasurementValue dmv =
-            this.getDerivedMeasurementManager().getMeasurement(mid);
+            getDerivedMeasurementManager().getMeasurement(mid);
         MeasurementTemplateValue tmpl = dmv.getTemplate();
         
         Integer[] mids = new Integer[] { mid };
@@ -1539,7 +1539,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId);
 
         MeasurementTemplateValue tmpl = null;
-        tmpl = this.getTemplateManager().getTemplate(tid);
+        tmpl = getTemplateManager().getTemplate(tid);
             
         List metrics = getMetricsForResource(subject, aid, tmpl);
         if (metrics == null || metrics.size() == 0) {
@@ -1592,7 +1592,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId);
 
         // Find the autogroup members
-        List entIds = this.getAGMemberIds(subject, aid, ctype);
+        List entIds = getAGMemberIds(subject, aid, ctype);
         
         return findMeasurementData(sessionId, tid, entIds, begin, end, interval,
                                    returnNulls, pc);
@@ -1624,7 +1624,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId);
     
         MeasurementTemplateValue tmpl = null;
-        tmpl = this.getTemplateManager().getTemplate(tid);
+        tmpl = getTemplateManager().getTemplate(tid);
 
         // Find the measurement IDs of the members in the autogroup for the
         // template
@@ -1636,7 +1636,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         
         Integer[] mids =
-            this.getDerivedMeasurementManager().findMeasurementIds(
+            getDerivedMeasurementManager().findMeasurementIds(
                 subject, tid, ids);
     
         return getDataMan().getHistoricalData(mids, begin, end, interval,
@@ -1702,7 +1702,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             // Get the flattened list of services
             AppdefEntityID[] serviceIds = aeval.getFlattenedServiceIds();
             
-            Map midMap = this.getDerivedMeasurementManager()
+            Map midMap = getDerivedMeasurementManager()
                              .findDesignatedMeasurementIds(
                                  subject, serviceIds,
                                  MeasurementConstants.CAT_AVAILABILITY);
@@ -1748,10 +1748,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                DataNotAvailableException, MeasurementNotFoundException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         DerivedMeasurementValue dmv =
-            this.getDerivedMeasurementManager().findMeasurement(
+            getDerivedMeasurementManager().findMeasurement(
                 subject, tid, new Integer(iid));
     
-        return this.findMeasurementData(sessionId, dmv.getId(), count);
+        return findMeasurementData(sessionId, dmv.getId(), count);
     }
 
     /** Dumps a specific number of data points for a specific measurement ID
@@ -1763,7 +1763,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                DataNotAvailableException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
                 
-        return this.getDataMan().getLastHistoricalData(mid, count);
+        return getDataMan().getLastHistoricalData(mid, count);
     }
 
     /**
@@ -1824,7 +1824,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId);
     
         // Find the autogroup members
-        List entIds = this.getAGMemberIds(subject, aids, ctype);
+        List entIds = getAGMemberIds(subject, aids, ctype);
     
         // Find the measurement IDs of the members in the autogroup for the
         // template
@@ -1836,7 +1836,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         
         Integer[] mids =
-            this.getDerivedMeasurementManager().findMeasurementIds(
+            getDerivedMeasurementManager().findMeasurementIds(
                 subject, tmpl.getId(), ids);
     
         return getDataMan().getHistoricalData(mids, begin, end, interval,
@@ -1856,7 +1856,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         
         // Get the template
-        this.getTemplateManager().getTemplate(tid);
+        getTemplateManager().getTemplate(tid);
         
         List entities;
 
@@ -1911,7 +1911,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         // get measurement summaries, enriched with metadata
         // tastes good and it's good for you 
         List mds = new ArrayList();
-        List mms = this.getDerivedMeasurementManager()
+        List mms = getDerivedMeasurementManager()
                         .findMeasurements(subject, tid, iids);
         for (iter = mms.iterator(); iter.hasNext();) {
             DerivedMeasurementValue mm = (DerivedMeasurementValue) iter.next();
@@ -1923,7 +1923,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             MetricValue mv = null;
             try {
                 Collection mvs =
-                    this.getDataMan().getLastHistoricalData(mm.getId(), 1);
+                    getDataMan().getLastHistoricalData(mm.getId(), 1);
                 
                 if (mvs.size() > 0) {
                     mv = (MetricValue) mvs.iterator().next();
@@ -1993,7 +1993,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         mtids.add(tid);
         
         // Look up the metric summaries of all associated resources
-        Map results = this.getResourceMetrics(subject, resources,
+        Map results = getResourceMetrics(subject, resources,
                                               mtids, begin, end, false);
         
         // Should only be one
@@ -2057,7 +2057,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         mtids.add(tid);
         
         // Look up the metric summaries of all associated resources
-        Map results = this.getResourceMetrics(subject, resources,
+        Map results = getResourceMetrics(subject, resources,
                                               mtids, begin, end, false);
         
         // Should only be one
@@ -2094,7 +2094,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         MeasurementTemplateValue tmpl = null;
 
-        tmpl = this.getTemplateManager().getTemplate(tid);
+        tmpl = getTemplateManager().getTemplate(tid);
 
         List pruned = new ArrayList();
         for (int i=0; i<resources.length; ++i) {
@@ -2139,7 +2139,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     }
                     
                     try {
-                        return this.getMetricsForResource(subject, id,tmpl);
+                        return getMetricsForResource(subject, id,tmpl);
                     } catch (MeasurementNotFoundException ignore) {}
                 }
             }
@@ -2148,10 +2148,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                                    aid);
         } else if (aid.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
             try {
-                Integer[] ids = this.getGroupMemberIDs(subject, aid);
+                Integer[] ids = getGroupMemberIDs(subject, aid);
             
                 // Get the list of measurements
-                return this.getDerivedMeasurementManager().findMeasurements(
+                return getDerivedMeasurementManager().findMeasurements(
                     subject, tmpl.getId(), ids);
             } catch (GroupNotCompatibleException e) {
                 throw new MeasurementNotFoundException(
@@ -2159,7 +2159,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }
         } else {
             Integer[] aids = { aid.getId() };
-            return this.getDerivedMeasurementManager().findMeasurements(
+            return getDerivedMeasurementManager().findMeasurements(
                 subject, tmpl.getId(), aids);
         }
     }
@@ -2170,12 +2170,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws MeasurementNotFoundException {
         // Get baseline values
         DerivedMeasurementValue dmval =
-            this.getDerivedMeasurementManager().findMeasurement(
+            getDerivedMeasurementManager().findMeasurement(
                 subject, tmpl.getId(), id.getId());
 
         // Use previous function to set most values, including only 1 resource
         MetricDisplaySummary summary =
-            this.getMetricDisplaySummary(tmpl, new Long(dmval.getInterval()),
+            getMetricDisplaySummary(tmpl, new Long(dmval.getInterval()),
                                          begin, end, data, 1);
 
         if (dmval.getBaseline() != null) {
@@ -2212,7 +2212,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         else {
             // Autogroup
-            resources = this.getAGMemberIds(subject, aeid, ctype);
+            resources = getAGMemberIds(subject, aeid, ctype);
         }
         return resources;
     }
@@ -2261,7 +2261,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     
         // Get the template ID's for that type
         List tmpls =
-            this.findMeasurementTemplates(sessionId, monitorableType,
+            findMeasurementTemplates(sessionId, monitorableType,
                                           PageControl.PAGE_ALL);
     
         // Keep the templates in a map        
@@ -2287,7 +2287,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             Integer[] eid = new Integer[] { entIds[i].getId() };
             try {
                 // Now get the aggregate data, keyed by template ID's
-                Map datamap = this.getDataMan().getAggregateData(mtids, eid,
+                Map datamap = getDataMan().getAggregateData(mtids, eid,
                                                                  begin, end);
     
                 // For each template, add a new summary
@@ -2319,7 +2319,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     }
                     
                     MetricDisplaySummary mds =
-                        this.getMetricDisplaySummary(subject, tmpl, begin, end,
+                        getMetricDisplaySummary(subject, tmpl, begin, end,
                                                      data, entIds[i]);
                     
                     resSummaries.add(new ResourceMetricDisplaySummary(mds, v));
@@ -2569,7 +2569,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                         ") is not a platform, server, or service");
             }
         } 
-        double[] data = this.getAvailability(subject, 
+        double[] data = getAvailability(subject, 
                 toAppdefEntityIDArray(resources));
     
         // Availability counts **this calls getLiveMeasurement
@@ -2726,7 +2726,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
         // Availability
         try {
-            Map midMap = this.getDerivedMeasurementManager()
+            Map midMap = getDerivedMeasurementManager()
                 .findDesignatedMeasurementIds(
                     subject, ids, MeasurementConstants.CAT_AVAILABILITY);
             
@@ -2735,7 +2735,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     (Integer[]) midMap.values().toArray(new Integer[0]);
                 
                 // Get absolute last data point
-                Map avails = this.getDataMan().getLastDataPoints(
+                Map avails = getDataMan().getLastDataPoints(
                     mids, MeasurementConstants.ACCEPTABLE_LIVE_MILLIS);
 
                 if (avails.size() == 0)
@@ -2765,7 +2765,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         
         // Throughput a.k.a. Usage
         try {
-            Map midMap = this.getDerivedMeasurementManager()
+            Map midMap = getDerivedMeasurementManager()
                 .findDesignatedMeasurementIds(
                     subject, ids, MeasurementConstants.CAT_THROUGHPUT);
 
@@ -2775,7 +2775,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
                 // this can throw DataNotAvailableException
                 double[] data =
-                    this.getDataMan().getAggregateData(mids, begin,end);
+                    getDataMan().getAggregateData(mids, begin,end);
                 log.trace("getting usage data took: " + watch.getElapsed());
                 summary.setThroughput(
                     new Double(data[MeasurementConstants.IND_AVG]));
@@ -2933,7 +2933,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             siblings.add(ent.getResourceValue());
         }
     
-        return this.getResourcesCurrentHealth(subject, siblings);
+        return getResourcesCurrentHealth(subject, siblings);
     }
 
     /**
@@ -2961,7 +2961,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             List resources =
                 vman.findVirtualResourcesByPhysical(subject, entId);
             PageList resPageList = new PageList(resources, resources.size());
-            return this.getResourcesCurrentHealth(subject, resPageList);
+            return getResourcesCurrentHealth(subject, resPageList);
         } catch (CreateException e) {
             throw new SystemException(e);
         } catch (NamingException e) {
@@ -3044,12 +3044,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     summary.setMonitorable(Boolean.TRUE);
                     // Set the availability now
                     summary.setAvailability(new Double(
-                        this.getAvailability(subject, resource.getEntityId())));
+                        getAvailability(subject, resource.getEntityId())));
                     
                     try {
                         // Get the availability template
                         MeasurementTemplateValue tmpl =
-                            this.getAvailabilityMetricTemplate(
+                            getAvailabilityMetricTemplate(
                                 subject, resource.getEntityId());
                         summary.setAvailTempl(tmpl.getId());
                     } catch (MeasurementNotFoundException e) {
@@ -3065,7 +3065,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                         
             // Set count of alerts
             summary.setAlerts(new Integer
-                (this.getAMan().getAlertCount(resource.getEntityId())));            
+                (getAMan().getAlertCount(resource.getEntityId())));            
             summaries.add(summary);
         }        
         summaries.setTotalSize(resources.getTotalSize());
@@ -3088,7 +3088,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         if (categories.size() == 0)
             return;
         
-        List measurements = this.findDesignatedMetrics(subject, id, categories);
+        List measurements = findDesignatedMetrics(subject, id, categories);
         
         // XXX - optimization for the fact that we can have multiple indicator
         // metrics for each category
@@ -3105,7 +3105,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             // value
             if (category.equals(MeasurementConstants.CAT_AVAILABILITY)) {
                 summary.setAvailability(
-                    new Double(this.getAvailability(subject, id)));
+                    new Double(getAvailability(subject, id)));
                 summary.setAvailTempl(dmv.getTemplate().getId());
             }
             
@@ -3120,7 +3120,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             Double theValue = new Double(Double.NaN);
             Map dataMap;
             try {
-                dataMap = this.getDataMan()
+                dataMap = getDataMan()
                     .getLastDataPoints(mids, MeasurementConstants.HOUR);
                 if (dataMap.size() < 1)
                     continue;
@@ -3159,7 +3159,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
         // Need to get the templates for this type, using the first resource
         AppdefResourceValue resource = (AppdefResourceValue) resources.get(0);
-        Integer[] tids = this.getTemplateManager().findTemplateIds(
+        Integer[] tids = getTemplateManager().findTemplateIds(
             resource.getAppdefResourceTypeValue().getName());
 
         // Create a hash set of ID's
@@ -3167,7 +3167,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         try {
             // See which entities actually have values
             Integer[] eids =
-                this.getDataMan().getInstancesWithData(tids, begin, end);
+                getDataMan().getInstancesWithData(tids, begin, end);
             eidSet = new HashSet(Arrays.asList(eids));
         } catch (DataNotAvailableException e) {
             // Return nothing
@@ -3184,7 +3184,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         
         // Create a new PageList
         PageList pagedResources = Pager.getDefaultPager().seek(resources, pc);
-        return this.getResourcesCurrentHealth(subject, pagedResources);
+        return getResourcesCurrentHealth(subject, pagedResources);
     }
 
     /**
@@ -3244,7 +3244,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         timingLog.trace("findResourceCurrentHealth(2) - timing [" +
                         timer.toString()+"]");
 
-        return this.getResourcesCurrentHealth(subject, resources);
+        return getResourcesCurrentHealth(subject, resources);
     }
 
     /**
@@ -3300,7 +3300,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         
         // Return a paged list of current health        
-        return this.getResourcesCurrentHealth(subject, hosts);
+        return getResourcesCurrentHealth(subject, hosts);
     }
     
     /**
@@ -3330,7 +3330,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         PageList platforms = rv.getAssociatedPlatforms(pc);
         
         // Return a paged list of current health        
-        return this.getResourcesCurrentHealth(subject, platforms);
+        return getResourcesCurrentHealth(subject, platforms);
     }
 
     /**
@@ -3357,11 +3357,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         PageList platforms;
         PageControl pc = PageControl.PAGE_ALL;
         
-        platforms = this.getPlatformManager()
+        platforms = getPlatformManager()
             .findPlatformsByType(subject, platTypeId, pc);
         
         // Return a paged list of current health        
-        return this.getResourcesCurrentHealth(subject, platforms);
+        return getResourcesCurrentHealth(subject, platforms);
     }
 
     /**
@@ -3424,7 +3424,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         PageList servers = rv.getAssociatedServers(pc);
         
         // Return a paged list of current health        
-        return this.getResourcesCurrentHealth(subject, servers);
+        return getResourcesCurrentHealth(subject, servers);
     }
 
     /**
@@ -3460,7 +3460,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         PageList servers = rv.getAssociatedServers(serverTypeId, pc);
         
         // Return a paged list of current health        
-        return this.getResourcesCurrentHealth(subject, servers);
+        return getResourcesCurrentHealth(subject, servers);
     }
 
     /**
@@ -3500,7 +3500,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         
         // Return a paged list of current health        
-        return this.getResourcesCurrentHealth(subject, servers);
+        return getResourcesCurrentHealth(subject, servers);
     }
     
    
@@ -3554,8 +3554,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             PageList servers = rv.getAssociatedServers(PageControl.PAGE_ALL);
             
             // Return a list of current health
-            return this.getResourcesCurrentHealth(subject, servers, begin, 
-                                                  end, PageControl.PAGE_ALL);
+            return getResourcesCurrentHealth(subject, servers, begin, end,
+                                             PageControl.PAGE_ALL);
         } catch (IllegalArgumentException e) {
             throw new InvalidAppdefTypeException(
                 "entityID is not valid type, id type: " + entId.getType());
@@ -3599,7 +3599,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             rv.getAssociatedServers(serverTypeId,PageControl.PAGE_ALL);
         
         // Return a list of current health
-        return this.getResourcesCurrentHealth(subject, servers, begin, end, pc);
+        return getResourcesCurrentHealth(subject, servers, begin, end, pc);
     }
 
     /** 
@@ -3625,7 +3625,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         PageList services = defaultPager.seek(rv.getAssociatedServices(pc), pc);
         
         // Return a paged list of current health        
-        return this.getResourcesCurrentHealth(subject, services);
+        return getResourcesCurrentHealth(subject, services);
     }
     
     /** 
@@ -3651,7 +3651,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         PageList services = rv.getAssociatedServices(serviceTypeId, pc);
 
         // Return a paged list of current health        
-        return this.getResourcesCurrentHealth(subject, services);
+        return getResourcesCurrentHealth(subject, services);
     }
 
     /**
@@ -3710,7 +3710,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         
         // Return a list of current health
-        return this.getResourcesCurrentHealth(subject,services, begin, end, pc);
+        return getResourcesCurrentHealth(subject,services, begin, end, pc);
     }
 
     /**
@@ -3753,16 +3753,16 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             rv.getAssociatedServices(serviceTypeId, PageControl.PAGE_ALL);
         
         // Return a list of current health
-        return this.getResourcesCurrentHealth(subject, services,
-                                              begin, end, pc);
+        return getResourcesCurrentHealth(subject, services, begin, end, pc);
     }
 
-    /** 
-     * Return a ResourceDisplaySummary bean for each of the resource's
-     * services.  The only applicable resource is currently a compatible group
-     * (of services...)
+    /**
+     * Return a ResourceDisplaySummary bean for each of the resource's services.
+     * The only applicable resource is currently a compatible group (of
+     * services...)
      * 
-     * @param entId the server's or application's ID
+     * @param entId
+     *            the server's or application's ID
      * @return a list of ResourceDisplaySummary beans
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
@@ -3784,7 +3784,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
     
         // Return a paged list of current health        
-        return this.getResourcesCurrentHealth(subject, services);
+        return getResourcesCurrentHealth(subject, services);
     }
 
     /*
@@ -3798,7 +3798,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     
         AppdefEntityID[] ids = new AppdefEntityID[] { id };
         try {
-            return this.getAvailability(subject, ids)[0];
+            return getAvailability(subject, ids)[0];
         } finally {
             if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_APPLICATION)
                 log.debug("END getAvailability() -- " +
@@ -3815,7 +3815,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        return this.getAvailability(subject, id);
+        return getAvailability(subject, id);
     }
 
     /** Get the availability of autogroup resources
@@ -3833,9 +3833,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         StopWatch watch = new StopWatch();
         log.debug("BEGIN getAGAvailability()");
     
-        List appdefIds = this.getAGMemberIds(subject, aids, ctype);
+        List appdefIds = getAGMemberIds(subject, aids, ctype);
         
-        double ret = this.getAggregateAvailability(
+        double ret = getAggregateAvailability(
             subject, toAppdefEntityIDArray(appdefIds));
         log.debug("END getAGAvailability() -- " + watch.getElapsed() + " msec");
         return ret;
@@ -4022,11 +4022,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                PermissionException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        TrackerManagerLocal trackManager = this.getTrackerManager();
+        TrackerManagerLocal trackManager = getTrackerManager();
         ConfigResponse response;
     
         try {
-            response = this.getConfigManager().
+            response = getConfigManager().
                 getMergedConfigResponse(subject,
                                         ProductPlugin.TYPE_MEASUREMENT,
                                         id, true);
@@ -4051,7 +4051,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         } catch (PluginException e) {
             // Not much we can do.. plugins will be removed on next
             // agent restart.
-            this.log.error("Unable to remove track plugins", e);
+            log.error("Unable to remove track plugins", e);
         }
     }
 
@@ -4121,13 +4121,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     public void ejbActivate() throws EJBException, RemoteException {}
     public void ejbPassivate() throws EJBException, RemoteException {}
     public void ejbRemove() throws EJBException, RemoteException {
-        this.ctx = null;
+        ctx = null;
     }
     public void setSessionContext(SessionContext ctx)
         throws EJBException, RemoteException {
         this.ctx = ctx;
     }
     public SessionContext getSessionContext() {
-        return this.ctx;
+        return ctx;
     }
 }
