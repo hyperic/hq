@@ -5,7 +5,7 @@
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping
-  package="org.hyperic.hq.scheduler.shared.pojo">
+  package="org.hyperic.hq.scheduler">
 
   <class name="QzLock" table="EAM_QRTZ_LOCKS">
     <id name="lockName" type="string">
