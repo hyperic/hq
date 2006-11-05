@@ -23,14 +23,16 @@
  * USA. 
  */
 
-package org.hyperic.hq.appdef;
+package org.hyperic.hq.authz;
+
+import org.hyperic.hibernate.PersistedObject;
 
 /**
  *
  */
-public class Virtual
+public class Virtual extends PersistedObject
 {
-    private Integer resourceId;
+    private Resource resource;
     private long _version_;
     private Integer processId;
     private Integer physicalId;
@@ -44,43 +46,43 @@ public class Virtual
     }
 
     // Property accessors
-    public Integer getResourceId()
+    public Resource getResource()
     {
-        return this.resourceId;
+        return resource;
     }
 
-    public void setResourceId(Integer resourceId)
+    public void setResource(Resource val)
     {
-        this.resourceId = resourceId;
+        resource = val;
     }
 
     public long get_version_()
     {
-        return this._version_;
+        return _version_;
     }
 
-    public void set_version_(long _version_)
+    public void set_version_(long val)
     {
-        this._version_ = _version_;
+        _version_ = val;
     }
 
     public Integer getProcessId()
     {
-        return this.processId;
+        return processId;
     }
 
-    public void setProcessId(Integer processId)
+    public void setProcessId(Integer val)
     {
-        this.processId = processId;
+        processId = val;
     }
 
     public Integer getPhysicalId()
     {
-        return this.physicalId;
+        return physicalId;
     }
 
-    public void setPhysicalId(Integer physicalId)
+    public void setPhysicalId(Integer val)
     {
-        this.physicalId = physicalId;
+        physicalId = val;
     }
 }
