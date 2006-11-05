@@ -28,6 +28,8 @@ package org.hyperic.hq.product.server.session;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -53,6 +55,8 @@ import org.hyperic.hq.appdef.shared.CPropKeyExistsException;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.CPropManagerLocalHome;
 import org.hyperic.hq.appdef.shared.CPropManagerUtil;
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
+import org.hyperic.hq.appdef.CpropKey;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
@@ -304,34 +308,53 @@ public class ProductManagerEJBImpl
                 toAdd.put(monitorableTypeId, newMeasurements);
             }
         }
+        this.log.info(pluginName + " deployment update took: " +
+                      timer + " seconds");
 
+        timer = new StopWatch();
         // For performance reasons, we add all the new measurements at once.
         tMan.createTemplates(pluginName, toAdd);
+        this.log.info(pluginName + " deployment createTemplates took: " +
+                      timer + " seconds");
 
-        // Add any custom properties.  Could change this to batch up all the
-        // properties and insert them at once for performance.
+        timer = new StopWatch();
+        // Add any custom properties.  Need to further optimize the
+        // lookup of resource and the cpropkey
+        // for performance reasons, do lookups/searches and weed out duplicate
+        // keys first
+        HashMap cprops = new HashMap();
         CPropManagerLocal cPropManager = this.getCPropManagerLocal();
         for (int i = 0; i < entities.length; i++) {
             TypeInfo info = entities[i];
             ConfigSchema schema = pplugin.getCustomPropertiesSchema(info);
             List options = schema.getOptions();
-
-            for (int j = 0; j < options.size(); j++) {
-                ConfigOption opt = (ConfigOption)options.get(j);
-
-                try {
-                    cPropManager.addKey(info,
-                                        opt.getName(), 
-                                        opt.getDescription());
-                } catch (AppdefEntityNotFoundException e) {
-                    // Not gonna happen
-                } catch (CPropKeyExistsException e) {
-                    // Ok
+            AppdefResourceType appdefType = cPropManager.findResourceType(info);
+            for (Iterator j=options.iterator(); j.hasNext();) {
+                ConfigOption opt = (ConfigOption)j.next();
+                CpropKey c = cPropManager.findByKey(appdefType, opt.getName());
+                if (c != null) {
+                    j.remove();
                 }
             }
+            cprops.put(appdefType, options);
         }
+        this.log.info(pluginName + " deployment findResourceType/findByKey " +
+                      "took: " + timer + " seconds");
 
-        this.log.info(pluginName + " deployment took: " + timer + " seconds");
+        timer = new StopWatch();
+        // add cpropkeys
+        for (Iterator i=cprops.keySet().iterator(); i.hasNext();) {
+            AppdefResourceType appdefType = (AppdefResourceType)i.next();
+            List options = (List)cprops.get(appdefType);
+            for (Iterator j = options.iterator(); j.hasNext();) {
+                ConfigOption opt = (ConfigOption)j.next();
+                cPropManager.addKey(appdefType,
+                                    opt.getName(),
+                                    opt.getDescription());
+            }
+        }
+        this.log.info(pluginName + " deployment addkey took: " +
+                      timer + " seconds");
 
         pluginDeployed(pInfo);
         this.updateEJBPlugin(plHome, pInfo);

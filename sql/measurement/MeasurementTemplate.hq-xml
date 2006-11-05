@@ -93,6 +93,13 @@
       <one-to-many class="MeasurementArg" />
     </bag>
 
+    <bag name="rawMeasurementArgs" table="EAM_MEASUREMENT_ARG"
+         cascade="save-update,delete,persist,merge,evict,all-delete-orphan"
+         inverse="true">
+      <key column="MEASUREMENT_TEMPLATE_ARG_ID" />
+      <one-to-many class="MeasurementArg" />
+    </bag>
+
   </class>
 
 </hibernate-mapping>

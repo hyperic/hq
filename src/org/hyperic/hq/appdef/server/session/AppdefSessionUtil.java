@@ -351,38 +351,16 @@ public abstract class AppdefSessionUtil {
         }
     }
 
-    protected AppdefResourceTypeValue findResourceType(TypeInfo info)
-        throws AppdefEntityNotFoundException
+    protected AppdefResourceType findResourceType(TypeInfo info)
     {
         int type = info.getType();
 
         if(type == AppdefEntityConstants.APPDEF_TYPE_PLATFORM){
-            PlatformManagerLocal pmLocal;
-
-            pmLocal = this.getPlatformMgrLocal();
-            return pmLocal.findPlatformTypeByName(info.getName());
+            return getPlatformTypeDAO().findByName(info.getName());
         } else if(type == AppdefEntityConstants.APPDEF_TYPE_SERVER){
-            ServerManagerLocal smLocal;
-
-            smLocal = this.getServerMgrLocal();
-            try {
-                return smLocal.findServerTypeByName(info.getName());
-            } catch(FinderException exc){
-                throw new ServerNotFoundException("server type name=" + 
-                                                  info.getName() +
-                                                  " not found");
-            }
+            return getServerTypeDAO().findByName(info.getName());
         } else if(type == AppdefEntityConstants.APPDEF_TYPE_SERVICE){
-            ServiceManagerLocal vmLocal;
-
-            vmLocal = this.getServiceMgrLocal();
-            try {
-                return vmLocal.findServiceTypeByName(info.getName());
-            } catch(FinderException exc){
-                throw new ServiceNotFoundException("service type name=" +
-                                                   info.getName() +
-                                                   " not found");
-            }
+            return getServiceTypeDAO().findByName(info.getName());
         } else {
             throw new IllegalArgumentException("Unrecognized appdef type:"+
                                                " " + info);

@@ -54,6 +54,7 @@ public class MeasurementTemplate extends PersistedObject
     private Category _category;
     private Collection _measurements;
     private Collection _measurementArgs;
+    private Collection _rawMeasurementArgs;
 
     // Constructors
     public MeasurementTemplate() {
@@ -237,6 +238,14 @@ public class MeasurementTemplate extends PersistedObject
     
     public void setMeasurementArgs(Collection measurementArgs) {
         _measurementArgs = measurementArgs;
+    }
+
+    public Collection getRawMeasurementArgs() {
+        return _rawMeasurementArgs;
+    }
+
+    public void setRawMeasurementArgs(Collection measurementArgs) {
+        _rawMeasurementArgs = measurementArgs;
     }
 
     /**

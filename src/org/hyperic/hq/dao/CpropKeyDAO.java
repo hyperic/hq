@@ -65,7 +65,8 @@ public class CpropKeyDAO extends HibernateDAO
         super.remove(entity);
     }
 
-    public CpropKey create(int appdefType, int appdefTypeId, String key, String description)
+    public CpropKey create(int appdefType, int appdefTypeId, String key,
+                           String description)
     {
         CpropKey cpropkey = new CpropKey();
         cpropkey.setAppdefType(new Integer(appdefType));
@@ -78,7 +79,8 @@ public class CpropKeyDAO extends HibernateDAO
 
     public Collection findByAppdefType(int appdefType, int appdefId)
     {
-        String sql = "from CpropKey k where k.appdefType = ? and k.appdefTypeId = ?";
+        String sql = "from CpropKey k where k.appdefType=? and " +
+                     "k.appdefTypeId = ?";
         return getSession().createQuery(sql)
             .setInteger(0, appdefType)
             .setInteger(1, appdefId)
@@ -87,7 +89,8 @@ public class CpropKeyDAO extends HibernateDAO
 
     public CpropKey findByKey(int appdefType, int appdefTypeId, String key)
     {
-        String sql = "from CpropKey k where k.appdefType=? and k.appdefTypeId=? and k.key=?";
+        String sql = "from CpropKey k where k.appdefType=? and " +
+                     "k.appdefTypeId=? and k.key=?";
         return (CpropKey)getSession().createQuery(sql)
             .setInteger(0, appdefType)
             .setInteger(1, appdefTypeId)

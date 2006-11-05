@@ -41,6 +41,7 @@ import org.hyperic.hq.appdef.shared.CPropChangeEvent;
 import org.hyperic.hq.appdef.shared.CPropKeyExistsException;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropKeyValue;
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
@@ -113,27 +114,41 @@ public class CPropManagerEJBImpl
     }
 
     /**
+     * find appdef resource type
+     * @ejb:interface-method
+     */
+    public AppdefResourceType findResourceType(TypeInfo info)
+    {
+        return super.findResourceType(info);
+    }
+
+    /**
+     * find Cprop by key to a resource type based on a TypeInfo object.
+     * @ejb:interface-method
+     */
+    public CpropKey findByKey(AppdefResourceType appdefType, String key)
+    {
+        int type = appdefType.getAppdefType();
+        int instanceId = appdefType.getId().intValue();
+
+        return getCPropKeyDAO().findByKey(type, instanceId, key);
+    }
+
+    /**
      * Add a key to a resource type based on a TypeInfo object.
      *
      * @throw AppdefEntityNotFoundException if the appdef resource type
      *        that the key references could not be found
      * @throw CPropKeyExistsException if the key already exists
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
-
-    public void addKey(TypeInfo info, String key, String description)
-        throws AppdefEntityNotFoundException, CPropKeyExistsException
+    public void addKey(AppdefResourceType appdefType,
+                       String key, String description)
     {
-        AppdefResourceTypeValue typeValue = 
-            this.findResourceType(info);
+        int type = appdefType.getAppdefType();
+        int instanceId = appdefType.getId().intValue();
 
-        CPropKeyValue cPropKey
-            = new CPropKeyValue(null, typeValue.getAppdefTypeId(),
-                                typeValue.getId().intValue(),
-                                key, description);
-
-        addKey(cPropKey);
+        getCPropKeyDAO().create(type, instanceId, key, description);
     }
 
     /**
@@ -161,12 +176,12 @@ public class CPropManagerEJBImpl
                                          key.getAppdefTypeId());
         cpHome = getCPropKeyDAO();
 
-        cpKey = cpHome.findByKey(key.getAppdefType(), 
+        cpKey = cpHome.findByKey(key.getAppdefType(),
                                  key.getAppdefTypeId(), key.getKey());
 
         if(cpKey != null){
             throw new CPropKeyExistsException("Key, '" + key.getKey() + "', " +
-               "already exists for " + 
+               "already exists for " +
                AppdefEntityConstants.typeToString(recValue.getAppdefTypeId()) +
                " type, '" + recValue.getName() + "'");
         }

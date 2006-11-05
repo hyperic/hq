@@ -28,6 +28,7 @@ package org.hyperic.hq.appdef.server.session;
 import java.io.Serializable;
 
 import org.hyperic.hq.appdef.AppdefBean;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 
 /**
  *
@@ -84,5 +85,23 @@ public abstract class AppdefResourceType extends AppdefBean
     public void setDescription(String description)
     {
         this.description = description;
+    }
+
+    public int getAppdefType() {
+        if (this instanceof PlatformType) {
+            return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+        } else if (this instanceof ServerType) {
+            return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+
+        } else if (this instanceof ServiceType) {
+            return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+
+        } else if (this instanceof ApplicationType) {
+            return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+
+        } else {
+            throw new UnsupportedOperationException(
+                "unsupported operation for class: " + this.getClass().getName());
+        }
     }
 }
