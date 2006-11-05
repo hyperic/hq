@@ -3,7 +3,8 @@
 
   <property name="build.dir" location="${server.installdir}/server-${version}/tmp" />
   <property name="hq-ear.dir" location="${server.installdir}/server-${version}/hq-engine/server/default/deploy/hq.ear" />
-  <property name="hibernate-properties" location="${build.dir}/hibernate/hibernate.properties" />
+  <property name="hibernate-properties" location="${install.dir}/etc/hibernate/hibernate.properties" />
+  <property name="hibernate-properties-gen" location="${build.dir}/hibernate/hibernate.properties" />
   <property name="hibernate-hq-config" location="${install.dir}/etc/hibernate/hibernate.hq-cfg-xml" />
   <property name="hibernate-mapping.xslt" location="${install.dir}/etc/hibernate/hibernate-mapping.xsl" /> 
   <property name="hibernate-config.xslt" location="${install.dir}/etc/hibernate/hibernate-config.xsl" />
@@ -121,7 +122,7 @@
     </for>
 
     <property name="hibernate.dialect" value="org.hibernate.dialect.${hyperic.dialect}Dialect" />
-    <echoproperties destfile="${hibernate-properties}.xml" format="xml">
+    <echoproperties destfile="${hibernate-properties-gen}.xml" format="xml">
       <propertyset>
         <propertyref prefix="mapping."/>
         <propertyref prefix="hibernate."/>
@@ -133,13 +134,12 @@
     <property name="hibernate.connection.driver_class" value="${server.database-driver}" />
     <property name="hibernate.connection.username" value="${server.database-user}" />
     <property name="hibernate.connection.password" value="${server.database-password}" />
-    <echoproperties destfile="${hibernate-properties}" format="text">
+    <property file="${hibernate-properties}" />
+
+    <echoproperties destfile="${hibernate-properties-gen}" format="text">
       <propertyset>
-        <propertyref name="hibernate.dialect"/>
-        <propertyref name="hibernate.connection.url"/>
-        <propertyref name="hibernate.connection.driver_class"/>
-        <propertyref name="hibernate.connection.username"/>
-        <propertyref name="hibernate.connection.password"/>
+        <propertyref prefix="hibernate."/>
+        <propertyref prefix="hq."/>
       </propertyset>
     </echoproperties>
 
@@ -150,7 +150,7 @@
         out="${hq-ear.dir}/META-INF/hibernate.cfg.xml">
 
       <param name="dialect" expression="${hyperic.dialect}" />
-      <param name="properties" expression="${hibernate-properties}.xml" />
+      <param name="properties" expression="${hibernate-properties-gen}.xml" />
 
       <!-- search hibernate-mapping.dtd in the classpath -->
       <xmlcatalog>
@@ -185,7 +185,7 @@
         <path location="${hq-ear.dir}" />
         <path location="${build.dir}/hibernate/classes" />
       </classpath>
-      <configuration propertyFile="${hibernate-properties}">
+      <configuration propertyFile="${hibernate-properties-gen}">
         <fileset dir="${hq-ear.dir}">
           <include name="**/CpropKey.hbm.xml" />
           <include name="**/Cprop.hbm.xml" />
@@ -215,7 +215,7 @@
         <path location="${hq-ear.dir}" />
         <path location="${build.dir}/hibernate/classes" />
       </classpath>
-      <configuration propertyFile="${hibernate-properties}">
+      <configuration propertyFile="${hibernate-properties-gen}">
         <fileset dir="${hq-ear.dir}">
           <include name="**/*.hbm.xml" />
         </fileset>
@@ -242,7 +242,7 @@
         <path location="${hq-ear.dir}" />
         <path location="${build.dir}/hibernate/classes" />
       </classpath>
-      <configuration propertyFile="${hibernate-properties}">
+      <configuration propertyFile="${hibernate-properties-gen}">
         <fileset dir="${hq-ear.dir}">
           <include name="**/*.hbm.xml" />
         </fileset>
@@ -265,7 +265,7 @@
         <path location="${hq-ear.dir}" />
         <path location="${build.dir}/hibernate/classes" />
       </classpath>
-      <configuration propertyFile="${hibernate-properties}">
+      <configuration propertyFile="${hibernate-properties-gen}">
         <fileset dir="${hq-ear.dir}">
           <include name="**/*.hbm.xml" />
         </fileset>
@@ -293,7 +293,7 @@
         <path location="${build.dir}/hibernate/classes" />
       </classpath>
     </taskdef>
-    <validate-schema properties="${hibernate-properties}">
+    <validate-schema properties="${hibernate-properties-gen}">
       <fileset dir="${hq-ear.dir}">
         <include name="**/*.hbm.xml" />
       </fileset>

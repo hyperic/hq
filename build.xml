@@ -1329,6 +1329,9 @@
       </fileset>
     </copy>
 
+    <copy file="${hq.home}/etc/hibernate.properties"
+          todir="${installer.dir}/etc/hibernate"/>
+
     <!-- Copy ant libs and DB driver libs -->
     <copy todir="${installer.dir}/lib" flatten="true">
       <fileset dir="${build.dir}/ant" includes="**/lib/*"/>
