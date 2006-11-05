@@ -91,13 +91,13 @@ public abstract class AppdefResourceType extends AppdefBean
         if (this instanceof PlatformType) {
             return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
         } else if (this instanceof ServerType) {
-            return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+            return AppdefEntityConstants.APPDEF_TYPE_SERVER;
 
         } else if (this instanceof ServiceType) {
-            return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+            return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
 
         } else if (this instanceof ApplicationType) {
-            return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+            return AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
 
         } else {
             throw new UnsupportedOperationException(
