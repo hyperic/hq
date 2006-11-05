@@ -25,19 +25,23 @@
 
 package org.hyperic.hq.dao;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
 import org.hibernate.Session;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
+import org.hyperic.hq.appdef.shared.PlatformLightValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.appdef.shared.PlatformLightValue;
-import org.hyperic.dao.DAOFactory;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Iterator;
+import org.hyperic.hq.authz.Resource;
+import org.hyperic.hq.authz.Virtual;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 
 /**
  * CRUD methods, finders, etc. for Server
@@ -246,5 +250,34 @@ public class ServerDAO extends HibernateDAO
         return getSession().createQuery(sql)
             .setString(0, name.toUpperCase())
             .list();
+    }
+
+    public Resource findVirtualByInstanceId(Integer id) {
+        VirtualDAO dao = new VirtualDAO(getSession());
+        return dao.findVirtualByInstanceId(id, AuthzConstants.serverResType);
+    }
+
+    public Collection findVirtualByProcessId(Integer id) {
+        VirtualDAO dao = new VirtualDAO(getSession());
+        Collection resources =
+            dao.findVirtualByProcessId(id, AuthzConstants.serverResType);
+        List servers = new ArrayList();
+        for (Iterator it = resources.iterator(); it.hasNext(); ) {
+            Virtual virt = (Virtual) it.next();
+            servers.add(findById(virt.getId()));
+        }
+        return servers;
+    }
+
+    public Collection findVirtualByPysicalId(Integer id) {
+        VirtualDAO dao = new VirtualDAO(getSession());
+        Collection resources =
+            dao.findVirtualByPysicalId(id, AuthzConstants.serverResType);
+        List servers = new ArrayList();
+        for (Iterator it = resources.iterator(); it.hasNext(); ) {
+            Virtual virt = (Virtual) it.next();
+            servers.add(findById(virt.getId()));
+        }
+        return servers;
     }
 }

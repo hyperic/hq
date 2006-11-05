@@ -25,18 +25,22 @@
 
 package org.hyperic.hq.dao;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
 import org.hibernate.Session;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.IpValue;
-import org.hyperic.dao.DAOFactory;
-
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.Iterator;
+import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.authz.Resource;
+import org.hyperic.hq.authz.Virtual;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 
 /**
  * CRUD methods, finders, etc. for Platform
@@ -318,4 +322,32 @@ public class PlatformDAO extends HibernateDAO {
             .list();
     }
 
+    public Resource findVirtualByInstanceId(Integer id) {
+        VirtualDAO dao = new VirtualDAO(getSession());
+        return dao.findVirtualByInstanceId(id, AuthzConstants.platformResType);
+    }
+
+    public Collection findVirtualByProcessId(Integer id) {
+        VirtualDAO dao = new VirtualDAO(getSession());
+        Collection resources =
+            dao.findVirtualByProcessId(id, AuthzConstants.platformResType);
+        List platforms = new ArrayList();
+        for (Iterator it = resources.iterator(); it.hasNext(); ) {
+            Virtual virt = (Virtual) it.next();
+            platforms.add(findById(virt.getId()));
+        }
+        return platforms;
+    }
+
+    public Collection findVirtualByPysicalId(Integer id) {
+        VirtualDAO dao = new VirtualDAO(getSession());
+        Collection resources =
+            dao.findVirtualByPysicalId(id, AuthzConstants.platformResType);
+        List platforms = new ArrayList();
+        for (Iterator it = resources.iterator(); it.hasNext(); ) {
+            Virtual virt = (Virtual) it.next();
+            platforms.add(findById(virt.getId()));
+        }
+        return platforms;
+    }
 }

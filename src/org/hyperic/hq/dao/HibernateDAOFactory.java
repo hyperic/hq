@@ -249,5 +249,9 @@ public class HibernateDAOFactory extends DAOFactory {
     public UserAlertDAO getUserAlertDAO() {
         return new UserAlertDAO(getCurrentSession());
     }
+
+    public VirtualDAO getVirtualDAO() {
+        return new VirtualDAO(getCurrentSession());
+    }
 }
 

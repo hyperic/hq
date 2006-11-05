@@ -25,17 +25,22 @@
 
 package org.hyperic.hq.dao;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
 import org.hibernate.Session;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.dao.DAOFactory;
-
-import java.util.Collection;
-import java.util.List;
+import org.hyperic.hq.authz.Resource;
+import org.hyperic.hq.authz.Virtual;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 
 /**
  * CRUD methods, finders, etc. for Service
@@ -409,5 +414,34 @@ public class ServiceDAO extends HibernateDAO
                    "order by sortName " +
                    (asc ? "asc" : "desc");
         return getSession().createQuery(sql).list();
+    }
+    
+    public Resource findVirtualByInstanceId(Integer id) {
+        VirtualDAO dao = new VirtualDAO(getSession());
+        return dao.findVirtualByInstanceId(id, AuthzConstants.serviceResType);
+    }
+
+    public Collection findVirtualByProcessId(Integer id) {
+        VirtualDAO dao = new VirtualDAO(getSession());
+        Collection resources =
+            dao.findVirtualByProcessId(id, AuthzConstants.serviceResType);
+        List services = new ArrayList();
+        for (Iterator it = resources.iterator(); it.hasNext(); ) {
+            Virtual virt = (Virtual) it.next();
+            services.add(findById(virt.getId()));
+        }
+        return services;
+    }
+
+    public Collection findVirtualByPysicalId(Integer id) {
+        VirtualDAO dao = new VirtualDAO(getSession());
+        Collection resources =
+            dao.findVirtualByPysicalId(id, AuthzConstants.serviceResType);
+        List services = new ArrayList();
+        for (Iterator it = resources.iterator(); it.hasNext(); ) {
+            Virtual virt = (Virtual) it.next();
+            services.add(findById(virt.getId()));
+        }
+        return services;
     }
 }
