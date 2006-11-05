@@ -25,11 +25,9 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.ejb.CreateException;
@@ -37,6 +35,8 @@ import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -44,28 +44,17 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformVOHelperLocal;
-import org.hyperic.hq.appdef.shared.PlatformVOHelperUtil;
-import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServerVOHelperLocal;
-import org.hyperic.hq.appdef.shared.ServerVOHelperUtil;
-import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
-import org.hyperic.hq.appdef.shared.ServiceVOHelperLocal;
-import org.hyperic.hq.appdef.shared.ServiceVOHelperUtil;
-import org.hyperic.hq.appdef.shared.ServiceValue;
+import org.hyperic.hq.authz.Resource;
+import org.hyperic.hq.authz.Virtual;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.util.jdbc.DBUtil;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.dao.VirtualDAO;
 
 /**
  * This class is responsible for managing Server objects in appdef
@@ -76,61 +65,78 @@ import org.apache.commons.logging.LogFactory;
  *      view-type="local"
  *      type="Stateless"
  * @ejb:util generate="physical"
- * @ejb:transaction type="SUPPORTS"
+ * @ejb:transaction type="REQUIRED"
  */
 public class VirtualManagerEJBImpl extends AppdefSessionEJB
     implements SessionBean {
 
     private Log log = LogFactory.getLog(
-        "org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl");
+        "org.hyperic.hq.appdef.server.session.VirtualManagerEJBImpl");
 
-    private final String VIRTUAL_TABLE = "EAM_VIRTUAL";
-    private final String PLATFORM_VIEW = "EAM_VIRT_PLAT_VIEW";
-    private final String SERVER_VIEW   = "EAM_VIRT_SVR_VIEW";
-    private final String SERVICE_VIEW  = "EAM_VIRT_SVC_VIEW";
-    
-    private ServerVOHelperLocal   svrHelper  = null;
-    private ServiceVOHelperLocal  svcHelper  = null;
-    
-    private PlatformValue getPlatformValue(AuthzSubjectValue subject, Integer id)
-        throws CreateException, NamingException, FinderException,
-               PermissionException 
-    {
-        Platform p = DAOFactory.getDAOFactory().getPlatformDAO().findById(id);
-        
-        PlatformValue platform = p.getPlatformValue();
-        checkViewPermission(subject, platform.getEntityId());
-        return platform;
+    private VirtualDAO getVirtualDAO() {
+        return DAOFactory.getDAOFactory().getVirtualDAO();
     }
 
-    private ServerValue getServerValue(AuthzSubjectValue subject, Integer id)
-        throws CreateException, NamingException, FinderException,
-               PermissionException {
-        if (svrHelper == null)
-            svrHelper = ServerVOHelperUtil.getLocalHome().create();
-        ServerValue server = svrHelper.getServerValue(id);
-        checkViewPermission(subject, server.getEntityId());
-        return server;
-    }
-
-    private ServiceValue getServiceValue(AuthzSubjectValue subject, Integer id)
-            throws CreateException, NamingException, FinderException,
-            PermissionException {
-        if (svcHelper == null)
-            svcHelper = ServiceVOHelperUtil.getLocalHome().create();
-        ServiceValue service = svcHelper.getServiceValue(id);
-        checkViewPermission(subject, service.getEntityId());
-        return service;
-    }
-
-    private Connection getDBConn() throws SQLException {
-        try {
-            return DBUtil.getConnByContext(this.getInitialContext(), 
-                                            HQConstants.DATASOURCE);
-        } catch(NamingException exc){
-            throw new SystemException("Unable to get database context: " +
-                                         exc.getMessage(), exc);
+    /**
+<<<<<<< .mine
+     * Find virtual platforms in a VM Process
+     * @param subject
+     * @param vmId
+     * @return a list of virtual platform values
+     * @throws PlatformNotFoundException
+     * @throws PermissionException
+     * @ejb:interface-method
+     */
+    public List findVirtualPlatformsByVM(AuthzSubjectValue subject, Integer vmId)
+        throws PlatformNotFoundException, PermissionException {
+        Collection platforms = getPlatformDAO().findVirtualByProcessId(vmId);
+        List platVals = new ArrayList();
+        for (Iterator it = platforms.iterator(); it.hasNext(); ) {
+            Platform platform = (Platform) it.next();
+            platVals.add(platform.getPlatformValue());
         }
+        return platVals;
+    }
+
+    /**
+     * Find virtual servers in a VM Process
+     * @param subject
+     * @param vmId
+     * @return a list of virtual server values
+     * @throws ServerNotFoundException
+     * @throws PermissionException
+     * @ejb:interface-method
+     */
+    public List findVirtualServersByVM(AuthzSubjectValue subject, Integer vmId)
+        throws ServerNotFoundException, PermissionException {
+        Collection servers = getPlatformDAO().findVirtualByProcessId(vmId);
+        List serverVals = new ArrayList();
+        for (Iterator it = servers.iterator(); it.hasNext(); ) {
+            Server server = (Server) it.next();
+            serverVals.add(server.getServerValue());
+        }
+        return serverVals;
+
+    }
+
+    /**
+     * Find virtual services in a VM Process
+     * @param subject
+     * @param vmId
+     * @return a list of virtual service values
+     * @throws ServiceNotFoundException
+     * @throws PermissionException
+     * @ejb:interface-method
+     */
+    public List findVirtualServicesByVM(AuthzSubjectValue subject, Integer vmId)
+        throws ServiceNotFoundException, PermissionException {
+        Collection services = getPlatformDAO().findVirtualByProcessId(vmId);
+        List svcVals = new ArrayList();
+        for (Iterator it = services.iterator(); it.hasNext(); ) {
+            Service service = (Service) it.next();
+            svcVals.add(service.getServiceValue());
+        }
+        return svcVals;
     }
 
     /**
@@ -145,20 +151,19 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
     public List findVirtualResourcesByPhysical(AuthzSubjectValue subject,
                                                AppdefEntityID aeid)
         throws AppdefEntityNotFoundException, PermissionException {
-        Connection conn      = null;
-        PreparedStatement ps = null;
-        ResultSet rs         = null;
-        StringBuffer sql = new StringBuffer("SELECT id FROM ");
-        
+        Collection appResources;
         switch (aeid.getType()) {
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            sql.append(PLATFORM_VIEW);
+            appResources =
+                getPlatformDAO().findVirtualByPysicalId(aeid.getId());
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            sql.append(SERVER_VIEW);
+            appResources =
+                getServerDAO().findVirtualByPysicalId(aeid.getId());
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            sql.append(SERVICE_VIEW);
+            appResources =
+                getServiceDAO().findVirtualByPysicalId(aeid.getId());
             break;
         default:
             throw new InvalidAppdefTypeException(
@@ -166,50 +171,99 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
                 " does not support virtual resources");
         }
         
-        sql.append(" WHERE physical_id = ?");
-
-        try {
-            conn = getDBConn();
-            ps = conn.prepareStatement(sql.toString());
-            
-            ps.setInt(1, aeid.getID());
-            rs = ps.executeQuery();
-
-            ArrayList resourcesList = new ArrayList();
-            while (rs.next()) {
-                Integer id = new Integer(rs.getInt(1));
-                
-                try {
-                    switch (aeid.getType()) {
-                    case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                        resourcesList.add(getPlatformValue(subject, id));
-                        break;
-                    case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                        resourcesList.add(getServerValue(subject, id));
-                        break;
-                    case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                        resourcesList.add(getServiceValue(subject, id));
-                        break;
-                    }
-                } catch (NamingException e) {
-                    throw new SystemException(e);
-                } catch (CreateException e) {
-                    throw new SystemException(e);
-                } catch (FinderException e) {
-                    // continue
-                }
+        List resourcesList = new ArrayList();
+        for (Iterator it = appResources.iterator(); it.hasNext(); ) {
+            switch (aeid.getType()) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                resourcesList.add(((Platform) it.next()).getPlatformValue());
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                resourcesList.add(((Server) it.next()).getServerValue());
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                resourcesList.add(((Service) it.next()).getServiceValue());
+                break;
+            default:
+                break;
             }
-            return resourcesList;
-        } catch (SQLException e) {
-            throw new SystemException("Error looking up virtual resources by " +
-                                      "physical id " + aeid + ":" + e, e);
-        } finally {
-            DBUtil.closeJDBCObjects(log, conn, ps, rs);
         }
+
+        return resourcesList;
     }
     
-    public void ejbCreate() throws CreateException { }
-    public void ejbRemove() { }
-    public void ejbActivate() { }
-    public void ejbPassivate() { }
+    /**
+     * Associate an array of entities to a VM
+     * @throws FinderException 
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void associateEntities(AuthzSubjectValue subj,
+                                  Integer processId,
+                                  AppdefEntityID[] aeids)
+        throws FinderException {
+        VirtualDAO dao = getVirtualDAO();
+        
+        try {
+            ResourceManagerLocal resMan =
+                ResourceManagerUtil.getLocalHome().create();
+            
+            for (int i = 0; i < aeids.length; i++) {
+               String typeStr =
+                   AppdefUtil.appdefTypeIdToAuthzTypeStr(aeids[i].getType());
+               ResourceValue res =
+                   resMan.findResourceByTypeAndInstanceId(typeStr,
+                                                          aeids[i].getId());
+               dao.createVirtual(res, processId);
+            }
+        } catch (NamingException e) {
+            throw new SystemException(e);
+        } catch (CreateException e) {
+            throw new SystemException(e);
+        }
+    }
+
+    /**
+     * Associate an array of entities to a VM
+     * @throws FinderException 
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void associateToPhysical(AuthzSubjectValue subj,
+                                    Integer physicalId,
+                                    AppdefEntityID aeid)
+        throws FinderException {
+        Resource resource;
+        switch (aeid.getType()) {
+        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+            resource =
+                getPlatformDAO().findVirtualByInstanceId(aeid.getId());
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+            resource =
+                getServerDAO().findVirtualByInstanceId(aeid.getId());
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+            resource =
+                getServiceDAO().findVirtualByInstanceId(aeid.getId());
+            break;
+        default:
+            throw new InvalidAppdefTypeException(
+                "Cannot associate appdefType " + aeid.getType() +
+                " to physical resource");
+        }
+
+        if (resource != null) {
+            Virtual virt = getVirtualDAO().findByResource(resource.getId());
+            virt.setPhysicalId(physicalId);
+        }
+        else {
+            throw new FinderException(aeid.toString() +
+                " is not registered as a virtual resource");
+        }
+    }
+
+    public void ejbCreate() throws CreateException {}    
+    public void ejbRemove() {}
+    public void ejbActivate() {}
+    public void ejbPassivate() {}
 }
