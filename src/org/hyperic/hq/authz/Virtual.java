@@ -54,6 +54,9 @@ public class Virtual extends PersistedObject
     public void setResource(Resource val)
     {
         resource = val;
+        
+        // Also set the ID
+        setId(resource.getId());
     }
 
     public long get_version_()
