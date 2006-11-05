@@ -187,6 +187,7 @@
       </classpath>
       <configuration propertyFile="${hibernate-properties}">
         <fileset dir="${hq-ear.dir}">
+          <include name="**/CpropKey.hbm.xml" />
           <include name="**/Cprop.hbm.xml" />
           <include name="**/FiredTrigger.hbm.xml" />
         </fileset>
