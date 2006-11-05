@@ -50,7 +50,6 @@ public class InstallerLogger implements BuildLogger {
         System.getProperty("line.separator");
     
     public static final String PROP_LOGFILE = "install.log";
-    public static final String PROP_DEBUG   = "install.debug";
     public static final String PROP_NOWRAP  = "install.nowrap";
     
     public static final String PREFIX = "^^^";
@@ -77,11 +76,9 @@ public class InstallerLogger implements BuildLogger {
     
     /** Time of the start of the build */
     private long startTime = System.currentTimeMillis();
-    private boolean isDebugMode = false;
     private boolean isNoWrapMode;
     
-    public InstallerLogger ()
-    {
+    public InstallerLogger () {
         // Initialize -nowrap to true on windows, false otherwise
         if (JDK.IS_WIN32) {
             isNoWrapMode = true;
@@ -94,7 +91,8 @@ public class InstallerLogger implements BuildLogger {
         InstallerMessageHandler handler;
         
         try {
-            handler = (InstallerMessageHandler) Class.forName(msgWriterClass).newInstance();
+            handler = (InstallerMessageHandler)
+                Class.forName(msgWriterClass).newInstance();
             handler.setLogger(this);
             messageHandlers.put(generatePrefix(handler.getPrefix()), handler);
             
@@ -132,36 +130,17 @@ public class InstallerLogger implements BuildLogger {
             }
         }
 
-        String debug = getProperty(PROP_DEBUG);
-        if ( debug != null ) {
-            if ( Boolean.valueOf(debug).booleanValue() ) {
-                isDebugMode = true;
-            }
-        }
-        
-        if ( isDebugMode ) {
-            err.println("Registering DEBUG message handler...");
-            registerMessageHandler(DEBUG_HANDLER);
-            
-            if ( logfile != null ) {
-                err.println("Registering basic logger in DEBUG mode...");
-                BasicLogger basicLogger = new BasicLogger();
 
-                // Make sure raw log is in the same dir as regular log
-                logfile = new WritableFile(logfile.getParentFile(),
-                                           logfile.getName() + ".raw");
-                basicLogger.setFile(logfile);
-                basicLogger.setLevel("debug");
-                basicLogger.register(project);
-            } else {
-                err.println("ERROR: Could not register basic logger "
-                            + "because the logfile is uninitialized.");
-            }
-            
-        } else {
-            // err.println("NOT Registering basic logger...");
-        }
-        
+        registerMessageHandler(DEBUG_HANDLER);
+        BasicLogger basicLogger = new BasicLogger();
+
+        // Make sure raw log is in the same dir as regular log
+        logfile = new WritableFile(logfile.getParentFile(),
+                                   logfile.getName() + ".debug");
+        basicLogger.setFile(logfile);
+        basicLogger.setLevel("debug");
+        basicLogger.register(project);
+
         // For debugging, uncomment the line below to
         // see all registered message handlers.
         // dumpHandlers();
@@ -216,14 +195,12 @@ public class InstallerLogger implements BuildLogger {
                                                 logfileName,
                                                 null,
                                                 "HQ_tmp");
-            // err.println("FileUtil.findWritableFile(" + originalDir + "," + originalFile.getName() + ") ==> " + logfile.getAbsolutePath());
+
             if (logfile == null) {
-                err.println(nowrap("WARNING: file is not writeable: " + logfileName 
-                            + "\nINSTALL LOG WILL NOT BE SAVED TO DISK."));
+                err.println(nowrap("WARNING: file is not writeable: " +
+                                   logfileName +
+                                   "\nINSTALL LOG WILL NOT BE SAVED TO DISK."));
                 return;
-            } else {
-                // err.println("Found writable file: " + logfile.getAbsolutePath() + " ON=" + originalFile.getName() + ", ONAP=" + originalFile.getAbsolutePath());
-                // err.println("LF=" + logfile.getAbsolutePath());
             }
 
             String parentAbsPath = logfile.getParentFile().getAbsolutePath();
@@ -283,10 +260,6 @@ public class InstallerLogger implements BuildLogger {
                                   + "FATAL EXCEPTION " + location
                                   + errMsg);
                 }
-            } else {
-                // If the error message started with our ERROR
-                // prefix, then we know the user has already seen
-                // the error message from the above handleMessage(event)
             }
         }
         if ( currentHandler != null ) {
@@ -332,10 +305,7 @@ public class InstallerLogger implements BuildLogger {
         InstallerMessageHandler handler
             = (InstallerMessageHandler) messageHandlers.get(prefix);
         if ( handler == null ) {
-            // err.println("no handler for: '" + msg + "' (prefix=" + prefix + ")");
             return null;
-        } else {
-            // err.println("using handler=" + handler + " for: '" + msg + "' (prefix=" + prefix + ")");
         }
         
         if ( msgbuf != null ) {
@@ -391,8 +361,6 @@ public class InstallerLogger implements BuildLogger {
             // and do not update currentMessageType
             // err.println("no handler for: " + msg);
             handler = currentHandler;
-        } else {
-            // err.println("using handler: " + handler + " for: " + msg);
         }
         
         if ( currentHandler == handler ) {
@@ -445,17 +413,6 @@ public class InstallerLogger implements BuildLogger {
                   + "====================================");
         logToFile("");
         logToFile("");
-    }
-    
-    private void dumpHandlers () {
-        java.util.Iterator i = messageHandlers.keySet().iterator();
-        InstallerMessageHandler handler;
-        String prefix;
-        while ( i.hasNext() ) {
-            prefix = (String) i.next();
-            handler = (InstallerMessageHandler) messageHandlers.get(prefix);
-            err.println("registered-prefix[" + prefix + "] --> " + handler);
-        }
     }
     
     private String getProperty (String name) {
