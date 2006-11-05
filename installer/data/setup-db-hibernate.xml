@@ -31,6 +31,8 @@
   </target>
 
   <target name="hibernate-taskdefs" depends="hibernate-init-taskdefs">
+    <!-- Always using the HypericDS datasource -->
+    <property name="hq.server.datasource" value="java:/HypericDS"/>
     <switch value="${server.database}">
       <case value="Oracle8">
         <property name="hyperic.dialect" value="Oracle" />
