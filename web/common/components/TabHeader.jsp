@@ -52,7 +52,7 @@
     </c:if>
     <td class="BlockTitle" width="100%" valign="middle">
     <c:if test="${dragDrop}">
-      <span style="cursor: move;">
+      <div style="cursor: move;">
     </c:if>
 <c:choose>
   <c:when test="${not empty tabKey}">
@@ -72,7 +72,7 @@
         <html:link href="${rssUrl}"><html:img border="0" page="/images/xml.gif"/></html:link>
       </c:if>
     <c:if test="${dragDrop}">
-      </span>
+      </div>
     </c:if>
     </td>
     <td class="BlockTitle" align="right"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
