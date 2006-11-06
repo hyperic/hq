@@ -119,29 +119,26 @@ public class MeasurementTemplateDAO extends HibernateDAO
                        MeasurementInfo info) {
         // Load category
         Category cat;
-        if (!info.getCategory().equals(mt.getCategory().getName())) {
-            CategoryDAO catDAO = DAOFactory.getDAOFactory().getCategoryDAO();
-            cat = catDAO.findByName(info.getCategory());
-            if (cat == null) {
-                cat = catDAO.create(info.getCategory());
+        if (info.getCategory() != null) {
+            if (!mt.getCategory().getName().equals(info.getCategory())) {
+                CategoryDAO catDAO = DAOFactory.getDAOFactory().getCategoryDAO();
+                cat = catDAO.findByName(info.getCategory());
+                if (cat == null) {
+                    cat = catDAO.create(info.getCategory());
+                }
+            } else {
+                cat = null;
             }
         } else {
-            cat = null;
+            throw new IllegalArgumentException("category has null value");
         }
 
         // Update raw template
-        if (!info.getTemplate().equals(mt.getTemplate())) {
-            mt.setTemplate(info.getTemplate());
-        }
-        if (info.getCollectionType() != mt.getCollectionType()) {
-            mt.setCollectionType(info.getCollectionType());
-        }
-        if (!pluginName.equals(mt.getPlugin())) {
-            mt.setPlugin(pluginName);
-        }
-        if (cat != null && !cat.equals(mt.getCategory())) {
-            mt.setCategory(cat);
-        }
+        mt.setTemplate(info.getTemplate());
+        mt.setCollectionType(info.getCollectionType());
+        mt.setPlugin(pluginName);
+        mt.setCategory(cat);
+        update(mt);
 
         // Update the derived template
         for (Iterator i = mt.getRawMeasurementArgs().iterator(); i.hasNext();) {
@@ -149,27 +146,14 @@ public class MeasurementTemplateDAO extends HibernateDAO
             MeasurementTemplate derived = raw.getTemplate();
             if (MeasurementConstants.TEMPL_IDENTITY
                 .equals(derived.getTemplate())) {
-                if (!info.getAlias().equals(derived.getAlias())) {
-                    derived.setAlias(info.getAlias());
-                }
-                if (info.isIndicator() != derived.isDesignate()) {
-                    derived.setDesignate(info.isIndicator());
-                }
-                if (!info.getUnits().equals(derived.getUnits())) {
-                    derived.setUnits(info.getUnits());
-                }
-                if (info.getCollectionType() != derived.getCollectionType()) {
-                    derived.setCollectionType(info.getCollectionType());
-                }
-                if (info.isDefaultOn() != derived.isDefaultOn()) {
-                    derived.setDefaultOn(info.isDefaultOn());
-                }
-                if (info.getInterval() != derived.getDefaultInterval()) {
-                    derived.setDefaultInterval(info.getInterval());
-                }
-                if (cat != null && !cat.equals(derived.getCategory())) {
-                    derived.setCategory(cat);
-                }
+                derived.setAlias(info.getAlias());
+                derived.setDesignate(info.isIndicator());
+                derived.setUnits(info.getUnits());
+                derived.setCollectionType(info.getCollectionType());
+                derived.setDefaultOn(info.isDefaultOn());
+                derived.setDefaultInterval(info.getInterval());
+                derived.setCategory(cat);
+                update(mt);
                 return;
             }
         }
@@ -241,6 +225,7 @@ public class MeasurementTemplateDAO extends HibernateDAO
             "select t from MeasurementTemplate t " +
             "join fetch t.rawMeasurementArgs ra " +
             "join fetch ra.template dt " +
+            "join fetch t.category c " +
             "join t.monitorableType mt " +
             "where mt.id=? and t.defaultInterval=0";
 

@@ -114,6 +114,11 @@ public abstract class HibernateDAO
         getSession().saveOrUpdate(entity);
     }
 
+    protected void update(Object entity)
+    {
+        getSession().update(entity);
+    }
+
     protected void remove(Object entity)
     {
         getSession().delete(entity);

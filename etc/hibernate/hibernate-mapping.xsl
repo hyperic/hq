@@ -19,7 +19,17 @@
         </xsl:copy>
     </xsl:template>
 
-    <!-- pass thru attributes ... -->
+    <!--
+      enable select-before-update, make sure there are real
+      updates before really doing SQL update
+    -->
+    <xsl:template match="@select-before-update">
+      <xsl:attribute name="{name()}">
+        <xsl:value-of select="'true'"/>
+      </xsl:attribute>
+    </xsl:template>
+
+    <!-- pass thru attributes -->
     <xsl:template match="@*">
       <xsl:copy/>
     </xsl:template>
