@@ -26,6 +26,7 @@
 package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -131,6 +132,10 @@ public class ServiceType extends AppdefResourceType
     public void setServiceClusters(Collection serviceClusters)
     {
         this.serviceClusters = serviceClusters;
+    }
+
+    public int getAppdefType() {
+        return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
     }
 
     private ServiceTypeValue serviceTypeValue = new ServiceTypeValue();

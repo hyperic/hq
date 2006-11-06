@@ -39,6 +39,8 @@ public abstract class AppdefResourceType extends AppdefBean
     protected String sortName;
     protected String description;
 
+    public abstract int getAppdefType();
+    
     /**
      * default constructor
      */
@@ -87,21 +89,4 @@ public abstract class AppdefResourceType extends AppdefBean
         this.description = description;
     }
 
-    public int getAppdefType() {
-        if (this instanceof PlatformType) {
-            return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-        } else if (this instanceof ServerType) {
-            return AppdefEntityConstants.APPDEF_TYPE_SERVER;
-
-        } else if (this instanceof ServiceType) {
-            return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
-
-        } else if (this instanceof ApplicationType) {
-            return AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
-
-        } else {
-            throw new UnsupportedOperationException(
-                "unsupported operation for class: " + this.getClass().getName());
-        }
-    }
 }

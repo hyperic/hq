@@ -37,6 +37,7 @@ import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 
 public class PlatformType extends AppdefResourceType {
     private String            _os;
@@ -114,7 +115,10 @@ public class PlatformType extends AppdefResourceType {
     private void registerNewPlatform(Platform p) {
         _platforms.add(p);
     }
-    
+
+    public int getAppdefType() {
+        return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+    }
     /**
      * Create a new platform based on the AI platform value.
      */

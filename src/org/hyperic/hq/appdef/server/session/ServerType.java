@@ -27,6 +27,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 
 import java.util.Collection;
 import java.util.Set;
@@ -119,6 +120,10 @@ public class ServerType extends AppdefResourceType
     {
         throw new UnsupportedOperationException(
             "use ServiceTypeDAO.createService()");
+    }
+
+    public int getAppdefType() {
+        return AppdefEntityConstants.APPDEF_TYPE_SERVER;
     }
 
     /**
