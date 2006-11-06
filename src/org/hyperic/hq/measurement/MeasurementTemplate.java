@@ -53,7 +53,6 @@ public class MeasurementTemplate extends PersistedObject
     private long _mtime;
     private MonitorableType _monitorableType;
     private Category _category;
-    private Collection _measurements = new ArrayList();
     private Collection _measurementArgs = new ArrayList();
     private Collection _rawMeasurementArgs = new ArrayList();
 
@@ -84,7 +83,6 @@ public class MeasurementTemplate extends PersistedObject
                                long ctime, long mtime, 
                                MonitorableType monitorableType, 
                                Category category, 
-                               Collection measurements,
                                Collection measurementArgs) {
         _name = name;
         _alias = alias;
@@ -100,7 +98,6 @@ public class MeasurementTemplate extends PersistedObject
         _mtime = mtime;
         _monitorableType = monitorableType;
         _category = category;
-        _measurements = measurements;
         _measurementArgs = measurementArgs;
     }
    
@@ -223,14 +220,6 @@ public class MeasurementTemplate extends PersistedObject
     
     public void setCategory(Category category) {
         _category = category;
-    }
-
-    public Collection getMeasurements() {
-        return _measurements;
-    }
-
-    public void setMeasurements(Collection measurements) {
-        _measurements = measurements;
     }
 
     public Collection getMeasurementArgs() {

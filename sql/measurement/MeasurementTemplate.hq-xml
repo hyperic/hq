@@ -79,15 +79,8 @@
       <column name="CATEGORY_ID" />
     </many-to-one>
 
-    <bag name="measurements" table="EAM_MEASUREMENT"
-         cascade="save-update,delete,persist,merge,evict"
-         inverse="true">
-      <key column="TEMPLATE_ID" />
-      <one-to-many class="Measurement" />
-    </bag>
-
     <bag name="measurementArgs" table="EAM_MEASUREMENT_ARG"
-         cascade="save-update,delete,persist,merge,evict"
+         cascade="save-update,delete,persist,merge,evict,all-delete-orphan"
          inverse="true">
       <key column="MEASUREMENT_TEMPLATE_ID" />
       <one-to-many class="MeasurementArg" />

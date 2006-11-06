@@ -34,16 +34,23 @@ import org.hyperic.hq.measurement.MonitorableType;
 import org.hyperic.hq.measurement.MeasurementArg;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateLiteValue;
 import org.hyperic.hq.product.MeasurementInfo;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Iterator;
+import java.util.HashSet;
+import java.sql.Connection;
 
 /**
  * CRUD methods, finders, etc. for MeasurementTemplate
  */
 public class MeasurementTemplateDAO extends HibernateDAO
 {
+    private final static Log log =
+        LogFactory.getLog(MeasurementTemplateDAO.class);
+
     public MeasurementTemplateDAO(Session session) {
         super(MeasurementTemplate.class, session);
     }
@@ -56,12 +63,33 @@ public class MeasurementTemplateDAO extends HibernateDAO
      * Remove a raw template and it's associated derived measurement
      */
     public void remove(MeasurementTemplate mt) {
-        // Lookup derived template
-        MeasurementTemplate dmt =  
-            findByArgAndTemplate(mt.getId(), 
-                                 MeasurementConstants.TEMPL_IDENTITY); 
-        super.remove(dmt);
+        // Update the derived template
+        HashSet dm = new HashSet();
+        for (Iterator i = mt.getRawMeasurementArgs().iterator(); i.hasNext();) {
+            MeasurementArg raw = (MeasurementArg)i.next();
+            MeasurementTemplate derived = raw.getTemplate();
+            dm.add(derived);
+        }
+        // remove all dependent derived measurements and
+        // its measurements
+        for (Iterator i=dm.iterator(); i.hasNext();) {
+            MeasurementTemplate dmt = (MeasurementTemplate)i.next();
+            removeMeasurements(dmt);
+            super.remove(dmt);
+        }
+        removeMeasurements(mt);
         super.remove(mt);
+    }
+
+    private void removeMeasurements(MeasurementTemplate mt) {
+        String sql = "delete Measurement where template.id=?";
+        int rows = getSession().createQuery(sql)
+            .setInteger(0, mt.getId().intValue())
+            .executeUpdate();
+        if (log.isDebugEnabled()) {
+            log.debug("removed " + rows + " measurements for template id "+
+                      mt.getId());
+        }
     }
 
     public MeasurementTemplate create(MeasurementTemplateLiteValue lite,
@@ -108,7 +136,7 @@ public class MeasurementTemplateDAO extends HibernateDAO
         if (info.getCollectionType() != mt.getCollectionType()) {
             mt.setCollectionType(info.getCollectionType());
         }
-        if (pluginName.equals(mt.getPlugin())) {
+        if (!pluginName.equals(mt.getPlugin())) {
             mt.setPlugin(pluginName);
         }
         if (cat != null && !cat.equals(mt.getCategory())) {
