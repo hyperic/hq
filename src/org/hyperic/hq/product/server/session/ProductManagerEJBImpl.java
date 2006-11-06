@@ -28,8 +28,6 @@ package org.hyperic.hq.product.server.session;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
-import java.util.Iterator;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -51,12 +49,9 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ConfigManagerUtil;
-import org.hyperic.hq.appdef.shared.CPropKeyExistsException;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.CPropManagerLocalHome;
 import org.hyperic.hq.appdef.shared.CPropManagerUtil;
-import org.hyperic.hq.appdef.server.session.AppdefResourceType;
-import org.hyperic.hq.appdef.CpropKey;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
@@ -74,7 +69,6 @@ import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.pluginxml.PluginData;
 import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.hq.product.shared.PluginValue;
-import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.timer.StopWatch;
@@ -308,56 +302,24 @@ public class ProductManagerEJBImpl
                 toAdd.put(monitorableTypeId, newMeasurements);
             }
         }
-        this.log.info(pluginName + " deployment update took: " +
-                      timer + " seconds");
-
-        timer = new StopWatch();
         // For performance reasons, we add all the new measurements at once.
         tMan.createTemplates(pluginName, toAdd);
-        this.log.info(pluginName + " deployment createTemplates took: " +
-                      timer + " seconds");
 
-        timer = new StopWatch();
-        // Add any custom properties.  Need to further optimize the
-        // lookup of resource and the cpropkey
-        // for performance reasons, do lookups/searches and weed out duplicate
-        // keys first
+        // batch up cproperties
         HashMap cprops = new HashMap();
-        CPropManagerLocal cPropManager = this.getCPropManagerLocal();
         for (int i = 0; i < entities.length; i++) {
             TypeInfo info = entities[i];
             ConfigSchema schema = pplugin.getCustomPropertiesSchema(info);
             List options = schema.getOptions();
-            AppdefResourceType appdefType = cPropManager.findResourceType(info);
-            for (Iterator j=options.iterator(); j.hasNext();) {
-                ConfigOption opt = (ConfigOption)j.next();
-                CpropKey c = cPropManager.findByKey(appdefType, opt.getName());
-                if (c != null) {
-                    j.remove();
-                }
-            }
-            cprops.put(appdefType, options);
+            cprops.put(info, options);
         }
-        this.log.info(pluginName + " deployment findResourceType/findByKey " +
-                      "took: " + timer + " seconds");
-
-        timer = new StopWatch();
-        // add cpropkeys
-        for (Iterator i=cprops.keySet().iterator(); i.hasNext();) {
-            AppdefResourceType appdefType = (AppdefResourceType)i.next();
-            List options = (List)cprops.get(appdefType);
-            for (Iterator j = options.iterator(); j.hasNext();) {
-                ConfigOption opt = (ConfigOption)j.next();
-                cPropManager.addKey(appdefType,
-                                    opt.getName(),
-                                    opt.getDescription());
-            }
-        }
-        this.log.info(pluginName + " deployment addkey took: " +
-                      timer + " seconds");
+        // Add any custom properties.
+        CPropManagerLocal cPropManager = this.getCPropManagerLocal();
+        cPropManager.addCpropKey(cprops);
+        log.info(pluginName + " deployment took: " + timer + " seconds");
 
         pluginDeployed(pInfo);
-        this.updateEJBPlugin(plHome, pInfo);
+        updateEJBPlugin(plHome, pInfo);
     }
 
     private ConfigManagerLocal getConfigManagerLocal()

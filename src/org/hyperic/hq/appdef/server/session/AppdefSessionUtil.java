@@ -350,20 +350,4 @@ public abstract class AppdefSessionUtil {
                                                " " + appdefType);
         }
     }
-
-    protected AppdefResourceType findResourceType(TypeInfo info)
-    {
-        int type = info.getType();
-
-        if(type == AppdefEntityConstants.APPDEF_TYPE_PLATFORM){
-            return getPlatformTypeDAO().findByName(info.getName());
-        } else if(type == AppdefEntityConstants.APPDEF_TYPE_SERVER){
-            return getServerTypeDAO().findByName(info.getName());
-        } else if(type == AppdefEntityConstants.APPDEF_TYPE_SERVICE){
-            return getServiceTypeDAO().findByName(info.getName());
-        } else {
-            throw new IllegalArgumentException("Unrecognized appdef type:"+
-                                               " " + info);
-        }
-    }
 }
