@@ -27,6 +27,7 @@ package org.hyperic.hq.measurement;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.ArrayList;
 
 import org.hyperic.hibernate.PersistedObject;
 
@@ -52,9 +53,9 @@ public class MeasurementTemplate extends PersistedObject
     private long _mtime;
     private MonitorableType _monitorableType;
     private Category _category;
-    private Collection _measurements;
-    private Collection _measurementArgs;
-    private Collection _rawMeasurementArgs;
+    private Collection _measurements = new ArrayList();
+    private Collection _measurementArgs = new ArrayList();
+    private Collection _rawMeasurementArgs = new ArrayList();
 
     // Constructors
     public MeasurementTemplate() {
@@ -227,7 +228,7 @@ public class MeasurementTemplate extends PersistedObject
     public Collection getMeasurements() {
         return _measurements;
     }
-    
+
     public void setMeasurements(Collection measurements) {
         _measurements = measurements;
     }

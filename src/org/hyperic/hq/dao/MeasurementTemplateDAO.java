@@ -102,10 +102,16 @@ public class MeasurementTemplateDAO extends HibernateDAO
         }
 
         // Update raw template
-        mt.setTemplate(info.getTemplate());
-        mt.setCollectionType(info.getCollectionType());
-        mt.setPlugin(pluginName);
-        if (cat != null) {
+        if (!info.getTemplate().equals(mt.getTemplate())) {
+            mt.setTemplate(info.getTemplate());
+        }
+        if (info.getCollectionType() != mt.getCollectionType()) {
+            mt.setCollectionType(info.getCollectionType());
+        }
+        if (pluginName.equals(mt.getPlugin())) {
+            mt.setPlugin(pluginName);
+        }
+        if (cat != null && !cat.equals(mt.getCategory())) {
             mt.setCategory(cat);
         }
 
@@ -115,13 +121,25 @@ public class MeasurementTemplateDAO extends HibernateDAO
             MeasurementTemplate derived = raw.getTemplate();
             if (MeasurementConstants.TEMPL_IDENTITY
                 .equals(derived.getTemplate())) {
-                derived.setAlias(info.getAlias());
-                derived.setDesignate(info.isIndicator());
-                derived.setUnits(info.getUnits());
-                derived.setCollectionType(info.getCollectionType());
-                derived.setDefaultOn(info.isDefaultOn());
-                derived.setDefaultInterval(info.getInterval());
-                if (cat != null) {
+                if (!info.getAlias().equals(derived.getAlias())) {
+                    derived.setAlias(info.getAlias());
+                }
+                if (info.isIndicator() != derived.isDesignate()) {
+                    derived.setDesignate(info.isIndicator());
+                }
+                if (!info.getUnits().equals(derived.getUnits())) {
+                    derived.setUnits(info.getUnits());
+                }
+                if (info.getCollectionType() != derived.getCollectionType()) {
+                    derived.setCollectionType(info.getCollectionType());
+                }
+                if (info.isDefaultOn() != derived.isDefaultOn()) {
+                    derived.setDefaultOn(info.isDefaultOn());
+                }
+                if (info.getInterval() != derived.getDefaultInterval()) {
+                    derived.setDefaultInterval(info.getInterval());
+                }
+                if (cat != null && !cat.equals(derived.getCategory())) {
                     derived.setCategory(cat);
                 }
                 return;
@@ -193,6 +211,8 @@ public class MeasurementTemplateDAO extends HibernateDAO
     public List findRawByMonitorableType(Integer mtId) {
         String sql =
             "select t from MeasurementTemplate t " +
+            "join fetch t.rawMeasurementArgs ra " +
+            "join fetch ra.template dt " +
             "join t.monitorableType mt " +
             "where mt.id=? and t.defaultInterval=0";
 

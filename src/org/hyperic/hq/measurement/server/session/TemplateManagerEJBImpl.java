@@ -622,7 +622,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                 dao.update(mt, pluginName, info);
             }
         }
-        
         return tmap;
     }
 
