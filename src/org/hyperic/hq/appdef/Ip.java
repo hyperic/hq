@@ -26,6 +26,7 @@
 package org.hyperic.hq.appdef;
 
 import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.shared.IpValue;
 
 /**
  *
@@ -40,6 +41,12 @@ public class Ip extends IpBase
     public Ip()
     {
         super();
+    }
+
+    public Ip(IpValue ipv) {
+        setAddress(ipv.getAddress());
+        setNetmask(ipv.getNetmask());
+        setMACAddress(ipv.getMACAddress());
     }
 
     public Platform getPlatform()

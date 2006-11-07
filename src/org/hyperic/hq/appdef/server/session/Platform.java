@@ -109,6 +109,11 @@ public class Platform extends PlatformBase
         this.ips = ips;
     }
 
+    public void addIp(Ip ip) {
+        ips.add(ip);
+        ip.setPlatform(this);
+    }
+
     public Collection getServers()
     {
         return this.servers;

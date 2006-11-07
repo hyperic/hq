@@ -92,6 +92,7 @@ import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.hyperic.hq.autoinventory.ScanState;
 import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.autoinventory.AIPlatform;
+import org.hyperic.hq.autoinventory.AIHistory;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerLocal;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerUtil;
@@ -110,6 +111,7 @@ import org.hyperic.hq.product.shared.ProductManagerLocal;
 import org.hyperic.hq.product.shared.ProductManagerUtil;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
+import org.hyperic.hq.dao.AIHistoryDAO;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -519,6 +521,55 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                                          + "for agent: " + e, e);
         }
         return core;
+    }
+
+    /**
+     * create AIHistory
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public AIHistory createAIHistory(AppdefEntityID id,
+                                     Integer groupId,
+                                     Integer batchId,
+                                     String subjectName,
+                                     ScanConfigurationCore config,
+                                     String scanName,
+                                     String scanDesc,
+                                     Boolean scheduled,
+                                     long startTime,
+                                     long stopTime,
+                                     long scheduleTime,
+                                     String status,
+                                     String errorMessage)
+        throws AutoinventoryException {
+        return getHistoryDAO().create(id, groupId, batchId, subjectName,
+                                      config, scanName, scanDesc,
+                                      scheduled, startTime,
+                                      stopTime, scheduleTime,
+                                      status, null /*description*/,
+                                      errorMessage);
+    }
+
+    /**
+     * update AIHistory
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void updateAIHistory(Integer jobId, long endTime,
+                                   String status, String message)
+        throws FinderException, CreateException, NamingException
+    {
+        AIHistory local = getHistoryDAO().findById(jobId);
+
+        local.setEndTime(endTime);
+        local.setDuration(endTime - local.getStartTime());
+        local.setStatus(status);
+        local.setMessage(message);
+    }
+
+    protected AIHistoryDAO getHistoryDAO()
+    {
+        return DAOFactory.getDAOFactory().getAIHistoryDAO();
     }
 
     /**

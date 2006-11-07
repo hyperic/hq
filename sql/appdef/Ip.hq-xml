@@ -9,7 +9,6 @@
 
   <class name="Ip" table="EAM_IP">
     <id name="id" type="integer">
-      <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />
       <generator class="sequence">
         <param name="sequence">EAM_IP_ID_SEQ</param>

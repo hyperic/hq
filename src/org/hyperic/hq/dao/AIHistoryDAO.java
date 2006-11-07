@@ -80,9 +80,7 @@ public class AIHistoryDAO extends HibernateDAO
                             long dateScheduled,
                             String status,
                             String description,
-                            String message)
-        throws CreateException, AutoinventoryException
-    {
+                            String message) throws AutoinventoryException {
         AIHistory h = new AIHistory();
 
         h.setGroupId(groupId);

@@ -34,10 +34,12 @@ import java.util.Set;
 
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.IpValue;
 
 public class PlatformType extends AppdefResourceType {
     private String            _os;
@@ -212,8 +214,13 @@ public class PlatformType extends AppdefResourceType {
         p.setOwner(pv.getOwner());
         p.setPlatformType(this);
         p.setAgent(agent);
-        p.getIps().addAll(pv.getAddedIpValues());
+        p.setConfigResponse(config);
 
+        for (Iterator i=pv.getAddedIpValues().iterator(); i.hasNext();) {
+            IpValue ipv = (IpValue)i.next();
+            Ip ip = new Ip(ipv);
+            p.addIp(ip);
+        }
         registerNewPlatform(p);
         return p;
     }

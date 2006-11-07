@@ -41,6 +41,8 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.hyperic.hq.autoinventory.AIHistory;
+import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
+import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerUtil;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.scheduler.server.session.BaseJob;
@@ -166,11 +168,12 @@ public abstract class AIJob extends BaseJob {
                                       String errorMessage)
         throws CreateException, NamingException, AutoinventoryException
     {
-        return getHistoryDAO().create(id, groupId, batchId, subjectName,
+        AutoinventoryManagerLocal alocal = getAutoInventoryManager();
+        return alocal.createAIHistory(id, groupId, batchId, subjectName,
                                       config, scanName, scanDesc,
                                       scheduled, startTime,
                                       stopTime, scheduleTime,
-                                      status, null /*description*/,
+                                      status,
                                       errorMessage);
     }
 
@@ -178,20 +181,20 @@ public abstract class AIJob extends BaseJob {
                                  String status, String message)
         throws FinderException, CreateException, NamingException
     {
-        AIHistory local = getHistoryDAO().findById(jobId);
-
-        local.setEndTime(endTime);
-        local.setDuration(endTime - local.getStartTime());
-        local.setStatus(status);
-        local.setMessage(message);
+        AutoinventoryManagerLocal alocal = getAutoInventoryManager();
+        alocal.updateAIHistory(jobId, endTime, status, message);
     }
 
-    protected AIHistoryDAO getHistoryDAO()
-    {
-        return DAOFactory.getDAOFactory().getAIHistoryDAO();
+    private AutoinventoryManagerLocal aimanager = null;
+    protected AutoinventoryManagerLocal getAutoInventoryManager()
+        throws NamingException, CreateException {
+        if (aimanager == null) {
+            aimanager = AutoinventoryManagerUtil.getLocalHome().create();
+        }
+        return aimanager;
     }
 
-    // Public interface for quartz 
+    // Public interface for quartz
     public abstract void execute(JobExecutionContext context)
         throws JobExecutionException;
 

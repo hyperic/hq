@@ -451,8 +451,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             else
                 config = configDAO.findById(pValue.getConfigResponseId());
                 
-            this.trimStrings(pValue);
-            this.counter.addCPUs(pValue.getCpuCount().intValue());
+            trimStrings(pValue);
+            counter.addCPUs(pValue.getCpuCount().intValue());
             validateNewPlatform(pValue);
             PlatformTypeDAO ptLHome =
                 DAOFactory.getDAOFactory().getPlatformTypeDAO();
