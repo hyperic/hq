@@ -34,6 +34,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
+import org.hibernate.transaction.JTATransactionFactory;
 
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
@@ -72,11 +73,13 @@ public class Util {
             if (mocktest) {
                 // set the proper hibernate configuration for mockejb test
                 Properties prop = configuration.getProperties();
-                prop.remove(Environment.TRANSACTION_MANAGER_STRATEGY);
                 String jta = System.getProperty(Environment.USER_TRANSACTION);
                 if (jta == null) {
                     jta = "javax.transaction.UserTransaction";
                 }
+                prop.setProperty(Environment.TRANSACTION_STRATEGY,
+                                 JTATransactionFactory.class.getName());
+                prop.remove(Environment.TRANSACTION_MANAGER_STRATEGY);
                 prop.setProperty(Environment.USER_TRANSACTION, jta);
                 configuration.setProperties(prop);
             }
