@@ -28,8 +28,7 @@ package org.hyperic.hibernate.dialect;
 /**
  *
  */
-public class HypericDialect
-{
+public class HypericDialectConstants {
     // defines for database sequencer start number
     public static final int SEQUENCE_START = 10001;
     // sequence numbers to prefetch and cache

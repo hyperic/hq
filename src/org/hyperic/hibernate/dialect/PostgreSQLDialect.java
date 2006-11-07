@@ -41,9 +41,9 @@ public class PostgreSQLDialect
             .append("create sequence ")
             .append(sequenceName)
             .append(" start ")
-            .append(HypericDialect.SEQUENCE_START)
+            .append(HypericDialectConstants.SEQUENCE_START)
             .append(" increment 1 cache ")
-            .append(HypericDialect.SEQUENCE_CACHE)
+            .append(HypericDialectConstants.SEQUENCE_CACHE)
             .toString();
     }
 }

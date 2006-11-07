@@ -44,9 +44,9 @@ public class Oracle9Dialect
             .append("create sequence ")
             .append(sequenceName)
             .append(" start with ")
-            .append(HypericDialect.SEQUENCE_START)
+            .append(HypericDialectConstants.SEQUENCE_START)
             .append(" increment by 1 cache ")
-            .append(HypericDialect.SEQUENCE_CACHE)
+            .append(HypericDialectConstants.SEQUENCE_CACHE)
             .toString();
     }
 }
