@@ -313,7 +313,6 @@ public class ProductManagerEJBImpl
         tMan.createTemplates(pluginName, toAdd);
 
         // Add any custom properties.
-        HashMap cprops = new HashMap();
         CPropManagerLocal cPropManager = this.getCPropManagerLocal();
         for (int i = 0; i < entities.length; i++) {
             TypeInfo info = entities[i];
