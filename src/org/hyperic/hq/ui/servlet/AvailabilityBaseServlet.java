@@ -143,14 +143,15 @@ public abstract class AvailabilityBaseServlet extends HttpServlet {
                 Thread t = new Thread(tg, ac);
                 t.setDaemon(true);
                 t.start();
-                while ( timer.getElapsed() < timeoutMillis.longValue() &&
-                        t.isAlive() && ac.getAvailValue() == null) {
+                while (timer.getElapsed() < timeoutMillis.longValue() &&
+                       t.isAlive() && ac.getAvailValue() == null) {
                     try { 
                         Thread.sleep(1000); /*  wait a sec  */
                     } catch (InterruptedException e) {
                         break;
                     }
                 }
+
                 if (ac.getAvailValue() != null) {
                     val = ac.getAvailValue().doubleValue();
                 } else {
@@ -165,6 +166,7 @@ public abstract class AvailabilityBaseServlet extends HttpServlet {
                     val = boss.getAGAvailability(sessionId, eids, atid);
                 }
             }
+
             if (log.isTraceEnabled())
                 log.trace("Elapsed time: " + timer.getElapsed() + " ms");
     
@@ -179,8 +181,7 @@ public abstract class AvailabilityBaseServlet extends HttpServlet {
             } else {
                 sendWarningIcon(request, response);
             }
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             log.debug("can't get availability measurement: ", t);
             sendErrorIcon(request, response);
             return;

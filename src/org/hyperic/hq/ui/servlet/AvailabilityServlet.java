@@ -40,8 +40,6 @@ import org.apache.commons.logging.LogFactory;
  */
 public class AvailabilityServlet extends AvailabilityBaseServlet {
 
-    //-------------------------------------constants
-
     private static final String ICON_ERR_URL =
         "/images/icon_available_error.gif";
 
@@ -61,26 +59,18 @@ public class AvailabilityServlet extends AvailabilityBaseServlet {
         ICON_ERR_URL, ICON_AVAIL_URL, ICON_UNAVAIL_URL, ICON_WARNING_URL,
         ICON_PAUSED_URL };
 
-   private static Log log =
+    private static Log log =
        LogFactory.getLog(AvailabilityServlet.class.getName());
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.hyperic.hq.ui.servlet.AvailabilityBaseServlet#getIconUrls()
-     */
     protected String[] getIconUrls() {
         return iconUrls;
     }
 
-    //-------------------------------------instance variables
-
     protected void sendAvailIcon(HttpServletRequest request,
-                               HttpServletResponse response) {
+                                 HttpServletResponse response) {
         try {
             sendIcon(request, response, ICON_AVAIL_URL);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.debug("can't send avail icon: ", e);
             sendErrorIcon(request, response);
         }
@@ -90,8 +80,7 @@ public class AvailabilityServlet extends AvailabilityBaseServlet {
                                    HttpServletResponse response) {
         try {
             sendIcon(request, response, ICON_UNAVAIL_URL);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.debug("can't send unavail icon: ", e);
             sendErrorIcon(request, response);
         }
@@ -131,9 +120,7 @@ public class AvailabilityServlet extends AvailabilityBaseServlet {
                                   HttpServletResponse response) {
         try {
             sendIcon(request, response, ICON_PAUSED_URL);
-            return;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.debug("can't send paused icon: ", e);
             sendErrorIcon(request, response);
         }
