@@ -28,7 +28,6 @@ package org.hyperic.hq.appdef.server.session;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.dialect.Dialect;
-import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.CpropKeyDAO;
 import org.hyperic.hibernate.Util;
@@ -51,7 +50,6 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
-import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.jdbc.DBUtil;
 
 import javax.ejb.CreateException;
@@ -66,7 +64,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import java.util.HashMap;
 
 /**
  * @ejb:bean name="CPropManager"
@@ -117,119 +114,41 @@ public class CPropManagerEJBImpl
     }
 
     /**
-     * optimized version to add cpropkey
-     * @param cprops
+     * find appdef resource type
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
-    public void addCpropKey(HashMap cprops)
+    public AppdefResourceType findResourceType(TypeInfo info)
     {
-        String platformSql= " select id from eam_platform_type where name=? ";
-        String serverSql = " select id from eam_server_type where name=? ";
-        String serviceSql = " select id from eam_service_type where name=? ";
-
-        String cpropkeySql = " select id from eam_cprop_key where " +
-                             "appdef_type=? and appdef_typeid=? and propkey=? ";
-
-        Session session = DAOFactory.getDAOFactory().getCurrentSession();
-        session.flush();
-        
-        Connection conn = session.connection();
-        PreparedStatement rstmt = null;
-        PreparedStatement cstmt = null;
-        ResultSet rs = null;
-        ResultSet crs = null;
-        try {
-            for (Iterator i=cprops.keySet().iterator(); i.hasNext();) {
-                int instanceId = 0;
-                TypeInfo info = (TypeInfo)i.next();
-                int tp = info.getType();
-                boolean found = false;
-                try {
-                    String name = info.getName();
-                    if (tp == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
-                        rstmt = conn.prepareStatement(serviceSql);
-                    } else if (tp==AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-                        rstmt = conn.prepareStatement(serverSql);
-                    } else if (tp==AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-                        rstmt = conn.prepareStatement(platformSql);
-                    } else {
-                        throw new IllegalArgumentException(
-                            "invalid type: "+ tp);
-                    }
-                    int col = 1;
-                    rstmt.setString(col, name);
-                    rs = rstmt.executeQuery();
-                    found = rs.next();
-                    if (found) {
-                        instanceId = rs.getInt(1);
-                    }
-                } catch (SQLException s) {
-                    throw new RuntimeException(s);
-                } finally {
-                    DBUtil.closeJDBCObjects(log, null, rstmt, rs);
-                }
-                if (found) {
-                    List options = (List)cprops.get(info);
-                    for (Iterator j=options.iterator(); j.hasNext();) {
-                        ConfigOption opt = (ConfigOption)j.next();
-                        found = true;
-                        try {
-                            int col = 1;
-                            cstmt = conn.prepareStatement(cpropkeySql);
-                            cstmt.setInt(col++, tp);
-                            cstmt.setInt(col++, instanceId);
-                            cstmt.setString(col, opt.getName());
-                            crs = cstmt.executeQuery();
-                            found = crs.next();
-                        } catch (SQLException s) {
-                            throw new RuntimeException(s);
-                        } finally {
-                            DBUtil.closeJDBCObjects(log, null, cstmt, crs);
-                        }
-                        if (!found) {
-                            // add key if it does not exist
-                            addkey(conn, tp, instanceId,
-                                   opt.getName(), opt.getDescription());
-                        }
-                    }
-                }
-            }
-        } finally {
-            session.disconnect();
-        }
+        return super.findResourceType(info);
     }
 
-    private void addkey(Connection conn, int type, int instanceId,
-                        String key, String description)
+    /**
+     * find Cprop by key to a resource type based on a TypeInfo object.
+     * @ejb:interface-method
+     */
+    public CpropKey findByKey(AppdefResourceType appdefType, String key)
     {
-        Dialect dialect = Util.getDialect();
-        StringBuffer cpropsql =  new StringBuffer(" insert into eam_cprop_key(");
-        if (dialect.supportsSequences()) {
-            cpropsql.append(
-                "id, appdef_type, appdef_typeid, propkey, description) values (")
-                .append(dialect.getSelectSequenceNextValString(
-                    "EAM_CPROP_KEY_ID_SEQ"))
-                .append(",?,?,?,?)");
-        } else {
-            cpropsql.append(
-                "appdef_type,appdef_typeid, propkey, description) values (")
-                .append("?,?,?,?) ");
-        }
-        PreparedStatement ps = null;
-        try {
-            ps = conn.prepareStatement(cpropsql.toString());
-            int col=1;
-            ps.setInt(col++, type);
-            ps.setInt(col++, instanceId);
-            ps.setString(col++, key);
-            ps.setString(col, description);
-            ps.execute();
-        } catch (SQLException s) {
-            throw new RuntimeException(s);
-        } finally {
-            DBUtil.closeJDBCObjects(log, null, ps, null);
-        }
+        int type = appdefType.getAppdefType();
+        int instanceId = appdefType.getId().intValue();
+
+        return getCPropKeyDAO().findByKey(type, instanceId, key);
+    }
+
+    /**
+     * Add a key to a resource type based on a TypeInfo object.
+     *
+     * @throw AppdefEntityNotFoundException if the appdef resource type
+     *        that the key references could not be found
+     * @throw CPropKeyExistsException if the key already exists
+     * @ejb:interface-method
+     */
+    public void addKey(AppdefResourceType appdefType,
+                       String key, String description)
+    {
+        int type = appdefType.getAppdefType();
+        int instanceId = appdefType.getId().intValue();
+
+        getCPropKeyDAO().create(type, instanceId, key, description);
     }
 
     /**
