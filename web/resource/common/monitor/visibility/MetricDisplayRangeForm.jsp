@@ -266,6 +266,10 @@
 <script language="javascript">
   function hideAdvanced() {
     var advancedDiv = $('advancedDisplay');
+    new Effect.Fade(advancedDiv, {duration: 0});
+  }
+
+  function showAdvanced() {
     new Rico.Effect.Position( 'advancedDisplay',
                                advancedDisplay.offsetLeft - advancedDisplay.offsetWidth,
                                null, // move across x axis
@@ -273,10 +277,7 @@
                                1, // 1 steps
                                {}
                              );
-    new Effect.Fade(advancedDiv, {duration: 0});
-  }
 
-  function showAdvanced() {
     new Effect.Appear('advancedDisplay', {to: 0.85});
     $('advancedDisplay').style.visibility = "visible";
     if ($('simpleRn')) {
