@@ -8,7 +8,6 @@
 
   <class name="RegisteredTrigger" table="EAM_REGISTERED_TRIGGER">
     <id name="id" type="integer">
-      <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />
       <generator class="sequence">
         <param name="sequence">EAM_REGISTERED_TRIGGER_ID_SEQ</param>

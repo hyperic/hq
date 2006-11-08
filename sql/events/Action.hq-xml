@@ -41,7 +41,9 @@
       <column name="ALERT_DEFINITION_ID" />
     </many-to-one>
 
-    <bag name="logEntriesBag" table="EAM_ALERT_ACTION_LOG">
+    <bag name="logEntriesBag" table="EAM_ALERT_ACTION_LOG"
+         cascade="delete,all-delete-orphan"
+         inverse="true">
       <key column="ACTION_ID" />
       <one-to-many class="AlertActionLog" />
     </bag>
