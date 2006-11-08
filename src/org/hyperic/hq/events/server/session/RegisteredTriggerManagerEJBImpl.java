@@ -46,7 +46,7 @@ import org.hyperic.hq.events.shared.RegisteredTriggerValue;
  *      view-type="local"
  *      type="Stateless"
  * 
- * @ejb:transaction type="Required"
+ * @ejb:transaction type="REQUIRED"
  */
 
 public class RegisteredTriggerManagerEJBImpl implements SessionBean {
@@ -65,7 +65,6 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
     /**
      * Get a collection of all triggers
      *
-     * @ejb:transaction type="REQUIRED"
      * @ejb:interface-method
      */
     public Collection getAllTriggers() {
@@ -88,7 +87,6 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
      *
      * @return a RegisteredTriggerValue 
      *
-     * @ejb:transaction type="REQUIRED"
      * @ejb:interface-method
      */
     public RegisteredTriggerValue createTrigger(RegisteredTriggerValue val) {
@@ -102,7 +100,6 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
     /**
      * Update a trigger.
      *
-     * @ejb:transaction type="REQUIRED"
      * @ejb:interface-method
      */
     public void updateTrigger(RegisteredTriggerValue val) {
@@ -118,7 +115,6 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
      * Delete a trigger.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void deleteTrigger(Integer trigId) {
         RegisteredTrigger t = getRegisteredTrigger(trigId);
@@ -134,7 +130,6 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
      * Delete all triggers for an alert definition.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void deleteAlertDefinitionTriggers(Integer adId) {
         AlertDefinition def = getAlertDefDAO().findById(adId);
