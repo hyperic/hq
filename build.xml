@@ -1668,7 +1668,8 @@
     <mkdir dir="${hq.javadoc.dest.dir}" />
     <javadoc
       destdir="${hq.javadoc.dest.dir}"
-      private="true"
+      private="false"
+      package="false"
       version="true"
       author="true"
       maxmemory="256M"
@@ -1678,8 +1679,8 @@
       overview="doc/javadoc-overview.html"
       windowtitle="Hyperic HQ Management System">
       <sourcepath>
-      <pathelement location="src"/>
-      <pathelement location="build/src"/>
+        <pathelement location="src"/>
+        <pathelement location="build/src"/>
       </sourcepath>
       <classpath>
         <path refid="alljars" />
