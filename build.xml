@@ -450,7 +450,6 @@
         <include name="cglib-2.1.3.jar" />
         <include name="concurrent-1.3.2.jar" />
         <include name="dom4j-1.6.1.jar" />
-        <include name="ehcache-1.1.jar" />
         <include name="hibernate3.jar" />
       </fileset>
     </copy>
