@@ -93,3 +93,8 @@ License: http://www.dom4j.org/license.html
 - Prototype Window Class -
 Information: http://prototype-window.xilinus.com
 License: http://prototype-window.xilinus.com/index.html
+
+- bockport-util-concurrent -
+Information:  http://dcl.mathcs.emory.edu/util/backport-util-concurrent
+License: http://creativecommons.org/licenses/publicdomain
+
