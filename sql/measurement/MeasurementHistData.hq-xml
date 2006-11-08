@@ -7,15 +7,13 @@
 <hibernate-mapping
   package="org.hyperic.hq.measurement">
 
-  <class name="MeasurementHistData"
-         table="EAM_MEASUREMENT_DATA_1H" entity-name="MeasumentData1H">
+  <class name="MeasurementHistData" table="EAM_MEASUREMENT_DATA_1H" entity-name="MeasumentData1H">
     <composite-id name="id" class="MeasurementDataId">
-      <key-many-to-one name="measurement" class="Measurement">
+      <key-property name="measurementId" type="integer">
         <column name="MEASUREMENT_ID" not-null="true" />
-      </key-many-to-one>
+      </key-property>
       <key-property name="timestamp" type="long">
-        <column name="TIMESTAMP"
-                index="MEASUREMENT_DATA_1H_TIME_IDX" not-null="true" />
+        <column name="TIMESTAMP" index="MEASUREMENT_DATA_1H_TIME_IDX" not-null="true" />
       </key-property>
     </composite-id>
 
@@ -32,15 +30,13 @@
     </property>
   </class>
 
-  <class name="MeasurementHistData"
-         entity-name="MeasurementData6H" table="EAM_MEASUREMENT_DATA_6H">
+  <class name="MeasurementHistData" entity-name="MeasurementData6H" table="EAM_MEASUREMENT_DATA_6H">
     <composite-id name="id" class="MeasurementDataId">
-      <key-many-to-one name="measurement" class="Measurement">
+      <key-property name="measurementId" type="integer">
         <column name="MEASUREMENT_ID" not-null="true" />
-      </key-many-to-one>
+      </key-property>
       <key-property name="timestamp" type="long">
-        <column name="TIMESTAMP"
-                index="MEASUREMENT_DATA_6H_TIME_IDX" not-null="true" />
+        <column name="TIMESTAMP" index="MEASUREMENT_DATA_6H_TIME_IDX" not-null="true" />
       </key-property>
     </composite-id>
 
@@ -57,15 +53,13 @@
     </property>
   </class>
 
-  <class name="MeasurementHistData"
-         entity-name="MeasurementData1D" table="EAM_MEASUREMENT_DATA_1D">
+  <class name="MeasurementHistData" entity-name="MeasurementData1D" table="EAM_MEASUREMENT_DATA_1D">
     <composite-id name="id" class="MeasurementDataId">
-      <key-many-to-one name="measurement" class="Measurement">
+      <key-property name="measurementId" type="integer">
         <column name="MEASUREMENT_ID" not-null="true" />
-      </key-many-to-one>
+      </key-property>
       <key-property name="timestamp" type="long">
-        <column name="TIMESTAMP"
-                index="MEASUREMENT_DATA_1D_TIME_IDX" not-null="true" />
+        <column name="TIMESTAMP" index="MEASUREMENT_DATA_1D_TIME_IDX" not-null="true" />
       </key-property>
     </composite-id>
 

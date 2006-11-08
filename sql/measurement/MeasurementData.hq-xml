@@ -10,9 +10,9 @@
   <class name="MeasurementData" table="EAM_MEASUREMENT_DATA">
     <!-- create an combined index -->
     <composite-id name="id" class="MeasurementDataId">
-      <key-many-to-one name="measurement" class="Measurement">
+      <key-property name="measurementId" type="integer">
         <column name="MEASUREMENT_ID" not-null="true" />
-      </key-many-to-one>
+      </key-property>
       <key-property name="timestamp" type="long">
         <column name="TIMESTAMP" index="MEASUREMENT_DATA_TIME_IDX" not-null="true" />
       </key-property>
