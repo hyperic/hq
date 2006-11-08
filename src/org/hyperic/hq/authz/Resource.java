@@ -44,6 +44,7 @@ public class Resource extends AuthzNamedBean
     private AuthzSubject owner;
     private boolean system = false;
     private Collection resourceGroups = new ArrayList();
+    private Collection virtuals = new ArrayList();
 
     private ResourceValue resourceValue = new ResourceValue();
 
@@ -134,6 +135,14 @@ public class Resource extends AuthzNamedBean
     public Collection getResourceGroups()
     {
         return resourceGroups;
+    }
+
+    public Collection getVirtuals() {
+        return virtuals;
+    }
+
+    public void setVirtuals(Collection virtuals) {
+        this.virtuals = virtuals;
     }
 
     public void setResourceGroups(Collection val)

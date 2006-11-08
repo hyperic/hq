@@ -9,7 +9,6 @@
 
   <class name="Resource" table="EAM_RESOURCE">
     <id name="id" type="integer">
-      <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />
       <generator class="sequence">
         <param name="sequence">EAM_RESOURCE_ID_SEQ</param>
@@ -54,6 +53,15 @@
          inverse="true">
       <key column="RESOURCE_ID"/>
       <many-to-many class="ResourceGroup" column="RESOURCE_GROUP_ID" />
+    </bag>
+
+    <!-- these are maintained for primarily for cascade (delete)
+         relationships -->
+    <bag name="virtuals" table="EAM_VIRTUAL"
+        cascade="delete,all-delete-orphan"
+        inverse="true">
+      <key column="RESOURCE_ID"/>
+      <one-to-many class="Virtual" />
     </bag>
 
   </class>

@@ -25,10 +25,6 @@
       <column name="SRN" not-null="true" />
     </property>
 
-    <!-- for Pojo -->
-    <property name="minInterval" type="long" formula="0" insert="false" update="false" />
-    <property name="lastReported" type="long" formula="0" insert="false" update="false" />
-    <property name="pending" type="boolean" formula="false" insert="false" update="false" />
   </class>
 
 </hibernate-mapping>

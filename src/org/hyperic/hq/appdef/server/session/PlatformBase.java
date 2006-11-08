@@ -52,7 +52,7 @@ public abstract class PlatformBase extends AppdefResource
     public AppdefEntityID getEntityId()
     {
         return new AppdefEntityID(
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE,
+            AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
             getId().intValue());
     }
 

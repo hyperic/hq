@@ -37,7 +37,6 @@ public class ResourceType extends AuthzNamedBean
     private Resource resource;
     private boolean system = false;
     private Collection operations = new ArrayList();
-    private Collection resources = new ArrayList();
 
     private ResourceTypeValue resourceTypeValue = new ResourceTypeValue();
 
@@ -55,14 +54,12 @@ public class ResourceType extends AuthzNamedBean
 
     /** full constructor */
     public ResourceType(String name, Integer cid, Resource resource,
-                        boolean fsystem, Collection operations,
-                        Collection resources) {
+                        boolean fsystem, Collection operations) {
         super(name);
         this.cid = cid;
         this.resource = resource;
         this.system = fsystem;
         this.operations = operations;
-        this.resources = resources;
     }
 
     public Integer getCid() {
@@ -95,14 +92,6 @@ public class ResourceType extends AuthzNamedBean
 
     public void setOperations(Collection val) {
         operations = val;
-    }
-
-    public Collection getResources() {
-        return resources;
-    }
-
-    public void setResources(Collection val) {
-        resources = val;
     }
 
     /**
