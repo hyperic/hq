@@ -37,6 +37,8 @@ public class ZeventManager {
     // The actual queue processor thread
     private Thread _processorThread;
     
+    private final Object _listenerLock = new Object();
+    
     /* Set of {@link ZeventListener}s listening to events of all types */
     private final Set _globalListeners = new HashSet(); 
 
@@ -81,7 +83,7 @@ public class ZeventManager {
     public boolean registerEventClass(Class eventClass) {
         assertClassIsZevent(eventClass);
      
-        synchronized (_listeners) {
+        synchronized (_listenerLock) {
             if (_listeners.containsKey(eventClass))
                 return false;
             
@@ -99,7 +101,7 @@ public class ZeventManager {
     public boolean unregisterEventClass(Class eventClass) {
         assertClassIsZevent(eventClass);
         
-        synchronized (_listeners) {
+        synchronized (_listenerLock) {
             return _listeners.remove(eventClass) != null;
         }
     }
@@ -122,13 +124,13 @@ public class ZeventManager {
      * @return false if the listener was not listening
      */
     public boolean removeGlobalListener(ZeventListener listener) {
-        synchronized (_listeners) {
+        synchronized (_listenerLock) {
             return _globalListeners.remove(listener);
         }
     }
     
     private List getEventTypeListeners(Class eventClass) {
-        synchronized (_listeners) {
+        synchronized (_listenerLock) {
             List res = (List)_listeners.get(eventClass);
             
             if (res == null)
@@ -148,7 +150,7 @@ public class ZeventManager {
     public boolean addListener(Class eventClass, ZeventListener listener) {
         assertClassIsZevent(eventClass);
 
-        synchronized (_listeners) {
+        synchronized (_listenerLock) {
             List listeners = getEventTypeListeners(eventClass);
 
             if (listeners.contains(listener))
@@ -165,7 +167,7 @@ public class ZeventManager {
     public boolean removeListener(Class eventClass, ZeventListener listener) {
         assertClassIsZevent(eventClass);
         
-        synchronized (_listeners) {
+        synchronized (_listenerLock) {
             List listeners = getEventTypeListeners(eventClass);
             
             return listeners.remove(listener);
@@ -196,7 +198,7 @@ public class ZeventManager {
     void dispatchEvent(Zevent e) {
         List listeners;
             
-        synchronized (_listeners) {
+        synchronized (_listenerLock) {
             List typeListeners = (List)_listeners.get(e.getClass());
 
             if (typeListeners == null) {
