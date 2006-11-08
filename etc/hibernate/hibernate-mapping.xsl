@@ -18,11 +18,46 @@
             <xsl:apply-templates select="node()" />
         </xsl:copy>
     </xsl:template>
+  
+    <xsl:template match="bag">
+      <xsl:copy>
+        <xsl:attribute name="inverse">
+          <xsl:value-of select="'true'"/>
+        </xsl:attribute>
+        <xsl:attribute name="cascade">
+          <xsl:value-of select="'save-update,delete,evict,persist,merge'"/>
+        </xsl:attribute>
+        <xsl:apply-templates select="@*" />
+        <xsl:choose>
+          <xsl:when test="one-to-many">
+            <xsl:apply-templates mode="key-mode" select="node()" />
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:apply-templates select="node()" />
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:copy>
+    </xsl:template>
 
-    <!--
-      enable select-before-update, make sure there are real
-      updates before really doing SQL update
-    -->
+    <xsl:template mode="key-mode" match="key">
+      <xsl:copy>
+        <xsl:attribute name="on-delete">
+          <xsl:value-of select="'cascade'"/>
+        </xsl:attribute>
+        <xsl:apply-templates select="@*" />
+        <xsl:apply-templates select="node()" />
+      </xsl:copy>
+    </xsl:template>
+
+    <!-- join main processing loop -->
+    <xsl:template mode="key-mode" match="node()">
+      <xsl:apply-templates select="."/>
+    </xsl:template>
+
+  <!--
+    enable select-before-update, make sure there are real
+    updates before really doing SQL update
+  -->
     <xsl:template match="@select-before-update">
       <xsl:attribute name="{name()}">
         <xsl:value-of select="'true'"/>
@@ -34,7 +69,7 @@
       <xsl:copy/>
     </xsl:template>
     <!-- except these ... -->
-    <xsl:template match="@dialect"/>
+    <xsl:template match="@dialect | @on-delete | @inverse"/>
 
     <!-- ignore elements and sql dialects not in context -->
     <xsl:template match="*[@dialect]">

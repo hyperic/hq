@@ -38,6 +38,7 @@ import java.util.List;
 
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
+import javax.ejb.CreateException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -55,6 +56,8 @@ import org.hyperic.hq.measurement.SRNCreateException;
 import org.hyperic.hq.measurement.ScheduleRevNum;
 import org.hyperic.hq.measurement.SrnId;
 import org.hyperic.hq.measurement.shared.ScheduleRevNumValue;
+import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
+import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.util.jdbc.DBUtil;
 
 /**
@@ -302,9 +305,15 @@ public class SRNCache {
 
         if (srnVal != null) {
             // Update the local EJB
-            SrnId srnId = new SrnId(eid.getType(), eid.getID());
-            ScheduleRevNum srn = getScheduleRevNumDAO().findById(srnId);
-            getScheduleRevNumDAO().remove(srn);
+            try {
+                MeasurementProcessorLocal mlocal =
+                    MeasurementProcessorUtil.getLocalHome().create();
+                mlocal.removeSRN(eid);
+            } catch (CreateException e) {
+                throw new RuntimeException(e);
+            } catch (NamingException e) {
+                throw new RuntimeException(e);
+            }
             srnVal.setSRN(0);
         }
         

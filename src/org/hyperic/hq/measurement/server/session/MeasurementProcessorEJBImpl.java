@@ -55,6 +55,8 @@ import org.hyperic.hq.measurement.SRNCreateException;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.DerivedMeasurement;
 import org.hyperic.hq.measurement.RawMeasurement;
+import org.hyperic.hq.measurement.SrnId;
+import org.hyperic.hq.measurement.ScheduleRevNum;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.ext.MonitorFactory;
 import org.hyperic.hq.measurement.ext.MonitorInterface;
@@ -69,6 +71,7 @@ import org.hyperic.hq.measurement.monitor.MonitorCreateException;
 import org.hyperic.hq.measurement.server.mbean.SRNCache;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.RawMeasurementValue;
+import org.hyperic.hq.measurement.shared.ScheduleRevNumValue;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -316,6 +319,15 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
                       entId, e);
                       */
         }
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public void removeSRN(AppdefEntityID eid) {
+        SrnId srnId = new SrnId(eid.getType(), eid.getID());
+        ScheduleRevNum srn = getScheduleRevNumDAO().findById(srnId);
+        getScheduleRevNumDAO().remove(srn);
     }
 
     /** Unschedule a measurement
