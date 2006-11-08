@@ -35,13 +35,10 @@ import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.dao.OperationDAO;
-import org.hyperic.hq.dao.ResourceTypeDAO;
 import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.hq.authz.Operation;
 import org.hyperic.hq.authz.Resource;
@@ -56,6 +53,8 @@ import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceVOHelperUtil;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.dao.OperationDAO;
+import org.hyperic.hq.dao.ResourceTypeDAO;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -126,9 +125,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * Delete the specified ResourceType.
      * @param whoami The current running user.
      * @param type The type to delete.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception RemoveException Unable to delete the specified entity.
      * @ejb:interface-method
      */
     public void removeResourceType(AuthzSubjectValue whoami,
@@ -146,9 +142,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * Write the specified entity out to permanent storage.
      * @param whoami The current running user.
      * @param type The type to save.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami may not perform modifyResourceType on this role.
+     * @throws PermissionException whoami may not perform modifyResourceType on this role.
      * @ejb:interface-method
      */
     public void saveResourceType(AuthzSubjectValue whoami,
@@ -169,15 +163,11 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param whoami The current running user.
      * @param type The type.
      * @param operations The operations to associate with the role. These operations will be created. Use setOperations() to associate existing operations.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
-     * @exception PermissionException whoami may not perform addOperation on this type.
      * @ejb:interface-method
      */
     public void addOperations(AuthzSubjectValue whoami,
                               ResourceTypeValue type,
-                              OperationValue[] operations)
-        throws PermissionException {
+                              OperationValue[] operations) {
         ResourceType resType = getResourceTypeDAO().findById(type.getId());
         Collection rtOps = resType.getOperations();
         rtOps.addAll(toPojos(operations));
@@ -188,15 +178,11 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param whoami The current running user.
      * @param type The type.
      * @param operations The roles to disassociate. These operations will be deleted.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
-     * @exception PermissionException whoami may not perform removeOperation on this type.
      * @ejb:interface-method
      */
     public void removeOperations(AuthzSubjectValue whoami,
                                  ResourceTypeValue type,
-                                 OperationValue[] operations)
-        throws PermissionException {
+                                 OperationValue[] operations) {
         Set opPojos = toPojos(operations);
         ResourceType resType = getResourceTypeDAO().findById(type.getId());
         for (Iterator it = resType.getOperations().iterator(); it.hasNext(); ) {
@@ -211,14 +197,10 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * Disassociate all operations from this role. All operations will be deleted.
      * @param whoami The current running user.
      * @param type The role.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
-     * @exception PermissionException whoami may not perform removeOperation on this type.
      * @ejb:interface-method
      */
     public void removeAllOperations(AuthzSubjectValue whoami,
-                                    ResourceTypeValue type)
-        throws PermissionException {
+                                    ResourceTypeValue type) {
         ResourceType resType = getResourceTypeDAO().findById(type.getId());
         resType.getOperations().clear();
     }
@@ -229,15 +211,12 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param whoami The current running user.
      * @param type This type.
      * @param operations Operations to associate with this role.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami is not allowed to perform setOperations on this type.
+     * @throws PermissionException whoami is not allowed to perform setOperations on this type.
      * @ejb:interface-method
      */
     public void setOperations(AuthzSubjectValue whoami, ResourceTypeValue type,
                               OperationValue[] operations)
-        throws NamingException, CreateException, FinderException,
-               PermissionException {
+        throws PermissionException {
         ResourceType resType = getResourceTypeDAO().findById(type.getId());
         Set opPojos = toPojos(operations);
 
@@ -255,8 +234,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * Find the type that has the given name.
      * @param name The name of the type you're looking for.
      * @return The value-object of the type of the given name.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
+     * @throws FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
      */
     public ResourceTypeValue findResourceTypeByName(String name)
@@ -296,13 +274,10 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     /**
      * Get the Resource entity associated with this ResourceType.
      * @param type This ResourceType.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
      * @ejb:transaction type="NOTSUPPORTED"
      */
-    public ResourceValue getResourceTypeResource(ResourceTypeValue type)
-        throws FinderException {
+    public ResourceValue getResourceTypeResource(ResourceTypeValue type) {
         try {
             ResourceType local= getResourceTypeDAO().findById(type.getId());
             return ResourceVOHelperUtil.getLocalHome().create()
@@ -319,7 +294,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param type The ResourceType of the Resource you're looking for.
      * @param instanceId Your ID for the resource you're looking for.
      * @return The value-object of the Resource of the given ID.
-     * @throws NamingException 
      * @ejb:interface-method
      */
     public ResourceValue findResourceByInstanceId(ResourceTypeValue type,
@@ -339,14 +313,11 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * Find the Resource that has the given ID 
      * @param id id for the resource you're looking for.
      * @return The value-object of the Resource of the given ID.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
      * @ejb:transaction type="NOTSUPPORTED"
      */
-    public ResourceValue findResourceById(Integer id)
-        throws FinderException {
-        try {    
+    public ResourceValue findResourceById(Integer id) {
+        try {
             return ResourceVOHelperUtil.getLocalHome().create()
                     .getResourceValue(id);
         } catch (NamingException e) {
@@ -361,13 +332,10 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param type The ResourceType of the Resource you're looking for.
      * @param instanceId Your ID for the resource you're looking for.
      * @return The value-object of the Resource of the given ID.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
      */
     public ResourceValue findResourceByTypeAndInstanceId(String type,
-                                                  Integer instanceId)
-        throws FinderException {
+                                                  Integer instanceId) {
         try {
             ResourceType resType = getResourceTypeDAO().findByName(type);
             return ResourceVOHelperUtil.getLocalHome().create()
@@ -385,8 +353,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * Write the specified entity out to permanent storage.
      * @param whoami The current running user.
      * @param resource The Resource to save.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
      */
     public void saveResource(ResourceValue res) {
@@ -399,9 +365,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * Delete the specified resource.
      * @param whoami The current running user.
      * @param resource The resource to delete.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception RemoveException Unable to delete the specified entity.
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
@@ -556,8 +519,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * Gets all the Resources owned by the given Subject.
      * @param subject The owner.
      * @return Array of resources owned by the given subject.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
@@ -567,6 +528,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                 .fromPojos(getResourceDAO().findByOwner(owner),
                            org.hyperic.hq.authz.shared.ResourceValue.class);
     }
+
     /**
      * Gets all the Resources of a particular type owned by the given Subject.
      * @param resource type
