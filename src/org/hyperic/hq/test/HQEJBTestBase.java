@@ -66,7 +66,7 @@ public abstract class HQEJBTestBase
         super(testName);
     }
     
-    private Class[] getUsedSessionBeans() {
+    protected Class[] getUsedSessionBeans() {
         return new Class[] { 
             AlertDefinitionManagerEJBImpl.class,
             AuthzSubjectManagerEJBImpl.class,
