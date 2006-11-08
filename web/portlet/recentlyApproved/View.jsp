@@ -49,9 +49,8 @@
     <html:hidden property="platformId"/>
       <tr>
         <td width="3%" class="ListHeaderInactive">&nbsp;</td>
-        <td width="57%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.ResourceName"/></td>
-        <td width="20%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.NewResources"/></td>
-        <td width="20%" class="ListHeaderInactive" align="center"><fmt:message key="dash.home.TableHeader.DateTime"/></td>
+        <td width="67%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.ResourceName"/></td>
+        <td width="30%" class="ListHeaderInactive" align="center"><fmt:message key="dash.home.TableHeader.DateTime"/></td>
       </tr>
       <c:forEach items="${recentlyApproved}" var="platform">
       <tr class="ListRow">
@@ -73,8 +72,10 @@
              </c:otherwise>
            </c:choose>
         <td class="ListCell">
-            <html:link page="/Resource.do?eid=1:${platform.id}"><c:out value="${platform.name}"/>&nbsp;</html:link></td>
-        <td class="ListCell"><c:out value="${platform.numResources}"/></td>
+            <html:link page="/Resource.do?eid=1:${platform.id}"><c:out value="${platform.name}"/>&nbsp;</html:link>
+          <fmt:message key="parenthesis">
+            <fmt:param value="${platform.numResources}"/>
+          </fmt:message></td>
         <td class="ListCell" align="center"><hq:dateFormatter value="${platform.resourceCTime}"/>&nbsp;</td>
       </tr>
       <c:if test="${platform.showServers}">
@@ -83,8 +84,10 @@
       <tr class="ListRow">
         <td class="ListCell"></td>
         <td class="ListCell">
-            <html:link page="/Resource.do?eid=2:${server.id}"><c:out value="${server.name}"/>&nbsp;</html:link></td>
-        <td class="ListCell"><c:out value="${server.numServices}"/></td>
+            <html:link page="/Resource.do?eid=2:${server.id}"><c:out value="${server.name}"/>&nbsp;</html:link>
+          <fmt:message key="parenthesis">
+            <fmt:param value="${server.numServices}"/>
+          </fmt:message></td>
         <td class="ListCell" align="center"><hq:dateFormatter value="${server.CTime}"/>&nbsp;</td>
       </tr>
       </c:forEach> <!-- For each server -->

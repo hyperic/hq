@@ -12,6 +12,7 @@
               <putList name="portlets">
                 <add value=".dashContent.searchResources"/>
                 <add value=".dashContent.savedCharts"/>
+                <add value=".dashContent.recentlyApproved"/>
                 <add value=".dashContent.summaryCounts"/>
               </putList>           
   </definition>  
@@ -24,7 +25,6 @@
                 <add value=".dashContent.resourceHealth"/>
                 <add value=".dashContent.criticalAlerts"/>
                 <add value=".dashContent.autoDiscovery"/>
-                <add value=".dashContent.recentlyApproved"/>
                 <add value=".dashContent.recentResources"/>
               </putList> 
   </definition>  
