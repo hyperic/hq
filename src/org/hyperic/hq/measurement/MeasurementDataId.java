@@ -28,25 +28,25 @@ package org.hyperic.hq.measurement;
 public class MeasurementDataId implements java.io.Serializable {
 
     // Fields    
-    private Integer _measurementId;
+    private Measurement _measurement;
     private long _timestamp;
 
     // Constructors
     public MeasurementDataId() {
     }
 
-    public MeasurementDataId(Integer measurementId, long timestamp) {
-        _measurementId = measurementId;
+    public MeasurementDataId(Measurement measurement, long timestamp) {
+        _measurement = measurement;
         _timestamp = timestamp;
     }
    
     // Property accessors
-    public Integer getMeasurementId() {
-        return _measurementId;
+    public Measurement getMeasurement() {
+        return _measurement;
     }
     
-    public void setMeasurementId(Integer measurementId) {
-        _measurementId = measurementId;
+    public void setMeasurement(Measurement measurement) {
+        _measurement = measurement;
     }
     public long getTimestamp() {
         return _timestamp;
@@ -63,10 +63,10 @@ public class MeasurementDataId implements java.io.Serializable {
         if (!(other instanceof MeasurementDataId)) return false;
         MeasurementDataId castOther = (MeasurementDataId) other; 
         
-        return ((getMeasurementId() == castOther.getMeasurementId()) || 
-                (getMeasurementId() != null &&
-                 castOther.getMeasurementId() != null &&
-                 getMeasurementId().equals(castOther.getMeasurementId()))) &&
+        return ((getMeasurement() == castOther.getMeasurement()) ||
+                (getMeasurement() != null &&
+                 castOther.getMeasurement() != null &&
+                 getMeasurement().equals(castOther.getMeasurement()))) &&
             (getTimestamp() == castOther.getTimestamp());
     }
    
@@ -74,7 +74,7 @@ public class MeasurementDataId implements java.io.Serializable {
         int result = 17;
         
         result = 37 * result + 
-            (getMeasurementId() == null ? 0 : getMeasurementId().hashCode() );
+            (getMeasurement() == null ? 0 : getMeasurement().hashCode() );
         result = 37 * result + (int)getTimestamp();
         return result;
     }   

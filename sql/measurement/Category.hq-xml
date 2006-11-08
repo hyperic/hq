@@ -26,12 +26,6 @@
       <column name="CID" />
     </property>
 
-    <bag name="measurementTemplates" table="EAM_MEASUREMENT_TEMPL"
-         cascade="save-update,delete,persist,merge,evict"
-         inverse="true">
-      <key column="CATEGORY_ID" />
-      <one-to-many class="MeasurementTemplate" />
-    </bag>
   </class>
 
 </hibernate-mapping>

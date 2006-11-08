@@ -29,6 +29,8 @@ import org.hibernate.Session;
 
 import org.hyperic.hq.measurement.MetricProblem;
 import org.hyperic.hq.measurement.MeasurementDataId;
+import org.hyperic.hq.measurement.Measurement;
+import org.hyperic.dao.DAOFactory;
 
 /**
  * CRUD methods, finders, etc. for MetricProblem
@@ -49,8 +51,10 @@ public class MetricProblemDAO extends HibernateDAO
 
     public MetricProblem create(Integer mid, long time,
                                 int type, Integer additional) {
-
-        MeasurementDataId id = new MeasurementDataId(mid, time);
+        Measurement meas = 
+            DAOFactory.getDAOFactory().getDerivedMeasurementDAO()
+            .findById(mid);
+        MeasurementDataId id = new MeasurementDataId(meas, time);
 
         MetricProblem p = new MetricProblem();
         p.setId(id);

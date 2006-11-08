@@ -36,7 +36,6 @@ public class Category extends PersistedObject
     // Fields    
      private String _name;
      private Integer _cid;
-     private Collection _measurementTemplates;
 
      // Constructors
     public Category() {
@@ -46,10 +45,9 @@ public class Category extends PersistedObject
         _name = name;
     }
 
-    public Category(String name, Integer cid, Collection measurementTemplates) {
+    public Category(String name, Integer cid) {
         _name = name;
         _cid = cid;
-        _measurementTemplates = measurementTemplates;
     }
    
     // Property accessors
@@ -66,14 +64,6 @@ public class Category extends PersistedObject
     
     public void setCid(Integer cid) {
         _cid = cid;
-    }
-
-    public Collection getMeasurementTemplates() {
-        return _measurementTemplates;
-    }
-    
-    public void setMeasurementTemplates(Collection measurementTemplates) {
-        _measurementTemplates = measurementTemplates;
     }
 
     /**

@@ -258,11 +258,8 @@ public class MeasurementTemplate extends PersistedObject
         value.setCtime(getCtime());
         value.setMtime(getMtime());
 
-        MonitorableType mt = getMonitorableType();
-        value.setMonitorableType(mt.getMonitorableTypeValue());
-        Category cat = getCategory();
-        value.setCategory(cat.getCategoryValue());
-
+        value.setMonitorableType(getMonitorableType().getMonitorableTypeValue());
+        value.setCategory(getCategory().getCategoryValue());
         for (Iterator i = _measurementArgs.iterator(); i.hasNext(); ) {
             MeasurementArg arg = (MeasurementArg)i.next();
             MeasurementArgValue val = arg.getMeasurementArgValue();

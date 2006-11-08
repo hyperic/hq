@@ -10,13 +10,12 @@
   <class name="MetricProblem" table="EAM_METRIC_PROB">
     <!-- move to EE only -->
     <composite-id name="id" class="MeasurementDataId">
-      <meta attribute="use-in-equals">true</meta>
-      <key-property name="measurementId" type="integer">
-        <meta attribute="use-in-equals">true</meta>
-        <column name="MEASUREMENT_ID" index="METRIC_PROB_ID_IDX, METRIC_PROB_TIME_IDX" not-null="true" />
-      </key-property>
+      <key-many-to-one name="measurement" class="Measurement">
+        <column name="MEASUREMENT_ID"
+                index="METRIC_PROB_ID_IDX, METRIC_PROB_TIME_IDX"
+                not-null="true" />
+      </key-many-to-one>
       <key-property name="timestamp" type="long">
-        <meta attribute="use-in-equals">true</meta>
         <column name="TIMESTAMP" index="METRIC_PROB_TIME_IDX" not-null="true" />
       </key-property>
     </composite-id>
