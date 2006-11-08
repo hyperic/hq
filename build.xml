@@ -8,6 +8,7 @@
     <!ENTITY archive-build SYSTEM "build_util/archive-build.xml">
     <!ENTITY hibernate-build SYSTEM "build_util/hibernate-build.xml">
     <!ENTITY dbsetup-build SYSTEM "build_util/dbsetup-build.xml">
+    <!ENTITY test-build SYSTEM "build_util/test-build.xml">
 ]>
 
 <project name="HQ" default="build" basedir=".">
@@ -133,6 +134,7 @@
 
   <!-- Source common targets -->
   &util-build;
+  &test-build;
 
   <target name="init-props" unless="init-props.notrequired">
      <property file="${version.properties}" />
@@ -204,37 +206,6 @@
     </emma>
   </target>
 
-  <target name="test" depends="init,init-taskdefs">
-
-    <mkdir dir="${junitResults.dir}"/>
-    <junit reloading="no" fork="no" printsummary="yes" haltonerror="no">
-      <classpath>
-        <path refid="alljars"/>
-        <path refid="testjars"/>
-        <path location="${build.dir}/classes" />
-        <path location="${build.dir}/src" />            
-        <path>
-          <fileset dir="${thirdparty.lib}" includes="*.jar" />
-        </path>
-      </classpath>
-      <formatter type="plain"/>
-      <batchtest todir="${junitResults.dir}">
-        <fileset dir="src">
-          <include name="**/*Test.java"/>
-        </fileset>
-      </batchtest>
-      <sysproperty key="hq.example.plugins" value="${hq.home}/plugins/examples"/>
-      <sysproperty key="pdk.dir" value="${pdk.dir}"/>
-      <sysproperty key="hq.server.ds-mapping" value="${hq.server.ds-mapping}"/>
-      <sysproperty key="hq.jdbc.url" value="${hq.jdbc.url}"/>
-      <sysproperty key="hq.jdbc.name" value="${hq.jdbc.name}"/>
-      <sysproperty key="hq.jdbc.user" value="${hq.jdbc.user}"/>
-      <sysproperty key="hq.jdbc.password" value="${hq.jdbc.password}"/>
-      <sysproperty key="hq.jdbc.server" value="${hq.jdbc.server}"/>
-    </junit>
-
-  </target>
- 
   <!-- ==================== Compile java sources ==================== -->
   <target name="compile" description="Compile sources" 
           depends="init">
