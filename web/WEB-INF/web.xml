@@ -41,6 +41,11 @@
     <listener-class>org.hyperic.hq.ui.Configurator</listener-class>
   </listener>
   <servlet>
+    <servlet-name>metricdata</servlet-name>
+    <servlet-class>org.hyperic.hq.ui.servlet.MetricDataServlet</servlet-class>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+  <servlet>
     <servlet-name>availability</servlet-name>
     <servlet-class>org.hyperic.hq.ui.servlet.AvailabilityServlet</servlet-class>
     <load-on-startup>2</load-on-startup>
@@ -139,6 +144,10 @@
   </servlet-mapping>
   <!-- end cactus redirector mapping -->
 
+  <servlet-mapping>
+    <servlet-name>metricdata</servlet-name>
+    <url-pattern>/resource/MetricData</url-pattern>
+  </servlet-mapping>
   <servlet-mapping>
     <servlet-name>availability</servlet-name>
     <url-pattern>/resource/Availability</url-pattern>

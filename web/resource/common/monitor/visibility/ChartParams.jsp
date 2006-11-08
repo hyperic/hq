@@ -104,9 +104,16 @@
       <html:link href="." onclick="ViewChartForm.saveChart.value='true'; ViewChartForm.submit(); return false;"><fmt:message key="resource.common.monitor.visibility.SaveChartToDash"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
 
     <c:if test="${not empty back}">
-        <html:link page="${back}"><fmt:message key="resource.common.monitor.visibility.Back2Resource"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link>
+        <html:link page="${back}"><fmt:message key="resource.common.monitor.visibility.Back2Resource"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
     </c:if>
 
+    <c:if test="${not empty metric}">
+      <c:url var="exportLink" value="/resource/MetricData">
+        <c:param name="metricId" value="${metric.id}"/>
+      </c:url>
+      <html:link href="${exportLink}"><fmt:message key="resource.common.monitor.visibility.ExportLink"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
+    </c:if>
+    
 </td></tr></table>
 
     </td>
