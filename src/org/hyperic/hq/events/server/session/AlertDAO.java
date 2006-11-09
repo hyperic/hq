@@ -30,6 +30,7 @@ import org.hibernate.Session;
 import org.hibernate.Query;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.util.jdbc.DBUtil;
 
 public class AlertDAO extends HibernateDAO {
     public AlertDAO(Session session) {
@@ -40,17 +41,10 @@ public class AlertDAO extends HibernateDAO {
         return (Alert)super.findById(id);
     }
 
-    public int deleteByIds(Integer[] ids) {
-        StringBuffer sql = new StringBuffer()
-            .append("delete Alert where id in (");
-        for (int i = 0; i < ids.length; i++) {
-            if (i > 0) {
-                sql.append(",");
-            }
-            sql.append(ids[i]);
-        }
-        sql.append(")");
-        return getSession().createQuery(sql.toString())
+    int deleteByIds(Integer[] ids) {
+        String sql = "delete Alert where id in " + DBUtil.makeInSet(ids);
+
+        return getSession().createQuery(sql)
             .executeUpdate();
     }
 
@@ -64,7 +58,7 @@ public class AlertDAO extends HibernateDAO {
             .list();
     }
 
-    public int deleteByCreateTime(long begin, long end) {
+    int deleteByCreateTime(long begin, long end) {
         String sql = "delete Alert a where a.ctime between :timeStart and " +
             ":timeEnd order by a.ctime desc";
 
@@ -131,7 +125,7 @@ public class AlertDAO extends HibernateDAO {
             .list();
     }
 
-    public int deleteByEntity(AppdefEntityID id) {
+    int deleteByEntity(AppdefEntityID id) {
         String sql = "delete Alert a WHERE a.alertDefinition.appdefType = :aType " +
             "and a.alertDefinition.appdefId = :aId";
 
@@ -163,7 +157,7 @@ public class AlertDAO extends HibernateDAO {
             .list();
     }
 
-    public int deleteByAlertDefinition(Integer def) {
+    int deleteByAlertDefinition(Integer def) {
         String sql = "delete Alert a WHERE a.alertDefinition.id = :alertDef";
 
         return getSession().createQuery(sql)
