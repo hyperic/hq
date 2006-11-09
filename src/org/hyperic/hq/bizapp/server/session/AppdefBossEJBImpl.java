@@ -150,7 +150,7 @@ import org.hyperic.util.pager.SortAttribute;
  *      local-jndi-name="LocalAppdefBoss"
  *      view-type="both"
  *      type="Stateless"
- * @ejb:transaction type="NOTSUPPORTED"
+ * @ejb:transaction type="Required"
  */
 public class AppdefBossEJBImpl
     extends BizappSessionEJB
@@ -1673,20 +1673,21 @@ public class AppdefBossEJBImpl
                 log.debug("AIPlatform not found: " + platformId);
             }
             
-            // Finally, remove the platform.
+            // now, remove the platform.
             getPlatformManager().removePlatform(subject, platformId, deep);
+
+            // Last, remove authz resources
+            getAuthzBoss().removeResources(toDeleteIds);
+
         } catch (RemoveException e) {
-            this.rollback();
             log.error("Caught EJB RemoveException",e);
             throw new SystemException(e);
         } catch (PermissionException e) {
-            this.rollback();
             log.error("Caught PermissionException while removing "+
                       "platform: " + platformId,e);
             throw e;
         } catch (AppdefEntityNotFoundException e) {
-            this.rollback();
-            String msg = "Not Found Error while removing platform: " + 
+            String msg = "Not Found Error while removing platform: " +
                 platformId;
             log.error(msg, e);
             throw new PlatformNotFoundException(msg, e);

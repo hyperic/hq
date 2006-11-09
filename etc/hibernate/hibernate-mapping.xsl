@@ -29,7 +29,7 @@
             <xsl:attribute name="cascade">
               <xsl:value-of select="'save-update,delete,evict,persist,merge'"/>
             </xsl:attribute>
-            <xsl:apply-templates select="@*" />
+            <xsl:apply-templates mode="key-mode" select="@*" />
             <xsl:apply-templates mode="key-mode" select="node()" />
           </xsl:when>
           <xsl:otherwise>
@@ -51,9 +51,11 @@
     </xsl:template>
 
     <!-- join main processing loop -->
-    <xsl:template mode="key-mode" match="node()">
-      <xsl:apply-templates select="."/>
+    <xsl:template mode="key-mode" match="node() | @*">
+      <xsl:apply-templates select="current()"/>
     </xsl:template>
+    <!-- except for these -->
+    <xsl:template mode="key-mode" match="@cascade" />
 
   <!--
     enable select-before-update, make sure there are real

@@ -28,6 +28,7 @@ package org.hyperic.hq.dao;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.HashSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,6 +43,7 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 
 /**
  * CRUD methods, finders, etc. for Resource
@@ -143,7 +145,72 @@ public class ResourceDAO extends HibernateDAO
         return is;
     }
 
-    public Resource findByInstanceId(ResourceType type, Integer id) {            
+    private String getInstanceIds(AppdefEntityID[] ids) {
+        StringBuffer sql = new StringBuffer("(");
+        for (int i = 0; i < ids.length; i++) {
+            if (i > 0) {
+                sql.append(",");
+            }
+            sql.append(ids[i].getID());
+        }
+        return sql.append(")").toString();
+    }
+
+    private String getAuthzTypenames(AppdefEntityID[] ids) {
+        StringBuffer sql = new StringBuffer("(");
+        // grab unique names
+        HashSet s = new HashSet();
+        for (int i = 0; i < ids.length; i++) {
+            s.add(ids[i].getAuthzTypeName());
+        }
+        int j = 0;
+        for (Iterator i = s.iterator(); i.hasNext(); j++) {
+            if (j > 0) {
+                sql.append(",");
+            }
+            sql.append("'")
+                .append(i.next())
+                .append("'");
+        }
+        return sql.append(")").toString();
+    }
+
+    private String getResourceHQL (AppdefEntityID[] ids) {
+        return new StringBuffer(
+            "select r.id from Resource r, " +
+            "ResourceType rt where r.resourceType.id=rt.id and " +
+            "r.instanceId in ")
+            .append(getInstanceIds(ids))
+            .append(" and rt.name in ")
+            .append(getAuthzTypenames(ids))
+            .toString();
+    }
+
+    private int deleteResourceMap(AppdefEntityID[] ids) {
+        StringBuffer sql = new StringBuffer(
+            "delete ResGrpResMap where id.resource.id in (")
+            .append(getResourceHQL(ids))
+            .append(")");
+        
+        return getSession().createQuery(sql.toString())
+            .executeUpdate();
+    }
+
+    public int deleteByInstances(AppdefEntityID[] ids) {
+        // kludge to work around hiberate's limitation to define
+        // on-delete="cascade" on many-to-many relationships
+        deleteResourceMap(ids);
+
+        StringBuffer sql = new StringBuffer(
+            "delete Resource where id in (")
+            .append(getResourceHQL(ids))
+            .append(")");
+
+        return getSession().createQuery(sql.toString())
+            .executeUpdate();
+    }
+
+    public Resource findByInstanceId(ResourceType type, Integer id) {
         String sql = "from Resource where instanceId = ? and" +
                      " resourceType.id = ?";
         return (Resource)getSession().createQuery(sql)

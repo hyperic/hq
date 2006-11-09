@@ -55,6 +55,7 @@ import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.OperationDAO;
 import org.hyperic.hq.dao.ResourceTypeDAO;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -372,6 +373,15 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         Resource reso = getResourceDAO().findById(res.getId());
         VOCache.getInstance().removeResource(res.getId());
         getResourceDAO().remove(reso);
+    }
+
+    /**
+     * Remove all measurements for an instance
+     *
+     * @ejb:interface-method
+     */
+    public void removeResources(AppdefEntityID[] ids) {
+        getResourceDAO().deleteByInstances(ids);
     }
 
     /**

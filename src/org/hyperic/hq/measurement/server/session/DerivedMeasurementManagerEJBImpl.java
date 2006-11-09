@@ -60,7 +60,6 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.MeasurementTemplate;
-import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.RawMeasurement;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.ext.MetricOperationEvent;
@@ -622,8 +621,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 DerivedMeasurement m = (DerivedMeasurement)it.next();
                 toUnschedule.add(m.getId());
             }
-            dao.deleteByInstance(entIds[i].getType(), entIds[i].getID());
         }
+        dao.deleteByInstances(entIds);
 
         // Now unschedule the DerivedMeasurments
         Integer[] mids = (Integer[])

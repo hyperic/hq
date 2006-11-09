@@ -19,11 +19,9 @@
       <column name ="VERSION_COL" default="0" />
     </version>
 
-    <properties name="resTypeName" unique="true">
-      <property name="name" type="string">
-        <column name="NAME" index="EAM_RES_TYPE_NAME_KEY" not-null="true" length="100" />
-      </property>
-    </properties>
+    <property name="name"  unique="true" type="string">
+      <column name="NAME" index="EAM_RES_TYPE_NAME_KEY" not-null="true" length="100" />
+    </property>
 
     <property name="cid" type="integer">
       <column name="CID" index="EAM_RESOURCE_TYPE_CID_IDX" not-null="false" />

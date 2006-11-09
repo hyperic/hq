@@ -28,6 +28,7 @@ package org.hyperic.hq.dao;
 import org.hibernate.Session;
 import org.hyperic.hq.measurement.DerivedMeasurement;
 import org.hyperic.hq.measurement.MeasurementTemplate;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 
 import java.util.List;
 
@@ -126,18 +127,30 @@ public class DerivedMeasurementDAO extends HibernateDAO
             .setInteger(1, id).list();
     }
 
-    public int deleteByInstance(int type, int id) {
-        String sql =
-            "delete DerivedMeasurement where id in " +
+    public int deleteByInstances(AppdefEntityID[] ids) {
+        StringBuffer sql = new StringBuffer()
+            .append("delete DerivedMeasurement where id in " +
             "(select m.id from DerivedMeasurement m " +
             "join m.template t " +
-            "join t.monitorableType mt " +
-            "where mt.appdefType=? and m.instanceId=? and " +
-            "m.interval is not null)";
+            "join t.monitorableType mt where " +
+            "  m.interval is not null and mt.appdefType in (");
+        for (int i = 0; i < ids.length; i++) {
+            if (i > 0) {
+                sql.append(",");
+            }
+            sql.append(ids[i].getType());
+        }
 
-        return getSession().createQuery(sql)
-            .setInteger(0, type)
-            .setInteger(1, id)
+        sql.append(") and m.instanceId in (");
+        for (int i = 0; i < ids.length; i++) {
+            if (i > 0) {
+                sql.append(",");
+            }
+            sql.append(ids[i].getID());
+        }
+        sql.append(") )");
+
+        return getSession().createQuery(sql.toString())
             .executeUpdate();
     }
 

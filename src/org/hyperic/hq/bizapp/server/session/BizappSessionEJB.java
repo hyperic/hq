@@ -70,6 +70,8 @@ import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
 import org.hyperic.hq.bizapp.shared.MeasurementBossUtil;
 import org.hyperic.hq.bizapp.shared.ProductBossLocal;
 import org.hyperic.hq.bizapp.shared.ProductBossUtil;
+import org.hyperic.hq.bizapp.shared.AuthzBossLocal;
+import org.hyperic.hq.bizapp.shared.AuthzBossUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
@@ -91,6 +93,7 @@ import org.hyperic.hq.product.shared.ProductManagerUtil;
 public abstract class BizappSessionEJB {
     private AIBossLocal                    aibossLocal;
     private AppdefBossLocal                appdefbossLocal;
+    private AuthzBossLocal                 authzbossLocal;
     private EventsBossLocal                eventsbossLocal;
     private MeasurementBossLocal           measurementBossLocal;
     private ProductBossLocal               productBossLocal;
@@ -246,6 +249,17 @@ public abstract class BizappSessionEJB {
             }
         }
         return this.ssmLocal;
+    }
+
+    public AuthzBossLocal getAuthzBoss() {
+        if(authzbossLocal == null){
+            try {
+                authzbossLocal = AuthzBossUtil.getLocalHome().create();
+            } catch(Exception exc){
+                throw new SystemException(exc);
+            }
+        }
+        return authzbossLocal;
     }
 
     public AutoinventoryManagerLocal getAutoInventoryManager() {

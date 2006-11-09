@@ -40,6 +40,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -232,6 +233,21 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId.intValue());
         return getResourceGroupManager()
             .getResourceGroupsById(subject, ids, pc);
+    }
+
+    /**
+     * Remove resources by appdef id
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void removeResources(AppdefEntityID[] ids) {
+        // should do some permission checks here.
+        // This is meant to be called from other bosses
+        // that need to remove resources as a last step
+        // to clean the repo.  i.e., for model use case
+        // see AppdefBossEJBImpl.removePlatform();
+        getResourceManager().removeResources(ids);
     }
 
     /**
