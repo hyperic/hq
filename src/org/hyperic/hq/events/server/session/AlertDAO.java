@@ -27,6 +27,7 @@ package org.hyperic.hq.events.server.session;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.hibernate.Query;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 
@@ -39,6 +40,20 @@ public class AlertDAO extends HibernateDAO {
         return (Alert)super.findById(id);
     }
 
+    public int deleteByIds(Integer[] ids) {
+        StringBuffer sql = new StringBuffer()
+            .append("delete Alert where id in (");
+        for (int i = 0; i < ids.length; i++) {
+            if (i > 0) {
+                sql.append(",");
+            }
+            sql.append(ids[i]);
+        }
+        sql.append(")");
+        return getSession().createQuery(sql.toString())
+            .executeUpdate();
+    }
+
     public List findByCreateTime(long begin, long end) {
         String sql = "from Alert a where a.ctime between :timeStart and " +
             ":timeEnd order by a.ctime desc";
@@ -47,6 +62,16 @@ public class AlertDAO extends HibernateDAO {
             .setLong("timeStart", begin)
             .setLong("timeEnd", end)
             .list();
+    }
+
+    public int deleteByCreateTime(long begin, long end) {
+        String sql = "delete Alert a where a.ctime between :timeStart and " +
+            ":timeEnd order by a.ctime desc";
+
+        return getSession().createQuery(sql)
+            .setLong("timeStart", begin)
+            .setLong("timeEnd", end)
+            .executeUpdate();
     }
     
     public List findByEntity(AppdefEntityID id) {
@@ -106,6 +131,16 @@ public class AlertDAO extends HibernateDAO {
             .list();
     }
 
+    public int deleteByEntity(AppdefEntityID id) {
+        String sql = "delete Alert a WHERE a.alertDefinition.appdefType = :aType " +
+            "and a.alertDefinition.appdefId = :aId";
+
+        return getSession().createQuery(sql)
+            .setInteger("aType", id.getType())
+            .setInteger("aId", id.getId().intValue())
+            .executeUpdate();
+    }
+
     public List findByAppdefEntitySortByAlertDef(AppdefEntityID id) {
         return findByEntity(id, "a.alertDefinition.name DESC");
     }
@@ -126,6 +161,14 @@ public class AlertDAO extends HibernateDAO {
         return getSession().createQuery(sql)
             .setParameter("alertDef", def)
             .list();
+    }
+
+    public int deleteByAlertDefinition(Integer def) {
+        String sql = "delete Alert a WHERE a.alertDefinition.id = :alertDef";
+
+        return getSession().createQuery(sql)
+            .setInteger("alertDef", def.intValue())
+            .executeUpdate();
     }
     
     public int countAlerts(AlertDefinition def) {

@@ -139,29 +139,11 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
         return alert.getAlertValue();
     }
 
-    private int deleteAlerts(Collection alerts) {
-        AlertDAO aDao = getAlertDAO();
-        
-        int count = 0;
-        for (Iterator i = alerts.iterator(); i.hasNext(); count++) {
-            Alert alert = (Alert) i.next();
-
-            aDao.remove(alert);
-        }
-        return count;
-    }
-    
     /** Remove alerts
      * @ejb:interface-method
      */
     public void deleteAlerts(Integer[] ids) {
-        AlertDAO aDao = getAlertDAO();
-        
-        for (int i = 0; i < ids.length; i++) {
-            Alert a = aDao.findById(ids[i]);
-
-            aDao.remove(a);
-        }
+        getAlertDAO().deleteByIds(ids);
     }
 
     /** 
@@ -169,7 +151,7 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public int deleteAlerts(AppdefEntityID id) {
-        return deleteAlerts(getAlertDAO().findByEntity(id));
+        return getAlertDAO().deleteByEntity(id);
     }
 
     /** 
@@ -177,9 +159,7 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public int deleteAlerts(Integer defId) throws RemoveException {
-        AlertDefinition def = getAlertDefDAO().findById(defId);
-        
-        return deleteAlerts(getAlertDAO().findByAlertDefinition(def));
+        return getAlertDAO().deleteByAlertDefinition(defId);
     }
 
     /** 
@@ -187,7 +167,7 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public int deleteAlerts(long begin, long end) {
-        return deleteAlerts(getAlertDAO().findByCreateTime(begin, end));
+        return getAlertDAO().deleteByCreateTime(begin, end);
     }
 
     /**
