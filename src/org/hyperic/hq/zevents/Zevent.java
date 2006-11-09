@@ -7,6 +7,7 @@ public abstract class Zevent {
     private ZeventSourceId _sourceId;
     private ZeventPayload  _payload;
     
+    private final Object _timeLock = new Object();
     private long _queueEntryTime;
     private long _queueExitTime;
     
@@ -30,25 +31,33 @@ public abstract class Zevent {
     }
     
     void enterQueue() {
-        _queueEntryTime = System.currentTimeMillis();
+        synchronized (_timeLock) { 
+            _queueEntryTime = System.currentTimeMillis();
+        }
     }
     
     void leaveQueue() {
-        _queueExitTime = System.currentTimeMillis();
+        synchronized (_timeLock) {
+            _queueExitTime = System.currentTimeMillis();
+        }
     }
 
     /**
      * Get the time that the event entered the queue (in ms)
      */
     public long getQueueEntryTime() {
-        return _queueEntryTime;
+        synchronized (_timeLock) {
+            return _queueEntryTime;
+        }
     }
     
     /**
      * Get the time that the event left the queue and went to be dispatched 
      */
     public long getQueueExitTime() {
-        return _queueExitTime;
+        synchronized (_timeLock) {
+            return _queueExitTime;
+        }
     }
     
     public String toString() {
