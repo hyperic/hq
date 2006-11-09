@@ -87,7 +87,7 @@ public class RSSAction extends BaseRSSAction {
             setManagingEditor(request);
             
             // Get user preferences
-            ConfigResponse preferences = getUserPreferences(user);
+            ConfigResponse preferences = getUserPreferences(request, user);
 
             int count = Integer.parseInt(preferences
                 .getValue(".dashContent.criticalalerts.numberOfAlerts").trim());

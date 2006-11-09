@@ -85,7 +85,7 @@ public class RSSAction extends BaseRSSAction {
             setManagingEditor(request);
             
             // Get user preferences
-            ConfigResponse preferences = getUserPreferences(user);
+            ConfigResponse preferences = getUserPreferences(request, user);
 
             String favIds =
                 preferences.getValue(Constants.USERPREF_KEY_FAVORITE_RESOURCES);
