@@ -598,89 +598,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
     }
 
-    /**
-     * Remove a measurement 
-     *
-     * @ejb:interface-method
-     */
-    public void removeMeasurement(AuthzSubjectValue subject, Integer mid)
-        throws RemoveException, PermissionException {
-
-        DerivedMeasurement m = getDerivedMeasurementDAO().findById(mid);
-        
-        // Check removal permission
-        AppdefEntityID aid = getAppdefEntityId(m);
-        super.checkDeletePermission(subject, aid);
-        
-        Integer[] mids = new Integer[] { mid };
-            
-        // Remove the measurement        
-        getDerivedMeasurementDAO().remove(m);
-        
-        // Now unschedule the DerivedMeasurment
-        this.unscheduleJobs(mids);
-        this.sendAgentSchedule(aid);
-        
-        sendRemovedMetricsEvent(mids);
-    }
-
-    /**
-     * Remove all measurements for an instance
-     *
-     * @ejb:interface-method
-     */
-    public void removeMeasurements(AuthzSubjectValue subject,
-                                   AppdefEntityID id, Integer[] tids)
-        throws RemoveException, PermissionException {
-        // Authz check
-        super.checkDeletePermission(subject, id);
-        
-        try {
-            // First find them, then delete them
-            List mcol =
-                getDerivedMeasurementDAO().findByInstance(id.getType(), id.getID());
-
-            HashSet tidSet = null;
-            if (tids != null) {
-                tidSet = new HashSet(Arrays.asList(tids));
-            }
-            
-            List toUnschedule = new ArrayList();
-            for (Iterator it = mcol.iterator(); it.hasNext(); ) {
-                DerivedMeasurement m = (DerivedMeasurement)it.next();
-
-                // Check to see if we need to remove this one
-                if (tidSet != null && 
-                    !tidSet.contains(m.getTemplate().getId()))
-                    continue;
-
-                Integer mid = m.getId();
-                
-                toUnschedule.add(mid);
-                getDerivedMeasurementDAO().remove(m);
-            }
-
-            // Now unschedule the DerivedMeasurments
-            this.unscheduleJobs((Integer[])toUnschedule.
-                                toArray(new Integer[0]));
-            
-            // Check to see if this is a total removal operation
-            if (tids == null) {
-                // Skip the middleman (agent schedule synchronizer)
-                this.getMeasurementProcessor().unschedule(id);
-            }
-            else {
-                this.sendAgentSchedule(id);
-            }
-            
-            // Send metrics removed event
-            Integer[] mids = (Integer[])
-                toUnschedule.toArray(new Integer[toUnschedule.size()]);
-            sendRemovedMetricsEvent(mids);
-        } catch (MeasurementUnscheduleException e) {
-            log.error("Error unscheduling metrics for entity: " + id, e);
-        }
-    }
 
     /**
      * Remove all measurements for multiple instances
@@ -719,34 +636,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         log.info("Sending unschedule message to SCHEDULE_QUEUE: " + unschBean);
         msg.sendMessage(MeasurementConstants.SCHEDULE_QUEUE, unschBean);
 
-        sendRemovedMetricsEvent(mids);
-    }
-
-    /**
-     * Remove and unschedule specific measurements
-     *
-     * @ejb:interface-method
-     */
-    public void removeMeasurements(AuthzSubjectValue subject, Integer[] mids)
-        throws RemoveException, PermissionException {
-        DerivedMeasurementDAO dao = getDerivedMeasurementDAO();
-        AppdefEntityID aid = null;
-        for (int i = 0; i < mids.length; i++) {
-            DerivedMeasurement m = dao.findById(mids[i]);
-            
-            // Check removal permission
-            if (aid == null) {
-                aid = getAppdefEntityId(m);
-                checkDeletePermission(subject, aid);
-            }
-
-            dao.remove(m);
-        }
-
-        // Now unschedule the DerivedMeasurments
-        this.unscheduleJobs(mids);
-        this.sendAgentSchedule(aid);
-            
         sendRemovedMetricsEvent(mids);
     }
 

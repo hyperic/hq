@@ -302,41 +302,12 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Remove a measurement 
-     *
-     * @ejb:interface-method
-     */
-    public void removeMeasurement(Integer mid) {
-        getRawMeasurementDAO().remove(mid);
-    }
-
-    /**
      * Remove all measurements for an instance
      *
      * @ejb:interface-method
      */
-    public void removeMeasurements(AppdefEntityID id) {
-        RawMeasurementDAO dao = getRawMeasurementDAO();
-        Collection mcol = dao.findByInstance(id.getType(), id.getID());
-        for (Iterator i = mcol.iterator(); i.hasNext();) {
-            RawMeasurement rm = (RawMeasurement) i.next();
-            dao.remove(rm);
-        }
-    }
-
-    /**
-     * Remove all measurements for a template ID
-     *
-     * @ejb:interface-method
-     */
-    public void removeMeasurements(Integer tid) {
-        RawMeasurementDAO dao = getRawMeasurementDAO();
-        Collection mcol = dao.findByTemplate(tid);
-
-        for (Iterator i = mcol.iterator(); i.hasNext();) {
-            RawMeasurement m = (RawMeasurement) i.next();
-            dao.remove(m);
-        }
+    public void removeMeasurements(AppdefEntityID[] ids) {
+        getRawMeasurementDAO().deleteByInstances(ids);
     }
 
     /**

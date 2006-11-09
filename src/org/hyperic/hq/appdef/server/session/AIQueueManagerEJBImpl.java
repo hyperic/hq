@@ -592,8 +592,7 @@ public class AIQueueManagerEJBImpl
                 if (isApproveAction) {
                     // Approved servers are removed from the queue
                     // (see bug 6898 for more info)
-                    // TODO: see if this breaks anything
-//                    aiserversToRemove.add(aiserver);
+                    aiserversToRemove.add(aiserver);
                 } else if (!isPurgeAction) {
                     Integer pk =
                         aiserver.getAIPlatform().getId();

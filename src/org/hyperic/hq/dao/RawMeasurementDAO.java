@@ -28,6 +28,7 @@ package org.hyperic.hq.dao;
 import org.hibernate.Session;
 import org.hyperic.hq.measurement.MeasurementTemplate;
 import org.hyperic.hq.measurement.RawMeasurement;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 
 import java.util.List;
 
@@ -77,6 +78,33 @@ public class RawMeasurementDAO extends HibernateDAO
         return getSession().createQuery(sql)
             .setInteger(0, appdefType)
             .setInteger(1, appdefId).list();
+    }
+
+    public int deleteByInstances(AppdefEntityID[] ids) {
+        StringBuffer sql = new StringBuffer()
+            .append("delete RawMeasurement r where r.id in " +
+                    "(select m.id from RawMeasurement m " +
+                    "join m.template as t " +
+                    "join t.monitorableType as mt where " +
+                    "mt.appdefType in (");
+        for (int i = 0; i < ids.length; i++) {
+            if (i > 0) {
+                sql.append(",");
+            }
+            sql.append(ids[i].getType());
+        }
+        
+        sql.append(") and m.instanceId in (");
+        for (int i = 0; i < ids.length; i++) {
+            if (i > 0) {
+                sql.append(",");
+            }
+            sql.append(ids[i].getID());
+        }
+        sql.append(") )");
+
+        return getSession().createQuery(sql.toString()).
+            executeUpdate();
     }
 
     public RawMeasurement findByDsnForInstance(String dsn, Integer id) {

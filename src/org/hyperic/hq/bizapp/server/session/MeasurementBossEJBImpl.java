@@ -903,11 +903,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         
         // First remove all the Derived Measurements
+        AppdefEntityID[] ids = new AppdefEntityID[] { id };
         getDerivedMeasurementManager().removeMeasurements(
-            subject, id, new AppdefEntityID[] { id });
+            subject, id, ids);
 
         // Then remove the Raw Measurements
-        getRawMeasurementManager().removeMeasurements(id);
+        getRawMeasurementManager().removeMeasurements(ids);
     }
 
     /** Remove all measurements for multiple instances
@@ -927,8 +928,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         log.debug("Remove Derived Measurements timing: " + timer.reset());
 
         // Then remove the Raw Measurements
-        for (int i = 0; i < ids.length; i++)
-            getRawMeasurementManager().removeMeasurements(ids[i]);
+        getRawMeasurementManager().removeMeasurements(ids);
 
         log.debug("Remove Raw Measurements timing: " + timer.getElapsed());
     }

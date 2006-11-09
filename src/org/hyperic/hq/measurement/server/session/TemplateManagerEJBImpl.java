@@ -408,10 +408,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         return monitorableTypes;
     }
 
-    private void removeMeasurements(Integer tmplId) throws RemoveException {
-        this.getRmMan().removeMeasurements(tmplId);
-    }
-
     /**
      * Remove a measurement template
      *
