@@ -31,16 +31,14 @@
 <%@ taglib uri="display" prefix="display" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
 
-<c:url var="rssUrl" value="/rss/ViewResourceHealth.rss">
-  <c:param name="user" value="${webUser.username}"/>
-</c:url>
+<c:set var="rssUrl" value="/rss/ViewResourceHealth.rss"/>
 
 <div class="effectsPortlet">
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="dash.home.ResourceHealth"/>
   <tiles:put name="adminUrl" beanName="adminUrl" />
   <tiles:put name="portletName" beanName="portletName" />
-  <tiles:put name="rssUrl" beanName="rssUrl" />
+  <tiles:put name="rssBase" beanName="rssUrl" />
   <tiles:put name="dragDrop" value="true"/>
 </tiles:insert>
 

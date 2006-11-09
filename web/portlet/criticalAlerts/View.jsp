@@ -41,9 +41,7 @@ initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');  
 </script>
 
-<c:url var="rssUrl" value="/rss/ViewCriticalAlerts.rss">
-  <c:param name="user" value="${webUser.username}"/>
-</c:url>
+<c:set var="rssUrl" value="/rss/ViewCriticalAlerts.rss"/>
 
 <div class="effectsPortlet">
 <!-- Content Block  -->
@@ -51,7 +49,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <tiles:put name="tabKey" value="dash.home.CriticalAlerts"/>
   <tiles:put name="adminUrl" beanName="adminUrl" />
   <tiles:put name="portletName" beanName="portletName" />
-  <tiles:put name="rssUrl" beanName="rssUrl" />
+  <tiles:put name="rssBase" beanName="rssUrl" />
   <tiles:put name="dragDrop" value="true"/>
 </tiles:insert>
 

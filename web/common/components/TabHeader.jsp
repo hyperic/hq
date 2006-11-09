@@ -41,8 +41,15 @@
 <tiles:importAttribute name="useToSideBar" ignore="true"/>
 <tiles:importAttribute name="adminUrl" ignore="true"/>
 <tiles:importAttribute name="portletName" ignore="true"/>
-<tiles:importAttribute name="rssUrl" ignore="true"/>
+<tiles:importAttribute name="rssBase" ignore="true"/>
 <tiles:importAttribute name="dragDrop" ignore="true"/>
+
+<c:if test="${not empty rssBase}">
+  <c:url var="rssUrl" value="${rssBase}">
+    <c:param name="user" value="${webUser.username}"/>
+    <c:param name="token" value="${rssToken}"/>
+  </c:url>
+</c:if>
 
 <!--  TAB HEADER -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
