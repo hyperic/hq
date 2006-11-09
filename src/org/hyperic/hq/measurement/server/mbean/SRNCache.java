@@ -521,9 +521,9 @@ public class SRNCache {
         
         for (int i = 0; i < values.length; i++) {
             ScheduleRevNumValue srnVal = (ScheduleRevNumValue) values[i];
-            log.debug("Checking " + srnVal.getAppdefType() + ":"
-                    + srnVal.getInstanceId() + " whose last reporte time was " +
-                    srnVal.getLastReported()); 
+            log.debug("Checking " + srnVal.getAppdefType() + ":" +
+                      srnVal.getInstanceId() + " whose last reported time " +
+                      "was " + srnVal.getLastReported());
             
             // If it's currently pending, then don't check it
             if (srnVal.getPending()) {
