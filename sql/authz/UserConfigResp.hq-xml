@@ -23,10 +23,6 @@
     <property name="prefResponse" type="binary">
       <column name="PREF_RESPONSE" />
     </property>
-
-    <many-to-one name="subjectId" class="AuthzSubject">
-      <column name="SUBJECT_ID" index="EAM_USER_CONFIG_RESP_USER_IDX" />
-    </many-to-one>
   </class>
 
 </hibernate-mapping>

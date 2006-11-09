@@ -82,7 +82,7 @@
     <bag name="userConfigs" table="EAM_USER_CONFIG_RESP"
          cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
          inverse="true">
-      <key column="SUBJECT_ID" />
+      <key column="ID" />
       <one-to-many class="UserConfigResp" />
     </bag>
   </class>

@@ -12,18 +12,14 @@ public class UserConfigResp  implements java.io.Serializable {
      private Integer id;
      private long _version_;
      private byte[] prefResponse;
-     private AuthzSubject subjectId;
-
-     // Constructors
-
-    /** default constructor */
+     /** default constructor */
     public UserConfigResp() {
     }
 
     /** full constructor */
-    public UserConfigResp(byte[] prefResponse, AuthzSubject subjectId) {
+    public UserConfigResp(byte[] prefResponse, AuthzSubject subject) {
         this.prefResponse = prefResponse;
-        this.subjectId = subjectId;
+        setId(subject.getId());
     }
     
    
@@ -48,13 +44,6 @@ public class UserConfigResp  implements java.io.Serializable {
     
     public void setPrefResponse(byte[] prefResponse) {
         this.prefResponse = prefResponse;
-    }
-    public AuthzSubject getSubjectId() {
-        return this.subjectId;
-    }
-    
-    public void setSubjectId(AuthzSubject subjectId) {
-        this.subjectId = subjectId;
     }
 }
 
