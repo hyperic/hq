@@ -11,6 +11,8 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.common.DiagnosticObject;
+import org.hyperic.hq.common.DiagnosticThread;
 
 import edu.emory.mathcs.backport.java.util.concurrent.BlockingQueue;
 import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
@@ -25,7 +27,9 @@ import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
  */
 public class ZeventManager { 
     private static final int MAX_QUEUE_ENTRIES = 100 * 1000;
-
+    private static final long WARN_INTERVAL = 5 * 60 * 1000;
+    private static final int QUEUE_WARN_SIZE = MAX_QUEUE_ENTRIES * 90 / 100;
+    
     private final Log _log = LogFactory.getLog(ZeventManager.class);
     
     private static final Object INIT_LOCK = new Object();
@@ -45,6 +49,12 @@ public class ZeventManager {
     /* Map of {@link Class}es subclassing {@link ZEvent} onto lists of 
      * {@link ZeventListener}s */
     private final Map _listeners = new HashMap();
+    
+    // For diagnostics and warnings
+    private long _lastWarnTime;
+    private long _maxTimeInQueue;
+    private long _minTimeInQueue = Long.MAX_VALUE;
+    private long _numEvents;
     
     private QueueProcessor _queueProcessor;
     private BlockingQueue  _eventQueue = 
@@ -183,6 +193,14 @@ public class ZeventManager {
      *                              interrupted
      */
     public void enqueueEvents(List events) throws InterruptedException {
+        if (_eventQueue.size() > QUEUE_WARN_SIZE && 
+            (System.currentTimeMillis() - _lastWarnTime) > WARN_INTERVAL)
+        {
+            _lastWarnTime = System.currentTimeMillis();
+            _log.warn("Your event queue is having a hard time keeping up.  " +
+                      "Get a faster CPU, or reduce the amount of events!");
+        }
+                        
         for (Iterator i=events.iterator(); i.hasNext(); ) {
             Zevent e = (Zevent)i.next();  
 
@@ -196,8 +214,17 @@ public class ZeventManager {
      * {@link EventQueueProcessor}
      */
     void dispatchEvent(Zevent e) {
+        long timeInQueue = e.getQueueExitTime() - e.getQueueEntryTime();
         List listeners;
-            
+
+        synchronized (INIT_LOCK) {
+            if (timeInQueue > _maxTimeInQueue)
+                _maxTimeInQueue = timeInQueue;
+            if (timeInQueue < _minTimeInQueue)
+                _minTimeInQueue = timeInQueue;
+            _numEvents++;
+        }
+        
         synchronized (_listenerLock) {
             List typeListeners = (List)_listeners.get(e.getClass());
 
@@ -220,6 +247,16 @@ public class ZeventManager {
             listener.processEvents(Collections.singletonList(e));
         }
     }
+
+    private String getDiagnostics() {
+        synchronized (INIT_LOCK) {
+            return "ZEvent Manager Diagnostics:\n" +  
+                "    Queue Size:        " + _eventQueue.size() + "\n" +
+                "    Max Time In Queue: " + _maxTimeInQueue + "\n" + 
+                "    Min Time In Queue: " + _minTimeInQueue + "\n" +
+                "    # of Events:       " + _numEvents;
+        }
+    }
     
     public static ZeventManager getInstance() {
         synchronized (INIT_LOCK) {
@@ -232,6 +269,14 @@ public class ZeventManager {
                                                        p, "ZeventProcessor");
                 INSTANCE._processorThread.setDaemon(true);
                 INSTANCE._processorThread.start();
+
+                DiagnosticObject myDiag = new DiagnosticObject() {
+                    public String getStatus() {
+                        return ZeventManager.getInstance().getDiagnostics();
+                    }
+                };
+                
+                DiagnosticThread.addDiagnosticObject(myDiag);
             }
         }
         return INSTANCE;
