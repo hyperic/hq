@@ -313,6 +313,8 @@
         </fileset>
     </copy>
 
+    <copy file="etc/ehcache.xml" todir="${ear.dir}"/>
+
     <copy file="etc/jboss/events/alertdef-prop-service.xml" tofile="${ear.dir}/alertdef-prop-service.xml" />
      <copy file="etc/jboss/measurement/measurement-prop-service.xml" tofile="${ear.dir}/measurement-prop-service.xml" />
     <copy file="etc/jboss/measurement/measurement-mq-service.xml" tofile="${ear.dir}/measurement-mq-service.xml" />
@@ -394,6 +396,7 @@
         <include name="quartz-oracle-1.5.1.jar" />
         <include name="instantj-1.6.jar" />
         <include name="snmp4j.jar" />
+        <include name="ehcache-1.2.3.jar" />
 
         <!-- replacement j2ee compile required for instantj 
              since our installer doesn't install tools.jar -->
