@@ -25,19 +25,22 @@
 
 package org.hyperic.hq.ui.action.portlet;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.Portal;
-import org.hyperic.hq.ui.WebUser;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.Portal;
+import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.util.config.InvalidOptionException;
 
 /**
  */
@@ -52,19 +55,40 @@ public class DisplayDashboardAction extends TilesAction {
 
         HttpSession session = request.getSession();
         
-        Portal portal = (Portal) session.getAttribute(Constants.USERS_SES_PORTAL);                
+        Portal portal =
+            (Portal) session.getAttribute(Constants.USERS_SES_PORTAL);
         if (portal == null) {
             portal = new Portal();
             portal.setName("dashboard.template.title");
             portal.setColumns(2);
-            //construct from user preferences.
-            WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );        
-            portal.addPortletsFromString( user.getPreference(Constants.USER_PORTLETS_FIRST), 1);
-            portal.addPortletsFromString( user.getPreference(Constants.USER_PORTLETS_SECOND), 2);
-            
+            // construct from user preferences.
+            WebUser user =
+                (WebUser) session.getAttribute(Constants.WEBUSER_SES_ATTR);
+            portal.addPortletsFromString(
+                user.getPreference(Constants.USER_PORTLETS_FIRST), 1);
+            portal.addPortletsFromString(
+                user.getPreference(Constants.USER_PORTLETS_SECOND), 2);
+
             session.setAttribute(Constants.USERS_SES_PORTAL, portal);
+
+            // Make sure there's a valid RSS auth token
+            String rssToken;
+            try {
+                rssToken = user.getPreference(Constants.RSS_TOKEN);
+            } catch (InvalidOptionException e) {
+                rssToken = String.valueOf(session.hashCode());
+ 
+                // Now store the RSS auth token
+                ServletContext ctx = getServlet().getServletContext();
+                AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+                user.setPreference(Constants.RSS_TOKEN, rssToken);
+                boss.setUserPrefs(user.getSessionId(), user.getId(),
+                                  user.getPreferences());
+            }
+            session.setAttribute("rssToken", rssToken);
+
         }
-        request.setAttribute(Constants.PORTAL_KEY, portal ); 
+        request.setAttribute(Constants.PORTAL_KEY, portal); 
         return null;
     }
 }
