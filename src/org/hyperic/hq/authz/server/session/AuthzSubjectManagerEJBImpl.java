@@ -466,15 +466,13 @@ public class AuthzSubjectManagerEJBImpl
 
     private static final String SQL_PREFS_INSERT
         = "INSERT INTO EAM_USER_CONFIG_RESP "
-        + "(ID, SUBJECT_ID, PREF_RESPONSE) "
-        + "VALUES (?,?,NULL)";
+        + "(ID, PREF_RESPONSE) VALUES (?, NULL)";
     private void insertUserPrefs(Integer subjId) {
         PreparedStatement ps = null;
         try {
             Connection conn = getSubjectDAO().getSession().connection();
             ps = conn.prepareStatement(SQL_PREFS_INSERT);
             ps.setInt(1, subjId.intValue());
-            ps.setInt(2, subjId.intValue());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new SystemException(e);
