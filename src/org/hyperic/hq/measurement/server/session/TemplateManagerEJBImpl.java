@@ -72,7 +72,6 @@ import org.hyperic.hq.measurement.MonitorableType;
 import org.hyperic.hq.measurement.SRNCreateException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.server.mbean.SRNCache;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementArgValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateLiteValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
@@ -460,7 +459,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                 
                 List metrics =
                     getDerivedMeasurementDAO().findByTemplate(templIds[i]);
-                DMValueCache cache = DMValueCache.getInstance();
                 SRNCache srnCache = SRNCache.getInstance();
                 
                 for (Iterator it = metrics.iterator(); it.hasNext(); ) {
@@ -471,15 +469,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                     
                     if (template.isDefaultOn() != dm.isEnabled())
                         dm.setEnabled(template.isDefaultOn());
-                    
-                    dm.setMtime(current);
-                    
-                    DerivedMeasurementValue dmval;
-                    if ((dmval = cache.get(dm.getId())) != null) {
-                        dmval.setInterval(interval);
-                        dmval.setEnabled(true);
-                        dmval.setMtime(current);
-                    }
 
                     AppdefEntityID aeid = 
                         new AppdefEntityID(dm.getAppdefType(),
@@ -523,7 +512,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                 
                 List metrics =
                     getDerivedMeasurementDAO().findByTemplate(templIds[i]);
-                DMValueCache cache = DMValueCache.getInstance();
                 SRNCache srnCache = SRNCache.getInstance();
                 for (Iterator it = metrics.iterator(); it.hasNext(); ) {
                     DerivedMeasurement dm = (DerivedMeasurement)it.next();
@@ -533,19 +521,13 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                     
                     dm.setEnabled(on);
                     dm.setMtime(current);
-                    
-                    DerivedMeasurementValue dmval;
-                    if ((dmval = cache.get(dm.getId())) != null) {
-                        dmval.setEnabled(on);
-                        dmval.setMtime(current);
-                    }
-                    
+
                     AppdefEntityID aeid =
                         new AppdefEntityID(dm.getAppdefType(),
                                            dm.getInstanceId());
                     ScheduleRevNumValue srn = srnCache.getSRN(aeid);
                     try {
-                        long minInterval = (srn == null) ? dmval.getInterval() :
+                        long minInterval = (srn == null) ? dm.getInterval() :
                             srn.getMinInterval();
                         srnCache.beginIncrementSRN(aeid, minInterval);
                     } catch (SRNCreateException e) {

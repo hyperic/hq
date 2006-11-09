@@ -176,12 +176,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             throw new FinderException();
         }
 
-        getDerivedMeasurementDAO().update(m, interval);
-
-        DerivedMeasurementValue dmVal = m.getDerivedMeasurementValue();
-        DMValueCache.getInstance().put(dmVal);
-        
-        return dmVal;
+        m = getDerivedMeasurementDAO().update(m, interval);
+        return m.getDerivedMeasurementValue();
     }
 
     private Integer getIdByTemplateAndInstance(Integer tid,
@@ -234,8 +230,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             getDerivedMeasurementDAO().create(instanceId, mt, interval);
         
         DerivedMeasurementValue dmValue = dm.getDerivedMeasurementValue();
-        DMValueCache.getInstance().put(dmValue);
-        
         return dmValue;
     }
 
@@ -441,14 +435,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         // Call back into ourselves to force a new transation to be created.
         List dmList = getDMManager().createMeasurements(id, templates,
                                                         intervals, props);
-        
-        // Make sure that the cache does not have outdated derived measurements
-        DMValueCache cache = DMValueCache.getInstance();
-        for (Iterator it = dmList.iterator(); it.hasNext();) {
-            DerivedMeasurementValue dmv = (DerivedMeasurementValue) it.next();
-            cache.put(dmv);
-        }
-        
         this.sendAgentSchedule(id);
         return dmList;
     }
@@ -659,13 +645,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                                    " not found.");
         }
 
-        DMValueCache cache = DMValueCache.getInstance();
-        DerivedMeasurementValue dmv = cache.get(m.getId());
-        if (dmv == null) {
-            dmv = m.getDerivedMeasurementValue();
-            cache.put(dmv);
-        }
-        return dmv;
+        return m.getDerivedMeasurementValue();
     }
 
     /**
@@ -677,18 +657,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      */
     public DerivedMeasurementValue getMeasurement(Integer mid)
         throws MeasurementNotFoundException {
-        DMValueCache cache = DMValueCache.getInstance();
-        DerivedMeasurementValue dmv = cache.get(mid);
-        if (dmv == null) {
-            DerivedMeasurement dm =
-                getDerivedMeasurementDAO().findById(mid);
-            if (dm == null) {
-                throw new MeasurementNotFoundException(mid);
-            }
-            dmv = dm.getDerivedMeasurementValue();
-            cache.put(dmv);
-        }
-        return dmv;
+
+        DerivedMeasurement dm = getDerivedMeasurementDAO().findById(mid);
+
+        return dm.getDerivedMeasurementValue();
     }
 
     /**
@@ -881,16 +853,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                                    "for " + iid + " with " +
                                                    "template " + tid);
         }
-        
-        DMValueCache cache = DMValueCache.getInstance();
-        DerivedMeasurementValue dmv = cache.get(dm.getId());
-        if (dmv == null) {
-            // Save it in cache
-            dmv = dm.getDerivedMeasurementValue();
-            cache.put(dmv);
-        }
-        
-        return dmv;
+
+        return dm.getDerivedMeasurementValue();
     }
 
     /**
@@ -1153,10 +1117,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         throws MeasurementNotFoundException {
 
         getDerivedMeasurementDAO().update(m, enabled);
-
-        // Must also update DMV in cache
-        DMValueCache cache = DMValueCache.getInstance();
-        cache.put(m.getDerivedMeasurementValue());
     }
 
     /**

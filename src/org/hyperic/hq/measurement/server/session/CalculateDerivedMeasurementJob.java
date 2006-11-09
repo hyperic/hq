@@ -329,11 +329,7 @@ public class CalculateDerivedMeasurementJob
         recentlyMissedCalculations = 
             new MissedJobMap((String)dataMap.get("recentlyMissedCalculations"));
 
-        DMValueCache cache = DMValueCache.getInstance();
         try {
-            // Get the measurement from the cache first
-            measurement = cache.get(measurementId);
-
             // Verify that the measurement still exists
             DerivedMeasurement dm = getDerivedMeasurementDAO().
                 findById(measurementId);
@@ -342,9 +338,6 @@ public class CalculateDerivedMeasurementJob
                                           "removed.");
             }
 
-            if (measurement == null) {
-                cache.put(dm.getDerivedMeasurementValue());
-            }
         } catch (FinderException e) {
             log.error("Derived measurement " + measurementId + " not found");
             // No measurement found, remove it, then

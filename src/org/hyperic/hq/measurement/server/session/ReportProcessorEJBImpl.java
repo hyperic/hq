@@ -100,19 +100,8 @@ public class ReportProcessorEJBImpl
             // but works. Lookup template, if identity, set interval
             // which will later be used to instruct datamanager to
             // insert the DM row in addition to just the RM row.
-
-            // first look for it in the cache
-            DMValueCache cache = DMValueCache.getInstance();
-            DerivedMeasurementValue dmVal = cache.get(dmId);
-            if (dmVal == null) {
-                // Fix for 4868: This lookup needs to be transactional
-                // in order to support simultaneous lookups. Thus, it can not
-                // be done directly against the entity.
-                dmVal = DerivedMeasurementManagerUtil.getLocalHome().create()
-                        .getMeasurement(dmId);
-                log.debug("Adding derived measurement: " + dmId + " to cache");
-            } 
-            return dmVal;
+            return DerivedMeasurementManagerUtil.getLocalHome().create()
+                .getMeasurement(dmId);
         } catch (MeasurementNotFoundException e) {
             log.debug("Unable to locate DM for passThrough data insertion.");
         } catch (CreateException e) {
