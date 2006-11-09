@@ -6,6 +6,7 @@ import org.apache.commons.logging.LogFactory;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Collections;
 
 /**
  * The DiagnosticThread is a simple object running within the server that
@@ -29,7 +30,8 @@ public class DiagnosticThread implements Runnable {
     // List of DiagnosticObjects, may want to convert to a Map if we ever
     // want to allow objects to be removed from the DiagnosticThread at
     // runtime.
-    private static List _diagnosticObjects = new ArrayList();
+    private static List _diagnosticObjects =
+        Collections.synchronizedList(new ArrayList());
 
     // How often the thread prints info
     private static long _interval = 1000 * 60; // 60 seconds for now
@@ -69,11 +71,19 @@ public class DiagnosticThread implements Runnable {
             try {
                 Thread.sleep(_interval);
                 _log.info("--- DIAGNOSTICS ---");
-                for (Iterator i = _diagnosticObjects.iterator();
-                     i.hasNext(); ) {
-                    DiagnosticObject o = (DiagnosticObject)i.next();
-                    _log.info("[" + o.getClass().getName() + "] " +
-                              o.getStatus());
+                synchronized(_diagnosticObjects) {
+                    Iterator i = _diagnosticObjects.iterator();
+
+                    while (i.hasNext()) {
+                        DiagnosticObject o = (DiagnosticObject)i.next();
+                        try {
+                            _log.info("[" + o.getClass().getName() + "] " +
+                                      o.getStatus());
+                        } catch (Throwable e) {
+                            // Don't let exceptions in DiagnosticObject's
+                            // bring us down...
+                        }
+                    }
                 }
 
             } catch (InterruptedException e) {
