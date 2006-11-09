@@ -701,13 +701,11 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             // First find them, then delete them
             List mcol = dao.findByInstance(entIds[i].getType(),
                                            entIds[i].getID());
-
             for (Iterator it = mcol.iterator(); it.hasNext(); ) {
                 DerivedMeasurement m = (DerivedMeasurement)it.next();
-
                 toUnschedule.add(m.getId());
-                dao.remove(m);
             }
+            dao.deleteByInstance(entIds[i].getType(), entIds[i].getID());
         }
 
         // Now unschedule the DerivedMeasurments

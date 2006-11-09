@@ -109,7 +109,6 @@ public class ConfigManagerEJBImpl
     private PlatformManagerLocalHome platformManagerLocalHome;
     private ServerManagerLocalHome   serverManagerLocalHome;
     private ServiceManagerLocalHome  serviceManagerLocalHome;
-    private ResourceValue _bogus; // workaround for Intellij import optimization
 
     private PlatformManagerLocal getPlatformManagerLocal(){
         try {

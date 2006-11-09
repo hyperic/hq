@@ -53,7 +53,7 @@ import org.apache.commons.logging.LogFactory;
  * @ejb:bean name="DefaultMetricsEnabler"
  *      jndi-name="ejb/bizapp/DefaultMetricsEnabler"
  *      local-jndi-name="LocalDefaultMetricsEnabler"
- *      transaction-type="Bean"
+ *      transaction-type="Container"
  *      acknowledge-mode="Auto-acknowledge"
  *      destination-type="javax.jms.Topic"
  *

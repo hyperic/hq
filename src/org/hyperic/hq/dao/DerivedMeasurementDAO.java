@@ -126,6 +126,21 @@ public class DerivedMeasurementDAO extends HibernateDAO
             .setInteger(1, id).list();
     }
 
+    public int deleteByInstance(int type, int id) {
+        String sql =
+            "delete DerivedMeasurement where id in " +
+            "(select m.id from DerivedMeasurement m " +
+            "join m.template t " +
+            "join t.monitorableType mt " +
+            "where mt.appdefType=? and m.instanceId=? and " +
+            "m.interval is not null)";
+
+        return getSession().createQuery(sql)
+            .setInteger(0, type)
+            .setInteger(1, id)
+            .executeUpdate();
+    }
+
     public List findByInstance(int type, int id, boolean enabled) {
         String sql =
             "select m from DerivedMeasurement m " +
