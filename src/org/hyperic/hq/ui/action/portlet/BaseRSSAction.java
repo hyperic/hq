@@ -57,7 +57,8 @@ public abstract class BaseRSSAction extends BaseAction {
         return RequestUtils.getStringParameter(request, "user");
     }
 
-    protected ConfigResponse getUserPreferences(String user)
+    protected ConfigResponse getUserPreferences(HttpServletRequest request,
+                                                String user)
         throws LoginException, RemoteException, ConfigPropertyException {
         ServletContext ctx = getServlet().getServletContext();
         AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
@@ -77,7 +78,15 @@ public abstract class BaseRSSAction extends BaseAction {
                 log.debug("error retrieving user preferences:", e);
         }
     
+        // Let's make sure that the rss auth token matches
+        String rssToken = RequestUtils.getStringParameter(request, "token");
+        String prefToken = preferences.getValue(Constants.RSS_TOKEN);
+        if (rssToken == null ||
+            !rssToken.equals(prefToken))
+            throw new LoginException("Username and Auth token do not match");
+        
         preferences.merge(defaultPreferences, false);
+        
         return preferences;
     }
     
