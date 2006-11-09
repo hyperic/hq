@@ -24,15 +24,16 @@
         <xsl:attribute name="inverse">
           <xsl:value-of select="'true'"/>
         </xsl:attribute>
-        <xsl:attribute name="cascade">
-          <xsl:value-of select="'save-update,delete,evict,persist,merge'"/>
-        </xsl:attribute>
-        <xsl:apply-templates select="@*" />
         <xsl:choose>
           <xsl:when test="one-to-many">
+            <xsl:attribute name="cascade">
+              <xsl:value-of select="'save-update,delete,evict,persist,merge'"/>
+            </xsl:attribute>
+            <xsl:apply-templates select="@*" />
             <xsl:apply-templates mode="key-mode" select="node()" />
           </xsl:when>
           <xsl:otherwise>
+            <xsl:apply-templates select="@*" />
             <xsl:apply-templates select="node()" />
           </xsl:otherwise>
         </xsl:choose>

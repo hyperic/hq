@@ -180,24 +180,22 @@ public class ResourceDAO extends HibernateDAO
     public Collection findViewableSvcRes_orderName(Integer user,
                                                    Boolean fSystem)
     {
-        // we use join fetch here to produce a single
-        // outer join => the strategy here is to rely on
+        // we use join here to produce a single
+        // join => the strategy here is to rely on
         // the database query optimizer to optimize the query
-        // If the database is too slow, only then
-        // we should remove the "fetch" clause
-        // and let hibernate issue multiple selects to
-        // fetch association subgraph.
+        // by feeding it a single query.
+        //
         // The important point is we should first give the
         // opportunity to the database to do the "query" optimization
         // before we do anything else.
         // Note: this should be refactored to use named queries so
         // that we can perform "fetch" optimization outside of the code
-        String sql = "select r from Resource r " +
-                     " join fetch r.resourceGroups rg " +
-                     " join fetch rg.roles role " +
-                     " join fetch role.subjects subj " +
-                     " join fetch role.operations op " +
-                     " join fetch r.resourceType rt " +
+        String sql = "select distinct r from Resource r " +
+                     " join r.resourceGroups rg " +
+                     " join rg.roles role " +
+                     " join role.subjects subj " +
+                     " join role.operations op " +
+                     " join r.resourceType rt " +
                      "where " +
                      "  r.system = :system and " +
                      "  (subj.id = :subjId or r.owner.id = :subjId) and " +
@@ -234,11 +232,11 @@ public class ResourceDAO extends HibernateDAO
 
     public Collection findSvcRes_orderName(Boolean fSystem)
     {
-        String sql="select r from Resource r " +
-                   " join fetch r.resourceGroups rg " +
-                   " join fetch rg.roles role " +
-                   " join fetch role.operations op " +
-                   " join fetch r.resourceType rt " +
+        String sql="select distinct r from Resource r " +
+                   " join r.resourceGroups rg " +
+                   " join rg.roles role " +
+                   " join role.operations op " +
+                   " join r.resourceType rt " +
                    "where " +
                    "  r.system = ? and " +
                    "  (" +
@@ -252,22 +250,11 @@ public class ResourceDAO extends HibernateDAO
                    "        where r.id = r2.id and rg2.groupType = 15 and" +
                    "              rg2.clusterId != -1) " +
                    "order by r.sortName ";
+        
         List resources =
             getSession().createQuery(sql)
                         .setBoolean(0, fSystem.booleanValue())
                         .list();
-        
-        // Hibernate's distinct does not work well with joins - do filter here
-        Integer lastId = null;  // Track the last one we looked at
-        for (Iterator it = resources.iterator(); it.hasNext(); ) {
-            Resource res = (Resource) it.next();
-            if (res.getId().equals(lastId)) {
-                it.remove();
-            }
-            else {
-                lastId = res.getId();
-            }
-        }
         
         return resources;
     }
@@ -277,11 +264,11 @@ public class ResourceDAO extends HibernateDAO
                                                  Boolean fSystem)
     {
         String sql="select distinct r from Resource r " +
-                   " join fetch r.resourceGroups rgg" +
-                   " join fetch r.resourceGroups rg " +
-                   " join fetch rg.roles role " +
-                   " join fetch role.subjects subj " +
-                   " join fetch role.operations op " +
+                   " join r.resourceGroups rgg" +
+                   " join r.resourceGroups rg " +
+                   " join rg.roles role " +
+                   " join role.subjects subj " +
+                   " join role.operations op " +
                    "where " +
                    " r.system = :system and " +
                    " rgg.id = :groupId and " +
@@ -309,11 +296,11 @@ public class ResourceDAO extends HibernateDAO
                                             Boolean fSystem)
     {
         String sql="select distinct r from Resource r " +
-                   " join fetch r.resourceGroups rgg" +
-                   " join fetch r.resourceGroups rg " +
-                   " join fetch rg.roles role " +
-                   " join fetch role.subjects subj " +
-                   " join fetch role.operations op " +
+                   " join r.resourceGroups rgg" +
+                   " join r.resourceGroups rg " +
+                   " join rg.roles role " +
+                   " join role.subjects subj " +
+                   " join role.operations op " +
                    "where " +
                    " r.system = :system and " +
                    " rgg.id = :groupId and " +
@@ -343,10 +330,10 @@ public class ResourceDAO extends HibernateDAO
 
         sb.append ("SELECT DISTINCT r " )
             .append ( "FROM Resource r      " )
-            .append ( "  join fetch r.resourceGroups g" )
-            .append ( "  join fetch g.roles e         " )
-            .append ( "  join fetch e.operations o    " )
-            .append ( "  join fetch e.subjects s       " )
+            .append ( "  join r.resourceGroups g" )
+            .append ( "  join g.roles e         " )
+            .append ( "  join e.operations o    " )
+            .append ( "  join e.subjects s       " )
             .append ( "    WHERE s.id = ?         " )
             .append ( "          AND (          " );
 
@@ -370,7 +357,7 @@ public class ResourceDAO extends HibernateDAO
 
         sb.append ("SELECT DISTINCT r " )
             .append ( "FROM Resource r "      )
-            .append ( "  join fetch r.resourceGroups g " )
+            .append ( "  join r.resourceGroups g " )
             .append ( "WHERE "              );
 
         for (int x = 0; x < resLocArr.length; x++) {

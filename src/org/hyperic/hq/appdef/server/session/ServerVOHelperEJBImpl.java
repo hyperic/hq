@@ -60,9 +60,11 @@ import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.ServiceType;
+import org.hyperic.dao.DAOFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Session;
 
 /**
  *
@@ -174,17 +176,21 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
         return vo;
     } 
     
-    private AppdefResourceValue getServerValueDirectSQL(Integer pk, boolean getLight) {
+    private AppdefResourceValue getServerValueDirectSQL(
+        Integer pk, boolean getLight) {
+        Session session = DAOFactory.getDAOFactory().getCurrentSession();
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
             log.debug("VOCache Miss! Retrieving ServerValue from database.");
-            conn = Util.getConnection();
+            conn = session.connection();
             ps = conn.prepareStatement(SERVER_SQL);
             ps.setInt(1, pk.intValue());
             rs = ps.executeQuery();
-            rs.next();
+            if (!rs.next()) {
+                throw new SystemException("Platform not found: " + pk);
+            }
             if(getLight) {
                 ServerLightValue slv = new ServerLightValue();
                 slv.setId(new Integer(rs.getInt(1)));
@@ -207,6 +213,7 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
             } else {
                 ServerValue sv = new ServerValue();
                 sv.setId(new Integer(rs.getInt(1)));
+                Integer platformId = new Integer(rs.getInt(2));
                 sv.setServerType(getServerTypeValue(new Integer(rs.getInt(3))));
                 sv.setName(rs.getString(4));
                 sv.setSortName(rs.getString(5));
@@ -222,8 +229,7 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
                 sv.setServicesAutomanaged(rs.getBoolean(15));
                 sv.setInstallPath(rs.getString(16));
                 sv.setAutoinventoryIdentifier(rs.getString(17));
-                Platform p =
-                    getPlatformDAO().findById(new Integer(rs.getInt(2)));
+                Platform p = getPlatformDAO().findById(platformId);
                 sv.setPlatform(p.getPlatformLightValue());
                 return sv;
             }
@@ -231,7 +237,7 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
             throw new SystemException(e);
         } finally {
             DBUtil.closeJDBCObjects(log, null, ps, rs);
-            Util.endConnection();
+            session.disconnect();
         }
     }
 
