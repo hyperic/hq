@@ -49,25 +49,6 @@ public class DerivedMeasurementDAO extends HibernateDAO
         super.remove(entity);
     }
 
-    /**
-     * Update the interval for a derived measurement
-     */
-    public DerivedMeasurement update(DerivedMeasurement dm, long interval) {
-        dm.setEnabled(interval != 0);
-        dm.setInterval(interval);
-        save(dm);
-        return dm;
-    }
-
-    /**
-     * Enable a derived measurement
-     */
-    public DerivedMeasurement update(DerivedMeasurement dm, boolean enabled) {
-        dm.setEnabled(enabled);
-        save(dm);
-        return dm;
-    }
-
     public DerivedMeasurement create(Integer instanceId,
                                      MeasurementTemplate mt,
                                      long interval) {

@@ -133,7 +133,7 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
 
                 // Translate the DSN
                 tmpl = rm.getTemplate().getTemplate();
-                getRawMeasurementDAO().update(rm, translate(tmpl, config));
+                rm.setDsn(translate(tmpl, config));
             }
         } catch (MetricInvalidException e) {
             throw new MeasurementCreateException("Invalid DSN generated", e);

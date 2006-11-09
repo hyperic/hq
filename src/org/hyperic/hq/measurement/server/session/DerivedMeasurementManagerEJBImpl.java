@@ -176,7 +176,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             throw new FinderException();
         }
 
-        m = getDerivedMeasurementDAO().update(m, interval);
+        m.setEnabled(interval != 0);
+        m.setInterval(interval);
         return m.getDerivedMeasurementValue();
     }
 
@@ -1115,8 +1116,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      */
     public void enableMeasurement(DerivedMeasurement m, boolean enabled)
         throws MeasurementNotFoundException {
-
-        getDerivedMeasurementDAO().update(m, enabled);
+        m.setEnabled(enabled);
     }
 
     /**

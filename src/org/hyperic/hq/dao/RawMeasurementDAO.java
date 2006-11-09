@@ -54,12 +54,6 @@ public class RawMeasurementDAO extends HibernateDAO
         super.remove(entity);
     }
 
-    public RawMeasurement update(RawMeasurement m, String dsn) {
-        m.setDsn(dsn);
-        save(m);
-        return m;
-    }
-
     public RawMeasurement create(Integer instanceId, MeasurementTemplate mt,
                                  String dsn) {
         RawMeasurement rm = new RawMeasurement(instanceId, mt, dsn);
