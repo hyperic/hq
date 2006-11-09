@@ -155,4 +155,5 @@ public interface KeyConstants {
     public static final String DEFAULT_INDICATOR_VIEW = 
         "resource.common.monitor.visibility.defaultview";
 
+    public static final String RSS_TOKEN = ".dashContent.rssToken";
 }
