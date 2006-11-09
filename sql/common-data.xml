@@ -1,4 +1,3 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
 <Covalent.DBSetup name="appdef-data.xml" notice="DBSetup, Copyright (C) 2002, Covalent Technologies, Inc., All Rights Reserved.">
     <!-- this file contains the seed data for the configuration table in
@@ -124,33 +123,33 @@
               DEFAULT_PROPVALUE="2678400000" FREAD_ONLY="FALSE"/>
 
         <!-- Determines if SNMP actions will be used -->
-        <data ID="37" KEY="SNMP_VERSION" VALUE="" DEFAULT_VALUE=""
+        <data ID="37" PROPKEY="SNMP_VERSION" PROPVALUE="" DEFAULT_PROPVALUE=""
               FREAD_ONLY="FALSE"/>
-        <data ID="38" KEY="SNMP_AUTH_PROTOCOL" VALUE="MD5" DEFAULT_VALUE=""
+        <data ID="38" PROPKEY="SNMP_AUTH_PROTOCOL" PROPVALUE="MD5" DEFAULT_PROPVALUE=""
               FREAD_ONLY="FALSE"/>
-        <data ID="39" KEY="SNMP_AUTH_PASSPHRASE" VALUE="" DEFAULT_VALUE=""
+        <data ID="39" PROPKEY="SNMP_AUTH_PASSPHRASE" PROPVALUE="" DEFAULT_PROPVALUE=""
               FREAD_ONLY="FALSE"/>
-        <data ID="40" KEY="SNMP_PRIV_PASSPHRASE" VALUE="" DEFAULT_VALUE=""
+        <data ID="40" PROPKEY="SNMP_PRIV_PASSPHRASE" PROPVALUE="" DEFAULT_PROPVALUE=""
               FREAD_ONLY="FALSE"/>
-        <data ID="41" KEY="SNMP_COMMUNITY" VALUE="public" DEFAULT_VALUE=""
+        <data ID="41" PROPKEY="SNMP_COMMUNITY" PROPVALUE="public" DEFAULT_PROPVALUE=""
               FREAD_ONLY="FALSE"/>
-        <data ID="42" KEY="SNMP_ENGINE_ID" VALUE="" DEFAULT_VALUE=""
+        <data ID="42" PROPKEY="SNMP_ENGINE_ID" PROPVALUE="" DEFAULT_PROPVALUE=""
               FREAD_ONLY="FALSE"/>
-        <data ID="43" KEY="SNMP_CONTEXT_NAME" VALUE="" DEFAULT_VALUE=""
+        <data ID="43" PROPKEY="SNMP_CONTEXT_NAME" PROPVALUE="" DEFAULT_PROPVALUE=""
               FREAD_ONLY="FALSE"/>
-        <data ID="44" KEY="SNMP_SECURITY_NAME" VALUE="" DEFAULT_VALUE=""
+        <data ID="44" PROPKEY="SNMP_SECURITY_NAME" PROPVALUE="" DEFAULT_PROPVALUE=""
               FREAD_ONLY="FALSE"/>
-        <data ID="45" KEY="SNMP_TRAP_OID" VALUE="" DEFAULT_VALUE=""
+        <data ID="45" PROPKEY="SNMP_TRAP_OID" PROPVALUE="" DEFAULT_PROPVALUE=""
               FREAD_ONLY="FALSE"/>
-        <data ID="46" KEY="SNMP_ENTERPRISE_OID" VALUE="" DEFAULT_VALUE=""
+        <data ID="46" PROPKEY="SNMP_ENTERPRISE_OID" PROPVALUE="" DEFAULT_PROPVALUE=""
               FREAD_ONLY="FALSE"/>
-        <data ID="47" KEY="SNMP_GENERIC_ID" VALUE="" DEFAULT_VALUE=""
+        <data ID="47" PROPKEY="SNMP_GENERIC_ID" PROPVALUE="" DEFAULT_PROPVALUE=""
               FREAD_ONLY="FALSE"/>
-        <data ID="48" KEY="SNMP_SPECIFIC_ID" VALUE="" DEFAULT_VALUE=""
+        <data ID="48" PROPKEY="SNMP_SPECIFIC_ID" PROPVALUE="" DEFAULT_PROPVALUE=""
               FREAD_ONLY="FALSE"/>
-        <data ID="49" KEY="SNMP_AGENT_ADDRESS" VALUE="" DEFAULT_VALUE=""
+        <data ID="49" PROPKEY="SNMP_AGENT_ADDRESS" PROPVALUE="" DEFAULT_PROPVALUE=""
               FREAD_ONLY="FALSE"/>
-        <data ID="50" KEY="SNMP_PRIVACY_PROTOCOL" VALUE="" DEFAULT_VALUE=""
+        <data ID="50" PROPKEY="SNMP_PRIVACY_PROTOCOL" PROPVALUE="" DEFAULT_PROPVALUE=""
               FREAD_ONLY="FALSE"/>
 
         <!-- How long to keep event logs around -->
