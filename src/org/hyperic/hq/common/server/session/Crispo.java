@@ -59,6 +59,21 @@ public class Crispo
         return getId().equals(o.getId());
     }
 
+    /**
+     * Create a new {@link ConfigResponse} based on the key/values stored
+     * within this object.
+     */
+    public ConfigResponse toResponse() {
+        ConfigResponse res = new ConfigResponse();
+        
+        for (Iterator i=getOptions().iterator(); i.hasNext(); ) {
+            CrispoOption opt = (CrispoOption)i.next();
+            
+            res.setValue(opt.getKey(), opt.getValue());
+        }
+        return res;
+    }
+    
     static Crispo create(Map keyVals) {
         Crispo res = new Crispo();
         
