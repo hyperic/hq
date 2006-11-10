@@ -135,7 +135,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
 
     public List findByInstanceForCategory(int type, int id, String cat) {
         String sql =
-            "select distinct m from DerivedMeasurement m " +
+            "select m from DerivedMeasurement m " +
             "join m.template t " +
             "join t.monitorableType mt " +
             "join t.category c " +
@@ -154,7 +154,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
     public List findByInstanceForCategory(int type, int id, boolean enabled,
                                           String cat) {
         String sql =
-            "select distinct m from DerivedMeasurement m " +
+            "select m from DerivedMeasurement m " +
             "join m.template t " +
             "join t.monitorableType mt " +
             "join t.category c " +
@@ -206,7 +206,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
 
     public List findDesignatedByInstance(int type, int id) {
         String sql =
-            "select distinct m from DerivedMeasurement m " +
+            "select m from DerivedMeasurement m " +
             "join m.template t " +
             "join t.monitorableType mt " +
             "where m.instanceId = ? and " +
