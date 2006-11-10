@@ -80,6 +80,10 @@ public abstract class PersistedObject
             return false;
         }
         PersistedObject o = (PersistedObject)obj;
+        
+        if (_id == null || o.getId() == null)
+            return false;
+        
         return _id == o.getId() ||
                (_id != null && o.getId() != null && _id.equals(o.getId()));
     }
