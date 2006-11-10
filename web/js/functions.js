@@ -334,16 +334,55 @@ function moveElementDown(elem, root) {
 }
 /*--------------------------- END helpers for CSS stuff ------------------------------*/
 
-function accord() {
+function accord(tab) {
+  if (tab == null)
+    tab = 0;
+
   new Rico.Accordion( 'propertiesAccordion',
                      { panelHeight: 300,
                        expandedBg: '#60a5ea',
                        hoverBg: '#70b5fa',
                        collapsedBg: '#BBBBBB',
                        collapsedTextColor: '#DDDDDD',
-                       borderColor: '#60a5ea'
+                       borderColor: '#60a5ea',
+                       onLoadShowTab: tab
                      } );
 } 
 
+function accord0() {
+  accord(0);
+}
+
+function accord1() {
+  accord(1);
+}
+
+function accord2() {
+  accord(2);
+}
+
+function accord3() {
+  accord(3);
+}
+
+function accord4() {
+  accord(4);
+}
+
+function accord5() {
+  accord(5);
+}
+
+function accord6() {
+  accord(6);
+}
+
+function accord7() {
+  accord(7);
+}
+
+function accord8() {
+  accord(8);
+}
 
 /*-- END functions.js --*/

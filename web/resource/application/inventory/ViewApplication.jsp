@@ -158,7 +158,7 @@ var pageData = new Array();
 </div>
 
 <script type="text/javascript">
-  onloads.push( accord );
+  onloads.push( accord<c:out value="${param.accord}"/> );
 </script>
 
 <tiles:insert definition=".page.footer"/>

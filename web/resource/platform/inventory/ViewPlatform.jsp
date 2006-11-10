@@ -231,7 +231,7 @@ var pageData = new Array();
 <script type="text/javascript">
   clearIfAnyChecked();
 
-  onloads.push( accord );
+  onloads.push( accord<c:out value="${param.accord}"/> );
 </script>
 
 <tiles:insert definition=".page.footer"/>

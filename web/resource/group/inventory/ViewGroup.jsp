@@ -170,7 +170,7 @@
 </div>
 
 <script type="text/javascript">
-  onloads.push( accord );
+  onloads.push( accord<c:out value="${param.accord}"/> );
 </script>
 
 <!-- FOOTER SECTION -->
