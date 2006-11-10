@@ -184,11 +184,11 @@ public class AlertDAO extends HibernateDAO {
             .list();
     }
     
-    protected void remove(Alert alert) {
+    void remove(Alert alert) {
         super.remove(alert);
     }
     
-    protected void save(Alert alert) { 
+    void save(Alert alert) { 
         super.save(alert);
     }
 }
