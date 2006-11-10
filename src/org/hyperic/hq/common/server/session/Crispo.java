@@ -40,7 +40,25 @@ public class Crispo
     void addOption(String key, String val) {
         getOptsSet().add(new CrispoOption(this, key, val));
     }
+
+    public int hashCode() {
+        return getId() == null ? 0 : getId().intValue();
+    }
     
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+
+        if (obj == null || obj instanceof Crispo == false)
+            return false;
+
+        Crispo o = (Crispo)obj;
+        if (getId() == null || o.getId() == null)
+            return false;
+
+        return getId().equals(o.getId());
+    }
+
     static Crispo create(Map keyVals) {
         Crispo res = new Crispo();
         

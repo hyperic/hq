@@ -40,4 +40,23 @@ public class CrispoOption
     protected void setValue(String val) {
         _val = val;
     }
+    
+    public int hashCode() {
+        int result = 17;
+        
+        result = 37*result + _crispo.hashCode();
+        result = 37*result + _key.hashCode();
+        return result;
+    }
+
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+
+        if (obj == null || obj instanceof CrispoOption == false)
+            return false;
+        
+        CrispoOption opt = (CrispoOption)obj;
+        return opt.getKey().equals(_key) && opt.getCrispo().equals(_crispo);
+    }
 }
