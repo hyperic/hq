@@ -44,6 +44,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 
 /**
  * CRUD methods, finders, etc. for Resource
@@ -145,44 +146,13 @@ public class ResourceDAO extends HibernateDAO
         return is;
     }
 
-    private String getInstanceIds(AppdefEntityID[] ids) {
-        StringBuffer sql = new StringBuffer("(");
-        for (int i = 0; i < ids.length; i++) {
-            if (i > 0) {
-                sql.append(",");
-            }
-            sql.append(ids[i].getID());
-        }
-        return sql.append(")").toString();
-    }
-
-    private String getAuthzTypenames(AppdefEntityID[] ids) {
-        StringBuffer sql = new StringBuffer("(");
-        // grab unique names
-        HashSet s = new HashSet();
-        for (int i = 0; i < ids.length; i++) {
-            s.add(ids[i].getAuthzTypeName());
-        }
-        int j = 0;
-        for (Iterator i = s.iterator(); i.hasNext(); j++) {
-            if (j > 0) {
-                sql.append(",");
-            }
-            sql.append("'")
-                .append(i.next())
-                .append("'");
-        }
-        return sql.append(")").toString();
-    }
-
-    private String getResourceHQL (AppdefEntityID[] ids) {
+    private String getResourceHQL(AppdefEntityID[] ids) {
         return new StringBuffer(
             "select r.id from Resource r, " +
-            "ResourceType rt where r.resourceType.id=rt.id and " +
-            "r.instanceId in ")
-            .append(getInstanceIds(ids))
-            .append(" and rt.name in ")
-            .append(getAuthzTypenames(ids))
+            "ResourceType rt where r.resourceType.id=rt.id and ")
+            .append(
+                AppdefUtil.getHQLWhereByAuthzType("rt.name", "r.instanceId",
+                                                  ids))
             .toString();
     }
 

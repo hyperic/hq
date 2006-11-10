@@ -29,6 +29,7 @@ import org.hibernate.Session;
 import org.hyperic.hq.measurement.DerivedMeasurement;
 import org.hyperic.hq.measurement.MeasurementTemplate;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 
 import java.util.List;
 
@@ -66,7 +67,7 @@ public class DerivedMeasurementDAO extends HibernateDAO
             new StringBuffer("from DerivedMeasurement where id IN (");
         int len = ids.length;
         for (int i = 0; i < len - 1; i++) {
-            buf.append(ids[i] + ", ");
+            buf.append(ids[i] + ",");
         }
         buf.append(ids[len - 1] + ")");
 
@@ -76,8 +77,8 @@ public class DerivedMeasurementDAO extends HibernateDAO
     public DerivedMeasurement findByTemplateForInstance(Integer tid, 
                                                         Integer iid) {
         String sql =
-            "select m from DerivedMeasurement m " +
-            "join fetch m.template t " +
+            "select distinct m from DerivedMeasurement m " +
+            "join m.template t " +
             "where t.id=? and m.instanceId=?";
 
         return (DerivedMeasurement)getSession().createQuery(sql)
@@ -87,8 +88,8 @@ public class DerivedMeasurementDAO extends HibernateDAO
 
     public List findByTemplate(Integer id) {
         String sql =
-            "select m from DerivedMeasurement m " +
-            "join fetch m.template t " +
+            "select distinct m from DerivedMeasurement m " +
+            "join m.template t " +
             "where t.id=?";
 
         return getSession().createQuery(sql)
@@ -97,9 +98,9 @@ public class DerivedMeasurementDAO extends HibernateDAO
 
     public List findByInstance(int type, int id) {
         String sql =
-            "select m from DerivedMeasurement m " +
-            "join fetch m.template t " +
-            "join fetch t.monitorableType mt " +
+            "select distinct m from DerivedMeasurement m " +
+            "join m.template t " +
+            "join t.monitorableType mt " +
             "where mt.appdefType=? and m.instanceId=? and " +
             "m.interval is not null";
 
@@ -111,25 +112,14 @@ public class DerivedMeasurementDAO extends HibernateDAO
     public int deleteByInstances(AppdefEntityID[] ids) {
         StringBuffer sql = new StringBuffer()
             .append("delete DerivedMeasurement where id in " +
-            "(select m.id from DerivedMeasurement m " +
-            "join m.template t " +
-            "join t.monitorableType mt where " +
-            "  m.interval is not null and mt.appdefType in (");
-        for (int i = 0; i < ids.length; i++) {
-            if (i > 0) {
-                sql.append(",");
-            }
-            sql.append(ids[i].getType());
-        }
-
-        sql.append(") and m.instanceId in (");
-        for (int i = 0; i < ids.length; i++) {
-            if (i > 0) {
-                sql.append(",");
-            }
-            sql.append(ids[i].getID());
-        }
-        sql.append(") )");
+                    "(select m.id from DerivedMeasurement m " +
+                    "join m.template t " +
+                    "join t.monitorableType mt where " +
+                    "  m.interval is not null and ")
+            .append(
+                AppdefUtil.getHQLWhereByAppdefType("mt.appdefType", "m.instanceId",
+                                              ids))
+            .append(")");
 
         return getSession().createQuery(sql.toString())
             .executeUpdate();
@@ -137,9 +127,9 @@ public class DerivedMeasurementDAO extends HibernateDAO
 
     public List findByInstance(int type, int id, boolean enabled) {
         String sql =
-            "select m from DerivedMeasurement m " +
-            "join fetch m.template t " +
-            "join fetch t.monitorableType mt " +
+            "select distinct m from DerivedMeasurement m " +
+            "join m.template t " +
+            "join t.monitorableType mt " +
             "where mt.appdefType=? and m.instanceId=? and " +
             "m.enabled = ? and m.interval is not null";
 
@@ -151,10 +141,10 @@ public class DerivedMeasurementDAO extends HibernateDAO
 
     public List findByInstanceForCategory(int type, int id, String cat) {
         String sql =
-            "select m from DerivedMeasurement m " +
-            "join fetch m.template t " +
-            "join fetch t.monitorableType mt " +
-            "join fetch t.category c " +
+            "select distinct m from DerivedMeasurement m " +
+            "join m.template t " +
+            "join t.monitorableType mt " +
+            "join t.category c " +
             "where mt.appdefType = ? and " +
             "m.instanceId = ? and " +
             "c.name = ? and " +
@@ -170,10 +160,10 @@ public class DerivedMeasurementDAO extends HibernateDAO
     public List findByInstanceForCategory(int type, int id, boolean enabled,
                                           String cat) {
         String sql =
-            "select m from DerivedMeasurement m " +
-            "join fetch m.template t " +
-            "join fetch t.monitorableType mt " +
-            "join fetch t.category c " +
+            "select distinct m from DerivedMeasurement m " +
+            "join m.template t " +
+            "join t.monitorableType mt " +
+            "join t.category c " +
             "where mt.appdefType = ? and " +
             "m.instanceId = ? and " +
             "m.enabled = ? " +
@@ -191,9 +181,9 @@ public class DerivedMeasurementDAO extends HibernateDAO
                                                int appdefType, int appdefId) {
 
         String sql =
-            "select m from DerivedMeasurement m " +
-            "join fetch m.tempalte t " +
-            "join fetch t.monitorableType mt " +
+            "select distinct m from DerivedMeasurement m " +
+            "join m.template t " +
+            "join t.monitorableType mt " +
             "where t.alias = ? and mt.appdefType = ? " +
             "and m.instanceId = ? and m.interval is not null";
 
@@ -206,9 +196,9 @@ public class DerivedMeasurementDAO extends HibernateDAO
     public List findDesignatedByInstanceForCategory(int appdefType, int iid,
                                                     String cat) {
         String sql =
-            "select m from DerivedMeasurement m " +
-            "join fetch m.template t " +
-            "join fetch t.monitorableType mt " +
+            "select distinct m from DerivedMeasurement m " +
+            "join m.template t " +
+            "join t.monitorableType mt " +
             "where m.instanceId = ? " +
             "and t.designate = true " +
             "and mt.appdefType = ? " +
@@ -222,9 +212,9 @@ public class DerivedMeasurementDAO extends HibernateDAO
 
     public List findDesignatedByInstance(int type, int id) {
         String sql =
-            "select m from DerivedMeasurement m " +
-            "join fetch m.template t " +
-            "join fetch t.monitorableType mt " +
+            "select distinct m from DerivedMeasurement m " +
+            "join m.template t " +
+            "join t.monitorableType mt " +
             "where m.instanceId = ? and " +
             "mt.appdefType = ? and " +
             "t.designate = true " +
@@ -238,8 +228,8 @@ public class DerivedMeasurementDAO extends HibernateDAO
     public List findByRawExcludeIdentity(Integer rid) {
         String sql =
             "select distinct d from DerivedMeasurement d " +
-            "join fetch d.template t " +
-            "join fetch t.measurementArgs a, " +
+            "join d.template t " +
+            "join t.measurementArgs a, " +
             "RawMeasurement r " +
             "where d.interval is not null and " +
             "d.instanceId = r.instanceId and " +

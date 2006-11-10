@@ -29,6 +29,7 @@ import org.hibernate.Session;
 import org.hyperic.hq.measurement.MeasurementTemplate;
 import org.hyperic.hq.measurement.RawMeasurement;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 
 import java.util.List;
 
@@ -63,9 +64,9 @@ public class RawMeasurementDAO extends HibernateDAO
 
     public List findByInstance(int appdefType, int appdefId) {
         String sql =
-            "from RawMeasurement m " +
-            "join fetch m.template as t " +
-            "join fetch t.monitorableType as mt " +
+            "select distinct m from RawMeasurement m " +
+            "join m.template as t " +
+            "join t.monitorableType as mt " +
             "where mt.appdefType = ? and m.instanceId = ? " +
             "and t.measurementArgs is empty";
 
@@ -79,23 +80,11 @@ public class RawMeasurementDAO extends HibernateDAO
             .append("delete RawMeasurement r where r.id in " +
                     "(select m.id from RawMeasurement m " +
                     "join m.template as t " +
-                    "join t.monitorableType as mt where " +
-                    "mt.appdefType in (");
-        for (int i = 0; i < ids.length; i++) {
-            if (i > 0) {
-                sql.append(",");
-            }
-            sql.append(ids[i].getType());
-        }
-        
-        sql.append(") and m.instanceId in (");
-        for (int i = 0; i < ids.length; i++) {
-            if (i > 0) {
-                sql.append(",");
-            }
-            sql.append(ids[i].getID());
-        }
-        sql.append(") )");
+                    "join t.monitorableType as mt where ")
+            .append(
+                AppdefUtil.getHQLWhereByAppdefType("mt.appdefType", "m.instanceId",
+                                              ids))
+            .append(")");
 
         return getSession().createQuery(sql.toString()).
             executeUpdate();
@@ -114,7 +103,7 @@ public class RawMeasurementDAO extends HibernateDAO
     public RawMeasurement findByTemplateForInstance(Integer tid,
                                                     Integer instanceId) {
         String sql =
-            "from RawMeasurement m " +
+            "select m from RawMeasurement m " +
             "join fetch m.template as t " +
             "where t.id = ? and m.instanceId = ?";
 
@@ -125,7 +114,7 @@ public class RawMeasurementDAO extends HibernateDAO
 
     public List findByTemplate(Integer id) {
         String sql =
-            "from RawMeasurement m " +
+            "select m from RawMeasurement m " +
             "join fetch m.template as t " +
             "where t.id = ?";
 
@@ -136,8 +125,8 @@ public class RawMeasurementDAO extends HibernateDAO
     public List findByDerivedMeasurement(Integer did) {
         String sql =
             "select distinct r from RawMeasurement r " +
-            "join fetch r.template t " +
-            "join fetch t.measurementArgs a, " +
+            "join r.template t " +
+            "join t.measurementArgs a, " +
             "DerivedMeasurement m " +
             "where r.instanceId = m.instanceId and " +
             "t.id = a.templateArg.id and " +

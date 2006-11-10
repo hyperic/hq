@@ -232,7 +232,7 @@ public class ServerDAO extends HibernateDAO
     public List findByPlatformAndType_orderName(Integer id, Integer tid,
                                                 Boolean isVirtual)
     {
-        String sql="from Server s join fetch s.serverType st " +
+        String sql="select s from Server s join s.serverType st " +
                    "where s.platform.id=? and " +
                    "st.id=? and " +
                    "st.virtual=? " +

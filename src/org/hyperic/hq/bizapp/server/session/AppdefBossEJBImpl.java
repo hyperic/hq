@@ -1630,7 +1630,7 @@ public class AppdefBossEJBImpl
             if (deep) {
                 ServerManagerLocal svrMgrLoc = getServerManager();
                 unscheduleList.addAll(
-                    svrMgrLoc.getServersByPlatform(subject, platformId, true,
+                    svrMgrLoc.getServersByPlatform(subject, platformId, false,
                                                    PageControl.PAGE_ALL));
 
                 ServiceManagerLocal svcMgrLoc= getServiceManager();
@@ -1642,18 +1642,29 @@ public class AppdefBossEJBImpl
             EventsBossLocal eventsBoss    = getEventsBoss();
             MeasurementBossLocal measBoss = getMeasurementBoss();
             
-            AppdefEntityID[] toDeleteIds =
+            AppdefEntityID[] toDeleteResourceIds =
                 new AppdefEntityID[unscheduleList.size()];
+            ArrayList toDeleteIdsList = new ArrayList();
 
             Iterator it = unscheduleList.iterator();
             for (int i = 0; it.hasNext(); i++) {
-                AppdefEntityID thisId =
-                    ((AppdefResourceValue)it.next()).getEntityId();
+                AppdefResourceValue v =(AppdefResourceValue)it.next();
+                AppdefEntityID thisId = v.getEntityId();
+
+                if (v instanceof ServerValue &&
+                    ((ServerValue)v).getServerType().getVirtual()) {
+                    // skip virtual servers
+                    toDeleteResourceIds[i] = thisId;
+                    continue;
+                }
 
                 // now remove the alerts
                 eventsBoss.removeAlertDefinitions(sessionId, thisId);
-                toDeleteIds[i] = thisId;
+                toDeleteIdsList.add(thisId);
+                toDeleteResourceIds[i] = thisId;
             }
+            AppdefEntityID[] toDeleteIds = (AppdefEntityID[])
+                toDeleteIdsList.toArray(new AppdefEntityID[0]);
 
             // now remove the measurements
             measBoss.removeMeasurements(sessionId, toDeleteIds);
@@ -1677,7 +1688,7 @@ public class AppdefBossEJBImpl
             getPlatformManager().removePlatform(subject, platformId, deep);
 
             // Last, remove authz resources
-            getAuthzBoss().removeResources(toDeleteIds);
+            getAuthzBoss().removeResources(toDeleteResourceIds);
 
         } catch (RemoveException e) {
             log.error("Caught EJB RemoveException",e);
