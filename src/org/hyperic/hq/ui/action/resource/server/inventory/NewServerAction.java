@@ -70,14 +70,15 @@ public class NewServerAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception {
         Log log = LogFactory.getLog(NewServerAction.class.getName());
-	Map forwardParams = new HashMap(2);
+        Map forwardParams = new HashMap(2);
         try {
             ServerForm newForm = (ServerForm) form;
-	    Integer resourceId = newForm.getRid();
-	    Integer resourceType = newForm.getType();
+            AppdefEntityID aeid =
+                new AppdefEntityID(newForm.getType().intValue(),
+                                   newForm.getRid());
 
-	    forwardParams.put(Constants.RESOURCE_PARAM, resourceId);
-	    forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, resourceType);
+            forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
+            forwardParams.put(Constants.ACCORDION_PARAM, "4");
 
             ActionForward forward = checkSubmit(request, mapping, form,
 						forwardParams, YES_RETURN_PATH);
@@ -109,7 +110,7 @@ public class NewServerAction extends BaseAction {
             
             ServerValue newServer =
             boss.createServer(sessionId.intValue(), server, ppk,stPk, null);
-	    Integer serverId = newServer.getId();
+            Integer serverId = newServer.getId();
             AppdefEntityID entityId = newServer.getEntityId();
 
             newForm.setRid(serverId);
@@ -118,8 +119,9 @@ public class NewServerAction extends BaseAction {
                                          "resource.server.inventory.confirm.CreateServer",
                                          server.getName());
  
-    	    forwardParams.put(Constants.RESOURCE_PARAM, serverId);
-            forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM,new Integer(newServer.getEntityId().getType()));
+            forwardParams.put(Constants.ENTITY_ID_PARAM,
+                              entityId.getAppdefKey());
+            forwardParams.put(Constants.ACCORDION_PARAM, "0");
  
             return returnNew(request, mapping, forwardParams);
         }

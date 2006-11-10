@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import javax.ejb.ObjectNotFoundException;
 
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
@@ -66,16 +67,16 @@ public class EditTypeHostAction extends BaseAction {
         Log log = LogFactory.getLog(EditTypeHostAction.class.getName());
         try {
             ServerForm serverForm = (ServerForm) form;
-
-            Integer resourceId = serverForm.getRid();
-            Integer resourceType = serverForm.getType();
-
+            AppdefEntityID aeid =
+                new AppdefEntityID(serverForm.getType().intValue(),
+                                   serverForm.getRid());
+            
             HashMap forwardParams = new HashMap(2);
-            forwardParams.put(Constants.RESOURCE_PARAM, resourceId);
-            forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, resourceType);
+            forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
+            forwardParams.put(Constants.ACCORDION_PARAM, "1");
 
-                ActionForward forward = checkSubmit(request, mapping, form,
-                            forwardParams);
+            ActionForward forward = checkSubmit(request, mapping, form,
+                        forwardParams);
             
             if (forward != null) {
                 return forward;

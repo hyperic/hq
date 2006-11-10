@@ -25,20 +25,26 @@
 
 package org.hyperic.hq.ui.action.resource.platform.inventory;
 
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AgentValue;
-import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.IpValue;
+import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.ui.Constants;
@@ -47,12 +53,6 @@ import org.hyperic.hq.ui.action.resource.platform.PlatformForm;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 
 /**
  * A <code>BaseAction</code> subclass that edits the type and
@@ -75,12 +75,12 @@ public class EditPlatformTypeNetworkPropertiesAction extends BaseAction {
              .getLog(EditPlatformTypeNetworkPropertiesAction.class.getName());
 
         PlatformForm editForm = (PlatformForm) form;
-        Integer platformId = editForm.getRid();
-        Integer entityType = editForm.getType();
+        AppdefEntityID aeid = new AppdefEntityID(editForm.getType().intValue(),
+                                                 editForm.getRid());
 
         HashMap forwardParams = new HashMap(2);
-        forwardParams.put(Constants.RESOURCE_PARAM, platformId);
-        forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
+        forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
+        forwardParams.put(Constants.ACCORDION_PARAM, "1");
 
         try {
             ActionForward forward = checkSubmit(request, mapping, form,
@@ -108,7 +108,7 @@ public class EditPlatformTypeNetworkPropertiesAction extends BaseAction {
 
             // now set up the platform
             PlatformValue platform =
-                boss.findPlatformById(sessionId.intValue(), platformId);
+                boss.findPlatformById(sessionId.intValue(), aeid.getId());
             
             if (platform == null) {
                 RequestUtils
@@ -132,7 +132,10 @@ public class EditPlatformTypeNetworkPropertiesAction extends BaseAction {
                 //XXX The code below is an ugly hack. ack......
                 //but there is no other way to get the IPs stored in the db
             
-                List dbIpValues = Arrays.asList(boss.findPlatformById(sessionId.intValue(), platformId).getIpValues());
+                List dbIpValues =
+                    Arrays.asList(boss.findPlatformById(sessionId.intValue(),
+                                                        aeid.getId())
+                    .getIpValues());
                 List uiIpValues = Arrays.asList(platform.getIpValues());
                 List uiIpIds = new ArrayList();
                 for(Iterator rcs = uiIpValues.iterator();rcs.hasNext();) {

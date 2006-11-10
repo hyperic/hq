@@ -483,4 +483,11 @@ public interface ParamConstants {
     public static final String PARAM_VAL_DELIMITOR = ",";
 
     public static final String APPDEF_RES_TYPE_ID = "aetid";
+    
+    /**
+     * The parameter that specifies the accordion tab to open.
+     */
+    public static final String ACCORDION_PARAM = "accord";
+
+
 }

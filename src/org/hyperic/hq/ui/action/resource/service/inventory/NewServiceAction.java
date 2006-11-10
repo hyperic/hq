@@ -32,7 +32,13 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
@@ -40,12 +46,6 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 
     /**
     * Create the service with the attributes specified in the given
@@ -67,9 +67,16 @@ public class NewServiceAction extends BaseAction {
             AppdefEntityID aeid = RequestUtils.getEntityId(request);
 
             forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
+            
+            switch (aeid.getType()) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                forwardParams.put(Constants.ACCORDION_PARAM, "3");
+                break;
+            }
 
-            ActionForward forward = checkSubmit(request, mapping, form,
-                        forwardParams, YES_RETURN_PATH);
+            ActionForward forward =
+                checkSubmit(request, mapping, form, forwardParams,
+                            YES_RETURN_PATH);
             if (forward != null) {
                 return forward;
             }         
@@ -99,7 +106,8 @@ public class NewServiceAction extends BaseAction {
 
             forwardParams.put(Constants.ENTITY_ID_PARAM,
                               newService.getEntityId().getAppdefKey());
-                                         
+            forwardParams.put(Constants.ACCORDION_PARAM, "0");
+
             return returnNew(request, mapping, forwardParams);
         } catch (AppdefDuplicateNameException e) {
             RequestUtils.setError(request, Constants.ERR_DUP_RESOURCE_FOUND);

@@ -39,6 +39,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -64,15 +65,15 @@ public class EditApplicationPropertiesAction extends BaseAction {
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
-    throws Exception{
+        throws Exception {
 
         ApplicationForm appForm = (ApplicationForm) form;
-        Integer applicationId = appForm.getRid();
-        Integer entityType = appForm.getType();
+        AppdefEntityID aeid = new AppdefEntityID(appForm.getType().intValue(),
+                                                 appForm.getRid());
 
         HashMap forwardParams = new HashMap(2);
-        forwardParams.put(Constants.RESOURCE_PARAM, applicationId);
-        forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
+        forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
+        forwardParams.put(Constants.ACCORDION_PARAM, "1");
 
         ActionForward forward = checkSubmit(request, mapping, form,
                                             forwardParams);
@@ -98,7 +99,7 @@ public class EditApplicationPropertiesAction extends BaseAction {
 
         // now set up the application
         ApplicationValue appVal =
-            boss.findApplicationById(sessionId.intValue(), applicationId);
+            boss.findApplicationById(sessionId.intValue(), aeid.getId());
         if (appVal == null) {
             RequestUtils
                 .setError(request,

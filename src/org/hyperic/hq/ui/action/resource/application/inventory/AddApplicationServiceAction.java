@@ -64,7 +64,8 @@ import org.apache.struts.action.ActionMapping;
  */
 public class AddApplicationServiceAction extends BaseAction {
     
-    private static Log log = LogFactory.getLog(AddApplicationServiceAction.class.getName());
+    private static Log log =
+        LogFactory.getLog(AddApplicationServiceAction.class.getName());
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -74,12 +75,12 @@ public class AddApplicationServiceAction extends BaseAction {
         HttpSession session = request.getSession();
 
         AddApplicationServicesForm addForm = (AddApplicationServicesForm) form;
-        Integer resourceId = addForm.getRid();
-        Integer entityType = addForm.getType();
+        AppdefEntityID aeid = new AppdefEntityID(addForm.getType().intValue(),
+                                                 addForm.getRid());
 
         HashMap forwardParams = new HashMap(2);
-        forwardParams.put(Constants.RESOURCE_PARAM, resourceId);
-        forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
+        forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
+        forwardParams.put(Constants.ACCORDION_PARAM, "3");
 
         ActionForward forward =
             checkSubmit(request, mapping, form, forwardParams);
@@ -94,17 +95,17 @@ public class AddApplicationServiceAction extends BaseAction {
                                 Constants.PENDING_APPSVCS_SES_ATTR);
             }
             else if (spiderForm.isAddClicked()) {
-                log.trace("adding to pending service list " + Arrays.asList(addForm.getAvailableServices()));
+                log.trace("adding to pending service list " +
+                          Arrays.asList(addForm.getAvailableServices()));
                 SessionUtils.addToList(session,
                                        Constants.PENDING_APPSVCS_SES_ATTR,
                                        addForm.getAvailableServices());
             }
             else if (spiderForm.isRemoveClicked()) {
                 log.trace("removing from pending service list");
-                SessionUtils
-                    .removeFromList(session,
-                                    Constants.PENDING_APPSVCS_SES_ATTR,
-                                    addForm.getPendingServices());
+                SessionUtils.removeFromList(session,
+                                            Constants.PENDING_APPSVCS_SES_ATTR,
+                                            addForm.getPendingServices());
             }
             return forward;
         }
@@ -120,7 +121,8 @@ public class AddApplicationServiceAction extends BaseAction {
 
         for(int pRcs=0;pRcs<uiPendings.size();pRcs++) {
             log.debug("uiPendings = " + uiPendings.get(pRcs));
-            StringTokenizer tok = new StringTokenizer((String) uiPendings.get(pRcs)," ");
+            StringTokenizer tok =
+                new StringTokenizer((String) uiPendings.get(pRcs)," ");
             svcList.add(new AppdefEntityID(tok.nextToken()));
         }
         // when we call boss.setApplicationServices(...) our map must
@@ -129,14 +131,16 @@ public class AddApplicationServiceAction extends BaseAction {
 
         // first, get the existing ones            
         PageControl nullPc = new PageControl(-1, -1);
-        List existingServices = boss.findServiceInventoryByApplication(sessionId.intValue(),
-                                       resourceId, nullPc);
-        DependencyTree tree = boss.getAppDependencyTree(sessionId.intValue(),resourceId);
+        List existingServices =
+            boss.findServiceInventoryByApplication(sessionId.intValue(),
+                                                   aeid.getId(), nullPc);
+        DependencyTree tree = boss.getAppDependencyTree(sessionId.intValue(),
+                                                        aeid.getId());
         for (Iterator iter = existingServices.iterator(); iter.hasNext();) {
             AppdefResourceValue service = (AppdefResourceValue) iter.next();
             log.debug("service =" + service.getClass().getName());
             
-            DependencyNode node = tree.findAppService((AppdefResourceValue)service);
+            tree.findAppService(service);
             svcList.add(service.getEntityId());
         }
 
@@ -147,12 +151,11 @@ public class AddApplicationServiceAction extends BaseAction {
         // setting up the dependencies is a separate activity            
 
         log.trace("adding servicess " + svcList + 
-                  " for application [" + resourceId + "]");            
-        boss.setApplicationServices(sessionId.intValue(),
-                          resourceId, svcList);            
+                  " for application [" + aeid.getID() + "]");            
+        boss.setApplicationServices(sessionId.intValue(), aeid.getId(),
+                                    svcList);            
         log.trace("removing pending service list");
-        SessionUtils.removeList(session,
-                                Constants.PENDING_APPSVCS_SES_ATTR);
+        SessionUtils.removeList(session, Constants.PENDING_APPSVCS_SES_ATTR);
 
         RequestUtils.setConfirmation(request,
                                      "resource.application.inventory.confirm.AddedServices");

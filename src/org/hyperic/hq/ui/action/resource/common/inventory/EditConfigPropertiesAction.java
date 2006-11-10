@@ -32,6 +32,12 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
@@ -53,12 +59,6 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.config.InvalidOptionValueException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 
 /**
  * This class will set the ConfigResponse for resources.This is applicable for
@@ -83,16 +83,27 @@ public class EditConfigPropertiesAction extends BaseAction {
         throws Exception {
 
         Log log = LogFactory.getLog(EditConfigPropertiesAction.class.getName());
-        ResourceConfigForm configForm = (ResourceConfigForm) form;
-        Integer rid = configForm.getRid();
-        Integer entityType = configForm.getType();
+        ResourceConfigForm cfgForm = (ResourceConfigForm) form;
+        AppdefEntityID aeid = new AppdefEntityID(cfgForm.getType().intValue(),
+                                                 cfgForm.getRid());
+        
         HashMap forwardParams = new HashMap(2);
-        forwardParams.put(Constants.RESOURCE_PARAM, rid);
-        forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
+        forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
+
+        switch (aeid.getType()) {
+        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+            forwardParams.put(Constants.ACCORDION_PARAM, "6");
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+            forwardParams.put(Constants.ACCORDION_PARAM, "5");
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+            forwardParams.put(Constants.ACCORDION_PARAM, "3");
+            break;
+        }
+        
         ActionForward forward = checkSubmit(request, mapping, form,
                                             forwardParams);
-        AppdefEntityID entityId =
-            new AppdefEntityID(entityType.intValue(), rid.intValue());
         AllConfigResponses allConfigs = new AllConfigResponses();
         AllConfigResponses allConfigsRollback = new AllConfigResponses();
         String prefix;
@@ -112,7 +123,7 @@ public class EditConfigPropertiesAction extends BaseAction {
             AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
             Integer resourceId = RequestUtils.getResourceId(request);
             AppdefResourceValue updatedResource =
-                boss.findById(sessionInt, entityId);
+                boss.findById(sessionInt, aeid);
             ProductBoss pboss = ContextUtils.getProductBoss(ctx);
 
             String[] cfgTypes = ProductPlugin.CONFIGURABLE_TYPES;
@@ -126,7 +137,7 @@ public class EditConfigPropertiesAction extends BaseAction {
             allConfigsRollback.setResource(updatedResource);
 
             ConfigResponseValue oldConfig =
-                pboss.getConfigResponseValue(sessionInt, entityId);
+                pboss.getConfigResponseValue(sessionInt, aeid);
             
             // get the configSchemas and existing configs
             for (i = 0; i < numConfigs; i++) {
@@ -153,7 +164,7 @@ public class EditConfigPropertiesAction extends BaseAction {
                         oldConfigs[i] = ConfigResponse.decode(oldCfgBytes);
                     
                     schemas[i] = pboss.getConfigSchema(
-                            sessionInt, entityId, cfgTypes[i], oldConfigs[i]);
+                            sessionInt, aeid, cfgTypes[i], oldConfigs[i]);
                     allConfigsRollback.setConfig(i, oldConfigs[i]);
                     allConfigsRollback.setSupports(i, true);
                     allConfigs.setSupports(i, true);
@@ -181,7 +192,7 @@ public class EditConfigPropertiesAction extends BaseAction {
                                                            new ConfigResponse(),
                                                            schemas[i], null);
                     // Make current form values appear in case of error.
-                    configForm.setResourceConfigOptions(BizappUtils.buildLoadConfigOptions(prefix, 
+                    cfgForm.setResourceConfigOptions(BizappUtils.buildLoadConfigOptions(prefix, 
                                                                                            schemas[i],
                                                                                            newConfigs[i]));
                     allConfigs.setShouldConfig(i, true);
@@ -190,13 +201,13 @@ public class EditConfigPropertiesAction extends BaseAction {
 
                 } else {
                     if ( i == ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME ) {
-                        if ( entityId.isServer() ) {
+                        if ( aeid.isServer() ) {
                             // On servers, RT always gets an empty config
                             allConfigs.setConfig(i, new ConfigResponse());
                             allConfigs.setShouldConfig(i, true);
                             allConfigsRollback.setShouldConfig(i, true);
 
-                        } else if ( !entityId.isService()
+                        } else if ( !aeid.isService()
                                     || !allConfigs.supportsMetricConfig() ) {
                             // Otherwise, only configure response time for
                             // services, and only if the plugin has metric support.
@@ -205,7 +216,7 @@ public class EditConfigPropertiesAction extends BaseAction {
                         }
                     }
                     if ( i == ProductPlugin.CFGTYPE_IDX_CONTROL 
-                         && !entityId.isService() && !entityId.isServer() ) {
+                         && !aeid.isService() && !aeid.isServer() ) {
                         // Control is only supported on servers and services
                         blankoutConfig(i, allConfigs, allConfigsRollback);
                         continue;
@@ -246,7 +257,7 @@ public class EditConfigPropertiesAction extends BaseAction {
                         boolean reallyWereChanges = false;
                         try {
                             pboss.getMergedConfigResponse(sessionInt, cfgTypes[i],
-                                                          entityId, true);
+                                                          aeid, true);
                         } catch (ConfigFetchException cfe) {
                             // OK, so there really were changes because the config doesn't
                             // exist!
@@ -263,13 +274,13 @@ public class EditConfigPropertiesAction extends BaseAction {
                     switch (i) {
                     case ProductPlugin.CFGTYPE_IDX_MEASUREMENT:
                         // If metric config was setup, then setup runtime AI flag.
-                        if ((entityId.isServer() || entityId.isService()) &&
+                        if ((aeid.isServer() || aeid.isService()) &&
                             (allConfigs.getMetricConfig() != null))
                         {
                             boolean rollback, runtimeAI;
-                            if (entityId.isServer()) {
+                            if (aeid.isServer()) {
                                 rollback = ((ServerValue) updatedResource).getRuntimeAutodiscovery();
-                                runtimeAI = configForm.getServerBasedAutoInventory();
+                                runtimeAI = cfgForm.getServerBasedAutoInventory();
                             }
                             else {
                                 rollback = false;
@@ -278,22 +289,22 @@ public class EditConfigPropertiesAction extends BaseAction {
                             allConfigsRollback.setEnableRuntimeAIScan(rollback);
                             allConfigs.setEnableRuntimeAIScan(runtimeAI);
                         }
-                        configForm.setMonitorConfigOptions(BizappUtils.buildLoadConfigOptions(prefix,
+                        cfgForm.setMonitorConfigOptions(BizappUtils.buildLoadConfigOptions(prefix,
                                                                                               schemas[i],
                                                                                               newConfigs[i]));
                         break;
 
                     case ProductPlugin.CFGTYPE_IDX_CONTROL:
-                        configForm.setControlConfigOptions(BizappUtils.buildLoadConfigOptions(prefix,
+                        cfgForm.setControlConfigOptions(BizappUtils.buildLoadConfigOptions(prefix,
                                                                                               schemas[i],
                                                                                               newConfigs[i]));
                         break;
                         
                     case ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME:
                         // enable the RT metrics based on input from ui
-                        allConfigs.setEnableServiceRT(configForm.getServiceRTEnabled());
-                        allConfigs.setEnableEuRT(configForm.getEuRTEnabled());
-                        configForm.setRtConfigOptions(BizappUtils.buildLoadConfigOptions(prefix,
+                        allConfigs.setEnableServiceRT(cfgForm.getServiceRTEnabled());
+                        allConfigs.setEnableEuRT(cfgForm.getEuRTEnabled());
+                        cfgForm.setRtConfigOptions(BizappUtils.buildLoadConfigOptions(prefix,
                                                                                          schemas[i],
                                                                                          newConfigs[i]));
                         break;
@@ -305,13 +316,14 @@ public class EditConfigPropertiesAction extends BaseAction {
             boss.setAllConfigResponses(sessionInt, allConfigs, allConfigsRollback);
 
             //run an auto-scan for platforms
-            if (entityId.isPlatform()) {
+            if (aeid.isPlatform()) {
                 BizappUtils.startAutoScan(ctx,
-                                          sessionId.intValue(), entityId);
+                                          sessionId.intValue(), aeid);
             }
 
             RequestUtils.setConfirmation(request,
-                     "resource."+ entityId.getTypeName() +".inventory.confirm.EditConfigProperties",
+                     "resource."+ aeid.getTypeName() +
+                     ".inventory.confirm.EditConfigProperties",
                      updatedResource.getName());
                                          
             // HACK to redirect back to Problem Resources portlet if the
@@ -324,7 +336,7 @@ public class EditConfigPropertiesAction extends BaseAction {
         } catch(InvalidConfigException e) {
             log.error("invalid config " + e);
             RequestUtils.setErrorWithNullCheck(request, e, ERR_NOMSG, ERR_CONFIG);
-            configForm.validationErrors = true;
+            cfgForm.validationErrors = true;
             return returnFailure(request, mapping);
         } catch(InvalidOptionValueException e) {
             log.error("invalid config " + e);
@@ -333,17 +345,17 @@ public class EditConfigPropertiesAction extends BaseAction {
         } catch(ConfigFetchException e) {
             log.error("general configuration set error "+ e, e);
             RequestUtils.setErrorWithNullCheck(request, e, ERR_NOMSG, ERR_CONFIG);
-            configForm.validationErrors = true;
+            cfgForm.validationErrors = true;
             return returnFailure(request, mapping);
         } catch(EncodingException e) {
             log.error("Encoding Exception " + e);
             RequestUtils.setErrorWithNullCheck(request, e, ERR_NOMSG, ERR_CONFIG);
-            configForm.validationErrors = true;
+            cfgForm.validationErrors = true;
             return returnFailure(request, mapping);
         } catch(FinderException e) {
             log.error("finder exception " + e);
             RequestUtils.setErrorWithNullCheck(request, e, ERR_NOMSG, ERR_CONFIG);
-            configForm.validationErrors = true;
+            cfgForm.validationErrors = true;
             return returnFailure(request, mapping);
         } catch(PluginNotFoundException e) {
             log.error("Plugin not found exception " + e);
@@ -356,7 +368,7 @@ public class EditConfigPropertiesAction extends BaseAction {
             RequestUtils.setErrorObject(
                 request, "resource.common.inventory.error.agentNotReachable",
                 e.getMessage());
-            configForm.validationErrors = true;
+            cfgForm.validationErrors = true;
             return returnFailure(request, mapping);
         }
     }

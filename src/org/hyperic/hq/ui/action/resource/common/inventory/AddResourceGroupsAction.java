@@ -25,17 +25,21 @@
 
 package org.hyperic.hq.ui.action.resource.common.inventory;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
@@ -44,12 +48,6 @@ import org.hyperic.hq.ui.action.BaseValidatorForm;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 
 /**
  * A <code>BaseAction</code> that adds group memberships for a
@@ -72,12 +70,24 @@ public class AddResourceGroupsAction extends BaseAction {
         HttpSession session = request.getSession();
 
         AddResourceGroupsForm addForm = (AddResourceGroupsForm) form;
-        Integer resourceId = addForm.getRid();
-        Integer entityType = addForm.getType();
+        AppdefEntityID aeid = new AppdefEntityID(addForm.getType().intValue(),
+                                                 addForm.getRid());
 
         HashMap forwardParams = new HashMap(2);
-        forwardParams.put(Constants.RESOURCE_PARAM, resourceId);
-        forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
+        forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
+
+        switch (aeid.getType()) {
+        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+            forwardParams.put(Constants.ACCORDION_PARAM, "5");
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+        case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+            forwardParams.put(Constants.ACCORDION_PARAM, "4");
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+            forwardParams.put(Constants.ACCORDION_PARAM, "2");
+            break;
+        }
 
         try {
             ActionForward forward =
@@ -118,14 +128,10 @@ public class AddResourceGroupsAction extends BaseAction {
                 SessionUtils.getList(session,
                                      Constants.PENDING_RESGRPS_SES_ATTR);
 
-            AppdefEntityID entityId =
-                new AppdefEntityID(entityType.intValue(),
-                                   resourceId.intValue());
             if (log.isTraceEnabled())
                 log.trace("adding groups " + Arrays.asList(pendingGroupIds) +
-                      " for resource [" + entityId + "]");
-            boss.batchGroupAdd(sessionId.intValue(), entityId,
-                               pendingGroupIds);
+                      " for resource [" + aeid + "]");
+            boss.batchGroupAdd(sessionId.intValue(), aeid, pendingGroupIds);
 
             log.trace("removing pending group list");
             SessionUtils.removeList(session,

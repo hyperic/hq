@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
@@ -77,13 +78,12 @@ public class AddGroupResourcesAction extends BaseAction {
         HttpSession session = request.getSession();
 
         AddGroupResourcesForm addForm = (AddGroupResourcesForm) form;
-        Integer groupId = addForm.getRid();
+        AppdefEntityID aeid = new AppdefEntityID(addForm.getType().intValue(),
+                                                 addForm.getRid());
 
-        Integer rid = addForm.getRid();
-        Integer entityType = addForm.getType();
         HashMap forwardParams = new HashMap(2);
-        forwardParams.put(Constants.RESOURCE_PARAM, rid);
-        forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
+        forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
+        forwardParams.put(Constants.ACCORDION_PARAM, "2");
         
         try {
             ActionForward forward = checkSubmit(request, mapping, form,
@@ -126,9 +126,9 @@ public class AddGroupResourcesAction extends BaseAction {
             if (pendingResourceIds.size() == 0)
                 return returnSuccess(request, mapping, forwardParams);
                             
-            log.trace("getting group [" + groupId + "]");
+            log.trace("getting group [" + aeid.getID() + "]");
             AppdefGroupValue group = boss.findGroup(sessionId.intValue(),
-                             groupId);
+                                                    aeid.getId());
 
             BizappUtils.addResourcesToGroup(group, pendingResourceIds);
 
