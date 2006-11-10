@@ -28,6 +28,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
+import org.hyperic.hq.common.server.session.CrispoDAO;
 import org.hyperic.hq.events.server.session.ActionDAO;
 import org.hyperic.hq.events.server.session.AlertActionLogDAO;
 import org.hyperic.hq.events.server.session.AlertConditionDAO;
@@ -261,6 +262,10 @@ public class HibernateDAOFactory extends DAOFactory {
 
     public VirtualDAO getVirtualDAO() {
         return new VirtualDAO(getCurrentSession());
+    }
+
+    public CrispoDAO getCrispoDAO() {
+        return new CrispoDAO(getCurrentSession());
     }
 }
 

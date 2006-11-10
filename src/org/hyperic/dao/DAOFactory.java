@@ -26,6 +26,7 @@
 package org.hyperic.dao;
 
 import org.hibernate.Session;
+import org.hyperic.hq.common.server.session.CrispoDAO;
 import org.hyperic.hq.dao.AIHistoryDAO;
 import org.hyperic.hq.dao.AIIpDAO;
 import org.hyperic.hq.dao.AIPlatformDAO;
@@ -129,7 +130,8 @@ public abstract class DAOFactory
     
     // Common DAO
     public abstract ConfigPropertyDAO getConfigPropertyDAO();
-
+    public abstract CrispoDAO         getCrispoDAO();
+    
     // Plugin DAO
     public abstract PluginDAO getPluginDAO();
 
