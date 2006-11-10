@@ -31,7 +31,7 @@ import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
-import org.hyperic.hq.measurement.SRN;
+import org.hyperic.hq.measurement.server.session.SRN;
 
 public class ScheduleMeasurements_args 
     extends AgentRemoteValue 

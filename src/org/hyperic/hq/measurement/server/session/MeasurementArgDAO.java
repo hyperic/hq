@@ -23,17 +23,15 @@
  * USA.
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.measurement.server.session;
 
 import org.hibernate.Session;
-import org.hyperic.hq.measurement.MeasurementArg;
-import org.hyperic.hq.measurement.MeasurementTemplate;
+import org.hyperic.hq.dao.HibernateDAO;
 
 /**
  * CRUD methods, finders, etc. for MeasurementArg
  */
-public class MeasurementArgDAO extends HibernateDAO
-{
+public class MeasurementArgDAO extends HibernateDAO {
     public MeasurementArgDAO(Session session) {
         super(MeasurementArg.class, session);
     }

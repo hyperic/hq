@@ -27,9 +27,6 @@ package org.hyperic.hq.measurement.server.session;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.measurement.DerivedMeasurement;
-import org.hyperic.hq.measurement.MeasurementTemplate;
-import org.hyperic.hq.measurement.RawMeasurement;
 import org.hyperic.util.pager.PagerProcessor;
 
 import javax.ejb.EJBLocalObject;

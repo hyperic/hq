@@ -23,50 +23,56 @@
  * USA. 
  */
 
-package org.hyperic.hq.measurement;
+package org.hyperic.hq.measurement.server.session;
 
-import org.hyperic.hq.measurement.shared.RawMeasurementValue;
-
-public class RawMeasurement extends Measurement
-    implements java.io.Serializable {
+public class SrnId implements java.io.Serializable {
 
     // Fields    
-    private String _dsn;
+    private int _appdefType;
+    private int _instanceId;
 
     // Constructors
-    public RawMeasurement() {
-    }
-
-    public RawMeasurement(Integer instanceId, MeasurementTemplate template, 
-                          String dsn) {
-        super(instanceId, template);
-        _dsn = dsn;
+    public SrnId() {
     }
     
+    public SrnId(int appdefType, int instanceId) {
+        _appdefType = appdefType;
+        _instanceId = instanceId;
+    }
+   
     // Property accessors
-    public String getDsn() {
-        return _dsn;
+    public int getAppdefType() {
+        return _appdefType;
     }
     
-    public void setDsn(String dsn) {
-        _dsn = dsn;
+    public void setAppdefType(int appdefType) {
+        _appdefType = appdefType;
     }
 
-    /**
-     * Legacy EJB DTO pattern
-     * @deprecated Use (this) RawMeasurement object instead
-     */
-    public RawMeasurementValue getRawMeasurementValue() {
-        RawMeasurementValue value = new RawMeasurementValue();
-        value.setId(getId());
-        value.setDsn(getDsn());
-        value.setInstanceId(getInstanceId());
-        value.setMtime(getMtime());
-        value.setTemplate(getTemplate().getMeasurementTemplateValue());
-        return value;
+    public int getInstanceId() {
+        return _instanceId;
+    }
+    
+    public void setInstanceId(int  instanceId) {
+        _instanceId = instanceId;
     }
 
-    public boolean equals(Object obj) {
-        return (obj instanceof RawMeasurement) && super.equals(obj);
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (other == null) return false;
+        if (!(other instanceof SrnId)) return false;
+        SrnId castOther = (SrnId)other;
+
+        return (getAppdefType() == castOther.getAppdefType()) &&
+            (getInstanceId() == castOther.getInstanceId());
+    }
+
+    public int hashCode()
+    {
+        int result = 17;
+
+        result = 37 * result + getAppdefType();
+        result = 37 * result + getInstanceId();
+        return result;
     }
 }

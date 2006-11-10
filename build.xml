@@ -725,6 +725,7 @@
       <include name="org/hyperic/hq/product/logparse/*.class" />
       <include name="org/hyperic/hq/common/*.class" />
       <include name="org/hyperic/hq/measurement/*.class"/>
+      <include name="org/hyperic/hq/measurement/server/session/SRN.class"/>
       <include name="org/hyperic/hq/measurement/data/*.class"/>
       <!-- For log/config track objects.  Should be moved into
            the product package -->
@@ -1008,6 +1009,7 @@
         <include name="org/hyperic/hq/measurement/client/**"/>
         <include name="org/hyperic/hq/measurement/schedule/**"/>
         <include name="org/hyperic/hq/measurement/*"/>
+        <include name="org/hyperic/hq/measurement/server/session/SRN.class"/>
         <manifest>
             <attribute name="Main-Class" value="org.hyperic.hq.measurement.agent.server.MeasurementCommandsServer"/>
         </manifest>

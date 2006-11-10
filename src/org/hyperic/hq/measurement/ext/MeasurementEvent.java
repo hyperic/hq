@@ -28,11 +28,11 @@ package org.hyperic.hq.measurement.ext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.dao.RawMeasurementDAO;
+import org.hyperic.hq.measurement.server.session.RawMeasurementDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ResourceEventInterface;
-import org.hyperic.hq.measurement.RawMeasurement;
+import org.hyperic.hq.measurement.server.session.RawMeasurement;
 import org.hyperic.hq.product.MetricValue;
 
 public class MeasurementEvent extends AbstractEvent

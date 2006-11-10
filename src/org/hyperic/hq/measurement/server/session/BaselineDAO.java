@@ -23,18 +23,17 @@
  * USA.
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.measurement.server.session;
 
 import org.hibernate.Session;
-import org.hyperic.hq.measurement.Baseline;
+import org.hyperic.hq.dao.HibernateDAO;
 
 import java.util.List;
 
 /**
  * CRUD methods, finders, etc. for Baseline
  */
-public class BaselineDAO extends HibernateDAO
-{
+public class BaselineDAO extends HibernateDAO {
     public BaselineDAO(Session session) {
         super(Baseline.class, session);
     }

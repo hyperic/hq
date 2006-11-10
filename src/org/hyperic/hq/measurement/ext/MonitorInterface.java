@@ -26,11 +26,9 @@
 package org.hyperic.hq.measurement.ext;
 
 import org.hyperic.hq.appdef.shared.AgentValue;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.measurement.SRN;
+import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.product.MetricValue;
 
 /** 
@@ -56,7 +54,7 @@ public interface MonitorInterface {
      * @throws MonitorAgentException if an error occurs communicating with 
      *         the agent
      */
-    public void schedule(AgentValue agent, SRN srn, 
+    public void schedule(AgentValue agent, SRN srn,
                          ScheduleMetricInfo[] schedule)
         throws MonitorAgentException;
 

@@ -23,17 +23,17 @@
  * USA. 
  */
 
-package org.hyperic.hq.measurement;
+package org.hyperic.hq.measurement.server.session;
 
 import java.math.BigDecimal;
 
 public class MeasurementHistData  implements java.io.Serializable {
 
     // Fields    
-     private MeasurementDataId _id;
-     private BigDecimal _value;
-     private BigDecimal _minValue;
-     private BigDecimal _maxValue;
+    private MeasurementDataId _id;
+    private BigDecimal _value;
+    private BigDecimal _minValue;
+    private BigDecimal _maxValue;
 
     // Constructors
     public MeasurementHistData() {

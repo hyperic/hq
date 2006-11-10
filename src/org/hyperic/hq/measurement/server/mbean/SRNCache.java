@@ -46,15 +46,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.dao.ScheduleRevNumDAO;
+import org.hyperic.hq.measurement.server.session.ScheduleRevNumDAO;
+import org.hyperic.hq.measurement.server.session.ScheduleRevNum;
+import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ProductProperties;
-import org.hyperic.hq.measurement.SRN;
 import org.hyperic.hq.measurement.SRNCreateException;
-import org.hyperic.hq.measurement.ScheduleRevNum;
-import org.hyperic.hq.measurement.SrnId;
 import org.hyperic.hq.measurement.shared.ScheduleRevNumValue;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
@@ -336,7 +335,7 @@ public class SRNCache {
         synchronized (_cache) {
             srnVal = getSRN(eid);
             if (srnVal == null) {
-                ScheduleRevNum srn = 
+                ScheduleRevNum srn =
                     getScheduleRevNumDAO().create(eid.getType(), eid.getID());
                 srnVal = srn.getScheduleRevNumValue();
                 _cache.put(eid, srnVal);

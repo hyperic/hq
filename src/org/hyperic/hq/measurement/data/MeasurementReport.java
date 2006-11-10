@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.measurement.data;
 
-import org.hyperic.hq.measurement.SRN;
+import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.product.MetricValue;
 
 public class MeasurementReport 

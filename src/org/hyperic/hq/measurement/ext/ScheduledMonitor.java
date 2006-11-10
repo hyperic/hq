@@ -35,7 +35,7 @@ import java.util.List;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.SRN;
+import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.MeasurementReportConstructor;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;

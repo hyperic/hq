@@ -38,7 +38,7 @@ import java.util.List;
 import org.hyperic.hq.agent.server.AgentStorageException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.measurement.SRN;
+import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
 import org.hyperic.util.encoding.Base64;
 

@@ -23,41 +23,36 @@
  * USA.
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.measurement.server.session;
 
 import org.hibernate.Session;
 
-import org.hyperic.hq.measurement.MetricProblem;
-import org.hyperic.hq.measurement.MeasurementDataId;
+import org.hyperic.hq.dao.HibernateDAO;
 
 /**
- * CRUD methods, finders, etc. for MetricProblem
+ * CRUD methods, finders, etc. for ScheduleRevNum
  */
-public class MetricProblemDAO extends HibernateDAO
-{
-    public MetricProblemDAO(Session session) {
-        super(MetricProblem.class, session);
+public class ScheduleRevNumDAO extends HibernateDAO {
+    public ScheduleRevNumDAO(Session session) {
+        super(ScheduleRevNum.class, session);
     }
 
-    public MetricProblem findById(MeasurementDataId id) {
-        return (MetricProblem)super.findById(id);
+    public ScheduleRevNum findById(SrnId id) {
+        return (ScheduleRevNum)super.findById(id);
     }
 
-    public void remove(MetricProblem entity) {
+    public void remove(ScheduleRevNum entity) {
         super.remove(entity);
     }
 
-    public MetricProblem create(Integer mid, long time,
-                                int type, Integer additional) {
+    public ScheduleRevNum create(int entType, int entId) {
+        
+        SrnId srnId = new SrnId(entType, entId);
+        ScheduleRevNum srn = new ScheduleRevNum();
 
-        MeasurementDataId id = new MeasurementDataId(mid, time);
-
-        MetricProblem p = new MetricProblem();
-        p.setId(id);
-        p.setType(new Integer(type));
-        p.setAdditional(additional);
-
-        save(p);
-        return p;
+        srn.setId(srnId);
+        srn.setSrn(new Integer(1));
+        save(srn);
+        return srn;
     }
 }

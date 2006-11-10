@@ -23,17 +23,14 @@
  * USA.
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.measurement.server.session;
 
 import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.measurement.Category;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.MeasurementTemplate;
-import org.hyperic.hq.measurement.MonitorableType;
-import org.hyperic.hq.measurement.MeasurementArg;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateLiteValue;
 import org.hyperic.hq.product.MeasurementInfo;
+import org.hyperic.hq.dao.HibernateDAO;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -41,13 +38,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Iterator;
 import java.util.HashSet;
-import java.sql.Connection;
 
 /**
  * CRUD methods, finders, etc. for MeasurementTemplate
  */
-public class MeasurementTemplateDAO extends HibernateDAO
-{
+public class MeasurementTemplateDAO extends HibernateDAO {
     private final static Log log =
         LogFactory.getLog(MeasurementTemplateDAO.class);
 

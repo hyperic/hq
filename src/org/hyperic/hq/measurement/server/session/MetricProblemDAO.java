@@ -23,34 +23,39 @@
  * USA.
  */
 
-package org.hyperic.hq.measurement;
+package org.hyperic.hq.measurement.server.session;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hibernate.Session;
+
+import org.hyperic.hq.dao.HibernateDAO;
 
 /**
- * SRN stands for 'Schedule Revision Number'  
- *
- * It is the association of an appdef entity with a number indicating
- * what the server's idea of the agent's metric collection schedule is.
+ * CRUD methods, finders, etc. for MetricProblem
  */
-public class SRN {
-    private AppdefEntityID id;
-    private int            revisionNumber;
-
-    public SRN(AppdefEntityID id, int revisionNumber){
-        this.id             = id;
-        this.revisionNumber = revisionNumber;
+public class MetricProblemDAO extends HibernateDAO {
+    public MetricProblemDAO(Session session) {
+        super(MetricProblem.class, session);
     }
 
-    public AppdefEntityID getEntity(){
-        return this.id;
+    public MetricProblem findById(MeasurementDataId id) {
+        return (MetricProblem)super.findById(id);
     }
 
-    public int getRevisionNumber(){
-        return this.revisionNumber;
+    public void remove(MetricProblem entity) {
+        super.remove(entity);
     }
-    
-    public void setRevisionNumber(int newRev){
-        this.revisionNumber = newRev;
+
+    public MetricProblem create(Integer mid, long time,
+                                int type, Integer additional) {
+
+        MeasurementDataId id = new MeasurementDataId(mid, time);
+
+        MetricProblem p = new MetricProblem();
+        p.setId(id);
+        p.setType(new Integer(type));
+        p.setAdditional(additional);
+
+        save(p);
+        return p;
     }
 }

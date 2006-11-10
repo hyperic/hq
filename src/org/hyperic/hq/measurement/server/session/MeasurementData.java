@@ -23,7 +23,7 @@
  * USA. 
  */
 
-package org.hyperic.hq.measurement;
+package org.hyperic.hq.measurement.server.session;
 
 import java.math.BigDecimal;
 

@@ -4,7 +4,7 @@
       "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
-<hibernate-mapping package="org.hyperic.hq.measurement">
+<hibernate-mapping package="org.hyperic.hq.measurement.server.session">
 
   <!-- one to N relationship with measurementBL measurement -->
   <class name="MeasurementTemplate" table="EAM_MEASUREMENT_TEMPL">

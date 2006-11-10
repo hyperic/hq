@@ -30,8 +30,8 @@ import org.hibernate.type.Type;
 import org.hyperic.hq.appdef.AppdefBean;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.product.Plugin;
-import org.hyperic.hq.measurement.MeasurementTemplate;
-import org.hyperic.hq.measurement.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.server.session.Measurement;
 
 import java.io.Serializable;
 

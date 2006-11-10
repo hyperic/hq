@@ -23,57 +23,42 @@
  * USA.
  */
 
-package org.hyperic.hq.measurement;
+package org.hyperic.hq.measurement.server.session;
 
-import java.util.Collection;
+import org.hibernate.Session;
 
-import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.measurement.shared.CategoryValue;
+import org.hyperic.hq.dao.HibernateDAO;
 
-public class Category extends PersistedObject
-    implements java.io.Serializable {
-
-    // Fields    
-     private String _name;
-     private Integer _cid;
-
-     // Constructors
-    public Category() {
+/**
+ * CRUD methods, finders, etc. for MonitorableType
+ */
+public class MonitorableTypeDAO extends HibernateDAO {
+    public MonitorableTypeDAO(Session session) {
+        super(MonitorableType.class, session);
     }
 
-    public Category(String name) {
-        _name = name;
+    public MonitorableType findById(Integer id) {
+        return (MonitorableType)super.findById(id);
     }
 
-    public Category(String name, Integer cid) {
-        _name = name;
-        _cid = cid;
-    }
-   
-    // Property accessors
-    public String getName() {
-        return _name;
-    }
-    
-    public void setName(String name) {
-        _name = name;
-    }
-    public Integer getCid() {
-        return _cid;
-    }
-    
-    public void setCid(Integer cid) {
-        _cid = cid;
+    public void remove(MonitorableType entity) {
+        super.remove(entity);
     }
 
-    /**
-     * Legacy EJB DTO pattern
-     * @deprecated Use (this) Category object instead
-     */
-    public CategoryValue getCategoryValue() {
-        CategoryValue category = new CategoryValue();
-        category.setId(getId());
-        category.setName(getName());
-        return category;
+    public MonitorableType create(String name, int appdefType,
+                                  String plugin) {
+        MonitorableType mt = new MonitorableType();
+
+        mt.setName(name);
+        mt.setAppdefType(appdefType);
+        mt.setPlugin(plugin);
+        save(mt);
+        return mt;
+    }
+
+    public MonitorableType findByName(String name) {
+        String sql = "from MonitorableType where name=?";
+        return (MonitorableType)getSession().createQuery(sql).
+            setString(0, name).uniqueResult();
     }
 }

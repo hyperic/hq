@@ -4,7 +4,7 @@
       "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
-<hibernate-mapping package="org.hyperic.hq.measurement">
+<hibernate-mapping package="org.hyperic.hq.measurement.server.session">
 
   <class name="Baseline" table="EAM_MEASUREMENT_BL">
     <id name="id" type="integer">

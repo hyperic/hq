@@ -23,16 +23,15 @@
  * USA.
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.measurement.server.session;
 
 import org.hibernate.Session;
-import org.hyperic.hq.measurement.Category;
+import org.hyperic.hq.dao.HibernateDAO;
 
 /**
  * CRUD methods, finders, etc. for Category
  */
-public class CategoryDAO extends HibernateDAO
-{
+public class CategoryDAO extends HibernateDAO {
     public CategoryDAO(Session session) {
         super(Category.class, session);
     }

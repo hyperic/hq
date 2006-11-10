@@ -27,11 +27,8 @@ package org.hyperic.hq.measurement.server.session;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.measurement.DerivedMeasurement;
 import org.hyperic.hq.measurement.EvaluationException;
-import org.hyperic.hq.measurement.MeasurementArg;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.RawMeasurement;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;

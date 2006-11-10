@@ -23,21 +23,19 @@
  * USA.
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.measurement.server.session;
 
 import org.hibernate.Session;
-import org.hyperic.hq.measurement.MeasurementTemplate;
-import org.hyperic.hq.measurement.RawMeasurement;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.dao.HibernateDAO;
 
 import java.util.List;
 
 /**
  * CRUD methods, finders, etc. for RawMeasurement
  */
-public class RawMeasurementDAO extends HibernateDAO
-{
+public class RawMeasurementDAO extends HibernateDAO {
     public RawMeasurementDAO(Session session) {
         super(RawMeasurement.class, session);
     }

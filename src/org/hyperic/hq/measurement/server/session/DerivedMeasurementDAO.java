@@ -23,21 +23,19 @@
  * USA.
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.measurement.server.session;
 
 import org.hibernate.Session;
-import org.hyperic.hq.measurement.DerivedMeasurement;
-import org.hyperic.hq.measurement.MeasurementTemplate;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.dao.HibernateDAO;
 
 import java.util.List;
 
 /**
  * CRUD methods, finders, etc. for DerivedMeasurement
  */
-public class DerivedMeasurementDAO extends HibernateDAO
-{
+public class DerivedMeasurementDAO extends HibernateDAO {
     public DerivedMeasurementDAO(Session session) {
         super(DerivedMeasurement.class, session);
     }

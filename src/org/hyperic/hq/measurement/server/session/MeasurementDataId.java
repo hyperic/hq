@@ -23,80 +23,59 @@
  * USA. 
  */
 
-package org.hyperic.hq.measurement;
+package org.hyperic.hq.measurement.server.session;
 
-public class MetricProblem implements java.io.Serializable {
+public class MeasurementDataId implements java.io.Serializable {
 
     // Fields    
-    private MeasurementDataId _id;
-    private Integer _type;
-    private Integer _additional;
-    private long _version_;
+    private Integer _measurementId;
+    private long _timestamp;
 
     // Constructors
-    public MetricProblem() {
+    public MeasurementDataId() {
     }
 
-    public MetricProblem(MeasurementDataId id, Integer type) {
-        _id = id;
-        _type = type;
-    }
-
-    public MetricProblem(MeasurementDataId id, Integer type,
-                         Integer additional) {
-        _id = id;
-        _type = type;
-        _additional = additional;
+    public MeasurementDataId(Integer measurementId, long timestamp) {
+        _measurementId = measurementId;
+        _timestamp = timestamp;
     }
    
     // Property accessors
-    public MeasurementDataId getId() {
-        return _id;
+    public Integer getMeasurementId() {
+        return _measurementId;
     }
     
-    public void setId(MeasurementDataId id) {
-        _id = id;
+    public void setMeasurementId(Integer measurementId) {
+        _measurementId = measurementId;
     }
-
-    public long get_version_() {
-        return _version_;
-    }
-
-    protected void set_version_(long newVer) {
-        _version_ = newVer;
-    }
-
-    public Integer getType() {
-        return _type;
+    public long getTimestamp() {
+        return _timestamp;
     }
     
-    public void setType(Integer type) {
-        _type = type;
+    public void setTimestamp(long timestamp) {
+        _timestamp = timestamp;
     }
 
-    public Integer getAdditional() {
-        return _additional;
-    }
-    
-    public void setAdditional(Integer additional) {
-        _additional = additional;
-    }
 
     public boolean equals(Object other) {
         if ((this == other)) return true;
         if ((other == null)) return false;
-        if (!(other instanceof MetricProblem)) return false;
-        MetricProblem castOther = (MetricProblem) other; 
+        if (!(other instanceof MeasurementDataId)) return false;
+        MeasurementDataId castOther = (MeasurementDataId) other; 
         
-        return ((getId() == castOther.getId()) || 
-                (getId() != null && castOther.getId() != null &&
-                 getId().equals(castOther.getId())));
+        return ((getMeasurementId() == castOther.getMeasurementId()) || 
+                (getMeasurementId() != null &&
+                 castOther.getMeasurementId() != null &&
+                 getMeasurementId().equals(castOther.getMeasurementId()))) &&
+            (getTimestamp() == castOther.getTimestamp());
     }
    
     public int hashCode() {
         int result = 17;
         
-        result = 37 * result + (getId() == null ? 0 : getId().hashCode());
+        result = 37 * result + 
+            (getMeasurementId() == null ? 0 : getMeasurementId().hashCode() );
+        result = 37 * result + (int)getTimestamp();
         return result;
     }   
 }

@@ -23,38 +23,34 @@
  * USA.
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.measurement.server.session;
 
-import org.hibernate.Session;
-
-import org.hyperic.hq.measurement.ScheduleRevNum;
-import org.hyperic.hq.measurement.SrnId;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 
 /**
- * CRUD methods, finders, etc. for ScheduleRevNum
+ * SRN stands for 'Schedule Revision Number'  
+ *
+ * It is the association of an appdef entity with a number indicating
+ * what the server's idea of the agent's metric collection schedule is.
  */
-public class ScheduleRevNumDAO extends HibernateDAO
-{
-    public ScheduleRevNumDAO(Session session) {
-        super(ScheduleRevNum.class, session);
+public class SRN {
+    private AppdefEntityID id;
+    private int            revisionNumber;
+
+    public SRN(AppdefEntityID id, int revisionNumber){
+        this.id             = id;
+        this.revisionNumber = revisionNumber;
     }
 
-    public ScheduleRevNum findById(SrnId id) {
-        return (ScheduleRevNum)super.findById(id);
+    public AppdefEntityID getEntity(){
+        return this.id;
     }
 
-    public void remove(ScheduleRevNum entity) {
-        super.remove(entity);
+    public int getRevisionNumber(){
+        return this.revisionNumber;
     }
-
-    public ScheduleRevNum create(int entType, int entId) {
-        
-        SrnId srnId = new SrnId(entType, entId);
-        ScheduleRevNum srn = new ScheduleRevNum();
-
-        srn.setId(srnId);
-        srn.setSrn(new Integer(1));
-        save(srn);
-        return srn;
+    
+    public void setRevisionNumber(int newRev){
+        this.revisionNumber = newRev;
     }
 }
