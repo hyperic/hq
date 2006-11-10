@@ -197,7 +197,7 @@
   </tr>
 </c:if>
   <tr> 
-    <td colspan="4"><html:img page="/images/spacer.gif" width="1" height="13" alt="" border="0"/></td>
+    <td colspan="4"><html:img page="/images/spacer.gif" height="10" alt="" border="0"/></td>
   </tr>
 </table>
 

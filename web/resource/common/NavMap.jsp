@@ -37,10 +37,9 @@
   <tr valign="top"> 
    <c:choose>
       <c:when test="${xlib}">
-    <td class="PageTitleSmallText" colspan="2">
+    <td class="PageTitleSmallText" colspan="2" style="padding-top: 6px;">
 <script src="<html:rewrite page="/js/"/>effects.js" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/"/>diagram.js" type="text/javascript"></script>
-
 <c:set var="imageWidth" value="800"/>
 <hq:navMap areasVar="mapAreas" areasSizeVar="mapAreasSize" imageWidth="${imageWidth}"/>
 
@@ -73,8 +72,7 @@
 </c:forEach>
 </map>
 
-      <br>
-      <html:link href="#" onclick="toggleDiagram('diagramDiv'); return false;"><html:img imageName="navMapIcon" border="0" alt="" page="/images/icon_navmap.png"/></html:link><br/>
+      <html:link href="#" onclick="toggleDiagram('diagramDiv'); return false;"><html:img imageName="navMapIcon" border="0" alt="" page="/images/icon_navmap.png"/></html:link>
       <div id="diagramDiv"><html:img imageName="navMapImage" page="/resource/NavMapImage?treeVar=${treeVar}&imageWidth=${imageWidth}" alt="" border="0" usemap="#diagram" />
       </div>
     </td>
@@ -85,10 +83,6 @@
     </td>
       </c:otherwise>
     </c:choose>
-    <td class="PageTitleSmallText">&nbsp;</td>
-  </tr>
-  <tr valign="top"> 
-    <td class="PageTitleSmallText" colspan="2">&nbsp;</td>
     <td class="PageTitleSmallText">&nbsp;</td>
   </tr>
 </table>
