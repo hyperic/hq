@@ -29,6 +29,7 @@ import org.hibernate.Session;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.util.jdbc.DBUtil;
 
 import java.util.List;
 
@@ -61,15 +62,10 @@ public class DerivedMeasurementDAO extends HibernateDAO {
     }
 
     public List findByIds(Integer ids[]) {
-        StringBuffer buf = 
-            new StringBuffer("from DerivedMeasurement where id IN (");
-        int len = ids.length;
-        for (int i = 0; i < len - 1; i++) {
-            buf.append(ids[i] + ",");
-        }
-        buf.append(ids[len - 1] + ")");
+        String sql = "from DerivedMeasurement where id IN " +
+            DBUtil.makeInSet(ids);
 
-        return getSession().createQuery(buf.toString()).list();
+        return getSession().createQuery(sql).list();
     }
 
     public DerivedMeasurement findByTemplateForInstance(Integer tid, 
