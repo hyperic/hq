@@ -34,6 +34,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
+import org.hibernate.stat.Statistics;
+import org.hibernate.stat.SecondLevelCacheStatistics;
 import org.hibernate.transaction.JTATransactionFactory;
 
 import org.hibernate.cfg.Configuration;
@@ -42,6 +44,8 @@ import org.hibernate.cfg.Environment;
 import org.hibernate.dialect.Dialect;
 
 import org.hibernate.engine.SessionFactoryImplementor;
+import org.hyperic.hq.common.DiagnosticThread;
+import org.hyperic.hq.common.DiagnosticObject;
 
 import java.sql.Connection;
 import java.util.Properties;
@@ -103,6 +107,34 @@ public class Util {
             log.error("Building SessionFactory failed.", ex);
             throw new ExceptionInInitializerError(ex);
         }
+
+        // Add second level cache statistics to the diagnostics
+        DiagnosticObject cacheDiagnostics = new DiagnosticObject() {
+            public String getStatus() {
+
+                Statistics stats = getSessionFactory().getStatistics();
+                String[] caches = stats.getSecondLevelCacheRegionNames();
+
+                StringBuffer buf = new StringBuffer();
+                for (int i = 0; i < caches.length; i++) {
+                    SecondLevelCacheStatistics cacheStats =
+                        stats.getSecondLevelCacheStatistics(caches[i]);
+
+                    buf.append("Cache: ")
+                        .append(caches[i])
+                        .append(" elements=")
+                        .append(cacheStats.getElementCountInMemory())
+                        .append(" (")
+                        .append(cacheStats.getSizeInMemory())
+                        .append(" bytes) hits=")
+                        .append(cacheStats.getHitCount())
+                        .append(" misses=")
+                        .append(cacheStats.getMissCount());
+                }
+                return buf.toString();
+            }
+        };
+        DiagnosticThread.addDiagnosticObject(cacheDiagnostics);
     }
 
     /**
