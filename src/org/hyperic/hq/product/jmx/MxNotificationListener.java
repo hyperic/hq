@@ -60,13 +60,11 @@ public class MxNotificationListener implements NotificationListener {
         this.props = plugin.getConfig().toProperties();
     }
 
-    public static MxNotificationListener getInstance(LogTrackPlugin plugin) {
+    public static MxNotificationListener getInstance(MxNotificationPlugin plugin) {
         MxNotificationListener listener =
             new MxNotificationListener(plugin);
 
-        listener.mbeans = new String[] {
-            plugin.getTypeProperty(MxQuery.PROP_OBJECT_NAME)
-        };
+        listener.mbeans = plugin.getMBeans();
 
         return listener;
     }
