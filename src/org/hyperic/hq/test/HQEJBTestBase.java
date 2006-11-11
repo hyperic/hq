@@ -27,7 +27,6 @@ package org.hyperic.hq.test;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.FlushMode;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
@@ -112,7 +111,6 @@ public abstract class HQEJBTestBase
             // properties are getting nuked after a test run.
             MockContextFactory.setAsInitial();
             _session = Util.getSessionFactory().openSession();
-            _session.setFlushMode(FlushMode.ALWAYS);
             DAOFactory.setMockSession(_session);
             return;
         }
@@ -160,11 +158,7 @@ public abstract class HQEJBTestBase
         try {
             block.run();
         } finally {
-            _session.flush();
             t.commit();
-            _session.close();
-            _session = Util.getSessionFactory().openSession();
-            DAOFactory.setMockSession(_session);
         }
     }
     
