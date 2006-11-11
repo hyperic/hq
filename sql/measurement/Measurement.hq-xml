@@ -7,6 +7,9 @@
 <hibernate-mapping package="org.hyperic.hq.measurement.server.session">
 
   <class name="Measurement" table="EAM_MEASUREMENT">
+
+    <cache usage="read-write" />
+
     <id name="id" type="integer">
       <column name="ID" not-null="true" />
       <generator class="sequence">

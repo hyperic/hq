@@ -2,8 +2,16 @@
          xsi:noNamespaceSchemaLocation="ehcache.xsd">
 
   <!-- The default cache -->
-  <defaultCache maxElementsInMemory="0"
+  <defaultCache maxElementsInMemory="1"
                 eternal="false"
                 overflowToDisk="false"/>
+
+  <!-- Caching of Derived and Raw Measurement pojo's -->
+  <cache name="org.hyperic.hq.measurement.server.session.Measurement"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
 </ehcache>
