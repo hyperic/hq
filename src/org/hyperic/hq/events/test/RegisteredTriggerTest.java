@@ -30,6 +30,7 @@ import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.test.HQEJBTestBase;
+import org.hyperic.dao.DAOFactory;
 
 public class RegisteredTriggerTest 
     extends HQEJBTestBase
@@ -51,6 +52,8 @@ public class RegisteredTriggerTest
         val.setFrequency(123);
         
         System.out.println("Trigger: " + tMan.createTrigger(val));
+        DAOFactory.getDAOFactory().getCurrentSession().flush();
+        
         System.out.println("All: " + tMan.getAllTriggers());
         
         assertEquals(numTriggers + 1, tMan.getAllTriggers().size());

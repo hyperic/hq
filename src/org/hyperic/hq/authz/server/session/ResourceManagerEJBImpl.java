@@ -98,7 +98,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * setOperations() to associate existing Operations.
      * @return Value-object for the ResourceType.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
+     * @ejb:transaction type="REQUIRED"
      */
     public ResourceType createResourceType(AuthzSubjectValue whoami,
                                            ResourceTypeValue type,
@@ -253,7 +253,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * Create a resource.
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
+     * @ejb:transaction type="REQUIRED"
      */
     public Resource createResource(AuthzSubjectValue whoami,
                                    ResourceTypeValue rtv,
@@ -367,7 +367,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param whoami The current running user.
      * @param resource The resource to delete.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
+     * @ejb:transaction type="REQUIRED"
      */
     public void removeResource(AuthzSubjectValue whoami, ResourceValue res) {
         Resource reso = getResourceDAO().findById(res.getId());

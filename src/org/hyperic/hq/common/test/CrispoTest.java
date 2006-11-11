@@ -53,6 +53,7 @@ public class CrispoTest
         // (C)reate
         int numCrispos = cDao.findAll().size();
         Crispo c = cMan.createCrispo(vals);
+        cDao.getSession().flush();
         assertEquals(2, c.getOptions().size());
         assertEquals(numCrispos + 1, cDao.findAll().size());
         assertValidVals(c.getOptions(), vals);
@@ -71,6 +72,7 @@ public class CrispoTest
         // (D)elete
         CrispoOption firstOpt = (CrispoOption)options.iterator().next();
         cMan.deleteCrispo(c);
+        cDao.getSession().flush();
         assertEquals(numCrispos, cDao.findAll().size());
         
         try {

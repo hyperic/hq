@@ -17,6 +17,8 @@ import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.test.HQEJBTestBase;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.hyperic.hibernate.Util;
+import org.hyperic.dao.DAOFactory;
 
 public class ResourceGroupTest extends HQEJBTestBase {
     private final int RANDOM_ID = (new Random()).nextInt(10000);
@@ -77,7 +79,8 @@ public class ResourceGroupTest extends HQEJBTestBase {
                                                   new Integer(RANDOM_ID),
                                                   "Platform " + BOGUS_NAME,
                                                   false);
-                
+                DAOFactory.getDAOFactory().getCurrentSession().flush();
+
                 // Now we have to find the resource
                 ResourceValue resource = remg.findResourceById(pk.getId());
                 assertNotNull(resource);

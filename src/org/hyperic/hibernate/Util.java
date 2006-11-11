@@ -34,6 +34,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
+import org.hibernate.cache.NoCacheProvider;
 import org.hibernate.stat.Statistics;
 import org.hibernate.stat.SecondLevelCacheStatistics;
 import org.hibernate.transaction.JTATransactionFactory;
@@ -42,6 +43,9 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 
 import org.hibernate.dialect.Dialect;
+import org.hibernate.dialect.function.ClassicAvgFunction;
+import org.hibernate.dialect.function.ClassicSumFunction;
+import org.hibernate.dialect.function.ClassicCountFunction;
 
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hyperic.hq.common.DiagnosticThread;
@@ -75,19 +79,9 @@ public class Util {
             // Read not only hibernate.properties, but also hibernate.cfg.xml
             configuration.configure("META-INF/hibernate.cfg.xml");
             if (mocktest) {
-                // set the proper hibernate configuration for mockejb test
-                Properties prop = configuration.getProperties();
-                String jta = System.getProperty(Environment.USER_TRANSACTION);
-                if (jta == null) {
-                    jta = "javax.transaction.UserTransaction";
-                }
-                prop.setProperty(Environment.TRANSACTION_STRATEGY,
-                                 JTATransactionFactory.class.getName());
-                prop.remove(Environment.TRANSACTION_MANAGER_STRATEGY);
-                prop.setProperty(Environment.USER_TRANSACTION, jta);
-                configuration.setProperties(prop);
+                mockTestConfig();
             }
-
+            hibernateVersionConfig();
             // Set global interceptor from configuration
             setInterceptor(configuration, null);
 
@@ -135,6 +129,48 @@ public class Util {
             }
         };
         DiagnosticThread.addDiagnosticObject(cacheDiagnostics);
+    }
+
+    private static void mockTestConfig() {
+        // set the proper hibernate configuration for mockejb test
+        Properties prop = configuration.getProperties();
+        String jta = System.getProperty(Environment.USER_TRANSACTION);
+        if (jta == null) {
+            jta = "javax.transaction.UserTransaction";
+        }
+        prop.setProperty(Environment.USE_QUERY_CACHE, "false");
+        prop.setProperty(Environment.USE_SECOND_LEVEL_CACHE, "false");
+        prop.setProperty(Environment.CACHE_PROVIDER,
+                                 NoCacheProvider.class.getName());
+        prop.setProperty(Environment.TRANSACTION_STRATEGY,
+                                 JTATransactionFactory.class.getName());
+        prop.remove(Environment.TRANSACTION_MANAGER_STRATEGY);
+        prop.setProperty(Environment.USER_TRANSACTION, jta);
+        configuration.setProperties(prop);
+    }
+
+    private static void hibernateVersionConfig() {
+        if (Environment.VERSION.startsWith("3.2")) {
+            hibernate32Config();
+        }
+    }
+
+    private static void hibernate32Config() {
+        // From hibernate 3.2 migration guide:
+        // In alignment with the JPA specification the count, sum and avg
+        // function now defaults to return types as specified by the
+        // specification. This can result in ClassCastException's at runtime
+        // if you used aggregation in HQL queries.
+
+        // The new type rules are described at
+        // http://opensource.atlassian.com/projects/hibernate/browse/HHH-1538
+
+        // Since we don't want to break existing code, we use the
+        // classic aggregate functions for backward compat.
+
+        configuration.addSqlFunction( "count", new ClassicCountFunction());
+        configuration.addSqlFunction( "avg", new ClassicAvgFunction());
+        configuration.addSqlFunction( "sum", new ClassicSumFunction()); 
     }
 
     /**

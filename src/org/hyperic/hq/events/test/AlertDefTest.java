@@ -14,6 +14,7 @@ import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.test.HQEJBTestBase;
+import org.hyperic.dao.DAOFactory;
 
 public class AlertDefTest
     extends HQEJBTestBase
@@ -57,6 +58,7 @@ public class AlertDefTest
         
         int numDefs = aMan.findAllAlertDefinitions().size();
         aInfo = aMan.createAlertDefinition(aInfo);
+        DAOFactory.getDAOFactory().getCurrentSession().flush();
         assertEquals(numDefs + 1, aMan.findAllAlertDefinitions().size());
         assertEquals(1, aInfo.getTriggers().length);
         assertEquals(1,  aInfo.getConditions().length);

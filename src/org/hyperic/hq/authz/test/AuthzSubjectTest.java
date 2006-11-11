@@ -8,6 +8,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.test.HQEJBTestBase;
 import org.hyperic.util.pager.PageControl;
+import org.hyperic.dao.DAOFactory;
 
 public class AuthzSubjectTest extends HQEJBTestBase {
     private static final String BOGUS_NAME="foobar";
@@ -56,6 +57,7 @@ public class AuthzSubjectTest extends HQEJBTestBase {
         
         // Now delete it
         zMan.removeSubject(overlord, subject.getId());
+        DAOFactory.getDAOFactory().getCurrentSession().flush();
 
         assertEquals(numSubjects,
                      zMan.getAllSubjects(overlord,
