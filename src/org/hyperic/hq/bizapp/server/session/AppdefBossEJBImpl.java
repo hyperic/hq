@@ -972,6 +972,10 @@ public class AppdefBossEJBImpl
     }
 
     /**
+     * TODO: this needs to be a batch query operation at the DAO layer
+     * TODO: requires object model change at the db level to do it properly
+     * TODO: AppdefResourceType includes all but the APPDEF_TYPE_GROUP.
+     *
      * Looks up and returns a value object corresponding to the appdef entity
      * represented by the instance id passed in. The method does not require
      * the caller to know the instance-id's corresponding type. Similarly,

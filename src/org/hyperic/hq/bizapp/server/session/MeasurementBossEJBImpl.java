@@ -136,7 +136,7 @@ import org.hyperic.util.timer.StopWatch;
  *      local-jndi-name="LocalMeasurementBoss"
  *      view-type="both"
  *      type="Stateless"
- * @ejb:transaction type="NOTSUPPORTED"
+ * @ejb:transaction type="Required"
  */
 public class MeasurementBossEJBImpl extends MetricSessionEJB
     implements SessionBean 
@@ -291,7 +291,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      * @return a PageList of MeasurementTemplateValue objects
      */
     public PageList findMeasurementTemplates(int sessionId, 
@@ -3196,7 +3196,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * 
      * @return PageList of ResourceDisplaySummary beans
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public List findResourcesCurrentHealth(String user, AppdefEntityID[] entIds)
         throws LoginException, ApplicationException, ConfigPropertyException,
@@ -3214,7 +3214,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * 
      * @return PageList of ResourceDisplaySummary beans
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public List findResourcesCurrentHealth(int sessionId, 
                                            AppdefEntityID[] entIds)
@@ -3256,7 +3256,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @throws PermissionException 
      * @throws AppdefEntityNotFoundException 
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public List findHostsCurrentHealth(int sessionId, AppdefEntityID entId,
                                        PageControl pc)
@@ -3809,7 +3809,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /** Get the availability of the resource
      * @param id the Appdef entity ID
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public double getAvailability(int sessionId, AppdefEntityID id)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -3822,7 +3822,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @param id the Appdef entity ID
      * @return a MetricValue for the availability
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public double getAGAvailability(int sessionId, AppdefEntityID[] aids,
                                     AppdefEntityTypeID ctype)
@@ -4067,7 +4067,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * Check if an entity has been enabled for log tracking
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public boolean isLogTrackEnabled(int sessionId, AppdefEntityID id)
         throws AppdefEntityNotFoundException, SessionNotFoundException, 
