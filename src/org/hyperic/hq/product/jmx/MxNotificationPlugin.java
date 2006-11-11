@@ -40,12 +40,23 @@ public class MxNotificationPlugin
         super.configure(config);
 
         //no concept of log levels in JMX notifications
-        this.setLogLevel(LOGLEVEL_INFO);
+        setLogLevel(LOGLEVEL_INFO);
 
         this.listener =
             MxNotificationListener.getInstance(this);
 
         this.listener.add();
+    }
+
+    public String[] getMBeans() {
+        String objectName = 
+            getTypeProperty(MxQuery.PROP_OBJECT_NAME);
+        if (objectName == null){
+            return new String[0];
+        }
+        else {
+            return new String[] { objectName };
+        }
     }
 
     public void shutdown() throws PluginException {
