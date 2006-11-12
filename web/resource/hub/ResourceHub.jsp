@@ -34,6 +34,7 @@
 
 <script language="JavaScript" src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
 <script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+<script language="JavaScript" src="<html:rewrite page="/js/diagram.js"/>" type="text/javascript"></script>
 <c:set var="widgetInstanceName" value="listResources"/>
 <script type="text/javascript">
 var pageData = new Array();
