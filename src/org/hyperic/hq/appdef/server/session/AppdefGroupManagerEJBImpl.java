@@ -942,7 +942,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
             GroupManagerLocal manager = getGroupManager();
 
             // first lookup the group to test permissions
-            AppdefGroupValue agv = new AppdefGroupValue(groupId);
+            AppdefGroupValue agv;
             agv = this.findGroup(subject, groupId);
 
             // now change the owner.
