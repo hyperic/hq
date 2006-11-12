@@ -80,7 +80,7 @@ A.ListHeaderLink:hover {color: #004680; text-decoration: underline;}
 .ListCellLineEmpty {background-color: #FFFFFF; padding: 0px;}
 .ListCellPrimary {padding: 3px; border-bottom: solid #D5D8DE; border-width: 1px; font-weight: bold;}
 
-.LinkBox {padding: 3px; border: solid #D5D8DE; border-width: 1px; background-color:#F2F9FF}
+.LinkBox {padding: 3px; border: solid #D5D8DE; border-width: 1px; background-color:#F2F9FF; color: #003399; text-decoration: none; font-weight: bold;}
 
 /* list for MONITOR */
 .ListHeaderLight {background-color: #DBE3F5;}
