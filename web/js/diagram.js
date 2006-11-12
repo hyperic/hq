@@ -25,6 +25,7 @@
 
 var diagShown = false;
 var diagramDiv;
+var toolsShown = false;
 
 function toggleDiagram(eId) {
   var thisDiv = $(eId);
@@ -55,6 +56,28 @@ function showDiagram(thisDiv) {
 
 function makeDiagramVisible(eId) {
   diagramDiv.style.visibility = "visible";
+}
+
+function showToolMenu() {
+  var menu = $('toolMenu');
+  menu.style.visibility = "visible";
+  new Effect.SlideDown(menu);
+  toolsShown = true;
+}
+
+function hideToolMenu() {
+  var menu = $('toolMenu');
+  new Effect.SlideUp(menu);
+  toolsShown = false;
+}
+
+function toggleToolMenu() {
+  if (toolsShown) {
+    hideToolMenu();
+  }
+  else {
+    showToolMenu();
+  }
 }
 
 // We register this body.onclick handler within this javascript file
