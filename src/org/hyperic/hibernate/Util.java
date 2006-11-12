@@ -109,12 +109,14 @@ public class Util {
                 Statistics stats = getSessionFactory().getStatistics();
                 String[] caches = stats.getSecondLevelCacheRegionNames();
 
+                String separator = System.getProperty("line.separator");
                 StringBuffer buf = new StringBuffer();
                 for (int i = 0; i < caches.length; i++) {
                     SecondLevelCacheStatistics cacheStats =
                         stats.getSecondLevelCacheStatistics(caches[i]);
 
-                    buf.append("Cache: ")
+                    buf.append(separator)
+                        .append("Cache: ")
                         .append(caches[i])
                         .append(" elements=")
                         .append(cacheStats.getElementCountInMemory())
