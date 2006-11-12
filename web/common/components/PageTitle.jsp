@@ -67,7 +67,7 @@
   <tr class="PageTitleBar"> 
     <td width="5"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
     <td width="15"><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
-    <td width="67%" colspan="2" nowrap>
+    <td width="85%" colspan="2" nowrap>
 <c:choose>
   <c:when test="${not empty titleKey}">
     <fmt:message key="${titleKey}">
@@ -89,7 +89,7 @@
     </td>
 <c:choose>
   <c:when test="${not empty titleBgStyle && not empty titleImg}">
-    <td width="32%"><html:img page="/images/${titleImg}" width="202" height="32" alt="" border="0" style="float: right;"/></td>
+    <td width="14%"><html:img page="/images/${titleImg}" width="202" height="32" alt="" border="0" style="float: right;"/></td>
     <td width="1%"><html:link href="" onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/title_pagehelp.gif" width="20" height="20" alt="" border="0" hspace="10"/></html:link></td>
   </c:when>
   <c:otherwise>
@@ -110,12 +110,12 @@
     <td colspan="2">
       <table width="100%" border="0" cellspacing="0" cellpadding="0">
         <tr> 
-          <td class="PageTitleSmallText" width="50%">
+          <td class="PageTitleSmallText">
       <b><fmt:message key="common.label.Description"/></b>
       <hq:shortenText maxlength="30" value="${resource.description}" styleClass="ListCellPopup5"/>
     </td>
     <td style="width: 5px;">&nbsp;</td>
-    <td class="PageTitleSmallText" valign="top" width="50%">
+    <td class="PageTitleSmallText" valign="top" colspan="2">
       <b><fmt:message key="resource.common.inventory.props.OwnerLabel"/></b> <c:out value="${ownerStr}" escapeXml="false"/> 
       <c:if test="${not empty resource}">
         - <html:link page="/resource/${resource.entityId.typeName}/Inventory.do?mode=changeOwner&rid=${resource.id}&type=${resource.entityId.type}"><fmt:message key="resource.common.inventory.props.ChangeButton"/></html:link><br>
@@ -128,20 +128,22 @@
   <c:if test="${leftRight > 0}">
     <tr>
   </c:if>
-      <td class="PageTitleSmallText"><b><c:out value="${cprop.key}"/></b><fmt:message key="common.label.Colon"/>
+      <td class="PageTitleSmallText" width="33%"><b><c:out value="${cprop.key}"/></b><fmt:message key="common.label.Colon"/>
       <hq:shortenText maxlength="30" value="${cprop.value}" styleClass="ListCellPopup5"/></td>
   <c:choose>
   <c:when test="${leftRight < 0}">
+    <c:set var="leftRight" value="${leftRight * -1}"/>
+    <td class="PageTitleSmallText"></td>
     </tr>
   </c:when>
   <c:otherwise>
+    <c:set var="leftRight" value="${leftRight - 1}"/>
     <td>&nbsp;</td>
   </c:otherwise>
   </c:choose>
-  <c:set var="leftRight" value="${leftRight * -1}"/>
 </logic:iterate>
 <c:if test="${leftRight < 0}">
-    <td colspan="2">&nbsp;</td>
+    <td colspan="3">&nbsp;</td>
   </tr>
 </c:if>
 </logic:present>
@@ -173,27 +175,22 @@
     <td>&nbsp;</td>
     </c:otherwise>
   </c:choose>
-  <c:choose>
-    <c:when test="${not empty linkUrl}">
-    <td colspan="2">
-      <table width="100%" border="0" cellspacing="0" cellpadding="0">
-        <tr> 
-          <td><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
-          <td width="100%" class="PageTitleSmallText">
+
+  <td colspan="2">
+    <c:if test="${not empty linkUrl}">
+      <span class="LinkBox" onclick="toggleToolMenu();"><fmt:message key="resource.toolsmenu.text"/><html:img page="/images/arrow_dropdown.gif" border="0"/></a></span>
+      <div id="toolMenu" style="visibility: hidden; position: absolute; margin-top: 2px; margin-left: -2px;">
 <tiles:insert attribute="linkUrl">
   <c:if test="${not empty resource}">
     <tiles:put name="resource" beanName="resource"/>
   </c:if>
 </tiles:insert>
-          </td>
-        </tr>
-      </table>
+      </div>
+      <script language="Javascript">
+      onloads.push( hideToolMenu );
+      </script>
+    </c:if>
     </td>
-    </c:when>
-    <c:otherwise>
-    <td colspan="2"></td>
-    </c:otherwise>
-  </c:choose>
   </tr>
 </c:if>
   <tr> 
