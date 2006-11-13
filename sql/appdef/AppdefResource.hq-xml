@@ -7,6 +7,9 @@
 <hibernate-mapping package="org.hyperic.hq.appdef.server.session">
   <class name="AppdefResource" abstract="true">
     <meta attribute="scope-class" inherit="false">public abstract</meta>
+
+    <cache usage="read-write" />
+
     <id name="id" type="integer">
       <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />
