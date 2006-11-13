@@ -25,38 +25,27 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-/** The inner class that encapsulates the info we need
- * from a Schedule
- *
- */
 public class Schedule {
     
-    /** The maximum number of times to calculate a measurement
-     *
-     */
-    public static final int MAX_ATTEMPT = CalculateDerivedMeasurementJob.MAX_ATTEMPTS_RECENT;
+    // The maximum number of times to calculate a measurement
+    public static final int MAX_ATTEMPT =
+        CalculateDerivedMeasurementJob.MAX_ATTEMPTS_RECENT;
     
-    /** The amount of time to wait to recalculate
-     *
-     */
+    // The amount of time to wait to recalculate
     public static final long ATTEMPT_WAIT = 10000;
-    
-    /** Holds value of property measurementId.  */
+
     private int measurementId;
-    
-    /** Holds value of property attempt.  */
+
     private int attempt = 1;
-    
-    /** Holds value of property time.  */
+
     private long time;
-    
-    /** Holds value of property reservation.  */
+
     private long reservation;
-    
-    /** Holds value of property dequeue. */
+
     private int dequeue = 0;
     
-    /** Constructor
+    /**
+     * Constructor
      * @param time when this measurement is scheduled for
      * @param measurementId the measurementId
      *
@@ -186,6 +175,4 @@ public class Schedule {
     public void setDequeue(int dequeue) {
         this.dequeue = dequeue;
     }
-    
 }
-
