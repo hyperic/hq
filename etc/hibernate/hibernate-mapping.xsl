@@ -10,7 +10,8 @@
         method="xml"
         indent="no" 
         doctype-system="http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd"
-        doctype-public="-//Hibernate/Hibernate Mapping DTD 3.0//EN" />
+        doctype-public="-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        cdata-section-elements="meta" />
 
     <xsl:template match="/ | *">
         <xsl:copy>
@@ -18,8 +19,21 @@
             <xsl:apply-templates select="node()" />
         </xsl:copy>
     </xsl:template>
-  
-    <xsl:template match="bag">
+
+    <!-- we currently use sets for non-inverse many-to-many
+         relationships.  Need to add support for other hibernate collection
+         types on as needed basis.
+         Never use bags on non-inverse many-to-many relationships as
+         non-inverse bags are the worst performing collection for adding
+         items ot it. -->
+    <xsl:template match="set[many-to-many]">
+        <xsl:copy>
+            <xsl:apply-templates select="@*" />
+            <xsl:apply-templates select="node()" />
+        </xsl:copy>
+    </xsl:template>
+
+    <xsl:template match="bag|list|set">
       <xsl:copy>
         <xsl:attribute name="inverse">
           <xsl:value-of select="'true'"/>

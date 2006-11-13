@@ -102,7 +102,7 @@ import org.hyperic.hq.appdef.server.session.ServiceType;
  *      view-type="local"
  *      type="Stateless"
  * @ejb:util generate="physical"
- * @ejb:transaction type="SUPPORTS"
+ * @ejb:transaction type="Required"
  */
 public class ServerManagerEJBImpl extends AppdefSessionEJB
     implements SessionBean {
@@ -1519,17 +1519,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 }
 
                 if(updatePlats == true){
-                    Set platSet;
-
-                    try {
-                        platSet = getPlatformTypeSet(newPlats);
-                    } catch(FinderException exc){
-                        throw new CreateException("Could not setup " +
-                                                  "server '" + serverName +
-                                                  "' because: " +
-                                                  exc.getMessage());
-                    }
-                    stlocal.setPlatformTypes(platSet);
+                    findAndSetPlatformType(newPlats, stlocal);
                 }
             }
         }
@@ -1538,24 +1528,14 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         for (Iterator i = infoMap.values().iterator(); i.hasNext(); ) {
             ServerTypeInfo sinfo = (ServerTypeInfo) i.next();
             ServerType stype = new ServerType();
-            Set platSet;
 
             log.debug("Creating new ServerType: " + sinfo.getName());
             stype.setPlugin(plugin);
             stype.setName(sinfo.getName());
             stype.setDescription(sinfo.getDescription());
             stype.setVirtual(sinfo.isVirtual());
-            try {
-                String newPlats[] = sinfo.getValidPlatformTypes();
-                    
-                platSet = getPlatformTypeSet(newPlats);
-            } catch(FinderException exc){
-                throw new CreateException("Could not setup " +
-                                          "server '" + sinfo.getName() +
-                                          "' because: " +
-                                          exc.getMessage());
-            }
-            stype.setPlatformTypes(platSet);
+            String newPlats[] = sinfo.getValidPlatformTypes();
+            findAndSetPlatformType(newPlats, stype);
             // Now create the server type
             stLHome.create(stype);
         }
@@ -1565,11 +1545,10 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Get a Set of PlatformTypeLocal objects which map to the names
      * as given by the argument.
      */
-    private Set getPlatformTypeSet(String[] platNames)
+    private void findAndSetPlatformType(String[] platNames, ServerType stype)
         throws FinderException {
         PlatformTypeDAO platHome =
             DAOFactory.getDAOFactory().getPlatformTypeDAO();
-        HashSet res = new HashSet();
             
         for(int i=0; i<platNames.length; i++){
             PlatformType pType;
@@ -1579,9 +1558,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 throw new FinderException("Could not find platform type '" +
                                           platNames[i] + "'");
             }
-            res.add(pType);
+            stype.addPlatformType(pType);
         }
-        return res;
     }
 
     /**

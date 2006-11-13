@@ -96,6 +96,12 @@ public class ServerType extends AppdefResourceType
         this.platformTypes = platformTypes;
     }
 
+    public void addPlatformType(PlatformType ptype)
+    {
+        platformTypes.add(ptype);
+        ptype.getServerTypesBag().add(this);
+    }
+
     public Collection getServers()
     {
         return this.servers;

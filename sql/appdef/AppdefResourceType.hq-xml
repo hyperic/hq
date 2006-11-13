@@ -94,7 +94,7 @@
         <column name="FVIRTUAL" not-null="false" />
       </property>
 
-      <set name="platformTypes" table="EAM_PLATFORM_SERVER_TYPE_MAP">
+      <set inverse="false" name="platformTypes" table="EAM_PLATFORM_SERVER_TYPE_MAP">
         <key column="SERVER_TYPE_ID" not-null="false" />
         <many-to-many class="PlatformType" column="PLATFORM_TYPE_ID" />
       </set>
