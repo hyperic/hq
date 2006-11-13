@@ -353,8 +353,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             DBUtil.closeStatement(logCtx, istmt);
             DBUtil.closeStatement(logCtx, ustmt);
             DBUtil.closeConnection(logCtx, conn);
-            // DEBUG: connection tracking code
-            decrement(conn);
         }
         
         // Now send the events
@@ -471,9 +469,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
 
             try {
-                // DEBUG: connection tracking code
-                increment(conn);
-    
                 stmt = conn.prepareStatement(
                     "SELECT count(*) FROM " + table +
                     " WHERE measurement_id=? AND timestamp BETWEEN ? AND ?");
@@ -579,8 +574,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 "Can't open connection", e);
         } finally {
             DBUtil.closeConnection(logCtx, conn);
-            // DEBUG: connection tracking code
-            decrement(conn);
         }
     }
 
@@ -637,9 +630,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             
             conn =
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-
-            // DEBUG: connection tracking code
-            increment(conn);
     
             if(log.isDebugEnabled()) {
                 log.debug("GetHistoricalData: ID: " +
@@ -844,8 +834,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 StringUtil.arrayToString(ids), e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
-            // DEBUG: connection tracking code
-            decrement(conn);
         }
     }
 
@@ -890,8 +878,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         try {
             conn =
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-            // DEBUG: connection tracking code
-            increment(conn);
     
             /*
              * SELECT timestamp, value FROM EAM_MEASUREMENT_DATA, EAM_NUMBERS,
@@ -932,8 +918,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 "Can't lookup historical data for " + id, e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
-            // DEBUG: connection tracking code
-            decrement(conn);
         }
     }
 
@@ -1073,8 +1057,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         try {
             conn =
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-            // DEBUG: connection tracking code
-            increment(conn);
     
             final String sqlString =
                 "SELECT timestamp, value, abs(timestamp - ?) AS diff" +
@@ -1099,8 +1081,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             // Allow the DataNotAvailableException to be thrown
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
-            // DEBUG: connection tracking code
-            decrement(conn);
         }
  
         throw new DataNotAvailableException(
@@ -1135,7 +1115,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             conn =
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
             // DEBUG: connection tracking code
-            increment(conn);
 
             StringBuffer sqlBuf = new StringBuffer(
                 "SELECT * FROM " + table + " WHERE ")
@@ -1180,8 +1159,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             throw new SystemException(this.ERR_DB, e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
-            // DEBUG: connection tracking code
-            decrement(conn);
         }
     }
 
@@ -1242,16 +1219,11 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         try {
             conn =
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-            // DEBUG: connection tracking code
-            increment(conn);
 
             int length = Math.min(ids.length, MAX_ID_LEN);
             boolean constrain =
                 (timerange != MeasurementConstants.TIMERANGE_UNLIMITED);
             StringBuffer sqlBuf = this.getLastDataPointsSQL(length, constrain);
-            
-            // No binding of id's due to bug in Pointbase
-            //this.replacePlaceHolder(sqlBuf, ids);
 
             stmt = conn.prepareStatement(sqlBuf.toString());
 
@@ -1313,8 +1285,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             throw new SystemException(e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
-            // DEBUG: connection tracking code
-            decrement(conn);
 
             if (log.isTraceEnabled()) {
                 log.trace("getLastDataPoints(): Statement query elapsed " +
@@ -1346,8 +1316,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         try {
             conn =
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-            // DEBUG: connection tracking code
-            increment(conn);
 
             StringBuffer sqlBuf = new StringBuffer(
                 "SELECT MIN(value), AVG(value), MAX(value) FROM ")
@@ -1377,8 +1345,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             throw new SystemException(this.ERR_DB, e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
-            // DEBUG: connection tracking code
-            decrement(conn);
         }
     }
 
@@ -1454,8 +1420,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         try {
             conn =
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-            // DEBUG: connection tracking code
-            increment(conn);
 
             // Prepare aggregate SQL
             astmt = conn.prepareStatement(aggregateSQL);
@@ -1562,8 +1526,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             DBUtil.closeStatement(logCtx, astmt);
             DBUtil.closeStatement(logCtx, lstmt);
             DBUtil.closeConnection(logCtx, conn);
-            // DEBUG: connection tracking code
-            decrement(conn);
         }
     }
 
@@ -1601,8 +1563,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         try {
             conn =
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-            // DEBUG: connection tracking code
-            increment(conn);
     
             StringBuffer mconj = new StringBuffer(
                 DBUtil.composeConjunctions("measurement_id", mids.length));
@@ -1660,8 +1620,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                           timer.getElapsed());
             }
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
-            // DEBUG: connection tracking code
-            decrement(conn);
         }
         return result;
     }
@@ -1724,8 +1682,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         try {
             conn =
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-            // DEBUG: connection tracking code
-            increment(conn);
             
             if (log.isTraceEnabled())
                 log.trace("getAggregateDataByMetric(): " + aggregateSQL);
@@ -1768,8 +1724,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             throw new SystemException(this.ERR_DB, e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
-            // DEBUG: connection tracking code
-            decrement(conn);
         }
     }
 
@@ -1827,9 +1781,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         try {
             conn =
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-            // DEBUG: connection tracking code
-            increment(conn);
-            
+
             if (log.isTraceEnabled())
                 log.trace("getAggregateDataByMetric(): " + aggregateSQL);
     
@@ -1870,8 +1822,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             throw new SystemException(this.ERR_DB, e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
-            // DEBUG: connection tracking code
-            decrement(conn);
         }
     }
 
@@ -1906,9 +1856,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         try {
             conn =
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-            // DEBUG: connection tracking code
-            increment(conn);
-    
+
             StringBuffer sqlBuf = new StringBuffer(
                 "SELECT DISTINCT(instance_id)" +
                 " FROM " + TAB_MEAS + " m, " + table + " d" +
@@ -1940,8 +1888,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             throw new SystemException(this.ERR_DB, e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
-            // DEBUG: connection tracking code
-            decrement(conn);
         }
     }
 
@@ -1963,8 +1909,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         try {
             conn =
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-            // DEBUG: connection tracking code
-            increment(conn);
 
             // select id from EAM_MEASUREMENTR_DATA where enabled = true
             // and interval is not null and
@@ -1996,18 +1940,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             throw new SystemException(this.ERR_DB, e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
-            // DEBUG: connection tracking code
-            decrement(conn);
         }
-    }
-
-    /**
-     * Used for debugging leaking connections
-     * 
-     * @ejb:interface-method
-     */
-    public void leakConnection () throws SQLException, NamingException {
-        DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
     }
 
     /**
@@ -2044,15 +1977,5 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     public void setSessionContext(SessionContext ctx)
         throws EJBException, RemoteException {
         this.ctx = ctx;
-    }
-
-    // DEBUG: connection tracking code
-    private void increment (Connection conn) {
-        // disable while this is broken
-        // org.hyperic.hq.common.server.DBConnectionCounter.openConnection(conn);
-    }
-    private void decrement (Connection conn) {
-        // disable while this is broken
-        // org.hyperic.hq.common.server.DBConnectionCounter.closeConnection(conn);
     }
 }

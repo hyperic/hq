@@ -4109,13 +4109,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return client.sigarCmd(cmd);
     }
 
-    /**
-     * @ejb:interface-method
-     */
-    public void leakConnection () throws NamingException, java.sql.SQLException {
-        getDataMan().leakConnection();
-    }
-
     /** @ejb:create-method */
     public void ejbCreate() throws CreateException {}
     public void ejbActivate() throws EJBException, RemoteException {}
