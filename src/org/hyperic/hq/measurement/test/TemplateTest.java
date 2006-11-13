@@ -228,14 +228,10 @@ public class TemplateTest
         AuthzSubjectValue subject = getOverlord();
 
         for (int i = 0; i < _types.length; i++) {
-            Integer id = manager.getMonitorableTypeId(_plugin, _types[i]);
-            List tmpls = getMeasurementTemplateDAO().
-                findRawByMonitorableType(id);
-
-            for (int j = 0; j < tmpls.size(); j++) {
-                MeasurementTemplate mt =
-                    (MeasurementTemplate)tmpls.get(j);
-                manager.removeTemplate(subject, mt.getId());
+            Integer ids[] = manager.findTemplateIds(_types[i].getName());
+            _log.info("Found " + ids.length + " templates for " + _types[i]);       
+            for (int j = 0; j < ids.length; j++) {
+                manager.removeTemplate(subject, ids[j]);
             }
         }
     }
