@@ -58,8 +58,6 @@ public class HQConstants {
     public static final String DataPurge1Day   = "CAM_DATA_PURGE_1D";
     // How often to perform database maintainence
     public static final String DataMaintenance = "CAM_DATA_MAINTENANCE";
-    // Whether or not to store every data point
-    public static final String DataStoreAll    = "DATA_STORE_ALL";
     // Whether or not to reindex nightly
     public static final String DataReindex     = "DATA_REINDEX_NIGHTLY";
 

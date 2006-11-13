@@ -111,9 +111,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
     // Purge intervals, loaded once on first invocation.
     private long purgeRaw, purge1h, purge6h;
-    
-    // Whether or not we should store all data points
-    private boolean storeAll = true;
 
     ///////////////////////////////////////
     // operations
@@ -266,13 +263,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     continue;
                 }
 
-                // See if we even need to insert this data
-                if (getStoreAll() == false &&
-                    cache.hasChanged(mid, dpts[ind]) == false) {
-                    cache.add(mid, dpts[ind]);
-                    continue;
-                }
-                
                 try {
                     int i = 1;
                     istmt.setInt       (i++, mid.intValue());
@@ -383,7 +373,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         String purgeRawString = conf.getProperty(HQConstants.DataPurgeRaw);
         String purge1hString  = conf.getProperty(HQConstants.DataPurge1Hour);
         String purge6hString  = conf.getProperty(HQConstants.DataPurge6Hour);
-        String storeAllString = conf.getProperty(HQConstants.DataStoreAll);
 
         try {
             this.purgeRaw = Long.parseLong(purgeRawString);
@@ -394,9 +383,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             // Shouldn't happen unless manual edit of config table
             throw new IllegalArgumentException("Invalid purge interval: " + e);
         }
-        
-        if (storeAllString != null)
-            this.storeAll = Boolean.valueOf(storeAllString).booleanValue();
     }
 
     /**
@@ -419,13 +405,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         } else {
             return TAB_DATA_1D;
         }
-    }
-    
-    private boolean getStoreAll() {
-        if (!this.confDefaultsLoaded)
-            loadConfigDefaults();
-        
-        return storeAll;
     }
     
     /**

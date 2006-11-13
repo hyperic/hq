@@ -86,22 +86,6 @@ public class MetricDataCache {
     }
 
     /**
-     * Detect if the given MetricValue is different than what is cached.
-     * @param mid The measurement id.
-     * @param mval The new MetricValue to check.
-     * @return true if the given MetricValue is different than what is cached.
-     */
-    public boolean hasChanged(Integer mid, MetricValue mval) {
-        MetricValue oldVal = (MetricValue) data.get(mid.intValue());
-
-        // Existing data is actually newer than value
-        if (oldVal != null && oldVal.getTimestamp() < mval.getTimestamp())
-            return oldVal.getValue() != mval.getValue();
-        
-        return true;
-    }
-
-    /**
      * Print the cache size to the log.
      * @param log The logging context.
      * @return The cache size.

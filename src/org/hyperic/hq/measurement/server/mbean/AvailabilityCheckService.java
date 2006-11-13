@@ -92,7 +92,6 @@ public class AvailabilityCheckService
     private MBeanServer server = null;
     private EjbModuleLifecycle camListener = null;
     private boolean started = false;
-    private Boolean fill = null;
         
     private static final String ENABLED_AVAIL_METRICS_SQL = 
         "SELECT m.id, m.mtime, m.coll_interval, mt.appdef_type, m.instance_id " +
@@ -172,33 +171,6 @@ public class AvailabilityCheckService
         if (log.isDebugEnabled())
             log.debug("AvailabilityCheckService.hit() at " + lDate + "(" +
                       current + ")");
-        
-        if (fill == null) {
-            try {
-                Properties conf =
-                    ServerConfigManagerUtil.getLocalHome().create().getConfig();
-                
-                String storeAllString =
-                    conf.getProperty(HQConstants.DataStoreAll);
-
-                if (storeAllString != null) {
-                    this.fill = new Boolean(storeAllString);
-                }
-                else {
-                    this.fill = Boolean.TRUE;
-                }
-            } catch (CreateException e) {
-                throw new SystemException(e);
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            } catch (ConfigPropertyException e) {
-                // Continue to fill
-                this.fill = Boolean.TRUE;
-            }
-        }
-        
-        if (fill.booleanValue() == false)
-            return;
         
         SRNCache srnCache = SRNCache.getInstance();
         
