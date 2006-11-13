@@ -31,8 +31,9 @@ import org.hyperic.util.collection.IntHashMap;
 import org.apache.commons.logging.Log;
 
 /**
- *
- * Cache last data point so that we don't have to go into the database for it
+ * The MetricDataCache caches the last measurement keyed on the derived
+ * measurement id.  The purpose of this cache is to avoid needing to go to
+ * the database when looking up the last value for a metric.
  */
 
 public class MetricDataCache {
@@ -48,7 +49,14 @@ public class MetricDataCache {
     }
 
     private MetricDataCache() {}
-    
+
+    /**
+     * Add a MetricValue to the cache.
+     *
+     * @param mid The measurement id.
+     * @param mval The MetricValue to store.
+     * @return true if the MetricValue was added to the cache, false otherwise.
+     */
     public boolean add(Integer mid, MetricValue mval) {
         MetricValue oldVal = (MetricValue) data.get(mid.intValue());
 
@@ -59,7 +67,15 @@ public class MetricDataCache {
         data.put(mid.intValue(), mval);
         return true;
     }
-    
+
+    /**
+     * Get a MetricValue from the cache.
+     *
+     * @param mid The measurement id.
+     * @param timestamp The beginning of the cache window.
+     * @return The MetricValue from the cache, or null if the element is not
+     * found, or the item in the cache is stale.
+     */
     public MetricValue get(Integer mid, long timestamp) {
         MetricValue val = (MetricValue) data.get(mid.intValue());
             
@@ -68,7 +84,13 @@ public class MetricDataCache {
 
         return null;
     }
-    
+
+    /**
+     * Detect if the given MetricValue is different than what is cached.
+     * @param mid The measurement id.
+     * @param mval The new MetricValue to check.
+     * @return true if the given MetricValue is different than what is cached.
+     */
     public boolean hasChanged(Integer mid, MetricValue mval) {
         MetricValue oldVal = (MetricValue) data.get(mid.intValue());
 
@@ -78,7 +100,12 @@ public class MetricDataCache {
         
         return true;
     }
-    
+
+    /**
+     * Print the cache size to the log.
+     * @param log The logging context.
+     * @return The cache size.
+     */
     public int logSize(Log log) {
         int size = data.size();
         log.info("MetricDataCache size = " + size);
