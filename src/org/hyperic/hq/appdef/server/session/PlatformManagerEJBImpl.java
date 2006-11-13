@@ -63,7 +63,6 @@ import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformLightValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
-import org.hyperic.hq.appdef.shared.PlatformVOHelperUtil;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
@@ -132,18 +131,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         }
     }
 
-    private PlatformTypeValue getPlatformTypeValue(PlatformType ptype)
-    {
-        try {
-            return PlatformVOHelperUtil.getLocalHome().create()
-                    .getPlatformTypeValue(ptype);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-    }
-    
     /**
      * Find a platform type by id
      * @param id - ID of the platform type
@@ -154,7 +141,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         throws PlatformNotFoundException {
         try {
             PlatformType ptype = getPlatformTypeDAO().findById(id);
-            return getPlatformTypeValue(ptype);
+            return ptype.getPlatformTypeValue();
         } catch (ObjectNotFoundException e) {
             throw new PlatformNotFoundException(id);
         }
@@ -173,7 +160,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         if (ptype == null) {
             throw new PlatformNotFoundException(type);
         }
-        return getPlatformTypeValue(ptype);
+        return ptype.getPlatformTypeValue();
     }
 
     /**

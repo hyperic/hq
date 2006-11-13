@@ -47,7 +47,6 @@ import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
-import org.hyperic.hq.appdef.shared.ApplicationVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.appdef.shared.ServiceValue;
@@ -382,19 +381,13 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         AuthzSubjectValue subject, String name)
         throws ApplicationNotFoundException,
                PermissionException {
-        try {
-            Application app = getApplicationDAO().findByName(name);
-            if (app == null) {
-                throw new ApplicationNotFoundException(name);
-            }
-            checkViewPermission(subject, app.getEntityId());
-            return ApplicationVOHelperUtil.getLocalHome().create()
-                    .getApplicationValue(app);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
+
+        Application app = getApplicationDAO().findByName(name);
+        if (app == null) {
+            throw new ApplicationNotFoundException(name);
         }
+        checkViewPermission(subject, app.getEntityId());
+        return app.getApplicationValue();
     }
 
     /** 
@@ -409,14 +402,9 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         try {
             Application app = getApplicationDAO().findById(id);
             checkViewPermission(subject, app.getEntityId());
-            return ApplicationVOHelperUtil.getLocalHome().create()
-                    .getApplicationValue(app);
+            return app.getApplicationValue();
         } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(id, e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
         }
     }
 

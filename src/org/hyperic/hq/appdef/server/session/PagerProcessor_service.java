@@ -27,7 +27,6 @@ package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.util.pager.PagerProcessor;
 
-import org.hyperic.hq.appdef.shared.ServiceVOHelperUtil;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ServiceCluster;
 
@@ -35,25 +34,24 @@ public class PagerProcessor_service implements PagerProcessor {
 
     public PagerProcessor_service () {}
 
-    public Object processElement ( Object o ) {
-        if ( o == null ) return null;
+    public Object processElement (Object o) {
+        if (o == null) return null;
         try {
-            if ( o instanceof Service) {
-                return ServiceVOHelperUtil.getLocalHome().create()
-                    .getServiceValue((Service)o);
+            if (o instanceof Service) {
+                return ((Service)o).getServiceValue();
             }
-            if ( o instanceof AppService) {
+            if (o instanceof AppService) {
                 return ((AppService) o).getAppServiceValue();
             }
-            if ( o instanceof ServiceCluster) {
+            if (o instanceof ServiceCluster) {
                 return ((ServiceCluster) o).getServiceClusterValue();
             }
-            if ( o instanceof ServiceType) {
-                return ServiceVOHelperUtil.getLocalHome().create()
-                    .getServiceTypeValue((ServiceType)o);
+            if (o instanceof ServiceType) {
+                return ((ServiceType)o).getServiceTypeValue();
             }
-        } catch ( Exception e ) {
-            throw new IllegalStateException("Error converting to ServiceValue: " + e);
+        } catch (Exception e) {
+            throw new IllegalStateException("Error converting to " +
+                                            "ServiceValue: " + e);
         }
         return o;
     }

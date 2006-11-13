@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.appdef.shared.PlatformVOHelperUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.pager.PagerProcessor;
 
@@ -34,18 +33,17 @@ public class PagerProcessor_platform implements PagerProcessor {
     public PagerProcessor_platform () {}
 
     public Object processElement ( Object o ) {
-        if ( o == null ) return null;
+        if (o == null) return null;
         try {
-            if ( o instanceof Platform) {
+            if (o instanceof Platform) {
                 return ((Platform)o).getPlatformValue();
             }
-            if ( o instanceof PlatformType ) {
-                return PlatformVOHelperUtil.getLocalHome().create()
-                    .getPlatformTypeValue((PlatformType) o);
+            if (o instanceof PlatformType) {
+                return ((PlatformType)o).getPlatformTypeValue();
             }
         } catch (Exception e) {
-            throw new SystemException("Error converting to PlatformValue: " + e,
-                                      e);
+            throw new SystemException("Error converting to PlatformValue: " +
+                                      e, e);
         }
         return o;
     }

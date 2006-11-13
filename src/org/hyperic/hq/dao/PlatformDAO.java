@@ -64,13 +64,12 @@ public class PlatformDAO extends HibernateDAO {
 
     public void save(Platform entity) {
         super.save(entity);
-        getSession().flush();  // XXX: Flush so VOCache will work
+        getSession().flush();
     }
 
     public void remove(Platform entity) {
         super.remove(entity);
     }
-
  
     /**
      * A method to update a platform based on a PlatformValue object

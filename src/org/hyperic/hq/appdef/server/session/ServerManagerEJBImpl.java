@@ -58,7 +58,6 @@ import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
-import org.hyperic.hq.appdef.shared.ServerVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
@@ -150,15 +149,12 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // first we look up the platform
             // if this bombs we go no further
             Platform pLocal = findPlatformByPK(ppk);
-            ServerTypeValue serverType = null;
-            try {
-                serverType = ServerVOHelperUtil.getLocalHome()
-                    .create().getServerTypeValue(stpk);
-                // set the serverTypeValue
-                sValue.setServerType(serverType);
-            } catch (CreateException e) {
-                throw new SystemException(e);    
-            }
+            ServerType serverType = null;
+
+            serverType = getServerTypeDAO().findById(stpk);
+            // set the serverTypeValue
+            sValue.setServerType(serverType.getServerTypeValue());
+
             // set the owner
             sValue.setOwner(subject.getName());
             // set modified by
@@ -239,14 +235,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             while(servicesIt.hasNext()) {
                 Service aService = (Service)servicesIt.next();
                 getServiceMgrLocal().removeService(subject, aService, true);
-                /*
-                ResourceValue serviceRv = getServiceResourceValue(
-                    (ServicePK)aService.getPrimaryKey());
-                checkRemovePermission(subject, aService.getEntityId());
-                this.removeAuthzResource(subject, serviceRv);
-                VOCache.getInstance()
-                    .removeService(((ServicePK)aService.getPrimaryKey()).getId());
-                */
             }
 
             // keep the configresponseId so we can remove it later
@@ -254,7 +242,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
             // remove the resource
             this.removeAuthzResource(subject, rv);
-            // remove the server and platform vo's from the cache
             getServerDAO().remove(server);
 
             // remove the config response
@@ -413,20 +400,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     public ServerValue findServerById(AuthzSubjectValue subject,
                                       Integer id) 
         throws ServerNotFoundException {
-
-        ServerValue server;
-        try {
-            server = ServerVOHelperUtil.getLocalHome().create()
-                .getServerValue(id);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (FinderException e) {
-            throw new ServerNotFoundException(id, e);
-        }
-        return server;
-
+        Server server = getServerDAO().findById(id);
+        return server.getServerValue();
     }
 
     /**
@@ -440,35 +415,26 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                                            String name)
         throws ServerNotFoundException
     {
-        try {
-            List serverLocals = getServerDAO().findByName(name);
+        List serverLocals = getServerDAO().findByName(name);
 
-            int numServers = serverLocals.size();
-            if (numServers == 0) {
-                throw new ServerNotFoundException("Server '" +
-                                                  name + "' not found");
-            }
-
-            List servers = new ArrayList();
-            for (int i = 0; i < numServers; i++) {
-                Server sLocal = (Server)serverLocals.get(i);
-                ServerValue sValue = ServerVOHelperUtil.getLocalHome().
-                    create().getServerValue(sLocal);
-                try {
-                    checkViewPermission(subject, sValue.getEntityId());
-                    servers.add(sValue);
-                } catch (PermissionException e) {
-                    //Ok, won't be added to the list
-                }
-            }
-
-            return (ServerValue[])servers.toArray(new ServerValue[0]);
-
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
+        int numServers = serverLocals.size();
+        if (numServers == 0) {
+            throw new ServerNotFoundException("Server '" +
+                                              name + "' not found");
         }
+
+        List servers = new ArrayList();
+        for (int i = 0; i < numServers; i++) {
+            Server sLocal = (Server)serverLocals.get(i);
+            ServerValue sValue = sLocal.getServerValue();
+            try {
+                checkViewPermission(subject, sValue.getEntityId());
+                servers.add(sValue);
+            } catch (PermissionException e) {
+                //Ok, won't be added to the list
+            }
+        }
+        return (ServerValue[])servers.toArray(new ServerValue[0]);
     }
 
     /**
@@ -480,16 +446,9 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      */
     public ServerTypeValue findServerTypeById(Integer id)
         throws FinderException {
-        ServerTypeValue sTypeV;
-        try {
-            sTypeV = ServerVOHelperUtil.
-                getLocalHome().create().getServerTypeValue(id);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
-        return sTypeV;
+
+        ServerType st = getServerTypeDAO().findById(id);
+        return st.getServerTypeValue();
     }
 
     /**
@@ -501,17 +460,12 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      */
     public ServerTypeValue findServerTypeByName(String name)
         throws FinderException {
-        try {
-            ServerType ejb = getServerTypeDAO().findByName(name);
-            if (ejb == null) {
-                throw new FinderException("name not found: " + name);
-            }
-            return ServerVOHelperUtil.getLocalHome().create().getServerTypeValue(ejb);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
+
+        ServerType ejb = getServerTypeDAO().findByName(name);
+        if (ejb == null) {
+            throw new FinderException("name not found: " + name);
         }
+        return ejb.getServerTypeValue();
     }
 
     /** 
@@ -581,23 +535,12 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     public ServerValue getServerById(AuthzSubjectValue subject, 
                                      Integer id)
         throws ServerNotFoundException, PermissionException {
-        try {
-            ServerValue serverValue = ServerVOHelperUtil.getLocalHome()
-                .create().getServerValue(id);
-            // now check if the user can see this at all
-            // one would think that it makes more sense to check the
-            // permission first, but if the resource doesnt exist, the
-            // check will falsely report a permission exception, instead
-            // of a finder exception
-            checkViewPermission(subject, serverValue.getEntityId());
-            return serverValue;
-        } catch (FinderException e) {
-            throw new ServerNotFoundException(id, e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+
+        Server s = getServerDAO().findById(id);
+        ServerValue sValue = s.getServerValue();
+        checkViewPermission(subject, sValue.getEntityId());
+
+        return sValue;
     }
 
     /**
@@ -622,26 +565,16 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         throws ServerNotFoundException, ServiceNotFoundException, 
                PermissionException
     {
-        Service serviceLocal;
+        Service svc;
+        Server s;
         ServerValue serverValue;
-        try {
-            serviceLocal = getServiceDAO().findById(sID);
-            
-            serverValue = ServerVOHelperUtil.getLocalHome().create()
-                .getServerValue(serviceLocal.getServer().getId());
-            
-            // Make sure they're authorized to see it. Otherwise, we should
-            // throw a not-found exception.
-            checkViewPermission(subject, serverValue.getEntityId());
-        } catch (FinderException e) {
-            throw new ServiceNotFoundException(sID, e);
-        } catch (ObjectNotFoundException e) {
-            throw new ServiceNotFoundException(sID, e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+
+        svc = getServiceDAO().findById(sID);
+        s = getServerDAO().findById(svc.getParentId());
+        serverValue = s.getServerValue();
+
+        checkViewPermission(subject, serverValue.getEntityId());
+
         return serverValue;
     }
 

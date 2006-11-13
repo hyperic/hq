@@ -30,8 +30,6 @@ import org.hibernate.Transaction;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.PlatformVOHelperEJBImpl;
-import org.hyperic.hq.appdef.server.session.ServerVOHelperEJBImpl;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
@@ -72,11 +70,9 @@ public abstract class HQEJBTestBase
             AlertDefinitionManagerEJBImpl.class,
             AuthzSubjectManagerEJBImpl.class,
             PlatformManagerEJBImpl.class,
-            PlatformVOHelperEJBImpl.class,
             RegisteredTriggerManagerEJBImpl.class,
             ResourceManagerEJBImpl.class,
             ResourceGroupManagerEJBImpl.class,
-            ServerVOHelperEJBImpl.class,
             ResourceVOHelperEJBImpl.class,
             TemplateManagerEJBImpl.class,
             CrispoManagerEJBImpl.class,

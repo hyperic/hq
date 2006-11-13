@@ -53,12 +53,10 @@ import org.hyperic.hq.appdef.shared.AppdefResourceLocal;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.ApplicationVOHelperUtil;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServerVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -1323,27 +1321,20 @@ public abstract class AppdefSessionEJB
             
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                 Server serv = findServerByPK(intID);
-            
-                return ServerVOHelperUtil.getLocalHome().create()
-                            .getServerValue(serv);
+                return serv.getServerValue();
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                 Service service = findServiceByPK(intID);
-                    
                 return service.getServiceValue();
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                 Application app =
                     findApplicationByPK(intID);
-
-                return ApplicationVOHelperUtil.getLocalHome().create()
-                            .getApplicationValue(app);
+                return app.getApplicationValue();
             default:
                 throw new IllegalArgumentException("The passed entity type " +
                                                    "does not have a base of " +
                                                    "AppdefResourceValue");
             }
         } catch(NamingException e){
-            throw new SystemException(e);
-        } catch (CreateException e) {
             throw new SystemException(e);
         }
     }

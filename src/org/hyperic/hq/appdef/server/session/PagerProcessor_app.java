@@ -25,25 +25,24 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.appdef.shared.ApplicationVOHelperUtil;
 import org.hyperic.util.pager.PagerProcessor;
 
 public class PagerProcessor_app implements PagerProcessor {
 
     public PagerProcessor_app () {}
 
-    public Object processElement ( Object o ) {
-        if ( o == null ) return null;
+    public Object processElement (Object o) {
+        if (o == null) return null;
         try {
-            if ( o instanceof Application) {
-                return ApplicationVOHelperUtil.getLocalHome().create()
-                    .getApplicationValue((Application)o);
+            if (o instanceof Application) {
+                return ((Application)o).getApplicationValue();
             }
-            if ( o instanceof ApplicationType) {
+            if (o instanceof ApplicationType) {
                 return ((ApplicationType) o).getApplicationTypeValue();
             }
         } catch ( Exception e ) {
-            throw new IllegalStateException("Error converting to ApplicationValue: " + e);
+            throw new IllegalStateException("Error converting to " +
+                                            "ApplicationValue: " + e);
         }
         return o;
     }

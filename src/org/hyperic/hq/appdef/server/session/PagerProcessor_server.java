@@ -25,30 +25,25 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.appdef.shared.ServerVOHelperLocal;
-import org.hyperic.hq.appdef.shared.ServerVOHelperUtil;
 import org.hyperic.util.pager.PagerProcessor;
 
 public class PagerProcessor_server implements PagerProcessor {
-    private ServerVOHelperLocal helperLocal = null;
-    
+
     public PagerProcessor_server () {}
 
     public Object processElement ( Object o ) {
         if ( o == null ) return null;
         try {
-            if (helperLocal == null)
-                helperLocal = ServerVOHelperUtil.getLocalHome().create();
-            
-            if ( o instanceof Server) {
-                return helperLocal.getServerValue((Server)o);
+            if (o instanceof Server) {
+                return ((Server)o).getServerValue();
             }
-            if ( o instanceof ServerType) {
-                return helperLocal.getServerTypeValue((ServerType) o);
+            if (o instanceof ServerType) {
+                return ((ServerType)o).getServerTypeValue();
             }
         } catch ( Exception e ) {
             IllegalStateException ex =
-                new IllegalStateException("Error converting to ServerValue: " + e);
+                new IllegalStateException("Error converting to ServerValue: "
+                                          + e);
             ex.initCause(e); 
             throw ex;
         }

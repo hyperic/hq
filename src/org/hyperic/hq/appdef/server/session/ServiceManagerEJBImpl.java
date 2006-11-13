@@ -64,7 +64,6 @@ import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceLightValue;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
-import org.hyperic.hq.appdef.shared.ServiceVOHelperUtil;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
@@ -157,14 +156,11 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             // first we look up the server
             // if this bombs we go no further
             Server sLocal = findServerByPK(spk);
-            try {
-                // set the service type
-                ServiceTypeValue serviceType = ServiceVOHelperUtil.getLocalHome()
-                    .create().getServiceTypeValue(stpk);
-                sValue.setServiceType(serviceType);    
-            } catch (CreateException e) {
-                throw new SystemException(e);                
-            } 
+
+            // set the service type
+            ServiceType serviceType = getServiceTypeDAO().findById(stpk);
+            sValue.setServiceType(serviceType.getServiceTypeValue());
+
             sValue.setOwner(subject.getName());
             sValue.setModifiedBy(subject.getName());
             // call the create
@@ -247,32 +243,22 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                                              String name)
         throws ServiceNotFoundException, PermissionException
     {
-        try {
-            List serviceLocals = getServiceDAO().findByName(name);
+        List serviceLocals = getServiceDAO().findByName(name);
 
-            int numServices = serviceLocals.size();
+        int numServices = serviceLocals.size();
 
-            List services = new ArrayList();
-            for (int i = 0; i < numServices; i++) {
-                Service sLocal = (Service)serviceLocals.get(i);
-                ServiceValue sValue = ServiceVOHelperUtil.getLocalHome().
-                    create().getServiceValue(sLocal);
-
-                try {
-                    checkViewPermission(subject, sValue.getEntityId());
-                    services.add(sValue);
-                } catch (PermissionException e) {
-                    //Ok, won't be added to the list
-                }
+        List services = new ArrayList();
+        for (int i = 0; i < numServices; i++) {
+            Service sLocal = (Service)serviceLocals.get(i);
+            ServiceValue sValue = sLocal.getServiceValue();
+            try {
+                checkViewPermission(subject, sValue.getEntityId());
+                services.add(sValue);
+            } catch (PermissionException e) {
+                //Ok, won't be added to the list
             }
-            
-            return (ServiceValue[])services.toArray(new ServiceValue[0]);
-    
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
         }
+        return (ServiceValue[])services.toArray(new ServiceValue[0]);
     }
 
     /**
@@ -371,16 +357,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     public ServiceTypeValue findServiceTypeById(Integer id) 
         throws FinderException 
     {
-        ServiceTypeValue typeV;
-        try {
-            typeV = ServiceVOHelperUtil.getLocalHome().create()
-                .getServiceTypeValue(id);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
-        return typeV;
+        ServiceType st = getServiceTypeDAO().findById(id);
+        return st.getServiceTypeValue();
     }
 
     /**
@@ -390,20 +368,13 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      */
     public ServiceTypeValue findServiceTypeByName(String name) 
         throws FinderException {
-        ServiceTypeValue typeV;
-        try {
-            ServiceType st = getServiceTypeDAO().findByName(name);
-            if (st == null) {
-                throw new FinderException("service type not found: "+ name);
-            }
-            typeV = ServiceVOHelperUtil.getLocalHome().create()
-                .getServiceTypeValue(st);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
+
+        ServiceType st = getServiceTypeDAO().findByName(name);
+        if (st == null) {
+            throw new FinderException("service type not found: "+ name);
         }
-        return typeV;
+        
+        return st.getServiceTypeValue();
     }
 
     /**     
@@ -480,16 +451,9 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      */
     public ServiceLightValue getServiceLightValue(Integer id)
         throws ServiceNotFoundException, PermissionException {
-        try {
-            return ServiceVOHelperUtil.getLocalHome().create()
-                .getServiceLightValue(id);
-        } catch (FinderException e) {
-            throw new ServiceNotFoundException(id, e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+
+        Service s = getServiceDAO().findById(id);
+        return s.getServiceLightValue();
     }
 
     /** 
@@ -498,18 +462,12 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      */
     public ServiceValue getServiceById(AuthzSubjectValue subject, Integer id)
         throws ServiceNotFoundException, PermissionException {
-        try {
-            ServiceValue service =
-                ServiceVOHelperUtil.getLocalHome().create().getServiceValue(id);
-            checkViewPermission(subject, service.getEntityId());
-            return service;
-        } catch (CreateException e) {
-            throw new SystemException(e);    
-        } catch (FinderException e) {
-            throw new ServiceNotFoundException(id, e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+
+        Service s = getServiceDAO().findById(id);
+        ServiceValue sValue = s.getServiceValue();
+
+        checkViewPermission(subject, sValue.getEntityId());
+        return sValue;
     }
 
     private final String SQL_SERVICE_BY_ID =
@@ -1860,13 +1818,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         page.setTotalSize(clustSvcs.size());
         for(Iterator i = clustSvcs.iterator(); i.hasNext();) {
             Service aSvc = (Service)i.next();
-            try {
-            page.add(ServiceVOHelperUtil.getLocalHome().create().getServiceValue(aSvc));
-            } catch (CreateException e) {
-                throw new SystemException(e);
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
+            page.add(aSvc.getServiceValue());
         }
         return page;
     }
