@@ -23,28 +23,23 @@
  * USA.
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.authz.server.session;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.HashSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.authz.AuthzSubject;
-import org.hyperic.hq.authz.Operation;
-import org.hyperic.hq.authz.Resource;
-import org.hyperic.hq.authz.ResourceGroup;
-import org.hyperic.hq.authz.ResourceType;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.dao.HibernateDAO;
 
 /**
  * CRUD methods, finders, etc. for Resource

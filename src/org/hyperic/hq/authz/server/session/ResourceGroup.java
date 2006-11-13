@@ -23,9 +23,8 @@
  * USA.
  */
 
-package org.hyperic.hq.authz;
+package org.hyperic.hq.authz.server.session;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -102,7 +101,7 @@ public class ResourceGroup extends AuthzNamedBean
         return cid;
     }
 
-    public void setCid(Integer val)
+    protected void setCid(Integer val)
     {
         cid = val;
     }
@@ -112,7 +111,7 @@ public class ResourceGroup extends AuthzNamedBean
         return description;
     }
 
-    public void setDescription(String val)
+    protected void setDescription(String val)
     {
         description = val;
     }
@@ -122,7 +121,7 @@ public class ResourceGroup extends AuthzNamedBean
         return location;
     }
 
-    public void setLocation(String val)
+    protected void setLocation(String val)
     {
         location = val;
     }
@@ -132,7 +131,7 @@ public class ResourceGroup extends AuthzNamedBean
         return system;
     }
 
-    public void setSystem(boolean val)
+    protected void setSystem(boolean val)
     {
         system = val;
     }
@@ -142,7 +141,7 @@ public class ResourceGroup extends AuthzNamedBean
         return groupType;
     }
 
-    public void setGroupType(Integer val)
+    protected void setGroupType(Integer val)
     {
         groupType = val;
     }
@@ -152,7 +151,7 @@ public class ResourceGroup extends AuthzNamedBean
         return groupEntType;
     }
 
-    public void setGroupEntType(Integer val)
+    protected void setGroupEntType(Integer val)
     {
         groupEntType = val;
     }
@@ -162,7 +161,7 @@ public class ResourceGroup extends AuthzNamedBean
         return groupEntResType;
     }
 
-    public void setGroupEntResType(Integer val)
+    protected void setGroupEntResType(Integer val)
     {
         groupEntResType = val;
     }
@@ -172,7 +171,7 @@ public class ResourceGroup extends AuthzNamedBean
         return clusterId;
     }
 
-    public void setClusterId(Integer val)
+    protected void setClusterId(Integer val)
     {
         clusterId = val;
     }
@@ -182,7 +181,7 @@ public class ResourceGroup extends AuthzNamedBean
         return ctime;
     }
 
-    public void setCtime(Long val)
+    protected void setCtime(Long val)
     {
         ctime = val != null ? val.longValue() : 0;
     }
@@ -192,7 +191,7 @@ public class ResourceGroup extends AuthzNamedBean
         return mtime;
     }
 
-    public void setMtime(Long val)
+    protected void setMtime(Long val)
     {
         mtime = val != null ? val.longValue() : 0;
     }
@@ -202,7 +201,7 @@ public class ResourceGroup extends AuthzNamedBean
         return modifiedBy;
     }
 
-    public void setModifiedBy(String val)
+    protected void setModifiedBy(String val)
     {
         modifiedBy = val;
     }
@@ -212,7 +211,7 @@ public class ResourceGroup extends AuthzNamedBean
         return resource;
     }
 
-    public void setResource(Resource val)
+    protected void setResource(Resource val)
     {
         resource = val;
     }
@@ -222,7 +221,7 @@ public class ResourceGroup extends AuthzNamedBean
         return resources;
     }
 
-    public void setResources(Collection val)
+    protected void setResources(Collection val)
     {
         resources = val;
     }
@@ -247,7 +246,7 @@ public class ResourceGroup extends AuthzNamedBean
     {
         return roles;
     }
-    public void setRoles(Collection val)
+    protected void setRoles(Collection val)
     {
         roles = val;
     }
@@ -289,7 +288,7 @@ public class ResourceGroup extends AuthzNamedBean
         return resourceGroupValue;
     }
 
-    public void setResourceGroupValue(ResourceGroupValue val)
+    protected void setResourceGroupValue(ResourceGroupValue val)
     {
         setClusterId(new Integer(val.getClusterId()));
         setCtime(val.getCTime());

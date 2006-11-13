@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.authz;
+package org.hyperic.hq.authz.server.session;
 
 import java.util.Collection;
 import java.util.ArrayList;
@@ -87,7 +87,7 @@ public class Resource extends AuthzNamedBean
         return resourceType;
     }
 
-    public void setResourceType(ResourceType resourceTypeId)
+    protected void setResourceType(ResourceType resourceTypeId)
     {
         resourceType = resourceTypeId;
     }
@@ -97,7 +97,7 @@ public class Resource extends AuthzNamedBean
         return instanceId;
     }
 
-    public void setInstanceId(Integer val)
+    protected void setInstanceId(Integer val)
     {
         instanceId = val;
     }
@@ -107,7 +107,7 @@ public class Resource extends AuthzNamedBean
         return cid;
     }
 
-    public void setCid(Integer val)
+    protected void setCid(Integer val)
     {
         cid = val;
     }
@@ -117,7 +117,7 @@ public class Resource extends AuthzNamedBean
         return owner;
     }
 
-    public void setOwner(AuthzSubject val)
+    protected void setOwner(AuthzSubject val)
     {
         owner = val;
     }
@@ -127,7 +127,7 @@ public class Resource extends AuthzNamedBean
         return system;
     }
 
-    public void setSystem(boolean fsystem)
+    protected void setSystem(boolean fsystem)
     {
         system = fsystem;
     }
@@ -141,11 +141,11 @@ public class Resource extends AuthzNamedBean
         return virtuals;
     }
 
-    public void setVirtuals(Collection virtuals) {
+    protected void setVirtuals(Collection virtuals) {
         this.virtuals = virtuals;
     }
 
-    public void setResourceGroups(Collection val)
+    protected void setResourceGroups(Collection val)
     {
         resourceGroups = val;
     }
@@ -170,7 +170,7 @@ public class Resource extends AuthzNamedBean
         return resourceValue;
     }
 
-    public void setResourceValue(ResourceValue val)
+    protected void setResourceValue(ResourceValue val)
     {
         setId(val.getId());
         setInstanceId(val.getInstanceId());

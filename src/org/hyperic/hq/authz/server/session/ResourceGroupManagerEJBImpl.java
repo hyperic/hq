@@ -41,13 +41,7 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.dao.ResourceDAO;
-import org.hyperic.hq.dao.ResourceGroupDAO;
-import org.hyperic.hq.authz.AuthzSubject;
-import org.hyperic.hq.authz.Resource;
-import org.hyperic.hq.authz.ResourceGroup;
-import org.hyperic.hq.authz.ResourceType;
-import org.hyperic.hq.authz.Role;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;

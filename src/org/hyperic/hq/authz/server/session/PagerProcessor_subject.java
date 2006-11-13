@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.authz.server.session;
 
-import org.hyperic.hq.authz.AuthzSubject;
 import org.hyperic.util.pager.PagerProcessor;
 
 public class PagerProcessor_subject implements PagerProcessor {

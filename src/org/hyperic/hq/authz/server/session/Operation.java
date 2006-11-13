@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.authz;
+package org.hyperic.hq.authz.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -77,7 +77,7 @@ public class Operation extends AuthzNamedBean
         return resourceType;
     }
 
-    public void setResourceType(ResourceType resourceTypeId)
+    protected void setResourceType(ResourceType resourceTypeId)
     {
         resourceType = resourceTypeId;
     }
@@ -87,7 +87,7 @@ public class Operation extends AuthzNamedBean
         return cid;
     }
 
-    public void setCid(Integer val)
+    protected void setCid(Integer val)
     {
         cid = val;
     }
@@ -96,7 +96,7 @@ public class Operation extends AuthzNamedBean
         return roles;
     }
 
-    public void setRoles(Collection val)
+    protected void setRoles(Collection val)
     {
         roles = val;
     }
@@ -126,7 +126,7 @@ public class Operation extends AuthzNamedBean
         return operationValue;
     }
 
-    public void setOperationValue(OperationValue val)
+    protected void setOperationValue(OperationValue val)
     {
         setId(val.getId());
         setName(val.getName());

@@ -23,18 +23,15 @@
  * USA.
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.authz.server.session;
 
 import java.util.Collection;
 
 import org.hibernate.Session;
-import org.hyperic.hq.authz.AuthzSubject;
-import org.hyperic.hq.authz.Resource;
-import org.hyperic.hq.authz.ResourceGroup;
-import org.hyperic.hq.authz.ResourceType;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.dao.DAOFactory;
 
 /**

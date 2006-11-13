@@ -1,5 +1,5 @@
-package org.hyperic.hq.authz;
-// Generated Oct 17, 2006 12:45:08 PM by Hibernate Tools 3.1.0.beta4
+package org.hyperic.hq.authz.server.session;
+
 
 
 
@@ -35,14 +35,14 @@ public class UserConfigResp  implements java.io.Serializable {
         return this._version_;
     }
     
-    public void set_version_(long _version_) {
+    protected void set_version_(long _version_) {
         this._version_ = _version_;
     }
     public byte[] getPrefResponse() {
         return this.prefResponse;
     }
     
-    public void setPrefResponse(byte[] prefResponse) {
+    protected void setPrefResponse(byte[] prefResponse) {
         this.prefResponse = prefResponse;
     }
 }

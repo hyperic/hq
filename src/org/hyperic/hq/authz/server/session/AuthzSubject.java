@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.authz;
+package org.hyperic.hq.authz.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,7 +60,7 @@ public class AuthzSubject extends AuthzNamedBean {
         return _dsn;
     }
 
-    public void setAuthDsn(String val) {
+    protected void setAuthDsn(String val) {
         _dsn = val;
     }
 
@@ -68,7 +68,7 @@ public class AuthzSubject extends AuthzNamedBean {
         return _cid;
     }
 
-    public void setCid(Integer val) {
+    protected void setCid(Integer val) {
         _cid = val;
     }
 
@@ -76,7 +76,7 @@ public class AuthzSubject extends AuthzNamedBean {
         return _firstName;
     }
 
-    public void setFirstName(String val) {
+    protected void setFirstName(String val) {
         _firstName = val;
     }
 
@@ -84,7 +84,7 @@ public class AuthzSubject extends AuthzNamedBean {
         return _lastName;
     }
 
-    public void setLastName(String val) {
+    protected void setLastName(String val) {
         _lastName = val;
     }
 
@@ -92,7 +92,7 @@ public class AuthzSubject extends AuthzNamedBean {
         return _emailAddress;
     }
 
-    public void setEmailAddress(String val) {
+    protected void setEmailAddress(String val) {
         _emailAddress = val;
     }
 
@@ -100,7 +100,7 @@ public class AuthzSubject extends AuthzNamedBean {
         return _smsAddress;
     }
 
-    public void setSMSAddress(String val) {
+    protected void setSMSAddress(String val) {
         _smsAddress = val;
     }
 
@@ -108,7 +108,7 @@ public class AuthzSubject extends AuthzNamedBean {
         return _phoneNumber;
     }
 
-    public void setPhoneNumber(String val) {
+    protected void setPhoneNumber(String val) {
         _phoneNumber = val;
     }
 
@@ -116,7 +116,7 @@ public class AuthzSubject extends AuthzNamedBean {
         return _department;
     }
 
-    public void setDepartment(String val) {
+    protected void setDepartment(String val) {
         _department = val;
     }
 
@@ -128,7 +128,7 @@ public class AuthzSubject extends AuthzNamedBean {
         return isActive();
     }
 
-    public void setActive(boolean val) {
+    protected void setActive(boolean val) {
         _active = val;
     }
 
@@ -140,7 +140,7 @@ public class AuthzSubject extends AuthzNamedBean {
         return isSystem();
     }
 
-    public void setSystem(boolean val) {
+    protected void setSystem(boolean val) {
         _system = val;
     }
 
@@ -148,7 +148,7 @@ public class AuthzSubject extends AuthzNamedBean {
         return _resource;
     }
 
-    public void setResource(Resource val) {
+    protected void setResource(Resource val) {
         _resource = val;
     }
 
@@ -156,7 +156,7 @@ public class AuthzSubject extends AuthzNamedBean {
         return _roles;
     }
 
-    public void setRoles(Collection val) {
+    protected void setRoles(Collection val) {
         _roles = val;
     }
 
@@ -176,7 +176,7 @@ public class AuthzSubject extends AuthzNamedBean {
         return _userConfigs;
     }
 
-    public void setUserConfigs(Collection val) {
+    protected void setUserConfigs(Collection val) {
         _userConfigs = val;
     }
 
@@ -207,7 +207,7 @@ public class AuthzSubject extends AuthzNamedBean {
         return _valueObj;
     }
 
-    public void setAuthzSubjectValue(AuthzSubjectValue authzSubjectValue) {
+    protected void setAuthzSubjectValue(AuthzSubjectValue authzSubjectValue) {
         setActive(authzSubjectValue.getActive());
         setAuthDsn(authzSubjectValue.getAuthDsn());
         setDepartment(authzSubjectValue.getDepartment());

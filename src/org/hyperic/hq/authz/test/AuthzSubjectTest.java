@@ -1,7 +1,7 @@
 package org.hyperic.hq.authz.test;
 
 
-import org.hyperic.hq.authz.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;

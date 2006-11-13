@@ -27,7 +27,6 @@ package org.hyperic.hq.authz.server.session;
 
 import org.hyperic.util.pager.PagerProcessor;
 import org.hyperic.hq.authz.values.OwnedResourceGroupValue;
-import org.hyperic.hq.authz.ResourceGroup;
 
 public class PagerProcessor_ownedResourceGroup implements PagerProcessor {
  

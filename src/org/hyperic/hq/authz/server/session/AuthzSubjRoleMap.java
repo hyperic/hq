@@ -1,4 +1,4 @@
-package org.hyperic.hq.authz;
+package org.hyperic.hq.authz.server.session;
 // Generated Oct 17, 2006 12:45:08 PM by Hibernate Tools 3.1.0.beta4
 
 
@@ -35,14 +35,14 @@ public class AuthzSubjRoleMap  implements java.io.Serializable {
         return this.id;
     }
     
-    public void setId(AuthzSubjRoleMapId id) {
+    protected void setId(AuthzSubjRoleMapId id) {
         this.id = id;
     }
     public Integer getCid() {
         return this.cid;
     }
     
-    public void setCid(Integer cid) {
+    protected void setCid(Integer cid) {
         this.cid = cid;
     }
 

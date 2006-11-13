@@ -28,8 +28,9 @@ package org.hyperic.hq.dao;
 import java.util.Collection;
 
 import org.hibernate.Session;
-import org.hyperic.hq.authz.Virtual;
-import org.hyperic.hq.authz.Resource;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceDAO;
+import org.hyperic.hq.authz.server.session.Virtual;
 import org.hyperic.hq.authz.shared.ResourceValue;
 
 /**

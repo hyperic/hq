@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.authz.server.session;
 
-import org.hyperic.hq.authz.Resource;
 import org.hyperic.hq.authz.shared.ResourceVOHelperUtil;
 import org.hyperic.util.pager.PagerProcessor;
 

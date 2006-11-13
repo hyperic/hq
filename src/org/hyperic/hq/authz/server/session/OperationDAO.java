@@ -23,16 +23,14 @@
  * USA.
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.authz.server.session;
 
 
 import org.hibernate.Session;
-import org.hyperic.hq.authz.Operation;
-import org.hyperic.hq.authz.ResourceType;
-import org.hyperic.hq.authz.Role;
-import org.hyperic.hq.authz.shared.OperationValue;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.OperationValue;
+import org.hyperic.hq.dao.HibernateDAO;
 
 /**
  * CRUD methods, finders, etc. for Operation
