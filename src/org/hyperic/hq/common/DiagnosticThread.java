@@ -80,8 +80,7 @@ public class DiagnosticThread implements Runnable {
                             _log.info("[" + o.getClass().getName() + "] " +
                                       o.getStatus());
                         } catch (Throwable e) {
-                            // Don't let exceptions in DiagnosticObject's
-                            // bring us down...
+                            _log.error("Error in diagnostics: " + e, e);
                         }
                     }
                 }
