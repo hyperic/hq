@@ -50,7 +50,7 @@ public class Measurement extends PersistedObject
         return _instanceId;
     }
     
-    public void setInstanceId(Integer instanceId) {
+    protected void setInstanceId(Integer instanceId) {
         _instanceId = instanceId;
     }
 
@@ -58,7 +58,7 @@ public class Measurement extends PersistedObject
         return _template;
     }
     
-    public void setTemplate(MeasurementTemplate template) {
+    protected void setTemplate(MeasurementTemplate template) {
         _template = template;
     }
 
@@ -66,7 +66,7 @@ public class Measurement extends PersistedObject
         return _cid;
     }
     
-    public void setCid(Integer cid) {
+    protected void setCid(Integer cid) {
         _cid = cid;
     }
 
@@ -74,7 +74,7 @@ public class Measurement extends PersistedObject
         return _mtime;
     }
     
-    public void setMtime(long mtime) {
+    protected void setMtime(long mtime) {
         _mtime = mtime;
     }
 

@@ -56,7 +56,7 @@ public class MeasurementHistData  implements java.io.Serializable {
         return _id;
     }
     
-    public void setId(MeasurementDataId id) {
+    protected void setId(MeasurementDataId id) {
         _id = id;
     }
 
@@ -64,7 +64,7 @@ public class MeasurementHistData  implements java.io.Serializable {
         return _value;
     }
     
-    public void setValue(BigDecimal value) {
+    protected void setValue(BigDecimal value) {
         _value = value;
     }
 
@@ -72,7 +72,7 @@ public class MeasurementHistData  implements java.io.Serializable {
         return _minValue;
     }
     
-    public void setMinValue(BigDecimal minValue) {
+    protected void setMinValue(BigDecimal minValue) {
         _minValue = minValue;
     }
 
@@ -80,7 +80,7 @@ public class MeasurementHistData  implements java.io.Serializable {
         return _maxValue;
     }
     
-    public void setMaxValue(BigDecimal maxValue) {
+    protected void setMaxValue(BigDecimal maxValue) {
         _maxValue = maxValue;
     }
 

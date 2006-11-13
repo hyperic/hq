@@ -60,7 +60,7 @@ public class ScheduleRevNum implements java.io.Serializable {
         return _id;
     }
     
-    public void setId(SrnId id) {
+    protected void setId(SrnId id) {
         _id = id;
     }
 
@@ -68,7 +68,7 @@ public class ScheduleRevNum implements java.io.Serializable {
         return _version_;
     }
     
-    public void set_version_(long _version_) {
+    protected void set_version_(long _version_) {
         _version_ = _version_;
     }
 
@@ -76,7 +76,7 @@ public class ScheduleRevNum implements java.io.Serializable {
         return _srn;
     }
     
-    public void setSrn(Integer srn) {
+    protected void setSrn(Integer srn) {
         _srn = srn;
     }
 
@@ -84,7 +84,7 @@ public class ScheduleRevNum implements java.io.Serializable {
         return _minInterval;
     }
     
-    public void setMinInterval(long minInterval) {
+    protected void setMinInterval(long minInterval) {
         _minInterval = minInterval;
     }
 
@@ -92,7 +92,7 @@ public class ScheduleRevNum implements java.io.Serializable {
         return _lastReported;
     }
     
-    public void setLastReported(long lastReported) {
+    protected void setLastReported(long lastReported) {
         _lastReported = lastReported;
     }
 
@@ -100,7 +100,7 @@ public class ScheduleRevNum implements java.io.Serializable {
         return _pending;
     }
     
-    public void setPending(boolean pending) {
+    protected void setPending(boolean pending) {
         _pending = pending;
     }
 
@@ -141,5 +141,3 @@ public class ScheduleRevNum implements java.io.Serializable {
         return val;
     }
 }
-
-

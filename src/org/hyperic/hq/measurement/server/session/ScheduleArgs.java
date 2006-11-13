@@ -39,8 +39,6 @@ import org.hyperic.hq.measurement.ext.depgraph.Graph;
 /**
  * This object contains the arguments for scheduling a measurement with the
  * agent
- * 
- * 
  */
 public class ScheduleArgs implements Serializable {
 

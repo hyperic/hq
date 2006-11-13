@@ -45,7 +45,7 @@ public class SrnId implements java.io.Serializable {
         return _appdefType;
     }
     
-    public void setAppdefType(int appdefType) {
+    protected void setAppdefType(int appdefType) {
         _appdefType = appdefType;
     }
 
@@ -53,7 +53,7 @@ public class SrnId implements java.io.Serializable {
         return _instanceId;
     }
     
-    public void setInstanceId(int  instanceId) {
+    protected void setInstanceId(int  instanceId) {
         _instanceId = instanceId;
     }
 

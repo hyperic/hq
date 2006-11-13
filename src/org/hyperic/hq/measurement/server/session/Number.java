@@ -43,7 +43,7 @@ public class Number implements java.io.Serializable {
         return _I;
     }
     
-    public void setI(long I) {
+    protected void setI(long I) {
         _I = I;
     }
 }

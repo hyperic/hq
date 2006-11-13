@@ -106,7 +106,7 @@ public class MeasurementTemplate extends PersistedObject
         return _cid;
     }
 
-    public void setCid(Integer cid) {
+    protected void setCid(Integer cid) {
         _cid = cid;
     }
 
@@ -114,7 +114,7 @@ public class MeasurementTemplate extends PersistedObject
         return _name;
     }
     
-    public void setName(String name) {
+    protected void setName(String name) {
         _name = name;
     }
 
@@ -122,7 +122,7 @@ public class MeasurementTemplate extends PersistedObject
         return _alias;
     }
     
-    public void setAlias(String alias) {
+    protected void setAlias(String alias) {
         _alias = alias;
     }
 
@@ -130,7 +130,7 @@ public class MeasurementTemplate extends PersistedObject
         return _units;
     }
     
-    public void setUnits(String units) {
+    protected void setUnits(String units) {
         _units = units;
     }
 
@@ -138,7 +138,7 @@ public class MeasurementTemplate extends PersistedObject
         return _collectionType;
     }
 
-    public void setCollectionType(int collectionType) {
+    protected void setCollectionType(int collectionType) {
         _collectionType = collectionType;
     }
 
@@ -146,7 +146,7 @@ public class MeasurementTemplate extends PersistedObject
         return _defaultOn;
     }
     
-    public void setDefaultOn(boolean defaultOn) {
+    protected void setDefaultOn(boolean defaultOn) {
         _defaultOn = defaultOn;
     }
 
@@ -154,7 +154,7 @@ public class MeasurementTemplate extends PersistedObject
         return _defaultInterval;
     }
     
-    public void setDefaultInterval(long defaultInterval) {
+    protected void setDefaultInterval(long defaultInterval) {
         _defaultInterval = defaultInterval;
     }
 
@@ -162,7 +162,7 @@ public class MeasurementTemplate extends PersistedObject
         return _designate;
     }
     
-    public void setDesignate(boolean designate) {
+    protected void setDesignate(boolean designate) {
         _designate = designate;
     }
 
@@ -170,7 +170,7 @@ public class MeasurementTemplate extends PersistedObject
         return _template;
     }
     
-    public void setTemplate(String template) {
+    protected void setTemplate(String template) {
         _template = template;
     }
 
@@ -178,7 +178,7 @@ public class MeasurementTemplate extends PersistedObject
         return _plugin;
     }
     
-    public void setPlugin(String plugin) {
+    protected void setPlugin(String plugin) {
         _plugin = plugin;
     }
 
@@ -186,7 +186,7 @@ public class MeasurementTemplate extends PersistedObject
         return _expressionData;
     }
     
-    public void setExpressionData(byte[] expressionData) {
+    protected void setExpressionData(byte[] expressionData) {
         _expressionData = expressionData;
     }
 
@@ -194,7 +194,7 @@ public class MeasurementTemplate extends PersistedObject
         return _ctime;
     }
     
-    public void setCtime(long ctime) {
+    protected void setCtime(long ctime) {
         _ctime = ctime;
     }
 
@@ -202,7 +202,7 @@ public class MeasurementTemplate extends PersistedObject
         return _mtime;
     }
     
-    public void setMtime(long mtime) {
+    protected void setMtime(long mtime) {
         _mtime = mtime;
     }
 
@@ -210,7 +210,7 @@ public class MeasurementTemplate extends PersistedObject
         return _monitorableType;
     }
     
-    public void setMonitorableType(MonitorableType monitorableType) {
+    protected void setMonitorableType(MonitorableType monitorableType) {
         _monitorableType = monitorableType;
     }
 
@@ -218,7 +218,7 @@ public class MeasurementTemplate extends PersistedObject
         return _category;
     }
     
-    public void setCategory(Category category) {
+    protected void setCategory(Category category) {
         _category = category;
     }
 
@@ -226,7 +226,7 @@ public class MeasurementTemplate extends PersistedObject
         return _measurementArgs;
     }
     
-    public void setMeasurementArgs(Collection measurementArgs) {
+    protected void setMeasurementArgs(Collection measurementArgs) {
         _measurementArgs = measurementArgs;
     }
 
@@ -234,7 +234,7 @@ public class MeasurementTemplate extends PersistedObject
         return _rawMeasurementArgs;
     }
 
-    public void setRawMeasurementArgs(Collection measurementArgs) {
+    protected void setRawMeasurementArgs(Collection measurementArgs) {
         _rawMeasurementArgs = measurementArgs;
     }
 

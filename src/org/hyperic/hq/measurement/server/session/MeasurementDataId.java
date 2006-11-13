@@ -45,14 +45,14 @@ public class MeasurementDataId implements java.io.Serializable {
         return _measurementId;
     }
     
-    public void setMeasurementId(Integer measurementId) {
+    protected void setMeasurementId(Integer measurementId) {
         _measurementId = measurementId;
     }
     public long getTimestamp() {
         return _timestamp;
     }
     
-    public void setTimestamp(long timestamp) {
+    protected void setTimestamp(long timestamp) {
         _timestamp = timestamp;
     }
 

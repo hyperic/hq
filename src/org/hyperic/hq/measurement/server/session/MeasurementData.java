@@ -51,7 +51,7 @@ public class MeasurementData implements java.io.Serializable {
         return _id;
     }
     
-    public void setId(MeasurementDataId id) {
+    protected void setId(MeasurementDataId id) {
         _id = id;
     }
 
@@ -59,7 +59,7 @@ public class MeasurementData implements java.io.Serializable {
         return _value;
     }
     
-    public void setValue(BigDecimal value) {
+    protected void setValue(BigDecimal value) {
         _value = value;
     }
 
@@ -83,5 +83,3 @@ public class MeasurementData implements java.io.Serializable {
         return result;
     }   
 }
-
-

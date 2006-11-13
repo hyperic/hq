@@ -48,7 +48,7 @@ public class RawMeasurement extends Measurement
         return _dsn;
     }
     
-    public void setDsn(String dsn) {
+    protected void setDsn(String dsn) {
         _dsn = dsn;
     }
 

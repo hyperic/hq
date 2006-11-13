@@ -51,7 +51,7 @@ public class DerivedMeasurement extends Measurement
         return _enabled;
     }
     
-    public void setEnabled(boolean enabled) {
+    protected void setEnabled(boolean enabled) {
         _enabled = enabled;
     }
 
@@ -59,7 +59,7 @@ public class DerivedMeasurement extends Measurement
         return _interval;
     }
     
-    public void setInterval(long interval) {
+    protected void setInterval(long interval) {
         _interval = interval;
     }
 
@@ -67,10 +67,13 @@ public class DerivedMeasurement extends Measurement
         return _formula;
     }
     
-    public void setFormula(String formula) {
+    protected void setFormula(String formula) {
         _formula = formula;
     }
 
+    /**
+     * XXX: Public for now for access from EE.
+     */
     public void setBaseline(Baseline b) {
         if (b != null) {
             b.setDerivedMeasurement(this);
@@ -85,7 +88,6 @@ public class DerivedMeasurement extends Measurement
     public int getAppdefType() {
         return getTemplate().getMonitorableType().getAppdefType();
     }
-
 
     /**
      * Legacy EJB DTO pattern

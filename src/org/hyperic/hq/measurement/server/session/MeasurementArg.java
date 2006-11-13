@@ -66,7 +66,7 @@ public class MeasurementArg extends PersistedObject
         return _cid;
     }
 
-    public void setCid(Integer cid) {
+    protected void setCid(Integer cid) {
         _cid = cid;
     }
 
@@ -74,7 +74,7 @@ public class MeasurementArg extends PersistedObject
         return _placement;
     }
     
-    public void setPlacement(Integer placement) {
+    protected void setPlacement(Integer placement) {
         _placement = placement;
     }
 
@@ -82,7 +82,7 @@ public class MeasurementArg extends PersistedObject
         return _ticks;
     }
     
-    public void setTicks(Integer ticks) {
+    protected void setTicks(Integer ticks) {
         _ticks = ticks;
     }
 
@@ -90,7 +90,7 @@ public class MeasurementArg extends PersistedObject
         return _weight;
     }
     
-    public void setWeight(float weight) {
+    protected void setWeight(float weight) {
         _weight = weight;
     }
 
@@ -98,7 +98,7 @@ public class MeasurementArg extends PersistedObject
         return _previous;
     }
     
-    public void setPrevious(Integer previous) {
+    protected void setPrevious(Integer previous) {
         _previous = previous;
     }
 
@@ -106,7 +106,7 @@ public class MeasurementArg extends PersistedObject
         return _template;
     }
     
-    public void setTemplate(MeasurementTemplate template) {
+    protected void setTemplate(MeasurementTemplate template) {
         _template = template;
     }
 
@@ -114,7 +114,7 @@ public class MeasurementArg extends PersistedObject
         return _templateArg;
     }
     
-    public void setTemplateArg(MeasurementTemplate templateArg) {
+    protected void setTemplateArg(MeasurementTemplate templateArg) {
         _templateArg = templateArg;
     }
 

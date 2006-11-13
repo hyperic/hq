@@ -64,7 +64,7 @@ public class MonitorableType extends PersistedObject
         return _name;
     }
     
-    public void setName(String name) {
+    protected void setName(String name) {
         _name = name;
     }
 
@@ -72,7 +72,7 @@ public class MonitorableType extends PersistedObject
         return _cid;
     }
     
-    public void setCid(Integer cid) {
+    protected void setCid(Integer cid) {
         _cid = cid;
     }
 
@@ -80,7 +80,7 @@ public class MonitorableType extends PersistedObject
         return _appdefType;
     }
     
-    public void setAppdefType(int appdefType) {
+    protected void setAppdefType(int appdefType) {
         _appdefType = appdefType;
     }
 
@@ -88,7 +88,7 @@ public class MonitorableType extends PersistedObject
         return _plugin;
     }
     
-    public void setPlugin(String plugin) {
+    protected void setPlugin(String plugin) {
         _plugin = plugin;
     }
 
@@ -96,7 +96,7 @@ public class MonitorableType extends PersistedObject
         return _measurementTemplates;
     }
     
-    public void setMeasurementTemplates(Collection measurementTemplates) {
+    protected void setMeasurementTemplates(Collection measurementTemplates) {
         _measurementTemplates = measurementTemplates;
     }
 

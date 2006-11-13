@@ -55,14 +55,15 @@ public class Category extends PersistedObject
         return _name;
     }
     
-    public void setName(String name) {
+    protected void setName(String name) {
         _name = name;
     }
+    
     public Integer getCid() {
         return _cid;
     }
     
-    public void setCid(Integer cid) {
+    protected void setCid(Integer cid) {
         _cid = cid;
     }
 

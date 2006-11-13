@@ -54,7 +54,7 @@ public class MetricProblem implements java.io.Serializable {
         return _id;
     }
     
-    public void setId(MeasurementDataId id) {
+    protected void setId(MeasurementDataId id) {
         _id = id;
     }
 
@@ -70,7 +70,7 @@ public class MetricProblem implements java.io.Serializable {
         return _type;
     }
     
-    public void setType(Integer type) {
+    protected void setType(Integer type) {
         _type = type;
     }
 
@@ -78,7 +78,7 @@ public class MetricProblem implements java.io.Serializable {
         return _additional;
     }
     
-    public void setAdditional(Integer additional) {
+    protected void setAdditional(Integer additional) {
         _additional = additional;
     }
 
@@ -100,5 +100,3 @@ public class MetricProblem implements java.io.Serializable {
         return result;
     }   
 }
-
-

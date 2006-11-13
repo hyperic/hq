@@ -89,7 +89,7 @@ public class Baseline extends PersistedObject
         return _mean;
     }
     
-    public void setMean(double mean) {
+    protected void setMean(double mean) {
         _mean = mean;
     }
 
@@ -97,7 +97,7 @@ public class Baseline extends PersistedObject
         return _minExpectedVal;
     }
     
-    public void setMinExpectedVal(double minExpectedVal) {
+    protected void setMinExpectedVal(double minExpectedVal) {
         _minExpectedVal = minExpectedVal;
     }
 
@@ -105,7 +105,7 @@ public class Baseline extends PersistedObject
         return _maxExpectedVal;
     }
     
-    public void setMaxExpectedVal(double maxExpectedVal) {
+    protected void setMaxExpectedVal(double maxExpectedVal) {
         _maxExpectedVal = maxExpectedVal;
     }
 
