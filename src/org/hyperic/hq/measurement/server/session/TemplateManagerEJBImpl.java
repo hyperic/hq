@@ -415,6 +415,14 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
     public void removeTemplate(AuthzSubjectValue subject, Integer tid) {
         MeasurementTemplate t = getMeasurementTemplateDAO().findById(tid);
         getMeasurementTemplateDAO().remove(t);
+
+        Collection args = t.getMeasurementArgs();
+        // Remove raw measurement templates as well
+        for (Iterator i = args.iterator(); i.hasNext(); ) {
+            MeasurementArg arg = (MeasurementArg)i.next();
+            MeasurementTemplate raw = arg.getTemplateArg();
+            getMeasurementTemplateDAO().remove(raw);
+        }
     }
 
     /**
