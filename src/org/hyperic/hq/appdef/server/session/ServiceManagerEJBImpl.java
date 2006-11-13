@@ -190,10 +190,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             } catch (CreateException e) {
                 throw e;
             }
-            
-            // remove the server vo from the cache 
-            // since the service set has changed
-            VOCache.getInstance().removeServer(spk);
+
             return service.getId();
         } catch (FinderException e) {
             log.error("Unable to find ServiceType", e);
@@ -359,8 +356,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
             ServiceType stype =
                 getServiceTypeDAO().createServiceType(servType, stv);
-            // flush the cache for the parent server type
-            VOCache.getInstance().removeServerType(serverType.getId());
             return stype.getId();
         } catch (ObjectNotFoundException e) {
             throw new CreateException("Unable to find Parent Server Type: " +
@@ -1538,8 +1533,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 return existing;
             } else {
                 service.updateService(existing);
-                // flush cache
-                VOCache.getInstance().removeService(existing.getId());
                 return getServiceById(subject, existing.getId());
             }
         } catch (NamingException e) {
@@ -1569,8 +1562,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             // update the owner field in the appdef table -- YUCK
             serviceEJB.setOwner(newOwner.getName());
             serviceEJB.setModifiedBy(who.getName());
-            // flush cache
-            VOCache.getInstance().removeService(serviceId);
         } catch (NamingException e) {
             throw new SystemException(e);
         }
@@ -1600,7 +1591,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      */
     public void updateServiceTypes(String plugin, ServiceTypeInfo[] infos)
         throws CreateException, FinderException, RemoveException {
-        VOCache cache = VOCache.getInstance();
         AuthzSubjectValue overlord = null;
         
         // First, put all of the infos into a Hash
@@ -1645,7 +1635,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                         }
                     }
                     
-                    cache.removeServiceType(stlocal.getId());
+           
                     stLHome.remove(stlocal);
                 } else {
                     // Just update it
@@ -1659,9 +1649,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                     
                     if (sinfo.getInternal() !=  stlocal.getIsInternal())
                         stlocal.setIsInternal(sinfo.getInternal());
-                    // flush cached value of service type
-                    cache.removeServiceType(
-                        stlocal.getId());
+
                     // Could be null if servertype was deleted/updated by plugin
                     ServerType svrtype = stlocal.getServerType();
 
@@ -1703,9 +1691,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 // Now create the service type
                 ServiceType stlocal = stLHome.create(stype);
                 ServiceTypeValue stvo = stlocal.getServiceTypeValue();
-                
-                // Save it in the VOCache
-                cache.put(stvo.getId(), stvo);
 
                 // Lookup the server type
                 ServerType servTypeEJB;
@@ -1717,13 +1702,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                     serverTypes.put(servTypeEJB.getName(), servTypeEJB);
                 }
                 stlocal.setServerType(servTypeEJB);
-            }
-
-            // expire the server types
-            for (Iterator it = serverTypes.values().iterator(); it.hasNext(); )
-            {
-                ServerType servTypeEJB = (ServerType) it.next();
-                cache.removeServerType(servTypeEJB.getId());
             }
         } finally {
             stLHome.getSession().flush();
@@ -1778,9 +1756,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
             // remove from authz
             this.removeAuthzResource(subj, serviceRv);
-            // remove vo from service cache, and from server cache
-            VOCache.getInstance().removeService(serviceId);
-            VOCache.getInstance().removeServer(serverId);
+
             // remove from appdef
             getServiceDAO().remove(service);
 

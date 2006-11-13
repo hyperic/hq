@@ -171,9 +171,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                               ppk,
                               serverType.getVirtual(), 
                               subject);
-            // remove platform vo from the cache
-            // since the server set has changed
-            VOCache.getInstance().removePlatform(ppk);
             return server.getId();
         } catch (CreateException e) {
             throw e;
@@ -258,9 +255,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // remove the resource
             this.removeAuthzResource(subject, rv);
             // remove the server and platform vo's from the cache
-            VOCache.getInstance().removeServer(id);
-            VOCache.getInstance().removePlatform(server.getPlatform().getId());
-            // remove it
             getServerDAO().remove(server);
 
             // remove the config response
@@ -318,8 +312,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                     .findById(ptv.getId());
                 // and add it to the set
                 ptSet.add(pType);
-                // flush the platform type from the cache
-                VOCache.getInstance().removePlatformType(ptv.getId());
             }
             // now we add the set to the server type
             sType.setPlatformTypes(ptSet);
@@ -1472,8 +1464,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 return existing;
             } else {
                 server.updateServer(existing);
-                // flush the cache
-                VOCache.getInstance().removeServer(existing.getId());
                 return getServerById(subject, existing.getId());
             }
         } catch (NamingException e) {
@@ -1510,8 +1500,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // update the owner field in the appdef table -- YUCK
             serverEJB.setOwner(newOwner.getName());
             serverEJB.setModifiedBy(who.getName());
-            // flush cache
-            VOCache.getInstance().removeServer(serverId);
         } catch (NamingException e) {
             throw new SystemException(e);
         } catch (FinderException e) {
@@ -1519,9 +1507,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         } catch (ObjectNotFoundException e) {
             throw new ServerNotFoundException(serverId, e);
         }
-        
     }
-
 
     /**
      * Update server types
@@ -1530,7 +1516,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      */
     public void updateServerTypes(String plugin, ServerTypeInfo[] infos)
         throws CreateException, FinderException, RemoveException {
-        VOCache cache = VOCache.getInstance();
 
         // First, put all of the infos into a Hash
         HashMap infoMap = new HashMap();
@@ -1568,8 +1553,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // See if this exists
             if (sinfo == null) {
                 log.debug("Removing ServerType: " + serverName);
-                // flush cache
-                cache.removeServerType(stlocal.getId());
                 stLHome.remove(stlocal);
             } else {
                 String   curDesc    = stlocal.getDescription();
@@ -1609,13 +1592,9 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                         platSet = getPlatformTypeSet(newPlats);
                     } catch(FinderException exc){
                         throw new CreateException("Could not setup " +
-                                                  "server '" + serverName + "' because: " +
+                                                  "server '" + serverName +
+                                                  "' because: " +
                                                   exc.getMessage());
-                    }
-                    // iterate over the collection to flush the cache
-                    for(Iterator it = platSet.iterator(); it.hasNext();) {
-                        PlatformType pt = (PlatformType)it.next();
-                        cache.removePlatformType(pt.getId());
                     }
                     stlocal.setPlatformTypes(platSet);
                 }
@@ -1639,18 +1618,13 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 platSet = getPlatformTypeSet(newPlats);
             } catch(FinderException exc){
                 throw new CreateException("Could not setup " +
-                                          "server '" + sinfo.getName() + "' because: " +
+                                          "server '" + sinfo.getName() +
+                                          "' because: " +
                                           exc.getMessage());
             }
             stype.setPlatformTypes(platSet);
             // Now create the server type
             stLHome.create(stype);
-
-            // expire the underlying platform types Bug# 9795
-            for(Iterator pti = platSet.iterator(); pti.hasNext();) {
-                Integer ptPk = ((PlatformType)pti.next()).getId();
-                cache.removePlatformType(ptPk);
-            }
         }
     }
 

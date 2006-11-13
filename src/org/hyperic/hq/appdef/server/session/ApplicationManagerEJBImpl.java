@@ -226,8 +226,6 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                 updateAuthzResource(rv);
             }
             getApplicationDAO().setApplicationValue(app, newValue);
-            // flush the cache
-            VOCache.getInstance().removeApplication(app.getId());
             return getApplicationById(subject, app.getId());
         } catch (NamingException e) {
             throw new SystemException(e);
@@ -247,7 +245,6 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             Application app =
                 getApplicationDAO().findById(id);
             checkRemovePermission(caller, app.getEntityId());
-            VOCache.getInstance().removeApplication(id);
             this.removeAuthzResource(caller, 
                 getApplicationResourceValue(id));
             getApplicationDAO().remove(app);
@@ -289,8 +286,6 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             AppServiceDAO appSvcdao = getAppServiceDAO();
             AppService appSvcLoc = appSvcdao.findById(appServiceId);
             appSvcdao.remove(appSvcLoc);
-            // flush cache
-            VOCache.getInstance().removeApplication(appId);
         } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(appId);
         }
@@ -327,8 +322,6 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             // update the owner field in the appdef table -- YUCK
             appEJB.setOwner(newOwner.getName());
             appEJB.setModifiedBy(who.getName());
-            // flush cache
-            VOCache.getInstance().removeApplication(appId);
         } catch (FinderException e) {
             throw new ApplicationNotFoundException(appId);
         } catch (NamingException e) {
@@ -546,8 +539,6 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                         app.getId());
                 }
             }
-            // flush cache
-            VOCache.getInstance().removeApplication(appId);
         } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(appId);
         } catch (NamingException e) {

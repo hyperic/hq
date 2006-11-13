@@ -101,64 +101,34 @@ public class PlatformVOHelperEJBImpl extends AppdefSessionEJB
     }
     
     /**
-     * Get the platform tyep value object with full CMR graph
      * @ejb:interface-method
      * @ejb:transaction type="Required"
-     *
      */
     public PlatformTypeValue getPlatformTypeValue(PlatformType ejb)
     {
-        // first see if its in the cache
-        PlatformTypeValue vo = VOCache.getInstance()
-            .getPlatformType(ejb.getId());
-        if (vo != null) {
-            log.debug("Returning cached instance for platform type: " +
-                      vo.getId());
-            return vo;
-        }
-        return getPlatformTypeValueImpl(ejb);
-    }
-
-    /**
-     * Synchronized VO retrieval
-     */
-    private PlatformTypeValue getPlatformTypeValueImpl(PlatformType ejb)
-    {
-        VOCache cache = VOCache.getInstance();
-        PlatformTypeValue vo;
-        synchronized(cache.getPlatformTypeLock()) {
-            // check the cache again
-            // first see if its in the cache
-            vo = cache.getPlatformType(ejb.getId());
-            if (vo != null) {
-                log.debug("Returning cached instance for platform type: " +
-                    vo.getId());
-                return vo;
-            }
-            vo = ejb.getPlatformTypeValueObject();
-            Iterator serverIt = ejb.getServerTypeSnapshot().iterator();
-            try {
-                ServerVOHelperLocal svo =
-                    ServerVOHelperUtil.getLocalHome().create();
-                while (serverIt.hasNext()) {
-                    try {
-                        Integer stpk =
-                            ((ServerType)serverIt.next()).getId();
-                        ServerTypeValue stv = svo.getServerTypeValue(stpk);
-                        vo.addServerTypeValue(stv);
-                    } catch (NoSuchObjectLocalException e) {
-                        // no problem... server type was removed while iterating
-                    } catch (FinderException e) {
-                        // same here
-                    }
+        PlatformTypeValue vo = ejb.getPlatformTypeValueObject();
+        Iterator serverIt = ejb.getServerTypeSnapshot().iterator();
+        try {
+            ServerVOHelperLocal svo =
+                ServerVOHelperUtil.getLocalHome().create();
+            while (serverIt.hasNext()) {
+                try {
+                    Integer stpk  =
+                        ((ServerType)serverIt.next()).getId();
+                    ServerTypeValue stv = svo.getServerTypeValue(stpk);
+                    vo.addServerTypeValue(stv);
+                } catch (NoSuchObjectLocalException e) {
+                    // no problem... server type was removed while iterating
+                } catch (FinderException e) {
+                    // same here
                 }
-            } catch (CreateException e) {
-                throw new SystemException(e);
-            } catch (NamingException e) {
-                throw new SystemException(e);
             }
-            cache.put(vo.getId(), vo);
+        } catch (CreateException e) {
+            throw new SystemException(e);
+        } catch (NamingException e) {
+            throw new SystemException(e);
         }
+
         return vo;
     }
     
@@ -186,7 +156,8 @@ public class PlatformVOHelperEJBImpl extends AppdefSessionEJB
         }
     }
     
-    private AgentValue getAgentValueDirectSQL(Integer agentId, Connection conn) {
+    private AgentValue getAgentValueDirectSQL(Integer agentId,
+                                              Connection conn) {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {

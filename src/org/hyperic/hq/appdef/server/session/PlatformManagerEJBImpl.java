@@ -352,8 +352,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
             // now remove the resource for the platform
             removeAuthzResource(subject, platformRv);
-            // flush the cache
-            VOCache.getInstance().removePlatform(platform.getId());
             getPlatformDAO().remove(platform);
 
             // remove the config response
@@ -1369,8 +1367,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                     }
                 }
                 getPlatformDAO().updatePlatform(existing);
-                // flush the cache
-                VOCache.getInstance().removePlatform(existing.getId());
                 return true;
             }
         } catch (FinderException e) {
@@ -1424,8 +1420,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             // update the owner field in the appdef table -- YUCK
             platEJB.setOwner(newOwner.getName());
             platEJB.setModifiedBy(who.getName());
-            // flush cache
-            VOCache.getInstance().removePlatform(platformId);
         } catch (NamingException e) {
             throw new SystemException(e);
         } catch (CreateException e) {
@@ -1478,7 +1472,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      */
     public void updatePlatformTypes(String plugin, PlatformTypeInfo[] infos)
         throws CreateException, FinderException, RemoveException {
-        VOCache cache = VOCache.getInstance();
         AuthzSubjectValue overlord = null;
 
         // First, put all of the infos into a Hash
@@ -1499,8 +1492,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             if (pinfo == null) {
                 // Remove platforms which are not supposed to exist
                 _log.debug("Removing PlatformType: " + localName);
-                    
-                cache.removePlatformType(ptlocal.getId());
                 ptLHome.remove(ptlocal);
             } else {
                 String curName = ptlocal.getName();
@@ -1511,9 +1502,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
                 if (!newName.equals(curName))
                     ptlocal.setName(newName);
-                    
-                // flush the type Cache
-                cache.removePlatformType(ptlocal.getId());
             }
         }
             
@@ -1561,7 +1549,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                 aiplatform.getCpuCount().intValue() - prevCpuCount);
         }
         pLocal.updateWithAI(aiplatform, owner);
-        VOCache.getInstance().removePlatform(pLocal.getId());
     }
 
     /**

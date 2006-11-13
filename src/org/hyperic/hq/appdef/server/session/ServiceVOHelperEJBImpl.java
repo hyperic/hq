@@ -57,7 +57,7 @@ import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 
 /**
- * 
+ *
  * @ejb:bean name="ServiceVOHelper" jndi-name="ejb/appdef/ServiceVOHelper"
  *           local-jndi-name="LocalServiceVOHelper" view-type="local"
  *           type="Stateless"
@@ -72,14 +72,11 @@ public class ServiceVOHelperEJBImpl extends AppdefSessionEJB implements
 
     private final String SERVICE_SQL = "SELECT ID, SERVER_ID, SERVICE_TYPE_ID,"
             + " SVC_CLUSTER_ID, NAME, SORT_NAME, DESCRIPTION, MTIME, CTIME, "
-            + " MODIFIED_BY, LOCATION, OWNER, CONFIG_RESPONSE_ID, PARENT_SERVICE_ID, "
-            + " AUTODISCOVERY_ZOMBIE, SERVICE_RT, ENDUSER_RT FROM EAM_SERVICE WHERE ID = ?";
-
-    private VOCache cache = VOCache.getInstance();
+            + "MODIFIED_BY, LOCATION, OWNER, CONFIG_RESPONSE_ID, "
+            + "PARENT_SERVICE_ID, AUTODISCOVERY_ZOMBIE, SERVICE_RT, "
+            + "ENDUSER_RT FROM EAM_SERVICE WHERE ID = ?";
 
     /**
-     * Get the service value object
-     * 
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
@@ -134,35 +131,7 @@ public class ServiceVOHelperEJBImpl extends AppdefSessionEJB implements
     private AppdefResourceValue getServiceValueImpl(Integer servicePK,
                                                     boolean getLightVO)
             throws NamingException {
-        ServiceValue vo;
-        ServiceLightValue lightVo;
-        synchronized (cache.getServiceLock()) {
-            if (getLightVO) {
-                lightVo = cache.getServiceLight(servicePK);
-                if (lightVo != null) {
-                    log.debug("Returning cached service light: "
-                            + lightVo.getId());
-                    return lightVo;
-                }
-                // lightVo = ejb.getServiceLightValue();
-                lightVo = (ServiceLightValue)
-                    getServiceValueDirectSQL(servicePK, true);
-                // add to cache
-                cache.put(lightVo.getId(), lightVo);
-                return lightVo;
-            } else {
-                vo = cache.getService(servicePK);
-                if (vo != null) {
-                    log.debug("Returning cached service: " + vo.getId());
-                    return vo;
-                }
-                // vo = ejb.getServiceValue();
-                vo = (ServiceValue) getServiceValueDirectSQL(servicePK, false);
-                // add to cache
-                cache.put(vo.getId(), vo);
-                return vo;
-            }
-        }
+        return getServiceValueDirectSQL(servicePK, getLightVO);
     }
 
     /**
@@ -175,7 +144,6 @@ public class ServiceVOHelperEJBImpl extends AppdefSessionEJB implements
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            log.debug("VOCache Miss! Retrieving ServiceValue from database");
             conn = Util.getConnection();
             ps = conn.prepareStatement(SERVICE_SQL);
             ps.setInt(1, pk.intValue());
@@ -240,10 +208,6 @@ public class ServiceVOHelperEJBImpl extends AppdefSessionEJB implements
     public ServiceTypeValue getServiceTypeValue(Integer pk)
             throws FinderException, NamingException
     {
-        ServiceTypeValue vo = cache.getServiceType(pk);
-        if (vo != null) {
-            return vo;
-        }
         ServiceType ejb = getServiceTypeDAO().findById(pk);
         return getServiceTypeValueImpl(ejb);
     }
@@ -256,29 +220,12 @@ public class ServiceVOHelperEJBImpl extends AppdefSessionEJB implements
      */
     public ServiceTypeValue getServiceTypeValue(ServiceType ejb)
             throws NamingException {
-        ServiceTypeValue vo = cache.getServiceType(ejb.getId());
-        if (vo != null) {
-            return vo;
-        }
         return getServiceTypeValueImpl(ejb);
     }
 
-    /**
-     * Synchronized VO retrieval
-     */
     private ServiceTypeValue getServiceTypeValueImpl(ServiceType ejb)
             throws NamingException {
-        ServiceTypeValue vo;
-        synchronized (cache.getServiceTypeLock()) {
-            vo = cache.getServiceType(ejb.getId());
-            if (vo != null) {
-                return vo;
-            }
-
-            vo = ejb.getServiceTypeValue();
-            cache.put(vo.getId(), vo);
-        }
-        return vo;
+        return ejb.getServiceTypeValue();
     }
 
     public void ejbCreate() {

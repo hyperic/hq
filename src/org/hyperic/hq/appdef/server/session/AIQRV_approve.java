@@ -42,8 +42,6 @@ import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformVOHelperLocal;
-import org.hyperic.hq.appdef.shared.PlatformVOHelperUtil;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
@@ -68,17 +66,9 @@ import org.apache.commons.logging.Log;
  */
 public class AIQRV_approve implements AIQResourceVisitor {
 
-    private PlatformVOHelperLocal platformVOCache;
     private PlatformValue existingPlatformValue = null;
 
-    public AIQRV_approve () {
-        try {
-            platformVOCache = PlatformVOHelperUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new IllegalStateException("Error instantiating "
-                                            + "PlatformVOCache session bean");
-        }
-    }
+    public AIQRV_approve () {}
 
     public void visitPlatform ( AIPlatform aiplatform,
                                 AuthzSubjectValue subject, 

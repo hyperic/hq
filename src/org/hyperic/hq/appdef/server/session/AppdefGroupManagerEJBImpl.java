@@ -295,9 +295,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
         // Setup any group visitors
         registerVisitors (gv);
 
-        // Put new value in cache
-        VOCache.getInstance().put(gv.getId(), gv);
-        
         return gv;
     }
 
@@ -403,17 +400,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
         if (id.getType() != AppdefEntityConstants.APPDEF_TYPE_GROUP)
             throw new InvalidAppdefTypeException(
                 "findGroup() requires a entity id of type group.");
-        
-        // Check for it in cache, only if we are not paging
-        if (pc == null || pc.equals(PageControl.PAGE_ALL)) {
-            AppdefGroupValue agVal = VOCache.getInstance().getGroup(id.getId());
-            if (agVal != null) {
-                checkPermission(subject, id,
-                                AuthzConstants.groupOpViewResourceGroup);
-                return agVal;
-            }
-        }
-        
+
         return findGroup(subject, id, null, pc);
     }
 
@@ -466,11 +453,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
             log.debug("findGroup() Unable to find group:" + id); 
             throw new AppdefGroupNotFoundException ("Unable to find group:",e);
         }
-        
-        // Store in VOCache, only if we are not paging
-        if (pc == null || pc.equals(PageControl.PAGE_ALL))
-            VOCache.getInstance().put(retVal.getId(), retVal);
-        
+
         return retVal;
     }
 
@@ -601,8 +584,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
             GroupManagerLocal manager = getGroupManager();
             manager.saveGroup(subject, gv);
             
-            // Remove it from cache since it changed
-            VOCache.getInstance().removeGroup(gv.getId());            
         } catch (AppSvcClustIncompatSvcException e) {
             log.error("Caught AppSvcClustIncompatSvcException exception "+
                       "creating cluster.");
@@ -902,12 +883,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
                 gv.getClusterId() != CLUSTER_UNDEFINED) {
                 removeServiceCluster (subject,gv.getClusterId());
             }
-            
-            // Remove it from cache
-            VOCache.getInstance().removeGroup(groupId);
-            // Who knows what groups this will affect.  Takes too long to figure
-            // out which groups, so just tell VOCache to delete them all
-            VOCache.getInstance().removeAllGroups();
         }
         catch (FinderException e) {
             // shouldn't happen, however, not fatal...
@@ -947,10 +922,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
 
             // now change the owner.
             manager.changeGroupOwner(subject, agv, newOwner);
-            
-            // Store it back into cache
-            VOCache.getInstance().put(groupId, agv);
-            
+
             return agv;
         }
         catch (GroupNotFoundException e) {

@@ -68,12 +68,8 @@ public class ApplicationVOHelperEJBImpl extends AppdefSessionEJB
      */
     public ApplicationValue getApplicationValue(Integer apk) throws FinderException,
         NamingException {
-            ApplicationValue vo = VOCache.getInstance().getApplication(apk);
-            if(vo != null) {
-                return vo;
-            }
-            Application ejb = getApplicationDAO().findById(apk);
-            return getApplicationValue(ejb);
+        Application ejb = getApplicationDAO().findById(apk);
+        return getApplicationValue(ejb);
     }
                 
     /**
@@ -83,41 +79,17 @@ public class ApplicationVOHelperEJBImpl extends AppdefSessionEJB
      */
     public ApplicationValue getApplicationValue(Application ejb)
         throws NamingException {
-        ApplicationValue vo = VOCache.getInstance()
-            .getApplication(ejb.getId());
-        if(vo != null) {
-            log.debug("Returning cached application: " + vo.getId());
-            return vo;            
-        }
-        return getApplicationValueImpl(ejb);
-    }
 
-    /**
-     * synchronized method to do the actual retrieval of the valie object
-     */
-    private ApplicationValue getApplicationValueImpl(Application ejb)
-        throws NamingException {
-        VOCache cache = VOCache.getInstance();
-        ApplicationValue vo;
-        synchronized(cache.getApplicationLock()) {
-            // try to get the VO again  
-            vo = VOCache.getInstance().getApplication(ejb.getId());
-            if(vo != null) {
-                log.debug("Returning cached application: " + vo.getId());
-                return vo;
-            }
-            // first get the flat vo
-            vo = ejb.getApplicationValueObject();
-            Iterator asIt = ejb.getAppServiceSnapshot().iterator();
-            while (asIt.hasNext()){
-                try {
-                    vo.addAppServiceValue( ((AppService)asIt.next()).getAppServiceValue() );
-                } catch (NoSuchObjectLocalException e) {
+        ApplicationValue vo = ejb.getApplicationValueObject();
+        Iterator asIt = ejb.getAppServiceSnapshot().iterator();
+        while (asIt.hasNext()){
+            try {
+                vo.addAppServiceValue(((AppService)asIt.next())
+                    .getAppServiceValue());
+            } catch (NoSuchObjectLocalException e) {
                 // the app service was removed during our iteration
                 // not a problem.
-                }
             }
-            cache.put(vo.getId(), vo);
         }
         return vo;
     }

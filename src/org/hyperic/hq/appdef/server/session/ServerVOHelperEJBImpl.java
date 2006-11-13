@@ -83,56 +83,40 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
     
     private final String SERVER_SQL = "SELECT ID, PLATFORM_ID, SERVER_TYPE_ID," 
         + " NAME, SORT_NAME, DESCRIPTION, MTIME, CTIME, " 
-        + " MODIFIED_BY, LOCATION, OWNER, CONFIG_RESPONSE_ID, RUNTIMEAUTODISCOVERY, " 
-        + " AUTODISCOVERY_ZOMBIE, SERVICESAUTOMANAGED, INSTALLPATH, AUTOINVENTORYIDENTIFIER " 
-        + " FROM EAM_SERVER WHERE ID = ?";
+        + "MODIFIED_BY, LOCATION, OWNER, CONFIG_RESPONSE_ID, "
+        + "RUNTIMEAUTODISCOVERY, AUTODISCOVERY_ZOMBIE, SERVICESAUTOMANAGED, "
+        + "INSTALLPATH, AUTOINVENTORYIDENTIFIER "
+        + "FROM EAM_SERVER WHERE ID = ?";
     
     /**
-     * Get the server value object
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
     public ServerValue getServerValue(Integer pk)
         throws FinderException, NamingException {
-        ServerValue vo = VOCache.getInstance().getServer(pk);
-        if(vo != null) {
-            return vo;
-        }
         Server ejb = getServerDAO().findById(pk);
         return getServerValue(ejb);
     }
             
     /**
-     * Get the server value object
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
     public ServerValue getServerValue(Server ejb)
         throws NamingException {
-        ServerValue vo = VOCache.getInstance().getServer(ejb.getId());
-        if(vo != null) {
-            log.debug("Returning cached instance for Server: " + vo.getId());
-            return vo;
-        }
         return (ServerValue)getServerValueImpl(ejb);
     }
 
     /**
-     * Get the server light value object
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
     public ServerLightValue getServerLightValue(Integer pk)
         throws FinderException, NamingException {
-        ServerLightValue vo = VOCache.getInstance().getServerLight(pk);
-        if(vo != null) {
-            return vo;
-        }
         return (ServerLightValue)getServerLightValueImpl(pk);
     }
             
     /**
-     * Get the server light value object
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
@@ -147,43 +131,25 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
             return null;
         }
     }
-    
-    /**
-     * Synchronized VO retrieval
-     */
+
     private AppdefResourceValue getServerValueImpl(Server ejb)
-        throws NamingException {
-        VOCache cache = VOCache.getInstance();
-        AppdefResourceValue vo;
-        synchronized(cache.getServerLock()) {
-            vo = ejb.getServerValue();
-            cache.put(vo.getId(), vo);
-        }
-        return vo;
+        throws NamingException {  
+        return ejb.getServerValue();
+
     }
-    
-    /**
-     * Synchronized VO retrieval 
-     */
+
     private AppdefResourceValue getServerLightValueImpl(Integer spk)
         throws NamingException {
-        VOCache cache = VOCache.getInstance();
-        AppdefResourceValue vo;
-        synchronized(cache.getServerLock()) {
-            vo       = getServerValueDirectSQL(spk, true);
-            cache.put(vo.getId(), vo);
-        }
-        return vo;
+        return getServerValueDirectSQL(spk, true);
     } 
     
-    private AppdefResourceValue getServerValueDirectSQL(
-        Integer pk, boolean getLight) {
+    private AppdefResourceValue getServerValueDirectSQL(Integer pk,
+                                                        boolean getLight) {
         Session session = DAOFactory.getDAOFactory().getCurrentSession();
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            log.debug("VOCache Miss! Retrieving ServerValue from database.");
             conn = session.connection();
             ps = conn.prepareStatement(SERVER_SQL);
             ps.setInt(1, pk.intValue());
@@ -242,53 +208,36 @@ public class ServerVOHelperEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * Get the server type value object
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
     public ServerTypeValue getServerTypeValue(Integer pk)
         throws FinderException, NamingException {
-            ServerTypeValue vo = VOCache.getInstance().getServerType(pk);
-            if(vo != null) {
-                return vo;
-            }
-            ServerType ejb = getServerTypeDAO().findById(pk);
-            return getServerTypeValue(ejb);
+
+        ServerType ejb = getServerTypeDAO().findById(pk);
+        return getServerTypeValue(ejb);
     }
                         
     /**
-     * Get the server type value object
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
     public ServerTypeValue getServerTypeValue(ServerType ejb)
         throws NamingException {
-        ServerTypeValue vo = VOCache.getInstance().getServerType(ejb.getId());
-        if(vo != null) {
-            log.debug("Returning cached instance of ServerType: " +vo.getId());
-            return vo;
-        }
         return getServerTypeValueImpl(ejb);
     }
 
     private ServerTypeValue getServerTypeValueImpl(ServerType ejb)
         throws NamingException {
-        VOCache cache = VOCache.getInstance();
-        ServerTypeValue vo;
-        synchronized(cache.getServerTypeLock()) {
-            vo = cache
-                .getServerType(ejb.getId());
-            if(vo != null) {
-                log.debug("Returning cached instance of ServerType: " + vo.getId());
-                return vo;
-            }
-            vo = ejb.getServerTypeValueObject();
-            Iterator serviceIt = ejb.getServiceTypeSnapshot().iterator();
-            while(serviceIt.hasNext()) {
-                vo.addServiceTypeValue(((ServiceType)serviceIt.next()).getServiceTypeValue());
-            }
-            cache.put(vo.getId(), vo);
+
+        ServerTypeValue vo = ejb.getServerTypeValueObject();
+
+        Iterator serviceIt = ejb.getServiceTypeSnapshot().iterator();
+        while(serviceIt.hasNext()) {
+            vo.addServiceTypeValue(((ServiceType)serviceIt.next()).
+                getServiceTypeValue());
         }
+
         return vo;
     }
     

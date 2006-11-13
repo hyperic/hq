@@ -236,23 +236,6 @@ public class AgentManagerEJBImpl
     }
 
     /**
-     * Clear out the VO cache based on an agent local object.  This is called
-     * when agents are updated.
-     *
-     * @param agent Agent local object
-     */
-    private void clearVoCache(Agent agent)
-    {
-        PlatformDAO platHome = getPlatformDAO();
-        Collection plats = platHome.findByAgent(agent);
-
-        for(Iterator i=plats.iterator(); i.hasNext();) {
-            Platform plat = (Platform)i.next();
-            VOCache.getInstance().removePlatform(plat.getId());
-        }
-    }
-
-    /**
      * Update an existing agent.  Currently the only thing updated
      * is the authentication token.
      *
@@ -275,7 +258,6 @@ public class AgentManagerEJBImpl
         agent.setAgentToken(newData.getAgentToken());
         agent.setVersion(newData.getVersion());
         agent.setModifiedTime(new Long(System.currentTimeMillis()));
-        this.clearVoCache(agent);
         return agent.getAgentValue();
     }
 
@@ -309,7 +291,6 @@ public class AgentManagerEJBImpl
         agent.setAuthToken(val.getAuthToken());
         agent.setAgentToken(val.getAgentToken());
         agent.setModifiedTime(new Long(System.currentTimeMillis()));
-        this.clearVoCache(agent);
         return agent.getAgentValue();
     }
 
@@ -401,17 +382,6 @@ public class AgentManagerEJBImpl
                             + "multiple agents");
             }
 
-            // See if we already have the value object in the cache
-            platformValue = VOCache.getInstance().getPlatform(platformId);
-            if(platformValue != null) {
-                AgentValue res = platformValue.getAgent();
-                if(res == null){
-                    throw new AgentNotFoundException(aID +
-                        " has no agent which can service it");
-                }
-                return res;
-            }
-            
             // Let's see if we have the local object
             if (platformLocal == null) {
                 platformLocal = platformLocalHome.findById(platformId);
