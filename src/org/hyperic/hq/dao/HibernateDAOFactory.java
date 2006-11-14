@@ -53,18 +53,15 @@ import org.hyperic.hq.measurement.server.session.RawMeasurementDAO;
 import org.hyperic.hq.measurement.server.session.ScheduleRevNumDAO;
 
 public class HibernateDAOFactory extends DAOFactory {
+    private static final Object INIT_LOCK = new Object();
     private static SessionFactory sessionFactory;
-
+    
     public Session getCurrentSession() {
-        // XXX:  DCL problem here.  Fix it if we encounter strange bugs later,
-        //       since politically, we can't change this now.  *sigh*
-        if (sessionFactory == null) {
-            synchronized(this) {
-                // Cache session factory, we cache it because hibernate 
-                // session factor lookup is an rather expensive JNDI call
-                if (sessionFactory == null) {
-                    sessionFactory  = Util.getSessionFactory();
-                }
+        synchronized (INIT_LOCK) {
+            // Cache session factory, we cache it because hibernate 
+            // session factor lookup is an rather expensive JNDI call
+            if (sessionFactory == null) {
+                sessionFactory  = Util.getSessionFactory();
             }
         }
         return sessionFactory.getCurrentSession();
@@ -273,4 +270,3 @@ public class HibernateDAOFactory extends DAOFactory {
         return new EventLogDAO(getCurrentSession()); 
     }
 }
-
