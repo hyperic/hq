@@ -63,10 +63,6 @@
               type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.ProblemMetricsDisplayAction" >
       </action>
 
-      <action path="/resource/common/monitor/visibility/Timeline"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.TimelineAction" >
-      </action>
-
       <action path="/resource/common/monitor/visibility/ResourceMetricsFormPrepare"
               name="MetricsDisplayForm"
               scope="request"

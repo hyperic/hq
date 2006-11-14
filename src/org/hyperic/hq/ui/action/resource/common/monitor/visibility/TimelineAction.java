@@ -27,6 +27,7 @@ package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 
 import java.util.Map;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -34,40 +35,58 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.bizapp.shared.EventLogBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.beans.TimelineBean;
+import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.TimeUtil;
 
 /**
- *
+ * 
  * Set an array for the timeline display
  */
 public class TimelineAction extends TilesAction {
 
-    /* (non-Javadoc)
-     * @see org.apache.struts.action.Action#execute(org.apache.struts.action.ActionMapping, org.apache.struts.action.ActionForm, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.struts.action.Action#execute(org.apache.struts.action.ActionMapping,
+     *      org.apache.struts.action.ActionForm,
+     *      javax.servlet.http.HttpServletRequest,
+     *      javax.servlet.http.HttpServletResponse)
      */
     public ActionForward execute(ActionMapping mapping, ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        WebUser user = (WebUser) request.getSession().getAttribute(
-                Constants.WEBUSER_SES_ATTR);
+        WebUser user = (WebUser) request.getSession()
+                .getAttribute(Constants.WEBUSER_SES_ATTR);
         Map range = user.getMetricRangePreference();
         long begin = ((Long) range.get(MonitorUtils.BEGIN)).longValue();
         long end = ((Long) range.get(MonitorUtils.END)).longValue();
         long[] intervals = new long[Constants.DEFAULT_CHART_POINTS];
+
+        // Get the events count
+        ServletContext ctx = getServlet().getServletContext();
+        EventLogBoss boss = ContextUtils.getEventLogBoss(ctx);
+        AppdefEntityID aeid = RequestUtils.getEntityId(request);
+
+        int[] eventsCounts = boss.getLogsCount(user.getSessionId().intValue(),
+                                               aeid, begin, end,
+                                               intervals.length);
 
         // Create the time intervals beans
         TimelineBean[] beans = new TimelineBean[intervals.length];
         long interval = TimeUtil.getInterval(begin, end,
                                              Constants.DEFAULT_CHART_POINTS);
         for (int i = 0; i < intervals.length; i++) {
-            beans[i] = new TimelineBean(begin + (interval * i), 0);
+            beans[i] = new TimelineBean(begin + (interval * i),eventsCounts[i]);
         }
-        
+
         request.setAttribute(Constants.TIME_INTERVALS_ATTR, beans);
 
         return null;

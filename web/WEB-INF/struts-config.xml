@@ -2332,9 +2332,18 @@
         <forward name="editRange" path="/resource/common/monitor/Visibility.do?mode=editRange"/>
       </action>
 
-    <action path="/welcome" forward="/welcome.jsp" >
+      <action path="/resource/common/monitor/visibility/Timeline"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.TimelineAction" >
+      </action>
+
+      <action path="/resource/common/monitor/visibility/EventDetails"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.EventDetailsAction" >
+        <forward name="success" path="/common/AJAXResponse.jsp"/>
+      </action>
+
+      <action path="/welcome" forward="/welcome.jsp" >
         <set-property property="title" value="EXAMPLE" />
-    </action>
+      </action>
   </action-mappings>
 
 <!-- ===================================== Controller Configuration -->

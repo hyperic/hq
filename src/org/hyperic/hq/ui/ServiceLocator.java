@@ -48,6 +48,8 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBossHome;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.ConfigBossHome;
+import org.hyperic.hq.bizapp.shared.EventLogBoss;
+import org.hyperic.hq.bizapp.shared.EventLogBossHome;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.EventsBossHome;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
@@ -86,15 +88,18 @@ public class ServiceLocator {
     private final static Class CONFIG_CLASS = ConfigBossHome.class;
     private final static String CONFIG_NAME = ConfigBossHome.JNDI_NAME;
 
+    public static final Class EVENT_LOG_CLASS = EventLogBossHome.class;
+    public static final String EVENT_LOG_NAME = EventLogBossHome.JNDI_NAME;
+    
     private final static Class PRODUCT_CLASS = ProductBossHome.class;
     private final static String PRODUCT_NAME = ProductBossHome.JNDI_NAME;
 
     private final static String CONTEXT_FACTORY_NAME =
-    "ejb-remote-config.context-factory";
+        "ejb-remote-config.context-factory";
     private final static String PROVIDER_URL_NAME =
         "ejb-remote-config.provider-url";
     private final static String PREFIXES_NAME =
-    "ejb-remote-config.url-package-prefixes";
+        "ejb-remote-config.url-package-prefixes";
     
     private Log log;
     private InitialContext context;
@@ -311,4 +316,23 @@ public class ServiceLocator {
 
         return props;
     }
+
+    /**
+     * Return a <code>EventLogBoss</code> instance. If not previously cached,
+     * look up the interface and then cache it before creating and returning the
+     * boss.
+     * 
+     * @exception ServiceLocatorException
+     *                if the lookup or create fails
+     */
+    public EventLogBoss getEventLogBoss()
+        throws ServiceLocatorException {
+            EventLogBossHome home = (EventLogBossHome) lookup(EVENT_LOG_NAME,
+                                                              EVENT_LOG_CLASS);
+            try {
+                return (EventLogBoss) home.create();
+            } catch (Exception e) {
+                throw new ServiceLocatorException(e);
+            }
+        }
 }
