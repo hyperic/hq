@@ -119,7 +119,7 @@
           <include name="**/*.hbm.xml"/>
         </fileset>
       </path>
-      <map from="${hq-ear.dir}/" to="" />
+      <map from="${hq-ear.dir}${file.separator}" to="" />
     </pathconvert>
     <for param="file" list="${hbm-files}">
       <sequential>
