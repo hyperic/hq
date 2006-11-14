@@ -3,7 +3,6 @@ package org.hyperic.hq.measurement.test;
 import junit.framework.TestCase;
 import org.hyperic.hq.measurement.server.session.MetricDataCache;
 import org.hyperic.hq.product.MetricValue;
-import org.hyperic.util.timer.StopWatch;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -46,8 +45,9 @@ public class MetricDataCacheTest extends TestCase {
         MetricValue cachedVal = cache.get(id, ts);
         assertNotNull(cachedVal);
 
-        // Try to save the already cached value
-        wasAdded = cache.add(id, cachedVal);
+        // Try to save old data
+        MetricValue oldVal = new MetricValue(0, ts);
+        wasAdded = cache.add(id, oldVal);
         assertFalse(wasAdded);
         
         // Lookup non-existant entry
