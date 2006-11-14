@@ -187,47 +187,8 @@
     <mkdir dir="${build.dir}/sql" />
   </target>
 
-  <target name="hibernate-schema-first-pass" depends="hibernate-schema-create-init" if="do-first-pass">
-    <!--
-        these two classes have nextval() as a default value on the ID.
-        On database version that perform nextval ID sequence referential integrity
-        checks such as PostgreSQL v8.1.3, hibernate table create fails on these two
-        tables.  The reason. Hibernate creates sequences after it creates table...
-
-        The workaround is to perform hibernate schema export on these two tables twice, :(.
-        The first time table creation will fail, but sequences will be created, the second
-        pass the table will be created... :)
-    -->
-    <hibernatetool>
-      <classpath>
-        <path location="${hq-ear.dir}" />
-        <path location="${build.dir}/hibernate/classes" />
-      </classpath>
-      <configuration propertyFile="${hibernate-properties-gen}">
-        <fileset dir="${hq-ear.dir}">
-          <include name="**/CpropKey.hbm.xml" />
-          <include name="**/Cprop.hbm.xml" />
-          <include name="**/FiredTrigger.hbm.xml" />
-        </fileset>
-      </configuration>
-
-      <!-- generate DDL -->
-      <hbm2ddl
-          destdir="${build.dir}/sql"
-          outputFileName="hibernate.sql"
-          drop="false"
-          create="true"
-          update="false"
-          format="true"
-          console="true"
-          export="true"
-          delimiter=";"
-          />
-    </hibernatetool>
-  </target>
-
-  <target name="hibernate-schema-create" depends="hibernate-prep,hibernate-schema-first-pass">
-    <!-- the second pass.  all tables will be created -->
+  <target name="hibernate-schema-create" depends="hibernate-prep">
+      
     <hibernatetool>
       <classpath>
         <path location="${hq-ear.dir}" />
