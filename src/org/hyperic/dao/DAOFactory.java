@@ -49,7 +49,6 @@ import org.hyperic.hq.dao.ConfigResponseDAO;
 import org.hyperic.hq.dao.CpropDAO;
 import org.hyperic.hq.dao.CpropKeyDAO;
 import org.hyperic.hq.dao.HibernateDAOFactory;
-import org.hyperic.hq.dao.HibernateMockDAOFactory;
 import org.hyperic.hq.dao.PlatformDAO;
 import org.hyperic.hq.dao.PlatformTypeDAO;
 import org.hyperic.hq.dao.PluginDAO;
@@ -156,44 +155,7 @@ public abstract class DAOFactory
     // Events DAOs
     public abstract EventLogDAO getEventLogDAO();
 
-    public static ThreadLocal defaultSession = new ThreadLocal();
-
-    public static DAOFactory getDAOFactory()
-    {
-        return getDAOFactory(DEFAULT);
-    }
-
-    /**
-     * @return mock hibernate factory suitable for use with mockejb
-     */
-    public static DAOFactory getMockDAOFactory(Session session)
-    {
-        HibernateMockDAOFactory factory =
-            (HibernateMockDAOFactory)getDAOFactory(HIBERNATE_MOCKTEST);
-        factory.setCurrentSession(session);
-        return factory;
-    }
-
-    public static DAOFactory getDAOFactory(int which)
-    {
-        switch (which) {
-        case HIBERNATE:
-            return new HibernateDAOFactory();
-        case HIBERNATE_MOCKTEST:
-            HibernateMockDAOFactory factory = new HibernateMockDAOFactory();
-            factory.setCurrentSession((Session)defaultSession.get());
-            return factory;
-        }
-        throw new RuntimeException("DAOFactory type not found: " + which);
-    }
-
-    public static void setDefaultDAOFactory(int which)
-    {
-        DEFAULT = which;
-    }
-
-    public static void setMockSession(Session session)
-    {
-        defaultSession.set(session);
+    public static DAOFactory getDAOFactory() {
+        return new HibernateDAOFactory(); 
     }
 }
