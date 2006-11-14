@@ -5,9 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.common.server.session.Crispo;
-import org.hyperic.hq.common.server.session.CrispoDAO;
 import org.hyperic.hq.common.server.session.CrispoOption;
 import org.hyperic.hq.common.shared.CrispoManagerLocal;
 import org.hyperic.hq.common.shared.CrispoManagerUtil;
@@ -43,7 +41,6 @@ public class CrispoTest
 
     public void doCRUDTest() throws Exception {
         CrispoManagerLocal cMan = CrispoManagerUtil.getLocalHome().create();
-        CrispoDAO cDao = DAOFactory.getDAOFactory().getCrispoDAO();
         
         Map vals = new HashMap();
         
@@ -51,11 +48,10 @@ public class CrispoTest
         vals.put("two", "2");
         
         // (C)reate
-        int numCrispos = cDao.findAll().size();
+        int numCrispos = cMan.findAll().size();
         Crispo c = cMan.createCrispo(vals);
-        cDao.getSession().flush();
         assertEquals(2, c.getOptions().size());
-        assertEquals(numCrispos + 1, cDao.findAll().size());
+        assertEquals(numCrispos + 1, cMan.findAll().size());
         assertValidVals(c.getOptions(), vals);
         
         // (R)ead
@@ -72,8 +68,7 @@ public class CrispoTest
         // (D)elete
         CrispoOption firstOpt = (CrispoOption)options.iterator().next();
         cMan.deleteCrispo(c);
-        cDao.getSession().flush();
-        assertEquals(numCrispos, cDao.findAll().size());
+        assertEquals(numCrispos, cMan.findAll().size());
         
         try {
             refresh(firstOpt);

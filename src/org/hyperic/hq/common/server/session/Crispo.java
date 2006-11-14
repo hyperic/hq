@@ -84,4 +84,15 @@ public class Crispo
         }
         return res;
     }
+    
+    static Crispo create(ConfigResponse cfg) {
+        Crispo res = new Crispo();
+        
+        for (Iterator i=cfg.getKeys().iterator(); i.hasNext(); ) {
+            String key = (String)i.next();
+            
+            res.addOption(key, cfg.getValue(key));
+        }
+        return res;
+    }
 }

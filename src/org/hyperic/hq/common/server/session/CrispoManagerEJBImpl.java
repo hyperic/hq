@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.common.server.session;
 
+import java.util.Collection;
 import java.util.Map;
 
 import javax.ejb.SessionBean;
@@ -49,6 +50,10 @@ import org.hyperic.hq.common.server.session.Crispo;
  * @ejb:transaction type="REQUIRED"
  */
 public class CrispoManagerEJBImpl implements SessionBean {
+    private CrispoDAO getDAO() {
+        return DAOFactory.getDAOFactory().getCrispoDAO();
+    }
+    
     /**
      * Create a new {@link Crispo} from a {@link Map} of {@link String}
      * key/value pairs
@@ -58,8 +63,23 @@ public class CrispoManagerEJBImpl implements SessionBean {
     public Crispo createCrispo(Map keyVals) {
         Crispo c = Crispo.create(keyVals);
         
-        DAOFactory.getDAOFactory().getCrispoDAO().save(c);
+        getDAO().save(c);
         return c;
+    }
+    
+    /** 
+     * @return all the {@link Crispo}s in the system
+     * @ejb:interface-method
+     */
+    public Collection findAll() {
+        return getDAO().findAll();
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public Crispo findById(Integer id) {
+        return getDAO().findById(id);
     }
     
     /**
@@ -68,7 +88,19 @@ public class CrispoManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      */
     public void deleteCrispo(Crispo c) {
-        DAOFactory.getDAOFactory().getCrispoDAO().remove(c);
+        getDAO().remove(c);
+    }
+
+    /**
+     * Create a new Crispo, filled out with the values from a 
+     * {@link ConfigResponse}
+     * 
+     * @ejb:interface-method
+     */
+    public Crispo create(ConfigResponse cfg) {
+        Crispo res = Crispo.create(cfg);
+        getDAO().save(res);
+        return res;
     }
     
     public void ejbCreate() { }

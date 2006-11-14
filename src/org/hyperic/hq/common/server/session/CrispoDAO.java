@@ -24,8 +24,6 @@
  */
 package org.hyperic.hq.common.server.session;
 
-import java.util.Iterator;
-
 import org.hibernate.Session;
 import org.hyperic.hq.dao.HibernateDAO;
 
@@ -34,7 +32,7 @@ public class CrispoDAO extends HibernateDAO {
         super(Crispo.class, session);
     }
 
-    public Crispo findById(Integer id) {
+    Crispo findById(Integer id) {
         return (Crispo)super.findById(id);
     }
 
