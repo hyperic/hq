@@ -405,8 +405,4 @@ public class ResourceDAO extends HibernateDAO
         return getSession().createQuery(sb.toString())
             .list();
     }
-    
-    public void setOwner(Resource resource, AuthzSubject owner) {
-        resource.setOwner(owner);
-    }
 }
