@@ -143,11 +143,16 @@ public class Util {
         prop.setProperty(Environment.USE_QUERY_CACHE, "false");
         prop.setProperty(Environment.USE_SECOND_LEVEL_CACHE, "false");
         prop.setProperty(Environment.CACHE_PROVIDER,
-                                 NoCacheProvider.class.getName());
+                         NoCacheProvider.class.getName());
         prop.setProperty(Environment.TRANSACTION_STRATEGY,
-                                 JTATransactionFactory.class.getName());
+                         JTATransactionFactory.class.getName());
         prop.remove(Environment.TRANSACTION_MANAGER_STRATEGY);
         prop.setProperty(Environment.USER_TRANSACTION, jta);
+        
+        // Setup a managed 'current session' context, since the tests
+        // will setup & destroy the session in setup(), teardown()
+        prop.setProperty(Environment.CURRENT_SESSION_CONTEXT_CLASS,
+                         "managed");
         configuration.setProperties(prop);
     }
 
