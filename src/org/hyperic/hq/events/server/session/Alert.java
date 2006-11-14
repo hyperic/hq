@@ -60,14 +60,6 @@ public class Alert
         setAlertDefinition(def);
     }
     
-    protected UserAlert createUserAlert(Integer userId) {
-        UserAlert ua = new UserAlert(this, userId);
-        
-        save(ua);
-        _userAlerts.add(ua);
-        return ua;
-    }
-    
     protected AlertActionLog createActionLog(String detail, Action action) {
         AlertActionLog res = new AlertActionLog(this, detail, action);
     

@@ -401,10 +401,6 @@ public class EmailAction extends EmailActionConfig implements ActionInterface {
                                 validAddresses.add(
                                     new InternetAddress(smsAddr));
                             }
-                            // Add an alert to the user
-                            if (aman != null) {
-                                aman.addSubjectAlert(uid, alertId);
-                            }
                             break;
                         default :
                         case TYPE_EMAILS :

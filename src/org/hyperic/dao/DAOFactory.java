@@ -69,7 +69,6 @@ import org.hyperic.hq.events.server.session.AlertDAO;
 import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
 import org.hyperic.hq.events.server.session.EventLogDAO;
 import org.hyperic.hq.events.server.session.TriggerDAO;
-import org.hyperic.hq.events.server.session.UserAlertDAO;
 import org.hyperic.hq.measurement.server.session.BaselineDAO;
 import org.hyperic.hq.measurement.server.session.CategoryDAO;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
@@ -127,8 +126,7 @@ public abstract class DAOFactory
     public abstract AlertActionLogDAO    getAlertActionLogDAO();
     public abstract AlertConditionLogDAO getAlertConditionLogDAO();
     public abstract AlertDAO             getAlertDAO();
-    public abstract UserAlertDAO         getUserAlertDAO();
-    
+
     // Common DAO
     public abstract ConfigPropertyDAO getConfigPropertyDAO();
     public abstract CrispoDAO         getCrispoDAO();

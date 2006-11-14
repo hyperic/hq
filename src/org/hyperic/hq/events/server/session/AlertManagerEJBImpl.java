@@ -28,7 +28,6 @@ package org.hyperic.hq.events.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -37,11 +36,11 @@ import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
-import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AlertCreateException;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
@@ -51,9 +50,6 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /** 
  * The alert manager.
@@ -92,10 +88,6 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
         return DAOFactory.getDAOFactory().getActionDAO();
     }
     
-    private UserAlertDAO getUserAlertDAO() {
-        return DAOFactory.getDAOFactory().getUserAlertDAO();
-    }
-
     /**
      * Create a new alert
      *
@@ -311,67 +303,6 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
         }
             
         return valuePager.seek(result, pc);
-    }
-
-    /**
-     * Get a collection of alerts for a Subject
-     *
-     * @ejb:interface-method
-     */
-    public List findSubjectAlerts(Integer uid) {
-        List alerts = getAlertDAO().findBySubject(uid);
-        
-        Collections.sort(alerts, new Comparator() {
-            public int compare(Object one, Object two) {
-                Alert aOne = (Alert)one;
-                Alert aTwo = (Alert)two;
-                
-                if (aOne.getCtime() < aTwo.getCtime())
-                    return -1;
-                else if (aOne.getCtime() == aTwo.getCtime())
-                    return 0;
-                return 1;
-            }
-        });
-
-        List res = new ArrayList(alerts.size());
-        for (Iterator i=alerts.iterator(); i.hasNext(); ) {
-            Alert a = (Alert)i.next();
-            
-            res.add(a.getAlertValue());
-        }
-        return res;
-    }
-
-    /**
-     * Add a reference to an alert for a user
-     *
-     * @ejb:interface-method
-     */
-    public void addSubjectAlert(Integer uid, Integer aid)
-        throws CreateException, FinderException 
-    {
-        UserAlertDAO uDao = getUserAlertDAO();
-
-        // Find the alert to set
-        Alert alert = getAlertDAO().findById(aid);
-
-        Collection alerts = uDao.findByUser(uid);
-            
-        if (alerts.size() < 2) {
-            // Create a new reference
-            alert.createUserAlert(uid);
-        } else {
-            Iterator i = alerts.iterator();
-            UserAlert ua1 = (UserAlert) i.next();
-            UserAlert ua2 = (UserAlert) i.next();
-
-            if (ua1.getAlert().getCtime() < ua2.getAlert().getCtime()) {
-                uDao.remove(ua1);
-            } else {
-                uDao.remove(ua2);
-            }
-        }
     }
 
     public void ejbCreate() throws CreateException {

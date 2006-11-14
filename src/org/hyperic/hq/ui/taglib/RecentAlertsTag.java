@@ -48,8 +48,9 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.bizapp.shared.uibeans.DashboardAlertBean;
 import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
-import org.hyperic.hq.events.shared.AlertValue;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.ui.beans.RecentAlertBean;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -121,14 +122,17 @@ public class RecentAlertsTag extends TagSupport {
      */
     public final int doStartTag() throws JspException {
         try {
-            HttpServletRequest request = (HttpServletRequest)pageContext.getRequest();
+            HttpServletRequest request =
+                (HttpServletRequest) pageContext.getRequest();
             ServletContext ctx = pageContext.getServletContext();
 
-            // get two most recent events
-            AppdefBoss ab = ContextUtils.getAppdefBoss(ctx);
             EventsBoss eb = ContextUtils.getEventsBoss(ctx);
             int sessionId = RequestUtils.getSessionId(request).intValue();
-            List userAlerts = eb.findUserAlerts(sessionId);
+            // Recent alerts in the last two hours
+            List userAlerts =
+                eb.findAlerts(sessionId, 2, 0, 2 * MeasurementConstants.HOUR,
+                              null, null);
+
             if ( log.isTraceEnabled() ) {
                 log.trace("found " + userAlerts.size() + " recent alerts");
             }
@@ -136,38 +140,18 @@ public class RecentAlertsTag extends TagSupport {
             ArrayList alertArr = new ArrayList();
             Iterator it = userAlerts.iterator();
             for (int i = 0; i < maxAlerts && it.hasNext(); i++) {
-                AlertValue av = (AlertValue)it.next();
-                String resourceName = "<unknown resource>";
-                AlertDefinitionBasicValue adv = null;
-                AppdefEntityID adeId = null;
+                DashboardAlertBean av = (DashboardAlertBean)it.next();
+                AppdefEntityID adeId = av.getResource().getEntityId();
 
-                try {
-                    adv = eb.getAlertDefinitionBasic(sessionId,
-                                                     av.getAlertDefId());
-                    adeId = new AppdefEntityID( adv.getAppdefType(),
-                                                adv.getAppdefId() );
-
-                    AppdefResourceValue resource = ab.findById(sessionId, adeId);
-                    resourceName = resource.getName();
-                } catch (AppdefEntityNotFoundException e) {
-                    // it's okay -- maybe the resource was deleted
-                    if ( log.isDebugEnabled() ) {
-                        log.debug("Resource not found: " + adeId, e);
-                    }
-                    continue;
-                } catch (PermissionException e) {
-                    continue;
-                }
-
-                alertArr.add(0,
-                    new RecentAlertBean(av.getId(),
+                alertArr.add(
+                    new RecentAlertBean(av.getAlertId(),
                                         av.getCtime(),
                                         av.getAlertDefId(),
-                                        adv.getName(),
-                                        adv.getPriority(),
-                                        new Integer( adv.getAppdefId() ),
-                                        new Integer( adv.getAppdefType() ),
-                                        resourceName));
+                                        av.getAlertDefName(),
+                                        0,
+                                        adeId.getId(),
+                                        new Integer( adeId.getType() ),
+                                        av.getResource().getName()));
             }
 
             RecentAlertBean[] recentAlerts =
@@ -177,8 +161,6 @@ public class RecentAlertsTag extends TagSupport {
             request.setAttribute(sizeVar, new Integer(recentAlerts.length) );
 
             return SKIP_BODY;
-        } catch (FinderException e) {
-            throw new JspTagException( e.getMessage() );
         } catch (SessionNotFoundException e) {
             throw new JspTagException( e.getMessage() );
         } catch (SessionTimeoutException e) {

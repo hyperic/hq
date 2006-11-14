@@ -1395,22 +1395,6 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     }
 
     /**
-     * Fetch the two most recent alerts for a given user
-     * @param sessionID the session token
-     * @ejb:interface-method
-     */
-    public List findUserAlerts(int sessionID)
-        throws SessionNotFoundException, SessionTimeoutException,
-               PermissionException {
-        StopWatch timer = new StopWatch();
-        AuthzSubjectValue subject  = this.manager.getSubject(sessionID);
-        // no need to check security here
-        List alerts = getAM().findSubjectAlerts(subject.getId());
-        log.debug("Time to find user alerts: " + timer.getElapsed());        
-        return alerts;
-    }
-
-    /**
      * Get config schema info for an action class
      *
      * @ejb:interface-method

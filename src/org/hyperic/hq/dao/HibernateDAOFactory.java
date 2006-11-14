@@ -42,16 +42,15 @@ import org.hyperic.hq.events.server.session.AlertDAO;
 import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
 import org.hyperic.hq.events.server.session.EventLogDAO;
 import org.hyperic.hq.events.server.session.TriggerDAO;
-import org.hyperic.hq.events.server.session.UserAlertDAO;
-import org.hyperic.hq.measurement.server.session.CategoryDAO;
 import org.hyperic.hq.measurement.server.session.BaselineDAO;
+import org.hyperic.hq.measurement.server.session.CategoryDAO;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
+import org.hyperic.hq.measurement.server.session.MeasurementArgDAO;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
 import org.hyperic.hq.measurement.server.session.MetricProblemDAO;
 import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
 import org.hyperic.hq.measurement.server.session.RawMeasurementDAO;
 import org.hyperic.hq.measurement.server.session.ScheduleRevNumDAO;
-import org.hyperic.hq.measurement.server.session.MeasurementArgDAO;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
 
 public class HibernateDAOFactory extends DAOFactory {
     private static SessionFactory sessionFactory;
@@ -262,10 +261,6 @@ public class HibernateDAOFactory extends DAOFactory {
         return new AlertDAO(getCurrentSession());
     }
     
-    public UserAlertDAO getUserAlertDAO() {
-        return new UserAlertDAO(getCurrentSession());
-    }
-
     public VirtualDAO getVirtualDAO() {
         return new VirtualDAO(getCurrentSession());
     }
