@@ -121,7 +121,6 @@ public class EditConfigPropertiesAction extends BaseAction {
             Integer sessionId = RequestUtils.getSessionId(request);
             int sessionInt = sessionId.intValue();
             AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
-            Integer resourceId = RequestUtils.getResourceId(request);
             AppdefResourceValue updatedResource =
                 boss.findById(sessionInt, aeid);
             ProductBoss pboss = ContextUtils.getProductBoss(ctx);
@@ -331,8 +330,7 @@ public class EditConfigPropertiesAction extends BaseAction {
             if (request.getParameter("todash") != null) {
                 return mapping.findForward("dash");
             }
-            return returnSuccess(request, mapping, Constants.RESOURCE_PARAM,
-                                 resourceId);
+            return returnSuccess(request, mapping, forwardParams);
         } catch(InvalidConfigException e) {
             log.error("invalid config " + e);
             RequestUtils.setErrorWithNullCheck(request, e, ERR_NOMSG, ERR_CONFIG);
