@@ -40,6 +40,7 @@ import org.hyperic.hq.events.server.session.AlertConditionDAO;
 import org.hyperic.hq.events.server.session.AlertConditionLogDAO;
 import org.hyperic.hq.events.server.session.AlertDAO;
 import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
+import org.hyperic.hq.events.server.session.EventLogDAO;
 import org.hyperic.hq.events.server.session.TriggerDAO;
 import org.hyperic.hq.events.server.session.UserAlertDAO;
 import org.hyperic.hq.measurement.server.session.CategoryDAO;
@@ -271,6 +272,10 @@ public class HibernateDAOFactory extends DAOFactory {
 
     public CrispoDAO getCrispoDAO() {
         return new CrispoDAO(getCurrentSession());
+    }
+
+    public EventLogDAO getEventLogDAO() {
+        return new EventLogDAO(getCurrentSession()); 
     }
 }
 

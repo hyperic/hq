@@ -25,31 +25,31 @@
 
 package org.hyperic.hq.measurement;
 
+import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Properties;
-import java.sql.SQLException;
 
 import javax.ejb.CreateException;
+import javax.ejb.RemoveException;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
-import org.hyperic.hq.measurement.TimingVoodoo;
+import org.hyperic.hq.events.shared.EventLogManagerLocal;
+import org.hyperic.hq.events.shared.EventLogManagerUtil;
 import org.hyperic.hq.measurement.shared.DataCompressLocal;
 import org.hyperic.hq.measurement.shared.DataCompressUtil;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.TimeUtil;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-public class DataPurgeJob 
-    implements Job {
+public class DataPurgeJob implements Job {
 
     private static final String logCtx  = "DataPurgeJob";
     private static final Log    log     = LogFactory.getLog(logCtx);
@@ -66,6 +66,18 @@ public class DataPurgeJob
 
         try {
             DataPurgeJob.compressData();
+
+            Properties conf; 
+            try { 
+                conf =
+                    ServerConfigManagerUtil.getLocalHome().create().getConfig(); 
+            } catch (Exception e) { 
+                throw new SystemException(e); 
+            }
+
+            long now = System.currentTimeMillis();
+            
+            purge(conf, now);
         } catch (CreateException e) {
             throw new JobExecutionException(
                 "Unable to create instance of DataManager.", e, false);
@@ -166,4 +178,32 @@ public class DataPurgeJob
             log.info("Not performing database maintenance");
         }
     }
+
+    protected void purge(Properties conf, long now)
+        throws CreateException, NamingException {
+        DataPurgeJob.purgeEventLogs(conf, now);
+    }
+    
+    /**
+     * Purge Event Log data
+     */
+    private static void purgeEventLogs(Properties conf, long now)
+        throws CreateException, NamingException {
+            String purgeEventString =
+                conf.getProperty(HQConstants.EventLogPurge);
+            long purgeEventLog = Long.parseLong(purgeEventString);
+        
+            // Purge event logs
+            EventLogManagerLocal eventLogManager =
+                EventLogManagerUtil.getLocalHome().create();
+            
+            log.info("Purging events older than " +
+                     TimeUtil.toString(now - purgeEventLog));
+            try {
+                eventLogManager.deleteLogs(0, now - purgeEventLog);
+                log.info("Done (Deleting events)");
+            } catch (RemoveException e) {
+                log.error("Unable to delete events: " + e.getMessage(), e);
+            }
+        }
 }

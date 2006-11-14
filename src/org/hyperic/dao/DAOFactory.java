@@ -44,15 +44,6 @@ import org.hyperic.hq.dao.AppServiceDAO;
 import org.hyperic.hq.dao.AppSvcDependencyDAO;
 import org.hyperic.hq.dao.ApplicationDAO;
 import org.hyperic.hq.dao.ApplicationTypeDAO;
-import org.hyperic.hq.measurement.server.session.BaselineDAO;
-import org.hyperic.hq.measurement.server.session.CategoryDAO;
-import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
-import org.hyperic.hq.measurement.server.session.MetricProblemDAO;
-import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
-import org.hyperic.hq.measurement.server.session.RawMeasurementDAO;
-import org.hyperic.hq.measurement.server.session.ScheduleRevNumDAO;
-import org.hyperic.hq.measurement.server.session.MeasurementArgDAO;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
 import org.hyperic.hq.dao.ConfigPropertyDAO;
 import org.hyperic.hq.dao.ConfigResponseDAO;
 import org.hyperic.hq.dao.CpropDAO;
@@ -76,8 +67,18 @@ import org.hyperic.hq.events.server.session.AlertConditionDAO;
 import org.hyperic.hq.events.server.session.AlertConditionLogDAO;
 import org.hyperic.hq.events.server.session.AlertDAO;
 import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
+import org.hyperic.hq.events.server.session.EventLogDAO;
 import org.hyperic.hq.events.server.session.TriggerDAO;
 import org.hyperic.hq.events.server.session.UserAlertDAO;
+import org.hyperic.hq.measurement.server.session.BaselineDAO;
+import org.hyperic.hq.measurement.server.session.CategoryDAO;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
+import org.hyperic.hq.measurement.server.session.MeasurementArgDAO;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
+import org.hyperic.hq.measurement.server.session.MetricProblemDAO;
+import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
+import org.hyperic.hq.measurement.server.session.RawMeasurementDAO;
+import org.hyperic.hq.measurement.server.session.ScheduleRevNumDAO;
 
 public abstract class DAOFactory
 {
@@ -153,6 +154,9 @@ public abstract class DAOFactory
     public abstract MeasurementArgDAO getMeasurementArgDAO();
     public abstract MetricProblemDAO getMetricProblemDAO();
     public abstract ScheduleRevNumDAO getScheduleRevNumDAO();
+
+    // Events DAOs
+    public abstract EventLogDAO getEventLogDAO();
 
     public static ThreadLocal defaultSession = new ThreadLocal();
 

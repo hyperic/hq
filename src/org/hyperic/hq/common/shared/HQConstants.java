@@ -94,4 +94,5 @@ public class HQConstants {
     public static final String EJB_MODULE_PATTERN = "hq-";
     
     public static final String JBOSSCACHE = "jboss.cache:service=hqTreeCache";
+    public static final String EventLogPurge = "EVENT_LOG_PURGE";
 }
