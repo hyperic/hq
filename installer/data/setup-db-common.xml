@@ -82,16 +82,6 @@
 
   <target name="dbsetup" depends="hibernate-create">
     <antcall target="dbsetup-process-file">
-      <param name="dbsetupfile" value="${data.dir}/schema.xml"/>
-      <param name="data"        value="false"/>
-      <param name="uninstall"   value="true"/>
-    </antcall>
-    <antcall target="dbsetup-process-file">
-      <param name="dbsetupfile" value="${data.dir}/schema.xml"/>
-      <param name="data"        value="false"/>
-      <param name="uninstall"   value="false"/>
-    </antcall>
-    <antcall target="dbsetup-process-file">
       <param name="dbsetupfile" value="${data.dir}/data.xml"/>
       <param name="data"        value="true"/>
       <param name="uninstall"   value="false"/>
@@ -171,19 +161,6 @@
     </replace>
 
     <crypto value="${server.admin.password}" property="server.admin.password.encrypted"/>
-
-    <!-- replace the tablespace names in the schema file -->
-    <delete file="${data.dir}/schema.xml"/>
-    <copy file="${install.dir}/data/schema-orig.xml"
-          tofile="${data.dir}/schema.xml"/>
-    <replace file="${data.dir}/schema.xml">
-      <replacefilter token="@@@M_DATA@@@" value="${server.tablespace.m_data}"/>
-      <replacefilter token="@@@M_IDX@@@" value="${server.tablespace.m_idx}"/>
-      <replacefilter token="@@@LG_DATA@@@" value="${server.tablespace.lg_data}"/>
-      <replacefilter token="@@@LG_IDX@@@" value="${server.tablespace.lg_idx}"/>
-      <replacefilter token="@@@SM_DATA@@@" value="${server.tablespace.sm_data}"/>
-      <replacefilter token="@@@SM_IDX@@@" value="${server.tablespace.sm_idx}"/>
-    </replace>
 
     <!-- replace the admin info in dbsetup data file -->
     <delete file="${data.dir}/data.xml"/>
