@@ -272,46 +272,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * Create a ServerType which is supported by a specific set of platform Types
-     * @return ServerTypeValue
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
-     */
-    public Integer createServerType(AuthzSubjectValue subject,
-                                    ServerTypeValue stv,
-                                    List suppPlatTypes)
-        throws CreateException, ValidationException {
-        try {
-            if(log.isDebugEnabled()) {
-                log.debug("Begin createServerType: " + stv);
-            }
-            validateNewServerType(stv, suppPlatTypes);
-            // now we create the serverType 
-            ServerTypeDAO stLHome = getServerTypeDAO();
-            ServerType sType = stLHome.create(stv);
-            // now we need to add the platform types
-            HashSet ptSet = new HashSet();
-            for(int i=0;i<suppPlatTypes.size(); i++) {
-                PlatformTypeValue ptv =(PlatformTypeValue)suppPlatTypes.get(i);
-                // now find the ejb
-                PlatformType pType =
-                    DAOFactory.getDAOFactory().getPlatformTypeDAO()
-                    .findById(ptv.getId());
-                // and add it to the set
-                ptSet.add(pType);
-            }
-            // now we add the set to the server type
-            sType.setPlatformTypes(ptSet);
-            
-            // and finally, return the primary key
-            return sType.getId();
-        } catch (ObjectNotFoundException e) {
-            throw new CreateException("Failed to look up a PlatformType: " +
-                                      e.getMessage());
-        }
-    }
-
-    /**
      * Find all server types
      * @return list of serverTypeValues
      * @ejb:interface-method

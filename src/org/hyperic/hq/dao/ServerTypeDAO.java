@@ -66,17 +66,6 @@ public class ServerTypeDAO extends HibernateDAO
         super.remove(entity);
     }
 
-    public ServerType create(ServerTypeValue serverType)
-    {
-        ServerType st = new ServerType();
-        st.setName(serverType.getName());
-        st.setDescription(serverType.getDescription());
-        st.setPlugin(serverType.getPlugin());
-        st.setVirtual(serverType.getVirtual());
-        save(st);
-        return st;
-    }
-
     public ServerType create(ServerType serverType)
     {
         save(serverType);
