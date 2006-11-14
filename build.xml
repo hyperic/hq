@@ -1332,9 +1332,11 @@
         <include name="hibernate/hibernate*"/>
       </fileset>
     </copy>
+
     <copy todir="${installer.dir}/etc/hibernate">
      <fileset dir="${hq.home}">
         <include name="sql/**/*.hq-xml"/>
+        <include name="sql/**/*.hbm.xml"/>
       </fileset>
     </copy>
 

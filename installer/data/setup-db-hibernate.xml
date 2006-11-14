@@ -76,6 +76,11 @@
       </fileset>
     </unjar>
 
+    <!-- Copy regular .hbm.xml files -->
+    <copy todir="${hq-ear.dir}/classes/META-INF">
+      <fileset dir="${hibernate-sql}" includes="**/*.hbm.xml"/>
+    </copy>
+    
     <copy todir="${build.dir}/hibernate/sql">
       <fileset dir="${hibernate-sql}" includes="**/*.hq-xml" />
     </copy>
