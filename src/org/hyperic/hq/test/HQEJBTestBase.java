@@ -27,7 +27,7 @@ package org.hyperic.hq.test;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hyperic.dao.DAOFactory;
+import org.hibernate.context.ManagedSessionContext;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
@@ -107,7 +107,7 @@ public abstract class HQEJBTestBase
             // properties are getting nuked after a test run.
             MockContextFactory.setAsInitial();
             _session = Util.getSessionFactory().openSession();
-            DAOFactory.setMockSession(_session);
+            ManagedSessionContext.bind((org.hibernate.classic.Session)_session);
             return;
         }
 
@@ -139,7 +139,7 @@ public abstract class HQEJBTestBase
         }
 
         _session = Util.getSessionFactory().openSession();
-        DAOFactory.setMockSession(_session);
+        ManagedSessionContext.bind((org.hibernate.classic.Session)_session);
         _initialized = true;
     }
 
@@ -160,6 +160,8 @@ public abstract class HQEJBTestBase
     
     public void tearDown() throws Exception {
         _session.disconnect();
+        ManagedSessionContext.unbind(Util.getSessionFactory());
+        _session = null;
     }
     
     protected AuthzSubjectValue getOverlord() 

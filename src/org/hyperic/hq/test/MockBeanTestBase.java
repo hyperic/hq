@@ -195,10 +195,6 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
         // bind datasource
         DataSource ds = getDataSource();
         _context.rebind("java:/HypericDS", ds);
-
-        // set dao factory suitable for out-of-container testing via mockejb
-        // be sure to set the mocksession
-        DAOFactory.setDefaultDAOFactory(DAOFactory.HIBERNATE_MOCKTEST);
     }
 
    /**
@@ -243,11 +239,6 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
     
     /**
      * Convenience method for registering session beans
-     * @param jndiName
-     * @param home
-     * @param local
-     * @param impl
-     * @throws Exception
      */
     public void deploySessionBean(String jndiName, Class home, Class local,
                                   Class impl)
