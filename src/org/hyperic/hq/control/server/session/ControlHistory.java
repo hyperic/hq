@@ -23,7 +23,7 @@
 * USA.
 */
 
-package org.hyperic.hq.control;
+package org.hyperic.hq.control.server.session;
 
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -63,7 +63,7 @@ public class ControlHistory extends PersistedObject
         return this.groupId;
     }
 
-    public void setGroupId(Integer groupId)
+    protected void setGroupId(Integer groupId)
     {
         this.groupId = groupId;
     }
@@ -73,7 +73,7 @@ public class ControlHistory extends PersistedObject
         return this.batchId;
     }
 
-    public void setBatchId(Integer batchId)
+    protected void setBatchId(Integer batchId)
     {
         this.batchId = batchId;
     }
@@ -83,7 +83,7 @@ public class ControlHistory extends PersistedObject
         return this.entityType;
     }
 
-    public void setEntityType(Integer entityType)
+    protected void setEntityType(Integer entityType)
     {
         this.entityType = entityType;
     }
@@ -93,7 +93,7 @@ public class ControlHistory extends PersistedObject
         return this.entityId;
     }
 
-    public void setEntityId(Integer entityId)
+    protected void setEntityId(Integer entityId)
     {
         this.entityId = entityId;
     }
@@ -103,7 +103,7 @@ public class ControlHistory extends PersistedObject
         return this.subject;
     }
 
-    public void setSubject(String subject)
+    protected void setSubject(String subject)
     {
         this.subject = subject;
     }
@@ -113,7 +113,7 @@ public class ControlHistory extends PersistedObject
         return this.scheduled;
     }
 
-    public void setScheduled(boolean scheduled)
+    protected void setScheduled(boolean scheduled)
     {
         this.scheduled = scheduled;
     }
@@ -123,7 +123,7 @@ public class ControlHistory extends PersistedObject
         return new Boolean(isScheduled());
     }
 
-    public void setScheduled(Boolean scheduled)
+    protected void setScheduled(Boolean scheduled)
     {
         setScheduled(scheduled.booleanValue());
     }
@@ -133,7 +133,7 @@ public class ControlHistory extends PersistedObject
         return this.dateScheduled;
     }
 
-    public void setDateScheduled(long dateScheduled)
+    protected void setDateScheduled(long dateScheduled)
     {
         this.dateScheduled = dateScheduled;
     }
@@ -143,7 +143,7 @@ public class ControlHistory extends PersistedObject
         return this.startTime;
     }
 
-    public void setStartTime(long startTime)
+    protected void setStartTime(long startTime)
     {
         this.startTime = startTime;
     }
@@ -153,7 +153,7 @@ public class ControlHistory extends PersistedObject
         return this.status;
     }
 
-    public void setStatus(String status)
+    protected void setStatus(String status)
     {
         this.status = status;
     }
@@ -163,7 +163,7 @@ public class ControlHistory extends PersistedObject
         return this.endTime;
     }
 
-    public void setEndTime(long endTime)
+    protected void setEndTime(long endTime)
     {
         this.endTime = endTime;
     }
@@ -173,7 +173,7 @@ public class ControlHistory extends PersistedObject
         return this.duration;
     }
 
-    public void setDuration(long duration)
+    protected void setDuration(long duration)
     {
         this.duration = duration;
     }
@@ -183,7 +183,7 @@ public class ControlHistory extends PersistedObject
         return this.description;
     }
 
-    public void setDescription(String description)
+    protected void setDescription(String description)
     {
         this.description = description;
     }
@@ -193,7 +193,7 @@ public class ControlHistory extends PersistedObject
         return this.message;
     }
 
-    public void setMessage(String message)
+    protected void setMessage(String message)
     {
         this.message = message;
     }
@@ -203,7 +203,7 @@ public class ControlHistory extends PersistedObject
         return this.action;
     }
 
-    public void setAction(String action)
+    protected void setAction(String action)
     {
         this.action = action;
     }
@@ -213,7 +213,7 @@ public class ControlHistory extends PersistedObject
         return this.args;
     }
 
-    public void setArgs(String args)
+    protected void setArgs(String args)
     {
         this.args = args;
     }
@@ -260,7 +260,7 @@ public class ControlHistory extends PersistedObject
         return "" + id;
     }
 
-    public void setControlHistoryValue(ControlHistoryValue valueHolder)
+    protected void setControlHistoryValue(ControlHistoryValue valueHolder)
     {
         setGroupId( valueHolder.getGroupId() );
         setBatchId( valueHolder.getBatchId() );

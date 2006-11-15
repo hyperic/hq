@@ -34,6 +34,8 @@ import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
 import org.hyperic.hq.common.server.session.CrispoDAO;
+import org.hyperic.hq.control.server.session.ControlHistoryDAO;
+import org.hyperic.hq.control.server.session.ControlScheduleDAO;
 import org.hyperic.hq.events.server.session.ActionDAO;
 import org.hyperic.hq.events.server.session.AlertActionLogDAO;
 import org.hyperic.hq.events.server.session.AlertConditionDAO;
@@ -269,4 +271,13 @@ public class HibernateDAOFactory extends DAOFactory {
     public EventLogDAO getEventLogDAO() {
         return new EventLogDAO(getCurrentSession()); 
     }
+
+    public ControlHistoryDAO getControlHistoryDAO() {
+        return new ControlHistoryDAO(getCurrentSession());
+    }
+
+    public ControlScheduleDAO getControlScheduleDAO() {
+        return new ControlScheduleDAO(getCurrentSession());
+    }
+
 }

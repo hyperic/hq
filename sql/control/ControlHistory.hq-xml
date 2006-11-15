@@ -5,7 +5,7 @@
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping
-  package="org.hyperic.hq.control">
+  package="org.hyperic.hq.control.server.session">
 
   <class name="ControlHistory" table="EAM_CONTROL_HISTORY">
     <id name="id" type="integer">

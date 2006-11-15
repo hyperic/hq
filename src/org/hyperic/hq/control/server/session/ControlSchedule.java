@@ -23,7 +23,7 @@
 * USA.
 */
 
-package org.hyperic.hq.control;
+package org.hyperic.hq.control.server.session;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -38,7 +38,7 @@ import org.hyperic.hq.scheduler.ScheduleValue;
 public class ControlSchedule extends PersistedObject
 {
 
-    // Fields    
+    // Fields
 
     private Integer entityType;
     private Integer entityId;
@@ -65,7 +65,7 @@ public class ControlSchedule extends PersistedObject
         return this.entityType;
     }
 
-    public void setEntityType(Integer entityType)
+    protected void setEntityType(Integer entityType)
     {
         this.entityType = entityType;
     }
@@ -75,7 +75,7 @@ public class ControlSchedule extends PersistedObject
         return this.entityId;
     }
 
-    public void setEntityId(Integer entityId)
+    protected void setEntityId(Integer entityId)
     {
         this.entityId = entityId;
     }
@@ -85,7 +85,7 @@ public class ControlSchedule extends PersistedObject
         return this.subject;
     }
 
-    public void setSubject(String subject)
+    protected void setSubject(String subject)
     {
         this.subject = subject;
     }
@@ -95,7 +95,7 @@ public class ControlSchedule extends PersistedObject
         return this.scheduleValueBytes;
     }
 
-    public void setScheduleValueBytes(byte[] scheduleValueBytes)
+    protected void setScheduleValueBytes(byte[] scheduleValueBytes)
     {
         this.scheduleValueBytes = scheduleValueBytes;
     }
@@ -105,7 +105,7 @@ public class ControlSchedule extends PersistedObject
         return this.nextFireTime;
     }
 
-    public void setNextFireTime(long nextFireTime)
+    protected void setNextFireTime(long nextFireTime)
     {
         this.nextFireTime = nextFireTime;
     }
@@ -115,7 +115,7 @@ public class ControlSchedule extends PersistedObject
         return this.triggerName;
     }
 
-    public void setTriggerName(String triggerName)
+    protected void setTriggerName(String triggerName)
     {
         this.triggerName = triggerName;
     }
@@ -125,7 +125,7 @@ public class ControlSchedule extends PersistedObject
         return this.jobName;
     }
 
-    public void setJobName(String jobName)
+    protected void setJobName(String jobName)
     {
         this.jobName = jobName;
     }
@@ -135,7 +135,7 @@ public class ControlSchedule extends PersistedObject
         return this.jobOrderData;
     }
 
-    public void setJobOrderData(String jobOrderData)
+    protected void setJobOrderData(String jobOrderData)
     {
         this.jobOrderData = jobOrderData;
     }
@@ -145,7 +145,7 @@ public class ControlSchedule extends PersistedObject
         return this.action;
     }
 
-    public void setAction(String action)
+    protected void setAction(String action)
     {
         this.action = action;
     }
@@ -184,7 +184,7 @@ public class ControlSchedule extends PersistedObject
         }
     }
 
-    public void setControlScheduleValue(ControlScheduleValue valueHolder)
+    protected void setControlScheduleValue(ControlScheduleValue valueHolder)
     {
         try {
             setEntityType( valueHolder.getEntityType() );
@@ -202,7 +202,7 @@ public class ControlSchedule extends PersistedObject
         }
     }
 
-    public void setScheduleValue(ScheduleValue schedule) throws IOException
+    protected void setScheduleValue(ScheduleValue schedule) throws IOException
     {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         ObjectOutputStream o = new ObjectOutputStream(os);
