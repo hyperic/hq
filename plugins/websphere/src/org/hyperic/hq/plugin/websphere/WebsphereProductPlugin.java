@@ -183,44 +183,57 @@ public class WebsphereProductPlugin extends ProductPlugin {
     }
 
     private static String findInstallDir() {
-        String dir;
+        String dir = null;
+        String where = "unknown";
 
         if (isWin32()) {
             File path = getRegistryInstallPath();
-            if (path == null) {
-                return null;
+            if (path != null) {
+                dir = path.getAbsolutePath();
+                where = "registry";
             }
-
-            dir = path.getAbsolutePath();
         }
-        else {
+
+        if (dir == null) {
             //we only check for WebSphere5 since 4.0 requires
             //the agent to be run with the WebSphere JDK.
             //in which case dir already set from getInstallPathFromJDK()
             dir = WebsphereDetector5.getRunningInstallPath();
-            if (dir == null) {
-                dir = getInstallPathFromJDK();
-            }
-            if (dir == null) {
-                //default WebSphere installpath(s)
-                dir = "/opt/IBM/WebSphere/AppServer";
-                if (!new File(dir).isDirectory()) {
-                    dir = "/opt/WebSphere/AppServer";
-                }
+            if (dir != null) {
+                where = "process table";
             }
             else {
-                log.debug(PROP_INSTALLPATH + " found in process table");
+                dir = getInstallPathFromJDK();
+                if (dir != null) {
+                    where = "JRE";
+                }
+            }
+
+            if (dir == null) {
+                String root;
+                if (isWin32()) {
+                    root = "C:/Program Files";
+                }
+                else {
+                    root = "/opt";
+                }
+                //default WebSphere installpath(s)
+                dir = root + "/IBM/WebSphere/AppServer";
+                if (!new File(dir).isDirectory()) {
+                    dir = root + "/WebSphere/AppServer";
+                }
+                where = "default location";
             }
         }
 
-        if (dir != null) {
+        if (dir == null) {
+            log.debug("Unable to determine " + PROP_INSTALLPATH); 
+            return null;
+        }
+        else {
+            log.debug(PROP_INSTALLPATH + " configured using " + where);
             return dir;
         }
-
-        log.info(PROP_INSTALLPATH +
-                 " not set, defaulting to: " + dir);
-        
-        return dir;
     }
 
     public static boolean autoRT() {
