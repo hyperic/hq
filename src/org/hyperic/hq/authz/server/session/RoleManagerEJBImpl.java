@@ -96,9 +96,9 @@ public class RoleManagerEJBImpl
     private final String SUBJECT_PAGER =
         "org.hyperic.hq.authz.server.session.PagerProcessor_subject";
     private final String ROLE_PAGER =
-        "com.hyperic.hq.authz.server.session.PagerProcessor_role";
+        "org.hyperic.hq.authz.server.session.PagerProcessor_role";
     private final String OWNEDROLE_PAGER =
-        "com.hyperic.hq.authz.server.session.PagerProcessor_ownedRole";
+        "org.hyperic.hq.authz.server.session.PagerProcessor_ownedRole";
     private final String GROUP_PAGER =
         "org.hyperic.hq.authz.server.session.PagerProcessor_resourceGroup";
 
@@ -965,7 +965,7 @@ public class RoleManagerEJBImpl
      * List all Roles in the system, except system roles.
      * @return List a list of OwnedRoleValues that are not system roles
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
+     * @ejb:transaction type="REQUIRED"
      */
     public PageList getAllNonSystemOwnedRoles(AuthzSubjectValue subject,
                                               Integer[] excludeIds,
