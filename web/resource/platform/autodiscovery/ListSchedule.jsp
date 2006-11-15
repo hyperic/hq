@@ -96,10 +96,10 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
       <display:checkboxdecorator name="resources" onclick="ToggleSelection(this, widgetProperties)" styleClass="listMember"/>
     </display:column>
     <display:column width="20%" property="scanName" sort="true" sortAttr="5" 
-                    defaultSort="true" title="resource.autodiscovery.autoDiscoverySchedule.AutoDiscoveryTH" 
+                    title="resource.autodiscovery.autoDiscoverySchedule.AutoDiscoveryTH" 
                     href="/resource/platform/AutoDiscovery.do?mode=edit&rid=${Resource.id}&type=${entityId.type}&sid=${aiSchedule.id}"/>
    <display:column width="16%" property="nextFireTime" title="resource.server.ControlSchedule.ListHeader.NextFire"  
-                   nowrap="true" sort="true" sortAttr="15" defaultSort="false">
+                   nowrap="true" sort="true" sortAttr="15" defaultSort="true">
       <display:datedecorator/>
    </display:column>
     <display:column width="30%" value="${aiSchedule.scheduleValue.scheduleString}"   

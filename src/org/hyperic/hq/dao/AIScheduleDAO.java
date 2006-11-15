@@ -134,4 +134,13 @@ public class AIScheduleDAO extends HibernateDAO
             .setInteger(1, id)
             .list();
     }
+
+    public Collection findByEntityScanName(int type, int id, boolean asc) {
+        String sql="from AISchedule where entityType=? and entityId=? " +
+                   "order by scanName " + (asc ? "asc" : "desc");
+        return getSession().createQuery(sql)
+            .setInteger(0, type)
+            .setInteger(1, id)
+            .list();
+    }
 }

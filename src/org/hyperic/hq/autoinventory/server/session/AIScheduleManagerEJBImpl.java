@@ -210,12 +210,12 @@ public class AIScheduleManagerEJBImpl
             trigger.setVolatility(true);
             
             try {
-                this.log.info("Scheduling job for immediate execution: " + 
+                log.info("Scheduling job for immediate execution: " + 
                               jobDetail);
                 this.scheduler.scheduleJob(jobDetail, trigger);
                 return;
             } catch (SchedulerException e) {
-                this.log.error("Unable to schedule job: " + e.getMessage());
+                log.error("Unable to schedule job: " + e.getMessage());
                 return;
             }
         }
@@ -224,7 +224,7 @@ public class AIScheduleManagerEJBImpl
         try {
             cronStr = ScheduleParser.getCronString(schedule);
         } catch (ScheduleParseException e) {
-            this.log.error("Unable to get cron string: " + e.getMessage());
+            log.error("Unable to get cron string: " + e.getMessage());
             throw new AutoinventoryException(e);
         }
 
@@ -264,7 +264,7 @@ public class AIScheduleManagerEJBImpl
             } catch (ScheduleWillNeverFireException e) {
                 throw e;
             } catch (Exception e) {
-                this.log.error("Unable to schedule job: " + e.getMessage());
+                log.error("Unable to schedule job: " + e.getMessage());
                 throw new AutoinventoryException(e);
             }
         } else {        
@@ -297,11 +297,11 @@ public class AIScheduleManagerEJBImpl
             } catch (ScheduleWillNeverFireException e) {
                 throw e;
             } catch (ParseException e) {
-                this.log.error("Unable to setup cron trigger: " +
+                log.error("Unable to setup cron trigger: " +
                                e.getMessage());
                 throw new AutoinventoryException(e);
             } catch (Exception e) {
-                this.log.error("Unable to schedule job: " + e.getMessage());
+                log.error("Unable to schedule job: " + e.getMessage());
                 throw new AutoinventoryException(e);
             }
         }
@@ -314,27 +314,27 @@ public class AIScheduleManagerEJBImpl
      */
     public PageList findScheduledJobs(AuthzSubjectValue subject, 
                                       AppdefEntityID id, PageControl pc)
-        throws NamingException, FinderException, CreateException
-    {
+        throws FinderException {
         AIScheduleDAO sl =
             DAOFactory.getDAOFactory().getAIScheduleDAO();
         Collection schedule;
 
         // default the sorting to the next fire time
-        pc = PageControl.initDefaults(pc, 
-                                      SortAttribute.CONTROL_NEXTFIRE);
+        pc = PageControl.initDefaults(pc, SortAttribute.CONTROL_NEXTFIRE);
 
         int sortAttr = pc.getSortattribute();
-        switch(sortAttr) {
-          case SortAttribute.CONTROL_NEXTFIRE:
-              schedule = sl.findByEntityFireTime(id.getType(),
-                                                 id.getID(),
-                                                 pc.isAscending());
+        switch (sortAttr) {
+        case SortAttribute.RESOURCE_NAME:
+            schedule = sl.findByEntityScanName(id.getType(), id.getID(),
+                                               pc.isAscending());
+            break;
+        case SortAttribute.CONTROL_NEXTFIRE:
+            schedule = sl.findByEntityFireTime(id.getType(), id.getID(),
+                                               pc.isAscending());
             break;
 
-          default:
-            throw new FinderException("Unknown sort attribute: " +
-                                      sortAttr);
+        default:
+            throw new FinderException("Unknown sort attribute: " + sortAttr);
         }
 
         // The pager will remove any stale data
