@@ -436,17 +436,11 @@ public class TableTag extends TablePropertyTag {
             buf.append( tag.getCellAttributes() );
             buf.append( ">" );
             
-            // Get the value to be displayed for the column
-            
+            // Get the value to be displayed for the column            
             Object value = null;
             if( tag.getValue() != null ) {
-                try {
-                    value = evalAttr("value", tag.getValue(), Object.class);
-                }
-                catch (NullAttributeException ne) {
-                 throw new JspException("bean " + tag.getValue()+
-                    	   " not found");
-                }
+                value = evalAttr("value", tag.getValue(), Object.class,
+                                 tag.getNulls());
              } else {
                 if ( tag.getProperty().equals( "ff" ) ) {
                     value = String.valueOf( rowcnt );
@@ -470,16 +464,6 @@ public class TableTag extends TablePropertyTag {
                 }
             }
 
-            // By default, we show null values as empty strings, unless the
-            // user tells us otherwise.
-            if( value == null || "".equals(value.toString().trim()) ) {
-                if( tag.getNulls() == null && prop.getProperty("basic.htmlNullValue") != null) {
-                    value = prop.getProperty( "basic.htmlNullValue" );
-                } else {
-                    value = tag.getNulls();
-                }
-            }
-            
             // String to hold what's left over after value is chopped
             String leftover = "";
             boolean chopped = false;
@@ -723,16 +707,9 @@ public class TableTag extends TablePropertyTag {
                 continue;
             }
             else if (tag.getHeaderColspan() != null) {
-                Integer colspan = null;
-                try {
-                    colspan = (Integer) evalAttr("headerColspan",
-                                                 tag.getHeaderColspan(),
-                                                 Integer.class);
-                }
-                catch (NullAttributeException ne) {
-                    throw new JspException("bean " + tag.getHeaderColspan() +
-                                           " not found");
-                }
+                Integer colspan = (Integer) evalAttr("headerColspan",
+                                                     tag.getHeaderColspan(),
+                                                     Integer.class);
 
                 // start the colspan
                 colsToSkip = colspan.intValue();
@@ -789,15 +766,9 @@ public class TableTag extends TablePropertyTag {
                 buf.append( " class=\"tableRowInactive\">" );
             }
 
-            String header = null;
-            try {
-                header =
-                    (String) evalAttr("title", tag.getTitle(), String.class);
-            }
-            catch (NullAttributeException ne) {
-                throw new JspException("bean " + tag.getTitle() +
-                                       " not found");
-            }
+            String header = 
+                (String) evalAttr("title", tag.getTitle(), String.class);
+
             if( header == null ) {
                 if (tag.getIsLocalizedTitle()) {
                     header = StringUtil.toUpperCaseAt( tag.getProperty(), 0 );
@@ -1498,14 +1469,23 @@ public class TableTag extends TablePropertyTag {
      * @exception NullAttributeException Thrown if the value is null.
      */
     private Object evalAttr(String name, String value, Class type)
-    throws JspTagException {
-        
+        throws JspTagException {
+        return evalAttr(name, value, type, null);
+    }
+
+    private Object evalAttr(String name, String value, Class type, Object nulls)
+        throws JspTagException {
+            
         try {
             return ExpressionUtil.evalNotNull( "display", name, value,
             type, this, pageContext );
         }
         catch (NullAttributeException ne) {
-            throw new JspTagException( "Attribute " + name + " not found in TableTag");
+            if (nulls != null) {
+                return nulls;
+            }
+            throw new JspTagException( "Attribute " + name +
+                                       " not found in TableTag");
         }
         catch (JspException je) {
             throw new JspTagException( je.toString() );
