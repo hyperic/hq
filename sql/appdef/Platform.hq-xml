@@ -88,13 +88,11 @@
     </many-to-one>
 
     <bag name="ips" table="EAM_IP">
-      <cache usage="read-write" />
       <key column="PLATFORM_ID" />
       <one-to-many class="org.hyperic.hq.appdef.Ip" />
     </bag>
 
     <bag name="servers" table="EAM_SERVER">
-      <cache usage="read-write" />
       <key column="PLATFORM_ID" />
       <one-to-many class="Server" />
     </bag>

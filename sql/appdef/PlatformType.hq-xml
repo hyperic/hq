@@ -61,13 +61,11 @@
     </property>
 
     <bag name="serverTypesBag" table="EAM_PLATFORM_SERVER_TYPE_MAP">
-      <cache usage="read-write" />
       <key column="PLATFORM_TYPE_ID" not-null="false" />
       <many-to-many class="ServerType" column="SERVER_TYPE_ID" />
     </bag>
 
     <bag name="platformBag" table="EAM_PLATFORM">
-      <cache usage="read-write" />
       <key column="PLATFORM_TYPE_ID" />
       <one-to-many class="Platform" />
     </bag>

@@ -67,7 +67,6 @@
     </set>
 
     <bag name="services" table="EAM_SERVICE">
-      <cache usage="read-write" />
       <key column="SERVICE_TYPE_ID" />
       <one-to-many class="Service" />
     </bag>
