@@ -1,13 +1,14 @@
 package org.hyperic.hq.dao;
 
-import org.hibernate.Session;
-import org.hyperic.hq.autoinventory.AISchedule;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.scheduler.ScheduleValue;
-
-import javax.ejb.CreateException;
 import java.io.IOException;
 import java.util.Collection;
+
+import javax.ejb.CreateException;
+
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.autoinventory.AISchedule;
+import org.hyperic.hq.scheduler.ScheduleValue;
 
 /*
 * NOTE: This copyright does *not* cover user programs that use HQ
@@ -38,9 +39,8 @@ import java.util.Collection;
  */
 public class AIScheduleDAO extends HibernateDAO
 {
-    public AIScheduleDAO(Session session)
-    {
-        super(AISchedule.class, session);
+    public AIScheduleDAO(DAOFactory f) {
+        super(AISchedule.class, f);
     }
 
     public AISchedule findById(Integer id)

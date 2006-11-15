@@ -25,16 +25,15 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import org.hibernate.Session;
-
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
 /**
  * CRUD methods, finders, etc. for MonitorableType
  */
 public class MonitorableTypeDAO extends HibernateDAO {
-    public MonitorableTypeDAO(Session session) {
-        super(MonitorableType.class, session);
+    public MonitorableTypeDAO(DAOFactory f) {
+        super(MonitorableType.class, f);
     }
 
     public MonitorableType findById(Integer id) {

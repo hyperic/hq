@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.dao;
 
-import org.hibernate.Session;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -34,10 +34,9 @@ import org.hyperic.util.config.EncodingException;
  * CRUD methods, finders, etc. for ConfigResponseDAO
  */
 public class ConfigResponseDAO extends HibernateDAO
-{
-    public ConfigResponseDAO(Session session)
-    {
-        super(ConfigResponseDB.class, session);
+{ 
+    public ConfigResponseDAO(DAOFactory f) {
+        super(ConfigResponseDB.class, f);
     }
 
     public ConfigResponseDB findById(Integer id)

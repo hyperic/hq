@@ -25,16 +25,15 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import org.hibernate.Session;
-
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
 /**
  * CRUD methods, finders, etc. for MetricProblem
  */
 public class MetricProblemDAO extends HibernateDAO {
-    public MetricProblemDAO(Session session) {
-        super(MetricProblem.class, session);
+    public MetricProblemDAO(DAOFactory f) {
+        super(MetricProblem.class, f);
     }
 
     public MetricProblem findById(MeasurementDataId id) {

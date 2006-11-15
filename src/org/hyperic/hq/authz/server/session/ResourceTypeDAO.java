@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.authz.server.session;
 
-import org.hibernate.Session;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
@@ -36,20 +36,21 @@ import org.hyperic.hq.dao.HibernateDAO;
  */
 public class ResourceTypeDAO extends HibernateDAO
 {
-    public ResourceTypeDAO(Session session) {
-        super(ResourceType.class, session);
+    public ResourceTypeDAO(DAOFactory f) {
+        super(ResourceType.class, f);
     }
 
     public ResourceType create(AuthzSubject creator,
-                               ResourceTypeValue createInfo) {
+                               ResourceTypeValue createInfo)
+    {
         ResourceType resType = new ResourceType(createInfo);
         save(resType);
 
         // We have to create a new resource
         ResourceValue resValue = new ResourceValue();
 
-        ResourceType typeResType = new ResourceTypeDAO(getSession())
-            .findByName(AuthzConstants.typeResourceTypeName);
+        ResourceType typeResType = findByName(AuthzConstants.typeResourceTypeName); 
+            
         if (typeResType == null) {
             throw new IllegalArgumentException("Resource Type not found: " +
                                                AuthzConstants.typeResourceTypeName);
@@ -58,11 +59,12 @@ public class ResourceTypeDAO extends HibernateDAO
 
         resValue.setInstanceId(resType.getId());
         resValue.setName(resType.getName());
-        Resource resource =
-            new ResourceDAO(getSession()).create(creator, resValue);
+        Resource resource = 
+            DAOFactory.getDAOFactory().getResourceDAO().create(creator, resValue);
         resType.setResource(resource);
 
-        ResourceGroup authzGroup = new ResourceGroupDAO(getSession())
+        ResourceGroup authzGroup = 
+            DAOFactory.getDAOFactory().getResourceGroupDAO()
             .findByName(AuthzConstants.authzResourceGroupName);
         if (authzGroup == null) {
             throw new IllegalArgumentException("Resource Group not found: " +

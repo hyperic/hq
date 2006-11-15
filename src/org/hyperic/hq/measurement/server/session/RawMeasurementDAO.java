@@ -25,19 +25,19 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import org.hibernate.Session;
+import java.util.List;
+
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.dao.HibernateDAO;
-
-import java.util.List;
 
 /**
  * CRUD methods, finders, etc. for RawMeasurement
  */
 public class RawMeasurementDAO extends HibernateDAO {
-    public RawMeasurementDAO(Session session) {
-        super(RawMeasurement.class, session);
+    public RawMeasurementDAO(DAOFactory f) {
+        super(RawMeasurement.class, f);
     }
 
     public RawMeasurement findById(Integer id) {

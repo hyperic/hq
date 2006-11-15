@@ -3,11 +3,10 @@ package org.hyperic.hq.control.server.session;
 import java.util.Collection;
 
 import org.hibernate.Criteria;
-import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.control.server.session.ControlHistory;
 import org.hyperic.hq.dao.HibernateDAO;
 
 /*
@@ -39,9 +38,8 @@ import org.hyperic.hq.dao.HibernateDAO;
  */
 public class ControlHistoryDAO extends HibernateDAO
 {
-    public ControlHistoryDAO(Session session)
-    {
-        super(ControlHistory.class, session);
+    public ControlHistoryDAO(DAOFactory f) {
+        super(ControlHistory.class, f);
     }
 
     public ControlHistory findById(Integer id)

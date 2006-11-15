@@ -7,8 +7,8 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.control.server.session.ControlSchedule;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.scheduler.ScheduleValue;
 
@@ -41,9 +41,8 @@ import org.hyperic.hq.scheduler.ScheduleValue;
  */
 public class ControlScheduleDAO extends HibernateDAO
 {
-    public ControlScheduleDAO(Session session)
-    {
-        super(ControlSchedule.class, session);
+    public ControlScheduleDAO(DAOFactory f) {
+        super(ControlSchedule.class, f);
     }
 
     public ControlSchedule findById(Integer id)
@@ -98,10 +97,6 @@ public class ControlScheduleDAO extends HibernateDAO
         }
     }
 
-    public ControlScheduleDAO(Class persistentClass, Session session)
-    {
-        super(persistentClass, session);
-    }
 
     public Collection findByFireTime(boolean asc)
     {

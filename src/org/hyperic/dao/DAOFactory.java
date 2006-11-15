@@ -80,13 +80,7 @@ import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
 import org.hyperic.hq.measurement.server.session.RawMeasurementDAO;
 import org.hyperic.hq.measurement.server.session.ScheduleRevNumDAO;
 
-public abstract class DAOFactory
-{
-    public static final int HIBERNATE = 1;
-    public static final int HIBERNATE_MOCKTEST = 2;
-
-    protected static int DEFAULT = HIBERNATE;
-
+public abstract class DAOFactory {
     public abstract Session getCurrentSession();
     
     // Appdef DAOs

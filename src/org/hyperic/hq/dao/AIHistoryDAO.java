@@ -1,13 +1,12 @@
 package org.hyperic.hq.dao;
 
-import org.hibernate.Session;
-import org.hyperic.hq.autoinventory.AIHistory;
-import org.hyperic.hq.autoinventory.ScanConfigurationCore;
-import org.hyperic.hq.autoinventory.AutoinventoryException;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-
-import javax.ejb.CreateException;
 import java.util.Collection;
+
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.autoinventory.AIHistory;
+import org.hyperic.hq.autoinventory.AutoinventoryException;
+import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 
 /*
 * NOTE: This copyright does *not* cover user programs that use HQ
@@ -38,9 +37,8 @@ import java.util.Collection;
  */
 public class AIHistoryDAO extends HibernateDAO
 {
-    public AIHistoryDAO(Session session)
-    {
-        super(AIHistory.class, session);
+    public AIHistoryDAO(DAOFactory f) {
+        super(AIHistory.class, f);
     }
 
     public AIHistory findById(Integer id)

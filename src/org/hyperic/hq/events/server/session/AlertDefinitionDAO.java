@@ -26,13 +26,13 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.List;
 
-import org.hibernate.Session;
-import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.dao.HibernateDAO;
 
 public class AlertDefinitionDAO extends HibernateDAO {
-    public AlertDefinitionDAO(Session session) {
-        super(AlertDefinition.class, session);
+    public AlertDefinitionDAO(DAOFactory f) {
+        super(AlertDefinition.class, f);
     }
 
     void remove(AlertDefinition def) {

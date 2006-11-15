@@ -39,8 +39,8 @@ import org.hyperic.dao.DAOFactory;
  */
 public class ResourceGroupDAO extends HibernateDAO
 {
-    public ResourceGroupDAO(Session session) {
-        super(ResourceGroup.class, session);
+    public ResourceGroupDAO(DAOFactory f) {
+        super(ResourceGroup.class, f);
     }
 
     public ResourceGroup create(AuthzSubject creator,
@@ -57,7 +57,8 @@ public class ResourceGroupDAO extends HibernateDAO
         // We have to create a new resource
         ResourceValue resValue = new ResourceValue();
 
-        ResourceType resType = new ResourceTypeDAO(getSession())
+        ResourceType resType = 
+            DAOFactory.getDAOFactory().getResourceTypeDAO()
             .findByName(AuthzConstants.groupResourceTypeName);
         if (resType == null) {
             throw new IllegalArgumentException("ResourceType not found " +
@@ -68,8 +69,9 @@ public class ResourceGroupDAO extends HibernateDAO
         resValue.setInstanceId(resGrp.getId());
         resValue.setName(resGrp.getName());
         resValue.setSystem(isSystem);
-        Resource resource =
-            new ResourceDAO(getSession()).create(creator, resValue);
+        Resource resource = 
+            DAOFactory.getDAOFactory().getResourceDAO().create(creator, 
+                                                               resValue);
         resGrp.setResource(resource);
 
         return resGrp;

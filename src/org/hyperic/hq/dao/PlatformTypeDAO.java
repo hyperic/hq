@@ -25,17 +25,16 @@
 
 package org.hyperic.hq.dao;
 
-import org.hibernate.Session;
+import java.util.Collection;
+
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 
-import java.util.Collection;
-
 public class PlatformTypeDAO extends HibernateDAO
 {
-    public PlatformTypeDAO(Session session)
-    {
-        super(PlatformType.class, session);
+    public PlatformTypeDAO(DAOFactory f) {
+        super(PlatformType.class, f);
     }
 
     public PlatformType findById(Integer id)

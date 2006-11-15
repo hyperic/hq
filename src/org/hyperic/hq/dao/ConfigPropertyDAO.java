@@ -1,9 +1,9 @@
 package org.hyperic.hq.dao;
 
-import org.hibernate.Session;
-import org.hyperic.hq.common.ConfigProperty;
-
 import java.util.Collection;
+
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.common.ConfigProperty;
 
 /*
 * NOTE: This copyright does *not* cover user programs that use HQ
@@ -34,9 +34,8 @@ import java.util.Collection;
  */
 public class ConfigPropertyDAO extends HibernateDAO
 {
-    public ConfigPropertyDAO(Session session)
-    {
-        super(ConfigProperty.class, session);
+    public ConfigPropertyDAO(DAOFactory f) {
+        super(ConfigProperty.class, f);
     }
 
     public ConfigProperty findById(Integer id)

@@ -28,16 +28,16 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.hibernate.Criteria;
-import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.events.shared.EventLogValue;
 
 public class EventLogDAO extends HibernateDAO {
-    public EventLogDAO(Session session) {
-        super(EventLog.class, session);
+    public EventLogDAO(DAOFactory f) {
+        super(EventLog.class, f);
     }
 
     public EventLog findById(Integer id) {

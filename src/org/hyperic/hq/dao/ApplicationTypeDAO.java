@@ -1,12 +1,11 @@
 package org.hyperic.hq.dao;
 
-import org.hibernate.Session;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
-import org.hyperic.dao.DAOFactory;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /*
 * NOTE: This copyright does *not* cover user programs that use HQ
@@ -40,9 +39,8 @@ public class ApplicationTypeDAO extends HibernateDAO
 {
     private static final Log log = LogFactory.getLog(ApplicationTypeDAO.class);
 
-    public ApplicationTypeDAO(Session session)
-    {
-        super(ApplicationType.class, session);
+    public ApplicationTypeDAO(DAOFactory f) {
+        super(ApplicationType.class, f);
     }
 
     public ApplicationType findById(Integer id)

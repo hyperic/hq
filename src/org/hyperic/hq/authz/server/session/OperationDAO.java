@@ -26,7 +26,6 @@
 package org.hyperic.hq.authz.server.session;
 
 
-import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.OperationValue;
@@ -37,8 +36,8 @@ import org.hyperic.hq.dao.HibernateDAO;
  */
 public class OperationDAO extends HibernateDAO
 {
-    public OperationDAO(Session session) {
-        super(Operation.class, session);
+    public OperationDAO(DAOFactory f) {
+        super(Operation.class, f);
     }
 
     public Operation create(OperationValue createInfo) {

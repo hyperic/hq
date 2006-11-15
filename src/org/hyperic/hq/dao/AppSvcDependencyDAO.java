@@ -1,10 +1,10 @@
 package org.hyperic.hq.dao;
 
-import org.hibernate.Session;
-import org.hyperic.hq.appdef.AppSvcDependency;
-import org.hyperic.hq.appdef.AppService;
-
 import java.util.Collection;
+
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.AppService;
+import org.hyperic.hq.appdef.AppSvcDependency;
 
 /*
 * NOTE: This copyright does *not* cover user programs that use HQ
@@ -35,9 +35,8 @@ import java.util.Collection;
  */
 public class AppSvcDependencyDAO extends HibernateDAO
 {
-    public AppSvcDependencyDAO(Session session)
-    {
-        super(AppSvcDependency.class, session);
+    public AppSvcDependencyDAO(DAOFactory f) {
+        super(AppSvcDependency.class, f);
     }
 
     public AppSvcDependency findById(Integer id)

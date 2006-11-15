@@ -27,7 +27,6 @@ package org.hyperic.hq.authz.server.session;
 
 import java.util.Collection;
 
-import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -39,9 +38,8 @@ import org.hyperic.hq.dao.HibernateDAO;
  */
 public class AuthzSubjectDAO extends HibernateDAO
 {
-    public AuthzSubjectDAO(Session session)
-    {
-        super(AuthzSubject.class, session);
+    public AuthzSubjectDAO(DAOFactory f) {
+        super(AuthzSubject.class, f);
     }
 
     public AuthzSubject create(AuthzSubject creator,

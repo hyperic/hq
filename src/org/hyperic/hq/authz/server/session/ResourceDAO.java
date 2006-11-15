@@ -48,8 +48,8 @@ public class ResourceDAO extends HibernateDAO
 {
     Log log = LogFactory.getLog(ResourceDAO.class);
 
-    public ResourceDAO(Session session) {
-        super(Resource.class, session);
+    public ResourceDAO(DAOFactory f) { 
+        super(Resource.class, f);
     }
 
     public Resource create(AuthzSubject creator, ResourceValue createInfo) {
@@ -64,14 +64,14 @@ public class ResourceDAO extends HibernateDAO
         }
         Resource resource = new Resource(createInfo);
 
-        ResourceType resType =
-            new ResourceTypeDAO(getSession()).findById(typeValue.getId());
+        ResourceType resType = DAOFactory.getDAOFactory().getResourceTypeDAO()
+            .findById(typeValue.getId());
         resource.setResourceType(resType);
 
         /* set owner */
         AuthzSubjectValue ownerValue = createInfo.getAuthzSubjectValue();
         if (ownerValue != null) {
-            creator = (new AuthzSubjectDAO(getSession()))
+            creator = DAOFactory.getDAOFactory().getAuthzSubjectDAO() 
                 .findById(ownerValue.getId());
         }
         resource.setOwner(creator);
@@ -80,7 +80,8 @@ public class ResourceDAO extends HibernateDAO
         /* add it to the root resourcegroup */
         /* This is done as the overlord, since it is meant to be an
            anonymous, priviledged operation */
-        ResourceGroup authzGroup = new ResourceGroupDAO(getSession())
+        ResourceGroup authzGroup = 
+            DAOFactory.getDAOFactory().getResourceGroupDAO() 
             .findByName(AuthzConstants.rootResourceGroupName);
         if (authzGroup == null) {
             throw new IllegalArgumentException("can not find Resource Group: "+

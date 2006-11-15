@@ -1,10 +1,10 @@
 package org.hyperic.hq.dao;
 
-import org.hibernate.Session;
-import org.hyperic.hq.autoinventory.AIService;
-import org.hyperic.hq.appdef.shared.AIServiceValue;
-
 import java.util.Collection;
+
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.shared.AIServiceValue;
+import org.hyperic.hq.autoinventory.AIService;
 
 /*
 * NOTE: This copyright does *not* cover user programs that use HQ
@@ -35,9 +35,8 @@ import java.util.Collection;
  */
 public class AIServiceDAO extends HibernateDAO
 {
-    public AIServiceDAO(Session session)
-    {
-        super(AIService.class, session);
+    public AIServiceDAO(DAOFactory f) {
+        super(AIService.class, f);
     }
 
     public AIService findById(Integer id)

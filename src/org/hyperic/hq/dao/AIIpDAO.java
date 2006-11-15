@@ -1,8 +1,8 @@
 package org.hyperic.hq.dao;
 
-import org.hibernate.Session;
-import org.hyperic.hq.autoinventory.AIIp;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AIIpValue;
+import org.hyperic.hq.autoinventory.AIIp;
 
 /*
 * NOTE: This copyright does *not* cover user programs that use HQ
@@ -33,9 +33,8 @@ import org.hyperic.hq.appdef.shared.AIIpValue;
  */
 public class AIIpDAO extends HibernateDAO
 {
-    public AIIpDAO(Session session)
-    {
-        super(AIIp.class, session);
+    public AIIpDAO(DAOFactory f) {
+        super(AIIp.class, f);
     }
 
     public AIIp findById(Integer id)

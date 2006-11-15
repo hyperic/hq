@@ -25,19 +25,18 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import org.hibernate.Session;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateLiteValue;
 import org.hyperic.hq.product.MeasurementInfo;
-import org.hyperic.hq.dao.HibernateDAO;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Iterator;
-import java.util.HashSet;
 
 /**
  * CRUD methods, finders, etc. for MeasurementTemplate
@@ -46,8 +45,8 @@ public class MeasurementTemplateDAO extends HibernateDAO {
     private final static Log log =
         LogFactory.getLog(MeasurementTemplateDAO.class);
 
-    public MeasurementTemplateDAO(Session session) {
-        super(MeasurementTemplate.class, session);
+    public MeasurementTemplateDAO(DAOFactory f) {
+        super(MeasurementTemplate.class, f);
     }
 
     public MeasurementTemplate findById(Integer id) {

@@ -28,7 +28,7 @@ package org.hyperic.hq.dao;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.hibernate.Session;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
@@ -37,17 +37,17 @@ import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
 import org.hyperic.hq.authz.server.session.Role;
-import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
+import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.hq.authz.shared.RoleValue;
 
 /**
  * CRUD methods, finders, etc. for Role
  */
 public class RoleDAO extends HibernateDAO {
-    public RoleDAO(Session session) {
-        super(Role.class, session);
+    public RoleDAO(DAOFactory f) {
+        super(Role.class, f);
     }
 
     public Role create(AuthzSubject creator, RoleValue createInfo) {
@@ -55,7 +55,8 @@ public class RoleDAO extends HibernateDAO {
         // Save it at this point to get an ID
         save(role);
 
-        ResourceType resType = (new ResourceTypeDAO(getSession()))
+        ResourceType resType = 
+            DAOFactory.getDAOFactory().getResourceTypeDAO()
             .findByName(AuthzConstants.roleResourceTypeName);
         if (resType == null) {
             throw new IllegalArgumentException(
@@ -66,10 +67,12 @@ public class RoleDAO extends HibernateDAO {
         rValue.setResourceTypeValue(resType.getResourceTypeValue());
         rValue.setInstanceId(role.getId());
         Resource myResource =
-            (new ResourceDAO(getSession())).create(creator, rValue);
+            DAOFactory.getDAOFactory().getResourceDAO()
+            .create(creator, rValue);
         role.setResource(myResource);
 
-        ResourceGroupDAO resourceGroupDAO = new ResourceGroupDAO(getSession());
+        ResourceGroupDAO resourceGroupDAO = 
+            DAOFactory.getDAOFactory().getResourceGroupDAO();
         HashSet groups = new HashSet(2);
 
         /**

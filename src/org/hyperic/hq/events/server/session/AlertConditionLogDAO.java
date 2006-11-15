@@ -24,12 +24,12 @@
  */
 package org.hyperic.hq.events.server.session;
 
-import org.hibernate.Session;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
 public class AlertConditionLogDAO extends HibernateDAO {
-    public AlertConditionLogDAO(Session session) {
-        super(AlertConditionLog.class, session);
+    public AlertConditionLogDAO(DAOFactory f) {
+        super(AlertConditionLog.class, f);
     }
 
     public AlertConditionLog findById(Integer id) {

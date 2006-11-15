@@ -26,12 +26,12 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.List;
 
-import org.hibernate.Session;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
 public class ActionDAO extends HibernateDAO {
-    public ActionDAO(Session session) {
-        super(Action.class, session);
+    public ActionDAO(DAOFactory f) {
+        super(Action.class, f);
     }
 
     public Action findById(Integer id) {

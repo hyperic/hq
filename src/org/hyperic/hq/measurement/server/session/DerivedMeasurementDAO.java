@@ -25,20 +25,20 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import org.hibernate.Session;
+import java.util.List;
+
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.util.jdbc.DBUtil;
 
-import java.util.List;
-
 /**
  * CRUD methods, finders, etc. for DerivedMeasurement
  */
 public class DerivedMeasurementDAO extends HibernateDAO {
-    public DerivedMeasurementDAO(Session session) {
-        super(DerivedMeasurement.class, session);
+    public DerivedMeasurementDAO(DAOFactory f) {
+        super(DerivedMeasurement.class, f);
     }
 
     public DerivedMeasurement findById(Integer id) {

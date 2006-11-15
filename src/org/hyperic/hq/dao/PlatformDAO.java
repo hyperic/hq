@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.Ip;
@@ -46,8 +45,8 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
  * CRUD methods, finders, etc. for Platform
  */
 public class PlatformDAO extends HibernateDAO {
-    public PlatformDAO(Session session) {
-        super(Platform.class, session);
+    public PlatformDAO(DAOFactory f) {
+        super(Platform.class, f);
     }
 
     public Platform findById(Integer id) {
@@ -322,12 +321,13 @@ public class PlatformDAO extends HibernateDAO {
     }
 
     public Resource findVirtualByInstanceId(Integer id) {
-        VirtualDAO dao = new VirtualDAO(getSession());
+        VirtualDAO dao = DAOFactory.getDAOFactory().getVirtualDAO(); 
+            
         return dao.findVirtualByInstanceId(id, AuthzConstants.platformResType);
     }
 
     public Collection findVirtualByProcessId(Integer id) {
-        VirtualDAO dao = new VirtualDAO(getSession());
+        VirtualDAO dao = DAOFactory.getDAOFactory().getVirtualDAO(); 
         Collection resources =
             dao.findVirtualByProcessId(id, AuthzConstants.platformResType);
         List platforms = new ArrayList();
@@ -339,7 +339,7 @@ public class PlatformDAO extends HibernateDAO {
     }
 
     public Collection findVirtualByPysicalId(Integer id) {
-        VirtualDAO dao = new VirtualDAO(getSession());
+        VirtualDAO dao = DAOFactory.getDAOFactory().getVirtualDAO(); 
         Collection resources =
             dao.findVirtualByPysicalId(id, AuthzConstants.platformResType);
         List platforms = new ArrayList();

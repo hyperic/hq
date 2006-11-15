@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.dao;
 
-import org.hibernate.Session;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.Cprop;
 
 /**
@@ -33,9 +33,8 @@ import org.hyperic.hq.appdef.Cprop;
  */
 public class CpropDAO extends HibernateDAO
 {
-    public CpropDAO(Session session)
-    {
-        super(Cprop.class, session);
+    public CpropDAO(DAOFactory f) {
+        super(Cprop.class, f);
     }
 
     public Cprop findById(Integer Id)

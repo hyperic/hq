@@ -25,19 +25,18 @@
 
 package org.hyperic.hq.dao;
 
-import org.hibernate.Session;
-import org.hyperic.hq.appdef.CpropKey;
-
 import java.util.Collection;
+
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.CpropKey;
 
 /**
  * CRUD methods, finders, etc. for CpropKey
  */
 public class CpropKeyDAO extends HibernateDAO
 {
-    public CpropKeyDAO(Session session)
-    {
-        super(CpropKey.class, session);
+    public CpropKeyDAO(DAOFactory f) {
+        super(CpropKey.class, f);
     }
 
     protected CpropKey findById(Integer id)

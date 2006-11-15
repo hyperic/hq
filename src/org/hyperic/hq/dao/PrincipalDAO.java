@@ -25,20 +25,19 @@
 
 package org.hyperic.hq.dao;
 
-import org.hibernate.Session;
+import java.util.Collection;
+
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.auth.Principal;
 import org.jboss.security.Util;
-
-import java.util.Collection;
 
 /**
  *
  */
 public class PrincipalDAO extends HibernateDAO
 {
-    public PrincipalDAO(Session session)
-    {
-        super(Principal.class, session);
+    public PrincipalDAO(DAOFactory f) {
+        super(Principal.class, f);
     }
 
     public Principal findById(Integer id)

@@ -26,15 +26,14 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.List;
 
-import org.hibernate.Session;
-import org.hibernate.Query;
-import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.util.jdbc.DBUtil;
 
 public class AlertDAO extends HibernateDAO {
-    public AlertDAO(Session session) {
-        super(Alert.class, session);
+    public AlertDAO(DAOFactory f) {
+        super(Alert.class, f);
     }
 
     public Alert findById(Integer id) {

@@ -25,17 +25,17 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import org.hibernate.Session;
-import org.hyperic.hq.dao.HibernateDAO;
-
 import java.util.List;
+
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.dao.HibernateDAO;
 
 /**
  * CRUD methods, finders, etc. for Baseline
  */
 public class BaselineDAO extends HibernateDAO {
-    public BaselineDAO(Session session) {
-        super(Baseline.class, session);
+    public BaselineDAO(DAOFactory f) {
+        super(Baseline.class, f);
     }
 
     public Baseline findById(Integer id) {

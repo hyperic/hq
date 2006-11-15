@@ -25,11 +25,12 @@
 
 package org.hyperic.hq.dao;
 
-import org.hibernate.LockMode;
-import org.hibernate.Session;
-
 import java.io.Serializable;
 import java.util.Collection;
+
+import org.hibernate.LockMode;
+import org.hibernate.Session;
+import org.hyperic.dao.DAOFactory;
 
 /**
  * Hibernate Data Access Object
@@ -37,90 +38,68 @@ import java.util.Collection;
  * This class should actually be implemented with J2SE 5 Generics,
  * but we have to support JDK 1.4, :(
  */
-public abstract class HibernateDAO
-{
-    private Class persistentClass;
-    private Session session;
+public abstract class HibernateDAO {
+    private Class      _persistentClass;
+    private DAOFactory _daoFactory;
 
-    protected HibernateDAO(Class persistentClass, Session session)
-    {
-        this.persistentClass = persistentClass;
-        this.session = session;
+    protected HibernateDAO(Class persistentClass, DAOFactory f) {
+        _persistentClass = persistentClass;
+        _daoFactory      = f;
     }
 
-    public Class getPersistentClass()
-    {
-        return persistentClass;
+    public Class getPersistentClass() {
+        return _persistentClass;
     }
 
-    protected void setSession(Session session)
-    {
-        this.session = session;
+    public Session getSession() {
+        return _daoFactory.getCurrentSession();
     }
 
-    public Session getSession()
-    {
-        if (session == null) {
-            throw new IllegalStateException("Session not set.");
-        }
-        return session;
-    }
-
-    protected Object findById(Serializable id)
-    {
+    protected Object findById(Serializable id) {
         return findById(id, false);
     }
 
-    protected Object findById(Serializable id, boolean lock)
-    {
+    protected Object findById(Serializable id, boolean lock) {
         return lock
                ? getSession().load(getPersistentClass(), id, LockMode.UPGRADE)
                : getSession().load(getPersistentClass(), id);
     }
 
-    public Collection findAll()
-    {
+    public Collection findAll() {
         return getSession().createCriteria(getPersistentClass()).list();
     }
 
-    public int size()
-    {
+    public int size() {
         return ((Integer)getSession()
             .createQuery("select count(*) from "+getPersistentClass().getName())
             .uniqueResult())
             .intValue();
     }
 
-    public int size(Collection coll)
-    {
+    public int size(Collection coll) {
         return ((Integer)getSession()
             .createFilter(coll, "select count(*)")
             .uniqueResult())
             .intValue();
     }
 
-    protected void evict(Object entity)
-    {
+    protected void evict(Object entity) {
         getSession().evict(entity);
     }
 
-    protected Object merge(Object entity)
-    {
+    protected Object merge(Object entity) {
         return getSession().merge(entity);
     }
 
-    protected void save(Object entity)
-    {
+    protected void save(Object entity) {
         getSession().saveOrUpdate(entity);
     }
 
-    protected void update(Object entity)
-    {
+    protected void update(Object entity) {
         getSession().update(entity);
     }
 
-    protected void remove(Object entity)
-    {
+    protected void remove(Object entity) {
         getSession().delete(entity);
     }
 }

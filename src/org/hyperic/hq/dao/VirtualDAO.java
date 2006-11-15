@@ -27,7 +27,7 @@ package org.hyperic.hq.dao;
 
 import java.util.Collection;
 
-import org.hibernate.Session;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.server.session.Virtual;
@@ -37,8 +37,8 @@ import org.hyperic.hq.authz.shared.ResourceValue;
  * CRUD methods, finders, etc. for Virtual
  */
 public class VirtualDAO extends HibernateDAO {
-    public VirtualDAO(Session session) {
-        super(Virtual.class, session);
+    public VirtualDAO(DAOFactory f) {
+        super(Virtual.class, f);
     }
 
     public void evict(Virtual entity) {
@@ -58,7 +58,8 @@ public class VirtualDAO extends HibernateDAO {
     }
     
     public void createVirtual(ResourceValue res, Integer processId) {
-        Resource resource = new ResourceDAO(getSession()).findById(res.getId());
+        Resource resource = 
+            DAOFactory.getDAOFactory().getResourceDAO().findById(res.getId());
         Virtual virt = new Virtual();
         virt.setResource(resource);
         virt.setProcessId(processId);

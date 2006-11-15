@@ -1,19 +1,18 @@
 package org.hyperic.hq.dao;
 
-import org.hibernate.Session;
-import org.hyperic.hq.appdef.ServiceCluster;
-import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.shared.ServiceClusterValue;
-import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
-import org.hyperic.hq.appdef.shared.AppSvcClustIncompatSvcException;
-import org.hyperic.dao.DAOFactory;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import java.util.List;
-import java.util.Collection;
-import java.util.Set;
-import java.util.HashSet;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.ServiceCluster;
+import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
+import org.hyperic.hq.appdef.shared.AppSvcClustIncompatSvcException;
+import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 
 /*
 * NOTE: This copyright does *not* cover user programs that use HQ
@@ -43,13 +42,11 @@ import java.util.HashSet;
 /**
  * CRUD methods
  */
-public class ServiceClusterDAO extends HibernateDAO
-{
+public class ServiceClusterDAO extends HibernateDAO {
     private static final Log log = LogFactory.getLog(ServiceClusterDAO.class);
 
-    public ServiceClusterDAO(Session session)
-    {
-        super(ServiceCluster.class, session);
+    public ServiceClusterDAO(DAOFactory f) { 
+        super(ServiceCluster.class, f);
     }
 
     public ServiceCluster findById(Integer id)
@@ -85,7 +82,7 @@ public class ServiceClusterDAO extends HibernateDAO
         sc.setGroupId(scv.getGroupId());
 
         Set services = new HashSet(serviceIds.size());
-        ServiceDAO dao = new ServiceDAO(getSession());
+        ServiceDAO dao = DAOFactory.getDAOFactory().getServiceDAO();
         for (int i = 0; i < serviceIds.size(); i++) {
             services.add(dao.findById((Integer) serviceIds.get(i)));
         }
@@ -97,7 +94,6 @@ public class ServiceClusterDAO extends HibernateDAO
 
     /**
      * @deprecated use findAll_orderName()
-     * @return
      */
     public Collection findAll_orderName_asc()
     {
@@ -106,7 +102,6 @@ public class ServiceClusterDAO extends HibernateDAO
 
     /**
      * @deprecated use findAll_orderName()
-     * @return
      */
     public Collection findAll_orderName_desc()
     {
@@ -130,7 +125,6 @@ public class ServiceClusterDAO extends HibernateDAO
 
     /**
      * Add a service to this cluster
-     * @param serviceId
      * @throws AppSvcClustDuplicateAssignException - if the service is already
                                                      assigned to a cluster
      * @throws AppSvcClustIncompatSvcException     - If service is incompatible

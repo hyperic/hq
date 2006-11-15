@@ -25,7 +25,13 @@
 
 package org.hyperic.hq.dao;
 
-import org.hibernate.Session;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.AppSvcDependency;
 import org.hyperic.hq.appdef.server.session.Application;
@@ -33,15 +39,8 @@ import org.hyperic.hq.appdef.server.session.ApplicationType;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
-import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.appdef.shared.DependencyNode;
-import org.hyperic.dao.DAOFactory;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.util.Iterator;
-import java.util.Collection;
-import java.util.List;
+import org.hyperic.hq.appdef.shared.DependencyTree;
 
 /**
  * CRUD methods, finders, etc. for Application
@@ -50,9 +49,8 @@ public class ApplicationDAO extends HibernateDAO
 {
     private static final Log log = LogFactory.getLog(ApplicationDAO.class);
 
-    public ApplicationDAO(Session session)
-    {
-        super(Application.class, session);
+    public ApplicationDAO(DAOFactory f) {
+        super(Application.class, f);
     }
 
     public Application findById(Integer id)

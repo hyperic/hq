@@ -1,6 +1,6 @@
 package org.hyperic.hq.dao;
 
-import org.hibernate.Session;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.product.Plugin;
 
 /*
@@ -32,9 +32,8 @@ import org.hyperic.hq.product.Plugin;
  */
 public class PluginDAO extends HibernateDAO
 {
-    public PluginDAO(Session session)
-    {
-        super(Plugin.class, session);
+    public PluginDAO(DAOFactory f) {
+        super(Plugin.class, f);
     }
 
     public Plugin findById(Integer id)

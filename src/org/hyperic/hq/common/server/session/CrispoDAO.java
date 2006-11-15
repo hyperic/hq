@@ -24,12 +24,12 @@
  */
 package org.hyperic.hq.common.server.session;
 
-import org.hibernate.Session;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
 public class CrispoDAO extends HibernateDAO {
-    public CrispoDAO(Session session) {
-        super(Crispo.class, session);
+    public CrispoDAO(DAOFactory f) {
+        super(Crispo.class, f);
     }
 
     Crispo findById(Integer id) {

@@ -1,22 +1,22 @@
 package org.hyperic.hq.dao;
 
-import org.hibernate.Session;
-import org.hyperic.hq.autoinventory.AIPlatform;
-import org.hyperic.hq.autoinventory.AIIp;
-import org.hyperic.hq.autoinventory.AIServer;
-import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.AIIpValue;
-import org.hyperic.hq.appdef.shared.AIServerValue;
-import org.hyperic.util.StringUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.shared.AIIpValue;
+import org.hyperic.hq.appdef.shared.AIPlatformValue;
+import org.hyperic.hq.appdef.shared.AIServerValue;
+import org.hyperic.hq.autoinventory.AIIp;
+import org.hyperic.hq.autoinventory.AIPlatform;
+import org.hyperic.hq.autoinventory.AIServer;
+import org.hyperic.util.StringUtil;
 
 /*
 * NOTE: This copyright does *not* cover user programs that use HQ
@@ -49,9 +49,8 @@ public class AIPlatformDAO extends HibernateDAO
 {
     private static final Log log = LogFactory.getLog(AIPlatformDAO.class);
 
-    public AIPlatformDAO(Session session)
-    {
-        super(AIPlatform.class, session);
+    public AIPlatformDAO(DAOFactory f) {
+        super(AIPlatform.class, f);
     }
 
     public AIPlatform findById(Integer id)

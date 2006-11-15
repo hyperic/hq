@@ -25,20 +25,18 @@
 
 package org.hyperic.hq.dao;
 
-import org.hibernate.Session;
-import org.hyperic.hq.appdef.server.session.ServerType;
-import org.hyperic.hq.appdef.shared.ServerTypeValue;
-
 import java.util.Collection;
+
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.server.session.ServerType;
 
 /**
  *
  */
 public class ServerTypeDAO extends HibernateDAO
 {
-    public ServerTypeDAO(Session session)
-    {
-        super(ServerType.class, session);
+    public ServerTypeDAO(DAOFactory f) {
+        super(ServerType.class, f);
     }
 
     public ServerType findById(Integer id)

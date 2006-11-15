@@ -25,15 +25,15 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import org.hibernate.Session;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
 /**
  * CRUD methods, finders, etc. for MeasurementArg
  */
 public class MeasurementArgDAO extends HibernateDAO {
-    public MeasurementArgDAO(Session session) {
-        super(MeasurementArg.class, session);
+    public MeasurementArgDAO(DAOFactory f) {
+        super(MeasurementArg.class, f);
     }
 
     public MeasurementArg findById(Integer id) {

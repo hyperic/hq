@@ -25,16 +25,15 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import org.hibernate.Session;
-
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
 /**
  * CRUD methods, finders, etc. for ScheduleRevNum
  */
 public class ScheduleRevNumDAO extends HibernateDAO {
-    public ScheduleRevNumDAO(Session session) {
-        super(ScheduleRevNum.class, session);
+    public ScheduleRevNumDAO(DAOFactory f) {
+        super(ScheduleRevNum.class, f);
     }
 
     public ScheduleRevNum findById(SrnId id) {

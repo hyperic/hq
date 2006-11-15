@@ -25,21 +25,20 @@
 
 package org.hyperic.hq.dao;
 
-import org.hibernate.Session;
+import java.util.Collection;
+
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.appdef.shared.AgentValue;
-
-import java.util.Collection;
 
 /**
  * CRUD methods, finders, etc. for Agent
  */
 public class AgentDAO extends HibernateDAO
 {
-    public AgentDAO(Session session)
-    {
-        super(Agent.class, session);
+    public AgentDAO(DAOFactory f) {
+        super(Agent.class, f);
     }
 
     public void evict(Agent entity)

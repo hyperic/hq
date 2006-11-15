@@ -25,15 +25,15 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import org.hibernate.Session;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
 /**
  * CRUD methods, finders, etc. for Category
  */
 public class CategoryDAO extends HibernateDAO {
-    public CategoryDAO(Session session) {
-        super(Category.class, session);
+    public CategoryDAO(DAOFactory f) {
+        super(Category.class, f);
     }
 
     public Category findById(Integer id) {

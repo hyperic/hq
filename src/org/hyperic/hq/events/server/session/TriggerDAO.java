@@ -24,13 +24,13 @@
  */
 package org.hyperic.hq.events.server.session;
 
-import org.hibernate.Session;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 
 public class TriggerDAO extends HibernateDAO {
-    public TriggerDAO(Session session) {
-        super(RegisteredTrigger.class, session);
+    public TriggerDAO(DAOFactory f) {
+        super(RegisteredTrigger.class, f);
     }
 
     protected RegisteredTrigger create(RegisteredTriggerValue createInfo) {

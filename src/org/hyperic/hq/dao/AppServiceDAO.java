@@ -1,17 +1,16 @@
 package org.hyperic.hq.dao;
 
-import org.hibernate.Session;
-import org.hyperic.hq.appdef.AppService;
-import org.hyperic.hq.appdef.ServiceCluster;
-import org.hyperic.hq.appdef.AppSvcDependency;
-import org.hyperic.hq.appdef.server.session.Application;
-import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.dao.DAOFactory;
+import java.util.Collection;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import java.util.List;
-import java.util.Collection;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.AppService;
+import org.hyperic.hq.appdef.AppSvcDependency;
+import org.hyperic.hq.appdef.ServiceCluster;
+import org.hyperic.hq.appdef.server.session.Application;
+import org.hyperic.hq.appdef.server.session.Service;
 
 /*
 * NOTE: This copyright does *not* cover user programs that use HQ
@@ -44,9 +43,8 @@ public class AppServiceDAO extends HibernateDAO
 {
     private static final Log log = LogFactory.getLog(ServiceClusterDAO.class);
 
-    public AppServiceDAO(Session session)
-    {
-        super(AppService.class, session);
+    public AppServiceDAO(DAOFactory f) {
+        super(AppService.class, f);
     }
 
     public AppService findById(Integer id)

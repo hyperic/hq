@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.dao;
 
-import org.hibernate.Session;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.appdef.shared.AgentTypeValue;
 
@@ -34,9 +34,8 @@ import org.hyperic.hq.appdef.shared.AgentTypeValue;
  */
 public class AgentTypeDAO extends HibernateDAO
 {
-    public AgentTypeDAO(Session session)
-    {
-        super(AgentType.class, session);
+    public AgentTypeDAO(DAOFactory f) {
+        super(AgentType.class, f);
     }
 
     public AgentType findById(Integer id)
