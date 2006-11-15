@@ -104,7 +104,7 @@ public class ControlScheduleManagerEJBImpl
     private InitialContext ic            = null;
     
     private final String PAGER_BASE =
-        "com.hyperic.hq.control.server.session.";
+        "org.hyperic.hq.control.server.session.";
     private final String HISTORY_PAGER =
         PAGER_BASE + "PagerProcessor_control_history";
     private final String SCHEDULE_PAGER =

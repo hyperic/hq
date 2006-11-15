@@ -43,6 +43,10 @@ public class CommandInfo {
     public static final String CMD_TRACK_SEND_LOG          = "trackSendLog";
     public static final String CMD_TRACK_SEND_CONFIG_CHANGE =
         "trackSendConfigChange";
+    public static final String CMD_CONTROL_GET_PLUGIN_CONFIG =
+        "controlGetPluginConfig";
+    public static final String CMD_CONTROL_SEND_COMMAND_RESULT =
+        "controlSendCommandResult";
 
     public static final String[] SECURE_COMMANDS = {
         CMD_MEASUREMENT_GET_SERVER_TIME,
@@ -52,5 +56,7 @@ public class CommandInfo {
         CMD_AI_SEND_RUNTIME_REPORT,
         CMD_TRACK_SEND_LOG,
         CMD_TRACK_SEND_CONFIG_CHANGE,
+        CMD_CONTROL_GET_PLUGIN_CONFIG,
+        CMD_CONTROL_SEND_COMMAND_RESULT,
     };
 }

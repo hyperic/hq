@@ -1025,6 +1025,16 @@
       <exclude name="org/hyperic/hq/agent/client/**"/>
     </jar>
 
+    <!-- Control agent server handler -->
+    <jar basedir="${build.dir}/classes"
+         jarfile="${agent.dir}/lib/AgentControlServer.jar">
+      <include name="org/hyperic/hq/control/**"/>
+      <exclude name="org/hyperic/hq/control/**/*_test.java"/>
+      <manifest>
+        <attribute name="Main-Class" value="org.hyperic.hq.control.agent.server.ControlCommandsServer" />
+      </manifest>
+    </jar>
+
     <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/lib/AgentClient.jar">
       <exclude name="org/hyperic/hq/agent/server/**"/>
       <include name="org/hyperic/hq/agent/**"/>
