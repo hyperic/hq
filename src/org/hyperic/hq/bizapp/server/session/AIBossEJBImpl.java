@@ -145,12 +145,8 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         if (this.aiScheduleManagerLocal == null) { init(); }
         try {
             return aiScheduleManagerLocal.findScheduledJobs(subject, id, pc);
-        } catch ( CreateException ce ) {
-            throw new SystemException(ce);
         } catch ( FinderException fe ) {
             throw new SystemException(fe);
-        } catch ( NamingException ne ) {
-            throw new SystemException(ne);
         }
     }
 
