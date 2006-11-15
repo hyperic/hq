@@ -1789,32 +1789,6 @@ has already been defined.
 
     <schemaSpec version="3.00">
       <schema-directSQL>
-        <statement desc="Bump the starting sequence number for eam_appdef_resource_id_seq appdef resource types to be max(id)+1 of specific resources below"
-                   targetDB="postgresql">
-        select setval('eam_appdef_resource_id_seq',
-                        (select max(r.rid)+1 from
-                          (select max(id) as rid from eam_application
-                             union
-                           select max(id) as rid from eam_platform
-                             union
-                           select max(id) as rid from eam_server
-                             union
-                           select max(id) as rid from eam_service) r)
-                     )
-        </statement>
-        <statement desc="Bump the starting sequence number for eam_appdef_resource_type_id_seq appdef resource types to be max(id)+1 of specific types below"
-                   targetDB="postgresql">
-        select setval('eam_appdef_resourcetype_id_seq',
-                        (select max(r.rid)+1 from
-                          (select max(id) as rid from eam_application_type
-                             union
-                           select max(id) as rid from eam_platform_type
-                             union
-                           select max(id) as rid from eam_server_type
-                             union
-                           select max(id) as rid from eam_service_type) r)
-                     )
-        </statement>
         <statement desc="drop default value constraint on eam_cprop"
                    targetDB="postgresql">
             alter table eam_cprop alter column id drop default
