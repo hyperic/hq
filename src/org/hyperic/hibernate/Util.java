@@ -34,6 +34,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
+import org.hibernate.Hibernate;
 import org.hibernate.cache.NoCacheProvider;
 import org.hibernate.stat.Statistics;
 import org.hibernate.stat.SecondLevelCacheStatistics;
@@ -53,6 +54,7 @@ import org.hyperic.hq.common.DiagnosticObject;
 
 import java.sql.Connection;
 import java.util.Properties;
+import java.util.Iterator;
 
 /**
  * from hibernate caveat emptor with modifications to optimize initial 
@@ -294,5 +296,11 @@ public class Util {
     public static void flushCurrentSession()
     {
         getSessionFactory().getCurrentSession().flush();
+    }
+
+    public static void initializeAll(Iterator i) {
+        while(i.hasNext()) {
+            Hibernate.initialize(i.next());
+        }
     }
 }

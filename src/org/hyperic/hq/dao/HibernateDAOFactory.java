@@ -44,8 +44,9 @@ import org.hyperic.hq.events.server.session.AlertDAO;
 import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
 import org.hyperic.hq.events.server.session.EventLogDAO;
 import org.hyperic.hq.events.server.session.TriggerDAO;
-import org.hyperic.hq.measurement.server.session.BaselineDAO;
+import org.hyperic.hq.events.server.session.EscalationDAO;
 import org.hyperic.hq.measurement.server.session.CategoryDAO;
+import org.hyperic.hq.measurement.server.session.BaselineDAO;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
 import org.hyperic.hq.measurement.server.session.MeasurementArgDAO;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
@@ -55,20 +56,15 @@ import org.hyperic.hq.measurement.server.session.RawMeasurementDAO;
 import org.hyperic.hq.measurement.server.session.ScheduleRevNumDAO;
 
 public class HibernateDAOFactory extends DAOFactory {
-    private static final Object INIT_LOCK = new Object();
-    private static SessionFactory sessionFactory;
-    
+    private static SessionFactory sessionFactory = Util.getSessionFactory();
+
     public Session getCurrentSession() {
         return getSessionFactory().getCurrentSession();
     }
 
     public SessionFactory getSessionFactory() {
-        synchronized (INIT_LOCK) {
-            // Cache session factory, we cache it because hibernate 
-            // session factor lookup is an rather expensive JNDI call
-            if (sessionFactory == null) {
-                sessionFactory  = Util.getSessionFactory();
-            }
+        if (sessionFactory == null) {
+            throw new IllegalStateException("SessionFactory not initialized");
         }
         return sessionFactory;
     }
@@ -195,7 +191,7 @@ public class HibernateDAOFactory extends DAOFactory {
     public MonitorableTypeDAO getMonitorableTypeDAO() {
         return new MonitorableTypeDAO(this);
     }
-    
+
     public RawMeasurementDAO getRawMeasurementDAO() {
         return new RawMeasurementDAO(this);
     }
@@ -251,25 +247,29 @@ public class HibernateDAOFactory extends DAOFactory {
     public PluginDAO getPluginDAO() {
         return new PluginDAO(this);
     }
-    
+
     public AlertActionLogDAO getAlertActionLogDAO() {
         return new AlertActionLogDAO(this);
     }
-    
+
     public AlertConditionLogDAO getAlertConditionLogDAO() {
         return new AlertConditionLogDAO(this);
     }
-    
+
     public AlertDAO getAlertDAO() {
         return new AlertDAO(this);
     }
-    
+
     public VirtualDAO getVirtualDAO() {
         return new VirtualDAO(this);
     }
 
     public CrispoDAO getCrispoDAO() {
         return new CrispoDAO(this);
+    }
+
+    public EscalationDAO getEscalationDAO() {
+        return new EscalationDAO(this);
     }
 
     public EventLogDAO getEventLogDAO() {

@@ -27,9 +27,11 @@ package org.hyperic.hq.dao;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 
 import org.hibernate.LockMode;
 import org.hibernate.Session;
+import org.hibernate.criterion.Example;
 import org.hyperic.dao.DAOFactory;
 
 /**
@@ -59,10 +61,17 @@ public abstract class HibernateDAO {
         return findById(id, false);
     }
 
+
     protected Object findById(Serializable id, boolean lock) {
         return lock
                ? getSession().load(getPersistentClass(), id, LockMode.UPGRADE)
                : getSession().load(getPersistentClass(), id);
+    }
+
+    public List findByExample(Serializable s) {
+        return getSession().createCriteria(getPersistentClass())
+            .add(Example.create(s).excludeZeroes())
+            .list();
     }
 
     public Collection findAll() {

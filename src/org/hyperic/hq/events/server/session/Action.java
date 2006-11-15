@@ -28,11 +28,15 @@ package org.hyperic.hq.events.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.events.shared.ActionValue;
+import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.util.ArrayUtil;
+import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.EncodingException;
 
 public class Action  
     extends PersistedObject
@@ -43,9 +47,28 @@ public class Action
     private AlertDefinition _alertDef;
     private Collection      _logEntries = new ArrayList();
     private Collection      _children = new ArrayList();
+    private int             escalationOrder;
+    private long            waitTime;
+    private Escalation      escalation;
     
     private ActionValue     _valueObj;
-    
+
+    public static Action createEmailAction(int type, Set notifs) {
+        EmailActionConfig config = new EmailActionConfig();
+        config.setType(type);
+        config.setNames(StringUtil.iteratorToString(notifs.iterator(), ",", ""));
+
+        Action act = new Action();
+        act.setClassName(config.getImplementor());
+        try {
+            act.setConfig(config.getConfigResponse().encode());
+        } catch (EncodingException e) {
+            throw new IllegalArgumentException("Can't encode email config " +
+                                               "response");
+        }
+        return act;
+    }
+
     protected Action() {
     }
 
@@ -85,7 +108,31 @@ public class Action
     public AlertDefinition getAlertDefinition() {
         return _alertDef;
     }
-    
+
+    public int getEscalationOrder() {
+        return escalationOrder;
+    }
+
+    public void setEscalationOrder(int escalationOrder) {
+        this.escalationOrder = escalationOrder;
+    }
+
+    public long getWaitTime() {
+        return waitTime;
+    }
+
+    public void setWaitTime(long waitTime) {
+        this.waitTime = waitTime;
+    }
+
+    public Escalation getEscalation() {
+        return escalation;
+    }
+
+    public void setEscalation(Escalation escalation) {
+        this.escalation = escalation;
+    }
+
     protected void setAlertDefinition(AlertDefinition alertDefinition) {
         _alertDef = alertDefinition;
     }
@@ -93,7 +140,7 @@ public class Action
     public Collection getChildren() {
         return Collections.unmodifiableCollection(_children);
     }
-    
+
     protected Collection getChildrenBag() {
         return _children;
     }
@@ -109,7 +156,7 @@ public class Action
     protected Collection getLogEntriesBag() {
         return _logEntries;
     }
-    
+
     protected void setLogEntriesBag(Collection logEntries) {
         _logEntries = logEntries;
     }
