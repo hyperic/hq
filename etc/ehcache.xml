@@ -54,4 +54,38 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
 
+  <!-- Server Type Caches -->
+  <cache name="org.hyperic.hq.appdef.server.session.ServerType"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.appdef.server.session.ServerType.servers"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.appdef.server.session.PlatformType.serviceTypes"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+
+  <!-- Server Caches -->
+  <cache name="org.hyperic.hq.appdef.server.session.Server"
+         maxElementsInMemory="500"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.appdef.server.session.Server.services"
+         maxElementsInMemory="500"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+
 </ehcache>

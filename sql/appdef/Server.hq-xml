@@ -7,6 +7,8 @@
 <hibernate-mapping package="org.hyperic.hq.appdef.server.session">
   <class name="Server" table="EAM_SERVER">
 
+    <cache usage="read-write" />
+
     <id name="id" type="integer">
       <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />
@@ -94,6 +96,7 @@
     </many-to-one>
 
     <bag name="services" table="EAM_SERVICE">
+      <cache usage="read-write" />
       <key column="SERVER_ID" />
       <one-to-many class="Service" />
     </bag>

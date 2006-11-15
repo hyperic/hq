@@ -6,6 +6,9 @@
 
 <hibernate-mapping package="org.hyperic.hq.appdef.server.session">
   <class name="ServerType" table="EAM_SERVER_TYPE">
+
+    <cache usage="read-write" />
+
     <id name="id" type="integer">
       <column name="ID" not-null="true" />
       <generator class="sequence">
@@ -56,11 +59,13 @@
     </set>
 
     <bag name="servers" table="EAM_SERVER">
+      <cache usage="read-write" />
       <key column="SERVER_TYPE_ID" />
       <one-to-many class="Server" />
     </bag>
 
     <bag name="serviceTypes" table="EAM_SERVICE_TYPE">
+      <cache usage="read-write" />
       <key column="SERVER_TYPE_ID" />
       <one-to-many class="ServiceType" />
     </bag>
