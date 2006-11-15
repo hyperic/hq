@@ -85,7 +85,17 @@ public class ServerDAO extends HibernateDAO
         s.setName(sv.getName());
         s.setDescription(sv.getDescription());
         s.setInstallPath(sv.getInstallPath());
-        s.setAutoinventoryIdentifier(sv.getAutoinventoryIdentifier());
+        String aiid = sv.getAutoinventoryIdentifier();
+        if (aiid != null) {
+            s.setAutoinventoryIdentifier(sv.getAutoinventoryIdentifier());
+        } else {
+            // Server was created by hand, use a generated AIID. (This matches
+            // the behaviour in 2.7 and prior)
+            aiid = sv.getInstallPath() + "_" + System.currentTimeMillis() +
+                "_" + sv.getName();
+            s.setAutoinventoryIdentifier(aiid);
+        }
+
         s.setServicesAutomanaged(sv.getServicesAutomanaged());
         s.setRuntimeAutodiscovery(sv.getRuntimeAutodiscovery());
         s.setWasAutodiscovered(sv.getWasAutodiscovered());
