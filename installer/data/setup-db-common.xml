@@ -63,23 +63,6 @@
     <substProps src="${conf-dir}/hq-server.conf"/>
   </target>
 
-  <target name="setup-default-tablespaces">
-    <if>
-      <or>
-        <not><isset property="server.database.advanced-setup"/></not>
-        <equals arg1="${server.database.advanced-setup}" arg2="No"/>
-      </or>
-      <then>
-        <property name="server.tablespace.m_data" value="DEFAULT"/>
-        <property name="server.tablespace.m_idx" value="DEFAULT"/>
-        <property name="server.tablespace.lg_data" value="DEFAULT"/>
-        <property name="server.tablespace.lg_idx" value="DEFAULT"/>
-        <property name="server.tablespace.sm_data" value="DEFAULT"/>
-        <property name="server.tablespace.sm_idx" value="DEFAULT"/>
-      </then>
-    </if>
-  </target>
-
   <target name="dbsetup" depends="hibernate-create">
     <antcall target="dbsetup-process-file">
       <param name="dbsetupfile" value="${data.dir}/data.xml"/>
@@ -140,15 +123,8 @@
     </fail>
   </target>
 
-  <target name="debug-check">
-    <condition property="debug.enabled">
-      <available file="${install.dir}/data/debug"/>
-    </condition>
-  </target>
-
-  <target name="replace-dbservice-values"
-          depends="debug-check,production-db,debug-db,setup-default-tablespaces">
-    <echo>using url: ${server.database-url} (debug.enabled=${debug.enabled})</echo>
+  <target name="replace-dbservice-values">
+    <echo>using url: ${server.database-url} </echo>
     <property name="server.deploy"
               value="${server.installdir}/server-${version}/hq-engine/server/default/deploy"/>
     <property name="server.installed-ear"
@@ -229,15 +205,6 @@
     <replace file="${data.dir}/data.xml">
       <replacefilter token="@@@CAM_SCHEMA_VERSION@@@" value="${force.cam.schema.version}"/>
     </replace>
-  </target>
-
-  <target name="production-db" unless="debug.enabled">
-    <property name="server.database-url" value="${server.database-url}"/>
-    <property name="server.database-driver" value="${server.database-driver}"/>
-  </target>
-  <target name="debug-db" if="debug.enabled">
-    <property name="server.database-url" value="jdbc:covalent-log:${server.database-driver}:${server.database-url}"/>
-    <property name="server.database-driver" value="org.hyperic.util.jdbc.log.LoggerDriver"/>
   </target>
 
   <target name="replace-jaas-provider-jdbc" if="server.jaas.provider.jdbc">

@@ -128,28 +128,6 @@ public class ServerConfig extends BaseConfig {
         = "What should the password be for the initial admin user?";
     public static final String Q_ADMIN_EMAIL
         = "What should the email address be for the initial admin user?";
-    public static final String Q_ADVANCED_DBSETUP
-        = "Do you want to perform advanced database setup?";
-
-    private static final String DESC_PREFIX = "Which tablespace should be used for ";
-    private static final String DESC_SUFFIX = "?";
-    private static final String [][] TABLESPACES
-        = { { "server.tablespace.m_data", 
-              DESC_PREFIX + "measurement data tables" + DESC_SUFFIX },
-            { "server.tablespace.m_idx", 
-              DESC_PREFIX + "indexes on measurement data" + DESC_SUFFIX },
-
-            { "server.tablespace.lg_data", 
-              DESC_PREFIX + "large tables (events, alerts, resources, etc.)" 
-              + DESC_SUFFIX },
-            { "server.tablespace.lg_idx", 
-              DESC_PREFIX + "indexes on large tables" + DESC_SUFFIX },
-
-            { "server.tablespace.sm_data", 
-              DESC_PREFIX + "all other tables" + DESC_SUFFIX },
-            { "server.tablespace.sm_idx", 
-              DESC_PREFIX + "indexes on all other tables" + DESC_SUFFIX }
-        };
 
     // convenience constants
     private static final String nl = System.getProperty("line.separator");
@@ -515,36 +493,6 @@ public class ServerConfig extends BaseConfig {
                 throw new EarlyExitException
                     ("No modifications made to existing database.  " +
                      "Exiting installer.");
-            }
-            break;
-
-        case 10:
-            dbChoice = previous.getValue("server.database");
-            dbCreateChoice = previous.getValue("server.database.create");
-            if (dbChoice.indexOf("Oracle") != -1 && 
-                dbCreateChoice != null &&
-                dbCreateChoice.equals(YesNoConfigOption.YES)) {
-                schema.addOption
-                    (new YesNoConfigOption("server.database.advanced-setup",
-                                           Q_ADVANCED_DBSETUP,
-                                           YesNoConfigOption.NO));
-            }
-            break;
-
-        case 11:
-            advancedDBSetupChoice
-                = previous.getValue("server.database.advanced-setup");
-            dbChoice = previous.getValue("server.database");
-            if ( advancedDBSetupChoice != null &&
-                 advancedDBSetupChoice.equals(YesNoConfigOption.YES) ) {
-                for ( tablespaceIndex=0;
-                      tablespaceIndex < TABLESPACES.length;
-                      tablespaceIndex++ ) {
-                    schema.addOption
-                        (new StringConfigOption(TABLESPACES[tablespaceIndex][0],
-                                                TABLESPACES[tablespaceIndex][1],
-                                                "DEFAULT"));
-                }
             }
             break;
 
