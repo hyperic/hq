@@ -56,8 +56,6 @@ public class MetricDataCacheTest extends TestCase {
             cache.add(derivedMeasurementId, val);
         }
 
-        cache.logSize(_log);
-
         Integer id = new Integer(CACHE_CAPACITY - 1);
         boolean wasAdded;
 

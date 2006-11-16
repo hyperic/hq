@@ -26,9 +26,12 @@
 package org.hyperic.hq.measurement.server.session;
 
 import org.hyperic.hq.product.MetricValue;
-import org.hyperic.util.collection.IntHashMap;
+import org.hyperic.hq.common.DiagnosticObject;
+import org.hyperic.hq.common.DiagnosticThread;
 
-import org.apache.commons.logging.Log;
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
 
 /**
  * The MetricDataCache caches the last measurement keyed on the derived
@@ -37,8 +40,11 @@ import org.apache.commons.logging.Log;
  */
 
 public class MetricDataCache {
-    private IntHashMap data = new IntHashMap(50000);
-    
+    // The cache name, must match what is in ehcache.xml
+    private static final String CACHENAME = "MetricDataCache";
+
+    private static Cache _cache;
+
     private static MetricDataCache singleton = new MetricDataCache();
     
     /**
@@ -48,23 +54,53 @@ public class MetricDataCache {
         return singleton;
     }
 
-    private MetricDataCache() {}
+    private MetricDataCache() {
+        _cache = CacheManager.getInstance().getCache(CACHENAME);
+
+        DiagnosticObject cacheDiagnostics = new DiagnosticObject() {
+            public String getStatus() {
+                String separator = System.getProperty("line.separator");
+
+                StringBuffer buf = new StringBuffer();
+                buf.append(separator)
+                    .append(CACHENAME)
+                    .append(" elements=")
+                    .append(_cache.getSize())
+                    .append(" (")
+                    .append(_cache.calculateInMemorySize())
+                    .append(" bytes) hits=")
+                    .append(_cache.getHitCount())
+                    .append(" misses=")
+                    .append(_cache.getMissCountNotFound());
+                return buf.toString();
+            }
+        };
+        DiagnosticThread.addDiagnosticObject(cacheDiagnostics);
+    }
 
     /**
-     * Add a MetricValue to the cache.
+     * Add a MetricValue to the cache.  This method checks the timestamp of
+     * the MetricValue to be added to ensure it's not an older datapoint than
+     * what is already cached.
      *
      * @param mid The measurement id.
      * @param mval The MetricValue to store.
      * @return true if the MetricValue was added to the cache, false otherwise.
      */
     public boolean add(Integer mid, MetricValue mval) {
-        MetricValue oldVal = (MetricValue) data.get(mid.intValue());
+        Element el = _cache.get(mid);
 
-        // Existing data is actually newer than value
-        if (oldVal != null && oldVal.getTimestamp() > mval.getTimestamp())
-            return false;
-        
-        data.put(mid.intValue(), mval);
+        if (el != null) {
+            // Check if existing cached data is newer
+            MetricValue val = (MetricValue)el.getObjectValue();
+            if (val.getTimestamp() > mval.getTimestamp()) {
+                return false;
+            }
+        }
+
+        el = new Element(mid, mval);
+        _cache.put(el);
+
         return true;
     }
 
@@ -77,22 +113,14 @@ public class MetricDataCache {
      * found, or the item in the cache is stale.
      */
     public MetricValue get(Integer mid, long timestamp) {
-        MetricValue val = (MetricValue) data.get(mid.intValue());
-            
-        if (val != null && val.getTimestamp() >= timestamp)
-            return val;
+        Element el = _cache.get(mid);
 
+        if (el != null) {
+            MetricValue val = (MetricValue)el.getObjectValue();
+            if (val.getTimestamp() >= timestamp) {
+                return val;
+            }
+        }
         return null;
-    }
-
-    /**
-     * Print the cache size to the log.
-     * @param log The logging context.
-     * @return The cache size.
-     */
-    public int logSize(Log log) {
-        int size = data.size();
-        log.info("MetricDataCache size = " + size);
-        return size;
     }
 }

@@ -207,6 +207,9 @@
       <fileset dir="src" includes="**/*.properties" />
     </copy>
 
+    <copy toDir="${build.dir}/classes"
+          file="etc/ehcache.xml"/>
+
     <mkdir dir="${build.dir}/classes/images"/>
     <copy toDir="${build.dir}/classes/images">
       <fileset dir="${webapp.home}/images">
