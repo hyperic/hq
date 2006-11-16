@@ -128,7 +128,7 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
         groupLocal = getResourceGroupDAO().create(whoamiLocal, group);
         
         /* associated resources */
-        groupLocal.setResources(toPojos(resources));
+        groupLocal.setResourceSet(toPojos(resources));
         
         /* associated roles */
         groupLocal.setRoles(toPojos(roles));
@@ -360,7 +360,7 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
                  groupLocal.getId(),
                  AuthzConstants.groupOpModifyResourceGroup);
 
-        groupLocal.setResources(toPojos(resources));
+        groupLocal.setResourceSet(toPojos(resources));
     }
 
     /**

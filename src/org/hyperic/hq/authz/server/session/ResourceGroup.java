@@ -26,7 +26,9 @@
 package org.hyperic.hq.authz.server.session;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 
@@ -45,7 +47,7 @@ public class ResourceGroup extends AuthzNamedBean
     private long mtime;
     private String modifiedBy;
     private Resource resource;
-    private Collection resources = new HashSet();
+    private Collection resourceSet = new HashSet();
     private Collection roles = new HashSet();
 
     private ResourceGroupValue resourceGroupValue = new ResourceGroupValue();
@@ -92,7 +94,7 @@ public class ResourceGroup extends AuthzNamedBean
         this.mtime = mtime;
         this.modifiedBy = modifiedBy;
         this.resource = resourceId;
-        this.resources = resources;
+        this.resourceSet = resources;
         this.roles = roles;
     }
 
@@ -216,30 +218,42 @@ public class ResourceGroup extends AuthzNamedBean
         resource = val;
     }
 
-    public Collection getResources()
-    {
-        return resources;
+    private Collection getResourceSet() {
+        return resourceSet;
     }
 
-    protected void setResources(Collection val)
+    public Collection getResources()
     {
-        resources = val;
+        Collection resources = new HashSet();
+        // Filter our the resource that is this group
+        for (Iterator it = getResourceSet().iterator(); it.hasNext(); ) {
+            Object res = it.next();
+            if (!resource.equals(res)) {
+                resources.add(res);
+            }
+        }
+        return Collections.unmodifiableCollection(resources);
+    }
+
+    protected void setResourceSet(Collection val)
+    {
+        resourceSet = val;
     }
 
     public void addResource(Resource resource)
     {
         resource.getResourceGroups().add(this);
-        resources.add(resource);
+        resourceSet.add(resource);
     }
 
     public void removeResource(Resource resource)
     {
-        resources.remove(resource);
+        resourceSet.remove(resource);
     }
 
     public void removeAllResources()
     {
-        resources.clear();
+        resourceSet.clear();
     }
 
     public Collection getRoles()
