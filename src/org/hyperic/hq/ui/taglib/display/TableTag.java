@@ -463,7 +463,18 @@ public class TableTag extends TablePropertyTag {
                     
                 }
             }
-
+            
+            // By default, we show null values as empty strings, unless the
+            // user tells us otherwise.
+            if(value == null || "".equals(value.toString().trim()) ) {
+                if( tag.getNulls() == null &&
+                    prop.getProperty("basic.htmlNullValue") != null) {
+                    value = prop.getProperty( "basic.htmlNullValue" );
+                } else {
+                    value = tag.getNulls();
+                }
+            }
+            
             // String to hold what's left over after value is chopped
             String leftover = "";
             boolean chopped = false;
