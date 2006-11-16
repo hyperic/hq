@@ -50,7 +50,7 @@ public class Action
 
     private ActionValue     _valueObj;
 
-    public static Action createEmailAction(int type, Set notifs) {
+    public static Action newEmailAction(int type, Set notifs) {
         EmailActionConfig config = new EmailActionConfig();
         config.setType(type);
         config.setNames(StringUtil.iteratorToString(notifs.iterator(), ",", ""));

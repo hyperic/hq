@@ -1,8 +1,29 @@
-package org.hyperic.hq.events.server.session;
+/*
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ * "derived work".
+ *
+ * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * This file is part of HQ.
+ *
+ * HQ is free software; you can redistribute it and/or modify
+ * it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
+ */
 
-import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
-import org.hyperic.util.StringUtil;
-import org.hyperic.util.config.EncodingException;
+package org.hyperic.hq.events.server.session;
 
 import java.util.Set;
 // Generated Nov 15, 2006 3:20:57 PM by Hibernate Tools 3.2.0.beta8
@@ -25,10 +46,10 @@ public class EscalationAction implements java.io.Serializable {
      * @param waitTime  time to wait until escalating to the next level
      * @return
      */
-    public static EscalationAction createEmailAction(int type, Set notifs,
-                                                     long waitTime) {
+    public static EscalationAction newEmailAction(int type, Set notifs,
+                                                  long waitTime) {
         EscalationAction eact = new EscalationAction();
-        Action act = Action.createEmailAction(type, notifs);
+        Action act = Action.newEmailAction(type, notifs);
         eact.setAction(act);
         eact.setWaitTime(waitTime);
         return eact;

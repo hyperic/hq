@@ -22,19 +22,23 @@
       <column name="NAME" not-null="true" length="200"/>
     </property>
 
-    <property name="pause" type="boolean">
+    <property name="allowPause" type="boolean">
       <meta attribute="field-description"><![CDATA[
-        If true, then wait for "waitTime" before escalating up the chain.
+        If true and EscalationState.pauseEscalation == true, then wait
+            max(EscalationAction.waitTime, EscalationState.pauseWaitTime)
+        else wait
+            EscalationAction.waitTime
+        before escalating up the chain.
       ]]></meta>
-      <column name="PAUSE" not-null="true" />
+      <column name="ALLOW_PAUSE" not-null="true" />
     </property>
 
-    <!-- waitTime is specified in milliseconds -->
-    <property name="waitTime" type="long">
+    <!-- max waitTime is specified in milliseconds -->
+    <property name="maxWaitTime" type="long">
       <meta attribute="field-description"><![CDATA[
-        waitTime is specified in milliseconds.
+        maxWaitTime is specified in milliseconds.
       ]]></meta>
-      <column name="WAIT_TIME" not-null="false" />
+      <column name="MAX_WAIT_TIME" not-null="true" />
     </property>
 
     <property name="notifyAll" type="boolean">
@@ -54,6 +58,59 @@
     <property name="modifiedTime" type="long">
       <column name="MTIME" not-null="true" />
     </property>
+    
+    <component name="escalationState" class="EscalationState">
+      <meta attribute="field-description"><![CDATA[
+        escalation chain state.
+      ]]></meta>
+
+      <property name="currentLevel" type="integer">
+        <meta attribute="field-description"><![CDATA[
+        The current escalation leven in the chain.  I.e.,
+        current escalation level == actions[currentLevel].
+        ]]></meta>
+        <column name="CURRENT_LEVEL" not-null="true" />
+      </property>
+      <property name="pauseEscalation" type="boolean">
+        <meta attribute="field-description"><![CDATA[
+        If true, then wait for max("waitTime", EscalationAction.waitTime)
+        before escalating up the chain.
+
+        If false, then wait EscalationAction.waitTime before escalating up
+        the chain.
+        ]]></meta>
+        <column name="PAUSE_ESCALATION" not-null="true" />
+      </property>
+      <property name="pauseWaitTime" type="long">
+        <meta attribute="field-description"><![CDATA[
+        meaningful if pauseEscalation == true.
+        pauseWaitTime < maxWaitTime
+        ]]></meta>
+        <column name="WAIT_TIME" not-null="true"/>
+      </property>
+      <property name="fixed" type="boolean">
+        <meta attribute="field-description"><![CDATA[
+        If fixed, then stop escalation chain. (terminal condition)
+        ]]></meta>
+        <column name="FIXED" not-null="true"/>
+      </property>
+      <property name="acknowledge" type="boolean">
+        <meta attribute="field-description"><![CDATA[
+        "acknowledgeBy" has taken ownership of this issue at the
+        current escalation level.
+        ]]></meta>
+        <column name="ACKNOWLEDGE" not-null="true"/>
+      </property>
+      <property name="acknowledgeBy" type="string">
+        <column name="ACKNOWLEDGE_BY" length="200"/>
+      </property>
+      <property name="lastUpdate" type="long">
+        <meta attribute="field-description"><![CDATA[
+        timestamp is updated on state change.
+        ]]></meta>
+        <column name="LAST_UPDATE" not-null="true"/>
+      </property>
+    </component>
 
     <list name="actions" table="EAM_ESCALATION_ACTION">
       <key column="ESCALATION_ID" />

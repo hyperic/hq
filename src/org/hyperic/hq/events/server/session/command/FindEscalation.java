@@ -49,7 +49,7 @@ public class FindEscalation extends Command {
         return escalation;
     }
 
-    public static FindEscalation createFinder(Escalation escalation) {
+    public static FindEscalation setInstance(Escalation escalation) {
         FindEscalation f = new FindEscalation();
         f.setEscalation(escalation);
         return f;

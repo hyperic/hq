@@ -37,19 +37,19 @@ import java.util.Iterator;
 /**
  * create escalation object
  */
-public class CreateEscalation extends Command {
+public class SaveEscalation extends Command {
 
     private Escalation escalation;
 
-    public static CreateEscalation newEscalation(Escalation e) {
-        CreateEscalation n = new CreateEscalation(e);
+    public static SaveEscalation setInstance(Escalation e) {
+        SaveEscalation n = new SaveEscalation(e);
         return n;
     }
 
-    protected CreateEscalation () {
+    protected SaveEscalation() {
     }
 
-    protected CreateEscalation(Escalation escalation) {
+    protected SaveEscalation(Escalation escalation) {
         this.escalation = escalation;
         verify(escalation);
     }
@@ -75,10 +75,6 @@ public class CreateEscalation extends Command {
     private void verify(Escalation escalation) {
         if (escalation == null) {
             throw new IllegalArgumentException("No escalation to create");
-        }
-        if (escalation.getId() != null) {
-            throw new IllegalArgumentException("Id must not be set, id=" +
-                                               escalation.getId());
         }
         if (escalation.getActions().size() == 0) {
             throw new IllegalArgumentException("There must be at least one " +
