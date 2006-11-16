@@ -33,7 +33,6 @@ import java.util.List;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.FileServerDetector;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.RegistryServerDetector;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
@@ -47,23 +46,6 @@ public class MQSeriesDetector
     implements FileServerDetector,
                RegistryServerDetector,
                AutoServerDetector {
-
-    static String MQ_KEY;
-
-    public void init(PluginManager manager)
-        throws PluginException {
-
-        super.init(manager);
-
-        if (isWin32()) {
-            String prop = "mqseries.regkey";
-            MQ_KEY = getProperty(prop);
-            if (MQ_KEY == null) {
-                throw new IllegalArgumentException(prop +
-                                                   " property undefined");
-            }
-        }
-    }
 
     private List getServerList(String path) {
         ServerResource server = createServerResource(path);

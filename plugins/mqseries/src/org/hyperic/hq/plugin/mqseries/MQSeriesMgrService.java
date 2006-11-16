@@ -106,7 +106,7 @@ public class MQSeriesMgrService
         throws PluginException {
 
         String MQ_MGR_KEY =
-            MQSeriesDetector.MQ_KEY +
+            MQSeriesProductPlugin.MQ_KEY +
             "\\Configuration\\QueueManager";
 
         try {

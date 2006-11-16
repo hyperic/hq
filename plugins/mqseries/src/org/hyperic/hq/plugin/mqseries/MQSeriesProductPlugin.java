@@ -32,6 +32,8 @@ import java.util.Properties;
 
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
+import org.hyperic.sigar.win32.RegistryKey;
+import org.hyperic.sigar.win32.Win32Exception;
 
 public class MQSeriesProductPlugin
     extends ProductPlugin {
@@ -55,26 +57,61 @@ public class MQSeriesProductPlugin
         "C:\\Program Files\\IBM\\Websphere MQ",
     };
 
+    static String MQ_KEY;
+
+    private String getRegistryInstallDir() {
+        RegistryKey key = null;
+
+        try {
+            key = RegistryKey.LocalMachine.openSubKey(MQ_KEY);
+            return key.getStringValue("FilePath").trim();
+        } catch (Win32Exception e) {
+            return null;
+        } finally {
+            if (key != null) {
+                key.close();
+            }
+        }
+    }
+
+    private String findInstallDir() {
+        String installDir = null;
+        String[] dirs;
+        if (isWin32()) {
+            if ((installDir = getRegistryInstallDir()) != null) {
+                return installDir;
+            }
+            dirs = DEFAULT_WIN32_INST;
+        }
+        else {
+            dirs = DEFAULT_UNIX_INST;
+        }
+
+        for (int i=0; i<dirs.length; i++) {
+            if (new File(dirs[i]).exists()) {
+                return dirs[i];
+            }
+        }        
+
+        return null;
+    }
+
     public String[] getClassPath(ProductPluginManager manager) {
+        if (isWin32()) {
+            String prop = "mqseries.regkey";
+            MQ_KEY = getProperty(prop);
+            if (MQ_KEY == null) {
+                throw new IllegalArgumentException(prop +
+                                                   " property undefined");
+            }
+        }
+
         Properties managerProps = manager.getProperties();
         String installDir =
             managerProps.getProperty(PROP_INSTALLPATH);
 
         if (installDir == null) {
-            String[] dirs;
-            if (isWin32()) {
-                dirs = DEFAULT_WIN32_INST;
-            }
-            else {
-                dirs = DEFAULT_UNIX_INST;
-            }
-
-            for (int i=0; i<dirs.length; i++) {
-                if (new File(dirs[i]).exists()) {
-                    installDir = dirs[i];
-                    break;
-                }
-            }
+            installDir = findInstallDir();
         }
 
         if (installDir == null) {
