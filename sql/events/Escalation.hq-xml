@@ -101,8 +101,8 @@
         ]]></meta>
         <column name="ACKNOWLEDGE" not-null="true"/>
       </property>
-      <property name="acknowledgeBy" type="string">
-        <column name="ACKNOWLEDGE_BY" length="200"/>
+      <property name="updateBy" type="string">
+        <column name="UPDATE_BY" length="200"/>
       </property>
       <property name="lastUpdate" type="long">
         <meta attribute="field-description"><![CDATA[

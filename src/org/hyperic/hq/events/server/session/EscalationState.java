@@ -60,14 +60,14 @@ public class EscalationState implements java.io.Serializable {
      */
     private boolean fixed;
     /**
-     * "acknowledgeBy" has taken ownership of this issue at the
+     * "updateBy" has taken ownership of this issue at the
      * current escalation level.
      */
     private boolean acknowledge;
     /**
      * escalation chain state.
      */
-    private String acknowledgeBy;
+    private String updateBy;
 
     private long lastUpdate;
 
@@ -130,7 +130,7 @@ public class EscalationState implements java.io.Serializable {
     }
 
     /**
-     * *         "acknowledgeBy" has taken ownership of this issue at the
+     * *         "updateBy" has taken ownership of this issue at the
      * current escalation level.
      */
     public boolean isAcknowledge() {
@@ -144,12 +144,12 @@ public class EscalationState implements java.io.Serializable {
     /**
      * *         escalation chain state.
      */
-    public String getAcknowledgeBy() {
-        return this.acknowledgeBy;
+    public String getUpdateBy() {
+        return this.updateBy;
     }
 
-    public void setAcknowledgeBy(String acknowledgeBy) {
-        this.acknowledgeBy = acknowledgeBy;
+    public void setUpdateBy(String updateBy) {
+        this.updateBy = updateBy;
     }
 
     /**
