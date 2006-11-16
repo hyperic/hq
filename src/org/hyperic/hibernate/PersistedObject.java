@@ -28,6 +28,9 @@ package org.hyperic.hibernate;
 import java.io.Serializable;
 
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.VisitorContext;
+import org.hyperic.hq.Visitor;
+import org.hyperic.hq.Visitable;
 
 /**
  * Base class for all HQ persisted objects.
@@ -38,8 +41,7 @@ import org.hyperic.dao.DAOFactory;
  * & version #.
  */
 public abstract class PersistedObject 
-    implements Serializable
-{
+    implements Serializable, Visitable {
     private Integer _id;
 
     // for hibernate optimistic locks -- don't mess with this.
@@ -91,5 +93,9 @@ public abstract class PersistedObject
         result = 37*result + (_id != null ? _id.hashCode() : 0);
 
         return result;
+    }
+
+    public void accept(VisitorContext context, Visitor visitor) {
+        visitor.visit(context, this);
     }
 }

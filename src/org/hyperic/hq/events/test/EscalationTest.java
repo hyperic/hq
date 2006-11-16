@@ -3,11 +3,12 @@ package org.hyperic.hq.events.test;
 import org.hyperic.hq.test.HQEJBTestBase;
 import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.hq.events.server.session.EscalationAction;
-import org.hyperic.hq.events.server.session.command.SaveEscalation;
-import org.hyperic.hq.events.server.session.command.FindEscalation;
-import org.hyperic.hq.events.server.session.command.RemoveEscalation;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.CommandContext;
+import org.hyperic.hq.command.SaveCommand;
+import org.hyperic.hq.command.FindCommand;
+import org.hyperic.hq.command.RemoveCommand;
+import org.hyperic.dao.DAOFactory;
 
 import javax.naming.NamingException;
 import java.util.HashSet;
@@ -74,14 +75,16 @@ public class EscalationTest
         e.getActions().add(act2);
 
         CommandContext context = CommandContext.createContext();
-        context.execute(SaveEscalation.setInstance(e));
+        context.setContextDao(DAOFactory.getDAOFactory().getEscalationDAO());
+
+        context.execute(SaveCommand.setInstance(e));
         // look it up, there should be exactly one
         List result = assertEscalation(BOGUS_NAME, 1);
 
         // remove it
         if (result != null) {
             context.execute(
-                RemoveEscalation.setInstance((Escalation)result.get(0))
+                RemoveCommand.setInstance((Escalation)result.get(0))
             );
         }
         // look it up again should not be there.
@@ -92,9 +95,10 @@ public class EscalationTest
         Escalation esc = Escalation.createFinder();
         esc.setName(name);
         CommandContext context = CommandContext.createContext(
-            FindEscalation.setInstance(esc));
+            FindCommand.setInstance(esc));
+        context.setContextDao(DAOFactory.getDAOFactory().getEscalationDAO());
         context.execute();
-        List result = (List)context.getResult();
+        List result = context.getQueryResult();
         assertTrue(result.size() == count);
         return result;
     }

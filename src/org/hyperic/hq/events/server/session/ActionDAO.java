@@ -29,6 +29,7 @@ import java.io.Serializable;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hibernate.PersistedObject;
 
 public class ActionDAO extends HibernateDAO {
     public ActionDAO(DAOFactory f) {
@@ -62,5 +63,13 @@ public class ActionDAO extends HibernateDAO {
         return getSession().createQuery(sql)
               .setParameter("alert", a)
               .list();
+    }
+
+    public void savePersisted(PersistedObject entity) {
+        save((Action)entity);
+    }
+
+    public void removePersisted(PersistedObject entity) {
+        remove((Action)entity);
     }
 }

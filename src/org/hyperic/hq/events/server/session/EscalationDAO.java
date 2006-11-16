@@ -2,6 +2,7 @@ package org.hyperic.hq.events.server.session;
 
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.PersistedObject;
 
 import java.util.Iterator;
 import java.io.Serializable;
@@ -89,5 +90,13 @@ public class EscalationDAO extends HibernateDAO {
             EscalationAction ea = (EscalationAction)i.next();
             dao.save(ea.getAction());
         }
+    }
+
+    public void savePersisted(PersistedObject entity) {
+        save((Escalation)entity);
+    }
+
+    public void removePersisted(PersistedObject entity) {
+        remove((Escalation)entity);
     }
 }

@@ -37,11 +37,9 @@ import java.util.HashMap;
 /**
  * for command execution Context
  */
-public class CommandContext implements Serializable {
-    private Object result;
+public class CommandContext extends VisitorContext {
     private int executionTime;
     private ArrayList commands = new ArrayList();
-    private HashMap params = new HashMap();
 
     public static CommandContext createContext() {
         return new CommandContext();
@@ -96,14 +94,6 @@ public class CommandContext implements Serializable {
         commandHandler.executeHandler(this);
     }
 
-    public Object getResult() {
-        return result;
-    }
-
-    public void setResult(Object result) {
-        this.result = result;
-    }
-
     public int getExecutionTime() {
         return executionTime;
     }
@@ -128,18 +118,8 @@ public class CommandContext implements Serializable {
         commands.addAll(commandList);
     }
 
-    public Object getParameter(Object key) {
-        return params.get(key);
-    }
-
-    public void setParameter(Object key, Object value) {
-        params.put(key, value);
-    }
-
     public void clear() {
         getCommands().clear();
-        params.clear();
-        setResult(null);
     }
 }
 

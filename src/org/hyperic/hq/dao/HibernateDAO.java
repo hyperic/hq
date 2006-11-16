@@ -33,6 +33,10 @@ import org.hibernate.LockMode;
 import org.hibernate.Session;
 import org.hibernate.criterion.Example;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.Visitable;
+import org.hyperic.hq.VisitorContext;
+import org.hyperic.hq.Visitor;
+import org.hyperic.hibernate.PersistedObject;
 
 /**
  * Hibernate Data Access Object
@@ -113,5 +117,12 @@ public abstract class HibernateDAO {
 
     protected void remove(Object entity) {
         getSession().delete(entity);
+    }
+
+    public void savePersisted(PersistedObject entity) {
+        throw new UnsupportedOperationException("savePersisted not supported");
+    }
+    public void removePersisted(PersistedObject entity) {
+        throw new UnsupportedOperationException("removePersisted not supported");
     }
 }

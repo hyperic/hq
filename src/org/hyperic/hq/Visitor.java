@@ -1,10 +1,7 @@
-package org.hyperic.hq.events.server.session.command;
+package org.hyperic.hq;
 
-import org.hyperic.hq.Command;
-import org.hyperic.hq.CommandContext;
 import org.hyperic.hq.events.server.session.Escalation;
-import org.hyperic.hq.events.server.session.EscalationDAO;
-import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.PersistedObject;
 
 /*
 * NOTE: This copyright does *not* cover user programs that use HQ
@@ -33,27 +30,6 @@ import org.hyperic.dao.DAOFactory;
 /**
  *
  */
-public class RemoveEscalation extends Command {
-    private Escalation escalation;
-
-    public Escalation getEscalation() {
-        return escalation;
-    }
-
-    public void setEscalation(Escalation escalation) {
-        this.escalation = escalation;
-    }
-
-    public static RemoveEscalation  setInstance(Escalation e) {
-        RemoveEscalation r = new RemoveEscalation();
-        r.setEscalation(e);
-        return r;
-    }
-
-    public void execute(CommandContext context) {
-        EscalationDAO dao =
-            DAOFactory.getDAOFactory().getEscalationDAO();
-        dao.findById(escalation.getId());
-        dao.remove(escalation);
-    }
+public interface Visitor {
+    public void visit(VisitorContext context, Visitable visitable);
 }

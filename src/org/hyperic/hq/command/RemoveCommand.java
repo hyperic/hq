@@ -1,14 +1,11 @@
-package org.hyperic.hq.events.server.session.command;
+package org.hyperic.hq.command;
 
 import org.hyperic.hq.Command;
 import org.hyperic.hq.CommandContext;
-import org.hyperic.hq.events.server.session.Escalation;
-import org.hyperic.hq.events.server.session.EscalationDAO;
-import org.hyperic.dao.DAOFactory;
-import org.hyperic.hibernate.Util;
-import org.hibernate.Hibernate;
-
-import java.util.List;
+import org.hyperic.hq.Visitable;
+import org.hyperic.hq.Visitor;
+import org.hyperic.hq.command.visitor.RemoveVisitor;
+import org.hyperic.hibernate.PersistedObject;
 
 /*
 * NOTE: This copyright does *not* cover user programs that use HQ
@@ -37,36 +34,28 @@ import java.util.List;
 /**
  *
  */
-public class FindEscalation extends Command {
-
-    private Escalation escalation;
-
-    public void setEscalation(Escalation escalation) {
-        this.escalation = escalation;
+public class RemoveCommand extends Command {
+    public static RemoveCommand setInstance(Visitable v) {
+        RemoveCommand r = new RemoveCommand();
+        r.setVisitable(v);
+        return r;
     }
 
-    public Escalation getEscalation() {
-        return escalation;
+    private Visitable visitable;
+
+    public Visitable getVisitable() {
+        return visitable;
     }
 
-    public static FindEscalation setInstance(Escalation escalation) {
-        FindEscalation f = new FindEscalation();
-        f.setEscalation(escalation);
-        return f;
+    public void setVisitable(Visitable visitable) {
+        this.visitable = visitable;
     }
 
     public void execute(CommandContext context) {
-
-        EscalationDAO edao =
-            DAOFactory.getDAOFactory().getEscalationDAO();
-        List result = edao.findByExample(escalation);
-
-        // initialize to avoid LazyInitializationException
-        // before shipping it out of hibernate session scope
-        
-        if (result != null) {
-            Util.initializeAll(result.iterator());
+        if (visitable == null || !(visitable instanceof PersistedObject)) {
+            throw new IllegalArgumentException("object is not Persistable");
         }
-        context.setResult(result);
+        RemoveVisitor visitor = new RemoveVisitor();
+        visitable.accept(context, visitor);
     }
 }
