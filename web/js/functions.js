@@ -335,6 +335,9 @@ function moveElementDown(elem, root) {
 /*--------------------------- END helpers for CSS stuff ------------------------------*/
 
 function accord(tab) {
+  var thisDiv = document.getElementById( 'propertiesAccordion' );
+  thisDiv.style.visibility = 'visible';
+
   if (tab == null)
     tab = 0;
 

@@ -57,7 +57,7 @@ var pageData = new Array();
 <tiles:insert definition=".portlet.confirm"/>
 <tiles:insert definition=".portlet.error"/>
 
-<div id="propertiesAccordion">
+<div id="propertiesAccordion" style="visibility: hidden;">
 <div id="panel1">
 <div id="panelHeader" class="accordionTabTitleBar">
 <!--  GENERAL PROPERTIES TITLE -->
