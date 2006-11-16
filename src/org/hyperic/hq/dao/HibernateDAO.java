@@ -61,6 +61,9 @@ public abstract class HibernateDAO {
         return findById(id, false);
     }
 
+    protected Object get(Serializable id) {
+        return getSession().get(getPersistentClass(), id);
+    }
 
     protected Object findById(Serializable id, boolean lock) {
         return lock

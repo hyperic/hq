@@ -4,6 +4,7 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.dao.DAOFactory;
 
 import java.util.Iterator;
+import java.io.Serializable;
 
 /*
 * NOTE: This copyright does *not* cover user programs that use HQ
@@ -39,12 +40,23 @@ public class EscalationDAO extends HibernateDAO {
     }
 
     public void save(Escalation entity) {
+        removeActions(entity.getActions().iterator());
+        saveActions(entity.getActions().iterator());
         super.save(entity);
+    }
+
+    public Escalation get(Integer id) {
+        return (Escalation)super.get(id);
     }
 
     public void remove(Escalation entity) {
         removeActions(entity.getActions().iterator());
         super.remove(entity);
+    }
+
+    public void clearActions(Escalation entity) {
+        removeActions(entity.getActions().iterator());
+        entity.getActions().clear();
     }
 
     public Escalation findById(Integer id) {
@@ -59,12 +71,23 @@ public class EscalationDAO extends HibernateDAO {
     }
 
     private void removeActions(Iterator i) {
+        ActionDAO dao = DAOFactory.getDAOFactory().getActionDAO();
         // have to remove actions manually as we can't setup
         // cascade relationship via the hbm model, :(
         while(i.hasNext()) {
             EscalationAction ea = (EscalationAction)i.next();
-            DAOFactory.getDAOFactory().getActionDAO()
-                .remove(ea.getAction());
+            Integer id = ea.getAction().getId();
+            if (id != null && dao.get(ea.getAction().getId()) != null) {
+                dao.remove(ea.getAction());
+            }
+        }
+    }
+
+    private void saveActions(Iterator i) {
+        ActionDAO dao = DAOFactory.getDAOFactory().getActionDAO();
+        while(i.hasNext()) {
+            EscalationAction ea = (EscalationAction)i.next();
+            dao.save(ea.getAction());
         }
     }
 }

@@ -56,20 +56,9 @@ public class SaveEscalation extends Command {
 
     public void execute(CommandContext context) {
         verify(escalation);
-        saveActions(escalation.getActions().iterator());
         EscalationDAO dao =
             DAOFactory.getDAOFactory().getEscalationDAO();
         dao.save(escalation);
-    }
-
-    private void saveActions(Iterator i) {
-        // have to save transient many-to-one references (Actions) prior to saving
-        // escalation, :(
-        ActionDAO dao = DAOFactory.getDAOFactory().getActionDAO();
-        while(i.hasNext()) {
-            EscalationAction ea = (EscalationAction)i.next();
-            dao.save(ea.getAction());
-        }
     }
 
     private void verify(Escalation escalation) {

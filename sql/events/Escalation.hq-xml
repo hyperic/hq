@@ -61,7 +61,7 @@
     
     <component name="escalationState" class="EscalationState">
       <meta attribute="field-description"><![CDATA[
-        escalation chain state.
+        escalation chain runtime state.
       ]]></meta>
 
       <property name="currentLevel" type="integer">
@@ -73,18 +73,18 @@
       </property>
       <property name="pauseEscalation" type="boolean">
         <meta attribute="field-description"><![CDATA[
-        If true, then wait for max("waitTime", EscalationAction.waitTime)
+        If true, then wait for
+            max(pauseWaitTime, EscalationAction.waitTime)
+        else wait for
+            EscalationAction.waitTime
         before escalating up the chain.
-
-        If false, then wait EscalationAction.waitTime before escalating up
-        the chain.
         ]]></meta>
         <column name="PAUSE_ESCALATION" not-null="true" />
       </property>
       <property name="pauseWaitTime" type="long">
         <meta attribute="field-description"><![CDATA[
         meaningful if pauseEscalation == true.
-        pauseWaitTime < maxWaitTime
+            (pauseWaitTime <= maxWaitTime)
         ]]></meta>
         <column name="WAIT_TIME" not-null="true"/>
       </property>

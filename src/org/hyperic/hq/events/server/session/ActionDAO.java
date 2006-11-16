@@ -25,6 +25,7 @@
 package org.hyperic.hq.events.server.session;
 
 import java.util.List;
+import java.io.Serializable;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -36,6 +37,10 @@ public class ActionDAO extends HibernateDAO {
 
     public Action findById(Integer id) {
         return (Action)super.findById(id);
+    }
+
+    public Action get(Integer id) {
+        return (Action)super.get(id);
     }
 
     public void save(Action entity) {
