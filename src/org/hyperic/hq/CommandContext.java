@@ -77,6 +77,18 @@ public class CommandContext implements Serializable {
     protected CommandContext() {
     }
 
+    public void execute(Command command) {
+        clear();
+        addCommand(command);
+        execute();
+    }
+
+    public void execute(List commands) {
+        clear();
+        addCommand(commands);
+        execute();
+    }
+
     public void execute() {
         if (commandHandler == null) {
             throw new IllegalStateException("CommandHandler not initialized");
@@ -122,6 +134,12 @@ public class CommandContext implements Serializable {
 
     public void setParameter(Object key, Object value) {
         params.put(key, value);
+    }
+
+    public void clear() {
+        getCommands().clear();
+        params.clear();
+        setResult(null);
     }
 }
 
