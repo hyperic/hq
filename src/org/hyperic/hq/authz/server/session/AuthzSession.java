@@ -139,8 +139,7 @@ public abstract class AuthzSession {
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public AuthzSubjectValue findOverlord()
-        throws NamingException, FinderException {
+    public AuthzSubjectValue findOverlord() throws NamingException {
         return findSubjectByAuth(AuthzConstants.overlordName,
                                  AuthzConstants.overlordDsn);
     }
