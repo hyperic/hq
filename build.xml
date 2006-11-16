@@ -179,32 +179,6 @@
     <property name="init-taskdefs.notrequired" value="true"/>
   </target>
 
-  <!-- Instrument classes directory inplace with emma -->
-  <target name="instrument" depends="init,init-taskdefs">
-    <taskdef resource="emma_ant.properties" classpathref="emma.lib" />
-
-    <emma>
-      <instr instrpath="${build.dir}/classes"
-             mode="overwrite">
-
-        <!-- exclude tests -->
-        <filter excludes="*Test*" />
-      </instr>
-    </emma>
-  </target>
-
- <target name="coverage">
-    <mkdir dir="${basedir}/coverage"/>
-
-   <taskdef resource="emma_ant.properties" classpathref="emma.lib" />
-
-    <emma>
-      <report sourcepath="${basedir}/src">
-        <infileset dir="." includes="coverage.*" />
-        <html />
-      </report>
-    </emma>
-  </target>
 
   <!-- ==================== Compile java sources ==================== -->
   <target name="compile" description="Compile sources" 
