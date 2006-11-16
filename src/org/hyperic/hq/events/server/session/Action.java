@@ -47,10 +47,7 @@ public class Action
     private AlertDefinition _alertDef;
     private Collection      _logEntries = new ArrayList();
     private Collection      _children = new ArrayList();
-    private int             escalationOrder;
-    private long            waitTime;
-    private Escalation      escalation;
-    
+
     private ActionValue     _valueObj;
 
     public static Action createEmailAction(int type, Set notifs) {
@@ -107,30 +104,6 @@ public class Action
 
     public AlertDefinition getAlertDefinition() {
         return _alertDef;
-    }
-
-    public int getEscalationOrder() {
-        return escalationOrder;
-    }
-
-    public void setEscalationOrder(int escalationOrder) {
-        this.escalationOrder = escalationOrder;
-    }
-
-    public long getWaitTime() {
-        return waitTime;
-    }
-
-    public void setWaitTime(long waitTime) {
-        this.waitTime = waitTime;
-    }
-
-    public Escalation getEscalation() {
-        return escalation;
-    }
-
-    public void setEscalation(Escalation escalation) {
-        this.escalation = escalation;
     }
 
     protected void setAlertDefinition(AlertDefinition alertDefinition) {

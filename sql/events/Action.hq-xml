@@ -26,28 +26,6 @@
       <column name="CONFIG" />
     </property>
 
-    <property name="escalationOrder" type="integer">
-      <meta attribute="field-description"><![CDATA[
-        n'th action in this escalation chain.
-      ]]></meta>
-      <column name="ESCALATION_ORDER"/>
-    </property>
-
-    <property name="waitTime" type="long">
-      <meta attribute="field-description"><![CDATA[
-        wait for "waitTime" before executing the next action
-        in the escalation chain.
-        waitTime is specified in milliseconds.
-      ]]></meta>
-      <column name="WAIT_TIME"/>
-    </property>
-
-    <many-to-one name="escalation" class="Escalation">
-      <!-- change to not-null contraint to not-null=true when work
-           is finished -->
-      <column name="ESCALATION_ID" not-null="false" />
-    </many-to-one>
-
     <many-to-one name="parent" class="Action">
       <column name="PARENT_ID" />
     </many-to-one>

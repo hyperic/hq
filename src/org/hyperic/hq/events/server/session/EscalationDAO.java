@@ -1,10 +1,9 @@
 package org.hyperic.hq.events.server.session;
 
-import org.hibernate.Session;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.dao.DAOFactory;
 
-import java.io.Serializable;
+import java.util.Iterator;
 
 /*
 * NOTE: This copyright does *not* cover user programs that use HQ
@@ -44,6 +43,7 @@ public class EscalationDAO extends HibernateDAO {
     }
 
     public void remove(Escalation entity) {
+        removeActions(entity.getActions().iterator());
         super.remove(entity);
     }
 
@@ -56,5 +56,15 @@ public class EscalationDAO extends HibernateDAO {
         return (Escalation)getSession().createQuery(sql)
             .setString(0, name)
             .uniqueResult();
+    }
+
+    private void removeActions(Iterator i) {
+        // have to remove actions manually as we can't setup
+        // cascade relationship via the hbm model, :(
+        while(i.hasNext()) {
+            EscalationAction ea = (EscalationAction)i.next();
+            DAOFactory.getDAOFactory().getActionDAO()
+                .remove(ea.getAction());
+        }
     }
 }

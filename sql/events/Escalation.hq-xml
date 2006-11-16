@@ -55,17 +55,19 @@
       <column name="MTIME" not-null="true" />
     </property>
 
-    <list name="actions" table="EAM_ACTION">
+    <list name="actions" table="EAM_ESCALATION_ACTION">
       <key column="ESCALATION_ID" />
-      <list-index column="ESCALATION_ORDER"/>
-      <one-to-many class="Action" />
+      <list-index column="IDX"/>
+      <composite-element class="EscalationAction">
+        <property name="waitTime" type="long">
+          <column name="WAIT_TIME" />
+        </property>
+        <many-to-one name="action" class="Action">
+          <column name="ACTION_ID" />
+        </many-to-one>
+      </composite-element>
     </list>
 
-    <bag name="alertDefinitions" table="EAM_ALERT_DEFINITION">
-      <key column="EVENT_ID" />
-      <one-to-many class="AlertDefinition" />
-    </bag>
-    
   </class>
 
 </hibernate-mapping>

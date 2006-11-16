@@ -36,7 +36,6 @@ public class Escalation extends PersistedObject {
     private long creationTime;
     private long modifiedTime;
     private List actions = new ArrayList(0);
-    private Collection alertDefinitions = new ArrayList();
 
     public static Escalation createEscalation(String name) {
         Escalation e = new Escalation();
@@ -53,7 +52,7 @@ public class Escalation extends PersistedObject {
     /**
      * default constructor
      */
-    protected Escalation() {
+    public Escalation() {
     }
 
     public String getName() {
@@ -122,19 +121,6 @@ public class Escalation extends PersistedObject {
 
     protected void setActions(List actions) {
         this.actions = actions;
-    }
-
-    public void addAction(Action action) {
-        actions.add(action);
-        action.setEscalation(this);
-    }
-
-    public Collection getAlertDefinitions() {
-        return alertDefinitions;
-    }
-
-    protected void setAlertDefinitions(Collection alertDefinitions) {
-        this.alertDefinitions = alertDefinitions;
     }
 
     public boolean equals(Object obj) {

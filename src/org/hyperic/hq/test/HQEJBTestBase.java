@@ -51,6 +51,7 @@ import org.hyperic.hq.events.shared.RegisteredTriggerManagerUtil;
 import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
+import org.hyperic.hq.bizapp.server.session.CommandHandlerEJBImpl;
 import org.mockejb.SessionBeanDescriptor;
 import org.mockejb.jndi.MockContextFactory;
 
@@ -76,6 +77,7 @@ public abstract class HQEJBTestBase
             ResourceVOHelperEJBImpl.class,
             TemplateManagerEJBImpl.class,
             CrispoManagerEJBImpl.class,
+            CommandHandlerEJBImpl.class,
         };
     }
 

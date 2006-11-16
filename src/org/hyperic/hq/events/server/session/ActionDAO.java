@@ -37,7 +37,15 @@ public class ActionDAO extends HibernateDAO {
     public Action findById(Integer id) {
         return (Action)super.findById(id);
     }
-    
+
+    public void save(Action entity) {
+        super.save(entity);
+    }
+
+    protected void remove(Action entity) {
+        super.remove(entity);
+    }
+
     /**
      * Find all the actions which triggered the alert in the alert log
      * @return a collection of {@link Action}s
