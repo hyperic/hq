@@ -83,9 +83,9 @@ import org.hyperic.util.pager.SortAttribute;
  *      type="Stateless"
  * 
  * @ejb:util generate="physical"
+ * @ejb:transaction type="REQUIRED"
  */
-public class RoleManagerEJBImpl 
-    extends AuthzSession implements SessionBean {
+public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
 
     protected Log log = LogFactory.getLog("org.hyperic.hq.authz." +
                                           "server.session.RoleManagerEJBImpl");
@@ -119,23 +119,19 @@ public class RoleManagerEJBImpl
         }        
     }
     
-    private Role lookupRole(RoleValue role)
-        throws NamingException, FinderException {
+    private Role lookupRole(RoleValue role) {
         return getRoleDAO().findById(role.getId());
     }
 
-    private Role lookupRole(Integer id)
-        throws NamingException, FinderException {
+    private Role lookupRole(Integer id) {
         return getRoleDAO().findById(id);
     }
 
-    private boolean isRootRoleMember(AuthzSubjectValue subject) 
-        throws NamingException, FinderException {
+    private boolean isRootRoleMember(AuthzSubjectValue subject)  {
         return getRootRoleIfMember(subject) != null;
     }
 
-    private Role getRootRoleIfMember(AuthzSubjectValue subject)
-        throws NamingException, FinderException {
+    private Role getRootRoleIfMember(AuthzSubjectValue subject) {
         // Look up the root role
         Role rootRole = getRoleDAO().findById(AuthzConstants.rootRoleId);
         // Look up the calling subject
@@ -149,10 +145,12 @@ public class RoleManagerEJBImpl
     /** 
      * Filter a collection of roleLocal objects to only include those viewable
      * by the specified user
+     * @throws NamingException if database connection cannot be established
+     * @throws FinderException SQL error looking up roles scope
      */
     private Collection filterViewableRoles(AuthzSubjectValue who,
                                            Collection roles) 
-        throws NamingException, FinderException, PermissionException {
+        throws PermissionException, NamingException, FinderException {
         return filterViewableRoles(who, roles, null);
     }
     /**
@@ -161,11 +159,13 @@ public class RoleManagerEJBImpl
      * @param who - the user
      * @param roles - the list of role locals
      * @param excludeIds - role ids which should be excluded from the return list     * 
+     * @throws NamingException if database connection cannot be established
+     * @throws FinderException SQL error looking up roles scope
      */                                                         
     private Collection filterViewableRoles(AuthzSubjectValue who,
                                            Collection roles, 
                                            Integer[] excludeIds)         
-        throws NamingException, FinderException, PermissionException {
+        throws PermissionException, NamingException, FinderException {
         List excludeList = null;
         boolean hasExclude = (excludeIds != null && excludeIds.length > 0);
         if (hasExclude)
@@ -194,19 +194,16 @@ public class RoleManagerEJBImpl
      * @param subjects Subject to add to the new role. Use null to add subjects
      * later.
      * @return RoleValue for the role.
-     * @exception CreateException Unable to create the specified entity.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami may not perform createResource on 
+     * @throws CreateException Unable to create the specified entity.
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami may not perform createResource on 
      * the covalentAuthzRole ResourceType.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public RoleValue createRole(AuthzSubjectValue whoami, RoleValue role,
                                 OperationValue[] operations,
                                 AuthzSubjectValue[] subjects)
-        throws FinderException, AuthzDuplicateNameException,
-               PermissionException {
+        throws AuthzDuplicateNameException, PermissionException {
         validateRole(role);
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
@@ -238,22 +235,16 @@ public class RoleManagerEJBImpl
      * @param groups Resource groups to add to the new role. Use null to add
      * subjects later.
      * @return OwnedRoleValue for the role.
-     * @exception CreateException Unable to create the specified entity.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami may not perform createResource 
+     * @throws PermissionException whoami may not perform createResource 
      * on the covalentAuthzRole ResourceType.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public Integer createOwnedRole(AuthzSubjectValue whoami,
                                   RoleValue role,
                                   OperationValue[] operations,
                                   AuthzSubjectValue[] subjects,
                                   ResourceGroupValue[] groups)
-        throws CreateException, NamingException, FinderException,
-               AuthzDuplicateNameException, PermissionException
-    {
+        throws AuthzDuplicateNameException, PermissionException {
         RoleDAO roleLome = getRoleDAO();
         validateRole(role);
 
@@ -290,22 +281,20 @@ public class RoleManagerEJBImpl
      * @param groupIds Ids of resource groups to add to the new role. Use 
      * null to add subjects later.
      * @return OwnedRoleValue for the role.
-     * @exception CreateException Unable to create the specified entity.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami may not perform createResource on
+     * @throws CreateException Unable to create the specified entity.
+     * @throws NamingException
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami may not perform createResource on
      * the covalentAuthzRole ResourceType.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public Integer createOwnedRole(AuthzSubjectValue whoami,
                                   RoleValue role,
                                   OperationValue[] operations,
                                   Integer[] subjectIds,
                                   Integer[] groupIds)
-        throws CreateException, NamingException, FinderException,
-               AuthzDuplicateNameException, PermissionException
-    {
+        throws NamingException, FinderException,
+               AuthzDuplicateNameException, PermissionException {
         RoleDAO roleLome = getRoleDAO();
         validateRole(role);
 
@@ -347,18 +336,13 @@ public class RoleManagerEJBImpl
      * Delete the specified role.
      * @param whoami The current running user.
      * @param role The role to delete.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception RemoveException Unable to delete the specified entity.
+     * @throws RemoveException Unable to delete the specified entity.
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
     public void removeRole(AuthzSubjectValue whoami, Integer rolePk)
-        throws NamingException, FinderException, RemoveException,
-        PermissionException
-    {
-        Role roleLocal =
-            getRoleDAO().findById(rolePk);
+        throws RemoveException, PermissionException {
+        Role roleLocal = getRoleDAO().findById(rolePk);
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
         pm.check(whoami.getId(), 
@@ -373,16 +357,12 @@ public class RoleManagerEJBImpl
      * Write the specified entity out to permanent storage.
      * @param whoami The current running user.
      * @param role The role to save.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami may not perform modifyRole on 
+     * @throws PermissionException whoami may not perform modifyRole on 
      * this role.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void saveRole(AuthzSubjectValue whoami, RoleValue role)
-        throws NamingException, FinderException, 
-               AuthzDuplicateNameException, PermissionException {
+        throws AuthzDuplicateNameException, PermissionException {
         Role roleLocal = lookupRole(role);
         if(!roleLocal.getName().equals(role.getName())) {
             // Name has changed... check it
@@ -400,16 +380,13 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param role The role to save
      * @param ownerVal The new owner of the role..
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami may not perform modifyRole 
+     * @throws PermissionException whoami may not perform modifyRole 
      * on this role.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void changeOwner(AuthzSubjectValue whoami, RoleValue role,
                             AuthzSubjectValue ownerVal)
-        throws NamingException, FinderException, PermissionException {
+        throws PermissionException {
         Role roleLocal = lookupRole(role);
         AuthzSubject owner = lookupSubject(ownerVal);
 
@@ -425,16 +402,15 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param role The role.
      * @param operations The operations to associate with the role.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
-     * @exception PermissionException whoami may not perform addOperation on
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws NamingException
+     * @throws PermissionException whoami may not perform addOperation on
      * this role.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void addOperations(AuthzSubjectValue whoami, RoleValue role,
                               OperationValue[] operations)
-        throws FinderException, NamingException, PermissionException {
+        throws NamingException, PermissionException {
         Set opLocals = toPojos(operations);
         Role roleLocal = lookupRole(role);
 
@@ -447,16 +423,15 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param role The role.
      * @param operations The roles to disassociate.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
-     * @exception PermissionException whoami may not perform removeOperation
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws NamingException
+     * @throws PermissionException whoami may not perform removeOperation
      * on this role.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeOperations(AuthzSubjectValue whoami, RoleValue role,
                                  OperationValue[] operations)
-        throws FinderException, NamingException, PermissionException {
+        throws NamingException, PermissionException {
         Set opLocals = toPojos(operations);
         Role roleLocal = lookupRole(role);
 //        roleLocal.setWhoami(lookupSubject(whoami));
@@ -467,15 +442,14 @@ public class RoleManagerEJBImpl
      * Disassociate all operations from this role.
      * @param whoami The current running user.
      * @param role The role.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
-     * @exception PermissionException whoami may not perform removeOperation 
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws NamingException
+     * @throws PermissionException whoami may not perform removeOperation 
      * on this role.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeAllOperations(AuthzSubjectValue whoami, RoleValue role)
-        throws FinderException, NamingException, PermissionException {
+        throws NamingException, PermissionException {
         Role roleLocal = lookupRole(role);
 //        roleLocal.setWhoami(lookupSubject(whoami));
         roleLocal.getOperations().clear();
@@ -487,16 +461,14 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param role This role.
      * @param operations Operations to associate with this role.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami is not allowed to perform
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami is not allowed to perform
      * setOperations on this role.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void setOperations(AuthzSubjectValue whoami, RoleValue role,
                               OperationValue[] operations)
-        throws NamingException, FinderException, PermissionException {
+        throws PermissionException {
         if (operations != null) {
             Role roleLocal = lookupRole(role);
 
@@ -515,16 +487,15 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param role This role.
      * @param groups The groups to associate with this role.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
-     * @exception PermissionException whoami is not allowed to perform 
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws NamingException
+     * @throws PermissionException whoami is not allowed to perform 
      * addResourceGroup on this role.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void addResourceGroups(AuthzSubjectValue whoami, RoleValue role,
                                   ResourceGroupValue[] groups)
-        throws FinderException, NamingException, PermissionException {
+        throws NamingException, PermissionException {
         Set sLocals = toPojos(groups);
         Role roleLocal = lookupRole(role);
 
@@ -540,16 +511,15 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param role This role.
      * @param ids The ids of the groups to associate with this role.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
-     * @exception PermissionException whoami is not allowed to perform
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws NamingException
+     * @throws PermissionException whoami is not allowed to perform
      * addResourceGroup on this role.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void addResourceGroups(AuthzSubjectValue whoami, RoleValue role,
                                   Integer[] ids)
-        throws FinderException, NamingException, PermissionException {
+        throws NamingException, PermissionException {
         Role roleLocal = lookupRole(role);
 //        roleLocal.setWhoami(lookupSubject(whoami));
         HashSet sLocals = new HashSet(ids.length);
@@ -564,16 +534,14 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param roles The roles.
      * @param ids The id of the group to associate with the roles.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
-     * @exception PermissionException whoami is not allowed to perform 
+     * @throws PermissionException whoami is not allowed to perform 
      * addResourceGroup on this role.
+     * @throws FinderException SQL error looking up roles scope
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void addResourceGroupRoles(AuthzSubjectValue whoami, Integer gid,
                                       Integer[] ids)
-        throws FinderException, NamingException, PermissionException {
+        throws PermissionException, FinderException {
         ResourceGroup group = lookupGroup(gid);
         for (int i = 0; i < ids.length; i++) {
             Role roleLocal = lookupRole(ids[i]);
@@ -586,16 +554,15 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param role This role.
      * @param groups The groups to disassociate.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
-     * @exception PermissionException whoami is not allowed to perform 
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws NamingException
+     * @throws PermissionException whoami is not allowed to perform 
      * modifyRole on this role.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeResourceGroups(AuthzSubjectValue whoami, RoleValue role,
                                      ResourceGroupValue[] groups)
-        throws FinderException, NamingException, PermissionException {
+        throws NamingException, PermissionException {
         Set sLocals = toPojos(groups);
         Role roleLocal = lookupRole(role);
 
@@ -612,16 +579,15 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param role This role.
      * @param ids The ids of the groups to disassociate.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
-     * @exception PermissionException whoami is not allowed to perform 
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws NamingException
+     * @throws PermissionException whoami is not allowed to perform 
      * modifyRole on this role.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeResourceGroups(AuthzSubjectValue whoami, RoleValue role,
                                      Integer[] ids)
-        throws FinderException, NamingException, PermissionException {
+        throws NamingException, PermissionException {
         Role roleLocal = lookupRole(role);
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
@@ -640,16 +606,15 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param role This role.
      * @param ids The ids of the groups to disassociate.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
-     * @exception PermissionException whoami is not allowed to perform 
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws NamingException
+     * @throws PermissionException whoami is not allowed to perform 
      * modifyRole on this role.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeResourceGroupRoles(AuthzSubjectValue whoami,
                                          Integer gid, Integer[] ids)
-        throws FinderException, NamingException, PermissionException {
+        throws NamingException, PermissionException {
         ResourceGroup group = lookupGroup(gid);
         
         for (int i = 0; i < ids.length; i++) {
@@ -669,16 +634,15 @@ public class RoleManagerEJBImpl
      * Disassociate all ResourceGroups of this role from this role.
      * @param whoami The current running user.
      * @param role This role.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException   
-     * @exception PermissionException whoami is not allowed to perform
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws NamingException   
+     * @throws PermissionException whoami is not allowed to perform
      * modifyRole on this role.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeAllResourceGroups(AuthzSubjectValue whoami,
                                         RoleValue role)
-        throws FinderException, NamingException, PermissionException {
+        throws NamingException, PermissionException {
         Role roleLocal = lookupRole(role);
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
@@ -693,16 +657,15 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param role This role.
      * @param groups The ResourceGroup to associate with this role.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami is not allowed to perform 
+     * @throws NamingException
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami is not allowed to perform 
      * setResourceGroups on this role.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void setResourceGroups(AuthzSubjectValue whoami, RoleValue role,
                                   ResourceGroupValue[] groups)
-        throws NamingException, FinderException, PermissionException {
+        throws PermissionException {
         Role roleLocal = lookupRole(role);
 
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
@@ -717,18 +680,17 @@ public class RoleManagerEJBImpl
       * List the ResourceGroups associate with this role.
       * @param whoami The current running user.
       * @param role This role.
-      * @exception NamingException
-      * @exception FinderException Unable to find a given or dependent entities.
-      * @exception PermissionException whoami is not allowed to 
+      * @throws NamingException
+      * @throws FinderException Unable to find a given or dependent entities.
+      * @throws PermissionException whoami is not allowed to 
       * @deprecated this method is not used by anything other than unit
       * tests. It also
       * perform listResourceGroup on this role.
       * @ejb:interface-method
-      * @ejb:transaction type="Required"
       */
      public ResourceGroupValue[] getResourceGroups(AuthzSubjectValue whoami,
                                                    RoleValue role)
-         throws NamingException, FinderException, PermissionException  {
+         throws PermissionException  {
          Role roleLocal = lookupRole(role);
          /** NOTE... NO PERMISSION CHECK
          perm.check(lookupSubject(whoami),
@@ -736,22 +698,20 @@ public class RoleManagerEJBImpl
                     AuthzConstants.roleOpListResourceGroups);
          **/
          return (ResourceGroupValue[])
-             this.fromLocals(roleLocal.getResourceGroups(),
-                             org.hyperic.hq.authz.shared.ResourceGroupValue.class);
+             fromLocals(roleLocal.getResourceGroups(),
+                        ResourceGroupValue.class);
      }
+     
     /**
      * Find the role that has the given name.
      * @param name The name of the role you're looking for.
      * @return The value-object of the role of the given name.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami does not have viewRole
+     * @throws PermissionException whoami does not have viewRole
      * for the selected role
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public RoleValue findRoleByName(AuthzSubjectValue whoami, String name)
-        throws NamingException, FinderException, PermissionException {
+        throws PermissionException {
         RoleDAO roleHome = getRoleDAO();
         Role roleLocal = roleHome.findByName(name);
 
@@ -766,16 +726,13 @@ public class RoleManagerEJBImpl
      * Find the owned role that has the given name.
      * @param name The name of the role you're looking for.
      * @return The owned value-object of the role of the given name.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami does not have viewRole
+     * @throws PermissionException whoami does not have viewRole
      * for the selected role
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public OwnedRoleValue findOwnedRoleByName(AuthzSubjectValue whoami,
                                               String name)
-        throws NamingException, FinderException, PermissionException {
+        throws PermissionException {
         RoleDAO roleHome = getRoleDAO();
         Role local = roleHome.findByName(name);
 
@@ -798,13 +755,11 @@ public class RoleManagerEJBImpl
      * Find the role that has the given ID.
      * @param id The ID of the role you're looking for.
      * @return The value-object of the role of the given ID.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
+     * @throws FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public RoleValue findRoleById(AuthzSubjectValue whoami, Integer id)
-        throws NamingException, FinderException, PermissionException {
+        throws PermissionException {
         RoleDAO roleHome = getRoleDAO();
         Role roleLocal = roleHome.findById(id);
 
@@ -819,14 +774,12 @@ public class RoleManagerEJBImpl
      * Find the owned role that has the given ID.
      * @param id The ID of the role you're looking for.
      * @return The owned value-object of the role of the given ID.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
+     * @throws FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public OwnedRoleValue findOwnedRoleById(AuthzSubjectValue whoami,
                                             Integer id)
-        throws NamingException, FinderException, PermissionException {
+        throws PermissionException {
         RoleDAO roleHome = getRoleDAO();
         Role local = roleHome.findById(id);
 
@@ -852,15 +805,11 @@ public class RoleManagerEJBImpl
      * to sync up your value-object.
      * @param old Your current value-object.
      * @return A new Role value-object.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
+     * @throws FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
-    public RoleValue updateRoleValue(RoleValue old)
-        throws NamingException, FinderException {
-        Role role =
-            getRoleDAO().findById(old.getId());
+    public RoleValue updateRoleValue(RoleValue old) throws FinderException {
+        Role role = getRoleDAO().findById(old.getId());
         RoleValue newValue = role.getRoleValue();
         return newValue;
     }
@@ -868,13 +817,9 @@ public class RoleManagerEJBImpl
     /**
      * Get the Resource entity associated with this Role.
      * @param role This role.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
-    public ResourceValue getRoleResource(RoleValue role)
-        throws NamingException, FinderException {
+    public ResourceValue getRoleResource(RoleValue role) {
         Role local = getRoleDAO().findById(role.getId());
         return local.getResource().getResourceValue();
     }
@@ -888,11 +833,9 @@ public class RoleManagerEJBImpl
      * @return map - keys are resource type names, values are lists of operation
      * values which are supported on the resouce type.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */ 
-    public Map getRoleOperationMap(AuthzSubjectValue subject, 
-        Integer roleId) throws NamingException, FinderException,
-        PermissionException {
+    public Map getRoleOperationMap(AuthzSubjectValue subject, Integer roleId)
+        throws PermissionException {
         Map theMap = new HashMap();
         // find the role by id
         Role role = getRoleDAO().findById(roleId);
@@ -925,11 +868,9 @@ public class RoleManagerEJBImpl
      * @param pc Paging information for the request
      * @return List a list of RoleValues
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
-    public List getAllRoles(AuthzSubjectValue subject, 
-                            PageControl pc ) 
-        throws NamingException, FinderException {
+    public List getAllRoles(AuthzSubjectValue subject, PageControl pc) 
+        throws FinderException {
         Collection roles;
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
         int attr = pc.getSortattribute();
@@ -952,10 +893,8 @@ public class RoleManagerEJBImpl
      * @param pc Paging and sorting information.
      * @return List a list of OwnedRoleValues
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
-    public List getAllOwnedRoles(AuthzSubjectValue subject, PageControl pc)
-        throws NamingException, FinderException {
+    public List getAllOwnedRoles(AuthzSubjectValue subject, PageControl pc) {
         Collection roles = getRoleDAO().findAll();
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
         return ownedRolePager.seek(roles, pc.getPagenum(), pc.getPagesize());
@@ -964,13 +903,14 @@ public class RoleManagerEJBImpl
     /**
      * List all Roles in the system, except system roles.
      * @return List a list of OwnedRoleValues that are not system roles
+     * @throws NamingException if database connection cannot be established
+     * @throws FinderException if sort attribute is unrecognized
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public PageList getAllNonSystemOwnedRoles(AuthzSubjectValue subject,
                                               Integer[] excludeIds,
                                               PageControl pc)
-        throws NamingException, FinderException, PermissionException {
+        throws PermissionException, NamingException, FinderException {
         Collection roles;
         RoleDAO RoleLH = getRoleDAO();
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
@@ -1012,7 +952,6 @@ public class RoleManagerEJBImpl
      * @throws FinderException
      * @throws PermissionException
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      *
      */
     public PageList getRolesById(AuthzSubjectValue whoami, Integer[] ids,
@@ -1060,14 +999,9 @@ public class RoleManagerEJBImpl
      * Find the role that has the given name.
      * @param name The name of the role you're looking for.
      * @return The value-object of the role of the given name.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * for the selected role
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
-    public Map getUserEmailsById(Integer id)
-        throws NamingException, FinderException {
+    public Map getUserEmailsById(Integer id) {
         RoleDAO roleHome = getRoleDAO();
         Role roleLocal = roleHome.findById(id);
 
@@ -1088,16 +1022,13 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param subject The subject.
      * @param roles The roles to associate with the subject.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
-     * @exception PermissionException whoami may not perform addRole on this 
+     * @throws PermissionException whoami may not perform addRole on this 
      * subject.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void addRoles(AuthzSubjectValue whoami, AuthzSubjectValue subject,
                          RoleValue[] roles)
-        throws FinderException, NamingException, PermissionException  {
+        throws PermissionException  {
         Set roleLocals = toPojos(roles);
         Iterator it = roleLocals.iterator();
         AuthzSubject subjectLocal = lookupSubject(subject);
@@ -1114,16 +1045,13 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param subject The subject.
      * @param roles The subjects to disassociate.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
-     * @exception PermissionException whoami may not perform removeRole on
+     * @throws PermissionException whoami may not perform removeRole on
      * this subject.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeRoles(AuthzSubjectValue whoami,
                             AuthzSubjectValue subject, RoleValue[] roles)
-        throws FinderException, NamingException, PermissionException {
+        throws PermissionException {
         Set roleLocals = toPojos(roles);
         Iterator it = roleLocals.iterator();
         AuthzSubject subjectLocal = lookupSubject(subject);
@@ -1139,16 +1067,13 @@ public class RoleManagerEJBImpl
      * Disassociate all roles from this subject.
      * @param whoami The current running user.
      * @param subject The subject.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
-     * @exception PermissionException whoami may not perform removeRole on
+     * @throws PermissionException whoami may not perform removeRole on
      * this subject.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeAllRoles(AuthzSubjectValue whoami,
                                AuthzSubjectValue subject)
-        throws FinderException, NamingException, PermissionException {
+        throws PermissionException {
         AuthzSubject subjectLocal = lookupSubject(subject);
         RoleValue[] values = (RoleValue[])
             fromLocals(subjectLocal.getRoles(),
@@ -1162,17 +1087,14 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param subject This subject.
      * @param roles Operations to associate with this subject.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami is not allowed to perform
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami is not allowed to perform
      * setRoles on this subject.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void setRoles(AuthzSubjectValue whoami, AuthzSubjectValue subject,
                          RoleValue[] roles)
-        throws NamingException, CreateException, FinderException,
-               PermissionException  {
+        throws FinderException, PermissionException {
         AuthzSubject subjectLocal = lookupSubject(subject);
         if (subjectLocal.isRoot()) {
             throw new PermissionException("The super user is cannot " +
@@ -1193,17 +1115,14 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param subject This subject.
      * @return Array of roles in this role.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami is not allowed to perform
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami is not allowed to perform
      * listRoles on this subject.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public RoleValue[] getRoles(AuthzSubjectValue whoami,
                                 AuthzSubjectValue subjectValue)
-        throws NamingException, CreateException, FinderException,
-               PermissionException {
+        throws FinderException, PermissionException {
         AuthzSubject subjectLocal = lookupSubject(subjectValue);
  
         PermissionManager pm = PermissionManagerFactory.getInstance();
@@ -1221,12 +1140,11 @@ public class RoleManagerEJBImpl
      * @param whoami 
      * @param subject
      * @return Set of Roles
+     * @throws NamingException if database connection cannot be established
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public Collection getRoleEJBs(AuthzSubjectValue subjectValue)
-        throws NamingException, CreateException, FinderException,
-               PermissionException {
+        throws PermissionException, NamingException {
         AuthzSubject subjectLocal = lookupSubject(subjectValue);
         PermissionManager pm = PermissionManagerFactory.getInstance();
         pm.check(findOverlord().getId(), getRootResourceType(),
@@ -1242,12 +1160,10 @@ public class RoleManagerEJBImpl
      * @param pc Paging and sorting information.
      * @return Set of Roles
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public List getRoles(AuthzSubjectValue subjectValue, PageControl pc)
-        throws NamingException,
-        CreateException, FinderException, PermissionException {
-        Collection roles = this.getRoleEJBs(subjectValue);
+        throws NamingException, PermissionException {
+        Collection roles = getRoleEJBs(subjectValue);
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
         return rolePager.seek(roles, pc.getPagenum(), pc.getPagesize()); 
     }
@@ -1258,13 +1174,12 @@ public class RoleManagerEJBImpl
      * @param subject
      * @param pc Paging and sorting information.
      * @return Set of Roles
+     * @throws NamingException if database connection cannot be established
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public List getOwnedRoles(AuthzSubjectValue subjectValue, PageControl pc) 
-        throws NamingException, CreateException, FinderException, 
-               PermissionException {
-        Collection roles = this.getRoleEJBs(subjectValue);
+        throws PermissionException, NamingException {
+        Collection roles = getRoleEJBs(subjectValue);
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
         return ownedRolePager.seek(roles, pc.getPagenum(), pc.getPagesize()); 
     }
@@ -1281,11 +1196,13 @@ public class RoleManagerEJBImpl
      * @throws FinderException Unable to find a given or dependent entities.
      * @throws PermissionException caller is not allowed to perform listRoles
      * on this role.
+     * @throws NamingException if database connection cannot be established
+     * @throws FinderException SQL error looking up roles scope
      */
     public PageList getNonSystemOwnedRoles(AuthzSubjectValue callerSubjectValue,
                                            AuthzSubjectValue intendedSubjectValue,
                                            PageControl pc)
-        throws NamingException, FinderException, PermissionException {
+        throws PermissionException, NamingException, FinderException {
         return getNonSystemOwnedRoles(callerSubjectValue, intendedSubjectValue,
                                       null, pc);
     }                  
@@ -1303,12 +1220,14 @@ public class RoleManagerEJBImpl
      * @throws FinderException Unable to find a given or dependent entities.
      * @throws PermissionException caller is not allowed to perform listRoles
      * on this role.
+     * @throws NamingException if database connection cannot be established
+     * @throws FinderException SQL error looking up roles scope
      */
     public PageList getNonSystemOwnedRoles(AuthzSubjectValue callerSubjectValue,
                                            AuthzSubjectValue intendedSubjectValue, 
                                            Integer[] excludeIds,
                                            PageControl pc)
-       throws NamingException, FinderException, PermissionException {
+       throws PermissionException, NamingException, FinderException {
 
         Collection viewableRoles; // used for filtering
 
@@ -1389,20 +1308,19 @@ public class RoleManagerEJBImpl
      *  If false, then only non-system roles are returned.
      * @param subjectId The id of the subject.
      * @return List of roles.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami is not allowed to perform
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami is not allowed to perform
      * listRoles on this role.
+     * @throws NamingException if database connection cannot be established
+     * @throws FinderException 
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public PageList getAvailableRoles(AuthzSubjectValue whoami,
                                       boolean system,
                                       Integer subjectId,
                                       Integer[] roleIds,
                                       PageControl pc) 
-        throws NamingException, FinderException, PermissionException
-    {
+        throws PermissionException, NamingException, FinderException {
         AuthzSubject subjectLocal = lookupSubject(subjectId);
 
         Collection foundRoles;
@@ -1470,19 +1388,18 @@ public class RoleManagerEJBImpl
      *  If false, then only non-system roles are returned.
      * @param groupId The id of the subject.
      * @return List of roles.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami is not allowed to perform
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami is not allowed to perform
      * listRoles on this role.
+     * @throws NamingException if database connection cannot be established
+     * @throws FinderException if the sort attribute was not recognized
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public PageList getAvailableGroupRoles(AuthzSubjectValue whoami,
                                            Integer groupId,
                                            Integer[] roleIds,
                                            PageControl pc) 
-        throws NamingException, FinderException, PermissionException
-    {
+        throws PermissionException, NamingException, FinderException {
         Collection foundRoles;
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
         int attr = pc.getSortattribute();
@@ -1555,13 +1472,11 @@ public class RoleManagerEJBImpl
      * to sync up your value-object.
      * @param old Your current value-object.
      * @return A new Subject value-object.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
+     * @throws FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AuthzSubjectValue updateSubjectValue(AuthzSubjectValue old)
-        throws NamingException, FinderException {
+        throws FinderException {
         AuthzSubject res = getSubjectDAO().findById(old.getId());
         AuthzSubjectValue newValue = res.getAuthzSubjectValue();
         return newValue;
@@ -1574,14 +1489,16 @@ public class RoleManagerEJBImpl
      * @return resourceGroupList
      * @throws PermissionException - subject can not listResourceGroups
      * for the given role
+     * @throws NamingException if database connection cannot be established
+     * @throws FinderException SQL error looking up roles scope or if sort
+     * attribute is not recognized
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public PageList getResourceGroupsByRoleIdAndSystem(AuthzSubjectValue subject, 
                                                        Integer roleId, 
                                                        boolean system,
                                                        PageControl pc)
-        throws NamingException, FinderException, PermissionException {
+        throws PermissionException, NamingException, FinderException {
         // first find the role by its id
         getRoleDAO().findById(roleId);
         
@@ -1617,11 +1534,10 @@ public class RoleManagerEJBImpl
      * @throws PermissionException 
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public PageList getResourceGroupRoles(AuthzSubjectValue whoami,
                                           Integer groupId, PageControl pc)
-        throws FinderException, NamingException, PermissionException {
+        throws NamingException, PermissionException {
         ResourceGroup resGrp = getResourceGroupDAO().findById(groupId);
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
@@ -1666,7 +1582,6 @@ public class RoleManagerEJBImpl
      * @throws FinderException 
      * @throws NamingException 
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public PageList getAvailableResourceGroups(AuthzSubjectValue whoami,
                                                Integer roleId,
@@ -1738,38 +1653,17 @@ public class RoleManagerEJBImpl
         return plist;
     }
     
-    public void setSessionContext(javax.ejb.SessionContext ctx) { }
-    public void ejbCreate() throws CreateException {
-        try {
-            subjectPager = Pager.getPager(SUBJECT_PAGER);
-            rolePager = Pager.getPager(ROLE_PAGER);
-            groupPager = Pager.getPager(GROUP_PAGER);
-            ownedRolePager = Pager.getPager(OWNEDROLE_PAGER);
-        } catch (Exception e) {
-            throw new CreateException("Could not create Pager: " + e);
-        }
-    }
-    public void ejbRemove() { }
-    public void ejbActivate() { }
-    public void ejbPassivate() { }
-    
     /** Add subjects to this role.
      * @param whoami The current running user.
      * @param role This role.
      * @param subjects Subjects to add to role.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
-     * @exception PermissionException whoami is not allowed to perform
+     * @throws PermissionException whoami is not allowed to perform
      * addSubject on this role.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     *
-     *
      */
     public void addSubjects(AuthzSubjectValue whoami, RoleValue role,
                             AuthzSubjectValue[] subjects) 
-        throws FinderException, NamingException, PermissionException
-    {
+        throws PermissionException {
         Set sLocals = toPojos(subjects);
         Role roleLocal = lookupRole(role);
 //        roleLocal.setWhoami(lookupSubject(whoami));
@@ -1780,17 +1674,14 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param role This role.
      * @param ids Ids of ubjects to add to role.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
-     * @exception PermissionException whoami is not allowed to perform 
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami is not allowed to perform 
      * addSubject on this role.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void addSubjects(AuthzSubjectValue whoami, RoleValue role,
                             Integer[] ids)
-        throws FinderException, NamingException, PermissionException
-    {
+        throws PermissionException {
         Role roleLocal = lookupRole(role);
 //        roleLocal.setWhoami(lookupSubject(whoami));
         HashSet sLocals = new HashSet(ids.length);
@@ -1804,22 +1695,18 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param role This role.
      * @return Array of subjects in this role.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami is not allowed to perform
+     * @throws PermissionException whoami is not allowed to perform
      * listSubjects on this role.
      * @deprecated this method is only used by the unit tests
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public AuthzSubjectValue[] getSubjects(AuthzSubjectValue whoami, 
                                            RoleValue roleValue)
-        throws NamingException, FinderException, PermissionException
-    {
+        throws PermissionException {
         Role roleLocal = lookupRole(roleValue);
         /** NOTE NO PERMISSION CHECK **/
         return (AuthzSubjectValue[])
-        fromLocals(roleLocal.getSubjects(), AuthzSubjectValue.class);
+            fromLocals(roleLocal.getSubjects(), AuthzSubjectValue.class);
     }
     
     /** 
@@ -1827,19 +1714,16 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param role This role.
      * @return List of subjects in this role.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami is not allowed to perform 
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami is not allowed to perform 
      * listSubjects on this role.
+     * @throws FinderException if the sort attribute is not recognized
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
-     *
      *
      */
     public List getSubjects(AuthzSubjectValue whoami, RoleValue roleValue, 
                             PageControl pc) 
-        throws NamingException, FinderException, PermissionException
-    {
+        throws PermissionException, FinderException {
         Role roleLocal = lookupRole(roleValue);
         AuthzSubject subj = lookupSubject(whoami);
         // check if this user is a member of this role
@@ -1885,18 +1769,15 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param roleId The id of the role.
      * @return List of subjects in this role.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami is not allowed to perform 
+     * @throws PermissionException whoami is not allowed to perform 
      * listSubjects on this role.
+     * @throws FinderException if the sort attribute is not recognized
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
-     *
      *
      */
     public PageList getSubjects(AuthzSubjectValue whoami, Integer roleId,
                                 PageControl pc) 
-        throws NamingException, FinderException, PermissionException {
+        throws PermissionException, FinderException {
         Role roleLocal = lookupRole(roleId);
         AuthzSubject subj = lookupSubject(whoami);
         // check if this user is a member of this role
@@ -1949,21 +1830,18 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param roleId The id of the role.
      * @return List of subjects in this role.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami is not allowed to perform
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami is not allowed to perform
      * listSubjects on this role.
+     * @throws FinderException if the sort attribute is not recognized
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
-     *
      *
      */
     public PageList getAvailableSubjects(AuthzSubjectValue whoami,
                                          Integer roleId,
                                          Integer[] subjectIds,
                                          PageControl pc) 
-        throws NamingException, FinderException, PermissionException
-    {
+        throws PermissionException, FinderException {
         Role roleLocal = lookupRole(roleId);
 
         /** TODO PermissionCheck scope for viewSubject **/
@@ -2023,17 +1901,14 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param role This role.
      * @param subjects The subjects to remove.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
-     * @exception PermissionException whoami is not allowed to perform
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami is not allowed to perform
      * removeSubject on this role.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeSubjects(AuthzSubjectValue whoami, RoleValue role, 
                                AuthzSubjectValue[] subjects)
-        throws FinderException, NamingException, PermissionException
-    {
+        throws PermissionException {
         Set sLocals = toPojos(subjects);
         Role roleLocal = lookupRole(role);
 //        roleLocal.setWhoami(lookupSubject(whoami));
@@ -2044,19 +1919,14 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param role This role.
      * @param ids The ids of the subjects to remove.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
-     * @exception PermissionException whoami is not allowed to perform
+     * @throws PermissionException whoami is not allowed to perform
      * removeSubject on this role.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     *
      *
      */
     public void removeSubjects(AuthzSubjectValue whoami, RoleValue role,
                                Integer[] ids)
-        throws FinderException, NamingException, PermissionException
-    {
+        throws PermissionException {
         Role roleLocal = lookupRole(role);
 //        roleLocal.setWhoami(lookupSubject(whoami));
         HashSet sLocals = new HashSet(ids.length);
@@ -2069,16 +1939,12 @@ public class RoleManagerEJBImpl
     /** Remove all subjects from this role.
      * @param whoami The current running user.
      * @param This role.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
-     * @exception PermissionException whoami is not allowed to perform
+     * @throws PermissionException whoami is not allowed to perform
      * removeSubject on this role.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeAllSubjects(AuthzSubjectValue whoami, RoleValue role)
-        throws FinderException, NamingException, PermissionException
-    {
+        throws PermissionException {
         Role roleLocal = lookupRole(role);
 //        roleLocal.setWhoami(lookupSubject(whoami));
         roleLocal.getSubjects().clear();
@@ -2088,19 +1954,14 @@ public class RoleManagerEJBImpl
      * @param whoami The current running user.
      * @param role This role.
      * @param subjects The subjects you want in this role.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami is not allowed to perform
+     * @throws PermissionException whoami is not allowed to perform
      * setSubjects on this role.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     *
      *
      */
     public void setSubjects(AuthzSubjectValue whoami, RoleValue role,
                             AuthzSubjectValue[] subjects)
-        throws NamingException, FinderException, PermissionException
-    {
+        throws PermissionException {
         Role roleLocal = lookupRole(role);
         
         PermissionManager pm = PermissionManagerFactory.getInstance();
@@ -2112,4 +1973,23 @@ public class RoleManagerEJBImpl
         Set sLocals = toPojos(subjects);
         roleLocal.setSubjects(sLocals);
     }
+
+    public void ejbPassivate() { }
+
+    public void ejbActivate() { }
+
+    public void ejbRemove() { }
+
+    public void ejbCreate() throws CreateException {
+        try {
+            subjectPager = Pager.getPager(SUBJECT_PAGER);
+            rolePager = Pager.getPager(ROLE_PAGER);
+            groupPager = Pager.getPager(GROUP_PAGER);
+            ownedRolePager = Pager.getPager(OWNEDROLE_PAGER);
+        } catch (Exception e) {
+            throw new CreateException("Could not create Pager: " + e);
+        }
+    }
+
+    public void setSessionContext(javax.ejb.SessionContext ctx) { }
 }
