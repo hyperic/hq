@@ -218,7 +218,7 @@ public class ResourceGroup extends AuthzNamedBean
         resource = val;
     }
 
-    private Collection getResourceSet() {
+    protected Collection getResourceSet() {
         return resourceSet;
     }
 

@@ -93,7 +93,7 @@ public class ResourceGroupDAO extends HibernateDAO
         // remove all roles
         entity.getRoles().clear();
         // remove all resources
-        entity.getResources().clear();
+        entity.getResourceSet().clear();
 
         // remove this resourceGroup itself
         DAOFactory.getDAOFactory().

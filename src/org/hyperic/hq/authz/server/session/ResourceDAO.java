@@ -111,7 +111,7 @@ public class ResourceDAO extends HibernateDAO
             ResourceGroup rg = (ResourceGroup)i.next();
             ResourceGroup resourceGroup =
                 dao.findById(rg.getId());
-            resourceGroup.getResources().remove(entity);
+            resourceGroup.getResourceSet().remove(entity);
         }
         entity.getResourceGroups().clear();
         super.remove(entity);
