@@ -35,9 +35,6 @@ import java.util.Set;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 
-/**
- *
- */
 public class Application extends AppdefResource
 {
     private String engContact;

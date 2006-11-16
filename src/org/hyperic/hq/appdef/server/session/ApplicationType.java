@@ -30,9 +30,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 
 import java.util.Collection;
 
-/**
- *
- */
 public class ApplicationType extends AppdefResourceType
 {
     private Collection serviceTypes;

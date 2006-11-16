@@ -39,9 +39,6 @@ import org.hibernate.ObjectNotFoundException;
 
 import java.util.Collection;
 
-/**
- *
- */
 public class Service extends AppdefResource
 {
     private static final Log log = LogFactory.getLog(Service.class);

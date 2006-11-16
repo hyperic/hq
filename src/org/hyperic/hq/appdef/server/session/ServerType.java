@@ -36,9 +36,6 @@ import java.util.LinkedHashSet;
 import java.util.HashSet;
 import java.util.ArrayList;
 
-/**
- *
- */
 public class ServerType extends AppdefResourceType
 {
     private String plugin;
