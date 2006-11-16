@@ -166,7 +166,7 @@ public class ResourceGroupDAO extends HibernateDAO
     {
 
         String sql="select distinct rg from ResourceGroup rg " +
-                   " join fetch rg.resourcesSet r " +
+                   " join fetch rg.resourceSet r " +
                    "where r.instanceId=? and " +
                    " r.resourceType.id=? " +
                    "order by rg.sortName " +
