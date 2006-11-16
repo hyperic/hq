@@ -96,6 +96,7 @@ import org.apache.commons.logging.LogFactory;
  *      view-type="both"
  *      type="Stateless"
  * @ejb:util generate="physical"
+ * 
  */
 public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     implements SessionBean {
@@ -157,7 +158,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throws GroupCreationException
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AppdefGroupValue createGroup(AuthzSubjectValue subject, String name,
                                         String description, String location )
@@ -188,7 +188,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throws GroupCreationException
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AppdefGroupValue createGroup(AuthzSubjectValue subject, int adType,
                                         String name, String description,
@@ -229,7 +228,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throws GroupCreationException
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AppdefGroupValue createGroup(AuthzSubjectValue subject, int adType,
         int adResType, String name, String description, String location)
@@ -340,7 +338,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throw AppdefGroupNotFoundException when group cannot be found.
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public AppdefGroupValue findGroup(AuthzSubjectValue subject, Integer id)
         throws AppdefGroupNotFoundException, PermissionException {
@@ -357,7 +354,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throw AppdefGroupNotFoundException when group cannot be found.
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public AppdefGroupValue findGroup(AuthzSubjectValue subject, Integer id,
                                       PageControl pc)
@@ -373,7 +369,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @param appdef entity id
      * @return AppdefGroupValue object
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      * @throws AppdefGroupNotFoundException when group cannot be located in db.
      * @throws PermissionException if the caller is not authorized.
      */
@@ -392,7 +387,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throws AppdefGroupNotFoundException when group cannot be located in db.
      * @throws PermissionException if the caller is not authorized.
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public AppdefGroupValue findGroup(AuthzSubjectValue subject,
                                       AppdefEntityID id, PageControl pc)
@@ -566,7 +560,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throws GroupModificationException in all other odd occurances (i.e.
                ancillary resources can't be found)
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void saveGroup(AuthzSubjectValue subject, AppdefGroupValue gv)
         throws GroupNotCompatibleException, GroupModificationException, 
@@ -669,8 +662,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @return List containing AppdefGroupValue.
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     * */
+     */
     public PageList findAllGroups(AuthzSubjectValue subject, PageControl pc)
         throws PermissionException {
         return findAllGroups(subject, (ResourceValue) null, pc, null);
@@ -685,8 +677,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @return PageList containing AppdefGroupValues.
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     * */
+     */
     public PageList findAllGroups(AuthzSubjectValue subject, PageControl pc,
                                   AppdefPagerFilter[] grpFilters)
         throws PermissionException {
@@ -704,7 +695,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @return PageList containing AppdefGroupValues.
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      * */
     public PageList findAllGroups(AuthzSubjectValue subject, 
         AppdefEntityID id, PageControl pc, AppdefPagerFilter[] grpFilters)
@@ -855,7 +845,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throw AppdefGroupNotFoundException when group cannot be found.
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void deleteGroup(AuthzSubjectValue subject, AppdefEntityID entityId)
         throws AppdefGroupNotFoundException, PermissionException {
@@ -869,7 +858,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throw AppdefGroupNotFoundException when group cannot be found.
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void deleteGroup(AuthzSubjectValue subject, Integer groupId)
         throws AppdefGroupNotFoundException, PermissionException {
@@ -908,7 +896,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @throw AppdefGroupNotFoundException when group cannot be found.
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AppdefGroupValue changeGroupOwner(AuthzSubjectValue subject,
         Integer groupId, AuthzSubjectValue newOwner)
