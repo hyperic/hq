@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.sigar.win32.Win32Exception;
 import org.hyperic.sigar.win32.RegistryKey;
 
@@ -47,6 +49,9 @@ public class MQSeriesMgrService
 
     //XXX might need to unhardcode.
     public static final File QMGRS_PATH = new File("/var/mqm/qmgrs");
+
+    private static final Log log =
+        LogFactory.getLog(MQSeriesMgrService.class.getName());
 
     private String name;
     private String fullname;
@@ -79,13 +84,15 @@ public class MQSeriesMgrService
     }
 
     private static String[] findQmgrs(File path) {
+        log.debug("Scanning for queue managers in: " + path);
+
         File[] dirs = path.listFiles(new FileFilter() {
             public boolean accept(File dir) {
                 if (dir.getName().equals("@SYSTEM")) {
                     return false;
                 }
                 if (dir.isDirectory() &&
-                    new File(dir, "qm.ini").exists())
+                    new File(dir, "queues").exists())
                 {
                     return true;
                 }
@@ -108,14 +115,21 @@ public class MQSeriesMgrService
         String MQ_MGR_KEY =
             MQSeriesProductPlugin.MQ_KEY +
             "\\Configuration\\QueueManager";
+        RegistryKey key = null;
 
         try {
-            RegistryKey key =
+            key =
                 RegistryKey.LocalMachine.openSubKey(MQ_MGR_KEY);
-            return key.getSubKeyNames();
+            String[] queues = key.getSubKeyNames();
+            log.debug(MQ_MGR_KEY + " contains " + queues.length + " queues");
+            return queues;
         } catch (Win32Exception e) {
             String msg = "Failed to open: " + MQ_MGR_KEY;
             throw new PluginException(msg, e);
+        } finally {
+            if (key != null) {
+                key.close();
+            }
         }
     }
 
@@ -127,6 +141,15 @@ public class MQSeriesMgrService
 
         if (GenericPlugin.isWin32()) {
             qmgrs = findQmgrsRegistry();
+
+            if (qmgrs.length == 0) {
+                String path =
+                    MQSeriesProductPlugin.getRegistryWorkPath();
+
+                if (path != null) {
+                    qmgrs = findQmgrs(new File(path, "Qmgrs"));
+                }
+            }
         }
         else {
             qmgrs = findQmgrs(QMGRS_PATH);
