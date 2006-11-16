@@ -59,12 +59,12 @@ public class MQSeriesProductPlugin
 
     static String MQ_KEY;
 
-    private String getRegistryInstallDir() {
+    static String getRegistryValue(String name) {
         RegistryKey key = null;
 
         try {
             key = RegistryKey.LocalMachine.openSubKey(MQ_KEY);
-            return key.getStringValue("FilePath").trim();
+            return key.getStringValue(name).trim();
         } catch (Win32Exception e) {
             return null;
         } finally {
@@ -74,11 +74,19 @@ public class MQSeriesProductPlugin
         }
     }
 
+    static String getRegistryFilePath() {
+        return getRegistryValue("FilePath");
+    }
+
+    static String getRegistryWorkPath() {
+        return getRegistryValue("WorkPath");
+    }
+
     private String findInstallDir() {
         String installDir = null;
         String[] dirs;
         if (isWin32()) {
-            if ((installDir = getRegistryInstallDir()) != null) {
+            if ((installDir = getRegistryFilePath()) != null) {
                 return installDir;
             }
             dirs = DEFAULT_WIN32_INST;
