@@ -4,8 +4,6 @@ import org.hyperic.hq.Visitor;
 import org.hyperic.hq.VisitorContext;
 import org.hyperic.hq.Visitable;
 import org.hyperic.hq.dao.HibernateDAO;
-import org.hyperic.hq.events.server.session.Escalation;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
 
 /*

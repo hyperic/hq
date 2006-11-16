@@ -1,8 +1,5 @@
 package org.hyperic.hq;
 
-import org.hyperic.hq.events.server.session.Escalation;
-import org.hyperic.hibernate.PersistedObject;
-
 /*
 * NOTE: This copyright does *not* cover user programs that use HQ
 * program services by normal system calls through the application
