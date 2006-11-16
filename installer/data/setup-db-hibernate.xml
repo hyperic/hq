@@ -187,7 +187,7 @@
     <mkdir dir="${build.dir}/sql" />
   </target>
 
-  <target name="hibernate-schema-create" depends="hibernate-prep">
+  <target name="hibernate-schema-create" depends="hibernate-prep,hibernate-schema-create-init">
       
     <hibernatetool>
       <classpath>
