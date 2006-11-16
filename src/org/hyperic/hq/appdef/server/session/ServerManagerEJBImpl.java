@@ -530,7 +530,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         ServerValue serverValue;
 
         svc = getServiceDAO().findById(sID);
-        s = getServerDAO().findById(svc.getParentId());
+        s = svc.getServer();
         serverValue = s.getServerValue();
 
         checkViewPermission(subject, serverValue.getEntityId());
