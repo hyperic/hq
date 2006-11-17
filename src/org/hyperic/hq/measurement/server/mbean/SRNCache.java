@@ -52,7 +52,6 @@ import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.measurement.SRNCreateException;
 import org.hyperic.hq.measurement.shared.ScheduleRevNumValue;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
@@ -65,8 +64,8 @@ import org.hyperic.util.jdbc.DBUtil;
 public class SRNCache {
     protected Log log = LogFactory.getLog(SRNCache.class.getName());
 
-    private static SRNCache _singleton = null;
-    private HashMap _cache = null;
+    private static SRNCache _singleton = new SRNCache();
+    private static HashMap _cache = null;
     private InitialContext _ic = null;
 
     protected SRNCache() {}
@@ -91,22 +90,11 @@ public class SRNCache {
      * Return singleton instance and initialize if necessary
      */    
     public static SRNCache getInstance() {
-        if (_singleton == null) {
-            _singleton = (SRNCache) ProductProperties
-                .getPropertyInstance("hyperic.hq.metric.srncache");
-            
-            if (_singleton == null)
-                _singleton = new SRNCache();
-            
-            _singleton.init();
+        synchronized(_singleton) {
+            if (_cache == null) {
+                _singleton.init();
+            }
         }
-        return _singleton;
-    }
-
-    /**
-     * Only return singleton instance only if it's already initialized
-     */    
-    public static SRNCache getInitializedInstance() {
         return _singleton;
     }
 
@@ -155,14 +143,14 @@ public class SRNCache {
             "appdef_type = ? AND instance_id = ?");
     }
 
-    private void setMinInterval(ScheduleRevNumValue srn, Connection conn,
+    private void setMinInterval(ScheduleRevNumValue srn,
                                 PreparedStatement stmt, AppdefEntityID eid)
         throws SQLException {
         ResultSet rs = null;
         try {
             int i = 1;
             stmt.setInt(i++, eid.getID());
-            stmt.setInt(i++, eid.getType());
+            stmt.setInt(i, eid.getType());
 
             rs = stmt.executeQuery();
 
@@ -362,7 +350,7 @@ public class SRNCache {
                 int i = 1;
                 stmt.setInt(i++, srnVal.getSRN());
                 stmt.setInt(i++, srnVal.getAppdefType());
-                stmt.setInt(i++, srnVal.getInstanceId());
+                stmt.setInt(i, srnVal.getInstanceId());
                 
                 stmt.execute();
             } catch (SQLException e) {
@@ -391,7 +379,7 @@ public class SRNCache {
                     stmt = this.getMinIntervalStmt(conn);
     
                     // Set minInterval
-                    this.setMinInterval(srnVal, conn, stmt, eid);
+                    this.setMinInterval(srnVal, stmt, eid);
                 } catch (SQLException e) {
                     // Prevent rescheduling
                     this.log.debug("SQLException, setting min interval to " +
@@ -551,7 +539,7 @@ public class SRNCache {
             stmt = getMinIntervalStmt(conn);
 
             // Set minInterval
-            setMinInterval(srnVal, conn, stmt, eid);
+            setMinInterval(srnVal, stmt, eid);
         } catch (SQLException e) {
             // Prevent rescheduling
             log.error("SQLException, abort handleMessage", e);

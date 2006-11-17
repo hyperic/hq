@@ -152,14 +152,7 @@ public class ScheduleVerificationService
         }
 
         // First make sure that the cache is initialized
-        SRNCache srnCache = SRNCache.getInitializedInstance();
-        
-        // Cache not yet initialized            
-        if (srnCache == null) {
-            log.info(
-                "Measurement Schedule Verification: SRN Cache not initialized");
-            return;
-        }
+        SRNCache srnCache = SRNCache.getInstance();
 
         AgentManagerLocal agentMan;
 
@@ -168,12 +161,14 @@ public class ScheduleVerificationService
         } catch (CreateException e) {
             // this is a schedulable MBean -- we will try again later,
             // so just log a "not ready" message
-            log.info("Measurement Schedule Verification: " +                     "Agent or Data Manager not ready.");
+            log.info("Measurement Schedule Verification: " +
+                     "Agent or Data Manager not ready.");
             return;
         } catch (NamingException e) {
             // this is a schedulable MBean -- we will try again later,
             // so just log a "not ready" message
-            log.info("Measurement Schedule Verification: " +                     "Agent or Data Manager not ready.");
+            log.info("Measurement Schedule Verification: " +
+                     "Agent or Data Manager not ready.");
             return;
         }
 
