@@ -289,10 +289,20 @@ public class WebUser {
     }
     
     public String getPreference(String key) throws InvalidOptionException {
-        String value =  preferences.getValue(key);
+        String value = preferences.getValue(key);
         
         if (value == null)
-            throw new InvalidOptionException("preference" + key + " requested is not valid");
+            throw new InvalidOptionException("preference" + key +
+                                             " requested is not valid");
+        return value.trim();
+    }
+
+    public String getPreference(String key, String def) {
+        String value = preferences.getValue(key);
+        
+        if (value == null)
+            return def;
+        
         return value.trim();
     }
 

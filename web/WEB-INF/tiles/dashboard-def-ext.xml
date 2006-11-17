@@ -26,6 +26,7 @@
                 <add value=".dashContent.criticalAlerts"/>
                 <add value=".dashContent.autoDiscovery"/>
                 <add value=".dashContent.recentResources"/>
+                <add value=".dashContent.controlActions"/>
               </putList> 
   </definition>  
     

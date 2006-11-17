@@ -61,6 +61,9 @@
                    type="org.hyperic.hq.ui.action.portlet.criticalalerts.PropertiesForm"/>  
         <form-bean name="DashboardAddResourceHealthForm"
                    type="org.hyperic.hq.ui.action.portlet.addresource.AddResourcesForm"/>  
+        <form-bean name="ControlActionsForm"
+                   type="org.hyperic.hq.ui.action.portlet.controlactions.PropertiesForm"/>
+
 
         <!-- RESOURCE COMMON FORMS -->
         <form-bean name="ResourceForm"
@@ -2111,6 +2114,28 @@
               <forward name="failure" path="/dashboard/Admin.do?mode=rsrcHealthAddResources"/>
               <forward name="success" path="/dashboard/Admin.do?mode=resourceHealth"/>
       </action>
+      
+      <action path="/dashboard/ViewControlActions"
+              type="org.hyperic.hq.ui.action.portlet.controlactions.ViewAction">
+      </action>
+
+      <action path="/dashboard/EditControlActions"
+              type="org.hyperic.hq.ui.action.portlet.controlactions.PrepareAction"
+              name="ControlActionsForm"
+              scope="request">
+        <set-property property="title" value="1.8"/>                            
+      </action>            
+
+      <action path="/dashboard/ModifyControlActions"
+              type="org.hyperic.hq.ui.action.portlet.controlactions.ModifyAction"
+              name="ControlActionsForm"
+              scope="request"
+              input="/dashboard/Admin.do?mode=controlActions">               
+              <forward name="success" path="/Dashboard.do" redirect="true"/>    
+              <forward name="cancel" path="/Dashboard.do" redirect="true"/>
+              <forward name="reset" path="/dashboard/Admin.do?mode=controlActions"/>                       
+              <forward name="remove" path="/dashboard/Admin.do?mode=controlActions"/>        
+      </action>      
       
       <action path="/dashboard/criticalalerts/AddResourcesAction"
               type="org.hyperic.hq.ui.action.portlet.addresource.AddResourcesAction"

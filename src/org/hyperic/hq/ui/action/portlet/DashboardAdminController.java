@@ -57,6 +57,7 @@ public class DashboardAdminController extends BaseDispatchAction {
         keyMethodMap.setProperty("summaryCounts",    "summaryCounts");
         keyMethodMap.setProperty("autoDiscovery",    "autoDiscovery");
         keyMethodMap.setProperty("changeLayout",     "changeLayout");
+        keyMethodMap.setProperty("controlActions",   "controlActions");
         keyMethodMap.setProperty(
                 "rsrcHealthAddResources", "rsrcHealthAddResources");
         keyMethodMap.setProperty(
@@ -217,4 +218,18 @@ public class DashboardAdminController extends BaseDispatchAction {
         
         return null;
     }
+
+    public ActionForward controlActions(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response)
+        throws Exception {
+            
+            Portal portal = 
+                Portal.createPortal("dash.settings.PageTitle.CA",
+                                    ".dashContent.admin.controlActions");
+            
+            portal.setDialog(true);
+            
+            request.setAttribute(Constants.PORTAL_KEY, portal);
+            
+            return null;
+        }
 }
