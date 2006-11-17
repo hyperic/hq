@@ -346,7 +346,7 @@ function accord(tab) {
                        expandedBg: '#60a5ea',
                        hoverBg: '#70b5fa',
                        collapsedBg: '#BBBBBB',
-                       collapsedTextColor: '#DDDDDD',
+                       collapsedTextColor: '#FFFFFF',
                        borderColor: '#60a5ea',
                        onLoadShowTab: tab
                      } );
