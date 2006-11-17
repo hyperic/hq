@@ -94,6 +94,7 @@ public class HypericInterceptor extends EmptyInterceptor
             } else if (curState[i] instanceof EscalationState) {
                 if (prevState == null || !curState[i].equals(prevState[i])) {
                     ((EscalationState)curState[i]).setModifiedTime(ts);
+                    modified =  true;
                 }
             }
         }
