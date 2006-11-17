@@ -64,17 +64,23 @@ import org.hyperic.hq.bizapp.shared.AIBossLocal;
 import org.hyperic.hq.bizapp.shared.AIBossUtil;
 import org.hyperic.hq.bizapp.shared.AppdefBossLocal;
 import org.hyperic.hq.bizapp.shared.AppdefBossUtil;
+import org.hyperic.hq.bizapp.shared.AuthzBossLocal;
+import org.hyperic.hq.bizapp.shared.AuthzBossUtil;
+import org.hyperic.hq.bizapp.shared.ControlBossLocal;
+import org.hyperic.hq.bizapp.shared.ControlBossUtil;
 import org.hyperic.hq.bizapp.shared.EventsBossLocal;
 import org.hyperic.hq.bizapp.shared.EventsBossUtil;
 import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
 import org.hyperic.hq.bizapp.shared.MeasurementBossUtil;
 import org.hyperic.hq.bizapp.shared.ProductBossLocal;
 import org.hyperic.hq.bizapp.shared.ProductBossUtil;
-import org.hyperic.hq.bizapp.shared.AuthzBossLocal;
-import org.hyperic.hq.bizapp.shared.AuthzBossUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
+import org.hyperic.hq.control.shared.ControlManagerLocal;
+import org.hyperic.hq.control.shared.ControlManagerUtil;
+import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
+import org.hyperic.hq.control.shared.ControlScheduleManagerUtil;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.DataManagerUtil;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
@@ -120,35 +126,39 @@ public abstract class BizappSessionEJB {
     private TrackerManagerLocal            trackerLocal;
     private ReportProcessorLocal           rpLocal;
     private DataManagerLocal               dataMan = null;
+    private ControlBossLocal               controlBossLocal = null;
+    private ControlManagerLocal            cmLocal = null;
+    private ControlScheduleManagerLocal    controlScheduleManager = null;
 
     protected SessionContext ctx;
     
     public EventsBossLocal getEventsBoss() {
-        if(this.eventsbossLocal == null) {
+        if(eventsbossLocal == null) {
             try {
-                this.eventsbossLocal = EventsBossUtil.getLocalHome().create();                
+                eventsbossLocal = EventsBossUtil.getLocalHome().create();                
             } catch (Exception e) {
                 throw new SystemException();
             }
         }
-        return this.eventsbossLocal;
+        return eventsbossLocal;
     }
     
     public MeasurementBossLocal getMeasurementBoss() {
-        if(this.measurementBossLocal == null) {
+        if(measurementBossLocal == null) {
             try {
-                this.measurementBossLocal = MeasurementBossUtil.getLocalHome().create();                
+                measurementBossLocal =
+                    MeasurementBossUtil.getLocalHome().create();                
             } catch (Exception e) {
                 throw new SystemException();
             }
         }
-        return this.measurementBossLocal;
+        return measurementBossLocal;
     }
     
     public ProductBossLocal getProductBoss() {
-        if(this.productBossLocal == null) {
+        if(productBossLocal == null) {
             try {
-                this.productBossLocal = ProductBossUtil.getLocalHome().create();                
+                productBossLocal = ProductBossUtil.getLocalHome().create();                
             } catch (Exception e) {
                 throw new SystemException();
             }
@@ -157,98 +167,98 @@ public abstract class BizappSessionEJB {
     }    
     
     public ReportProcessorLocal getReportProcessor() {
-        if(this.rpLocal == null){
+        if(rpLocal == null){
             try {
-                this.rpLocal = ReportProcessorUtil.getLocalHome().create();
+                rpLocal = ReportProcessorUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.rpLocal;
+        return rpLocal;
     }
 
     public CPropManagerLocal getCPropManager() {
-        if(this.cpmLocal == null){
+        if(cpmLocal == null){
             try {
-                this.cpmLocal = 
+                cpmLocal = 
                     CPropManagerUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.cpmLocal;
+        return cpmLocal;
     }
 
     public ConfigManagerLocal getConfigManager() {
-        if(this.confmLocal == null){
+        if(confmLocal == null){
             try {
-                this.confmLocal = 
+                confmLocal = 
                     ConfigManagerUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.confmLocal;
+        return confmLocal;
     }
 
     public ServerConfigManagerLocal getServerConfigManager() {
-        if(this.svrCfgMgrLocal == null){
+        if(svrCfgMgrLocal == null){
             try {
-                this.svrCfgMgrLocal = 
+                svrCfgMgrLocal = 
                     ServerConfigManagerUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.svrCfgMgrLocal;
+        return svrCfgMgrLocal;
     }
 
     public ResourceManagerLocal getResourceManager() {
-        if(this.resourcemLocal == null){
+        if(resourcemLocal == null){
             try {
-                this.resourcemLocal = 
+                resourcemLocal = 
                     ResourceManagerUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.resourcemLocal;
+        return resourcemLocal;
     }
 
     public ResourceGroupManagerLocal getResourceGroupManager() {
-        if(this.resourcegLocal == null){
+        if(resourcegLocal == null){
             try {
-                this.resourcegLocal = 
+                resourcegLocal = 
                     ResourceGroupManagerUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.resourcegLocal;
+        return resourcegLocal;
     }
 
     public AppdefStatManagerLocal getAppdefStatManager() {
-        if(this.asmLocal == null){
+        if(asmLocal == null){
             try {
-                this.asmLocal = 
+                asmLocal = 
                     AppdefStatManagerUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.asmLocal;
+        return asmLocal;
     }    
     
     public AuthzSubjectManagerLocal getAuthzSubjectManager() {
-        if(this.ssmLocal == null){
+        if(ssmLocal == null){
             try {
-                this.ssmLocal = 
+                ssmLocal = 
                     AuthzSubjectManagerUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.ssmLocal;
+        return ssmLocal;
     }
 
     public AuthzBossLocal getAuthzBoss() {
@@ -263,48 +273,48 @@ public abstract class BizappSessionEJB {
     }
 
     public AutoinventoryManagerLocal getAutoInventoryManager() {
-        if(this.aimLocal == null){
+        if(aimLocal == null){
             try {
-                this.aimLocal = 
+                aimLocal = 
                     AutoinventoryManagerUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.aimLocal;
+        return aimLocal;
     }
 
     public ServerManagerLocal getServerManager() {
-        if(this.servermLocal == null){
+        if(servermLocal == null){
             try {
-                this.servermLocal = ServerManagerUtil.getLocalHome().create();
+                servermLocal = ServerManagerUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.servermLocal;
+        return servermLocal;
     }
 
     public ServiceManagerLocal getServiceManager() {
-        if(this.servicemLocal == null){
+        if(servicemLocal == null){
             try {
-                this.servicemLocal = ServiceManagerUtil.getLocalHome().create();
+                servicemLocal = ServiceManagerUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.servicemLocal;
+        return servicemLocal;
     }
 
     public PlatformManagerLocal getPlatformManager() {
-        if(this.platformmLocal == null){
+        if(platformmLocal == null){
             try {
-                this.platformmLocal = PlatformManagerUtil.getLocalHome().create();
+                platformmLocal = PlatformManagerUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.platformmLocal;
+        return platformmLocal;
     }
 
     public AppdefGroupManagerLocal getGroupManager() {
@@ -312,115 +322,115 @@ public abstract class BizappSessionEJB {
     }
 
     public AppdefGroupManagerLocal getAppdefGroupManager() {
-        if(this.agmLocal == null){
+        if(agmLocal == null){
             try {
-                this.agmLocal = AppdefGroupManagerUtil.getLocalHome().create();
+                agmLocal = AppdefGroupManagerUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.agmLocal;
+        return agmLocal;
     }
 
     public ProductManagerLocal getProductManager() {
-        if(this.pmLocal == null){
+        if(pmLocal == null){
             try {
-                this.pmLocal = ProductManagerUtil.getLocalHome().create();
+                pmLocal = ProductManagerUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.pmLocal;
+        return pmLocal;
     }
 
     public TemplateManagerLocal getTemplateManager() {
-        if(this.tmLocal == null){
+        if(tmLocal == null){
             try {
-                this.tmLocal = TemplateManagerUtil.getLocalHome().create();
+                tmLocal = TemplateManagerUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.tmLocal;
+        return tmLocal;
     }
 
     public DerivedMeasurementManagerLocal getDerivedMeasurementManager() {
-        if(this.dmmLocal == null){
+        if(dmmLocal == null){
             try {
-                this.dmmLocal = 
+                dmmLocal = 
                     DerivedMeasurementManagerUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.dmmLocal;
+        return dmmLocal;
     }
 
     public RawMeasurementManagerLocal getRawMeasurementManager() {
-        if(this.rmmLocal == null){
+        if(rmmLocal == null){
             try {
-                this.rmmLocal = 
+                rmmLocal = 
                     RawMeasurementManagerUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.rmmLocal;
+        return rmmLocal;
     }
 
     public AIBossLocal getAIBoss() {
-        if(this.aibossLocal == null){
+        if(aibossLocal == null){
             try {
-                this.aibossLocal = AIBossUtil.getLocalHome().create();
+                aibossLocal = AIBossUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.aibossLocal;
+        return aibossLocal;
     }
     
     public AppdefBossLocal getAppdefBoss() {
-        if(this.appdefbossLocal == null){
+        if(appdefbossLocal == null){
             try {
-                this.appdefbossLocal = AppdefBossUtil.getLocalHome().create();
+                appdefbossLocal = AppdefBossUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.appdefbossLocal;
+        return appdefbossLocal;
     }
     
     public ApplicationManagerLocal getApplicationManager() {
-        if(this.appmLocal == null){
+        if(appmLocal == null){
             try {
-                this.appmLocal = ApplicationManagerUtil.getLocalHome().create();
+                appmLocal = ApplicationManagerUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.appmLocal;
+        return appmLocal;
     }
     
     public AgentManagerLocal getAgentManager() {
-        if(this.amLocal == null){
+        if(amLocal == null){
             try {
-                this.amLocal = AgentManagerUtil.getLocalHome().create();
+                amLocal = AgentManagerUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.amLocal;
+        return amLocal;
     }
     
     public AuthManagerLocal getAuthManager() {
-        if(this.authmLocal == null){
+        if(authmLocal == null){
             try {
-                this.authmLocal = AuthManagerUtil.getLocalHome().create();
+                authmLocal = AuthManagerUtil.getLocalHome().create();
             } catch(Exception exc){
                 throw new SystemException(exc);
             }
         }
-        return this.authmLocal;
+        return authmLocal;
     }
 
     public DataManagerLocal getDataMan() {
@@ -437,15 +447,15 @@ public abstract class BizappSessionEJB {
     }
 
     protected TrackerManagerLocal getTrackerManager() {
-        if (this.trackerLocal == null) {
+        if (trackerLocal == null) {
             try {
-                this.trackerLocal = TrackerManagerUtil.getLocalHome().create();
+                trackerLocal = TrackerManagerUtil.getLocalHome().create();
             } catch (Exception e) {
                 throw new SystemException(e);
             }
         }
 
-        return this.trackerLocal;
+        return trackerLocal;
     }
 
     /**
@@ -456,7 +466,7 @@ public abstract class BizappSessionEJB {
     protected AuthzSubjectValue getOverlord() {
         if (overlord == null) {
             try {
-                overlord = this.getAuthzSubjectManager().findOverlord();
+                overlord = getAuthzSubjectManager().findOverlord();
             } catch (Exception e) {
                 throw new SystemException(e);
             }
@@ -480,5 +490,39 @@ public abstract class BizappSessionEJB {
         if(!getSessionContext().getRollbackOnly()) {
             getSessionContext().setRollbackOnly();
         }
+    }
+
+    public ControlBossLocal getControlBoss() {
+        if(controlBossLocal == null) {
+            try {
+                controlBossLocal = ControlBossUtil.getLocalHome().create();
+            } catch (Exception e) {
+                throw new SystemException(e);
+            }
+        }
+        return controlBossLocal;
+    }
+
+    public ControlManagerLocal getControlManager() {
+        if(cmLocal == null){
+            try {
+                cmLocal = ControlManagerUtil.getLocalHome().create();
+            } catch(Exception exc){
+                throw new SystemException(exc);
+            }
+        }
+        return cmLocal;
+    }
+
+    public ControlScheduleManagerLocal getControlScheduleManager() {
+        if (controlScheduleManager == null) {
+            try {
+                controlScheduleManager =
+                    ControlScheduleManagerUtil.getLocalHome().create();
+            } catch (Exception e) {
+                throw new SystemException(e);
+            }
+        }
+        return controlScheduleManager;
     }
 }

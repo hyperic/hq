@@ -48,6 +48,8 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBossHome;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.ConfigBossHome;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
+import org.hyperic.hq.bizapp.shared.ControlBossHome;
 import org.hyperic.hq.bizapp.shared.EventLogBoss;
 import org.hyperic.hq.bizapp.shared.EventLogBossHome;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
@@ -93,6 +95,9 @@ public class ServiceLocator {
     
     private final static Class PRODUCT_CLASS = ProductBossHome.class;
     private final static String PRODUCT_NAME = ProductBossHome.JNDI_NAME;
+
+    private static final String CONTROL_NAME = ControlBossHome.JNDI_NAME;
+    private static final Class CONTROL_CLASS = ControlBossHome.class;
 
     private final static String CONTEXT_FACTORY_NAME =
         "ejb-remote-config.context-factory";
@@ -331,6 +336,26 @@ public class ServiceLocator {
                                                               EVENT_LOG_CLASS);
             try {
                 return (EventLogBoss) home.create();
+            } catch (Exception e) {
+                throw new ServiceLocatorException(e);
+            }
+        }
+
+    /**
+     * Return an <code>ControlBoss</code> instance. If not previously cached,
+     * look up the interface and then cache it before creating and returning the
+     * boss.
+     * 
+     * @exception ServiceLocatorException
+     *                if the lookup or create fails.
+     * @return An instance of the ConrolBoss
+     */
+    public ControlBoss getControlBoss()
+        throws ServiceLocatorException {
+            ControlBossHome home = (ControlBossHome) lookup(CONTROL_NAME,
+                                                            CONTROL_CLASS);
+            try {
+                return (ControlBoss) home.create();
             } catch (Exception e) {
                 throw new ServiceLocatorException(e);
             }

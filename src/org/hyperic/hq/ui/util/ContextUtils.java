@@ -43,6 +43,7 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.bizapp.shared.EventLogBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
@@ -254,5 +255,16 @@ public class ContextUtils {
         throws ServiceLocatorException {
             ServiceLocator sl = (ServiceLocator) getServiceLocator(ctx);
             return sl.getEventLogBoss();
+        }
+
+    /** Consult the cached <code>ServiceLocator</code> for an instance of
+     * <code>ControlBoss</code>.
+     *
+     * @param ctx the <code>ServletContext</code>
+     */
+    public static ControlBoss getControlBoss(ServletContext ctx)
+        throws ServiceLocatorException {
+            ServiceLocator sl = getServiceLocator(ctx);
+            return sl.getControlBoss();
         }
 }
