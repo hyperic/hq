@@ -36,16 +36,16 @@ public class MonitorableTypeDAO extends HibernateDAO {
         super(MonitorableType.class, f);
     }
 
-    public MonitorableType findById(Integer id) {
+    MonitorableType findById(Integer id) {
         return (MonitorableType)super.findById(id);
     }
 
-    public void remove(MonitorableType entity) {
+    void remove(MonitorableType entity) {
         super.remove(entity);
     }
 
-    public MonitorableType create(String name, int appdefType,
-                                  String plugin) {
+    MonitorableType create(String name, int appdefType,
+                           String plugin) {
         MonitorableType mt = new MonitorableType();
 
         mt.setName(name);
@@ -55,7 +55,7 @@ public class MonitorableTypeDAO extends HibernateDAO {
         return mt;
     }
 
-    public MonitorableType findByName(String name) {
+    MonitorableType findByName(String name) {
         String sql = "from MonitorableType where name=?";
         return (MonitorableType)getSession().createQuery(sql).
             setString(0, name).uniqueResult();

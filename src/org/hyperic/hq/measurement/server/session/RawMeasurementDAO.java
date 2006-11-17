@@ -44,23 +44,23 @@ public class RawMeasurementDAO extends HibernateDAO {
         return (RawMeasurement)super.findById(id);
     }
 
-    public void remove(Integer id) {
+    void remove(Integer id) {
         RawMeasurement m = findById(id);
         remove(m);
     }
     
-    public void remove(RawMeasurement entity) {
+    void remove(RawMeasurement entity) {
         super.remove(entity);
     }
 
-    public RawMeasurement create(Integer instanceId, MeasurementTemplate mt,
+    RawMeasurement create(Integer instanceId, MeasurementTemplate mt,
                                  String dsn) {
         RawMeasurement rm = new RawMeasurement(instanceId, mt, dsn);
         save(rm);
         return rm;
     }
 
-    public List findByInstance(int appdefType, int appdefId) {
+    List findByInstance(int appdefType, int appdefId) {
         String sql =
             "select distinct m from RawMeasurement m " +
             "join m.template as t " +
@@ -73,22 +73,23 @@ public class RawMeasurementDAO extends HibernateDAO {
             .setInteger(1, appdefId).list();
     }
 
-    public int deleteByInstances(AppdefEntityID[] ids) {
+    int deleteByInstances(AppdefEntityID[] ids) {
         StringBuffer sql = new StringBuffer()
             .append("delete RawMeasurement r where r.id in " +
                     "(select m.id from RawMeasurement m " +
                     "join m.template as t " +
                     "join t.monitorableType as mt where ")
             .append(
-                AppdefUtil.getHQLWhereByAppdefType("mt.appdefType", "m.instanceId",
-                                              ids))
+                AppdefUtil.getHQLWhereByAppdefType("mt.appdefType",
+                                                   "m.instanceId",
+                                                   ids))
             .append(")");
 
         return getSession().createQuery(sql.toString()).
             executeUpdate();
     }
 
-    public RawMeasurement findByDsnForInstance(String dsn, Integer id) {
+    RawMeasurement findByDsnForInstance(String dsn, Integer id) {
         String sql =
             "from RawMeasurement m " +
             "where m.dsn = ? and m.instanceId = ?";
@@ -98,7 +99,7 @@ public class RawMeasurementDAO extends HibernateDAO {
             .setInteger(1, id.intValue()).uniqueResult();
     }
 
-    public RawMeasurement findByTemplateForInstance(Integer tid,
+    RawMeasurement findByTemplateForInstance(Integer tid,
                                                     Integer instanceId) {
         String sql =
             "select m from RawMeasurement m " +
@@ -110,7 +111,7 @@ public class RawMeasurementDAO extends HibernateDAO {
             .setInteger(1, instanceId.intValue()).uniqueResult();
     }
 
-    public List findByTemplate(Integer id) {
+    List findByTemplate(Integer id) {
         String sql =
             "select m from RawMeasurement m " +
             "join fetch m.template as t " +
@@ -120,7 +121,7 @@ public class RawMeasurementDAO extends HibernateDAO {
             .setInteger(0, id.intValue()).list();
     }
 
-    public List findByDerivedMeasurement(Integer did) {
+    List findByDerivedMeasurement(Integer did) {
         String sql =
             "select distinct r from RawMeasurement r " +
             "join r.template t " +

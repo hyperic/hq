@@ -40,20 +40,20 @@ public class MeasurementArgDAO extends HibernateDAO {
         return (MeasurementArg)super.findById(id);
     }
 
-    public void remove(MeasurementArg entity) {
+    void remove(MeasurementArg entity) {
         super.remove(entity);
     }
 
-    public MeasurementArg create(Integer placement,
-                                 MeasurementTemplate mt) {
+    MeasurementArg create(Integer placement,
+                          MeasurementTemplate mt) {
         return create(placement, mt, new Integer(0),
                       new Float(0), new Integer(0));
     }
 
-    public MeasurementArg create(Integer placement,
-                                 MeasurementTemplate mt,
-                                 Integer ticks, Float weight,
-                                 Integer previous) {
+    MeasurementArg create(Integer placement,
+                          MeasurementTemplate mt,
+                          Integer ticks, Float weight,
+                          Integer previous) {
         MeasurementArg arg = new MeasurementArg();
         arg.setPlacement(placement);
         arg.setTemplate(mt);

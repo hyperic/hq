@@ -36,11 +36,11 @@ public class CategoryDAO extends HibernateDAO {
         super(Category.class, f);
     }
 
-    public Category findById(Integer id) {
+    Category findById(Integer id) {
         return (Category)super.findById(id);
     }
 
-    public Category create(String name) {
+    Category create(String name) {
         Category c = new Category();
 
         c.setName(name);
@@ -48,7 +48,7 @@ public class CategoryDAO extends HibernateDAO {
         return c;
     }
 
-    public Category findByName(String name) {
+    Category findByName(String name) {
         String sql = "from Category where name=?";
         return (Category)getSession().createQuery(sql).
             setString(0, name).uniqueResult();

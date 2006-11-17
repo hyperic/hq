@@ -56,7 +56,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
     /**
      * Remove a raw template and it's associated derived measurement
      */
-    public void remove(MeasurementTemplate mt) {
+    void remove(MeasurementTemplate mt) {
         // Update the derived template
         HashSet dm = new HashSet();
         for (Iterator i = mt.getRawMeasurementArgs().iterator(); i.hasNext();) {
@@ -86,10 +86,10 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         }
     }
 
-    public MeasurementTemplate create(MeasurementTemplateLiteValue lite,
-                                      MonitorableType monitorableType,
-                                      Category cat,
-                                      Collection lineItems) {
+    MeasurementTemplate create(MeasurementTemplateLiteValue lite,
+                               MonitorableType monitorableType,
+                               Category cat,
+                               Collection lineItems) {
         MeasurementTemplate mt = new MeasurementTemplate();
 
         mt.setName(lite.getName()); 
@@ -109,8 +109,8 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         return mt;
     }
 
-    public void update(MeasurementTemplate mt, String pluginName,
-                       MeasurementInfo info) {
+    void update(MeasurementTemplate mt, String pluginName,
+                MeasurementInfo info) {
         // Load category
         Category cat;
         if (info.getCategory() != null) {
@@ -153,7 +153,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         }
     }
 
-    public List findTemplates(Integer ids[]) {
+    List findTemplates(Integer ids[]) {
         StringBuffer buf = 
             new StringBuffer("from MeasurementTemplate where id IN (");
         int len = ids.length;
@@ -165,7 +165,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         return getSession().createQuery(buf.toString()).list();
     }
 
-    public List findTemplatesByMonitorableType(String type) {
+    List findTemplatesByMonitorableType(String type) {
         String sql = 
             "select t from MeasurementTemplate t " +
             "join t.monitorableType mt " +
@@ -174,8 +174,8 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             setString(0, type).list();
     }
 
-    public List findTemplatesByMonitorableTypeAndCategory(String type,
-                                                          String cat) {
+    List findTemplatesByMonitorableTypeAndCategory(String type,
+                                                   String cat) {
         String sql = 
             "select t from MeasurementTemplate t " +
             "join t.monitorableType mt " +
@@ -188,7 +188,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             .setString(1, cat).list();
     }
 
-    public List findDefaultsByMonitorableType(String mt, int appdefType) {
+    List findDefaultsByMonitorableType(String mt, int appdefType) {
         String sql =
             "select t from MeasurementTemplate t " +
             "join t.monitorableType mt " +
@@ -201,7 +201,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             .setInteger(1, appdefType).list();
     }
 
-    public List findDesignatedByMonitorableType(String mt, int appdefType) {
+    List findDesignatedByMonitorableType(String mt, int appdefType) {
         String sql =
             "select t from MeasurementTemplate t " +
             "join t.monitorableType mt " +
@@ -214,7 +214,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             .setInteger(1, appdefType).list();
     }
 
-    public List findRawByMonitorableType(Integer mtId) {
+    List findRawByMonitorableType(Integer mtId) {
         String sql =
             "select t from MeasurementTemplate t " +
             "join fetch t.rawMeasurementArgs ra " +
@@ -227,7 +227,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             .setInteger(0, mtId.intValue()).list();
     }
 
-    public List findByMeasurementArg(Integer tId) {
+    List findByMeasurementArg(Integer tId) {
         String sql =
             "select distinct t from MeasurementTemplate t " +
             "join t.measurementArgs args " +
@@ -237,8 +237,8 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             .setInteger(0, tId.intValue()).list();
     }
 
-    public MeasurementTemplate findByArgAndTemplate(Integer tId,
-                                                    String template) {
+    MeasurementTemplate findByArgAndTemplate(Integer tId,
+                                             String template) {
         String sql =
             "select distinct t from MeasurementTemplate t " +
             "join t.measurementArgs args " +
@@ -249,7 +249,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             .setString(1, template).uniqueResult();
     }
 
-    public List findDerivedByMonitorableType(String name) {
+    List findDerivedByMonitorableType(String name) {
         String sql =
             "select distinct m from MeasurementTemplate m " +
             "join m.monitorableType mt " +

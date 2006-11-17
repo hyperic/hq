@@ -45,13 +45,13 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         return (DerivedMeasurement)super.findById(id);
     }
 
-    public void remove(DerivedMeasurement entity) {
+    void remove(DerivedMeasurement entity) {
         super.remove(entity);
     }
 
-    public DerivedMeasurement create(Integer instanceId,
-                                     MeasurementTemplate mt,
-                                     long interval) {
+    DerivedMeasurement create(Integer instanceId,
+                              MeasurementTemplate mt,
+                              long interval) {
         DerivedMeasurement dm = new DerivedMeasurement(instanceId, mt,
                                                        interval);
 
@@ -61,14 +61,14 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         return dm;
     }
 
-    public List findByIds(Integer ids[]) {
+    List findByIds(Integer ids[]) {
         String sql = "from DerivedMeasurement where id IN " +
             DBUtil.makeInSet(ids);
 
         return getSession().createQuery(sql).list();
     }
 
-    public DerivedMeasurement findByTemplateForInstance(Integer tid, 
+    public DerivedMeasurement findByTemplateForInstance(Integer tid,
                                                         Integer iid) {
         String sql =
             "select distinct m from DerivedMeasurement m " +
@@ -80,7 +80,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .setInteger(1, iid.intValue()).uniqueResult();
     }
 
-    public List findByTemplate(Integer id) {
+    List findByTemplate(Integer id) {
         String sql =
             "select distinct m from DerivedMeasurement m " +
             "join m.template t " +
@@ -90,7 +90,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .setInteger(0, id.intValue()).list();
     }
 
-    public List findByInstance(int type, int id) {
+    List findByInstance(int type, int id) {
         String sql =
             "select distinct m from DerivedMeasurement m " +
             "join m.template t " +
@@ -103,7 +103,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .setInteger(1, id).list();
     }
 
-    public int deleteByInstances(AppdefEntityID[] ids) {
+    int deleteByInstances(AppdefEntityID[] ids) {
         StringBuffer sql = new StringBuffer()
             .append("delete DerivedMeasurement where id in " +
                     "(select m.id from DerivedMeasurement m " +
@@ -119,7 +119,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .executeUpdate();
     }
 
-    public List findByInstance(int type, int id, boolean enabled) {
+    List findByInstance(int type, int id, boolean enabled) {
         String sql =
             "select distinct m from DerivedMeasurement m " +
             "join m.template t " +
@@ -133,7 +133,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .setBoolean(2, enabled).list();
     }
 
-    public List findByInstanceForCategory(int type, int id, String cat) {
+    List findByInstanceForCategory(int type, int id, String cat) {
         String sql =
             "select m from DerivedMeasurement m " +
             "join m.template t " +
@@ -151,8 +151,8 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .setString(2, cat).list();
     }
 
-    public List findByInstanceForCategory(int type, int id, boolean enabled,
-                                          String cat) {
+    List findByInstanceForCategory(int type, int id, boolean enabled,
+                                   String cat) {
         String sql =
             "select m from DerivedMeasurement m " +
             "join m.template t " +
@@ -171,8 +171,8 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .setString(2, cat).list();
     }
     
-    public DerivedMeasurement findByAliasAndID(String alias,
-                                               int appdefType, int appdefId) {
+    DerivedMeasurement findByAliasAndID(String alias,
+                                        int appdefType, int appdefId) {
 
         String sql =
             "select distinct m from DerivedMeasurement m " +
@@ -187,8 +187,8 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .setInteger(2, appdefId).uniqueResult();
     }
 
-    public List findDesignatedByInstanceForCategory(int appdefType, int iid,
-                                                    String cat) {
+    List findDesignatedByInstanceForCategory(int appdefType, int iid,
+                                             String cat) {
         String sql =
             "select distinct m from DerivedMeasurement m " +
             "join m.template t " +
@@ -204,7 +204,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .setString(2, cat).list();
     }
 
-    public List findDesignatedByInstance(int type, int id) {
+    List findDesignatedByInstance(int type, int id) {
         String sql =
             "select m from DerivedMeasurement m " +
             "join m.template t " +
@@ -219,7 +219,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .setInteger(1, type).list();
     }
 
-    public List findByRawExcludeIdentity(Integer rid) {
+    List findByRawExcludeIdentity(Integer rid) {
         String sql =
             "select distinct d from DerivedMeasurement d " +
             "join d.template t " +
