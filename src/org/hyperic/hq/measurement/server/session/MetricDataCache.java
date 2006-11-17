@@ -45,13 +45,13 @@ public class MetricDataCache {
 
     private static Cache _cache;
 
-    private static MetricDataCache singleton = new MetricDataCache();
+    private static MetricDataCache _singleton = new MetricDataCache();
     
     /**
      * Singleton accessor
      */
     public static MetricDataCache getInstance() {
-        return singleton;
+        return _singleton;
     }
 
     private MetricDataCache() {

@@ -54,7 +54,7 @@ public class RawMeasurementDAO extends HibernateDAO {
     }
 
     RawMeasurement create(Integer instanceId, MeasurementTemplate mt,
-                                 String dsn) {
+                          String dsn) {
         RawMeasurement rm = new RawMeasurement(instanceId, mt, dsn);
         save(rm);
         return rm;
