@@ -62,6 +62,7 @@ import org.hyperic.hq.dao.ServiceClusterDAO;
 import org.hyperic.hq.dao.ServiceDAO;
 import org.hyperic.hq.dao.ServiceTypeDAO;
 import org.hyperic.hq.dao.VirtualDAO;
+import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.events.server.session.EscalationDAO;
 import org.hyperic.hq.events.server.session.ActionDAO;
 import org.hyperic.hq.events.server.session.AlertActionLogDAO;
@@ -158,6 +159,6 @@ public abstract class DAOFactory {
     public abstract ControlScheduleDAO getControlScheduleDAO();
 
     public static DAOFactory getDAOFactory() {
-        return new HibernateDAOFactory();
+        return HibernateDAOFactory.getInstance();
     }
 }

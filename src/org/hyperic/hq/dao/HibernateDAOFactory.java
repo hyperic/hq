@@ -57,6 +57,11 @@ import org.hyperic.hq.measurement.server.session.ScheduleRevNumDAO;
 
 public class HibernateDAOFactory extends DAOFactory {
     private static SessionFactory sessionFactory = Util.getSessionFactory();
+    private static HibernateDAOFactory singleton = new HibernateDAOFactory();
+
+    public static HibernateDAOFactory getInstance() {
+        return singleton;
+    }
 
     public Session getCurrentSession() {
         return getSessionFactory().getCurrentSession();
@@ -68,7 +73,7 @@ public class HibernateDAOFactory extends DAOFactory {
         }
         return sessionFactory;
     }
-    
+
     public HibernateDAOFactory() {
     }
 
