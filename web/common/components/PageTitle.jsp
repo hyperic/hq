@@ -178,7 +178,7 @@
 
   <td colspan="2">
     <c:if test="${not empty linkUrl}">
-      <span class="LinkBox" onclick="toggleToolMenu();"><fmt:message key="resource.toolsmenu.text"/><html:img page="/images/arrow_dropdown.gif" border="0"/></a></span>
+      <span class="LinkBox" onclick="toggleToolMenu();"><fmt:message key="resource.toolsmenu.text"/><html:img page="/images/arrow_dropdown.gif" border="0"/></a></span><br>
       <div id="toolMenu" style="visibility: hidden; position: absolute; margin-top: 2px; margin-left: -2px;">
 <tiles:insert attribute="linkUrl">
   <c:if test="${not empty resource}">
