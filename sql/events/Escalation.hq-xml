@@ -104,7 +104,7 @@
       <property name="updateBy" type="string">
         <column name="UPDATE_BY" length="200"/>
       </property>
-      <property name="lastUpdate" type="long">
+      <property name="modifiedTime" type="long">
         <meta attribute="field-description"><![CDATA[
         timestamp is updated on state change.
         ]]></meta>

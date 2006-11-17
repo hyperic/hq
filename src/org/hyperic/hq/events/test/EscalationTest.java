@@ -3,6 +3,7 @@ package org.hyperic.hq.events.test;
 import org.hyperic.hq.test.HQEJBTestBase;
 import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.hq.events.server.session.EscalationAction;
+import org.hyperic.hq.events.server.session.EscalationState;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.CommandContext;
 import org.hyperic.hq.command.SaveCommand;
@@ -81,14 +82,53 @@ public class EscalationTest
         // look it up, there should be exactly one
         List result = assertEscalation(BOGUS_NAME, 1);
 
-        // remove it
         if (result != null) {
+            e = (Escalation)result.get(0);
+            assertTrue(e.getActions().size() == 2);
+            // verify escalation order
+            assertTrue(e.getActions().get(0).equals(act1));
+            assertTrue(e.getActions().get(1).equals(act2));
+
+            // alter escalation order
+            e.getActions().clear();
+            e.getActions().add(act2);
+            e.getActions().add(act1);
+            long mtime = e.getEscalationState().getModifiedTime();
+            context.execute(SaveCommand.setInstance(e));
+            // look it up, there should be exactly one
+            result = assertEscalation(BOGUS_NAME, 1);
+
+            e = (Escalation)result.get(0);
+            // should still have 2 actions
+            assertTrue(e.getActions().size() == 2);
+            // verify escalation order
+            assertTrue(e.getActions().get(0).equals(act2));
+            assertTrue(e.getActions().get(1).equals(act1));
+
+            // escalation state time should not be updated
+            assertTrue(e.getEscalationState().getModifiedTime() == mtime);
+
+            // update state
+            mtime = e.getEscalationState().getModifiedTime();
+            EscalationState clone =
+                (EscalationState)e.getEscalationState().clone();
+            clone.setCurrentLevel(1);
+            e.setEscalationState(clone);
+            context.execute(SaveCommand.setInstance(e));
+            // look it up, there should be exactly one
+            result = assertEscalation(BOGUS_NAME, 1);
+            e = (Escalation)result.get(0);
+            // escalation state time should have been  updated
+            assertTrue(e.getEscalationState().getModifiedTime() > mtime);
+
+            // remove it
+
             context.execute(
-                RemoveCommand.setInstance((Escalation)result.get(0))
+                RemoveCommand.setInstance(e)
             );
+            // look it up again should not be there.
+            assertEscalation(BOGUS_NAME, 0);
         }
-        // look it up again should not be there.
-        assertEscalation(BOGUS_NAME, 0);
     }
 
     private List assertEscalation(String name, int count) {

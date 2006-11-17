@@ -41,7 +41,6 @@ public class EscalationDAO extends HibernateDAO {
     }
 
     public void save(Escalation entity) {
-        removeActions(entity.getActions().iterator());
         saveActions(entity.getActions().iterator());
         super.save(entity);
     }

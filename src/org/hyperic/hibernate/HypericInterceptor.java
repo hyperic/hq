@@ -29,6 +29,8 @@ import org.hibernate.EmptyInterceptor;
 import org.hibernate.type.Type;
 import org.hyperic.hq.appdef.AppdefBean;
 import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.server.session.Escalation;
+import org.hyperic.hq.events.server.session.EscalationState;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.Measurement;
@@ -49,6 +51,7 @@ public class HypericInterceptor extends EmptyInterceptor
         return o instanceof Plugin ||
                o instanceof AppdefBean ||
                o instanceof AlertDefinition ||
+               o instanceof Escalation ||
                o instanceof MeasurementTemplate ||
                o instanceof Measurement;
     }
@@ -58,7 +61,7 @@ public class HypericInterceptor extends EmptyInterceptor
                                 String[] propertyNames, Type[] types)
     {
         if (entHasTimestamp(entity))
-            return updateTimestamp(currentState, propertyNames);
+            return updateTimestamp(currentState, previousState, propertyNames);
         return false;
     }
 
@@ -66,27 +69,32 @@ public class HypericInterceptor extends EmptyInterceptor
                           String[] propertyNames, Type[] types)
     {
         if (entHasTimestamp(entity))
-            return updateTimestamp(state, propertyNames);
+            return updateTimestamp(state, null, propertyNames);
         return false;
     }
 
-    private boolean updateTimestamp(Object[] state, String[] propertyNames) {
+    private boolean updateTimestamp(Object[] curState, Object[] prevState,
+                                    String[] propertyNames) {
         boolean modified = false;
         long ts = System.currentTimeMillis();
         for (int i = 0; i < propertyNames.length; i++) {
             if ("creationTime".equals(propertyNames[i]) ||
                 "ctime".equals(propertyNames[i])) 
             {
-                Long ctime = (Long)state[i];
+                Long ctime = (Long)curState[i];
                 if (ctime == null || ctime.longValue() == 0) {
-                    state[i] = new Long(ts);
+                    curState[i] = new Long(ts);
                     modified =  true;
                 }
             } else if ("modifiedTime".equals(propertyNames[i]) ||
                        "mtime".equals(propertyNames[i]))
             {
-                state[i] = new Long(ts);
+                curState[i] = new Long(ts);
                 modified =  true;
+            } else if (curState[i] instanceof EscalationState) {
+                if (prevState == null || !curState[i].equals(prevState[i])) {
+                    ((EscalationState)curState[i]).setModifiedTime(ts);
+                }
             }
         }
         return modified;
