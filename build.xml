@@ -36,7 +36,7 @@
   	location="${jboss.home}/server/default/deploy/${jbossweb.home}" />
 
   <property name="build.dir" location="${basedir}/build" />
-  <property name="archive.basename" value="hyperic-hq-installer" />
+  <property name="archive.basename" value="hyperic-hq" />
   <property name="archive.build.dir" location="${build.dir}/archive" />
 
   <!-- Native libs -->
@@ -1474,7 +1474,7 @@
   <target name="archive-full" depends="init,check-release,all,precompile-jsp,pdk-javadoc,unpack-jboss,dbsetup-combine,jboss-version,pack-installer,precompile-jsp-check,remove-tests">
 
     <property name="archive-dir" 
-              location="${archive.build.dir}/${archive.basename}" />
+              location="${archive.build.dir}/${archive.basename}-installer" />
     <mkdir dir="${archive-dir}" />
 
     <!-- Verify that the unpacked JBoss is the same 
