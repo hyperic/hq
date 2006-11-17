@@ -685,6 +685,14 @@ public class DBUtil {
         }
     }
 
+    /**
+     * Creates a string that consists of the clause repeated a number
+     * (iterations) of times, joined by the conjunction string
+     * @param iterations the number of times to repeat the clause
+     * @param conjunction the string used to join the clause
+     * @param clause the clause to repeat
+     * @return the resulting String
+     */
     public static String composeConjunctions(int iterations, String conjunction,
                                              String clause) {
         StringBuffer strBuf = new StringBuffer();
@@ -698,6 +706,17 @@ public class DBUtil {
         return strBuf.toString();
     }
 
+    /**
+     * Creates the SQL query that is used in PreparedStatement for 0 or more
+     * values for a given column.  For example:
+     * 
+     * SELECT id FROM TABLE WHERE id IN (?, ?, ?)
+     * SELECT id FROM TABLE WHERE id = ?
+     * 
+     * @param column the name of the column to query against
+     * @param iterations the number of variables
+     * @return the WHERE clause (without the WHERE keyword)
+     */
     public static String composeConjunctions(String column, int iterations) {
         if (iterations > 1) {
             StringBuffer strBuf = new StringBuffer(column)
