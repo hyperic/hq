@@ -54,6 +54,8 @@ import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.server.session.Alert;
+import org.hyperic.hq.events.server.session.AlertConditionLog;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
@@ -245,7 +247,12 @@ public abstract class AbstractTrigger implements TriggerInterface {
         // Regardless of whether or not the actions succeed, we will send an
         // AlertFiredEvent
         this.publishEvent(new AlertFiredEvent(event, alert.getId(), adBasic));
-        
+
+        // get alert pojo so retrieve array of AlertCondtionLogs
+        Alert alertpojo = alman.getAlertById(alert.getId());
+        AlertConditionLog[] logs =
+            (AlertConditionLog[])alertpojo
+                .getConditionLog().toArray(new AlertConditionLog[0]);
         // Iterate through the actions
         for (int i = 0; i < actions.length; i++) {
             ActionValue aval = actions[i];
@@ -258,8 +265,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
                 action.init(ConfigResponse.decode(action.getConfigSchema(),
                                                   aval.getConfig()));
 
-                String detail = action.execute(
-                    adBasic, alert.getConditionLogs(), alert.getId());
+                String detail = action.execute(adBasic, logs, alert.getId());
                                    
                 AlertActionLogValue alog = new AlertActionLogValue();
                 alog.setActionId(aval.getId());

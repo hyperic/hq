@@ -44,6 +44,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertCondition;
+import org.hyperic.hq.events.server.session.AlertConditionLog;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
@@ -64,7 +65,7 @@ public class SyslogAction extends SyslogActionConfig
     }
 
     private String createConditions(Collection cconds,
-                                    AlertConditionLogValue[] logs, String indent) {
+                                    AlertConditionLog[] logs, String indent) {
         StringBuffer text = new StringBuffer();
 
         AlertCondition[] conds =
@@ -89,7 +90,7 @@ public class SyslogAction extends SyslogActionConfig
                     text.append(" (actual value = ");
 
                     // Make sure the event is present to be displayed
-                    text.append(logs[i].getCondition().getTriggerId());
+                    text.append(logs[i].getCondition().getTrigger().getId());
 
                     text.append(")");
                     break;
@@ -118,7 +119,7 @@ public class SyslogAction extends SyslogActionConfig
      *
      */
     public String execute(AlertDefinition alertdef,
-                          AlertConditionLogValue[] logs, Integer alertId)
+                          AlertConditionLog[] logs, Integer alertId)
         throws ActionExecuteException {
 //        TriggerFiredEvent[] firedEvents = event.getRootEvents();
 //        HashMap eventMap = new HashMap();

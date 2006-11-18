@@ -29,6 +29,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.server.session.AlertConditionLog;
 import org.hyperic.util.config.ConfigResponse;
 
 /** Interface to be implemented by all Action classes
@@ -39,7 +40,7 @@ public interface ActionInterface extends ActionConfigInterface {
      * @throws org.hyperic.hq.events.ActionExecuteException if execution causes an error
      */
     public String execute(AlertDefinition alertdef,
-                          AlertConditionLogValue[] logs,
+                          AlertConditionLog[] logs,
                           Integer alertId)
         throws ActionExecuteException;
     

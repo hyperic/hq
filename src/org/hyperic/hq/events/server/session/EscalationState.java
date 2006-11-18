@@ -66,6 +66,11 @@ public class EscalationState implements Serializable, Cloneable {
      * current escalation level.
      */
     private boolean acknowledge;
+
+    /**
+     * if true, escalation is active
+     */
+    private boolean active;
     /**
      * escalation chain state.
      */
@@ -91,6 +96,11 @@ public class EscalationState implements Serializable, Cloneable {
     }
 
     public void setCurrentLevel(int currentLevel) {
+        if (this.currentLevel != currentLevel) {
+            // use low tech approach, could use custome usertype + interceptor
+            // but requires more investigation
+            setModifiedTime(System.currentTimeMillis());
+        }
         this.currentLevel = currentLevel;
     }
 
@@ -105,6 +115,9 @@ public class EscalationState implements Serializable, Cloneable {
     }
 
     public void setPauseEscalation(boolean pauseEscalation) {
+        if (this.pauseEscalation != pauseEscalation) {
+            setModifiedTime(System.currentTimeMillis());
+        }
         this.pauseEscalation = pauseEscalation;
     }
 
@@ -117,6 +130,9 @@ public class EscalationState implements Serializable, Cloneable {
     }
 
     public void setPauseWaitTime(long pauseWaitTime) {
+        if (this.pauseWaitTime != pauseWaitTime) {
+            setModifiedTime(System.currentTimeMillis());
+        }
         this.pauseWaitTime = pauseWaitTime;
     }
 
@@ -128,6 +144,9 @@ public class EscalationState implements Serializable, Cloneable {
     }
 
     public void setFixed(boolean fixed) {
+        if (this.fixed != fixed) {
+            setModifiedTime(System.currentTimeMillis());
+        }
         this.fixed = fixed;
     }
 
@@ -140,7 +159,21 @@ public class EscalationState implements Serializable, Cloneable {
     }
 
     public void setAcknowledge(boolean acknowledge) {
+        if (this.acknowledge != acknowledge) {
+            setModifiedTime(System.currentTimeMillis());
+        }
         this.acknowledge = acknowledge;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        if (this.active != active) {
+            setModifiedTime(System.currentTimeMillis());
+        }
+        this.active = active;
     }
 
     /**
@@ -179,6 +212,7 @@ public class EscalationState implements Serializable, Cloneable {
                pauseWaitTime == o.getPauseWaitTime() &&
                acknowledge == o.isAcknowledge() &&
                fixed == o.isFixed() &&
+               active == o.isActive() &&
                pauseEscalation == o.isPauseEscalation() &&
                (updateBy == o.getUpdateBy() ||
                 (updateBy != null && o.getUpdateBy() != null &&
@@ -191,6 +225,7 @@ public class EscalationState implements Serializable, Cloneable {
         result = 37*result + (acknowledge ? 0 : 1);
         result = 37*result + (fixed ? 0 : 1);
         result = 37*result + (pauseEscalation ? 0 : 1);
+        result = 37*result + (active ? 0 : 1);
         result = 37*result + currentLevel;
         result = 37*result + (int)(modifiedTime ^ (modifiedTime >>> 32));
         result = 37*result + (int)(pauseWaitTime ^ (pauseWaitTime >>> 32));

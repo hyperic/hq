@@ -33,6 +33,8 @@ import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.server.session.AlertConditionLog;
+import org.hyperic.hq.events.server.session.AlertCondition;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -50,7 +52,7 @@ public class MetricAlertAction implements ActionInterface {
     private Log log = LogFactory.getLog(MetricAlertAction.class);
 
     public String execute(AlertDefinition alertdef,
-                          AlertConditionLogValue[] logs, Integer alertId)
+                          AlertConditionLog[] logs, Integer alertId)
         throws ActionExecuteException {
         MetricProblemDAO dao =
             DAOFactory.getDAOFactory().getMetricProblemDAO();
@@ -61,7 +63,7 @@ public class MetricAlertAction implements ActionInterface {
         for (int i = 0; i < logs.length; i++) {
             // Go through the TriggerFiredEvent's root events
             for (int j = 0; j < logs.length; j++) {
-                AlertConditionValue cond = logs[j].getCondition();
+                AlertCondition cond = logs[j].getCondition();
                 if (cond.getType() == EventConstants.TYPE_THRESHOLD ||
                     cond.getType() == EventConstants.TYPE_BASELINE) {
                     dao.create(new Integer(cond.getMeasurementId()),

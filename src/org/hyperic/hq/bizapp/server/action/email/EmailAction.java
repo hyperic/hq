@@ -56,6 +56,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertCondition;
+import org.hyperic.hq.events.server.session.AlertConditionLog;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
@@ -121,7 +122,7 @@ public class EmailAction extends EmailActionConfig implements ActionInterface {
     }
 
     private String createConditions(Collection cconds,
-                                    AlertConditionLogValue[] logs,
+                                    AlertConditionLog[] logs,
                                     String indent)
         throws NamingException, CreateException, MeasurementNotFoundException
     {
@@ -287,7 +288,7 @@ public class EmailAction extends EmailActionConfig implements ActionInterface {
     }
 
     private String createText(AlertDefinition alertdef,
-                              AlertConditionLogValue[] logs, AppdefEntityID aeid,
+                              AlertConditionLog[] logs, AppdefEntityID aeid,
                               Integer alertId)
         throws NamingException, CreateException, MeasurementNotFoundException
     {
@@ -362,7 +363,7 @@ public class EmailAction extends EmailActionConfig implements ActionInterface {
      *
      */
     public String execute(AlertDefinition alertdef,
-                          AlertConditionLogValue[] logs, Integer alertId)
+                          AlertConditionLog[] logs, Integer alertId)
         throws ActionExecuteException {
         AlertManagerLocal aman = null;
 

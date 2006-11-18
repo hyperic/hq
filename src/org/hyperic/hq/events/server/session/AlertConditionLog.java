@@ -53,7 +53,7 @@ public class AlertConditionLog
         setCondition(condition);
     }
 
-    protected String getValue() {
+    public String getValue() {
         return _value;
     }
     
@@ -69,7 +69,7 @@ public class AlertConditionLog
         _alert = alert;
     }
 
-    protected AlertCondition getCondition() {
+    public AlertCondition getCondition() {
         return _condition;
     }
     

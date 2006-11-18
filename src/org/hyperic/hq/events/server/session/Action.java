@@ -86,7 +86,7 @@ public class Action
         _className = className;
     }
     
-    protected byte[] getConfig() {
+    public byte[] getConfig() {
         return ArrayUtil.clone(_config);
     }
     

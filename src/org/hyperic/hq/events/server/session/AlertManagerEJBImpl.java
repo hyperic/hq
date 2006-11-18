@@ -43,13 +43,25 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.AlertCreateException;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.InvalidActionDataException;
+import org.hyperic.hq.events.ActionExecuteException;
+import org.hyperic.hq.events.ActionInterface;
+import org.hyperic.hq.events.escalation.EscalationJob;
+import org.hyperic.hq.events.escalation.command.ScheduleActionCommand;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertValue;
+import org.hyperic.hq.events.server.session.Alert;
+import org.hyperic.hq.events.server.session.Escalation;
+import org.hyperic.hq.CommandContext;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.hyperic.util.config.EncodingException;
+import org.hyperic.util.config.ConfigResponse;
+import org.hibernate.Hibernate;
 
 /** 
  * The alert manager.
@@ -78,6 +90,10 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
     
     private AlertDAO getAlertDAO() {
         return DAOFactory.getDAOFactory().getAlertDAO();
+    }
+
+    private EscalationDAO getEscalationDAO() {
+        return DAOFactory.getDAOFactory().getEscalationDAO();
     }
     
     private AlertConditionDAO getAlertConDAO() {
@@ -172,6 +188,28 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
+     * Find an alert pojo by ID
+     *
+     * @ejb:interface-method
+     */
+    public Alert getAlertById(Integer id) {
+        Alert alert = getAlertDAO().findById(id);
+        Hibernate.initialize(alert);
+        return alert;
+    }
+
+    /**
+     * Find an alert pojo by ID
+     *
+     * @ejb:interface-method
+     */
+    public Escalation getEscalationById(Integer id) {
+        Escalation e = getEscalationDAO().findById(id);
+        Hibernate.initialize(e);
+        return e;
+    }
+
+    /**
      * Find an alert by ID and time
      * 
      * @ejb:interface-method
@@ -263,6 +301,171 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
             Collections.reverse(alerts);
 
         return valuePager.seek(alerts, pc);
+    }
+
+    /**
+     * schedule action
+     * 
+     * @param escalationId
+     * @param alertId
+     *
+     * @ejb:interface-method
+     */
+    public void scheduleAction(Integer escalationId, Integer alertId)
+    {
+        EscalationDAO dao = DAOFactory.getDAOFactory().getEscalationDAO();
+        Escalation  escalation = dao.findById(escalationId);
+        Alert alert =
+            DAOFactory.getDAOFactory().getAlertDAO().findById(alertId);
+        Integer alertDefId = alert.getAlertDefinition().getId();
+        EscalationState state = escalation.getEscalationState(alertDefId);
+        if (state.isFixed()) {
+            // fixed so no need to schedule
+            state.setCurrentLevel(0);
+            state.setActive(false);
+            dao.save(escalation);
+            return;
+        }
+        int nextlevel = state.getCurrentLevel() + 1;
+        if (nextlevel >= escalation.getActions().size()) {
+            // at the end of escalation chain, so reset and wait for
+            //  next alert to fire.  DO NOT schedule next job.
+            state.setCurrentLevel(0);
+            state.setActive(false);
+            dao.save(escalation);
+        } else {
+            EscalationJob.scheduleJob(
+                escalation.getId(), alertId,
+                escalation.getCurrentAction(
+                    state.getCurrentLevel()).getWaitTime());
+            state.setActive(true);
+            state.setCurrentLevel(nextlevel);
+            dao.save(escalation);
+        }
+    }
+
+    /**
+     * run action
+     *
+     * @param escalationId
+     * @param alertId
+     *
+     * @ejb:interface-method
+     */
+    public void dispatchAction(Integer escalationId, Integer alertId)
+    {
+        EscalationDAO dao = DAOFactory.getDAOFactory().getEscalationDAO();
+        Escalation escalation = dao.findById(escalationId);
+        Alert alert =
+            DAOFactory.getDAOFactory().getAlertDAO().findById(alertId);
+        Integer alertDefId = alert.getAlertDefinition().getId();
+        EscalationState state = escalation.getEscalationState(alertDefId);
+        if (state.isFixed()) {
+            // fixed or is in progress so no need run
+            state.setCurrentLevel(0);
+            state.setActive(false);
+            dao.save(escalation);
+            return;
+        }
+        // mark escalation as in progress.
+        state.setActive(true);
+
+        // check to see if there is remaining pauseWaitTime
+        long remainder = getRemainingPauseWaitTime(escalation, state);
+        if (remainder > 0) {
+            // reschedule
+            EscalationJob.scheduleJob(escalation.getId(), alertId, remainder);
+            // reset the pause escalation flag to avoid wait loop.
+            state.setPauseEscalation(false);
+            dao.save(escalation);
+            return;
+        }
+        int curlevel = state.getCurrentLevel();
+        if (curlevel >= escalation.getActions().size()) {
+            throw new IllegalStateException("current level out of bounds " +
+                                            curlevel);
+        }
+
+        try {
+            dispatchAction(escalation, alert, state);
+            dao.save(escalation);
+
+            // schedule next action;
+            CommandContext context = CommandContext.createContext(
+                ScheduleActionCommand.setInstance(escalation.getId(), alertId)
+            );
+            context.execute();
+        } catch (ClassNotFoundException e) {
+            throw new SystemException(e);
+        } catch (IllegalAccessException e) {
+            throw new SystemException(e);
+        } catch (InstantiationException e) {
+            throw new SystemException(e);
+        } catch (EncodingException e) {
+            throw new SystemException(e);
+        } catch (InvalidActionDataException e) {
+            throw new SystemException(e);
+        } catch (ActionExecuteException e) {
+            throw new SystemException(e);
+        } catch (AlertCreateException e) {
+            throw new SystemException(e);
+        }
+    }
+
+    private long getRemainingPauseWaitTime(Escalation e, EscalationState s)
+    {
+        if (e.isAllowPause() && s.isPauseEscalation()) {
+            long waitTime =
+                e.getCurrentAction(s.getCurrentLevel()).getWaitTime();
+            long remainder = s.getPauseWaitTime() - waitTime;
+
+            // remaining pause wait time has to be greater than 1
+            // minute to qualify
+            return remainder > 60000 ? remainder : 0;
+        } else {
+            return 0;
+        }
+    }
+
+    private void dispatchAction(Escalation escalation, Alert alert,
+                                EscalationState state)
+        throws ClassNotFoundException, IllegalAccessException,
+               InstantiationException, EncodingException,
+               InvalidActionDataException, ActionExecuteException,
+               AlertCreateException
+    {
+        Action a =
+            escalation.getCurrentAction(state.getCurrentLevel()).getAction();
+
+        // prepare, instantiate,  and invoke action
+        Class ac = Class.forName(a.getClassName());
+        ActionInterface action = (ActionInterface) ac.newInstance();
+        action.init(ConfigResponse.decode(action.getConfigSchema(),
+                                          a.getConfig()));
+
+        Collection coll = alert.getConditionLog();
+        AlertConditionLog[] logs =
+            (AlertConditionLog[]) coll.toArray(new AlertConditionLog[0]);
+
+        String detail = action.execute(
+            alert.getAlertDefinition(), logs, alert.getId());
+
+        addAlertActionLog(alert, detail);
+    }
+
+    private void addAlertActionLog(Alert alert, String detail)
+        throws AlertCreateException
+    {
+        // TODO: this gotta be done with pojos.  not value objects!
+        AlertValue alertValue = new AlertValue();
+        alertValue.setAlertDefId(alert.getAlertDefinition().getId());
+
+        AlertActionLogValue alog = new AlertActionLogValue();
+        alog.setActionId(alert.getId());
+        alog.setDetail(detail);
+        alertValue.addActionLog(alog);
+        
+        createAlert(alertValue);
     }
 
     /**
