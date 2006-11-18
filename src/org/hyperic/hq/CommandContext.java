@@ -103,10 +103,6 @@ public class CommandContext extends VisitorContext {
         return executionTime;
     }
 
-    public void setExecutionTime(int executionTime) {
-        this.executionTime = executionTime;
-    }
-
     public List getCommands() {
         return commands;
     }
