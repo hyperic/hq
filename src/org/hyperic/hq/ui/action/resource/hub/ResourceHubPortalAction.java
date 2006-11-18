@@ -377,7 +377,7 @@ public class ResourceHubPortalAction extends BaseAction {
 
         request.setAttribute(Constants.INVENTORY_HIERARCHY_ATTR, navHierarchy);
         
-        return returnSuccess(request, mapping);
+        return null;
     }
 
     private void addTypeOptions(ResourceHubForm form, List types) {
