@@ -28,10 +28,18 @@ public class ScheduleActionCommand extends Command
 
     public void execute(CommandContext context)
     {
+        verify();
+        EscalationMediator mediator = EscalationMediator.getInstance();
+        mediator.scheduleAction(escalationId, alertId);
+    }
+
+    private void verify()
+    {
         if (escalationId == null) {
             throw new IllegalArgumentException("Missing Escalation ID");
         }
-        EscalationMediator mediator = EscalationMediator.getInstance();
-        mediator.scheduleAction(escalationId, alertId);
+        if (alertId == null) {
+            throw new IllegalArgumentException("Missing Alert ID");
+        }
     }
 }

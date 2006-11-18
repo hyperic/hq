@@ -5,6 +5,7 @@ package org.hyperic.hq.events.escalation.mediator;
 
 import org.hyperic.hq.Mediator;
 import org.hyperic.hq.CommandContext;
+import org.hyperic.hq.command.SaveCommand;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.hq.events.server.session.EscalationDAO;
@@ -66,12 +67,16 @@ public class EscalationMediator extends Mediator
         Alert alert = alertManagerLocal.getAlertById(alertId);
         Integer alertDefId = alert.getAlertDefinition().getId();
         EscalationState state = escalation.getEscalationState(alertDefId);
-        if(state.isActive()) {
-            // escalation is active, so do not start another chain
-            // for this chain.
-            return;
-        }
         CommandContext context = CommandContext.createContext();
+        synchronized(state) {
+            if(state.isActive()) {
+                // escalation is active, so do not start another escalation
+                // for this chain.
+                return;
+            }
+            state.setActive(true);
+            context.execute(SaveCommand.setInstance(escalation));
+        }
         context.execute(
             EscalateCommand.setInstance(escalationId, alertId)
         );

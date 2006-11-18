@@ -23,10 +23,18 @@ public class EscalateCommand extends Command {
     }
 
     public void execute(CommandContext context) {
+        verify();
+        EscalationMediator mediator = EscalationMediator.getInstance();
+        mediator.dispatchAction(escalationId, alertId);
+    }
+
+    private void verify()
+    {
         if (escalationId == null) {
             throw new IllegalArgumentException("Missing Escalation ID");
         }
-        EscalationMediator mediator = EscalationMediator.getInstance();
-        mediator.dispatchAction(escalationId, alertId);
+        if (alertId == null) {
+            throw new IllegalArgumentException("Missing Alert ID");
+        }
     }
 }
