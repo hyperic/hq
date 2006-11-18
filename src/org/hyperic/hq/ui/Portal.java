@@ -38,57 +38,68 @@ import org.hyperic.util.StringUtil;
  */
 public class Portal {
     
-    private String name;
-    private String description;
-    private int columns = 1;
-    private List portlets;
-    private boolean dialog = false;
-    private boolean workflowPortal = false;
+    private String _name;
+    private String _description;
+    private int _columns = 1;
+    private List _portlets = new ArrayList();
+    private boolean _dialog = false;
+    private boolean _workflowPortal = false;
 
-    private Map workflowParams = null;
+    private Map _workflowParams = null;
     
-    public Portal() {}
+    public Portal() {
+    }
 
-    public String getName() { return this.name; }
-    public void setName(String name) { this.name = name; }
+    public String getName() {
+        return _name;
+    }
+
+    public void setName(String name) {
+        _name = name;
+    }
+
+    public String getDescription() {
+        return _description;
+    }
+
+    public void setDescription(String description) {
+        _description = description;
+    }
+
+    public int getColumns() {
+        return _columns;
+    }
+
+    public void setColumns(int columns) {
+        if (_portlets.size() < columns) {
+            while (_columns < columns) {
+                _portlets.add(new ArrayList());
+                _columns = _portlets.size();
+            }
+        }
+    }
     
-    public String getDescription() { return this.description; }
-    public void setDescription(String description) { this.description = description; }
-    
-    public int getColumns() { return this.columns; }
-    public void setColumns(int columns) { this.columns = columns; }
     public void setColumns( String numCols ) { 
         setColumns( Integer.parseInt(numCols) );
     }
 
-    public List getPortlets() { return this.portlets; }
-    public void setPortlets(List portlets) { this.portlets = portlets; }
+    public List getPortlets() {
+        return _portlets;
+    }
+
+    public void setPortlets(List portlets) {
+        _portlets = portlets;
+    }
 
     /**
      * adds a single portlet to the column number provided
      */
     public void addPortlet(Portlet portlet, int column) {
-        int colIdx = column-1;
-
-        if( portlets == null ){
-            this.portlets = new ArrayList();              
-
-            int size = this.columns > colIdx ? this.columns : colIdx;
-            this.columns = size;
-            for( int i = 0; i < size; i++ ){
-                portlets.add(i, new ArrayList() );
-            }
+        if (column > _columns) {
+            setColumns(column);
         }
-        else {
-            if (colIdx >= this.columns) {
-                // grow portlets to the required size
-                for (int i=this.columns; i<colIdx; i++) {
-                    portlets.add(i, new ArrayList());
-                }
-            }
-        }
-
-        List col = (List) portlets.get(colIdx);
+            
+        List col = (List) _portlets.get(column - 1);
         col.add(portlet);
     }
     
@@ -139,22 +150,20 @@ public class Portal {
         // if we have a null or empty column list, use that column,
         // use that one. otherwise, make a new column.
         int nextColIndex = 1;
-        if (portlets != null) {
-            Iterator i = portlets.iterator();
-            int colcnt = 1;
-            while (i.hasNext()) {
-                List col = (List) i.next();
-                if (col != null) {
-                    if (col.size() == 0) {
-                        nextColIndex = colcnt;
-                        break;
-                    }
-                    colcnt++;
-                    continue;
+        Iterator i = _portlets.iterator();
+        int colcnt = 1;
+        while (i.hasNext()) {
+            List col = (List) i.next();
+            if (col != null) {
+                if (col.size() == 0) {
+                    nextColIndex = colcnt;
+                    break;
                 }
-                nextColIndex = colcnt;
-                break;
+                colcnt++;
+                continue;
             }
+            nextColIndex = colcnt;
+            break;
         }
 
         addPortlets(definitions, nextColIndex);
@@ -164,10 +173,16 @@ public class Portal {
         return "Portal [" + getName()+ "]";
     }
     
-    public boolean isDialog() { return this.dialog; }
-    public void setDialog(boolean dialog) { this.dialog = dialog; }    
+    public boolean isDialog() {
+        return _dialog;
+    }
+
+    public void setDialog(boolean dialog) {
+        _dialog = dialog;
+    }
+
     public void setDialog(String dialog) {
-        this.dialog = (dialog != null && dialog.equalsIgnoreCase("true"));
+        _dialog = Boolean.valueOf(dialog).booleanValue();
     }
     
     /** Getter for property workflowPortal.
@@ -179,26 +194,26 @@ public class Portal {
      * @return Value of property workflowPortal.
      */
     public boolean isWorkflowPortal() {
-        return this.workflowPortal;
+        return _workflowPortal;
     }
     public void setWorkflowPortal(boolean workflowPortal) {
-        this.workflowPortal = workflowPortal;
+        _workflowPortal = workflowPortal;
     }    
     public void setWorkflowPortal(String workflowPortal) {
         if("true".equalsIgnoreCase( workflowPortal ) ){
-            this.workflowPortal = true;
+            _workflowPortal = true;
         }
         else {
-            this.workflowPortal = false;
+            _workflowPortal = false;
         }
     }
 
     public Map getWorkflowParams() {
-        return this.workflowParams;
+        return _workflowParams;
     }
 
     public void setWorkflowParams(Map m) {
-        this.workflowParams = m;
+        _workflowParams = m;
     }
 
     /**
@@ -234,13 +249,16 @@ public class Portal {
     public void addPortletsFromString(String stringList, int column) {
         //convert string to portlets then call addPortlets().
         
-        List StringColumn = StringUtil.explode(stringList, "|");
+        List StringColumn = StringUtil.explode(stringList,
+                                               Constants.DASHBOARD_DELIMITER);
 
-        for(int i = 0; i<StringColumn.size(); i++){
+        for (int i = 0; i < StringColumn.size(); i++) {
             String tile = (String) StringColumn.get(i);
             Portlet portlet = new Portlet(tile);
-            if (i==0) portlet.setIsFirst();
-            if (i==(StringColumn.size()-1)) portlet.setIsLast();
+            if (i == 0)
+                portlet.setIsFirst();
+            if (i == (StringColumn.size() - 1))
+                portlet.setIsLast();
             addPortlet(portlet, column);
         }
     }
@@ -254,12 +272,7 @@ public class Portal {
      *   1        1              1
      */
     public boolean doWorkflow() {
-        if (!(isDialog() || isWorkflowPortal())
-            || (isDialog() && isWorkflowPortal())) {
-            return true;
-        } else {
-            return false;
-        }
+        return isDialog() == isWorkflowPortal();
     }
     
 }
