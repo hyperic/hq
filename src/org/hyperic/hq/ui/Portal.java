@@ -40,7 +40,7 @@ public class Portal {
     
     private String _name;
     private String _description;
-    private int _columns = 1;
+    private int _columns = 0;
     private List _portlets = new ArrayList();
     private boolean _dialog = false;
     private boolean _workflowPortal = false;
