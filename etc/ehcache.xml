@@ -21,6 +21,13 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
 
+  <!-- The SRN cache, used outside of hibernate -->
+  <cache name="SRNCache"
+         maxElementsInMemory="50000"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+
   <!-- Platform Type Caches -->
   <cache name="org.hyperic.hq.appdef.server.session.PlatformType"
          maxElementsInMemory="15"
