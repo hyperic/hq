@@ -27,6 +27,9 @@ package org.hyperic.hq.measurement.server.session;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+
+import java.util.Collection;
 
 /**
  * CRUD methods, finders, etc. for ScheduleRevNum
@@ -38,6 +41,11 @@ public class ScheduleRevNumDAO extends HibernateDAO {
 
     public ScheduleRevNum findById(SrnId id) {
         return (ScheduleRevNum)super.findById(id);
+    }
+
+    public void remove(SrnId id) {
+        ScheduleRevNum srn = findById(id);
+        remove(srn);
     }
 
     public void remove(ScheduleRevNum entity) {
@@ -53,5 +61,64 @@ public class ScheduleRevNumDAO extends HibernateDAO {
         srn.setSrn(new Integer(1));
         save(srn);
         return srn;
+    }
+
+    /**
+     * Get a Collection of entities that have metrics enabled
+     * @return A Collection of Object arrays with 2 entries, the Integer
+     * type, and the Integer id.
+     */
+    public Collection getEnabledEntities() {
+        String sql =
+            "select mt.appdefType, m.instanceId " +
+            "from Measurement m, " +
+            "MonitorableType mt, " +
+            "MeasurementTemplate t " +
+            "where m.enabled = true and " +
+            "m.template.id = t.id and " +
+            "t.monitorableType.id = mt.id " +
+            "group by appdef_type, instance_id";
+        return getSession().createQuery(sql).list();
+    }
+
+    /**
+     * Get the minimum collection intervals for all entities with metrics
+     * enabled.
+     * @return A Collection of Object arrays with 3 entries, the Integer
+     * type, the Integer id, and the Long collection interval.
+     */
+    public Collection getMinIntervals() {
+        String sql =
+            "select mt.appdefType, m.instanceId, min(m.interval) " +
+            "from DerivedMeasurement m, " +
+            "MonitorableType mt, " +
+            "MeasurementTemplate t " +
+            "where m.enabled = true and " +
+            "m.template.id = t.id and " +
+            "t.monitorableType.id = mt.id " +
+            "group by appdef_type, instance_id";
+        return getSession().createQuery(sql).list();
+    }
+
+    /**
+     * @return The minimum collection interval for the given entity.
+     */
+    public Long getMinInterval(AppdefEntityID id) {
+        String sql =
+            "select min(m.interval) " +
+            "from DerivedMeasurement m, " +
+            "MonitorableType mt, " +
+            "MeasurementTemplate t " +
+            "where m.enabled = true and " +
+            "m.instanceId = ? and " +
+            "m.template.id = t.id and " +
+            "t.monitorableType.id = mt.id and " +
+            "mt.appdefType = ? " +
+            "group by appdef_type, instance_id";
+
+
+        return (Long)getSession().createQuery(sql)
+            .setInteger(0, id.getID())
+            .setInteger(1, id.getType()).uniqueResult();
     }
 }
