@@ -41,13 +41,16 @@ public class RemoveCommand extends Command {
         return r;
     }
 
+    protected RemoveCommand() {
+    }
+
     private Visitable visitable;
 
     public Visitable getVisitable() {
         return visitable;
     }
 
-    public void setVisitable(Visitable visitable) {
+    protected void setVisitable(Visitable visitable) {
         this.visitable = visitable;
     }
 

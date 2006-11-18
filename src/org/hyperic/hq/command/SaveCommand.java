@@ -41,7 +41,7 @@ public class SaveCommand extends Command {
         return visitable;
     }
 
-    public void setVisitable(Visitable visitable) {
+    protected void setVisitable(Visitable visitable) {
         this.visitable = visitable;
     }
 
@@ -49,6 +49,9 @@ public class SaveCommand extends Command {
         SaveCommand s = new SaveCommand();
         s.setVisitable(v);
         return s;
+    }
+
+    protected SaveCommand() {
     }
 
     public void execute(CommandContext context) {

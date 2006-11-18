@@ -40,13 +40,17 @@ public class FindCommand extends Command {
         return f;
     }
 
+    protected FindCommand() {
+
+    }
+    
     private Visitable visitable;
 
     public Visitable getVisitable() {
         return visitable;
     }
 
-    public void setVisitable(Visitable visitable) {
+    protected void setVisitable(Visitable visitable) {
         this.visitable = visitable;
     }
 
