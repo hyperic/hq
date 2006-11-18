@@ -240,7 +240,7 @@ public class AlertDefinition
         return _willRecover;
     }
     
-    protected boolean isWillRecover() {
+    public boolean isWillRecover() {
         return _willRecover;
     }
 

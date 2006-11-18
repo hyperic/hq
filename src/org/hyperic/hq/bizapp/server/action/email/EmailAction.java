@@ -29,10 +29,9 @@ import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Collection;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -55,9 +54,8 @@ import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidActionDataException;
-import org.hyperic.hq.events.TriggerFiredEvent;
-import org.hyperic.hq.events.shared.AlertConditionValue;
-import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
+import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.server.session.AlertCondition;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
@@ -103,7 +101,7 @@ public class EmailAction extends EmailActionConfig implements ActionInterface {
         return subjMan;
     }
 
-    private String createPriority(AlertDefinitionBasicValue alertdef) {
+    private String createPriority(AlertDefinition alertdef) {
         StringBuffer pri = new StringBuffer();
         for (int i = 0; i < alertdef.getPriority(); i++) {
             pri.append('!');
@@ -111,7 +109,7 @@ public class EmailAction extends EmailActionConfig implements ActionInterface {
         return pri.toString();
     }
 
-    private String createSubject(AlertDefinitionBasicValue alertdef) {
+    private String createSubject(AlertDefinition alertdef) {
         // XXX - Where can I get product name?
         StringBuffer subj = new StringBuffer("[HQ] ")
             .append(createPriority(alertdef))
@@ -122,20 +120,21 @@ public class EmailAction extends EmailActionConfig implements ActionInterface {
         return subj.toString();
     }
 
-    private String createConditions(AlertConditionValue[] conds,
+    private String createConditions(Collection cconds,
                                     AlertConditionLogValue[] logs,
                                     String indent)
         throws NamingException, CreateException, MeasurementNotFoundException
     {
         StringBuffer text = new StringBuffer();
-
+        AlertCondition[] conds =
+            (AlertCondition[])cconds.toArray(new AlertCondition[0]);
         for (int i = 0; i < conds.length; i++) {
             if (i == 0) {
                 text.append("\n").append(indent).append("If Condition: ");
             }
             else {
                 text.append("\n").append(indent)
-                    .append(conds[i].getRequired() ? "AND " : "OR ");
+                    .append(conds[i].isRequired() ? "AND " : "OR ");
             }
 
 //            TriggerFiredEvent event = (TriggerFiredEvent)
@@ -157,11 +156,11 @@ public class EmailAction extends EmailActionConfig implements ActionInterface {
                         text.append("% of ");
 
                         if (MeasurementConstants.BASELINE_OPT_MAX
-                            .equals(conds[i].getOption())) {
+                            .equals(conds[i].getOptionStatus())) {
                             text.append("Max Value");
                         }
                         else if (MeasurementConstants.BASELINE_OPT_MIN
-                            .equals(conds[i].getOption())) {
+                            .equals(conds[i].getOptionStatus())) {
                             text.append("Min Value");
                         }
                         else {
@@ -238,11 +237,11 @@ public class EmailAction extends EmailActionConfig implements ActionInterface {
                         .append(ResourceLogEvent.getLevelString(
                                 Integer.parseInt(conds[i].getName())))
                         .append(")");
-                    if (conds[i].getOption() != null &&
-                        conds[i].getOption().length() > 0) {
+                    if (conds[i].getOptionStatus() != null &&
+                        conds[i].getOptionStatus().length() > 0) {
                         text.append(" and matching substring ")
                             .append('"')
-                            .append(conds[i].getOption())
+                            .append(conds[i].getOptionStatus())
                             .append('"');
                     }
                     
@@ -271,7 +270,7 @@ public class EmailAction extends EmailActionConfig implements ActionInterface {
         return baseUrl;
     }
 
-    private String createLink(AlertDefinitionBasicValue alertdef, Integer aid)
+    private String createLink(AlertDefinition alertdef, Integer aid)
         throws ConfigPropertyException, CreateException, NamingException {
         StringBuffer text = new StringBuffer();
 
@@ -287,7 +286,7 @@ public class EmailAction extends EmailActionConfig implements ActionInterface {
         return text.toString();
     }
 
-    private String createText(AlertDefinitionBasicValue alertdef,
+    private String createText(AlertDefinition alertdef,
                               AlertConditionLogValue[] logs, AppdefEntityID aeid,
                               Integer alertId)
         throws NamingException, CreateException, MeasurementNotFoundException
@@ -362,7 +361,7 @@ public class EmailAction extends EmailActionConfig implements ActionInterface {
     /** Execute the action
      *
      */
-    public String execute(AlertDefinitionBasicValue alertdef,
+    public String execute(AlertDefinition alertdef,
                           AlertConditionLogValue[] logs, Integer alertId)
         throws ActionExecuteException {
         AlertManagerLocal aman = null;
@@ -426,7 +425,7 @@ public class EmailAction extends EmailActionConfig implements ActionInterface {
 
             filter.sendAlert(appEnt, to, createSubject(alertdef),
                              createText(alertdef, logs, appEnt, alertId),
-                             alertdef.getNotifyFiltered());
+                             alertdef.isNotifyFiltered());
 
             StringBuffer result = new StringBuffer();
             // XXX: Should get this strings into a resource file

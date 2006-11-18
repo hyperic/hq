@@ -27,6 +27,7 @@ package org.hyperic.hq.events;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
+import org.hyperic.hq.events.server.session.AlertDefinition;
 
 /**
  * Event sent when alerts have fired
@@ -46,7 +47,7 @@ public class AlertFiredEvent extends AbstractEvent
 
     /** Creates a new instance of AlertFiredEvent */
     public AlertFiredEvent(TriggerFiredEvent e, Integer alertId,
-                           AlertDefinitionBasicValue alertDef) {
+                           AlertDefinition alertDef) {
         setMessage(e.getMessage());
         setInstanceId(alertDef.getId());
         setAlertId(alertId);

@@ -440,10 +440,10 @@ public class AlertDefinitionManagerEJBImpl
     /** Find an alert definition
      * @ejb:interface-method
      */
-    public AlertDefinitionBasicValue getBasicById(Integer id) 
+    public AlertDefinition getBasicById(Integer id)
         throws FinderException
     {
-        return badFindById(id).getAlertDefinitionBasicValue();
+        return badFindById(id);
     }
     
     /** 

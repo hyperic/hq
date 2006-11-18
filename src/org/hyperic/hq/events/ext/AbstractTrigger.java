@@ -53,6 +53,7 @@ import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
+import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
@@ -151,7 +152,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
 
         AlertDefinitionManagerLocal aman;
         AlertManagerLocal alman;
-        AlertDefinitionBasicValue adBasic;
+        AlertDefinition adBasic;
         try {
             aman = AlertDefinitionManagerUtil.getLocalHome().create();
             alman = AlertManagerUtil.getLocalHome().create();
@@ -169,7 +170,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
                 return;
             
             adBasic = aman.getBasicById(adId);
-            if (adBasic.getEnabled()) {
+            if (adBasic.isEnabled()) {
                 if (log.isDebugEnabled())
                     log.debug("Trigger ID " + this.getId() +
                               " causing alert definition ID " + adId +
@@ -196,7 +197,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
             }
 
             if (adBasic.getFrequencyType() == EventConstants.FREQ_ONCE ||
-                    adBasic.getWillRecover()) {
+                    adBasic.isWillRecover()) {
             	// Disable the alert definition now that we've fired
                 aman.updateAlertDefinitionsEnable(
                     new Integer[]{ adBasic.getId() }, false);

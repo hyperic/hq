@@ -1015,12 +1015,12 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      *
      * @ejb:interface-method
      */
-    public AlertDefinitionBasicValue getAlertDefinitionBasic(int sessionID,
-                                                             Integer id)
+    public AlertDefinition getAlertDefinitionBasic(int sessionID,
+                                                   Integer id)
         throws SessionNotFoundException, SessionTimeoutException, 
                FinderException, PermissionException {
         AuthzSubjectValue subject = this.manager.getSubject(sessionID);
-        AlertDefinitionBasicValue adval = getADM().getBasicById(id);
+        AlertDefinition adval = getADM().getBasicById(id);
         canManageAlerts(subject, getAppdefEntityID(adval));
         return adval;
     }
@@ -1503,7 +1503,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         return new AppdefEntityID(ad.getAppdefType(), ad.getAppdefId());
     }
     
-    private AppdefEntityID getAppdefEntityID(AlertDefinitionBasicValue ad) {
+    private AppdefEntityID getAppdefEntityID(AlertDefinition ad) {
         return new AppdefEntityID(ad.getAppdefType(), ad.getAppdefId());
     }
     
@@ -1516,7 +1516,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     
     private void canManageAlerts(AuthzSubjectValue who, Integer alertDefId)
         throws PermissionException, FinderException {
-        AlertDefinitionBasicValue ad = this.getADM().getBasicById(alertDefId);
+        AlertDefinition ad = this.getADM().getBasicById(alertDefId);
         canManageAlerts(who, ad);        
     }
     
@@ -1536,9 +1536,11 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     }
     
     private void canManageAlerts(AuthzSubjectValue who,
-                                 AlertDefinitionBasicValue ad)
+                                 AlertDefinition ad)
         throws PermissionException {
-        if (!EventConstants.TYPE_ALERT_DEF_ID.equals(ad.getParentId()))
+        Integer parentId =
+            ad.getParent() != null ? ad.getParent().getId() : null;
+        if (!EventConstants.TYPE_ALERT_DEF_ID.equals(parentId))
             canManageAlerts(who, getAppdefEntityID(ad));
     }
     

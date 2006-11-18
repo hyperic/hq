@@ -28,18 +28,15 @@ package org.hyperic.hq.measurement.action;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.InvalidActionDataException;
-import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
+import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.MetricProblemDAO;
-import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.InvalidOptionException;
@@ -52,7 +49,7 @@ import org.hyperic.dao.DAOFactory;
 public class MetricAlertAction implements ActionInterface {
     private Log log = LogFactory.getLog(MetricAlertAction.class);
 
-    public String execute(AlertDefinitionBasicValue alertdef,
+    public String execute(AlertDefinition alertdef,
                           AlertConditionLogValue[] logs, Integer alertId)
         throws ActionExecuteException {
         MetricProblemDAO dao =

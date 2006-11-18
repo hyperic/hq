@@ -31,7 +31,7 @@
 
 package org.hyperic.hq.bizapp.server.action.log;
 
-import java.util.HashMap;
+import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,9 +42,8 @@ import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidActionDataException;
-import org.hyperic.hq.events.TriggerFiredEvent;
-import org.hyperic.hq.events.shared.AlertConditionValue;
-import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
+import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.server.session.AlertCondition;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
@@ -64,16 +63,18 @@ public class SyslogAction extends SyslogActionConfig
     public SyslogAction() {
     }
 
-    private String createConditions(AlertConditionValue[] conds,
+    private String createConditions(Collection cconds,
                                     AlertConditionLogValue[] logs, String indent) {
         StringBuffer text = new StringBuffer();
 
+        AlertCondition[] conds =
+            (AlertCondition[])cconds.toArray(new AlertCondition[0]);
         for (int i = 0; i < conds.length; i++) {
             if (i == 0) {
                 text.append(indent).append("If ");
             } else {
                 text.append(indent).append(
-                    conds[i].getRequired() ? " AND " : " OR ");
+                    conds[i].isRequired() ? " AND " : " OR ");
             }
 
             switch (conds[i].getType()) {
@@ -116,7 +117,7 @@ public class SyslogAction extends SyslogActionConfig
     /** Execute the action
      *
      */
-    public String execute(AlertDefinitionBasicValue alertdef,
+    public String execute(AlertDefinition alertdef,
                           AlertConditionLogValue[] logs, Integer alertId)
         throws ActionExecuteException {
 //        TriggerFiredEvent[] firedEvents = event.getRootEvents();
