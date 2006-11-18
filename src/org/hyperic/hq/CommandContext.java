@@ -91,7 +91,12 @@ public class CommandContext extends VisitorContext {
         if (commandHandler == null) {
             throw new IllegalStateException("CommandHandler not initialized");
         }
-        commandHandler.executeHandler(this);
+        long start = System.currentTimeMillis();
+        try {
+            commandHandler.executeHandler(this);
+        } finally {
+            executionTime = (int)(System.currentTimeMillis() - start);
+        }
     }
 
     public int getExecutionTime() {
