@@ -33,8 +33,8 @@ public class ScheduleRevNum implements java.io.Serializable {
     private SrnId _id;
     private long _version_;
     private Integer _srn;
-    private long _minInterval;
-    private long _lastReported;
+    private long _minInterval = 0;
+    private long _lastReported = 0;
     private boolean _pending;
     
     // Constructors
