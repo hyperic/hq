@@ -33,7 +33,10 @@ import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
+import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
+import org.hyperic.hq.events.shared.AlertConditionLogValue;
+import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.MetricProblemDAO;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
@@ -50,27 +53,28 @@ public class MetricAlertAction implements ActionInterface {
     private Log log = LogFactory.getLog(MetricAlertAction.class);
 
     public String execute(AlertDefinitionBasicValue alertdef,
-                          TriggerFiredEvent event, Integer alertId)
+                          AlertConditionLogValue[] logs, Integer alertId)
         throws ActionExecuteException {
         MetricProblemDAO dao =
             DAOFactory.getDAOFactory().getMetricProblemDAO();
         StringBuffer actLog = new StringBuffer();
 
         // Organize the events by trigger
-        TriggerFiredEvent[] firedEvents = event.getRootEvents();
-        for (int i = 0; i < firedEvents.length; i++) {
+//        TriggerFiredEvent[] firedEvents = event.getRootEvents();
+        for (int i = 0; i < logs.length; i++) {
             // Go through the TriggerFiredEvent's root events
-            AbstractEvent[] events = firedEvents[i].getEvents();
-            for (int j = 0; j < events.length; j++) {
-                if (events[j] instanceof MeasurementEvent) {
-                    dao.create(events[j].getInstanceId(),
-                               events[j].getTimestamp(),
+            for (int j = 0; j < logs.length; j++) {
+                AlertConditionValue cond = logs[j].getCondition();
+                if (cond.getType() == EventConstants.TYPE_THRESHOLD ||
+                    cond.getType() == EventConstants.TYPE_BASELINE) {
+                    dao.create(new Integer(cond.getMeasurementId()),
+                               System.currentTimeMillis(),
                                MeasurementConstants.PROBLEM_TYPE_ALERT,
                                alertId);
 
                     // Append to action log
                     actLog.append("MeasurementAlert added for mid: ");
-                    actLog.append(events[j].getInstanceId());
+                    actLog.append(cond.getMeasurementId());
                     actLog.append(" aid: ");
                     actLog.append(alertId);
                     actLog.append("\n");

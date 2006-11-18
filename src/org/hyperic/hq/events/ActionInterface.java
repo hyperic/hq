@@ -27,6 +27,7 @@ package org.hyperic.hq.events;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
+import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.util.config.ConfigResponse;
 
 /** Interface to be implemented by all Action classes
@@ -37,7 +38,8 @@ public interface ActionInterface extends ActionConfigInterface {
      * @throws org.hyperic.hq.events.ActionExecuteException if execution causes an error
      */
     public String execute(AlertDefinitionBasicValue alertdef,
-                          TriggerFiredEvent event, Integer alertId)
+                          AlertConditionLogValue[] logs,
+                          Integer alertId)
         throws ActionExecuteException;
     
     /** Inherit configuration from parent action

@@ -257,7 +257,8 @@ public abstract class AbstractTrigger implements TriggerInterface {
                 action.init(ConfigResponse.decode(action.getConfigSchema(),
                                                   aval.getConfig()));
 
-                String detail = action.execute(adBasic, event, alert.getId());
+                String detail = action.execute(
+                    adBasic, alert.getConditionLogs(), alert.getId());
                                    
                 AlertActionLogValue alog = new AlertActionLogValue();
                 alog.setActionId(aval.getId());

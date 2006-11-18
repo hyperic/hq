@@ -45,6 +45,7 @@ import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
+import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -64,7 +65,7 @@ public class SyslogAction extends SyslogActionConfig
     }
 
     private String createConditions(AlertConditionValue[] conds,
-                                    HashMap eventMap, String indent) {
+                                    AlertConditionLogValue[] logs, String indent) {
         StringBuffer text = new StringBuffer();
 
         for (int i = 0; i < conds.length; i++) {
@@ -87,10 +88,7 @@ public class SyslogAction extends SyslogActionConfig
                     text.append(" (actual value = ");
 
                     // Make sure the event is present to be displayed
-                    if (eventMap.containsKey(conds[i].getTriggerId()))
-                        text.append(eventMap.get(conds[i].getTriggerId()));
-                    else
-                        text.append("Not Available");
+                    text.append(logs[i].getCondition().getTriggerId());
 
                     text.append(")");
                     break;
@@ -116,19 +114,18 @@ public class SyslogAction extends SyslogActionConfig
     }
 
     /** Execute the action
-     * @throws org.hyperic.hq.events.ext.ActionExecuteException if execution causes an error
      *
      */
     public String execute(AlertDefinitionBasicValue alertdef,
-                          TriggerFiredEvent event, Integer alertId)
+                          AlertConditionLogValue[] logs, Integer alertId)
         throws ActionExecuteException {
-        TriggerFiredEvent[] firedEvents = event.getRootEvents();
-        HashMap eventMap = new HashMap();
-        for (int i = 0; i < firedEvents.length; i++) {
-            eventMap.put(
-                firedEvents[i].getInstanceId(),
-                firedEvents[i].toString());
-        }
+//        TriggerFiredEvent[] firedEvents = event.getRootEvents();
+//        HashMap eventMap = new HashMap();
+//        for (int i = 0; i < firedEvents.length; i++) {
+//            eventMap.put(
+//                firedEvents[i].getInstanceId(),
+//                firedEvents[i].toString());
+//        }
         
         EmailFilter filter = EmailFilter.getInstance();
         AppdefEntityID aeid = new AppdefEntityID(alertdef.getAppdefType(),
@@ -140,7 +137,7 @@ public class SyslogAction extends SyslogActionConfig
                   ' ' + this.getMeta() + '/' + this.getProduct() +'/' +
                   this.getVersion() + ' ' + resName + " :" +
                   alertdef.getName() + " - " +
-                  this.createConditions(alertdef.getConditions(), eventMap,""));
+                  this.createConditions(alertdef.getConditions(), logs,""));
         
         return "success";
     }
