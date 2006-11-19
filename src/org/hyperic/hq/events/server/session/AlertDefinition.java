@@ -64,6 +64,7 @@ public class AlertDefinition
     private Collection        _conditions = new ArrayList();
     private Collection        _triggers = new ArrayList();
     private Collection        _actions = new ArrayList();
+    private Escalation        _escalation;
 
     private AlertDefinitionValue      _value;
     private AlertDefinitionBasicValue _basicValue;
@@ -270,6 +271,16 @@ public class AlertDefinition
 
     protected void setActOnTrigger(RegisteredTrigger actOnTrigger) {
         _actOnTrigger = actOnTrigger;
+    }
+
+    public Escalation getEscalation()
+    {
+        return _escalation;
+    }
+
+    public void setEscalation(Escalation _escalation)
+    {
+        this._escalation = _escalation;
     }
 
     public boolean isDeleted() {

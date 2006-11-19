@@ -94,6 +94,10 @@
       <column name="DELETED" not-null="true" />
     </property>
 
+    <many-to-one name="escalation" class="Escalation">
+      <column name="ESCALATION_ID" not-null="false" />
+    </many-to-one>
+
     <bag name="actionsBag" table="EAM_ACTION"
          cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
          inverse="true">
