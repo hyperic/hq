@@ -67,6 +67,7 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.measurement.server.mbean.SRNCache;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
+import org.hyperic.hq.events.escalation.mediator.EscalationMediator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -410,6 +411,9 @@ public class ProductPluginDeployer
         Collections.sort(plugins, this);
 
         try {
+            // clear active escalations.
+            EscalationMediator.getInstance().clearActiveEscalation();
+            
             ProductManagerLocal pm = getProductManager();
             String pluginName;
             for (Iterator it = plugins.iterator();

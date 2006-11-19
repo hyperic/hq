@@ -162,4 +162,8 @@ public class Action
             setParent(aDao.findById(val.getId()));
         }
     }
+
+    public String toString() {
+        return "(id=" + getId() + ", class=" + _className + ")";
+    }
 }

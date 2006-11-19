@@ -69,7 +69,7 @@ public class Escalation extends PersistedObject {
         return e;
     }
 
-    public static Escalation createFinder() {
+    public static Escalation newInstance() {
         return new Escalation();
     }
     
@@ -194,6 +194,11 @@ public class Escalation extends PersistedObject {
         return result;
     }
 
+    public String toString() {
+        return "(id=" + getId() + ", name=" + name + ", allowPause=" +
+               allowPause + ", maxWaitTime="+ maxWaitTime + ", notifyAll=" +
+               notifyAll + ", created=" + creationTime + ")";
+    }
 }
 
 

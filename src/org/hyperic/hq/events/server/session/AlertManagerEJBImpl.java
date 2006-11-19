@@ -321,6 +321,10 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
         EscalationState state = escalation.getEscalationState(alertDefId);
         if (state.isFixed()) {
             // fixed so no need to schedule
+            if (log.isInfoEnabled()) {
+                log.info("Escalation fixed. alert=" +  alert + ", escalation=" +
+                         escalation + ", state=" + state);
+            }
             state.setCurrentLevel(0);
             state.setActive(false);
             dao.save(escalation);
@@ -333,14 +337,22 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
             state.setCurrentLevel(0);
             state.setActive(false);
             dao.save(escalation);
+            if (log.isInfoEnabled()) {
+                log.info("End escalation. alert=" +  alert + ", escalation=" +
+                         escalation + ", state=" + state);
+            }
         } else {
+            EscalationAction ea =
+                escalation.getCurrentAction(state.getCurrentLevel());
             EscalationJob.scheduleJob(
-                escalation.getId(), alertId,
-                escalation.getCurrentAction(
-                    state.getCurrentLevel()).getWaitTime());
-            state.setActive(true);
+                escalation.getId(), alertId, ea.getWaitTime());
             state.setCurrentLevel(nextlevel);
             dao.save(escalation);
+            if (log.isDebugEnabled()) {
+                log.debug("schedule next action. alert=" +  alert +
+                          ", escalation=" + escalation + ", state=" +
+                          state + "action=" + ea);
+            }
         }
     }
 
@@ -362,14 +374,15 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
         EscalationState state = escalation.getEscalationState(alertDefId);
         if (state.isFixed()) {
             // fixed or is in progress so no need run
+            if (log.isInfoEnabled()) {
+                log.info("Escalation fixed. alert=" +  alert + ", escalation=" +
+                         escalation + ", state=" + state);
+            }
             state.setCurrentLevel(0);
             state.setActive(false);
             dao.save(escalation);
             return;
         }
-        // mark escalation as in progress.
-        state.setActive(true);
-
         // check to see if there is remaining pauseWaitTime
         long remainder = getRemainingPauseWaitTime(escalation, state);
         if (remainder > 0) {
@@ -378,12 +391,18 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
             // reset the pause escalation flag to avoid wait loop.
             state.setPauseEscalation(false);
             dao.save(escalation);
+            if (log.isDebugEnabled()) {
+                log.debug("Pause for additional wait time. alert=" +  alert +
+                          ", escalation=" + escalation + ", state=" +
+                          state);
+            }
             return;
         }
         int curlevel = state.getCurrentLevel();
         if (curlevel >= escalation.getActions().size()) {
-            throw new IllegalStateException("current level out of bounds " +
-                                            curlevel);
+            throw new IllegalStateException("current level out of bounds: " +
+                                            "alert="+ alert + ", escalation=" +
+                                            escalation+ ", state=" + state);
         }
 
         try {
@@ -434,9 +453,15 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
                InvalidActionDataException, ActionExecuteException,
                AlertCreateException
     {
-        Action a =
-            escalation.getCurrentAction(state.getCurrentLevel()).getAction();
+        EscalationAction ea =
+            escalation.getCurrentAction(state.getCurrentLevel());
+        Action a = ea.getAction();
 
+        if (log.isDebugEnabled()) {
+            log.debug("escalation in progress. alert=" +  alert +
+                      ", escalation=" + escalation + ", state=" +
+                      state + ", action="+ea);
+        }
         // prepare, instantiate,  and invoke action
         Class ac = Class.forName(a.getClassName());
         ActionInterface action = (ActionInterface) ac.newInstance();
@@ -466,6 +491,26 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
         alertValue.addActionLog(alog);
         
         createAlert(alertValue);
+    }
+
+    /**
+     * clear active status on all escalation
+     *
+     * @ejb:interface-method
+     */
+    public void clearActiveEscalation() {
+        DAOFactory.getDAOFactory().getEscalationDAO().clearActiveEscalation();
+    }
+
+    /**
+     * clear active status for an alertDefinition
+     *
+     * @ejb:interface-method
+     */
+    public void clearActiveEscalation(Integer escalationId,
+                                            Integer alertDefId) {
+        DAOFactory.getDAOFactory().getEscalationDAO()
+            .clearActiveEscalation(escalationId, alertDefId);
     }
 
     /**

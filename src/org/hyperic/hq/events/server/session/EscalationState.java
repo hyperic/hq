@@ -242,6 +242,19 @@ public class EscalationState implements Serializable, Cloneable {
             throw new UnsupportedOperationException(e.getMessage());
         }
     }
+
+    public String toString() {
+        return new StringBuffer()
+            .append("(currentLevel=" + currentLevel + ", fixed=" +
+                    fixed +", active"+
+                    active + ", acknowledge=" + acknowledge +
+                    ", pause=" + pauseEscalation +
+                    ", pauseWaitTIme=" + pauseWaitTime +
+                    ", modified=" + modifiedTime)
+            .append((updateBy != null ? (", updateBy="+updateBy) : ""))
+            .append(")")
+            .toString();
+    }
 }
 
 

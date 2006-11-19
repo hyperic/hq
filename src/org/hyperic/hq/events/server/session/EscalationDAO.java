@@ -3,9 +3,15 @@ package org.hyperic.hq.events.server.session;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.util.jdbc.DBUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.Iterator;
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /*
 * NOTE: This copyright does *not* cover user programs that use HQ
@@ -34,7 +40,9 @@ import java.io.Serializable;
 /**
  * CRUD for Escalation, finders
  */
-public class EscalationDAO extends HibernateDAO {
+public class EscalationDAO extends HibernateDAO
+{
+    private static Log log = LogFactory.getLog(EscalationDAO.class);
 
     public EscalationDAO(DAOFactory df) {
         super(Escalation.class, df);
@@ -97,5 +105,44 @@ public class EscalationDAO extends HibernateDAO {
 
     public void removePersisted(PersistedObject entity) {
         remove((Escalation)entity);
+    }
+
+    public int clearActiveEscalation()
+    {
+        // direct sql is the only option here to clear all
+        // active flags.  This should only be called during
+        // hq startup to reset all escalation active status.
+        String sql = "update eam_escalation_state " +
+                     "  set active=? " +
+                     "where" +
+                     "  active=?";
+
+        Connection conn = getSession().connection();
+        PreparedStatement p;
+        int count = 0;
+        try {
+            p = conn.prepareStatement(sql);
+            p.setBoolean(1, false);
+            p.setBoolean(2, true);
+            count = p.executeUpdate();
+            p.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            getSession().disconnect();
+        }
+        if (count > 0 && log.isInfoEnabled()) {
+            log.info("Cleared " + count + " active " +
+                     (count == 1 ? "escalation." : "escalations."));
+        }
+        return count;
+    }
+
+    public void clearActiveEscalation(Integer eid, Integer alertDefId)
+    {
+        Escalation e = findById(eid);
+        EscalationState s = e.getEscalationState(alertDefId);
+        s.setActive(false);
+        save(e);
     }
 }

@@ -29,6 +29,8 @@ import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.CreateException;
 import javax.naming.NamingException;
@@ -36,8 +38,19 @@ import java.util.Collection;
 
 public class EscalationMediator extends Mediator
 {
-    private static AlertManagerLocal alertManagerLocal;
-    static {
+    private static Log log = LogFactory.getLog(EscalationMediator.class);
+
+    private static EscalationMediator instance = new EscalationMediator();
+
+    public static EscalationMediator getInstance()
+    {
+        return instance;
+    }
+
+    private AlertManagerLocal alertManagerLocal;
+
+    protected EscalationMediator()
+    {
         try {
             alertManagerLocal = AlertManagerUtil.getLocalHome().create();
         } catch (CreateException e) {
@@ -45,13 +58,6 @@ public class EscalationMediator extends Mediator
         } catch (NamingException e) {
             throw new SystemException(e);
         }
-    }
-
-    private static EscalationMediator instance = new EscalationMediator();
-
-    public static EscalationMediator getInstance()
-    {
-        return instance;
     }
 
     /**
@@ -67,19 +73,46 @@ public class EscalationMediator extends Mediator
         Alert alert = alertManagerLocal.getAlertById(alertId);
         Integer alertDefId = alert.getAlertDefinition().getId();
         EscalationState state = escalation.getEscalationState(alertDefId);
-        CommandContext context = CommandContext.createContext();
+        if (setEscalationActiveStatus(escalation, state)) {
+            // Escalation is not active, start escalation.
+            if (log.isInfoEnabled()) {
+                log.info("Start escalation. alert=" +  alert +
+                         ", escalation=" + escalation + ", state=" +
+                         state);
+            }
+            CommandContext context = CommandContext.createContext();
+            context.execute(
+                EscalateCommand.setInstance(escalationId, alertId)
+            );
+        } else {
+            // escalation already in progress for this alert def.
+            if (log.isInfoEnabled()) {
+                log.info("Escalation already in progress. alert=" +  alert +
+                         ", escalation=" + escalation + ", state="+ state);
+            }
+        }
+    }
+
+    /**
+     *
+     * @param escalation
+     * @param state
+     * @return true if the escalation active bit is set by the caller.
+     */
+    public boolean setEscalationActiveStatus(Escalation escalation,
+                                             EscalationState state)
+    {
         synchronized(state) {
             if(state.isActive()) {
                 // escalation is active, so do not start another escalation
                 // for this chain.
-                return;
+                return false;
             }
             state.setActive(true);
+            CommandContext context = CommandContext.createContext();
             context.execute(SaveCommand.setInstance(escalation));
         }
-        context.execute(
-            EscalateCommand.setInstance(escalationId, alertId)
-        );
+        return true;
     }
 
     public void scheduleAction(Integer escalationId, Integer alertId)
@@ -90,5 +123,17 @@ public class EscalationMediator extends Mediator
     public void dispatchAction(Integer escalationId, Integer alertId)
     {
         alertManagerLocal.dispatchAction(escalationId, alertId);
+    }
+
+    public void clearActiveEscalation() {
+        // usually invoke on hq start to clear all escalation marked
+        // as in progress
+        alertManagerLocal.clearActiveEscalation();
+    }
+
+    public void clearActiveEscalation(Integer escalationId,
+                                      Integer alertDefId) {
+        // clear active status for this alertDef
+        alertManagerLocal.clearActiveEscalation(escalationId, alertDefId);
     }
 }

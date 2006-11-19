@@ -88,6 +88,39 @@ public class EscalationAction implements java.io.Serializable {
     public void setWaitTime(long waitTime) {
         this.waitTime = waitTime;
     }
+
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof EscalationAction)) {
+            return false;
+        }
+        EscalationAction o = (EscalationAction)obj;
+        return waitTime == o.getWaitTime() &&
+               (action == o.getAction() ||
+                (action!=null && o.getAction()!=null &&
+                 action.equals(o.getAction())
+                )
+               );
+    }
+
+    public int hashCode() {
+        int result = 17;
+
+        result = 37*result + (int)(waitTime ^ (waitTime >>> 32));
+        result = 37*result + (action != null ? action.hashCode() : 0);
+
+        return result;
+    }
+
+    public String toString() {
+        return new StringBuffer()
+            .append("(action=")
+            .append(action)
+            .append(", waitTime=" + waitTime)
+            .toString();
+    }
 }
 
 

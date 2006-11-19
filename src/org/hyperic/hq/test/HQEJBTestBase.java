@@ -44,6 +44,7 @@ import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
+import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
@@ -78,6 +79,7 @@ public abstract class HQEJBTestBase
             TemplateManagerEJBImpl.class,
             CrispoManagerEJBImpl.class,
             CommandHandlerEJBImpl.class,
+            AlertManagerEJBImpl.class,
         };
     }
 

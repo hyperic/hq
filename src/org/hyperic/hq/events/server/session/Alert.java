@@ -43,7 +43,6 @@ public class Alert
     private AlertDefinition _alertDefinition;
     private Collection      _actionLog    = new ArrayList();
     private Collection      _conditionLog = new ArrayList();
-    private Collection      _userAlerts   = new ArrayList();
 
     private AlertValue      _alertVal;
 
@@ -134,18 +133,6 @@ public class Alert
         _conditionLog.remove(acl);
     }
     
-    public Collection getUserAlerts() {
-        return Collections.unmodifiableCollection(_userAlerts);
-    }
-    
-    protected Collection getUserAlertsBag() {
-        return _userAlerts;
-    }
-    
-    protected void setUserAlertsBag(Collection userAlerts) {
-        _userAlerts = userAlerts;
-    }
-    
     public AlertValue getAlertValue() {
         if (_alertVal == null) 
             _alertVal = new AlertValue();
@@ -207,5 +194,10 @@ public class Alert
             
             removeActionLog(alDao.findById(lv.getId()));
         }
+    }
+
+    public String toString() {
+        return "(id=" + getId() + ", alertdef=" + _alertDefinition.getId() +
+               ", createdtime=" + _ctime +")";
     }
 }
