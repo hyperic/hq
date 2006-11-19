@@ -169,7 +169,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         String sql = 
             "select t from MeasurementTemplate t " +
             "join t.monitorableType mt " +
-            "where mt.name=? and t.defaultInterval > 0";
+            "where mt.name=? and t.defaultInterval > 0 order by t.name";
         return getSession().createQuery(sql).
             setString(0, type).list();
     }
