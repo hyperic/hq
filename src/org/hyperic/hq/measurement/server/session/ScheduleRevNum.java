@@ -32,7 +32,7 @@ public class ScheduleRevNum implements java.io.Serializable {
     // Fields    
     private SrnId _id;
     private long _version_;
-    private Integer _srn;
+    private int _srn;
     private long _minInterval = 0;
     private long _lastReported = 0;
     private boolean _pending;
@@ -41,12 +41,12 @@ public class ScheduleRevNum implements java.io.Serializable {
     public ScheduleRevNum() {
     }
 
-    public ScheduleRevNum(SrnId id, Integer srn) {
+    public ScheduleRevNum(SrnId id, int srn) {
         _id = id;
         _srn = srn;
     }
 
-    public ScheduleRevNum(SrnId id, Integer srn, long minInterval,
+    public ScheduleRevNum(SrnId id, int srn, long minInterval,
                           long lastReported, boolean pending) {
         _id = id;
         _srn = srn;
@@ -72,11 +72,11 @@ public class ScheduleRevNum implements java.io.Serializable {
         _version_ = _version_;
     }
 
-    public Integer getSrn() {
+    public int getSrn() {
         return _srn;
     }
     
-    protected void setSrn(Integer srn) {
+    protected void setSrn(int srn) {
         _srn = srn;
     }
 
@@ -133,7 +133,7 @@ public class ScheduleRevNum implements java.io.Serializable {
 
         val.setAppdefType(getId().getAppdefType());
         val.setInstanceId(getId().getInstanceId());
-        val.setSRN(getSrn().intValue());
+        val.setSRN(getSrn());
         val.setMinInterval(getMinInterval());
         val.setLastReported(getLastReported());
         val.setPending(isPending());
