@@ -107,7 +107,6 @@ import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
-import org.hyperic.hq.measurement.server.mbean.SRNCache;
 import org.hyperic.hq.measurement.server.session.ResourcesWithoutDataHelper;
 import org.hyperic.hq.measurement.shared.BaselineValue;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
@@ -115,6 +114,7 @@ import org.hyperic.hq.measurement.shared.MeasurementArgValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
+import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.product.ConfigTrackPlugin;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.MetricValue;
@@ -826,9 +826,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
         // Wait for the srnCache to show that this entity is
         // not an out-of-sync entity
-        SRNCache srnCache = SRNCache.getInstance();
+        SRNManagerLocal srnManager = getSrnManager();
+
         while (true) {
-            List oos = srnCache.getOutOfSyncEntities();
+            List oos = srnManager.getOutOfSyncEntities();
             if (!oos.contains(id)) {
                 return;
             }

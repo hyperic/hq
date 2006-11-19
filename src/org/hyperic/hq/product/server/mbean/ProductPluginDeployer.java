@@ -64,9 +64,8 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.hq.product.PluginException;
 
-import org.hyperic.hq.measurement.server.mbean.SRNCache;
-import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
-import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
+import org.hyperic.hq.measurement.shared.SRNManagerLocal;
+import org.hyperic.hq.measurement.shared.SRNManagerUtil;
 import org.hyperic.hq.events.escalation.mediator.EscalationMediator;
 
 import org.apache.commons.logging.Log;
@@ -435,8 +434,8 @@ public class ProductPluginDeployer
 
         // Initialize the SRNCache within a transaction
         try {
-            MeasurementProcessorLocal proc = getMeasurementProcessor();
-            proc.initializeSrnCache();
+            SRNManagerLocal srnManager = getSRNManager();
+            srnManager.initializeCache();
         } catch (DeploymentException e) {
             log.error(e.getMessage(), e);
         }
@@ -477,19 +476,19 @@ public class ProductPluginDeployer
         broadcaster.sendNotification(notif);
     }
 
-    private MeasurementProcessorLocal getMeasurementProcessor()
+    private SRNManagerLocal getSRNManager()
         throws DeploymentException {
         try {
-            return MeasurementProcessorUtil.getLocalHome().create();
+            return SRNManagerUtil.getLocalHome().create();
         } catch (NamingException e) {
             throw new DeploymentException("Failed to lookup " +
-                                          "MeasurementProcessor", e);
+                                          "SRNManager", e);
         } catch (CreateException e) {
             throw new DeploymentException("Failed to create " +
-                                          "MeasurementProcessor", e);
+                                          "SRNManager", e);
         }
-    }
 
+    }
 
     private ProductManagerLocal getProductManager()
         throws DeploymentException {

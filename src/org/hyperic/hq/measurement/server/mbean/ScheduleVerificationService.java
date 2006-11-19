@@ -42,7 +42,6 @@ import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentManagerUtil;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentValue;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
@@ -58,6 +57,8 @@ import org.hyperic.hq.measurement.monitor.MonitorCreateException;
 import org.hyperic.hq.measurement.server.mdb.AgentScheduleSynchronizer;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
+import org.hyperic.hq.measurement.shared.SRNManagerLocal;
+import org.hyperic.hq.measurement.shared.SRNManagerUtil;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -103,7 +104,19 @@ public class ScheduleVerificationService
 
         return mproc;
     }
-    
+
+    private SRNManagerLocal srnManager;
+    private SRNManagerLocal getSrnManager() {
+        if (srnManager == null) {
+            try {
+                srnManager = SRNManagerUtil.getLocalHome().create();
+            } catch (Exception e) {
+                throw new SystemException(e);
+            }
+        }
+        return srnManager;
+    }
+
     private AgentScheduleSynchronizer agentSync =
         AgentScheduleSynchronizer.getInstance();
     
@@ -152,7 +165,7 @@ public class ScheduleVerificationService
         }
 
         // First make sure that the cache is initialized
-        SRNCache srnCache = SRNCache.getInstance();
+        SRNManagerLocal srnManager = getSrnManager();
 
         AgentManagerLocal agentMan;
 
@@ -173,7 +186,7 @@ public class ScheduleVerificationService
         }
 
         // Ask the SRNCache what requires rescheduling
-        Collection toResched = srnCache.getOutOfSyncEntities();
+        Collection toResched = srnManager.getOutOfSyncEntities();
         
         HashSet downAgents = new HashSet();
         HashSet upAgents   = new HashSet();
@@ -206,13 +219,7 @@ public class ScheduleVerificationService
                 log.debug("Measurement Schedule Verification: " +
                           "Agent not found for " + entId);
                 // Resource not found, remove from SRN
-                try {
-                    srnCache.removeSRN(entId);
-                } catch (FinderException fe) {
-                    // Not clear why the srnCache would have it then
-                } catch (RemoveException re) {
-                    log.error("Unable to remove SRN", e);
-                }
+                srnManager.removeSrn(entId);
             } catch (PermissionException e) {
                 log.debug("Measurement Schedule Verification: " +
                           "No permission to look up " + entId);
@@ -246,7 +253,6 @@ public class ScheduleVerificationService
      * @jmx:managed-operation
      */
     public void init() {
-        // do nothing
     }
 
     /**

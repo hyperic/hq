@@ -37,7 +37,6 @@ import java.util.Set;
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
 import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 import javax.jms.JMSException;
@@ -50,9 +49,8 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
-import org.hyperic.hq.measurement.server.session.SRN;
-import org.hyperic.hq.measurement.SRNCreateException;
 import org.hyperic.hq.measurement.TimingVoodoo;
+import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.measurement.server.session.RawMeasurement;
 import org.hyperic.hq.measurement.server.session.SrnId;
@@ -68,13 +66,14 @@ import org.hyperic.hq.measurement.ext.depgraph.Graph;
 import org.hyperic.hq.measurement.ext.depgraph.RawNode;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.monitor.MonitorCreateException;
-import org.hyperic.hq.measurement.server.mbean.SRNCache;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.RawMeasurementValue;
+import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.SchedulerException;
+import org.hibernate.ObjectNotFoundException;
 
 /** The MeasurementProcessor class runs as a daemon that receives
  *  DerivedMeasurements to be scheduled, and RawMeasurements to be
@@ -111,14 +110,6 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
         
         return monitor.ping(aconn);
     }
-    
-    /**
-     * Initialize the SRN cache within a transaction
-     * @ejb:interface-method
-     */
-    public void initializeSrnCache() {
-        SRNCache.getInstance();
-    }
 
     /**
      * Schedule a DerivedMeasurement and all of its dependent
@@ -140,7 +131,7 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
                MonitorAgentException {
         long scheduleTime = System.currentTimeMillis();
 
-        SRNCache srnCache = SRNCache.getInstance();
+        SRNManagerLocal srnManager = getSRNManager();
         try {
             Map toScheduleRaw = new HashMap();
             List toScheduleDerived = new ArrayList();
@@ -219,7 +210,7 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
 
             // Schedule the measurements
             scheduleRawMeasurements(entId, toScheduleRaw,
-                srnCache.beginIncrementSRN(entId, minInterval));
+                srnManager.beginIncrementSrn(entId, minInterval));
             scheduleDerivedMeasurement(toScheduleDerived, serverSchedule);
         } catch (SchedulerException e) {
             throw new MeasurementScheduleException(
@@ -231,11 +222,8 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
             throw new MonitorAgentException(e);
         } catch (MonitorCreateException e) {
             throw new MonitorAgentException(e);
-        } catch (SRNCreateException e) {
-            throw new MeasurementScheduleException(
-                "Cannot create SRN for entity " + entId, e);
         } finally {
-            srnCache.endIncrementSRN(entId);
+            srnManager.endIncrementSrn(entId);
         }
         
         logTime("schedule",scheduleTime);
@@ -248,24 +236,17 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
             UnscheduleMetricInfo[] schedule =
                 new UnscheduleMetricInfo[entIds.length];
             
-            SRNCache srnCache = SRNCache.getInstance();
+            SRNManagerLocal srnManager = getSRNManager();
             for (int i = 0; i < schedule.length; i++) {
                 schedule[i] = new UnscheduleMetricInfo(entIds[i]);
-
-                // Remove entity from our cache
                 try {
-                    srnCache.removeSRN(entIds[i]);
-                } catch (FinderException e) {
-                    throw new MeasurementUnscheduleException(
-                        "Could not find SRN for entity " + entIds[i], entIds[i],
-                        e);
-                } catch (RemoveException e) {
-                    throw new MeasurementUnscheduleException(
-                        "Could not remove SRN for entity " + entIds[i],
-                        aconn.getId(), e);
+                    srnManager.removeSrn(entIds[i]);
+                } catch (ObjectNotFoundException e) {
+                    // Ok to ignore, this is the first time scheduling metrics
+                    // for this resource.
                 }
             }
-        
+
             // Get the monitor for the agent type
             MonitorInterface monitor =
                 MonitorFactory.newInstance(aconn.getAgentType().getName());
@@ -290,11 +271,6 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
             AgentValue aconn = getAgentConnection(agentToken);
             unschedule(aconn, entIds);
         } catch (MonitorAgentException e) {
-            // Log error, but do not throw exception
-            /*
-            log.error("Could not connect with agent or cannot unschedule: " +
-                      entId, e);
-                      */
         }
 
     }
@@ -312,21 +288,7 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
             AgentValue aconn = getAgentConnection(agentEnt);
             unschedule(aconn, entIds);
         } catch (MonitorAgentException e) {
-            // Log error, but do not throw exception
-            /*
-            log.error("Could not connect with agent or cannot unschedule: " +
-                      entId, e);
-                      */
         }
-    }
-
-    /**
-     * @ejb:interface-method
-     */
-    public void removeSRN(AppdefEntityID eid) {
-        SrnId srnId = new SrnId(eid.getType(), eid.getID());
-        ScheduleRevNum srn = getScheduleRevNumDAO().findById(srnId);
-        getScheduleRevNumDAO().remove(srn);
     }
 
     /** Unschedule a measurement

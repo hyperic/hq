@@ -43,7 +43,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.measurement.server.mbean.SRNCache;
+import org.hyperic.hq.measurement.shared.SRNManagerUtil;
+import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.math.MathUtil;
@@ -68,7 +69,6 @@ public class ResourcesWithoutDataHelper {
     private final Log log = LogFactory.getLog(logCtx);
 
     private InitialContext    initialContext = null;
-    private static final SRNCache srnCache = SRNCache.getInstance();
     private static final PermissionManager pm =
         PermissionManagerFactory.getInstance();
 
@@ -147,7 +147,15 @@ public class ResourcesWithoutDataHelper {
     public List getResourcesWithoutData(AuthzSubjectValue subject,
                                         List ignores) {
         // First get all the out-of-sync1 resources from the SRNCache
-        List results = srnCache.getOutOfSyncEntities();
+        SRNManagerLocal mgr;
+        try {
+            mgr = SRNManagerUtil.getLocalHome().create();
+        } catch (Exception e) {
+            log.error("Unable to lookup SRNManager.", e);
+            return new ArrayList();
+        }
+
+        List results = mgr.getOutOfSyncEntities();
 
         // Now, filter these into platforms, servers, and services
         List OOSplatforms = new ArrayList();

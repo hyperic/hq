@@ -93,6 +93,8 @@ import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
 import org.hyperic.hq.measurement.shared.TrackerManagerUtil;
+import org.hyperic.hq.measurement.shared.SRNManagerLocal;
+import org.hyperic.hq.measurement.shared.SRNManagerUtil;
 import org.hyperic.hq.product.shared.ProductManagerLocal;
 import org.hyperic.hq.product.shared.ProductManagerUtil;
 
@@ -125,10 +127,11 @@ public abstract class BizappSessionEJB {
     private TemplateManagerLocal           tmLocal;
     private TrackerManagerLocal            trackerLocal;
     private ReportProcessorLocal           rpLocal;
-    private DataManagerLocal               dataMan = null;
-    private ControlBossLocal               controlBossLocal = null;
-    private ControlManagerLocal            cmLocal = null;
-    private ControlScheduleManagerLocal    controlScheduleManager = null;
+    private DataManagerLocal               dataMan;
+    private ControlBossLocal               controlBossLocal;
+    private ControlManagerLocal            cmLocal;
+    private ControlScheduleManagerLocal    controlScheduleManager;
+    private SRNManagerLocal                srnManager;
 
     protected SessionContext ctx;
     
@@ -142,7 +145,7 @@ public abstract class BizappSessionEJB {
         }
         return eventsbossLocal;
     }
-    
+
     public MeasurementBossLocal getMeasurementBoss() {
         if(measurementBossLocal == null) {
             try {
@@ -524,5 +527,16 @@ public abstract class BizappSessionEJB {
             }
         }
         return controlScheduleManager;
+    }
+
+    public SRNManagerLocal getSrnManager() {
+        if (srnManager == null) {
+            try {
+                srnManager = SRNManagerUtil.getLocalHome().create();
+            } catch (Exception e) {
+                throw new SystemException();
+            }
+        }
+        return srnManager;
     }
 }

@@ -45,7 +45,9 @@ public class ScheduleRevNumDAO extends HibernateDAO {
 
     public void remove(SrnId id) {
         ScheduleRevNum srn = findById(id);
-        remove(srn);
+        if (srn != null) {
+            remove(srn);
+        }
     }
 
     public void remove(ScheduleRevNum entity) {
@@ -101,6 +103,7 @@ public class ScheduleRevNumDAO extends HibernateDAO {
     }
 
     /**
+     * @param id The appdef entity to look up.
      * @return The minimum collection interval for the given entity.
      */
     public Long getMinInterval(AppdefEntityID id) {

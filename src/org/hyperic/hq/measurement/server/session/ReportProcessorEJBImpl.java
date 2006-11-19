@@ -49,13 +49,13 @@ import org.hyperic.hq.measurement.data.SingleMeasurementReport;
 import org.hyperic.hq.measurement.data.ValueList;
 import org.hyperic.hq.measurement.ext.MonitorFactory;
 import org.hyperic.hq.measurement.ext.PropertyNotFoundException;
-import org.hyperic.hq.measurement.server.mbean.SRNCache;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.DataManagerUtil;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerUtil;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
+import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.StringUtil;
 
@@ -232,8 +232,8 @@ public class ReportProcessorEJBImpl
         }
         
         // Check the SRNs to make sure the agent is up-to-date
-        SRNCache srnCache = SRNCache.getInstance();
-        Collection nonEntities = srnCache.reportAgentSRNs(report.getSRNList());
+        SRNManagerLocal srnManager = getSRNManager();
+        Collection nonEntities = srnManager.reportAgentSRNs(report.getSRNList());
         
         if (report.getAgentToken() != null && nonEntities.size() > 0 &&
             measurementProc != null) {

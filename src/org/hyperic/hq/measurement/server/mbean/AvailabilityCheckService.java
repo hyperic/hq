@@ -45,7 +45,6 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycle;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycleListener;
 import org.hyperic.hq.ha.shared.Mode;
@@ -53,12 +52,12 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.server.session.MetricDataCache;
+import org.hyperic.hq.measurement.server.session.SRNCache;
+import org.hyperic.hq.measurement.server.session.ScheduleRevNum;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.DataManagerUtil;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
-import org.hyperic.hq.measurement.shared.ScheduleRevNumValue;
 import org.hyperic.hq.product.MetricValue;
-import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 
@@ -118,7 +117,7 @@ public class AvailabilityCheckService
     private long startTime = 0;
     private long wait = 5 * MeasurementConstants.MINUTE;
     
-    private DataManagerLocal dataMan = null;
+    private DataManagerLocal dataMan;
     private DataManagerLocal getDataMan() {
         try {
             if (dataMan == null)
@@ -252,7 +251,7 @@ public class AvailabilityCheckService
                 
                 downPlatforms.add(aeid);
                 
-                ScheduleRevNumValue srn = srnCache.getSRN(aeid);
+                ScheduleRevNum srn = srnCache.get(aeid);
                 
                 if (srn == null)
                     continue;

@@ -75,6 +75,8 @@ import org.hyperic.hq.measurement.shared.DataManagerUtil;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
+import org.hyperic.hq.measurement.shared.SRNManagerLocal;
+import org.hyperic.hq.measurement.shared.SRNManagerUtil;
 import org.hyperic.hq.product.MeasurementPluginManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
@@ -105,12 +107,13 @@ public abstract class SessionEJB {
     protected static MeasurementPluginManager mpm = null;
 
     // SessionBeans are not static
-    private DataManagerLocal dataMan = null;
-    private AgentManagerLocal agentMan = null;
-    private SchedulerLocal scheduler = null;
-    private ProductManagerLocal prodMan = null;
-    private AuthzSubjectManagerLocal ssmLocal = null;
-    private TemplateManagerLocal templateMan = null;
+    private DataManagerLocal dataMan;
+    private AgentManagerLocal agentMan;
+    private SchedulerLocal scheduler;
+    private ProductManagerLocal prodMan;
+    private AuthzSubjectManagerLocal ssmLocal;
+    private TemplateManagerLocal templateMan;
+    private SRNManagerLocal srnManager;
 
     // Static initial context so that there's no need to keep creating
     private InitialContext ic = null;
@@ -156,7 +159,7 @@ public abstract class SessionEJB {
 
     // Exposed accessor methods
     protected TemplateManagerLocal getTemplateMan(){
-        if (this.templateMan == null) {
+        if (templateMan == null) {
             try {
                 this.templateMan = TemplateManagerUtil.getLocalHome().create();
             } catch(Exception exc){
@@ -167,7 +170,7 @@ public abstract class SessionEJB {
     }
 
     protected AuthzSubjectManagerLocal getAuthzSubjectManager() {
-        if (this.ssmLocal == null) {
+        if (ssmLocal == null) {
             try {
                 this.ssmLocal =
                     AuthzSubjectManagerUtil.getLocalHome().create();
@@ -192,7 +195,7 @@ public abstract class SessionEJB {
     }
 
     protected AgentManagerLocal getAgentMan() {
-        if (this.agentMan == null) {
+        if (agentMan == null) {
             try {
                 this.agentMan = AgentManagerUtil.getLocalHome().create();
             } catch (Exception exc) {
@@ -203,7 +206,7 @@ public abstract class SessionEJB {
     }
 
     protected ProductManagerLocal getProductMan() {
-        if (this.prodMan == null) {
+        if (prodMan == null) {
             try {
                 this.prodMan = ProductManagerUtil.getLocalHome().create();
             } catch (CreateException e) {
@@ -231,7 +234,7 @@ public abstract class SessionEJB {
     }
 
     protected SchedulerLocal getScheduler() {
-        if (null == scheduler) {
+        if (scheduler == null) {
             try {
                 scheduler = SchedulerUtil.getLocalHome().create();
             } catch (CreateException e) {
@@ -241,6 +244,19 @@ public abstract class SessionEJB {
             }
         }
         return scheduler;
+    }
+
+    protected SRNManagerLocal getSRNManager() {
+        if (srnManager == null) {
+            try {
+                srnManager = SRNManagerUtil.getLocalHome().create();
+            } catch (CreateException e) {
+                throw new SystemException(e);
+            } catch (NamingException e) {
+                throw new SystemException(e);
+            }
+        }
+        return srnManager;
     }
 
     protected InitialContext getInitialContext() {

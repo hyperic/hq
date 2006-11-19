@@ -68,15 +68,13 @@ import org.hyperic.hq.measurement.server.session.MeasurementArg;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
-import org.hyperic.hq.measurement.SRNCreateException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
-import org.hyperic.hq.measurement.server.mbean.SRNCache;
 import org.hyperic.hq.measurement.shared.MeasurementArgValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateLiteValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerUtil;
-import org.hyperic.hq.measurement.shared.ScheduleRevNumValue;
+import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.TypeInfo;
@@ -449,54 +447,46 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      */
     public void updateTemplateDefaultInterval(Integer[] templIds, long interval) 
         throws TemplateNotFoundException {
-        try {
-            long current = System.currentTimeMillis();
+        long current = System.currentTimeMillis();
 
-            for (int i = 0; i < templIds.length; i++) {
-                MeasurementTemplate template =
-                    getMeasurementTemplateDAO().findById(templIds[i]);
-                
-                if (interval != template.getDefaultInterval())
-                    template.setDefaultInterval(interval);
-            
-                if (!template.isDefaultOn())
-                    template.setDefaultOn(interval != 0);
-            
-                template.setMtime(current);
-                
-                List metrics =
-                    getDerivedMeasurementDAO().findByTemplate(templIds[i]);
-                SRNCache srnCache = SRNCache.getInstance();
-                
-                for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-                    DerivedMeasurement dm = (DerivedMeasurement)it.next();
-                    
-                    if (dm.getInterval() != interval)
-                        dm.setInterval(interval);
-                    
-                    if (template.isDefaultOn() != dm.isEnabled())
-                        dm.setEnabled(template.isDefaultOn());
+        for (int i = 0; i < templIds.length; i++) {
+            MeasurementTemplate template =
+                getMeasurementTemplateDAO().findById(templIds[i]);
 
-                    AppdefEntityID aeid = 
-                        new AppdefEntityID(dm.getAppdefType(),
-                                           dm.getInstanceId());
-                    ScheduleRevNumValue srn = srnCache.getSRN(aeid);
-                    if (srn != null) {  // Increment SRN only if not null
-                        try {
-                            srnCache.beginIncrementSRN(aeid,
-                                                       Math.min(interval, 
-                                                                srn.
-                                                                getMinInterval()));
-                        } catch (SRNCreateException e) {
-                            log.error("Should not be creating SRNs", e);
-                        } finally {
-                            srnCache.endIncrementSRN(aeid);
-                        }
-                    }
+            if (interval != template.getDefaultInterval())
+                template.setDefaultInterval(interval);
+
+            if (!template.isDefaultOn())
+                template.setDefaultOn(interval != 0);
+
+            template.setMtime(current);
+
+            List metrics =
+                getDerivedMeasurementDAO().findByTemplate(templIds[i]);
+            SRNManagerLocal srnManager = getSRNManager();
+            SRNCache cache = SRNCache.getInstance();
+
+            for (Iterator it = metrics.iterator(); it.hasNext(); ) {
+                DerivedMeasurement dm = (DerivedMeasurement)it.next();
+
+                if (dm.getInterval() != interval)
+                    dm.setInterval(interval);
+
+                if (template.isDefaultOn() != dm.isEnabled())
+                    dm.setEnabled(template.isDefaultOn());
+
+                AppdefEntityID aeid =
+                    new AppdefEntityID(dm.getAppdefType(),
+                                       dm.getInstanceId());
+                ScheduleRevNum srn = cache.get(aeid);
+                if (srn != null) {  // Increment SRN only if not null
+                    srnManager.beginIncrementSrn(aeid,
+                                                 Math.min(interval,
+                                                          srn.
+                                                          getMinInterval()));
+                    srnManager.endIncrementSrn(aeid);
                 }
             }
-        } catch (FinderException e) {
-            throw new TemplateNotFoundException(e.getMessage());
         }
     }
     
@@ -507,45 +497,36 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      */
     public void enableTemplateByDefault(Integer[] templIds, boolean on) 
         throws TemplateNotFoundException {
-        try {
-            long current = System.currentTimeMillis();
-        
-            for (int i = 0; i < templIds.length; i++) {
-                MeasurementTemplate template =
-                    getMeasurementTemplateDAO().findById(templIds[i]);
+        long current = System.currentTimeMillis();
 
-                template.setDefaultOn(on);
-                template.setMtime(current);
-                
-                List metrics =
-                    getDerivedMeasurementDAO().findByTemplate(templIds[i]);
-                SRNCache srnCache = SRNCache.getInstance();
-                for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-                    DerivedMeasurement dm = (DerivedMeasurement)it.next();
-                    
-                    if (dm.isEnabled() == on || dm.getInterval() == 0)
-                        continue;
-                    
-                    dm.setEnabled(on);
-                    dm.setMtime(current);
+        for (int i = 0; i < templIds.length; i++) {
+            MeasurementTemplate template =
+                getMeasurementTemplateDAO().findById(templIds[i]);
 
-                    AppdefEntityID aeid =
-                        new AppdefEntityID(dm.getAppdefType(),
-                                           dm.getInstanceId());
-                    ScheduleRevNumValue srn = srnCache.getSRN(aeid);
-                    try {
-                        long minInterval = (srn == null) ? dm.getInterval() :
-                            srn.getMinInterval();
-                        srnCache.beginIncrementSRN(aeid, minInterval);
-                    } catch (SRNCreateException e) {
-                        log.error("Should not be creating SRNs", e);
-                    } finally {
-                        srnCache.endIncrementSRN(aeid);
-                    }
-                }
+            template.setDefaultOn(on);
+            template.setMtime(current);
+
+            List metrics =
+                getDerivedMeasurementDAO().findByTemplate(templIds[i]);
+            SRNManagerLocal srnManager = getSRNManager();
+            for (Iterator it = metrics.iterator(); it.hasNext(); ) {
+                DerivedMeasurement dm = (DerivedMeasurement)it.next();
+
+                if (dm.isEnabled() == on || dm.getInterval() == 0)
+                    continue;
+
+                dm.setEnabled(on);
+                dm.setMtime(current);
+
+                AppdefEntityID aeid =
+                    new AppdefEntityID(dm.getAppdefType(),
+                                       dm.getInstanceId());
+                ScheduleRevNum srn = srnManager.get(aeid);
+                long minInterval = (srn == null) ? dm.getInterval() :
+                    srn.getMinInterval();
+                srnManager.beginIncrementSrn(aeid, minInterval);
+                srnManager.endIncrementSrn(aeid);
             }
-        } catch (FinderException e) {
-            throw new TemplateNotFoundException(e.getMessage());
         }
     }
     
