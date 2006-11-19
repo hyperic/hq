@@ -32,12 +32,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
-import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.product.MeasurementInfo;
@@ -103,18 +99,10 @@ public class TemplateTest
         ppm.shutdown();
     }
 
-    private MeasurementTemplateDAO getMeasurementTemplateDAO() {
-        return DAOFactory.getDAOFactory().getMeasurementTemplateDAO();
-    }
-
-    private MonitorableTypeDAO getMonitorableTypeDAO() {
-        return DAOFactory.getDAOFactory().getMonitorableTypeDAO();
-    }
-
     /**
      * Test registering MonitorableTypes
      */
-    private void registerMonitorableTypes() throws Exception {
+    protected void registerMonitorableTypes() throws Exception {
 
         TemplateManagerLocal manager = getTemplateManager();
 
