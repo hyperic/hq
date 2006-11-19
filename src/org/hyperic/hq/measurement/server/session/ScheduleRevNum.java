@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import org.hyperic.hq.measurement.shared.ScheduleRevNumValue;
-
 public class ScheduleRevNum implements java.io.Serializable {
 
     // Fields    
@@ -122,22 +120,5 @@ public class ScheduleRevNum implements java.io.Serializable {
         result = 37*result + (_id != null ? _id.hashCode() : 0);
 
         return result;
-    }
-
-    /**
-     * Legacy EJB DTO pattern
-     * @deprecated Use (this) ScheduleRevNum object instead
-     */
-    public ScheduleRevNumValue getScheduleRevNumValue() {
-        ScheduleRevNumValue val = new ScheduleRevNumValue();
-
-        val.setAppdefType(getId().getAppdefType());
-        val.setInstanceId(getId().getInstanceId());
-        val.setSRN(getSrn());
-        val.setMinInterval(getMinInterval());
-        val.setLastReported(getLastReported());
-        val.setPending(isPending());
-
-        return val;
     }
 }
