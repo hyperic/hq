@@ -1800,6 +1800,10 @@ has already been defined.
       </schema-directSQL>
     </schemaSpec>
 
+    <schemaSpec version="3.01">
+      <schema-insert table="EAM_ALERT_DEFINITION "
+                     insertCmd="(VERSION_COL, NAME, CTIME, MTIME, PRIORITY, APPDEF_ID, APPDEF_TYPE, ENABLED, FREQUENCY_TYPE, WILL_RECOVER, NOTIFY_FILTERED, CONTROL_FILTERED, DELETED, ID) VALUES (0, 'Resource Type Alert', 0, 0, 0, 0, 0, 'false', 0, 'false', 'false', 'false', 'false', 0)"/>
+    </schemaSpec>
 </dbupgrade>
 
 </target>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Covalent.DBSetup name="events-data.xml" notice="DBSetup, Copyright (C) 2002, Covalent Technologies, Inc., All Rights Reserved.">
+  <!-- Resource Type Alert -->
+  <table name="EAM_ALERT_DEFINITION ">
+    <data ID="0" VERSION_COL="0" NAME="Resource Type Alert" CTIME="0"
+          MTIME="0" PRIORITY="0" APPDEF_ID="0" APPDEF_TYPE="0" ENABLED="FALSE" FREQUENCY_TYPE="0" WILL_RECOVER="FALSE" NOTIFY_FILTERED="FALSE" CONTROL_FILTERED="FALSE" DELETED="FALSE"/>
+  </table>
+</Covalent.DBSetup> 
