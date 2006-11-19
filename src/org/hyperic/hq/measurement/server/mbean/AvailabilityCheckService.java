@@ -75,7 +75,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * This job is responsible for filling in missing availabilty
@@ -89,7 +88,7 @@ public class AvailabilityCheckService
                EjbModuleLifecycleListener {
 
     private MBeanServer server = null;
-    private EjbModuleLifecycle camListener = null;
+    private EjbModuleLifecycle haListener = null;
     private boolean started = false;
         
     private static final String ENABLED_AVAIL_METRICS_SQL = 
@@ -131,9 +130,6 @@ public class AvailabilityCheckService
         return dataMan;
     }
 
-    //---------------------------------------------------------------------
-    //-- managed operations
-    //---------------------------------------------------------------------
     /**
      * AvailCheck service is only active on master and standalone servers.
      * @jmx:managed-operation
@@ -455,25 +451,20 @@ public class AvailabilityCheckService
     public void setWait(long wait) {
         this.wait = wait;
     }
-    
-    //---------------------------------------------------------------------
-    //-- mbean control methods
-    //---------------------------------------------------------------------
+
     /**
      * @jmx:managed-operation
      */
-    public void init() {
-        // Do nothing
-    }
+    public void init() {}
 
     /**
      * @jmx:managed-operation
      */
     public void start() throws Exception {
-        camListener =
+        haListener =
             new EjbModuleLifecycle(this.server, this,
                                    HQConstants.EJB_MODULE_PATTERN);
-        camListener.start();
+        haListener.start();
     }
 
     /**
@@ -481,59 +472,31 @@ public class AvailabilityCheckService
      */
     public void stop() {
         log.info("Stopping " + this.getClass().getName());
-        camListener.stop();
+        haListener.stop();
     }
 
     /**
      * @jmx:managed-operation
      */
-    public void destroy() {
-        // do nothing
-    }
-    
-    /* (non-Javadoc)
-     * @see javax.management.MBeanRegistration#preRegister(javax.management.MBeanServer, javax.management.ObjectName)
-     */
+    public void destroy() {}
+
     public ObjectName preRegister(MBeanServer server, ObjectName name)
         throws Exception {
         this.server = server;
         return name;
     }
 
-    /* (non-Javadoc)
-     * @see javax.management.MBeanRegistration#postRegister(java.lang.Boolean)
-     */
-    public void postRegister(Boolean arg0) {
-        // do nothing
-    }
+    public void postRegister(Boolean arg0) {}
 
-    /* (non-Javadoc)
-     * @see javax.management.MBeanRegistration#preDeregister()
-     */
-    public void preDeregister() throws Exception {
-        // do nothing
-    }
+    public void preDeregister() throws Exception {}
 
-    /* (non-Javadoc)
-     * @see javax.management.MBeanRegistration#postDeregister()
-     */
-    public void postDeregister() {
-        // do nothing
-    }
+    public void postDeregister() {}
 
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.common.shared.util.EjbModuleLifecycleListener#ejbModuleStarted()
-     */
     public void ejbModuleStarted() {
         log.info("Starting " + this.getClass().getName());
         this.started = true;
     }
 
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.common.shared.util.EjbModuleLifecycleListener#ejbModuleStopped()
-     */
-    public void ejbModuleStopped() {
-        // do nothing
-    }
+    public void ejbModuleStopped() {}
 }
 
