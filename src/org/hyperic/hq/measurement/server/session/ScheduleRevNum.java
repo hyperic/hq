@@ -84,7 +84,7 @@ public class ScheduleRevNum implements java.io.Serializable {
         return _minInterval;
     }
     
-    protected void setMinInterval(long minInterval) {
+    public void setMinInterval(long minInterval) {
         _minInterval = minInterval;
     }
 
@@ -92,7 +92,7 @@ public class ScheduleRevNum implements java.io.Serializable {
         return _lastReported;
     }
     
-    protected void setLastReported(long lastReported) {
+    public void setLastReported(long lastReported) {
         _lastReported = lastReported;
     }
 
@@ -100,7 +100,7 @@ public class ScheduleRevNum implements java.io.Serializable {
         return _pending;
     }
     
-    protected void setPending(boolean pending) {
+    public void setPending(boolean pending) {
         _pending = pending;
     }
 
