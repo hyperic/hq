@@ -169,7 +169,8 @@ public class AlertDefinitionManagerEJBImpl
         // Create new conditions
         AlertConditionValue[] conds = a.getConditions();
         for (int i = 0; i < conds.length; i++) {
-            RegisteredTrigger trigger = tDAO.findById(conds[i].getTriggerId());
+            RegisteredTrigger trigger = conds[i].getTriggerId() != null ?
+                tDAO.findById(conds[i].getTriggerId()) : null;
 
             res.createCondition(conds[i], trigger);
         }
@@ -203,6 +204,7 @@ public class AlertDefinitionManagerEJBImpl
             }
         }
 
+        res.setAlertDefinitionValueNoRels(a);
         // Alert definitions are the root of the cascade relationship, so
         // we must explicitly save them
         adDAO.save(res);
