@@ -332,6 +332,8 @@ public class SRNManagerEJBImpl extends SessionEJB
             }
 
             if (curInterval > maxInterval) {
+                _log.debug("Reschedule " + id.getAppdefType() + ":" +
+                           id.getInstanceId());
                 toReschedule.add(srn);
             }
         }
