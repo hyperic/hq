@@ -97,22 +97,6 @@ public class SRNManagerEJBImpl extends SessionEJB
                 cache.put(srn);
             }
 
-            // Backward compatibility for when there are no entries in the
-            // SRN tables.
-            if (cache.getSize() == 0) {
-                _log.info("Loading SRN from existing entities.");
-                Collection entities =
-                    getScheduleRevNumDAO().getEnabledEntities();
-                _log.info("Loaded " + entities.size() + " existing entries.");
-                for (Iterator i = entities.iterator(); i.hasNext(); ) {
-                    Object[] ent = (Object[])i.next();
-                    ScheduleRevNum srn = getScheduleRevNumDAO()
-                        .create(((Integer)ent[0]).intValue(),
-                                ((Integer)ent[1]).intValue());
-                    cache.put(srn);
-                }
-            }
-
             _log.info("Fetching minimum metric collection intervals.");
 
             Collection entities =
@@ -124,8 +108,11 @@ public class SRNManagerEJBImpl extends SessionEJB
                                      ((Integer)ent[1]).intValue());
                 ScheduleRevNum srn = cache.get(id);
                 if (srn == null) {
-                    _log.error("Unable to find cached SRN val=" + srn);
-                    continue;
+                    // Create the SRN if it does not exist.
+                    srn = getScheduleRevNumDAO()
+                        .create(((Integer)ent[0]).intValue(),
+                                ((Integer)ent[1]).intValue());
+                    cache.put(srn);
                 }
                 _log.debug("Setting min interval to " +
                            ((Long)ent[2]).longValue() + " for ent " + id);
@@ -279,6 +266,7 @@ public class SRNManagerEJBImpl extends SessionEJB
      * Get a List of out-of-sync entities.
      *
      * @ejb:interface-method
+     * @return A list of ScheduleReNum objects that are out of sync.
      */
     public List getOutOfSyncEntities() {
         List srns = getOutOfSyncSRNs(3);

@@ -66,24 +66,6 @@ public class ScheduleRevNumDAO extends HibernateDAO {
     }
 
     /**
-     * Get a Collection of entities that have metrics enabled
-     * @return A Collection of Object arrays with 2 entries, the Integer
-     * type, and the Integer id.
-     */
-    public Collection getEnabledEntities() {
-        String sql =
-            "select mt.appdefType, m.instanceId " +
-            "from Measurement m, " +
-            "MonitorableType mt, " +
-            "MeasurementTemplate t " +
-            "where m.enabled = true and " +
-            "m.template.id = t.id and " +
-            "t.monitorableType.id = mt.id " +
-            "group by appdef_type, instance_id";
-        return getSession().createQuery(sql).list();
-    }
-
-    /**
      * Get the minimum collection intervals for all entities with metrics
      * enabled.
      * @return A Collection of Object arrays with 3 entries, the Integer
