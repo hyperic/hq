@@ -58,7 +58,7 @@ public class ScheduleRevNumDAO extends HibernateDAO {
         ScheduleRevNum srn = new ScheduleRevNum();
 
         srn.setId(srnId);
-        srn.setSrn(new Integer(1));
+        srn.setSrn(1);
         save(srn);
         return srn;
     }
