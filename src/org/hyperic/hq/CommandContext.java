@@ -39,7 +39,8 @@ import java.util.HashMap;
  */
 public class CommandContext extends VisitorContext {
     private int executionTime;
-    private ArrayList commands = new ArrayList();
+    private boolean requiresNew;
+    private ArrayList commands = new ArrayList(0);
 
     public static CommandContext createContext() {
         return new CommandContext();
@@ -72,6 +73,16 @@ public class CommandContext extends VisitorContext {
         }
     }
 
+    public boolean isRequiresNew()
+    {
+        return requiresNew;
+    }
+
+    public void setRequiresNew(boolean requiresNew)
+    {
+        this.requiresNew = requiresNew;
+    }
+
     protected CommandContext() {
     }
 
@@ -93,7 +104,11 @@ public class CommandContext extends VisitorContext {
         }
         long start = System.currentTimeMillis();
         try {
-            commandHandler.executeHandler(this);
+            if (requiresNew) {
+                commandHandler.executeRequiresNew(this);
+            } else {
+                commandHandler.executeHandler(this);
+            }
         } finally {
             executionTime = (int)(System.currentTimeMillis() - start);
         }

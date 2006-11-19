@@ -29,6 +29,7 @@ import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
+import org.hyperic.hibernate.LockSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -38,6 +39,8 @@ import java.util.Collection;
 
 public class EscalationMediator extends Mediator
 {
+    private static final int DEFAULT_LOCKSET_SIZE = 1024;
+    private static final LockSet stateLocks=new LockSet(DEFAULT_LOCKSET_SIZE);
     private static Log log = LogFactory.getLog(EscalationMediator.class);
 
     private static EscalationMediator instance = new EscalationMediator();
@@ -68,24 +71,26 @@ public class EscalationMediator extends Mediator
      */
     public void startEscalation(Integer escalationId, Integer alertId)
     {
-        Escalation escalation =
-            alertManagerLocal.getEscalationById(escalationId);
         Alert alert = alertManagerLocal.getAlertById(alertId);
         Integer alertDefId = alert.getAlertDefinition().getId();
+        Escalation escalation =
+            alertManagerLocal.getEscalationById(escalationId);
         EscalationState state = escalation.getEscalationState(alertDefId);
-        if (setEscalationActiveStatus(escalation, state)) {
-            // Escalation is not active, start escalation.
+
+        if (setActiveEscalation(alertDefId, escalationId)) {
             if (log.isInfoEnabled()) {
                 log.info("Start escalation. alert=" +  alert +
                          ", escalation=" + escalation + ", state=" +
                          state);
             }
+            // Escalation is not active, start escalation.
             CommandContext context = CommandContext.createContext();
             context.execute(
                 EscalateCommand.setInstance(escalationId, alertId)
             );
         } else {
-            // escalation already in progress for this alert def.
+            // escalation is active, so do not start another escalation
+            // for this chain.
             if (log.isInfoEnabled()) {
                 log.info("Escalation already in progress. alert=" +  alert +
                          ", escalation=" + escalation + ", state="+ state);
@@ -94,22 +99,25 @@ public class EscalationMediator extends Mediator
     }
 
     /**
+     * set escalation state to active
      *
-     * @param escalation
-     * @param state
-     * @return true if the escalation active bit is set by the caller.
+     * @param escalationId
+     * @param alertDefId
+     * @return true if escalation state changed from inactive to active.
      */
-    public boolean setEscalationActiveStatus(Escalation escalation,
-                                             EscalationState state)
+    private boolean setActiveEscalation(Integer escalationId,
+                                        Integer alertDefId)
     {
-        synchronized(state) {
+        synchronized(stateLocks.getLock(alertDefId)) {
+            Escalation escalation =
+                alertManagerLocal.getEscalationById(escalationId);
+            EscalationState state = escalation.getEscalationState(alertDefId);
             if(state.isActive()) {
-                // escalation is active, so do not start another escalation
-                // for this chain.
                 return false;
             }
             state.setActive(true);
             CommandContext context = CommandContext.createContext();
+            context.setRequiresNew(true);
             context.execute(SaveCommand.setInstance(escalation));
         }
         return true;

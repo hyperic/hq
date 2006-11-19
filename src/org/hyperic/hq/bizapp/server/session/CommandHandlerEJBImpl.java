@@ -45,11 +45,25 @@ import java.util.Iterator;
  *      type="Stateless"
  * @ejb:transaction type="Required"
  */
-public class CommandHandlerEJBImpl implements SessionBean, CommandHandler {
+public class CommandHandlerEJBImpl implements SessionBean, CommandHandler
+{
     /**
      * @ejb:interface-method
+     * @ejb:transaction type="RequiresNew"
+     */
+	public void executeRequiresNew(CommandContext context) {
+        execute(context);
+    }
+
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
      */
 	public void executeHandler(CommandContext context) {
+        execute(context);
+    }
+
+    private void execute(CommandContext context) {
         List commands = context.getCommands();
         for(Iterator i = commands.iterator(); i.hasNext(); ) {
             Command command = (Command)i.next();
