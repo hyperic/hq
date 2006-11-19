@@ -345,8 +345,10 @@ public class AlertDefinition
         _value.setFrequencyType(getFrequencyType());
         _value.setCount(getCount());
         _value.setRange(getRange());
-        _value.setActOnTriggerId(getActOnTrigger().getId().intValue());
         _value.setDeleted(isDeleted());
+        if (getActOnTrigger() != null) {
+            _value.setActOnTriggerId(getActOnTrigger().getId().intValue());
+        }
 
         _value.removeAllTriggers();
         for (Iterator i=getTriggers().iterator(); i.hasNext(); ) {
@@ -393,8 +395,13 @@ public class AlertDefinition
         setFrequencyType(val.getFrequencyType());
         setCount(val.getCount());
         setRange(val.getRange());
-        setActOnTrigger(tDAO.findById(new Integer(val.getActOnTriggerId())));
         setDeleted(val.getDeleted());
+        if (val.actOnTriggerIdHasBeenSet()) {
+            setActOnTrigger(tDAO.findById(new Integer(val.getActOnTriggerId())));
+        }
+        else {
+            setActOnTrigger(null);
+        }
     }
 
     protected void setAlertDefinitionValue(AlertDefinitionValue val) {
