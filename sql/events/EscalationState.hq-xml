@@ -21,10 +21,10 @@
 
     <properties name="escalationStateId" unique="true">
       <many-to-one name="escalation" class="Escalation">
-        <column name="ESCALATION_ID" />
+        <column name="ESCALATION_ID" not-null="true" />
       </many-to-one>
       <property name="alertDefinition" type="integer">
-        <column name="ALERT_DEF_ID" />
+        <column name="ALERT_DEF_ID" not-null="true" />
       </property>
     </properties>
 
