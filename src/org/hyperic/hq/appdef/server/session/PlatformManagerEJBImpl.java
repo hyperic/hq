@@ -95,6 +95,7 @@ import org.hyperic.hq.dao.ApplicationDAO;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.NonUniqueObjectException;
 import org.hibernate.ObjectNotFoundException;
+import org.hibernate.NonUniqueResultException;
 
 /**
  * This class is responsible for managing Platform objects in appdef
@@ -678,11 +679,11 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
         try {
             try {
-                // First try to find by certdn
-                return getPlatformByCertDN(subject, certdn);
-            } catch ( PlatformNotFoundException e ) {
-                // Now try to find by FQDN
+                // First try to find by FQDN
                 return getPlatformByFqdn(subject, fqdn);
+            } catch ( PlatformNotFoundException e ) {
+                // Now try to find by certdn
+                return getPlatformByCertDN(subject, certdn);
             } catch ( Exception e ) {
                 _log.info("Error finding platform by certdn: " + certdn);
                 throw new SystemException(e);
@@ -864,7 +865,12 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     public PlatformValue getPlatformByCertDN(AuthzSubjectValue subject,
                                              String certDN)
         throws PlatformNotFoundException, PermissionException {
-        Platform p = getPlatformDAO().findByCertDN(certDN);
+        Platform p;
+        try {
+            p = getPlatformDAO().findByCertDN(certDN);
+        } catch (NonUniqueResultException e) {
+            p = null;
+        }
         if (p == null) {
             throw new PlatformNotFoundException(
                 "Platform with certdn " + certDN + " not found");
@@ -884,7 +890,12 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                                            String fqdn)
         throws PlatformNotFoundException, PermissionException 
     {
-        Platform p = getPlatformDAO().findByFQDN(fqdn);
+        Platform p;
+        try {
+            p = getPlatformDAO().findByFQDN(fqdn);
+        } catch (NonUniqueResultException e) {
+            p = null;
+        }
         if (p == null) {
             throw new PlatformNotFoundException("Platform with fqdn "
                                                 + fqdn + " not found");
@@ -1519,10 +1530,20 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         String fqdn = aiplatform.getFqdn();
         PlatformDAO plh = getPlatformDAO();
         // First try to find by fqdn
-        Platform pLocal = plh.findByFQDN(fqdn);
+
+        Platform pLocal;
+        try {
+            pLocal = plh.findByFQDN(fqdn);
+        } catch (NonUniqueResultException e) {
+            pLocal = null;
+        }
         if(pLocal == null) {
             // Now try to find by certdn
-            pLocal = plh.findByCertDN(certdn);
+            try {
+                pLocal = plh.findByCertDN(certdn);
+            } catch (NonUniqueResultException e) {
+                pLocal = null;
+            }
             if(pLocal ==  null) {
                 throw new PlatformNotFoundException(
                     "Platform not found with either FQDN: " + fqdn +
