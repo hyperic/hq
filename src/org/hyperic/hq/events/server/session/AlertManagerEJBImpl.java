@@ -376,7 +376,7 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
             DAOFactory.getDAOFactory().getEscalationStateDAO();
         EscalationState state = sdao.getEscalationState(escalation, alertDefId);
         if (state.isFixed()) {
-            // fixed or is in progress so no need run
+            // fixed so stop.
             if (log.isInfoEnabled()) {
                 log.info("Escalation fixed. alert=" +  alert + ", escalation=" +
                          escalation + ", state=" + state);

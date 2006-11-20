@@ -550,6 +550,16 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                                       errorMessage);
     }
 
+
+    /**
+     * remove AIHistory
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void removeHistory(AIHistory history) {
+        getHistoryDAO().remove(history);
+    }
+
     /**
      * update AIHistory
      * @ejb:interface-method

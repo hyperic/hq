@@ -124,14 +124,12 @@ public abstract class AIJob extends BaseJob {
         
             if (errorMsg != null) {
                 this.log.error("Unable to execute command: " + errorMsg);
-            
-                // Add the failed job to the history
-                if (commandHistory != null) {
-                    DAOFactory.getDAOFactory().getAIHistoryDAO()
-                        .remove(commandHistory);
-                }
 
                 try {
+                    // Add the failed job to the history
+                    if (commandHistory != null) {
+                        removeHistory(commandHistory);
+                    }
                     createHistory(id, groupId, batchId,
                                   subject.getName(), 
                                   scanConfig, scanName, scanDesc,
@@ -151,6 +149,13 @@ public abstract class AIJob extends BaseJob {
         }
 
         return commandHistory.getId();
+    }
+
+    protected void removeHistory(AIHistory history)
+        throws NamingException, CreateException
+    {
+        AutoinventoryManagerLocal alocal = getAutoInventoryManager();
+        alocal.removeHistory(history);
     }
 
     protected AIHistory createHistory(AppdefEntityID id,

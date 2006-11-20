@@ -689,8 +689,10 @@ public class AIQueueManagerEJBImpl
                 continue;
             }
             AIIp addr = getAIIpDAO().findByAddress(address);
-            AIPlatform aiplatform = addr.getAIPlatform();
-            return aiplatform.getAIPlatformValue();
+            if (addr != null) {
+                AIPlatform aiplatform = addr.getAIPlatform();
+                return aiplatform.getAIPlatformValue();
+            }
         }
 
         return null;        
