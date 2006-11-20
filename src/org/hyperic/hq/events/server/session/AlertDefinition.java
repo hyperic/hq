@@ -54,8 +54,8 @@ public class AlertDefinition
     private int               _appdefType;
     private boolean           _enabled;   // XXX -- Needs to default to true
     private int               _frequencyType;
-    private long              _count;
-    private long              _range;
+    private Long              _count;  // can't use primitive.
+    private Long              _range;  // can't use primitive.
     private boolean           _willRecover;  // XXX -- Default to false
     private boolean           _notifyFiltered;  // XXX - default to false
     private boolean           _controlFiltered; // XXX -- default to false
@@ -222,18 +222,18 @@ public class AlertDefinition
     }
 
     public long getCount() {
-        return _count;
+        return _count != null ? _count.longValue() : 0;
     }
 
-    protected void setCount(long count) {
+    protected void setCount(Long count) {
         _count = count;
     }
 
     public long getRange() {
-        return _range;
+        return _range != null ? _range.longValue() : 0;
     }
 
-    protected void setRange(long range) {
+    protected void setRange(Long range) {
         _range = range;
     }
 
@@ -405,8 +405,8 @@ public class AlertDefinition
         setAppdefId(val.getAppdefId());
         setAppdefType(val.getAppdefType());
         setFrequencyType(val.getFrequencyType());
-        setCount(val.getCount());
-        setRange(val.getRange());
+        setCount(new Long(val.getCount()));
+        setRange(new Long(val.getRange()));
         setDeleted(val.getDeleted());
         if (val.actOnTriggerIdHasBeenSet()) {
             setActOnTrigger(tDAO.findById(new Integer(val.getActOnTriggerId())));
