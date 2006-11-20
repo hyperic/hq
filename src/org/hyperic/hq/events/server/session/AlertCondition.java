@@ -163,7 +163,9 @@ public class AlertCondition
         _value.setComparator(getComparator() == null ? "" : getComparator());
         _value.setThreshold(getThreshold());
         _value.setOption(getOptionStatus() == null ? "" : getOptionStatus());
-        _value.setTriggerId(getTrigger().getId());
+        if (getTrigger() != null) {
+            _value.setTriggerId(getTrigger().getId());
+        }
         return _value;
     }
 
