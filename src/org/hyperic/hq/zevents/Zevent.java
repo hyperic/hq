@@ -86,6 +86,6 @@ public abstract class Zevent {
     }
     
     public String toString() {
-        return "ZEvent[resNum=" + _sourceId + ", payload=" + _payload + "]";
+        return "ZEvent[srcId=" + _sourceId + ", payload=" + _payload + "]";
     }
 }
