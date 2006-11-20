@@ -393,8 +393,9 @@ public class AlertDefinition
         setName(val.getName());
         setCtime(val.getCtime());
         setMtime(val.getMtime());
-        setParent(val.getParentId() == null ? null : 
-                  aDAO.findById(val.getParentId()));
+        if (val.parentIdHasBeenSet()) {
+            setParent(aDAO.findById(val.getParentId()));
+        }
         setDescription(val.getDescription());
         setEnabled(val.getEnabled());
         setWillRecover(val.getWillRecover());
@@ -409,9 +410,6 @@ public class AlertDefinition
         setDeleted(val.getDeleted());
         if (val.actOnTriggerIdHasBeenSet()) {
             setActOnTrigger(tDAO.findById(new Integer(val.getActOnTriggerId())));
-        }
-        else {
-            setActOnTrigger(null);
         }
     }
 
