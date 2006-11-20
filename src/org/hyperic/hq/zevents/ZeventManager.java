@@ -234,6 +234,19 @@ public class ZeventManager {
         }
     }
     
+    public void enqueueEvent(Zevent event) throws InterruptedException {
+        enqueueEvents(Collections.singletonList(event));
+    }
+
+    /**
+     * Wait until the queue is empty.  This is a non-performant function, so
+     * please only use it in test suites. 
+     */
+    public void waitUntilNoEvents() throws InterruptedException {
+        while (_eventQueue.size() != 0)
+            Thread.sleep(100);
+    }
+    
     /**
      * Internal method to dispatch events.  Called by the 
      * {@link EventQueueProcessor}
