@@ -191,7 +191,7 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public Alert getAlertById(Integer id) {
+    public Alert findAlertById(Integer id) {
         Alert alert = getAlertDAO().findById(id);
         Hibernate.initialize(alert);
         return alert;
@@ -202,7 +202,7 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public Escalation getEscalationById(Integer id) {
+    public Escalation findEscalationById(Integer id) {
         Escalation e = getEscalationDAO().findById(id);
         Hibernate.initialize(e);
         return e;

@@ -54,10 +54,10 @@ public class EscalationMediator extends Mediator
      */
     public void startEscalation(Integer escalationId, Integer alertId)
     {
-        Alert alert = alertManagerLocal.getAlertById(alertId);
+        Alert alert = alertManagerLocal.findAlertById(alertId);
         Integer alertDefId = alert.getAlertDefinition().getId();
         Escalation escalation =
-            alertManagerLocal.getEscalationById(escalationId);
+            alertManagerLocal.findEscalationById(escalationId);
 
         if (setActiveEscalation(escalation, alertDefId)) {
             if (log.isInfoEnabled()) {

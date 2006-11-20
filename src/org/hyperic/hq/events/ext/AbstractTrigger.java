@@ -249,7 +249,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
         this.publishEvent(new AlertFiredEvent(event, alert.getId(), adBasic));
 
         // get alert pojo so retrieve array of AlertCondtionLogs
-        Alert alertpojo = alman.getAlertById(alert.getId());
+        Alert alertpojo = alman.findAlertById(alert.getId());
         AlertConditionLog[] logs =
             (AlertConditionLog[])alertpojo
                 .getConditionLog().toArray(new AlertConditionLog[0]);
