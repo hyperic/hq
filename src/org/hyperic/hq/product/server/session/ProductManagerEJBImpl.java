@@ -28,7 +28,6 @@ package org.hyperic.hq.product.server.session;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 import javax.ejb.CreateException;
@@ -51,7 +50,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ConfigManagerUtil;
-import org.hyperic.hq.appdef.shared.CPropKeyExistsException;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.CPropManagerLocalHome;
 import org.hyperic.hq.appdef.shared.CPropManagerUtil;
