@@ -288,8 +288,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      *
      * @param templates   List of Integer template IDs to add
      * @param id          instance ID (appdef resource) the templates are for
-     * @param interval    Millisecond interval that the measurement is polled
-     * @param protoProps  Configuration data for the instance
+     * @param intervals   Millisecond interval that the measurement is polled
+     * @param props       Configuration data for the instance
      *
      * @return a List of the associated DerivedMeasurementValue objects
      * @ejb:transaction type="REQUIRESNEW"
@@ -444,7 +444,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      *
      * @param templates   List of Integer template IDs to add
      * @param id          instance ID (appdef resource) the templates are for
-     * @param protoProps  Configuration data for the instance
+     * @param props       Configuration data for the instance
      *
      * @return a List of the associated DerivedMeasurementValue objects
      * @ejb:interface-method
@@ -452,7 +452,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     public List createMeasurements(AuthzSubjectValue subject, 
                                    AppdefEntityID id, Integer[] templates,
                                    ConfigResponse props)
-        throws PermissionException, MeasurementCreateException, TemplateNotFoundException {
+        throws PermissionException, MeasurementCreateException,
+               TemplateNotFoundException {
         long[] intervals = new long[templates.length];
         for (int i = 0; i < templates.length; i++) {
             MeasurementTemplate tmpl =
@@ -470,7 +471,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      *
      * @param subject     Spider subject
      * @param id          appdef entity ID of the resource
-     * @param mtyp        The string name of the plugin type
+     * @param mtype       The string name of the plugin type
      * @param props       Configuration data for the instance
      *
      * @return a List of the associated DerivedMeasurementValue objects
@@ -512,10 +513,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     /**
      * Create Measurement object based on its template
      *
-     * @param template    Integer template ID to add
-     * @param id          Appdef ID the templates are for
-     * @param interval    Millisecond interval that the measurement is polled
-     * @param protoProps  Configuration data for the instance
+     * @param template Integer template ID to add
+     * @param id Appdef ID the templates are for
+     * @param interval Millisecond interval that the measurement is polled
+     * @param config Configuration data for the instance
      *
      * @return an associated DerivedMeasurementValue object
      * @ejb:interface-method
@@ -571,9 +572,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    /**
-     * @param mids
-     */
     private void sendRemovedMetricsEvent(Integer[] mids) {
         // Now send a message that we've deleted the metrics
         Messenger sender = new Messenger();
@@ -711,7 +709,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     /**
      * Get the live measurement value - assumes all measurement ID's share
      * the same agent connection
-     * @param mtype the name of the monitorable type
+     * @param mids The array of metric id's to fetch
      * @ejb:interface-method
      */
     public MetricValue[] getLiveMeasurementValues(AuthzSubjectValue subject,
@@ -1121,12 +1119,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     /**
      * Set the interval of Measurements based their ID's
      *
-     * @param templates   List of Integer template IDs to add
-     * @param id          instance ID (appdef resource) the templates are for
-     * @param interval    Millisecond interval that the measurement is polled
-     * @param protoProps  Configuration data for the instance
-     *
-     * @return a List of the associated DerivedMeasurementValue objects
      * @ejb:interface-method
      */
     public void enableMeasurements(AuthzSubjectValue subject,
@@ -1185,12 +1177,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     /**
      * Set the interval of Measurements based their template ID's
      *
-     * @param templates   List of Integer template IDs to add
-     * @param id          instance ID (appdef resource) the templates are for
-     * @param interval    Millisecond interval that the measurement is polled
-     * @param protoProps  Configuration data for the instance
-     *
-     * @return a List of the associated DerivedMeasurementValue objects
      * @ejb:interface-method
      */
     public void enableMeasurements(AuthzSubjectValue subject,
@@ -1212,7 +1198,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     /**
      * Disable all derived measurement EJBs for an instance
      *
-     * @return a list of DerivedMeasurement value
      * @ejb:interface-method
      */
     public void disableMeasurements(AuthzSubjectValue subject,
@@ -1244,9 +1229,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Disable all derived measurement EJBs for an instance
+     * Disable all derived measurements for an instance
      *
-     * @return a list of DerivedMeasurement value
      * @ejb:interface-method
      */
     public void disableMeasurements(AuthzSubjectValue subject, Integer[] mids)
@@ -1321,7 +1305,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * @see javax.ejb.SessionBean#ejbCreate()
      * @ejb:create-method
      */
     public void ejbCreate() throws CreateException {
@@ -1332,31 +1315,17 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    /**
-     * @see javax.ejb.SessionBean#ejbPostCreate()
-     */
+
     public void ejbPostCreate() {}
 
-    /**
-     * @see javax.ejb.SessionBean#ejbActivate()
-     */
     public void ejbActivate() {}
 
-    /**
-     * @see javax.ejb.SessionBean#ejbPassivate()
-     */
     public void ejbPassivate() {}
 
-    /**
-     * @see javax.ejb.SessionBean#ejbRemove()
-     */
     public void ejbRemove() {
         this.ctx = null;
     }
 
-    /**
-     * @see javax.ejb.SessionBean#setSessionContext(SessionContext)
-     */
     public void setSessionContext(SessionContext ctx)
         throws EJBException, RemoteException {
         this.ctx = ctx;
