@@ -223,7 +223,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
             if (aiplatformValue.isPlatformDevice()) {
                 try {
                     AIConversionUtil.configurePlatform(subject, log,
-                                                       existingPlatformValue.getId(),
+                                                       existingPlatform.getId(),
                                                        aiplatform.getProductConfig(),
                                                        aiplatform.getMeasurementConfig(),
                                                        aiplatform.getControlConfig(),
