@@ -90,7 +90,7 @@
 <c:choose>
   <c:when test="${not empty titleBgStyle && not empty titleImg}">
     <td width="14%"><html:img page="/images/${titleImg}" width="202" height="32" alt="" border="0" style="float: right;"/></td>
-    <td width="1%"><html:link href="" onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/title_pagehelp.gif" width="20" height="20" alt="" border="0" hspace="10"/></html:link></td>
+    <td width="1%" nowrap><span onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/title_pagehelp.gif" width="20" height="20" alt="" border="0" hspace="10"/></span></td>
   </c:when>
   <c:otherwise>
     <td width="33%"><html:img page="/images/spacer.gif" width="1" height="32" alt="" border="0"/></td>
@@ -179,16 +179,13 @@
   <td colspan="2">
     <c:if test="${not empty linkUrl}">
       <span class="LinkBox" onclick="toggleToolMenu();"><fmt:message key="resource.toolsmenu.text"/><html:img page="/images/arrow_dropdown.gif" border="0"/></a></span><br>
-      <div id="toolMenu" style="visibility: hidden; position: absolute; margin-top: 2px; margin-left: -2px;">
+      <div id="toolMenu" style="display: none; position: absolute; margin-top: 2px; margin-left: -2px;">
 <tiles:insert attribute="linkUrl">
   <c:if test="${not empty resource}">
     <tiles:put name="resource" beanName="resource"/>
   </c:if>
 </tiles:insert>
       </div>
-      <script language="Javascript">
-      onloads.push( hideToolMenu );
-      </script>
     </c:if>
     </td>
   </tr>

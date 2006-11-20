@@ -40,7 +40,6 @@ function toggleDiagram(eId) {
 function hideDiagram(thisDiv) {
   new Effect.SlideUp(thisDiv);
   showFormElements();
-  
   diagShown = false;
 }
 
@@ -60,7 +59,6 @@ function makeDiagramVisible(eId) {
 
 function showToolMenu() {
   var menu = $('toolMenu');
-  menu.style.visibility = "visible";
   new Effect.SlideDown(menu);
   toolsShown = true;
 }

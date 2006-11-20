@@ -73,14 +73,11 @@
 </map>
 
       <span onclick="toggleDiagram('diagramDiv');"><html:img imageName="navMapIcon" border="0" alt="" page="/images/icon_navmap.png"/></span><br>
-      <div id="diagramDiv" style="position: absolute; visibility: hidden;">
-      <span>
-      <html:img imageName="navMapImage" page="/resource/NavMapImage?treeVar=${treeVar}&imageWidth=${imageWidth}" alt="" border="0" usemap="#diagram" />
-      </span>
+      <div id="diagramDiv" style="position: absolute; display: none;">
+        <span>
+          <html:img imageName="navMapImage" page="/resource/NavMapImage?treeVar=${treeVar}&imageWidth=${imageWidth}" alt="" border="0" usemap="#diagram" />
+        </span>
       </div>
-      <script language="Javascript">
-      onloads.push( hideDiagram );
-      </script>
     </td>
       </c:when>
       <c:otherwise>
