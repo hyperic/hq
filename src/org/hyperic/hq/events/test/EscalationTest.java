@@ -5,7 +5,7 @@ import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.hq.events.server.session.EscalationAction;
 import org.hyperic.hq.events.server.session.EscalationState;
 import org.hyperic.hq.events.server.session.Action;
-import org.hyperic.hq.events.escalation.mediator.EscalationMediator;
+import org.hyperic.hq.events.escalation.EscalationMediator;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.CommandContext;
 import org.hyperic.hq.command.SaveCommand;
@@ -99,7 +99,8 @@ public class EscalationTest
         e.getActions().add(act2);
         e.getActions().add(act1);
 
-        EscalationState state = e.getEscalationState(ALERT_DEF_ID1);
+        EscalationState state =
+            EscalationMediator.getInstance().getEscalationState(e, ALERT_DEF_ID1);
         long mtime = state.getModifiedTime();
 
         context.execute(SaveCommand.setInstance(e));
@@ -116,7 +117,8 @@ public class EscalationTest
         assertTrue(a2.getId().equals(act1.getAction().getId()));
 
         // escalation state time should not be updated
-        state = e.getEscalationState(ALERT_DEF_ID1);
+        state =
+            EscalationMediator.getInstance().getEscalationState(e, ALERT_DEF_ID1);
         assertTrue(state.getModifiedTime() == mtime);
 
         // update state
@@ -128,7 +130,7 @@ public class EscalationTest
         e = (Escalation)result.get(0);
         // escalation state time should have been  updated
         state =
-            (EscalationState)e.getEscalationState().get(ALERT_DEF_ID1);
+            EscalationMediator.getInstance().getEscalationState(e, ALERT_DEF_ID1);
         assertTrue(state.getModifiedTime() > mtime);
 
         // remove it
@@ -175,9 +177,6 @@ public class EscalationTest
         CommandContext context = CommandContext.createContext();
         context.setContextDao(DAOFactory.getDAOFactory().getEscalationDAO());
 
-        e.getEscalationState().put(ALERT_DEF_ID1, EscalationState.newInstance());
-        e.getEscalationState().put(ALERT_DEF_ID2, EscalationState.newInstance());
-
         context.execute(SaveCommand.setInstance(e));
         // look it up, there should be exactly one
         List result = assertEscalation(e, 1);
@@ -186,29 +185,32 @@ public class EscalationTest
         // verify number of actions
         assertTrue(e.getActions().size() == 2);
 
-        // verify number of states
-        assertTrue(e.getEscalationState().size() == 2);
-
         // set state to active
-        EscalationState state1 = e.getEscalationState(ALERT_DEF_ID1);
+        EscalationState state1 =
+            EscalationMediator.getInstance().getEscalationState(e, ALERT_DEF_ID2);
         state1.setActive(true);
         e.setAllowPause(true);
         context.execute(SaveCommand.setInstance(e));
         
         result = assertEscalation(e, 1);
         e = (Escalation)result.get(0);
-        state1 = e.getEscalationState(ALERT_DEF_ID1);
+        state1 =
+            EscalationMediator.getInstance().getEscalationState(e, ALERT_DEF_ID2);
+
         // verify active status has been set
         assertTrue(state1.isActive());
         assertTrue(e.isAllowPause());
 
         // clear active status
         EscalationMediator.getInstance()
-            .clearActiveEscalation(e.getId(), ALERT_DEF_ID1);
+            .clearActiveEscalation(e.getId(), ALERT_DEF_ID2);
 
         result = assertEscalation(e, 1);
         e = (Escalation)result.get(0);
-        state1 = e.getEscalationState(ALERT_DEF_ID1);
+
+        state1 =
+            EscalationMediator.getInstance()
+                .getEscalationState(e, ALERT_DEF_ID2);
         // verify active status has been cleared
         assertTrue(!state1.isActive());
         

@@ -45,6 +45,7 @@ import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
 import org.hyperic.hq.events.server.session.EventLogDAO;
 import org.hyperic.hq.events.server.session.TriggerDAO;
 import org.hyperic.hq.events.server.session.EscalationDAO;
+import org.hyperic.hq.events.server.session.EscalationStateDAO;
 import org.hyperic.hq.measurement.server.session.CategoryDAO;
 import org.hyperic.hq.measurement.server.session.BaselineDAO;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
@@ -275,6 +276,10 @@ public class HibernateDAOFactory extends DAOFactory {
 
     public EscalationDAO getEscalationDAO() {
         return new EscalationDAO(this);
+    }
+
+    public EscalationStateDAO getEscalationStateDAO() {
+        return new EscalationStateDAO(this);
     }
 
     public EventLogDAO getEventLogDAO() {

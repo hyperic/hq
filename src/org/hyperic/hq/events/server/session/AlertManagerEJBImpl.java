@@ -32,7 +32,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.ejb.CreateException;
-import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
@@ -47,13 +46,13 @@ import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.escalation.EscalationJob;
-import org.hyperic.hq.events.escalation.command.ScheduleActionCommand;
+import org.hyperic.hq.events.escalation.EscalationMediator;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.Escalation;
-import org.hyperic.hq.CommandContext;
+import org.hyperic.hq.events.server.session.EscalationState;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -318,7 +317,9 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
         Alert alert =
             DAOFactory.getDAOFactory().getAlertDAO().findById(alertId);
         Integer alertDefId = alert.getAlertDefinition().getId();
-        EscalationState state = escalation.getEscalationState(alertDefId);
+        EscalationStateDAO sdao =
+            DAOFactory.getDAOFactory().getEscalationStateDAO();
+        EscalationState state = sdao.getEscalationState(escalation, alertDefId);
         if (state.isFixed()) {
             // fixed so no need to schedule
             if (log.isInfoEnabled()) {
@@ -371,7 +372,9 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
         Alert alert =
             DAOFactory.getDAOFactory().getAlertDAO().findById(alertId);
         Integer alertDefId = alert.getAlertDefinition().getId();
-        EscalationState state = escalation.getEscalationState(alertDefId);
+        EscalationStateDAO sdao =
+            DAOFactory.getDAOFactory().getEscalationStateDAO();
+        EscalationState state = sdao.getEscalationState(escalation, alertDefId);
         if (state.isFixed()) {
             // fixed or is in progress so no need run
             if (log.isInfoEnabled()) {
@@ -410,10 +413,8 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
             dao.save(escalation);
 
             // schedule next action;
-            CommandContext context = CommandContext.createContext(
-                ScheduleActionCommand.setInstance(escalation.getId(), alertId)
-            );
-            context.execute();
+            EscalationMediator.getInstance()
+                .scheduleAction(escalation.getId(), alertId);
         } catch (ClassNotFoundException e) {
             throw new SystemException(e);
         } catch (IllegalAccessException e) {
@@ -507,10 +508,24 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public void clearActiveEscalation(Integer escalationId,
-                                            Integer alertDefId) {
-        DAOFactory.getDAOFactory().getEscalationDAO()
-            .clearActiveEscalation(escalationId, alertDefId);
+    public void clearActiveEscalation(Integer escalationId, Integer alertDefId)
+    {
+        EscalationDAO dao =
+            DAOFactory.getDAOFactory().getEscalationDAO();
+        Escalation e = dao.findById(escalationId);
+        dao.clearActiveEscalation(e, alertDefId);
+    }
+
+    /**
+     * get escalationstate
+     *
+     * @ejb:interface-method
+     */
+    public EscalationState getEscalationState(Escalation e,
+                                              Integer alertDefId) {
+        EscalationStateDAO dao =
+            DAOFactory.getDAOFactory().getEscalationStateDAO();
+        return dao.getEscalationState(e, alertDefId);
     }
 
     /**

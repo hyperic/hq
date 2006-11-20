@@ -10,13 +10,9 @@ import org.quartz.JobDetail;
 import org.quartz.SimpleTrigger;
 import org.quartz.SchedulerException;
 import org.quartz.JobDataMap;
-import org.hyperic.hq.events.server.session.Escalation;
-import org.hyperic.hq.events.server.session.EscalationAction;
-import org.hyperic.hq.events.escalation.command.EscalateCommand;
-import org.hyperic.hq.events.escalation.mediator.EscalationMediator;
+import org.hyperic.hq.events.escalation.EscalationMediator;
 import org.hyperic.hq.scheduler.shared.SchedulerLocal;
 import org.hyperic.hq.scheduler.shared.SchedulerUtil;
-import org.hyperic.hq.CommandContext;
 
 import javax.ejb.CreateException;
 import javax.naming.NamingException;
@@ -75,9 +71,6 @@ public class EscalationJob implements Job {
         Integer escalationId = (Integer)map.get(APP_ID);
         Integer alertId = (Integer)map.get(ALERT_ID);
         
-        CommandContext context = CommandContext.createContext(
-            EscalateCommand.setInstance(escalationId, alertId)
-        );
-        context.execute();
+        EscalationMediator.getInstance().dispatchAction(escalationId, alertId);
     }
 }

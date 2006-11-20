@@ -3,15 +3,10 @@ package org.hyperic.hq.events.server.session;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.util.jdbc.DBUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.Iterator;
-import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 /*
  * NOTE: This copyright does *not* cover user programs that use HQ
@@ -59,6 +54,8 @@ public class EscalationDAO extends HibernateDAO
     }
 
     public void remove(Escalation entity) {
+        DAOFactory.getDAOFactory().getEscalationStateDAO()
+            .removeByEscalation(entity);
         removeActions(entity.getActions().iterator());
         super.remove(entity);
     }
@@ -110,40 +107,13 @@ public class EscalationDAO extends HibernateDAO
 
     public int clearActiveEscalation()
     {
-        // direct sql is the only option here to clear all
-        // active flags.  This should only be called during
-        // hq startup to reset all escalation active status.
-        String sql = "update eam_escalation_state " +
-                     "  set active=? " +
-                     "where" +
-                     "  active=?";
-
-        Connection conn = getSession().connection();
-        PreparedStatement p;
-        int count = 0;
-        try {
-            p = conn.prepareStatement(sql);
-            p.setBoolean(1, false);
-            p.setBoolean(2, true);
-            count = p.executeUpdate();
-            p.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            getSession().disconnect();
-        }
-        if (count > 0 && log.isInfoEnabled()) {
-            log.info("Cleared " + count + " active " +
-                     (count == 1 ? "escalation." : "escalations."));
-        }
-        return count;
+        return DAOFactory.getDAOFactory().getEscalationStateDAO()
+            .clearActiveEscalation();
     }
 
-    public void clearActiveEscalation(Integer eid, Integer alertDefId)
+    public void clearActiveEscalation(Escalation e, Integer alertDefId)
     {
-        Escalation e = findById(eid);
-        EscalationState s = e.getEscalationState(alertDefId);
-        s.setActive(false);
-        save(e);
+        DAOFactory.getDAOFactory().getEscalationStateDAO()
+            .clearActiveEscalation(e, alertDefId);
     }
 }

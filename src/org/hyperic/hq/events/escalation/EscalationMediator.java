@@ -1,41 +1,24 @@
 /**
  *
  */
-package org.hyperic.hq.events.escalation.mediator;
+package org.hyperic.hq.events.escalation;
 
 import org.hyperic.hq.Mediator;
 import org.hyperic.hq.CommandContext;
 import org.hyperic.hq.command.SaveCommand;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.server.session.Escalation;
-import org.hyperic.hq.events.server.session.EscalationDAO;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.EscalationState;
-import org.hyperic.hq.events.server.session.EscalationAction;
-import org.hyperic.hq.events.server.session.Action;
-import org.hyperic.hq.events.server.session.AlertConditionLog;
-import org.hyperic.hq.events.server.session.AlertActionLog;
-import org.hyperic.hq.events.escalation.EscalationJob;
-import org.hyperic.hq.events.escalation.command.ScheduleActionCommand;
-import org.hyperic.hq.events.escalation.command.EscalateCommand;
-import org.hyperic.hq.events.ActionInterface;
-import org.hyperic.hq.events.InvalidActionDataException;
-import org.hyperic.hq.events.ActionExecuteException;
-import org.hyperic.hq.events.AlertCreateException;
-import org.hyperic.hq.events.shared.AlertActionLogValue;
-import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.EncodingException;
 import org.hyperic.hibernate.LockSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.CreateException;
 import javax.naming.NamingException;
-import java.util.Collection;
 
 public class EscalationMediator extends Mediator
 {
@@ -75,23 +58,23 @@ public class EscalationMediator extends Mediator
         Integer alertDefId = alert.getAlertDefinition().getId();
         Escalation escalation =
             alertManagerLocal.getEscalationById(escalationId);
-        EscalationState state = escalation.getEscalationState(alertDefId);
 
-        if (setActiveEscalation(alertDefId, escalationId)) {
+        if (setActiveEscalation(escalation, alertDefId)) {
             if (log.isInfoEnabled()) {
+                EscalationState state =
+                    getEscalationState(escalation, alertDefId);
                 log.info("Start escalation. alert=" +  alert +
                          ", escalation=" + escalation + ", state=" +
                          state);
             }
             // Escalation is not active, start escalation.
-            CommandContext context = CommandContext.createContext();
-            context.execute(
-                EscalateCommand.setInstance(escalationId, alertId)
-            );
+            dispatchAction(escalationId, alertDefId);
         } else {
             // escalation is active, so do not start another escalation
             // for this chain.
             if (log.isInfoEnabled()) {
+                EscalationState state =
+                    getEscalationState(escalation, alertDefId);
                 log.info("Escalation already in progress. alert=" +  alert +
                          ", escalation=" + escalation + ", state="+ state);
             }
@@ -99,28 +82,38 @@ public class EscalationMediator extends Mediator
     }
 
     /**
-     * set escalation state to active
+     * set escalation state to active and take ownership of the escalation
+     * chain.  The caller is guaranteed that no other thread will have
+     * access to this escalation chain.
      *
-     * @param escalationId
+     * This method is not cluster-safe.
+     *
+     * @param e
      * @param alertDefId
-     * @return true if escalation state changed from inactive to active.
+     * @return true if escalation state changed from inactive to active. I.e,
+     *         the caller now owns the escalation chain.
+     *         false escalation chain is already in progress.
      */
-    private boolean setActiveEscalation(Integer escalationId,
-                                        Integer alertDefId)
+    private boolean setActiveEscalation(Escalation e, Integer alertDefId)
     {
         synchronized(stateLocks.getLock(alertDefId)) {
-            Escalation escalation =
-                alertManagerLocal.getEscalationById(escalationId);
-            EscalationState state = escalation.getEscalationState(alertDefId);
+            EscalationState state = getEscalationState(e, alertDefId);
             if(state.isActive()) {
                 return false;
             }
             state.setActive(true);
             CommandContext context = CommandContext.createContext();
             context.setRequiresNew(true);
-            context.execute(SaveCommand.setInstance(escalation));
+            context.setContextDao(
+                DAOFactory.getDAOFactory().getEscalationStateDAO());
+            context.execute(SaveCommand.setInstance(state));
         }
         return true;
+    }
+
+    public EscalationState getEscalationState(Escalation e, Integer alertDefId)
+    {
+        return alertManagerLocal.getEscalationState(e, alertDefId);
     }
 
     public void scheduleAction(Integer escalationId, Integer alertId)
@@ -133,14 +126,15 @@ public class EscalationMediator extends Mediator
         alertManagerLocal.dispatchAction(escalationId, alertId);
     }
 
-    public void clearActiveEscalation() {
+    public void clearActiveEscalation()
+    {
         // usually invoke on hq start to clear all escalation marked
         // as in progress
         alertManagerLocal.clearActiveEscalation();
     }
 
-    public void clearActiveEscalation(Integer escalationId,
-                                      Integer alertDefId) {
+    public void clearActiveEscalation(Integer escalationId, Integer alertDefId)
+    {
         // clear active status for this alertDef
         alertManagerLocal.clearActiveEscalation(escalationId, alertDefId);
     }

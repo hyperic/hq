@@ -52,6 +52,7 @@ public class HypericInterceptor extends EmptyInterceptor
                o instanceof AppdefBean ||
                o instanceof AlertDefinition ||
                o instanceof Escalation ||
+               o instanceof EscalationState ||
                o instanceof MeasurementTemplate ||
                o instanceof Measurement;
     }
@@ -77,21 +78,38 @@ public class HypericInterceptor extends EmptyInterceptor
                                     String[] propertyNames) {
         boolean modified = false;
         long ts = System.currentTimeMillis();
+        int modifiedIdx = -1;
+        int createdIdx = -1;
         for (int i = 0; i < propertyNames.length; i++) {
+            if (prevState != null) {
+                if (curState[i] == null && prevState[i] != null) {
+                    modified = true;
+                } else if (curState[i] != null && prevState[i] == null) {
+                    modified = true;
+                } else if (curState[i] != null && prevState[i] != null &&
+                    !curState[i].equals(prevState[i])) {
+                    modified = true;
+                }
+            }
             if ("creationTime".equals(propertyNames[i]) ||
                 "ctime".equals(propertyNames[i])) 
             {
                 Long ctime = (Long)curState[i];
                 if (ctime == null || ctime.longValue() == 0) {
-                    curState[i] = new Long(ts);
+                    createdIdx = i;
                     modified =  true;
                 }
             } else if ("modifiedTime".equals(propertyNames[i]) ||
                        "mtime".equals(propertyNames[i]))
             {
-                curState[i] = new Long(ts);
-                modified =  true;
+                modifiedIdx = i;
             }
+        }
+        if (createdIdx >= 0) {
+            curState[createdIdx] = new Long(ts);
+        }
+        if (modifiedIdx >= 0 && modified) {
+            curState[modifiedIdx] = new Long(ts);
         }
         return modified;
     }

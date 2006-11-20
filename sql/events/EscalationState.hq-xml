@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+      "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="org.hyperic.hq.events.server.session">
+
+  <class name="EscalationState" table="EAM_ESCALATION_STATE">
+
+    <id name="id" type="integer">
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_ESCALATION_STATE_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name ="VERSION_COL" default="0" />
+    </version>
+
+    <properties name="escalationStateId" unique="true">
+      <many-to-one name="escalation" class="Escalation">
+        <column name="ESCALATION_ID" />
+      </many-to-one>
+      <property name="alertDefinition" type="integer">
+        <column name="ALERT_DEF_ID" />
+      </property>
+    </properties>
+
+    <property name="currentLevel" type="integer">
+      <meta attribute="field-description"><![CDATA[
+        The current escalation leven in the chain.  I.e.,
+        current escalation level == actions[currentLevel].
+        ]]></meta>
+      <column name="CURRENT_LEVEL" not-null="true" />
+    </property>
+
+    <property name="pauseEscalation" type="boolean">
+      <meta attribute="field-description"><![CDATA[
+        If true, then wait for
+            max(pauseWaitTime, EscalationAction.waitTime)
+        else wait for
+            EscalationAction.waitTime
+        before escalating up the chain.
+        ]]></meta>
+      <column name="PAUSE_ESCALATION" not-null="true" />
+    </property>
+
+    <property name="pauseWaitTime" type="long">
+      <meta attribute="field-description"><![CDATA[
+        meaningful if pauseEscalation == true.
+            (pauseWaitTime <= maxWaitTime)
+        ]]></meta>
+      <column name="WAIT_TIME" not-null="true"/>
+    </property>
+
+    <property name="fixed" type="boolean">
+      <meta attribute="field-description"><![CDATA[
+        If fixed, then stop escalation chain. (terminal condition)
+        ]]></meta>
+      <column name="FIXED" not-null="true"/>
+    </property>
+
+    <property name="acknowledge" type="boolean">
+      <meta attribute="field-description"><![CDATA[
+        "updateBy" has taken ownership of this issue at the
+        current escalation level.
+        ]]></meta>
+      <column name="ACKNOWLEDGE" not-null="true"/>
+    </property>
+
+    <property name="active" type="boolean">
+      <meta attribute="field-description"><![CDATA[
+        Escalation is in progress.
+        ]]></meta>
+      <column name="ACTIVE" not-null="true"/>
+    </property>
+
+    <property name="updateBy" type="string">
+      <column name="UPDATE_BY" length="200"/>
+    </property>
+
+    <property name="creationTime" type="long">
+      <column name="CTIME" not-null="true"/>
+    </property>
+
+    <property name="modifiedTime" type="long">
+      <meta attribute="field-description"><![CDATA[
+        timestamp is updated on state change.
+        ]]></meta>
+      <column name="MTIME" not-null="true"/>
+    </property>
+
+  </class>
+
+</hibernate-mapping>
