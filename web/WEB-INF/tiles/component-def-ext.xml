@@ -6,12 +6,6 @@
 <tiles-definitions>
   <definition name=".footer.current.time"
               path="/common/CurrentTime.jsp"/>
-
-  <definition name=".toolbar.recentResources"
-              controllerUrl="/dashboard/ViewRecentResources.do"                             
-              path="/portlet/recentResources/View.jsp">
-              <put name="portletName"      value=".dashContent.recentResources" />
-  </definition>  
-  
+ 
 </tiles-definitions>
 
