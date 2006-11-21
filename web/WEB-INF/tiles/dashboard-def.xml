@@ -59,12 +59,11 @@
               <put name="portletName"      value=".dashContent.resourceHealth" />
   </definition>
 
+  <!-- Deprecated -->
   <definition name=".dashContent.recentResources"
-              controllerUrl="/dashboard/ViewRecentResources.do"                             
-              path="/portlet/recentResources/View.jsp">
-              <put name="portletName"      value=".dashContent.recentResources" />
+              path="/common/blank.html">
   </definition>  
-  
+
   <definition name=".dashContent.recentlyApproved"
               controllerUrl="/dashboard/ViewRecentlyApproved.do"
               path="/portlet/recentlyApproved/View.jsp">
