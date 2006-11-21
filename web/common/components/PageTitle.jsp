@@ -90,7 +90,28 @@
 <c:choose>
   <c:when test="${not empty titleBgStyle && not empty titleImg}">
     <td width="14%"><html:img page="/images/${titleImg}" width="202" height="32" alt="" border="0" style="float: right;"/></td>
-    <td width="1%" nowrap><span onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/title_pagehelp.gif" width="20" height="20" alt="" border="0" hspace="10"/></span></td>
+    <td width="1%" nowrap><html:img page="/images/title_pagedown.gif" width="20" height="20" alt="" border="0" hspace="10" onmousedown="toggleMenu('recent');"/><span onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/title_pagehelp.gif" width="20" height="20" alt="" border="0" hspace="10"/></span><br/>
+    <div id="recent" style="position:absolute; visibility: hidden;">
+      <tiles:insert definition=".toolbar.recentResources"/>
+    </div>
+    <script language="JavaScript" type="text/javascript">
+      function moveRecent() {
+        var resDiv = $('recent');
+        var left = resDiv.offsetLeft - resDiv.offsetWidth + 40;
+        new Rico.Effect.Position( resDiv ,
+                                  left,
+                                  resDiv.offsetTop,
+                                  0,
+                                  1, // 1 steps
+                                  {}
+                                  );
+        resDiv.style.display = "none";
+        resDiv.style.visibility = "visible";
+      }
+
+      onloads.push( moveRecent );
+    </script>
+    </td>
   </c:when>
   <c:otherwise>
     <td width="33%"><html:img page="/images/spacer.gif" width="1" height="32" alt="" border="0"/></td>
@@ -178,7 +199,7 @@
 
   <td colspan="2">
     <c:if test="${not empty linkUrl}">
-      <span class="LinkBox" onclick="toggleToolMenu();"><fmt:message key="resource.toolsmenu.text"/><html:img page="/images/arrow_dropdown.gif" border="0"/></a></span><br>
+      <span class="LinkBox" onclick="toggleMenu('toolMenu');"><fmt:message key="resource.toolsmenu.text"/><html:img page="/images/arrow_dropdown.gif" border="0"/></a></span><br>
       <div id="toolMenu" style="display: none; position: absolute; margin-top: 2px; margin-left: -2px;">
 <tiles:insert attribute="linkUrl">
   <c:if test="${not empty resource}">

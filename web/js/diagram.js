@@ -57,24 +57,23 @@ function makeDiagramVisible(eId) {
   diagramDiv.style.visibility = "visible";
 }
 
-function showToolMenu() {
-  var menu = $('toolMenu');
+function show(menu) {
   new Effect.SlideDown(menu);
-  toolsShown = true;
+  menu.shown = true;
 }
 
-function hideToolMenu() {
-  var menu = $('toolMenu');
+function hide(menu) {
   new Effect.SlideUp(menu);
-  toolsShown = false;
+  menu.shown = false;
 }
 
-function toggleToolMenu() {
-  if (toolsShown) {
-    hideToolMenu();
+function toggleMenu(menuId) {
+  var menu = $(menuId);
+  if ( menu.shown ) {
+    hide(menu);
   }
   else {
-    showToolMenu();
+    show(menu);
   }
 }
 

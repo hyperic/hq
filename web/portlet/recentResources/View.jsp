@@ -23,66 +23,26 @@
   USA.
  --%>
 
- <%@ page language="java" %>
+<%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
 <%@ taglib uri="struts-html-el" prefix="html" %>
 <%@ taglib uri="struts-tiles" prefix="tiles" %>
 <%@ taglib uri="jstl-fmt" prefix="fmt" %>
 <%@ taglib uri="display" prefix="display" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
-
-<div class="effectsPortlet">
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="dash.home.RecentResources"/>
-  <tiles:put name="portletName" beanName="portletName" />
-  <tiles:put name="dragDrop" value="true"/>
-</tiles:insert>
-
 <tiles:importAttribute name="resourceHealth"/>
-<tiles:importAttribute name="performance"/>
-<tiles:importAttribute name="throughput"/>
-<tiles:importAttribute name="availability"/>
-<tiles:importAttribute name="utilization"/>
 
-<c:choose >
+<div class="DropDown">
+<fmt:message key="dash.home.RecentResources"/>
+<c:choose>
   <c:when test="${not empty resourceHealth}">   
-  
-    <display:table cellspacing="0" cellpadding="0" width="100%" action="/Dashboard.do"
-                   var="resource" pageSize="-1" items="${resourceHealth}" >
-                
-        <display:column width="50%" href="/Resource.do?eid=${resource.resourceTypeId}:${resource.resourceId}" property="resourceName" title="dash.home.TableHeader.ResourceName"/>
-        <display:column width="20%" property="resourceTypeName" title="dash.home.TableHeader.Type"/>
-        <c:if test="${performance}">  
-          <display:column width="10%" property="performance" title="resource.common.monitor.visibility.PerformanceTH" align="center" />
-        </c:if>
-        <c:if test="${throughput}">  
-          <display:column width="10%" property="throughput" title="resource.common.monitor.visibility.UsageTH" align="center" > 
-          <display:metricdecorator unit="${resource.throughputUnits}" defaultKey="resource.common.monitor.visibility.performance.NotAvail"/>
-          </display:column>
-        </c:if>
-        
-        <c:if test="${availability}">  
-          <display:column width="10%" property="availability" title="resource.common.monitor.visibility.AvailabilityTH" align="center" >
-            <display:availabilitydecorator value="${resource.availability}"
-                                     monitorable="${resource.monitorable}"
-                                  resourceTypeId="${resource.resourceTypeId}"
-                                      resourceId="${resource.resourceId}"/>
-          </display:column>
-        </c:if>
-        <c:if test="${utilization}">                  
-          <display:column width="10%" property="alerts" title="dash.home.TableHeader.Alerts" align="center"/>          
-        </c:if>
-        
-    </display:table>    
-    <tiles:insert definition=".dashContent.seeAll"/>
-    
+  <ul style="list-style-type: none;">
+  <c:forEach var="resource" items="${resourceHealth}">
+    <li>
+    <html:link page="/Resource.do?eid=${resource.resourceTypeId}:${resource.resourceId}"><c:out value="${resource.resourceName}"/></html:link>
+  </c:forEach>
+    </li>
+  </ul>
   </c:when>
-  <c:otherwise>
-    <table width="100%" cellpadding="0" cellspacing="0" border="0">
-      <tr class="ListRow">
-        <td class="ListCell"><fmt:message key="dash.home.no.resource.to.display"/></td>
-      </tr>
-    </table>
-  </c:otherwise>
 </c:choose>
 </div>
