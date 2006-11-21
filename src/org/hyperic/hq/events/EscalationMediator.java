@@ -73,8 +73,6 @@ public class EscalationMediator extends Mediator
                 }
             });
         }
-
-        log.info("Hello world! " + Thread.currentThread().getName());
     }
 
     public List getScheduledEscalationState()
