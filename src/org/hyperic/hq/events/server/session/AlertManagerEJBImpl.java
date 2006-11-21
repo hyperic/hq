@@ -45,8 +45,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionInterface;
-import org.hyperic.hq.events.escalation.EscalationJob;
-import org.hyperic.hq.events.escalation.EscalationMediator;
+import org.hyperic.hq.events.EscalationMediator;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertValue;
@@ -326,18 +325,16 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
                 log.info("Escalation fixed. alert=" +  alert + ", escalation=" +
                          escalation + ", state=" + state);
             }
-            state.setCurrentLevel(0);
-            state.setActive(false);
-            dao.save(escalation);
+            resetEscalationState(state);
+            sdao.save(state);
             return;
         }
         int nextlevel = state.getCurrentLevel() + 1;
         if (nextlevel >= escalation.getActions().size()) {
             // at the end of escalation chain, so reset and wait for
             //  next alert to fire.  DO NOT schedule next job.
-            state.setCurrentLevel(0);
-            state.setActive(false);
-            dao.save(escalation);
+            resetEscalationState(state);
+            sdao.save(state);
             if (log.isInfoEnabled()) {
                 log.info("End escalation. alert=" +  alert + ", escalation=" +
                          escalation + ", state=" + state);
@@ -345,16 +342,24 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
         } else {
             EscalationAction ea =
                 escalation.getCurrentAction(state.getCurrentLevel());
-            EscalationJob.scheduleJob(
-                escalation.getId(), alertId, ea.getWaitTime());
+            // schedule next run time
+            state.setScheduleRunTime(System.currentTimeMillis() +
+                                     ea.getWaitTime());
             state.setCurrentLevel(nextlevel);
-            dao.save(escalation);
+            sdao.save(state);
             if (log.isDebugEnabled()) {
                 log.debug("schedule next action. alert=" +  alert +
                           ", escalation=" + escalation + ", state=" +
                           state + "action=" + ea);
             }
         }
+    }
+
+    private void resetEscalationState(EscalationState state)
+    {
+        state.setCurrentLevel(0);
+        state.setScheduleRunTime(0);
+        state.setActive(false);
     }
 
     /**
@@ -381,19 +386,18 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
                 log.info("Escalation fixed. alert=" +  alert + ", escalation=" +
                          escalation + ", state=" + state);
             }
-            state.setCurrentLevel(0);
-            state.setActive(false);
-            dao.save(escalation);
+            resetEscalationState(state);
+            sdao.save(state);
             return;
         }
         // check to see if there is remaining pauseWaitTime
         long remainder = getRemainingPauseWaitTime(escalation, state);
         if (remainder > 0) {
             // reschedule
-            EscalationJob.scheduleJob(escalation.getId(), alertId, remainder);
+            state.setScheduleRunTime(System.currentTimeMillis()+remainder);
             // reset the pause escalation flag to avoid wait loop.
             state.setPauseEscalation(false);
-            dao.save(escalation);
+            sdao.save(state);
             if (log.isDebugEnabled()) {
                 log.debug("Pause for additional wait time. alert=" +  alert +
                           ", escalation=" + escalation + ", state=" +
@@ -410,7 +414,6 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
 
         try {
             dispatchAction(escalation, alert, state);
-            dao.save(escalation);
 
             // schedule next action;
             EscalationMediator.getInstance()
@@ -492,6 +495,16 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
         alertValue.addActionLog(alog);
         
         createAlert(alertValue);
+    }
+
+    /**
+     * clear active status on all escalation
+     *
+     * @ejb:interface-method
+     */
+    public List getScheduledEscalationState() {
+        return DAOFactory.getDAOFactory().getEscalationStateDAO()
+            .findScheduledEscalationState();
     }
 
     /**

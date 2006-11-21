@@ -5,7 +5,7 @@ import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.hq.events.server.session.EscalationAction;
 import org.hyperic.hq.events.server.session.EscalationState;
 import org.hyperic.hq.events.server.session.Action;
-import org.hyperic.hq.events.escalation.EscalationMediator;
+import org.hyperic.hq.events.EscalationMediator;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.CommandContext;
 import org.hyperic.hq.command.SaveCommand;

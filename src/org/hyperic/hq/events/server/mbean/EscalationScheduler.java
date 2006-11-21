@@ -9,7 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycleListener;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycle;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.events.escalation.EscalationMediator;
+import org.hyperic.hq.events.EscalationMediator;
 
 import javax.management.ObjectName;
 import javax.management.Notification;

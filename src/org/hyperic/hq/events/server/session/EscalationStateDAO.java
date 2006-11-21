@@ -9,6 +9,8 @@ import org.hyperic.dao.DAOFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.List;
+
 public class EscalationStateDAO extends HibernateDAO
 {
     private static Log log = LogFactory.getLog(EscalationStateDAO.class);
@@ -51,7 +53,7 @@ public class EscalationStateDAO extends HibernateDAO
     public EscalationState getEscalationState(Escalation e, Integer alertDefId)
     {
         String sql = "from EscalationState where escalation=? and " +
-                     "alertDefinition=?";
+                     "alertDefinitionId=?";
         EscalationState state =
             (EscalationState)getSession().createQuery(sql)
                 .setEntity(0, e)
@@ -93,5 +95,19 @@ public class EscalationStateDAO extends HibernateDAO
         EscalationState state = getEscalationState(e, alertDefId);
         state.setActive(false);
         save(state);
+    }
+
+    public List findScheduledEscalationState()
+    {
+        long now = System.currentTimeMillis();
+        String sql="from EscalationState " +
+                   "where" +
+                   "  active = true and " +
+                   "  scheduleRunTime > 0 and " +
+                   "  scheduleRunTime <= ?";
+        
+        return getSession().createQuery(sql)
+            .setLong(0, now)
+            .list();
     }
 }

@@ -28,6 +28,13 @@ public class EscalationState extends PersistedObject implements Cloneable
      * before escalating up the chain.
      */
     private boolean pauseEscalation;
+
+    /**
+     * >0 next scheduled run time.
+     * =0 not scheduled.
+     */
+    private long scheduleRunTime;
+
     /**
      * meaningful if pauseEscalation == true.
      * (pauseWaitTime <= maxWaitTime)
@@ -53,7 +60,8 @@ public class EscalationState extends PersistedObject implements Cloneable
      */
     private long modifiedTime;
     private Escalation escalation;
-    private int alertDefinition;
+    private int alertDefinitionId;
+    private int alertId;
 
     // Constructors
 
@@ -67,7 +75,7 @@ public class EscalationState extends PersistedObject implements Cloneable
     protected EscalationState(Escalation e, int aid)
     {
         escalation = e;
-        alertDefinition = aid;
+        alertDefinitionId = aid;
     }
 
     /**
@@ -99,6 +107,16 @@ public class EscalationState extends PersistedObject implements Cloneable
     public void setPauseEscalation(boolean pauseEscalation)
     {
         this.pauseEscalation = pauseEscalation;
+    }
+
+    public long getScheduleRunTime()
+    {
+        return scheduleRunTime;
+    }
+
+    public void setScheduleRunTime(long scheduleRunTime)
+    {
+        this.scheduleRunTime = scheduleRunTime;
     }
 
     /**
@@ -198,16 +216,25 @@ public class EscalationState extends PersistedObject implements Cloneable
         this.escalation = escalation;
     }
 
-    public int getAlertDefinition()
+    public int getAlertDefinitionId()
     {
-        return this.alertDefinition;
+        return this.alertDefinitionId;
     }
 
-    public void setAlertDefinition(int alertDefinition)
+    public void setAlertDefinitionId(int alertDefinitionId)
     {
-        this.alertDefinition = alertDefinition;
+        this.alertDefinitionId = alertDefinitionId;
     }
 
+    public int getAlertId()
+    {
+        return alertId;
+    }
+
+    public void setAlertId(int alertId)
+    {
+        this.alertId = alertId;
+    }
 
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -219,13 +246,16 @@ public class EscalationState extends PersistedObject implements Cloneable
         EscalationState o = (EscalationState)obj;
 
         return currentLevel == o.getCurrentLevel() &&
+               creationTime == o.getCreationTime() &&
                modifiedTime == o.getModifiedTime() &&
                pauseWaitTime == o.getPauseWaitTime() &&
+               scheduleRunTime == o.getScheduleRunTime() &&
                acknowledge == o.isAcknowledge() &&
                fixed == o.isFixed() &&
                active == o.isActive() &&
                pauseEscalation == o.isPauseEscalation() &&
-               alertDefinition == o.getAlertDefinition() &&
+               alertDefinitionId == o.getAlertDefinitionId() &&
+               alertId == o.getAlertId() &&
                (escalation == o.getEscalation() ||
                 (escalation != null && o.getEscalation() != null &&
                  updateBy.equals(o.getEscalation()) ) ) &&
@@ -242,9 +272,12 @@ public class EscalationState extends PersistedObject implements Cloneable
         result = 37*result + (pauseEscalation ? 0 : 1);
         result = 37*result + (active ? 0 : 1);
         result = 37*result + currentLevel;
-        result = 37*result + alertDefinition;
+        result = 37*result + alertDefinitionId;
+        result = 37*result + alertId;
+        result = 37*result + (int)(creationTime ^ (creationTime >>> 32));
         result = 37*result + (int)(modifiedTime ^ (modifiedTime >>> 32));
         result = 37*result + (int)(pauseWaitTime ^ (pauseWaitTime >>> 32));
+        result = 37*result + (int)(scheduleRunTime ^ (scheduleRunTime >>> 32));
         result = 37*result + (updateBy != null ? updateBy.hashCode() : 0);
         result = 37*result + (escalation != null ? escalation.hashCode() : 0);
 
@@ -262,10 +295,16 @@ public class EscalationState extends PersistedObject implements Cloneable
 
     public String toString() {
         return new StringBuffer()
-            .append("(currentLevel=" + currentLevel + ", fixed=" +
-                    fixed +", active"+
-                    active + ", acknowledge=" + acknowledge +
+            .append("(id=" + getId() + 
+                    ", escalationId=" + getEscalation().getId() +
+                    ", alertDefId=" + alertDefinitionId +
+                    ", alertId=" + alertId +
+                    ", currentLevel=" + currentLevel +
+                    ", fixed=" + fixed +
+                    ", active"+ active +
+                    ", acknowledge=" + acknowledge +
                     ", pause=" + pauseEscalation +
+                    ", scheduleRunTime=" + scheduleRunTime +
                     ", pauseWaitTIme=" + pauseWaitTime +
                     ", modified=" + modifiedTime)
             .append((updateBy != null ? (", updateBy="+updateBy) : ""))

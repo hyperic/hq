@@ -1,7 +1,7 @@
 /**
  *
  */
-package org.hyperic.hq.events.escalation;
+package org.hyperic.hq.events;
 
 import org.hyperic.hq.Mediator;
 import org.hyperic.hq.CommandContext;
@@ -20,6 +20,8 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.CreateException;
 import javax.naming.NamingException;
+import java.util.List;
+import java.util.Iterator;
 
 public class EscalationMediator extends Mediator
 {
@@ -52,14 +54,32 @@ public class EscalationMediator extends Mediator
      */
     public void processEscalation()
     {
-        log.info("Hello world! " + Thread.currentThread().getName());
-        EscalationScheduler.getInstance().run(new Runnable() {
-            public void run()
-            {
-                log.info("EcalationScheduler sends regards " +
-                         Thread.currentThread().getName());
+
+        // get all scheduled escalations
+        List states = getScheduledEscalationState();
+        if (log.isInfoEnabled()) {
+            log.info("Found " + states.size() + " scheduled escalations.");
+        }
+        for (Iterator s = states.iterator(); s.hasNext(); ) {
+            final EscalationState state = (EscalationState)s.next();
+            if (log.isDebugEnabled()) {
+                log.debug("EscalationState: "+state);
             }
-        });
+            EscalationScheduler.getInstance().run(new Runnable() {
+                public void run()
+                {
+                    dispatchAction(state.getEscalation().getId(),
+                                   new Integer(state.getAlertId()));
+                }
+            });
+        }
+
+        log.info("Hello world! " + Thread.currentThread().getName());
+    }
+
+    public List getScheduledEscalationState()
+    {
+        return alertManagerLocal.getScheduledEscalationState();
     }
 
     /**

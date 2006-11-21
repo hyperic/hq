@@ -23,7 +23,7 @@
       <many-to-one name="escalation" class="Escalation">
         <column name="ESCALATION_ID" not-null="true" />
       </many-to-one>
-      <property name="alertDefinition" type="integer">
+      <property name="alertDefinitionId" type="integer">
         <column name="ALERT_DEF_ID" not-null="true" />
       </property>
     </properties>
@@ -70,11 +70,27 @@
       <column name="ACKNOWLEDGE" not-null="true"/>
     </property>
 
+    <property name="alertId" type="integer">
+      <meta attribute="field-description"><![CDATA[
+        alert id that triggered the escalation
+        ]]></meta>
+      <column name="ALERT_ID" not-null="true"/>
+    </property>
+
+    <property name="scheduleRunTime" type="long">
+      <meta attribute="field-description"><![CDATA[
+        next scheduled runtime.  0 = not scheduled.
+        ]]></meta>
+      <column name="RUN_TIME" index="SCHEDULE_RUN_TIME_INDEX"
+              not-null="true"/>
+    </property>
+
     <property name="active" type="boolean">
       <meta attribute="field-description"><![CDATA[
         Escalation is in progress.
         ]]></meta>
-      <column name="ACTIVE" not-null="true"/>
+      <column name="ACTIVE" index="SCHEDULE_RUN_TIME_INDEX"
+              not-null="true"/>
     </property>
 
     <property name="updateBy" type="string">
