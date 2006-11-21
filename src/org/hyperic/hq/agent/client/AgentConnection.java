@@ -48,12 +48,11 @@ import org.apache.commons.logging.LogFactory;
  */
 
 public class AgentConnection {
-    private String   agentAddress;   
-    private int      agentPort;      
-    private AgentAPI agentAPI;
+    private String   _agentAddress;
+    private int      _agentPort;
+    private AgentAPI _agentAPI;
 
-    private final String logCtx = "AgentConnection";
-    private final Log log = LogFactory.getLog(logCtx);
+    private final Log _log = LogFactory.getLog(AgentConnection.class);
 
     /**
      * Create a connection to an Agent with the specified address and
@@ -64,9 +63,9 @@ public class AgentConnection {
      */
 
     public AgentConnection(String agentAddress, int agentPort) {
-        this.agentAddress = agentAddress;
-        this.agentPort    = agentPort;
-        this.agentAPI     = new AgentAPI();
+        _agentAddress = agentAddress;
+        _agentPort    = agentPort;
+        _agentAPI     = new AgentAPI();
     }
 
     protected Socket getSocket()
@@ -76,12 +75,12 @@ public class AgentConnection {
 
         // Connect to the remote agent
         try {
-            s = new Socket(this.agentAddress, this.agentPort);
+            s = new Socket(_agentAddress, _agentPort);
         } catch(IOException exc){
             String msg;
 
-            msg = "Error connecting to agent @ ("+this.agentAddress+":"+
-                this.agentPort+"): " + exc.getMessage();
+            msg = "Error connecting to agent @ ("+ _agentAddress+ ":"+
+                _agentPort+"): " + exc.getMessage();
             throw new AgentConnectionException(msg);
         }
 
@@ -110,7 +109,7 @@ public class AgentConnection {
         AgentStreamPair sPair;
 
         // XXX: DEBUG: Print out commands made to agents
-        this.log.debug(agentAddress + " -> " + cmdName);
+        _log.info(_agentAddress + " -> " + cmdName);
         sPair = this.sendCommandHeaders(cmdName, cmdVersion, arg);
         return this.getCommandResult(sPair);
     }
@@ -150,7 +149,7 @@ public class AgentConnection {
             streamPair = new SocketStreamPair(s, s.getInputStream(),
                                               s.getOutputStream());
             outputStream = new DataOutputStream(streamPair.getOutputStream());
-            outputStream.writeInt(agentAPI.getVersion());
+            outputStream.writeInt(_agentAPI.getVersion());
             outputStream.writeInt(cmdVersion);
             outputStream.writeUTF(cmdName);
             arg.toStream(outputStream);
