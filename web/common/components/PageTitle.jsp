@@ -91,7 +91,7 @@
   <c:when test="${not empty titleBgStyle && not empty titleImg}">
     <td width="14%"><html:img page="/images/${titleImg}" width="202" height="32" alt="" border="0" style="float: right;"/></td>
     <td width="1%" nowrap><html:img page="/images/title_pagedown.gif" width="20" height="20" alt="" border="0" hspace="10" onmousedown="toggleMenu('recent');"/><span onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/title_pagehelp.gif" width="20" height="20" alt="" border="0" hspace="10"/></span><br/>
-    <div id="recent" style="position:absolute; visibility: hidden;">
+    <div id="recent" style="position:absolute; visibility: hidden; z-index: 300;">
       <tiles:insert definition=".toolbar.recentResources"/>
     </div>
     <script language="JavaScript" type="text/javascript">
