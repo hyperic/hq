@@ -55,7 +55,6 @@ function about() {
 function closeAbout(e) {
   if (typeof(window['diagShown']) != 'undefined') {
       bodyClicked(e);
-      showFormElements();
   }
 
   Dialog.closeInfo();
