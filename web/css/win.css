@@ -85,6 +85,7 @@ A.ListHeaderLink:hover {color: #004680; text-decoration: underline;}
 .DropDown {
   font-size: 11px;
   z-index: 3000;
+  border-color: #f7faff #99a #99a #f7faff; 
 }
 
 /* list for MONITOR */
