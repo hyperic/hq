@@ -10,9 +10,9 @@ A:link {color: #003399; text-decoration: none; font-weight: bold;}
 A:visited {color: #003399; text-decoration: none; font-weight: bold;}
 A:hover {color: #003399; font-weight: bold; text-decoration: underline;}
 
-A.NotBold:link {color: #003399; text-decoration: none; font-weight: normal;}
-A.NotBold:visited {color: #003399; text-decoration: none; font-weight: normal;}
-A.NotBold:hover {color: #003399; font-weight: normal; text-decoration: underline;}
+A.NotBold:link, .DropDown A:link {color: #003399; text-decoration: none; font-weight: normal;}
+A.NotBold:visited , .DropDown A:visited{color: #003399; text-decoration: none; font-weight: normal;}
+A.NotBold:hover, .DropDown A:hover {color: #003399; font-weight: normal; text-decoration: underline;}
 
 /* TEXT */
 .CaptionText {font-size: 10px; font-weight: normal; color: #000000;}
@@ -80,7 +80,12 @@ A.ListHeaderLink:hover {color: #004680; text-decoration: underline;}
 .ListCellLineEmpty {background-color: #FFFFFF; padding: 0px;}
 .ListCellPrimary {padding: 3px; border-bottom: solid #D5D8DE; border-width: 1px; font-weight: bold;}
 
-.LinkBox {padding: 3px; border: solid #D5D8DE; border-width: 1px; background-color:#F2F9FF; color: #003399; text-decoration: none; font-weight: bold;}
+.LinkBox, .DropDown {padding: 3px; border: solid #D5D8DE; border-width: 1px; background-color:#F2F9FF; color: #003399; text-decoration: none; font-weight: bold;}
+
+.DropDown {
+  font-size: 11px;
+  z-index: 3000;
+}
 
 /* list for MONITOR */
 .ListHeaderLight {background-color: #DBE3F5;}
@@ -292,12 +297,18 @@ div.menu {
 }
 
 /* Style specifications for menu items and links  */
-div.menu ul { margin:0; padding:0 }
+div.menu ul, .DropDown ul { margin:0; padding:0 }
 /* Need to set padding of at least one pixel or ie sets very large margin */
 div.menu ul li { 
-  padding:.3em .4em; margin:0; 
+  padding:.3em .4em;
+  margin:0; 
   list-style-type:none
   }
+
+.DropDown li { 
+  margin: 2px; 
+  list-style-type:none
+}
 
 /* Set display block and position relative so clicks on list items activate links  */  
 div.menu a, div.eventsSummary a { 
@@ -598,14 +609,15 @@ div.eventBlock {
 }
 
 ul.boxy {
-    list-style-type: none;
-    padding: 0px;
-    margin: 0px;
+  list-style-type: none;
+  padding: 0px;
+  margin: 0px;
+  z-index: 0;
 }
 
 ul.boxy li {
-    padding-left: 4px;
-    margin: 0px; 
+  padding-left: 4px;
+  margin: 0px; 
 }
 
 .overlay_dialog {
