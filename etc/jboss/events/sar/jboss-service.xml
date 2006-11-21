@@ -57,4 +57,25 @@
     <attribute name="InitialRepetitions">-1</attribute>
   </mbean>
 
+  <mbean code="org.hyperic.hq.events.server.mbean.EscalationScheduler"
+         name="hyperic.jmx:type=Service,name=EscalationService">
+     <!-- The maximum amount of work in the queue -->
+     <attribute name="MaximumQueueSize">256</attribute>
+     <!-- The maximum number of active threads -->
+     <attribute name="MaximumPoolSize">25</attribute>
+     <!-- How long to keep threads alive after their last work (default one minute) -->
+     <attribute name="KeepAliveTime">60000</attribute>
+  </mbean>
+
+  <mbean code="org.jboss.varia.scheduler.Scheduler"
+         name="hyperic.jmx:service=Scheduler,name=EscalationService">
+    <depends>hyperic.jmx:type=Service,name=EscalationService</depends>
+    <attribute name="StartAtStartup">true</attribute>
+    <attribute name="SchedulableMBean">hyperic.jmx:type=Service,name=EscalationService</attribute>
+    <attribute name="SchedulableMBeanMethod">hit( NOTIFICATION, DATE, REPETITIONS, SCHEDULER_NAME )</attribute>
+    <attribute name="InitialStartDate">NOW</attribute>
+    <attribute name="SchedulePeriod">30000</attribute>
+    <attribute name="InitialRepetitions">-1</attribute>
+  </mbean>
+
 </server>

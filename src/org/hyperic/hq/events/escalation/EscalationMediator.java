@@ -10,6 +10,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.EscalationState;
+import org.hyperic.hq.events.server.mbean.EscalationScheduler;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.dao.DAOFactory;
@@ -44,6 +45,21 @@ public class EscalationMediator extends Mediator
         } catch (NamingException e) {
             throw new SystemException(e);
         }
+    }
+
+    /**
+     * run escalation
+     */
+    public void processEscalation()
+    {
+        log.info("Hello world! " + Thread.currentThread().getName());
+        EscalationScheduler.getInstance().run(new Runnable() {
+            public void run()
+            {
+                log.info("EcalationScheduler sends regards " +
+                         Thread.currentThread().getName());
+            }
+        });
     }
 
     /**
