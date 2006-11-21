@@ -57,9 +57,7 @@ import org.apache.struts.tiles.actions.TilesAction;
  * <code>PORTAL_KEY</code> request attribute.
  */
 public class ViewAction extends TilesAction {
-    // --------------------------------------------------------- Public Methods
-    
-    
+
    public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
                                  ActionForm form,

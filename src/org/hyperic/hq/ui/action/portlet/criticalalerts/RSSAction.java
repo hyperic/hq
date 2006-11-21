@@ -102,8 +102,7 @@ public class RSSAction extends BaseRSSAction {
             throw new ServletException("Error finding recent alerts", e);
         }
 
-        int i = 0;
-        for (Iterator it = list.iterator(); it.hasNext(); i++) {
+        for (Iterator it = list.iterator(); it.hasNext(); ) {
             DashboardAlertBean alert = (DashboardAlertBean) it.next();
             AppdefEntityID aeid = alert.getResource().getEntityId();
             

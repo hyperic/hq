@@ -44,7 +44,6 @@ import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.StringUtil;
-import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
 import org.apache.commons.logging.Log;
@@ -56,12 +55,9 @@ import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 
 /**
- * prepairs the list and form for the saved queries properties page.
+ * Prepares the list and form for the saved queries properties page.
  */
 public class PrepareAction extends TilesAction {
-
-    // --------------------------------------------------------- Public Methods
-    
 
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
@@ -77,12 +73,11 @@ public class PrepareAction extends TilesAction {
 
         ServletContext ctx = getServlet().getServletContext();
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
-        PageControl pc = RequestUtils.getPageControl(request);
 
         HttpSession session = request.getSession();
         Integer sessionId = RequestUtils.getSessionId(request);
         WebUser user =
-            (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );            
+            (WebUser) session.getAttribute(Constants.WEBUSER_SES_ATTR);
         PageList resources = new PageList();
         String key = ".dashContent.criticalalerts.resources";
 
@@ -112,7 +107,7 @@ public class PrepareAction extends TilesAction {
 
         Iterator i = resourceList.iterator();
 
-        while( i.hasNext() ){
+        while(i.hasNext()) {
 
             ArrayList resourceIds =
                 (ArrayList) StringUtil.explode((String) i.next(), ":");
@@ -122,16 +117,15 @@ public class PrepareAction extends TilesAction {
             int id = Integer.parseInt( (String) j.next() );
 
             AppdefEntityID entityID = new AppdefEntityID(type, id);               
-            AppdefResourceValue resource = appdefBoss.findById(sessionId.intValue(), entityID);
+            AppdefResourceValue resource =
+                appdefBoss.findById(sessionId.intValue(), entityID);
             resources.add(resource);  
         }
 
         resources.setTotalSize(resources.size());
         request.setAttribute("criticalAlertsList", resources);
         request.setAttribute("criticalAlertsTotalSize",
-                             new Integer(resources.getTotalSize()));                                 
-
-        
+                             new Integer(resources.getTotalSize()));
         return null;
     }
 }

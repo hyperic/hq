@@ -39,134 +39,68 @@ public class PropertiesForm extends DashboardBaseForm  {
         ".dashContent.criticalalerts.priority";
     public final static String SELECTED_OR_ALL =
         ".dashContent.criticalalerts.selectedOrAll";
-    
-    /** Holds value of property numberOfAlerts. */
-    private Integer numberOfAlerts;
-    
-    /** Holds value of property priority. */
-    private String priority;
-    
-    /** Holds value of property past. */
-    private long past;
-    
-    /** Holds value of property selectedOrAll. */
-    private String selectedOrAll;
-    
-    /** Holds value of property key. */
-    private String key;
-    
-    /** Holds value of property ids. */
-    private String[] ids;
-    
-    //-------------------------------------instance variables
 
-    //-------------------------------------constructors
+    private Integer numberOfAlerts;
+    private String priority;
+    private long past;
+    private String selectedOrAll;
+    private String key;
+    private String[] ids;
 
     public PropertiesForm() {
         super();
-}
-
-    //-------------------------------------public methods
+    }
 
     public String toString() {
         StringBuffer s = new StringBuffer();
         return s.toString();
     }
-    
-    /** Getter for property numberOfAlerts.
-     * @return Value of property numberOfAlerts.
-     *
-     */
+
     public Integer getNumberOfAlerts() {
         return this.numberOfAlerts;
     }
-    
-    /** Setter for property numberOfAlerts.
-     * @param numberOfAlerts New value of property numberOfAlerts.
-     *
-     */
+
     public void setNumberOfAlerts(Integer numberOfAlerts) {
         this.numberOfAlerts = numberOfAlerts;
     }
-    
-    /** Getter for property priority.
-     * @return Value of property priority.
-     *
-     */
+
     public String getPriority() {
         return this.priority;
     }
-    
-    /** Setter for property priority.
-     * @param priority New value of property priority.
-     *
-     */
+
     public void setPriority(String priority) {
         this.priority = priority;
     }
-    
-    /** Getter for property past.
-     * @return Value of property past.
-     *
-     */
+
     public long getPast() {
         return this.past;
     }
-    
-    /** Setter for property past.
-     * @param past New value of property past.
-     *
-     */
+
     public void setPast(long past) {
         this.past = past;
     }
-    
-    /** Getter for property selectedOrAll.
-     * @return Value of property selectedOrAll.
-     *
-     */
+
     public String getSelectedOrAll() {
         return this.selectedOrAll;
     }
-    
-    /** Setter for property selectedOrAll.
-     * @param selectedOrAll New value of property selectedOrAll.
-     *
-     */
+
     public void setSelectedOrAll(String selectedOrAll) {
         this.selectedOrAll = selectedOrAll;
     }
-    
-    /** Getter for property key.
-     * @return Value of property key.
-     *
-     */
+
     public String getKey() {
         return this.key;
     }
-    
-    /** Setter for property key.
-     * @param key New value of property key.
-     *
-     */
+
     public void setKey(String key) {
         this.key = key;
     }
-    
-    /** Getter for property ID.
-     * @return Value of property ID.
-     *
-     */
+
     public String[] getIds() {
         return this.ids;
     }
-    
-    /** Setter for property ID.
-     * @param ID New value of property ID.
-     *
-     */
+
     public void setIds(String[] ids) {
         this.ids = ids;
     }
-    
 }
