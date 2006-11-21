@@ -849,7 +849,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     /**
      * Get actions for a given alert.
      *
-     * @param aid the alert id
+     * @param alertId the alert id
      *
      * @ejb:interface-method
      */
