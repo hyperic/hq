@@ -80,11 +80,12 @@ public class EscalationScheduler
             }
             return;
         }
-        log.info("Notification " + notification +
-                 " EscalationService is called at: " + date +
-                 ", remaining repetitions: " + repetitions +
-                 ", test, name: " + name);
-
+        if (log.isDebugEnabled()) {
+            log.debug("Notification " + notification +
+                      " EscalationService is called at: " + date +
+                      ", remaining repetitions: " + repetitions +
+                      ", name: " + name);
+        }
         threadPool.run(new Runnable() {
             public void run()
             {

@@ -86,8 +86,8 @@ public class EscalationMediator extends Mediator
     {
         // get all scheduled escalations
         List states = getScheduledEscalationState();
-        if (log.isInfoEnabled()) {
-            log.info("Found " + states.size() + " scheduled escalations.");
+        if (log.isDebugEnabled()) {
+            log.debug("Found " + states.size() + " scheduled escalations.");
         }
         if (MOCKTEST) {
             return;
@@ -126,23 +126,23 @@ public class EscalationMediator extends Mediator
             alertManagerLocal.findEscalationById(escalationId);
 
         if (setActiveEscalation(escalation, alertDefId)) {
-            if (log.isInfoEnabled()) {
+            if (log.isDebugEnabled()) {
                 EscalationState state =
                     getEscalationState(escalation, alertDefId);
-                log.info("Start escalation. alert=" +  alert +
-                         ", escalation=" + escalation + ", state=" +
-                         state);
+                log.debug("Start escalation. alert=" +  alert +
+                          ", escalation=" + escalation + ", state=" +
+                          state);
             }
             // Escalation is not active, start escalation.
             dispatchAction(escalationId, alertDefId);
         } else {
             // escalation is active, so do not start another escalation
             // for this chain.
-            if (log.isInfoEnabled()) {
+            if (log.isDebugEnabled()) {
                 EscalationState state =
                     getEscalationState(escalation, alertDefId);
-                log.info("Escalation already in progress. alert=" +  alert +
-                         ", escalation=" + escalation + ", state="+ state);
+                log.debug("Escalation already in progress. alert=" +  alert +
+                          ", escalation=" + escalation + ", state="+ state);
             }
         }
     }
