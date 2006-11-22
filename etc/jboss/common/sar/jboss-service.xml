@@ -20,7 +20,7 @@
     <!-- The maximum number of active threads -->
     <attribute name="MaximumPoolSize">25</attribute>
     <!-- How long to keep threads alive after their last work (default one minute) -->
-    <attribute name="KeepAliveTime">5000</attribute>
+    <attribute name="KeepAliveTime">60000</attribute>
   </mbean>
 
 </server>
