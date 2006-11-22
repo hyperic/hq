@@ -74,12 +74,11 @@
     <xsl:template mode="key-mode" match="@cascade" />
 
   <!--
-    enable select-before-update, make sure there are real
-    updates before really doing SQL update
+    disable as we are using optimistic lock with versioning.
   -->
     <xsl:template match="@select-before-update">
       <xsl:attribute name="{name()}">
-        <xsl:value-of select="'true'"/>
+        <xsl:value-of select="'false'"/>
       </xsl:attribute>
     </xsl:template>
 
