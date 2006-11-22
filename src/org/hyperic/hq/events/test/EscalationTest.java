@@ -7,16 +7,10 @@ import org.hyperic.hq.events.server.session.EscalationState;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.EscalationMediator;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
-import org.hyperic.hq.CommandContext;
-import org.hyperic.hq.command.SaveCommand;
-import org.hyperic.hq.command.FindCommand;
-import org.hyperic.hq.command.RemoveCommand;
-import org.hyperic.dao.DAOFactory;
 
 import javax.naming.NamingException;
 import java.util.HashSet;
 import java.util.Random;
-import java.util.List;
 
 /*
  * NOTE: This copyright does *not* cover user programs that use HQ
@@ -79,15 +73,12 @@ public class EscalationTest
         e.getActions().add(act1);
         e.getActions().add(act2);
 
-        CommandContext context = CommandContext.createContext();
-        context.setContextDao(DAOFactory.getDAOFactory().getEscalationDAO());
-
-        context.execute(SaveCommand.setInstance(e));
+        EscalationMediator.getInstance().saveEscalation(e);
         // look it up, there should be exactly one
-        List result = assertEscalation(e, 1);
-
-        e = (Escalation)result.get(0);
+        e = EscalationMediator.getInstance().findEscalationById(e);
+        assertNotNull(e);
         assertTrue(e.getActions().size() == 2);
+        
         // verify escalation order
         Action a1 = ((EscalationAction)e.getActions().get(0)).getAction();
         Action a2 = ((EscalationAction)e.getActions().get(1)).getAction();
@@ -99,24 +90,24 @@ public class EscalationTest
         e.getActions().add(act2);
         e.getActions().add(act1);
 
-        EscalationState state =
-            EscalationMediator.getInstance().getEscalationState(e, ALERT_DEF_ID1);
-        long mtime = state.getModifiedTime();
-
-        context.execute(SaveCommand.setInstance(e));
+        EscalationMediator.getInstance().saveEscalation(e);
         // look it up, there should be exactly one
-        result = assertEscalation(e, 1);
-
-        e = (Escalation)result.get(0);
+        e = EscalationMediator.getInstance().findEscalationById(e);
+        assertNotNull(e);
         // should still have 2 actions
         assertTrue(e.getActions().size() == 2);
+
         // verify escalation order
         a1 = ((EscalationAction)e.getActions().get(0)).getAction();
         a2 = ((EscalationAction)e.getActions().get(1)).getAction();
         assertTrue(a1.getId().equals(act2.getAction().getId()));
         assertTrue(a2.getId().equals(act1.getAction().getId()));
 
-        // escalation state time should not be updated
+        EscalationState state =
+            EscalationMediator.getInstance().getEscalationState(e, ALERT_DEF_ID1);
+        long mtime = state.getModifiedTime();
+        EscalationMediator.getInstance().saveEscalationState(state);
+       // escalation state time should not be updated
         state =
             EscalationMediator.getInstance().getEscalationState(e, ALERT_DEF_ID1);
         assertTrue(state.getModifiedTime() == mtime);
@@ -124,33 +115,12 @@ public class EscalationTest
         // update state
         mtime = state.getModifiedTime();
         state.setCurrentLevel(1);
-        context.execute(SaveCommand.setInstance(e));
-        // look it up, there should be exactly one
-        result = assertEscalation(e, 1);
-        e = (Escalation)result.get(0);
+        EscalationMediator.getInstance().saveEscalationState(state);
         // escalation state time should have been  updated
         state =
             EscalationMediator.getInstance().getEscalationState(e, ALERT_DEF_ID1);
         assertTrue(state.getModifiedTime() > mtime);
 
-        // remove it
-        context.execute(
-            RemoveCommand.setInstance(e)
-        );
-        // look it up again should not be there.
-        e = Escalation.newInstance(BOGUS_NAME1);
-        assertEscalation(e, 0);
-    }
-
-    private List assertEscalation(Escalation esc, int count) {
-        // clear session to make sure we are hitting the db
-        CommandContext context = CommandContext.createContext(
-            FindCommand.setInstance(esc));
-        context.setContextDao(DAOFactory.getDAOFactory().getEscalationDAO());
-        context.execute();
-        List result = context.getQueryResult();
-        assertTrue(result.size() == count);
-        return result;
     }
 
     private EscalationAction createEmailAction(String[] users) {
@@ -174,14 +144,8 @@ public class EscalationTest
         e.getActions().add(act1);
         e.getActions().add(act2);
 
-        CommandContext context = CommandContext.createContext();
-        context.setContextDao(DAOFactory.getDAOFactory().getEscalationDAO());
-
-        context.execute(SaveCommand.setInstance(e));
-        // look it up, there should be exactly one
-        List result = assertEscalation(e, 1);
-
-        e = (Escalation)result.get(0);
+        EscalationMediator.getInstance().saveEscalation(e);
+        e = EscalationMediator.getInstance().findEscalationById(e);
         // verify number of actions
         assertTrue(e.getActions().size() == 2);
 
@@ -190,10 +154,8 @@ public class EscalationTest
             EscalationMediator.getInstance().getEscalationState(e, ALERT_DEF_ID2);
         state1.setActive(true);
         e.setAllowPause(true);
-        context.execute(SaveCommand.setInstance(e));
-        
-        result = assertEscalation(e, 1);
-        e = (Escalation)result.get(0);
+        EscalationMediator.getInstance().saveEscalation(e);
+        EscalationMediator.getInstance().saveEscalationState(state1);
         state1 =
             EscalationMediator.getInstance().getEscalationState(e, ALERT_DEF_ID2);
 
@@ -205,22 +167,11 @@ public class EscalationTest
         EscalationMediator.getInstance()
             .clearActiveEscalation(e.getId(), ALERT_DEF_ID2);
 
-        result = assertEscalation(e, 1);
-        e = (Escalation)result.get(0);
-
         state1 =
             EscalationMediator.getInstance()
                 .getEscalationState(e, ALERT_DEF_ID2);
         // verify active status has been cleared
         assertTrue(!state1.isActive());
-        
-        // remove it
-        context.execute(
-            RemoveCommand.setInstance(e)
-        );
-        // look it up again should not be there.
-        e = Escalation.newInstance(BOGUS_NAME2);
-        assertEscalation(e, 0);
     }
 
 }

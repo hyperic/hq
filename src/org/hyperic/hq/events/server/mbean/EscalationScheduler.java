@@ -3,12 +3,12 @@
  */
 package org.hyperic.hq.events.server.mbean;
 
-import org.jboss.util.threadpool.BasicThreadPool;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycleListener;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycle;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.common.server.mbean.HQThreadPool;
 import org.hyperic.hq.events.EscalationMediator;
 
 import javax.management.ObjectName;
@@ -39,73 +39,27 @@ public class EscalationScheduler
     private MBeanServer server = null;
     private boolean started = false;
 
-    private int maximumPoolSize;
-    private int maximumQueueSize;
-    private int keepAliveTime;
-
-    /** The thread pool */
-    private BasicThreadPool threadPool =
-        new BasicThreadPool("EscalationManager");
-
     /**
-     * Get the maximum pool size
+     * get the thread pool object name
      *
      * @jmx:managed-attribute
      */
-    public int getMaximumPoolSize()
+    public ObjectName getThreadPoolName()
     {
-        return maximumPoolSize;
+        return threadPoolName;
     }
 
     /**
-     * Set the maximum pool size
+     * set the thread pool object name
      *
      * @jmx:managed-attribute
      */
-    public void setMaximumPoolSize(int maximumPoolSize)
+    public void setThreadPoolName(ObjectName threadPoolName)
     {
-        this.maximumPoolSize = maximumPoolSize;
+        this.threadPoolName = threadPoolName;
     }
 
-    /**
-     * Get the maximum queue size
-     *
-     * @jmx:managed-attribute
-     */
-    public int getMaximumQueueSize()
-    {
-        return maximumQueueSize;
-    }
-
-    /**
-     * set the maximum queue size
-     *
-     * @jmx:managed-attribute
-     */
-    public void setMaximumQueueSize(int maximumQueueSize)
-    {
-        this.maximumQueueSize = maximumQueueSize;
-    }
-
-    /**
-     * get thread keep alive time
-     *
-     * @jmx:managed-attribute
-     */
-    public int getKeepAliveTime()
-    {
-        return keepAliveTime;
-    }
-
-    /**
-     * set thread keep alive time
-     *
-     * @jmx:managed-attribute
-     */
-    public void setKeepAliveTime(int keepAliveTime)
-    {
-        this.keepAliveTime = keepAliveTime;
-    }
+    private ObjectName threadPoolName;
 
     /**
      * MBean entry point
@@ -127,7 +81,7 @@ public class EscalationScheduler
                  ", remaining repetitions: " + repetitions +
                  ", test, name: " + name);
 
-        threadPool.run(new Runnable() {
+        HQThreadPool.getInstance().run(new Runnable() {
             public void run()
             {
                 EscalationMediator.getInstance().processEscalation();
@@ -137,7 +91,7 @@ public class EscalationScheduler
 
     public void run(Runnable runnable)
     {
-        threadPool.run(runnable);
+        HQThreadPool.getInstance().run(runnable);
     }
 
     /**
@@ -152,14 +106,6 @@ public class EscalationScheduler
      */
     public void start() throws Exception
     {
-        if (log.isInfoEnabled()) {
-            log.info("EscalationManager: MaximumPoolSize=" + maximumPoolSize +
-                     ", MaximumQueueSize="+ maximumQueueSize +
-                     ", KeepAliveTime="+ keepAliveTime);
-        }
-        threadPool.setMaximumPoolSize(maximumPoolSize);
-        threadPool.setMaximumQueueSize(maximumQueueSize);
-        threadPool.setKeepAliveTime((long)keepAliveTime);
         instance = this;
         
         haListener =

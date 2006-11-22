@@ -302,6 +302,66 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
+     * save escalation state new transaction to make sure the result
+     * is visible when the call ends.
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public void saveEscalation(Escalation e)
+    {
+        DAOFactory.getDAOFactory().getEscalationDAO().save(e);
+    }
+
+    /**
+     * save escalation state new transaction to make sure the result
+     * is visible when the call ends.
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public void saveEscalationState(EscalationState state)
+    {
+        DAOFactory.getDAOFactory().getEscalationStateDAO().save(state);
+    }
+
+    /**
+     * save escalation state new transaction to make sure the result
+     * is visible when the call ends.
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="RequiresNew"
+     */
+    public void saveEscalationStateReqNew(EscalationState state)
+    {
+        DAOFactory.getDAOFactory().getEscalationStateDAO().save(state);
+    }
+
+    /**
+     * save escalation state new transaction to make sure the result
+     * is visible when the call ends.
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public void removeEscalation(Escalation e)
+    {
+        DAOFactory.getDAOFactory().getEscalationDAO().remove(e);
+    }
+
+    /**
+     * save escalation state new transaction to make sure the result
+     * is visible when the call ends.
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public void removeEscalationState(EscalationState state)
+    {
+        DAOFactory.getDAOFactory().getEscalationStateDAO().remove(state);
+    }
+
+    /**
      * schedule action
      * 
      * @param escalationId

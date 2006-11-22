@@ -4,8 +4,6 @@
 package org.hyperic.hq.events;
 
 import org.hyperic.hq.Mediator;
-import org.hyperic.hq.CommandContext;
-import org.hyperic.hq.command.SaveCommand;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.hq.events.server.session.Alert;
@@ -13,7 +11,6 @@ import org.hyperic.hq.events.server.session.EscalationState;
 import org.hyperic.hq.events.server.mbean.EscalationScheduler;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.LockSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,7 +51,6 @@ public class EscalationMediator extends Mediator
      */
     public void processEscalation()
     {
-
         // get all scheduled escalations
         List states = getScheduledEscalationState();
         if (log.isInfoEnabled()) {
@@ -136,13 +132,39 @@ public class EscalationMediator extends Mediator
                 return false;
             }
             state.setActive(true);
-            CommandContext context = CommandContext.createContext();
-            context.setRequiresNew(true);
-            context.setContextDao(
-                DAOFactory.getDAOFactory().getEscalationStateDAO());
-            context.execute(SaveCommand.setInstance(state));
+            saveEscalationStateReqNew(state);
         }
         return true;
+    }
+
+    public Escalation findEscalationById(Escalation e)
+    {
+        return alertManagerLocal.findEscalationById(e.getId());
+    }
+
+    public void saveEscalation(Escalation e)
+    {
+        alertManagerLocal.saveEscalation(e);
+    }
+
+    public void saveEscalationState(EscalationState state)
+    {
+        alertManagerLocal.saveEscalationState(state);
+    }
+
+    public void saveEscalationStateReqNew(EscalationState state)
+    {
+        alertManagerLocal.saveEscalationStateReqNew(state);
+    }
+
+    public void removeEscalation(Escalation e)
+    {
+        alertManagerLocal.removeEscalation(e);
+    }
+
+    public void removeEscalationState(EscalationState state)
+    {
+        alertManagerLocal.removeEscalationState(state);
     }
 
     public EscalationState getEscalationState(Escalation e, Integer alertDefId)
