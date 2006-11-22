@@ -79,6 +79,8 @@ public class AlertDefinitionBasicValue
    private boolean actOnTriggerIdHasBeenSet = false;
    private boolean deleted;
    private boolean deletedHasBeenSet = false;
+   private Integer escalationId;
+   private boolean escalationIdHasBeenSet = false;
    private java.util.Collection Triggers = new java.util.ArrayList();
    private java.util.Collection Conditions = new java.util.ArrayList();
    private java.util.Collection Actions = new java.util.ArrayList();
@@ -316,7 +318,27 @@ public class AlertDefinitionBasicValue
 	  return this.controlFiltered;
    }
 
-   public void setControlFiltered( boolean controlFiltered )
+    public Integer getEscalationId()
+    {
+        return escalationId;
+    }
+
+    public void setEscalationId(Integer escalationId)
+    {
+        this.escalationId = escalationId;
+    }
+
+    public boolean isEscalationIdHasBeenSet()
+    {
+        return escalationIdHasBeenSet;
+    }
+
+    public void setEscalationIdHasBeenSet(boolean escalationIdHasBeenSet)
+    {
+        this.escalationIdHasBeenSet = escalationIdHasBeenSet;
+    }
+
+    public void setControlFiltered( boolean controlFiltered )
    {
 	  this.controlFiltered = controlFiltered;
 	  controlFilteredHasBeenSet = true;
