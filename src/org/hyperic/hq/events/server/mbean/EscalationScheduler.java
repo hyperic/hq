@@ -8,8 +8,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycleListener;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycle;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.common.server.mbean.HQThreadPool;
 import org.hyperic.hq.events.EscalationMediator;
+import org.jboss.util.threadpool.ThreadPool;
 
 import javax.management.ObjectName;
 import javax.management.Notification;
@@ -28,16 +28,20 @@ public class EscalationScheduler
 {
     private static Log log = LogFactory.getLog(EscalationScheduler.class);
 
-    private static EscalationScheduler instance;
-
-    public static EscalationScheduler getInstance()
-    {
-        return instance;
-    }
-
     private EjbModuleLifecycle haListener = null;
     private MBeanServer server = null;
     private boolean started = false;
+    private ThreadPool threadPool;
+
+    /**
+     * this this instance
+     *
+     * @jmx:managed-attribute
+     */
+    public EscalationSchedulerMBean getInstance()
+    {
+        return this;
+    }
 
     /**
      * get the thread pool object name
@@ -81,7 +85,7 @@ public class EscalationScheduler
                  ", remaining repetitions: " + repetitions +
                  ", test, name: " + name);
 
-        HQThreadPool.getInstance().run(new Runnable() {
+        threadPool.run(new Runnable() {
             public void run()
             {
                 EscalationMediator.getInstance().processEscalation();
@@ -89,9 +93,14 @@ public class EscalationScheduler
         });
     }
 
+    /**
+     * run a Job in a threadPool
+     *
+     * @jmx:managed-operation
+     */
     public void run(Runnable runnable)
     {
-        HQThreadPool.getInstance().run(runnable);
+        threadPool.run(runnable);
     }
 
     /**
@@ -106,12 +115,11 @@ public class EscalationScheduler
      */
     public void start() throws Exception
     {
-        instance = this;
-        
         haListener =
             new EjbModuleLifecycle(this.server, this,
                                    HQConstants.EJB_MODULE_PATTERN);
         haListener.start();
+        threadPool = (ThreadPool)server.getAttribute(threadPoolName, "Instance");
     }
 
     /**
@@ -119,7 +127,7 @@ public class EscalationScheduler
      */
     public void stop()
     {
-        instance = null;
+        threadPool = null;
         log.info("Stopping " + getClass().getName());
         haListener.stop();
     }

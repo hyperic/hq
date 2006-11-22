@@ -57,21 +57,9 @@
     <attribute name="InitialRepetitions">-1</attribute>
   </mbean>
 
-  <!-- Ideally should not need to create threadpool -->
-  <mbean code="org.hyperic.hq.common.server.mbean.HQThreadPool"
-         name="hyperic.jmx:type=Service,name=HQWorkManagerThreadPool">
-    <attribute name="Name">HQWorkManager</attribute>
-    <!-- The maximum amount of work in the queue -->
-    <attribute name="MaximumQueueSize">256</attribute>
-    <!-- The maximum number of active threads -->
-    <attribute name="MaximumPoolSize">25</attribute>
-    <!-- How long to keep threads alive after their last work (default one minute) -->
-    <attribute name="KeepAliveTime">60000</attribute>
-  </mbean>
-
   <mbean code="org.hyperic.hq.events.server.mbean.EscalationScheduler"
          name="hyperic.jmx:type=Service,name=EscalationService">
-    <depends optional-attribute-name="ThreadPoolName">hyperic.jmx:type=Service,name=HQWorkManagerThreadPool</depends>
+    <depends optional-attribute-name="ThreadPoolName">hyperic.jmx:service=HQWorkManagerThreadPool</depends>
   </mbean>
 
   <mbean code="org.jboss.varia.scheduler.Scheduler"

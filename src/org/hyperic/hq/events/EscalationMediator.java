@@ -4,11 +4,12 @@
 package org.hyperic.hq.events;
 
 import org.hyperic.hq.Mediator;
+import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.EscalationState;
-import org.hyperic.hq.events.server.mbean.EscalationScheduler;
+import org.hyperic.hq.events.server.mbean.EscalationSchedulerMBean;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.hibernate.LockSet;
@@ -17,6 +18,12 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.CreateException;
 import javax.naming.NamingException;
+import javax.management.ObjectName;
+import javax.management.MalformedObjectNameException;
+import javax.management.ReflectionException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.AttributeNotFoundException;
 import java.util.List;
 import java.util.Iterator;
 
@@ -25,6 +32,11 @@ public class EscalationMediator extends Mediator
     private static final int DEFAULT_LOCKSET_SIZE = 1024;
     private static final LockSet stateLocks=new LockSet(DEFAULT_LOCKSET_SIZE);
     private static Log log = LogFactory.getLog(EscalationMediator.class);
+    private static boolean MOCKTEST =
+        "true".equals(System.getProperty("hq.mocktest"));
+
+    private static String ESCALATION_SERVICE_MBEAN =
+        "hyperic.jmx:type=Service,name=EscalationService";
 
     private static EscalationMediator instance = new EscalationMediator();
 
@@ -34,6 +46,7 @@ public class EscalationMediator extends Mediator
     }
 
     private AlertManagerLocal alertManagerLocal;
+    private EscalationSchedulerMBean escalationServiceMBean;
 
     protected EscalationMediator()
     {
@@ -42,6 +55,26 @@ public class EscalationMediator extends Mediator
         } catch (CreateException e) {
             throw new SystemException(e);
         } catch (NamingException e) {
+            throw new SystemException(e);
+        }
+        // MBEAN Service lookup does not work in mock unit test env.
+        if (MOCKTEST) {
+            return;
+        }
+        try {
+            ObjectName name = new ObjectName(ESCALATION_SERVICE_MBEAN);
+            escalationServiceMBean =
+                (EscalationSchedulerMBean)
+                    MBeanUtil.getMBeanServer().getAttribute(name, "Instance");
+        } catch (MalformedObjectNameException e) {
+            throw new SystemException(e);
+        } catch (ReflectionException e) {
+            throw new SystemException(e);
+        } catch (InstanceNotFoundException e) {
+            throw new SystemException(e);
+        } catch (MBeanException e) {
+            throw new SystemException(e);
+        } catch (AttributeNotFoundException e) {
             throw new SystemException(e);
         }
     }
@@ -56,12 +89,15 @@ public class EscalationMediator extends Mediator
         if (log.isInfoEnabled()) {
             log.info("Found " + states.size() + " scheduled escalations.");
         }
+        if (MOCKTEST) {
+            return;
+        }
         for (Iterator s = states.iterator(); s.hasNext(); ) {
             final EscalationState state = (EscalationState)s.next();
             if (log.isDebugEnabled()) {
                 log.debug("EscalationState: "+state);
             }
-            EscalationScheduler.getInstance().run(new Runnable() {
+            escalationServiceMBean.run(new Runnable() {
                 public void run()
                 {
                     dispatchAction(state.getEscalation().getId(),

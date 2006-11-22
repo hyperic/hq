@@ -7,8 +7,10 @@ import org.hyperic.hq.events.server.session.EscalationState;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.EscalationMediator;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
+import org.hibernate.ObjectNotFoundException;
 
 import javax.naming.NamingException;
+import javax.ejb.EJBException;
 import java.util.HashSet;
 import java.util.Random;
 
@@ -120,7 +122,16 @@ public class EscalationTest
         state =
             EscalationMediator.getInstance().getEscalationState(e, ALERT_DEF_ID1);
         assertTrue(state.getModifiedTime() > mtime);
-
+        
+        EscalationMediator.getInstance().removeEscalation(e);
+        try {
+            EscalationMediator.getInstance().findEscalationById(e);
+            assertTrue(1==0);
+        } catch (EJBException ignore) {
+            // object should not be found
+            Exception ex = ignore.getCausedByException();
+            assertTrue(ex instanceof ObjectNotFoundException);
+        }
     }
 
     private EscalationAction createEmailAction(String[] users) {
@@ -172,6 +183,16 @@ public class EscalationTest
                 .getEscalationState(e, ALERT_DEF_ID2);
         // verify active status has been cleared
         assertTrue(!state1.isActive());
+
+        EscalationMediator.getInstance().removeEscalation(e);
+        try {
+            EscalationMediator.getInstance().findEscalationById(e);
+            assertTrue(1==0);
+        } catch (EJBException ignore) {
+            // object should not be found
+            Exception ex = ignore.getCausedByException();
+            assertTrue(ex instanceof ObjectNotFoundException);
+        }
     }
 
 }
