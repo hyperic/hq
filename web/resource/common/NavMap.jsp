@@ -39,7 +39,6 @@
       <c:when test="${xlib}">
     <td class="PageTitleSmallText" colspan="2" style="padding-top: 6px;">
 <script src="<html:rewrite page="/js/"/>effects.js" type="text/javascript"></script>
-<script src="<html:rewrite page="/js/"/>diagram.js" type="text/javascript"></script>
 <c:set var="imageWidth" value="800"/>
 <hq:navMap areasVar="mapAreas" areasSizeVar="mapAreasSize" imageWidth="${imageWidth}"/>
 

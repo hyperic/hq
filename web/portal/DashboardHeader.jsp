@@ -30,7 +30,6 @@
   USA.
  --%>
 
-<script src="<html:rewrite page="/js/"/>diagram.js" type="text/javascript"></script>
 <script language="JavaScript" type="text/javascript">
   var help = "<hq:help/>";
 </script>
