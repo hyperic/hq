@@ -168,8 +168,28 @@ public class ViewServiceAction extends TilesAction {
 
             setUIOptions(service, request, config, oldResponse);
             
+            config = new ConfigSchema();
+
+            oldResponse = pboss.getMergedConfigResponse(sessionId.intValue(),
+                    ProductPlugin.TYPE_CONTROL, entityId, false);
+            try {
+                config = pboss.getConfigSchema(sessionId.intValue(), entityId,
+                        ProductPlugin.TYPE_CONTROL, oldResponse);
+            } catch (PluginNotFoundException e) {
+                // do nothing
+            }
+
+            List uiControlOptions =
+                ActionUtils.getConfigValues(config, oldResponse);
+
+            request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS,
+                                 uiControlOptions);
+            request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS_COUNT,
+                                 new Integer(uiControlOptions.size()));
+
             request.setAttribute(Constants.AUTO_INVENTORY,
-                                 new Boolean(service.getServer().getRuntimeAutodiscovery()));
+                                 new Boolean(service.getServer()
+                                             .getRuntimeAutodiscovery()));
             
             if(!editConfig)
                 RequestUtils.setError(request, "resource.common.inventory.error.serverConfigNotSet","configServer");

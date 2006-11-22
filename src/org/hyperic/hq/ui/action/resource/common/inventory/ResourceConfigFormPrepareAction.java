@@ -118,12 +118,11 @@ public class ResourceConfigFormPrepareAction extends TilesAction {
         int sessionId = RequestUtils.getSessionId(request).intValue();
         ServletContext ctx = getServlet().getServletContext();
 
-        AppdefEntityID rid = RequestUtils.getEntityId(request);
+        AppdefEntityID aeid = RequestUtils.getEntityId(request);
 
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
         
-        AppdefResourceValue resource
-            = (AppdefResourceValue) boss.findById(sessionId, rid);
+        AppdefResourceValue resource = boss.findById(sessionId, aeid);
 
         resourceForm.loadResourceValue(resource);
 
@@ -139,10 +138,10 @@ public class ResourceConfigFormPrepareAction extends TilesAction {
         try {
             oldResponse = pboss
                     .getMergedConfigResponse(sessionId,
-                                             ProductPlugin.TYPE_PRODUCT, rid,
+                                             ProductPlugin.TYPE_PRODUCT, aeid,
                                              false);
 
-            config = pboss.getConfigSchema(sessionId, rid,
+            config = pboss.getConfigSchema(sessionId, aeid,
                                            ProductPlugin.TYPE_PRODUCT,
                                            oldResponse);
 
@@ -196,51 +195,76 @@ public class ResourceConfigFormPrepareAction extends TilesAction {
 
         try {
             oldResponse = pboss.getMergedConfigResponse(sessionId,
-                    ProductPlugin.TYPE_MEASUREMENT, rid, false);
-            config = pboss.getConfigSchema(sessionId, rid,
+                    ProductPlugin.TYPE_MEASUREMENT, aeid, false);
+            config = pboss.getConfigSchema(sessionId, aeid,
                     ProductPlugin.TYPE_MEASUREMENT, oldResponse);
 
             addHelpProperties(helpProps, config, oldResponse);
 
-            if(rid.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
+            if(aeid.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
                 ServerValue server = (ServerValue)resource;
                 if(server.getWasAutodiscovered()) { 
                     request.setAttribute(Constants.SERVER_BASED_AUTO_INVENTORY,
-                                                                 new Integer(0));
+                                         new Integer(0));
                 } else {
                     request.setAttribute(Constants.SERVER_BASED_AUTO_INVENTORY, 
-                                                                new Integer(1));
+                                         new Integer(1));
                     resourceForm.setServerBasedAutoInventory(
-                                                server.getRuntimeAutodiscovery());
+                                         server.getRuntimeAutodiscovery());
                 }
-                BizappUtils.setRuntimeAIMessage(sessionId, request, 
-                                                server, boss);
+                BizappUtils.setRuntimeAIMessage(sessionId, request, server,
+                                                boss);
             }
 
         }catch(PluginNotFoundException e) {
             //do nothing
         }
         
-        List uiMonitorOptions = BizappUtils.buildLoadConfigOptions(prefix, config,
-                                                                     oldResponse); 
+        List uiMonitorOptions = BizappUtils.buildLoadConfigOptions(prefix,
+                                                                   config,
+                                                                   oldResponse); 
 
         resourceForm.setMonitorConfigOptions(uiMonitorOptions);
-        request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS_COUNT,new Integer(uiMonitorOptions.size()));
+        request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS_COUNT,
+                             new Integer(uiMonitorOptions.size()));
 
-        if(rid.getType() != AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-            setUIOptions(rid, request, resourceForm, uiMonitorOptions, helpProps);
+        if(aeid.getType() != AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
+            setUIOptions(aeid, request, resourceForm, uiMonitorOptions,
+                         helpProps);
         }
 
         addExtraHelpProperties(pboss, helpProps);
 
         try {
-            help = pboss.getMonitoringHelp(sessionId, rid, helpProps);
+            help = pboss.getMonitoringHelp(sessionId, aeid, helpProps);
         } catch (Exception e) {
             log.error("Error getting help: " + e.getMessage(), e);
         }
 
         request.setAttribute(Constants.MONITOR_HELP, help);
 
+        prefix = ProductPlugin.TYPE_CONTROL + ".";
+        config = new ConfigSchema();
+        oldResponse = new ConfigResponse();
+
+        try {
+            oldResponse = pboss.getMergedConfigResponse(sessionId,
+                    ProductPlugin.TYPE_CONTROL, aeid, false);
+            config = pboss.getConfigSchema(sessionId, aeid,
+                    ProductPlugin.TYPE_CONTROL, oldResponse);
+
+            addHelpProperties(helpProps, config, oldResponse);
+        }catch(PluginNotFoundException e) {
+            // do nothing
+        }
+
+        List uiControlOptions =
+            BizappUtils.buildLoadConfigOptions(prefix, config, oldResponse);
+
+        resourceForm.setControlConfigOptions(uiControlOptions);
+        request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS_COUNT,
+                             new Integer(uiControlOptions.size()));
+        
         return null;
 
     }

@@ -43,7 +43,6 @@
 <tiles:importAttribute name="rtConfigOptions" ignore="true"/>
 <tiles:importAttribute name="controlConfigOptions" ignore="true"/>
 <tiles:importAttribute name="controlConfigOptionsCount" ignore="true" />
-<tiles:importAttribute name="resourceNotControllable" ignore="true"/>
 
 <c:url var="editAction" value="/resource/${resource.entityId.typeName}/Inventory.do?mode=editConfig&rid=${resource.id}&type=${resourceType}"/>
 
@@ -192,12 +191,6 @@
 </tr>
 </c:if>
 </c:if>
-<c:choose>
-<c:when test="${not empty resourceNotControllable}">
-<tr>
-</tr>
-</c:when>
-<c:otherwise>
 <tr>
     <td class="ConfigPropHeader" colspan="4"><fmt:message key="resource.common.inventory.configProps.Control"/></td>
   </tr>
@@ -221,8 +214,6 @@
     </c:choose> -->
 </logic:iterate>
 	</tr>
-</c:otherwise>
-</c:choose>
   <tr>
     <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
   </tr>

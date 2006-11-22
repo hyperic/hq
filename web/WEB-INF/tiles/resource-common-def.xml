@@ -41,6 +41,9 @@
   <definition name=".resource.common.inventory.groups"
               path="/resource/common/inventory/ViewGroupMembership.jsp"/>
 			  
+  <definition name=".resource.common.inventory.viewConfigProperties"
+              path="/resource/common/inventory/ViewConfigProperties.jsp"/>
+
   <!-- monitor timeline -->
   <definition name=".resource.common.monitor.visibility.timeline"
               path="/resource/common/monitor/visibility/Timeline.jsp"

@@ -75,10 +75,4 @@
   <definition name=".resource.common.monitor.visibility.metricsToolbar"
               path="/resource/common/monitor/visibility/MetricsToolbar.jsp"/>
 
-  <!-- inventory portlets -->
-  <definition name=".resource.common.inventory.viewConfigProperties"
-              path="/resource/common/inventory/ViewConfigProperties.jsp">
-    <put name="resourceNotControllable" value="true"/>
-  </definition>
-
 </tiles-definitions>
