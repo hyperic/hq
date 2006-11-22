@@ -17,6 +17,8 @@
     <attribute name="Name">HQWorkManager</attribute>
     <!-- The maximum amount of work in the queue -->
     <attribute name="MaximumQueueSize">256</attribute>
+    <!-- The minimum number of active threads to keep -->
+    <attribute name="MinimumPoolSize">2</attribute>
     <!-- The maximum number of active threads -->
     <attribute name="MaximumPoolSize">25</attribute>
     <!-- How long to keep threads alive after their last work (default one minute) -->
