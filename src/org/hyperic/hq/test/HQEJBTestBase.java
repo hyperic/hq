@@ -157,17 +157,28 @@ public abstract class HQEJBTestBase
         throws Exception
     {
         Transaction t = _session.beginTransaction();
+        boolean success = false;
+        
         try {
             block.run();
+            success = true;
         } finally {
-            t.commit();
+            if (success == false) {
+                t.rollback();
+            } else {
+                t.commit();
+            }
         }
     }
     
     public void tearDown() throws Exception {
-        _session.disconnect();
-        ManagedSessionContext.unbind(Util.getSessionFactory());
-        _session = null;
+        try {
+            _session.flush();
+        } finally {
+            _session.disconnect();
+            ManagedSessionContext.unbind(Util.getSessionFactory());
+            _session = null;
+        }
     }
     
     protected AuthzSubjectValue getOverlord() 

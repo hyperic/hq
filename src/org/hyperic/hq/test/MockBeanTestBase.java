@@ -14,28 +14,37 @@
  */
 package org.hyperic.hq.test;
 
-import com.mockrunner.mock.ejb.MockUserTransaction;
+import java.lang.reflect.Method;
 
 import javax.jms.MessageListener;
 import javax.jms.Queue;
 import javax.jms.QueueConnectionFactory;
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.sql.DataSource;
+import javax.transaction.Status;
 
-import org.hyperic.dao.DAOFactory;
+import oracle.jdbc.pool.OracleDataSource;
 
+import org.hyperic.util.jdbc.LoggingTransaction;
 import org.mockejb.MDBDescriptor;
 import org.mockejb.MockContainer;
 import org.mockejb.OptionalCactusTestCase;
 import org.mockejb.SessionBeanDescriptor;
+import org.mockejb.TransactionManager;
+import org.mockejb.TransactionPolicy;
+import org.mockejb.interceptor.Aspect;
+import org.mockejb.interceptor.AspectSystem;
+import org.mockejb.interceptor.AspectSystemFactory;
+import org.mockejb.interceptor.ClassPatternPointcut;
+import org.mockejb.interceptor.InvocationContext;
+import org.mockejb.interceptor.Pointcut;
 import org.mockejb.jms.MockQueue;
 import org.mockejb.jms.QueueConnectionFactoryImpl;
 import org.mockejb.jndi.MockContextFactory;
-
 import org.postgresql.jdbc2.optional.SimpleDataSource;
-import oracle.jdbc.pool.OracleDataSource;
+
+import com.mockrunner.mock.ejb.MockUserTransaction;
 
 /**
  * Abstract base class for all JUnit tests that use Mock EJB
@@ -168,10 +177,9 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
                                                _dsMapping);
         }
     }
-
+    
     /**
      * Initialising the context and mock container
-     * @throws NamingException if the initialisation cannot be completed
      */
     public void initialiseContainer() throws Exception {
         /* We want to use MockEJB JNDI provider only if we run outside of
@@ -190,17 +198,23 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
         // Create an instance of the MockContainer
         _container = new MockContainer(_context);
 
+        AspectSystem sys = AspectSystemFactory.getAspectSystem();
+        sys.addFirst(new SessionBeanPointcut(), 
+                     new TransactionManager(TransactionPolicy.REQUIRED));
+        
+        
         if (!isRunningOnServer()) {
             // bind jta transaction
             // we use MockTransaction outside of the app server
             MockUserTransaction mockTransaction = new MockUserTransaction();
-            _context.rebind("javax.transaction.UserTransaction", mockTransaction);
+            _context.rebind("javax.transaction.UserTransaction", 
+                            mockTransaction);
             // bind datasource
             DataSource ds = getDataSource();
             _context.rebind("java:/HypericDS", ds);
         }
     }
-
+    
    /**
     * Deploy the session bean that has the specified remote interface
     * class.  The bean must have a remote interface and must follow the
