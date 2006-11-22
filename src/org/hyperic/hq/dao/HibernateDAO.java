@@ -33,9 +33,6 @@ import org.hibernate.LockMode;
 import org.hibernate.Session;
 import org.hibernate.criterion.Example;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.Visitable;
-import org.hyperic.hq.VisitorContext;
-import org.hyperic.hq.Visitor;
 import org.hyperic.hibernate.PersistedObject;
 
 /**
