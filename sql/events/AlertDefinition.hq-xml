@@ -35,9 +35,7 @@
       <column name="PARENT_ID" />
     </many-to-one>
 
-    <bag name="childrenBag"
-         cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
-         inverse="true">
+    <bag name="childrenBag">
       <key column="PARENT_ID" />
       <one-to-many class="AlertDefinition" />
     </bag>
@@ -98,23 +96,17 @@
       <column name="ESCALATION_ID" not-null="false" />
     </many-to-one>
 
-    <bag name="actionsBag" table="EAM_ACTION"
-         cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
-         inverse="true">
+    <bag name="actionsBag" table="EAM_ACTION">
       <key column="ALERT_DEFINITION_ID" />
       <one-to-many class="Action" />
     </bag>
 
-    <bag name="conditionsBag" table="EAM_ALERT_CONDITION"
-         cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
-         inverse="true">
+    <bag name="conditionsBag" table="EAM_ALERT_CONDITION">
       <key column="ALERT_DEFINITION_ID" />
       <one-to-many class="AlertCondition" />
     </bag>
 
-    <bag name="triggersBag" table="EAM_REGISTERED_TRIGGER"
-         cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
-         inverse="true">
+    <bag name="triggersBag" table="EAM_REGISTERED_TRIGGER">
       <key column="ALERT_DEFINITION_ID" />
       <one-to-many class="RegisteredTrigger" />
     </bag>
