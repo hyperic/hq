@@ -74,10 +74,13 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
     private String _server;
 
     static {
-        // set mocktest property in class static block
-        // to ensure hibernate configuration is set
-        // for mockejb testing (a bit of a hack)
-        System.setProperty("hq.mocktest", "true");
+        String cactusMode = System.getProperty("mockejb.cactus.mode");
+        if (!"true".equals(cactusMode)) {
+            // set mocktest property in class static block
+            // to ensure hibernate configuration is set
+            // for mockejb testing (a bit of a hack)
+            System.setProperty("hq.mocktest", "true");
+        }
     }
 
     public MockBeanTestBase(String testName){
@@ -187,14 +190,15 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
         // Create an instance of the MockContainer
         _container = new MockContainer(_context);
 
-        // bind jta transaction
-        // we use MockTransaction outside of the app server
-        MockUserTransaction mockTransaction = new MockUserTransaction();
-        _context.rebind("javax.transaction.UserTransaction", mockTransaction);
-
-        // bind datasource
-        DataSource ds = getDataSource();
-        _context.rebind("java:/HypericDS", ds);
+        if (!isRunningOnServer()) {
+            // bind jta transaction
+            // we use MockTransaction outside of the app server
+            MockUserTransaction mockTransaction = new MockUserTransaction();
+            _context.rebind("javax.transaction.UserTransaction", mockTransaction);
+            // bind datasource
+            DataSource ds = getDataSource();
+            _context.rebind("java:/HypericDS", ds);
+        }
     }
 
    /**

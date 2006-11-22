@@ -104,6 +104,10 @@ public abstract class HQEJBTestBase
     public void setUp() 
         throws Exception
     {
+        // TODO: should not assume out of container only!, since Mockejb
+        // framework can be used for in container testing as well.
+        // JT, fix ASAP as this (out of container) assumption is prevalent
+        // in this base class.
         if (_initialized) {
             // We need to have this here, because for some reason the
             // properties are getting nuked after a test run.
