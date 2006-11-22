@@ -221,6 +221,9 @@
         <include name="icon_resource.gif" />
       </fileset>
     </copy>
+    <copy toDir="${build.dir}/classes">
+      <fileset dir="${hq.home}/etc" includes="cactus.properties,log_client.properties" />
+    </copy>
   </target>
 
   <target name="compile-test" depends="compile">
@@ -381,6 +384,14 @@
 
         <include name="ant.jar" />
         <include name="ant-lancher.jar" />
+
+        <!--  in container test jar files -->
+        <include name="aspectjrt-1.2.1.jar" />
+        <include name="cactus-13-1.6.1.jar" />
+        <include name="mockejb.jar" />
+        <include name="mockrunner-ejb.jar" />
+        <include name="junit.jar" />
+        <include name="commons-httpclient-2.0.jar" />
       </fileset>
       <fileset dir="${sigar.lib}" >
         <include name="sigar.jar" />
@@ -499,8 +510,18 @@
         <include name="struts.jar" />               
         <include name="struts-el.jar" />
         <include name="snmp4j.jar" />
+        <!--include name="aspectjrt-1.2.1.jar" />
+        <include name="cactus-13-1.6.1.jar" />
+        <include name="mockejb.jar" />
+        <include name="mockrunner-ejb.jar" />
+        <include name="junit.jar" />
+        <include name="commons-httpclient-2.0.jar" /-->
       </fileset> 
     </copy>
+
+    <!--copy todir="${ear.dir}/hq.war/WEB-INF/classes" >
+      <fileset dir="${build.dir}/classes" includes="**/*Test*.class" />
+    </copy-->
 
     <jar file="${ear.dir}/hq.war/WEB-INF/lib/hq-ui.jar" basedir="${build.dir}/classes" >
       <include name="org/hyperic/hq/ui/**" />
