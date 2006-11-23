@@ -30,6 +30,7 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.util.jdbc.DBUtil;
+import org.hyperic.hibernate.PersistedObject;
 
 public class AlertDAO extends HibernateDAO {
     public AlertDAO(DAOFactory f) {
@@ -179,5 +180,9 @@ public class AlertDAO extends HibernateDAO {
     
     void save(Alert alert) { 
         super.save(alert);
+    }
+
+    public void savePersisted(PersistedObject entity) {
+        save((Alert)entity);
     }
 }

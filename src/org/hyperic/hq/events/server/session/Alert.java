@@ -62,7 +62,7 @@ public class Alert
     protected AlertActionLog createActionLog(String detail, Action action) {
         AlertActionLog res = new AlertActionLog(this, detail, action);
     
-        save(res);
+        DAOFactory.getDAOFactory().getDAO(res.getClass()).savePersisted(res);
         _actionLog.add(res);
         return res;
     }
@@ -72,7 +72,7 @@ public class Alert
     {
         AlertConditionLog res = new AlertConditionLog(this, value, cond);
 
-        save(res);
+        DAOFactory.getDAOFactory().getDAO(res.getClass()).savePersisted(res);
         _conditionLog.add(res);
         return res;
     }

@@ -77,7 +77,7 @@ public class AlertDefinition
     {
         AlertCondition res = new AlertCondition(this, condVal, trigger);
         
-        save(res);
+        DAOFactory.getDAOFactory().getDAO(res.getClass()).savePersisted(res);
         _conditions.add(res);
         return res;
     }
@@ -85,7 +85,7 @@ public class AlertDefinition
     protected Action createAction(ActionValue actVal, Action parent) {
         Action res = new Action(this, actVal, parent);
         
-        save(res);
+        DAOFactory.getDAOFactory().getDAO(res.getClass()).savePersisted(res);
         _actions.add(res);
         return res;
     }
@@ -93,7 +93,7 @@ public class AlertDefinition
     protected Alert createAlert(AlertValue val) {
         Alert res = new Alert(this, val);
         
-        save(res);
+        DAOFactory.getDAOFactory().getDAO(res.getClass()).savePersisted(res);
         return res;
     }
     

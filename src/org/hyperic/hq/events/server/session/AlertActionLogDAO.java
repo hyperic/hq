@@ -26,6 +26,7 @@ package org.hyperic.hq.events.server.session;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hibernate.PersistedObject;
 
 public class AlertActionLogDAO extends HibernateDAO {
     public AlertActionLogDAO(DAOFactory f) {
@@ -34,5 +35,10 @@ public class AlertActionLogDAO extends HibernateDAO {
 
     public AlertActionLog findById(Integer id) {
         return (AlertActionLog)super.findById(id);
+    }
+
+    public void savePersisted(PersistedObject entity)
+    {
+        save((AlertActionLog)entity);
     }
 }

@@ -26,6 +26,7 @@ package org.hyperic.hq.events.server.session;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hibernate.PersistedObject;
 
 public class AlertConditionDAO extends HibernateDAO {
     public AlertConditionDAO(DAOFactory f) {
@@ -34,5 +35,9 @@ public class AlertConditionDAO extends HibernateDAO {
 
     public AlertCondition findById(Integer id) {
         return (AlertCondition)super.findById(id);
+    }
+
+    public void savePersisted(PersistedObject entity) {
+        save((AlertCondition)entity);
     }
 }
