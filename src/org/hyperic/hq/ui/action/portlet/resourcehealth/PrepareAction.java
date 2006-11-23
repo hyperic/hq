@@ -47,13 +47,10 @@ import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 
 /**
- *prepairs the list and form for the saved queries properties page.
+ * Prepares the list and form for the saved queries properties page.
  */
-
 public class PrepareAction extends TilesAction {
 
-    // Public Methods
-    
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
                                  ActionForm form,
@@ -65,7 +62,8 @@ public class PrepareAction extends TilesAction {
         
         ServletContext ctx = getServlet().getServletContext();
         HttpSession session = request.getSession();
-        WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
+        WebUser user = (WebUser)
+            session.getAttribute(Constants.WEBUSER_SES_ATTR);
         String key = Constants.USERPREF_KEY_FAVORITE_RESOURCES;
 
         DashboardUtils.verifyResources(key, ctx, user);
@@ -73,10 +71,10 @@ public class PrepareAction extends TilesAction {
         SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
         pForm.setDisplayOnDash(true);
 
-        boolean availability = new Boolean( user.getPreference(".dashContent.resourcehealth.availability") ).booleanValue();
-        boolean throughput =  new Boolean( user.getPreference(".dashContent.resourcehealth.throughput") ).booleanValue(); 
-        boolean performance = new Boolean( user.getPreference(".dashContent.resourcehealth.performance") ).booleanValue();
-        boolean utilization = new Boolean( user.getPreference(".dashContent.resourcehealth.utilization") ).booleanValue();
+        boolean availability = new Boolean(user.getPreference(".dashContent.resourcehealth.availability")).booleanValue();
+        boolean throughput =  new Boolean(user.getPreference(".dashContent.resourcehealth.throughput")).booleanValue();
+        boolean performance = new Boolean(user.getPreference(".dashContent.resourcehealth.performance")).booleanValue();
+        boolean utilization = new Boolean(user.getPreference(".dashContent.resourcehealth.utilization")).booleanValue();
 
         pForm.setAvailability(availability);
         pForm.setThroughput(throughput);

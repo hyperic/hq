@@ -52,13 +52,8 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 
-/**
- *prepairs the list and form for the saved queries properties page.
- */
-
 public class RemoveResourcesAction extends TilesAction {
 
-    // Public Methods
 
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
@@ -66,24 +61,23 @@ public class RemoveResourcesAction extends TilesAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-            
-        Log log = LogFactory.getLog(PrepareAction.class.getName());
+
         PropertiesForm pForm = (PropertiesForm) form;
         
         ServletContext ctx = getServlet().getServletContext();
         HttpSession session = request.getSession();
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
-        WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
+        WebUser user =
+            (WebUser)session.getAttribute(Constants.WEBUSER_SES_ATTR);
         Integer sessionId = RequestUtils.getSessionId(request);
         PageList resources = new PageList();
 
-        // XXX: Implement this.
         pForm.setDisplayOnDash(true);
 
-        boolean availability = new Boolean( user.getPreference(".dashContent.resourcehealth.availability") ).booleanValue();
-        boolean throughput =  new Boolean( user.getPreference(".dashContent.resourcehealth.throughput") ).booleanValue(); 
-        boolean performance = new Boolean( user.getPreference(".dashContent.resourcehealth.performance") ).booleanValue();
-        boolean utilization = new Boolean( user.getPreference(".dashContent.resourcehealth.utilization") ).booleanValue();
+        boolean availability = new Boolean(user.getPreference(".dashContent.resourcehealth.availability")).booleanValue();
+        boolean throughput =  new Boolean(user.getPreference(".dashContent.resourcehealth.throughput")).booleanValue(); 
+        boolean performance = new Boolean(user.getPreference(".dashContent.resourcehealth.performance")).booleanValue();
+        boolean utilization = new Boolean(user.getPreference(".dashContent.resourcehealth.utilization")).booleanValue();
 
         pForm.setAvailability(availability);
         pForm.setThroughput(throughput);
@@ -96,14 +90,16 @@ public class RemoveResourcesAction extends TilesAction {
 
         while(i.hasNext()) {
 
-            ArrayList resourceIds = (ArrayList) StringUtil.explode((String) i.next(), ",");
+            ArrayList resourceIds =
+                (ArrayList) StringUtil.explode((String) i.next(), ",");
 
             Iterator j = resourceIds.iterator();
             int type = Integer.parseInt( (String) j.next() );
             int id = Integer.parseInt( (String) j.next() );
 
             AppdefEntityID entityID = new AppdefEntityID(type, id);               
-            AppdefResourceValue resource = appdefBoss.findById(sessionId.intValue(), entityID);
+            AppdefResourceValue resource =
+                appdefBoss.findById(sessionId.intValue(), entityID);
             resources.add(resource);  
         }
 

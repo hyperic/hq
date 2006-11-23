@@ -38,112 +38,59 @@ import org.hyperic.hq.ui.action.portlet.DashboardBaseForm;
  * methods for dealing with image-based form buttons.
  */
 public class PropertiesForm extends DashboardBaseForm  {
-    
-    /** Holds value of property availability. */
-    private boolean availability;
-    
-    /** Holds value of property throughput. */
-    private boolean throughput;
-    
-    /** Holds value of property performance. */
-    private boolean performance;
-    
-    /** Holds value of property utilization. */
-    private boolean utilization;
-    
-    /** Holds value of property ids. */
-    private String[] ids;
 
-    /** Holds value of property order. */
+    private boolean availability;
+    private boolean throughput;
+    private boolean performance;
+    private boolean utilization;
+    private String[] ids;
     private String order;
 
     public PropertiesForm() {
         super();
     }
 
-    // Public methods
-
     public String toString() {
         StringBuffer s = new StringBuffer();
         return s.toString();
     }
-    
-    /** Getter for property availability.
-     * @return Value of property availability.
-     *
-     */
+
     public boolean isAvailability() {
         return this.availability;
     }
-    
-    /** Setter for property availability.
-     * @param availability New value of property availability.
-     *
-     */
+
     public void setAvailability(boolean availability) {
         this.availability = availability;
     }
-    
-    /** Getter for property throughput.
-     * @return Value of property throughput.
-     *
-     */
+
     public boolean isThroughput() {
         return this.throughput;
     }
-    
-    /** Setter for property throughput.
-     * @param throughput New value of property throughput.
-     *
-     */
+
     public void setThroughput(boolean throughput) {
         this.throughput = throughput;
     }
-    
-    /** Getter for property performance.
-     * @return Value of property performance.
-     *
-     */
+
     public boolean isPerformance() {
         return this.performance;
     }
-    
-    /** Setter for property performance.
-     * @param performance New value of property performance.
-     *
-     */
+
     public void setPerformance(boolean performance) {
         this.performance = performance;
     }
-    
-    /** Getter for property utilization.
-     * @return Value of property utilization.
-     *
-     */
+
     public boolean isUtilization() {
         return this.utilization;
     }
-    
-    /** Setter for property utilization.
-     * @param utilization New value of property utilization.
-     *
-     */
+
     public void setUtilization(boolean utilization) {
         this.utilization = utilization;
     }
-    
-    /** Getter for property id.
-     * @return Value of property id.
-     *
-     */
+
     public String[] getIds() {
         return this.ids;
     }
     
-    /** Setter for property id.
-     * @param id New value of property id.
-     *
-     */
     public void setIds(String[] ids) {
         this.ids = ids;
     }

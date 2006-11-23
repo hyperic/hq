@@ -57,7 +57,7 @@ public class ModifyAction extends BaseAction {
     /**
      *
      * @param mapping The ActionMapping used to select this instance
-     * @param actionForm The optional ActionForm bean for this request (if any)
+     * @param form The optional ActionForm bean for this request (if any)
      * @param request The HTTP request we are processing
      * @param response The HTTP response we are creating
      *
@@ -74,7 +74,8 @@ public class ModifyAction extends BaseAction {
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
-        WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
+        WebUser user = (WebUser)
+            session.getAttribute(Constants.WEBUSER_SES_ATTR);
 
         String forwardStr = "success";
 
@@ -99,10 +100,14 @@ public class ModifyAction extends BaseAction {
         String performance = Boolean.toString( pForm.isPerformance() );
         String utilization = Boolean.toString( pForm.isUtilization() );
 
-        user.setPreference(".dashContent.resourcehealth.availability", availability);
-        user.setPreference(".dashContent.resourcehealth.throughput", throughput); 
-        user.setPreference(".dashContent.resourcehealth.performance", performance); 
-        user.setPreference(".dashContent.resourcehealth.utilization", utilization);
+        user.setPreference(".dashContent.resourcehealth.availability",
+                           availability);
+        user.setPreference(".dashContent.resourcehealth.throughput",
+                           throughput);
+        user.setPreference(".dashContent.resourcehealth.performance",
+                           performance);
+        user.setPreference(".dashContent.resourcehealth.utilization",
+                           utilization);
 
         // Set the order of resources
         String order = StringUtil.replace(pForm.getOrder(), "%3A", ":");
@@ -120,7 +125,8 @@ public class ModifyAction extends BaseAction {
             " in resourcehealth/ModifyAction " +
             " for " + user.getId() + " at "+System.currentTimeMillis() +
             " user.prefs = " + user.getPreferences());
-        boss.setUserPrefs(user.getSessionId(), user.getId(), user.getPreferences() );
+        boss.setUserPrefs(user.getSessionId(), user.getId(),
+                          user.getPreferences() );
 
         session.removeAttribute(Constants.USERS_SES_PORTAL);
         return mapping.findForward(forwardStr);
