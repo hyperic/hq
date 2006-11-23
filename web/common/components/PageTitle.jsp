@@ -117,12 +117,12 @@
     <td colspan="2">
       <table width="100%" border="0" cellspacing="0" cellpadding="0">
         <tr> 
-          <td class="PageTitleSmallText">
+          <td class="PageTitleSmallText" valign="top">
       <b><fmt:message key="common.label.Description"/></b>
       <hq:shortenText maxlength="30" value="${resource.description}" styleClass="ListCellPopup5"/>
     </td>
     <td style="width: 5px;">&nbsp;</td>
-    <td class="PageTitleSmallText" valign="top" colspan="2">
+    <td class="PageTitleSmallText" valign="top" colspan="2" nowrap>
       <b><fmt:message key="resource.common.inventory.props.OwnerLabel"/></b> <c:out value="${ownerStr}" escapeXml="false"/> 
       <c:if test="${not empty resource}">
         - <html:link page="/resource/${resource.entityId.typeName}/Inventory.do?mode=changeOwner&rid=${resource.id}&type=${resource.entityId.type}"><fmt:message key="resource.common.inventory.props.ChangeButton"/></html:link><br>
@@ -135,12 +135,12 @@
   <c:if test="${leftRight > 0}">
     <tr>
   </c:if>
-      <td class="PageTitleSmallText" width="33%"><b><c:out value="${cprop.key}"/></b><fmt:message key="common.label.Colon"/>
+      <td class="PageTitleSmallText" width="33%" valign="top"><b><c:out value="${cprop.key}"/></b><fmt:message key="common.label.Colon"/>
       <hq:shortenText maxlength="30" value="${cprop.value}" styleClass="ListCellPopup5"/></td>
   <c:choose>
   <c:when test="${leftRight < 0}">
     <c:set var="leftRight" value="${leftRight * -1}"/>
-    <td class="PageTitleSmallText"></td>
+    <td>&nbsp;</td>
     </tr>
   </c:when>
   <c:otherwise>
