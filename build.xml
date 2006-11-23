@@ -510,6 +510,7 @@
         <include name="struts.jar" />               
         <include name="struts-el.jar" />
         <include name="snmp4j.jar" />
+        <include name="json.jar" />
         <!--include name="aspectjrt-1.2.1.jar" />
         <include name="cactus-13-1.6.1.jar" />
         <include name="mockejb.jar" />
