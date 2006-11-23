@@ -175,7 +175,7 @@ public class ResourceDisplaySummary extends SingletonDisplaySummary
 
     /**
      * Sets the resourceEntityTypeName.
-     * @param resourceName The resourceEntityTypeName to set
+     * @param resourceEntityTypeName The resourceEntityTypeName to set
      */
     public void setResourceEntityTypeName(String resourceEntityTypeName) {
         this.resourceEntityTypeName = resourceEntityTypeName;
@@ -262,8 +262,4 @@ public class ResourceDisplaySummary extends SingletonDisplaySummary
         sb.append(")");
         return sb.toString();
     }
-
-
-
-
 }
