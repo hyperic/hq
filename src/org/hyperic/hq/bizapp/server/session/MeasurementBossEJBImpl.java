@@ -3222,19 +3222,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws AppdefEntityNotFoundException, PermissionException,
                SessionNotFoundException, SessionTimeoutException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        PageList resources = new PageList();
+        PageList resources;
 
         Log timingLog = LogFactory.getLog("DASHBOARD-TIMING");
         StopWatch timer = new StopWatch();
-        /* Slow version...
-        for (int i = 0; i < entIds.length; i++) {
-            AppdefEntityValue aeVal = new AppdefEntityValue(entIds[i], subject);
-            resources.add(aeVal.getResourceValue());
-        }
-        timingLog.trace("findResourceCurrentHealth(1) - timing ["+timer.toString()+"]");
-        timer.reset();*/
 
-        /* Faster version ... (50%-75% faster after the first execution) */
         AppdefBossLocal boss;
         try {
             boss = AppdefBossUtil.getLocalHome().create();
