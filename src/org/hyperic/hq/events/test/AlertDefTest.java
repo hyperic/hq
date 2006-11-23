@@ -83,7 +83,6 @@ public class AlertDefTest
         
         int numDefs = aMan.findAllAlertDefinitions().size();
         aInfo = aMan.createAlertDefinition(aInfo);
-        DAOFactory.getDAOFactory().getCurrentSession().flush();
         assertEquals(numDefs + 1, aMan.findAllAlertDefinitions().size());
         assertEquals(1, aInfo.getTriggers().length);
         assertEquals(1,  aInfo.getConditions().length);

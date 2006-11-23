@@ -52,7 +52,6 @@ public class RegisteredTriggerTest
         val.setFrequency(123);
         
         System.out.println("Trigger: " + tMan.createTrigger(val));
-        DAOFactory.getDAOFactory().getCurrentSession().flush();
         
         System.out.println("All: " + tMan.getAllTriggers());
         

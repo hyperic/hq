@@ -82,7 +82,6 @@ public class AuthzSubjectTest extends HQEJBTestBase {
         
         // Now delete it
         zMan.removeSubject(overlord, subject.getId());
-        DAOFactory.getDAOFactory().getCurrentSession().flush();
 
         assertEquals(numSubjects,
                      zMan.getAllSubjects(overlord,

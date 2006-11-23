@@ -104,7 +104,6 @@ public class ResourceGroupTest extends HQEJBTestBase {
                                                   new Integer(RANDOM_ID),
                                                   "Platform " + BOGUS_NAME,
                                                   false);
-                DAOFactory.getDAOFactory().getCurrentSession().flush();
 
                 // Now we have to find the resource
                 ResourceValue resource = remg.findResourceById(pk.getId());
