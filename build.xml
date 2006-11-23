@@ -433,12 +433,12 @@
 
   <target name="pack-ear" depends="pack-ear-files" unless="generate-manifest.notrequired">
     <!-- generate EAR MANIFEST file -->
-    <pathconvert pathSep="," property="Class-Path">
+    <pathconvert targetos="unix" pathSep="," property="Class-Path">
       <path>
         <fileset dir="${ear.dir}" includes="hq.jar,hqee.jar" />
         <fileset dir="${ear.dir}/lib" includes="*.jar" />
       </path>
-      <map from="${ear.dir}/" to="hq.ear/" />
+      <map from="${ear.dir}${file.separator}" to="hq.ear/" />
     </pathconvert>
     <delete quiet="true" file="${ear.dir}/META-INF/MANIFEST.MF" />
     <echo file="${ear.dir}/META-INF/MANIFEST.MF">Manifest-Version: 1.0${line.separator}</echo>
