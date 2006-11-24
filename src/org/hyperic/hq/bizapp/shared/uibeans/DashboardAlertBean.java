@@ -24,36 +24,29 @@
  */
 
 package org.hyperic.hq.bizapp.shared.uibeans;
+
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 
 /**
  * Bean to hold alert values from AlertValue and AlertDefinitionValue
- * **/
-
-public final class DashboardAlertBean extends java.lang.Object implements java.io.Serializable{
-    
+ **/
+public final class DashboardAlertBean
+    implements java.io.Serializable
+{
     private long ctime ;
     private Integer alertDefId ;
     private Integer alertId;
-    private Integer type;
-
-    /** Holds value of property alertDefName. */
-    private String alertDefName;    
-    
-    /** Holds value of property resource. */
+    private String alertDefName;
     private AppdefResourceValue resource;
     
-    public DashboardAlertBean() {
-    //empty constructor
-    }
-    
+    public DashboardAlertBean() {}
 
     public long getCtime() {
         return ctime;
     }
 
     public void setCtime(long ctime) {
-        this.ctime=ctime;
+        this.ctime = ctime;
     }
     
     public Integer getAlertId() {
@@ -71,49 +64,34 @@ public final class DashboardAlertBean extends java.lang.Object implements java.i
     public void setAlertDefId(Integer alertDefId) {
         this.alertDefId = alertDefId;
     }
+
+    public String getAlertDefName() {
+        return this.alertDefName;
+    }
+
+    public void setAlertDefName(String alertDefName) {
+        this.alertDefName = alertDefName;
+    }
+
+    public AppdefResourceValue getResource() {
+        return this.resource;
+    }
+
+    public void setResource(AppdefResourceValue resource) {
+        this.resource = resource;
+    }
     
+    public String toString()
+    {
+	    StringBuffer str = new StringBuffer("[");
+	    str.append("id=")
+         .append(getAlertId())
+         .append("alertDefId=")
+         .append(getAlertDefId())
+         .append("ctime=")
+         .append(getCtime())
+         .append("]");
 
-   public String toString()
-   {
-	  StringBuffer str = new StringBuffer("{");
-	  str.append("id=" + getAlertId() + " " + "alertDefId=" + getAlertDefId() + " " + "ctime=" + getCtime());
-    	  str.append('}');
-
-	  return(str.toString());
-   }
-
-   /** Getter for property alertDefName.
-    * @return Value of property alertDefName.
-    *
-    */
-   public String getAlertDefName() {
-       return this.alertDefName;
-   }   
-   
-   /** Setter for property alertDefName.
-    * @param alertDefName New value of property alertDefName.
-    *
-    */
-   public void setAlertDefName(String alertDefName) {
-       this.alertDefName = alertDefName;
-   }
-   
-   /** Getter for property resource.
-    * @return Value of property resource.
-    *
-    */
-   public AppdefResourceValue getResource() {
-       return this.resource;
-   }
-   
-   /** Setter for property resource.
-    * @param resource New value of property resource.
-    *
-    */
-   public void setResource(AppdefResourceValue resource) {
-       this.resource = resource;
-   }
-   
+        return(str.toString());
+    }
 }
-
-// EOF
