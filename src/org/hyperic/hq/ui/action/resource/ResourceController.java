@@ -44,6 +44,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseDispatchAction;
@@ -139,6 +140,21 @@ public abstract class ResourceController extends BaseDispatchAction {
                 request.setAttribute(Constants.RESOURCE_MODIFIER_ATTR, modifier);
                 request.setAttribute(Constants.TITLE_PARAM_ATTR,
                                      resource.getName());
+
+                // set the resource controllability flag
+                ControlBoss controlBoss = ContextUtils.getControlBoss(ctx);
+                // We were doing group Specific isGroupControlEnabled for
+                // groups.
+                // We should just see if the group control is supported
+                // regardless of whether control is enabled or not.  Also we
+                // should be calling isControlSupported on entity and not
+                // controlEnabled.
+                boolean isControllable =
+                    controlBoss.isControlSupported(sessionId.intValue(),
+                                                   resource);
+
+                request.setAttribute(Constants.CONTROL_ENABLED_ATTR,
+                                     new Boolean(isControllable));
 
                 // Set additional flags
                 UIUtils utils = ContextUtils.getUIUtils(ctx);

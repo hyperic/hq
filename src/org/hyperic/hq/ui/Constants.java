@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.ui;
 
+import org.hyperic.hq.control.shared.ControlConstants;
+
 /**
  * Manifest constants for the UI of the HQ application.
  * 
@@ -54,4 +56,11 @@ public class Constants
     public static final String ALERT_LOC = "alerts/Alerts.do";
 
     public static final String ALERT_CONFIG_LOC = "alerts/Config.do";
+    /**
+     * Status of the current control action.
+     */
+    public static final String CONTROL_STATUS_ERROR = ControlConstants.STATUS_FAILED;
+    public static final String CONTROL_STATUS_INPROGRESS = ControlConstants.STATUS_INPROGRESS;
+    public static final String CONTROL_STATUS_COMPLETED = ControlConstants.STATUS_COMPLETED;
+    public static final String CONTROL_STATUS_NONE = "none";
 }
