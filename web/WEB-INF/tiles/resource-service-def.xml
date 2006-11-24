@@ -27,16 +27,36 @@
     <put name="titleBgStyle" value="PageTitleServiceBg"/>
     <put name="titleImg" value="title_service.gif"/>    			  
   </definition>
+
   <definition name=".resource.service.inventory.generalProperties"
               extends=".resource.common.inventory.generalProperties">
     <put name="showLocation" value="true"/>
   </definition>
   
-    <definition name=".resource.service.inventory.EditConfigProperties"
+  <definition name=".resource.service.inventory.EditConfigProperties"
             controllerUrl="/resource/service/inventory/EditConfigFormPrepare.do"
             path="/resource/common/inventory/EditConfigPropertiesForm.jsp"/>
 
   <!-- service tabs -->
+  <definition name=".tabs.resource.service" extends=".tabs.resource">
+    <put name="resourceType" value="3" />
+    <putList name="tabList">
+       <item value="Monitor" mode="currentHealth"
+            link="/resource/service/monitor/Visibility.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Inventory" link="/resource/service/Inventory.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Control" link="/resource/service/Control.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Alert" mode="list"
+            link="/alerts/Config.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+   </putList>     
+  </definition>
 
   <definition name=".tabs.resource.service.nocontrol" extends=".tabs.resource">
    <putList name="tabList">
@@ -226,4 +246,49 @@
   <definition name=".resource.service.monitor.visibility.serverHealth"
               path="/resource/service/monitor/visibility/ServerHealth.jsp"/>
 
+  <definition name=".tabs.resource.service.control"
+              extends=".tabs.resource.service">                                     
+   <put name="selectedIndex"  value="2" />
+   <putList name="subTabList">
+      <item value="Current" link="/resource/service/Control.do"
+            height="25" width="104" mode="view"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="History" link="/resource/service/Control.do"
+            height="25" width="104" mode="history"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+   </putList>
+   <put name="subSectionName" value="Control"/>
+   <put name="subSelectedIndex" value="1"/>
+  </definition>
+
+  <definition name=".resource.service.control.list.detail"
+              extends=".resource.common.control.list.detail">
+              <put name="section" value="service"/>
+  </definition>
+
+  <definition name=".resource.service.control.list.history"
+              extends=".resource.common.control.list.history">
+              <put name="section" value="service"/>
+  </definition>
+
+  <definition name=".resource.service.control.quickControl" 
+              extends=".resource.common.control.quickControl" >    
+              <put name="action" value="/resource/service/control/QuickControl"/>               
+  </definition>                                            
+
+  <definition name=".tabs.resource.service.control.list.detail"
+              extends=".tabs.resource.service.control">                            
+   <put name="subSelectedIndex" value="0"/>
+  </definition>
+  
+  <definition name=".tabs.resource.service.control.list.history"
+              extends=".tabs.resource.service.control">                            
+   <put name="subSelectedIndex" value="1"/>
+  </definition>
+  
+  <definition name=".resource.service.control.list.scheduled"
+              extends=".resource.common.control.list.scheduled">
+              <put name="section" value="service"/>
+  </definition>
+    
 </tiles-definitions>

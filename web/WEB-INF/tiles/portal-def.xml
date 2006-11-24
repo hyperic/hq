@@ -147,4 +147,19 @@
                 extends=".main.layout"
                 controllerUrl="/DashboardAdminController.do" />                
     <!---->           
+
+    <definition name=".resource.server.control.layout" 
+                extends=".main.layout"
+                controllerUrl="/resource/server/ServerController.do" />
+
+    <definition name=".resource.service.control.layout" 
+                extends=".main.layout"
+                controllerUrl="/resource/service/ServiceController.do" />
+    
+    <definition name=".resource.group.control.layout" 
+                extends=".main.layout"
+                controllerUrl="/resource/group/GroupController.do" >        
+        <put name="body" value="/portal/ResourceLayout.jsp" />
+    </definition>
+
 </tiles-definitions>

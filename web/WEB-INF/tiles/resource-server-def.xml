@@ -42,8 +42,6 @@
              classtype="org.hyperic.hq.ui.util.Tab"/>
      </putList>
   </definition>
-
-
   
   <definition name=".page.title.resource.server.new"
               extends=".page.title">
@@ -88,6 +86,27 @@
   <definition name=".resource.server.inventory.generalProperties"
               extends=".resource.common.inventory.generalProperties">
     <put name="showLocation" value="true"/>
+  </definition>
+
+  <definition name=".tabs.resource.server" extends=".tabs.resource"> 
+    <put name="selectedIndex" value="0" />
+    <put name="resourceType" value="2" />
+    <putList name="tabList">
+       <item value="Monitor" mode="currentHealth"
+            link="/resource/server/monitor/Visibility.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Inventory" link="/resource/server/Inventory.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Control" link="/resource/server/Control.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Alert" mode="list"
+            link="/alerts/Config.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+   </putList>     
   </definition>
 
   <definition name=".tabs.resource.server.nocontrol"
@@ -152,6 +171,52 @@
               path="/resource/server/inventory/ListServices.jsp"/>
   <definition name=".resource.server.inventory.serviceCounts"
               path="/resource/server/inventory/ViewServiceCounts.jsp"/>   
+
+  <!-- resource server control tiles -->
+  <definition name=".tabs.resource.server.control"
+              extends=".tabs.resource.server">                                     
+   <put name="selectedIndex"  value="2" />
+   <putList name="subTabList">
+      <item value="Current" link="/resource/server/Control.do"
+            height="25" width="104" mode="view"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="History" link="/resource/server/Control.do"
+            height="25" width="104" mode="history"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+   </putList>
+   <put name="subSectionName" value="Control"/>
+   <put name="subSelectedIndex" value="1"/>
+  </definition>
+
+  <definition name=".resource.server.control.list.detail"
+              extends=".resource.common.control.list.detail">
+              <put name="section" value="server"/>
+  </definition>
+
+  <definition name=".resource.server.control.list.history"
+              extends=".resource.common.control.list.history">
+              <put name="section" value="server"/>
+  </definition>
+
+  <definition name=".resource.server.control.list.scheduled"
+              extends=".resource.common.control.list.scheduled">
+              <put name="section" value="server"/>
+  </definition>
+    
+  <definition name=".resource.server.control.quickControl" 
+              extends=".resource.common.control.quickControl" >    
+              <put name="action" value="/resource/server/control/QuickControl"/>               
+  </definition>                                            
+
+  <definition name=".tabs.resource.server.control.list.detail"
+              extends=".tabs.resource.server.control">                            
+   <put name="subSelectedIndex" value="0"/>
+  </definition>
+  
+  <definition name=".tabs.resource.server.control.list.history"
+              extends=".tabs.resource.server.control">                            
+   <put name="subSelectedIndex" value="1"/>
+  </definition>
 
   <!-- alert subtabs --> 
 

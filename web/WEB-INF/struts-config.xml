@@ -61,10 +61,22 @@
                    type="org.hyperic.hq.ui.action.portlet.criticalalerts.PropertiesForm"/>  
         <form-bean name="DashboardAddResourceHealthForm"
                    type="org.hyperic.hq.ui.action.portlet.addresource.AddResourcesForm"/>  
+
+        <!-- RESOURCE CONTROL FORMS -->
         <form-bean name="ControlActionsForm"
                    type="org.hyperic.hq.ui.action.portlet.controlactions.PropertiesForm"/>
 
+        <form-bean name="QuickControlForm"
+                   type="org.hyperic.hq.ui.action.resource.common.control.QuickControlForm"/>
 
+        <form-bean name="RemoveControlForm"
+                   type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryForm"/>
+
+        <form-bean name="RemoveControlJobsForm"
+                   type="org.hyperic.hq.ui.action.resource.common.control.RemoveControlJobsForm"/>
+        
+        <!-- / -->
+	
         <!-- RESOURCE COMMON FORMS -->
         <form-bean name="ResourceForm"
                    type="org.hyperic.hq.ui.action.resource.ResourceForm"/>
@@ -206,6 +218,13 @@
 
         <form-bean name="MetricMetadataForm"
                    type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricMetadataForm"/>
+
+        <!-- RESOURCE SERVER CONTROL FORMS -->
+        <form-bean name="ServerControlForm"
+                   type="org.hyperic.hq.ui.action.resource.common.control.ControlForm"/>
+
+       <!-- / -->
+
   </form-beans>
 
 <!-- ================================= Global Exception Definitions -->
@@ -579,6 +598,41 @@
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.inventory.AddResourceGroupsFormPrepareAction">
         <set-property property="title" value="2.2.6.4"/>
+      </action>
+
+      <action path="/resource/common/control/ListScheduled"
+              name="RemoveControlJobsForm"
+              scope="request"               
+              type="org.hyperic.hq.ui.action.resource.common.control.ListScheduledAction" >
+      </action>
+      
+      <action path="/resource/common/control/ListHistory"
+              name="RemoveControlJobsForm"
+              scope="request"            
+              type="org.hyperic.hq.ui.action.resource.common.control.ListHistoryAction" >
+        <set-property property="title" value="2.3.7.3"/>
+      </action>
+      
+      <action path="/resource/common/control/ListDetail"  
+              name="RemoveControlJobsForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.BaseTilesAction" >
+        <set-property property="title" value="2.3.7"/>
+      </action>
+
+      <action path="/resource/common/control/QuickControlPrepareAction"
+              name="QuickControlForm"
+              scope="request"         
+              type="org.hyperic.hq.ui.action.resource.common.control.QuickControlPrepareAction" >
+      </action>
+                  
+      <action path="/resource/common/control/CurrentStatus"
+              type="org.hyperic.hq.ui.action.resource.common.control.CurrentStatusAction"> 
+      </action>      
+      
+      <action path="/resource/common/control/UpdatedStatus"
+              type="org.hyperic.hq.ui.action.resource.common.control.UpdateStatusAction"> 
+        <forward name="success" path="/resource/common/control/CurrentStatusAJAX.jsp"/>
       </action>
 
       <!-- resource platform actions -->      
@@ -1243,6 +1297,102 @@
                           
       <!-- / -->
 
+      <!-- resource server control -->
+      <action path="/resource/server/Control"
+              forward=".resource.server.control.layout">
+      </action>
+      
+      <action path="/resource/server/ServerController" 
+              parameter="mode"
+              input="/resource/server/Control.do"
+              type="org.hyperic.hq.ui.action.resource.server.control.ServerControllerAction" >
+      </action>
+
+      <action path="/resource/server/control/NewFormPrepare"
+              name="ServerControlForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.control.NewFormPrepareAction">
+        <set-property property="title" value="2.3.7.1"/>
+      </action>
+
+      <action path="/resource/server/control/New"   
+              type="org.hyperic.hq.ui.action.resource.common.control.NewAction"
+              name="ServerControlForm"
+              scope="request"
+              input="/resource/server/Control.do?mode=new">
+        <forward name="add" path="/resource/server/Control.do?mode=new"/>
+        <forward name="remove" path="/resource/server/Control.do?mode=new"/>
+        <forward name="cancel" path="/resource/server/Control.do?mode=view"
+                 redirect="true"/>
+        <forward name="reset" path="/resource/server/Control.do?mode=new"
+                 redirect="true"/>
+        <forward name="failure" path="/resource/server/Control.do?mode=new" />
+        <forward name="success" path="/resource/server/Control.do?mode=view" redirect="true" />
+      </action>
+
+      <action path="/resource/server/control/EditFormPrepare"
+              name="ServerControlForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.control.EditFormPrepareAction">
+        <set-property property="title" value="2.3.7.2"/>
+      </action>
+
+      <action path="/resource/server/control/Edit"
+              type="org.hyperic.hq.ui.action.resource.common.control.EditAction"
+              name="ServerControlForm"
+              scope="request"
+              input="/resource/server/Control.do?mode=edit">
+        <forward name="add" path="/resource/server/Control.do?mode=edit"/>
+        <forward name="remove" path="/resource/server/Control.do?mode=edit"/>              
+        <forward name="cancel" path="/resource/server/Control.do?mode=view" redirect="true"/>
+        <forward name="reset" path="/resource/server/Control.do?mode=edit"/>
+        <forward name="failure" path="/resource/server/Control.do?mode=edit"/>
+        <forward name="success" path="/resource/server/Control.do?mode=view" redirect="true"/>
+      </action>
+
+      <action path="/resource/server/control/RemoveHistory"
+              type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction"
+              name="RemoveControlForm"
+              scope="request"
+              input="/resource/server/Control.do?mode=history">
+        <forward name="failure" path="/resource/server/Control.do?mode=history" redirect="true" />
+        <forward name="success" path="/resource/server/Control.do?mode=history" redirect="true" />
+      </action>
+      
+      <action path="/resource/server/control/RemoveCurrentStatus"
+              type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction"
+              name="RemoveControlForm"
+              scope="request"
+              input="/resource/server/Control.do?mode=view">
+        <forward name="failure" path="/resource/server/Control.do?mode=view" redirect="true" />
+        <forward name="success" path="/resource/server/Control.do?mode=view" redirect="true" />
+      </action>
+     
+      <action path="/resource/server/control/QuickControl" 
+              name="QuickControlForm"
+              scope="request"
+              input="/resource/server/Control.do?mode=view"          
+              type="org.hyperic.hq.ui.action.resource.common.control.QuickControlAction" >
+        <forward name="new" path="/resource/server/Control.do?mode=new"/>              
+        <forward name="failure" path="/resource/server/Control.do?mode=view" redirect="true"/>
+        <forward name="success" path="/resource/server/Control.do?mode=view" redirect="true"/>
+      </action>
+
+      <action path="/resource/server/control/EditAddToGroups"
+              scope="request"
+              type="org.apache.struts.tiles.actions.TilesAction"/>
+
+      <action path="/resource/server/control/RemoveControlJobs"
+              type="com.hyperic.hq.ui.action.resource.common.control.RemoveControlJobsAction"
+              name="RemoveControlJobsForm"
+              scope="request"
+              input="/resource/server/Control.do?mode=view">
+        <forward name="failure" path="/resource/server/Control.do?mode=view" redirect="true"/>
+        <forward name="success" path="/resource/server/Control.do?mode=view" redirect="true"/>
+      </action>
+
+      <!-- / end resource server control -->
+
       <!-- resource service actions -->
       <action path="/resource/service/Inventory"
               forward=".resource.service.inventory.layout">
@@ -1415,6 +1565,46 @@
               <forward name="success" path="/resource/service/monitor/Config.do?mode=configure"/> 
       </action>
            
+      <action path="/resource/service/control/RemoveHistory"
+              type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction"
+              name="RemoveControlForm"
+              scope="request"
+              input="/resource/service/Control.do?mode=history">
+        <forward name="failure" path="/resource/service/Control.do?mode=history" redirect="true" />
+        <forward name="success" path="/resource/service/Control.do?mode=history" redirect="true" />
+     </action>
+
+     <action path="/resource/service/control/RemoveCurrentStatus"
+              type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction"
+              name="RemoveControlForm"
+              scope="request"
+              input="/resource/service/Control.do?mode=view">
+        <forward name="failure" path="/resource/service/Control.do?mode=view" redirect="true" />
+        <forward name="success" path="/resource/service/Control.do?mode=view" redirect="true" />
+      </action>
+     
+      <action path="/resource/service/control/QuickControl" 
+              name="QuickControlForm"
+              scope="request"
+              input="/resource/service/Control.do?mode=view"          
+              type="org.hyperic.hq.ui.action.resource.common.control.QuickControlAction" >
+        <forward name="new" path="/resource/service/Control.do?mode=new"/>              
+        <forward name="failure" path="/resource/service/Control.do?mode=view" redirect="true"/>
+        <forward name="success" path="/resource/service/Control.do?mode=view" redirect="true"/>
+      </action>
+
+      <!-- resource service control. this reuses the forms, action classes, and
+           jsp's for server control, it just makes them available at different
+           urls.  -->
+      <action path="/resource/service/Control"
+              forward=".resource.service.control.layout">
+      </action>
+      
+      <action path="/resource/service/ServiceController" 
+              parameter="mode"
+              input="/resource/service/Control.do"
+              type="org.hyperic.hq.ui.action.resource.service.control.ServiceControllerAction" >
+      </action>
       <!-- / -->
 
       <!-- application actions -->

@@ -75,4 +75,7 @@
   <definition name=".resource.common.monitor.visibility.metricsToolbar"
               path="/resource/common/monitor/visibility/MetricsToolbar.jsp"/>
 
+  <definition name=".resource.common.control.list.scheduled" 
+              path="/common/blank.html"/>
+  
 </tiles-definitions>
