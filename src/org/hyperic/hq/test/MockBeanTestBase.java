@@ -14,31 +14,24 @@
  */
 package org.hyperic.hq.test;
 
-import java.lang.reflect.Method;
-
 import javax.jms.MessageListener;
 import javax.jms.Queue;
 import javax.jms.QueueConnectionFactory;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
-import javax.transaction.Status;
+import javax.transaction.UserTransaction;
 
 import oracle.jdbc.pool.OracleDataSource;
 
-import org.hyperic.util.jdbc.LoggingTransaction;
 import org.mockejb.MDBDescriptor;
 import org.mockejb.MockContainer;
 import org.mockejb.OptionalCactusTestCase;
 import org.mockejb.SessionBeanDescriptor;
 import org.mockejb.TransactionManager;
 import org.mockejb.TransactionPolicy;
-import org.mockejb.interceptor.Aspect;
 import org.mockejb.interceptor.AspectSystem;
 import org.mockejb.interceptor.AspectSystemFactory;
-import org.mockejb.interceptor.ClassPatternPointcut;
-import org.mockejb.interceptor.InvocationContext;
-import org.mockejb.interceptor.Pointcut;
 import org.mockejb.jms.MockQueue;
 import org.mockejb.jms.QueueConnectionFactoryImpl;
 import org.mockejb.jndi.MockContextFactory;
@@ -175,6 +168,15 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
             throw new IllegalArgumentException("Unknown " +
                                                "hq.server.ds-mapping: " + 
                                                _dsMapping);
+        }
+    }
+    
+    protected void rollbackUserTransaction() throws Exception {
+        if (!isRunningOnServer()) {
+            UserTransaction tx = (UserTransaction)
+                _context.lookup("javax.transaction.UserTransaction");
+            
+            tx.setRollbackOnly();
         }
     }
     

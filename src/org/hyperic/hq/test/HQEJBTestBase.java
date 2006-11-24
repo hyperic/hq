@@ -32,6 +32,7 @@ import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
+import org.hyperic.hq.application.server.session.TestManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
@@ -43,8 +44,8 @@ import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
-import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
+import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
@@ -78,6 +79,7 @@ public abstract class HQEJBTestBase
             TemplateManagerEJBImpl.class,
             CrispoManagerEJBImpl.class,
             AlertManagerEJBImpl.class,
+            TestManagerEJBImpl.class,
         };
     }
 
@@ -164,6 +166,8 @@ public abstract class HQEJBTestBase
             success = true;
         } finally {
             if (success == false) {
+                // Also set the current UserTransaction to kabong
+                rollbackUserTransaction();
                 t.rollback();
             } else {
                 t.commit();
