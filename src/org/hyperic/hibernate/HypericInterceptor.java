@@ -26,8 +26,10 @@
 package org.hyperic.hibernate;
 
 import org.hibernate.EmptyInterceptor;
+import org.hibernate.Transaction;
 import org.hibernate.type.Type;
 import org.hyperic.hq.appdef.AppdefBean;
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.hq.events.server.session.EscalationState;
@@ -45,8 +47,11 @@ import java.io.Serializable;
  *
  * TODO:  Consolidate into regular UserTyped AuditInfo stylee 
  */
-public class HypericInterceptor extends EmptyInterceptor
+public class HypericInterceptor 
+    extends EmptyInterceptor
 {
+    private static final HQApp _app = HQApp.getInstance(); 
+    
     private boolean entHasTimestamp(Object o) {
         return o instanceof Plugin ||
                o instanceof AppdefBean ||
@@ -112,5 +117,11 @@ public class HypericInterceptor extends EmptyInterceptor
             curState[modifiedIdx] = new Long(ts);
         }
         return modified;
+    }
+
+    public void afterTransactionCompletion(Transaction tx) {
+        if (tx.wasCommitted())
+            _app.runPostCommitListeners();
+        super.afterTransactionCompletion(tx);
     }
 }
