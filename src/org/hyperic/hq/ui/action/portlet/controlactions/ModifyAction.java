@@ -84,8 +84,9 @@ public class ModifyAction extends BaseAction {
             DashboardUtils.removePortlet( user, pForm.getPortletName());
 
         String lastCompleted = pForm.getLastCompleted().toString();            
-        String nextScheduled = pForm.getNextScheduled().toString();            
         String mostFrequent  = pForm.getMostFrequent().toString();            
+        String nextScheduled = pForm.getNextScheduled() == null ?
+                "1" : pForm.getNextScheduled().toString();            
 
         String useLastCompleted = String.valueOf( pForm.isUseLastCompleted() );
         String useMostFrequent  = String.valueOf( pForm.isUseMostFrequent() );
