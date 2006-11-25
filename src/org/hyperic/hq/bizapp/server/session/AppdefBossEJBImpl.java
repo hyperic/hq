@@ -163,16 +163,13 @@ public class AppdefBossEJBImpl
 
     private SessionManager manager = SessionManager.getInstance();
 
-    protected Log log = LogFactory.getLog(
-        "org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl");
+    protected Log log = LogFactory.getLog(AppdefBossEJBImpl.class.getName());
     protected boolean debug = log.isDebugEnabled();
     protected static final int APPDEF_TYPE_UNDEFINED     = -1;
     protected static final int APPDEF_RES_TYPE_UNDEFINED = -1;
     protected static final int APPDEF_GROUP_TYPE_UNDEFINED = -1;
 
-    /** Creates a new instance of AppdefBoss  */
     public AppdefBossEJBImpl() {}
-
 
     /**
      * Find a common appdef resource type among the appdef entities

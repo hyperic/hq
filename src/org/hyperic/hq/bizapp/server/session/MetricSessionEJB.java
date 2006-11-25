@@ -77,7 +77,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.timer.StopWatch;
 
 public class MetricSessionEJB extends BizappSessionEJB {
-    private Log log = LogFactory.getLog(MetricSessionEJB.class);
+    private Log log = LogFactory.getLog(MetricSessionEJB.class.getName());
 
     protected SessionManager manager = SessionManager.getInstance();
 

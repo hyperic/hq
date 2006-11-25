@@ -128,13 +128,12 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     implements SessionBean {
     private SessionManager manager;
 
-    /** Static logging context */
     protected Log log = LogFactory.getLog(EventsBossEJBImpl.class.getName());
 
-    private RegisteredTriggerManagerLocal triggerMan      = null;
-    private AlertDefinitionManagerLocal   alDefMan        = null;
-    private AlertManagerLocal             alertMan        = null;
-    private ActionManagerLocal            actMan          = null;
+    private RegisteredTriggerManagerLocal triggerMan;
+    private AlertDefinitionManagerLocal   alDefMan;
+    private AlertManagerLocal             alertMan;
+    private ActionManagerLocal            actMan;
 
     public EventsBossEJBImpl() {
         this.manager = SessionManager.getInstance();
@@ -217,7 +216,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
             Object newObj = trigClass.newInstance();
             
             // Make sure that the new object implements the right interface
-            if (newObj instanceof ConditionalTriggerInterface == false)
+            if (!(newObj instanceof ConditionalTriggerInterface))
                 throw new InvalidOptionValueException(
                     "Condition does not generate valid trigger");
             
@@ -411,7 +410,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      */
     public AlertDefinitionValue createAlertDefinition(
         int sessionID, AlertDefinitionValue adval)
-        throws AlertDefinitionCreateException, TriggerCreateException,
+        throws AlertDefinitionCreateException,
                PermissionException, InvalidOptionException,
                InvalidOptionValueException, 
                SessionNotFoundException, SessionTimeoutException {
@@ -503,7 +502,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      */
     public AlertDefinitionValue createResourceTypeAlertDefinition(
         int sessionID, AppdefEntityTypeID aetid, AlertDefinitionValue adval)
-        throws AlertDefinitionCreateException, TriggerCreateException,
+        throws AlertDefinitionCreateException,
                PermissionException, InvalidOptionException,
                InvalidOptionValueException, 
                SessionNotFoundException, SessionTimeoutException {
@@ -637,7 +636,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                                                    AppdefEntityID id)
         throws AppdefEntityNotFoundException, PermissionException,
                InvalidOptionException, InvalidOptionValueException,
-               ActionCreateException, AlertDefinitionCreateException {
+               AlertDefinitionCreateException {
         AppdefEntityValue rv = new AppdefEntityValue(id, subject);
         AppdefResourceTypeValue type = rv.getResourceTypeValue();
         
@@ -1428,11 +1427,10 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                                                          String triggerClass)
         throws SessionNotFoundException, SessionTimeoutException, 
                EncodingException {
-        AuthzSubjectValue subject;
+        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
         RegisterableTriggerInterface iface;
         Class c;
 
-        subject  = this.manager.getSubject(sessionID);
         try {
             c = Class.forName(triggerClass);
             iface = (RegisterableTriggerInterface) c.newInstance();
@@ -1453,8 +1451,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                                         AlertDefinitionValue adval)
         throws SessionNotFoundException, SessionTimeoutException,
                RemoveException, AlertDefinitionCreateException,
-               FinderException, PermissionException, 
-               TriggerCreateException {
+               FinderException, PermissionException
+    {
         AuthzSubjectValue subject = this.manager.getSubject(sessionID);
         // check security
         canManageAlerts(subject, getAppdefEntityID(adval));
