@@ -66,54 +66,6 @@
   </tr>
   <tr>
     <td>
-      <c:if test="${displayNextScheduled}">
-        <!-- Pending Actions Content Here -->
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" class="ToolbarContent">
-          <tr>
-            <td class="Subhead"><fmt:message key="dash.home.Subhead.Pending"/></td>
-          </tr>
-        </table>    
-        <table width="100%" cellpadding="0" cellspacing="0" border="0">
-          <c:choose>    
-            <c:when test="${empty nextScheduled}">
-              <tr class="ListRow">
-                <td class="ListCell"><fmt:message key="dash.home.no.resource.to.display"/></td>
-              </tr>
-            </c:when>
-            <c:otherwise>              
-                <tr>
-                  <td width="37%" class="ListHeaderInactiveSorted"><fmt:message key="dash.home.TableHeader.ResourceName"/><html:img page="/images/tb_sortup_inactive.gif" width="9" height="9" border="0"/></td>
-                  <td width="21%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.Type"/></td>
-                  <td width="21%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.ControlAction"/></td>
-                  <td width="21%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.DateTime"/></td>
-                </tr>                
-                <c:forEach items="${nextScheduled}" var="pending">
-                  <c:choose>
-                    <c:when test="${pending.control.entityType == 3}">
-                      <c:set var="typename" value="service"/>
-                    </c:when>
-                    <c:when test="${pending.control.entityType == 5}">
-                      <c:set var="typename" value="group"/>
-                    </c:when>
-                    <c:otherwise>
-                      <c:set var="typename" value="server"/>
-                    </c:otherwise>
-                  </c:choose>
-                  <tr class="ListRow">                                        
-                    <td class="ListCell"><html:link page="/resource/${typename}/Control.do?mode=view&eid=${pending.control.entityType}:${pending.control.entityId}"><c:out value="${pending.resource.name}"/></html:link></td>
-                    <td class="ListCell"><hq:resourceTypeName typeId="${pending.control.entityType}"/></td>
-                    <td class="ListCell"><c:out value="${pending.control.action}"/></td>
-                    <td class="ListCell"><hq:dateFormatter value="${pending.control.nextFireTime}"/></td>
-                  </tr>    
-                </c:forEach>              
-            </c:otherwise>
-          </c:choose>  
-        </table>
-      </c:if>
-    </td>
-  </tr>
-  <tr>
-    <td>
       <c:if test="${displayMostFrequent}">
         <!-- On-Demand Control Frequency Contents -->
         <table width="100%" cellpadding="0" cellspacing="0" border="0" class="ToolbarContent">

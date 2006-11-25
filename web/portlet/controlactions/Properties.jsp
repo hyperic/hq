@@ -59,20 +59,6 @@
         </tr>
         <tr>
           <td class="BlockContent" nowrap>
-            <html:checkbox property="useNextScheduled"/>
-            <fmt:message key="dash.settings.controlActions.next"/>
-          </td>
-          <td class="BlockContent">
-            <html:select property="nextScheduled"  >
-              <html:option value="1">1</html:option>
-              <html:option value="5">5</html:option>
-              <html:option value="10">10</html:option>   
-              <html:option value="15">15</html:option>
-            </html:select> <fmt:message key="dash.settings.controlActions.scheduled"/><br>
-          </td>
-        </tr>
-        <tr>
-          <td class="BlockContent" nowrap>
             <html:checkbox property="useMostFrequent"/>
             <fmt:message key="dash.settings.controlActions.last"/>
           </td>

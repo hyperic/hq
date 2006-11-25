@@ -5,6 +5,19 @@
 
 <tiles-definitions>
 
+  <definition name=".dashContent.controlActions"
+              controllerUrl="/dashboard/ViewControlActions.do"
+              path="/portlet/controlactions/View.jsp">
+              <put name="adminUrl" value="/dashboard/Admin.do?mode=controlActions" />
+              <put name="portletName" value=".dashContent.controlActions" />
+  </definition>  
+
+  <definition name=".dashContent.admin.controlActions"
+              controllerUrl="/dashboard/EditControlActions.do"
+              path="/portlet/controlactions/Properties.jsp">
+              <put name="portletName" value=".dashContent.controlActions" />
+  </definition> 
+ 
   <definition name=".dashContent.addContent.narrow"
               controllerUrl="/dashboard/AddContent.do"
               path="/portlet/AddContentControl.jsp">
