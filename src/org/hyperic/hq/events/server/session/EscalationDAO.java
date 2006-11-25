@@ -5,8 +5,10 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.NonUniqueObjectException;
 
 import java.util.Iterator;
+import java.util.List;
 
 /*
  * NOTE: This copyright does *not* cover user programs that use HQ
@@ -95,6 +97,18 @@ public class EscalationDAO extends HibernateDAO
             EscalationAction ea = (EscalationAction)i.next();
             dao.save(ea.getAction());
         }
+    }
+
+    public PersistedObject findPersisted(PersistedObject entity) {
+        List result = findByExample(entity);
+        if (result.size() == 0) {
+            return null;
+        } else if (result.size() > 1) {
+            throw new NonUniqueObjectException("found " + result.size() +
+                    " escalations.", entity.getId(),
+                    entity.getClass().getName());
+        }
+        return (Escalation)result.get(0);
     }
 
     public void savePersisted(PersistedObject entity) {

@@ -75,7 +75,7 @@ public class EscalationTest
         e.getActions().add(act1);
         e.getActions().add(act2);
 
-        EscalationMediator.getInstance().saveEscalation(e);
+        EscalationMediator.getInstance().save(e);
         // look it up, there should be exactly one
         e = EscalationMediator.getInstance().findEscalationById(e);
         assertNotNull(e);
@@ -92,7 +92,7 @@ public class EscalationTest
         e.getActions().add(act2);
         e.getActions().add(act1);
 
-        EscalationMediator.getInstance().saveEscalation(e);
+        EscalationMediator.getInstance().save(e);
         // look it up, there should be exactly one
         e = EscalationMediator.getInstance().findEscalationById(e);
         assertNotNull(e);
@@ -108,7 +108,7 @@ public class EscalationTest
         EscalationState state =
             EscalationMediator.getInstance().getEscalationState(e, ALERT_DEF_ID1);
         long mtime = state.getModifiedTime();
-        EscalationMediator.getInstance().saveEscalationState(state);
+        EscalationMediator.getInstance().save(state);
        // escalation state time should not be updated
         state =
             EscalationMediator.getInstance().getEscalationState(e, ALERT_DEF_ID1);
@@ -117,13 +117,13 @@ public class EscalationTest
         // update state
         mtime = state.getModifiedTime();
         state.setCurrentLevel(1);
-        EscalationMediator.getInstance().saveEscalationState(state);
+        EscalationMediator.getInstance().save(state);
         // escalation state time should have been  updated
         state =
             EscalationMediator.getInstance().getEscalationState(e, ALERT_DEF_ID1);
         assertTrue(state.getModifiedTime() > mtime);
         
-        EscalationMediator.getInstance().removeEscalation(e);
+        EscalationMediator.getInstance().remove(e);
         try {
             EscalationMediator.getInstance().findEscalationById(e);
             assertTrue(1==0);
@@ -155,7 +155,7 @@ public class EscalationTest
         e.getActions().add(act1);
         e.getActions().add(act2);
 
-        EscalationMediator.getInstance().saveEscalation(e);
+        EscalationMediator.getInstance().save(e);
         e = EscalationMediator.getInstance().findEscalationById(e);
         // verify number of actions
         assertTrue(e.getActions().size() == 2);
@@ -165,8 +165,8 @@ public class EscalationTest
             EscalationMediator.getInstance().getEscalationState(e, ALERT_DEF_ID2);
         state1.setActive(true);
         e.setAllowPause(true);
-        EscalationMediator.getInstance().saveEscalation(e);
-        EscalationMediator.getInstance().saveEscalationState(state1);
+        EscalationMediator.getInstance().save(e);
+        EscalationMediator.getInstance().save(state1);
         state1 =
             EscalationMediator.getInstance().getEscalationState(e, ALERT_DEF_ID2);
 
@@ -184,7 +184,7 @@ public class EscalationTest
         // verify active status has been cleared
         assertTrue(!state1.isActive());
 
-        EscalationMediator.getInstance().removeEscalation(e);
+        EscalationMediator.getInstance().remove(e);
         try {
             EscalationMediator.getInstance().findEscalationById(e);
             assertTrue(1==0);

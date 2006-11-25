@@ -6,6 +6,8 @@ package org.hyperic.hq.events;
 import org.hyperic.hq.Mediator;
 import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.shared.TransactionManagerLocal;
+import org.hyperic.hq.common.shared.TransactionManagerUtil;
 import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.EscalationState;
@@ -13,6 +15,7 @@ import org.hyperic.hq.events.server.mbean.EscalationSchedulerMBean;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.hibernate.LockSet;
+import org.hyperic.hibernate.PersistedObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -46,12 +49,14 @@ public class EscalationMediator extends Mediator
     }
 
     private AlertManagerLocal alertManagerLocal;
+    private TransactionManagerLocal transactionManager;
     private EscalationSchedulerMBean escalationServiceMBean;
 
     protected EscalationMediator()
     {
         try {
             alertManagerLocal = AlertManagerUtil.getLocalHome().create();
+            transactionManager = TransactionManagerUtil.getLocalHome().create();
         } catch (CreateException e) {
             throw new SystemException(e);
         } catch (NamingException e) {
@@ -105,11 +110,6 @@ public class EscalationMediator extends Mediator
                 }
             });
         }
-    }
-
-    public List getScheduledEscalationState()
-    {
-        return alertManagerLocal.getScheduledEscalationState();
     }
 
     /**
@@ -168,44 +168,24 @@ public class EscalationMediator extends Mediator
                 return false;
             }
             state.setActive(true);
-            saveEscalationStateReqNew(state);
+            transactionManager.saveReqNew(state);
         }
         return true;
+    }
+
+    public void save(PersistedObject p)
+    {
+        transactionManager.save(p);
+    }
+
+    public void remove(PersistedObject p)
+    {
+        transactionManager.delete(p);
     }
 
     public Escalation findEscalationById(Escalation e)
     {
         return alertManagerLocal.findEscalationById(e.getId());
-    }
-
-    public void saveEscalation(Escalation e)
-    {
-        alertManagerLocal.saveEscalation(e);
-    }
-
-    public void saveEscalationState(EscalationState state)
-    {
-        alertManagerLocal.saveEscalationState(state);
-    }
-
-    public void saveEscalationStateReqNew(EscalationState state)
-    {
-        alertManagerLocal.saveEscalationStateReqNew(state);
-    }
-
-    public void removeEscalation(Escalation e)
-    {
-        alertManagerLocal.removeEscalation(e);
-    }
-
-    public void removeEscalationState(EscalationState state)
-    {
-        alertManagerLocal.removeEscalationState(state);
-    }
-
-    public EscalationState getEscalationState(Escalation e, Integer alertDefId)
-    {
-        return alertManagerLocal.getEscalationState(e, alertDefId);
     }
 
     public void scheduleAction(Integer escalationId, Integer alertId)
@@ -229,5 +209,21 @@ public class EscalationMediator extends Mediator
     {
         // clear active status for this alertDef
         alertManagerLocal.clearActiveEscalation(escalationId, alertDefId);
+    }
+
+    public Escalation findByEscalationName(String name)
+    {
+        Escalation e = Escalation.newInstance(name);
+        return (Escalation)transactionManager.findPersisted(e);
+    }
+
+    public List getScheduledEscalationState()
+    {
+        return alertManagerLocal.getScheduledEscalationState();
+    }
+
+    public EscalationState getEscalationState(Escalation e, Integer alertDefId)
+    {
+        return alertManagerLocal.getEscalationState(e, alertDefId);
     }
 }
