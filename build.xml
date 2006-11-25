@@ -608,6 +608,7 @@
         <include name="commons-validator.jar" />
         <include name="commons-dbcp.jar" />        
         <include name="log4j.jar" />
+        <include name="json.jar" />
         <include name="jstl.jar" />
         <include name="standard.jar" />
         <include name="struts.jar" />               
