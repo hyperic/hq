@@ -53,6 +53,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.ui.Constants;
@@ -63,7 +64,6 @@ import org.hyperic.hq.ui.taglib.display.StringUtil;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
-import org.hyperic.hq.ui.util.UIUtils;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -303,9 +303,11 @@ public class ResourceHubPortalAction extends BaseAction {
             }
 
             // Set additional flags
-            UIUtils utils = ContextUtils.getUIUtils(ctx);
-            if (utils != null)
-                utils.setHubFlags(idArr, request);
+            ControlBoss controlBoss = ContextUtils.getControlBoss(ctx);
+            List controllableResources =
+                controlBoss.batchCheckControlPermissions(sessionId, idArr);
+            request.setAttribute(Constants.ALL_RESOURCES_CONTROLLABLE,
+                                 controllableResources);
         }
         
         // retrieve inventory summary

@@ -27,14 +27,10 @@ package org.hyperic.hq.ui.util;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 
 public interface UIUtils {
     public void setResourceFlags(AppdefResourceValue resource, boolean config,
                                  HttpServletRequest request)
-        throws Exception;
-    
-    public void setHubFlags(AppdefEntityID[] idArr, HttpServletRequest request)
         throws Exception;
 }
