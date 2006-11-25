@@ -87,7 +87,7 @@ public class PermissionManagerImpl
         Connection conn = null;
         try {
             conn = DBUtil.getConnByContext(getInitialContext(), DATASOURCE);
-            this.falseToken = DBUtil.getBooleanValue(false, conn);                
+            falseToken = DBUtil.getBooleanValue(false, conn);                
         } catch (Exception e) {
             throw new SystemException("Unable to initialize " +
                                       "PermissionManager:" + e, e);
@@ -149,26 +149,17 @@ public class PermissionManagerImpl
                                          String[] opArr)
         throws FinderException
     {
-        Resource[] resLocArr;
-
-        if (resArr == null || opArr == null ||
-            resArr.length != opArr.length) {
-            throw new IllegalArgumentException("At least one resource " +
-                                               "must have an equal number " +
-                                               "of operations");
+        if (resArr == null) {
+            throw new IllegalArgumentException("At least one resource required");
         }
 
-        resLocArr = new Resource[resArr.length];
+        ArrayList resLocArr = new ArrayList(resArr.length);
 
-        for (int x = 0; x < resLocArr.length; x++) {
-            resLocArr[x] = lookupResource(resArr[x]);
+        for (int x = 0; x < resArr.length; x++) {
+            resLocArr.add(lookupResource(resArr[x]));
         }
         
-        Collection coll = 
-            getResourceDAO().findScopeByOperationBatch(resLocArr);
-        return (ResourceValue[])this.fromLocals(coll, 
-            org.hyperic.hq.authz.shared.ResourceValue.class);
-
+        return (ResourceValue[]) fromLocals(resLocArr, ResourceValue.class);
     }
 
     public List findViewableResources(AuthzSubjectValue subj,
@@ -191,7 +182,7 @@ public class PermissionManagerImpl
                     sql = sql + "DESC";
                 }
                 sql = StringUtil.replace(sql, "DB_FALSE_TOKEN",
-                                         this.falseToken);
+                                         falseToken);
                 stmt = conn.prepareStatement(sql);
                 stmt.setString(1, resType);
             } else {
@@ -200,7 +191,7 @@ public class PermissionManagerImpl
                     sql = sql + "DESC";
                 }
                 sql = StringUtil.replace(sql, "DB_FALSE_TOKEN",
-                                         this.falseToken);
+                                         falseToken);
                 stmt = conn.prepareStatement(sql);
                 stmt.setString(1, resType);
                 stmt.setString(2, resName);
@@ -276,7 +267,7 @@ public class PermissionManagerImpl
             "SELECT RES.INSTANCE_ID FROM " +
             "  EAM_RESOURCE RES, EAM_RESOURCE_TYPE RT " +
             "WHERE " + col + " = RES.INSTANCE_ID " +
-            "  AND RES.FSYSTEM = " + this.falseToken + 
+            "  AND RES.FSYSTEM = " + falseToken + 
             "  AND RES.RESOURCE_TYPE_ID = RT.ID " +
             "  AND RT.NAME = ? ";
     }

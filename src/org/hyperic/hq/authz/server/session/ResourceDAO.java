@@ -31,7 +31,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
@@ -177,12 +176,7 @@ public class ResourceDAO extends HibernateDAO
     }
 
     public Resource findByInstanceId(ResourceType type, Integer id) {
-        String sql = "from Resource where instanceId = ? and" +
-                     " resourceType.id = ?";
-        return (Resource)getSession().createQuery(sql)
-            .setInteger(0, id.intValue())
-            .setInteger(1, type.getId().intValue())
-            .uniqueResult();
+        return findByInstanceId(type.getId(), id);
     }
     
     public Resource findByInstanceId(Integer typeId, Integer id) {            
@@ -356,7 +350,7 @@ public class ResourceDAO extends HibernateDAO
     }
 
     public Collection findScopeByOperationBatch(AuthzSubject subjLoc,
-                                                ResourceValue[] resLocArr,
+                                                Resource[] resLocArr,
                                                 Operation[] opLocArr)
     {
         StringBuffer sb = new StringBuffer();
@@ -381,29 +375,6 @@ public class ResourceDAO extends HibernateDAO
         sb.append(")");
         return getSession().createQuery(sb.toString())
             .setInteger(0, subjLoc.getId().intValue())
-            .list();
-    }
-
-    public Collection findScopeByOperationBatch(Resource[] resLocArr)
-    {
-        StringBuffer sb = new StringBuffer();
-
-        sb.append ("SELECT DISTINCT r " )
-            .append ( "FROM Resource r "      )
-            .append ( "  join r.resourceGroups g " )
-            .append ( "WHERE "              );
-
-        for (int x = 0; x < resLocArr.length; x++) {
-            if (x > 0)
-                sb.append(" OR ");
-            sb.append(" r.id=")
-                .append(resLocArr[x].getId());
-        }
-        if (log.isDebugEnabled()) {
-            log.debug ("findScopeByOperationBatch() [query=" +
-                       sb.toString() + "]");
-        }
-        return getSession().createQuery(sb.toString())
             .list();
     }
 }
