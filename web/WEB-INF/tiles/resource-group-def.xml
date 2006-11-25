@@ -34,6 +34,21 @@
   </definition>
 
   <!-- group tabs -->
+  <definition name=".tabs.resource.group"
+              extends=".tabs.resource"> 
+   <putList name="tabList">
+       <item value="Monitor" mode="currentHealth"
+            link="/resource/group/monitor/Visibility.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Inventory" link="/resource/group/Inventory.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Control" link="/resource/group/Control.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+   </putList>     
+  </definition>
   
   <!-- compatibility groups do not have control -->
     <definition name=".tabs.resource.group.nocontrol"
@@ -47,6 +62,21 @@
      </putList>     
     </definition>
 
+  <definition name=".tabs.resource.group.control.current"
+              extends=".tabs.resource.group">                            
+   <put name="selectedIndex"  value="2" />
+   <put name="subSectionName" value="Control"/>
+   <put name="subSelectedIndex" value="0"/>
+   <putList name="subTabList">
+      <item value="Current" link="/resource/group/Control.do"            
+            height="25" width="104" mode="view"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="History" link="/resource/group/Control.do"
+            height="25" width="104" mode="history"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+   </putList>
+  </definition>
+  
     <!-- mixed groups have only inventory -->
   <definition name=".tabs.resource.group.inventoryonly"
         extends=".tabs.resource.inventoryonly">
@@ -192,4 +222,55 @@
 
   <definition name=".resource.group.monitor.visibility.listhostresources"
               path="/resource/group/monitor/visibility/ListHostResources.jsp"/>
+
+  <definition name=".resource.group.control.list.detail"
+              extends=".resource.common.control.list.detail">
+              <put name="section" value="group"/>
+  </definition>
+
+  <!-- tile for group control current status detail page -->
+  <definition name=".resource.group.control.list.current.detail"
+              path="/resource/group/control/ListDetail.jsp"
+              controllerUrl="/resource/group/control/ListDetail.do">
+             <put name="returnUrl" value="/resource/group/Control.do?mode=view"/>
+             <put name="returnKey" value="resource.group.ControlDetail.Link.ReturnStatus"/>
+             <put name="noButtons" value="true"/>
+  </definition>
+              
+  <definition name=".resource.group.control.list.history"
+              extends=".resource.common.control.list.history">
+              <put name="section" value="group"/>
+  </definition>
+
+  <definition name=".resource.group.control.list.history.detail"
+              path="/resource/group/control/ListDetail.jsp" 
+              controllerUrl="/resource/group/control/ListDetail.do">
+             <put name="returnUrl" value="/resource/group/Control.do?mode=history"/>
+             <put name="returnKey" value="resource.group.ControlDetail.Link.ReturnHistory"/>
+  </definition>
+  
+  <definition name=".resource.group.control.list.scheduled"
+              extends=".resource.common.control.list.scheduled">
+              <put name="section" value="group"/>
+  </definition>
+    
+  <definition name=".resource.group.control.quickControl" 
+              extends=".resource.common.control.quickControl" >    
+              <put name="action" value="/resource/group/control/QuickControl.do"/>
+  </definition>
+  
+  <!-- history and current use different sized subtab buttons -->
+  <definition name=".tabs.resource.group.control.list.history"
+              extends=".tabs.resource.group.control.current">
+   <put name="subSelectedIndex" value="1"/>
+    <putList name="subTabList">
+      <item value="Current" link="/resource/group/Control.do"            
+            height="25" width="104" mode="view"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="History" link="/resource/group/Control.do"
+            height="25" width="104" mode="history"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+   </putList>
+  </definition>
+  
 </tiles-definitions>

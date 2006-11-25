@@ -77,6 +77,12 @@
         
         <!-- / -->
 	
+        <!-- RESOURCE GROUP CONTROL FORMS -->           
+        <form-bean name="GroupControlForm"
+                   type="org.hyperic.hq.ui.action.resource.group.control.GroupControlForm"/>
+                   
+        <!-- / -->  
+
         <!-- RESOURCE COMMON FORMS -->
         <form-bean name="ResourceForm"
                    type="org.hyperic.hq.ui.action.resource.ResourceForm"/>
@@ -598,6 +604,17 @@
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.inventory.AddResourceGroupsFormPrepareAction">
         <set-property property="title" value="2.2.6.4"/>
+      </action>
+
+      <!-- resource common control -->
+      <action path="/ResourceControlHistory"
+              type="org.hyperic.hq.ui.action.resource.DetermineLocationAction">
+              <forward name="platform" path="/resource/platform/Control.do?mode=history"/>
+              <forward name="application" path="/resource/application/Control.do?mode=history"/>
+              <forward name="server" path="/resource/server/Control.do?mode=history"/>
+              <forward name="service" path="/resource/service/Control.do?mode=history"/>
+              <forward name="compatGroup" path="/resource/group/Control.do?mode=history"/>
+              <forward name="adhocGroup" path="/resource/group/Inventory.do?mode=view"/>
       </action>
 
       <action path="/resource/common/control/ListScheduled"
@@ -1383,7 +1400,7 @@
               type="org.apache.struts.tiles.actions.TilesAction"/>
 
       <action path="/resource/server/control/RemoveControlJobs"
-              type="com.hyperic.hq.ui.action.resource.common.control.RemoveControlJobsAction"
+              type="org.hyperic.hq.ui.action.resource.common.control.RemoveControlJobsAction"
               name="RemoveControlJobsForm"
               scope="request"
               input="/resource/server/Control.do?mode=view">
@@ -1985,6 +2002,52 @@
       </action>        
       <!-- / end group monitoring config -->
       
+      <!-- resource group control -->
+      <action path="/resource/group/Control"
+              forward=".resource.group.control.layout">
+      </action>
+      
+      <action path="/resource/group/GroupController"
+              parameter="mode"
+              input="/resource/group/Control.do" 
+              type="org.hyperic.hq.ui.action.resource.group.control.GroupControllerAction" >
+      </action>
+      
+      <action path="/resource/group/control/RemoveHistory"
+              type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction"
+              name="RemoveControlForm"
+              scope="request"
+              input="/resource/group/Control.do?mode=history">
+        <forward name="failure" path="/resource/group/Control.do?mode=history" redirect="true" />
+        <forward name="success" path="/resource/group/Control.do?mode=history" redirect="true" />
+     </action>
+ 
+     <action path="/resource/group/control/RemoveCurrentStatus"
+              type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction"
+              name="RemoveControlForm"
+              scope="request"
+              input="/resource/group/Control.do?mode=view">
+        <forward name="failure" path="/resource/group/Control.do?mode=view" redirect="true" />
+        <forward name="success" path="/resource/group/Control.do?mode=view" redirect="true" />
+      </action>
+              
+      <action path="/resource/group/control/QuickControl" 
+              name="QuickControlForm"
+              scope="request"
+              input="/resource/group/Control.do"          
+              type="org.hyperic.hq.ui.action.resource.common.control.QuickControlAction">
+        <forward name="new" path="/resource/group/Control.do?mode=new"/>
+        <forward name="failure" path="/resource/group/Control.do?mode=view" redirect="true"/>
+        <forward name="success" path="/resource/group/Control.do?mode=view" redirect="true"/>
+      </action>
+      
+      <action path="/resource/group/control/ListDetail"       
+              type="org.hyperic.hq.ui.action.resource.group.control.ListDetailAction" >
+        <set-property property="title" value="2.4.7.5"/>
+      </action>
+            
+      <!-- / end resource group control -->
+
       <!-- autogroup monitoring actions -->          
       <action path="/resource/autogroup/monitor/Visibility"
               forward=".resource.autogroup.monitor.visibility.layout">
