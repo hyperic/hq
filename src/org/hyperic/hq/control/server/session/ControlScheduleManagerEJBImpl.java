@@ -217,6 +217,11 @@ public class ControlScheduleManagerEJBImpl
                                        cLocal.getEntityId());
                 try {
                     checkViewPermission(subject, entity);
+                    
+                    AppdefEntityValue aVal =
+                        new AppdefEntityValue(entity, subject);
+                    cLocal.setEntityName(aVal.getName());
+
                     if (++count > rows)
                         break;
                 } catch (PermissionException e) {
@@ -541,11 +546,9 @@ public class ControlScheduleManagerEJBImpl
         // Sort the list if we are sorting by entity name
         if (sortAttr == SortAttribute.CONTROL_ENTITYNAME) {
             if (pc.isAscending()) {
-                Collections.sort(list, 
-                                 new ControlHistoryLocalComparatorAsc());
+                Collections.sort(list, new ControlHistoryLocalComparatorAsc());
             } else {
-                Collections.sort(list,
-                                 new ControlHistoryLocalComparatorDesc());
+                Collections.sort(list, new ControlHistoryLocalComparatorDesc());
             }
         }
             
