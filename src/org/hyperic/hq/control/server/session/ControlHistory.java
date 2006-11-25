@@ -37,6 +37,7 @@ public class ControlHistory extends PersistedObject
     private Integer batchId;
     private Integer entityType;
     private Integer entityId;
+    private String entityName;
     private String subject;
     private boolean scheduled;
     private long dateScheduled;
@@ -218,6 +219,23 @@ public class ControlHistory extends PersistedObject
         this.args = args;
     }
 
+    private String getEntityIdString()
+    {
+        AppdefEntityID id = new AppdefEntityID(getEntityType().intValue(),
+                                               getEntityId().intValue());
+        return "" + id;
+    }
+
+    public String getEntityName() {
+        if (entityName == null)
+            return getEntityIdString();
+        return entityName;
+    }
+
+    public void setEntityName(String entityName) {
+        this.entityName = entityName;
+    }
+
     private ControlHistoryValue controlHistoryValue = new ControlHistoryValue();
     /**
      * legacy EJB DTO pattern
@@ -231,8 +249,7 @@ public class ControlHistory extends PersistedObject
         controlHistoryValue.setBatchId(getBatchId());
         controlHistoryValue.setEntityType(getEntityType());
         controlHistoryValue.setEntityId(getEntityId());
-        controlHistoryValue.setEntityName(
-            (getEntityName() == null) ? "" : getEntityName());
+        controlHistoryValue.setEntityName(getEntityName());
         controlHistoryValue.setSubject(
             (getSubject() == null) ? "" : getSubject());
         controlHistoryValue.setScheduled(getScheduled());
@@ -251,13 +268,6 @@ public class ControlHistory extends PersistedObject
         controlHistoryValue.setArgs(
             (getArgs() == null) ? "" : getArgs());
         return controlHistoryValue;
-    }
-
-    public String getEntityName()
-    {
-        AppdefEntityID id = new AppdefEntityID(getEntityType().intValue(),
-                                               getEntityId().intValue());
-        return "" + id;
     }
 
     protected void setControlHistoryValue(ControlHistoryValue valueHolder)
