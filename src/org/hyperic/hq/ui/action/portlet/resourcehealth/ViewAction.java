@@ -26,6 +26,8 @@
 package org.hyperic.hq.ui.action.portlet.resourcehealth;
 
 import java.util.List;
+import java.util.Iterator;
+import java.util.ArrayList;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -33,70 +35,100 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.bizapp.shared.uibeans.ResourceDisplaySummary;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
-import org.hyperic.util.timer.StopWatch;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 
 /**
- * An <code>Action</code> that loads the <code>Portal</code>
- * identified by the <code>PORTAL_PARAM</code> request parameter (or
- * the default portal, if the parameter is not specified) into the
- * <code>PORTAL_KEY</code> request attribute.
+ * This action class is used by the Favorite Resources portlet.  It's main
+ * use is to generate the JSON objects required for display into the UI.
  */
 public class ViewAction extends TilesAction {
 
-   public ActionForward execute(ComponentContext context,
-                                ActionMapping mapping,
-                                ActionForm form,
-                                HttpServletRequest request,
-                                HttpServletResponse response)
-       throws Exception {
+    Log _log = LogFactory.getLog("FAVORITE RESOURCES");
 
-       StopWatch timer = new StopWatch();
-       Log timingLog = LogFactory.getLog("DASHBOARD-TIMING");
+    public ActionForward execute(ComponentContext context,
+                                 ActionMapping mapping,
+                                 ActionForm form,
+                                 HttpServletRequest request,
+                                 HttpServletResponse response)
+       throws Exception
+    {
+        ServletContext ctx = getServlet().getServletContext();
+        MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
+        WebUser user = (WebUser)
+            request.getSession().getAttribute(Constants.WEBUSER_SES_ATTR);
+        String key = Constants.USERPREF_KEY_FAVORITE_RESOURCES;
 
-       ServletContext ctx = getServlet().getServletContext();
-       MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);        
-       WebUser user = (WebUser) request.getSession().getAttribute( 
-                                                   Constants.WEBUSER_SES_ATTR );
-       String key = Constants.USERPREF_KEY_FAVORITE_RESOURCES;
-       
-       List list;
-       try{
-           list = getStuff(key, boss, user);
-       }catch(Exception e){
-           DashboardUtils.verifyResources(key, ctx, user);                                                
-           list = getStuff(key, boss, user);
-       }
-       
-       context.putAttribute("resourceHealth", list);
+        List list;
+        try{
+            list = getResources(key, boss, user);
+        } catch(Exception e) {
+            DashboardUtils.verifyResources(key, ctx, user);
+            list = getResources(key, boss, user);
+        }
 
-       Boolean availability = new Boolean(user.getPreference(".dashContent.resourcehealth.availability"));
-       Boolean throughput = new Boolean( user.getPreference(".dashContent.resourcehealth.throughput") ); 
-       Boolean performance = new Boolean( user.getPreference(".dashContent.resourcehealth.performance") ); 
-       Boolean utilization = new Boolean( user.getPreference(".dashContent.resourcehealth.utilization") );
+        // XXX: We should get rid of this configuration, who uses it, and why?
+        Boolean availability =
+            Boolean.valueOf(user.
+                getPreference(".dashContent.resourcehealth.availability"));
+        Boolean throughput =
+            Boolean.valueOf(user.
+                getPreference(".dashContent.resourcehealth.throughput"));
+        Boolean performance =
+            Boolean.valueOf(user.
+                getPreference(".dashContent.resourcehealth.performance"));
+        Boolean utilization =
+            Boolean.valueOf(user.
+                getPreference(".dashContent.resourcehealth.utilization"));
+        //context.putAttribute("availability", availability);
+        //context.putAttribute("throughput", throughput);
+        //context.putAttribute("performance", performance);
+        //context.putAttribute("utilization", utilization);
 
-       context.putAttribute("availability", availability);
-       context.putAttribute("throughput", throughput);
-       context.putAttribute("performance", performance);
-       context.putAttribute("utilization", utilization);
+        // Due to the complexity of the UIBeans, we need to construct the
+        // JSON objects by hand.
+        JSONObject favorites = new JSONObject();
 
-       timingLog.trace("ViewResourceHealth - timing ["+timer.toString()+"]");
-       return null;
+        List resources = new ArrayList();
+        for (Iterator i = list.iterator(); i.hasNext(); ) {
+            JSONObject res = new JSONObject();
+            ResourceDisplaySummary bean = (ResourceDisplaySummary)i.next();
+            res.put("resourceName", bean.getResourceName());
+            res.put("resourceTypeId", bean.getResourceTypeId());
+            res.put("resourceId", bean.getResourceId());
+            res.put("performance", bean.getPerformance());
+            res.put("throughput", bean.getThroughput());
+            res.put("throughputUnits", bean.getThroughputUnits());
+            res.put("availability", bean.getAvailability());
+            res.put("monitorable", bean.getMonitorable());
+            res.put("alerts", bean.getAlerts());
+
+            resources.add(res);
+        }
+        favorites.put("favorites", resources);
+
+        _log.info(favorites.toString());
+
+        //response.getWriter().write(favorites.toString());
+
+        return null;
     }
-    
-    private List getStuff(String key, MeasurementBoss boss, WebUser user)
-        throws Exception {
+
+    private List getResources(String key, MeasurementBoss boss, WebUser user)
+        throws Exception
+    {
         List entityIds =  DashboardUtils.preferencesAsEntityIds(key, user);                                    
 
         AppdefEntityID[] arrayIds = new AppdefEntityID[entityIds.size()];

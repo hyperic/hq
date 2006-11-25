@@ -27,6 +27,7 @@ package org.hyperic.hq.ui.action.portlet.criticalalerts;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.ArrayList;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -34,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.bizapp.shared.uibeans.DashboardAlertBean;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -49,64 +51,79 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.json.JSONObject;
 
 /**
- * An <code>Action</code> that loads the <code>Portal</code>
- * identified by the <code>PORTAL_PARAM</code> request parameter (or
- * the default portal, if the parameter is not specified) into the
- * <code>PORTAL_KEY</code> request attribute.
+ * This action class is used by the Critical Alerts portlet.  It's main
+ * use is to generate the JSON objects required for display into the UI.
  */
 public class ViewAction extends TilesAction {
 
-   public ActionForward execute(ComponentContext context,
+    private Log _log = LogFactory.getLog("CRITICAL ALERTS");
+
+    public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
-       throws Exception {
-       StopWatch timer = new StopWatch();
-       Log timingLog = LogFactory.getLog("DASHBOARD-TIMING");
-           
-       ServletContext ctx = getServlet().getServletContext();
-       EventsBoss eventBoss = ContextUtils.getEventsBoss(ctx);
-       WebUser user = (WebUser) request.getSession().getAttribute(
-                    Constants.WEBUSER_SES_ATTR);
-       String key = ".dashContent.criticalalerts.resources";
+        throws Exception
+    {
+        ServletContext ctx = getServlet().getServletContext();
+        EventsBoss eventBoss = ContextUtils.getEventsBoss(ctx);
+        WebUser user = (WebUser) request.getSession().getAttribute(
+            Constants.WEBUSER_SES_ATTR);
+        String key = ".dashContent.criticalalerts.resources";
+
+        List entityIds = DashboardUtils.preferencesAsEntityIds(key, user);
+
+        AppdefEntityID[] arrayIds = new AppdefEntityID[entityIds.size()];
+
+        int h = 0;
+        for (Iterator i = entityIds.iterator(); i.hasNext(); h++) {
+            arrayIds[h] = (AppdefEntityID) i.next();
+        }
+
+        int count = Integer.parseInt(user.getPreference(PropertiesForm.
+            ALERT_NUMBER));
+        int priority = Integer.parseInt(user.getPreference(PropertiesForm.
+            PRIORITY));
+        long timeRange = Long.parseLong(user.getPreference(PropertiesForm.PAST));
+        boolean all =
+            "all".equals(user.getPreference(PropertiesForm.SELECTED_OR_ALL));
+
+        int sessionID = user.getSessionId().intValue();
+        PageControl pc = new PageControl();
+        pc.setPagesize(10);
+
+        if (all) {
+            arrayIds = null;
+        }
+
+        PageList criticalAlerts =
+            eventBoss.findAlerts(sessionID, count, priority, timeRange, arrayIds,
+                                 pc);
+
+        JSONObject alerts = new JSONObject();
+        List a = new ArrayList();
+        for (Iterator i = criticalAlerts.iterator(); i.hasNext(); ) {
+            DashboardAlertBean bean = (DashboardAlertBean)i.next();
+            JSONObject alert = new JSONObject();
+            alert.put("alertId", bean.getAlertId());
+            alert.put("appdefKey",
+                      bean.getResource().getEntityId().getAppdefKey());
+            alert.put("resourceName", bean.getResource().getName());
+            alert.put("alertDefName", bean.getAlertDefName());
+            alert.put("cTime", bean.getCtime());
+
+            a.add(alert);
+        }
+
+        alerts.put("criticalAlerts", a);
+
+        _log.info(alerts.toString());
+
+        //response.getWriter().write(alerts.toString());
         
-       List entityIds =  DashboardUtils.preferencesAsEntityIds(key, user);                                    
-        
-       AppdefEntityID[] arrayIds =  new AppdefEntityID[entityIds.size()];
-        
-       int h = 0;
-       for (Iterator i = entityIds.iterator(); i.hasNext(); h++) {
-           arrayIds[h] = (AppdefEntityID) i.next();
-       }
-        
-       int count = new Integer(user.getPreference(
-                PropertiesForm.ALERT_NUMBER)).intValue();
-       int priority =
-           new Integer(user.getPreference(PropertiesForm.PRIORITY)).intValue();
-       long timeRange =
-           new Long(user.getPreference(PropertiesForm.PAST)).longValue();
-       boolean all =
-           "all".equals(user.getPreference(PropertiesForm.SELECTED_OR_ALL)); 
-        
-       int sessionID = user.getSessionId().intValue();
-       PageControl pc = new PageControl();
-       pc.setPagesize(10);
-        
-       if(all)
-           arrayIds = null;
-        
-       // need to test if findAlerts is working correclty.
-       // this may acutally need to call findUserAlerts
-       PageList criticalAlerts =
-           eventBoss.findAlerts(sessionID, count, priority, timeRange, arrayIds,
-                                pc);
-        
-       context.putAttribute("criticalAlerts", criticalAlerts);   
-       timingLog.trace("ViewCriticalAlerts - timing ["+timer.toString()+"]");
-        
-       return null;
-   }
+        return null;
+    }
 }
