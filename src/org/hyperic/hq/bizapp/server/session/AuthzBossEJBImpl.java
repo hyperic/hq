@@ -73,11 +73,9 @@ import org.hyperic.util.pager.PageList;
 public class AuthzBossEJBImpl extends BizappSessionEJB 
     implements SessionBean {
 
-    private SessionContext sessionCtx = null;
     private SessionManager manager    = SessionManager.getInstance();
 
-    protected Log log = LogFactory.getLog(
-        "org.hyperic.hq.bizapp.server.session.AuthzBossEJBImpl");
+    protected Log log = LogFactory.getLog(AuthzBossEJBImpl.class.getName());
     protected boolean debug = log.isDebugEnabled();
 
     public AuthzBossEJBImpl() {}

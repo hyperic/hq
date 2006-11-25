@@ -77,7 +77,7 @@ import org.hyperic.util.pager.PageList;
 public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
 {
     // Our log instance
-    private Log log = LogFactory.getLog(ControlBossEJBImpl.class);
+    private Log log = LogFactory.getLog(ControlBossEJBImpl.class.getName());
 
     // Session manager
     private SessionManager sessionManager = SessionManager.getInstance();
