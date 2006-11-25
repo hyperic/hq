@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.taglib.display;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.PageContext;
@@ -36,11 +35,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
 import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.ui.Constants;
-
+import org.hyperic.hq.ui.taglib.QuicknavUtil;
 
 /**
  * This class is a two in one decorator/tag for use within the
@@ -50,17 +46,6 @@ import org.hyperic.hq.ui.Constants;
 public class QuicknavDecorator extends ColumnDecorator implements Tag {
 
     //----------------------------------------------------static variables
-
-    private final static String ICON_SRC_M      = "/images/icon_hub_m.gif";
-    private final static String ICON_HREF_M     =
-        "/monitor/Visibility.do?mode=currentHealth";
-    private final static String ICON_SRC_I      = "/images/icon_hub_i.gif";
-    private final static String ICON_HREF_I     = "/Inventory.do?mode=view";
-    private final static String ICON_SRC_A      = "/images/icon_hub_a.gif";
-    private final static String ICON_HREF_A     = "/alerts/Config.do?mode=list";
-    private final static String ICON_WIDTH      = "11";
-    private final static String ICON_HEIGHT     = "11";
-    private final static String ICON_BORDER     = "0";
 
     protected static Log log =
         LogFactory.getLog(QuicknavDecorator.class.getName());
@@ -94,107 +79,18 @@ public class QuicknavDecorator extends ColumnDecorator implements Tag {
                                                 AppdefResourceValue.class);
         } catch (NullAttributeException ne) {
             log.debug("bean " + getResource() + " not found");
-            return getNA();
+            return QuicknavUtil.getNA();
         } catch (JspException je) {
             log.debug("can't evaluate resource type [" + getResource() + "]",
                       je);
-            return getNA();
+            return QuicknavUtil.getNA();
         }
 
         if (rv.getEntityId() == null) {
-            return getNA();
+            return QuicknavUtil.getNA();
         }
 
-        return getOutput(rv);
-    }
-
-    private String getOutput(AppdefResourceValue rv) {
-        StringBuffer buf = new StringBuffer();
-
-        if (isMonitorable(rv)) {
-            makeLinkedIcon(rv, buf, ICON_HREF_M, ICON_SRC_M);
-        }
-
-        makeLinkedIcon(rv, buf, ICON_HREF_I, ICON_SRC_I);
-
-        if (isAlertable(rv)) {
-            makeLinkedIconWithRef(rv, buf, ICON_HREF_A, ICON_SRC_A);
-        }
-
-        return buf.toString();
-    }
-
-    private String getNA() {
-        return "";
-    }
-
-    private void makeLinkedIcon(AppdefResourceValue rv,
-                                StringBuffer buf,
-                                String href,
-                                String src) {
-        String full = "/resource/" + rv.getEntityId().getTypeName() + href;
-        makeLinkedIconWithRef(rv, buf, full, src);
-    }
-    
-    private void makeLinkedIconWithRef(AppdefResourceValue rv,
-                                       StringBuffer buf,
-                                       String href,
-                                       String src) {
-        HttpServletRequest req = (HttpServletRequest) context.getRequest();
-
-        buf.append("<a href=\"")
-           .append(req.getContextPath())
-           .append(href)
-           .append("&");
-        parameterizeUrl(rv, buf);
-        buf.append("\">");
-        
-        buf.append("<img src=\"")
-           .append(req.getContextPath())
-           .append(src)
-           .append("?");
-        parameterizeUrl(rv, buf);
-        buf.append("\" width=\"")
-           .append(ICON_WIDTH)
-           .append("\" height=\"")
-           .append(ICON_HEIGHT)
-           .append("\" alt=\"\" border=\"")
-           .append(ICON_BORDER)
-           .append("\">");
-        
-        buf.append("</a>\n");
-    }
-
-    private void parameterizeUrl(AppdefResourceValue rv,
-                                 StringBuffer buf) {
-        buf.append(Constants.ENTITY_ID_PARAM)
-           .append("=")
-           .append(rv.getEntityId().getType())
-           .append(":")
-           .append(rv.getId());
-    }
-
-    private boolean isMonitorable(AppdefResourceValue rv) {
-        if (rv.getEntityId().getType() ==
-            AppdefEntityConstants.APPDEF_TYPE_GROUP) {
-            AppdefGroupValue grp = (AppdefGroupValue) rv;
-            if (grp.isGroupAdhoc()) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private boolean isAlertable(AppdefResourceValue rv) {
-        switch (rv.getEntityId().getType()) {
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                return true;
-            default:
-                return false;
-        }
+        return QuicknavUtil.getOutput(rv, context);
     }
 
     public int doStartTag() throws JspTagException {
