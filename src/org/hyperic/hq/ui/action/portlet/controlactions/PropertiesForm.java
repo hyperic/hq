@@ -39,25 +39,25 @@ import org.hyperic.hq.ui.util.RequestUtils;
 public class PropertiesForm extends DashboardBaseForm  {
     
     /** Holds value of property lastCompleted. */
-    private Integer lastCompleted;
+    private Integer _lastCompleted;
     
     /** Holds value of property nextScheduled. */
-    private Integer nextScheduled;
+    private Integer _nextScheduled;
     
     /** Holds value of property mostFrequent. */
-    private Integer mostFrequent;
+    private Integer _mostFrequent;
     
     /** Holds value of property useLastCompleted. */
-    private boolean useLastCompleted;
+    private boolean _useLastCompleted;
     
     /** Holds value of property useMostFrequent. */
-    private boolean useMostFrequent;
+    private boolean _useMostFrequent;
     
     /** Holds value of property useNextScheduled. */
-    private boolean useNextScheduled;
+    private boolean _useNextScheduled;
     
     /** Holds value of property past. */
-    private long past;
+    private long _past;
     
     //-------------------------------------instance variables
 
@@ -110,7 +110,7 @@ public class PropertiesForm extends DashboardBaseForm  {
      *
      */
     public Integer getLastCompleted() {
-        return this.lastCompleted;
+        return _lastCompleted;
     }
     
     /** Setter for property lastCompleted.
@@ -118,7 +118,7 @@ public class PropertiesForm extends DashboardBaseForm  {
      *
      */
     public void setLastCompleted(Integer lastCompleted) {
-        this.lastCompleted = lastCompleted;
+        _lastCompleted = lastCompleted;
     }
     
     /** Getter for property lastScheduled.
@@ -126,7 +126,7 @@ public class PropertiesForm extends DashboardBaseForm  {
      *
      */
     public Integer getNextScheduled() {
-        return this.nextScheduled;
+        return _nextScheduled;
     }
     
     /** Setter for property lastScheduled.
@@ -134,7 +134,7 @@ public class PropertiesForm extends DashboardBaseForm  {
      *
      */
     public void setNextScheduled(Integer nextScheduled) {
-        this.nextScheduled = nextScheduled;
+        _nextScheduled = nextScheduled;
     }
     
     /** Getter for property mostFrequent.
@@ -142,7 +142,7 @@ public class PropertiesForm extends DashboardBaseForm  {
      *
      */
     public Integer getMostFrequent() {
-        return this.mostFrequent;
+        return _mostFrequent;
     }
     
     /** Setter for property mostFrequent.
@@ -150,7 +150,7 @@ public class PropertiesForm extends DashboardBaseForm  {
      *
      */
     public void setMostFrequent(Integer mostFrequent) {
-        this.mostFrequent = mostFrequent;
+        _mostFrequent = mostFrequent;
     }
     
     /** Getter for property useLastCompleted.
@@ -158,7 +158,7 @@ public class PropertiesForm extends DashboardBaseForm  {
      *
      */
     public boolean isUseLastCompleted() {
-        return this.useLastCompleted;
+        return _useLastCompleted;
     }
     
     /** Setter for property useLastCompleted.
@@ -166,7 +166,7 @@ public class PropertiesForm extends DashboardBaseForm  {
      *
      */
     public void setUseLastCompleted(boolean useLastCompleted) {
-        this.useLastCompleted = useLastCompleted;
+        _useLastCompleted = useLastCompleted;
     }
     
     /** Getter for property useMostFrequent.
@@ -174,7 +174,7 @@ public class PropertiesForm extends DashboardBaseForm  {
      *
      */
     public boolean isUseMostFrequent() {
-        return this.useMostFrequent;
+        return _useMostFrequent;
     }
     
     /** Setter for property useMostFrequent.
@@ -182,7 +182,7 @@ public class PropertiesForm extends DashboardBaseForm  {
      *
      */
     public void setUseMostFrequent(boolean useMostFrequent) {
-        this.useMostFrequent = useMostFrequent;
+        _useMostFrequent = useMostFrequent;
     }
     
     /** Getter for property useNextScheduled.
@@ -190,7 +190,7 @@ public class PropertiesForm extends DashboardBaseForm  {
      *
      */
     public boolean isUseNextScheduled() {
-        return this.useNextScheduled;
+        return _useNextScheduled;
     }
     
     /** Setter for property useNextScheduled.
@@ -198,14 +198,14 @@ public class PropertiesForm extends DashboardBaseForm  {
      *
      */
     public void setUseNextScheduled(boolean useNextScheduled) {
-        this.useNextScheduled = useNextScheduled;
+        _useNextScheduled = useNextScheduled;
     }
     
     public long getPast() {
-        return past;
+        return _past;
     }
     
     public void setPast(long past) {
-        this.past = past;
+        _past = past;
     }
 }
