@@ -33,6 +33,7 @@ import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 import javax.naming.NamingException;
+import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -510,9 +511,24 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                                                                    window);
     }
 
+
+    /**
+     * Get a list of recent control actions in decending order.  Called by RSS
+     * feed so it does not require valid session ID.
+     * @throws ApplicationException if user is not found
+     * @throws LoginException if user account has been disabled
+     *
+     * @ejb:interface-method
+     */
+    public PageList getRecentControlActions(String user, int rows, long window)
+        throws LoginException, ApplicationException {
+        int sessionId = getAuthManager().getUnauthSessionId(user);
+        return getRecentControlActions(sessionId, rows, window);
+    }
+    
     /**
      * Get a list of pending control actions in decending order
-     *
+     * 
      * @ejb:interface-method
      */
     public PageList getPendingControlActions(int sessionId, int rows)
