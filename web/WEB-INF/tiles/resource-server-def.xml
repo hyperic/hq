@@ -99,11 +99,11 @@
       <item value="Inventory" link="/resource/server/Inventory.do"
             height="21" width="102"
             classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="Control" link="/resource/server/Control.do"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
       <item value="Alert" mode="list"
             link="/alerts/Config.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Control" link="/resource/server/Control.do"
             height="21" width="102"
             classtype="org.hyperic.hq.ui.util.Tab"/>
    </putList>     
@@ -175,7 +175,7 @@
   <!-- resource server control tiles -->
   <definition name=".tabs.resource.server.control"
               extends=".tabs.resource.server">                                     
-   <put name="selectedIndex"  value="2" />
+   <put name="selectedIndex"  value="3" />
    <putList name="subTabList">
       <item value="Current" link="/resource/server/Control.do"
             height="25" width="104" mode="view"

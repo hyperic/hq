@@ -76,12 +76,6 @@
    </putList> 
   </definition>
 
-  <!-- control tabs -->  
-  <definition name=".tabs.resource.control"
-              extends=".tabs.resource">                            
-   <put name="selectedIndex"  value="2" />
-  </definition>
-
   <!-- monitor minitabs -->
   <definition name=".resource.common.monitor.visibility.minitabs"
               path="/resource/common/monitor/visibility/MiniTabs.jsp"/>

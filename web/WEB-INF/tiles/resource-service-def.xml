@@ -48,11 +48,11 @@
       <item value="Inventory" link="/resource/service/Inventory.do"
             height="21" width="102"
             classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="Control" link="/resource/service/Control.do"
-            height="21" width="102"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
       <item value="Alert" mode="list"
             link="/alerts/Config.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Control" link="/resource/service/Control.do"
             height="21" width="102"
             classtype="org.hyperic.hq.ui.util.Tab"/>
    </putList>     
@@ -248,7 +248,7 @@
 
   <definition name=".tabs.resource.service.control"
               extends=".tabs.resource.service">                                     
-   <put name="selectedIndex"  value="2" />
+   <put name="selectedIndex"  value="3" />
    <putList name="subTabList">
       <item value="Current" link="/resource/service/Control.do"
             height="25" width="104" mode="view"
