@@ -2372,6 +2372,9 @@
               type="org.hyperic.hq.ui.action.portlet.controlactions.ViewAction">
       </action>
 
+      <action path="/rss/ViewControlActions"
+              type="org.hyperic.hq.ui.action.portlet.controlactions.RSSAction"/>
+
       <action path="/dashboard/EditControlActions"
               type="org.hyperic.hq.ui.action.portlet.controlactions.PrepareAction"
               name="ControlActionsForm"

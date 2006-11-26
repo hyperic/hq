@@ -23,7 +23,7 @@
   USA.
  --%>
 
- <%@ page language="java" %>
+<%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
 <%@ taglib uri="struts-html-el" prefix="html" %>
 <%@ taglib uri="struts-tiles" prefix="tiles" %>
