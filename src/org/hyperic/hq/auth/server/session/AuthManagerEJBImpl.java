@@ -74,9 +74,6 @@ public class AuthManagerEJBImpl implements SessionBean {
     // Always authenticate against the HQ application realm
     private static final String appName = HQConstants.ApplicationName;
 
-    // By default all default login module options are used.
-    private HashMap configOptions = new HashMap();
-
     public AuthManagerEJBImpl() {}
 
     public void ejbCreate() {}
@@ -95,7 +92,6 @@ public class AuthManagerEJBImpl implements SessionBean {
      */
     public void setConfigurationOptions(HashMap options)
     {
-        configOptions = options;
     }
 
     private AuthzSubjectValue createSubjectValue(String name, String dsn)
@@ -190,11 +186,13 @@ public class AuthManagerEJBImpl implements SessionBean {
      * Get a session ID based on username only
      * @param user The user to authenticate
      * @return session id that is associated with the user
+     * @throws ApplicationException if user is not found
+     * @throws LoginException if user account has been disabled
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
     public int getUnauthSessionId(String user)
-        throws LoginException, ApplicationException, ConfigPropertyException {
+        throws ApplicationException, LoginException {
         try {
             SessionManager mgr = SessionManager.getInstance();
             try {
@@ -223,7 +221,8 @@ public class AuthManagerEJBImpl implements SessionBean {
             throw new SystemException("CreateException in getSessionId", e);
         } catch (ObjectNotFoundException e) {
             throw new ApplicationException(
-                "Unable to find Overlord User to create authz user entry", e);
+                "Unable to find User " + user + " to create authz user entry",
+                e);
         } 
     }
 
