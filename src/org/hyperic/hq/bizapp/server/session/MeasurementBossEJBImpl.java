@@ -3195,14 +3195,16 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * be equivalent to the size of the entity ID's passed in.  Called by RSS
      * feed so it does not require valid session ID.
      * 
+     * @throws ApplicationException if user is not found
+     * @throws LoginException if user account has been disabled
      * @return PageList of ResourceDisplaySummary beans
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
     public List findResourcesCurrentHealth(String user, AppdefEntityID[] entIds)
-        throws LoginException, ApplicationException, ConfigPropertyException,
+        throws LoginException, ApplicationException, PermissionException,
                AppdefEntityNotFoundException, SessionNotFoundException,
-               SessionTimeoutException, PermissionException, CreateException {
+               SessionTimeoutException {
         int sessionId = getAuthManager().getUnauthSessionId(user);
         return findResourcesCurrentHealth(sessionId, entIds);
     }
