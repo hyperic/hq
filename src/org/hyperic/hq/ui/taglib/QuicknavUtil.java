@@ -177,6 +177,11 @@ public class QuicknavUtil {
         QuicknavUtil.makeLinkedIcon(rv, buf, QuicknavUtil.ICON_HREF_I,
                        QuicknavUtil.ICON_SRC_I, context);
     
+        if (QuicknavUtil.isAlertable(rv)) {
+            QuicknavUtil.makeLinkedIconWithRef(rv, buf, QuicknavUtil.ICON_HREF_A,
+                                  QuicknavUtil.ICON_SRC_A, context);
+        }
+    
         if (QuicknavUtil.isControllable(rv, context)) {
             boolean skip = false;
     
@@ -193,11 +198,6 @@ public class QuicknavUtil {
                                    QuicknavUtil.ICON_SRC_C, context);
                 }
             }
-        }
-    
-        if (QuicknavUtil.isAlertable(rv)) {
-            QuicknavUtil.makeLinkedIconWithRef(rv, buf, QuicknavUtil.ICON_HREF_A,
-                                  QuicknavUtil.ICON_SRC_A, context);
         }
     
         return buf.toString();
