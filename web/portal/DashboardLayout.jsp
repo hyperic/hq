@@ -50,6 +50,10 @@
     new Effect.BlindUp($(name));
 
     var wide = isWide(name);
+    if (!wide && !isNarrow(name)) {
+        return;
+    }
+
     var portletOptions;
     for (i = 0; i < document.forms.length; i++) {
       if (document.forms[i].wide) {
@@ -139,10 +143,12 @@
   <c:forEach var="portlet" items="${columnsList}">
   <c:set var="isFirstPortlet" value="${portlet.isFirst}" scope="request"/>
   <c:set var="isLastPortlet"  value="${portlet.isLast}"  scope="request"/>
-  <li id="<c:out value="${portlet.url}"/>">
-  <table width="100%" border="0" cellspacing="0" cellpadding="0">
-    <tr><td valign="top" class="DashboardPadding"><tiles:insert beanProperty="url" beanName="portlet" flush="true"/></td></tr>
-  </table>
+  <li id="<c:out value="${portlet.fullUrl}"/>">
+    <div class="DashboardPadding">
+    <tiles:insert beanProperty="url" beanName="portlet" flush="true">
+      <tiles:put name="portlet" beanName="portlet"/>
+    </tiles:insert>
+    </div>
   </li>
   </c:forEach>
 </ul>
