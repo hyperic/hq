@@ -70,16 +70,18 @@ public class ModifyAction extends BaseAction {
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
-        WebUser user = (WebUser)
-            session.getAttribute(Constants.WEBUSER_SES_ATTR);
+        WebUser user =
+            (WebUser) session.getAttribute(Constants.WEBUSER_SES_ATTR);
 
         String forwardStr = Constants.SUCCESS_URL;
         
+        String key = ViewAction.RESOURCES_KEY;
+        if (pForm.getToken() != null) {
+            key += pForm.getToken();
+        }
+        
         if(pForm.isRemoveClicked()){
-            DashboardUtils
-                .removeResources(pForm.getIds(),
-                                 ".dashContent.criticalalerts.resources",
-                                 user);
+            DashboardUtils.removeResources(pForm.getIds(), key, user);
             forwardStr = "review";
         }
 

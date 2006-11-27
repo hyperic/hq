@@ -37,6 +37,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.DashboardAlertBean;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.Portlet;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
@@ -60,6 +61,7 @@ import org.json.JSONObject;
 public class ViewAction extends TilesAction {
 
     private Log _log = LogFactory.getLog("CRITICAL ALERTS");
+    static final String RESOURCES_KEY = ".dashContent.criticalalerts.resources";
 
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
@@ -72,19 +74,26 @@ public class ViewAction extends TilesAction {
         EventsBoss eventBoss = ContextUtils.getEventsBoss(ctx);
         WebUser user = (WebUser) request.getSession().getAttribute(
             Constants.WEBUSER_SES_ATTR);
-        String key = ".dashContent.criticalalerts.resources";
+        
+        Portlet portlet = (Portlet) context.getAttribute("portlet");
+        
+        String key = ViewAction.RESOURCES_KEY;
+        if (portlet.getToken() != null) {
+            key += portlet.getToken();
+        }
 
         List entityIds = DashboardUtils.preferencesAsEntityIds(key, user);
         AppdefEntityID[] arrayIds =
             (AppdefEntityID[])entityIds.toArray(new AppdefEntityID[0]);
 
-        int count = Integer.parseInt(user.getPreference(PropertiesForm.
-            ALERT_NUMBER));
-        int priority = Integer.parseInt(user.getPreference(PropertiesForm.
-            PRIORITY));
-        long timeRange = Long.parseLong(user.getPreference(PropertiesForm.PAST));
-        boolean all =
-            "all".equals(user.getPreference(PropertiesForm.SELECTED_OR_ALL));
+        int count = Integer.parseInt(
+                user.getPreference(PropertiesForm.ALERT_NUMBER));
+        int priority = Integer.parseInt(
+                user.getPreference(PropertiesForm.PRIORITY));
+        long timeRange = Long
+                .parseLong(user.getPreference(PropertiesForm.PAST));
+        boolean all = "all".equals(
+                user.getPreference(PropertiesForm.SELECTED_OR_ALL));
 
         int sessionID = user.getSessionId().intValue();
         PageControl pc = new PageControl();

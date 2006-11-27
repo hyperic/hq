@@ -79,7 +79,11 @@ public class PrepareAction extends TilesAction {
         WebUser user =
             (WebUser) session.getAttribute(Constants.WEBUSER_SES_ATTR);
         PageList resources = new PageList();
-        String key = ".dashContent.criticalalerts.resources";
+        
+        String key = ViewAction.RESOURCES_KEY;
+        if (pForm.getToken() != null) {
+            key += pForm.getToken();
+        }
 
         // This quarantees that the session dosen't contain any resources it
         // shouldn't
@@ -102,21 +106,10 @@ public class PrepareAction extends TilesAction {
         pForm.setPriority(prioritity);
         pForm.setSelectedOrAll(selectedOrAll);
 
-        List resourceList =
-            user.getPreferenceAsList(key, Constants.DASHBOARD_DELIMITER);
+        List entityIds = DashboardUtils.preferencesAsEntityIds(key, user);
 
-        Iterator i = resourceList.iterator();
-
-        while(i.hasNext()) {
-
-            ArrayList resourceIds =
-                (ArrayList) StringUtil.explode((String) i.next(), ":");
-
-            Iterator j = resourceIds.iterator();
-            int type = Integer.parseInt( (String) j.next() );
-            int id = Integer.parseInt( (String) j.next() );
-
-            AppdefEntityID entityID = new AppdefEntityID(type, id);               
+        for (Iterator i = entityIds.iterator(); i.hasNext(); ) {
+            AppdefEntityID entityID = (AppdefEntityID) i.next();
             AppdefResourceValue resource =
                 appdefBoss.findById(sessionId.intValue(), entityID);
             resources.add(resource);  
