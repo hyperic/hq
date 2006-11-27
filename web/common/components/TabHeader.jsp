@@ -40,6 +40,7 @@
 <tiles:importAttribute name="useFromSideBar" ignore="true"/>
 <tiles:importAttribute name="useToSideBar" ignore="true"/>
 <tiles:importAttribute name="adminUrl" ignore="true"/>
+<tiles:importAttribute name="adminToken" ignore="true"/>
 <tiles:importAttribute name="portletName" ignore="true"/>
 <tiles:importAttribute name="rssBase" ignore="true"/>
 <tiles:importAttribute name="dragDrop" ignore="true"/>
@@ -98,7 +99,15 @@
     </c:if>
 
     <c:if test="${not empty adminUrl}">
-    <td class="BlockTitle" align="right"><html:link page="${adminUrl}"><html:img page="/images/dash-icon_edit.gif" width="16" height="16" border="0"/></html:link></td>
+    <td class="BlockTitle" align="right">
+      <c:choose>
+        <c:when test="${not empty adminToken}">
+          <html:link page="${adminUrl}" paramId="token" paramName="adminToken"><html:img page="/images/dash-icon_edit.gif" width="16" height="16" border="0"/></html:link></td>
+        </c:when>
+        <c:otherwise>
+          <html:link page="${adminUrl}"><html:img page="/images/dash-icon_edit.gif" width="16" height="16" border="0"/></html:link></td>
+        </c:otherwise>
+      </c:choose>
     </c:if>
     <c:if test="${not empty portletName}">
       <td class="BlockTitle" align="right">
