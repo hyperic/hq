@@ -99,8 +99,6 @@ public class PrepareAction extends TilesAction {
             resources.add(resource);
         }
 
-        _log.info("Loaded " + resources.size() + " items.");
-
         resources.setTotalSize(resources.size());
         request.setAttribute("availSummaryList", resources);
         request.setAttribute("availSummaryTotalSize",
