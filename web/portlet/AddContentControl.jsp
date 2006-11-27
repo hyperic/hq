@@ -34,9 +34,15 @@
 <tiles:importAttribute name="wide"/>
 <tiles:importAttribute name="portlets"/>
 
-<c:if test="${wide}">
 <script>
+<c:choose>
+<c:when test="${wide}">
   function isWide(portlet) {
+</c:when>
+<c:otherwise>
+  function isNarrow(portlet) {
+</c:otherwise>
+</c:choose>
     <c:forEach var="portlet" items="${portlets}">
       if (portlet == '<c:out value="${portlet}"/>')
         return true;
@@ -44,7 +50,6 @@
     return false;
   }
 </script>
-</c:if>
 
 <c:choose>
 <c:when test="${not empty availablePortlets }">
