@@ -133,8 +133,12 @@ var help = '<hq:help/>';
 
       </display:table>
 
+      <c:set var="addToListUrl" value="/dashboard/Admin.do?mode=crtAlertsAddResources&key=.dashContent.criticalalerts.resources"/> 
+      <c:if test="${not empty CriticalAlertsForm.token}">
+        <c:set var="addToListUrl" value="/dashboard/Admin.do?mode=crtAlertsAddResources&key=.dashContent.criticalalerts.resources${CriticalAlertsForm.token}&token=${CriticalAlertsForm.token}"/> 
+      </c:if>
       <tiles:insert definition=".toolbar.addToList">
-        <tiles:put name="addToListUrl" value="/dashboard/Admin.do?mode=crtAlertsAddResources&key=.dashContent.criticalalerts.resources"/>  
+        <tiles:put name="addToListUrl"><c:out value="${addToListUrl}"/></tiles:put>
         <tiles:put name="listItems" beanName="criticalAlertsList"/>
         <tiles:put name="listSize" beanName="criticalAlertsTotalSize"/>
         <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>  
@@ -144,6 +148,7 @@ var help = '<hq:help/>';
       </tiles:insert>
 
       <tiles:insert definition=".form.buttons"/>
+      <html:hidden property="token"/>
       </html:form>
       
     </td>
