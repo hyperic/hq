@@ -32,7 +32,8 @@
 
 
 <html:form method="POST" action="/dashboard/criticalalerts/AddResourcesAction">
-<html:hidden property="key" value=".dashContent.criticalalerts.resources"/>
+<html:hidden property="key"/>
+<html:hidden property="token"/>
 
 <tiles:insert definition=".portlet.error"/>
 
