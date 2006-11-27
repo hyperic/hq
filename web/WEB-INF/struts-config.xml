@@ -61,6 +61,8 @@
                    type="org.hyperic.hq.ui.action.portlet.criticalalerts.PropertiesForm"/>  
         <form-bean name="DashboardAddResourceHealthForm"
                    type="org.hyperic.hq.ui.action.portlet.addresource.AddResourcesForm"/>  
+        <form-bean name="AvailSummaryForm"
+                   type="org.hyperic.hq.ui.action.portlet.availsummary.PropertiesForm"/>
 
         <!-- RESOURCE CONTROL FORMS -->
         <form-bean name="ControlActionsForm"
@@ -2405,6 +2407,41 @@
               <forward name="failure" path="/dashboard/Admin.do?mode=crtAlertsAddResources"/>
               <forward name="success" path="/dashboard/Admin.do?mode=criticalAlerts"/>
       </action>
+
+      <action path="/dashboard/ViewAvailSummary"
+              type="org.hyperic.hq.ui.action.portlet.availsummary.ViewAction"/>
+
+      <action path="/dashboard/availsummary/AddResourcesAction"
+              type="org.hyperic.hq.ui.action.portlet.addresource.AddResourcesAction"
+              name="DashboardAddResourceHealthForm"
+              scope="request"
+              input="/dashboard/Admin.do?mode=availSummaryAddResources">
+              <forward name="cancel"  path="/dashboard/Admin.do?mode=availSummary"/>
+              <forward name="reset"   path="/dashboard/Admin.do?mode=availSummaryAddResources"/>
+              <forward name="add"     path="/dashboard/Admin.do?mode=availSummaryAddResources"/>
+              <forward name="remove"  path="/dashboard/Admin.do?mode=availSummaryAddResources"/>
+              <forward name="failure" path="/dashboard/Admin.do?mode=availSummaryAddResources"/>
+              <forward name="success" path="/dashboard/Admin.do?mode=availSummary"/>
+      </action>
+
+      <action path="/dashboard/EditAvailSummary"
+              type="org.hyperic.hq.ui.action.portlet.availsummary.PrepareAction"
+              name="AvailSummaryForm"
+              scope="request">
+      </action>
+
+      <action path="/dashboard/ModifyAvailSummary"
+              type="org.hyperic.hq.ui.action.portlet.availsummary.ModifyAction"
+              name="AvailSummaryForm"
+              scope="request"
+              input="/dashboard/EditAvailSummary">               
+              <forward name="success" path="/Dashboard.do" redirect="true"/>
+              <forward name="cancel" path="/Dashboard.do" redirect="true"/>
+              <forward name="reset" path="/dashboard/Admin.do?mode=availSummary"/>
+              <forward name="remove" path="/dashboard/Admin.do?mode=availSummary"/>
+              <forward name="review" path="/dashboard/Admin.do?mode=availSummary"/>
+      </action>  
+
       <!-- / -->
             
       <!-- BEGIN: events actions -->      

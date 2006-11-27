@@ -39,6 +39,7 @@
                 <add value=".dashContent.criticalAlerts"/>
                 <add value=".dashContent.autoDiscovery"/>
                 <add value=".dashContent.controlActions"/>
+                <add value=".dashContent.availSummary"/>
               </putList> 
   </definition>  
     
