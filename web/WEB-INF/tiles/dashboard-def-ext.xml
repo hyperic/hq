@@ -44,12 +44,5 @@
               </putList> 
   </definition>  
     
-  <definition name=".dash.portlets.multi">
-            <putList name="multi.narrow"/>
-            <putList name="multi.wide">
-              <add value=".dashContent.criticalAlerts"/>
-            </putList>
-  </definition>
-
 </tiles-definitions>
  

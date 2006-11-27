@@ -108,6 +108,13 @@
               controllerUrl="/dashboard/AddResourcesPrepareAction.do"
               path="/portlet/resourceHealth/AddResources.jsp"/>
 
+  <definition name=".dash.portlets.multi">
+            <putList name="multi.narrow"/>
+            <putList name="multi.wide">
+              <add value=".dashContent.criticalAlerts"/>
+            </putList>
+  </definition>
+
   <definition name=".dashContent.controlActions"
               controllerUrl="/dashboard/ViewControlActions.do"
               path="/portlet/controlactions/View.jsp">
