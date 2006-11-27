@@ -30,6 +30,8 @@
   USA.
  --%>
 
+<tiles:importAttribute name="portlet"/>
+
 <c:set var="widgetInstanceName" value="alerts"/>
 
 <script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
@@ -46,7 +48,10 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="dash.home.CriticalAlerts"/>
   <tiles:put name="adminUrl" beanName="adminUrl" />
-  <tiles:put name="portletName" beanName="portletName" />
+  <c:if test="${not empty portlet.token}">
+    <tiles:put name="adminToken" beanName="portlet" beanProperty="token"/>
+  </c:if>
+  <tiles:put name="portletName"><c:out value="${portlet.fullUrl}"/></tiles:put>
   <tiles:put name="rssBase" beanName="rssUrl" />
   <tiles:put name="dragDrop" value="true"/>
 </tiles:insert>
