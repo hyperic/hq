@@ -76,6 +76,9 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:if test="${not empty param.scp}">
     <c:param name="scp" value="${param.scp}"/>
   </c:if>
+  <c:if test="${not empty param.token}">
+    <c:param name="token" value="${param.token}"/>
+  </c:if>
 </c:url>
 
 <c:url var="selfPnFilterAction" value="/dashboard/Admin.do">
@@ -108,6 +111,9 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:if test="${not empty param.scp}">
     <c:param name="scp" value="${param.scp}"/>
   </c:if>
+  <c:if test="${not empty param.token}">
+    <c:param name="token" value="${param.token}"/>
+  </c:if>
 </c:url>
 
 <c:url var="ffAction" value="/dashboard/Admin.do">
@@ -133,6 +139,9 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   </c:if>
   <c:if test="${not empty param.scp}">
     <c:param name="scp" value="${param.scp}"/>
+  </c:if>
+  <c:if test="${not empty param.token}">
+    <c:param name="token" value="${param.token}"/>
   </c:if>
 </c:url>
 
@@ -162,6 +171,9 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   </c:if>
   <c:if test="${not empty param.scp}">
     <c:param name="scp" value="${param.scp}"/>
+  </c:if>
+  <c:if test="${not empty param.token}">
+    <c:param name="token" value="${param.token}"/>
   </c:if>
 </c:url>
 
@@ -195,6 +207,9 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:if test="${not empty param.scp}">
     <c:param name="scp" value="${param.scp}"/>
   </c:if>
+  <c:if test="${not empty param.token}">
+    <c:param name="token" value="${param.token}"/>
+  </c:if>
 </c:url>
 
 <c:url var="selfPsaAction" value="/dashboard/Admin.do">
@@ -226,6 +241,9 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   </c:if>
   <c:if test="${not empty param.scp}">
     <c:param name="scp" value="${param.scp}"/>
+  </c:if>
+  <c:if test="${not empty param.token}">
+    <c:param name="token" value="${param.token}"/>
   </c:if>
 </c:url>
 
@@ -259,6 +277,9 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:if test="${not empty param.scp}">
     <c:param name="scp" value="${param.scp}"/>
   </c:if>
+  <c:if test="${not empty param.token}">
+    <c:param name="token" value="${param.token}"/>
+  </c:if>
 </c:url>
 
 <c:url var="selfPaAction" value="/dashboard/Admin.do">
@@ -288,6 +309,9 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:if test="${not empty param.scp}">
     <c:param name="scp" value="${param.scp}"/>
   </c:if>
+  <c:if test="${not empty param.token}">
+    <c:param name="token" value="${param.token}"/>
+  </c:if>
 </c:url>
 
 <c:url var="selfPpAction" value="/dashboard/Admin.do">
@@ -316,6 +340,9 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   </c:if>
   <c:if test="${not empty param.psp}">
     <c:param name="psp" value="${param.psp}"/>
+  </c:if>
+  <c:if test="${not empty param.token}">
+    <c:param name="token" value="${param.token}"/>
   </c:if>
 </c:url>
 
