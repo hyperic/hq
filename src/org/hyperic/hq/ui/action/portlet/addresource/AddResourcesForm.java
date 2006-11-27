@@ -25,15 +25,14 @@
 
 package org.hyperic.hq.ui.action.portlet.addresource;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.resource.ResourceForm;
-import org.apache.struts.util.LabelValueBean;
 import org.apache.struts.action.ActionMapping;
+import org.apache.struts.util.LabelValueBean;
+import org.hyperic.hq.ui.action.resource.ResourceForm;
 
 
 /**
@@ -50,20 +49,12 @@ public class AddResourcesForm extends ResourceForm  {
     private Integer psa;
     private Integer psp;
     private List availResourceTypes;
-    /** Holds value of property key. */
     private String key;
-    
-    /** Holds value of property ft. */
     private Integer ft;
-    
-    /** Holds value of property ff. */
     private Integer ff;
-    
-    /** Holds value of property functions. */
     private List functions;
-    
-    /** Holds value of property types. */
     private List types;
+    private String token;
     
     //-------------------------------------constructors
 
@@ -268,10 +259,19 @@ public class AddResourcesForm extends ResourceForm  {
     
 // ******************** support methods ***********************************
     
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
     private void setDefaults() {
         ff = null;
         ft = new Integer(-1);
         functions = new ArrayList();        
         types = new ArrayList();
+        token = null;
     }
 }
