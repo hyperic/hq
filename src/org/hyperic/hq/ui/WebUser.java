@@ -323,27 +323,25 @@ public class WebUser {
      * @param key the name of the preference
      * @return <code>List</code> of <code>String</code> tokens
      */
-    public List getPreferenceAsList(String key, String delimiter) throws InvalidOptionException {
+    public List getPreferenceAsList(String key, String delimiter)
+        throws InvalidOptionException {
         return StringUtil.explode(getPreference(key), delimiter);
     }
     
-    public void setPreference(String key, List values) 
-        throws InvalidOptionValueException, 
-               InvalidOptionException {
+    public void setPreference(String key, List values)
+        throws InvalidOptionValueException, InvalidOptionException {
         setPreference(key, values, PREF_LIST_DELIM);                  
         
     }
 
-    public void setPreference(String key, List values, String delim) 
-        throws InvalidOptionValueException, 
-               InvalidOptionException {
+    public void setPreference(String key, List values, String delim)
+        throws InvalidOptionValueException, InvalidOptionException {
         String stringified = StringUtil.listToString(values, delim);
         setPreference(key,stringified);
     }
     
-    public void setPreference(String key, Object value ) 
-        throws InvalidOptionValueException, 
-               InvalidOptionException {
+    public void setPreference(String key, Object value)
+        throws InvalidOptionValueException, InvalidOptionException {
         String val = null;
         if (value == null) {
             val = "";
