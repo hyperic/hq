@@ -41,14 +41,18 @@ public class HQApp {
         if (list == null)
             return;
         
-        for (Iterator i=list.iterator(); i.hasNext(); ) {
-            TransactionListener l = (TransactionListener)i.next();
+        try {
+            for (Iterator i=list.iterator(); i.hasNext(); ) {
+                TransactionListener l = (TransactionListener)i.next();
             
-            try {
-                l.afterCommit();
-            } catch(Exception e) {
-                _log.warn("Error running commit listener [" + l + "]", e);
-            }
+                try {
+                    l.afterCommit();
+                } catch(Exception e) {
+                    _log.warn("Error running commit listener [" + l + "]", e);
+                }
+            } 
+        } finally {
+            list.clear();
         }
     }
     
