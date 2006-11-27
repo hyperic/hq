@@ -54,11 +54,10 @@
 <tiles:useAttribute name="autogroupResourceType" ignore="true" />
 <tiles:importAttribute name="entityIds" ignore="true"/>
 
-<%-- UNCOMMENT BELOW vvvvv TO ENABLE THE NAVIGATION MAP FEATURE --%>
 <c:if test="${not empty autogroupResourceId}"> 
    <tiles:insert definition=".resource.common.navmap"/>
+   <br/>
 </c:if>
-<%-- UNCOMMENT ABOVE ^^^^^ TO ENABLE THE NAVIGATION MAP FEATURE --%>
 
 <c:if test="${empty resourceType}">
  <c:set var="resourceType" value="${Resource.entityId.type}"/>
