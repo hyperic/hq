@@ -45,6 +45,7 @@ import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -155,20 +156,23 @@ public class AddResourcesPrepareAction extends Action {
 
         if (pendingResourcesIds == null){
             log.debug("get avalable resources from user preferences");
-            pendingResourcesIds = user.getPreferenceAsList(
-                                    addForm.getKey(),
-                                    "|");
-
-            if(pendingResourcesIds != null){                
-                log.debug("put entire list of pending resources in session");
-                session.setAttribute(Constants.PENDING_RESOURCES_SES_ATTR, 
-                                     pendingResourcesIds ); 
+            try {
+                pendingResourcesIds =
+                    user.getPreferenceAsList(addForm.getKey(),
+                                             Constants.DASHBOARD_DELIMITER);
+            } catch (InvalidOptionException e) {
+                // Then we don't have any pending resources
+                pendingResourcesIds = new ArrayList(0);
             }
+            log.debug("put entire list of pending resources in session");
+            session.setAttribute(Constants.PENDING_RESOURCES_SES_ATTR,
+                                 pendingResourcesIds);
         }
 
         log.debug("get page of pending resources selected by user");
         Pager pendingPager = Pager.getDefaultPager(); 
-        List pendingResources = DashboardUtils.listAsResources(pendingResourcesIds, ctx, user);
+        List pendingResources =
+            DashboardUtils.listAsResources(pendingResourcesIds, ctx, user);
 
         PageList pageOfPendingResources = pendingPager. 
                                 seek(pendingResources, 
