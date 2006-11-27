@@ -91,9 +91,13 @@ public class DashboardUtils {
 
     public static List preferencesAsEntityIds(String key, WebUser user)
         throws Exception {
-        List resourceList = user
-            .getPreferenceAsList(key, Constants.DASHBOARD_DELIMITER);
-        return listAsEntityIds(resourceList);
+        try {
+            List resourceList = 
+                user.getPreferenceAsList(key, Constants.DASHBOARD_DELIMITER);
+            return listAsEntityIds(resourceList);
+        } catch (InvalidOptionException e) {
+            return new ArrayList(0);
+        }
     }
 
     public static void removePortlet(WebUser user, String PortletName)
@@ -110,6 +114,8 @@ public class DashboardUtils {
 
         user.setPreference(Constants.USER_PORTLETS_FIRST, first);
         user.setPreference(Constants.USER_PORTLETS_SECOND, second);
+        
+        // XXX - Need to clear out the preferences for multiple portlets
     }
 
     public static void removeResources(String[] ids, String key, WebUser user)
@@ -164,4 +170,6 @@ public class DashboardUtils {
         user.setPreference(key, StringUtil
             .listToString(existing, Constants.DASHBOARD_DELIMITER));
     }
+
+    public static final char MULTI_PORTLET_TOKEN = '@';
 }
