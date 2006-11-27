@@ -116,6 +116,14 @@ public abstract class HibernateDAO {
         getSession().delete(entity);
     }
 
+    public PersistedObject findPersistedList(PersistedObject entity) {
+        throw new UnsupportedOperationException("FindPersisted not supported");
+    }
+
+    public PersistedObject findPersisted(PersistedObject entity) {
+        throw new UnsupportedOperationException("FindPersisted not supported");
+    }
+
     public void savePersisted(PersistedObject entity) {
         throw new UnsupportedOperationException("savePersisted not supported");
     }

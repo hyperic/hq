@@ -43,6 +43,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
+import org.hyperic.hq.common.server.session.TransactionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
@@ -80,6 +81,7 @@ public abstract class HQEJBTestBase
             CrispoManagerEJBImpl.class,
             AlertManagerEJBImpl.class,
             TestManagerEJBImpl.class,
+            TransactionManagerEJBImpl.class,
         };
     }
 
