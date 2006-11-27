@@ -75,13 +75,8 @@ public class ViewAction extends TilesAction {
         String key = ".dashContent.criticalalerts.resources";
 
         List entityIds = DashboardUtils.preferencesAsEntityIds(key, user);
-
-        AppdefEntityID[] arrayIds = new AppdefEntityID[entityIds.size()];
-
-        int h = 0;
-        for (Iterator i = entityIds.iterator(); i.hasNext(); h++) {
-            arrayIds[h] = (AppdefEntityID) i.next();
-        }
+        AppdefEntityID[] arrayIds =
+            (AppdefEntityID[])entityIds.toArray(new AppdefEntityID[0]);
 
         int count = Integer.parseInt(user.getPreference(PropertiesForm.
             ALERT_NUMBER));
