@@ -25,27 +25,23 @@
 
 package org.hyperic.hq.ui.action.portlet.addcontent;
 
-import java.util.Arrays;
-import java.util.List;
+import java.text.NumberFormat;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -69,44 +65,59 @@ public class AddPortletAction extends BaseAction {
      *  an exception
      */
     public ActionForward execute(ActionMapping mapping,
-                            ActionForm form,
-                            HttpServletRequest request,
-                            HttpServletResponse response)
+                                 ActionForm form,
+                                 HttpServletRequest request,
+                                 HttpServletResponse response)
     throws Exception {
     
         ServletContext ctx = getServlet().getServletContext();
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
         HttpSession session = request.getSession();
-        WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
-        String portletName = (String) request.getParameter(Constants.REM_PORTLET_PARAM) ;
+        WebUser user =
+            (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
         PropertiesForm pForm = (PropertiesForm) form;
 
-        String preferences = Constants.DASHBOARD_DELIMITER;
-        preferences += pForm.getPortlet();
-
-        if( pForm.getPortlet() == null || "bad".equals( pForm.getPortlet() ) ){
-            return mapping.findForward("success");
+        if( pForm.getPortlet() == null || "bad".equals( pForm.getPortlet() ) ) {
+            return mapping.findForward(Constants.SUCCESS_URL);
         }
-        if( pForm.isWide() ){
-            user.setPreference(Constants.USER_PORTLETS_SECOND,  
-                               user.getPreference( Constants.USER_PORTLETS_SECOND )
-                               + preferences);
+        
+        String prefKey;
+        if (pForm.isWide()) {
+            prefKey = Constants.USER_PORTLETS_SECOND;
         }                            
         else{
-            user.setPreference(Constants.USER_PORTLETS_FIRST,  
-                               user.getPreference( Constants.USER_PORTLETS_FIRST )
-                               + preferences);
+            prefKey = Constants.USER_PORTLETS_FIRST;
         }
 
+        String userPrefs = user.getPreference(prefKey);
+        
+        String portlet = pForm.getPortlet();
+        while (userPrefs.indexOf(portlet) > -1) {
+            // We need to add a multi portlet
+            StringBuffer portletName = new StringBuffer(pForm.getPortlet());
+            // 1. Generate random token
+            NumberFormat nf = NumberFormat.getIntegerInstance();
+            nf.setMinimumIntegerDigits(3);      // Exactly 3 digits
+            nf.setMaximumIntegerDigits(3);
+            portletName.append(DashboardUtils.MULTI_PORTLET_TOKEN)
+                       .append(nf.format(Math.random() * 999));
+            // 2. Create unique portlet name based on the new random token
+            portlet = portletName.toString();
+        }
+        
+        String preferences = Constants.DASHBOARD_DELIMITER + portlet;
+        user.setPreference(prefKey, userPrefs + preferences);
+        
         LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
             " in AddPortletAction " +
             " for " + user.getId() + " at "+System.currentTimeMillis() +
             " user.prefs = " + user.getPreferences());
-        boss.setUserPrefs(user.getSessionId(), user.getId(), user.getPreferences() );
+        boss.setUserPrefs(user.getSessionId(), user.getId(),
+                          user.getPreferences() );
 
         session.removeAttribute(Constants.USERS_SES_PORTAL);
 
-        return mapping.findForward("success");
+        return mapping.findForward(Constants.SUCCESS_URL);
     
     }
 }
