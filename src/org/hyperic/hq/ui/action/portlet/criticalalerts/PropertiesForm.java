@@ -40,12 +40,13 @@ public class PropertiesForm extends DashboardBaseForm  {
     public final static String SELECTED_OR_ALL =
         ".dashContent.criticalalerts.selectedOrAll";
 
-    private Integer numberOfAlerts;
-    private String priority;
-    private long past;
-    private String selectedOrAll;
-    private String key;
-    private String[] ids;
+    private Integer _numberOfAlerts;
+    private String _priority;
+    private long _past;
+    private String _selectedOrAll;
+    private String _key;
+    private String[] _ids;
+    private String _token;
 
     public PropertiesForm() {
         super();
@@ -57,50 +58,58 @@ public class PropertiesForm extends DashboardBaseForm  {
     }
 
     public Integer getNumberOfAlerts() {
-        return this.numberOfAlerts;
+        return _numberOfAlerts;
     }
 
     public void setNumberOfAlerts(Integer numberOfAlerts) {
-        this.numberOfAlerts = numberOfAlerts;
+        _numberOfAlerts = numberOfAlerts;
     }
 
     public String getPriority() {
-        return this.priority;
+        return _priority;
     }
 
     public void setPriority(String priority) {
-        this.priority = priority;
+        _priority = priority;
     }
 
     public long getPast() {
-        return this.past;
+        return _past;
     }
 
     public void setPast(long past) {
-        this.past = past;
+        _past = past;
     }
 
     public String getSelectedOrAll() {
-        return this.selectedOrAll;
+        return _selectedOrAll;
     }
 
     public void setSelectedOrAll(String selectedOrAll) {
-        this.selectedOrAll = selectedOrAll;
+        _selectedOrAll = selectedOrAll;
     }
 
     public String getKey() {
-        return this.key;
+        return _key;
     }
 
     public void setKey(String key) {
-        this.key = key;
+        _key = key;
     }
 
     public String[] getIds() {
-        return this.ids;
+        return _ids;
     }
 
     public void setIds(String[] ids) {
-        this.ids = ids;
+        _ids = ids;
+    }
+
+    public String getToken() {
+        return _token;
+    }
+
+    public void setToken(String token) {
+        _token = token;
     }
 }
