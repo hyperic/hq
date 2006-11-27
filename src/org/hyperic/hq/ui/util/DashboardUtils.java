@@ -38,6 +38,7 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
 
@@ -45,6 +46,9 @@ import org.hyperic.util.config.InvalidOptionValueException;
  * Utilities class that provides general convenience methods.
  */
 public class DashboardUtils {
+    private static final String EMPTY_DELIMITER =
+        Constants.DASHBOARD_DELIMITER + Constants.DASHBOARD_DELIMITER;
+    public static final char MULTI_PORTLET_TOKEN = '@';
 
     public static List listAsResources(List list, ServletContext ctx,
                                        WebUser user)
@@ -62,7 +66,7 @@ public class DashboardUtils {
         return resources;
     }
 
-    public static List listAsEntityIds(List list) throws Exception {
+    public static List listAsEntityIds(List list) {
         ArrayList resources = new ArrayList();
         Iterator i = list.iterator();
 
@@ -89,8 +93,7 @@ public class DashboardUtils {
         return listAsResources(resourceList, ctx, user);
     }
 
-    public static List preferencesAsEntityIds(String key, WebUser user)
-        throws Exception {
+    public static List preferencesAsEntityIds(String key, WebUser user) {
         try {
             List resourceList = 
                 user.getPreferenceAsList(key, Constants.DASHBOARD_DELIMITER);
@@ -100,22 +103,44 @@ public class DashboardUtils {
         }
     }
 
-    public static void removePortlet(WebUser user, String PortletName)
+    public static void removePortlet(WebUser user, String portlet)
         throws InvalidOptionException, InvalidOptionValueException {
         String first = user.getPreference(Constants.USER_PORTLETS_FIRST);
         String second = user.getPreference(Constants.USER_PORTLETS_SECOND);
 
-        first = StringUtil.remove(first, PortletName);
-        second = StringUtil.remove(second, PortletName);
+        first = StringUtil.remove(first, portlet);
+        second = StringUtil.remove(second, portlet);
 
-        first = StringUtil.replace(first, "||", Constants.DASHBOARD_DELIMITER);
-        second = StringUtil
-            .replace(second, "||", Constants.DASHBOARD_DELIMITER);
+        first = StringUtil.replace(first,  EMPTY_DELIMITER,
+                                   Constants.DASHBOARD_DELIMITER);
+        second = StringUtil.replace(second,EMPTY_DELIMITER,
+                                    Constants.DASHBOARD_DELIMITER);
 
         user.setPreference(Constants.USER_PORTLETS_FIRST, first);
         user.setPreference(Constants.USER_PORTLETS_SECOND, second);
         
-        // XXX - Need to clear out the preferences for multiple portlets
+        // Need to clear out the preferences for multiple portlets
+        int index;
+        if ((index = portlet.lastIndexOf(MULTI_PORTLET_TOKEN)) > -1) {
+            String token = portlet.substring(index);
+            
+            // If there are other portlets with the same token, then we can't
+            // arbitrarily delete preferences
+            if (first.indexOf(token) > -1 || second.indexOf(token) > -1) {
+                return;
+            }
+            
+            // Look through preferences for the token
+            ConfigResponse prefs = user.getPreferences();
+            String[] keys = (String[]) prefs.getKeys().toArray(new String[0]);
+            for (int i = 0; i < keys.length; i++) {
+                if (keys[i].indexOf(token) > -1) {
+                    prefs.unsetValue(keys[i]);
+                }
+            }
+            
+            user.setPreferences(prefs);
+        }
     }
 
     public static void removeResources(String[] ids, String key, WebUser user)
@@ -125,7 +150,7 @@ public class DashboardUtils {
         for (int i = 0; i < ids.length; i++) {
             String resource = ids[i];
             resources = StringUtil.remove(resources, resource);
-            resources = StringUtil.replace(resources, "||",
+            resources = StringUtil.replace(resources, EMPTY_DELIMITER,
                                            Constants.DASHBOARD_DELIMITER);
         }
 
@@ -147,8 +172,8 @@ public class DashboardUtils {
                 removeResources(new String[] { entityid }, key, user);
 
             }
-            authzboss.setUserPrefs(user.getSessionId(), user.getId(), user
-                .getPreferences());
+            authzboss.setUserPrefs(user.getSessionId(), user.getId(),
+                                   user.getPreferences());
         }
     }
     
@@ -167,9 +192,8 @@ public class DashboardUtils {
         if (max < Integer.MAX_VALUE && existing.size() > max)
             existing.remove(0);
         
-        user.setPreference(key, StringUtil
-            .listToString(existing, Constants.DASHBOARD_DELIMITER));
+        user.setPreference(key,
+                       StringUtil.listToString(existing,
+                                               Constants.DASHBOARD_DELIMITER));
     }
-
-    public static final char MULTI_PORTLET_TOKEN = '@';
 }
