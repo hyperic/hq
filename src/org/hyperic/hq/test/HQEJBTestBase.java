@@ -43,7 +43,6 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
-import org.hyperic.hq.common.server.session.TransactionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
@@ -57,19 +56,19 @@ import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
 import org.mockejb.SessionBeanDescriptor;
 import org.mockejb.jndi.MockContextFactory;
 
-public abstract class HQEJBTestBase
-    extends MockBeanTestBase
+public abstract class HQEJBTestBase    
+    extends MockBeanTestBase 
 {
     private static boolean _initialized = false;
     private static long    _uniqVal = System.currentTimeMillis();
     private Session _session;
-
+    
     public HQEJBTestBase(String testName) {
         super(testName);
     }
-
+    
     protected Class[] getUsedSessionBeans() {
-        return new Class[] {
+        return new Class[] { 
             AlertDefinitionManagerEJBImpl.class,
             AuthzSubjectManagerEJBImpl.class,
             PlatformManagerEJBImpl.class,
@@ -80,32 +79,31 @@ public abstract class HQEJBTestBase
             TemplateManagerEJBImpl.class,
             CrispoManagerEJBImpl.class,
             AlertManagerEJBImpl.class,
-            TransactionManagerEJBImpl.class,
             TestManagerEJBImpl.class,
         };
     }
 
     /**
-     * Get a unique value during the test invocation.  This is useful to
-     * generate unique names for things which ... must have unique names
+     * Get a unique value during the test invocation.  This is useful to 
+     * generate unique names for things which ... must have unique names 
      */
     protected long getUniq() {
         return _uniqVal++;
     }
-
+    
     protected long u() {
         return getUniq();
     }
-
+    
     protected String u(Object o) {
         return o.toString() + getUniq();
     }
-
+    
     protected void refresh(Object o) {
         _session.refresh(o);
     }
-
-    public void setUp()
+    
+    public void setUp() 
         throws Exception
     {
         // TODO: should not assume out of container only!, since Mockejb
@@ -129,15 +127,15 @@ public abstract class HQEJBTestBase
         for (int i=0; i<sessBeans.length; i++) {
             String simpleName = sessBeans[i].getName();
             String baseName, jndi;
-            Class local, localHome;
-
+            Class local, localHome; 
+            
             if (!simpleName.endsWith("EJBImpl")) {
-                throw new IllegalArgumentException("getUsedSessionBeans() " +
+                throw new IllegalArgumentException("getUsedSessionBeans() " + 
                                                    "needs EJBImpl classes");
             }
-
+            
             baseName = simpleName.replaceFirst("server", "shared");
-            baseName = baseName.substring(0, simpleName.length() -
+            baseName = baseName.substring(0, simpleName.length() - 
                                           "EJBImpl".length());
             baseName = baseName.replaceFirst(".session.", ".");
             local     = Class.forName(baseName + "Local");
@@ -154,15 +152,15 @@ public abstract class HQEJBTestBase
     }
 
     public interface TransactionBlock {
-        public void run() throws Exception;
+        public void run() throws Exception;        
     }
-
-    protected void runInTransaction(TransactionBlock block)
+    
+    protected void runInTransaction(TransactionBlock block) 
         throws Exception
     {
         Transaction t = _session.beginTransaction();
         boolean success = false;
-
+        
         try {
             block.run();
             success = true;
