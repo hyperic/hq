@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.util.StringUtil;
 
 /**
@@ -254,7 +255,17 @@ public class Portal {
 
         for (int i = 0; i < StringColumn.size(); i++) {
             String tile = (String) StringColumn.get(i);
-            Portlet portlet = new Portlet(tile);
+            
+            Portlet portlet;
+            int index;
+            if ((index = tile.indexOf(DashboardUtils.MULTI_PORTLET_TOKEN)) < 0) {
+                portlet = new Portlet(tile);
+            }
+            else {
+                // This is a mult-portlet
+                portlet = new Portlet(tile.substring(0, index), tile);
+            }
+            
             if (i == 0)
                 portlet.setIsFirst();
             if (i == (StringColumn.size() - 1))
