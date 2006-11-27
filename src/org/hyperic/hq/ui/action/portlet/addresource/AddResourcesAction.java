@@ -111,23 +111,21 @@ public class AddResourcesAction extends BaseAction {
         StringBuffer resourcesAsString = new StringBuffer();
 
         for(Iterator i = pendingResourceIds.iterator(); i.hasNext(); ){
-            resourcesAsString.append( "|" );
-            resourcesAsString.append( (String)i.next() );            
+            resourcesAsString.append( Constants.DASHBOARD_DELIMITER );
+            resourcesAsString.append( i.next() );            
         }
 
-        SessionUtils.removeList(session,
-                                Constants.PENDING_RESOURCES_SES_ATTR);
+        SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
 
-        RequestUtils.setConfirmation(request,
-                                     "admin.user.confirm.AddResource");
+        RequestUtils.setConfirmation(request, "admin.user.confirm.AddResource");
 
         user.setPreference(addForm.getKey(), resourcesAsString);
         LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
             " in AddResourcesAction " +
             " for " + user.getId() + " at "+System.currentTimeMillis() +
             " user.prefs = " + user.getPreferences());
-        boss.setUserPrefs(user.getSessionId(), user.getId(), user.getPreferences() );
-
+        boss.setUserPrefs(user.getSessionId(), user.getId(),
+                          user.getPreferences() );
 
         return returnSuccess(request, mapping);
 
