@@ -32,40 +32,65 @@ package org.hyperic.hq.ui;
  */
 public class Portlet {
     
-    private String name;
-    private String description;
-    private String url;
-    private String label;
-    private boolean isFirst = false;
-    private boolean isLast = false;
+    private String _name;
+    private String _description;
+    private String _url;
+    private String _label;
+    private String _fullUrl;
+    private boolean _isFirst = false;
+    private boolean _isLast = false;
 
     public Portlet() {}
     
     public Portlet(String url) {
         super();
-        this.url = url;
+        _url = url;
     }
 
-    public String getName() { return this.name; }
-    public void setName(String name) { this.name = name; }
+    public Portlet(String url, String fullUrl) {
+        this(url);
+        _fullUrl = fullUrl;
+    }
+
+    public String getName() { return _name; }
+    public void setName(String name) { _name = name; }
     
-    public String getDescription() { return this.description; }
+    public String getDescription() { return _description; }
     public void setDescription(String description) {
-        this.description = description;
+        _description = description;
     }
     
-    public String getUrl() { return this.url; }
-    public void setUrl(String url) { this.url = url; }
+    public String getUrl() { return _url; }
+    public void setUrl(String url) { _url = url; }
     
-    public String getLabel() { return this.label; }
-    public void setLabel(String label) { this.label = label; }
+    public String getLabel() { return _label; }
+    public void setLabel(String label) { _label = label; }
 
-    public void    setIsFirst() { isFirst = true; }
-    public boolean getIsFirst() { return isFirst; }
+    public void    setIsFirst() { _isFirst = true; }
+    public boolean getIsFirst() { return _isFirst; }
 
-    public void    setIsLast () { isLast = true; }
-    public boolean getIsLast () { return isLast; }
+    public void    setIsLast () { _isLast = true; }
+    public boolean getIsLast () { return _isLast; }
 
+    public String getFullUrl() {
+        if (_fullUrl == null) {
+            return _url;
+        }
+        
+        return _fullUrl;
+    }
+
+    public void setFullUrl(String token) {
+        _fullUrl = token;
+    }
+
+    public String getToken() {
+        if (_fullUrl != null && _url.length() < _fullUrl.length()) {
+            return _fullUrl.substring(_url.length());
+        }
+        return null;
+    }
+    
     public String toString() {
         return "[ name:" + getName() + " url: " + getUrl() + " ]" ;
     }
