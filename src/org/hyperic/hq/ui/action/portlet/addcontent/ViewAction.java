@@ -25,33 +25,20 @@
 
 package org.hyperic.hq.ui.action.portlet.addcontent;
 
-import java.io.IOException;
-
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
-
-import org.hyperic.util.config.InvalidOptionException;
-import org.hyperic.util.config.InvalidOptionValueException;
-import org.hyperic.util.StringUtil;
-
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.WebUser;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -71,28 +58,30 @@ public class ViewAction extends TilesAction {
    throws Exception{
 
         List portlets = (List) context.getAttribute("portlets");
-        WebUser user =  (WebUser) request.getSession().getAttribute(
-        Constants.WEBUSER_SES_ATTR );
+        WebUser user = (WebUser) request.getSession()
+                .getAttribute(Constants.WEBUSER_SES_ATTR);
 
         ArrayList availablePortlets = new ArrayList();
         String userPortlets = new String();
 
-        Boolean wide = new Boolean( (String) context.getAttribute("wide") );
+        Boolean wide = new Boolean((String) context.getAttribute("wide"));
 
-
+        List multi;
         if( wide.booleanValue() ){
             userPortlets = user.getPreference( Constants.USER_PORTLETS_SECOND );
+            multi = (List) context.getAttribute("multi.wide");
         }
         else{
             userPortlets = user.getPreference( Constants.USER_PORTLETS_FIRST );
+            multi = (List) context.getAttribute("multi.narrow");
         }
-
+        
         for( Iterator i = portlets.iterator(); i.hasNext(); ){
             String portlet = (String) i.next();
 
-            if( userPortlets.indexOf(portlet) == -1 )
+            if( userPortlets.indexOf(portlet) == -1 ||
+                (multi != null && multi.contains(portlet)))
                 availablePortlets.add(portlet);
-
         }
 
         context.putAttribute("availablePortlets", availablePortlets);
