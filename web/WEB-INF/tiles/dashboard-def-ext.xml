@@ -32,6 +32,7 @@
 
   <definition name=".dashContent.addContent.wide"
               controllerUrl="/dashboard/AddContent.do"
+              extends=".dash.portlets.multi"
               path="/portlet/AddContentControl.jsp">  
               <put name="wide"      value="true" />
               <putList name="portlets">
@@ -43,5 +44,12 @@
               </putList> 
   </definition>  
     
+  <definition name=".dash.portlets.multi">
+            <putList name="multi.narrow"/>
+            <putList name="multi.wide">
+              <add value=".dashContent.criticalAlerts"/>
+            </putList>
+  </definition>
+
 </tiles-definitions>
  
