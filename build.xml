@@ -377,6 +377,7 @@
         <include name="instantj-1.6.jar" />
         <include name="snmp4j.jar" />
         <include name="ehcache-1.2.3.jar" />
+        <include name="json.jar" />
 
         <!-- replacement j2ee compile required for instantj 
              since our installer doesn't install tools.jar -->
