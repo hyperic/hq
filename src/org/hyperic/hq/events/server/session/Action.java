@@ -45,7 +45,6 @@ import org.json.JSONException;
 
 public class Action  
     extends PersistedObject
-    implements Json
 {
     private String          _className;
     private byte[]          _config;
@@ -168,7 +167,7 @@ public class Action
             setParent(aDao.findById(val.getId()));
         }
     }
-
+/*
     public JSONObject toJSON() throws JSONException
     {
         try {
@@ -180,7 +179,7 @@ public class Action
             throw new SystemException(e);
         }
     }
-
+*/
     public String toString() {
         return "(id=" + getId() + ", class=" + _className + ")";
     }
