@@ -32,6 +32,8 @@ package org.hyperic.hq.ui;
 public interface StringConstants {
 
     public static final String DASHBOARD_DELIMITER = "|";
+    public static final String EMPTY_DELIMITER = DASHBOARD_DELIMITER +
+                                                 DASHBOARD_DELIMITER;
 
     public static final String GUIDE_WINDOW_PROPS =
         "height=500,width=350,menubar=no,toolbar=no,status=no,resizable=yes,scrollbars=yes";
