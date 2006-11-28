@@ -59,7 +59,7 @@ public class BaseAction extends Action {
     //-------------------------------------public methods
 
     /**
-     * Dosen't do a damn thing. its here as a dummy method
+     * Doesn't do a thing.  It's here as a dummy method
      * used by list that don't submit a form.
      */
     public ActionForward execute(ActionMapping mapping,
