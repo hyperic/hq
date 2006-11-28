@@ -35,7 +35,7 @@ import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.ui.json.Json;
+import org.hyperic.hq.Json;
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.EncodingException;
@@ -45,6 +45,7 @@ import org.json.JSONException;
 
 public class Action  
     extends PersistedObject
+    implements Json
 {
     private String          _className;
     private byte[]          _config;
@@ -167,7 +168,7 @@ public class Action
             setParent(aDao.findById(val.getId()));
         }
     }
-/*
+
     public JSONObject toJSON() throws JSONException
     {
         try {
@@ -179,7 +180,7 @@ public class Action
             throw new SystemException(e);
         }
     }
-*/
+  
     public String toString() {
         return "(id=" + getId() + ", class=" + _className + ")";
     }

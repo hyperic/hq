@@ -1,4 +1,4 @@
-package org.hyperic.hq.ui.json;
+package org.hyperic.hq;
 
 import org.json.JSONObject;
 import org.json.JSONException;
