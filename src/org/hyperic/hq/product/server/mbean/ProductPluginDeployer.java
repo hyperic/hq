@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import javax.ejb.CreateException;
@@ -56,7 +57,6 @@ import org.jboss.deployment.DeploymentException;
 import org.hyperic.hq.product.server.UpgradeUtil;
 
 import org.hyperic.hq.product.shared.ProductManagerLocal;
-import org.hyperic.hq.product.shared.ProductManagerLocalHome;
 import org.hyperic.hq.product.shared.ProductManagerUtil;
 
 import org.hyperic.hq.product.PluginInfo;
@@ -64,6 +64,7 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.hq.product.PluginException;
 
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerUtil;
 
@@ -84,30 +85,26 @@ public class ProductPluginDeployer
                NotificationBroadcaster,
                Comparator
 {
-    private static final String PRODUCT = "HQ";
-    private static final String PLUGIN_DIR = "hq-plugins";
-    private String pluginDir = PLUGIN_DIR;
-
-    private Log log = LogFactory.getLog(ProductPluginDeployer.class.getName());
-
-    private ProductPluginManager ppm;
-
-    private ArrayList plugins = new ArrayList();
-    
-    private boolean isStarted = false;
-    
     private static final String READY_MGR_NAME =
         "hyperic.jmx:service=NotReadyManager";
-    private static final String READY_ATTR = "Ready";
-    private ObjectName readyMgrName;
-    
     private static final String URL_SCANNER_NAME =
         "hyperic.jmx:type=DeploymentScanner,flavor=URL";
+    private static final String READY_ATTR = "Ready";
+    private static final String PRODUCT = "HQ";
+    private static final String PLUGIN_DIR = "hq-plugins";
+
+    private Log _log = LogFactory.getLog(ProductPluginDeployer.class.getName());
+
+    private ProductPluginManager _ppm;
+    private List                 _plugins = new ArrayList();
+    private boolean              _isStarted = false;
+    private ObjectName           _readyMgrName;
+    private String               _pluginDir = PLUGIN_DIR;
     
-    private NotificationBroadcasterSupport broadcaster =
+    private NotificationBroadcasterSupport _broadcaster =
         new NotificationBroadcasterSupport();
 
-    private long notifSequence = 0;
+    private long _notifSequence = 0;
 
     private static final String PLUGIN_REGISTERED =
         NOTIF_TYPE("registered");
@@ -147,11 +144,11 @@ public class ProductPluginDeployer
         DatabaseInitializer.init();
         
         File propFile = ProductPluginManager.PLUGIN_PROPERTIES_FILE;
-        this.ppm = new ProductPluginManager(propFile);
-        this.ppm.setRegisterTypes(true);
+        _ppm = new ProductPluginManager(propFile);
+        _ppm.setRegisterTypes(true);
 
         if (propFile.canRead()) {
-            log.info("Loaded custom properties from: " + propFile);
+            _log.info("Loaded custom properties from: " + propFile);
         }
 
         //native libraries are deployed into another directory
@@ -163,10 +160,10 @@ public class ProductPluginDeployer
                            "/deploy/hq.ear/sigar_bin/lib");
         
         try {
-            this.readyMgrName = new ObjectName(READY_MGR_NAME);
+            _readyMgrName = new ObjectName(READY_MGR_NAME);
         } catch (MalformedObjectNameException e) {
             //notgonnahappen
-            log.error(e);
+            _log.error(e);
         }
     }
 
@@ -182,15 +179,15 @@ public class ProductPluginDeployer
 
     public void addNotificationListener(NotificationListener listener,
                                         NotificationFilter filter,
-                                        Object handback) {
-        this.broadcaster.addNotificationListener(listener,
-                                                 filter,
-                                                 handback);
+                                        Object handback) 
+    {
+        _broadcaster.addNotificationListener(listener, filter, handback);
     }
 
     public void removeNotificationListener(NotificationListener listener)
-        throws ListenerNotFoundException {
-        this.broadcaster.removeNotificationListener(listener);
+        throws ListenerNotFoundException 
+    {
+        _broadcaster.removeNotificationListener(listener);
     }
 
     public MBeanNotificationInfo[] getNotificationInfo() {
@@ -205,27 +202,27 @@ public class ProductPluginDeployer
      * @jmx:managed-attribute
      */
     public ProductPluginManager getProductPluginManager() {
-        return this.ppm;
+        return _ppm;
     }
 
     /**
      * @jmx:managed-attribute
      */
     public void setPluginDir(String name) {
-        this.pluginDir = name;
+        _pluginDir = name;
     }
 
     /**
      * @jmx:managed-attribute
      */
     public String getPluginDir() {
-        return this.pluginDir;
+        return _pluginDir;
     }
 
     private Set getPluginNames(String type)
-        throws PluginException {
-
-        return this.ppm.getPluginManager(type).getPlugins().keySet();
+        throws PluginException 
+    {
+        return _ppm.getPluginManager(type).getPlugins().keySet();
     }
     
     /**
@@ -234,8 +231,8 @@ public class ProductPluginDeployer
      * Intended for use via /jmx-console
      */
     public ArrayList getRegisteredPluginNames(String type)
-        throws PluginException {
-
+        throws PluginException 
+    {
         return new ArrayList(getPluginNames(type));
     }
 
@@ -245,25 +242,26 @@ public class ProductPluginDeployer
      * Intended for use via /jmx-console
      */
     public ArrayList getRegisteredPluginNames()
-        throws PluginException {
-        return new ArrayList(this.ppm.getPlugins().keySet());
+        throws PluginException 
+    {
+        return new ArrayList(_ppm.getPlugins().keySet());
     }
 
     /**
      * @jmx:managed-attribute
      */
     public int getProductPluginCount()
-        throws PluginException {
-
-        return this.ppm.getPlugins().keySet().size();
+        throws PluginException 
+    {
+        return _ppm.getPlugins().keySet().size();
     }
 
     /**
      * @jmx:managed-attribute
      */
     public int getMeasurementPluginCount()
-        throws PluginException {
-
+        throws PluginException 
+    {
         return getPluginNames(ProductPlugin.TYPE_MEASUREMENT).size();
     }
 
@@ -271,8 +269,8 @@ public class ProductPluginDeployer
      * @jmx:managed-attribute
      */
     public int getControlPluginCount()
-        throws PluginException {
-
+        throws PluginException 
+    {
         return getPluginNames(ProductPlugin.TYPE_CONTROL).size();
     }
 
@@ -280,8 +278,8 @@ public class ProductPluginDeployer
      * @jmx:managed-attribute
      */
     public int getAutoInventoryPluginCount()
-        throws PluginException {
-
+        throws PluginException 
+    {
         return getPluginNames(ProductPlugin.TYPE_AUTOINVENTORY).size();
     }
 
@@ -289,8 +287,8 @@ public class ProductPluginDeployer
      * @jmx:managed-attribute
      */
     public int getLogTrackPluginCount()
-        throws PluginException {
-
+        throws PluginException 
+    {
         return getPluginNames(ProductPlugin.TYPE_LOG_TRACK).size();
     }
 
@@ -298,8 +296,8 @@ public class ProductPluginDeployer
      * @jmx:managed-attribute
      */
     public int getConfigTrackPluginCount()
-        throws PluginException {
-
+        throws PluginException 
+    {
         return getPluginNames(ProductPlugin.TYPE_CONFIG_TRACK).size();
     }
 
@@ -307,9 +305,9 @@ public class ProductPluginDeployer
      * @jmx:managed-operation 
      */
     public void setProperty(String name, String value) {
-        String oldValue = this.ppm.getProperty(name, "null");
-        this.ppm.setProperty(name, value);
-        log.info("setProperty(" + name + ", " + value + ")");
+        String oldValue = _ppm.getProperty(name, "null");
+        _ppm.setProperty(name, value);
+        _log.info("setProperty(" + name + ", " + value + ")");
         attributeChangeNotify("setProperty", name, oldValue, value);
     }
 
@@ -317,21 +315,19 @@ public class ProductPluginDeployer
      * @jmx:managed-operation 
      */
     public String getProperty(String name) {
-       return this.ppm.getProperty(name); 
+       return _ppm.getProperty(name); 
     }
 
     /**
      * @jmx:managed-operation
      */
     public PluginInfo getPluginInfo(String name)
-        throws PluginException {
-
-        PluginInfo info =
-            this.ppm.getPluginInfo(name);
+        throws PluginException 
+    {
+        PluginInfo info = _ppm.getPluginInfo(name);
 
         if (info == null) {
-            throw new PluginException("No PluginInfo found for: " +
-                                      name);
+            throw new PluginException("No PluginInfo found for: " + name);
         }
 
         return info;
@@ -346,8 +342,8 @@ public class ProductPluginDeployer
 
         String urlPath = new File(urlFile).getParent();
 
-        if (urlPath.endsWith(this.pluginDir)) {
-            log.debug("accepting plugin=" + urlFile);
+        if (urlPath.endsWith(_pluginDir)) {
+            _log.debug("accepting plugin=" + urlFile);
             return true;
         }
 
@@ -358,21 +354,20 @@ public class ProductPluginDeployer
         String s1 = (String)o1;
         String s2 = (String)o2;
 
-        int order1 = this.ppm.getPluginInfo(s1).deploymentOrder;
-        int order2 = this.ppm.getPluginInfo(s2).deploymentOrder;
+        int order1 = _ppm.getPluginInfo(s1).deploymentOrder;
+        int order2 = _ppm.getPluginInfo(s2).deploymentOrder;
 
         return order1 - order2;
     }
 
     private void setReady(boolean ready) {
         try {
-            getServer().setAttribute(this.readyMgrName,
+            getServer().setAttribute(_readyMgrName,
                                      new Attribute(READY_ATTR,
                                                    ready ? Boolean.TRUE :
                                                    Boolean.FALSE));
         } catch(Exception e) {
-            log.error("Unable to declare application ready: " +
-                      e.getMessage());
+            _log.error("Unable to declare application ready", e);
         }
     }
     
@@ -382,11 +377,10 @@ public class ProductPluginDeployer
     public boolean isReady() {
         Boolean isReady;
         try {
-            isReady =
-                (Boolean)getServer().getAttribute(this.readyMgrName,
-                                                  READY_ATTR);
+            isReady = (Boolean)getServer().getAttribute(_readyMgrName, 
+                                                        READY_ATTR);
         } catch (Exception e) {
-            log.error("Unable to get Application's ready state", e);
+            _log.error("Unable to get Application's ready state", e);
             return false;
         }
         
@@ -403,25 +397,23 @@ public class ProductPluginDeployer
      * @jmx:managed-operation
      */
     public void startDeployer() {
-
         pluginNotify("deployer", DEPLOYER_READY);
 
-        Collections.sort(plugins, this);
+        Collections.sort(_plugins, this);
 
-        try {
-            ProductManagerLocal pm = getProductManager();
-            String pluginName;
-            for (Iterator it = plugins.iterator();
-                 it.hasNext();)
-            {
-                pluginName = (String)it.next();
+        ProductManagerLocal pm = getProductManager();
+
+        for (Iterator i = _plugins.iterator(); i.hasNext();) {
+            String pluginName = (String)i.next();
+
+            try {
                 deployPlugin(pluginName, pm);
+            } catch(DeploymentException e) {
+                _log.error("Unable to deploy plugin [" + pluginName + "]", e);
             }
-        } catch (DeploymentException e) {
-            log.error(e.getMessage(), e);
         }
 
-        plugins.clear();
+        _plugins.clear();
 
         //generally means we are done deploying plugins at startup.
         //but we are not "done" since a plugin can be dropped into
@@ -433,7 +425,7 @@ public class ProductPluginDeployer
             SRNManagerLocal srnManager = getSRNManager();
             srnManager.initializeCache();
         } catch (DeploymentException e) {
-            log.error(e.getMessage(), e);
+            _log.error(e.getMessage(), e);
         }
         // Do any inventory cleanups
         UpgradeUtil.removeOldResources();
@@ -445,15 +437,12 @@ public class ProductPluginDeployer
         String action = type.substring(type.lastIndexOf(".") + 1);
         String msg = PRODUCT + " plugin " + name + " " + action;
 
-        Notification notif =
-            new Notification(type,
-                             this,
-                             ++this.notifSequence,
-                             msg);
+        Notification notif = new Notification(type, this, ++_notifSequence, 
+                                              msg); 
 
-        log.info(msg);
+        _log.info(msg);
 
-        broadcaster.sendNotification(notif);
+        _broadcaster.sendNotification(notif);
     }
 
     private void attributeChangeNotify(String msg, String attr,
@@ -461,7 +450,7 @@ public class ProductPluginDeployer
         
         Notification notif =
             new AttributeChangeNotification(this,
-                                            ++this.notifSequence,
+                                            ++_notifSequence,
                                             System.currentTimeMillis(),
                                             msg,
                                             attr,
@@ -469,53 +458,46 @@ public class ProductPluginDeployer
                                             oldValue,
                                             newValue);
 
-        broadcaster.sendNotification(notif);
+        _broadcaster.sendNotification(notif);
     }
 
     private SRNManagerLocal getSRNManager()
-        throws DeploymentException {
+        throws DeploymentException 
+    {
         try {
             return SRNManagerUtil.getLocalHome().create();
         } catch (NamingException e) {
-            throw new DeploymentException("Failed to lookup " +
-                                          "SRNManager", e);
+            throw new DeploymentException("Failed to lookup SRNManager", e);
         } catch (CreateException e) {
-            throw new DeploymentException("Failed to create " +
-                                          "SRNManager", e);
+            throw new DeploymentException("Failed to create SRNManager", e);
         }
-
     }
 
-    private ProductManagerLocal getProductManager()
-        throws DeploymentException {
-
+    private ProductManagerLocal getProductManager() {
         try {
-            ProductManagerLocalHome pmHome =
-                ProductManagerUtil.getLocalHome();
-            return pmHome.create();
+            return ProductManagerUtil.getLocalHome().create();
         } catch (NamingException e) {
-            throw new DeploymentException("Failed to lookup ProductManager", e);
+            throw new SystemException(e);
         } catch (CreateException e) {
-            throw new DeploymentException("Failed to create ProductManager", e);
+            throw new SystemException(e);
         }
     }
 
     private String registerPluginJar(DeploymentInfo di) {
         String pluginJar = di.url.getFile();
 
-        if (!this.ppm.isLoadablePluginName(pluginJar)) {
+        if (!_ppm.isLoadablePluginName(pluginJar)) {
             return null;
         }
 
         try {
             //di.localCl to find resources such as etc/hq-plugin.xml
-            String plugin =
-                this.ppm.registerPluginJar(pluginJar, di.localCl);
+            String plugin = _ppm.registerPluginJar(pluginJar, di.localCl);
 
             pluginNotify(plugin, PLUGIN_REGISTERED);
             return plugin;
         } catch (Exception e) {
-            log.error("Unable to deploy plugin '" + pluginJar + "'", e);
+            _log.error("Unable to deploy plugin '" + pluginJar + "'", e);
             return null;
         }
     }
@@ -527,7 +509,7 @@ public class ProductPluginDeployer
             pm.deploymentNotify(plugin);
             pluginNotify(plugin, PLUGIN_DEPLOYED);
         } catch (Exception e) {
-            log.error("Unable to deploy plugin '" + plugin + "'", e);
+            _log.error("Unable to deploy plugin '" + plugin + "'", e);
         }
     }
 
@@ -535,7 +517,7 @@ public class ProductPluginDeployer
         ObjectName urlScanner;
 
         String msg = "Adding custom plugin dir " + dir; 
-        log.info(msg);
+        _log.info(msg);
 
         try {
             urlScanner = new ObjectName(URL_SCANNER_NAME);
@@ -543,7 +525,7 @@ public class ProductPluginDeployer
                                new Object[] { dir.toURL() },
                                new String[] { URL.class.getName() });
         } catch (Exception e) {
-            log.error(msg, e);
+            _log.error(msg, e);
         }        
     }
 
@@ -559,7 +541,7 @@ public class ProductPluginDeployer
         try {
             url = new URL(home);
         } catch (MalformedURLException e) {
-            log.error("Malformed " + prop + "=" + home);
+            _log.error("Malformed " + prop + "=" + home);
             return;
         }
         
@@ -584,24 +566,24 @@ public class ProductPluginDeployer
      */
     public void start() throws Exception { 
     
-        if(isStarted) return;
-        isStarted = true;
+        if(_isStarted) return;
+        _isStarted = true;
         
         super.start();
 
-        this.ppm.init();
+        _ppm.init();
 
         try {
             //hq.ear contains sigar_bin/lib with the 
             //native sigar libraries.  we set sigar.install.home 
             //here so plugins which use sigar can find it during Sigar.load()
 
-            String path = this.getClass().getClassLoader().
+            String path = getClass().getClassLoader().
                 getResource("sigar_bin").getFile();
 
-            this.ppm.setProperty("sigar.install.home", path);
+            _ppm.setProperty("sigar.install.home", path);
         } catch (Exception e) {
-            e.printStackTrace();
+            _log.error(e);
         }
 
         //turn off ready filter asap at shutdown
@@ -620,18 +602,19 @@ public class ProductPluginDeployer
         super.stop();
         pluginNotify("deployer", DEPLOYER_SUSPENDED);
         setReady(false);
-        plugins.clear();
+        _plugins.clear();
     }
 
     public void start(DeploymentInfo di)
-        throws DeploymentException {
+        throws DeploymentException 
+    {
         try {
-            this.start();
+            start();
         } catch (Exception e) {
-            throw new DeploymentException("Bombed: " + e.getMessage());
+            throw new DeploymentException("Bombed", e);
         }
 
-        log.debug("start: " + di.url.getFile());
+        _log.debug("start: " + di.url.getFile());
 
         //the plugin jar can be registered at any time
         String plugin = registerPluginJar(di);
@@ -645,18 +628,18 @@ public class ProductPluginDeployer
             deployPlugin(plugin, pm);
         }
         else {
-            plugins.add(plugin);
+            _plugins.add(plugin);
         }
     }
 
     public void stop(DeploymentInfo di)
-        throws DeploymentException {
-
-        log.debug("stop: " + di.url.getFile());
+        throws DeploymentException 
+    {
+        _log.debug("stop: " + di.url.getFile());
 
         try {
             String jar = di.url.getFile();
-            this.ppm.removePluginJar(jar);
+            _ppm.removePluginJar(jar);
             pluginNotify(new File(jar).getName(), PLUGIN_UNDEPLOYED);
         } catch (Exception e) {
             throw new DeploymentException(e);
