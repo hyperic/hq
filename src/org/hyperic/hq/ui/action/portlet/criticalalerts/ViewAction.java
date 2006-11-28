@@ -124,7 +124,7 @@ public class ViewAction extends TilesAction {
 
         alerts.put("criticalAlerts", a);
 
-        _log.info(alerts.toString());
+        _log.info(alerts.toString(2));
 
         //response.getWriter().write(alerts.toString());
         
