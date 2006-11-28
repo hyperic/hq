@@ -40,6 +40,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.measurement.MeasurementConstants;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -106,24 +107,49 @@ public class ViewAction extends TilesAction {
             JSONObject res = new JSONObject();
             ResourceDisplaySummary bean = (ResourceDisplaySummary)i.next();
             res.put("resourceName", bean.getResourceName());
+            res.put("resourceTypeName", bean.getResourceTypeName());
             res.put("resourceTypeId", bean.getResourceTypeId());
             res.put("resourceId", bean.getResourceId());
             res.put("performance", bean.getPerformance());
             res.put("throughput", bean.getThroughput());
             res.put("throughputUnits", bean.getThroughputUnits());
-            res.put("availability", bean.getAvailability());
+            res.put("availability", getAvailString(bean.getAvailability()));
             res.put("monitorable", bean.getMonitorable());
             res.put("alerts", bean.getAlerts());
 
             resources.add(res);
         }
+        
         favorites.put("favorites", resources);
 
-        _log.info(favorites.toString());
+        _log.info(favorites.toString(2));
 
         //response.getWriter().write(favorites.toString());
 
         return null;
+    }
+
+    /**
+     * Get the availability string for the given metric value.  The returned
+     * string should match the availabilty icon filenames.
+     * @param availability The availability metric value.
+     * @return The mapped string for the given availablity metric.  If the
+     * given metric is not valid, unknown is returned.
+     */
+    private String getAvailString(Double availability) {
+        double avail = availability.doubleValue();
+
+        if (avail == MeasurementConstants.AVAIL_UP) {
+                return "green";
+        } else if (avail == MeasurementConstants.AVAIL_DOWN) {
+                return "red";
+        } else if (avail == MeasurementConstants.AVAIL_PAUSED) {
+                return "orange";
+        } else if (avail == MeasurementConstants.AVAIL_WARN) {
+                return "yellow";
+        } else {
+                return "unknown";
+        }
     }
 
     private List getResources(String key, MeasurementBoss boss, WebUser user)
