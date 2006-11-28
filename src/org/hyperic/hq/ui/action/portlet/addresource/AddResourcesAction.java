@@ -34,6 +34,7 @@ import javax.servlet.http.HttpSession;
 
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.BaseValidatorForm;
@@ -111,7 +112,7 @@ public class AddResourcesAction extends BaseAction {
         StringBuffer resourcesAsString = new StringBuffer();
 
         for(Iterator i = pendingResourceIds.iterator(); i.hasNext(); ){
-            resourcesAsString.append( Constants.DASHBOARD_DELIMITER );
+            resourcesAsString.append( StringConstants.DASHBOARD_DELIMITER );
             resourcesAsString.append( i.next() );            
         }
 

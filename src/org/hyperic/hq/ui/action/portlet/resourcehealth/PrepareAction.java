@@ -69,7 +69,6 @@ public class PrepareAction extends TilesAction {
         DashboardUtils.verifyResources(key, ctx, user);
         //this quarantees that the session dosen't contain any resources it shouldnt
         SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
-        pForm.setDisplayOnDash(true);
 
         boolean availability = new Boolean(user.getPreference(".dashContent.resourcehealth.availability")).booleanValue();
         boolean throughput =  new Boolean(user.getPreference(".dashContent.resourcehealth.throughput")).booleanValue();

@@ -37,6 +37,7 @@ import javax.servlet.http.HttpSession;
 
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -87,9 +88,6 @@ public class ModifyAction extends BaseAction {
             return forward;
         }
 
-        if(!pForm.isDisplayOnDash())
-            DashboardUtils.removePortlet( user, pForm.getPortletName());
-
         String[] charts = pForm.getCharts();
         if (charts != null && pForm.isDeleteClicked()) {                
             String userCharts =
@@ -103,7 +101,7 @@ public class ModifyAction extends BaseAction {
         } else {
             // Sort by order
             List chartList = user.getPreferenceAsList(
-                Constants.USER_DASHBOARD_CHARTS, Constants.DASHBOARD_DELIMITER);
+                Constants.USER_DASHBOARD_CHARTS, StringConstants.DASHBOARD_DELIMITER);
             
             for (Iterator it = chartList.iterator(); it.hasNext(); ) {
                 if ("null".equals(it.next()))
@@ -121,7 +119,7 @@ public class ModifyAction extends BaseAction {
             }
             
             user.setPreference(Constants.USER_DASHBOARD_CHARTS,
-                StringUtil.arrayToString(orderedCharts, Constants
+                StringUtil.arrayToString(orderedCharts, StringConstants
                                          .DASHBOARD_DELIMITER.charAt(0)));
         }
 

@@ -35,6 +35,7 @@ import javax.servlet.http.HttpSession;
 
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -92,9 +93,6 @@ public class ModifyAction extends BaseAction {
             return forward;
         }
 
-        if(!pForm.isDisplayOnDash())
-            DashboardUtils.removePortlet( user, pForm.getPortletName());
-
         String availability = Boolean.toString( pForm.isAvailability() );
         String throughput =  Boolean.toString( pForm.isThroughput() );
         String performance = Boolean.toString( pForm.isPerformance() );
@@ -118,7 +116,7 @@ public class ModifyAction extends BaseAction {
             resources.add(orderTK.nextToken());     // appdef key
         }
         user.setPreference(Constants.USERPREF_KEY_FAVORITE_RESOURCES,
-                           StringUtil.listToString(resources, Constants
+                           StringUtil.listToString(resources, StringConstants
                                                    .DASHBOARD_DELIMITER));
         
         LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+

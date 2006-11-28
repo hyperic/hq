@@ -80,9 +80,6 @@ public class ModifyAction extends BaseAction {
             return forward;
         }
 
-        if(!pForm.isDisplayOnDash())
-            DashboardUtils.removePortlet( user, pForm.getPortletName());
-
         String lastCompleted = pForm.getLastCompleted().toString();            
         String mostFrequent  = pForm.getMostFrequent().toString();            
         String nextScheduled = pForm.getNextScheduled() == null ?

@@ -41,6 +41,7 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
@@ -72,15 +73,13 @@ public class PrepareAction extends TilesAction {
         PropertiesForm pForm = (PropertiesForm) form;
         PageList resources = new PageList();
 
-        pForm.setDisplayOnDash(true);
-
         Integer numberToShow =
             new Integer(user.getPreference(PropertiesForm.NUM_TO_SHOW));
 
         pForm.setNumberToShow(numberToShow);
         
         List resourceList =
-            user.getPreferenceAsList(key, Constants.DASHBOARD_DELIMITER);
+            user.getPreferenceAsList(key, StringConstants.DASHBOARD_DELIMITER);
 
         Iterator i = resourceList.iterator();
 

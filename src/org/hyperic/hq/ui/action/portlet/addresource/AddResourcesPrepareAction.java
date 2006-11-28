@@ -40,6 +40,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -159,7 +160,7 @@ public class AddResourcesPrepareAction extends Action {
             try {
                 pendingResourcesIds =
                     user.getPreferenceAsList(addForm.getKey(),
-                                             Constants.DASHBOARD_DELIMITER);
+                                             StringConstants.DASHBOARD_DELIMITER);
             } catch (InvalidOptionException e) {
                 // Then we don't have any pending resources
                 pendingResourcesIds = new ArrayList(0);

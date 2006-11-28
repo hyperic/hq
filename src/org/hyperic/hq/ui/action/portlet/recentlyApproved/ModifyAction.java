@@ -82,9 +82,6 @@ public class ModifyAction extends BaseAction {
             return forward;
         }
 
-        if(!pForm.isDisplayOnDash())
-            DashboardUtils.removePortlet(user, pForm.getPortletName());
-
         user.setPreference(".dashContent.recentlyApproved.range", range);            
 
         LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+

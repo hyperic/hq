@@ -72,8 +72,6 @@ public class RemoveResourcesAction extends TilesAction {
         Integer sessionId = RequestUtils.getSessionId(request);
         PageList resources = new PageList();
 
-        pForm.setDisplayOnDash(true);
-
         boolean availability = new Boolean(user.getPreference(".dashContent.resourcehealth.availability")).booleanValue();
         boolean throughput =  new Boolean(user.getPreference(".dashContent.resourcehealth.throughput")).booleanValue(); 
         boolean performance = new Boolean(user.getPreference(".dashContent.resourcehealth.performance")).booleanValue();

@@ -87,9 +87,6 @@ public class ModifyAction extends BaseAction {
 
         WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
 
-        if(!pForm.isDisplayOnDash())
-            DashboardUtils.removePortlet( user, pForm.getPortletName());
-
         String application = Boolean.toString( pForm.isApplication() );
         String platform = Boolean.toString( pForm.isPlatform() );
         String cluster = Boolean.toString( pForm.isCluster() );

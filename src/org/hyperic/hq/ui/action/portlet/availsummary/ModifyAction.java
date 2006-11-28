@@ -74,9 +74,6 @@ public class ModifyAction extends BaseAction {
             return forward;
         }
 
-        if(!pForm.isDisplayOnDash())
-            DashboardUtils.removePortlet(user, pForm.getPortletName());
-
         Integer numberToShow = pForm.getNumberToShow();
 
         user.setPreference(PropertiesForm.NUM_TO_SHOW,

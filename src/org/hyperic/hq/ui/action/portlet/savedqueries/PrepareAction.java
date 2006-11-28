@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.util.StringUtil;
 
@@ -62,14 +63,13 @@ public class PrepareAction extends TilesAction {
         throws Exception {
             
         Log log = LogFactory.getLog(PrepareAction.class.getName());
-        PropertiesForm pForm = (PropertiesForm) form;
         log.trace("getting saved charts associated with user ");
 
-        WebUser user = (WebUser) request.getSession().getAttribute( Constants.WEBUSER_SES_ATTR );
-        pForm.setDisplayOnDash(true);
+        WebUser user = (WebUser)
+            request.getSession().getAttribute( Constants.WEBUSER_SES_ATTR );
         List chartList = StringUtil.explode(
             user.getPreference(Constants.USER_DASHBOARD_CHARTS), 
-            Constants.DASHBOARD_DELIMITER);
+            StringConstants.DASHBOARD_DELIMITER);
 
         ArrayList charts = new ArrayList();
 

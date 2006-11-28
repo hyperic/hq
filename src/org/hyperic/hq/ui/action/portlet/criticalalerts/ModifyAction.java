@@ -91,9 +91,6 @@ public class ModifyAction extends BaseAction {
             return forward;
         }
 
-        if(!pForm.isDisplayOnDash())
-            DashboardUtils.removePortlet( user, pForm.getPortletName());
-
         Integer numberOfAlerts = pForm.getNumberOfAlerts();
         String past            = String.valueOf(pForm.getPast());
         String prioritity      = pForm.getPriority();

@@ -90,8 +90,6 @@ public class PrepareAction extends TilesAction {
         SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
 
         // set all the form properties
-        pForm.setDisplayOnDash(true);
-
         Integer numberOfAlerts =
             new Integer(user.getPreference(PropertiesForm.ALERT_NUMBER));
         long past = Long.parseLong(user.getPreference(PropertiesForm.PAST));

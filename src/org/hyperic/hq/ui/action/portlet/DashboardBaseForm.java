@@ -25,22 +25,16 @@
 
 package org.hyperic.hq.ui.action.portlet;
 
-// XXX: remove when ImageBeanButton works
 import org.hyperic.hq.ui.action.BaseValidatorForm;
+
 /**
  * A subclass of <code>ValidatorForm</code> that adds convenience
  * methods for dealing with image-based form buttons.
  */
 public class DashboardBaseForm extends BaseValidatorForm  {
 
-    //-------------------------------------instance variables
-    private Integer pageSize;
-    
-    /** Holds value of property displayOnDash. */
-    private boolean displayOnDash;
-    
     /** Holds value of property portletName. */
-    private String portletName;
+    private String _portletName;
     
     //-------------------------------------constructors
 
@@ -49,44 +43,20 @@ public class DashboardBaseForm extends BaseValidatorForm  {
     }
 
     //-------------------------------------public methods
-    public String toString() {
-        StringBuffer s = new StringBuffer();
-
-        s.append("displayOnDash=" + isDisplayOnDash() + " ");
-
-        return s.toString();
-    }
-    
-    /** Getter for property displayOnDash.
+    /** Getter for property portletName.
      * @return Value of property displayOnDash.
      *
      */
-    public boolean isDisplayOnDash() {
-        return this.displayOnDash;
+    public String getPortletName() {
+        return _portletName;
     }
     
     /** Setter for property displayOnDash.
-     * @param displayOnDash New value of property displayOnDash.
-     *
-     */
-    public void setDisplayOnDash(boolean displayOnDash) {
-        this.displayOnDash = displayOnDash;
-    }
-    
-    /** Getter for property removePortlet.
-     * @return Value of property removePortlet.
-     *
-     */
-    public String getPortletName() {
-        return this.portletName;
-    }
-    
-    /** Setter for property removePortlet.
-     * @param removePortlet New value of property removePortlet.
+     * @param removePortlet New value of property displayOnDash.
      *
      */
     public void setPortletName(String portletName) {
-        this.portletName = portletName;
+        _portletName = portletName;
     }
     
 }
