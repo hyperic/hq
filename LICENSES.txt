@@ -10,6 +10,10 @@ of the projects listed below for their contributions.
 Information: http://www.jboss.org
 License: http://www.jboss.org/company/opensouce_aboutlgpl
 
+- Apache Struts - 
+Information: http://struts.apache.org
+License: http://www.apache.org/licenses/LICENSE-2.0
+
 - PostgreSQL Development Group -
 Information: http://www.postgresql.org
 License: http://www.postgresql.org/licence.html
