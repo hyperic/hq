@@ -31,12 +31,12 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.WebUser;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.InvalidOptionException;
@@ -46,8 +46,6 @@ import org.hyperic.util.config.InvalidOptionValueException;
  * Utilities class that provides general convenience methods.
  */
 public class DashboardUtils {
-    private static final String EMPTY_DELIMITER =
-        Constants.DASHBOARD_DELIMITER + Constants.DASHBOARD_DELIMITER;
     public static final char MULTI_PORTLET_TOKEN = '@';
 
     public static List listAsResources(List list, ServletContext ctx,
@@ -111,9 +109,9 @@ public class DashboardUtils {
         first = StringUtil.remove(first, portlet);
         second = StringUtil.remove(second, portlet);
 
-        first = StringUtil.replace(first,  EMPTY_DELIMITER,
+        first = StringUtil.replace(first,  Constants.EMPTY_DELIMITER,
                                    Constants.DASHBOARD_DELIMITER);
-        second = StringUtil.replace(second,EMPTY_DELIMITER,
+        second = StringUtil.replace(second,Constants.EMPTY_DELIMITER,
                                     Constants.DASHBOARD_DELIMITER);
 
         user.setPreference(Constants.USER_PORTLETS_FIRST, first);
@@ -150,7 +148,7 @@ public class DashboardUtils {
         for (int i = 0; i < ids.length; i++) {
             String resource = ids[i];
             resources = StringUtil.remove(resources, resource);
-            resources = StringUtil.replace(resources, EMPTY_DELIMITER,
+            resources = StringUtil.replace(resources, Constants.EMPTY_DELIMITER,
                                            Constants.DASHBOARD_DELIMITER);
         }
 
@@ -193,7 +191,7 @@ public class DashboardUtils {
             existing.remove(0);
         
         user.setPreference(key,
-                       StringUtil.listToString(existing,
-                                               Constants.DASHBOARD_DELIMITER));
+                        StringUtil.listToString(existing,
+                                                Constants.DASHBOARD_DELIMITER));
     }
 }
