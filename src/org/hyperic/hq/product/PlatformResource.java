@@ -64,7 +64,7 @@ public class PlatformResource extends AIPlatformValue {
         try {
             setCustomProperties(config.encode());
         } catch (EncodingException e) {
-            new IllegalArgumentException("Error encoding config");
+            throw new IllegalArgumentException("Error encoding config");
         }
     }
     
@@ -76,7 +76,7 @@ public class PlatformResource extends AIPlatformValue {
         try {
             setProductConfig(config.encode());
         } catch (EncodingException e) {
-            new IllegalArgumentException("Error encoding config");
+            throw new IllegalArgumentException("Error encoding config");
         }
     }
 
@@ -88,7 +88,7 @@ public class PlatformResource extends AIPlatformValue {
         try {
             setMeasurementConfig(config.encode());
         } catch (EncodingException e) {
-            new IllegalArgumentException("Error encoding config");
+            throw new IllegalArgumentException("Error encoding config");
         }
     }
 
@@ -112,7 +112,7 @@ public class PlatformResource extends AIPlatformValue {
         try {
             setControlConfig(config.encode());
         } catch (EncodingException e) {
-            new IllegalArgumentException("Error encoding config");
+            throw new IllegalArgumentException("Error encoding config");
         }
     }
 }
