@@ -34,12 +34,18 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.ui.json.Json;
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.EncodingException;
+import org.hyperic.util.config.ConfigResponse;
+import org.json.JSONObject;
+import org.json.JSONException;
 
 public class Action  
     extends PersistedObject
+    implements Json
 {
     private String          _className;
     private byte[]          _config;
@@ -160,6 +166,18 @@ public class Action
             ActionDAO aDao = DAOFactory.getDAOFactory().getActionDAO();
 
             setParent(aDao.findById(val.getId()));
+        }
+    }
+
+    public JSONObject toJSON() throws JSONException
+    {
+        try {
+            ConfigResponse conf = ConfigResponse.decode(getConfig());
+            return new JSONObject()
+                    .put("config", conf.toProperties());
+        } catch (EncodingException e) {
+            // can't happen
+            throw new SystemException(e);
         }
     }
 
