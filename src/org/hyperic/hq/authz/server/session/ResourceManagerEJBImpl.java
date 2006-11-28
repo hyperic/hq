@@ -496,6 +496,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
 
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
 
+        // Damn I love this code.  -- JMT
         switch(pc.getSortattribute()) {
             case SortAttribute.RESOURCE_NAME:
             default:
