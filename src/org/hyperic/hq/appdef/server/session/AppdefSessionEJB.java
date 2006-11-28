@@ -181,14 +181,14 @@ public abstract class AppdefSessionEJB
     /**
      * Create an authz resource
      * @param resTypeVal - the type
-     * @param subject - who
      * @param id - the id of the object
      */
     protected void createAuthzResource(AuthzSubjectValue who, 
                                        ResourceTypeValue resTypeVal, 
                                        Integer id, 
                                        String name) 
-        throws CreateException {
+        throws CreateException 
+    {
         createAuthzResource(who, resTypeVal, id, name, false);
     }
     
@@ -205,7 +205,8 @@ public abstract class AppdefSessionEJB
 									   Integer id, 
 									   String name,
                                        boolean fsystem) 
-    	throws CreateException{
+    	throws CreateException
+    {
         if (log.isDebugEnabled())
             log.debug("Creating Authz Resource Type: " + resTypeVal +
                       " id: " + id + " by: " + who);
@@ -219,7 +220,8 @@ public abstract class AppdefSessionEJB
      * @param resVal - the resourceVal
      */
     protected void updateAuthzResource(ResourceValue rv)
-        throws NamingException, UpdateException {
+        throws NamingException, UpdateException 
+    {
         try {
             ResourceManagerUtil.getLocalHome().create().saveResource(rv); 
         } catch (CreateException e) {
@@ -234,7 +236,8 @@ public abstract class AppdefSessionEJB
      */
     protected ResourceValue getAuthzResource(ResourceTypeValue rtV,
     										 Integer id)
-        throws FinderException {
+        throws FinderException 
+    {
         ResourceManagerLocal rm = getResourceManager();
         return rm.findResourceByInstanceId(rtV, id);
     }
@@ -454,8 +457,8 @@ public abstract class AppdefSessionEJB
     protected void checkPermission(AuthzSubjectValue subject, 
                                    ResourceTypeValue rtV,
                                    Integer id, String operation)
-        throws PermissionException {
-        
+        throws PermissionException 
+    {
         log.debug("Checking Permission for Operation: "
             + operation + " ResourceType: " + rtV +
             " Instance Id: " + id + " Subject: " + subject);
@@ -470,15 +473,11 @@ public abstract class AppdefSessionEJB
 
     /**
      * Check a permission
-     * @param subject - who
-     * @param appdefEntityId - what
-     * @param operation - name of operation
      */
     protected void checkPermission(AuthzSubjectValue subject, 
-                                   AppdefEntityID id,
-                                   String operation) 
-        throws PermissionException {
-
+                                   AppdefEntityID id, String operation) 
+        throws PermissionException 
+    {
         ResourceTypeValue rtv = null;            
         try {
             // get the resource type
@@ -514,41 +513,42 @@ public abstract class AppdefSessionEJB
     
     /**
      * Check for modify permission for a given resource
-     * @param subject 
-     * @param appdefEntityId - what
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
     public void checkModifyPermission(AuthzSubjectValue subject,
                                       AppdefEntityID id)
-        throws PermissionException {
+        throws PermissionException 
+    {
         int type = id.getType();
-        String opName = null;
+        String opName;
+
         switch (type) {
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                opName = AuthzConstants.platformOpModifyPlatform;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                opName = AuthzConstants.serverOpModifyServer;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                opName = AuthzConstants.serviceOpModifyService;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                opName = AuthzConstants.appOpModifyApplication;
-                break;
-            default:
-                throw new InvalidAppdefTypeException("Unknown type: " +
-                    type);
+        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+            opName = AuthzConstants.platformOpModifyPlatform;
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+            opName = AuthzConstants.serverOpModifyServer;
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+            opName = AuthzConstants.serviceOpModifyService;
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+            opName = AuthzConstants.appOpModifyApplication;
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+            opName = AuthzConstants.groupOpModifyResourceGroup;
+            break;
+        default:
+            throw new InvalidAppdefTypeException("Unknown type: " + type);
         }
+
         // now check
-        this.checkPermission(subject, id, opName);
+        checkPermission(subject, id, opName);
     }
 
     /**
      * Check for view permission for a given resource
-     * @param subject 
-     * @param appdefEntityId - what
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
@@ -583,17 +583,15 @@ public abstract class AppdefSessionEJB
 
     /**
      * Check for control permission for a given resource
-     * @param subject 
-     * @param appdefEntityId - what
-     * @param subject - who
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
     public void checkControlPermission(AuthzSubjectValue subject,
                                        AppdefEntityID id)
-        throws PermissionException {
+        throws PermissionException 
+    {
         int type = id.getType();
-        String opName = null;
+        String opName;
         switch (type) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 opName = AuthzConstants.platformOpControlPlatform;
@@ -607,9 +605,11 @@ public abstract class AppdefSessionEJB
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                 opName = AuthzConstants.appOpControlApplication;
                 break;
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                opName = AuthzConstants.groupOpControlResourceGroup;
+                break;
             default:
-                throw new InvalidAppdefTypeException("Unknown type: " +
-                    type);
+                throw new InvalidAppdefTypeException("Unknown type: " + type);
         }
         // now check
         this.checkPermission(subject, id, opName);
@@ -617,9 +617,6 @@ public abstract class AppdefSessionEJB
     
     /**
      * Check for control permission for a given resource
-     * @param subject 
-     * @param appdefEntityId - what
-     * @param subject - who
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
@@ -640,6 +637,9 @@ public abstract class AppdefSessionEJB
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                 opName = AuthzConstants.appOpRemoveApplication;
+                break; 
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                opName = AuthzConstants.groupOpRemoveResourceGroup;
                 break;
             default:
                 throw new InvalidAppdefTypeException("Unknown type: " +
@@ -651,9 +651,6 @@ public abstract class AppdefSessionEJB
 
     /**
      * Check for monitor permission for a given resource
-     * @param subject 
-     * @param appdefEntityId - what
-     * @param subject - who
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
@@ -674,6 +671,9 @@ public abstract class AppdefSessionEJB
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                 opName = AuthzConstants.appOpMonitorApplication;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                opName = AuthzConstants.groupOpMonitorResourceGroup;
                 break;
             default:
                 throw new InvalidAppdefTypeException("Unknown type: " +
@@ -805,8 +805,6 @@ public abstract class AppdefSessionEJB
                                              + "scan on an empty group");
             }
 
-            ArrayList jobIds = new ArrayList();
-            
             for (Iterator i = groupMembers.iterator(); i.hasNext();) {
                 AppdefEntityID platformEntityID = (AppdefEntityID) i.next();
                 checkAIScanPermissionForPlatform(subject, platformEntityID);
@@ -938,6 +936,7 @@ public abstract class AppdefSessionEJB
                     canCreateChild = true;
                 }
             } catch (PermissionException e) {
+            } catch (InvalidAppdefTypeException e) {
             }
             // finally create the object
             return new AppdefResourcePermissions(who, eid, canView, canCreateChild,

@@ -92,6 +92,12 @@ public final class AuthzConstants {
     // Group Operations
     public static final String groupOpViewResourceGroup = "viewResourceGroup";
     public static final String groupOpManageAlerts = "manageGroupAlerts";
+    public static final String groupOpModifyResourceGroup =
+        "modifyResourceGroup";
+    public static final String groupOpAddRole = "addRole";
+    public static final String groupOpRemoveResourceGroup = "removeResourceGroup";
+    public static final String groupOpControlResourceGroup = "controlResourceGroup";
+    public static final String groupOpMonitorResourceGroup = "monitorResourceGroup";
 
     // View permission constants - defined in authz-data.xml
     public static final Integer perm_viewSubject       = new Integer(8);
@@ -150,11 +156,6 @@ public final class AuthzConstants {
     public static final String roleOpRemoveRole = "removeRole";
     public static final String roleOpViewRole = "viewRole";
 
-    public static final String groupOpModifyResourceGroup =
-        "modifyResourceGroup";
-    public static final String groupOpAddRole = "addRole";
-
-    public static final String groupOpRemoveResourceGroup = "removeResourceGroup";
     public static final String privateRoleGroupName = "camPrivateRoleGroup:";
     public static final int authzDefaultResourceGroupType = 13;
 
