@@ -79,11 +79,13 @@ import org.hyperic.hq.events.AlertDefinitionCreateException;
 import org.hyperic.hq.events.AlertNotFoundException;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerCreateException;
+import org.hyperic.hq.events.EscalationMediator;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggerEvent;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
 import org.hyperic.hq.events.server.session.RegisteredTriggerNotifier;
+import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.hq.events.shared.ActionManagerLocal;
 import org.hyperic.hq.events.shared.ActionManagerUtil;
 import org.hyperic.hq.events.shared.ActionValue;
@@ -111,6 +113,9 @@ import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
+import org.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONArray;
 
 /** 
  * The BizApp's interface to the Events Subsystem
@@ -1495,6 +1500,74 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                FinderException {
         AuthzSubjectValue subject = this.manager.getSubject(sessionID);
         return getRTM().getAllTriggers();
+    }
+
+    /**
+     * retrieve escalation JSONObject by name.
+     *
+     * Escalation finders begin with find* to be consistent with
+     * DAO finder convention
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public JSONObject jsonByEscalationName(int sessionID, String name)
+    {
+        // TODO: access check on escalation resource
+        try {
+            return EscalationMediator.getInstance().findByEscalationName(name)
+                    .toJSON();
+        } catch (JSONException e) {
+            throw new SystemException(e);
+        }
+    }
+
+    /**
+     * retrieve escalation JSONObject by alert definition id.
+     *
+     * Escalation json finders begin with json* to be consistent with
+     * DAO finder convention
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public JSONObject jsonEscalationByAlertDefId(int sessionID, Integer id)
+    {
+        // TODO: access check on escalation resource
+        try {
+            return EscalationMediator.getInstance()
+                    .findEscalationByAlertDefId(id)
+                    .toJSON();
+        } catch (JSONException e) {
+            throw new SystemException(e);
+        }
+    }
+
+    /**
+     * retrieve all escalation policy names as a Array of JSONObject.
+     *
+     * Escalation json finders begin with json* to be consistent with
+     * DAO finder convention
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public JSONArray listAllEscalationName(int sessionID)
+    {
+        // TODO: access check on escalation resource
+        try {
+            Collection all = EscalationMediator.getInstance().findAll();
+            JSONArray jarr = new JSONArray();
+            for (Iterator i = all.iterator(); i.hasNext(); ) {
+                Escalation esc = (Escalation)i.next();
+                jarr.put(new JSONObject()
+                        .put("id", esc.getId())
+                        .put("name", esc.getName()));
+            }
+            return jarr;
+        } catch (JSONException e) {
+            throw new SystemException(e);
+        }
     }
 
     private AppdefEntityID getAppdefEntityID(AlertDefinitionValue ad) {

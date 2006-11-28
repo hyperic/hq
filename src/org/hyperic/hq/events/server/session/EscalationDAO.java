@@ -130,4 +130,14 @@ public class EscalationDAO extends HibernateDAO
         DAOFactory.getDAOFactory().getEscalationStateDAO()
             .clearActiveEscalation(e, alertDefId);
     }
+
+    public Escalation findByAlertDefinitionId(Integer id)
+    {
+        String sql = "select e from AlertDefinition d " +
+                "join Escalation e " +
+                "where d.id = ?";
+        return (Escalation)getSession().createQuery(sql)
+                .setInteger(0, id.intValue())
+                .uniqueResult();
+    }
 }

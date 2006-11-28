@@ -11,11 +11,13 @@ import org.hyperic.hq.common.shared.TransactionManagerUtil;
 import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.EscalationState;
+import org.hyperic.hq.events.server.session.EscalationDAO;
 import org.hyperic.hq.events.server.mbean.EscalationSchedulerMBean;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.hibernate.LockSet;
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.dao.DAOFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -29,6 +31,7 @@ import javax.management.MBeanException;
 import javax.management.AttributeNotFoundException;
 import java.util.List;
 import java.util.Iterator;
+import java.util.Collection;
 
 public class EscalationMediator extends Mediator
 {
@@ -188,6 +191,11 @@ public class EscalationMediator extends Mediator
         return alertManagerLocal.findEscalationById(e.getId());
     }
 
+    public Collection findAll()
+    {
+        return DAOFactory.getDAOFactory().getEscalationDAO().findAll();
+    }
+
     public void scheduleAction(Integer escalationId, Integer alertId)
     {
         alertManagerLocal.scheduleAction(escalationId, alertId);
@@ -215,6 +223,12 @@ public class EscalationMediator extends Mediator
     {
         Escalation e = Escalation.newInstance(name);
         return (Escalation)transactionManager.findPersisted(e);
+    }
+
+    public Escalation findEscalationByAlertDefId(Integer id)
+    {
+        EscalationDAO dao =DAOFactory.getDAOFactory().getEscalationDAO();
+        return dao.findByAlertDefinitionId(id);
     }
 
     public List getScheduledEscalationState()

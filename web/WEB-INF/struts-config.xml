@@ -2662,6 +2662,33 @@
       <action path="/welcome" forward="/welcome.jsp" >
         <set-property property="title" value="EXAMPLE" />
       </action>
+
+      <!-- JSON APIs for escalation -->
+      <!--action path="/escalation/save*"
+              scope="request"
+              type="org.hyperic.hq.ui.json.action.escalation.crud.Save{1}"
+              />
+
+      <action path="/escalation/remove*/*"
+              scope="request"
+              type="org.hyperic.hq.ui.json.action.escalation.crud.Remove{1}"
+              parameter="{2}"
+              /-->
+
+      <action path="/escalation/jsonBy*Name/*"
+              scope="request"
+              type="org.hyperic.hq.ui.json.action.escalation.finder.JsonBy{1}Name"
+              parameter="{2}"/>
+
+      <action path="/escalation/listAll*Name"
+              scope="request"
+              type="org.hyperic.hq.ui.json.action.escalation.finder.ListAll{1}Name"
+              parameter="{2}"/>
+
+      <action path="/escalation/json*ByAlertDefId/*"
+              scope="request"
+              type="org.hyperic.hq.ui.json.action.escalation.finder.Json{1}ByAlertDefId"
+              parameter="{2}"/>
   </action-mappings>
 
 <!-- ===================================== Controller Configuration -->

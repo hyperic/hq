@@ -18,9 +18,12 @@
       <column name ="VERSION_COL" default="0" />
     </version>
 
-    <property name="name" type="string" unique="true">
-      <column name="NAME" not-null="true" length="200"/>
-    </property>
+    <properties name="uniqueName" unique="true">
+      <!-- wrap with properties to generate unique constraint index -->
+      <property name="name" type="string">
+        <column name="NAME" not-null="true" length="200"/>
+      </property>
+    </properties>
 
     <property name="allowPause" type="boolean">
       <meta attribute="field-description"><![CDATA[
