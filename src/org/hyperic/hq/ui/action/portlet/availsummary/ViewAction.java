@@ -42,21 +42,19 @@ import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.json.JSONObject;
 
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.TreeSet;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This action class is used by the Availability Summary portlet.  It's main
@@ -86,6 +84,9 @@ public class ViewAction extends TilesAction {
         AppdefEntityID[] arrayIds =
             (AppdefEntityID[])entityIds.toArray(new AppdefEntityID[0]);
 
+        int count = Integer.parseInt(user.
+            getPreference(PropertiesForm.NUM_TO_SHOW));
+
         int sessionId = user.getSessionId().intValue();
         PageList resources = appdefBoss.findByIds(sessionId, arrayIds);
 
@@ -96,7 +97,7 @@ public class ViewAction extends TilesAction {
 
             AvailSummary summary = (AvailSummary)res.get(type);
             if (summary == null) {
-                summary = new AvailSummary();
+                summary = new AvailSummary(type);
                 res.put(type, summary);
             }
                 
@@ -107,12 +108,14 @@ public class ViewAction extends TilesAction {
 
         JSONObject availSummary = new JSONObject();
         List types = new ArrayList();
-        Set keys = res.keySet();
-        for (Iterator i = keys.iterator(); i.hasNext(); ) {
-            String type = (String)i.next();
-            AvailSummary summary = (AvailSummary)res.get(type);
+
+        TreeSet sortedSet = new TreeSet(new AvailSummaryComparator());
+        sortedSet.addAll(res.values());
+
+        for (Iterator i = sortedSet.iterator(); i.hasNext() && count-- > 0; ) {
+            AvailSummary summary = (AvailSummary)i.next();
             JSONObject typeSummary = new JSONObject();
-            typeSummary.put("resourceTypeName", type);
+            typeSummary.put("resourceTypeName", summary.getTypeName());
             typeSummary.put("numUp", summary.getNumUp());
             typeSummary.put("numDown", summary.getNumDown());
 
@@ -121,14 +124,19 @@ public class ViewAction extends TilesAction {
 
         availSummary.put("availSummary", types);
 
-        _log.info(availSummary.toString());
+        _log.info(availSummary.toString(2));
         
         return null;
     }
 
     private class AvailSummary {
+        private String _typeName;
         private int _numUp = 0;
         private int _numDown = 0;
+
+        public AvailSummary(String typeName) {
+            _typeName = typeName;
+        }
 
         public void setAvailability(double avail) {
             if (avail == MeasurementConstants.AVAIL_UP) {
@@ -138,6 +146,10 @@ public class ViewAction extends TilesAction {
             }
         }
 
+        public String getTypeName() {
+            return _typeName;
+        }
+
         public int getNumUp() {
             return _numUp;
         }
@@ -145,5 +157,27 @@ public class ViewAction extends TilesAction {
         public int getNumDown() {
             return _numDown;
         }
+
+        public double getAvailPercentage() {
+            return (double)_numUp/(_numDown + _numUp);
+        }
+    }
+
+    private class AvailSummaryComparator implements Comparator {
+
+        public int compare(Object o1, Object o2) {
+            AvailSummary s1 = (AvailSummary)o1;
+            AvailSummary s2 = (AvailSummary)o2;
+
+            if (s1.getAvailPercentage() == s2.getAvailPercentage()) {
+                // Sort on type name if equal avail percentage
+                return s1.getTypeName().compareTo(s2.getTypeName());
+            } else if (s1.getAvailPercentage() < s2.getAvailPercentage()) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
+
     }
 }
