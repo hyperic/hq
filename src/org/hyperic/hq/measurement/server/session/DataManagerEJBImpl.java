@@ -122,7 +122,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private double getValue(ResultSet rs) throws SQLException {
         double val = rs.getDouble("value");
 
-        if(rs.wasNull() == true)
+        if(rs.wasNull())
             val = Double.NaN;
 
         return val;
@@ -133,7 +133,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         long timestamp = rs.getLong("timestamp");
         double value = this.getValue(rs);
         
-        if (value != Double.NaN) {
+        if (!Double.isNaN(value)) {
             try {
                 double high = rs.getDouble("peak");
                 double low = rs.getDouble("low");
@@ -148,10 +148,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     
     private void mergeMetricValues(HighLowMetricValue existing,
                                    HighLowMetricValue additional) {
-        if (additional.getValue() == Double.NaN)
+        if (Double.isNaN(additional.getValue()))
             return;
         
-        if (existing.getValue() == Double.NaN) {
+        if (Double.isNaN(existing.getValue())) {
             existing.setHighValue(additional.getHighValue());
             existing.setLowValue(additional.getLowValue());
             existing.setValue(additional.getValue());
@@ -159,10 +159,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             return;
         }
         
-        existing.setHighValue(
-            Math.max(existing.getHighValue(), additional.getHighValue()));
-        existing.setLowValue(
-            Math.min(existing.getLowValue(), additional.getLowValue()));
+        existing.setHighValue(Math.max(existing.getHighValue(),
+                                       additional.getHighValue()));
+        existing.setLowValue(Math.min(existing.getLowValue(),
+                                      additional.getLowValue()));
         
         // Average the two values
         double total = existing.getCount() + additional.getCount();
@@ -763,7 +763,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                         
                         if (row < pagesize) {
                             HighLowMetricValue val = this.getMetricValue(rs);
-                            if (returnNulls || val.getValue() != Double.NaN) {
+                            if (returnNulls || !Double.isNaN(val.getValue())) {
                                 val.setCount(idsCnt);
                                 
                                 if (it != null) {
