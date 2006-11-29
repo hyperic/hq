@@ -94,10 +94,6 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
     private static Log timingLog =
         LogFactory.getLog(MeasurementConstants.MEA_TIMING_LOG);
 
-    // Instance variables
-    private QueueConnection qConn = null;
-    private QueueSession qSession = null;
-
     /**
      * Ping the agent to make sure it's up
      * @ejb:interface-method
@@ -117,13 +113,8 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
      *
      * @ejb:interface-method
      *
-     * @param measurement the measurement to be scheduled
-     * @param g the graph for measurement
-     * @param agentSchedule set of raw measurement ids to be scheduled
-     * @param agentSchedule set of derived measurement ids to be scheduled
-     *
-     * @throws ScheduleException if the measurement cannot be 
-     *                                      scheduled
+     * @param entId The AppdefEntityID to schedule
+     * @param graphs the graph for measurement
      */
     public void schedule(AppdefEntityID entId, Graph[] graphs,
                          Set agentSchedule, Set serverSchedule)
@@ -260,7 +251,8 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
     
     /** Unschedule metrics of multiple appdef entities
      * @ejb:interface-method
-     * @param agentEnt the entity whose agent will be contacted for the unschedule
+     * @param agentToken the entity whose agent will be contacted for the
+     * unschedule
      * @param entIds the entity IDs whose metrics should be unscheduled
      * @throws MeasurementUnscheduleException if an error occurs
      */
@@ -293,7 +285,7 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
 
     /** Unschedule a measurement
      * @ejb:interface-method
-     * @param measurement the measurement to be unscheduled
+     * @param entId The Appdef ID to unschedule
      * @throws MeasurementUnscheduleException if an error occurs
      */
     public void unschedule(AppdefEntityID entId)
@@ -509,49 +501,20 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
     }
 
     /**
-     * @see javax.ejb.SessionBean#ejbCreate()
      * @ejb:create-method
      */
     public void ejbCreate() throws CreateException {}
 
-    /**
-     * @see javax.ejb.SessionBean#ejbPostCreate()
-     */
     public void ejbPostCreate() {}
 
-    /**
-     * @see javax.ejb.SessionBean#ejbActivate()
-     */
     public void ejbActivate() {}
 
-    /**
-     * @see javax.ejb.SessionBean#ejbPassivate()
-     */
     public void ejbPassivate() {}
 
-    /**
-     * @see javax.ejb.SessionBean#ejbRemove()
-     */
     public void ejbRemove() {
-        try {
-            if (this.qConn != null)
-                this.qConn.close();
-            if (this.qSession != null)
-                this.qSession.close();
-        } catch (JMSException e) {
-            log.error("Could not close JMS connection and session", e);
-        }
-
-        // Reset the variables
-        this.qConn = null;
-        this.qSession = null;
-
         this.ctx = null;
     }
 
-    /**
-     * @see javax.ejb.SessionBean#setSessionContext(SessionContext)
-     */
     public void setSessionContext(SessionContext ctx)
         throws EJBException, RemoteException {
         this.ctx = ctx;
