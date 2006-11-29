@@ -99,6 +99,11 @@ public class ApacheStatusCollector extends HTTPCollector {
                     val = val.substring(0, ix);
                 }
                 setValue(key, val);
+                /* {Busy,Idle}Servers in 1.3, {Busy,Idle}Workers in 2.0 */
+                if (key.endsWith("Workers")) {
+                    key = StringUtil.replace(key, "Workers", "Servers");
+                }
+                setValue(key, val);
             }
         }        
     }

@@ -390,9 +390,15 @@
     <metric name="Availability"
             indicator="true"/>
 
+    <!-- {Busy,Idle}Servers == 1.3 --> 
     <metric name="Busy Servers"/>
 
     <metric name="Idle Servers"/>
+
+    <!-- {Busy,Idle}Workers == 2.x --> 
+    <metric name="Busy Workers"/>
+
+    <metric name="Idle Workers"/>
 
     <metric name="Bytes Served per Second"
             alias="BytesPerSec"
