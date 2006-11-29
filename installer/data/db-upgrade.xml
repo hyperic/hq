@@ -1804,6 +1804,30 @@ has already been defined.
       <schema-insert table="EAM_ALERT_DEFINITION "
                      insertCmd="(VERSION_COL, NAME, CTIME, MTIME, PRIORITY, APPDEF_ID, APPDEF_TYPE, ENABLED, FREQUENCY_TYPE, WILL_RECOVER, NOTIFY_FILTERED, CONTROL_FILTERED, DELETED, ID) VALUES (0, 'Resource Type Alert', 0, 0, 0, 0, 0, 'false', 0, 'false', 'false', 'false', 'false', 0)"/>
     </schemaSpec>
+
+    <!-- Create escalation permissions -->
+    <schemaSpec version="3.02">
+      <schema-insert table="EAM_RESOURCE"
+                     insertCmd="(ID, VERSION_COL, RESOURCE_TYPE_ID, INSTANCE_ID, CID, SUBJECT_ID, FSYSTEM) VALUES (401, 0, 0, 401, 401, 0, 'true')"/>
+      <schema-insert table="EAM_RESOURCE_TYPE"
+                     insertCmd="(ID, VERSION_COL, NAME, CID, RESOURCE_ID, FSYSTEM) VALUES (401, 0, 'EscalationScheme', 401, 401, 'false')"/>
+      <schema-insert table="EAM_OPERATION"
+                     insertCmd="(ID, VERSION_COL, NAME, RESOURCE_TYPE_ID, CID) VALUES (412, 0, 'createEscalation', 401, 412)"/>
+      <schema-insert table="EAM_OPERATION"
+                     insertCmd="(ID, VERSION_COL, NAME, RESOURCE_TYPE_ID, CID) VALUES (413, 0, 'modifyEscalation', 401, 413)"/>
+      <schema-insert table="EAM_OPERATION"
+                     insertCmd="(ID, VERSION_COL, NAME, RESOURCE_TYPE_ID, CID) VALUES (414, 0, 'removeEscalation', 401, 414)"/>
+      <schema-insert table="EAM_OPERATION"
+                     insertCmd="(ID, VERSION_COL, NAME, RESOURCE_TYPE_ID, CID) VALUES (415, 0, 'viewEscalation', 401, 415)"/>
+      <schema-insert table="EAM_ROLE_OPERATION_MAP"
+                     insertCmd="(ROLE_ID, OPERATION_ID, CID) VALUES (0, 412, 68)"/>
+      <schema-insert table="EAM_ROLE_OPERATION_MAP"
+                     insertCmd="(ROLE_ID, OPERATION_ID, CID) VALUES (0, 413, 69)"/>
+      <schema-insert table="EAM_ROLE_OPERATION_MAP"
+                     insertCmd="(ROLE_ID, OPERATION_ID, CID) VALUES (0, 414, 70)"/>
+      <schema-insert table="EAM_ROLE_OPERATION_MAP"
+                     insertCmd="(ROLE_ID, OPERATION_ID, CID) VALUES (0, 415, 71)"/>
+    </schemaSpec>
 </dbupgrade>
 
 </target>

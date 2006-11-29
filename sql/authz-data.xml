@@ -170,6 +170,15 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
         <data ID="308" CID="308" NAME="covalentEAMApplication" FSYSTEM="FALSE"/>
     </table>
 
+    <!-- Begin Definition of Events AUTHZ Entities 
+         In order to avoid CID conflicts, all Events CID's
+         will start with 4xx -->
+    <!-- EVENTS RESOURCE TYPES -->
+    <table name="EAM_RESOURCE_TYPE">
+        <data ID="401" CID="401" NAME="EscalationScheme" FSYSTEM="FALSE"/>
+    </table>
+
+
     <table name="EAM_RESOURCE">
         <data ID="301" CID="301" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:301"
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
@@ -187,6 +196,10 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
               SUBJECT_ID="%EAM_SUBJECT.ID:0"    
               FSYSTEM="TRUE"/>
+        <data ID="401" CID="401" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:401"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"    
+              FSYSTEM="TRUE"/>
     </table>
 
     <!-- now set the resource ids -->
@@ -195,6 +208,7 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
         <data CID="303" RESOURCE_ID="%EAM_RESOURCE.ID:303"/>
         <data CID="305" RESOURCE_ID="%EAM_RESOURCE.ID:305"/>
         <data CID="308" RESOURCE_ID="%EAM_RESOURCE.ID:308"/>
+        <data CID="401" RESOURCE_ID="%EAM_RESOURCE.ID:401"/>
     </table>
 
 
@@ -269,8 +283,8 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
         <data ID="328" CID="328" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:308"
             NAME="controlApplication"/>
 
-		<!-- Alerting Permissions -->
-		<data ID="400" CID="400" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:301"
+		    <!-- Alerting Permissions -->
+		    <data ID="400" CID="400" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:301"
             NAME="managePlatformAlerts"/>
         <data ID="401" CID="401" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:303"
             NAME="manageServerAlerts"/>    
@@ -278,8 +292,18 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
             NAME="manageServiceAlerts"/>
         <data ID="403" CID="403" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:308"
             NAME="manageApplicationAlerts"/>  	
-		<data ID="404" CID="404" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:3"
-		    NAME="manageGroupAlerts"/>                  
+		    <data ID="404" CID="404" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:3"
+		        NAME="manageGroupAlerts"/>                  
+
+        <!-- Service -->
+        <data ID="412" CID="412" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:401"
+            NAME="createEscalation"/>
+        <data ID="413" CID="413" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:401"
+            NAME="modifyEscalation"/>
+        <data ID="414" CID="414" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:401"
+            NAME="removeEscalation"/>
+        <data ID="415" CID="415" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:401"
+            NAME="viewEscalation"/>
 
     </table>
 
@@ -425,10 +449,14 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
         <data CID="61" OPERATION_ID="%EAM_OPERATION.ID:328" ROLE_ID="%EAM_ROLE.ID:0"/>
         <data CID="62" OPERATION_ID="%EAM_OPERATION.ID:32" ROLE_ID="%EAM_ROLE.ID:0"/>
         <data CID="63" OPERATION_ID="%EAM_OPERATION.ID:400" ROLE_ID="%EAM_ROLE.ID:0"/>
-    	<data CID="64" OPERATION_ID="%EAM_OPERATION.ID:401" ROLE_ID="%EAM_ROLE.ID:0"/>
-    	<data CID="65" OPERATION_ID="%EAM_OPERATION.ID:402" ROLE_ID="%EAM_ROLE.ID:0"/>
-    	<data CID="66" OPERATION_ID="%EAM_OPERATION.ID:403" ROLE_ID="%EAM_ROLE.ID:0"/>
-    	<data CID="67" OPERATION_ID="%EAM_OPERATION.ID:404" ROLE_ID="%EAM_ROLE.ID:0"/>
+    	  <data CID="64" OPERATION_ID="%EAM_OPERATION.ID:401" ROLE_ID="%EAM_ROLE.ID:0"/>
+    	  <data CID="65" OPERATION_ID="%EAM_OPERATION.ID:402" ROLE_ID="%EAM_ROLE.ID:0"/>
+    	  <data CID="66" OPERATION_ID="%EAM_OPERATION.ID:403" ROLE_ID="%EAM_ROLE.ID:0"/>
+    	  <data CID="67" OPERATION_ID="%EAM_OPERATION.ID:404" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="68" OPERATION_ID="%EAM_OPERATION.ID:412" ROLE_ID="%EAM_ROLE.ID:0"/>
+    	  <data CID="69" OPERATION_ID="%EAM_OPERATION.ID:413" ROLE_ID="%EAM_ROLE.ID:0"/>
+    	  <data CID="70" OPERATION_ID="%EAM_OPERATION.ID:414" ROLE_ID="%EAM_ROLE.ID:0"/>
+    	  <data CID="71" OPERATION_ID="%EAM_OPERATION.ID:415" ROLE_ID="%EAM_ROLE.ID:0"/>
     </table>
 
     <!-- RESOURCE CREATOR ROLE DEFINITION STUFF. The entries here
