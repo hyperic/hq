@@ -26,7 +26,6 @@
 package org.hyperic.util.jdbc.log;
 
 import java.sql.*;
-import org.hyperic.util.leak.ResourceTracker;
 
 public class LoggerStatement implements Statement {
 
@@ -34,15 +33,11 @@ public class LoggerStatement implements Statement {
 
     protected LoggerConnection itsConn = null;
     protected Statement itsStmt = null;
-    protected ResourceTracker tracker = null;
 
     public LoggerStatement ( LoggerConnection conn, 
                              Statement stmt ) {
         itsConn = conn;
         itsStmt = stmt;
-        tracker = itsConn.getDriver().getResourceTracker();
-        // System.err.println("Constructing statement based on: " + stmt.getClass().getName());
-        // (new Exception()).printStackTrace();
     }
 
     protected void doLogging (String sql) {

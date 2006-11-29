@@ -27,7 +27,6 @@ package org.hyperic.util.jdbc.log;
 
 import java.util.Properties;
 import java.sql.*;
-import org.hyperic.util.leak.ResourceTracker;
 
 public class LoggerDriver implements Driver {
 
@@ -42,19 +41,6 @@ public class LoggerDriver implements Driver {
                                + "with DriverManager: " + e);
         }
     }
-
-    private boolean isResourceTrackerEnabled = false;
-    private ResourceTracker connTracker = null;
-
-    public LoggerDriver () {
-        // System.err.println("LoggerDriver loaded.");
-        isResourceTrackerEnabled = Boolean.getBoolean(PROP_RESTRACKER);
-        if ( isResourceTrackerEnabled ) {
-            connTracker = new ResourceTracker("Connection");
-        }
-    }
-
-    protected ResourceTracker getResourceTracker () { return connTracker; }
 
     public boolean acceptsURL(String url) throws SQLException {
         // System.err.println("acceptsURL: '" + url + "'");
@@ -115,9 +101,6 @@ public class LoggerDriver implements Driver {
             String user     = info.getProperty("user");
             String password = info.getProperty("password");
             Connection conn = DriverManager.getConnection(url2, user, password);
-            if ( connTracker != null ) {
-                connTracker.openResource(conn);
-            }
 
             return new LoggerConnection(this, conn);
         } else {

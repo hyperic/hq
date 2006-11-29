@@ -29,7 +29,6 @@ import java.sql.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-import org.hyperic.util.leak.ResourceTracker;
 
 public class LoggerConnection implements Connection {
 
@@ -59,7 +58,6 @@ public class LoggerConnection implements Connection {
     private boolean itsSqlOnly = false;
     private boolean itsLogTx = false;
     private LoggerDriver itsDriver = null;
-    private ResourceTracker connTracker = null;
 
     // command history tracking
     private int historySize;
@@ -76,7 +74,6 @@ public class LoggerConnection implements Connection {
         itsConn = c;
         itsListeners = new Vector();
         itsDriver = driver;
-        connTracker = itsDriver.getResourceTracker();
 
         itsVerbose     = Boolean.getBoolean(PROP_VERBOSE);
         itsSqlOnly     = Boolean.getBoolean(PROP_SQLONLY);
@@ -221,7 +218,6 @@ public class LoggerConnection implements Connection {
 
     public void close() throws SQLException {
         itsConn.close();
-        if (connTracker != null) connTracker.closeResource(itsConn);
     }
 
     public boolean isClosed() throws SQLException {
