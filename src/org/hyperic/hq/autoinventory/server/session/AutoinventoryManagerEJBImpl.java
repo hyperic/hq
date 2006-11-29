@@ -30,13 +30,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -44,17 +42,13 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.appdef.shared.AIAppdefResourceValue;
-import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
-import org.hyperic.hq.appdef.shared.AgentTypeValue;
-import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -132,24 +126,9 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                                           class.getName());
     protected static final String DATASOURCE_NAME = HQConstants.DATASOURCE;
 
-    // Static initial context so that there's no need to keep creating
-    private InitialContext ic = null;
-
     private AutoinventoryPluginManager aiPluginManager;
     private AIScheduleManagerLocal     aiScheduleManager;
-    private ProductManagerLocal        productManager;
     private javax.ejb.SessionContext   sessionCtx;
-
-    private InitialContext getInitialContext() {
-        if (ic == null) {
-            try {
-                ic = new InitialContext();
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
-        return ic;
-    }
 
     /**
      * Get server signatures for a set of servertypes.
@@ -165,8 +144,6 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                                      List serverTypes )
         throws NamingException, FinderException, 
                CreateException, AutoinventoryException {
-
-        // log.info("AIMgr.getServerSigs(" + StringUtil.listToString(serverTypes) + ")");
 
         // Plug server type names into a map for quick retrieval
         HashMap stNames = null;
@@ -344,10 +321,13 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     }
 
     // XXX hack, see usage in startScan method below.
-    private static final org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl authzChecker = new org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl();
+    private static final
+    org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl authzChecker =
+        new org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl();
+
     /**
      * Start an autoinventory scan.
-     * @param aval The appdef entity whose agent we'll talk to.
+     * @param aid The appdef entity whose agent we'll talk to.
      * @param scanConfig The scan configuration to use when scanning.
      * @param scanName The name of the scan - this is ignored (i.e. it can be 
      * null) for immediate, one-time scans.
@@ -369,8 +349,6 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                ScheduleWillNeverFireException, PermissionException {
 
         try {
-            AICommandsClient client;
-            
             // XXX XXX XXX
             // Dude, this is a totally silly, ugly hack.  In my defense,
             // implementing these security checks as methods in AppdefSessionEJB
@@ -400,17 +378,17 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                                               scanDesc,
                                               schedule);
         } 
-        catch ( ScheduleWillNeverFireException e ) {
+        catch (ScheduleWillNeverFireException e) {
             throw e;
-        } catch ( DuplicateAIScanNameException ae ) {
+        } catch (DuplicateAIScanNameException ae) {
             throw ae;
-        } catch ( AutoinventoryException ae ) {
+        } catch (AutoinventoryException ae) {
             log.warn("Error starting scan: " + StringUtil.getStackTrace(ae));
             throw ae;
 
-        } catch ( PermissionException ae ) {
+        } catch (PermissionException ae) {
             throw ae;
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             throw new SystemException("Error starting scan "
                                          + "for agent: " + e, e);
         }
@@ -470,12 +448,12 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
     /**
      * Stop an autoinventory scan.
-     * @param aval The appdef entity whose agent we'll talk to.
+     * @param aid The appdef entity whose agent we'll talk to.
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void stopScan ( AuthzSubjectValue subject,
-                           AppdefEntityID aid  )
+    public void stopScan (AuthzSubjectValue subject,
+                          AppdefEntityID aid)
         throws AutoinventoryException {
 
         log.info("AutoinventoryManager.stopScan called");
@@ -491,12 +469,12 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
     /**
      * Get status for an autoinventory scan.
-     * @param aval The appdef entity whose agent we'll talk to.
+     * @param aid The appdef entity whose agent we'll talk to.
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public ScanStateCore getScanStatus ( AuthzSubjectValue subject,
-                                         AppdefEntityID aid  )
+    public ScanStateCore getScanStatus(AuthzSubjectValue subject,
+                                       AppdefEntityID aid)
         throws AgentNotFoundException, 
                AgentConnectionException, AgentRemoteException,
                AutoinventoryException {
@@ -507,16 +485,15 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             AICommandsClient client = AIUtil.getClient(aid);
             core = client.getScanStatus();
         } 
-        catch ( AgentNotFoundException ae ) {
+        catch (AgentNotFoundException ae) {
             throw ae;
-        } 
-        catch ( AgentRemoteException ae ) {
+        } catch (AgentRemoteException ae) {
             throw ae;
-        } catch ( AgentConnectionException ae ) {
+        } catch (AgentConnectionException ae) {
             throw ae;
-        } catch ( AutoinventoryException ae ) {
+        } catch (AutoinventoryException ae) {
             throw ae;
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             throw new SystemException("Error getting scan status "
                                          + "for agent: " + e, e);
         }
@@ -587,28 +564,26 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public ScanStateCore getScanStatusByAgentToken
-        ( AuthzSubjectValue subject,
-          String agentToken)
+    public ScanStateCore getScanStatusByAgentToken(AuthzSubjectValue subject,
+                                                   String agentToken)
         throws AgentNotFoundException,  AgentConnectionException,
-               AgentRemoteException, AutoinventoryException {
-        
+               AgentRemoteException, AutoinventoryException
+    {
         log.info("AutoinventoryManager.getScanStatus called");
-        ScanStateCore core = null;
+        ScanStateCore core;
         try {
             AICommandsClient client = AIUtil.getClient(agentToken);
             core = client.getScanStatus();
         } 
-        catch ( AgentNotFoundException ae ) {
+        catch (AgentNotFoundException ae) {
             throw ae;
-        } 
-        catch ( AgentRemoteException ae ) {
+        } catch (AgentRemoteException ae) {
             throw ae;
-        } catch ( AgentConnectionException ae ) {
+        } catch (AgentConnectionException ae) {
             throw ae;
-        } catch ( AutoinventoryException ae ) {
+        } catch (AutoinventoryException ae) {
             throw ae;
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             throw new SystemException("Error getting scan status "
                                          + "for agent: " + e, e);
         }
@@ -632,13 +607,13 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * detected via autoinventory scans.
      * @param agentToken The token identifying the agent that sent 
      * the report.
-     * @param state The ScanState that was detected during the autoinventory
+     * @param stateCore The ScanState that was detected during the autoinventory
      * scan.
      * 
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
-    public void reportAIData ( String agentToken, ScanStateCore stateCore ) 
+    public void reportAIData (String agentToken, ScanStateCore stateCore)
         throws AutoinventoryException {
 
         ScanState state = new ScanState(stateCore);
@@ -779,15 +754,14 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void reportAIRuntimeReport ( String agentToken, 
-                                        CompositeRuntimeResourceReport crrr ) 
+    public void reportAIRuntimeReport(String agentToken,
+                                      CompositeRuntimeResourceReport crrr)
         throws AutoinventoryException, PermissionException, ValidationException,
                ApplicationException {
 
         PlatformManagerLocal platformMgr;
         ServerManagerLocal serverMgr;
         ServiceManagerLocal serviceMgr;
-        AIQueueManagerLocal aiqMgr;
         AutoinventoryManagerLocal aiMgr;
         ConfigManagerLocal configMgr;
         ServerConfigManagerLocal serverConfigMgr;
@@ -801,8 +775,6 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                 = getServerManagerLocalHome().create();
             serviceMgr
                 = getServiceManagerLocalHome().create();
-            aiqMgr
-                = getAIQueueManagerLocal();
             aiMgr
                 = (AutoinventoryManagerLocal) sessionCtx.getEJBLocalObject();
             configMgr
@@ -853,7 +825,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     public void ejbCreate() throws CreateException {
         // Get reference to the AI plugin manager
         try {
-            this.productManager = ProductManagerUtil.getLocalHome().create();
+            ProductManagerLocal productManager = 
+                ProductManagerUtil.getLocalHome().create();
             this.aiPluginManager = 
                 (AutoinventoryPluginManager)productManager.
                 getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
@@ -967,90 +940,4 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         return authzSubjectManagerLHome;
     }
     protected AuthzSubjectManagerLocalHome authzSubjectManagerLHome;
-
-    private AgentType AT_LOCAL;
-    private HashMap generatedAddrs = new HashMap(); 
-    
-    /************************************************************
-     ************************************************************
-     * test agent creation
-     *  
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
-    public String createTestAgent ()
-        throws Exception
-    {
-        AgentValue agtValue = new AgentValue();
-        
-        //agtValue.setAgentType("");
-        agtValue.setAddress(randomIpString());
-        agtValue.setPort(2144);
-        agtValue.setAuthToken(randomIpString()
-                              + "-" + System.currentTimeMillis());
-        agtValue.setAgentToken(randomIpString()
-                               + "-" + System.currentTimeMillis());
-                               
-        AgentTypeValue atValue = new AgentTypeValue();
-        atValue.setName("bogus-agent-type-" + System.currentTimeMillis());
-        AT_LOCAL = DAOFactory.getDAOFactory().getAgentTypeDAO().create(atValue);
-        
-        DAOFactory.getDAOFactory().getAgentDAO().create(agtValue, AT_LOCAL);
-        return agtValue.getAgentToken();
-    }
-
-    /**
-     * generated test data
-     * 
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
-    public ScanStateCore buildTestScanState() 
-    {    
-        ScanState state = new ScanState();
-        long now = System.currentTimeMillis();
-
-        AIPlatformValue platform = new AIPlatformValue();
-        platform.setFqdn("junit-" + now);
-        platform.setName(platform.getFqdn());
-        platform.setPlatformTypeName("Linux");
-
-        state.setCertDN("junit-" + now);
-        state.setPlatform(platform);
-        
-        AIPlatformValue aiplatform = state.getPlatform();
-        int ipcount = 4;
-        for ( int i=0; i<ipcount; i++ ) {
-            aiplatform.addAIIpValue(randomAIIp());
-        }
-        
-        return state.getCore();        
-    }
-    
-    protected AIIpValue randomAIIp () {
-        AIIpValue ip = new AIIpValue();
-        ip.setAddress(randomIpString());
-        ip.setNetmask("255.255.255.0");
-        ip.setMACAddress("00:00:00:00:00:00");
-        return ip;
-    }
-    protected String randomIpString () {
-        Random RANDOM = new Random();
-        Random r = RANDOM; // defined in BossEJB_test
-        String addr = null;
-        boolean foundUnusedAddr = false;
-        while ( !foundUnusedAddr ) {
-            addr
-                = ipDigit(r) + "."
-                + ipDigit(r) + "." 
-                + ipDigit(r) + "."
-                + ipDigit(r);
-            foundUnusedAddr = (generatedAddrs.get(addr) == null);
-        }
-        generatedAddrs.put(addr, addr);
-        return addr;
-    }
-    protected String ipDigit (Random r) {
-        return String.valueOf((Math.abs(r.nextInt()) % 253) + 1);
-    }
 }

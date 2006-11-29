@@ -67,7 +67,6 @@ import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerLocal;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerUtil;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
-import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.bizapp.server.RuntimeAIUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
@@ -98,8 +97,6 @@ import org.apache.commons.logging.LogFactory;
  *      type="Stateless"
  */
 public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
-
-    private SessionContext sessionCtx = null;
 
     private AIQueueManagerLocal       aiqManagerLocal = null;
     private AIScheduleManagerLocal    aiScheduleManagerLocal = null;
@@ -302,7 +299,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                DuplicateAIScanNameException, ScheduleWillNeverFireException {
 
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
-        AutoinventoryManagerLocal aiManagerLocal = null;
         AppdefEntityID aid
             = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
                                  platformID);
@@ -358,7 +354,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                AutoinventoryException {
 
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
-        ScanStateCore core = null;
+        ScanStateCore core;
         AppdefEntityID aid
             = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
                                  platformID);
@@ -380,7 +376,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                AutoinventoryException {
 
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
-        ScanStateCore core = null;
+        ScanStateCore core;
 
         core = getAutoInventoryManager().getScanStatusByAgentToken(subject, 
                                                                    agentToken);
@@ -697,29 +693,8 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
     public void ejbRemove() {}
     public void ejbActivate() {}
     public void ejbPassivate() {}
-    public void setSessionContext(SessionContext ctx) { sessionCtx = ctx; }
-    
-    /************************************************************
-     ************************************************************
-     * generated test data
-     * 
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
-    public ScanStateCore buildTestScanState (int sessionId)
-        throws Exception 
-    {
-        init();
-        
-        ScanStateCore state = getAutoInventoryManager().buildTestScanState();
-        
-        getAutoInventoryManager().reportAIData(getAutoInventoryManager().createTestAgent(), state);
-        AIPlatformValue qPlatform = findAIPlatformByFqdn(sessionId, 
-                        state.getPlatform().getFqdn());
-        
-        return state;
-    }
-    
+    public void setSessionContext(SessionContext ctx) {}
+
     /**
      * Find out if a server supports runtimeAI
      * @param server a ServerValue object
@@ -730,33 +705,27 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException
     {
-        boolean retVal = false;
+        boolean retVal;
         AutoinventoryPluginManager aiPluginManager ;
         ProductManagerLocal prodManLocal;
         try {
-                prodManLocal  = getProductManager();
-                String pluginName = server.getServerType().getName();
-                log.debug("name = " + pluginName);
-                
-                aiPluginManager = (AutoinventoryPluginManager)prodManLocal.
-                                        getPluginManager(ProductPlugin.
-                                                    TYPE_AUTOINVENTORY);
-                GenericPlugin plugin = aiPluginManager.getPlugin(pluginName);
-                log.debug("got plugin " + plugin);
-    
-                if (plugin instanceof ServerDetector) {
-                    retVal =
-                        ((ServerDetector)plugin).isRuntimeDiscoverySupported();
-                } else {
-                    retVal = false ;
-                }
-                
+            prodManLocal  = getProductManager();
+            String pluginName = server.getServerType().getName();
+
+            aiPluginManager = (AutoinventoryPluginManager)prodManLocal.
+                getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
+            GenericPlugin plugin = aiPluginManager.getPlugin(pluginName);
+
+            if (plugin instanceof ServerDetector) {
+                retVal =
+                    ((ServerDetector)plugin).isRuntimeDiscoverySupported();
+            } else {
+                retVal = false ;
+            }
         } catch (PluginNotFoundException pne) {
-            log.debug("AIPlugin not found for the entityId: " + server.getEntityId());
             return false;
         } catch (PluginException e) {
-            log.error("Exception when retrieving the aiPluginManager for the entityId:" 
-                                                            + server.getEntityId());
+            log.error("Error getting plugin", e);
             return false;
         }
         
