@@ -42,8 +42,6 @@ public final class AlertDefinitionBean {
 
     private boolean enabled;
 
-    private Integer rid;
-
     private Integer type;
 
     private Integer parentId;
@@ -79,10 +77,6 @@ public final class AlertDefinitionBean {
         return ctime;
     }
 
-    public Integer getRid() {
-        return rid;
-    }
-
     public Integer getType() {
         return type;
     }
@@ -95,5 +89,3 @@ public final class AlertDefinitionBean {
         this.type = new Integer(aeid.getType());
     }
 }
-
-// EOF
