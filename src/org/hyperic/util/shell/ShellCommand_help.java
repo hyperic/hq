@@ -49,7 +49,7 @@ public class ShellCommand_help extends ShellCommandBase {
             String[] cmdNames;
             Iterator i;
 
-            i = itsShell.getCommandNameIterator();
+            i = getShell().getCommandNameIterator();
             while(i.hasNext()) {
                 cmdNamesList.add(i.next());
             }
@@ -61,7 +61,7 @@ public class ShellCommand_help extends ShellCommandBase {
             out.println("Available commands:");
 
             for(int j=0; j<cmdNames.length; j++){
-                handler = itsShell.getHandler(cmdNames[j]);
+                handler = getShell().getHandler(cmdNames[j]);
                 fArgs[0] = cmdNames[j];
                 fArgs[1] = handler.getUsageShort();
                 out.println(fmt.sprintf(fArgs));
@@ -74,7 +74,8 @@ public class ShellCommand_help extends ShellCommandBase {
         // command words until we encounter one for which there is no
         // sub handler.  Also ignore any option-words (words beginning
         // with a '-').
-        ShellCommandHandler lastHandler = handler = itsShell.getHandler(args[0]);
+        ShellCommandHandler lastHandler = handler =
+            getShell().getHandler(args[0]);
         useArgs = 1;
         for (int i=1; i<args.length; ++i) {
             if (! args[i].startsWith("-") ) {
@@ -93,7 +94,7 @@ public class ShellCommand_help extends ShellCommandBase {
             }
         }
         if ( handler == null ) {
-            // Iterate to build the full command-string, ignorign any
+            // Iterate to build the full command-string, ignoring any
             // option arguments.
             out.print("Command '");
             for (int i=0; i<args.length; ++i) {

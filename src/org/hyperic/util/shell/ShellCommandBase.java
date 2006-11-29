@@ -31,12 +31,16 @@ import java.util.Locale;
 
 public class ShellCommandBase implements ShellCommandHandler {
 
-    protected String itsCommandName = null;
-    protected ShellBase itsShell = null;
+    private String _commandName = null;
+    private ShellBase _shell = null;
 
-    private PrintStream out = null;
-    public String getCommandName () { return itsCommandName; }
-    public ShellBase getShell () { return itsShell; }
+    public String getCommandName() {
+        return _commandName;
+    }
+
+    public ShellBase getShell() {
+        return _shell;
+    }
 
     public PrintStream getOutStream () { 
         return this.getShell().getOutStream(); 
@@ -46,21 +50,18 @@ public class ShellCommandBase implements ShellCommandHandler {
         return this.getShell().getErrStream(); 
     }
 
-    public void init ( String commandName,
-                       ShellBase shell ) throws ShellCommandInitException {
-        itsCommandName = commandName;
-        itsShell = shell;
+    public void init(String commandName, ShellBase shell)
+        throws ShellCommandInitException
+    {
+        _commandName = commandName;
+        _shell = shell;
     }
 
     public void processCommand ( String[] args ) 
         throws ShellCommandUsageException, ShellCommandExecException {
 
-        out.println("ShellCommandBase: not implemented: " + itsCommandName);
-        /*
-        if ( args != null && args.trim().length() > 0 ) {
-            out.println("args were: " + args);
-        }
-        */
+        getOutStream().println("ShellCommandBase: not implemented: " +
+                               _commandName);
     }
 
     public String getSyntax() {
@@ -76,7 +77,7 @@ public class ShellCommandBase implements ShellCommandHandler {
     }
 
     public String getUsageHelp ( String[] args ) {
-        return "Help not available for command " + itsCommandName;
+        return "Help not available for command " + _commandName;
     }
 
     /**
@@ -85,24 +86,24 @@ public class ShellCommandBase implements ShellCommandHandler {
      * @param string containing the package qualified resourcebundle name.
      * @return ResourceBundle
      * */
-    public ResourceBundle getMessages (String resourceBundleStr) {
-        return getMessages (resourceBundleStr,null);
+    public ResourceBundle getMessages (String string) {
+        return getMessages(string, null);
     }
+
     /**
      * Load and initialize the ResourceBundle according to the specified
      * locale.
      * @param string containing the package qualified resourcebundle name.
-     * @param locale specific version of the resource bundle.
+     * @param loc specific version of the resource bundle.
      * @return ResourceBundle
      * */
-    public ResourceBundle getMessages (String resourceBundleStr,
-        Locale loc) {
+    public ResourceBundle getMessages (String string, Locale loc) {
         ResourceBundle messages = null;
         try {
             if (loc != null)
-                messages = ResourceBundle.getBundle(resourceBundleStr,loc);
+                messages = ResourceBundle.getBundle(string, loc);
             else
-            	messages = ResourceBundle.getBundle(resourceBundleStr);
+            	messages = ResourceBundle.getBundle(string);
         } catch (Exception e){
             e.printStackTrace();
         }
