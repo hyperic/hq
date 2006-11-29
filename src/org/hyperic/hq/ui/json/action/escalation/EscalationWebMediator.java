@@ -50,4 +50,9 @@ public class EscalationWebMediator
     {
         return eventsBoss.listAllEscalationName(sessionId);
     }
+
+    public int removeEscalation(int sessionId, Integer id)
+    {
+        return eventsBoss.deleteEscalationById(sessionId, new Integer[]{id});
+    }
 }

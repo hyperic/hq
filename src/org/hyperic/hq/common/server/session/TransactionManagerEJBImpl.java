@@ -2,6 +2,7 @@ package org.hyperic.hq.common.server.session;
 
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.TransactionContext;
 import org.hibernate.NonUniqueObjectException;
 
 import javax.ejb.SessionBean;
@@ -72,6 +73,15 @@ public class TransactionManagerEJBImpl implements SessionBean
             // ok
             return null;
         }
+    }
+
+    /**
+     * execute custom action in JTA transaction context.
+     * @ejb:interface-method
+     */
+    public TransactionContext execute(TransactionContext context)
+    {
+        return context.run(context);
     }
 
     private void savePersistedList(List lp)

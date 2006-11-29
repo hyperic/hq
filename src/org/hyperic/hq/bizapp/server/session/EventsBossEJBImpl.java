@@ -998,7 +998,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         }
         return count;
     }
-    
+
     /**
      * Get an alert definition by ID
      *
@@ -1500,6 +1500,19 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                FinderException {
         AuthzSubjectValue subject = this.manager.getSubject(sessionID);
         return getRTM().getAllTriggers();
+    }
+
+    /**
+     * remove escalation by id
+     *
+     * @return number of deleted rows
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public int deleteEscalationById(int sessionID, Integer[] ids)
+    {
+        // TODO: access check on escalation resource
+        return EscalationMediator.getInstance().deleteEscalationById(ids);
     }
 
     /**

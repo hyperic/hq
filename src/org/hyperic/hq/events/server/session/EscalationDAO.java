@@ -125,10 +125,10 @@ public class EscalationDAO extends HibernateDAO
             .clearActiveEscalation();
     }
 
-    public void clearActiveEscalation(Escalation e, Integer alertDefId)
+    public void clearActiveEscalation(Integer escalationId, Integer alertDefId)
     {
         DAOFactory.getDAOFactory().getEscalationStateDAO()
-            .clearActiveEscalation(e, alertDefId);
+            .clearActiveEscalation(findById(escalationId), alertDefId);
     }
 
     public Escalation findByAlertDefinitionId(Integer id)
@@ -139,5 +139,12 @@ public class EscalationDAO extends HibernateDAO
         return (Escalation)getSession().createQuery(sql)
                 .setInteger(0, id.intValue())
                 .uniqueResult();
+    }
+
+    public int deleteById(Integer[] ids) {
+        String sql = "delete Escalation where id in (:ids)";
+        return getSession().createQuery(sql)
+                .setParameterList("ids", ids)
+                .executeUpdate();
     }
 }
