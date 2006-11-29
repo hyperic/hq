@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -44,17 +43,12 @@ import org.apache.struts.tiles.actions.TilesAction;
 import org.apache.struts.util.LabelValueBean;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.CPropKeyValue;
-import org.hyperic.hq.auth.shared.SessionNotFoundException;
-import org.hyperic.hq.auth.shared.SessionTimeoutException;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
-import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -79,8 +73,8 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
-        throws Exception {
-            
+        throws Exception 
+    {
         ServletContext ctx = getServlet().getServletContext();
         int sessionID = RequestUtils.getSessionId(request).intValue();
         MeasurementBoss mb = ContextUtils.getMeasurementBoss(ctx);
@@ -99,7 +93,8 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
 
     protected void setupForm(DefinitionForm defForm, HttpServletRequest request,
                              int sessionID, MeasurementBoss mb, AppdefBoss ab)
-        throws Exception {
+        throws Exception 
+    {
         request.setAttribute( "enableEachTime",
         		              new Integer(EventConstants.FREQ_EVERYTIME) );
         request.setAttribute( "enableOnce",
@@ -162,23 +157,11 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
 
     /**
      * Returns a List of custom property keys for the passed-in resource.
-     * @throws RemoteException
-     * @throws PermissionException
-     * @throws PluginNotFoundException
-     * @throws AppdefEntityNotFoundException
-     * @throws SessionTimeoutException
-     * @throws SessionNotFoundException
-     * @throws SessionNotFoundException
-     * @throws SessionTimeoutException
-     * @throws RemoteException
-     * @throws PermissionException
-     * @throws AppdefEntityNotFoundException
      */
     private List getCustomProperties(int sessionID, AppdefEntityID adeId,
                                      AppdefBoss ab)
-        throws SessionNotFoundException, SessionTimeoutException,
-               AppdefEntityNotFoundException, PermissionException,
-               RemoteException {
+        throws Exception
+    {
         List custProps;
         
         if (adeId instanceof AppdefEntityTypeID)
@@ -197,5 +180,3 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
         return custPropStrs;
     }
 }
-
-// EOF

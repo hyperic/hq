@@ -47,6 +47,7 @@ import org.hyperic.hq.ui.action.resource.ResourceController;
 import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ActionUtils;
+import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
@@ -116,27 +117,7 @@ public class PortalAction extends ResourceController {
             aeid = RequestUtils.getEntityId(request);
         }
         
-        switch (aeid.getType()) {
-        case 1:
-            break;
-        case 2:
-            titleName = StringUtil.replace(titleName, "platform", "server");
-            break;
-        case 3:
-            titleName = StringUtil.replace(titleName, "platform", "service");
-            break;
-        case 4:
-            titleName = StringUtil
-                    .replace(titleName, "platform", "application");
-            break;
-        case 5:
-            titleName = StringUtil.replace(titleName, "platform", "group");
-            break;
-        default:
-            titleName = StringUtil.replace(titleName, "platform.", "");
-            break;
-        }
-        
+        titleName = BizappUtils.replacePlatform(titleName, aeid);
         portal.setName(titleName);
 
         // if there's an alert definition available, set our second
@@ -297,10 +278,8 @@ public class PortalAction extends ResourceController {
         // set the return path
         try {
             setReturnPath(request, mapping);
-        }
-        catch (ParameterNotFoundException pne) {
-            if (log.isDebugEnabled())
-                 log.debug("", pne);
+        } catch (ParameterNotFoundException pne) {
+            log.debug(pne);
         }
 
         Portal portal = Portal.createPortal();

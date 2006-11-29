@@ -37,7 +37,6 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.events.AlertNotFoundException;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
@@ -47,10 +46,10 @@ import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.Portlet;
 import org.hyperic.hq.ui.action.resource.ResourceController;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
+import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
-import org.hyperic.util.StringUtil;
 
 /**
  * A dispatcher for the alerts portal.
@@ -70,36 +69,9 @@ public class PortalAction extends ResourceController {
     }
 
     private void setTitle(AppdefEntityID aeid, Portal portal, String titleName) 
-        throws Exception  {
-
-        switch (aeid.getType()) {
-            
-            case 1: 
-                break;
-
-            case 2: {
-                titleName = StringUtil.replace(titleName,"platform","server"); 
-                break;
-            }
-            case 3: {
-                titleName = StringUtil.replace(titleName,"platform","service"); 
-                break;
-            }
-            case 4: {
-                titleName = StringUtil.replace(titleName,"platform","application"); 
-                break;
-            }
-            case 5: {
-                titleName = StringUtil.replace(titleName,"platform","group"); 
-                break;
-            }
-            default : {
-                titleName = StringUtil.replace(titleName,"platform.",""); 
-            }
-        }
-        
-        portal.setName(titleName);
-
+        throws Exception  
+    {
+        portal.setName(BizappUtils.replacePlatform(titleName, aeid));
     }
 
     public ActionForward viewAlert(ActionMapping mapping,
@@ -153,21 +125,17 @@ public class PortalAction extends ResourceController {
         // set the return path
         try {
             setReturnPath(request, mapping);
-        }
-        catch (ParameterNotFoundException pne) {
-            if (log.isDebugEnabled())
-                 log.debug("", pne);
+        } catch (ParameterNotFoundException pne) {
+            log.debug(pne);
         }
         
         Portal portal = Portal.createPortal();
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         setTitle(aeid, portal, "alerts.alert.platform.AlertList.Title");
         portal.setDialog(false);
-        portal.addPortlet(new Portlet(".events.alert.list"),1);
+        portal.addPortlet(new Portlet(".events.alert.list"), 1);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
     }
 }
-
-// EOF
