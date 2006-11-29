@@ -439,7 +439,9 @@
         <fileset dir="${ear.dir}" includes="hq.jar,hqee.jar" />
         <fileset dir="${ear.dir}/lib" includes="*.jar" />
       </path>
-      <map from="${ear.dir}${file.separator}" to="hq.ear/" />
+      <mapper>
+        <globmapper from="${ear.dir}/" to="hq.ear/" handledirsep="true" />
+      </mapper>
     </pathconvert>
     <delete quiet="true" file="${ear.dir}/META-INF/MANIFEST.MF" />
     <echo file="${ear.dir}/META-INF/MANIFEST.MF">Manifest-Version: 1.0${line.separator}</echo>
