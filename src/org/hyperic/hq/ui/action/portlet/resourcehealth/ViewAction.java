@@ -38,6 +38,7 @@ import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceDisplaySummary;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -45,22 +46,15 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
-import org.apache.struts.tiles.actions.TilesAction;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 
 /**
  * This action class is used by the Favorite Resources portlet.  It's main
  * use is to generate the JSON objects required for display into the UI.
  */
-public class ViewAction extends TilesAction {
+public class ViewAction extends BaseAction {
 
-    Log _log = LogFactory.getLog("FAVORITE RESOURCES");
-
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
+    public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
@@ -122,9 +116,7 @@ public class ViewAction extends TilesAction {
         
         favorites.put("favorites", resources);
 
-        _log.info(favorites.toString(2));
-
-        //response.getWriter().write(favorites.toString());
+        response.getWriter().write(favorites.toString());
 
         return null;
     }

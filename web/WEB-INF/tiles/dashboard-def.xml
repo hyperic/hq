@@ -48,7 +48,6 @@
   </definition>
   
   <definition name=".dashContent.resourceHealth"
-              controllerUrl="/dashboard/ViewResourceHealth.do"                             
               path="/portlet/resourceHealth/View.jsp">              
               <put name="adminUrl"        value="/dashboard/Admin.do?mode=resourceHealth" />    
               <put name="portletName"      value=".dashContent.resourceHealth" />

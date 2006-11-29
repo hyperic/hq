@@ -42,7 +42,7 @@
   <tiles:put name="dragDrop" value="true"/>
 </tiles:insert>
 
-  <!-- JSON available at /dashboard/ViewResourceHealth -->
+  <!-- JSON available at /dashboard/ViewResourceHealth.do -->
 
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
     <tr class="ListRow">
