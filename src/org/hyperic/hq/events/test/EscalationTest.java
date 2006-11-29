@@ -42,9 +42,9 @@ import java.util.Random;
 public class EscalationTest
     extends HQEJBTestBase {
     private final String BOGUS_NAME1 =
-        "escalation " + (new Random()).nextInt(10000);
+        "bogus1 " + (new Random()).nextInt(10000);
     private final String BOGUS_NAME2 =
-        "escalation " + (new Random()).nextInt(10000);
+        "bogus2 " + (new Random()).nextInt(10000);
     private final Integer ALERT_DEF_ID1 = new Integer(10001);
     private final Integer ALERT_DEF_ID2 = new Integer(10002);
 
@@ -131,6 +131,8 @@ public class EscalationTest
             // object should not be found
             Exception ex = ignore.getCausedByException();
             assertTrue(ex instanceof ObjectNotFoundException);
+        } catch (ObjectNotFoundException ignore) {
+            // object should not be found
         }
     }
 
@@ -192,6 +194,8 @@ public class EscalationTest
             // object should not be found
             Exception ex = ignore.getCausedByException();
             assertTrue(ex instanceof ObjectNotFoundException);
+        } catch (ObjectNotFoundException ignore) {
+            // object should not be found
         }
     }
 
