@@ -654,6 +654,8 @@
                  description="Server Built"/>
        <property name="serverAdmin"
                  description="Server Admin"/>
+       <property name="mpm"
+                 description="Server MPM"/>
     </properties>
 
     <plugin type="log_track"
@@ -739,8 +741,6 @@ ExtendedStatus On
                  description="Server Built"/>
        <property name="serverAdmin"
                  description="Server Admin"/>
-       <property name="mpm"
-                 description="Server MPM"/>
     </properties>
 
     <plugin type="autoinventory"
