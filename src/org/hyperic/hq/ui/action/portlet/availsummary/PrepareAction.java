@@ -35,8 +35,6 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -54,8 +52,6 @@ import java.util.ArrayList;
 
 public class PrepareAction extends TilesAction {
 
-    private Log _log = LogFactory.getLog(PrepareAction.class);
-
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
                                  ActionForm form,
@@ -65,7 +61,7 @@ public class PrepareAction extends TilesAction {
     {
         ServletContext ctx = getServlet().getServletContext();
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
-         HttpSession session = request.getSession();
+        HttpSession session = request.getSession();
         Integer sessionId = RequestUtils.getSessionId(request);
         WebUser user =
             (WebUser)session.getAttribute(Constants.WEBUSER_SES_ATTR);

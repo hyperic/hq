@@ -172,6 +172,5 @@ public class ViewAction extends BaseAction {
                 return 1;
             }
         }
-
     }
 }
