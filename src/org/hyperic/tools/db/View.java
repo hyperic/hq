@@ -41,28 +41,24 @@ import org.xml.sax.SAXException;
 
 class View {
     
-    private DBSetup     m_parent;
-    private String      m_strName;
-    private String      m_strQuery;
-    private DataSet     m_dataset;
+    private DBSetup _parent;
+    private String _strName;
+    private String _strQuery;
     
     protected View(Node node, int dbtype, DBSetup dbsetup) throws SAXException
     {
-        m_parent = dbsetup;
+        _parent = dbsetup;
         boolean queryIsSet = false;
 
-        if(View.isView(node))
-        {
+        if(View.isView(node)) {
             NamedNodeMap map = node.getAttributes();
 
-            for (int iTab = 0; iTab < map.getLength(); iTab++)
-            {
+            for (int iTab = 0; iTab < map.getLength(); iTab++) {
                 Node nodeMap = map.item(iTab);
 
                 if(nodeMap.getNodeName().equalsIgnoreCase("name")) {
-                    this.m_strName = nodeMap.getNodeValue();
-                }
-                else if( m_parent.isVerbose()) {
+                    _strName = nodeMap.getNodeValue();
+                } else if(_parent.isVerbose()) {
                     System.out.println("Unknown attribute \'" 
                         + nodeMap.getNodeName() + "\' in tag \'table\'");
                 }
@@ -73,83 +69,60 @@ class View {
                 if (child.getNodeName().equalsIgnoreCase("query") &&
                     child.hasChildNodes()) {
                     NodeList contentNodes = child.getChildNodes();
-                    this.m_strQuery = child.getFirstChild().getNodeValue();
+                    _strQuery = child.getFirstChild().getNodeValue();
                     queryIsSet = true;
                 }
             }
-            if (! queryIsSet) {
+            if (!queryIsSet) {
                 throw new SAXException("no query specified");
             }            
-        }
-        else
-        {
+        } else {
             throw new SAXException("node is not a table.");
         }
     }
-
-    /**
-
-    protected View(ResultSet set, DatabaseMetaData meta, DBSetup dbsetup) throws SQLException
-    {
-        this.m_parent      = dbsetup;
-        this.m_strName     = set.getString(3);
-        this.m_listColumns = Column.getColumns(meta, this);
-        this.m_dataset     = new SqlDataSet(this);
-    }
-
-    **/
 
     protected void create(Collection typemaps) throws SQLException
     {
         List commands = new java.util.Vector();
         this.getCreateCommands(commands, typemaps,  
-            JDBC.toType(m_parent.getConn().getMetaData().getURL()));
+            JDBC.toType(_parent.getConn().getMetaData().getURL()));
         Iterator iter = commands.iterator();
-        while(iter.hasNext() == true)
+        while(iter.hasNext())
         {
             String strCmd = (String)iter.next();
-            m_parent.doSQL(strCmd);
+            _parent.doSQL(strCmd);
         }
     }
 
     private void doCmd(List collCmds) throws SQLException {
         Iterator iter = collCmds.iterator();
-        while(iter.hasNext() == true)
-        {
+        while(iter.hasNext()) {
             String strCmd = (String)iter.next();
-            m_parent.doSQL(strCmd);
+            _parent.doSQL(strCmd);
         }
     }
 
-    protected void drop() throws SQLException
-    {
+    protected void drop() throws SQLException {
         List collCmds = new StringList();      
         this.getDropCommands(collCmds);
 
         doCmd(collCmds);
     }
     
-    protected void getCreateCommands(List cmds, Collection typemaps, int dbtype)
-    {
+    protected void getCreateCommands(List cmds, Collection typemaps,
+                                     int dbtype) {
         String strCmd = "CREATE VIEW " + this.getName() + " AS " +
             this.getQuery();
         
         cmds.add(0, strCmd); 
     }
 
-    protected DataSet getDataSet()
-    {
-        return this.m_dataset;
-    }
-    
-    protected void getDropCommands(List cmds)
-    {
+    protected void getDropCommands(List cmds) {
         String strCmd = "DROP VIEW " + this.getName();
         cmds.add(strCmd);
     }
 
-    protected String getQueryCommand()
-    {
+    protected String getQueryCommand() {
         String strCmd = "SELECT * ";
         
         strCmd = strCmd + "FROM " + this.getName();
@@ -157,71 +130,42 @@ class View {
         return strCmd;
     }
 
-    protected String getName()
-    {
-        return this.m_strName.toUpperCase();
+    protected String getName() {
+        return _strName.toUpperCase();
     }
 
-    protected String getQuery()
-    {
-        return this.m_strQuery;
+    protected String getQuery() {
+        return _strQuery;
     }
     
-    protected static Collection getViews(Node node, int dbtype, DBSetup parent)
+    protected static Collection getViews(Node node, int dbtype,
+                                         DBSetup parent)
     {
-        Collection colResult = new StrongCollection("org.hyperic.tools.db.View");
+        Collection colResult =
+            new StrongCollection("org.hyperic.tools.db.View");
         NodeList listViews = node.getChildNodes();
 
-        String strTmp = node.getNodeName();
-
-        for(int i = 0;i < listViews.getLength(); i++)
-        {
+        for(int i = 0;i < listViews.getLength(); i++) {
             Node nodeView = listViews.item(i);
 
-            if(View.isView(nodeView))
-            {
-                try
-                {
+            if(View.isView(nodeView)) {
+                try {
                     colResult.add(new View(nodeView, dbtype, parent));
-                }
-                catch(SAXException e)
-                {
+                } catch(SAXException e) {
                 }
             }
         }
         return colResult;
     }
 
-
-/**
-
-    protected static Collection getTables(DBSetup parent, String username) throws SQLException
-    {
-        if(username != null)
-            username = username.toUpperCase();
-            
-        Collection coll = new StrongCollection("org.hyperic.tools.db.Table");
-
-        String[]         types   = {"TABLE"};
-        DatabaseMetaData meta    = parent.getConn().getMetaData();
-        ResultSet        setTabs = meta.getTables(null, username, "%", types);
-
-        // Find Tables
-        while(setTabs.next() == true)
-            coll.add(new Table(setTabs, meta, parent));
-
-        return coll;
-    }
-**/    
-
-    protected static boolean isView(Node nodeTable)
-    {
+    protected static boolean isView(Node nodeTable) {
         return nodeTable.getNodeName().equalsIgnoreCase("view");
     }
 
-    protected DBSetup getDBSetup () { return m_parent; }
+    protected DBSetup getDBSetup () {
+        return _parent;
+    }
     
-    protected static void uninstallCleanup(DBSetup parent) throws SQLException 
-    {}
-
+    protected static void uninstallCleanup(DBSetup parent)
+        throws SQLException {}
 }
