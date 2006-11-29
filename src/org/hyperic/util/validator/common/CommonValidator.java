@@ -52,51 +52,68 @@ import org.apache.commons.validator.ValidatorAction;
  */
 public class CommonValidator {
 
-    private ResourceBundle 		properties 			= null; // message strings
-    private ValidatorResults 	validatorResults 	= null; // results of validation
-    private String 				resourceName 		= null; // current xml resource.
-    private ValidatorResources 	validatorResources 	= null; // commons-v object
+    private ResourceBundle _properties = null; // message strings
+    private ValidatorResults _validatorResults = null; // results of validation
+    private String _resourceName = null; // current xml resource.
+    private ValidatorResources _validatorResources = null; // commons-v object
 
     /**
      * Simple constructor with property resourcebundle containing localized
-     * mesages */
+     * messages
+     **/
     public CommonValidator(ResourceBundle properties) {
-        this.properties = properties;
+        _properties = properties;
     }
 
-    private void setValidatorResults 	(ValidatorResults vr) 	{this.validatorResults = vr;}
-    private void setResourceName  		(String rName) 			{this.resourceName = rName;}
+    private void setResourceName (String rName) {
+        _resourceName = rName;
+    }
 
-    /** Simple getter for results object. Null until validate is first run */
-    public ValidatorResults 	getValidatorResults 	() { return this.validatorResults; }
-    /** Simple getter for resource name. Null until validate is first run */
-    public String 				getResourceName			() {return this.resourceName;}
-    /** Simple getter for current Validator Resources. Null until validate is first run */
-    public ValidatorResources 	getValidatorResources 	() { return validatorResources;}
+    private void setValidatorResults(ValidatorResults results) {
+        _validatorResults = results;
+    }
 
+    public ValidatorResults getValidatorResults () {
+        return _validatorResults;
+    }
 
-    /* Gets and/or initializes validatorResources before returning it. Init-
-       ialization is expensive so only perform it if necessary.
-       Note: (1) CALLER's responsibility to close InputStream.
-       (2) XML Resources always looked for in same package as Bean. */
-    private void setValidatorResources (String resourceName,
-        	Object bean, InputStream in) throws IOException {
+    public String getResourceName () {
+        return _resourceName;
+    }
+
+    /**
+     * Simple getter for current Validator Resources. null until validate
+     * is first run
+     **/
+    public ValidatorResources getValidatorResources () {
+        return _validatorResources;
+    }
+
+    /**
+     * Gets and/or initializes validatorResources before returning it. Init-
+     * ialization is expensive so only perform it if necessary.
+     * Note: (1) CALLER's responsibility to close InputStream.
+     * (2) XML Resources always looked for in same package as Bean.
+     **/
+    private void setValidatorResources (String resourceName, Object bean,
+                                        InputStream in)
+        throws IOException
+    {
 		if (getResourceName()==null ||
-						!getResourceName().equals(resourceName)) {
+            !getResourceName().equals(resourceName)) {
 			// remember this resource
 			setResourceName(resourceName);
 			// create a new "validator" resources object. This thing contains
 			// FormSets stored against locale.
-			this.validatorResources = new ValidatorResources();
+			_validatorResources = new ValidatorResources();
 
 			// Read in the XMLfile
 			in = bean.getClass().getResourceAsStream(resourceName);
 
 			// Now initialize our VR with the xml file contents.
-			ValidatorResourcesInitializer.initialize(validatorResources, in);
+			ValidatorResourcesInitializer.initialize(_validatorResources, in);
 		}
     }
-
 
    /**
     * Perform all form-specific the validation. All form specific validation
@@ -105,29 +122,34 @@ public class CommonValidator {
     * object will contain a collection of error Strings see
     * {@ref CommonValidatorException}.
     *
-    * @param 	validationMappingRes A String containing the name of the mapping resource file.
-    * @param	formName A String containing the name of the form containing the validation action references.
-    * @param    beanInstance An instance of the bean to apply validation on.
-    * @throws   CommonValidatorException - Exception containing collection of messages.
-    * 
-   */
+    * @param validationMappingRes A String containing the name of the
+    * mapping resource file.
+    * @param formName A String containing the name of the form containing
+    * the validation action references.
+    * @param beanInstance An instance of the bean to apply validation on.
+    * @throws CommonValidatorException - Exception containing collection of
+    * messages.
+    **/
     public void validate (String validationMappingRes, String formName,
-        Object beanInstance  ) throws CommonValidatorException   {
-        InputStream 				xmlStream 	= null;
-        ValidatorResults 			results 	= null;
-		CommonValidatorException	cve 		= null;
+                          Object beanInstance)
+       throws CommonValidatorException
+    {
+        InputStream xmlStream = null;
+		CommonValidatorException cve = null;
+        ValidatorResults results;
 
         try {
 			// Start by setting the "ValidatorResources" object. Its only
             // created if necessary. Contains FormSets stored against locale.
-			setValidatorResources(validationMappingRes,beanInstance,xmlStream);
+			setValidatorResources(validationMappingRes, beanInstance,
+                                  xmlStream);
 
 			// Get the form for the current locale and Bean.
-			Form form = validatorResources.get(Locale.getDefault(), formName);
+			Form form = _validatorResources.get(Locale.getDefault(), formName);
 
 			// Instantiate the validator (coordinates the validation
 			// while the ValidatorResources implements the validation)
-			Validator validator = new Validator(validatorResources, formName);
+			Validator validator = new Validator(_validatorResources, formName);
 
 			// Tell the validator which bean to validate against.
 			validator.addResource(Validator.BEAN_KEY, beanInstance);
@@ -150,10 +172,11 @@ public class CommonValidator {
 
 	    		// Look up the formatted name of the field from the Field arg0
 	    		String prettyFieldName =
-                    properties.getString(field.getArg0().getKey());
+                    _properties.getString(field.getArg0().getKey());
 
 	    		// Get the result of validating the property.
-	    		ValidatorResult result = results.getValidatorResult(propertyName);
+	    		ValidatorResult result =
+                    results.getValidatorResult(propertyName);
 
                 // Get all the actions run against the property, and iterate
                 // over their names. Check for invalid results.
@@ -163,23 +186,22 @@ public class CommonValidator {
 					String actName = (String) keys.next();
 					// Get the Action for that name.
 					ValidatorAction action =
-                        validatorResources.getValidatorAction(actName);
+                        _validatorResources.getValidatorAction(actName);
 					if (!result.isValid(actName)) {
-		    			String message = properties.getString(action.getMsg());
+		    			String message = _properties.getString(action.getMsg());
 		   				Object[] args = { prettyFieldName };
-                		if (cve==null)
+                		if (cve == null) {
                             cve = new CommonValidatorException();
-		    			cve.addMessage(MessageFormat.format(message, args));
+                        }
+                        cve.addMessage(MessageFormat.format(message, args));
 					}
-				} // end while actionMap keyset
-            } // end while form prop fields
-		}
-        catch (IOException ex) {
+				}
+            }
+		} catch (IOException ex) {
             // Note: This exception shouldn't be reported to user since it
             // wasn't likely caused by user input.
             ex.printStackTrace(); //log this
-		}
-        catch (ValidatorException ex) {
+		} catch (ValidatorException ex) {
             // Note: This exception shouldn't bubble up to user since it
             // wasn't likely caused by user input.
 			ex.printStackTrace(); //log this
