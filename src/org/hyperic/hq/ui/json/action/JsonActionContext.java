@@ -82,6 +82,12 @@ public class JsonActionContext extends HashMap
         put(JSON_RESULT, result);
     }
 
+    public boolean isPrettyPrint()
+    {
+        String pretty = getRequest().getParameter("pretty");
+        return pretty != null;
+    }
+
     private ActionMapping getMapping()
     {
         return(ActionMapping)get(ACTION_MAPPING);
