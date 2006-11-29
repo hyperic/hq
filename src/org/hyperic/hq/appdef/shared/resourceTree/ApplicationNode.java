@@ -33,34 +33,31 @@ import java.util.Iterator;
 public class ApplicationNode 
     implements java.io.Serializable
 {
-    private ResourceTree     tree;
-    private ApplicationValue app;
-    private ArrayList        services;
+    private ResourceTree _tree;
+    private ApplicationValue _app;
+    private ArrayList _services;
 
     ApplicationNode(ResourceTree tree, ApplicationValue app){
-        this.tree     = tree;
-        this.services = new ArrayList();
-    }
-
-    public ApplicationValue getApplication(){
-        return this.app;
+        _tree = tree;
+        _app = app;
+        _services = new ArrayList();
     }
 
     public void linkToService(ServiceNode service){
-        if(service.getTree() != this.tree){
+        if(service.getTree() != _tree){
             throw new IllegalArgumentException("Services may only be linked " +
                                                "to applications within the " +
                                                "same ResourceTree");
         }
 
-        this.services.add(service);
+        _services.add(service);
     }
 
     public Iterator getServices(){
-        return this.services.iterator();
+        return _services.iterator();
     }
 
     public String toString(){
-        return this.app.toString() + " services=" + this.services;
+        return _app.toString() + " services=" + _services;
     }
 }
