@@ -37,34 +37,29 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.DashboardAlertBean;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.Portlet;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
+import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
-import org.hyperic.util.timer.StopWatch;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
-import org.apache.struts.tiles.actions.TilesAction;
 import org.json.JSONObject;
 
 /**
  * This action class is used by the Critical Alerts portlet.  It's main
  * use is to generate the JSON objects required for display into the UI.
  */
-public class ViewAction extends TilesAction {
+public class ViewAction extends BaseAction {
 
-    private Log _log = LogFactory.getLog("CRITICAL ALERTS");
     static final String RESOURCES_KEY = ".dashContent.criticalalerts.resources";
 
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
+    public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
@@ -75,11 +70,17 @@ public class ViewAction extends TilesAction {
         WebUser user = (WebUser) request.getSession().getAttribute(
             Constants.WEBUSER_SES_ATTR);
         
-        Portlet portlet = (Portlet) context.getAttribute("portlet");
+        String token;
+
+        try {
+            token = RequestUtils.getStringParameter(request, "token");
+        } catch (ParameterNotFoundException e) {
+            token = null;
+        }
         
         String key = ViewAction.RESOURCES_KEY;
-        if (portlet.getToken() != null) {
-            key += portlet.getToken();
+        if (token != null) {
+            key += token;
         }
 
         List entityIds = DashboardUtils.preferencesAsEntityIds(key, user);
@@ -124,10 +125,8 @@ public class ViewAction extends TilesAction {
 
         alerts.put("criticalAlerts", a);
 
-        _log.info(alerts.toString(2));
+        response.getWriter().write(alerts.toString());
 
-        //response.getWriter().write(alerts.toString());
-        
         return null;
     }
 }

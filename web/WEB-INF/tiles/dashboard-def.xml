@@ -77,7 +77,6 @@
   </definition>
  
   <definition name=".dashContent.criticalAlerts"
-              controllerUrl="/dashboard/ViewCriticalAlerts.do"
               path="/portlet/criticalAlerts/View.jsp">                            
               <put name="adminUrl"        value="/dashboard/Admin.do?mode=criticalAlerts" />    
               <put name="portletName"      value=".dashContent.criticalAlerts" />

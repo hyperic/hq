@@ -56,6 +56,8 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <tiles:put name="dragDrop" value="true"/>
 </tiles:insert>
 
+  <!-- JSON available at /dashboard/ViewCriticalAlerts.do -->
+
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
     <tr class="ListRow">
       <td class="ListCell"><fmt:message key="dash.home.alerts.no.resource.to.display"/></td>
