@@ -126,6 +126,29 @@ public class BizappUtils {
 
     private static Log log = LogFactory.getLog(BizappUtils.class.getName());
 
+    /**
+     * Replace the word 'platform' in the input string with the correct
+     * object type as specified by the entity ID.  
+     * 
+     * For instance, if the string is "events.config.platform", and id
+     * specifies a server, the result will be "events.config.server"
+     */
+    public static String replacePlatform(String inStr, AppdefEntityID id) {
+        if (id.isPlatform()) {
+            return inStr;
+        } else if (id.isServer()) {
+            return StringUtil.replace(inStr, "platform", "server");
+        } else if (id.isService()) {
+            return StringUtil.replace(inStr, "platform", "service");
+        } else if (id.isApplication()) {
+            return StringUtil.replace(inStr, "platform", "application");
+        } else if (id.isGroup()) {
+            return StringUtil.replace(inStr, "platform", "group");
+        } else {
+            return StringUtil.replace(inStr, "platform.", "");
+        }
+     }
+    
     /** A helper method used by setRuntimeAIMessage */
     private static String getServiceName(PageList serviceTypes, int index, 
                                          String stName) {
