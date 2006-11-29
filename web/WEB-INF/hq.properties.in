@@ -4,7 +4,7 @@ ejb-remote-config.context-factory=org.jnp.interfaces.NamingContextFactory
 ejb-remote-config.url-package-prefixes=org.jboss.naming\:org.jnp.interfaces
 
 #the base url for help 
-helpBaseURL=http://support.hyperic.net/confluence/display/DOCSHQ27/
+helpBaseURL=http://support.hyperic.net/confluence/display/DOCSHQ30/
 
 smallLogo=false
 smallLogoName=
