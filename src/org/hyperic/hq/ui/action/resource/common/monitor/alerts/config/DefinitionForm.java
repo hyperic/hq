@@ -53,12 +53,9 @@ import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * Form for editing / creating new alert definitions.
- *
  */
 public class DefinitionForm extends ResourceForm  {
     private Log log = LogFactory.getLog(DefinitionForm.class.getName());
-
-    //-------------------------------------instance variables
 
     // alert definition properties
     private Integer id; // nullable
@@ -106,21 +103,16 @@ public class DefinitionForm extends ResourceForm  {
 
     private boolean disableForRecovery;
 
-    //-------------------------------------constructors
-
     public DefinitionForm() {
         // do nothing
     }
 
-
-    //-------------------------------------public methods
-
     public Integer getId() {
-	return id;
+        return id;
     }
 
     public void setId(Integer id) {
-	this.id = id;
+        this.id = id;
     }
 
     public String getName() {
@@ -192,20 +184,10 @@ public class DefinitionForm extends ResourceForm  {
     public String getMetricName() {
         return metricName;
     }
+
     public void setMetricName(String metricName) {
         this.metricName = metricName;
     }
-    /*
-     * NEVER INVOKED
-     public void setCondition(int index, ConditionBean condition) {
-     log.trace("setCondition(" + index + ", " + condition + ")");
-     if (conditions.size() > index) {
-     conditions.set(index, condition);
-     } else {
-     conditions.add(condition);
-     }
-     }
-    */
 
     public int getNumConditions() {
         return conditions.size();
@@ -492,11 +474,6 @@ public class DefinitionForm extends ResourceForm  {
     /**
      * Import the conditions and enablement properties from the
      * AlertDefinitionValue to this form.
-     * @throws MeasurementNotFoundException
-     * @throws SessionNotFoundException
-     * @throws SessionTimeoutException
-     * @throws RemoteException
-     * @throws TemplateNotFoundException
      */
     public void importConditionsEnablement(AlertDefinitionValue adv,
                                            int sessionId, MeasurementBoss mb)
@@ -543,11 +520,6 @@ public class DefinitionForm extends ResourceForm  {
     /**
      * Export the conditions and enablement properties from this form
      * to the AlertDefinitionValue.
-     * @throws SessionTimeoutException
-     * @throws SessionNotFoundException
-     * @throws MeasurementNotFoundException
-     * @throws RemoteException
-     * @throws TemplateNotFoundException
      */
     public void exportConditionsEnablement(AlertDefinitionValue adv,
                                            HttpServletRequest request,
@@ -668,5 +640,3 @@ public class DefinitionForm extends ResourceForm  {
         disableForRecovery = false;
     }
 }
-
-// EOF
