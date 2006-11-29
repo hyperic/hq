@@ -77,7 +77,8 @@ public class PermissionManagerImpl
         " appdef_type = ? AND lower(propvalue) like '%'||lower(?)||'%'))";
 
     private static final String ALL_RESOURCE_SQL = 
-        "SELECT res.instance_id FROM EAM_RESOURCE res";
+        "SELECT res.instance_id FROM EAM_RESOURCE res, EAM_OPERATION o " +
+        "WHERE o.resource_type_id = res.resource_type_id and o.id = ?";
 
     private static final String AUTHZ_WHERE_OVERLORD_INSTANCE
         = " AND authz_r.RESOURCE_TYPE_ID = ? "
@@ -119,13 +120,12 @@ public class PermissionManagerImpl
     {
         log.debug("Checking Scope for Operation: " + opName +
                   " subject: " + subj);
-        ResourceType resTypeBean = getResourceTypeDAO()
-            .findByName(resType);
+        ResourceType resTypeBean = getResourceTypeDAO().findByName(resType);
         if (resTypeBean != null) {
-            Operation opEJB = getOperationDAO().findByTypeAndName(
-                resTypeBean, opName);
+            Operation opEJB =
+                getOperationDAO().findByTypeAndName(resTypeBean, opName);
             if (opEJB != null) {
-                return findOperationScopeBySubject(subj, opEJB.getId(),pc);
+                return findOperationScopeBySubject(subj, opEJB.getId(), pc);
             }
         }
         return new PageList();
@@ -225,10 +225,10 @@ public class PermissionManagerImpl
         ResultSet rs = null;
         List instanceIds = null;
         try {
-            conn = 
-                DBUtil.getConnByContext(getInitialContext(), DATASOURCE);
+            conn = DBUtil.getConnByContext(getInitialContext(), DATASOURCE);
             // Always return all resources
             stmt = conn.prepareStatement(ALL_RESOURCE_SQL);
+            stmt.setInt(1, opId.intValue());
             rs = stmt.executeQuery();
             // now build the list
             instanceIds = new ArrayList();
