@@ -74,24 +74,6 @@ public class ViewAction extends BaseAction {
             list = getResources(key, boss, user);
         }
 
-        // XXX: We should get rid of this configuration, who uses it, and why?
-        Boolean availability =
-            Boolean.valueOf(user.
-                getPreference(".dashContent.resourcehealth.availability"));
-        Boolean throughput =
-            Boolean.valueOf(user.
-                getPreference(".dashContent.resourcehealth.throughput"));
-        Boolean performance =
-            Boolean.valueOf(user.
-                getPreference(".dashContent.resourcehealth.performance"));
-        Boolean utilization =
-            Boolean.valueOf(user.
-                getPreference(".dashContent.resourcehealth.utilization"));
-        //context.putAttribute("availability", availability);
-        //context.putAttribute("throughput", throughput);
-        //context.putAttribute("performance", performance);
-        //context.putAttribute("utilization", utilization);
-
         // Due to the complexity of the UIBeans, we need to construct the
         // JSON objects by hand.
         JSONObject favorites = new JSONObject();

@@ -44,8 +44,6 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageList;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -60,10 +58,8 @@ public class RemoveResourcesAction extends TilesAction {
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
-        throws Exception {
-
-        PropertiesForm pForm = (PropertiesForm) form;
-        
+        throws Exception
+    {
         ServletContext ctx = getServlet().getServletContext();
         HttpSession session = request.getSession();
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
@@ -72,22 +68,12 @@ public class RemoveResourcesAction extends TilesAction {
         Integer sessionId = RequestUtils.getSessionId(request);
         PageList resources = new PageList();
 
-        boolean availability = new Boolean(user.getPreference(".dashContent.resourcehealth.availability")).booleanValue();
-        boolean throughput =  new Boolean(user.getPreference(".dashContent.resourcehealth.throughput")).booleanValue(); 
-        boolean performance = new Boolean(user.getPreference(".dashContent.resourcehealth.performance")).booleanValue();
-        boolean utilization = new Boolean(user.getPreference(".dashContent.resourcehealth.utilization")).booleanValue();
-
-        pForm.setAvailability(availability);
-        pForm.setThroughput(throughput);
-        pForm.setPerformance(performance);
-        pForm.setUtilization(utilization);
-
-        List resourceList = user.getPreferenceAsList(Constants.USERPREF_KEY_FAVORITE_RESOURCES, "|");
+        List resourceList = user.
+            getPreferenceAsList(Constants.USERPREF_KEY_FAVORITE_RESOURCES, "|");
 
         Iterator i = resourceList.iterator();
 
         while(i.hasNext()) {
-
             ArrayList resourceIds =
                 (ArrayList) StringUtil.explode((String) i.next(), ",");
 

@@ -56,10 +56,8 @@ public class PrepareAction extends TilesAction {
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
-        throws Exception {
-            
-        PropertiesForm pForm = (PropertiesForm) form;
-        
+        throws Exception
+    {
         ServletContext ctx = getServlet().getServletContext();
         HttpSession session = request.getSession();
         WebUser user = (WebUser)
@@ -67,18 +65,9 @@ public class PrepareAction extends TilesAction {
         String key = Constants.USERPREF_KEY_FAVORITE_RESOURCES;
 
         DashboardUtils.verifyResources(key, ctx, user);
-        //this quarantees that the session dosen't contain any resources it shouldnt
+        // this quarantees that the session dosen't contain any resources it
+        // shouldnt
         SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
-
-        boolean availability = new Boolean(user.getPreference(".dashContent.resourcehealth.availability")).booleanValue();
-        boolean throughput =  new Boolean(user.getPreference(".dashContent.resourcehealth.throughput")).booleanValue();
-        boolean performance = new Boolean(user.getPreference(".dashContent.resourcehealth.performance")).booleanValue();
-        boolean utilization = new Boolean(user.getPreference(".dashContent.resourcehealth.utilization")).booleanValue();
-
-        pForm.setAvailability(availability);
-        pForm.setThroughput(throughput);
-        pForm.setPerformance(performance);
-        pForm.setUtilization(utilization);
 
         List resources = DashboardUtils.preferencesAsResources(key, ctx, user);
 

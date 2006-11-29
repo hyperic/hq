@@ -39,10 +39,6 @@ import org.hyperic.hq.ui.action.portlet.DashboardBaseForm;
  */
 public class PropertiesForm extends DashboardBaseForm  {
 
-    private boolean availability;
-    private boolean throughput;
-    private boolean performance;
-    private boolean utilization;
     private String[] ids;
     private String order;
 
@@ -53,38 +49,6 @@ public class PropertiesForm extends DashboardBaseForm  {
     public String toString() {
         StringBuffer s = new StringBuffer();
         return s.toString();
-    }
-
-    public boolean isAvailability() {
-        return this.availability;
-    }
-
-    public void setAvailability(boolean availability) {
-        this.availability = availability;
-    }
-
-    public boolean isThroughput() {
-        return this.throughput;
-    }
-
-    public void setThroughput(boolean throughput) {
-        this.throughput = throughput;
-    }
-
-    public boolean isPerformance() {
-        return this.performance;
-    }
-
-    public void setPerformance(boolean performance) {
-        this.performance = performance;
-    }
-
-    public boolean isUtilization() {
-        return this.utilization;
-    }
-
-    public void setUtilization(boolean utilization) {
-        this.utilization = utilization;
     }
 
     public String[] getIds() {

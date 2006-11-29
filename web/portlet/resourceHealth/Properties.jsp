@@ -63,35 +63,6 @@ var help = '<hq:help/>';
       <html:form action="/dashboard/ModifyResourceHealth.do" onsubmit="ResourceHealthForm.order.value=Sortable.serialize('resOrd')">
 
       <tiles:insert definition=".header.tab">
-        <tiles:put name="tabKey" value="dash.settings.DisplaySettings"/>
-      </tiles:insert>
-
-      <tiles:insert definition=".dashContent.admin.generalSettings">
-        <tiles:put name="portletName" beanName="portletName" />
-      </tiles:insert>
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">  
-        <tr>
-          <td colspan="5" class="BlockContent"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-        </tr>
-         <tr valign="top">
-          <td width="20%" class="BlockLabel"><fmt:message key="dash.settings.FormLabel.ListAttributes"/></td>
-          <td width="15%" class="BlockContent"><html:checkbox property="availability"/><fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/><br>
-              <html:checkbox property="throughput"/><fmt:message key="resource.common.monitor.visibility.UsageTH"/></td>
-          <td width="15%" class="BlockContent"><!--html:checkbox property="performance"/><fmt:message key="resource.common.monitor.visibility.PerformanceTH"/><br-->
-              <html:checkbox property="utilization"/><fmt:message key="dash.home.TableHeader.Alerts"/></td>
-          <td width="20%" class="BlockLabel">&nbsp;</td>
-          <td width="30%" class="BlockContent">&nbsp;</td>
-        </tr>
-        <tr>
-          <td colspan="5" class="BlockContent"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-        </tr>
-        <tr>
-          <td colspan="5" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-        </tr>
-      </table>
-      &nbsp;<br>
-
-      <tiles:insert definition=".header.tab">
         <tiles:put name="tabKey" value="dash.settings.SelectedResources"/>
       </tiles:insert>
 

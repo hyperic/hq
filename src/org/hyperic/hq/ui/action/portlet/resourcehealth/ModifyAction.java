@@ -81,9 +81,10 @@ public class ModifyAction extends BaseAction {
         String forwardStr = "success";
 
         if(pForm.isRemoveClicked()){
-            DashboardUtils.removeResources(pForm.getIds(), 
-                                           Constants.USERPREF_KEY_FAVORITE_RESOURCES,
-                                           user);
+            DashboardUtils.
+                removeResources(pForm.getIds(),
+                                Constants.USERPREF_KEY_FAVORITE_RESOURCES,
+                                user);
             forwardStr = "review";
         }
 
@@ -93,27 +94,13 @@ public class ModifyAction extends BaseAction {
             return forward;
         }
 
-        String availability = Boolean.toString( pForm.isAvailability() );
-        String throughput =  Boolean.toString( pForm.isThroughput() );
-        String performance = Boolean.toString( pForm.isPerformance() );
-        String utilization = Boolean.toString( pForm.isUtilization() );
-
-        user.setPreference(".dashContent.resourcehealth.availability",
-                           availability);
-        user.setPreference(".dashContent.resourcehealth.throughput",
-                           throughput);
-        user.setPreference(".dashContent.resourcehealth.performance",
-                           performance);
-        user.setPreference(".dashContent.resourcehealth.utilization",
-                           utilization);
-
         // Set the order of resources
         String order = StringUtil.replace(pForm.getOrder(), "%3A", ":");
         StringTokenizer orderTK = new StringTokenizer(order, "=&");
         ArrayList resources = new ArrayList();
         while (orderTK.hasMoreTokens()) {
-            orderTK.nextToken();                    // left-hand
-            resources.add(orderTK.nextToken());     // appdef key
+            orderTK.nextToken();
+            resources.add(orderTK.nextToken());
         }
         user.setPreference(Constants.USERPREF_KEY_FAVORITE_RESOURCES,
                            StringUtil.listToString(resources, StringConstants
@@ -128,6 +115,5 @@ public class ModifyAction extends BaseAction {
 
         session.removeAttribute(Constants.USERS_SES_PORTAL);
         return mapping.findForward(forwardStr);
-        
     }
 }
