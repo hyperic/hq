@@ -39,6 +39,8 @@
   <tiles:put name="dragDrop" value="true"/>
 </tiles:insert>
 
+  <!-- JSON available at /dashboard/ViewAvailSummary.do -->
+    
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
     <tr class="ListRow">
       <td class="ListCell"><fmt:message key="dash.home.no.resource.to.display"/></td>

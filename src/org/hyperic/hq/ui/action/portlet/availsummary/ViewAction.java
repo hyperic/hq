@@ -32,16 +32,13 @@ import javax.servlet.ServletContext;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
-import org.apache.struts.tiles.actions.TilesAction;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -60,12 +57,9 @@ import java.util.Map;
  * This action class is used by the Availability Summary portlet.  It's main
  * use is to generate the JSON objects required for display into the UI.
  */
-public class ViewAction extends TilesAction {
+public class ViewAction extends BaseAction {
 
-    Log _log = LogFactory.getLog("AVAIL SUMMARY");
-
-    public ActionForward execute(ComponentContext context,
-                                 ActionMapping mapping,
+    public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
@@ -124,8 +118,8 @@ public class ViewAction extends TilesAction {
 
         availSummary.put("availSummary", types);
 
-        _log.info(availSummary.toString(2));
-        
+        response.getWriter().write(availSummary.toString());
+
         return null;
     }
 

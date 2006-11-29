@@ -120,7 +120,6 @@
   </definition> 
 
   <definition name=".dashContent.availSummary"
-              controllerUrl="/dashboard/ViewAvailSummary.do"
               path="/portlet/availSummary/View.jsp">
               <put name="adminUrl" value="/dashboard/Admin.do?mode=availSummary" />
               <put name="portletName" value=".dashContent.availSummary"/>
