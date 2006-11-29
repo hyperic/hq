@@ -11,4 +11,32 @@
               path="/resource/group/inventory/ViewGroup.jsp">
   </definition>
   
+  <definition name=".tabs.resource.group"
+              extends=".tabs.resource"> 
+   <putList name="tabList">
+       <item value="Monitor" mode="currentHealth"
+            link="/resource/group/monitor/Visibility.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Inventory" link="/resource/group/Inventory.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Control" link="/resource/group/Control.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+   </putList>     
+  </definition>
+  
+  <!-- compatibility groups do not have control -->
+    <definition name=".tabs.resource.group.nocontrol"
+        extends=".tabs.resource.nocontrol">
+     <putList name="tabList">
+       <item value="Monitor" mode="currentHealth"
+             link="/resource/group/monitor/Visibility.do"
+             height="21" width="102" classtype="org.hyperic.hq.ui.util.Tab"/>
+       <item value="Inventory" link="/resource/group/Inventory.do"
+             height="21" width="102" classtype="org.hyperic.hq.ui.util.Tab"/>
+     </putList>     
+    </definition>
+
 </tiles-definitions>

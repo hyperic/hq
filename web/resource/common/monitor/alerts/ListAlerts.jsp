@@ -232,13 +232,13 @@
     </tiles:insert>
     <c:choose>
         <c:when test="${ canControl }">
-            <tiles:insert definition =".tabs.resource.group.monitor.alerts">
+            <tiles:insert definition =".tabs.resource.group.alert">
                     <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
                     <tiles:put name="resourceType" beanName="entityId" beanProperty="type"/>
             </tiles:insert>
         </c:when>
         <c:otherwise>
-            <tiles:insert definition =".tabs.resource.group.monitor.alerts.nocontrol">
+            <tiles:insert definition =".tabs.resource.group.alert.nocontrol">
                     <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
                     <tiles:put name="resourceType" beanName="entityId" beanProperty="type"/>
             </tiles:insert>

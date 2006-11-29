@@ -201,13 +201,13 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     </tiles:insert>
     <c:choose>
         <c:when test="${ canControl }">
-            <tiles:insert definition =".tabs.resource.group.monitor.configAlerts">
+            <tiles:insert definition =".tabs.resource.group.alert.configAlerts">
                 <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
                 <tiles:put name="resourceType" beanName="entityId" beanProperty="type"/>
             </tiles:insert>
         </c:when>
         <c:otherwise>
-            <tiles:insert definition =".tabs.resource.group.monitor.configAlerts.nocontrol">
+            <tiles:insert definition =".tabs.resource.group.alert.configAlerts.nocontrol">
                 <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
                 <tiles:put name="resourceType" beanName="entityId" beanProperty="type"/>
             </tiles:insert>
