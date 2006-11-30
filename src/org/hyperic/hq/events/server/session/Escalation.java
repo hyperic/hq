@@ -175,7 +175,7 @@ public class Escalation extends PersistedObject
             EscalationAction action = (EscalationAction)i.next();
             actionArray.put(action.toJSON());
         }
-        return new JSONObject()
+        JSONObject json = new JSONObject()
                 .put("name", name)
                 .put("allowPause", allowPause)
                 .put("maxWaitTime", maxWaitTime)
@@ -183,6 +183,10 @@ public class Escalation extends PersistedObject
                 .put("creationTime", creationTime)
                 .put("modifiedTime", modifiedTime)
                 .put("actions", actionArray);
+        if (getId() != null) {
+            json.put("id", getId());
+        }
+        return json;
     }
 
     public boolean equals(Object obj) {

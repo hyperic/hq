@@ -173,9 +173,13 @@ public class Action
     {
         try {
             ConfigResponse conf = ConfigResponse.decode(getConfig());
-            return new JSONObject()
+            JSONObject json = new JSONObject()
                     .put("className", getClassName())
                     .put("config", conf.toProperties());
+            if (getId() != null) {
+                json.put("id", getId());
+            }
+            return json;
         } catch (EncodingException e) {
             // can't happen
             throw new SystemException(e);
