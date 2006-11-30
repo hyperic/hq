@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -43,13 +44,21 @@ import org.apache.struts.tiles.actions.TilesAction;
 import org.apache.struts.util.LabelValueBean;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.CPropKeyValue;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
+import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -77,11 +86,13 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
     {
         ServletContext ctx = getServlet().getServletContext();
         int sessionID = RequestUtils.getSessionId(request).intValue();
+        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
         MeasurementBoss mb = ContextUtils.getMeasurementBoss(ctx);
+        ControlBoss cb = ContextUtils.getControlBoss(ctx);
         AppdefBoss ab = ContextUtils.getAppdefBoss(ctx);
 
         DefinitionForm defForm = (DefinitionForm) form;
-        setupForm(defForm, request, sessionID, mb, ab);
+        setupForm(defForm, request, sessionID, eb, mb, cb, ab);
 
         if (! defForm.isOkClicked() ) {
             // setting up form for the first time
@@ -92,13 +103,13 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
     }
 
     protected void setupForm(DefinitionForm defForm, HttpServletRequest request,
-                             int sessionID, MeasurementBoss mb, AppdefBoss ab)
-        throws Exception 
-    {
+                             int sessionID, EventsBoss eb, MeasurementBoss mb,
+                             ControlBoss cb, AppdefBoss ab)
+        throws Exception {
         request.setAttribute( "enableEachTime",
-        		              new Integer(EventConstants.FREQ_EVERYTIME) );
+                              new Integer(EventConstants.FREQ_EVERYTIME) );
         request.setAttribute( "enableOnce",
-        		              new Integer(EventConstants.FREQ_ONCE) );
+                              new Integer(EventConstants.FREQ_ONCE) );
         request.setAttribute( "enableTimePeriod",
                               new Integer(EventConstants.FREQ_DURATION) );
         request.setAttribute( "enableNumTimesInPeriod",
@@ -107,9 +118,10 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
                               new Integer(Constants.ALERT_CONDITION_NONE_DELETED) );
 
         PageControl pc = PageControl.PAGE_ALL;
-        List metrics = new ArrayList();
+        List metrics, baselines = new ArrayList();
         int numMetricsEnabled = 0;
         AppdefEntityID adeId;
+        boolean controlEnabled;
         
         try {
             adeId = RequestUtils.getEntityTypeId(request);
@@ -119,6 +131,8 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
             defForm.setResourceType(adeId.getId());
             numMetricsEnabled++;
             
+            controlEnabled =
+                cb.isControlSupported(sessionID, (AppdefEntityTypeID) adeId);            
         } catch (ParameterNotFoundException e) {
             adeId = RequestUtils.getEntityId(request);
             metrics = mb.findMeasurements( sessionID, adeId, pc );
@@ -131,7 +145,19 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
                         numMetricsEnabled++;
                 }
             }
+
+            controlEnabled = cb.isControlEnabled(sessionID, adeId);
+            
+            // Check for logging
+            // [SUPPORT-21] Show log track alerting on all resources/resource
+            // types
+            /*
+            boolean logTrackEnabled = mb.isLogTrackEnabled(sessionID, adeId);
+            if (logTrackEnabled)
+                request.setAttribute("logTrackEnabled", Boolean.TRUE);
+                */
         }
+        request.setAttribute("logTrackEnabled", Boolean.TRUE);
         
         defForm.setMetrics(metrics);
 
@@ -141,6 +167,20 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
         } else if (numMetricsEnabled == 0) {
             RequestUtils.setError(
                 request, "resource.common.monitor.alert.config.error.NoMetricsEnabled");
+        }
+        
+        // need to duplicate this for the JavaScript on the page
+        request.setAttribute("baselines", baselines);
+        
+        request.setAttribute(Constants.CONTROL_ENABLED,
+                             new Boolean(controlEnabled));
+        if (controlEnabled) {
+            defForm.setControlActions(
+                AlertDefUtil.getControlActions(sessionID, adeId, cb));
+        } else {
+            List controlActions = new ArrayList(1);
+            controlActions.add("(N/A)");
+            defForm.setControlActions(controlActions);
         }
         
         List custProps = getCustomProperties(sessionID, adeId, ab);
@@ -154,14 +194,25 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
                                             DefinitionForm defForm)
         throws Exception;
 
-
     /**
      * Returns a List of custom property keys for the passed-in resource.
+     * @throws RemoteException
+     * @throws PermissionException
+     * @throws PluginNotFoundException
+     * @throws AppdefEntityNotFoundException
+     * @throws SessionTimeoutException
+     * @throws SessionNotFoundException
+     * @throws SessionNotFoundException
+     * @throws SessionTimeoutException
+     * @throws RemoteException
+     * @throws PermissionException
+     * @throws AppdefEntityNotFoundException
      */
-    private List getCustomProperties(int sessionID, AppdefEntityID adeId,
+    protected List getCustomProperties(int sessionID, AppdefEntityID adeId,
                                      AppdefBoss ab)
-        throws Exception
-    {
+        throws SessionNotFoundException, SessionTimeoutException,
+               AppdefEntityNotFoundException, PermissionException,
+               RemoteException {
         List custProps;
         
         if (adeId instanceof AppdefEntityTypeID)

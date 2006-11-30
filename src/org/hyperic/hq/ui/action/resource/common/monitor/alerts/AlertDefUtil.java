@@ -34,9 +34,13 @@ import javax.ejb.FinderException;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.action.SyslogActionConfig;
@@ -50,6 +54,7 @@ import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.ResourceLogEvent;
+import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.SyslogActionForm;
 import org.hyperic.hq.ui.beans.AlertConditionBean;
@@ -369,6 +374,30 @@ public class AlertDefUtil {
             form.setId( actionValue.getId() );
         }
     }
+
+    /**
+     * Returns a List of LabelValueBean objects whose labels and
+     * values are both set to the string of the control actions for
+     * the passed-in resource.
+     * @throws RemoteException
+     * @throws PermissionException
+     * @throws PluginNotFoundException
+     * @throws AppdefEntityNotFoundException
+     * @throws SessionTimeoutException
+     * @throws SessionNotFoundException
+     */
+    public static List getControlActions(int sessionID, AppdefEntityID adeId, ControlBoss cb)
+        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PluginNotFoundException, PermissionException, RemoteException {
+            List controlActions;
+            
+            if (adeId instanceof AppdefEntityTypeID)
+                controlActions =
+                    cb.getActions(sessionID, (AppdefEntityTypeID) adeId);
+            else
+                controlActions = cb.getActions(sessionID, adeId);
+                
+            return controlActions;
+        }
 }
 
 // EOF

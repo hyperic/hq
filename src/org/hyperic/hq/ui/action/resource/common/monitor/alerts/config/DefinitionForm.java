@@ -41,6 +41,7 @@ import org.apache.struts.action.ActionMessage;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
@@ -83,6 +84,8 @@ public class DefinitionForm extends ResourceForm  {
     private List metrics;
     private Collection customProperties;    
     
+    private boolean disableForRecovery;
+
     private static int[] priorities =
         new int[] { EventConstants.PRIORITY_HIGH,
                     EventConstants.PRIORITY_MEDIUM,
@@ -101,7 +104,15 @@ public class DefinitionForm extends ResourceForm  {
                        Constants.ALERT_THRESHOLD_COMPARATOR_NE,
                      };
 
-    private boolean disableForRecovery;
+    private static String[] controlActionStatuses = {
+                ControlConstants.STATUS_INPROGRESS,
+                ControlConstants.STATUS_COMPLETED,
+                ControlConstants.STATUS_FAILED, };
+
+
+    public String[] getControlActionStatuses() {
+        return controlActionStatuses;
+    }
 
     public DefinitionForm() {
         // do nothing
