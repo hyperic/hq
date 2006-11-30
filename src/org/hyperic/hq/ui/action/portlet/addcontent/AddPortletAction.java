@@ -26,6 +26,7 @@
 package org.hyperic.hq.ui.action.portlet.addcontent;
 
 import java.text.NumberFormat;
+import java.util.Random;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -100,7 +101,7 @@ public class AddPortletAction extends BaseAction {
             nf.setMinimumIntegerDigits(3);      // Exactly 3 digits
             nf.setMaximumIntegerDigits(3);
             portletName.append(DashboardUtils.MULTI_PORTLET_TOKEN)
-                       .append(nf.format(Math.random() * 999));
+                       .append(nf.format(new Random().nextInt(1000)));
             // 2. Create unique portlet name based on the new random token
             portlet = portletName.toString();
         }
