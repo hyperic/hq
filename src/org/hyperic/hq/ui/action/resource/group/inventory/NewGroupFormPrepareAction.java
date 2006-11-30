@@ -26,7 +26,6 @@
 package org.hyperic.hq.ui.action.resource.group.inventory;
 
 import java.util.List;
-import java.util.Locale;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -43,8 +42,6 @@ import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -68,12 +65,8 @@ public class NewGroupFormPrepareAction
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log =
-            LogFactory.getLog(NewGroupFormPrepareAction.class.getName());
 
         GroupForm newForm = (GroupForm) form;
-
-        Locale userLocale = getLocale(request);
         MessageResources res = getResources(request);
             
         List groupTypes = BizappUtils.buildGroupTypes(request);
@@ -166,5 +159,4 @@ public class NewGroupFormPrepareAction
 
         return null;
     }
-
 }
