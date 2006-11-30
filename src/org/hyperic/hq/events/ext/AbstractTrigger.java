@@ -41,6 +41,8 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.AbstractEvent;
@@ -53,14 +55,13 @@ import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
-import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertConditionLog;
+import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
-import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
@@ -133,7 +134,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
     }
     
     protected void notFired() {
-        this.publishEvent(new TriggerNotFiredEvent(getId()));
+        publishEvent(new TriggerNotFiredEvent(getId()));
     }
     
     /** The utility method which fires the actions of a trigger
@@ -142,7 +143,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
         throws ActionExecuteException, AlertCreateException {
             
         // If the system is not ready, do nothing
-        if (!this.isSystemReady())
+        if (!isSystemReady())
             return;
             
         ActionValue[] actions;
@@ -150,7 +151,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
         
         // No matter what, send a message to let people know that this trigger
         // has fired
-        this.publishEvent(event);
+        publishEvent(event);
 
         AlertDefinitionManagerLocal aman;
         AlertManagerLocal alman;
@@ -167,14 +168,14 @@ public abstract class AbstractTrigger implements TriggerInterface {
         try {
             // See if the alert def is actually enabled and if it's our job to
             // fire the actions
-            Integer adId = aman.getIdFromTrigger(this.getId());
+            Integer adId = aman.getIdFromTrigger(getId());
             if (adId == null)
                 return;
             
             adBasic = aman.getByIdNoCheck(adId);
             if (adBasic.isEnabled()) {
                 if (log.isDebugEnabled())
-                    log.debug("Trigger ID " + this.getId() +
+                    log.debug("Trigger ID " + getId() +
                               " causing alert definition ID " + adId +
                               " to fire");
             }
@@ -201,7 +202,8 @@ public abstract class AbstractTrigger implements TriggerInterface {
             if (adBasic.getFrequencyType() == EventConstants.FREQ_ONCE ||
                     adBasic.isWillRecover()) {
             	// Disable the alert definition now that we've fired
-                aman.updateAlertDefinitionsEnable(
+                aman.updateAlertDefinitionsEnable(AuthzSubjectManagerUtil
+                    .getLocalHome().create().getOverlord(),
                     new Integer[]{ adBasic.getId() }, false);
             }
             
@@ -241,12 +243,21 @@ public abstract class AbstractTrigger implements TriggerInterface {
             actions = aman.getActionsById(adId);
         } catch (FinderException e) {
             throw new ActionExecuteException(
-                "Alert Definition not found for trigger: " + this.getId());
+                "Alert Definition not found for trigger: " + getId());
+        } catch (PermissionException e) {
+            throw new ActionExecuteException(
+                "Overlord does not have permission to disable definition");
+        } catch (CreateException e) {
+            throw new ActionExecuteException(
+                "Cannot create AuthzSubjectManagerLocal");
+        } catch (NamingException e) {
+            throw new ActionExecuteException(
+                "Cannot look up AuthzSubjectManagerLocal interface");
         }
 
         // Regardless of whether or not the actions succeed, we will send an
         // AlertFiredEvent
-        this.publishEvent(new AlertFiredEvent(event, alert.getId(), adBasic));
+        publishEvent(new AlertFiredEvent(event, alert.getId(), adBasic));
 
         // get alert pojo so retrieve array of AlertCondtionLogs
         Alert alertpojo = alman.findAlertById(alert.getId());
@@ -308,24 +319,24 @@ public abstract class AbstractTrigger implements TriggerInterface {
     }   
     
     public Integer getId() {
-        if (this.triggerValue == null)
+        if (triggerValue == null)
             return new Integer(0);
 
-        return this.triggerValue.getId();
+        return triggerValue.getId();
     }
     
     public long getFrequency() {
-        if (this.triggerValue == null)
+        if (triggerValue == null)
             return 0;
 
-        return this.triggerValue.getFrequency();
+        return triggerValue.getFrequency();
     }
     
     public RegisteredTriggerValue getTriggerValue() {
-        return this.triggerValue;
+        return triggerValue;
     }
     
-    public void setTriggerValue(RegisteredTriggerValue triggerValue) {
-        this.triggerValue = triggerValue;
+    public void setTriggerValue(RegisteredTriggerValue tv) {
+        triggerValue = tv;
     }
 }
