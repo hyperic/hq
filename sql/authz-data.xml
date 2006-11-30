@@ -34,6 +34,10 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
         <data ID="1" CID="1" NAME="covalentAuthzSubject" FSYSTEM="FALSE"/>
         <data ID="2" CID="2" NAME="covalentAuthzRole" FSYSTEM="FALSE"/>
         <data ID="3" CID="3" NAME="covalentAuthzResourceGroup" FSYSTEM="FALSE"/>
+        <!-- Begin Definition of Events AUTHZ Entities 
+             In order to avoid CID conflicts, all Events CID's
+             will start with 4xx -->
+        <data ID="401" CID="401" NAME="EscalationScheme" FSYSTEM="FALSE"/>
     </table>
 
     <table name="EAM_SUBJECT">
@@ -72,6 +76,10 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:3"
               SUBJECT_ID="%EAM_SUBJECT.ID:0"
               FSYSTEM="TRUE"/>
+        <data ID="401" CID="401" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:401"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"    
+              FSYSTEM="TRUE"/>
     </table>
 
     <!-- now set the resource ids -->
@@ -80,6 +88,7 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
         <data CID="1" RESOURCE_ID="%EAM_RESOURCE.ID:1"/>
         <data CID="2" RESOURCE_ID="%EAM_RESOURCE.ID:2"/>
         <data CID="3" RESOURCE_ID="%EAM_RESOURCE.ID:3"/>
+        <data CID="401" RESOURCE_ID="%EAM_RESOURCE.ID:401"/>
     </table>
 
     <table name="EAM_SUBJECT">
@@ -104,6 +113,8 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
                       RESOURCE_ID="%EAM_RESOURCE.ID:4"/>
         <data CID="5" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
                       RESOURCE_ID="%EAM_RESOURCE.ID:5"/>
+        <data CID="6" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+                      RESOURCE_ID="%EAM_RESOURCE.ID:401"/>
     </table>
 
     <table name="EAM_OPERATION">
@@ -170,15 +181,6 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
         <data ID="308" CID="308" NAME="covalentEAMApplication" FSYSTEM="FALSE"/>
     </table>
 
-    <!-- Begin Definition of Events AUTHZ Entities 
-         In order to avoid CID conflicts, all Events CID's
-         will start with 4xx -->
-    <!-- EVENTS RESOURCE TYPES -->
-    <table name="EAM_RESOURCE_TYPE">
-        <data ID="401" CID="401" NAME="EscalationScheme" FSYSTEM="FALSE"/>
-    </table>
-
-
     <table name="EAM_RESOURCE">
         <data ID="301" CID="301" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:301"
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
@@ -196,10 +198,6 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
               SUBJECT_ID="%EAM_SUBJECT.ID:0"    
               FSYSTEM="TRUE"/>
-        <data ID="401" CID="401" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:401"
-              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
-              SUBJECT_ID="%EAM_SUBJECT.ID:0"    
-              FSYSTEM="TRUE"/>
     </table>
 
     <!-- now set the resource ids -->
@@ -208,7 +206,6 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
         <data CID="303" RESOURCE_ID="%EAM_RESOURCE.ID:303"/>
         <data CID="305" RESOURCE_ID="%EAM_RESOURCE.ID:305"/>
         <data CID="308" RESOURCE_ID="%EAM_RESOURCE.ID:308"/>
-        <data CID="401" RESOURCE_ID="%EAM_RESOURCE.ID:401"/>
     </table>
 
 

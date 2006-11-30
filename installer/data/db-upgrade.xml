@@ -1811,6 +1811,8 @@ has already been defined.
                      insertCmd="(ID, VERSION_COL, RESOURCE_TYPE_ID, INSTANCE_ID, CID, SUBJECT_ID, FSYSTEM) VALUES (401, 0, 0, 401, 401, 0, 'true')"/>
       <schema-insert table="EAM_RESOURCE_TYPE"
                      insertCmd="(ID, VERSION_COL, NAME, CID, RESOURCE_ID, FSYSTEM) VALUES (401, 0, 'EscalationScheme', 401, 401, 'false')"/>
+      <schema-insert table="EAM_RES_GRP_RES_MAP"
+                     insertCmd="(RESOURCE_GROUP_ID, RESOURCE_ID, CID) VALUES (0, 401, 6)"/>
       <schema-insert table="EAM_OPERATION"
                      insertCmd="(ID, VERSION_COL, NAME, RESOURCE_TYPE_ID, CID) VALUES (412, 0, 'createEscalation', 401, 412)"/>
       <schema-insert table="EAM_OPERATION"
