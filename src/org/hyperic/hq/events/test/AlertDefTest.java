@@ -82,7 +82,7 @@ public class AlertDefTest
         addCondition(aInfo, addTrigger(aInfo));
         
         int numDefs = aMan.findAllAlertDefinitions(getOverlord()).size();
-        aInfo = aMan.createAlertDefinition(aInfo);
+        aInfo = aMan.createAlertDefinition(getOverlord(), aInfo);
         assertEquals(numDefs + 1,
                      aMan.findAllAlertDefinitions(getOverlord()).size());
         assertEquals(1, aInfo.getTriggers().length);
