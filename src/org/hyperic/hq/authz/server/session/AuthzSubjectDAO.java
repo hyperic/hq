@@ -168,9 +168,9 @@ public class AuthzSubjectDAO extends HibernateDAO
     public Collection findByRoleId_orderName(Integer roleId, boolean asc)
     {
         return getSession()
-            .createQuery("from AuthzSubject join fetch roles r " +
-                         "where r.id = ? and system = false " +
-                         "order by sortName " + (asc ? "asc" : "desc"))
+            .createQuery("select s from AuthzSubject s join fetch s.roles r " +
+                         "where r.id = ? and s.system = false " +
+                         "order by s.sortName " + (asc ? "asc" : "desc"))
             .setInteger(0, roleId.intValue())
             .list();
     }
@@ -190,9 +190,9 @@ public class AuthzSubjectDAO extends HibernateDAO
     public Collection findWithNoRoles_orderName(Integer roleId, boolean asc)
     {
         return getSession()
-            .createQuery("from AuthzSubject join fetch roles r " +
-                         "WHERE r.size = 0 and system = false " +
-                         "order by sortName " + (asc ? "asc" : "desc"))
+            .createQuery("select s from AuthzSubject s join fetch s.roles r " +
+                         "where r.size = 0 and s.system = false " +
+                         "order by s.sortName " + (asc ? "asc" : "desc"))
             .setInteger(0, roleId.intValue())
             .list();
     }
