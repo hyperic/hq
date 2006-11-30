@@ -43,6 +43,7 @@ import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.apache.struts.tiles.ComponentContext;
 
 /**
  * An <code>Action</code> subclass that provides convenience methods
@@ -70,6 +71,20 @@ public class BaseAction extends Action {
         return null;   
     }
    
+    /*
+     * Finalize the method signature so that we don't mistakenly try to override
+     * it when we try to convert from TileAction to Action and forget to change
+     * the execute() parameter list.
+     */
+    public final ActionForward execute(ComponentContext context,
+                                       ActionMapping mapping,
+                                       ActionForm form,
+                                       HttpServletRequest request,
+                                       HttpServletResponse response)
+        throws Exception {
+        return null;
+    }
+        
     /**
      * Return an <code>ActionForward</code> if the form has been
      * cancelled or reset; otherwise return <code>null</code> so that
