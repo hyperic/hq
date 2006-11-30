@@ -157,9 +157,8 @@ public abstract class SessionEJB {
      * @param operation - the name of the operation to perform
      */
     private void checkPermission(AuthzSubjectValue subject, 
-                                   AppdefEntityID id, String operation)
-        throws PermissionException 
-    {
+                                 AppdefEntityID id, String operation)
+        throws PermissionException {
         ResourceTypeDAO rtDAO =
             DAOFactory.getDAOFactory().getResourceTypeDAO();
         ResourceType rt = rtDAO.findByName(id.getTypeName());
@@ -182,7 +181,7 @@ public abstract class SessionEJB {
      * Check for manage alerts permission for a given resource
      */
     protected void canManageAlerts(AuthzSubjectValue subject,
-                                           AppdefEntityID id)
+                                   AppdefEntityID id)
         throws PermissionException {
         int type = id.getType();
         String opName = null;
@@ -208,5 +207,37 @@ public abstract class SessionEJB {
         }
         // now check
         checkPermission(subject, id, opName);
+    }
+    
+    private void checkEscalation(AuthzSubjectValue subj, String operation) 
+        throws PermissionException {
+        ResourceType rt =
+            DAOFactory.getDAOFactory().getResourceTypeDAO()
+            .findByName(AuthzConstants.escalationResourceTypeName);
+        
+        PermissionManager permMgr =
+            PermissionManagerFactory.getInstance();
+        permMgr.check(subj.getId(), AuthzConstants.rootResType, rt.getId(),
+                      operation);
+    }
+    
+    protected void canCreateEscalation(AuthzSubjectValue subj)
+        throws PermissionException {
+        checkEscalation(subj, AuthzConstants.escOpCreateEscalation);
+    }
+    
+    protected void canViewEscalation(AuthzSubjectValue subj)
+        throws PermissionException {
+        checkEscalation(subj, AuthzConstants.escOpViewEscalation);
+    }
+    
+    protected void canModifyEscalation(AuthzSubjectValue subj)
+        throws PermissionException {
+        checkEscalation(subj, AuthzConstants.escOpModifyEscalation);
+    }
+    
+    protected void canRemoveEscalation(AuthzSubjectValue subj)
+        throws PermissionException {
+        checkEscalation(subj, AuthzConstants.escOpRemoveEscalation);
     }
 }
