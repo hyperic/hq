@@ -119,22 +119,6 @@ public abstract class SessionBase {
         // Permission Check Succesful
     }
 
-    /**
-     * Check alerting permission 
-     * @param subject - who
-     * @param resourceType - type of resource 
-     * @param instance Id - the id of the object
-     * @param operation - the name of the operation to perform
-     */
-    private void checkAlerting(AuthzSubjectValue subject, AppdefEntityID id,
-                               String operation)
-        throws PermissionException {
-        log.debug("Checking Permission for Operation: "
-            + operation + " ResourceType: " + id.getTypeName() +
-            " Instance Id: " + id + " Subject: " + subject);
-        checkPermission(subject.getId(), id.getTypeName(), id.getId(), operation);
-    }
-
     protected void canManageAlerts(AuthzSubjectValue who, AlertDefinition ad)
         throws PermissionException {
         Integer parentId = ad.getParent() != null ? ad.getParent().getId()
@@ -149,21 +133,27 @@ public abstract class SessionBase {
     protected void canManageAlerts(AuthzSubjectValue subject, AppdefEntityID id)
         throws PermissionException {
         int type = id.getType();
+        String rtName = null;
         String opName = null;
         switch (type) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                rtName = AuthzConstants.platformResType;
                 opName = AuthzConstants.platformOpManageAlerts;
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                rtName = AuthzConstants.serverResType;
                 opName = AuthzConstants.serverOpManageAlerts;
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                rtName = AuthzConstants.serviceResType;
                 opName = AuthzConstants.serviceOpManageAlerts;
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                rtName = AuthzConstants.applicationResType;
                 opName = AuthzConstants.appOpManageAlerts;
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                rtName = AuthzConstants.groupResourceTypeName;
                 opName = AuthzConstants.groupOpManageAlerts;
                 break;                
             default:
@@ -171,7 +161,7 @@ public abstract class SessionBase {
                     type);
         }
         // now check
-        checkAlerting(subject, id, opName);
+        checkPermission(subject.getId(), rtName, id.getId(), opName);
     }
     
     private static void checkEscalation(Integer subjectId,
