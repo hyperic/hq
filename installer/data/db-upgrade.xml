@@ -1830,6 +1830,21 @@ has already been defined.
       <schema-insert table="EAM_ROLE_OPERATION_MAP"
                      insertCmd="(ROLE_ID, OPERATION_ID, CID) VALUES (0, 415, 71)"/>
     </schemaSpec>
+
+    <schemaSpec version="3.03">
+      <schema-directSQL>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='org.hyperic.hq.bizapp.server.trigger.conditional.ControlEventTrigger'
+            WHERE CLASSNAME='com.hyperic.hq.bizapp.server.trigger.conditional.ControlEventTrigger'
+        </statement>
+        <statement>
+          UPDATE EAM_REGISTERED_TRIGGER
+              SET CLASSNAME='org.hyperic.hq.bizapp.server.trigger.conditional.LogEventTrigger'
+            WHERE CLASSNAME='com.hyperic.hq.bizapp.server.trigger.conditional.LogEventTrigger'
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
 </dbupgrade>
 
 </target>

@@ -30,9 +30,11 @@
 
       triggers = \
         org.hyperic.hq.bizapp.server.trigger.conditional.MeasurementThresholdTrigger, \
+        org.hyperic.hq.bizapp.server.trigger.conditional.ControlEventTrigger, \
         org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger, \
         org.hyperic.hq.bizapp.server.trigger.conditional.AlertTrigger, \
-        org.hyperic.hq.bizapp.server.trigger.conditional.CustomPropertyTrigger 
+        org.hyperic.hq.bizapp.server.trigger.conditional.CustomPropertyTrigger, \
+        org.hyperic.hq.bizapp.server.trigger.conditional.LogEventTrigger
 
       actions =
     </attribute>
