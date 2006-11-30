@@ -133,4 +133,61 @@
 </tr>
 </c:if>
 
+<c:if test="${controlEnabled}">
+<tr>
+  <td class="BlockLabel">&nbsp;</td>
+  <logic:messagesPresent property="condition[0].controlAction">
+  <c:set var="controlActionErrs" value="true"/>
+  </logic:messagesPresent>
+  <logic:messagesPresent property="condition[0].controlActionStatus">
+  <c:set var="controlActionStatusErrs" value="true"/>
+  </logic:messagesPresent>
+  <c:choose>
+  <c:when test="${controlActionErrs or controlActionStatusErrs}">
+  <td class="ErrorField">
+  </c:when>
+  <c:otherwise>
+  <td class="BlockContent">
+  </c:otherwise>
+  </c:choose>
+    <html:radio property="condition[0].trigger" value="onEvent"/>
+    <fmt:message key="alert.config.props.CB.Content.ControlAction"/>&nbsp;
+    <html:select property="condition[0].controlAction">
+    <html:option value="" key="alert.dropdown.SelectOption"/>
+    <html:options property="controlActions"/>
+    </html:select>
+    &nbsp;<fmt:message key="alert.config.props.CB.Content.Comparator.="/>&nbsp;
+    <html:select property="condition[0].controlActionStatus">
+    <html:option value="" key="alert.dropdown.SelectOption"/>
+    <html:options property="controlActionStatuses"/>
+    </html:select>
+    <c:if test="${controlActionErrs}">
+    <br><span class="ErrorFieldContent">- <html:errors property="condition[0].controlAction"/></span>
+    </c:if>
+    <c:if test="${controlActionStatusErrs}">
+    <br><span class="ErrorFieldContent">- <html:errors property="condition[0].controlActionStatus"/></span>
+    </c:if>
+  </td>
+</tr>
+</c:if>
+
+<c:if test="${logTrackEnabled}">
+<tr>
+  <td class="BlockLabel">&nbsp;</td>
+  <td class="BlockContent" nowrap>
+    <html:radio property="condition[0].trigger" value="onLog"/>
+    <fmt:message key="alert.config.props.CB.Content.Log"/>
+    <html:select property="condition[0].logLevel">
+      <html:option value="-1" key="any"/>
+      <html:option value="3" key="resource.common.monitor.label.events.Error"/>
+      <html:option value="4" key="resource.common.monitor.label.events.Warn"/>
+      <html:option value="6" key="resource.common.monitor.label.events.Info"/>
+      <html:option value="7" key="resource.common.monitor.label.events.Debug"/>
+    </html:select>
+    <bean:message bundle="ee" key="alert.config.props.CB.Content.Match"/>
+    <html:text property="condition[0].logMatch" size="10" maxlength="25"/>
+  </td>
+</tr>
+</c:if>
+
 
