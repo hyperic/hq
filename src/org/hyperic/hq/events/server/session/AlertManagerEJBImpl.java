@@ -74,7 +74,7 @@ import org.hyperic.util.pager.SortAttribute;
  * 
  * @ejb:transaction type="REQUIRED"
  */
-public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
+public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     private final String _logCtx = AlertManagerEJBImpl.class.getName();
     private final Log    _log = LogFactory.getLog(_logCtx);
     private final String VALUE_PROCESSOR =

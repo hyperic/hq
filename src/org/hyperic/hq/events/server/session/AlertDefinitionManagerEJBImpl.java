@@ -79,7 +79,7 @@ import org.hyperic.util.pager.SortAttribute;
  *
  */
 public class AlertDefinitionManagerEJBImpl 
-    extends SessionEJB
+    extends SessionBase
     implements SessionBean 
 {
     private final String VALUE_PROCESSOR =

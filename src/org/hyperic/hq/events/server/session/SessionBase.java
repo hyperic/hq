@@ -37,10 +37,7 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
-import org.hyperic.hq.authz.server.session.Operation;
-import org.hyperic.hq.authz.server.session.OperationDAO;
 import org.hyperic.hq.authz.server.session.ResourceType;
-import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -50,11 +47,10 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.util.jdbc.IDGenerator;
 
-/** Entity EJB superclass, which provides generic utility
- * functions
+/** Session class superclass, which provides generic utility functions
  */
-public abstract class SessionEJB {
-    protected Log log = LogFactory.getLog(SessionEJB.class);
+public abstract class SessionBase {
+    protected Log log = LogFactory.getLog(SessionBase.class);
 
     /** the events database name */
     protected static final String DATASOURCE = HQConstants.DATASOURCE;
@@ -81,12 +77,8 @@ public abstract class SessionEJB {
     protected Long getNextId(String seq) throws CreateException {
         IDGenerator idGen = (IDGenerator) idGenerators.get(seq);
         if (idGen == null) {
-            idGen =
-                new IDGenerator(
-                    SessionEJB.class.getName(),
-                    seq,
-                    SEQUENCE_INTERVAL,
-                    DATASOURCE);
+            idGen = new IDGenerator(SessionBase.class.getName(), seq,
+                                    SEQUENCE_INTERVAL, DATASOURCE);
             idGenerators.put(seq, idGen);
         }
 
@@ -117,17 +109,18 @@ public abstract class SessionEJB {
      * @throws PermissionException if the user is not authorized to perform the
      * operation on the resource
      */
-    private void checkPermission(AuthzSubjectValue subject, String rtName,
-                                 Integer instId, String operation)
+    private static void checkPermission(AuthzSubjectValue subject,
+                                        String rtName, Integer instId,
+                                        String operation)
         throws PermissionException {
         PermissionManager permMgr = PermissionManagerFactory.getInstance();
         // note, using the "SLOWER" permission check
         permMgr.check(subject.getId(), rtName, instId, operation);
-        log.debug("Permission Check Succesful");
+        // Permission Check Succesful
     }
 
     /**
-     * Check a permission 
+     * Check alerting permission 
      * @param subject - who
      * @param resourceType - type of resource 
      * @param instance Id - the id of the object
@@ -181,8 +174,12 @@ public abstract class SessionEJB {
         checkAlerting(subject, id, opName);
     }
     
-    private void checkEscalation(AuthzSubjectValue subject, String operation) 
+    private static void checkEscalation(AuthzSubjectValue subject,
+                                        String operation) 
         throws PermissionException {
+        // The escalation resource type is looked up for its ID to be used
+        // instance ID.  The reason is that escalations are global, and we're
+        // not applying escalation permission per appdef resource.
         ResourceType rt =
             DAOFactory.getDAOFactory().getResourceTypeDAO()
             .findByName(AuthzConstants.escalationResourceTypeName);
@@ -191,22 +188,22 @@ public abstract class SessionEJB {
                         operation);        
     }
     
-    protected void canCreateEscalation(AuthzSubjectValue subj)
+    protected static void canCreateEscalation(AuthzSubjectValue subj)
         throws PermissionException {
         checkEscalation(subj, AuthzConstants.escOpCreateEscalation);
     }
     
-    protected void canViewEscalation(AuthzSubjectValue subj)
+    protected static void canViewEscalation(AuthzSubjectValue subj)
         throws PermissionException {
         checkEscalation(subj, AuthzConstants.escOpViewEscalation);
     }
     
-    protected void canModifyEscalation(AuthzSubjectValue subj)
+    protected static void canModifyEscalation(AuthzSubjectValue subj)
         throws PermissionException {
         checkEscalation(subj, AuthzConstants.escOpModifyEscalation);
     }
     
-    protected void canRemoveEscalation(AuthzSubjectValue subj)
+    protected static void canRemoveEscalation(AuthzSubjectValue subj)
         throws PermissionException {
         checkEscalation(subj, AuthzConstants.escOpRemoveEscalation);
     }

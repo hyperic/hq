@@ -51,7 +51,7 @@ import org.hyperic.util.jdbc.DBUtil;
  *      type="Stateless"
  *
  */
-public class TriggerTrackerEJBImpl extends SessionEJB implements SessionBean {
+public class TriggerTrackerEJBImpl extends SessionBase implements SessionBean {
     private final String logCtx =
         "org.hyperic.hq.events.server.session.TriggerTrackerEJBImpl";
 

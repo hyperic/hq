@@ -59,7 +59,7 @@ import org.hyperic.util.pager.PageControl;
  *
  * @ejb:transaction type="REQUIRED"
  */
-public class EventLogManagerEJBImpl extends SessionEJB implements SessionBean {
+public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
     private final String logCtx =
         EventLogManagerEJBImpl.class.getName();
     

@@ -59,7 +59,7 @@ import org.hyperic.util.jdbc.DBUtil;
  *      
  * @ejb:transaction type="NOTSUPPORTED"
  */
-public class EventTrackerEJBImpl extends SessionEJB implements SessionBean {
+public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
     private final String logCtx =
         "org.hyperic.hq.events.server.session.EventTrackerEJBImpl";
     private final Log log = LogFactory.getLog(logCtx);
