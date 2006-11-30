@@ -1528,8 +1528,9 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     {
         // TODO: access check on escalation resource
         try {
-            return EscalationMediator.getInstance().findByEscalationName(name)
-                    .toJSON();
+            Escalation e =
+                    EscalationMediator.getInstance().findByEscalationName(name);
+            return e != null ? e.toJSON() : null;
         } catch (JSONException e) {
             throw new SystemException(e);
         }
@@ -1548,9 +1549,10 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     {
         // TODO: access check on escalation resource
         try {
-            return EscalationMediator.getInstance()
-                    .findEscalationByAlertDefId(id)
-                    .toJSON();
+            Escalation e =
+                    EscalationMediator.getInstance()
+                            .findEscalationByAlertDefId(id);
+            return e != null ? e.toJSON() : null;
         } catch (JSONException e) {
             throw new SystemException(e);
         }

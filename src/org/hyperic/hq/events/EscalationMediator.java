@@ -231,7 +231,7 @@ public class EscalationMediator extends Mediator
 
     public Escalation findByEscalationName(String name)
     {
-        Escalation e = Escalation.newInstance(name);
+        Escalation e = Escalation.newSearchable(name);
         return (Escalation)transactionManager.findPersisted(e);
     }
 

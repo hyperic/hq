@@ -123,17 +123,17 @@ public class EscalationTest
             EscalationMediator.getInstance().getEscalationState(e, ALERT_DEF_ID1);
         assertTrue(state.getModifiedTime() > mtime);
         
-        EscalationMediator.getInstance().remove(e);
-        try {
-            EscalationMediator.getInstance().findEscalationById(e);
-            assertTrue(1==0);
-        } catch (EJBException ignore) {
-            // object should not be found
-            Exception ex = ignore.getCausedByException();
-            assertTrue(ex instanceof ObjectNotFoundException);
-        } catch (ObjectNotFoundException ignore) {
-            // object should not be found
-        }
+//        EscalationMediator.getInstance().remove(e);
+//        try {
+//            EscalationMediator.getInstance().findEscalationById(e);
+//            assertTrue(1==0);
+//        } catch (EJBException ignore) {
+//            // object should not be found
+//            Exception ex = ignore.getCausedByException();
+//            assertTrue(ex instanceof ObjectNotFoundException);
+//        } catch (ObjectNotFoundException ignore) {
+//            // object should not be found
+//        }
     }
 
     private EscalationAction createEmailAction(String[] users) {

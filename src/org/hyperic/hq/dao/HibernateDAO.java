@@ -31,6 +31,7 @@ import java.util.List;
 
 import org.hibernate.LockMode;
 import org.hibernate.Session;
+import org.hibernate.type.Type;
 import org.hibernate.criterion.Example;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
@@ -72,10 +73,19 @@ public abstract class HibernateDAO {
                : getSession().load(getPersistentClass(), id);
     }
 
-    public List findByExample(Serializable s) {
+    public List findByExample(final PersistedObject p) {
+        // searchable properties
+        Example.PropertySelector selector =
+                new Example.PropertySelector() {
+                    public boolean include(Object val, String name, Type type)
+                    {
+                        return p.getSearchable().contains(name);
+                    }
+                };
+        
         return getSession().createCriteria(getPersistentClass())
-            .add(Example.create(s).excludeZeroes())
-            .list();
+                .add(Example.create(p).setPropertySelector(selector))
+                .list();
     }
 
     public Collection findAll() {

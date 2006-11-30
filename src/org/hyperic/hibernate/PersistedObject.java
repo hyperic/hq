@@ -26,6 +26,8 @@
 package org.hyperic.hibernate;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.hyperic.dao.DAOFactory;
 
@@ -43,7 +45,10 @@ public abstract class PersistedObject
 
     // for hibernate optimistic locks -- don't mess with this.
     // Named ugly-style since we already use VERSION in some of our tables.
-    private long    _version_;
+    private long    _version_;// list of parameters set by call to newInstance
+
+    // list of searchable fields
+    protected List searchable = new ArrayList(0);
 
     // XXX -- This is public for now, but should be made more private later
     protected void setId(Integer id) {
@@ -60,6 +65,26 @@ public abstract class PersistedObject
 
     protected void set_version_(long newVer) {
         _version_ = newVer;
+    }
+
+    protected void resetSearchable()
+    {
+        searchable.clear();
+    }
+
+    protected void removeSearchable(String name)
+    {
+        searchable.remove(name);
+    }
+
+    protected void addSearchable(String name)
+    {
+        searchable.add(name);
+    }
+
+    public List getSearchable()
+    {
+        return searchable;
     }
     
     public boolean equals(Object obj) {
