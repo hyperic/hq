@@ -63,8 +63,10 @@
                    type="org.hyperic.hq.ui.action.portlet.addresource.AddResourcesForm"/>  
         <form-bean name="AvailSummaryForm"
                    type="org.hyperic.hq.ui.action.portlet.availsummary.PropertiesForm"/>
+        <form-bean name="MetricViewerForm"
+                   type="org.hyperic.hq.ui.action.portlet.metricviewer.PropertiesForm"/>
 
-        <!-- RESOURCE CONTROL FORMS -->
+      <!-- RESOURCE CONTROL FORMS -->
         <form-bean name="ControlActionsForm"
                    type="org.hyperic.hq.ui.action.portlet.controlactions.PropertiesForm"/>
 
@@ -2440,7 +2442,41 @@
               <forward name="reset" path="/dashboard/Admin.do?mode=availSummary"/>
               <forward name="remove" path="/dashboard/Admin.do?mode=availSummary"/>
               <forward name="review" path="/dashboard/Admin.do?mode=availSummary"/>
-      </action>  
+      </action>
+
+      <action path="/dashboard/ViewMetrics"
+              type="org.hyperic.hq.ui.action.portlet.metricviewer.ViewAction"/>
+
+      <action path="/dashboard/metricviewer/AddResourcesAction"
+              type="org.hyperic.hq.ui.action.portlet.addresource.AddResourcesAction"
+              name="DashboardAddResourceHealthForm"
+              scope="request"
+              input="/dashboard/Admin.do?mode=metricViewerAddResources">
+              <forward name="cancel"  path="/dashboard/Admin.do?mode=metricViewer"/>
+              <forward name="reset"   path="/dashboard/Admin.do?mode=metricViewerAddResources"/>
+              <forward name="add"     path="/dashboard/Admin.do?mode=metricViewerAddResources"/>
+              <forward name="remove"  path="/dashboard/Admin.do?mode=metricViewerAddResources"/>
+              <forward name="failure" path="/dashboard/Admin.do?mode=metricViewerAddResources"/>
+              <forward name="success" path="/dashboard/Admin.do?mode=metricViewer"/>
+      </action>
+
+      <action path="/dashboard/EditMetricViewer"
+              type="org.hyperic.hq.ui.action.portlet.metricviewer.PrepareAction"
+              name="MetricViewerForm"
+              scope="request">
+      </action>
+
+      <action path="/dashboard/ModifyMetricViewer"
+              type="org.hyperic.hq.ui.action.portlet.metricviewer.ModifyAction"
+              name="MetricViewerForm"
+              scope="request"
+              input="/dashboard/EditMetricViewer">
+              <forward name="success" path="/Dashboard.do" redirect="true"/>
+              <forward name="cancel" path="/Dashboard.do" redirect="true"/>
+              <forward name="reset" path="/dashboard/Admin.do?mode=metricViewer"/>
+              <forward name="remove" path="/dashboard/Admin.do?mode=metricViewer"/>
+              <forward name="review" path="/dashboard/Admin.do?mode=metricViewer"/>
+      </action>
 
       <!-- / -->
             

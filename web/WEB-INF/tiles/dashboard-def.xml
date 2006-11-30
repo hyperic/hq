@@ -121,6 +121,22 @@
               controllerUrl="/dashboard/AddResourcesPrepareAction.do"
               path="/portlet/availSummary/AddResources.jsp"/>
 
+  <definition name=".dashContent.metricViewer"
+              controllerUrl="/dashboard/ViewMetrics.do"
+              path="/portlet/metricViewer/View.jsp">
+              <put name="adminUrl" value="/dashboard/Admin.do?mode=metricViewer" />
+              <put name="portletName" value=".dashContent.metricViewer"/>
+  </definition>
+
+  <definition name=".dashContent.admin.metricViewer"
+              controllerUrl="/dashboard/EditMetricViewer.do"
+              path="/portlet/metricViewer/Properties.jsp">
+              <put name="portletName" value=".dashContent.metricViewer" />
+  </definition>
+  <definition name=".dashContent.admin.metricViewer.addResources"
+              controllerUrl="/dashboard/AddResourcesPrepareAction.do"
+              path="/portlet/metricViewer/AddResources.jsp"/>
+    
   <definition name=".dashContent.controlActions"
               controllerUrl="/dashboard/ViewControlActions.do"
               path="/portlet/controlactions/View.jsp">

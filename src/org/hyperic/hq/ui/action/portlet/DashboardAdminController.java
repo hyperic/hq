@@ -65,6 +65,9 @@ public class DashboardAdminController extends BaseDispatchAction {
         keyMethodMap.setProperty("availSummary", "availSummary");
         keyMethodMap.setProperty("availSummaryAddResources",
                                  "availSummaryAddResources");
+        keyMethodMap.setProperty("metricViewer", "metricViewer");
+        keyMethodMap.setProperty("metricViewerAddResources",
+                                 "metricViewerAddResources");
     }
     
     protected Properties getKeyMethodMap() {
@@ -264,6 +267,39 @@ public class DashboardAdminController extends BaseDispatchAction {
         Portal portal =
             Portal.createPortal("dash.settings.PageTitle.A.addResources",
                                 ".dashContent.admin.availSummary.addResources");
+        portal.setDialog(true);
+
+        request.setAttribute(Constants.PORTAL_KEY, portal);
+
+        return null;
+    }
+
+    public ActionForward metricViewer(ActionMapping mapping,
+                                      ActionForm form,
+                                      HttpServletRequest request,
+                                      HttpServletResponse response)
+        throws Exception
+    {
+        Portal portal =
+            Portal.createPortal("dash.settings.PageTitle.MV",
+                                ".dashContent.admin.metricViewer");
+        portal.setDialog(true);
+
+        request.setAttribute(Constants.PORTAL_KEY, portal);
+
+        return null;
+
+    }
+
+    public ActionForward metricViewerAddResources(ActionMapping mapping,
+                                                  ActionForm form,
+                                                  HttpServletRequest request,
+                                                  HttpServletResponse response)
+        throws Exception
+    {
+        Portal portal =
+            Portal.createPortal("dash.settings.PageTitle.A.addResources",
+                                ".dashContent.admin.metricViewer.addResources");
         portal.setDialog(true);
 
         request.setAttribute(Constants.PORTAL_KEY, portal);

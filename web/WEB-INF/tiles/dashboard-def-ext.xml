@@ -16,7 +16,8 @@
                 <add value=".dashContent.controlActions"/>
                 <add value=".dashContent.resourceHealth"/>
                 <add value=".dashContent.criticalAlerts"/>
-              </putList> 
+                <add value=".dashContent.metricViewer"/>
+              </putList>
   </definition>  
     
 </tiles-definitions>
