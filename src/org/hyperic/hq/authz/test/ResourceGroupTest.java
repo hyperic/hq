@@ -46,8 +46,7 @@ import org.hyperic.hibernate.Util;
 import org.hyperic.dao.DAOFactory;
 
 public class ResourceGroupTest extends HQEJBTestBase {
-    private final int RANDOM_ID = (new Random()).nextInt(10000);
-    private final String BOGUS_NAME = "foobar " + RANDOM_ID;
+    private final String BOGUS_NAME = u("ResourceGroupTest Name");
     
     private ResourceGroupManagerLocal rman;
     
@@ -100,8 +99,9 @@ public class ResourceGroupTest extends HQEJBTestBase {
                 ResourceTypeValue rtv =
                     remg.findResourceTypeByName(AuthzConstants.platformResType);
                 assertEquals(AuthzConstants.platformResType, rtv.getName());
+                int randomId = (new Random()).nextInt(10000);
                 Resource pk = remg.createResource(overlord, rtv,
-                                                  new Integer(RANDOM_ID),
+                                                  new Integer(randomId),
                                                   "Platform " + BOGUS_NAME,
                                                   false);
 
