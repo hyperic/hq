@@ -26,17 +26,35 @@
 package org.hyperic.hq.events.server.session;
 
 import java.util.HashMap;
-import java.util.StringTokenizer;
+import java.util.List;
 
 import javax.ejb.CreateException;
+import javax.ejb.FinderException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.util.jdbc.IDGenerator;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
+import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
+import org.hyperic.hq.authz.server.session.Operation;
+import org.hyperic.hq.authz.server.session.OperationDAO;
+import org.hyperic.hq.authz.server.session.ResourceType;
+import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.util.jdbc.IDGenerator;
 
 /** Entity EJB superclass, which provides generic utility
  * functions
@@ -94,4 +112,101 @@ public abstract class SessionEJB {
         }
     }
 
+    private AppdefEntityID getAppdefEntityID(AlertDefinitionValue ad) {
+        return new AppdefEntityID(ad.getAppdefType(), ad.getAppdefId());
+    }
+    
+    protected AppdefEntityID getAppdefEntityID(AlertDefinition ad) {
+        return new AppdefEntityID(ad.getAppdefType(), ad.getAppdefId());
+    }
+
+    private void canManageAlerts(AuthzSubjectValue who, AppdefEntityID[] ids)
+        throws PermissionException, FinderException {
+        for (int i = 0; i < ids.length; i++) {
+            canManageAlerts(who, ids[i]);
+        }
+    }
+
+    private void canManageAlerts(AuthzSubjectValue who, List ads)
+        throws PermissionException {
+        for (int i = 0; i < ads.size(); i++) {
+            AlertDefinitionValue ad = (AlertDefinitionValue) ads.get(i);
+            canManageAlerts(who, getAppdefEntityID(ad));
+        }
+    }
+
+    protected void canManageAlerts(AuthzSubjectValue who, AlertDefinition ad)
+        throws PermissionException {
+        Integer parentId = ad.getParent() != null ? ad.getParent().getId()
+                : null;
+        if (!EventConstants.TYPE_ALERT_DEF_ID.equals(parentId))
+            canManageAlerts(who, getAppdefEntityID(ad));
+    }
+
+    private void canManageAlerts(AuthzSubjectValue who, AlertDefinitionValue ad)
+        throws PermissionException {
+        if (!EventConstants.TYPE_ALERT_DEF_ID.equals(ad.getParentId()))
+            canManageAlerts(who, getAppdefEntityID(ad));
+    }
+
+    /**
+     * Check a permission 
+     * @param subject - who
+     * @param resourceType - type of resource 
+     * @param instance Id - the id of the object
+     * @param operation - the name of the operation to perform
+     */
+    private void checkPermission(AuthzSubjectValue subject, 
+                                   AppdefEntityID id, String operation)
+        throws PermissionException 
+    {
+        ResourceTypeDAO rtDAO =
+            DAOFactory.getDAOFactory().getResourceTypeDAO();
+        ResourceType rt = rtDAO.findByName(id.getTypeName());
+        log.debug("Checking Permission for Operation: "
+            + operation + " ResourceType: " + rt +
+            " Instance Id: " + id + " Subject: " + subject);
+        PermissionManager permMgr =
+            PermissionManagerFactory.getInstance();
+        OperationDAO opDAO =
+            DAOFactory.getDAOFactory().getOperationDAO();
+        Operation op = opDAO.findByTypeAndName(rt, operation);
+        // note, using the "SLOWER" permission check
+        permMgr.check(subject.getId(), rt.getId(), id.getId(), op.getId());
+        log.debug("Permission Check Succesful");
+    }
+
+
+
+    /**
+     * Check for manage alerts permission for a given resource
+     */
+    protected void canManageAlerts(AuthzSubjectValue subject,
+                                           AppdefEntityID id)
+        throws PermissionException {
+        int type = id.getType();
+        String opName = null;
+        switch (type) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                opName = AuthzConstants.platformOpManageAlerts;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                opName = AuthzConstants.serverOpManageAlerts;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                opName = AuthzConstants.serviceOpManageAlerts;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                opName = AuthzConstants.appOpManageAlerts;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                opName = AuthzConstants.groupOpManageAlerts;
+                break;                
+            default:
+                throw new InvalidAppdefTypeException("Unknown type: " +
+                    type);
+        }
+        // now check
+        checkPermission(subject, id, opName);
+    }
 }

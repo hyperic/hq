@@ -77,20 +77,19 @@ import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.AlertConditionCreateException;
 import org.hyperic.hq.events.AlertDefinitionCreateException;
 import org.hyperic.hq.events.AlertNotFoundException;
+import org.hyperic.hq.events.EscalationMediator;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerCreateException;
-import org.hyperic.hq.events.EscalationMediator;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggerEvent;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
-import org.hyperic.hq.events.server.session.RegisteredTriggerNotifier;
 import org.hyperic.hq.events.server.session.Escalation;
+import org.hyperic.hq.events.server.session.RegisteredTriggerNotifier;
 import org.hyperic.hq.events.shared.ActionManagerLocal;
 import org.hyperic.hq.events.shared.ActionManagerUtil;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
-import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
@@ -113,9 +112,9 @@ import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
-import org.json.JSONObject;
-import org.json.JSONException;
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /** 
  * The BizApp's interface to the Events Subsystem
@@ -141,13 +140,9 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     private ActionManagerLocal            actMan;
 
     public EventsBossEJBImpl() {
-        this.manager = SessionManager.getInstance();
+        manager = SessionManager.getInstance();
     }
 
-    private AlertDefinitionDAO getAlertDefDAO() {
-        return DAOFactory.getDAOFactory().getAlertDefDAO();
-    }
-    
     private RegisteredTriggerManagerLocal getRTM() {
         if (triggerMan == null) {
             try {
@@ -419,15 +414,13 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                PermissionException, InvalidOptionException,
                InvalidOptionValueException, 
                SessionNotFoundException, SessionTimeoutException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
 
         // Verify that there are some conditions to evaluate
         if (adval.getConditions().length == 0) {
             throw new AlertDefinitionCreateException(
                 "Conditions cannot be null or empty");
         }        
-        // check that the user can modify alerts for resource
-        canManageAlerts(subject, getAppdefEntityID(adval));
         
         // Create list of ID's to create the alert definition
         List appdefIds = new ArrayList();
@@ -471,7 +464,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                 }
             
                 // Create the triggers
-                this.createTriggers(subject, adval);
+                createTriggers(subject, adval);
                 triggers.addAll(Arrays.asList(adval.getTriggers()));
             }
 
@@ -481,7 +474,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
             try {
                 // Now create the alert definition
                 AlertDefinitionValue created =
-                    getADM().createAlertDefinition(adval);
+                    getADM().createAlertDefinition(subject, adval);
                 
                 if (parent == null)
                     parent = created;
@@ -511,7 +504,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                PermissionException, InvalidOptionException,
                InvalidOptionValueException, 
                SessionNotFoundException, SessionTimeoutException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
 
         // Verify that there are some conditions to evaluate
         if (adval.getConditions().length == 0) {
@@ -528,7 +521,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         
         try {
             // Now create the alert definition
-            parent = getADM().createAlertDefinition(adval);
+            parent = getADM().createAlertDefinition(subject, adval);
         } catch (FinderException e) {
             throw new AlertDefinitionCreateException(e.getMessage());
         }
@@ -571,7 +564,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
             cloneParentConditions(subject, id, adval, parent.getConditions());
                         
             // Create the triggers
-            this.createTriggers(subject, adval);
+            createTriggers(subject, adval);
             triggers.addAll(Arrays.asList(adval.getTriggers()));
 
             // Make sure the actions have the proper parentId
@@ -587,7 +580,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
 
             try {
                 // Now create the alert definition
-                getADM().createAlertDefinition(adval);
+                getADM().createAlertDefinition(subject, adval);
             } catch (FinderException e) {
                 throw new AlertDefinitionCreateException(e.getMessage());
             }
@@ -648,7 +641,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         // Find the alert definitions for the type
         AppdefEntityTypeID aetid =
             new AppdefEntityTypeID(type.getAppdefTypeId(), type.getId());
-        List defs = getADM().findAlertDefinitions(
+        List defs = getADM().findAlertDefinitions(subject,
             aetid, EventConstants.TYPE_ALERT_DEF_ID, PageControl.PAGE_ALL);
         
         ArrayList triggers = new ArrayList();
@@ -668,7 +661,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
             cloneParentConditions(subject, id, adval, adval.getConditions());
         
             // Create the triggers
-            this.createTriggers(subject, adval);
+            createTriggers(subject, adval);
             triggers.addAll(Arrays.asList(adval.getTriggers()));
     
             // Create a measurement AlertLogAction if necessary
@@ -676,7 +669,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     
             try {
                 // Now create the alert definition
-                getADM().createAlertDefinition(adval);
+                getADM().createAlertDefinition(subject, adval);
             } catch (FinderException e) {
                 throw new AlertDefinitionCreateException(e.getMessage());
             }
@@ -699,7 +692,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         throws SessionNotFoundException, SessionTimeoutException,
                ActionCreateException, RemoveException, FinderException,
                PermissionException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
 
         ActionValue action = new ActionValue();
 
@@ -712,7 +705,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
 
         ArrayList alertdefs = new ArrayList();
         // Associate with alert definition
-        alertdefs.add(getADM().getById(adid));
+        alertdefs.add(getADM().getById(subject, adid));
         
         // If there are any children
         alertdefs.addAll(getADM().findAlertDefinitionChildren(adid));
@@ -720,11 +713,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         // check that the user can actually manage alerts for this resource
         for (Iterator it = alertdefs.iterator(); it.hasNext(); ) {
             AlertDefinitionValue ad = (AlertDefinitionValue) it.next();
-            AlertDefinition def = getAlertDefDAO().findById(ad.getId());
-            
-            canManageAlerts(subject, ad);
 
-            getADM().addAction(def, action);
+            getADM().addAction(subject, ad.getId(), action);
 
             if (action.getParentId() == null) {
                 action.setParentId(action.getId());
@@ -746,9 +736,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                                        boolean enable)
         throws SessionNotFoundException, SessionTimeoutException, 
                FinderException, PermissionException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
-        canManageAlerts(subject, ids);
-        getADM().updateAlertDefinitionsEnable(ids, enable);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        getADM().updateAlertDefinitionsEnable(subject, ids, enable);
     }
 
     /**
@@ -762,10 +751,9 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                                            int priority, boolean enabled)
         throws SessionNotFoundException, SessionTimeoutException,
                FinderException, RemoveException, PermissionException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
-        canManageAlerts(subject, alertDefId);
-        getADM().updateAlertDefinitionBasic(alertDefId, name, desc, priority,
-                                            enabled);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        getADM().updateAlertDefinitionBasic(subject, alertDefId, name, desc,
+                                            priority, enabled);
     }
 
     /**
@@ -779,7 +767,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                InvalidOptionValueException, AlertConditionCreateException,
                ActionCreateException, FinderException, RemoveException,
                SessionNotFoundException, SessionTimeoutException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
 
         // Verify that there are some conditions to evaluate
         if (adval.getConditions().length < 1) {
@@ -825,7 +813,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                     
                 // Triggers are deleted by the manager
                 getRTM().deleteAlertDefinitionTriggers(child.getId());
-                this.createTriggers(subject, child);
+                createTriggers(subject, child);
                 triggers.addAll(Arrays.asList(adval.getTriggers()));
             
                 // Now update the alert definition
@@ -837,7 +825,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
             getRTM().deleteAlertDefinitionTriggers(adval.getId());
             
             // Now create the new triggers
-            this.createTriggers(subject, adval);
+            createTriggers(subject, adval);
             triggers.addAll(Arrays.asList(adval.getTriggers()));
                 
             // Now update the alert definition
@@ -860,7 +848,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     public List getActionsForAlert(int sessionId, Integer alertId)
         throws SessionNotFoundException, SessionTimeoutException
     {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionId);
+        AuthzSubjectValue subject = manager.getSubject(sessionId);
 
         return getActMan().getActionsForAlert(alertId.intValue());
     }
@@ -874,7 +862,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     public void updateAction(int sessionID, ActionValue aval)
         throws SessionNotFoundException, SessionTimeoutException 
     {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
         getActMan().updateAction(aval);
     }
 
@@ -887,7 +875,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     public void removeAlertDefinitions(int sessionID, AppdefEntityID id)
         throws SessionNotFoundException, SessionTimeoutException, 
                RemoveException, PermissionException {
-        getADM().deleteAlertDefinitions(id);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        getADM().deleteAlertDefinitions(subject, id);
     }
 
     /**
@@ -899,14 +888,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     public void deleteAlertDefinitions(int sessionID, Integer[] ids)
         throws SessionNotFoundException, SessionTimeoutException, 
                RemoveException, PermissionException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
-        // check security
-        try {
-            canManageAlerts(subject, ids);
-        } catch (FinderException e) {
-            throw new RemoveException("AlertDefinition was not found");
-        }
-        getADM().deleteAlertDefinitions(ids);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        getADM().deleteAlertDefinitions(subject, ids);
     }
 
     /**
@@ -918,8 +901,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     public void deleteResourceTypeAlertDefinitions(int sessionID, Integer[] ids)
         throws SessionNotFoundException, SessionTimeoutException, 
                RemoveException, PermissionException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
-        getADM().deleteAlertDefinitions(ids);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        getADM().deleteAlertDefinitions(subject, ids);
     }
 
     /**
@@ -931,7 +914,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     public void deleteAlerts(int sessionID, Integer[] ids)
         throws SessionNotFoundException, SessionTimeoutException,
                RemoveException, PermissionException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
         /* incorrect to use alert IDs as alert definition IDs
         try {
             // check security
@@ -952,10 +935,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     public int deleteAlerts(int sessionID, AppdefEntityID aeid)
         throws SessionNotFoundException, SessionTimeoutException,
                RemoveException, PermissionException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
-        // check security
-        canManageAlerts(subject, aeid);
-        return getAM().deleteAlerts(aeid);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        return getAM().deleteAlerts(subject, aeid);
     }
     
     /**
@@ -967,7 +948,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     public int deleteAlerts(int sessionID, long begin, long end)
         throws SessionNotFoundException, SessionTimeoutException,
                RemoveException, PermissionException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
         // XXX - check security
         return getAM().deleteAlerts(begin, end);
     }
@@ -981,19 +962,19 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     public int deleteAlertsForDefinitions(int sessionID, Integer[] adids)
         throws SessionNotFoundException, SessionTimeoutException,
                RemoveException, PermissionException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
         // XXX - check security
         
         // Delete alerts for definition and its children
         int count = 0;
         for (int i = 0; i < adids.length; i++) {
-            count += getAM().deleteAlerts(adids[i]);
+            count += getAM().deleteAlerts(subject, adids[i]);
             
             List cids = getADM().findAlertDefinitionChildrenIds(adids[i]);
             
             for (Iterator it = cids.iterator(); it.hasNext(); ) {
                 Integer id = (Integer) it.next();
-                count += getAM().deleteAlerts(id);
+                count += getAM().deleteAlerts(subject, id);
             }
         }
         return count;
@@ -1007,26 +988,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     public AlertDefinitionValue getAlertDefinition(int sessionID, Integer id)
         throws SessionNotFoundException, SessionTimeoutException, 
                FinderException, PermissionException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
-        AlertDefinitionValue adval = getADM().getById(id);
-        if (!EventConstants.TYPE_ALERT_DEF_ID.equals(adval.getParentId()))
-            canManageAlerts(subject, getAppdefEntityID(adval));
-        return adval;
-    }
-
-    /**
-     * Get an alert definition by ID
-     *
-     * @ejb:interface-method
-     */
-    public AlertDefinition getAlertDefinitionBasic(int sessionID,
-                                                   Integer id)
-        throws SessionNotFoundException, SessionTimeoutException, 
-               FinderException, PermissionException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
-        AlertDefinition adval = getADM().getBasicById(id);
-        canManageAlerts(subject, getAppdefEntityID(adval));
-        return adval;
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        return getADM().getById(subject, id);
     }
 
     /**
@@ -1055,12 +1018,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     public AlertValue getAlert(int sessionID, Integer adid, long ctime)
         throws SessionNotFoundException, SessionTimeoutException, 
                AlertNotFoundException, PermissionException {
-        try {
-            canManageAlerts(manager.getSubject(sessionID), adid);                   
-        } catch (FinderException e) {
-            throw new AlertNotFoundException(adid);
-        }
-        return getAM().getByAlertDefAndTime(adid, ctime);
+        return getAM().getByAlertDefAndTime(manager.getSubject(sessionID),
+                                            adid, ctime);
     }
 
     /**
@@ -1072,10 +1031,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     public PageList findAllAlertDefinitions(int sessionID)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
-        PageList alertdefs = getADM().findAllAlertDefinitions();
-        canManageAlerts(subject, alertdefs);
-        return alertdefs;
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        return getADM().findAllAlertDefinitions(subject);
     }
 
 	/**
@@ -1087,9 +1044,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                                          PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
-        canManageAlerts(subject, id);
-        return getADM().findAlertDefinitions(id, pc);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        return getADM().findAlertDefinitions(subject, id, pc);
     }
     
     /**
@@ -1101,20 +1057,22 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                                          Integer parentId, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
-        return getADM().findAlertDefinitions(id, parentId, pc);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        return getADM().findAlertDefinitions(subject, id, parentId, pc);
     }
     
     /**
      * Get a collection of alert definitions for a resource or resource type
+     * @throws PermissionException 
      *
      * @ejb:interface-method
      */
     public PageList findAlertDefinitions(int sessionID, AppdefEntityTypeID id,
                                          PageControl pc)
-        throws SessionNotFoundException, SessionTimeoutException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
-        return getADM().findAlertDefinitions(id,
+        throws SessionNotFoundException, SessionTimeoutException,
+               PermissionException {
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        return getADM().findAlertDefinitions(subject, id,
                                              EventConstants.TYPE_ALERT_DEF_ID,
                                              pc);
     }
@@ -1128,13 +1086,13 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     public List findAlertDefinitionsByAgent(int sessionID, AppdefEntityID id)
     	throws SessionNotFoundException, SessionTimeoutException,
 			   AppdefEntityNotFoundException, PermissionException {
-    	AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+    	AuthzSubjectValue subject = manager.getSubject(sessionID);
     	// first get the tree 
         // bomb if this isnt a platform
         if(!id.isPlatform()) {
             throw new IllegalArgumentException(id + " is not a platform");
         }
-    	MiniResourceTree tree = this.getPlatformManager().getMiniResourceTree(subject, 
+    	MiniResourceTree tree = getPlatformManager().getMiniResourceTree(subject, 
                                         new AppdefEntityID[] { id }, 0);
         List resourceIds = new ArrayList();
         resourceIds.add(id);
@@ -1153,8 +1111,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
 
         // Add any platform services
         PageList platformServices =
-            this.getServiceManager().getPlatformServices(subject, id.getId(),
-                                                         PageControl.PAGE_ALL);
+            getServiceManager().getPlatformServices(subject, id.getId(),
+                                                    PageControl.PAGE_ALL);
         for(int i = 0; i< platformServices.size(); i++) {
             ServiceValue platformService = 
                 (ServiceValue)platformServices.get(i);
@@ -1181,11 +1139,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                                         Integer parentId)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, PermissionException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
-        if (!EventConstants.TYPE_ALERT_DEF_ID.equals(parentId))
-            canManageAlerts(subject, id);
-        
-        return getADM().findAlertDefinitionNames(id, parentId);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        return getADM().findAlertDefinitionNames(subject, id, parentId);
     }
     
     /**
@@ -1233,7 +1188,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      */
     public PageList findAllAlerts(int sessionID)
         throws SessionNotFoundException, SessionTimeoutException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
         // XXX no security... FIXME
         return getAM().findAllAlerts();
     }
@@ -1246,9 +1201,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     public PageList findAlerts(int sessionID, AppdefEntityID id, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
-        canManageAlerts(subject, id);
-        return getAM().findAlerts(id, pc);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        return getAM().findAlerts(subject, id, pc);
     }
 
     /**
@@ -1260,9 +1214,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                                long begin, long end, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
-        canManageAlerts(subject, id);
-        return getAM().findAlerts(id, begin, end, pc);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        return getAM().findAlerts(subject, id, begin, end, pc);
     }
 
     /**
@@ -1299,7 +1252,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                                PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
-        AuthzSubjectValue subject  = this.manager.getSubject(sessionID);
+        AuthzSubjectValue subject  = manager.getSubject(sessionID);
         StopWatch timer = new StopWatch();
         List appentResources = null;
         if (ids == null) {
@@ -1307,16 +1260,9 @@ public class EventsBossEJBImpl extends BizappSessionEJB
             // otherwise, it'll be filtered out later anyways
             // find ALL alertable resources
             appentResources = 
-                this.getPlatformManager().checkAlertingScope(subject);
+                getPlatformManager().checkAlertingScope(subject);
         } else {
-            // check security on all of the specified items if the list was
-            // supplied by the caller
-            try {
-                canManageAlerts(subject, ids);
-                appentResources = Arrays.asList(ids);
-            } catch (FinderException e) {
-                // should not happen
-            }
+            appentResources = Arrays.asList(ids);
         }
         
         if (log.isDebugEnabled()) {
@@ -1325,7 +1271,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         }
         
         PageList alerts =
-            getAM().findAlerts(count, priority, timeRange, appentResources, pc);
+            getAM().findAlerts(subject, count, priority, timeRange,
+                               appentResources, pc);
 
         if (log.isDebugEnabled()) {
             log.debug("findAlerts(): " + timer + " seconds");
@@ -1409,7 +1356,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         ActionInterface iface;
         Class c;
 
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
         try {
             c = Class.forName(actionClass);
             iface = (ActionInterface) c.newInstance();
@@ -1432,7 +1379,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                                                          String triggerClass)
         throws SessionNotFoundException, SessionTimeoutException, 
                EncodingException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
         RegisterableTriggerInterface iface;
         Class c;
 
@@ -1458,9 +1405,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                RemoveException, AlertDefinitionCreateException,
                FinderException, PermissionException
     {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
         // check security
-        canManageAlerts(subject, getAppdefEntityID(adval));
         RegisteredTriggerValue trigger = new RegisteredTriggerValue();
         trigger.setClassname(className);
         try {
@@ -1483,7 +1429,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
             acval.setComparator("=");
             adval.addCondition(acval);           
             
-            adval = getADM().createAlertDefinition(adval);
+            adval = getADM().createAlertDefinition(subject, adval);
             return adval.getId();
         }
         
@@ -1498,7 +1444,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     public Collection getAllRegisteredTriggers(int sessionID)
         throws SessionNotFoundException, SessionTimeoutException, 
                FinderException {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
         return getRTM().getAllTriggers();
     }
 
@@ -1589,59 +1535,6 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         return new AppdefEntityID(ad.getAppdefType(), ad.getAppdefId());
     }
     
-    private AppdefEntityID getAppdefEntityID(AlertDefinition ad) {
-        return new AppdefEntityID(ad.getAppdefType(), ad.getAppdefId());
-    }
-    
-    private void canManageAlerts(AuthzSubjectValue who, Integer[] adIds)
-        throws PermissionException, FinderException {
-        for(int i = 0; i < adIds.length; i++) {
-            canManageAlerts(who, adIds[i]);
-        }
-    }
-    
-    private void canManageAlerts(AuthzSubjectValue who, Integer alertDefId)
-        throws PermissionException, FinderException {
-        AlertDefinition ad = this.getADM().getBasicById(alertDefId);
-        canManageAlerts(who, ad);        
-    }
-    
-    private void canManageAlerts(AuthzSubjectValue who, AppdefEntityID[] ids)
-        throws PermissionException, FinderException {
-        for (int i = 0; i < ids.length; i++) {
-            canManageAlerts(who, ids[i]);
-        }
-    }
-    
-    private void canManageAlerts(AuthzSubjectValue who, List ads)
-        throws PermissionException {
-        for(int i = 0; i < ads.size(); i++) {
-            AlertDefinitionValue ad = (AlertDefinitionValue)ads.get(i);
-            canManageAlerts(who, getAppdefEntityID(ad));                                         
-        }
-    }
-    
-    private void canManageAlerts(AuthzSubjectValue who,
-                                 AlertDefinition ad)
-        throws PermissionException {
-        Integer parentId =
-            ad.getParent() != null ? ad.getParent().getId() : null;
-        if (!EventConstants.TYPE_ALERT_DEF_ID.equals(parentId))
-            canManageAlerts(who, getAppdefEntityID(ad));
-    }
-    
-    private void canManageAlerts(AuthzSubjectValue who,
-                                 AlertDefinitionValue ad)
-        throws PermissionException {
-        if (!EventConstants.TYPE_ALERT_DEF_ID.equals(ad.getParentId()))
-            canManageAlerts(who, getAppdefEntityID(ad));
-    }
-    
-    private void canManageAlerts(AuthzSubjectValue who, AppdefEntityID what)
-        throws PermissionException {
-        this.getPlatformManager().checkAlertingPermission(who, what);
-    }
-
     /**
      * @ejb:create-method
      */

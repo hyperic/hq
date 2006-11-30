@@ -171,7 +171,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
             if (adId == null)
                 return;
             
-            adBasic = aman.getBasicById(adId);
+            adBasic = aman.getByIdNoCheck(adId);
             if (adBasic.isEnabled()) {
                 if (log.isDebugEnabled())
                     log.debug("Trigger ID " + this.getId() +

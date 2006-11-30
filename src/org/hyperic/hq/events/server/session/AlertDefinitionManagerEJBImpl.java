@@ -40,9 +40,13 @@ import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 import javax.naming.NamingException;
 
+import org.hibernate.Hibernate;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.ActionCreateException;
 import org.hyperic.hq.events.AlertConditionCreateException;
@@ -50,7 +54,6 @@ import org.hyperic.hq.events.AlertDefinitionCreateException;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
-import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
@@ -58,7 +61,6 @@ import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -112,9 +114,11 @@ public class AlertDefinitionManagerEJBImpl
 
     /** 
      * Remove alert definitions
+     * @throws PermissionException 
      */
-    private void deleteAlertDefinition(AlertDefinition alertdef, boolean force)
-        throws RemoveException 
+    private void deleteAlertDefinition(AuthzSubjectValue subj,
+                                       AlertDefinition alertdef, boolean force)
+        throws RemoveException, PermissionException 
     {
         // If this is a child alert definition, do not delete it unless forced
         if (!force && alertdef.isResourceTypeDefinition())
@@ -127,7 +131,7 @@ public class AlertDefinitionManagerEJBImpl
             if (getAlertMan().getAlertCount(child.getId()) > 0)
                 child.setDeleted(true);
             else
-                deleteAlertDefinition(child, true);
+                deleteAlertDefinition(subj, child, true);
         }
 
         // See if there are any alerts
@@ -137,7 +141,7 @@ public class AlertDefinitionManagerEJBImpl
         }
 
         // Delete the alerts
-        getAlertMan().deleteAlerts(alertdef.getId());
+        getAlertMan().deleteAlerts(subj, alertdef.getId());
 
         // Actually remove the definition
         getAlertDefDAO().remove(alertdef);
@@ -148,13 +152,17 @@ public class AlertDefinitionManagerEJBImpl
 
     /** 
      * Create a new alert definition
+     * @throws PermissionException 
      * 
      * @ejb:interface-method
      */
-    public AlertDefinitionValue createAlertDefinition(AlertDefinitionValue a)
+    public AlertDefinitionValue createAlertDefinition(AuthzSubjectValue subj,
+                                                      AlertDefinitionValue a)
         throws AlertDefinitionCreateException, ActionCreateException,
-               FinderException 
+               FinderException, PermissionException 
     {
+        canManageAlerts(subj,
+                        new AppdefEntityID(a.getAppdefType(), a.getAppdefId()));
         AlertDefinition res = new AlertDefinition();
         TriggerDAO tDAO = getTriggerDAO();
         ActionDAO aDAO = getActionDAO();
@@ -213,15 +221,18 @@ public class AlertDefinitionManagerEJBImpl
 
     /**
      * Update just the basics
+     * @throws PermissionException 
      *
      * @ejb:interface-method
      */
-    public void updateAlertDefinitionBasic(Integer id, String name, String desc,
+    public void updateAlertDefinitionBasic(AuthzSubjectValue subj, Integer id,
+                                           String name, String desc,
                                            int priority, boolean enabled)
+        throws PermissionException
     {
         List alertdefs = new ArrayList(1);
         AlertDefinition def = getAlertDefDAO().findById(id);
-        
+        canManageAlerts(subj, def);
         alertdefs.add(def);
         
         // If there are any children, add them, too
@@ -307,10 +318,12 @@ public class AlertDefinitionManagerEJBImpl
 
     /** 
      * Enable/Disable alert definitions
+     * @throws PermissionException 
      * @ejb:interface-method
      */
-    public void updateAlertDefinitionsEnable(Integer[] ids, boolean enable)
-        throws FinderException 
+    public void updateAlertDefinitionsEnable(AuthzSubjectValue subj,
+                                             Integer[] ids, boolean enable)
+        throws FinderException, PermissionException 
     {
         AlertDefinitionDAO aDAO = getAlertDefDAO();
         List alertdefs = new ArrayList();
@@ -326,6 +339,7 @@ public class AlertDefinitionManagerEJBImpl
 
         for (Iterator i = alertdefs.iterator(); i.hasNext(); ) {
             AlertDefinition ad = (AlertDefinition) i.next();
+            canManageAlerts(subj, ad);
 
             ad.setEnabled(enable);
             ad.setMtime(System.currentTimeMillis());
@@ -334,12 +348,18 @@ public class AlertDefinitionManagerEJBImpl
 
     /** 
      * Add an action to an alert definition
+     * @throws PermissionException 
      * 
      * @ejb:interface-method
      */
-    public void addAction(AlertDefinition def, ActionValue action)
-        throws FinderException 
+    public void addAction(AuthzSubjectValue subj, Integer defId,
+                          ActionValue action)
+        throws FinderException, PermissionException 
     {
+        AlertDefinition def = getAlertDefDAO().findById(defId);
+        
+        canManageAlerts(subj, def);
+        
         Action parent = null;
         
         if (action.getParentId() != null)
@@ -350,10 +370,13 @@ public class AlertDefinitionManagerEJBImpl
 
     /** 
      * Remove alert definitions
+     * @throws PermissionException 
      *
      * @ejb:interface-method
      */
-    public void deleteAlertDefinitions(Integer[] ids) throws RemoveException {
+    public void deleteAlertDefinitions(AuthzSubjectValue subj, Integer[] ids)
+        throws RemoveException, PermissionException
+    {
         RegisteredTriggerManagerLocal rtm;
         
         try {
@@ -366,7 +389,8 @@ public class AlertDefinitionManagerEJBImpl
         
         // Get rid of their triggers first
         for (int i = 0; i < ids.length; i++) {
-            AlertDefinition def = getAlertDefDAO().findById(ids[i]);
+            AlertDefinition def = getAlertDefDAO().findById(ids[i]);            
+            canManageAlerts(subj, def);
 
             rtm.deleteAlertDefinitionTriggers(ids[i]);
 
@@ -380,15 +404,17 @@ public class AlertDefinitionManagerEJBImpl
         for (int i = 0; i < ids.length; i++) {
             AlertDefinition alertdef = getAlertDefDAO().findById(ids[i]);
 
-            deleteAlertDefinition(alertdef, false);
+            deleteAlertDefinition(subj, alertdef, false);
         }
     }
 
     /** Remove alert definitions
+     * @throws PermissionException 
      * @ejb:interface-method
      */
-    public void deleteAlertDefinitions(AppdefEntityID aeid)
-        throws RemoveException 
+    public void deleteAlertDefinitions(AuthzSubjectValue subj,
+                                       AppdefEntityID aeid)
+        throws RemoveException, PermissionException 
     {
         RegisteredTriggerManagerLocal rtm;
         AlertDefinitionDAO aDao = getAlertDefDAO();
@@ -416,7 +442,7 @@ public class AlertDefinitionManagerEJBImpl
                 rtm.deleteAlertDefinitionTriggers(child.getId());
             }
                 
-            deleteAlertDefinition(adef, true);
+            deleteAlertDefinition(subj, adef, true);
         }
     }
 
@@ -430,21 +456,37 @@ public class AlertDefinitionManagerEJBImpl
         }
     }
     
-    /** Find an alert definition
+    /** Find an alert definition and return a value object
+     * @throws PermissionException if user does not have permission to manage
+     * alerts
      * @ejb:interface-method
      */
-    public AlertDefinitionValue getById(Integer id) 
-        throws FinderException
+    public AlertDefinitionValue getById(AuthzSubjectValue subj, Integer id) 
+        throws FinderException, PermissionException
     {
-        return badFindById(id).getAlertDefinitionValue();
+        return getByIdAndCheck(subj, id).getAlertDefinitionValue();
     }
     
     /** Find an alert definition
+     * @throws PermissionException if user does not have permission to manage
+     * alerts
      * @ejb:interface-method
      */
-    public AlertDefinition getBasicById(Integer id)
-        throws FinderException
+    public AlertDefinition getByIdAndCheck(AuthzSubjectValue subj, Integer id)
+        throws FinderException, PermissionException
     {
+        AlertDefinition ad = badFindById(id);
+        if (ad.getParent() != null &&
+            !EventConstants.TYPE_ALERT_DEF_ID.equals(ad.getParent().getId()))
+            canManageAlerts(subj, getAppdefEntityID(ad));
+        return ad;
+    }
+    
+    /** Find an alert definition and return a basic value.  This is called by
+     * the abstract trigger, so it does no permission checking.
+     * @ejb:interface-method
+     */
+    public AlertDefinition getByIdNoCheck(Integer id) throws FinderException {
         return badFindById(id);
     }
     
@@ -533,14 +575,17 @@ public class AlertDefinitionManagerEJBImpl
      * @return a PageList of {@link AlertDefinitionValue} objects
      * @ejb:interface-method
      */
-    public PageList findAllAlertDefinitions() {
+    public PageList findAllAlertDefinitions(AuthzSubjectValue subj) {
         List vals = new ArrayList();
         
-        for (Iterator i = getAlertDefDAO().findAll().iterator(); 
-             i.hasNext(); ) 
-        {
-            AlertDefinition a = (AlertDefinition)i.next();
-        
+        for (Iterator i = getAlertDefDAO().findAll().iterator(); i.hasNext();) {
+            AlertDefinition a = (AlertDefinition) i.next();
+            try {
+                // Only return the alert definitions that user can see
+                canManageAlerts(subj, getAppdefEntityID(a));
+            } catch (PermissionException e) {
+                continue;
+            }
             vals.add(a.getAlertDefinitionValue());
         }
         return new PageList(vals, vals.size());
@@ -579,9 +624,14 @@ public class AlertDefinitionManagerEJBImpl
 
     /** 
      * Get list of alert conditions for a resource
+     * @throws PermissionException 
      * @ejb:interface-method
      */
-    public PageList findAlertDefinitions(AppdefEntityID id, PageControl pc) {
+    public PageList findAlertDefinitions(AuthzSubjectValue subj,
+                                         AppdefEntityID id, PageControl pc)
+        throws PermissionException
+    {
+        canManageAlerts(subj, id);
         AlertDefinitionDAO aDao = getAlertDefDAO(); 
         
         List adefs;
@@ -600,11 +650,15 @@ public class AlertDefinitionManagerEJBImpl
 
     /** 
      * Get list of alert conditions for a resource or resource type
+     * @throws PermissionException 
      *
      * @ejb:interface-method
      */
-    public PageList findAlertDefinitions(AppdefEntityID id, Integer parentId,
-                                         PageControl pc) 
+    public PageList findAlertDefinitions(AuthzSubjectValue subj,
+                                         AppdefEntityID id,
+                                         Integer parentId,
+                                         PageControl pc)
+        throws PermissionException 
     {
         AlertDefinitionDAO aDao = getAlertDefDAO();
 
@@ -612,6 +666,7 @@ public class AlertDefinitionManagerEJBImpl
         if (parentId == EventConstants.TYPE_ALERT_DEF_ID) {
             adefs = aDao.findByAppdefEntityType(id);
         } else {
+            canManageAlerts(subj, id);
             adefs = aDao.findChildAlertDefs(id, parentId);
         }
                 
@@ -651,10 +706,13 @@ public class AlertDefinitionManagerEJBImpl
 
     /** 
      * Get list of alert definition names for a resource
+     * @throws PermissionException 
      * @ejb:interface-method
      */
-    public SortedMap findAlertDefinitionNames(AppdefEntityID id,
-                                              Integer parentId) 
+    public SortedMap findAlertDefinitionNames(AuthzSubjectValue subj,
+                                              AppdefEntityID id,
+                                              Integer parentId)
+        throws PermissionException 
     {
         AlertDefinitionDAO aDao = getAlertDefDAO();
         TreeMap ret = new TreeMap();
@@ -665,6 +723,7 @@ public class AlertDefinitionManagerEJBImpl
         {
             adefs = aDao.findChildAlertDefs(id, parentId);
         } else {
+            canManageAlerts(subj, id);
             adefs = aDao.findByAppdefEntity(id.getType(), id.getID());
         }
             

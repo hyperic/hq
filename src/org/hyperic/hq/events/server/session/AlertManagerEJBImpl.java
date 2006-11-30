@@ -38,28 +38,30 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Hibernate;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.events.AlertCreateException;
-import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.InvalidActionDataException;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionInterface;
+import org.hyperic.hq.events.AlertCreateException;
 import org.hyperic.hq.events.EscalationMediator;
+import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.hq.events.server.session.EscalationState;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
-import org.hyperic.util.config.EncodingException;
-import org.hyperic.util.config.ConfigResponse;
-import org.hibernate.Hibernate;
 
 /** 
  * The alert manager.
@@ -150,17 +152,24 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
 
     /** 
      * Remove alerts for an appdef entity
+     * @throws PermissionException 
      * @ejb:interface-method
      */
-    public int deleteAlerts(AppdefEntityID id) {
+    public int deleteAlerts(AuthzSubjectValue subj, AppdefEntityID id)
+        throws PermissionException {
+        canManageAlerts(subj, id);
         return getAlertDAO().deleteByEntity(id);
     }
 
     /** 
      * Remove alerts for an alert definition
+     * @throws PermissionException 
      * @ejb:interface-method
      */
-    public int deleteAlerts(Integer defId) throws RemoveException {
+    public int deleteAlerts(AuthzSubjectValue subj, Integer defId)
+        throws RemoveException, PermissionException {
+        AlertDefinition ad = getAlertDefDAO().findById(defId);
+        canManageAlerts(subj, ad);
         return getAlertDAO().deleteByAlertDefinition(defId);
     }
 
@@ -194,13 +203,16 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
 
     /**
      * Find an alert by ID and time
+     * @throws PermissionException 
      * 
      * @ejb:interface-method
      */
-    public AlertValue getByAlertDefAndTime(Integer id, long ctime) {
+    public AlertValue getByAlertDefAndTime(AuthzSubjectValue subj, Integer id,
+                                           long ctime)
+        throws PermissionException {
         AlertDAO aDao = getAlertDAO();
         AlertDefinition def = getAlertDefDAO().findById(id);
-
+        canManageAlerts(subj, def);
         return aDao.findByAlertDefinitionAndCtime(def, ctime).getAlertValue(); 
     }
 
@@ -244,10 +256,14 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
 
     /**
      * Get a collection of alerts for an AppdefEntityID
+     * @throws PermissionException 
      *
      * @ejb:interface-method
      */
-    public PageList findAlerts(AppdefEntityID id, PageControl pc) {
+    public PageList findAlerts(AuthzSubjectValue subj, AppdefEntityID id,
+                               PageControl pc)
+        throws PermissionException {
+        canManageAlerts(subj, id);
         List alerts;
 
         if (pc.getSortattribute() == SortAttribute.NAME) {
@@ -264,12 +280,15 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
 
     /**
      * Get a collection of alerts for an AppdefEntityID and time range
+     * @throws PermissionException 
      *
      * @ejb:interface-method
      */
-    public PageList findAlerts(AppdefEntityID id, long begin, long end,
-                               PageControl pc) 
+    public PageList findAlerts(AuthzSubjectValue subj, AppdefEntityID id,
+                               long begin, long end, PageControl pc)
+        throws PermissionException 
     {
+        canManageAlerts(subj, id);
         AlertDAO aDao = getAlertDAO();
         List alerts;
 
@@ -288,11 +307,13 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
 
     /**
      * Search alerts given a set of criteria
+     * @throws PermissionException 
      *
      * @ejb:interface-method
      */
-    public PageList findAlerts(int count, int priority, long timeRange,
-                               List includes, PageControl pc) 
+    public PageList findAlerts(AuthzSubjectValue subj, int count, int priority,
+                               long timeRange, List includes, PageControl pc) 
+        throws PermissionException 
     {
         AlertDAO aDao = getAlertDAO();
         
@@ -318,7 +339,8 @@ public class AlertManagerEJBImpl extends SessionEJB implements SessionBean {
             AppdefEntityID aeid = alertdef.getAppdefEntityId();
             if (includes != null && !includes.contains(aeid))
                 continue;
-                
+
+            canManageAlerts(subj, aeid);
             // Finally add it
             result.add(alert);
         }
