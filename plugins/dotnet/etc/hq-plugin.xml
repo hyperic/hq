@@ -543,6 +543,7 @@
             template="${thread.domain}:Platform=Win32:# of current physical Threads"
             category="UTILIZATION"
             group="Thread"
+            indicator="true"
             collectionType="dynamic"
             units="none"/>
 
@@ -586,7 +587,6 @@
             template="${net.domain}:Platform=Win32:Bytes Sent"
             category="THROUGHPUT"
             group="Throughput"
-            indicator="true"
             collectionType="trendsup"
             units="B"/>
 
