@@ -44,7 +44,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.dao.RoleDAO;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocalHome;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
@@ -63,6 +62,7 @@ import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.dao.RoleDAO;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 
@@ -170,18 +170,10 @@ public abstract class AuthzSession {
     }
 
     protected Set toPojos(Object[] vals) {
-        final int OPER_HASH = OperationValue.class.hashCode();
-        final int SUBJ_HASH = AuthzSubjectValue.class.hashCode();
-        final int RES_HASH  = ResourceValue.class.hashCode();
-        final int GRP_HASH  = ResourceGroupValue.class.hashCode();
-        final int ROLE_HASH = RoleValue.class.hashCode();
-
         Set ret = new HashSet();
         if (vals == null || vals.length == 0) {
             return ret;
         }
-        
-        int hashCode = vals[0].hashCode();
         
         OperationDAO operDao = null;
         AuthzSubjectDAO subjDao = null;
@@ -189,31 +181,31 @@ public abstract class AuthzSession {
         RoleDAO roleDao = null;
         ResourceGroupDAO resGrpDao = null;
         for (int i = 0; i < vals.length; i++) {
-            if (hashCode == OPER_HASH) {
+            if (vals[i] instanceof OperationValue) {
                 if (operDao == null) {
                     operDao = getOperationDAO();
                 }
                 ret.add(operDao.findById(((OperationValue) vals[i]).getId()));
             }
-            else if (hashCode == SUBJ_HASH) {
+            else if (vals[i] instanceof AuthzSubjectValue) {
                 if (subjDao == null) {
                     subjDao = getSubjectDAO();
                 }
                 ret.add(subjDao.findById(((AuthzSubjectValue)vals[i]).getId()));
             }
-            else if (hashCode == RES_HASH) {
+            else if (vals[i] instanceof ResourceValue) {
                 if (resDao == null) {
                     resDao = getResourceDAO();
                 }
                 ret.add(resDao.findById(((ResourceValue) vals[i]).getId()));
             }
-            else if (hashCode == ROLE_HASH) {
+            else if (vals[i] instanceof RoleValue) {
                 if (roleDao == null) {
                     roleDao = getRoleDAO();
                 }
                 ret.add(roleDao.findById(((RoleValue) vals[i]).getId()));
             }
-            else if (hashCode == GRP_HASH) {
+            else if (vals[i] instanceof ResourceGroupValue) {
                 if (resGrpDao == null) {
                     resGrpDao = getResourceGroupDAO();
                 }
