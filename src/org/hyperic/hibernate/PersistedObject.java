@@ -45,7 +45,7 @@ public abstract class PersistedObject
 
     // for hibernate optimistic locks -- don't mess with this.
     // Named ugly-style since we already use VERSION in some of our tables.
-    private long    _version_;// list of parameters set by call to newInstance
+    private long    _version_;
 
     // list of searchable fields
     protected List searchable = new ArrayList(0);
