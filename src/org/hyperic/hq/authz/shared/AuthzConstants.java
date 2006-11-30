@@ -138,7 +138,8 @@ public final class AuthzConstants {
     public static final String overlordDsn = "covalentAuthzInternalDsn";
     public static final String authzResourceGroupName =
         "covalentAuthzResourceGroup";
-
+    public static final String escalationResourceTypeName = "EscalationScheme";
+        
     public static final String rootOpCAMAdmin = "administerCAM";
 
     public static final String typeOpCreateResource = "createResource";
@@ -155,6 +156,11 @@ public final class AuthzConstants {
     public static final String roleOpModifyRole = "modifyRole";
     public static final String roleOpRemoveRole = "removeRole";
     public static final String roleOpViewRole = "viewRole";
+
+    public static final String escOpCreateEscalation = "createEscalation";
+    public static final String escOpModifyEscalation = "modifyEscalation";
+    public static final String escOpRemoveEscalation = "removeEscalation";
+    public static final String escOpViewEscalation   = "viewEscalation";
 
     public static final String privateRoleGroupName = "camPrivateRoleGroup:";
     public static final int authzDefaultResourceGroupType = 13;
