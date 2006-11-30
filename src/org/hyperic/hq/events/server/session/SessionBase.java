@@ -102,20 +102,20 @@ public abstract class SessionBase {
 
     /**
      * Check the permission based on resource type, instance ID, and operation
-     * @param subject the subject trying to perform the operation
+     * @param subjectId the subject trying to perform the operation
      * @param rtName the resource type name
      * @param instId the instance ID
      * @param operation the operation
      * @throws PermissionException if the user is not authorized to perform the
      * operation on the resource
      */
-    private static void checkPermission(AuthzSubjectValue subject,
+    private static void checkPermission(Integer subjectId,
                                         String rtName, Integer instId,
                                         String operation)
         throws PermissionException {
         PermissionManager permMgr = PermissionManagerFactory.getInstance();
         // note, using the "SLOWER" permission check
-        permMgr.check(subject.getId(), rtName, instId, operation);
+        permMgr.check(subjectId, rtName, instId, operation);
         // Permission Check Succesful
     }
 
@@ -132,7 +132,7 @@ public abstract class SessionBase {
         log.debug("Checking Permission for Operation: "
             + operation + " ResourceType: " + id.getTypeName() +
             " Instance Id: " + id + " Subject: " + subject);
-        checkPermission(subject, id.getTypeName(), id.getId(), operation);
+        checkPermission(subject.getId(), id.getTypeName(), id.getId(), operation);
     }
 
     protected void canManageAlerts(AuthzSubjectValue who, AlertDefinition ad)
@@ -174,7 +174,7 @@ public abstract class SessionBase {
         checkAlerting(subject, id, opName);
     }
     
-    private static void checkEscalation(AuthzSubjectValue subject,
+    private static void checkEscalation(Integer subjectId,
                                         String operation) 
         throws PermissionException {
         // The escalation resource type is looked up for its ID to be used
@@ -184,27 +184,27 @@ public abstract class SessionBase {
             DAOFactory.getDAOFactory().getResourceTypeDAO()
             .findByName(AuthzConstants.escalationResourceTypeName);
 
-        checkPermission(subject, AuthzConstants.rootResType, rt.getId(),
+        checkPermission(subjectId, AuthzConstants.rootResType, rt.getId(),
                         operation);        
     }
     
-    protected static void canCreateEscalation(AuthzSubjectValue subj)
+    protected static void canCreateEscalation(Integer subjectId)
         throws PermissionException {
-        checkEscalation(subj, AuthzConstants.escOpCreateEscalation);
+        checkEscalation(subjectId, AuthzConstants.escOpCreateEscalation);
     }
     
-    protected static void canViewEscalation(AuthzSubjectValue subj)
+    protected static void canViewEscalation(Integer subjectId)
         throws PermissionException {
-        checkEscalation(subj, AuthzConstants.escOpViewEscalation);
+        checkEscalation(subjectId, AuthzConstants.escOpViewEscalation);
     }
     
-    protected static void canModifyEscalation(AuthzSubjectValue subj)
+    protected static void canModifyEscalation(Integer subjectId)
         throws PermissionException {
-        checkEscalation(subj, AuthzConstants.escOpModifyEscalation);
+        checkEscalation(subjectId, AuthzConstants.escOpModifyEscalation);
     }
     
-    protected static void canRemoveEscalation(AuthzSubjectValue subj)
+    protected static void canRemoveEscalation(Integer subjectId)
         throws PermissionException {
-        checkEscalation(subj, AuthzConstants.escOpRemoveEscalation);
+        checkEscalation(subjectId, AuthzConstants.escOpRemoveEscalation);
     }
 }
