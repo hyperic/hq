@@ -113,7 +113,8 @@ var tmp = eval('(' + originalRequest.responseText + ')');
 		var td4 = document.createElement('td');
 		var td5 = document.createElement('td');
 		var favAnchor = document.createElement("a");
-		
+		var urlColon = ":"
+		var resUrl = $('viewResUrl').href;
 		
 			table.appendChild(tr);
 		
@@ -127,10 +128,10 @@ var tmp = eval('(' + originalRequest.responseText + ')');
 				td1.setAttribute((document.all ? 'className' : 'class'), "resourceName");
 				td1.setAttribute("id", (fList[i].resourceName));
 				
-			if (fList[i].resourceName && favAnchor) {
+			if (fList[i].resourceName && favAnchor && fList[i].resourceId && fList[i].resourceTypeId) {
 				td1.appendChild(favAnchor);
 				favAnchor.appendChild(document.createTextNode(fList[i].resourceName));
-				favAnchor.setAttribute('href', (fList[i].resourceName));
+				favAnchor.setAttribute('href', (resUrl + fList[i].resourceTypeId + urlColon + fList[i].resourceId));
 			} else {
 			td1.innerHTML = "&nbsp;";
 			}
