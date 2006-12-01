@@ -43,11 +43,37 @@
 </tiles:insert>
 
   <!-- JSON available at /dashboard/ViewResourceHealth.do -->
+<script type="text/javascript">
+function requestFavoriteResources() {
+	var faveUrl = "<html:rewrite page="/dashboard/ViewResourceHealth.do"/>"
+	new Ajax.Request(faveUrl, {method: 'get', onSuccess:showFavoriteResponse, onFailure :reportError});
+}
+onloads.push(requestFavoriteResources);
+</script>
 
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+ <table class="table" width="100%" border="0" cellspacing="0" cellpadding="0" id="favoriteTable" >
+	<tr class="tableRowHeader">
+		<th width="50%" class="tableRowInactive">
+			Resource Name
+		</th>
+		<th width="20%" class="tableRowInactive">
+			Resource Type
+		</th>
+		<th width="10%" align="center" class="tableRowInactive">
+			Throughput
+		</th>
+		<th width="10%" align="center" class="tableRowInactive">
+			Availability
+		</th>
+		<th width="10%" align="center" class="tableRowInactive">
+			Alerts
+		</th>
+	</tr>
+	
+	</table>
+	<table width="100%" cellpadding="0" cellspacing="0" border="1" id="noFaveResources" style="display:none;">
     <tr class="ListRow">
       <td class="ListCell"><fmt:message key="dash.home.no.resource.to.display"/></td>
     </tr>
   </table>
-
 </div>
