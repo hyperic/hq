@@ -7,6 +7,7 @@ import org.hyperic.hq.events.server.session.EscalationState;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.EscalationMediator;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hibernate.ObjectNotFoundException;
 
 import javax.naming.NamingException;
@@ -64,32 +65,39 @@ public class EscalationTest
     }
 
     private void createEscalationTest()
-        throws javax.ejb.CreateException, NamingException {
+        throws javax.ejb.CreateException, NamingException, PermissionException
+    {
         EscalationAction act1 = createEmailAction(
             new String[] {"joe@gmail.com", "bob@yahoo.com"});
 
         EscalationAction act2 = createEmailAction(
             new String[] {"paul@att.com", "bill@google.com"});
 
+        EscalationAction act3 = createSyslogAction("meta", "tomcat", "5.0");
+
         Escalation e = Escalation.newInstance(BOGUS_NAME1);
         e.getActions().add(act1);
         e.getActions().add(act2);
+        e.getActions().add(act3);
 
         EscalationMediator.getInstance().save(e);
         // look it up, there should be exactly one
         e = EscalationMediator.getInstance().findEscalationById(e);
         assertNotNull(e);
-        assertTrue(e.getActions().size() == 2);
+        assertTrue(e.getActions().size() == 3);
         
         // verify escalation order
         Action a1 = ((EscalationAction)e.getActions().get(0)).getAction();
         Action a2 = ((EscalationAction)e.getActions().get(1)).getAction();
+        Action a3 = ((EscalationAction)e.getActions().get(2)).getAction();
         assertTrue(a1.getId().equals(act1.getAction().getId()));
         assertTrue(a2.getId().equals(act2.getAction().getId()));
+        assertTrue(a3.getId().equals(act3.getAction().getId()));
 
         // alter escalation order
         e.getActions().clear();
         e.getActions().add(act2);
+        e.getActions().add(act3);
         e.getActions().add(act1);
 
         EscalationMediator.getInstance().save(e);
@@ -97,13 +105,15 @@ public class EscalationTest
         e = EscalationMediator.getInstance().findEscalationById(e);
         assertNotNull(e);
         // should still have 2 actions
-        assertTrue(e.getActions().size() == 2);
+        assertTrue(e.getActions().size() == 3);
 
         // verify escalation order
         a1 = ((EscalationAction)e.getActions().get(0)).getAction();
         a2 = ((EscalationAction)e.getActions().get(1)).getAction();
+        a3 = ((EscalationAction)e.getActions().get(2)).getAction();
         assertTrue(a1.getId().equals(act2.getAction().getId()));
-        assertTrue(a2.getId().equals(act1.getAction().getId()));
+        assertTrue(a2.getId().equals(act3.getAction().getId()));
+        assertTrue(a3.getId().equals(act1.getAction().getId()));
 
         EscalationState state =
             EscalationMediator.getInstance().getEscalationState(e, ALERT_DEF_ID1);
@@ -145,7 +155,14 @@ public class EscalationTest
             EmailActionConfig.TYPE_EMAILS, u, 60000);
     }
 
-    private void resetEscalationActiveStatusTest()
+    private EscalationAction createSyslogAction(String metaProject, String proj,
+                                                String version)
+    {
+        return EscalationAction.newSyslogAction(metaProject, proj, version,
+            60000);
+    }
+
+    private void resetEscalationActiveStatusTest() throws PermissionException
     {
         EscalationAction act1 = createEmailAction(
             new String[] {"joe1@gmail.com", "bob1@yahoo.com"});

@@ -33,7 +33,9 @@ import java.util.Set;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.events.shared.ActionValue;
+import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
+import org.hyperic.hq.bizapp.shared.action.SyslogActionConfig;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.Json;
 import org.hyperic.util.ArrayUtil;
@@ -61,6 +63,22 @@ public class Action
         config.setType(type);
         config.setNames(StringUtil.iteratorToString(notifs.iterator(), ",", ""));
 
+        return createAction(config);
+    }
+
+    public static Action newSyslogAction(String metaProject, String project,
+                                         String version)
+    {
+        SyslogActionConfig sa = new SyslogActionConfig();
+        sa.setMeta(metaProject);
+        sa.setProduct(project);
+        sa.setVersion(version);
+        
+        return createAction(sa);
+    }
+
+    private static Action createAction(ActionConfigInterface config)
+    {
         Action act = new Action();
         act.setClassName(config.getImplementor());
         try {

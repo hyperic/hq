@@ -54,8 +54,23 @@ public class EscalationAction implements Serializable, Json
      */
     public static EscalationAction newEmailAction(int type, Set notifs,
                                                   long waitTime) {
-        EscalationAction eact = new EscalationAction();
         Action act = Action.newEmailAction(type, notifs);
+        return createEscalationAction(act, waitTime);
+    }
+
+    public static EscalationAction newSyslogAction(String metaProject,
+                                                   String project,
+                                                   String version,
+                                                   long waitTime)
+    {
+        Action act = Action.newSyslogAction(metaProject, project, version);
+        return createEscalationAction(act, waitTime);
+    }
+
+    private static EscalationAction createEscalationAction(Action act,
+                                                           long waitTime)
+    {
+        EscalationAction eact = new EscalationAction();
         eact.setAction(act);
         eact.setWaitTime(waitTime);
         return eact;
