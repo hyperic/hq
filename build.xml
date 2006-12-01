@@ -359,6 +359,7 @@
 
     <copy todir="${ear.dir}/lib" >
       <fileset dir="${thirdparty.lib}" >
+        <include name="backport-util-concurrent.jar" />
         <include name="commons-beanutils.jar" />
         <include name="commons-logging.jar" />
         <include name="commons-modeler.jar" />
@@ -501,6 +502,7 @@
 
     <copy todir="${ear.dir}/hq.war/WEB-INF/lib/" >
       <fileset dir="${thirdparty.lib}" >
+        <include name="backport-util-concurrent.jar" />
         <include name="commons-beanutils.jar" />
         <include name="commons-digester.jar" />
         <include name="commons-logging.jar" />
