@@ -97,6 +97,7 @@
             template="${db.domain}:Platform=Win32:Transactions/sec"
             category="THROUGHPUT"
             group="Throughput"
+            indicator="true"
             collectionType="trendsup"
             units="none"/>
 
@@ -105,7 +106,6 @@
             template="${db.domain}:Type=Formatted:Transactions/sec"
             category="THROUGHPUT"
             group="Throughput"
-            indicator="true"
             collectionType="dynamic"
             units="none"/>
 
