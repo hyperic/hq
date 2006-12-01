@@ -42,18 +42,20 @@
     <td rowspan="2" width="34%">
       <table width="100%" border="0" cellspacing="0" cellpadding="0">
         <tr>                     
+          <td class="logo">
+            <html:link page="/Dashboard.do">
           <c:choose>
             <c:when test="${applicationScope.largeLogo}">           
-              <td class="logo">
                 <html:img page="/customer/${applicationScope.largeLogoName}" width="225" height="31" alt="" border="0"/>
                 <br>
                 <html:img page="/images/cobrand_logo.gif" width="225" height="25" alt="" border="0"/>
-              </td>
             </c:when>
             <c:otherwise>
-                <td class="logo"><html:img page="/images/logo_large.gif" width="223" height="56" alt="" border="0"/></td>
+                <html:img page="/images/logo_large.gif" width="223" height="56" alt="" border="0"/>
             </c:otherwise>
           </c:choose>
+            </html:link>
+          </td>
           <td width="100%" class="logo"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
           <td class="logo"><html:img page="/images/logo_Image_large.jpg" width="225" height="56" alt="" border="0"/></td>
         </tr>
