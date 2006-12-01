@@ -61,6 +61,7 @@ import org.hyperic.hq.measurement.data.MeasurementDataSourceException;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.TimeUtil;
@@ -129,7 +130,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
     
     private HighLowMetricValue getMetricValue(ResultSet rs)
-        throws SQLException {
+        throws SQLException 
+    {
         long timestamp = rs.getLong("timestamp");
         double value = this.getValue(rs);
         
@@ -174,7 +176,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     // Returns the next index to be used
     private int setStatementArguments(PreparedStatement stmt, int start,
                                       Integer[] ids)
-        throws SQLException {
+        throws SQLException 
+    {
         // Set ID's
         int i = start;
         for (int ind = 0; ind < ids.length; ind++) {
@@ -198,7 +201,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private void checkTimeArguments(long begin, long end, long interval)
         throws IllegalArgumentException {
         
-        this.checkTimeArguments(begin, end);
+        checkTimeArguments(begin, end);
         
         if(interval > (end - begin) )
             throw new IllegalArgumentException(this.ERR_INTERVAL);
@@ -211,19 +214,17 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public void addData(Integer mid, MetricValue dp, boolean overwrite) {
-        this.addData(mid, new MetricValue[] { dp }, overwrite);
+        addData(mid, new MetricValue[] { dp }, overwrite);
     }
 
     /**
      * Save the new MetricValue to the database
-     *
-     * @param dp the new MetricValue
      * @ejb:interface-method
      */
-    public void addData(Integer mid, MetricValue[] dpts, boolean overwrite)
-    {
+    public void addData(Integer mid, MetricValue[] dpts, boolean overwrite) {
         // Be ready to send a measurement event
         ArrayList events = new ArrayList();
+        List zevents = new ArrayList();
         MetricDataCache cache = MetricDataCache.getInstance();
         
         // Save the data point
@@ -235,17 +236,14 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 .getPropertyInstance("hyperic.hq.measurement.analyzer");
 
         try {
-            conn =
-                DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+            conn = DBUtil.getConnByContext(getInitialContext(), 
+                                           DATASOURCE_NAME);
             
             conn.setAutoCommit(false);
 
             if (overwrite && DBUtil.isPostgreSQL(conn)) {
-                istmt = conn.prepareStatement(
-                    "SELECT add_data(?, ?, ?)");
-
-            }
-            else {
+                istmt = conn.prepareStatement("SELECT add_data(?, ?, ?)");
+            } else {
                 istmt = conn.prepareStatement(
                     "INSERT  /*+ APPEND */ INTO " + TAB_DATA +
                     " (measurement_id, timestamp, value) VALUES (?, ?, ?)");
@@ -269,6 +267,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     istmt.setLong      (i++, dpts[ind].getTimestamp());
                     istmt.setBigDecimal(i++, bigDec);                    
                     istmt.execute();
+                    
+                    // XXX -- Maybe this would be faster if we used
+                    //        executeBatch?  -- JMT 11/30/06 
                     
                     conn.commit();
                 } catch (SQLException e) {
@@ -332,6 +333,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     // See if we need to send the measurement event                
                     if (RegisteredTriggers.isTriggerInterested(event))
                         events.add(event);                    
+
+                    zevents.add(new MeasurementZevent(mid.intValue(), 
+                                                      dpts[ind]));
                 }
             }
         } catch (NamingException e) {
@@ -349,6 +353,16 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         if (events.size() > 0) {
             Messenger sender = new Messenger();
             sender.publishMessage(EventConstants.EVENTS_TOPIC, events);
+
+        }
+
+        if (!zevents.isEmpty()) {
+            try {
+                ZeventManager.getInstance().enqueueEvents(zevents);
+            } catch(InterruptedException e) {
+                log.warn("Timed out while enqueuing events.  Some events may "+
+                         "be lost!");
+            }
         }
     }
 
@@ -1923,38 +1937,19 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
-     * @see javax.ejb.SessionBean#ejbCreate()
      * @ejb:create-method
      */
     public void ejbCreate() throws CreateException {}
-
-    /**
-     * @see javax.ejb.SessionBean#ejbPostCreate()
-     */
     public void ejbPostCreate() {}
-
-    /**
-     * @see javax.ejb.SessionBean#ejbActivate()
-     */
     public void ejbActivate() {}
-
-    /**
-     * @see javax.ejb.SessionBean#ejbPassivate()
-     */
     public void ejbPassivate() {}
-
-    /**
-     * @see javax.ejb.SessionBean#ejbRemove()
-     */
     public void ejbRemove() {
         this.ctx = null;
     }
 
-    /**
-     * @see javax.ejb.SessionBean#setSessionContext()
-     */
     public void setSessionContext(SessionContext ctx)
-        throws EJBException, RemoteException {
+        throws EJBException, RemoteException 
+    {
         this.ctx = ctx;
     }
 }
