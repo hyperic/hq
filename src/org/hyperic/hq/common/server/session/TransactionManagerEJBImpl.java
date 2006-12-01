@@ -3,6 +3,7 @@ package org.hyperic.hq.common.server.session;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.TransactionContext;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hibernate.NonUniqueObjectException;
 
 import javax.ejb.SessionBean;
@@ -26,14 +27,16 @@ public class TransactionManagerEJBImpl implements SessionBean
     /**
      * @ejb:interface-method
      */
-    public void delete(PersistedObject p) {
+    public void delete(PersistedObject p) throws PermissionException
+    {
         DAOFactory.getDAOFactory().getDAO(p.getClass()).removePersisted(p);
     }
 
     /**
      * @ejb:interface-method
      */
-    public void save(PersistedObject p) {
+    public void save(PersistedObject p) throws PermissionException
+    {
         DAOFactory.getDAOFactory().getDAO(p.getClass()).savePersisted(p);
     }
 
@@ -41,7 +44,8 @@ public class TransactionManagerEJBImpl implements SessionBean
      * save list of persistedobjects
      * @ejb:interface-method
      */
-    public void save(List lp) {
+    public void save(List lp) throws PermissionException
+    {
         savePersistedList(lp);
     }
 
@@ -49,7 +53,8 @@ public class TransactionManagerEJBImpl implements SessionBean
      * @ejb:interface-method
      * @ejb:transaction type="RequiresNew"
      */
-    public void saveReqNew(PersistedObject p) {
+    public void saveReqNew(PersistedObject p) throws PermissionException
+    {
         DAOFactory.getDAOFactory().getDAO(p.getClass()).savePersisted(p);
     }
 
@@ -58,14 +63,17 @@ public class TransactionManagerEJBImpl implements SessionBean
      * @ejb:interface-method
      * @ejb:transaction type="RequiresNew"
      */
-    public void saveReqNew(List lp) {
+    public void saveReqNew(List lp) throws PermissionException
+    {
         savePersistedList(lp);
     }
 
     /**
      * @ejb:interface-method
      */
-    public PersistedObject findPersisted(PersistedObject p) {
+    public PersistedObject findPersisted(PersistedObject p)
+        throws PermissionException
+    {
         try {
             return DAOFactory.getDAOFactory().getDAO(p.getClass())
                     .findPersisted(p);
@@ -84,7 +92,7 @@ public class TransactionManagerEJBImpl implements SessionBean
         return context.run(context);
     }
 
-    private void savePersistedList(List lp)
+    private void savePersistedList(List lp) throws PermissionException
     {
         DAOFactory factory = DAOFactory.getDAOFactory();
         for (Iterator i = lp.iterator(); i.hasNext();) {

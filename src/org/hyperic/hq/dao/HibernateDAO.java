@@ -35,6 +35,7 @@ import org.hibernate.type.Type;
 import org.hibernate.criterion.Example;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.authz.shared.PermissionException;
 
 /**
  * Hibernate Data Access Object
@@ -73,6 +74,16 @@ public abstract class HibernateDAO {
                : getSession().load(getPersistentClass(), id);
     }
 
+    /**
+     * Simple pojo attribute value search, uses Hibernate Example Criteria
+     * search.
+     *
+     * Instantiate pojo, set the pojo attribute values, then add corresponding
+     * hdm proerty names with calls to Persisted.addSearchable().
+     * 
+     * @param p
+     * @return
+     */
     public List findByExample(final PersistedObject p) {
         // searchable properties
         Example.PropertySelector selector =
@@ -130,14 +141,26 @@ public abstract class HibernateDAO {
         throw new UnsupportedOperationException("FindPersisted not supported");
     }
 
-    public PersistedObject findPersisted(PersistedObject entity) {
+    public PersistedObject findPersistedById(Integer subjectId, Serializable id)
+        throws PermissionException
+    {
+        throw new UnsupportedOperationException(
+            "FindPersistedById not supported");
+    }
+
+    public PersistedObject findPersisted(PersistedObject entity)
+        throws PermissionException
+    {
         throw new UnsupportedOperationException("FindPersisted not supported");
     }
 
-    public void savePersisted(PersistedObject entity) {
+    public void savePersisted(PersistedObject entity) throws PermissionException
+    {
         throw new UnsupportedOperationException("savePersisted not supported");
     }
-    public void removePersisted(PersistedObject entity) {
+    public void removePersisted(PersistedObject entity)
+        throws PermissionException
+    {
         throw new UnsupportedOperationException("removePersisted not supported");
     }
 }

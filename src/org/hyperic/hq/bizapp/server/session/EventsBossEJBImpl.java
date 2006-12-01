@@ -43,7 +43,6 @@ import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -82,8 +81,6 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerCreateException;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggerEvent;
-import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
 import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.hq.events.server.session.RegisteredTriggerNotifier;
 import org.hyperic.hq.events.shared.ActionManagerLocal;
@@ -1456,9 +1453,12 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * @ejb:transaction type="REQUIRED"
      */
     public int deleteEscalationById(int sessionID, Integer[] ids)
+        throws SessionTimeoutException, SessionNotFoundException,
+        PermissionException
     {
-        // TODO: access check on escalation resource
-        return EscalationMediator.getInstance().deleteEscalationById(ids);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        EscalationMediator mediator = EscalationMediator.getInstance();
+        return mediator.deleteEscalationById(subject.getId(), ids);
     }
 
     /**
@@ -1471,15 +1471,14 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * @ejb:transaction type="REQUIRED"
      */
     public JSONObject jsonByEscalationName(int sessionID, String name)
+        throws SessionTimeoutException, SessionNotFoundException, JSONException,
+        PermissionException
     {
-        // TODO: access check on escalation resource
-        try {
-            Escalation e =
-                    EscalationMediator.getInstance().findByEscalationName(name);
-            return e != null ? e.toJSON() : null;
-        } catch (JSONException e) {
-            throw new SystemException(e);
-        }
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        Escalation e =
+            EscalationMediator.getInstance()
+                .findByEscalationName(subject.getId(), name);
+        return e != null ? e.toJSON() : null;
     }
 
     /**
@@ -1492,16 +1491,14 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * @ejb:transaction type="REQUIRED"
      */
     public JSONObject jsonEscalationByAlertDefId(int sessionID, Integer id)
+        throws SessionTimeoutException, SessionNotFoundException,
+        PermissionException, JSONException
     {
-        // TODO: access check on escalation resource
-        try {
-            Escalation e =
-                    EscalationMediator.getInstance()
-                            .findEscalationByAlertDefId(id);
-            return e != null ? e.toJSON() : null;
-        } catch (JSONException e) {
-            throw new SystemException(e);
-        }
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        Escalation e =
+            EscalationMediator.getInstance()
+                .findEscalationByAlertDefId(subject.getId(), id);
+        return e != null ? e.toJSON() : null;
     }
 
     /**
@@ -1514,21 +1511,20 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * @ejb:transaction type="REQUIRED"
      */
     public JSONArray listAllEscalationName(int sessionID)
+        throws JSONException, SessionTimeoutException, SessionNotFoundException,
+        PermissionException
     {
-        // TODO: access check on escalation resource
-        try {
-            Collection all = EscalationMediator.getInstance().findAll();
-            JSONArray jarr = new JSONArray();
-            for (Iterator i = all.iterator(); i.hasNext(); ) {
-                Escalation esc = (Escalation)i.next();
-                jarr.put(new JSONObject()
-                        .put("id", esc.getId())
-                        .put("name", esc.getName()));
-            }
-            return jarr;
-        } catch (JSONException e) {
-            throw new SystemException(e);
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        Collection all =
+            EscalationMediator.getInstance().findAll(subject.getId());
+        JSONArray jarr = new JSONArray();
+        for (Iterator i = all.iterator(); i.hasNext(); ) {
+            Escalation esc = (Escalation)i.next();
+            jarr.put(new JSONObject()
+                .put("id", esc.getId())
+                .put("name", esc.getName()));
         }
+        return jarr;
     }
 
     private AppdefEntityID getAppdefEntityID(AlertDefinitionValue ad) {

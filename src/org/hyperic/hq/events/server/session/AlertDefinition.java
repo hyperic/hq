@@ -76,24 +76,18 @@ public class AlertDefinition
                                              RegisteredTrigger trigger)
     {
         AlertCondition res = new AlertCondition(this, condVal, trigger);
-        
-        DAOFactory.getDAOFactory().getDAO(res.getClass()).savePersisted(res);
         _conditions.add(res);
         return res;
     }
 
     protected Action createAction(ActionValue actVal, Action parent) {
         Action res = new Action(this, actVal, parent);
-        
-        DAOFactory.getDAOFactory().getDAO(res.getClass()).savePersisted(res);
         _actions.add(res);
         return res;
     }
     
     protected Alert createAlert(AlertValue val) {
         Alert res = new Alert(this, val);
-        
-        DAOFactory.getDAOFactory().getDAO(res.getClass()).savePersisted(res);
         return res;
     }
     

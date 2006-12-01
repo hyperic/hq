@@ -67,10 +67,11 @@ public class Escalation extends PersistedObject
     private long modifiedTime;
     private List actions = new ArrayList(0);
 
-    public static Escalation newSearchable(String name) {
+    public static Escalation newSearchable(Integer subjectId, String name) {
         Escalation e = newInstance(name);
         e.addSearchable("uniqueName");
         e.addSearchable("uniqueName.name");
+        e.setSubjectId(subjectId);
         return e;
     }
 

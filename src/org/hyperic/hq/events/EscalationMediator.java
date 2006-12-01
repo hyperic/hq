@@ -5,6 +5,7 @@ package org.hyperic.hq.events;
 
 import org.hyperic.hq.Mediator;
 import org.hyperic.hq.TransactionContext;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.TransactionManagerLocal;
@@ -179,17 +180,21 @@ public class EscalationMediator extends Mediator
                 return false;
             }
             state.setActive(true);
-            transactionManager.saveReqNew(state);
+            try {
+                transactionManager.saveReqNew(state);
+            } catch (PermissionException e1) {
+                log.info("Permission check does not apply here", e1);
+            }
         }
         return true;
     }
 
-    public void save(PersistedObject p)
+    public void save(PersistedObject p) throws PermissionException
     {
         transactionManager.save(p);
     }
 
-    public void remove(PersistedObject p)
+    public void remove(PersistedObject p) throws PermissionException
     {
         transactionManager.delete(p);
     }
@@ -204,15 +209,16 @@ public class EscalationMediator extends Mediator
         return DAOFactory.getDAOFactory().getEscalationDAO().findById(id);
     }
 
-    public int deleteEscalationById(Integer[] ids)
+    public int deleteEscalationById(Integer subjectId, Integer[] ids)
+        throws PermissionException
     {
         return DAOFactory.getDAOFactory().getEscalationDAO()
-                .deleteById(ids);
+                .deleteById(subjectId, ids);
     }
 
-    public Collection findAll()
+    public Collection findAll(Integer subjectId) throws PermissionException
     {
-        return DAOFactory.getDAOFactory().getEscalationDAO().findAll();
+        return DAOFactory.getDAOFactory().getEscalationDAO().findAll(subjectId);
     }
 
     public void clearActiveEscalation()
@@ -229,16 +235,18 @@ public class EscalationMediator extends Mediator
                 .clearActiveEscalation(escalationId, alertDefId);
     }
 
-    public Escalation findByEscalationName(String name)
+    public Escalation findByEscalationName(Integer subjectId, String name)
+        throws PermissionException
     {
-        Escalation e = Escalation.newSearchable(name);
+        Escalation e = Escalation.newSearchable(subjectId, name);
         return (Escalation)transactionManager.findPersisted(e);
     }
 
-    public Escalation findEscalationByAlertDefId(Integer id)
+    public Escalation findEscalationByAlertDefId(Integer subjectId, Integer id)
+        throws PermissionException
     {
         EscalationDAO dao =DAOFactory.getDAOFactory().getEscalationDAO();
-        return dao.findByAlertDefinitionId(id);
+        return dao.findByAlertDefinitionId(subjectId, id);
     }
 
     public EscalationState getEscalationState(Escalation e, Integer alertDefId)
@@ -390,7 +398,7 @@ public class EscalationMediator extends Mediator
             throw new SystemException(e);
         } catch (ActionExecuteException e) {
             throw new SystemException(e);
-        } catch (AlertCreateException e) {
+        } catch (PermissionException e) {
             throw new SystemException(e);
         }
     }
@@ -413,9 +421,9 @@ public class EscalationMediator extends Mediator
     private void dispatchAction(Escalation escalation, Alert alert,
                                 EscalationState state)
         throws ClassNotFoundException, IllegalAccessException,
-               InstantiationException, EncodingException,
-               InvalidActionDataException, ActionExecuteException,
-               AlertCreateException
+        InstantiationException, EncodingException,
+        InvalidActionDataException, ActionExecuteException,
+        PermissionException
     {
         EscalationAction ea =
             escalation.getCurrentAction(state.getCurrentLevel());
@@ -450,7 +458,7 @@ public class EscalationMediator extends Mediator
     }
 
     private void addAlertActionLog(Alert alert, String detail)
-        throws AlertCreateException
+        throws PermissionException
     {
         // TODO: this gotta be done with pojos.  not value objects!
         AlertValue alertValue = new AlertValue();

@@ -48,7 +48,13 @@ public abstract class PersistedObject
     private long    _version_;
 
     // list of searchable fields
-    protected List searchable = new ArrayList(0);
+    private List searchable = new ArrayList(0);
+
+    // This is an optional feature for use by the
+    // server side to perform capability based ACL checks.
+    // One use case is to allow DAOs to perform RBAC via
+    // PermissionManager
+    private Integer subjectId;
 
     // XXX -- This is public for now, but should be made more private later
     protected void setId(Integer id) {
@@ -86,7 +92,19 @@ public abstract class PersistedObject
     {
         return searchable;
     }
-    
+
+    public Integer getSubjectId()
+    {
+        return subjectId;
+    }
+
+    protected void setSubjectId(Integer subjectId)
+    {
+        // We expose this only to the appropriate modules
+        // to set subjects.
+        this.subjectId = subjectId;
+    }
+
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;

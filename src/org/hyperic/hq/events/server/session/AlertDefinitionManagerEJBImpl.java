@@ -180,7 +180,9 @@ public class AlertDefinitionManagerEJBImpl
             RegisteredTrigger trigger = conds[i].getTriggerId() != null ?
                 tDAO.findById(conds[i].getTriggerId()) : null;
 
-            res.createCondition(conds[i], trigger);
+            AlertCondition cond = res.createCondition(conds[i], trigger);
+            DAOFactory.getDAOFactory().getDAO(cond.getClass())
+                .savePersisted(cond);
         }
                 
         // Create actions
@@ -191,7 +193,8 @@ public class AlertDefinitionManagerEJBImpl
             if (actions[i].getParentId() != null)
                 parent = aDAO.findById(actions[i].getParentId());
             
-            res.createAction(actions[i], parent);
+            Action act = res.createAction(actions[i], parent);
+            DAOFactory.getDAOFactory().getDAO(act.getClass()).savePersisted(act);
         }
         
         // Set triggers

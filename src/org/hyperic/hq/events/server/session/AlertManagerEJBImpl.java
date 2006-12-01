@@ -105,10 +105,12 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public AlertValue createAlert(AlertValue val) {
+    public AlertValue createAlert(AlertValue val) throws PermissionException
+    {
         AlertDefinition def = getAlertDefDAO().findById(val.getAlertDefId());
         Alert alert = def.createAlert(val);
-        
+        DAOFactory.getDAOFactory().getDAO(alert.getClass())
+            .savePersisted(alert);
         return alert.getAlertValue();
     }
 
@@ -117,30 +119,43 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public AlertValue updateAlert(AlertValue val) throws AlertCreateException {
+    public AlertValue updateAlert(AlertValue val)
+        throws AlertCreateException
+    {
         Alert alert;
         
         alert = getAlertDAO().findById(val.getId());
+
+        try {
     
-        // Go through the AlertConditionLogs and create them
-        for (Iterator i = val.getAddedConditionLogs().iterator(); i.hasNext();){
-            AlertConditionLogValue aclv = (AlertConditionLogValue) i.next();
-            AlertCondition cond = 
-                getAlertConDAO().findById(aclv.getCondition().getId());
+            // Go through the AlertConditionLogs and create them
+            for (Iterator i = val.getAddedConditionLogs().iterator();
+                 i.hasNext();){
+                AlertConditionLogValue aclv = (AlertConditionLogValue) i.next();
+                AlertCondition cond =
+                    getAlertConDAO().findById(aclv.getCondition().getId());
             
-            alert.createConditionLog(aclv.getValue(), cond); 
-        }
+                AlertConditionLog log =
+                    alert.createConditionLog(aclv.getValue(), cond);
+                DAOFactory.getDAOFactory().getDAO(log.getClass())
+                    .savePersisted(log);
+            }
             
-        // Go through the AlertActionLogs and create them
-        Collection alogs = val.getAddedActionLogs();
-        for (Iterator i = alogs.iterator(); i.hasNext(); ) {
-            AlertActionLogValue aalv = (AlertActionLogValue) i.next();
-            Action action = getActionDAO().findById(aalv.getActionId());
+            // Go through the AlertActionLogs and create them
+            Collection alogs = val.getAddedActionLogs();
+            for (Iterator i = alogs.iterator(); i.hasNext(); ) {
+                AlertActionLogValue aalv = (AlertActionLogValue) i.next();
+                Action action = getActionDAO().findById(aalv.getActionId());
                 
-            alert.createActionLog(aalv.getDetail(), action);
+                AlertActionLog log =alert.createActionLog(aalv.getDetail(),
+                    action);
+                DAOFactory.getDAOFactory().getDAO(log.getClass())
+                    .savePersisted(log);
+            }
+            return alert.getAlertValue();
+        } catch(PermissionException e){
+            throw new AlertCreateException(e);
         }
-            
-        return alert.getAlertValue();
     }
 
     /** Remove alerts

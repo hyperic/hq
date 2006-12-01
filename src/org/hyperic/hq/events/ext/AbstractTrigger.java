@@ -313,10 +313,10 @@ public abstract class AbstractTrigger implements TriggerInterface {
                 log.debug("Bad action config value for ID " + aval.getId(), e);
             }
         }
-        
+
         // Store the alert
         alman.updateAlert(alert);
-    }   
+    }
     
     public Integer getId() {
         if (triggerValue == null)

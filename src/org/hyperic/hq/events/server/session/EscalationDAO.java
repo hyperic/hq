@@ -1,6 +1,8 @@
 package org.hyperic.hq.events.server.session;
 
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.apache.commons.logging.Log;
@@ -9,6 +11,8 @@ import org.hibernate.NonUniqueObjectException;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Collection;
+import java.io.Serializable;
 
 /*
  * NOTE: This copyright does *not* cover user programs that use HQ
@@ -46,7 +50,16 @@ public class EscalationDAO extends HibernateDAO
         super(Escalation.class, df);
     }
 
-    public void save(Escalation entity) {
+    public void save(Escalation entity) throws PermissionException
+    {
+        Integer subjectId = entity.getSubjectId();
+        if (subjectId != null) {
+            if (entity.getId() == null) {
+                SessionBase.canCreateEscalation(subjectId);
+            } else {
+                SessionBase.canModifyEscalation(subjectId);
+            }
+        }
         saveActions(entity.getActions().iterator());
         super.save(entity);
     }
@@ -55,11 +68,22 @@ public class EscalationDAO extends HibernateDAO
         return (Escalation)super.get(id);
     }
 
-    public void remove(Escalation entity) {
+    public void remove(Escalation entity) throws PermissionException
+    {
+        Integer subjectId = entity.getSubjectId();
+        if (subjectId != null) {
+            SessionBase.canRemoveEscalation(subjectId);
+        }
         DAOFactory.getDAOFactory().getEscalationStateDAO()
             .removeByEscalation(entity);
         removeActions(entity.getActions().iterator());
         super.remove(entity);
+    }
+
+    public Collection findAll(Integer subjectId) throws PermissionException
+    {
+        SessionBase.canViewEscalation(subjectId);
+        return super.findAll();
     }
 
     public void clearActions(Escalation entity) {
@@ -99,7 +123,20 @@ public class EscalationDAO extends HibernateDAO
         }
     }
 
-    public PersistedObject findPersisted(PersistedObject entity) {
+    public PersistedObject findPersistedById(Integer subjectId, Serializable id)
+        throws PermissionException
+    {
+        SessionBase.canViewEscalation(subjectId);
+        return findById((Integer)id);
+    }
+
+    public PersistedObject findPersisted(PersistedObject entity)
+        throws PermissionException
+    {
+        Integer subjectId = entity.getSubjectId();
+        if (subjectId != null) {
+            SessionBase.canViewEscalation(subjectId);
+        }
         List result = findByExample(entity);
         if (result.size() == 0) {
             return null;
@@ -111,11 +148,14 @@ public class EscalationDAO extends HibernateDAO
         return (Escalation)result.get(0);
     }
 
-    public void savePersisted(PersistedObject entity) {
+    public void savePersisted(PersistedObject entity) throws PermissionException
+    {
         save((Escalation)entity);
     }
 
-    public void removePersisted(PersistedObject entity) {
+    public void removePersisted(PersistedObject entity)
+        throws PermissionException
+    {
         remove((Escalation)entity);
     }
 
@@ -131,8 +171,10 @@ public class EscalationDAO extends HibernateDAO
             .clearActiveEscalation(findById(escalationId), alertDefId);
     }
 
-    public Escalation findByAlertDefinitionId(Integer id)
+    public Escalation findByAlertDefinitionId(Integer subjectId, Integer id)
+        throws PermissionException
     {
+        SessionBase.canViewEscalation(subjectId);
         String sql = "select e from AlertDefinition d " +
                 "join Escalation e " +
                 "where d.id = ?";
@@ -141,7 +183,10 @@ public class EscalationDAO extends HibernateDAO
                 .uniqueResult();
     }
 
-    public int deleteById(Integer[] ids) {
+    public int deleteById(Integer subjectId, Integer[] ids)
+        throws PermissionException
+    {
+        SessionBase.canRemoveEscalation(subjectId);
         String sql = "delete Escalation where id in (:ids)";
         return getSession().createQuery(sql)
                 .setParameterList("ids", ids)

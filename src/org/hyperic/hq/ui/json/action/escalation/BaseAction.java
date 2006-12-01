@@ -5,6 +5,9 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.json.JSONException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,7 +31,9 @@ public abstract class BaseAction extends Action
         return null;
     }
 
-    public abstract void execute(JsonActionContext context);
+    public abstract void execute(JsonActionContext context) throws
+        PermissionException, SessionTimeoutException, SessionNotFoundException,
+        JSONException;
 
     protected void streamResult(JsonActionContext context)
             throws JSONException, IOException
