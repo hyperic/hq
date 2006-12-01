@@ -52,6 +52,10 @@ public abstract class HypericEnum {
         return _desc;
     }
     
+    public String toString() {
+        return _desc;
+    }
+    
     private static Comparator CODE_COMPARATOR = new Comparator() {
         public int compare(Object o1, Object o2) {
             HypericEnum e1, e2;
