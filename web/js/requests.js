@@ -231,6 +231,8 @@ function showRecentAlerts(originalRequest) {
     var td4 = document.createElement('td');
     var alertAnchor = document.createElement("a");
     var checkBox = document.createElement("input");
+    var urlAmp = "&a="
+	var alertUrl = $('viewAlertUrl').href;
 
     
 		alertTable.appendChild(tr);
@@ -245,10 +247,11 @@ function showRecentAlerts(originalRequest) {
 		tr.appendChild(td2);
 		td2.setAttribute((document.all ? 'className' : 'class'), "resourceName");
 		
-		if (aList[i].resourceName) {
+		if (aList[i].resourceName && aList[i].appdefKey && aList[i].alertId) {
 		td2.appendChild(alertAnchor);
 		alertAnchor.appendChild(document.createTextNode(aList[i].resourceName));
-		alertAnchor.setAttribute('href', (aList[i].resourceName));
+		//alertAnchor.setAttribute('href', (aList[i].resourceName));
+		alertAnchor.setAttribute('href', (alertUrl + aList[i].appdefKey + urlAmp + aList[i].alertId));
 		}
 		
 		tr.appendChild(td3);
