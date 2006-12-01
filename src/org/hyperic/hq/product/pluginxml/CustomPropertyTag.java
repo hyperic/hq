@@ -32,7 +32,7 @@ public class CustomPropertyTag extends ConfigOptionTag {
     };
     
     private static final String[] OPTIONAL_ATTRS = {
-        ATTR_TYPE, ATTR_DESCRIPTION
+        ATTR_TYPE, ATTR_DESCRIPTION, ATTR_DEFAULT, ATTR_CATEGORY
     };
     
     CustomPropertyTag(BaseTag parent) {

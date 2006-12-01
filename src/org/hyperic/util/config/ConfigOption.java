@@ -32,6 +32,7 @@ public abstract class ConfigOption
 
     private String     optName;    // Option name
     private String     optDesc;    // Option description
+    private String     optCat;     // Option category     
     private String     defValue;   // Default value 
     private Boolean    optional;   // Is the option, optional?
 
@@ -90,6 +91,14 @@ public abstract class ConfigOption
     
     public String getDescription(){
         return this.optDesc;
+    }
+
+    public void setCategory(String category) {
+        this.optCat = category;
+    }
+    
+    public String getCategory(){
+        return this.optCat;
     }
 
     public int hashCode() {
