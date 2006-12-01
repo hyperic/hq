@@ -78,7 +78,6 @@ public class ZeventManager {
     // For diagnostics and warnings
     private long _lastWarnTime;
     private long _maxTimeInQueue;
-    private long _minTimeInQueue = Long.MAX_VALUE;
     private long _numEvents;
     
     private QueueProcessor _queueProcessor;
@@ -258,8 +257,6 @@ public class ZeventManager {
         synchronized (INIT_LOCK) {
             if (timeInQueue > _maxTimeInQueue)
                 _maxTimeInQueue = timeInQueue;
-            if (timeInQueue < _minTimeInQueue)
-                _minTimeInQueue = timeInQueue;
             _numEvents++;
         }
         
@@ -288,11 +285,10 @@ public class ZeventManager {
 
     private String getDiagnostics() {
         synchronized (INIT_LOCK) {
-            return "ZEvent Manager Diagnostics:\n" +  
-                "    Queue Size:        " + _eventQueue.size() + "\n" +
-                "    Max Time In Queue: " + _maxTimeInQueue + "\n" + 
-                "    Min Time In Queue: " + _minTimeInQueue + "\n" +
-                "    # of Events:       " + _numEvents;
+            return "ZEvent Manager Diagnostics:\n" +   
+                       "    Queue Size:        " + _eventQueue.size() + "\n" +
+                       "    Events Handled:    " + _numEvents + "\n" + 
+                       "    Max Time In Queue: " + _maxTimeInQueue + "ms";
         }
     }
     
@@ -311,6 +307,10 @@ public class ZeventManager {
                 DiagnosticObject myDiag = new DiagnosticObject() {
                     public String getStatus() {
                         return ZeventManager.getInstance().getDiagnostics();
+                    }
+                    
+                    public String toString() {
+                        return "ZEvent Subsystem";
                     }
                 };
                 
