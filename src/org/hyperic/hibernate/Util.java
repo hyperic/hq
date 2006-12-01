@@ -131,6 +131,10 @@ public class Util {
                 }
                 return buf.toString();
             }
+            
+            public String toString() {
+                return "Hibernate Cache";
+            }
         };
         DiagnosticThread.addDiagnosticObject(cacheDiagnostics);
     }
