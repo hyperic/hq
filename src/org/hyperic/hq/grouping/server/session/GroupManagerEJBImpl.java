@@ -77,9 +77,8 @@ import org.hyperic.util.pager.SortAttribute;
   *           type="Stateless"
   */
 public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
-    private javax.ejb.SessionContext ctx;
-    private final Log log = LogFactory.getLog(
-        "org.hyperic.hq.grouping.server.session.GroupManagerEJBImpl");
+    private final Log log = 
+        LogFactory.getLog(GroupManagerEJBImpl.class);
     public final String authzResourceGroupName = "covalentAuthzResourceGroup";
 
 
@@ -95,17 +94,17 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
      * @ejb:transaction type="Required"
      */
     public GroupValue createGroup (AuthzSubjectValue subject,GroupValue retVal)
-        throws GroupCreationException, GroupDuplicateNameException {
-
+        throws GroupCreationException, GroupDuplicateNameException 
+    {
         try {
-            ResourceGroupValue  rgVo  = null;
+            ResourceGroupValue  rgVo;
             RoleValue[]         roArr = null;
             ResourceValue[]     reArr = null;
 
             // To avoid groups with duplicate names, we're now performing a
             // a case-insensitive name based find before creation.
             // PR:5059
-            if (isGroupNameExists(subject,retVal)) {
+            if (groupNameExists(subject,retVal)) {
                 throw new GroupDuplicateNameException ("A ResourceGroup "+
                                                        "with same name "+
                                                        "exists.");
@@ -141,15 +140,13 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
                 getResourceByInstanceId(authzResourceGroupName, rgVo.getId());
             rgmLoc.addResource(subject, rgVo, rgVo.getId(),
                                resVal.getResourceTypeValue());
-        }
-        catch (PermissionException pe) {
+        } catch (PermissionException pe) {
             // This should NOT occur. Anyone can create groups.
             log.error("Caught PermissionException during "+
                       "self-assignment of group resource to group",pe);
             throw new GroupCreationException ("Caught PermissionException "+
                 "during self-assignment of resource to group");
-        }
-        catch (FinderException fe) {
+        } catch (FinderException fe) {
             log.error("GroupManager caught underlying finder exc "+
                           "with findResourceTypeByName(): "+fe.getMessage());
             throw new GroupCreationException (fe.getMessage());
@@ -160,12 +157,11 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
     private String fetchGroupOwner(Integer gid) {
         String retVal = "";
         try {
-            ResourceGroupManagerLocal rgmLoc =
-                getResourceGroupManager();
+            ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
+                
             retVal = rgmLoc.getResourceGroupOwner(gid).getName();
-        }catch (Exception e){
-            log.debug("Unable to set subject during create");
-            log.debug(e);
+        } catch (Exception e){
+            log.debug("Unable to set subject during create", e);
         }
         return retVal;
     }
@@ -186,7 +182,8 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
      */
     public GroupValue findGroup (AuthzSubjectValue subject, GroupValue retVal,
                                  PageControl pc)
-        throws PermissionException, GroupNotFoundException {
+        throws PermissionException, GroupNotFoundException 
+    {
         try {
             ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
 
@@ -194,8 +191,7 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             if (retVal.getName () != null) {
                 rgVo = rgmLoc.findResourceGroupByName(subject,
                                                       retVal.getName());
-            } 
-            else {
+            } else { 
                 rgVo = rgmLoc.findResourceGroupById(subject,retVal.getId());
             }
 
@@ -223,13 +219,12 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
                 retVal.addEntry(ge);
             }
             retVal.setTotalSize( rgVo.getResources().size() );
-        }
-        catch (FinderException fe) {
+        } catch (FinderException fe) {
             log.debug("GroupManager caught underlying finder exc "+
                       "attempting to findResourceGroupById(): "+
                           fe.getMessage());
             throw new GroupNotFoundException("The specified group "+
-                          "does not exist.",fe);
+                                             "does not exist.", fe);
         }
         return retVal;
     }
@@ -241,20 +236,18 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
      * @param GroupValue for filtering
      * @param ResourceValue for filtering
      * @param PageControl for paging
-     * @return PageList
-     * @throws FinderException
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
     public PageList findAllGroups (AuthzSubjectValue subject, GroupValue gv, 
                                    ResourceValue rv, PageControl pc) 
         throws  GroupNotFoundException, PermissionException,
-                CloneNotSupportedException {
+                CloneNotSupportedException 
+    {
         PageList retVal = null;
 
         try {
-            ResourceGroupManagerLocal rgmLoc =
-                getResourceGroupManager();
+            ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
 
             List rgList;
             if (rv != null) {
@@ -306,29 +299,25 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             }
             retVal = getPageList(toBePaged, pc);
 
-        }
-        catch (FinderException fe) {
+        } catch (FinderException fe) {
             log.debug("Finder caught, no groups for this subject: "+
                       fe.getMessage());
             throw new GroupNotFoundException("No groups exist for specified "+
                                             "subject.",fe);
-        }
-        catch (PermissionException pe) {
+        } catch (PermissionException pe) {
             log.error("GroupManager caught PermissionException: "+
                       pe.getMessage());
             throw pe;
-        }
-        catch (NamingException ne) {
+        } catch (NamingException ne) {
             log.error("Caught NamingException in resource group manager",ne);
             throw new SystemException ("Caught NamingException "+
-                "in resource group manager");
+                                       "in resource group manager");
         }
         return retVal;
     }
 
     // For group paging only. Not members!
-    private PageList getPageList (Collection coll, PageControl pc)
-    {
+    private PageList getPageList (Collection coll, PageControl pc) {
         Pager defaultPager = Pager.getDefaultPager();
         PageControl.initDefaults(pc, SortAttribute.RESGROUP_NAME);
         return  defaultPager.seek(coll,pc.getPagenum(),pc.getPagesize());
@@ -354,7 +343,6 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
                 GroupVisitorException
     {
         try {
-
             ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
             
             // First, lookup the group to preserve non-updatable fields
@@ -367,7 +355,7 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             // case-insensitive name based find before saving. PR:5208
             if (!groupVo.getName().toLowerCase().equals( 
                     rgVo.getName().toLowerCase()) &&
-                isGroupNameExists(subject,groupVo)) {
+                groupNameExists(subject,groupVo)) {
                 throw new GroupDuplicateNameException ("A ResourceGroup "+
                                                        "with same name "+
                                                        "exists.");
@@ -428,14 +416,12 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             ResourceValue[] resToAddArr = (ResourceValue[])
                 resToAdd.toArray(new ResourceValue[]{});
             rgmLoc.addResources(subject,rgVo,resToAddArr);
-        }
-        catch (FinderException fe) {
+        } catch (FinderException fe) {
             log.error("GroupManager.saveGroup caught underlying finder exc: "+
                       "this may happen in authz during permission checks if "+
                       "person or resource isn't found"+ fe.getMessage());
             throw new GroupModificationException (fe);
-        }
-        catch (PermissionException pe) {
+        } catch (PermissionException pe) {
             log.error("GroupManager caught PermissionException: "+
                       pe.getMessage(),pe);
             throw pe;
@@ -453,34 +439,30 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
                     return true;
             }
         } catch (Exception e) {
-            log.debug("ResourceListContainsGroupEntry caught exception:"+
-                e.getMessage());
+            log.debug("ResourceListContainsGroupEntry caught exception:", e);
         }
         return false;
     }
+
     /**
-     *  Removes a group specified by id.
+     * Removes a group specified by id.
      * 
-     * @param spider subject
-     * @param group identifier
      * @throws PermissionException when consumer is not owner or priv'd.
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
     public void deleteGroup (AuthzSubjectValue subject, Integer groupId)
-        throws GroupNotFoundException, PermissionException {
+        throws GroupNotFoundException, PermissionException 
+    {
         try {
-
-            ResourceGroupManagerLocal rgmLoc =
-                getResourceGroupManager();
+            ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
 
             ResourceGroupValue rgVo = new ResourceGroupValue();
             rgVo.setId(groupId);
 
             // First, remove existing resources...
             rgmLoc.removeResourceGroup(subject,rgVo);
-        }
-        catch (PermissionException pe) {
+        } catch (PermissionException pe) {
             log.error("GroupManager caught PermissionException: "+
                       pe.getMessage());
             throw pe;
@@ -489,16 +471,14 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
 
     /**
      * Change owner of a group.
-     * @param current owner subject
-     * @param group value
-     * @param newOwner subject
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
     public GroupValue changeGroupOwner(AuthzSubjectValue subject,
                                        GroupValue groupVo,
                                        AuthzSubjectValue newOwner)
-        throws GroupNotFoundException, PermissionException {
+        throws GroupNotFoundException, PermissionException 
+    {
         try {
             // now get its authz resource
             ResourceValue authzRes = getResourceByInstanceId(
@@ -514,8 +494,7 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             // Set the GroupValue to be returned
             groupVo.setOwner(newOwner.getName());
             groupVo.setModifiedBy(subject.getName());
-        }
-        catch (FinderException e) {
+        } catch (FinderException e) {
             log.error("Unable to find resource group to change owner.");
             throw new GroupNotFoundException ("Unable to lookup ResourceGroup" +
                                               " for ownership change");
@@ -525,49 +504,30 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
 
     /* Get the authz resource type value  */
     protected ResourceTypeValue getResourceType(String resType)
-        throws FinderException {
+        throws FinderException 
+    {
         return getResourceManager().findResourceTypeByName(resType);
     }
 
     private ResourceGroupManagerLocal getResourceGroupManager() {
         try {
             return ResourceGroupManagerUtil.getLocalHome().create();
-        }
-        catch (NamingException ne) {
-            log.error("Unable to lookup ResourceGroupManagerLocalHome "+
-                      "interface", ne);
-            throw new SystemException ("Unable to lookup "+
-                                          "ResourceGroupManagerLocal"+
-                                          "Home interface",ne);
-        }
-        catch (CreateException ce) {
-            log.error("Unable to create ResourceGroupManagerLocal", ce);
-            throw new SystemException ("Unable to create Resource"+
-                                          "GroupManagerLocal interface",ce);
+        } catch (Exception e) {
+            throw new SystemException(e);
         }
     }
 
-    /* Get the local interace of the Resource Manager  */
     private ResourceManagerLocal getResourceManager() {
         try {
             return ResourceManagerUtil.getLocalHome().create();
-        }
-        catch (NamingException ne) {
-            log.error("Unable to lookup ResourceManagerLocalHome "+
-                      "interface", ne);
-            throw new SystemException ("Unable to lookup "+
-                                          "ResourceManagerLocal"+
-                                          "Home interface",ne);
-        }
-        catch (CreateException ce) {
-            log.error("Unable to create ResourceManagerLocal", ce);
-            throw new SystemException ("Unable to create Resource"+
-                                          "ManagerLocal interface",ce);
+        } catch (Exception e) {
+            throw new SystemException(e);
         }
     }
 
     private ResourceValue getResourceByInstanceId(String type, Integer id)
-        throws FinderException {
+        throws FinderException 
+    {
         return getResourceManager()
             .findResourceByInstanceId(getResourceType(type),id);
     }
@@ -576,8 +536,9 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
     // a case-insensitive name based find before creation.
     // PR:5059
     // Simply lookup group by name throwing appropriate exceptions.
-    private boolean isGroupNameExists(AuthzSubjectValue subject, 
-                                      GroupValue gVo) {
+    private boolean groupNameExists(AuthzSubjectValue subject, 
+                                    GroupValue gVo) 
+    {
         boolean retVal;
 
         try {
@@ -594,40 +555,12 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
     }
 
     /**
-     * @see javax.ejb.SessionBean#ejbCreate()
      * @ejb:create-method
-     * @throws CreateException
      */
-    public void ejbCreate() throws CreateException {
-    }
-
-    /**
-     * @see javax.ejb.SessionBean#ejbPostCreate()
-     */
+    public void ejbCreate() {}
     public void ejbPostCreate() {}
-
-    /**
-     * @see javax.ejb.SessionBean#ejbActivate()
-     */
     public void ejbActivate() {}
-
-    /**
-     * @see javax.ejb.SessionBean#ejbPassivate()
-     */
     public void ejbPassivate() {}
-
-    /**
-     * @see javax.ejb.SessionBean#ejbRemove()
-     */
-    public void ejbRemove() {
-        this.ctx = null;
-    }
-
-    /**
-     * @see javax.ejb.SessionBean#setSessionContext(SessionContext)
-     */
-    public void setSessionContext(SessionContext ctx)
-        throws EJBException, RemoteException {
-        this.ctx = ctx;
-    }
+    public void ejbRemove() { }
+    public void setSessionContext(SessionContext ctx) {}
 }
