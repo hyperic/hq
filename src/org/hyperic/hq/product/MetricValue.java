@@ -38,11 +38,14 @@ import org.hyperic.util.data.IDisplayDataPoint;
  *
  * @see MeasurementPluginManager#getValue
  * @see MeasurementPlugin#getValue
+ *
+ * XXX: It would be best if this object were immutable. -- JMT 11/31/09
  */
 public class MetricValue
-    implements IDisplayDataPoint, IComparableDatapoint, Serializable {
-    private double  value;
-    private long    timestamp; 
+    implements IDisplayDataPoint, IComparableDatapoint, Serializable 
+{
+    private double  _value;
+    private long    _timestamp; 
 
     public static final double VALUE_NONE = Double.NaN;
 
@@ -75,10 +78,15 @@ public class MetricValue
     public MetricValue() {}
 
     public MetricValue(double value, long rtime) {
-        timestamp = rtime;
-        this.value = value;
+        _timestamp = rtime;
+        _value = value;
     }
 
+    public MetricValue(MetricValue src) {
+        _timestamp = src.getTimestamp();
+        _value     = src.getValue();
+    }
+    
     /**
      * Default retrieval time to System.currentTimeMillis()
      */
@@ -116,14 +124,14 @@ public class MetricValue
      * @return true if getValue() == VALUE_NONE, false otherwise.
      */
     public boolean isNone() {
-        return Double.isNaN(value);
+        return Double.isNaN(_value);
     }
 
     /**
      * @return true if getValue() == VALUE_FUTURE, false otherwise.
      */
     public boolean isFuture() {
-        return Double.isInfinite(value);
+        return Double.isInfinite(_value);
     }
 
     /**
@@ -139,30 +147,30 @@ public class MetricValue
         }
         // Format the double value
         NumberFormat nf = NumberFormat.getInstance();
-        return nf.format(value);
+        return nf.format(_value);
     }
 
-    public Double getObjectValue () { return new Double(this.value); }
+    public Double getObjectValue () { return new Double(_value); }
 
     public double getValue () {
-        return value;
+        return _value;
     }
 
     public void setValue(double value) {
-        this.value = value;
+        _value = value;
     }
 
     public long getTimestamp () {
-        return timestamp;
+        return _timestamp;
     }
 
     public void setTimestamp( long t ) {
-        timestamp = t;
+        _timestamp = t;
     }
 
     public String getLabel() {
         return SimpleDateFormat.getDateTimeInstance().format(
-            new Date(this.getTimestamp()));
+            new Date(getTimestamp()));
     }
     
     /**
@@ -171,7 +179,7 @@ public class MetricValue
      */
     public int compareTo(Object o) {
         MetricValue o2 = (MetricValue)o;
-        double difference = this.value - o2.value;
+        double difference = _value - o2._value;
         // can't just return subtraction, because casting to integer
         // loses the negative values for small differences (< 1), which we 
         // need.
@@ -183,8 +191,8 @@ public class MetricValue
     public boolean equals(Object obj) {
         if (obj instanceof MetricValue) {
             MetricValue val = (MetricValue) obj;
-            return (this.getTimestamp() == val.getTimestamp() &&
-                    this.getValue() == val.getValue());
+            return (getTimestamp() == val.getTimestamp() &&
+                    getValue() == val.getValue());
         }
 
         return false;
