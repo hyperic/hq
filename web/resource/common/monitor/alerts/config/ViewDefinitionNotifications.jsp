@@ -54,32 +54,41 @@
   </c:choose>
   <c:param name="ad" value="${alertDef.id}"/>
 </c:url>
+<c:url var="viewEscalationUrl" value="/alerts/Config.do">
+  <c:param name="mode" value="viewEscalation"/>
+  <c:choose>
+  <c:when test="${not empty Resource}">
+    <c:param name="eid" value="${Resource.entityId.appdefKey}"/>
+  </c:when>
+  <c:otherwise>
+    <c:param name="aetid" value="${ResourceType.appdefTypeKey}"/>
+  </c:otherwise>
+  </c:choose>
+  <c:param name="ad" value="${alertDef.id}"/>
+</c:url>
 
 <tiles:insert definition=".events.config.view.notifications.tabs">
   <tiles:put name="viewUsersUrl" beanName="viewUsersUrl"/>
   <tiles:put name="viewOthersUrl" beanName="viewOthersUrl"/>
+  <tiles:put name="viewEscalationUrl" beanName="viewEscalationUrl"/>
 </tiles:insert>
 
-<%--
-  I don't particularly *WANT* to use JSP-RT stuff here, but there
-  seems to be no better choice since the struts tiles:insert does
-  not yet take EL.
---%>
-<% String notificationsTile = null; %>
 <c:choose>
 <c:when test="${param.mode == 'viewUsers' || param.mode == 'viewDefinition'}">
-<% notificationsTile = ".events.config.view.notifications.users"; %>
 <c:set var="formAction" value="/alerts/RemoveUsers"/>
 <c:set var="selfUrl" value="${viewUsersUrl}"/>
 <c:set var="addMode" value="addUsers"/>
 <c:set var="defaultSortColumn" value="2"/>
 </c:when>
 <c:when test="${param.mode == 'viewOthers'}">
-<% notificationsTile = ".events.config.view.notifications.others"; %>
 <c:set var="formAction" value="/alerts/RemoveOthers"/>
 <c:set var="selfUrl" value="${viewOthersUrl}"/>
 <c:set var="addMode" value="addOthers"/>
 <c:set var="defaultSortColumn" value="0"/>
+</c:when>
+<c:when test="${param.mode == 'viewEscalation'}">
+<c:set var="formAction" value="/alerts/SaveEscalation"/>
+<c:set var="selfUrl" value="${viewEscalationUrl}"/>
 </c:when>
 <c:otherwise>
 <%-- do nothing --%>
@@ -105,11 +114,11 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 </c:otherwise>
 </c:choose>
 
-<%-- I have to use an RT-expr here.  Yuck.  See comment above. --%>
-<tiles:insert definition="<%=notificationsTile%>">
+<tiles:insert beanName="notificationsTile">
   <tiles:put name="selfUrl" beanName="selfUrl"/>
 </tiles:insert>
 
+<c:if test="${not empty addMode}">
 <%-- if the attributes are not available, we can't display this tile: an error probably occured --%>
   <c:choose>
     <c:when test="${null == notifyList || empty listSize}">
@@ -138,6 +147,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
       </tiles:insert>
     </c:otherwise>
   </c:choose>
+</c:if>
 
 </html:form>
 

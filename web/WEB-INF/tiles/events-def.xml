@@ -176,6 +176,10 @@
         path="/resource/common/monitor/alerts/config/ListUsers.jsp"
         controllerUrl="/alerts/ViewNotificationsUsers.do"/>
 
+  <definition name=".events.config.view.notifications.escalation"
+        path="/resource/common/monitor/alerts/config/ViewEscalation.jsp"
+        controllerUrl="/alerts/ViewEscalation.do"/>
+
   <definition name=".events.config.view.notifications.snmp"
         path="/resource/common/monitor/alerts/config/SnmpActionProps.jsp"
         controllerUrl="/alerts/ViewNotificationsSnmp.do"/>

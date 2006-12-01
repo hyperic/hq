@@ -40,7 +40,9 @@
 
 <tiles:insert definition=".events.config.view.conditionsbox"/>
 
-<tiles:insert definition=".events.config.view.notifications"/>
+<tiles:insert definition=".events.config.view.notifications">
+  <tiles:put name="notificationsTile" beanName="notificationsTile"/>
+</tiles:insert>
 
 <tiles:insert definition=".events.config.view.nav"/>
 
