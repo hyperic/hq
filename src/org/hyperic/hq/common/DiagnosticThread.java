@@ -68,6 +68,7 @@ public class DiagnosticThread implements Runnable {
     /**
      * Set the interval at which the DiagnosticThread will print status info
      * @param interval The interval in milliseconds.
+     * XXX -- Technically, access to interval should be synchronized
      */
     public static void setInterval(long interval) {
         _interval = interval;
@@ -102,8 +103,7 @@ public class DiagnosticThread implements Runnable {
                     while (i.hasNext()) {
                         DiagnosticObject o = (DiagnosticObject)i.next();
                         try {
-                            _log.info("[" + o.getClass().getName() + "] " +
-                                      o.getStatus());
+                            _log.info("[" + o + "] " + o.getStatus());
                         } catch (Throwable e) {
                             _log.error("Error in diagnostics: " + e, e);
                         }
