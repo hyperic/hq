@@ -34,7 +34,6 @@ import org.hyperic.hq.ui.action.resource.NonScheduleResourceForm;
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
 
-
 /**
  * A subclass of <code>ResourceForm</code> representing the
  * <em>AddGroupResources</em> form. The purpose of this form is
@@ -42,26 +41,20 @@ import org.apache.struts.action.ActionMapping;
  */
 public class AddGroupResourcesForm extends NonScheduleResourceForm  {
 
-    //-------------------------------------instance variables
-
-    private String[] availableResources;
-    private String[] pendingResources;
-    private Integer psa;
-    private Integer psp;
-    private List availResourceTypes;
-    private String filterBy;
-    private String nameFilter;
+    private String[] _availableResources;
+    private String[] _pendingResources;
+    private Integer _psa;
+    private Integer _psp;
+    private List _availResourceTypes;
+    private String _filterBy;
+    private String _nameFilter;
     
-    //-------------------------------------constructors
-
     public AddGroupResourcesForm() {
         super();
     }
 
-    //-------------------------------------public methods
-
     public String[] getAvailableResource() {
-	   return this.availableResources;
+	   return _availableResources;
     }
 
     public String[] getAvailableResources() {
@@ -69,7 +62,7 @@ public class AddGroupResourcesForm extends NonScheduleResourceForm  {
     }
 
     public void setAvailableResource(String[] availableResource) {
-        this.availableResources = availableResource;
+        _availableResources = availableResource;
     }
 
     public void setAvailableResources(String[] availableResources) {
@@ -77,7 +70,7 @@ public class AddGroupResourcesForm extends NonScheduleResourceForm  {
     }
 
     public String[] getPendingResource() {
-	return this.pendingResources;
+	    return _pendingResources;
     }
 
     public String[] getPendingResources() {
@@ -85,7 +78,7 @@ public class AddGroupResourcesForm extends NonScheduleResourceForm  {
     }
 
     public void setPendingResource(String[] pendingResource) {
-        this.pendingResources = pendingResource;
+        _pendingResources = pendingResource;
     }
 
     public void setPendingResources(String[] pendingResources) {
@@ -93,29 +86,29 @@ public class AddGroupResourcesForm extends NonScheduleResourceForm  {
     }
 
     public Integer getPsa() {
-        return this.psa;
+        return _psa;
     }
 
     public void setPsa(Integer ps) {
-        this.psa = ps;
+        _psa = ps;
     }
 
     public Integer getPsp() {
-        return this.psp;
+        return _psp;
     }
 
     public void setPsp(Integer ps) {
-        this.psp = ps;
+        _psp = ps;
     }
 
     public void reset(ActionMapping mapping,
                       HttpServletRequest request) {
-        this.availResourceTypes = null;
-        this.availableResources = new String[0];
-        this.pendingResources = new String[0];
-        this.filterBy = null;
-        this.psa = null;
-        this.psp = null;
+        _availResourceTypes = null;
+        _availableResources = new String[0];
+        _pendingResources = new String[0];
+        _filterBy = null;
+        _psa = null;
+        _psp = null;
         super.reset(mapping, request);
     }
 
@@ -128,8 +121,6 @@ public class AddGroupResourcesForm extends NonScheduleResourceForm  {
             errs = new ActionErrors();
         }
         
-        // custom validation
-        
         if (errs.isEmpty()) {
             return null;
         }
@@ -138,16 +129,16 @@ public class AddGroupResourcesForm extends NonScheduleResourceForm  {
     
     public String toString() {
         StringBuffer s = new StringBuffer(super.toString());
-        s.append("psa=" + psa + " ");
-        s.append("psp=" + psp + " ");
-        s.append("nameFilter=").append(nameFilter).append(" ");
+        s.append("psa=" + _psa + " ");
+        s.append("psp=" + _psp + " ");
+        s.append("nameFilter=").append(_nameFilter).append(" ");
 
         s.append("availableResources={");
-        listToString(s, availableResources);
+        listToString(s, _availableResources);
         s.append("} ");
 
         s.append("pendingResources={");
-        listToString(s, pendingResources);
+        listToString(s, _pendingResources);
         s.append("}");
 
         return s.toString();
@@ -163,44 +154,28 @@ public class AddGroupResourcesForm extends NonScheduleResourceForm  {
             }
         }
     }
-    
-    /**
-     * @return List
-     */
+
     public List getAvailResourceTypes() {
-        return availResourceTypes;
+        return _availResourceTypes;
     }
 
-    /**
-     * Sets the availResourceTypes.
-     * @param availResourceTypes The availResourceTypes to set
-     */
     public void setAvailResourceTypes(List availResourceTypes) {
-        this.availResourceTypes = availResourceTypes;
+        _availResourceTypes = availResourceTypes;
     }
 
-    /**
-     * 
-     * @return Integer
-     */
     public String getFilterBy() {
-        return filterBy;
+        return _filterBy;
     }
 
-    /**
-     * Sets the filter by param.
-     * 
-     * @param fs The fs to set
-     */
     public void setFilterBy(String fs) {
-        this.filterBy = fs;
+        _filterBy = fs;
     }
     
     public String getNameFilter() {
-        return nameFilter;   
+        return _nameFilter;
     }
     
     public void setNameFilter(String s) {
-        this.nameFilter = s;
+        _nameFilter = s;
     }
 }

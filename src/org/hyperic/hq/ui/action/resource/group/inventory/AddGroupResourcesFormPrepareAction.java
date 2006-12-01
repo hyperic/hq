@@ -183,10 +183,11 @@ public class AddGroupResourcesFormPrepareAction extends Action {
         String filterBy = addForm.getFilterBy();
         
         int appdefType = -1;
-        if (filterBy != null)
-            appdefType = new Integer(filterBy).intValue();
-        
-        PrepareResourceGroup p = null;
+        if (filterBy != null) {
+            appdefType = Integer.parseInt(filterBy);
+        }
+
+        PrepareResourceGroup p;
         
         if (group.isGroupCompat())
             p = new PrepareCompatGroup();
@@ -199,7 +200,8 @@ public class AddGroupResourcesFormPrepareAction extends Action {
         else
             p = new PrepareMixedGroup();
         
-        p.loadGroupMembers(sessionId, addForm, group, boss, appdefType, nameFilter, pendingResItems, pcAvail);
+        p.loadGroupMembers(sessionId, addForm, group, boss, appdefType,
+                           nameFilter, pendingResItems, pcAvail);
         PageList availResources = p.getAvailResources();
         
         request.setAttribute(Constants.AVAIL_RESOURCES_ATTR, availResources);
@@ -223,13 +225,6 @@ public class AddGroupResourcesFormPrepareAction extends Action {
         
         /**
          * This method loads group members from the back-end.
-         * @param sessionId TODO
-         * @param group TODO
-         * @param boss TODO
-         * @param appdefType TODO
-         * @param nameFilter TODO
-         * @param pendingResItems TODO
-         * @param pcAvail TODO
          */
         protected abstract void loadGroupMembers(int sessionId,
                                                  AddGroupResourcesForm addForm,
@@ -303,7 +298,6 @@ public class AddGroupResourcesFormPrepareAction extends Action {
     
     /**
      * Inner class which represents the Group of Groups.
-     *
      */
     private class PrepareGroupOfGroups extends PrepareResourceGroup {
         PageList availMembers = null;
@@ -336,7 +330,6 @@ public class AddGroupResourcesFormPrepareAction extends Action {
              */
             addForm.setAvailResourceTypes(buildGroupTypes());
         }
-        
     }
     
     /**
@@ -373,7 +366,6 @@ public class AddGroupResourcesFormPrepareAction extends Action {
              */
             addForm.setAvailResourceTypes(buildResourceTypes());
         }
-        
     }
     
     /**
@@ -388,19 +380,19 @@ public class AddGroupResourcesFormPrepareAction extends Action {
         int type = -1;
         type = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
         bv = new LabelValueBean(AppdefEntityConstants.typeToString(type),
-        new Integer(type).toString());
+                                Integer.toString(type));
         
         gTypes.add(bv);
         
         type = AppdefEntityConstants.APPDEF_TYPE_SERVER;
         bv = new LabelValueBean(AppdefEntityConstants.typeToString(type),
-        new Integer(type).toString());
+                                Integer.toString(type));
         
         gTypes.add(bv);
         
         type = AppdefEntityConstants.APPDEF_TYPE_SERVICE;
         bv = new LabelValueBean(AppdefEntityConstants.typeToString(type),
-        new Integer(type).toString());
+                                Integer.toString(type));
         
         gTypes.add(bv);
         
@@ -420,25 +412,24 @@ public class AddGroupResourcesFormPrepareAction extends Action {
         type = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP;
         bv = new LabelValueBean(
         AppdefEntityConstants.getAppdefGroupTypeName(type),
-        new Integer(type).toString());
+        Integer.toString(type));
         
         gTypes.add(bv);
         
         type = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS;
         bv = new LabelValueBean(
         AppdefEntityConstants.getAppdefGroupTypeName(type),
-        new Integer(type).toString());
+        Integer.toString(type));
         
         gTypes.add(bv);
         
         type = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS;
         bv = new LabelValueBean(
         AppdefEntityConstants.getAppdefGroupTypeName(type),
-        new Integer(type).toString());
+        Integer.toString(type));
         
         gTypes.add(bv);
         
         return gTypes;
     }
-    
 }

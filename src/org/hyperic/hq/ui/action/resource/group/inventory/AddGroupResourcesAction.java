@@ -63,8 +63,6 @@ import org.apache.struts.action.ActionMapping;
  */
 public class AddGroupResourcesAction extends BaseAction {
 
-    // ---------------------------------------------------- Public Methods
-
     /**
      * Add roles to the user specified in the given
      * <code>AddGroupResourcesForm</code>.
@@ -91,7 +89,8 @@ public class AddGroupResourcesAction extends BaseAction {
             if (forward != null) {
                 BaseValidatorForm spiderForm = (BaseValidatorForm) form;
 
-                if (spiderForm.isCancelClicked() || spiderForm.isResetClicked()) {
+                if (spiderForm.isCancelClicked() ||
+                    spiderForm.isResetClicked()) {
                     log.trace("removing pending/removed resources list");
                     SessionUtils
                         .removeList(session,
@@ -120,9 +119,7 @@ public class AddGroupResourcesAction extends BaseAction {
             List pendingResourceIds =
                 SessionUtils.getListAsListStr(request.getSession(),
                                      Constants.PENDING_RESOURCES_SES_ATTR);
-    
-            // Bug#7258; don't do anything if the user does not add any 
-            // members to the group.        
+            
             if (pendingResourceIds.size() == 0)
                 return returnSuccess(request, mapping, forwardParams);
                             
@@ -162,6 +159,5 @@ public class AddGroupResourcesAction extends BaseAction {
             log.error("Unable to add resources to group", e);
             throw e;
         }
-        
     }
 }

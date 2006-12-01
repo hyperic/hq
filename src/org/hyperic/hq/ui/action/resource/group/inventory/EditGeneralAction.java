@@ -49,8 +49,6 @@ import org.apache.struts.action.ActionMapping;
 
 /**
  * Action which saves the general properties for a group
- * 
- *
  */
 public class EditGeneralAction extends BaseAction {
 
@@ -67,8 +65,8 @@ public class EditGeneralAction extends BaseAction {
         
         ResourceForm rForm = (ResourceForm) form;
 
-        Integer rid = null;
-        Integer entityType = null;
+        Integer rid;
+        Integer entityType;
         HashMap forwardParams = new HashMap(2);
             
         rid = rForm.getRid();

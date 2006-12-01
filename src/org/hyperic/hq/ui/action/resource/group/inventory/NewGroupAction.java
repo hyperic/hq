@@ -50,9 +50,6 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
-/**
- *
- */
 public class NewGroupAction extends BaseAction {
 
     private static Log log = LogFactory.getLog(NewGroupAction.class.getName());
@@ -83,9 +80,8 @@ public class NewGroupAction extends BaseAction {
             Integer sessionId = RequestUtils.getSessionId(request);
             AppdefGroupValue newGroup;
             AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
-            
-            newGroup = null;
-            if (newForm.getGroupType().intValue() == 
+
+            if (newForm.getGroupType().intValue() ==
                     Constants.APPDEF_TYPE_GROUP_COMPAT)
             {
                 newGroup = boss.createGroup(sessionId.intValue(), 
@@ -93,9 +89,8 @@ public class NewGroupAction extends BaseAction {
                             newForm.getResourceTypeId().intValue(),
                             newForm.getName(), newForm.getDescription(),
                             newForm.getLocation() );
-            }
-            else // Constants.APPDEF_TYPE_GROUP_ADHOC
-            {
+            } else {
+                // Constants.APPDEF_TYPE_GROUP_ADHOC
                 if (newForm.getEntityTypeId().intValue() ==
                         AppdefEntityConstants.APPDEF_TYPE_APPLICATION ||
                         newForm.getEntityTypeId().intValue() ==
@@ -107,9 +102,8 @@ public class NewGroupAction extends BaseAction {
                                 newForm.getName(), 
                                 newForm.getDescription(),
                                 newForm.getLocation());
-                }
-                else // otherwise, create a mixed group
-                {
+                } else {
+                    // otherwise, create a mixed group
                     newGroup = 
                       boss.createGroup(sessionId.intValue(), 
                                 newForm.getName(), newForm.getDescription(), 
@@ -121,8 +115,8 @@ public class NewGroupAction extends BaseAction {
             log.trace("creating group [" + newForm.getName()
                                + "]" + " with attributes " + newForm);
     
-            Integer rid = null;
-            Integer entityType = null;
+            Integer rid;
+            Integer entityType;
             HashMap forwardParams = new HashMap(2);
             
             rid = newGroup.getId();
@@ -152,7 +146,6 @@ public class NewGroupAction extends BaseAction {
                 .setError(request,
                           "resource.group.inventory.error.DuplicateGroupName");
             return returnFailure(request, mapping);
-        }
-         
+        } 
     }
 }

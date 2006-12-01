@@ -52,22 +52,16 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
-/**
- */
 public class RemoveAction extends BaseAction {
-    /** Removes a application identified by the
-     * value of the request parameter <code>Constants.RESOURCE_PARAM</code>
-     * from the BizApp.
-     * @return
-     */
+
+    Log log = LogFactory.getLog(RemoveAction.class.getName());
+
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
-        throws Exception {
-            
-        Log log = LogFactory.getLog(RemoveAction.class.getName());
-                
+        throws Exception
+    {
         RemoveGroupResourcesForm nwForm = (RemoveGroupResourcesForm) form;
         HashMap forwardParams = new HashMap(2);
         forwardParams.put(Constants.RESOURCE_PARAM, nwForm.getRid());
@@ -77,7 +71,7 @@ public class RemoveAction extends BaseAction {
             
             String[] resources = nwForm.getResources();
             
-            if (resources == null || resources.length == 0){
+            if (resources == null || resources.length == 0) {
                 return returnSuccess(request, mapping,forwardParams);
             }
             
@@ -94,10 +88,8 @@ public class RemoveAction extends BaseAction {
             AppdefGroupValue group = boss.findGroup(sessionId.intValue(), 
                             groupId);
             
-            for (int i = 0; i < resources.length; i++)
-            {
+            for (int i = 0; i < resources.length; i++) {
                 AppdefEntityID entity = new AppdefEntityID(resources[i]);
-                
                 group.removeAppdefEntity(entity);                
             }
 
@@ -105,14 +97,12 @@ public class RemoveAction extends BaseAction {
             
             return returnSuccess(request, mapping,forwardParams);
                 
-        }
-        catch (ParameterNotFoundException e2) {
+        } catch (ParameterNotFoundException e2) {
             RequestUtils
                 .setError(request,
                           Constants.ERR_RESOURCE_ID_FOUND);
             return returnFailure(request, mapping, forwardParams);
-        } 
-        catch (AppdefGroupNotFoundException e) {
+        } catch (AppdefGroupNotFoundException e) {
             RequestUtils
                 .setError(request,
                           "resource.common.inventory.error.ResourceNotFound");
@@ -120,6 +110,4 @@ public class RemoveAction extends BaseAction {
             return returnFailure(request, mapping, forwardParams);
         } 
     }
-    
-
 }

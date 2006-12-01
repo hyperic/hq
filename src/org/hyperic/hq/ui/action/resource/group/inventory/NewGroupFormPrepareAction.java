@@ -48,17 +48,9 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.util.MessageResources;
 
-/**
- *
- */
 public class NewGroupFormPrepareAction 
     extends WorkflowPrepareAction {
 
-    /**
-     * Retrieve this data and store it in the
-     * <code>ServerForm</code>:
-     *
-     */
     public ActionForward workflow(ComponentContext context,
                                  ActionMapping mapping,
                                  ActionForm form,

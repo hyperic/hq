@@ -47,10 +47,6 @@ import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
-/**
- * 
- *
- */
 public class GroupInventoryPortalAction extends ResourceInventoryPortalAction {
 
     /**
@@ -64,11 +60,7 @@ public class GroupInventoryPortalAction extends ResourceInventoryPortalAction {
     
     protected static Log log =
         LogFactory.getLog(GroupInventoryPortalAction.class.getName());
-        
-    //-------------------------------------instance variables
-//    private final String RESOURCE_PAGER = "org.hyperic.hq.appdef.server.session.PagerProcessor_server";
-//    private static Pager resourcePager = null;
-    
+
     /**
 	 * @see org.apache.struts.actions.LookupDispatchAction#getKeyMethodMap()
 	 */
@@ -233,5 +225,4 @@ public class GroupInventoryPortalAction extends ResourceInventoryPortalAction {
         if (appValues.getTotalSize() > 0)
             request.setAttribute(Constants.APPLICATIONS_ATTR, appValues);
     }
-
 }

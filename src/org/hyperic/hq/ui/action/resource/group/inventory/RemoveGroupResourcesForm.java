@@ -37,27 +37,17 @@ import org.hyperic.hq.ui.action.BaseValidatorForm;
 
 import org.apache.struts.action.ActionMapping;
 
-/**
- * removes resources specified with identifier in the string
- * form:
- * 
- */
 public class RemoveGroupResourcesForm extends BaseValidatorForm {
-    //-------------------------------------instance variables
 
-    private String[] resources;
-    protected Integer resourceType;
-    protected List resourceTypes;
-    private Integer rid;
-    private Integer type;
-    
-    //-------------------------------------constructors
+    private String[] _resources;
+    protected Integer _resourceType;
+    protected List _resourceTypes;
+    private Integer _rid;
+    private Integer _type;
 
     public RemoveGroupResourcesForm() {
         super();
     }
-
-    //-------------------------------------public methods
 
     public Integer getF() {
         return getResourceType();
@@ -75,104 +65,68 @@ public class RemoveGroupResourcesForm extends BaseValidatorForm {
         setResources(r);
     }
 
-    /** Getter for property users.
-     * @return Value of property users.
-     *
-     */
     public String[] getResources() {
-    return resources;
+        return _resources;
     }
-    
-    /** Setter for property users.
-     * @param users New value of property users.
-     *
-     */
+
     public void setResources(String[] resources) {
-    this.resources = resources;
+        _resources = resources;
     }
-    
-    /** Returns the resourceType.
-     * @return Integer
-     */
+
     public Integer getResourceType() {
-        return resourceType;
+        return _resourceType;
     }
 
-    /**
-     * Sets the resourceType.
-     * @param resourceType The resourceType to set
-     */
+
     public void setResourceType(Integer resourceType) {
-        this.resourceType = resourceType;
+        _resourceType = resourceType;
     }
-    /** Returns the resourceTypes.
-     * @return List
-     */
+
     public List getResourceTypes() {
-        return resourceTypes;
+        return _resourceTypes;
     }
 
-    /** Sets the resourceTypes.
-     * @param resourceTypes The resourceTypes to set
-     */
     public void setResourceTypes(List resourceTypes) {
-        this.resourceTypes = resourceTypes;
+        _resourceTypes = resourceTypes;
     }
 
-    /**
-     * Returns the rid.
-     * @return String
-     */
     public Integer getRid() {
-        return rid;
+        return _rid;
     }
 
-    /**
-     * Sets the rid.
-     * @param rid The rid to set
-     */
     public void setRid(Integer rid) {
-        this.rid = rid;
+        _rid = rid;
     }
 
-    /**
-     */
     public void reset(ActionMapping mapping, HttpServletRequest request) {
         super.reset(mapping, request);
-        resources = new String[0];
-        resourceType = null;
-        resourceTypes = null;
-        rid = null;
+        _resources = new String[0];
+        _resourceType = null;
+        _resourceTypes = null;
+        _rid = null;
     }
 
     public String toString() {
         StringBuffer s = new StringBuffer(super.toString());
 
         s.append(" rid=");
-        s.append(rid);
+        s.append(_rid);
         s.append(" resources=");
-        s.append(resources);
+        s.append(_resources);
         s.append(" resourceType=");
-        s.append(resourceType);
+        s.append(_resourceType);
         s.append(" resourceTypes=");
-        s.append(resourceTypes);
+        s.append(_resourceTypes);
 
         return s.toString();
     }
 
-    /**
-     * @return Integer
-     */
     public Integer getType() {
-        return type;
+        return _type;
     }
 
-    /**
-     * Sets the type.
-     * @param type The type to set
-     */
     public void setType(Integer type) {
-        this.type = type;
+        _type = type;
     }
 
 }

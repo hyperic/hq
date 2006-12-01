@@ -47,237 +47,172 @@ public class GroupForm extends NonScheduleResourceForm {
     /**
      * contains the [appdef_type]:[appdef_resource_type] value
      */
-    private String typeAndResourceTypeId;
-    private Integer groupType;
-    private List platformTypes;
-    private List applicationTypes;
-    private List serverTypes;
-    private List serviceTypes;
-    private List groupTypes;
-    private String[] entityIds;
-    private String typeName;
+    private String _typeAndResourceTypeId;
+    private Integer _groupType;
+    private List _platformTypes;
+    private List _applicationTypes;
+    private List _serverTypes;
+    private List _serviceTypes;
+    private List _groupTypes;
+    private String[] _entityIds;
+    private String _typeName;
 
-    /**
-     * @return the number of items of compatible types
-     */
     public Integer getCompatibleCount()
     {
-        if (platformTypes == null || serverTypes == null ||
-            serviceTypes == null || applicationTypes == null)
+        if (_platformTypes == null || _serverTypes == null ||
+            _serviceTypes == null || _applicationTypes == null)
             return new Integer(0);
             
-        return new Integer(platformTypes.size() + serverTypes.size() + 
-               serviceTypes.size() + applicationTypes.size());
+        return new Integer(_platformTypes.size() + _serverTypes.size() +
+            _serviceTypes.size() + _applicationTypes.size());
     }
-    
-    /**
-     * @return the number of items of service types 
-     */
+
     public Integer getClusterCount()
     {
-        if (serviceTypes == null)
+        if (_serviceTypes == null) {
             return new Integer(0);
+        }
             
-        return new Integer(serviceTypes.size());
+        return new Integer(_serviceTypes.size());
     }
-    
-    /**
-     * Returns the platformTypes.
-     * @return List
-     */
+
     public List getPlatformTypes() {
-	return platformTypes;
+	    return _platformTypes;
     }
-    
-    /**
-     * Returns the number of platformTypes.
-     * @return List
-     */
+
     public Integer getPlatformTypeCount() {
-        if (platformTypes == null)
+        if (_platformTypes == null) {
             return new Integer(0);
+        }
             
-        return new Integer(platformTypes.size());
+        return new Integer(_platformTypes.size());
     }
-    
-    /**
-     * Returns the platformTypes.
-     * @return List
-     */
+
     public List getApplicationTypes() {
-        return applicationTypes;
+        return _applicationTypes;
     }
-    
-    /**
-     * Returns the serverTypes.
-     * @return List
-     */
+
     public List getServerTypes() {
-	return serverTypes;
+	    return _serverTypes;
     }
-    
-    /**
-     * Returns the number of serverTypes.
-     * @return Integer
-     */
+
     public Integer getServerTypeCount() {
-        if (serverTypes == null)
+        if (_serverTypes == null) {
             return new Integer(0);
+        }
             
-        return new Integer(serverTypes.size());
+        return new Integer(_serverTypes.size());
     }
-    
-    /**
-     * Returns the serviceTypes.
-     * @return List
-     */
+
     public List getServiceTypes() {
-	   return serviceTypes;
+	   return _serviceTypes;
     }
-    
-    /**
-     * Returns the serviceTypes.
-     * @return List
-     */
+
     public Integer getServiceTypeCount() {
-        if (serviceTypes == null)
+        if (_serviceTypes == null) {
             return new Integer(0);
+        }
             
-       return new Integer(serviceTypes.size());
+        return new Integer(_serviceTypes.size());
     }
-    
-    /**
-     * Sets the platformTypes.
-     * @param platformTypes The platformTypes to set
-     */
+
     public void setPlatformTypes(List platformTypes)
         throws InvalidAppdefTypeException 
     {
-    	this.platformTypes = BizappUtils.buildAppdefOptionList(platformTypes, true);
+    	_platformTypes = BizappUtils.buildAppdefOptionList(platformTypes,
+                                                           true);
     }
-    
-    /**
-     * Sets the platformTypes.
-     * @param platformTypes The platformTypes to set
-     */
+
     public void setApplicationTypes(List applicationTypes)
         throws InvalidAppdefTypeException 
     {
-        this.applicationTypes = BizappUtils.buildAppdefOptionList(applicationTypes, true);
+        _applicationTypes = BizappUtils.buildAppdefOptionList(applicationTypes,
+                                                              true);
     }
-    
-    /**
-     * Sets the serverTypes.
-     * @param serverTypes The serverTypes to set
-     */
+
     public void setServerTypes(List serverTypes) 
         throws InvalidAppdefTypeException 
     {
-	   this.serverTypes = BizappUtils.buildAppdefOptionList(serverTypes, true);
+	   _serverTypes = BizappUtils.buildAppdefOptionList(serverTypes,
+                                                        true);
     }
-    
-    /**
-     * Sets the serviceTypes.
-     * @param serviceTypes The serviceTypes to set
-     */
+
     public void setServiceTypes(List serviceTypes) 
         throws InvalidAppdefTypeException 
     {
-	   this.serviceTypes = BizappUtils.buildAppdefOptionList(serviceTypes, true);
+	   _serviceTypes = BizappUtils.buildAppdefOptionList(serviceTypes, true);
     }
 
-    /**
-     * Returns the typeAndResourceTypeId.
-     * @return String
-     */
+
     public String getTypeAndResourceTypeId() {
-	return typeAndResourceTypeId;
+	    return _typeAndResourceTypeId;
     }
 
     /**
      * Returns the entity type id in [entity type id]:[resource type id]
-     * .
-     * @return String
      */
     public Integer getEntityTypeId()
     {
-        if (typeAndResourceTypeId.equals("-1"))
+        if (_typeAndResourceTypeId.equals("-1")) {
             return new Integer("-1");
+        }
             
-        List typeList = StringUtil.explode(typeAndResourceTypeId, ":");
+        List typeList = StringUtil.explode(_typeAndResourceTypeId, ":");
         return new Integer((String)typeList.get(0));
     }
 
     /**
      * Returns resource type id in [entity type id]:[resource type id]
-     * 
-     * @return String
      */
     public Integer getResourceTypeId() {
-        if (typeAndResourceTypeId.equals("-1"))
+        if (_typeAndResourceTypeId.equals("-1"))
             return new Integer("-1");
             
-        List typeList = StringUtil.explode(typeAndResourceTypeId, ":");
+        List typeList = StringUtil.explode(_typeAndResourceTypeId, ":");
         return new Integer((String)typeList.get(1));
     }
 
     /**
      * Sets the typeAndResourceTypeId.
-     * @param typeAndResourceTypeId The typeAndResourceTypeId to set
      */
     public void setTypeAndResourceTypeId(String typeAndResourceTypeId) {
-	this.typeAndResourceTypeId = typeAndResourceTypeId;
+	    _typeAndResourceTypeId = typeAndResourceTypeId;
     }
-    
-    /**
-     * Returns the groupType.
-     * @return Integer
-     */
+
     public Integer getGroupType() {
-	return groupType;
+	    return _groupType;
     }
 
-    /**
-     * Sets the groupType.
-     * @param groupType The groupType to set
-     */
     public void setGroupType(Integer groupType) {
-	this.groupType = groupType;
+	    _groupType = groupType;
     }
 
-    /**
-     * @return List
-     */
     public List getGroupTypes() {
-        return groupTypes;
+        return _groupTypes;
     }
 
-    /**
-     * Sets the groupTypes.
-     * @param groupTypes The groupTypes to set
-     */
     public void setGroupTypes(List groupTypes) {
-        this.groupTypes = groupTypes;
+        _groupTypes = groupTypes;
     }
 
     public String[] getEntityIds() {
-        return entityIds;
+        return _entityIds;
     }
     
     public void setEntityIds(String[] entityIds) {
-        this.entityIds = entityIds;
+        _entityIds = entityIds;
     }
     
     public String getTypeName() {
-        return typeName;
+        return _typeName;
     }
     
     public void setTypeName(String typeName) {
-        this.typeName = typeName;
+        _typeName = typeName;
     }
     
     /** 
-     * over-ride the validate method.  need to do validation.
+     * Overide the validate method.  need to do validation.
      */
     public ActionErrors validate(ActionMapping mapping,
                                  HttpServletRequest request) {
@@ -288,9 +223,9 @@ public class GroupForm extends NonScheduleResourceForm {
                 errors = new ActionErrors();
             }
             
-            if (  groupType.intValue() == Constants.APPDEF_TYPE_GROUP_ADHOC ||  
-                 groupType.intValue()  == Constants.APPDEF_TYPE_GROUP_COMPAT ) { 
-                 if ( typeAndResourceTypeId.equals("-1")   )
+            if (_groupType.intValue() == Constants.APPDEF_TYPE_GROUP_ADHOC ||
+                _groupType.intValue()  == Constants.APPDEF_TYPE_GROUP_COMPAT ) {
+                 if (_typeAndResourceTypeId.equals("-1"))
                     errors.add("typeAndResourceTypeId",
                         new ActionMessage("resource.group.inventory.error." +
                                           "ResourceTypeIsRequired"));
@@ -298,5 +233,4 @@ public class GroupForm extends NonScheduleResourceForm {
         }
         return errors;
     }
-    
 }

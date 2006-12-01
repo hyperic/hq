@@ -54,29 +54,22 @@ import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.apache.struts.util.MessageResources;
 
-/**
- *
- */
 public class ViewGroupAction extends TilesAction {
-    /**
-     * Retrieve this data and store it in the
-     * <code>NewServerForm</code>:
-     *
-     */
+
+    Log log = LogFactory.getLog(ViewGroupAction.class.getName());
+
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
-        throws Exception {
-
-        Log log = LogFactory.getLog(ViewGroupAction.class.getName());
-
-        ServletContext ctx     = getServlet().getServletContext();
-        int sessionId          = RequestUtils.getSessionIdInt(request);
-        AppdefBoss boss        = ContextUtils.getAppdefBoss(ctx);
-        PageControl pc         = RequestUtils.getPageControl(request,"ps", 
-                                                          "pn","so","sc");
+        throws Exception
+    {
+        ServletContext ctx = getServlet().getServletContext();
+        int sessionId = RequestUtils.getSessionIdInt(request);
+        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+        PageControl pc = RequestUtils.getPageControl(request,"ps",
+                                                     "pn","so","sc");
         AppdefGroupValue group =
             (AppdefGroupValue) RequestUtils.getResource(request);
 
@@ -89,11 +82,13 @@ public class ViewGroupAction extends TilesAction {
         List appdefValues =
             BizappUtils.buildGroupResources(boss, sessionId, group);
 
-        log.trace("getting resource type map for group");
-        if (group.getGroupType() == AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP ||
-            group.getGroupType() == AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS)
+        if (group.getGroupType() ==
+                AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP ||
+            group.getGroupType() ==
+                AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS)
         {
-            Map typeMap = AppdefResourceValue.getResourceTypeCountMap(appdefValues);
+            Map typeMap =
+                AppdefResourceValue.getResourceTypeCountMap(appdefValues);
             request.setAttribute(Constants.RESOURCE_TYPE_MAP_ATTR, typeMap);
         }
 
@@ -103,12 +98,12 @@ public class ViewGroupAction extends TilesAction {
         HashSet entries = new HashSet(group.getAppdefGroupEntries());
         for (Iterator it = appdefValues.iterator(); it.hasNext(); ) {
             AppdefResourceValue res = (AppdefResourceValue) it.next();
-            if (!entries.contains(res.getEntityId()))
+            if (!entries.contains(res.getEntityId())) {
                 it.remove();
+            }
         }
-        request.setAttribute( Constants.APPDEF_ENTRIES_ATTR, appdefValues );
 
-        log.trace("getting resource count for group");
+        request.setAttribute(Constants.APPDEF_ENTRIES_ATTR, appdefValues);
         request.setAttribute(Constants.NUM_CHILD_RESOURCES_ATTR,
                              new Integer(group.getTotalSize()));
 
@@ -135,15 +130,13 @@ public class ViewGroupAction extends TilesAction {
      * @return a group type label from the list of group labels
      */
     public static String getGroupTypeLabel(AppdefGroupValue group, 
-                        List groupLabels,  
-                        MessageResources res,
-                        Locale locale ) 
+                                           List groupLabels,
+                                           MessageResources res,
+                                           Locale locale)
     {
-        
         Iterator gIterator = groupLabels.iterator();
         
-        while (gIterator.hasNext())
-        {
+        while (gIterator.hasNext()) {
             Map item = (Map)gIterator.next();
             Integer groupType = (Integer)item.get("value");
             if (groupType.intValue() == group.getGroupType())
@@ -152,7 +145,4 @@ public class ViewGroupAction extends TilesAction {
         
         return "";
     }
-    
-
-
 }
