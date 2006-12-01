@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.measurement.ext;
 
+import java.io.Serializable;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
@@ -36,42 +38,42 @@ import org.hyperic.hq.measurement.server.session.RawMeasurement;
 import org.hyperic.hq.product.MetricValue;
 
 public class MeasurementEvent extends AbstractEvent
-    implements java.io.Serializable, ResourceEventInterface {
-    private static final Log log = LogFactory.getLog(MeasurementEvent.class);
+    implements Serializable, ResourceEventInterface 
+{
+    private static final Log _log = LogFactory.getLog(MeasurementEvent.class);
     
-    private AppdefEntityID resource;
-    private MetricValue value;
-    private String units;
+    private AppdefEntityID _resource;
+    private MetricValue    _value;
+    private String         _units;
 
-    /** Creates a new instance of MeasurementEvent */
     public MeasurementEvent(Integer mid, MetricValue value) {
         super.setInstanceId(mid);
         super.setTimestamp(value.getTimestamp());
-        this.resource = null;
-        this.value = value;
-        this.units = null;
+        _resource = null;
+        _value = value;
+        _units = null;
     }
     
     public AppdefEntityID getResource(){
         lazySetValues();
-        return this.resource;
+        return _resource;
     }
 
     public MetricValue getValue() {
-        return this.value;
+        return _value;
     }
     
     public void setValue(MetricValue value) {
-        this.value = value;
+        _value = value;
     }
 
     public String getUnits() {
         lazySetValues();
-        return this.units;
+        return _units;
     }
     
     private void lazySetValues() {
-        if (this.resource != null && this.units != null)
+        if (_resource != null && _units != null)
             return;
         
         try {
@@ -81,20 +83,20 @@ public class MeasurementEvent extends AbstractEvent
             RawMeasurement rm = dao.findById(getInstanceId());
             int resourceId, resourceType;
 
-            resourceId = rm.getInstanceId().intValue();
+            resourceId   = rm.getInstanceId().intValue();
             resourceType = rm.getTemplate().getMonitorableType()
                 .getAppdefType();
-            this.resource = new AppdefEntityID(resourceType, resourceId);
-            this.units = rm.getTemplate().getUnits();
+            _resource    = new AppdefEntityID(resourceType, resourceId);
+            _units       = rm.getTemplate().getUnits();
         } catch (Exception e) {
             // don't set anything
-            log.warn("Couldn't setup measurement event values.", e);
-            this.resource = null;
-            this.units = null;
+            _log.warn("Couldn't setup measurement event values.", e);
+            _resource = null;
+            _units    = null;
         }
     }
 
     public String toString() {
-        return this.value.toString();
+        return _value.toString();
     }    
 }
