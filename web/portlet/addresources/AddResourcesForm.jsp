@@ -35,6 +35,8 @@
 <script language="JavaScript" src="<html:rewrite page="/js/addRemoveWidget.js"/>" type="text/javascript">
 </script>
 
+<tiles:importAttribute name="noFilter" ignore="true"/>
+
 <c:set var="widgetInstanceName" value="addResources"/>
 
 <script type="text/javascript">
@@ -364,6 +366,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
      </tiles:insert>
     </td>
   </tr>
+  <c:if test="${empty noFilter}">
   <tr>
     <td width="50%" valign="top">
       <!--  FILTER TOOLBAR CONTENTS -->
@@ -403,7 +406,8 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
       </table>
     </td>
   </tr>
-  <c:if test="${Resource.groupType == 2}"> <!-- AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT--> 
+  </c:if>
+  <c:if test="${Resource.groupType == 2}"> <!-- AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT-->
     <tr>
       <td valign="bottom">
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
