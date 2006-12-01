@@ -56,4 +56,13 @@
 
   <definition name=".events.config.view.definition"
       path="/resource/common/monitor/alerts/config/ViewDefinition.jsp"/>
+
+  <definition name=".events.alert.view.notifications"
+        path="/resource/common/monitor/alerts/ViewAlertNotifications.jsp">
+    <putList name="notificationList">
+      <add value=".events.alert.view.notifications.users"/>
+      <add value=".events.alert.view.notifications.others"/>
+    </putList>
+  </definition>
+
 </tiles-definitions>
