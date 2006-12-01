@@ -53,8 +53,9 @@
         onloads[i]();
     }
   </script>
+  <script language="JavaScript" src="<html:rewrite page='/js/requests.js'/>" type="text/javascript"></script>
 </head>
-<body bgcolor="#FFFFFF" onload="bodyOnLoad()">
+<body bgcolor="#FFFFFF" onload="bodyOnLoad();">
   <c:choose>    
     <c:when test="${portal.dialog}">    
      <tiles:insert attribute="headerSmall"/>
