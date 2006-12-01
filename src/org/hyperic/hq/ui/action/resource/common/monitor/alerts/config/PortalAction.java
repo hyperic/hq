@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
-import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -34,11 +33,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
@@ -51,14 +53,6 @@ import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
-import org.hyperic.util.ConfigPropertyException;
-import org.hyperic.util.StringUtil;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 
 /**
  * A dispatcher for the alerts portal.
@@ -72,22 +66,8 @@ public class PortalAction extends ResourceController {
     static {
         keyMethodMap.setProperty(Constants.MODE_LIST, "listDefinitions");
         keyMethodMap.setProperty(Constants.MODE_NEW, "newDefinition");
-        keyMethodMap.setProperty(
-            "editProperties", "editDefinitionProperties");
-        keyMethodMap.setProperty("editConditions", "editDefinitionConditions");
-        keyMethodMap.setProperty(
-            "editControlAction", "editDefinitionControlAction");
-        keyMethodMap.setProperty(
-            "editSyslogAction", "editDefinitionSyslogAction");
-
-        keyMethodMap.setProperty("viewOthers", "viewDefinitionOthers");
-        keyMethodMap.setProperty("viewDefinition", "viewDefinitionUsers");
-        keyMethodMap.setProperty("viewUsers", "viewDefinitionUsers");
-
-        keyMethodMap.setProperty("addOthers", "addOthersDefinitions");
-        keyMethodMap.setProperty("addUsers", "addUsersDefinitions");
-
         keyMethodMap.setProperty(Constants.MODE_VIEW, "listDefinitions");
+        keyMethodMap.setProperty("viewDefinition", "viewUsers");
     }
 
     protected Properties getKeyMethodMap() {
@@ -151,10 +131,10 @@ public class PortalAction extends ResourceController {
         return null;
     }
 
-    public ActionForward editDefinitionProperties(ActionMapping mapping,
-                                                  ActionForm form,
-                                                  HttpServletRequest request,
-                                                  HttpServletResponse response)
+    public ActionForward editProperties(ActionMapping mapping,
+                                        ActionForm form,
+                                        HttpServletRequest request,
+                                        HttpServletResponse response)
         throws Exception
     {
         setResource(request);
@@ -167,10 +147,10 @@ public class PortalAction extends ResourceController {
         return null;
     }
 
-    public ActionForward editDefinitionConditions(ActionMapping mapping,
-                                                  ActionForm form,
-                                                  HttpServletRequest request,
-                                                  HttpServletResponse response)
+    public ActionForward editConditions(ActionMapping mapping,
+                                        ActionForm form,
+                                        HttpServletRequest request,
+                                        HttpServletResponse response)
         throws Exception
     {
         setResource(request);
@@ -183,10 +163,10 @@ public class PortalAction extends ResourceController {
         return null;
     }
 
-    public ActionForward editDefinitionControlAction(ActionMapping mapping,
-                                                     ActionForm form,
-                                                     HttpServletRequest request,
-                                                     HttpServletResponse response)
+    public ActionForward editControlAction(ActionMapping mapping,
+                                           ActionForm form,
+                                           HttpServletRequest request,
+                                           HttpServletResponse response)
         throws Exception
     {
         setResource(request);
@@ -199,10 +179,10 @@ public class PortalAction extends ResourceController {
         return null;
     }
 
-    public ActionForward editDefinitionSyslogAction(ActionMapping mapping,
-                                                    ActionForm form,
-                                                    HttpServletRequest request,
-                                                    HttpServletResponse response)
+    public ActionForward editSyslogAction(ActionMapping mapping,
+                                          ActionForm form,
+                                          HttpServletRequest request,
+                                          HttpServletResponse response)
         throws Exception
     {
         setResource(request);
@@ -215,10 +195,10 @@ public class PortalAction extends ResourceController {
         return null;
     }
 
-    public ActionForward viewDefinitionOthers(ActionMapping mapping,
-                                              ActionForm form,
-                                              HttpServletRequest request,
-                                              HttpServletResponse response)
+    public ActionForward viewOthers(ActionMapping mapping,
+                                    ActionForm form,
+                                    HttpServletRequest request,
+                                    HttpServletResponse response)
         throws Exception
     {
         setResource(request);
@@ -231,10 +211,10 @@ public class PortalAction extends ResourceController {
         return null;
     }
 
-    public ActionForward viewDefinitionUsers(ActionMapping mapping,
-                                             ActionForm form,
-                                             HttpServletRequest request,
-                                             HttpServletResponse response)
+    public ActionForward viewUsers(ActionMapping mapping,
+                                   ActionForm form,
+                                   HttpServletRequest request,
+                                   HttpServletResponse response)
         throws Exception
     {
         setResource(request);
@@ -247,10 +227,26 @@ public class PortalAction extends ResourceController {
         return null;
     }
 
+    public ActionForward viewEscalation(ActionMapping mapping,
+                                        ActionForm form,
+                                        HttpServletRequest request,
+                                        HttpServletResponse response)
+        throws Exception
+    {
+        setResource(request);
+        Portal portal = Portal.createPortal();
+        setTitle(request,portal,"alert.config.platform.props.ViewDef.escalation.Title");
+        portal.addPortlet(new Portlet(".events.config.view.escalation"),1);
+        // JW - this shouldn't be a dialog ... portal.setDialog(true);
+        request.setAttribute(Constants.PORTAL_KEY, portal);
+
+        return null;
+    }
+
     public ActionForward monitorConfigureAlerts(ActionMapping mapping,
-                                         ActionForm form,
-                                         HttpServletRequest request,
-                                         HttpServletResponse response)
+                                                ActionForm form,
+                                                HttpServletRequest request,
+                                                HttpServletResponse response)
         throws Exception
     {
         setResource(request);
@@ -299,10 +295,10 @@ public class PortalAction extends ResourceController {
 
     }
 
-    public ActionForward addUsersDefinitions(ActionMapping mapping,
-                                        ActionForm form,
-                                        HttpServletRequest request,
-                                        HttpServletResponse response)
+    public ActionForward addUsers(ActionMapping mapping,
+                                  ActionForm form,
+                                  HttpServletRequest request,
+                                  HttpServletResponse response)
         throws Exception
     {
         setResource(request);
@@ -316,10 +312,10 @@ public class PortalAction extends ResourceController {
         return null;
     }
 
-    public ActionForward addOthersDefinitions(ActionMapping mapping,
-                                        ActionForm form,
-                                        HttpServletRequest request,
-                                        HttpServletResponse response)
+    public ActionForward addOthers(ActionMapping mapping,
+                                   ActionForm form,
+                                   HttpServletRequest request,
+                                   HttpServletResponse response)
         throws Exception
     {
         setResource(request);
