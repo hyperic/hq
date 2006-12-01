@@ -187,7 +187,7 @@ public class Escalation extends PersistedObject
         if (getId() != null) {
             json.put("id", getId());
         }
-        return json;
+        return new JSONObject().put("escalation", json);
     }
 
     public boolean equals(Object obj) {
