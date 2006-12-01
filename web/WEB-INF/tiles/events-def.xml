@@ -300,13 +300,13 @@
   <definition name=".events.config.view.users"
       extends=".events.config.view.definition"
       controllerUrl="/alerts/ViewDefinition.do">
-     <put name="notificationsTile" value=".events.config.view.notifications.others" />
+     <put name="notificationsTile" value=".events.config.view.notifications.users" />
   </definition>
 
   <definition name=".events.config.view.others"
       extends=".events.config.view.definition"
       controllerUrl="/alerts/ViewDefinition.do">
-     <put name="notificationsTile" value=".events.config.view.notifications.users" />
+     <put name="notificationsTile" value=".events.config.view.notifications.others" />
   </definition>
 
   <definition name=".events.config.view.escalation"
