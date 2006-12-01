@@ -8,6 +8,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycleListener;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycle;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.jboss.util.threadpool.ThreadPool;
@@ -16,6 +17,8 @@ import javax.management.ObjectName;
 import javax.management.Notification;
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
+import javax.ejb.CreateException;
+import javax.naming.NamingException;
 import java.util.Date;
 
 /**
@@ -82,6 +85,7 @@ public class EscalationScheduler
             }
             return;
         }
+        lookUpAlertManager();
         if (log.isDebugEnabled()) {
             log.debug("Notification " + notification +
                       " EscalationService is called at: " + date +
@@ -106,6 +110,19 @@ public class EscalationScheduler
         threadPool.run(runnable);
     }
 
+    private void lookUpAlertManager()
+    {
+        if (alertManagerLocal == null) {
+            try {
+                alertManagerLocal = AlertManagerUtil.getLocalHome().create();
+            } catch (CreateException e) {
+                throw new SystemException(e);
+            } catch (NamingException e) {
+                throw new SystemException(e);
+            }
+        }
+    }
+
     /**
      * @jmx:managed-operation
      */
@@ -123,7 +140,6 @@ public class EscalationScheduler
                                    HQConstants.EJB_MODULE_PATTERN);
         haListener.start();
         threadPool = (ThreadPool)server.getAttribute(threadPoolName, "Instance");
-        alertManagerLocal = AlertManagerUtil.getLocalHome().create();
     }
 
     /**
