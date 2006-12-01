@@ -37,13 +37,14 @@ class ConfigOptionTag extends ContainerTag {
 
     static final String ATTR_DEFAULT  = "default";
     static final String ATTR_OPTIONAL = "optional";
-    
+    static final String ATTR_CATEGORY = "category";
+
     private static final String[] REQUIRED_ATTRS = {
         ATTR_NAME, ATTR_DESCRIPTION
     };
     
     private static final String[] OPTIONAL_ATTRS = {
-        ATTR_DEFAULT, ATTR_TYPE, ATTR_OPTIONAL
+        ATTR_DEFAULT, ATTR_TYPE, ATTR_OPTIONAL, ATTR_CATEGORY
     };
     
     private ConfigTag config;
@@ -170,6 +171,8 @@ class ConfigOptionTag extends ContainerTag {
         if ("true".equals(getAttribute(ATTR_OPTIONAL))) {
             option.setOptional(true);
         }
+
+        option.setCategory(getAttribute(ATTR_CATEGORY));
 
         super.endTag();
     }

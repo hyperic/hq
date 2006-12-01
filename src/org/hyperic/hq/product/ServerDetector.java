@@ -835,7 +835,18 @@ public abstract class ServerDetector
         mergeConfigDefaults(getName(), manager, config);
         server.setMeasurementConfig(config);
     }
-    
+
+    /**
+     * Merge default values from server's Custom Properties schema and
+     * saves to ServerResource.setCustomProperties.
+     */
+    protected void setCustomProperties(ServerResource server,
+                                       ConfigResponse config) {
+        ConfigSchema cprops = getCustomPropertiesSchema();
+        mergeConfigDefaults(config, cprops);
+        server.setCustomProperties(config);
+    }
+
     /**
      * Merge default values from server's control ConfigSchema and
      * saves to ServerResource.setControlConfig.
