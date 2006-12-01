@@ -72,10 +72,13 @@
       </table>
     </td>
     <td width="46%" height="18" class="MastheadBgTop">
-      <table width="250" border="0" cellspacing="0" cellpadding="0">
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" height="18" style="margin-right:20px;">
         <tr> 
-          <td width="9">&nbsp;</td>
+          <td width="9" height="18"><html:img page="/images/spacer.gif" width="1" height="14" alt="" border="0"/></td>
           <td width="100%" class="MastheadContent"><fmt:message key="header.RecentAlerts"/></td>
+           <td id="loading" style="display:none" style="float:right;margin-right:10px;">
+		    <html:img page="/images/ajax-loader.gif" border="0" width="16" height="16" />
+		   </td>
         </tr>
       </table>
     </td>
