@@ -29,42 +29,33 @@
   USA.
  --%>
 
+<tiles:importAttribute name="formAction"/>
+<tiles:importAttribute name="addMode" ignore="true"/>
+<tiles:importAttribute name="defaultSortColumn" ignore="true"/>
 
-<c:url var="viewUsersUrl" value="/alerts/Config.do">
+<c:url var="viewUrl" value="/Config.do" context="/alerts">
+  <c:choose>
+  <c:when test="${not empty Resource}">
+    <c:param name="eid" value="${Resource.entityId.appdefKey}"/>
+  </c:when>
+  <c:otherwise>
+    <c:param name="aetid" value="${ResourceType.appdefTypeKey}"/>
+  </c:otherwise>
+  </c:choose>
+  <c:param name="ad" value="${alertDef.id}"/>
+</c:url>
+
+<c:url var="selfUrl" value="${viewUrl}">
+  <c:param name="mode" value="${param.mode}"/>
+</c:url>
+<c:url var="viewUsersUrl" value="${viewUrl}">
   <c:param name="mode" value="viewUsers"/>
-  <c:choose>
-  <c:when test="${not empty Resource}">
-    <c:param name="eid" value="${Resource.entityId.appdefKey}"/>
-  </c:when>
-  <c:otherwise>
-    <c:param name="aetid" value="${ResourceType.appdefTypeKey}"/>
-  </c:otherwise>
-  </c:choose>
-  <c:param name="ad" value="${alertDef.id}"/>
 </c:url>
-<c:url var="viewOthersUrl" value="/alerts/Config.do">
+<c:url var="viewOthersUrl" value="${viewUrl}">
   <c:param name="mode" value="viewOthers"/>
-  <c:choose>
-  <c:when test="${not empty Resource}">
-    <c:param name="eid" value="${Resource.entityId.appdefKey}"/>
-  </c:when>
-  <c:otherwise>
-    <c:param name="aetid" value="${ResourceType.appdefTypeKey}"/>
-  </c:otherwise>
-  </c:choose>
-  <c:param name="ad" value="${alertDef.id}"/>
 </c:url>
-<c:url var="viewEscalationUrl" value="/alerts/Config.do">
+<c:url var="viewEscalationUrl" value="${viewUrl}">
   <c:param name="mode" value="viewEscalation"/>
-  <c:choose>
-  <c:when test="${not empty Resource}">
-    <c:param name="eid" value="${Resource.entityId.appdefKey}"/>
-  </c:when>
-  <c:otherwise>
-    <c:param name="aetid" value="${ResourceType.appdefTypeKey}"/>
-  </c:otherwise>
-  </c:choose>
-  <c:param name="ad" value="${alertDef.id}"/>
 </c:url>
 
 <tiles:insert definition=".events.config.view.notifications.tabs">
@@ -73,27 +64,6 @@
   <tiles:put name="viewEscalationUrl" beanName="viewEscalationUrl"/>
 </tiles:insert>
 
-<c:choose>
-<c:when test="${param.mode == 'viewUsers' || param.mode == 'viewDefinition'}">
-<c:set var="formAction" value="/alerts/RemoveUsers"/>
-<c:set var="selfUrl" value="${viewUsersUrl}"/>
-<c:set var="addMode" value="addUsers"/>
-<c:set var="defaultSortColumn" value="2"/>
-</c:when>
-<c:when test="${param.mode == 'viewOthers'}">
-<c:set var="formAction" value="/alerts/RemoveOthers"/>
-<c:set var="selfUrl" value="${viewOthersUrl}"/>
-<c:set var="addMode" value="addOthers"/>
-<c:set var="defaultSortColumn" value="0"/>
-</c:when>
-<c:when test="${param.mode == 'viewEscalation'}">
-<c:set var="formAction" value="/alerts/SaveEscalation"/>
-<c:set var="selfUrl" value="${viewEscalationUrl}"/>
-</c:when>
-<c:otherwise>
-<%-- do nothing --%>
-</c:otherwise>
-</c:choose>
 <script language="JavaScript" src="<html:rewrite page='/js/listWidget.js'/>" type="text/javascript"></script>
 <c:set var="widgetInstanceName" value="list"/>
 <script language="JavaScript" type="text/javascript">
