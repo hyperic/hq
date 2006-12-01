@@ -91,7 +91,7 @@ function showProblemResponse(originalRequest) {
 
 function showFavoriteResponse(originalRequest) {
 var tmp = eval('(' + originalRequest.responseText + ')');
-//alert(tmp);
+
 	var fList = tmp.favorites;
 	var table = document.getElementById('favoriteTable');
 	
@@ -243,7 +243,6 @@ function showRecentAlerts(originalRequest) {
 	
 		tr.appendChild(td2);
 		td2.setAttribute((document.all ? 'className' : 'class'), "resourceName");
-		alert(aList[i].resourceName);
 		
 		if (aList[i].resourceName) {
 		td2.appendChild(alertAnchor);
@@ -276,4 +275,3 @@ function showRecentAlerts(originalRequest) {
 
 
 }
-
