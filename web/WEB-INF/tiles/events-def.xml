@@ -176,11 +176,11 @@
         path="/resource/common/monitor/alerts/config/ListUsers.jsp"
         controllerUrl="/alerts/ViewNotificationsUsers.do"/>
 
-  <definition name=".events.config.view.notifications.escalation.view"
+  <definition name=".events.config.view.notifications.escalation.details"
         path="/resource/common/monitor/alerts/config/ViewEscalation.jsp"
         controllerUrl="/alerts/ViewEscalation.do"/>
 
-  <definition name=".events.config.view.notifications.snmp"
+  <definition name=".events.config.view.notifications.snmp.details"
         path="/resource/common/monitor/alerts/config/SnmpActionProps.jsp"
         controllerUrl="/alerts/ViewNotificationsSnmp.do"/>
 
@@ -323,7 +323,7 @@
 
   <definition name=".events.config.view.notifications.escalation"
               extends=".events.config.view.notifications">
-     <put name="notificationsTile" value=".events.config.view.notifications.escalation.view"/>
+     <put name="notificationsTile" value=".events.config.view.notifications.escalation.details"/>
      <put name="formAction" value="/alerts/SaveEscalation"/>
   </definition>
 
