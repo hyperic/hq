@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -46,20 +47,16 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.measurement.EvaluationException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
-import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
-import org.hyperic.hq.measurement.server.session.RawMeasurement;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.ext.MetricOperationEvent;
 import org.hyperic.hq.measurement.ext.depgraph.DerivedNode;
@@ -70,17 +67,16 @@ import org.hyperic.hq.measurement.ext.depgraph.Node;
 import org.hyperic.hq.measurement.ext.depgraph.RawNode;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
+import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerUtil;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
-import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
-import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.MonitorableTypeValue;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocalHome;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerUtil;
 import org.hyperic.hq.measurement.shared.RawMeasurementValue;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerUtil;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.StringUtil;
@@ -147,27 +143,11 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    private MeasurementProcessorLocal mproc = null;
-    private MeasurementProcessorLocal getMeasurementProcessor() {
-        try {
-            if (mproc == null) 
-                mproc = MeasurementProcessorUtil.getLocalHome().create();
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-
-        return mproc;
-    }
-
     private DerivedMeasurementValue updateMeasurementInterval(Integer tid,
                                                               Integer iid,
                                                               long interval)
         throws FinderException
     {
-        long current = System.currentTimeMillis();
-
         DerivedMeasurement m = 
             getDerivedMeasurementDAO().findByTemplateForInstance(tid, iid);
         if (m == null) {
@@ -229,8 +209,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         DerivedMeasurement dm =
             getDerivedMeasurementDAO().create(instanceId, mt, interval);
         
-        DerivedMeasurementValue dmValue = dm.getDerivedMeasurementValue();
-        return dmValue;
+        return dm.getDerivedMeasurementValue();
     }
 
     /**
@@ -428,14 +407,13 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         throws PermissionException, MeasurementCreateException,
                TemplateNotFoundException
     {
-
         // Authz check
         super.checkModifyPermission(subject, id);        
 
         // Call back into ourselves to force a new transation to be created.
         List dmList = getDMManager().createMeasurements(id, templates,
                                                         intervals, props);
-        this.sendAgentSchedule(id);
+        sendAgentSchedule(id);
         return dmList;
     }
 
@@ -568,7 +546,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         } catch (TemplateNotFoundException e) {
             // Would not happen since we're creating measurements with the
             // template that we just looked up
-            this.log.error(e);
+            log.error(e);
         }
     }
 
@@ -611,7 +589,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         // Now unschedule the DerivedMeasurments
         Integer[] mids = (Integer[])
             toUnschedule.toArray(new Integer[toUnschedule.size()]);
-        this.unscheduleJobs(mids);
+        unscheduleJobs(mids);
 
         // send queue message to unschedule
         UnScheduleArgs unschBean = new UnScheduleArgs(agentEnt, entIds);
@@ -728,7 +706,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             HashSet derIdSet = new HashSet();
             for (int i = 0; i < mids.length; i++) {
                 // First, find the derived measurement
-                dms[i] = this.getMeasurement(mids[i]);
+                dms[i] = getMeasurement(mids[i]);
                 
                 if (!dms[i].getEnabled())
                     throw new LiveMeasurementException("Metric ID: " +
@@ -885,7 +863,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         ArrayList results = new ArrayList();
         for (int i = 0; i < ids.length; i++) {
             try {
-                results.add(this.getIdByTemplateAndInstance(tid, ids[i]));
+                results.add(getIdByTemplateAndInstance(tid, ids[i]));
             } catch (FinderException e) {
                 continue;
             }
@@ -893,6 +871,38 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         return (Integer[]) results.toArray(new Integer[0]);
     }
 
+    private List sortMetrics(List mcol, PageControl pc) {
+        // Clearly, assuming that we are sorting by name, in the future we may
+        // need to pay attention to the PageControl passed in if we sort by
+        // more attributes
+        if (pc.getSortorder() == PageControl.SORT_DESC) {
+            Collections.sort(mcol, new Comparator() {
+                
+                public int compare(Object arg0, Object arg1) {
+                    DerivedMeasurement dm0 = (DerivedMeasurement) arg0;
+                    DerivedMeasurement dm1 = (DerivedMeasurement) arg1;
+                    return dm1.getTemplate().getName()
+                        .compareTo(dm0.getTemplate().getName());
+                }
+                
+            });
+        }
+        else {
+            Collections.sort(mcol, new Comparator() {
+                
+                public int compare(Object arg0, Object arg1) {
+                    DerivedMeasurement dm0 = (DerivedMeasurement) arg0;
+                    DerivedMeasurement dm1 = (DerivedMeasurement) arg1;
+                    return dm0.getTemplate().getName()
+                        .compareTo(dm1.getTemplate().getName());
+                }
+                
+            });
+        }
+        
+        return mcol;
+    }
+    
     /**
      * Look up a list of derived measurement EJBs for a category
      *
@@ -912,12 +922,11 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 .findByInstance(id.getType(), id.getID(), true);
         } else {
             mcol = getDerivedMeasurementDAO()
-                .findByInstanceForCategory(id.getType(), id.getID(),
-                                           true, cat);
+                .findByInstanceForCategory(id.getType(), id.getID(), true, cat);
         }
-                
-        if (pc.getSortorder() == PageControl.SORT_DESC)
-            Collections.reverse(mcol);
+
+        // Need to order the metrics, as the HQL does not allow us to order
+        mcol = sortMetrics(mcol, pc);
     
         return valuePager.seek(mcol, pc);
     }
@@ -946,8 +955,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                           enabled, cat);
         }
 
-        if (pc.getSortorder() == PageControl.SORT_DESC)
-            Collections.reverse(mcol);
+        // Need to order the metrics, as the HQL does not allow us to order
+        mcol = sortMetrics(mcol, pc);
     
         return valuePager.seek(mcol, pc);
     }
@@ -963,7 +972,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
 
         List mlocals = getDerivedMeasurementDAO().
             findDesignatedByInstance(id.getType(), id.getID());
-        return this.valuePager.seek(mlocals, PageControl.PAGE_ALL);
+        return valuePager.seek(mlocals, PageControl.PAGE_ALL);
     }
 
     /**
@@ -978,7 +987,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                            String cat) {
         List mlocals = getDerivedMeasurementDAO()
             .findDesignatedByInstanceForCategory(id.getType(), id.getID(), cat);
-        return this.valuePager.seek(mlocals, PageControl.PAGE_ALL);
+        return valuePager.seek(mlocals, PageControl.PAGE_ALL);
     }
 
     /**
@@ -1000,7 +1009,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                                    "found for " + id);
         }
 
-        DerivedMeasurement dm = (DerivedMeasurement)mlocals.get(0);
+        DerivedMeasurement dm = (DerivedMeasurement) mlocals.get(0);
         return dm.getDerivedMeasurementValue();
     }
 
@@ -1018,8 +1027,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         for (int i = 0; i < ids.length; i++) {
             AppdefEntityID id = ids[i];
             try {
-                List metrics =
-                    this.getDerivedMeasurementDAO().
+                List metrics = getDerivedMeasurementDAO().
                     findDesignatedByInstanceForCategory(id.getType(),
                                                         id.getID(), cat);
 
@@ -1224,8 +1232,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
 
         // Now unschedule the DerivedMeasurment
-        this.unscheduleJobs(mids);
-        this.sendAgentSchedule(id);
+        unscheduleJobs(mids);
+        sendAgentSchedule(id);
     }
 
     /**
@@ -1257,8 +1265,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
 
         // Now unschedule the DerivedMeasurment
-        this.unscheduleJobs(mids);
-        this.sendAgentSchedule(aid);
+        unscheduleJobs(mids);
+        sendAgentSchedule(aid);
     }
 
     /**
@@ -1300,8 +1308,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
 
         // Now unschedule the DerivedMeasurment
-        this.unscheduleJobs((Integer[])toUnschedule.toArray(new Integer[0]));
-        this.sendAgentSchedule(id);
+        unscheduleJobs((Integer[])toUnschedule.toArray(new Integer[0]));
+        sendAgentSchedule(id);
     }
 
     /**
