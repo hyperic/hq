@@ -28,11 +28,14 @@ package org.hyperic.hq.ui.taglib;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.JspWriter;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.struts.taglib.html.Constants;
 import org.apache.struts.taglib.html.OptionsCollectionTag;
 import org.apache.struts.taglib.html.SelectTag;
@@ -58,20 +61,11 @@ import org.apache.struts.util.RequestUtils;
  *
  */
 public class OptionMessageListTag extends OptionsCollectionTag {
+    private final Log _log = LogFactory.getLog(OptionMessageListTag.class);
 
-    //----------------------------------------------------instance variables
-
-    private String bundle = org.apache.struts.Globals.MESSAGES_KEY;
-    private String locale = org.apache.struts.Globals.LOCALE_KEY;
-    private String baseKey;
-
-    //----------------------------------------------------constructors
-
-    public OptionMessageListTag() {
-        super();
-    }
-
-    //----------------------------------------------------public methods
+    private String _bundle = org.apache.struts.Globals.MESSAGES_KEY;
+    private String _locale = org.apache.struts.Globals.LOCALE_KEY;
+    private String _baseKey;
 
     /**
      * Set the name of the resource bundle to use.
@@ -79,7 +73,7 @@ public class OptionMessageListTag extends OptionsCollectionTag {
      * @param list the el expression for the list variable
      */
     public void setBundle(String bundle) {
-        this.bundle = bundle;
+        _bundle = bundle;
     }
 
     /**
@@ -88,7 +82,7 @@ public class OptionMessageListTag extends OptionsCollectionTag {
      * @param list the el expression for the list variable
      */
     public void setLocale(String locale) {
-        this.locale = locale;
+        _locale = locale;
     }
 
     /**
@@ -98,7 +92,7 @@ public class OptionMessageListTag extends OptionsCollectionTag {
      * @param delimiter the text to be printed between list items
      */
     public void setBaseKey(String baseKey) {
-        this.baseKey = baseKey;
+        _baseKey = baseKey;
     }
     
     /**
@@ -109,39 +103,50 @@ public class OptionMessageListTag extends OptionsCollectionTag {
      */
     public final int doStartTag() throws JspException {
         try {
-            SelectTag selectTag = (SelectTag)pageContext.getAttribute(Constants.SELECT_KEY);
+            SelectTag selectTag = (SelectTag)
+                pageContext.getAttribute(Constants.SELECT_KEY);
 
-            Object collection = RequestUtils.lookup(pageContext, name, property, null);
-            Iterator it = getIterator(collection);
+            Object collection = RequestUtils.lookup(pageContext, name, property, 
+                                                    null);
 
+            if (collection == null) {
+                _log.warn("OptionMessageList tag was looking for bean=" + 
+                          name + " property=" + property + " but it wasn't " +
+                          "found");
+                throw new JspTagException("Unable to find bean=" + name + 
+                                          " property=" + property);
+            }
+                
             JspWriter out = pageContext.getOut();
             StringBuffer sb = new StringBuffer();
-            while ( it.hasNext() ) {
-                Object next = it.next();
-                String value = null;
-                String key = null;
-                if ( next instanceof LabelValueBean ) {
+            for (Iterator i = getIterator(collection); i.hasNext(); ) {
+                Object next = i.next();
+                String value, key;
+
+                if (next instanceof LabelValueBean) {
                     LabelValueBean bean = (LabelValueBean) next;
                     value = bean.getValue();
-                    key = baseKey + '.' + bean.getLabel();
-                }
-                else {
+                    key = _baseKey + '.' + bean.getLabel();
+                } else {
                     value = String.valueOf( next );
-                    key = baseKey + '.' + value;
+                    key = _baseKey + '.' + value;
                 }
-                String label = RequestUtils.message(pageContext, bundle, locale, key);
-                addOption( sb, label, value, selectTag.isMatched(value) );
+                String label = RequestUtils.message(pageContext, _bundle, 
+                                                    _locale, key);
+                addOption(sb, label, value, selectTag.isMatched(value));
             }
-            out.write( sb.toString() );
+            out.write(sb.toString());
 
             return SKIP_BODY;
         } catch (IOException e) {
+            _log.warn("Unabel to generate message list", e);
             throw new JspTagException(e.toString());
         } catch (JspException e) {
+            _log.warn("Unabel to generate message list", e);
             throw new JspTagException(e.toString());
-        } catch (Throwable t) {
-            t.printStackTrace();
-            throw new JspTagException(t.toString());
+        } catch (Exception e) {
+            _log.warn("Unable to generate message list", e);
+            throw new JspTagException(e.toString());
         }
     }
 
@@ -151,9 +156,9 @@ public class OptionMessageListTag extends OptionsCollectionTag {
     }
 
     public void release() {
-        bundle = null;
-        locale = null;
-        baseKey = null;
+        _bundle  = null;
+        _locale  = null;
+        _baseKey = null;
         super.release();
     }
 
@@ -161,7 +166,7 @@ public class OptionMessageListTag extends OptionsCollectionTag {
         try {
             return super.getIterator(collection);
         } catch (ClassCastException e) {
-            ArrayList list = null;
+            List list;
             if (collection.getClass().isArray()) {
                 if (collection instanceof short[]) {
                     short[] arr = (short[])collection;
@@ -221,5 +226,3 @@ public class OptionMessageListTag extends OptionsCollectionTag {
         }
     }
 }
-
-// EOF
