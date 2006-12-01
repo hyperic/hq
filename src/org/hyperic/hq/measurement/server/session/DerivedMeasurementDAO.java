@@ -110,9 +110,9 @@ public class DerivedMeasurementDAO extends HibernateDAO {
                     "join m.template t " +
                     "join t.monitorableType mt where " +
                     "  m.interval is not null and ")
-            .append(
-                AppdefUtil.getHQLWhereByAppdefType("mt.appdefType", "m.instanceId",
-                                              ids))
+            .append(AppdefUtil.getHQLWhereByAppdefType("mt.appdefType",
+                                                       "m.instanceId",
+                                                       ids))
             .append(")");
 
         return getSession().createQuery(sql.toString())
@@ -142,8 +142,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             "where mt.appdefType = ? and " +
             "m.instanceId = ? and " +
             "c.name = ? and " +
-            "m.interval is not null " +
-            "order by t.name";
+            "m.interval is not null";
 
         return getSession().createQuery(sql)
             .setInteger(0, type)
