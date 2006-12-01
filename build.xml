@@ -639,7 +639,7 @@
               value="${jboss.home}/server/default/deploy"/>
 
     <copy todir="${jboss.deploy.dir}/web.ear/hq.war" >
-      <fileset dir="${webapp.home}" includes="**/*.jsp" />
+      <fileset dir="${webapp.home}" includes="**/*.js*" />
     </copy>
 
   </target>
