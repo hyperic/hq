@@ -25,15 +25,13 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
-public class MeasurementData implements java.io.Serializable {
-
-    // Fields    
+public class MeasurementData implements Serializable {
     private MeasurementDataId _id;
-    private BigDecimal _value;
+    private BigDecimal        _value;
 
-    // Constructors
     public MeasurementData() {
     }
 
@@ -42,7 +40,7 @@ public class MeasurementData implements java.io.Serializable {
     }
 
     public MeasurementData(MeasurementDataId id, BigDecimal value) {
-        _id = id;
+        _id    = id;
         _value = value;
     }
     
