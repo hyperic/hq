@@ -42,7 +42,9 @@
   <tiles:put name="titleImg" value="spacer.gif"/>
 </tiles:insert>
 
-<tiles:insert page="/portlet/addresources/AddResourcesForm.jsp"/>
+<tiles:insert page="/portlet/addresources/AddResourcesForm.jsp">
+  <tiles:put name="noFilter" value="true"/>
+</tiles:insert>
 
 <tiles:insert definition=".form.buttons">
   <tiles:put name="addToList" value="true"/>
