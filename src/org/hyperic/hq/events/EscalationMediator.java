@@ -98,7 +98,7 @@ public class EscalationMediator extends Mediator
     }
 
     /**
-     * run escalation
+     * run escalation process.  The must be invoked within JTA context.
      */
     public void processEscalation()
     {
@@ -118,7 +118,7 @@ public class EscalationMediator extends Mediator
             escalationServiceMBean.run(new Runnable() {
                 public void run()
                 {
-                    actionDispatcher(state.getEscalation().getId(),
+                    dispatchAction(state.getEscalation().getId(),
                             new Integer(state.getAlertId()));
                 }
             });
@@ -146,7 +146,7 @@ public class EscalationMediator extends Mediator
                           state);
             }
             // Escalation is not active, start escalation.
-            actionDispatcher(escalationId, alertDefId);
+            dispatchAction(escalationId, alertDefId);
         } else {
             // escalation is active, so do not start another escalation
             // for this chain.
@@ -239,57 +239,29 @@ public class EscalationMediator extends Mediator
         throws PermissionException
     {
         Escalation e = Escalation.newSearchable(subjectId, name);
-        return (Escalation)transactionManager.findPersisted(e);
+        EscalationDAO dao = DAOFactory.getDAOFactory().getEscalationDAO();
+        return (Escalation)dao.findPersisted(e);
     }
 
     public Escalation findEscalationByAlertDefId(Integer subjectId, Integer id)
         throws PermissionException
     {
-        EscalationDAO dao =DAOFactory.getDAOFactory().getEscalationDAO();
+        EscalationDAO dao = DAOFactory.getDAOFactory().getEscalationDAO();
         return dao.findByAlertDefinitionId(subjectId, id);
     }
 
     public EscalationState getEscalationState(Escalation e, Integer alertDefId)
     {
-        return DAOFactory.getDAOFactory().getEscalationStateDAO()
-                .getEscalationState(e, alertDefId);
+        EscalationStateDAO dao =
+            DAOFactory.getDAOFactory().getEscalationStateDAO();
+        return dao.getEscalationState(e, alertDefId);
     }
 
     public List findScheduledEscalationState()
     {
-        TransactionContext context =
-                transactionManager.execute(new TransactionContext() {
-                    public TransactionContext run(TransactionContext ctx) {
-                        List result = DAOFactory.getDAOFactory()
-                                .getEscalationStateDAO()
-                                .findScheduledEscalationState();
-                        ctx.setList(result);
-                        return ctx;
-                    }
-                });
-        return context.getList();
-    }
-
-    private void actionScheduler(final Integer escalationId,
-                                final Integer alertId)
-    {
-        transactionManager.execute(new TransactionContext() {
-            public TransactionContext run(TransactionContext ctx) {
-                scheduleAction(escalationId, alertId);
-                return ctx;
-            }
-        });
-    }
-
-    private void actionDispatcher(final Integer escalationId,
-                                 final Integer alertId)
-    {
-        transactionManager.execute(new TransactionContext() {
-            public TransactionContext run(TransactionContext ctx) {
-                dispatchAction(escalationId, alertId);
-                return ctx;
-            }
-        });
+        EscalationStateDAO dao =
+            DAOFactory.getDAOFactory().getEscalationStateDAO();
+        return dao.findScheduledEscalationState();
     }
 
     private void scheduleAction(Integer escalationId, Integer alertId)
@@ -384,8 +356,7 @@ public class EscalationMediator extends Mediator
             dispatchAction(escalation, alert, state);
 
             // schedule next action;
-            EscalationMediator.getInstance()
-                .actionScheduler(escalation.getId(), alertId);
+            scheduleAction(escalation.getId(), alertId);
         } catch (ClassNotFoundException e) {
             throw new SystemException(e);
         } catch (IllegalAccessException e) {

@@ -8,7 +8,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycleListener;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycle;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.events.EscalationMediator;
+import org.hyperic.hq.events.shared.AlertManagerLocal;
+import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.jboss.util.threadpool.ThreadPool;
 
 import javax.management.ObjectName;
@@ -32,6 +33,7 @@ public class EscalationScheduler
     private MBeanServer server = null;
     private boolean started = false;
     private ThreadPool threadPool;
+    private AlertManagerLocal alertManagerLocal;
 
     /**
      * this this instance
@@ -89,7 +91,7 @@ public class EscalationScheduler
         threadPool.run(new Runnable() {
             public void run()
             {
-                EscalationMediator.getInstance().processEscalation();
+                alertManagerLocal.processEscalation();
             }
         });
     }
@@ -121,6 +123,7 @@ public class EscalationScheduler
                                    HQConstants.EJB_MODULE_PATTERN);
         haListener.start();
         threadPool = (ThreadPool)server.getAttribute(threadPoolName, "Instance");
+        alertManagerLocal = AlertManagerUtil.getLocalHome().create();
     }
 
     /**

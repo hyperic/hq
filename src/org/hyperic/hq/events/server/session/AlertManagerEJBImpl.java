@@ -363,6 +363,16 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         return valuePager.seek(result, pc);
     }
 
+
+    /**
+     * delegate to EscalationMediator inside JTA context
+     * @ejb:interface-method
+     */
+    public void processEscalation()
+    {
+        EscalationMediator.getInstance().processEscalation();
+    }
+
     public void ejbCreate() throws CreateException {
         try {
             valuePager = Pager.getPager(VALUE_PROCESSOR);
