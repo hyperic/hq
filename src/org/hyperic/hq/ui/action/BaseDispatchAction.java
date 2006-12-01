@@ -94,8 +94,9 @@ public abstract class BaseDispatchAction extends DispatchAction {
         // look up the dispatch method
         String methodName = getKeyMethodMap().getProperty(name);
         if (methodName == null) {
-            throw new ServletException("dispatch method for key [" + name +
-                                       "] not found");
+            // Use the dispatch parameter value as the method name, as
+            // DispatchAction was originally designed to do
+            methodName = name;
         }
         
         // execute the dispatch method
