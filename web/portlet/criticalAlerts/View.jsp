@@ -35,12 +35,20 @@
 <c:set var="widgetInstanceName" value="alerts"/>
 
 <script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+
 <script type="text/javascript">
 var pageData = new Array();
 initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');  
 </script>
 
+<script type="text/javascript">
+function requestRecentAlerts() {
+	var critAlertUrl = "<html:rewrite page="/dashboard/ViewCriticalAlerts.do"/>"
+	new Ajax.Request(critAlertUrl, {method: 'get', onSuccess:showRecentAlerts, onFailure :reportError});
+}
+onloads.push(requestRecentAlerts);
+</script>
 <c:set var="rssUrl" value="/rss/ViewCriticalAlerts.rss"/>
 
 <div class="effectsPortlet">
@@ -58,10 +66,31 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 
   <!-- JSON available at /dashboard/ViewCriticalAlerts.do -->
 
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-    <tr class="ListRow">
-      <td class="ListCell"><fmt:message key="dash.home.alerts.no.resource.to.display"/></td>
-    </tr>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" id="recentAlertsTable">
+  	<tbody>
+		<tr class="ListRow">
+			<td width="1%" class="ListHeaderCheckbox">
+				<input type="checkbox" onclick="ToggleAll(this, widgetProperties, false)" name="listToggleAll">
+			</td>
+			<td width="60%" class="ListHeaderInactive">
+				Resource Name
+			</td>
+			<td width="20%" class="ListHeaderInactive">
+				Alert Name
+			</td>
+			<td width="20%" class="ListHeaderInactiveSorted" align="center">
+				Date / Time<img src="images/tb_sortdown.gif" height="9" width="9" border="0">
+			</td>
+		</tr>
+		
+		
+ 	 </tbody>
+  </table>
+    
+     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="display:none;" id="noCritAlerts">
+     	<tr class="ListRow">
+      		<td class="ListCell"><fmt:message key="dash.home.alerts.no.resource.to.display"/></td>
+    	</tr>
   </table>
 
 </div>
