@@ -72,8 +72,6 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
     protected Log log =
         LogFactory.getLog(DefinitionFormPrepareAction.class.getName());    
 
-    // ---------------------------------------------------- Public Methods
-
     /**
      * Prepare the form for a new alert definition.
      */
@@ -105,7 +103,8 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
     protected void setupForm(DefinitionForm defForm, HttpServletRequest request,
                              int sessionID, EventsBoss eb, MeasurementBoss mb,
                              ControlBoss cb, AppdefBoss ab)
-        throws Exception {
+        throws Exception 
+    {
         request.setAttribute( "enableEachTime",
                               new Integer(EventConstants.FREQ_EVERYTIME) );
         request.setAttribute( "enableOnce",
@@ -196,23 +195,13 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
 
     /**
      * Returns a List of custom property keys for the passed-in resource.
-     * @throws RemoteException
-     * @throws PermissionException
-     * @throws PluginNotFoundException
-     * @throws AppdefEntityNotFoundException
-     * @throws SessionTimeoutException
-     * @throws SessionNotFoundException
-     * @throws SessionNotFoundException
-     * @throws SessionTimeoutException
-     * @throws RemoteException
-     * @throws PermissionException
-     * @throws AppdefEntityNotFoundException
      */
     protected List getCustomProperties(int sessionID, AppdefEntityID adeId,
                                      AppdefBoss ab)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, PermissionException,
-               RemoteException {
+               RemoteException 
+    {
         List custProps;
         
         if (adeId instanceof AppdefEntityTypeID)
