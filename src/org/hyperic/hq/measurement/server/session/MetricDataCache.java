@@ -33,7 +33,7 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 
-/**
+    /**
  * The MetricDataCache caches the last measurement keyed on the derived
  * measurement id.  The purpose of this cache is to avoid needing to go to
  * the database when looking up the last value for a metric.
@@ -73,6 +73,10 @@ public class MetricDataCache {
                     .append(" misses=")
                     .append(_cache.getMissCountNotFound());
                 return buf.toString();
+            }
+            
+            public String toString() {
+                return "Metric Data Cache";
             }
         };
         DiagnosticThread.addDiagnosticObject(cacheDiagnostics);

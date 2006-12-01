@@ -70,6 +70,10 @@ public class SRNCache {
                     .append(_cache.getMissCountNotFound());
                 return buf.toString();
             }
+            
+            public String toString() {
+                return "SRN Cache";
+            }
         };
         DiagnosticThread.addDiagnosticObject(cacheDiagnostics);
     }
