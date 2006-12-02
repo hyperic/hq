@@ -6,7 +6,12 @@
 <tiles-definitions>
 
   <!-- admin portlets -->
-  <definition name=".admin.home" path="/admin/AdminHome.jsp"/> 
+  <definition name=".admin.home"
+              extends=".admin.main.layout">
+    <put name="titleKey" value="admin.admin.AdministrationTitle"/>
+    <put name="configTile" value="/admin/AdminHome.jsp"/> 
+  </definition>
+
 
   <definition name=".admin.user.View"
               controllerUrl="/admin/user/View.do"
@@ -20,13 +25,13 @@
 
   <definition name=".admin.config.EditConfig"
               controllerUrl="/admin/config/EditConfigPrep.do"
-              extends=".admin.config.main.layout">
+              extends=".admin.main.layout">
     <put name="titleKey" value="admin.settings.EditServerConfig.PageTitle"/>
     <put name="configTile" value="/admin/config/EditServerConfig.jsp"/>
   </definition>
 
   <definition name=".admin.config.EditMonitorConfig"
-              extends=".admin.config.main.layout">
+              extends=".admin.main.layout">
     <put name="titleKey" value="admin.resource.templates.PageTitle"/>
     <put name="configTile" value="/admin/config/ChangeResourceTemplate.jsp"/>
   </definition>

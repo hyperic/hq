@@ -24,17 +24,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
-
-<!--  PAGE TITLE -->
-<tiles:insert definition=".page.title.admin.admin">
-  <tiles:put name="titleKey" value="admin.admin.AdministrationTitle"/>
-  <tiles:put name="titleName" beanName="fullName"/>
-</tiles:insert>
-<!--  /  -->
-
 <tiles:insert definition=".admin.auth.functions"/>
 
 <tiles:insert page="/admin/Settings.jsp"/>
 
-<tiles:insert definition=".page.footer"/>

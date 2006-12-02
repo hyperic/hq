@@ -7,12 +7,9 @@
 
 <tiles-definitions>
   
-  <definition name=".page.title.admin.admin"
-              extends=".page.title">
-    <put name="titleBgStyle" value="PageTitle"/>
-    <put name="titleImg" value="spacer.gif"/>
-  </definition>              
-	
+  <definition name=".admin.main.layout"
+              path="/admin/MainLayout.jsp"/>
+
   <definition name=".page.title.admin.user"
               extends=".page.title">
     <put name="titleKey" value="admin.user.ListUsers"/>  
@@ -57,11 +54,8 @@
               controllerUrl="/alerts/ListDefinitions.do"
               path="/admin/config/ListDefinitions.jsp"/>
 
-  <definition name=".admin.config.main.layout"
-              path="/admin/config/MainLayout.jsp"/>
-
   <definition name=".admin.config.EditEscalationConfig"
-              extends=".admin.config.main.layout">
+              extends=".admin.main.layout">
     <put name="titleKey" value="admin.home.EscalationSchemes"/>
     <put name="configTile" value="/admin/config/ListEscalationSchemes.jsp"/>
   </definition>
