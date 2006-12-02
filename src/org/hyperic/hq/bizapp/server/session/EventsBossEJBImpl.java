@@ -79,6 +79,7 @@ import org.hyperic.hq.events.AlertNotFoundException;
 import org.hyperic.hq.events.server.session.EscalationMediator;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerCreateException;
+import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggerEvent;
 import org.hyperic.hq.events.server.session.Escalation;
@@ -1537,7 +1538,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      */
     public void acknowledgeAlert(int sessionID, Integer alertID)
         throws SessionTimeoutException, SessionNotFoundException,
-        PermissionException
+        PermissionException, ActionExecuteException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         EscalationMediator med = EscalationMediator.getInstance();
@@ -1550,7 +1551,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      */
     public void fixAlert(int sessionID, Integer alertID)
         throws SessionTimeoutException, SessionNotFoundException,
-        PermissionException
+        PermissionException, ActionExecuteException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         EscalationMediator med = EscalationMediator.getInstance();

@@ -36,6 +36,7 @@ import java.util.Collection;
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.AddressException;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -45,6 +46,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.common.SystemException;
@@ -58,9 +60,9 @@ import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertCondition;
 import org.hyperic.hq.events.server.session.AlertConditionLog;
+import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
-import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.UnitsConvert;
@@ -71,6 +73,7 @@ import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.NumberUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.units.FormattedNumber;
+import org.hyperic.dao.DAOFactory;
 
 /**
  */
@@ -379,48 +382,8 @@ public class EmailAction extends EmailActionConfig implements ActionInterface,
         }
 
         try {
-            // First, look up the addresses
-            String smsAddr;
-            Integer uid;
-            int i = 0;
-            List validAddresses = new ArrayList();
-            for (Iterator it = this.getUsers().iterator(); it.hasNext(); i++) {
-                try {
-                    AuthzSubjectValue overlord = getSubjMan().getOverlord();
-                    switch (this.getType()) {
-                        case TYPE_USERS :
-                            uid = (Integer) it.next();
-                            AuthzSubjectValue who = 
-                                getSubjMan().findSubjectById(overlord, uid);
-                            validAddresses.add(
-                                new InternetAddress(who.getEmailAddress()));
-                            smsAddr = who.getSMSAddress();    
-                            if(smsAddr != null && !smsAddr.equals("")) {
-                                validAddresses.add(
-                                    new InternetAddress(smsAddr));
-                            }
-                            break;
-                        default :
-                        case TYPE_EMAILS :
-                            validAddresses.add(
-                                new InternetAddress((String) it.next(), true));
-                            break;
-                    }
-                } catch (FinderException e) {
-                    // This one is no good, continue
-                    continue;
-                } catch (CreateException e) {
-                    throw new ActionExecuteException("Session EJB error", e);
-                } catch (PermissionException e) {
-                    // authz failure...should not happen since its the overlord
-                    // doing the user lookup
-                    continue;
-                }
-            }
+            InternetAddress[] to = lookupEmailAddr();
 
-            // Convert the valid addresses
-            InternetAddress[] to = (InternetAddress[])
-                validAddresses.toArray(new InternetAddress[0]);
 
             EmailFilter filter = EmailFilter.getInstance();
 
@@ -449,13 +412,63 @@ public class EmailAction extends EmailActionConfig implements ActionInterface,
             throw new ActionExecuteException(e);
         } catch (javax.naming.NamingException e) {
             throw new ActionExecuteException(e);
-        } catch (javax.mail.MessagingException e) {
-            throw new ActionExecuteException(e);
         } catch (MeasurementNotFoundException e) {
             throw new ActionExecuteException(e);
         } catch (SystemException e) {
             throw new ActionExecuteException(e);
         }
+    }
+
+    private InternetAddress[] lookupEmailAddr()
+        throws ActionExecuteException
+    {
+        // First, look up the addresses
+        String smsAddr;
+        Integer uid;
+        int i = 0;
+        List validAddresses = new ArrayList();
+        for (Iterator it = this.getUsers().iterator(); it.hasNext(); i++) {
+            try {
+                AuthzSubjectValue overlord = getSubjMan().getOverlord();
+                switch (this.getType()) {
+                    case TYPE_USERS :
+                        uid = (Integer) it.next();
+                        AuthzSubjectValue who =
+                            getSubjMan().findSubjectById(overlord, uid);
+                        validAddresses.add(
+                            new InternetAddress(who.getEmailAddress()));
+                        smsAddr = who.getSMSAddress();
+                        if(smsAddr != null && !smsAddr.equals("")) {
+                            validAddresses.add(
+                                new InternetAddress(smsAddr));
+                        }
+                        break;
+                    default :
+                    case TYPE_EMAILS :
+                        validAddresses.add(
+                            new InternetAddress((String) it.next(), true));
+                        break;
+                }
+            } catch (FinderException e) {
+                // This one is no good, continue
+                continue;
+            } catch (CreateException e) {
+                throw new ActionExecuteException("Session EJB error", e);
+            } catch (PermissionException e) {
+                // authz failure...should not happen since its the overlord
+                // doing the user lookup
+                continue;
+            } catch (NamingException e) {
+                throw new ActionExecuteException("Session EJB error", e);
+            } catch (AddressException e) {
+                throw new ActionExecuteException("Mail address", e);
+            }
+        }
+
+        // Convert the valid addresses
+        InternetAddress[] to = (InternetAddress[])
+            validAddresses.toArray(new InternetAddress[0]);
+        return to;
     }
 
     public void setParentActionConfig(AppdefEntityID aeid,
@@ -464,10 +477,30 @@ public class EmailAction extends EmailActionConfig implements ActionInterface,
         this.init(config);
     }
 
-    public void send()
+    public void send(Integer alertId, String message)
+        throws ActionExecuteException
     {
-        // TODO: figure out what to send
+        // this had better be called from within JTA context!!!
         log.info("send invoked on EmailAction");
 
+        Alert alert =
+            DAOFactory.getDAOFactory().getAlertDAO().get(alertId);
+        if (alert == null) {
+            // log and return
+            log.error("alert not found (id="+alertId+").");
+            return;
+        }
+        AlertDefinition alertdef =
+            alert.getAlertDefinition();
+        
+        InternetAddress[] to = lookupEmailAddr();
+
+        EmailFilter filter = EmailFilter.getInstance();
+
+        try {
+            filter.sendAlert(null, to, createSubject(alertdef), message, false);
+        } catch (NamingException e) {
+            throw new ActionExecuteException(e);
+        }
     }
 }

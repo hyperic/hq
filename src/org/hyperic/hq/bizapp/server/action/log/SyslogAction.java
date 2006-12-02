@@ -46,8 +46,10 @@ import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertCondition;
 import org.hyperic.hq.events.server.session.AlertConditionLog;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.dao.DAOFactory;
 
 /**
  *
@@ -167,10 +169,8 @@ public class SyslogAction extends SyslogActionConfig
         this.init(config);
     }
 
-    public void send()
+    public void send(Integer alertId, String message)
     {
-        // send notification on escalation
-        // TODO: figure out what to send
-        log.info("send invoked on SyslogAction");
+        log.info(message);
     }
 }

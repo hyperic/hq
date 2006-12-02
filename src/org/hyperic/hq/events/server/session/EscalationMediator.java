@@ -282,20 +282,49 @@ public class EscalationMediator extends Mediator
     }
 
     public void acknowledgeAlert(Integer subjectID, Integer alertID)
-        throws PermissionException
+        throws PermissionException, ActionExecuteException
     {
-        setEscalationState(subjectID, alertID, false);
+        EscalationState state =
+            setEscalationState(subjectID, alertID, false);
+        AuthzSubject subj =
+            DAOFactory.getDAOFactory().getAuthzSubjectDAO()
+                .findById(subjectID);
+        // TODO: refine message content
+        String message = new StringBuffer()
+            .append(subj.getFirstName())
+            .append(" ")
+            .append(subj.getLastName())
+            .append(" has acknowledged the alert. The alert id number is ")
+            .append(alertID)
+            .append(".")
+            .toString();
+        notifyEscalation(alertID, state, message);
     }
 
     public void fixAlert(Integer subjectID, Integer alertID)
-        throws PermissionException
+        throws PermissionException, ActionExecuteException
     {
         EscalationState state =
             setEscalationState(subjectID, alertID, true);
-        notifyEscalation(state);
+        AuthzSubject subj =
+            DAOFactory.getDAOFactory().getAuthzSubjectDAO()
+                .findById(subjectID);
+        // TODO: refine message content
+        String message = new StringBuffer()
+            .append(subj.getFirstName())
+            .append(" ")
+            .append(subj.getLastName())
+            .append(" has fixed the alert. The alert id number is ")
+            .append(alertID)
+            .append(".")
+            .toString();
+        notifyEscalation(alertID, state, message);
     }
 
-    private void notifyEscalation(EscalationState state)
+    private void notifyEscalation(Integer alertId,
+                                  EscalationState state,
+                                  String message)
+        throws ActionExecuteException
     {
         Escalation e = state.getEscalation();
         // get the correct level to notify
@@ -306,7 +335,7 @@ public class EscalationMediator extends Mediator
             EscalationAction ea =
                 (EscalationAction)e.getActions().get(level);
             if (ea.getAction() instanceof Notify) {
-                ((Notify)ea.getAction()).send();
+                ((Notify)ea.getAction()).send(alertId, message);
             }
             level--;
         }
