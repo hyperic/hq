@@ -48,9 +48,18 @@
       <td width="15%" class="ListHeaderInactive" align="center" nowrap>&nbsp;</td>
   	</tr>
     <c:forEach var="entry" varStatus="status" items="${platformTypes}">
-    <tr class="ListRowSelected">
-      <td class="ListCellPrimary"><html:link page="/ResourceHub.do?ff=1&ft=1:${entry.id}"><c:out value="${entry.name}"/></html:link></td>
-      <td class="ListCell" align="center"><html:link page="/resource/platform/monitor/Config.do?mode=configure&aetid=1:${entry.id}&type=1"><html:img page="/images/tbb_editMetricTemplate.gif" width="136" height="16" border="0"/></html:link></td>
+    <c:choose>
+      <c:when test="${even}">
+        <tr class="tableRowEven">
+        <c:set var="even" value="false"/>
+      </c:when>
+      <c:otherwise>
+        <tr class="tableRowOdd">
+        <c:set var="even" value="true"/>
+      </c:otherwise>
+    </c:choose>
+      <td class="tableCell"><html:link page="/ResourceHub.do?ff=1&ft=1:${entry.id}"><c:out value="${entry.name}"/></html:link></td>
+      <td class="tableCell" align="center"><html:link page="/resource/platform/monitor/Config.do?mode=configure&aetid=1:${entry.id}&type=1"><html:img page="/images/tbb_editMetricTemplate.gif" width="136" height="16" border="0"/></html:link></td>
     </tr>
   </c:forEach>
 <!--  /  -->
@@ -67,13 +76,31 @@
       <td width="15%" class="ListHeaderInactive" align="center" nowrap>&nbsp;</td>
   	</tr>
 	<c:forEach var="platSvc" varStatus="psStatus" items="${platformServiceTypes}">
-    <tr class="ListRow">
-      <td class="ListCellPrimary"><html:img page="/images/icon_indent_arrow.gif" width="16" height="16" border="0"/><html:link page="/ResourceHub.do?ff=3&ft=3:${platSvc.id}"><c:out value="${platSvc.name}"/></html:link></td>
-      <td class="ListCell" align="center"><html:link page="/resource/platform/monitor/Config.do?mode=configure&aetid=3:${platSvc.id}&type=3"><html:img page="/images/tbb_editMetricTemplate.gif" width="136" height="16" border="0"/></html:link></td>
+    <c:choose>
+      <c:when test="${even}">
+        <tr class="tableRowEven">
+        <c:set var="even" value="false"/>
+      </c:when>
+      <c:otherwise>
+        <tr class="tableRowOdd">
+        <c:set var="even" value="true"/>
+      </c:otherwise>
+    </c:choose>
+      <td class="tableCell"><html:img page="/images/icon_indent_arrow.gif" width="16" height="16" border="0"/><html:link page="/ResourceHub.do?ff=3&ft=3:${platSvc.id}"><c:out value="${platSvc.name}"/></html:link></td>
+      <td class="tableCell" align="center"><html:link page="/resource/platform/monitor/Config.do?mode=configure&aetid=3:${platSvc.id}&type=3"><html:img page="/images/tbb_editMetricTemplate.gif" width="136" height="16" border="0"/></html:link></td>
     </tr>
     </c:forEach>
     <c:forEach var="winSvc" varStatus="wsStatus" items="${windowsServiceTypes}">
-    <tr class="ListRow">
+    <c:choose>
+      <c:when test="${even}">
+        <tr class="tableRowEven">
+        <c:set var="even" value="false"/>
+      </c:when>
+      <c:otherwise>
+        <tr class="tableRowOdd">
+        <c:set var="even" value="true"/>
+      </c:otherwise>
+    </c:choose>
       <td class="ListCellPrimary"><html:img page="/images/icon_indent_arrow.gif" width="16" height="16" border="0"/><html:link page="/ResourceHub.do?ff=3&ft=3:${winSvc.id}"><c:out value="${winSvc.name}"/></html:link></td>
       <td class="ListCell" align="center"><html:link page="/resource/platform/monitor/Config.do?mode=configure&aetid=3:${winSvc.id}&type=3"><html:img page="/images/tbb_editMetricTemplate.gif" width="136" height="16" border="0"/></html:link></td>
     </tr>
@@ -90,13 +117,31 @@
 	</tr>
     <c:forEach var="entry" varStatus="status" items="${serverTypes}">
     <c:if test="${entry.virtual == false}">
-    <tr class="ListRowSelected">
+    <c:choose>
+      <c:when test="${even}">
+        <tr class="tableRowEven">
+        <c:set var="even" value="false"/>
+      </c:when>
+      <c:otherwise>
+        <tr class="tableRowOdd">
+        <c:set var="even" value="true"/>
+      </c:otherwise>
+    </c:choose>
       <td class="ListCellPrimary"><html:link page="/ResourceHub.do?ff=2&ft=2:${entry.id}"><c:out value="${entry.name}"/></html:link></td>
       <td class="ListCell" align="center"><html:link page="/resource/server/monitor/Config.do?mode=configure&aetid=2:${entry.id}&type=2"><html:img page="/images/tbb_editMetricTemplate.gif" width="136" height="16" border="0"/></html:link></td>
     </tr>
     <tr class="ListRow">
         <c:forEach var="serviceType" varStatus="status" items="${entry.serviceTypeValues}">
-        <tr class="ListRow">
+    <c:choose>
+      <c:when test="${even}">
+        <tr class="tableRowEven">
+        <c:set var="even" value="false"/>
+      </c:when>
+      <c:otherwise>
+        <tr class="tableRowOdd">
+        <c:set var="even" value="true"/>
+      </c:otherwise>
+    </c:choose>
             <td class="ListCellPrimary"><html:img page="/images/icon_indent_arrow.gif" width="16" height="16" border="0"/>
             <html:link page="/ResourceHub.do?ff=3&ft=3:${serviceType.id}"><c:out value="${serviceType.name}"/></html:link>
             </td>
