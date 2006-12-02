@@ -64,13 +64,7 @@
      <tiles:insert attribute="header" />
     </c:otherwise>
   </c:choose>  
-  
-  <table width="100%" border="0" cellspacing="0" cellpadding="0">
-    <tr valign="top">
-      <tiles:insert attribute='body' />
-    </tr>
-  </table>          
-
+  <tiles:insert attribute='body' />
   <tiles:insert attribute="footer" />
 </body>
 </html:html>
