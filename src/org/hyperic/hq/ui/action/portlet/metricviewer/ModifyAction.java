@@ -35,7 +35,7 @@ public class ModifyAction extends BaseAction {
         if(pForm.isRemoveClicked()){
             DashboardUtils
                 .removeResources(pForm.getIds(),
-                                 ".dashContent.metricviewer.resources",
+                                 PropertiesForm.RESOURCES,
                                  user);
             forwardStr = "review";
         }
@@ -52,6 +52,13 @@ public class ModifyAction extends BaseAction {
                            numberToShow.toString());
 
         String resourceType = pForm.getResourceType();
+
+        // If the selected resource type does not match the previous value,
+        // clear out the resources
+        if (!resourceType.equals(user.getPreference(PropertiesForm.RES_TYPE))) {
+            user.setPreference(PropertiesForm.RESOURCES, "");
+        }
+
         user.setPreference(PropertiesForm.RES_TYPE, resourceType);
 
         String metric = pForm.getMetric();
@@ -59,7 +66,6 @@ public class ModifyAction extends BaseAction {
 
         boss.setUserPrefs(user.getSessionId(), user.getId(),
                           user.getPreferences());
-
         session.removeAttribute(Constants.USERS_SES_PORTAL);
 
         if (!pForm.isOkClicked()) {

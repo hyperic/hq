@@ -5,6 +5,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 
 public class PropertiesForm extends DashboardBaseForm {
 
+    protected final static String RESOURCES =
+        ".dashContent.metricviewer.resources";
     protected final static String NUM_TO_SHOW =
         ".dashContent.metricviewer.numToShow";
     protected final static String RES_TYPE =

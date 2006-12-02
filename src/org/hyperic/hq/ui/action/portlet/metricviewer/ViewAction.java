@@ -42,9 +42,9 @@ public class ViewAction extends TilesAction {
         WebUser user = (WebUser) request.getSession().getAttribute(
             Constants.WEBUSER_SES_ATTR);
 
-        String key = ".dashContent.metricviewer.resources";
-
-        List entityIds = DashboardUtils.preferencesAsEntityIds(key, user);
+        List entityIds =
+            DashboardUtils.preferencesAsEntityIds(PropertiesForm.RESOURCES,
+                                                  user);
         AppdefEntityID[] arrayIds =
             (AppdefEntityID[])entityIds.toArray(new AppdefEntityID[0]);
 
