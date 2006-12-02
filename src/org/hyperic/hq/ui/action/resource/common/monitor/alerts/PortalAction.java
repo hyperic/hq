@@ -64,7 +64,8 @@ public class PortalAction extends ResourceController {
         Properties map = new Properties();
         map.put(Constants.MODE_VIEW,  "listAlerts");
         map.put(Constants.MODE_LIST,  "listAlerts");
-        map.put("viewAlert", "viewAlert");
+        map.put("ACKNOWLEDGE", "acknowledgeAlert");
+        map.put("FIXED", "fixAlert");
         return map;
     }
 
@@ -74,12 +75,38 @@ public class PortalAction extends ResourceController {
         portal.setName(BizappUtils.replacePlatform(titleName, aeid));
     }
 
+    public ActionForward listAlerts(ActionMapping mapping,
+                                    ActionForm form,
+                                    HttpServletRequest request,
+                                    HttpServletResponse response)
+        throws Exception {
+        setResource(request);
+        
+        super.setNavMapLocation(request, mapping, Constants.ALERT_LOC); 
+        // clean out the return path
+        SessionUtils.resetReturnPath(request.getSession());
+        // set the return path
+        try {
+            setReturnPath(request, mapping);
+        } catch (ParameterNotFoundException pne) {
+            log.debug(pne);
+        }
+        
+        Portal portal = Portal.createPortal();
+        AppdefEntityID aeid = RequestUtils.getEntityId(request);
+        setTitle(aeid, portal, "alerts.alert.platform.AlertList.Title");
+        portal.setDialog(false);
+        portal.addPortlet(new Portlet(".events.alert.list"), 1);
+        request.setAttribute(Constants.PORTAL_KEY, portal);
+
+        return null;
+    }
+
     public ActionForward viewAlert(ActionMapping mapping,
                                    ActionForm form,
                                    HttpServletRequest request,
                                    HttpServletResponse response)
-        throws Exception
-    {
+        throws Exception {
         // Get alert definition name
         ServletContext ctx = getServlet().getServletContext();
         int sessionID = RequestUtils.getSessionId(request).intValue();
@@ -111,31 +138,33 @@ public class PortalAction extends ResourceController {
         return null;
     }
 
-    public ActionForward listAlerts(ActionMapping mapping,
-                                    ActionForm form,
-                                    HttpServletRequest request,
-                                    HttpServletResponse response)
-        throws Exception
-    {
-        setResource(request);
-        
-        super.setNavMapLocation(request, mapping, Constants.ALERT_LOC); 
-        // clean out the return path
-        SessionUtils.resetReturnPath(request.getSession());
-        // set the return path
-        try {
-            setReturnPath(request, mapping);
-        } catch (ParameterNotFoundException pne) {
-            log.debug(pne);
-        }
-        
-        Portal portal = Portal.createPortal();
-        AppdefEntityID aeid = RequestUtils.getEntityId(request);
-        setTitle(aeid, portal, "alerts.alert.platform.AlertList.Title");
-        portal.setDialog(false);
-        portal.addPortlet(new Portlet(".events.alert.list"), 1);
-        request.setAttribute(Constants.PORTAL_KEY, portal);
+    public ActionForward acknowledgeAlert(ActionMapping mapping,
+                                  ActionForm form,
+                                  HttpServletRequest request,
+                                  HttpServletResponse response)
+        throws Exception {
+        ServletContext ctx = getServlet().getServletContext();
+        int sessionID = RequestUtils.getSessionId(request).intValue();
+        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
 
-        return null;
+        Integer alertId = new Integer( request.getParameter("a") );
+        //eb.acknowledgeAlert(sessionID, alertId);
+        
+        return viewAlert(mapping, form, request, response);
+    }
+
+    public ActionForward fixAlert(ActionMapping mapping,
+                                  ActionForm form,
+                                  HttpServletRequest request,
+                                  HttpServletResponse response)
+        throws Exception {
+        ServletContext ctx = getServlet().getServletContext();
+        int sessionID = RequestUtils.getSessionId(request).intValue();
+        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
+
+        Integer alertId = new Integer( request.getParameter("a") );
+        //eb.fixAlert(sessionID, alertId);
+
+        return viewAlert(mapping, form, request, response);
     }
 }
