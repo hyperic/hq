@@ -64,8 +64,8 @@ A.ListHeaderLink:hover {color: #004680; text-decoration: underline;}
 .ListHeaderOff {text-align: left; font-weight: bold; background-color: #DBE3F5; padding: 3px; border-top: solid #ABB1C7; border-bottom: solid #C6CFE5; border-width: 1px; color: #999999;}
 .ListHeaderInactiveCenter {text-align: center; font-weight: bold; background-color: #DBE3F5; padding: 3px; border-top: solid #ABB1C7; border-bottom: solid #C6CFE5; border-width: 1px;}
 
-.ListRow, .tableRowEven, .tableRowOdd {background-color: #F2F4F7;}
-.ListRowSelected, .tableRowAction {text-align: left; background-color: #EBEDF2;}
+.ListRow, .tableRowEven {background-color: #F2F4F7;}
+.ListRowSelected, .tableRowAction, .tableRowOdd {text-align: left; background-color: #EBEDF2;}
 
 .ListCell, .ListCellSelected, .tableCell, .redTableCell {padding: 3px; border-bottom: solid #D5D8DE; border-width: 1px; vertical-align: middle; }
 .ListCellSmall8 {font-size: 8px; border-width: 1px; border-bottom: solid #D5D8DE; border-width: 1px; padding: 3px;}
