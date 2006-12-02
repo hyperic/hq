@@ -82,7 +82,7 @@ public class SQLQueryMeasurementPlugin
     protected void getDriver()
         throws ClassNotFoundException {}
 
-    private synchronized void loadDriver(String driver) {
+    private static synchronized void loadDriver(String driver) {
         if (loadedDrivers.get(driver) != null) {
             return;
         }
@@ -92,6 +92,23 @@ public class SQLQueryMeasurementPlugin
         } catch (ClassNotFoundException e) {
             // Ignore, will fail in getConnection()
         }
+    }
+
+    static void loadDriver(Properties props) {
+        loadDriver(props.getProperty(PROP_DRIVER));
+    }
+
+    static Connection getConnection(Properties props)
+        throws SQLException {
+
+        loadDriver(props);
+
+        String
+            url = props.getProperty(PROP_URL),
+            user = props.getProperty(PROP_USER),
+            pass = props.getProperty(PROP_PASSWORD);
+
+        return DriverManager.getConnection(url, user, pass);
     }
 
     protected Connection getConnection(String url,
@@ -109,14 +126,11 @@ public class SQLQueryMeasurementPlugin
 
     protected String getQuery(Metric metric)
     {
-        Properties props = metric.getProperties();
-        String driver = props.getProperty(PROP_DRIVER);
-
         //The ObjectProperties portion is pulled directly from the plugin 
         //without being parsed since the query may include a ','.
         String query = Metric.decode(metric.getObjectPropString());
 
-        loadDriver(driver);
+        loadDriver(metric.getProperties());
 
         return query;
     }
