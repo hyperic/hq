@@ -366,6 +366,10 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
      </tiles:insert>
     </td>
   </tr>
+  <c:if test="${noFilter}">
+      <html:hidden property="ff"/>
+      <html:hidden property="ft"/>
+  </c:if>
   <c:if test="${empty noFilter}">
   <tr>
     <td width="50%" valign="top">

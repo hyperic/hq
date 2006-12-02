@@ -53,9 +53,6 @@ public class ViewAction extends TilesAction {
 
         int sessionId = user.getSessionId().intValue();
 
-        _log.info("Found " + arrayIds.length + " (count=" + count +
-                  " for session=" + sessionId);
-
         return null;
     }
 }

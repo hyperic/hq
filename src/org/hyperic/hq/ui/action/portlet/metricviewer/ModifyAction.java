@@ -51,10 +51,20 @@ public class ModifyAction extends BaseAction {
         user.setPreference(PropertiesForm.NUM_TO_SHOW,
                            numberToShow.toString());
 
+        String resourceType = pForm.getResourceType();
+        user.setPreference(PropertiesForm.RES_TYPE, resourceType);
+
+        String metric = pForm.getMetric();
+        user.setPreference(PropertiesForm.METRIC, metric);
+
         boss.setUserPrefs(user.getSessionId(), user.getId(),
                           user.getPreferences());
 
         session.removeAttribute(Constants.USERS_SES_PORTAL);
+
+        if (!pForm.isOkClicked()) {
+            forwardStr="review";
+        }
 
         return mapping.findForward(forwardStr);
     }

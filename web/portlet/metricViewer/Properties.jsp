@@ -86,6 +86,41 @@ var help = '<hq:help/>';
      
           </td>
         </tr>
+        <tr valign="top">
+          <td width="20%" class="BlockLabel" valign="center"><fmt:message key="dash.settings.FormLabel.ResourceType"/></td>
+          <td width="80%" class="BlockContent" colspan="3" valign="center">
+              <html:select property="resourceType" onclick="MetricViewerForm.submit()">
+              <html:option value="-1" disabled="true"><fmt:message key="dash.settings.metricViewer.selectResourceType"/></html:option>
+              <html:option value="-1" disabled="true"><fmt:message key="dash.settings.metricViewer.platformTypes"/></html:option>
+              <c:forEach var="type" items="${platformTypes}">
+                  <html:option value="${type.appdefTypeKey}"> - <c:out value="${type.name}"/></html:option>
+              </c:forEach>
+              <html:option value="" disabled="true"></html:option>
+              <html:option value="-1" disabled="true"><fmt:message key="dash.settings.metricViewer.serverTypes"/></html:option>
+              <c:forEach var="type" items="${serverTypes}">
+                  <html:option value="${type.appdefTypeKey}"> - <c:out value="${type.name}"/></html:option>
+              </c:forEach>
+              <html:option value="" disabled="true"></html:option>
+              <html:option value="-1" disabled="true"><fmt:message key="dash.settings.metricViewer.serviceTypes"/></html:option>
+              <c:forEach var="type" items="${serviceTypes}">
+                  <html:option value="${type.appdefTypeKey}"> - <c:out value="${type.name}"/></html:option>
+              </c:forEach>
+              </html:select>
+          </td>
+        </tr>
+        <tr valign="top">
+          <td width="20%" class="BlockLabel" valign="center"><fmt:message key="dash.settings.FormLabel.Metric"/></td>
+          <td width="80%" class="BlockContent" colspan="3" valign="center">
+             <html:select property="metric">
+             <html:option value="-1" disabled="true"><fmt:message key="dash.settings.metricViewer.selectMetric"/></html:option>
+             <c:forEach var="metric" items="${metrics}">
+                 <c:if test="${metric.defaultOn}">
+                 <html:option value="${metric.id}"> - <c:out value="${metric.name}"/></html:option>
+                 </c:if>
+             </c:forEach>    
+             </html:select>
+          </td>
+        </tr>
         <tr>
           <td colspan="4" class="BlockContent"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
         </tr>
@@ -113,8 +148,15 @@ var help = '<hq:help/>';
 
       </display:table>
 
+
+      <c:url var="addToListUrl" value="/Admin.do" context="/dashboard">
+          <c:param name="mode" value="metricViewerAddResources"/>
+          <c:param name="key" value=".dashContent.metricviewer.resources"/>
+          <c:param name="ff" value="${MetricViewerForm.appdefType}"/>
+          <c:param name="ft" value="${MetricViewerForm.appdefTypeID}"/>
+      </c:url>
       <tiles:insert definition=".toolbar.addToList">
-        <tiles:put name="addToListUrl" value="/dashboard/Admin.do?mode=metricViewerAddResources&key=.dashContent.metricviewer.resources"/>
+        <tiles:put name="addToListUrl" beanName="addToListUrl"/>
         <tiles:put name="listItems" beanName="metricViewerList"/>
         <tiles:put name="listSize" beanName="metricViewerTotalSize"/>
         <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
