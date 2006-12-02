@@ -27,11 +27,10 @@ package org.hyperic.hq.appdef.shared;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Comparator;
-import java.util.Collection;
-import java.util.Collections;
 
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.grouping.shared.GroupEntry;
@@ -40,7 +39,8 @@ import org.hyperic.hq.grouping.shared.GroupVisitor;
 import org.hyperic.hq.grouping.shared.GroupVisitorException;
 import org.hyperic.util.pager.PageList;
 
-/** Appdef GroupValue implements the grouping subsystem's GroupValue
+/** 
+ *  Appdef GroupValue implements the grouping subsystem's GroupValue
  *  interface and provides the implementation for its methods.
  *  The class extends the domain of groupable elements to include
  *  appdef entities. The group entries are converted to and from
@@ -59,12 +59,11 @@ import org.hyperic.util.pager.PageList;
  *  subsystem. However, the requirement is that this class MUST
  *  extend AppdefResourceValue and since Java doesn't allow
  *  multiple inheritance, well, we're stuck with this.)
- * 
-*/
+ */
 public class AppdefGroupValue
-                  extends AppdefResourceValue implements GroupValue,
-                                                         Cloneable, 
-                                                         Serializable {
+    extends AppdefResourceValue 
+    implements GroupValue, Cloneable, Serializable 
+{ 
     private Integer  id;            // id of group.
     private int      groupType;     // adhoc|compat|clusterable
     private int      groupEntType;  // platform|server|group|app|service
@@ -178,6 +177,7 @@ public class AppdefGroupValue
     public PageList  getAppdefGroupEntries () {
         return getAppdefGroupEntries(null);
     }
+
     /** Fetch the group members as a paged list of AppdefEntityIDs. The group
      *  will always contain a page list of values because ResourceGroupManager
      *  sees to it that all requests for group members receives a paged list.
@@ -198,34 +198,18 @@ public class AppdefGroupValue
         return new PageList(entities,getGroupEntries().getTotalSize());
     }
 
-    /**
-     * Returns the ctime.
-     * @return Long
-     */
     public Long getCTime() {
         return cTime;
     }
 
-    /**
-     * Returns the mtime.
-     * @return Long
-     */
     public Long getMTime() {
         return mTime;
     }
 
-    /**
-     * Sets the ctime.
-     * @param ctime The ctime to set
-     */
     public void setCTime(Long ctime) {
         this.cTime = ctime;
     }
 
-    /**
-     * Sets the mtime.
-     * @param mtime The mtime to set
-     */
     public void setMTime(Long mtime) {
         this.mTime = mtime;
     }
@@ -242,14 +226,12 @@ public class AppdefGroupValue
     }
 
     /** Asserts that an element exists in the group.
-     * @param AppdefEntityID
      * @return true if in group, false if not in group */
     public boolean existsAppdefEntity ( AppdefEntityID entity ) {
         return existsEntry( entityToEntry(entity) );
     }
 
     /** Asserts that an element exists in the group.
-     * @param GroupEntry
      * @return true if in group, false if not in group */
     public boolean existsEntry (GroupEntry entry) {
         for (Iterator i=this.getGroupEntries().iterator();i.hasNext();) {
@@ -261,9 +243,9 @@ public class AppdefGroupValue
         return false;
     }
 
-    /** Removes an entity identified by AppdefEntityID from our group.
-     * @param appdef entity id
-     * */
+    /** 
+     * Removes an entity identified by AppdefEntityID from our group.
+     */
     public void removeAppdefEntity (AppdefEntityID entity) {
         removeEntry( entityToEntry(entity) );
     }
@@ -284,10 +266,10 @@ public class AppdefGroupValue
 
     /** Adds an entry to the group.
      * @param group entry value object.
-     * @throws GroupVisitorException
      * */
     public void addEntry (GroupEntry entry)
-        throws GroupVisitorException {
+        throws GroupVisitorException 
+    {
         // If there are any incremental vistors registered, dispatch.
         if (visitorsInc != null) {
             for (Iterator i=visitorsInc.iterator();i.hasNext();) {
@@ -298,9 +280,9 @@ public class AppdefGroupValue
         groupEntries.add(entry);
     }
 
-    /** Removes an entry from the group.
-     * @param id of entry to remove.
-     * */
+    /** 
+     * Removes an entry from the group.
+     */
     public void removeEntry (GroupEntry goner) {
         for (Iterator i=groupEntries.iterator();i.hasNext();) {
             GroupEntry ge = (GroupEntry)i.next();
@@ -310,12 +292,10 @@ public class AppdefGroupValue
         }
     }
 
-
     /** Iterate through all registered visitors and invoke their
      * visitGroup method passing this group as a parameter. Operations
      * will be performed in order of registration.
-     * @throws GroupVisitorException
-     * */
+     */
     public void visit () throws GroupVisitorException {
         if (visitors != null) {
             for (Iterator i=visitors.iterator();i.hasNext();) {
@@ -324,11 +304,10 @@ public class AppdefGroupValue
             }
         }
     }
+    
     /** With the argument visitor immediately invoke its
      * visitGroup method passing this group as a parameter.
-     * @param GroupVisitor
-     * @throws GroupVisitorException
-     * */
+     */
     public void visit (GroupVisitor gv) throws GroupVisitorException {
         gv.visitGroup(this);
     }
@@ -337,15 +316,15 @@ public class AppdefGroupValue
         if (visitors!=null)
             visitors.clear();
     }
+
     public void clearVisitorsInc() {
         if (visitorsInc!=null)
             visitorsInc.clear();
     }
 
     /** Register a visitor with this group value object for later
-     * visitation.
-     * @param object implementing GroupVisitor interface.
-     * */
+     *  visitation.
+     */
     public void registerVisitor (GroupVisitor gv) {
         if (visitors == null)
             visitors = new ArrayList();
@@ -355,8 +334,7 @@ public class AppdefGroupValue
     /** Register an incremental visitor with this group value object
      * for later visitation. Visitation occurs automatically after
      * an add operation.
-     * @param object implementing GroupVisitor interface.
-     * */
+     */
     public void registerVisitorInc (GroupVisitor gv) {
         if (visitorsInc == null)
             visitorsInc = new ArrayList();
@@ -390,8 +368,7 @@ public class AppdefGroupValue
    }
 
    public boolean equals(Object other)  {
-      if (other instanceof AppdefGroupValue)
-      {
+      if (other instanceof AppdefGroupValue) {
          AppdefGroupValue that = (AppdefGroupValue) other;
 
          // Cannot perform equals if groupid is not defined.
@@ -399,8 +376,7 @@ public class AppdefGroupValue
             return false;
 
          return this.id.equals( that.id );
-      }
-      else  {
+      } else  {
          return false;
       }
    }
@@ -449,5 +425,4 @@ public class AppdefGroupValue
 
         return newGroupVo;
     }
-
 }
