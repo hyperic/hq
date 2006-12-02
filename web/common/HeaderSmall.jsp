@@ -33,9 +33,6 @@
   var help = "<hq:help/>";
 </script>
 
-<script src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
-<script src="<html:rewrite page="/js/"/>diagram.js" type="text/javascript"></script>
-
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr> 
     <td width="22%">
