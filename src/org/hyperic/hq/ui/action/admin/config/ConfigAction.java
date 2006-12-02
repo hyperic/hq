@@ -69,6 +69,14 @@ public class ConfigAction extends BaseDispatchAction {
         return map;
     }
 
+    private void createPortal(HttpServletRequest request, boolean dialog,
+                              String title, String tile) {
+        // Create the portal
+        Portal p = Portal.createPortal(title, tile);
+        p.setDialog(dialog);
+        request.setAttribute(Constants.PORTAL_KEY, p);
+    }
+
     public ActionForward editConfig(ActionMapping mapping,
                                     ActionForm form,
                                     HttpServletRequest request,
@@ -80,11 +88,8 @@ public class ConfigAction extends BaseDispatchAction {
             throw new PermissionException(
                     "User not authorized to configure server settings");
         
-        Portal portal = Portal
-             .createPortal("admin.settings.EditServerConfig.Title",
-                          ".admin.config.EditConfig");
-        portal.setDialog(true);
-        request.setAttribute(Constants.PORTAL_KEY, portal);
+        createPortal(request, true, "admin.settings.EditServerConfig.Title",
+                     ".admin.config.EditConfig");
 
         return null;
     }
@@ -99,11 +104,10 @@ public class ConfigAction extends BaseDispatchAction {
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
     
         JSONArray arr = eb.listAllEscalationName(sessionID);
+        request.setAttribute("escalations", arr);
         
-        // Create the portal
-        Portal p = Portal.createPortal("admin.home.EscalationSchemes",
-                                       ".admin.config.EditEscalationConfig");
-        request.setAttribute(Constants.PORTAL_KEY, p);
+        createPortal(request, false, "admin.home.EscalationSchemes",
+                     ".admin.config.EditEscalationConfig");
         
         return null;        
     }
@@ -150,9 +154,8 @@ public class ConfigAction extends BaseDispatchAction {
                              winServices);
         
         // Create the portal
-        Portal p = Portal.createPortal("admin.home.ResourceTemplates",
-                                       ".admin.config.EditMonitorConfig");
-        request.setAttribute(Constants.PORTAL_KEY, p);
+        createPortal(request, false, "admin.home.ResourceTemplates",
+                     ".admin.config.EditMonitorConfig");
         
         return null;
     }
