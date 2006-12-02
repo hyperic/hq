@@ -54,9 +54,9 @@
     <td width="80%">
       <table cellpadding="0" cellspacing="10" border="0">
         <tr>
-          <td><input type=SUBMIT name="mode" value="ACKNOWLEDGE"/></td>
+          <td><input type=SUBMIT name="mode" value="<fmt:message key="resource.common.alert.action.acknowledge.label"/>"/></td>
           <td><html:img page="/images/spacer.gif" width="10" height="1" border="0"/></td>
-          <td><input type=SUBMIT name="mode" value="FIXED"/></td>
+          <td><input type=SUBMIT name="mode" value="<fmt:message key="resource.common.alert.action.fixed.label"/>"/></td>
         </tr>
       </table>
     </td>
