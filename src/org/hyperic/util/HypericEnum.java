@@ -17,6 +17,11 @@ import java.util.Set;
  * Enums have a code and a description.  The code must be unique for enums
  * of a specific class.  This has great use in things like Web-UI where you
  * need a code representation as well as a string (rendering a listbox)
+ * 
+ * XXX:  It would be good to implement the PersistentEnum stylee via 
+ *       a UserType in Hibernate, so we don't have to do the conversion in
+ *       every class that uses an enum.  Don't have the time now.. :-(
+ *           http://www.hibernate.org/203.html
  */
 public abstract class HypericEnum {
     private static final Map _enumsByClass = new HashMap();
