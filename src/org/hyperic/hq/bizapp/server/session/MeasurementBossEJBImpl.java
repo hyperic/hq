@@ -141,14 +141,13 @@ import org.hyperic.util.timer.StopWatch;
 public class MeasurementBossEJBImpl extends MetricSessionEJB
     implements SessionBean 
 {
-    /** Static logging context */
-    protected Log log =
+    protected static Log log =
         LogFactory.getLog(MeasurementBossEJBImpl.class.getName());
 
     private final ResourcesWithoutDataHelper resourcesWithoutDataHelper
         = ResourcesWithoutDataHelper.instance();
 
-    private AlertManagerLocal alertMan   = null;
+    private AlertManagerLocal alertMan = null;
 
     private AlertManagerLocal getAMan() {
         if (alertMan == null) {
@@ -208,10 +207,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
         return metrics;
     }
-    
-    /*
-     * Measurement Template functions
-     */
 
     /** Create a measurement template
      * @return the ID of the newly created template
@@ -227,13 +222,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                                     MeasurementArgValue[] args)
         throws SessionNotFoundException, SessionTimeoutException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-    
-        if(log.isDebugEnabled())
-            log.debug("Creating Derived Measurement template:\n"+
-              "[name="+name+"] [alias="+alias+"] [type="+type+"] "+
-              "[category="+category+"] [template="+template+"] [args="+
-              args.toString()+"]");
-    
+
         TemplateManagerLocal tMan = getTemplateManager();
             
         try {
@@ -269,7 +258,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         getTemplateManager().setDesignatedTemplates(typeName, tids);
     }
 
-    /** Delete a derived measurement template
+    /**
+     * Delete a derived measurement template
      * @ejb:interface-method
      */
     public void removeDerivedMeasurementTemplate(int sessionId, Integer arg)
@@ -320,11 +310,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     }
 
     /** Retrieve list of measurement templates given specific IDs
-     * @param mtype the monitorableType
-     * @return a List of MeasurementTemplateValue objects
-     * @throws ConfigPropertyException
-     * @throws ApplicationException
-     * @throws LoginException
      * @ejb:interface-method
      */
     public PageList findMeasurementTemplates(String user, Integer[] ids,
@@ -335,7 +320,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     }
 
     /** Retrieve list of measurement templates given specific IDs
-     * @param mtype the monitorableType
      * @return a List of MeasurementTemplateValue objects
      * @ejb:interface-method
      */
@@ -430,33 +414,18 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     }
 
     /** Retrieve a measurement template given specific ID
-     * @param id the template ID
-     * @return a MeasurementTemplateValue object
-     * @throws SessionTimeoutException
-     * @throws SessionNotFoundException
-     * @throws TemplateNotFoundException
-     * @throws ConfigPropertyException
-     * @throws ApplicationException
-     * @throws LoginException
      * @ejb:interface-method
      */
     public MeasurementTemplateValue getMeasurementTemplate(int sessionId,
                                                            Integer id)
         throws SessionNotFoundException, SessionTimeoutException,
                TemplateNotFoundException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
         return getTemplateManager().getTemplate(id);
     }
 
     /**
      * Get the the availability metric template for the given autogroup
-     * @param adeId the resource id
-     * @return template of availabililty metric
-     * @throws MeasurementNotFoundException
-     * @throws SessionTimeoutException
-     * @throws SessionNotFoundException
-     * @throws PermissionException
-     * @throws AppdefEntityNotFoundException
+     * @return The availabililty metric template.
      * @ejb:interface-method
      */
     public MeasurementTemplateValue getAvailabilityMetricTemplate(
@@ -557,13 +526,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     
     /**
      * Get the the availability metric template for the given resource
-     * @param adeId the resource id
      * @return template of availabililty metric
-     * @throws MeasurementNotFoundException
-     * @throws SessionTimeoutException
-     * @throws SessionNotFoundException
-     * @throws PermissionException
-     * @throws AppdefEntityNotFoundException
      * @ejb:interface-method
      */
     public MeasurementTemplateValue getAvailabilityMetricTemplate(
@@ -578,8 +541,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * Get the the designated measurement template for the given resource
      * and corresponding category.
-     * @param adeIds the resource ids
-     * @param category the category
      * @return array of derived measurement IDs
      * @ejb:interface-method
      */
@@ -601,8 +562,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
     /**
      * Get the the designated measurement template for the given resources
-     * @param adeIds the resource ids
-     * @param category the category
      * @return array of derived measurement IDs
      * @ejb:interface-method
      */
@@ -622,8 +581,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * Get the the designated measurement template for the given resources
      * and corresponding categories.
-     * @param adeIds the resource ids
-     * @param category the category
      * @return array of derived measurement IDs
      * @ejb:interface-method
      */
@@ -654,9 +611,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * Get the the designated measurement template for the autogroup given
      * a type and corresponding category.
-     * @param adeIds the resource ids
      * @param ctype the AppdefEntityTypeID of the AG members
-     * @param category the category of the measurement     
      * @return array of derived measurement IDs
      * @ejb:interface-method
      */
@@ -685,8 +640,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             " does not contain designated measurements");
     }
 
-    /** Create the default measurements for a resource
-     * @param templateIds the IDs of the measurement templates
+    /**
+     * Create the default measurements for a resource
      * @param id the resource ID
      * @ejb:interface-method
      */
@@ -715,8 +670,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         createMeasurements(sessionId, id, tids, 0);
     }
 
-    /** Create list of measurements for a resource
-     * @param templateIds the IDs of the measurement templates
+    /**
+     * Create list of measurements for a resource
      * @param id the resource ID
      * @ejb:interface-method
      */
@@ -729,8 +684,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         createMeasurements(sessionId, id, tids, 0);
     }
 
-    /** Create list of measurements for a resource
-     * @param templateIds the IDs of the measurement templates
+    /**
+     * Create list of measurements for a resource
      * @param id the resource ID
      * @ejb:interface-method
      */
@@ -779,9 +734,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * Create a list of measurements for an autogroup resource
      * @param parentAeid - the parent resource of the autogroup
-     * @param appdefTypeId - the appdefTypeId of the children
      * @param tids - template ids to create
-     * 
      * @ejb:interface-method
      */
     public void createAGMeasurements(int sessionId, 
@@ -807,8 +760,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * at a time.
      * @ejb:interface-method
      */
-    public void enableDefaultMetricsAndRuntimeAI (int sessionId,
-                                                  AppdefEntityID id) 
+    public void enableDefaultMetricsAndRuntimeAI(int sessionId,
+                                                 AppdefEntityID id)
         throws AppdefEntityNotFoundException, TemplateNotFoundException,
                PermissionException, ConfigFetchException, 
                EncodingException, MeasurementCreateException,
@@ -837,8 +790,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
     }
 
-    /** Update the measurements - set the interval
-     * @param mValue measurement id
+    /**
+     * Update the measurements - set the interval
      * @ejb:interface-method
      */
     public void updateMeasurements(int sessionID, Integer[] mids, long interval)
@@ -912,8 +865,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         getRawMeasurementManager().removeMeasurements(ids);
     }
 
-    /** Remove all measurements for multiple instances
-     * @param id the appdef entity ID
+    /**
+     * Remove all measurements for multiple instances
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
@@ -934,7 +887,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         log.debug("Remove Raw Measurements timing: " + timer.getElapsed());
     }
 
-    /** Disable all measurements for an instance
+    /**
+     * Disable all measurements for an instance
      * @param id the resource's ID
      * @ejb:interface-method
      */
@@ -947,7 +901,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
     /** 
      * Disable measurements so that they no longer collect data
-     * 
      * @param mids the array of measurement ID's
      * @ejb:interface-method
      */
@@ -958,7 +911,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         getDerivedMeasurementManager().disableMeasurements(subject, mids);
     }
 
-    /** Disable all measurements for a resource
+    /**
+     * Disable all measurements for a resource
      * @param id the resource's ID
      * @param tids the array of measurement ID's
      * @ejb:interface-method
@@ -969,7 +923,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                RemoveException, AppdefEntityNotFoundException,
                GroupNotCompatibleException, PermissionException,
-               TemplateNotFoundException {
+               TemplateNotFoundException
+    {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
 
         if (id == null) {
@@ -992,8 +947,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
     }
 
-    /** Disable all measurements for a resource
-     * @param id the resource's ID
+    /**
+     * Disable all measurements for a resource
      * @param tids the array of measurement ID's
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
@@ -1014,12 +969,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
     }
 
-    /** Get the count of enabled metrics for an entity
-     * @throws SessionNotFoundException
-     * @throws SessionTimeoutException
-     * @throws AppdefEntityNotFoundException
-     * @throws PermissionException
-     * @throws GroupNotCompatibleException
+    /**
+     * Get the count of enabled metrics for an entity
      * @ejb:interface-method
      */
     public int getEnabledMetricsCount(int sessionId, AppdefEntityID id)
@@ -1038,8 +989,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * Get the the designated measurement for the given resource
      * and corresponding category.
-     * @param adeId the resource id
-     * @param category the category
      * @return array of derived measurement IDs
      * @ejb:interface-method
      */
@@ -1146,14 +1095,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     }
 
     /**
-     * find a measurement using measurement id
+     * Find a measurement using measurement id
      * @param id measurement id
      * @ejb:interface-method
      */
     public DerivedMeasurementValue getMeasurement(int sessionID, Integer id)
         throws SessionTimeoutException, SessionNotFoundException,
                MeasurementNotFoundException {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
         return getDerivedMeasurementManager().getMeasurement(id);
     }
 
@@ -1328,10 +1276,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     }
 
     /** Retrieve a measurement for a specific instance
-     * @param mtype the monitorable type to get the measurements for
      * @return a PageList of DerivedMeasurementValue objects
-     * @throws MeasurementNotFoundException 
-     * @throws AppdefEntityNotFoundException 
      * @ejb:interface-method
      */
     public DerivedMeasurementValue findMeasurement(int sessionId,
@@ -1351,7 +1296,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     }
 
     /** Retrieve list of measurements for a specific instance
-     * @param mtype the monitorable type to get the measurements for
      * @return a PageList of DerivedMeasurementValue objects
      * @ejb:interface-method
      */
@@ -1480,7 +1424,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return new PageList(beans, tmpls.getTotalSize());
     }
 
-    /** Dumps data for a specific measurement
+    /**
+     * Dumps data for a specific measurement
      * @return a PageList of MetricValue objects
      * @ejb:interface-method
      */
@@ -1493,12 +1438,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
     }
 
-    /** Dumps data for a specific measurement on an interval
+    /**
+     * Dumps data for a specific measurement on an interval
      * @return a PageList of MetricValue objects
-     * @throws SessionTimeoutException
-     * @throws SessionNotFoundException
-     * @throws MeasurementNotFoundException
-     * @throws DataNotAvailableException
      * @ejb:interface-method
      */
     public PageList findMeasurementData(int sessionId, Integer mid,
@@ -1518,7 +1460,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                               returnNulls, pc);
     }
 
-    /** Dumps data for a specific measurement template for an instance based on
+    /**
+     * Dumps data for a specific measurement template for an instance based on
      * an interval
      * @param tid the template ID
      * @param aid the AppdefEntityID
@@ -1577,8 +1520,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @param end end of interval
      * @param interval the interval
      * @param returnNulls whether or not to return nulls
-     * @param isPlatformServiceAG look for services of the given ctype
-     *        associated with the platform
      * @return a PageList of MetricValue objects
      * @ejb:interface-method
      */
@@ -1604,13 +1545,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * an interval.
      *
      * @param tid the measurement template id
-     * @param aid the entity id
-     * @param ctype the auto-group child type
      * @param begin start of interval
      * @param end end of interval
      * @param interval the interval
      * @param returnNulls whether or not to return nulls
-     * @param isPlatformServiceAG look for services of the given ctype
      *        associated with the platform
      * @return a PageList of MetricValue objects
      * @ejb:interface-method
@@ -1644,18 +1582,15 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             tmpl.getCollectionType(), returnNulls, pc);
     }
 
-    /** Dumps data for a specific measurement template for an instance based on
+    /**
+     * Dumps data for a specific measurement template for an instance based on
      * an interval
-     * @param tid the template ID
      * @param aid the AppdefEntityID
      * @param begin the beginning of the time range
      * @param end the end of the time range
      * @param interval the time interval at which the data should be calculated
      * @param returnNulls whether or not nulls should be inserted for no data
      * @return a PageList of MetricValue objects
-     * @throws ConfigPropertyException
-     * @throws ApplicationException
-     * @throws LoginException
      * @ejb:interface-method
      */
     public PageList findMeasurementData(String user, AppdefEntityID aid,
@@ -1738,7 +1673,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
     }
 
-    /** Dumps a specific number of data points for a specific
+    /**
+     * Dumps a specific number of data points for a specific
      * measurement template ID and resource id
      * @return a List of MetricValue objects
      * @ejb:interface-method
@@ -1755,7 +1691,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return findMeasurementData(sessionId, dmv.getId(), count);
     }
 
-    /** Dumps a specific number of data points for a specific measurement ID
+    /**
+     * Dumps a specific number of data points for a specific measurement ID
      * @return a List of MetricValue objects
      * @ejb:interface-method
      */
@@ -1770,16 +1707,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * Dumps data for a specific measurement template for an auto-group based on
      * an interval.
-     *
-     * @param tid the measurement template id
-     * @param aid the entity id
      * @param ctype the auto-group child type
      * @param begin start of interval
      * @param end end of interval
      * @param interval the interval
      * @param returnNulls whether or not to return nulls
-     * @param isPlatformServiceAG look for services of the given ctype
-     *        associated with the platform
      * @return a PageList of MetricValue objects
      * @throws ConfigPropertyException
      * @throws ApplicationException
@@ -1800,16 +1732,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * Dumps data for a specific measurement template for an auto-group based on
      * an interval.
-     *
-     * @param tid the measurement template id
-     * @param aid the entity id
      * @param ctype the auto-group child type
      * @param begin start of interval
      * @param end end of interval
      * @param interval the interval
      * @param returnNulls whether or not to return nulls
-     * @param isPlatformServiceAG look for services of the given ctype
-     *        associated with the platform
      * @return a PageList of MetricValue objects
      * @ejb:interface-method
      */
@@ -1966,8 +1893,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * 
      * @return Map keyed on the category (String), values are List's of 
      * MetricDisplaySummary beans
-     * @throws AppdefCompatException
-     * @throws MeasurementNotFoundException
      * @see org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
@@ -1996,12 +1921,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         // Look up the metric summaries of all associated resources
         Map results = getResourceMetrics(subject, resources,
                                               mtids, begin, end, false);
-        
+
         // Should only be one
         if (log.isDebugEnabled()) {
             log.debug("getResourceMetrics() returned " + results.size());
         }
-    
+
         if (results.size() > 0) {
             Iterator it = results.values().iterator();
             Collection coll = (Collection) it.next();
@@ -2040,8 +1965,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * 
      * @return Map keyed on the category (String), values are List's of 
      * MetricDisplaySummary beans
-     * @throws AppdefCompatException
-     * @throws MeasurementNotFoundException
      * @see org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
@@ -2240,8 +2163,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * (i.e. applications, groups) are inappropriate for this signature.
      * 
      * Used for screen 0.3
-     *  
-     * @param resources a list of AppdefResourceValues
+     *
      * @param begin the commencement of the timeframe of interest
      * @param end the end of the timeframe of interest
      * @return Map of measure templates and resource metric lists
@@ -2348,13 +2270,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * Return a MetricSummary bean for each of the metrics (template) for the
      * entities in the given time frame
-     * 
-     * @param entIDs
-     *            the resource ID's (platform, server, or service)
-     * @param begin
-     *            the beginning time frame
-     * @param end
-     *            the ending time frame
+     * @param begin the beginning time frame
+     * @param end the ending time frame
      * @return a list of ResourceTypeDisplaySummary beans
      * @throws AppdefCompatException
      * @ejb:interface-method
@@ -2407,8 +2324,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     }
 
     /** Return a MetricSummary bean for each of the servers of a specific type.
-     * @param entId the application's or platform's ID
-     * @param serverTypeId the ID of the server type
      * @param begin the beginning time frame
      * @param end the ending time frame
      * @return a list of ResourceTypeDisplaySummary beans
@@ -2445,13 +2360,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * <li>servers (2.3.2.1-4 - internal/deplyed tabs)
      * <li>services (2.5.2.2 - internal/deplyed tabs)
      * </ul>
-     * 
-     * @param entId
-     *            the resource's ID (application, server, or service)
-     * @param begin
-     *            the beginning time frame
-     * @param end
-     *            the ending time frame
+     *
+     * @param begin the beginning time frame
+     * @param end the ending time frame
      * @return a list of CurrentHealthDisplaySummary beans
      * @throws AppdefCompatException
      * @ejb:interface-method
@@ -2479,15 +2390,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @return a List of MiniResourceValue objects
      * @ejb:interface-method
      */
-    public List getResourcesWithoutData (int sessionId,
-                                         List ignoreList)
+    public List getResourcesWithoutData(int sessionId,
+                                        List ignoreList)
         throws SessionTimeoutException, SessionNotFoundException {
         
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        List resources
-            = resourcesWithoutDataHelper.getResourcesWithoutData(subject,
-                                                                 ignoreList);
-        return resources;
+        return resourcesWithoutDataHelper.getResourcesWithoutData(subject,
+                                                                  ignoreList);
     }
 
     /**
@@ -2504,10 +2413,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException {
         
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        List resources
-            = resourcesWithoutDataHelper.getResourcesWithoutMetrics(subject,
-                                                                    ignoreList);
-        return resources;
+        return resourcesWithoutDataHelper.getResourcesWithoutMetrics(subject,
+                                                                     ignoreList);
     }
 
     /** Return a MeasurementSummary bean for the resource's associated resources
@@ -2594,24 +2501,16 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 unavailCnt++;
             }
             else {
-                // something stinks, barf
                 throw new IllegalStateException(data[i] + 
                                 " is not a valid availability state");
             }
         }
         
-        MeasurementSummary summary =
-            new MeasurementSummary(new Integer(availCnt),
-                                   new Integer(unavailCnt),
-                                   new Integer(unknownCnt));
-    
-        return summary;
+        return new MeasurementSummary(new Integer(availCnt),
+                                      new Integer(unavailCnt),
+                                      new Integer(unknownCnt));
     }
 
-    /*
-     * Functions dealing with resources health
-     */
-    
     /**
      * @return List the List of ResourceTypeDisplaySummary's
      */    
@@ -3076,7 +2975,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * @param id the AppdefEntityID of the resource our ResourceDisplaySummary is for
      * @param summary a ResourceDisplaySummary
-     * @param category a category i.e. MeasurementConstants.CAT_THROUGHPUT
      * @throws PermissionException
      * @throws AppdefEntityNotFoundException
      */
@@ -3246,10 +3144,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * Find the current health of the entity's host(s)
      * 
      * @return PageList of ResourceDisplaySummary beans
-     * @throws SessionTimeoutException 
-     * @throws SessionNotFoundException 
-     * @throws PermissionException 
-     * @throws AppdefEntityNotFoundException 
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
@@ -3335,10 +3229,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * 
      * If the entId is a platform, the deployed servers view shows
      * the current health of servers.
-     * 
-     * @param entId the platform's or application's ID
-     * @param pc the PageControl
-     * @param end the end of the timeframe of interest
+     *
      * @return a list of ResourceDisplaySummary beans
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
@@ -3391,7 +3282,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * the appdef entity is a service.
      * 
      * @param entId the platform's or application's ID
-     * @param end the end of the timeframe of interest
      * @return a list of ResourceDisplaySummary beans
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
@@ -3431,7 +3321,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * the current health of servers.
      * 
      * @param entId the platform's or application's ID
-     * @param end the end of the timeframe of interest
      * @return a list of ResourceDisplaySummary beans
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
@@ -3465,9 +3354,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * 
      * If the entId is a platform, the deployed servers view shows
      * the current health of servers.
-     * 
-     * @param entId the platform's or application's ID
-     * @param end the end of the timeframe of interest
+     *
      * @return a list of ResourceDisplaySummary beans
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
@@ -3497,8 +3384,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         // Return a paged list of current health        
         return getResourcesCurrentHealth(subject, servers);
     }
-    
-   
+
     /**
      * Method findServersCurrentHealth
      *  
@@ -3570,8 +3456,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * <li>servers (2.3.2.1-4 - internal/deplyed tabs)
      * <li>services (2.5.2.2 - internal/deplyed tabs)
      * </ul>
-     * 
-     * @param serviceType a ServiceTypeValue
+     *
      * @param begin the commencement of the timeframe of interest
      * @param end the end of the timeframe of interest
      * @return List of ResourceDisplaySummary beans
@@ -3662,8 +3547,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * <li>servers (2.3.2.1-4 - internal/deplyed tabs)
      * <li>services (2.5.2.2 - internal/deplyed tabs)
      * </ul>
-     * 
-     * @param serviceType a ServiceTypeValue
+     *
      * @param begin the commencement of the timeframe of interest
      * @param end the end of the timeframe of interest
      * @return List of ResourceDisplaySummary beans
@@ -3755,9 +3639,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * Return a ResourceDisplaySummary bean for each of the resource's services.
      * The only applicable resource is currently a compatible group (of
      * services...)
-     * 
-     * @param entId
-     *            the server's or application's ID
      * @return a list of ResourceDisplaySummary beans
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
@@ -3782,9 +3663,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return getResourcesCurrentHealth(subject, services);
     }
 
-    /*
-     * Availability functions
-     */
     private double getAvailability(AuthzSubjectValue subject, AppdefEntityID id)
         throws AppdefEntityNotFoundException, PermissionException {
         StopWatch watch = new StopWatch();
@@ -3814,7 +3692,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     }
 
     /** Get the availability of autogroup resources
-     * @param id the Appdef entity ID
      * @return a MetricValue for the availability
      * @ejb:interface-method
      * @ejb:transaction type="Required"
@@ -3860,12 +3737,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * Returns a list of problem metrics for a resource, and the selected
      * children and hosts of that resource.  Return a summarized
      * list of UI beans
-     * @throws SessionTimeoutException
-     * @throws SessionNotFoundException
-     * @throws AppdefEntityNotFoundException
-     * @throws PermissionException
-     * @throws InvalidAppdefTypeException
-     * @throws AppdefCompatException
      * @ejb:interface-method
      */
     public List findAllMetrics(int sessionId, AppdefEntityID aeid,
@@ -3875,8 +3746,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                    long begin, long end)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException,
-               AppdefCompatException, InvalidAppdefTypeException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+               AppdefCompatException, InvalidAppdefTypeException
+    {
         List singlesList = new ArrayList();
         
         if (aeid != null && members == null)
@@ -3926,12 +3797,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * Returns a list of problem metrics for a resource, and the selected
      * children and hosts of that resource.  Return a summarized
      * list of UI beans
-     * @throws SessionTimeoutException
-     * @throws SessionNotFoundException
-     * @throws AppdefEntityNotFoundException
-     * @throws PermissionException
-     * @throws InvalidAppdefTypeException
-     * @throws AppdefCompatException
      * @ejb:interface-method
      */
     public List findAllMetrics(int sessionId, AppdefEntityID aeid,
@@ -3940,8 +3805,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                    long begin, long end)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException,
-               AppdefCompatException, InvalidAppdefTypeException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+               AppdefCompatException, InvalidAppdefTypeException
+    {
         List singlesList = new ArrayList();
         
         if (aeid != null)
@@ -3970,8 +3835,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }
             
             result.addAll(metrics);
-        }
-        else {
+        } else {
             // Go through the singles list first
             for (Iterator it = singlesList.iterator(); it.hasNext(); ) {
                 AppdefEntityID entity = (AppdefEntityID) it.next();
@@ -3987,8 +3851,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 }
             }
         }
-        
-        
+
         return result;
     }
 
@@ -4059,6 +3922,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return new MeasurementCommandsClient(AgentConnectionUtil.
                                              getClient(aid));
     }
+
     /**
      * Check if an entity has been enabled for log tracking
      * @ejb:interface-method
@@ -4098,8 +3962,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                PermissionException, AgentNotFoundException,
                AgentRemoteException, AgentConnectionException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-
         MeasurementCommandsClient client = getClient(id);
         return client.sigarCmd(cmd);
     }
