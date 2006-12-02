@@ -530,9 +530,9 @@
       </action>
 
       <action path="/admin/config/EditResourceTypeDefaults"
-      		   type="org.hyperic.hq.ui.action.admin.config.EditDefaultsAction"
-      		   scope="request"
-               parameter="mode">
+      		    type="org.hyperic.hq.ui.action.admin.config.EditDefaultsAction"
+      		    scope="request"
+              parameter="mode">
       </action>
       
       <!--end admin CONFIG -->

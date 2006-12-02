@@ -40,18 +40,18 @@
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
 	<tr>
 		<td width="20%" class="BlockLabel"><fmt:message key="admin.home.Settings"/></td>
-		<td width="30%" class="BlockContent"><html:link page="/admin/config/Config.do?mode=edit"><fmt:message key="admin.home.ServerConfig"/></html:link></td>
-		<td width="20%" class="BlockLabel">&nbsp;</td>
-		<td width="30%" class="BlockContent">&nbsp;</td>
+		<td class="BlockContent"><html:link page="/admin/config/Config.do?mode=edit"><fmt:message key="admin.home.ServerConfig"/></html:link></td>
 	</tr>
 	<tr>
-		<td width="20%" class="BlockLabel"></td>
-		<td width="30%" class="BlockContent"><html:link page="/admin/config/EditDefaults.do?mode=monitor"><fmt:message key="admin.home.ResourceTemplates"/></html:link></td>
-		<td width="20%" class="BlockLabel">&nbsp;</td>
-		<td width="30%" class="BlockContent">&nbsp;</td>
+		<td class="BlockLabel"></td>
+		<td class="BlockContent"><html:link page="/admin/config/EditDefaults.do?mode=monitor"><fmt:message key="admin.home.ResourceTemplates"/></html:link></td>
 	</tr>
 	<tr>
-    	<td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
+		<td class="BlockLabel"></td>
+		<td class="BlockContent"><html:link page="/admin/config/EditDefaults.do?mode=escalate"><fmt:message key="admin.home.EscalationSchemes"/></html:link></td>
+	</tr>
+	<tr>
+    	<td colspan="2" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
   </tr>
 </table>
 <!--  /  -->
