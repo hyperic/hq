@@ -29,6 +29,9 @@
  */
 package org.hyperic.hq.ui.action.admin.config;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
@@ -38,13 +41,18 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.BaseDispatchAction;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.pager.PageControl;
+import org.json.JSONArray;
 
 /**
  *
@@ -78,6 +86,74 @@ public class ConfigAction extends BaseDispatchAction {
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
+        return null;
+    }
+
+    public ActionForward escalate(ActionMapping mapping,
+                                  ActionForm form,
+                                  HttpServletRequest request,
+                                  HttpServletResponse resp)
+        throws Exception {
+        ServletContext ctx = getServlet().getServletContext();
+        int sessionID = RequestUtils.getSessionId(request).intValue();
+        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
+    
+        JSONArray arr = eb.listAllEscalationName(sessionID);
+        
+        // Create the portal
+        Portal p = Portal.createPortal("admin.home.EscalationSchemes",
+                                       ".admin.config.EditEscalationConfig");
+        request.setAttribute(Constants.PORTAL_KEY, p);
+        
+        return null;        
+    }
+
+    public ActionForward monitor(ActionMapping mapping,
+                                 ActionForm form,
+                                 HttpServletRequest request,
+                                 HttpServletResponse resp)
+        throws Exception {
+        Integer sessionId = RequestUtils.getSessionId(request);
+        ServletContext ctx = getServlet().getServletContext();
+        if (!BizappUtils.canAdminHQ(sessionId, ContextUtils.getAuthzBoss(ctx)))
+            throw new PermissionException(
+                    "User not authorized to configure monitor defaults");
+    
+        AppdefBoss apBoss = ContextUtils.getAppdefBoss(ctx);
+        // get platform types
+        int session = sessionId.intValue();
+        List platTypes = apBoss.findAllPlatformTypes(session,
+                                                     PageControl.PAGE_ALL);
+        request.setAttribute(Constants.ALL_PLATFORM_TYPES_ATTR, platTypes);
+        // get server types
+        List serverTypes = apBoss.findAllServerTypes(session,
+                                                     PageControl.PAGE_ALL);
+        // get the special service types sans windows special case
+        List platServices = new ArrayList();
+        List winServices = new ArrayList();
+        for (int i = 0; i < serverTypes.size(); i++) {
+            ServerTypeValue stv = (ServerTypeValue) serverTypes.get(i);
+            if (stv.getVirtual()) {
+                if (stv.getName().startsWith("Win")) {
+                    winServices.addAll(
+                        Arrays.asList(stv.getServiceTypeValues()));
+                } else {
+                    platServices.addAll(
+                        Arrays.asList(stv.getServiceTypeValues()));
+                }
+            }
+        }
+        request.setAttribute(Constants.ALL_SERVER_TYPES_ATTR, serverTypes);
+        request.setAttribute(Constants.ALL_PLATFORM_SERVICE_TYPES_ATTR,
+                             platServices);
+        request.setAttribute(Constants.ALL_WINDOWS_SERVICE_TYPES_ATTR,
+                             winServices);
+        
+        // Create the portal
+        Portal p = Portal.createPortal("admin.home.ResourceTemplates",
+                                       ".admin.config.EditMonitorConfig");
+        request.setAttribute(Constants.PORTAL_KEY, p);
+        
         return null;
     }
 }
