@@ -31,7 +31,6 @@
   USA.
  --%>
 
-
 <script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 <c:set var="widgetInstanceName" value="listUser"/>
 <script type="text/javascript">
@@ -84,12 +83,6 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <html:hidden property="sc" value="${param.sc}"/>
 </c:if>
 
-  <!--  PAGE TITLE -->
-  <tiles:insert definition=".page.title.admin.user">
-    <tiles:put name="titleName" beanName="fullName"/>   
-  </tiles:insert>
-  <!--  /  -->
-
 <tiles:insert definition=".admin.auth.functions"/>
 
   <display:table cellspacing="0" cellpadding="0" width="100%" action="${sortAction}" pageSize="${pageSize}" items="${AllUsers}" var="user">
@@ -124,7 +117,5 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     <tiles:put name="defaultSortColumn" value="3"/>
   </tiles:insert>
   
-  <tiles:insert definition=".page.footer"/>
-
 </html:form>
 <!-- /  -->

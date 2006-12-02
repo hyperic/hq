@@ -8,14 +8,16 @@
 <tiles-definitions>
   
   <definition name=".admin.main.layout"
-              path="/admin/MainLayout.jsp"/>
+              path="/admin/MainLayout.jsp">
+    <put name="titleImg" value="spacer.gif"/>
+  </definition>
 
   <definition name=".page.title.admin.user"
               extends=".page.title">
     <put name="titleKey" value="admin.user.ListUsers"/>  
     <put name="titleBgStyle" value="PageTitleUserBg"/>
     <put name="titleImg" value="title_user.gif"/>
-  </definition>   
+  </definition>
                
     <definition name=".page.title.admin.user.view"
               extends=".page.title">    
@@ -26,8 +28,13 @@
   <!--admin user portlets-->      
   <definition name=".admin.user.List"
               controllerUrl="/admin/user/List.do"
-              path="/admin/user/ListUsers.jsp"/>
-  
+              extends=".admin.main.layout">
+    <put name="titleKey" value="admin.user.ListUsers"/>  
+    <put name="titleBgStyle" value="PageTitleUserBg"/>
+    <put name="titleImg" value="title_user.gif"/>
+    <put name="configTile" value="/admin/user/ListUsers.jsp"/>
+  </definition>
+ 
   <definition name=".admin.user.Edit"
               controllerUrl="/admin/user/EditUserFormPrepare.do"
               path="/admin/user/EditUser.jsp"/>
