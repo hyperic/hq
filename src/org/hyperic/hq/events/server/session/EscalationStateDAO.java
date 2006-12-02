@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.List;
+import java.io.Serializable;
 
 public class EscalationStateDAO extends HibernateDAO
 {
@@ -38,6 +39,11 @@ public class EscalationStateDAO extends HibernateDAO
     public EscalationState findById(Integer id)
     {
         return (EscalationState)super.findById(id);
+    }
+
+    public EscalationState get(Integer id)
+    {
+        return (EscalationState)super.get(id);
     }
 
     public void savePersisted(PersistedObject entity)

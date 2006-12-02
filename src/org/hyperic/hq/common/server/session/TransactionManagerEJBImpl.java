@@ -86,8 +86,18 @@ public class TransactionManagerEJBImpl implements SessionBean
     /**
      * execute custom action in JTA transaction context.
      * @ejb:interface-method
+     * @ejb:transaction type="RequiresNew"
      */
     public TransactionContext execute(TransactionContext context)
+    {
+        return context.run(context);
+    }
+
+    /**
+     * execute custom action in JTA transaction context.
+     * @ejb:interface-method
+     */
+    public TransactionContext executeReqNew(TransactionContext context)
     {
         return context.run(context);
     }

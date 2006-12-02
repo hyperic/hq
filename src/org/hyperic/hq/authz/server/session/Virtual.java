@@ -33,7 +33,6 @@ import org.hyperic.hibernate.PersistedObject;
 public class Virtual extends PersistedObject
 {
     private Resource resource;
-    private long _version_;
     private Integer processId;
     private Integer physicalId;
 
@@ -57,16 +56,6 @@ public class Virtual extends PersistedObject
         
         // Also set the ID
         setId(resource.getId());
-    }
-
-    public long get_version_()
-    {
-        return _version_;
-    }
-
-    public void set_version_(long val)
-    {
-        _version_ = val;
     }
 
     public Integer getProcessId()

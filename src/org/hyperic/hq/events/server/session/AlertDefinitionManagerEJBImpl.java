@@ -215,7 +215,9 @@ public class AlertDefinitionManagerEJBImpl
             }
         }
 
+        EscalationDAO edao = DAOFactory.getDAOFactory().getEscalationDAO();
         res.setAlertDefinitionValueNoRels(a);
+        res.setEscalation(edao.findById(a.getEscalationId()));
         // Alert definitions are the root of the cascade relationship, so
         // we must explicitly save them
         adDAO.save(res);
@@ -315,6 +317,8 @@ public class AlertDefinitionManagerEJBImpl
 
         // Now set the alertdef
         aldef.setAlertDefinitionValueNoRels(adval);
+        EscalationDAO edao = DAOFactory.getDAOFactory().getEscalationDAO();
+        aldef.setEscalation(edao.findById(adval.getEscalationId()));
         
         return aldef.getAlertDefinitionValue();
     }

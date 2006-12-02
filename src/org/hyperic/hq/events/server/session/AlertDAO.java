@@ -25,6 +25,7 @@
 package org.hyperic.hq.events.server.session;
 
 import java.util.List;
+import java.io.Serializable;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -46,6 +47,11 @@ public class AlertDAO extends HibernateDAO {
 
         return getSession().createQuery(sql)
             .executeUpdate();
+    }
+
+    public Alert get(Integer id)
+    {
+        return (Alert)super.get(id);
     }
 
     public List findByCreateTime(long begin, long end) {

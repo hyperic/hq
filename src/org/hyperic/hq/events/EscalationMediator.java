@@ -118,8 +118,10 @@ public class EscalationMediator extends Mediator
             escalationServiceMBean.run(new Runnable() {
                 public void run()
                 {
-                    dispatchAction(state.getEscalation().getId(),
-                            new Integer(state.getAlertId()));
+                    alertManagerLocal.dispatchAction(
+                        state.getEscalation().getId(),
+                        new Integer(state.getAlertDefinitionId()),
+                        new Integer(state.getAlertId()));
                 }
             });
         }
@@ -137,7 +139,7 @@ public class EscalationMediator extends Mediator
         Integer alertDefId = alert.getAlertDefinition().getId();
         Escalation escalation = findEscalationById(escalationId);
 
-        if (setActiveEscalation(escalation, alertDefId)) {
+        if (setActiveEscalation(escalation, alertDefId, alertId.intValue())) {
             if (log.isDebugEnabled()) {
                 EscalationState state =
                     getEscalationState(escalation, alertDefId);
@@ -146,7 +148,7 @@ public class EscalationMediator extends Mediator
                           state);
             }
             // Escalation is not active, start escalation.
-            dispatchAction(escalationId, alertDefId);
+            dispatchAction(escalationId, alertDefId, alertId);
         } else {
             // escalation is active, so do not start another escalation
             // for this chain.
@@ -172,21 +174,33 @@ public class EscalationMediator extends Mediator
      *         the caller now owns the escalation chain.
      *         false escalation chain is already in progress.
      */
-    private boolean setActiveEscalation(Escalation e, Integer alertDefId)
+    private boolean setActiveEscalation(final Escalation e,
+                                        final Integer alertDefId,
+                                        final int alertId)
     {
         synchronized(stateLocks.getLock(alertDefId)) {
-            EscalationState state = getEscalationState(e, alertDefId);
-            if(state.isActive()) {
-                return false;
-            }
-            state.setActive(true);
-            try {
-                transactionManager.saveReqNew(state);
-            } catch (PermissionException e1) {
-                log.info("Permission check does not apply here", e1);
-            }
+            // the point of this is to make sure people wait
+            // while we check on the active bit in a new JTA context
+            // so by the time the transaction is over
+            // we are sure the update is available.
+            //
+            // The code is all here for maintainability(?), sigh.
+            TransactionContext context =
+                transactionManager.executeReqNew(new TransactionContext() {
+                    public TransactionContext run(TransactionContext context)
+                    {
+                        EscalationState state =
+                            getEscalationState(e, alertDefId);
+                        if(state.isActive()) {
+                            return null;
+                        }
+                        state.setActive(true);
+                        state.setAlertId(alertId);
+                        return context;
+                    }
+                });
+            return context != null;
         }
-        return true;
     }
 
     public void save(PersistedObject p) throws PermissionException
@@ -310,21 +324,29 @@ public class EscalationMediator extends Mediator
         }
     }
 
-    private void dispatchAction(Integer escalationId, Integer alertId)
+    public void dispatchAction(Integer escalationId, Integer alertDefId,
+                               Integer alertId)
     {
         EscalationDAO dao = DAOFactory.getDAOFactory().getEscalationDAO();
-        Escalation escalation = dao.findById(escalationId);
-        Alert alert =
-            DAOFactory.getDAOFactory().getAlertDAO().findById(alertId);
-        Integer alertDefId = alert.getAlertDefinition().getId();
         EscalationStateDAO sdao =
             DAOFactory.getDAOFactory().getEscalationStateDAO();
+
+        Escalation escalation = dao.findById(escalationId);
         EscalationState state = sdao.getEscalationState(escalation, alertDefId);
-        if (state.isFixed()) {
+
+        Alert alert =
+            DAOFactory.getDAOFactory().getAlertDAO().get(alertId);
+        
+        if (state.isFixed() || alert == null) {
             // fixed so stop.
             if (log.isInfoEnabled()) {
-                log.info("Escalation fixed. alert=" +  alert + ", escalation=" +
-                         escalation + ", state=" + state);
+                if (state.isFixed()) {
+                    log.info("Escalation fixed. alert=" +  alert + ", escalation=" +
+                        escalation + ", state=" + state);
+                } else {
+                    log.info("Stop Escalation as alert not found fixed. " +
+                        "escalation=" + escalation + ", state=" + state);
+                }
             }
             resetEscalationState(state);
             sdao.save(state);

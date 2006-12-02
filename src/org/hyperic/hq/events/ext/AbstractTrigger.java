@@ -55,6 +55,7 @@ import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
+import org.hyperic.hq.events.EscalationMediator;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertConditionLog;
 import org.hyperic.hq.events.server.session.AlertDefinition;
@@ -261,60 +262,67 @@ public abstract class AbstractTrigger implements TriggerInterface {
 
         // get alert pojo so retrieve array of AlertCondtionLogs
         Alert alertpojo = alman.findAlertById(alert.getId());
-        AlertConditionLog[] logs =
-            (AlertConditionLog[])alertpojo
-                .getConditionLog().toArray(new AlertConditionLog[0]);
-        // Iterate through the actions
-        for (int i = 0; i < actions.length; i++) {
-            ActionValue aval = actions[i];
+        Integer escalationId =
+            alertpojo.getAlertDefinition().getEscalation().getId();
+        if (escalationId != null) {
+            // invoke escalation chain
+            EscalationMediator emed = EscalationMediator.getInstance();
+            emed.startEscalation(escalationId, alert.getId());
+        } else {
+            AlertConditionLog[] logs =
+                (AlertConditionLog[])alertpojo
+                    .getConditionLog().toArray(new AlertConditionLog[0]);
+            // Iterate through the actions
+            for (int i = 0; i < actions.length; i++) {
+                ActionValue aval = actions[i];
 
-            try {
-                Class ac = Class.forName(aval.getClassname());
-                ActionInterface action = (ActionInterface) ac.newInstance();
+                try {
+                    Class ac = Class.forName(aval.getClassname());
+                    ActionInterface action = (ActionInterface) ac.newInstance();
 
-                // Initialize action
-                action.init(ConfigResponse.decode(action.getConfigSchema(),
-                                                  aval.getConfig()));
+                    // Initialize action
+                    action.init(ConfigResponse.decode(action.getConfigSchema(),
+                        aval.getConfig()));
 
-                String detail = action.execute(adBasic, logs, alert.getId());
+                    String detail = action.execute(adBasic, logs, alert.getId());
                                    
-                AlertActionLogValue alog = new AlertActionLogValue();
-                alog.setActionId(aval.getId());
-                alog.setDetail(detail);
+                    AlertActionLogValue alog = new AlertActionLogValue();
+                    alog.setActionId(aval.getId());
+                    alog.setDetail(detail);
                 
-                alert.addActionLog(alog);
-            } catch (ClassNotFoundException e) {
-                // Can't execute if we can't lookup up the class
-                throw new ActionExecuteException(
-                    "Action class not found for ID " + aval.getId(), e);
-            } catch (InstantiationException e) {
-                // Can't execute if we can't instantiate the object
-                throw new ActionExecuteException(
-                    "Cannot instantiate action for ID " + aval.getId(), e);
-            } catch (InvalidActionDataException e) {
-                // Can't execute if we can't instantiate the object
-                throw new ActionExecuteException(
-                    "Cannot initialize action for ID " + aval.getId(), e);
-            } catch (IllegalAccessException e) {
-                // Can't execute if we can't access the class
-                throw new ActionExecuteException(
-                    "Cannot access action for ID " + aval.getId(), e);
-            } catch (EncodingException e) {
-                // Can't execute if we can't decode the config
-                throw new ActionExecuteException(
-                    "Cannot decode action config for ID " + aval.getId(), e);
-            } catch (InvalidOptionException e) {
-                // Can't execute if we can't decode the config
-                throw new ActionExecuteException(
-                    "Action config contains invalid option for ID " +
-                    aval.getId(), e);
-            } catch (InvalidOptionValueException e) {
-                // Can't execute if we don't have good config, just log it
-                log.debug("Bad action config value for ID " + aval.getId(), e);
-            }
-        }
-
-        // Store the alert
+                    alert.addActionLog(alog);
+                } catch (ClassNotFoundException e) {
+                    // Can't execute if we can't lookup up the class
+                    throw new ActionExecuteException(
+                        "Action class not found for ID " + aval.getId(), e);
+                } catch (InstantiationException e) {
+                    // Can't execute if we can't instantiate the object
+                    throw new ActionExecuteException(
+                        "Cannot instantiate action for ID " + aval.getId(), e);
+                } catch (InvalidActionDataException e) {
+                    // Can't execute if we can't instantiate the object
+                    throw new ActionExecuteException(
+                        "Cannot initialize action for ID " + aval.getId(), e);
+                } catch (IllegalAccessException e) {
+                    // Can't execute if we can't access the class
+                    throw new ActionExecuteException(
+                        "Cannot access action for ID " + aval.getId(), e);
+                } catch (EncodingException e) {
+                    // Can't execute if we can't decode the config
+                    throw new ActionExecuteException(
+                        "Cannot decode action config for ID " + aval.getId(), e);
+                } catch (InvalidOptionException e) {
+                    // Can't execute if we can't decode the config
+                    throw new ActionExecuteException(
+                        "Action config contains invalid option for ID " +
+                            aval.getId(), e);
+                } catch (InvalidOptionValueException e) {
+                    // Can't execute if we don't have good config, just log it
+                    log.debug("Bad action config value for ID " + aval.getId(), e);
+                }
+            } // for
+        } // else
+            // Store the alert
         alman.updateAlert(alert);
     }
     

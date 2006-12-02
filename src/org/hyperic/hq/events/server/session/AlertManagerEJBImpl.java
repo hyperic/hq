@@ -363,7 +363,6 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         return valuePager.seek(result, pc);
     }
 
-
     /**
      * delegate to EscalationMediator inside JTA context
      * @ejb:interface-method
@@ -371,6 +370,19 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     public void processEscalation()
     {
         EscalationMediator.getInstance().processEscalation();
+    }
+
+    /**
+     * delegate to EscalationMediator inside JTA context
+     * @ejb:interface-method
+     */
+    public void dispatchAction(Integer escalationId, Integer alertDefId,
+                               Integer alertId)
+    {
+        EscalationMediator.getInstance().dispatchAction(
+            escalationId,
+            alertDefId,
+            alertId);
     }
 
     public void ejbCreate() throws CreateException {
