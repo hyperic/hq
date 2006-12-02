@@ -30,6 +30,8 @@
   USA.
  --%>
 
+<tiles:insert page="/admin/config/AdminHomeNav.jsp"/>
+
 <table width="100%" cellpadding="0" cellspacing="0" border="0" id="listTable">
 <!-- PLATFORM CONTENTS -->
 	<tr class="ListHeaderDark">
@@ -141,3 +143,7 @@
     </c:forEach>
 <!--  /  -->
 </table>
+
+<br/>
+<br/>
+<tiles:insert page="/admin/config/AdminHomeNav.jsp"/>
