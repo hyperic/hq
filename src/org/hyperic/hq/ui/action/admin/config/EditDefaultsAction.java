@@ -34,9 +34,13 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.BaseDispatchAction;
@@ -44,20 +48,17 @@ import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
-
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import org.json.JSONArray;
 
 /**
  * Populate the list of types to configure metric defaults
  */
 public class EditDefaultsAction extends BaseDispatchAction {
 
-    public ActionForward getMonitorDefaults(ActionMapping mapping,
-                                            ActionForm form,
-                                            HttpServletRequest request,
-                                            HttpServletResponse resp)
+    public ActionForward monitor(ActionMapping mapping,
+                                 ActionForm form,
+                                 HttpServletRequest request,
+                                 HttpServletResponse resp)
         throws Exception {
         Integer sessionId = RequestUtils.getSessionId(request);
         ServletContext ctx = getServlet().getServletContext();
@@ -94,15 +95,35 @@ public class EditDefaultsAction extends BaseDispatchAction {
                              platServices);
         request.setAttribute(Constants.ALL_WINDOWS_SERVICE_TYPES_ATTR,
                              winServices);
+        
+        // Create the portal
         Portal p = Portal.createPortal("admin.home.ResourceTemplates",
                                        ".admin.config.EditMonitorConfig");
         request.setAttribute(Constants.PORTAL_KEY, p);
+        
         return null;
     }
     
+    public ActionForward escalate(ActionMapping mapping,
+                                  ActionForm form,
+                                  HttpServletRequest request,
+                                  HttpServletResponse resp)
+        throws Exception {
+        ServletContext ctx = getServlet().getServletContext();
+        int sessionID = RequestUtils.getSessionId(request).intValue();
+        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
+
+        JSONArray arr = eb.listAllEscalationName(sessionID);
+        
+        // Create the portal
+        Portal p = Portal.createPortal("admin.home.EscalationSchemes",
+                                       ".admin.config.EditEscalationConfig");
+        request.setAttribute(Constants.PORTAL_KEY, p);
+        
+        return null;        
+    }
+    
 	protected Properties getKeyMethodMap() {
-		Properties map = new Properties();
-		map.setProperty("monitor", "getMonitorDefaults");
-		return map;
+		return new Properties();
 	}
 }
