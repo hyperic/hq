@@ -1,8 +1,7 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
 <%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
+<%@ taglib uri="jstl-fmt" prefix="fmt" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -29,38 +28,37 @@
  --%>
 
 
-<tiles:importAttribute name="actionList"/>
+<script language="JavaScript" type="text/javascript">
+  var isButtonClicked = false;
+  
+  function checkSubmit() {
+    if (isButtonClicked) {
+      alert('<fmt:message key="error.PreviousRequestEtc"/>');
+      return false;
+    }
+  }
+</script>
 
-<%-- Don't insert the sub-tiles if there is no alert and no alertDef. --%>
-<c:if test="${not empty alert and not empty alertDef}">
-
-<form name="AlertForm" action="<html:rewrite action="/alerts/Alerts"/>">
-<input type=hidden name="a" value="<c:out value="${a}"/>"/>
-
-<tiles:insert definition=".page.title.events">
-  <tiles:put name="titleKey" value="alert.current.detail.PageTitle"/>
-</tiles:insert>
-
-<tiles:insert definition=".events.alert.view.nav" flush="true"/>
-
-<tiles:insert definition=".events.alert.view.properties"/>
-
-&nbsp;<br>
-<tiles:insert definition=".events.config.view.conditions">
-  <tiles:put name="showValues" value="true"/>
-</tiles:insert>
-
-<c:forEach var="action" items="${actionList}">
-  &nbsp;<br>
-  <tiles:insert beanName="action"/>
-</c:forEach>
-
-<tiles:insert page="/resource/common/monitor/alerts/AcknowledgeButtons.jsp"/>
-
-<tiles:insert definition=".events.alert.view.nav" flush="true"/>
-
-<tiles:insert definition=".page.footer"/>
-
-</form>
-
-</c:if>
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td colspan="2"><html:img page="/images/spacer.gif" width="1" height="10" border="0"/></td>
+  </tr>
+  <tr>
+    <td colspan="2" class="ToolbarLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
+  </tr>
+  <tr>
+    <td colspan="2"><html:img page="/images/spacer.gif" width="1" height="10" border="0"/></td>
+  </tr>
+  <tr align=left valign=bottom>
+    <td width="20%">&nbsp;</td>
+    <td width="80%">
+      <table cellpadding="0" cellspacing="10" border="0">
+        <tr>
+          <td><input type=SUBMIT name="mode" value="ACKNOWLEDGE"/></td>
+          <td><html:img page="/images/spacer.gif" width="10" height="1" border="0"/></td>
+          <td><input type=SUBMIT name="mode" value="FIXED"/></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
