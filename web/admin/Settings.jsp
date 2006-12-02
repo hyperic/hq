@@ -44,11 +44,11 @@
 	</tr>
 	<tr>
 		<td class="BlockLabel"></td>
-		<td class="BlockContent"><html:link page="/admin/config/EditDefaults.do?mode=monitor"><fmt:message key="admin.home.ResourceTemplates"/></html:link></td>
+		<td class="BlockContent"><html:link page="/admin/config/Config.do?mode=monitor"><fmt:message key="admin.home.ResourceTemplates"/></html:link></td>
 	</tr>
 	<tr>
 		<td class="BlockLabel"></td>
-		<td class="BlockContent"><html:link page="/admin/config/EditDefaults.do?mode=escalate"><fmt:message key="admin.home.EscalationSchemes"/></html:link></td>
+		<td class="BlockContent"><html:link page="/admin/config/Config.do?mode=escalate"><fmt:message key="admin.home.EscalationSchemes"/></html:link></td>
 	</tr>
 	<tr>
     	<td colspan="2" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>

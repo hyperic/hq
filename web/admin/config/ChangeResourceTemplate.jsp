@@ -30,17 +30,6 @@
   USA.
  --%>
 
-
-<script src="<html:rewrite page="/js/"/>functions.js" type="text/javascript"></script>
-<link rel=stylesheet href="<html:rewrite page="/css/"/>win.css" type="text/css">
-
-<tiles:insert definition=".page.title">
-  <tiles:put name="titleBgStyle" value="PageTitle"/>
-  <tiles:put name="titleImg" value="spacer.gif"/>
-  <tiles:put name="titleKey" value="admin.resource.templates.PageTitle"/>
-</tiles:insert>
-
-
 <table width="100%" cellpadding="0" cellspacing="0" border="0" id="listTable">
 <!-- PLATFORM CONTENTS -->
 	<tr class="ListHeaderDark">
@@ -152,6 +141,3 @@
     </c:forEach>
 <!--  /  -->
 </table>
-
-<!-- FOOTER -->
-<tiles:insert definition=".page.footer"/>

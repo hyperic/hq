@@ -20,11 +20,16 @@
 
   <definition name=".admin.config.EditConfig"
               controllerUrl="/admin/config/EditConfigPrep.do"
-              path="/admin/config/EditServerConfig.jsp"/> 
+              extends=".admin.config.main.layout">
+    <put name="titleKey" value="admin.settings.EditServerConfig.PageTitle"/>
+    <put name="configTile" value="/admin/config/EditServerConfig.jsp"/>
+  </definition>
 
   <definition name=".admin.config.EditMonitorConfig"
-              path="/admin/config/ChangeResourceTemplate.jsp"/>
-  
+              extends=".admin.config.main.layout">
+    <put name="titleKey" value="admin.resource.templates.PageTitle"/>
+    <put name="configTile" value="/admin/config/ChangeResourceTemplate.jsp"/>
+  </definition>
 
   <definition name=".admin.auth.functions"
               path="/admin/AuthFunctions.jsp"/>

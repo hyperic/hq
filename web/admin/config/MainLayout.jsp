@@ -30,12 +30,17 @@
   USA.
  --%>
 
-<html:form action="/admin/config/EditConfig">
 
-<tiles:insert page="/admin/config/EditServerConfigForm.jsp"/>
+<script src="<html:rewrite page="/js/"/>functions.js" type="text/javascript"></script>
+<link rel=stylesheet href="<html:rewrite page="/css/"/>win.css" type="text/css">
 
-<!-- FORM BUTTONS -->
-<tiles:insert definition=".form.buttons"/>
+<tiles:insert definition=".page.title">
+  <tiles:put name="titleBgStyle" value="PageTitle"/>
+  <tiles:put name="titleImg" value="spacer.gif"/>
+  <tiles:put name="titleKey" beanName="titleKey"/>
+</tiles:insert>
 
-</html:form>
+<tiles:insert beanName="configTile"/>
 
+<!-- FOOTER -->
+<tiles:insert definition=".page.footer"/>

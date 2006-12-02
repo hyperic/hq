@@ -57,6 +57,13 @@
               controllerUrl="/alerts/ListDefinitions.do"
               path="/admin/config/ListDefinitions.jsp"/>
 
+  <definition name=".admin.config.main.layout"
+              path="/admin/config/MainLayout.jsp"/>
+
   <definition name=".admin.config.EditEscalationConfig"
-              path="/admin/config/ListEscalationSchemes.jsp"/>
+              extends=".admin.config.main.layout">
+    <put name="titleKey" value="admin.home.EscalationSchemes"/>
+    <put name="configTile" value="/admin/config/ListEscalationSchemes.jsp"/>
+  </definition>
+
  </tiles-definitions>

@@ -30,12 +30,4 @@
   USA.
  --%>
 
-<html:form action="/admin/config/EditConfig">
-
-<tiles:insert page="/admin/config/EditServerConfigForm.jsp"/>
-
-<!-- FORM BUTTONS -->
-<tiles:insert definition=".form.buttons"/>
-
-</html:form>
-
+This is where the UI would go
