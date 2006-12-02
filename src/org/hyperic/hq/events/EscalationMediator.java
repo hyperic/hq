@@ -191,6 +191,11 @@ public class EscalationMediator extends Mediator
                     {
                         EscalationState state =
                             getEscalationState(e, alertDefId);
+                        if (state == null) {
+                            state = EscalationState.newInstance(e, alertDefId);
+                            DAOFactory.getDAOFactory().getEscalationStateDAO()
+                                .save(state);
+                        }
                         if(state.isActive()) {
                             return null;
                         }
@@ -235,13 +240,6 @@ public class EscalationMediator extends Mediator
         return DAOFactory.getDAOFactory().getEscalationDAO().findAll(subjectId);
     }
 
-    public void clearActiveEscalation()
-    {
-        // usually invoke on hq start to clear all escalation marked
-        // as in progress
-        DAOFactory.getDAOFactory().getEscalationDAO().clearActiveEscalation();
-    }
-
     public void clearActiveEscalation(Integer escalationId, Integer alertDefId)
     {
         // clear active status for this alertDef
@@ -278,21 +276,34 @@ public class EscalationMediator extends Mediator
         return dao.findScheduledEscalationState();
     }
 
-    private void scheduleAction(Integer escalationId, Integer alertId)
+    private void scheduleAction(Integer escalationId, Integer alertDefId,
+                                Integer alertId)
     {
         EscalationDAO dao = DAOFactory.getDAOFactory().getEscalationDAO();
         Escalation  escalation = dao.findById(escalationId);
-        Alert alert =
-            DAOFactory.getDAOFactory().getAlertDAO().findById(alertId);
-        Integer alertDefId = alert.getAlertDefinition().getId();
         EscalationStateDAO sdao =
             DAOFactory.getDAOFactory().getEscalationStateDAO();
-        EscalationState state = sdao.getEscalationState(escalation, alertDefId);
-        if (state.isFixed()) {
+
+        EscalationState state = getEscalationState(escalation, alertDefId);
+        if (state == null) {
+            log.error("Escalation state not found. escalation="+escalation+
+                ", alertDefId="+ alertDefId +", alertId="+ alertId);
+            return;
+        }
+        Alert alert =
+            DAOFactory.getDAOFactory().getAlertDAO().get(alertId);
+        if (state.isFixed() || alert == null) {
             // fixed so no need to schedule
             if (log.isInfoEnabled()) {
-                log.info("Escalation fixed. alert=" +  alert + ", escalation=" +
-                         escalation + ", state=" + state);
+                if (state.isFixed()) {
+                    log.info("Escalation fixed. alert=" +  alert +
+                        ", escalation=" +
+                        escalation + ", state=" + state);
+                } else {
+                    log.error("Stopping Escalation chain as the Alert " +
+                        "was not found. escalation=" + escalation +
+                        ", state=" + state);
+                }
             }
             resetEscalationState(state);
             sdao.save(state);
@@ -332,7 +343,14 @@ public class EscalationMediator extends Mediator
             DAOFactory.getDAOFactory().getEscalationStateDAO();
 
         Escalation escalation = dao.findById(escalationId);
-        EscalationState state = sdao.getEscalationState(escalation, alertDefId);
+        EscalationState state = getEscalationState(escalation, alertDefId);
+        if (state == null) {
+            // log error and stop escalation chain
+            log.error("Escalation state not found, stop chain. " +
+                "escalation=" + escalation + ", alertDefid="+ alertDefId +
+                ", alertId="+alertId);
+            return;
+        }
 
         Alert alert =
             DAOFactory.getDAOFactory().getAlertDAO().get(alertId);
@@ -341,10 +359,12 @@ public class EscalationMediator extends Mediator
             // fixed so stop.
             if (log.isInfoEnabled()) {
                 if (state.isFixed()) {
-                    log.info("Escalation fixed. alert=" +  alert + ", escalation=" +
+                    log.info("Escalation fixed. alert=" +  alert +
+                        ", escalation=" +
                         escalation + ", state=" + state);
                 } else {
-                    log.info("Stop Escalation as alert not found fixed. " +
+                    log.error("Stopping Escalation as the alert was not " +
+                        "found. " +
                         "escalation=" + escalation + ", state=" + state);
                 }
             }
@@ -378,7 +398,7 @@ public class EscalationMediator extends Mediator
             dispatchAction(escalation, alert, state);
 
             // schedule next action;
-            scheduleAction(escalation.getId(), alertId);
+            scheduleAction(escalation.getId(), alertDefId, alertId);
         } catch (ClassNotFoundException e) {
             throw new SystemException(e);
         } catch (IllegalAccessException e) {

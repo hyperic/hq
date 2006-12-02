@@ -65,10 +65,6 @@ public class EscalationStateDAO extends HibernateDAO
                 .setEntity(0, e)
                 .setInteger(1, alertDefId.intValue())
                 .uniqueResult();
-        if (state == null) {
-            state = EscalationState.newInstance(e, alertDefId);
-            save(state);
-        }
         return state;
     }
 
@@ -78,22 +74,6 @@ public class EscalationStateDAO extends HibernateDAO
         return getSession().createQuery(sql)
             .setEntity(0, e)
             .executeUpdate();
-    }
-
-    public int clearActiveEscalation()
-    {
-        String sql="update EscalationState " +
-                   "set active=false " +
-                   "where" +
-                   "  active = true ";
-
-        int count = getSession().createQuery(sql).executeUpdate();
-
-        if (count > 0 && log.isInfoEnabled()) {
-            log.info("Cleared " + count + " active " +
-                     (count == 1 ? "escalation." : "escalations."));
-        }
-        return count;
     }
 
     public void clearActiveEscalation(Escalation e, Integer alertDefId)
