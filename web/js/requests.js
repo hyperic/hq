@@ -208,8 +208,7 @@ var tmp = eval('(' + originalRequest.responseText + ')');
 		alert('Error ' + originalRequest.status + ' -- ' + originalRequest.statusText);
 	}
 	
-
-function showRecentAlerts(originalRequest) {
+	function showRecentAlerts(originalRequest) {
 	var alertText = eval("(" + originalRequest.responseText + ")");
 	var aList = alertText.criticalAlerts;
 	var alertTable = document.getElementById('recentAlertsTable');
@@ -276,6 +275,67 @@ function showRecentAlerts(originalRequest) {
 	
 		rTimer = setTimeout(requestRecentAlerts,60000); //Refresh in 60 seconds
 	}
+	
+	function showMetricsResponse(originalRequest) {
+	
+	var metricText = eval("(" + originalRequest.responseText + ")");
+	var metricValues = metricText.metricViewer;
+	var metricTable = document.getElementById('metricTable');
+	var resourceNameHeader = metricValues.resourceTypeName;
+	var resourceLoadTypeHeader = metricValues.metricName;
+	
+	if (metricValues && metricValues != 0) {
+	
+	for(var i=metricTable.childNodes.length-1; i>1; i--){
+        metricTable.removeChild(metricTable.childNodes[i]);
+    }
+
+	for (i=0; i<metricValues.values.length; i++) {
+	//alert(metricValues.values.length);
+	
+
+	var tr  = document.createElement('tr');
+	var td1 = document.createElement('td');
+    var td2 = document.createElement('td');
+    var oTextNode = $('resourceNameType').childNodes[0];
+    var lTextNode = $('resourceLoadType').childNodes[0];
+   	var oReplaceNode = oTextNode.replaceData(0,27,resourceNameHeader);
+    var lReplaceNode = lTextNode.replaceData(0,35,resourceLoadTypeHeader);
+   	
+    
+		metricTable.appendChild(tr);
+		tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
+		if (metricValues.resourceName && metricValues.metricName) {
+		oReplaceNode;
+		lReplaceNode;
+		
+		}
+		
+		tr.appendChild(td1);
+		td1.setAttribute((document.all ? 'className' : 'class'), "resource");
+		if (metricValues.values[i].resourceName) {
+		td1.appendChild(document.createTextNode(metricValues.values[i].resourceName));
+		}
+		
+		tr.appendChild(td2);
+		td2.setAttribute((document.all ? 'className' : 'class'), "metricName");
+		
+		if (metricValues.values[i].value) {
+		td2.appendChild(document.createTextNode(metricValues.values[i].value));
+		}
+		
+
+	
+	}
+	
+	} else {
+	$('noMetricValues').style.display = '';
+	}
+	
+		rTimer = setTimeout(requestMetricsPortal,60000); //Refresh in 60 seconds
+	}
+	
+
 
 
 }

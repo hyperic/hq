@@ -53,6 +53,7 @@ onloads.push(requestFavoriteResources);
 </script>
 
  <table class="table" width="100%" border="0" cellspacing="0" cellpadding="0" id="favoriteTable" >
+ 	<tbody>
 	<tr class="tableRowHeader">
 		<th width="50%" class="tableRowInactive">
 			Resource Name
@@ -70,9 +71,10 @@ onloads.push(requestFavoriteResources);
 			Alerts
 		</th>
 	</tr>
-	
+	 <!-- table rows are inserted here dynamically -->
+		</tbody>
 	</table>
-	<table width="100%" cellpadding="0" cellspacing="0" border="1" id="noFaveResources" style="display:none;">
+	<table width="100%" cellpadding="0" cellspacing="0" border="0" id="noFaveResources" style="display:none;">
     <tr class="ListRow">
       <td class="ListCell"><fmt:message key="dash.home.no.resource.to.display"/></td>
     </tr>

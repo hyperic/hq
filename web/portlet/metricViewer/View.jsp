@@ -31,6 +31,14 @@
 <%@ taglib uri="display" prefix="display" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
 
+<script type="text/javascript">
+function requestMetricsResponse() {
+var metricsUrl = "<html:rewrite page="/dashboard/ViewMetrics.do"/>"
+	new Ajax.Request(metricsUrl, {method: 'get', onSuccess:showMetricsResponse, onFailure :reportError});
+	}
+onloads.push(requestMetricsResponse);
+</script>
+
 <div class="effectsPortlet">
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="dash.home.MetricViewer"/>
@@ -40,8 +48,22 @@
 </tiles:insert>
 
   <!-- JSON available at /dashboard/ViewMetrics.do -->
-    
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  
+  <table class="table" width="100%" border="0" cellspacing="0" cellpadding="0" id="metricTable" >
+  	<tbody>
+	<tr class="tableRowHeader">
+		<th width="90%" class="tableRowInactive" id="resourceNameType" nowrap>
+		Resource
+		</th>
+		<th width="10%" align="center" nowrap class="tableRowInactive" id="resourceLoadType">
+		Load Avg
+		</th>
+	</tr>
+	
+ <!-- table rows are inserted here dynamically -->
+ 	</tbody>
+ </table>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" id="noMetricValues" style="display:none;">
     <tr class="ListRow">
       <td class="ListCell"><fmt:message key="dash.home.no.resource.to.display"/></td>
     </tr>

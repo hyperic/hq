@@ -93,7 +93,7 @@ Ajax.Responders.register({
 			</td>
 		</tr>
 		
-		
+		 <!-- table rows are inserted here dynamically -->
  	 </tbody>
   </table>
     
