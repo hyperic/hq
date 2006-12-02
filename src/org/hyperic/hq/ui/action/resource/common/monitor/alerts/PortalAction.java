@@ -148,7 +148,7 @@ public class PortalAction extends ResourceController {
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
 
         Integer alertId = new Integer( request.getParameter("a") );
-        //eb.acknowledgeAlert(sessionID, alertId);
+        eb.acknowledgeAlert(sessionID, alertId);
         
         return viewAlert(mapping, form, request, response);
     }
@@ -163,7 +163,7 @@ public class PortalAction extends ResourceController {
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
 
         Integer alertId = new Integer( request.getParameter("a") );
-        //eb.fixAlert(sessionID, alertId);
+        eb.fixAlert(sessionID, alertId);
 
         return viewAlert(mapping, form, request, response);
     }

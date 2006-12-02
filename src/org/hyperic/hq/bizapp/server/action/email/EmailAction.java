@@ -54,6 +54,7 @@ import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidActionDataException;
+import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertCondition;
 import org.hyperic.hq.events.server.session.AlertConditionLog;
@@ -73,7 +74,9 @@ import org.hyperic.util.units.FormattedNumber;
 
 /**
  */
-public class EmailAction extends EmailActionConfig implements ActionInterface {
+public class EmailAction extends EmailActionConfig implements ActionInterface,
+    Notify
+{
     private static final String LINK_FORMAT =
         "alerts/Alerts.do?mode=viewAlert&eid={0,number,#}:{1,number,#}&a={2,number,#}";
 
@@ -461,4 +464,10 @@ public class EmailAction extends EmailActionConfig implements ActionInterface {
         this.init(config);
     }
 
+    public void send()
+    {
+        // TODO: figure out what to send
+        log.info("send invoked on EmailAction");
+
+    }
 }

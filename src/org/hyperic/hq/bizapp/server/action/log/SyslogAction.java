@@ -42,10 +42,10 @@ import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidActionDataException;
+import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertCondition;
 import org.hyperic.hq.events.server.session.AlertConditionLog;
-import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -53,7 +53,8 @@ import org.hyperic.util.config.ConfigResponse;
  *
  */
 public class SyslogAction extends SyslogActionConfig
-    implements ActionInterface {
+    implements ActionInterface, Notify
+{
     private Log log = LogFactory.getLog(SyslogAction.class.getName());
     
     private static final int PRI_HIGH = 3;
@@ -166,4 +167,10 @@ public class SyslogAction extends SyslogActionConfig
         this.init(config);
     }
 
+    public void send()
+    {
+        // send notification on escalation
+        // TODO: figure out what to send
+        log.info("send invoked on SyslogAction");
+    }
 }

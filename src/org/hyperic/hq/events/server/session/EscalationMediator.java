@@ -1,11 +1,12 @@
 /**
  *
  */
-package org.hyperic.hq.events;
+package org.hyperic.hq.events.server.session;
 
 import org.hyperic.hq.Mediator;
 import org.hyperic.hq.TransactionContext;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.TransactionManagerLocal;
@@ -23,6 +24,10 @@ import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
+import org.hyperic.hq.events.InvalidActionDataException;
+import org.hyperic.hq.events.ActionExecuteException;
+import org.hyperic.hq.events.ActionInterface;
+import org.hyperic.hq.events.Notify;
 import org.hyperic.hibernate.LockSet;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.dao.DAOFactory;
@@ -274,6 +279,70 @@ public class EscalationMediator extends Mediator
         EscalationStateDAO dao =
             DAOFactory.getDAOFactory().getEscalationStateDAO();
         return dao.findScheduledEscalationState();
+    }
+
+    public void acknowledgeAlert(Integer subjectID, Integer alertID)
+        throws PermissionException
+    {
+        setEscalationState(subjectID, alertID, false);
+    }
+
+    public void fixAlert(Integer subjectID, Integer alertID)
+        throws PermissionException
+    {
+        EscalationState state =
+            setEscalationState(subjectID, alertID, true);
+        notifyEscalation(state);
+    }
+
+    private void notifyEscalation(EscalationState state)
+    {
+        Escalation e = state.getEscalation();
+        // get the correct level to notify
+        int level = e.isNotifyAll()
+            ? state.getCurrentLevel()
+            : e.getActions().size() - 1;
+        while (level >= 0) {
+            EscalationAction ea =
+                (EscalationAction)e.getActions().get(level);
+            if (ea.getAction() instanceof Notify) {
+                ((Notify)ea.getAction()).send();
+            }
+            level--;
+        }
+    }
+
+    private EscalationState setEscalationState(Integer subjectID,
+                                               Integer alertID,
+                                               boolean fixed)
+        throws PermissionException
+    {
+        SessionBase.canModifyEscalation(subjectID);
+
+        Alert alert =
+            DAOFactory.getDAOFactory().getAlertDAO().findById(alertID);
+        Integer alertDefId =
+            alert.getAlertDefinition().getId();
+        Escalation escalation =
+            alert.getAlertDefinition().getEscalation();
+
+        EscalationState state =
+            getEscalationState(escalation, alertDefId);
+
+        if (state != null) {
+            if (fixed) {
+                state.setFixed(true);
+            } else {
+                state.setAcknowledge(true);
+            }
+            AuthzSubject subject =
+                DAOFactory.getDAOFactory().getAuthzSubjectDAO()
+                    .findById(subjectID);
+            state.setUpdateBy(subject.getFirstName());
+            DAOFactory.getDAOFactory().getEscalationStateDAO()
+                .save(state);
+        }
+        return state;
     }
 
     private void scheduleAction(Integer escalationId, Integer alertDefId,

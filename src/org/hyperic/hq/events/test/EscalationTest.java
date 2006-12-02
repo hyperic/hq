@@ -5,7 +5,7 @@ import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.hq.events.server.session.EscalationAction;
 import org.hyperic.hq.events.server.session.EscalationState;
 import org.hyperic.hq.events.server.session.Action;
-import org.hyperic.hq.events.EscalationMediator;
+import org.hyperic.hq.events.server.session.EscalationMediator;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hibernate.ObjectNotFoundException;

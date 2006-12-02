@@ -76,7 +76,7 @@ import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.AlertConditionCreateException;
 import org.hyperic.hq.events.AlertDefinitionCreateException;
 import org.hyperic.hq.events.AlertNotFoundException;
-import org.hyperic.hq.events.EscalationMediator;
+import org.hyperic.hq.events.server.session.EscalationMediator;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerCreateException;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
@@ -1529,6 +1529,32 @@ public class EventsBossEJBImpl extends BizappSessionEJB
 
     private AppdefEntityID getAppdefEntityID(AlertDefinitionValue ad) {
         return new AppdefEntityID(ad.getAppdefType(), ad.getAppdefId());
+    }
+
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void acknowledgeAlert(int sessionID, Integer alertID)
+        throws SessionTimeoutException, SessionNotFoundException,
+        PermissionException
+    {
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        EscalationMediator med = EscalationMediator.getInstance();
+        med.acknowledgeAlert(subject.getId(), alertID);
+    }
+
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void fixAlert(int sessionID, Integer alertID)
+        throws SessionTimeoutException, SessionNotFoundException,
+        PermissionException
+    {
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        EscalationMediator med = EscalationMediator.getInstance();
+        med.fixAlert(subject.getId(), alertID);
     }
     
     /**
