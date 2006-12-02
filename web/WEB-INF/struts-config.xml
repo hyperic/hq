@@ -515,7 +515,7 @@
                   
       <action path="/admin/config/ConfigPortal" 
               parameter="mode"
-              type="org.hyperic.hq.ui.action.admin.config.ConfigAction">              
+              type="org.hyperic.hq.ui.action.admin.config.ConfigAction">
       </action>
 	  
       <action path="/admin/config/EditConfigPrep"

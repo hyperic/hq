@@ -30,4 +30,9 @@
   USA.
  --%>
 
-This is where the UI would go
+<ul id="escalations" class="boxy">
+  <li><table width="100%" cellpadding="0" cellspacing="0"><tr class="ListRow"><td colspan="2" class="ListHeaderInactiveSorted">Escalation Scheme</td></tr></table></li>
+  <li><table width="100%" cellpadding="0" cellspacing="0"><tr class="ListRow"><td class="ListCell">Scheme 1</td><td class="ListCell" style="text-align: right;">[--]</td</tr></table></li>
+</ul>
+
+<c:out value="${escalations}"/>
