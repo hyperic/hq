@@ -12,14 +12,20 @@
     <put name="titleImg" value="spacer.gif"/>
   </definition>
 
+  <definition name=".admin.user.layout"
+              extends=".admin.main.layout">
+    <put name="titleBgStyle" value="PageTitleUserBg"/>
+    <put name="titleImg" value="title_user.gif"/>
+  </definition>
+
   <definition name=".page.title.admin.user"
               extends=".page.title">
     <put name="titleKey" value="admin.user.ListUsers"/>  
     <put name="titleBgStyle" value="PageTitleUserBg"/>
     <put name="titleImg" value="title_user.gif"/>
   </definition>
-               
-    <definition name=".page.title.admin.user.view"
+
+  <definition name=".page.title.admin.user.view"
               extends=".page.title">    
     <put name="titleBgStyle" value="PageTitleUserBg"/>
     <put name="titleImg" value="title_user.gif"/>
@@ -28,20 +34,23 @@
   <!--admin user portlets-->      
   <definition name=".admin.user.List"
               controllerUrl="/admin/user/List.do"
-              extends=".admin.main.layout">
+              extends=".admin.user.layout">
     <put name="titleKey" value="admin.user.ListUsers"/>  
-    <put name="titleBgStyle" value="PageTitleUserBg"/>
-    <put name="titleImg" value="title_user.gif"/>
     <put name="configTile" value="/admin/user/ListUsers.jsp"/>
   </definition>
  
   <definition name=".admin.user.Edit"
               controllerUrl="/admin/user/EditUserFormPrepare.do"
-              path="/admin/user/EditUser.jsp"/>
-
+              extends=".admin.main.layout">
+    <put name="titleKey" value="admin.user.edit"/>  
+    <put name="configTile" value="/admin/user/NewUser.jsp"/>
+  </definition>
   <definition name=".admin.user.New"
               controllerUrl="/admin/user/NewFormPrepare.do"
-              path="/admin/user/NewUser.jsp"/>
+              extends=".admin.main.layout">
+    <put name="titleKey" value="admin.user.NewUser"/>  
+    <put name="configTile" value="/admin/user/NewUser.jsp"/>
+  </definition>
 
   <!-- used to aggregate ViewProperties for a user -->
   <definition name=".admin.user.ViewProperties"

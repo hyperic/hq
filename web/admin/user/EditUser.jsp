@@ -29,18 +29,8 @@
   USA.
  --%>
 
-
-<c:set var="fullName" value="${User.firstName} ${User.lastName}"/>
-
 <!-- FORM -->
 <html:form action="/admin/user/Edit">
-
-<!--  PAGE TITLE -->
-<tiles:insert definition=".page.title.admin.user">
-  <tiles:put name="titleKey" value="admin.user.edit"/>  
-  <tiles:put name="titleName" beanName="fullName"/>   
-</tiles:insert>
-<!--  /  -->
 
 <!--  HEADER TITLE -->
 <tiles:insert definition=".header.tab">  
