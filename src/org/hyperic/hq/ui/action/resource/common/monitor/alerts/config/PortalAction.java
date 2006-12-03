@@ -40,6 +40,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.Constants;
@@ -53,6 +54,8 @@ import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
 
 /**
  * A dispatcher for the alerts portal.
@@ -240,6 +243,14 @@ public class PortalAction extends ResourceController {
         // JW - this shouldn't be a dialog ... portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
+        // Get the list of users
+        ServletContext ctx = getServlet().getServletContext();
+        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+        Integer sessionId = RequestUtils.getSessionId(request);
+        PageList availableUsers =
+            authzBoss.getAllSubjects(sessionId, PageControl.PAGE_ALL);
+        request.setAttribute(Constants.AVAIL_USERS_ATTR, availableUsers);
+        
         return null;
     }
 
