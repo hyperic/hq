@@ -110,7 +110,7 @@ public class Escalation extends PersistedObject
         }
         setName(json.getString("name"));
         setAllowPause(json.optBoolean("allowPause"));
-        setMaxWaitTime(json.optInt("maxWaitTime"));
+        setMaxWaitTime(json.optLong("maxWaitTime"));
         setNotifyAll(json.optBoolean("notifyAll"));
         setActions(
             getEscalationActions(json.getJSONArray("actions")));
