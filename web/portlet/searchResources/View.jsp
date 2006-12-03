@@ -63,7 +63,7 @@ function checkGroup() {
         <hq:optionMessageList property="functions" baseKey="resource.hub.filter"/>        
       </html:select>
     </td>
-    <td width="100%" class="BlockContent" valign="center">&nbsp;<html:image page="/images/dash-button_go-arrow.gif" border="0" property="ok" /></td>
+    <td width="100%" class="BlockContent" valign="center"><html:image page="/images/dash-button_go-arrow.gif" border="0" property="ok" /></td>
   </tr>                                                         
   <tr>
     <td class="BlockContent" colspan="3"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
