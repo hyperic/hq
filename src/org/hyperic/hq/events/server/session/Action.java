@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.ActionConfigInterface;
@@ -67,7 +66,7 @@ public class Action
         } else if (className.endsWith("SyslogAction")) {
             action = newSyslogAction(json.getJSONObject("config"));
         } else {
-            throw new JSONException("unsupport Action class " + className);
+            throw new JSONException("Unsupported Action class " + className);
         }
         int id = json.optInt("id");
         if (id > 0) {
@@ -212,14 +211,6 @@ public class Action
     public void setActionValue(ActionValue val) {
         setClassName(val.getClassname());
         setConfig(val.getConfig());
-        
-        if (val.getParentId() == null) {
-            setParent(null);
-        } else {
-            ActionDAO aDao = DAOFactory.getDAOFactory().getActionDAO();
-
-            setParent(aDao.findById(val.getId()));
-        }
     }
 
     public JSONObject toJSON() throws JSONException

@@ -132,6 +132,7 @@ public class ActionManagerEJBImpl implements SessionBean {
         Action action = aDao.findById(val.getId());
             
         action.setActionValue(val);
+        setParentAction(val, action, aDao);
 
         // Then find and update the child actions.
 
@@ -142,11 +143,20 @@ public class ActionManagerEJBImpl implements SessionBean {
         val.setParentId(val.getId());
         for (Iterator i = children.iterator(); i.hasNext(); ) {
             Action act = (Action) i.next();
-
             act.setActionValue(val);
+            setParentAction(val, act, aDao);
         }
         
         return action.getActionValue();
+    }
+
+    private void setParentAction(ActionValue val, Action action, ActionDAO aDao)
+    {
+        if (val.getParentId() == null) {
+            action.setParent(null);
+        } else {
+            action.setParent(aDao.findById(val.getId()));
+        }
     }
 
     public void ejbCreate() {}
