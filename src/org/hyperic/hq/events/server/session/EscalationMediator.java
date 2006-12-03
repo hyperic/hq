@@ -197,8 +197,15 @@ public class EscalationMediator extends Mediator
     public void saveEscalation(Integer subjectId, JSONObject escalation)
         throws JSONException, PermissionException
     {
+        EscalationDAO dao = DAOFactory.getDAOFactory().getEscalationDAO();
         Escalation e = Escalation.newInstance(subjectId, escalation);
-        DAOFactory.getDAOFactory().getEscalationDAO().save(e);
+        if (e.getId() == null) {
+            // save escalation
+            dao.save(e);
+        } else {
+            // merge updated values
+            dao.merge(e);
+        }
     }
 
     public Escalation findEscalationById(Escalation e)

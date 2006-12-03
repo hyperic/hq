@@ -42,6 +42,7 @@ public class Escalation extends PersistedObject
         implements Json
 {
 
+    public static final String JSON_ESCALATION = "escalation";
     // Fields
 
     private String name;
@@ -103,10 +104,14 @@ public class Escalation extends PersistedObject
         throws JSONException
     {
         setSubjectId(subjectId);
+        int id = json.optInt("id");
+        if (id > 0) {
+            setId(new Integer(id));
+        }
         setName(json.getString("name"));
         setAllowPause(json.optBoolean("allowPause"));
         setMaxWaitTime(json.optInt("maxWaitTime"));
-        setAllowPause(json.optBoolean("notifyAll"));
+        setNotifyAll(json.optBoolean("notifyAll"));
         setActions(
             getEscalationActions(json.getJSONArray("actions")));
     }

@@ -48,6 +48,11 @@ public class ActionDAO extends HibernateDAO {
         super.save(entity);
     }
 
+    public Action merge(Action entity)
+    {
+        return (Action)super.merge(entity);
+    }
+
     protected void remove(Action entity) {
         super.remove(entity);
     }

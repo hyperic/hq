@@ -36,6 +36,7 @@ import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.bizapp.shared.action.SyslogActionConfig;
+import org.hyperic.hq.bizapp.server.action.log.SyslogAction;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.Json;
 import org.hyperic.util.ArrayUtil;
@@ -61,12 +62,19 @@ public class Action
     public static Action newInstance(JSONObject json) throws JSONException
     {
         String className = json.getString("className");
+        Action action;
         if (className.endsWith("EmailAction")) {
-            return newEmailAction(json.getJSONObject("config"));
+            action = newEmailAction(json.getJSONObject("config"));
         } else if (className.endsWith("SyslogAction")) {
-            return newSyslogAction(json.getJSONObject("config"));
+            action = newSyslogAction(json.getJSONObject("config"));
+        } else {
+            throw new JSONException("unsupport Action class " + className);
         }
-        throw new JSONException("unsupport Action class " + className);
+        int id = json.optInt("id");
+        if (id > 0) {
+            action.setId(new Integer(id));
+        }
+        return action;
     }
 
     public static Action newEmailAction(JSONObject json) throws JSONException

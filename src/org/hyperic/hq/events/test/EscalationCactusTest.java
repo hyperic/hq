@@ -91,8 +91,19 @@ public class EscalationCactusTest
         // read after save
         JSONObject json_saved =
             eventsBoss.jsonByEscalationName(sessionID, BOGUS_NAME1);
-
         assertNotNull(json_saved);
+
+        // flip notify bit
+        boolean notify = json_saved.getJSONObject("escalation")
+            .getBoolean("notifyAll");
+        json_saved.getJSONObject("escalation")
+            .put("notifyAll", !notify);
+        eventsBoss.saveEscalation(sessionID, json_saved);
+        json_saved =
+            eventsBoss.jsonByEscalationName(sessionID, BOGUS_NAME1);
+        boolean notify_update = json_saved.getJSONObject("escalation")
+            .getBoolean("notifyAll");
+        assertTrue(notify != notify_update);
 
         int id = json_saved.getJSONObject("escalation")
             .getInt("id");

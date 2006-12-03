@@ -52,6 +52,14 @@ public class EscalationDAO extends HibernateDAO
 
     public void save(Escalation entity) throws PermissionException
     {
+        checkUpdatePermission(entity);
+        saveActions(entity.getActions().iterator());
+        super.save(entity);
+    }
+
+    private void checkUpdatePermission(Escalation entity)
+        throws PermissionException
+    {
         Integer subjectId = entity.getSubjectId();
         if (subjectId != null) {
             if (entity.getId() == null) {
@@ -60,8 +68,13 @@ public class EscalationDAO extends HibernateDAO
                 SessionBase.canModifyEscalation(subjectId);
             }
         }
-        saveActions(entity.getActions().iterator());
-        super.save(entity);
+    }
+
+    public Escalation merge(Escalation entity) throws PermissionException
+    {
+        checkUpdatePermission(entity);
+        mergeActions(entity.getActions().iterator());
+        return (Escalation)super.merge(entity);
     }
 
     public Escalation get(Integer id) {
@@ -120,6 +133,14 @@ public class EscalationDAO extends HibernateDAO
         while(i.hasNext()) {
             EscalationAction ea = (EscalationAction)i.next();
             dao.save(ea.getAction());
+        }
+    }
+
+    private void mergeActions(Iterator i) {
+        ActionDAO dao = DAOFactory.getDAOFactory().getActionDAO();
+        while(i.hasNext()) {
+            EscalationAction ea = (EscalationAction)i.next();
+            dao.merge(ea.getAction());
         }
     }
 
