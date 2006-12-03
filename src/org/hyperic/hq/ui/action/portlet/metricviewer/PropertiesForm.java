@@ -14,7 +14,7 @@ public class PropertiesForm extends DashboardBaseForm {
     protected final static String METRIC =
         ".dashContent.metricviewer.metric";
 
-    private AppdefEntityTypeID _resType;
+    private String _resType;
     private String _metric;
     private Integer _numberToShow;
     private String[] _ids;
@@ -40,19 +40,26 @@ public class PropertiesForm extends DashboardBaseForm {
     }
 
     public String getResourceType() {
-        return _resType.getAppdefKey();
+        return _resType;
     }
 
     public void setResourceType(String resType) {
-        _resType = new AppdefEntityTypeID(resType);
+        _resType = resType;
     }
 
-    public int getAppdefType() {
-        return _resType.getType();
+    public String getAppdefType() {
+        if (_resType != null && _resType.length() != 0) {
+            AppdefEntityTypeID type = new AppdefEntityTypeID(_resType);
+            return Integer.toString(type.getType());
+        }
+        return "";
     }
 
-    public int getAppdefTypeID() {
-        return _resType.getID();
+    public String getAppdefTypeID() {
+        if (_resType != null && _resType.length() != 0) {
+            return new AppdefEntityTypeID(_resType).getId().toString();
+        }
+        return "";
     }
 
     public String getMetric() {

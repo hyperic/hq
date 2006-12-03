@@ -58,7 +58,9 @@ public class PrepareAction extends TilesAction {
         pForm.setNumberToShow(numberToShow);
 
         String resourceType = user.getPreference(PropertiesForm.RES_TYPE);
-        pForm.setResourceType(resourceType);
+        if (resourceType != null && resourceType.length() != 0) {
+            pForm.setResourceType(resourceType);
+        }
 
         String metric = user.getPreference(PropertiesForm.METRIC);
         pForm.setMetric(metric);
@@ -100,7 +102,7 @@ public class PrepareAction extends TilesAction {
         request.setAttribute("serviceTypes", viewableServiceTypes);
 
         PageList metrics = new PageList();
-        if (resourceType != null) {
+        if (resourceType != null && resourceType.length() != 0) {
             AppdefEntityTypeID typeId = new AppdefEntityTypeID(resourceType);
             AppdefResourceTypeValue typeVal =
                 appdefBoss.findResourceTypeById(sessionId, typeId);

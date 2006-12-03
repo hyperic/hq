@@ -4,9 +4,9 @@ import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.product.MetricValue;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionForm;
@@ -36,7 +36,6 @@ public class ViewAction extends TilesAction {
         throws Exception
     {
         ServletContext ctx = getServlet().getServletContext();
-        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
         MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
 
         WebUser user = (WebUser) request.getSession().getAttribute(
@@ -51,8 +50,21 @@ public class ViewAction extends TilesAction {
         int count = Integer.parseInt(user.
             getPreference(PropertiesForm.NUM_TO_SHOW));
 
+        String metric = user.getPreference(PropertiesForm.METRIC);
+
         int sessionId = user.getSessionId().intValue();
 
+        if (metric == null || metric.length() == 0) {
+            return null;
+        }
+
+        for (int i = 0; i < arrayIds.length; i++) {
+            Integer[] tids = new Integer[] { new Integer(metric) };
+            MetricValue[] val = mBoss.getLastMetricValue(sessionId, arrayIds[i],
+                                                         tids);
+            _log.info(arrayIds[i] + " metric=" + metric + " value="  +
+                      val[0]);
+        }
         return null;
     }
 }
