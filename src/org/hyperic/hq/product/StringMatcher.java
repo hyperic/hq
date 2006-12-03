@@ -25,6 +25,9 @@
 
 package org.hyperic.hq.product;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 //we bury the Pattern.matcher reference here
@@ -34,6 +37,7 @@ public class StringMatcher {
 
     private Pattern includes;
     private Pattern excludes;
+    private List matches = new ArrayList();
 
     private Pattern compile(String pattern) {
         if (pattern == null) {
@@ -63,23 +67,52 @@ public class StringMatcher {
         }
         return pattern.matcher(s).find();
     }
-    
+
+    public List getLastMatches() {
+        return this.matches;
+    }
+
     public boolean matches(String s) {
+        boolean includesMatch;
+
+        if (this.includes == null) {
+            includesMatch = true;
+        }
+        else {
+            this.matches.clear();
+            includesMatch = false;
+            Matcher matcher = this.includes.matcher(s);
+
+            while (matcher.find()) {
+                includesMatch = true;
+                int count = matcher.groupCount();
+                //skip group(0):
+                //"Group zero denotes the entire pattern by convention"
+                for (int i=1; i<=count; i++) {
+                    this.matches.add(matcher.group(i));
+                }
+            }
+
+            if (this.matches.size() == 0) {
+                this.matches.add(this.includes.pattern());
+            }
+        }
+
         return
-            matches(this.includes, s, true) &&
+            includesMatch &&
             !matches(this.excludes, s, false);
     }
 
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         if (this.includes != null) {
-            buffer.append(this.includes);
+            buffer.append(this.includes.pattern());
             if (this.excludes != null) {
                 buffer.append(" && ");
             }
         }
         if (this.excludes != null) {
-            buffer.append('!').append(this.excludes);
+            buffer.append('!').append(this.excludes.pattern());
         }
         return buffer.toString();
     }

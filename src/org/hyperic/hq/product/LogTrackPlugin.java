@@ -26,6 +26,7 @@
 package org.hyperic.hq.product;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -121,6 +122,7 @@ public class LogTrackPlugin extends GenericPlugin {
     private int logLevel;
     private StringMatcher matcher = null;
     private Map logLevelMap = null;
+    private LogMessageFolder folder;
 
     public static int[] getLogLevels() {
         return LOG_LEVELS;
@@ -232,7 +234,9 @@ public class LogTrackPlugin extends GenericPlugin {
         this.logLevel = level;
     }
 
-    protected boolean messageMatches(String message) {
+    protected boolean messageMatches(TrackEvent event) {
+        String message = event.getMessage();
+
         if (this.matcher == null) {
             if (debugLogging) {
                 debugLog(message, "No pattern match configured");
@@ -257,7 +261,13 @@ public class LogTrackPlugin extends GenericPlugin {
                      " '" + this.matcher + "'");
         }
 
-        return matches;
+        if (matches) {
+            List lastMatches = this.matcher.getLastMatches();
+            return !this.folder.shouldFold(event, lastMatches);
+        }
+        else {
+            return false;
+        }
     }
 
     protected TrackEvent newTrackEvent(long time,
@@ -329,7 +339,14 @@ public class LogTrackPlugin extends GenericPlugin {
                     getLogLevelLabel(getLogLevel()));
         }
 
-        if (!messageMatches(message)) {
+        TrackEvent event =
+            new TrackEvent(getName(),
+                           time,
+                           level,
+                           source,
+                           message);
+        
+        if (!messageMatches(event)) {
             return null;
         }
 
@@ -337,11 +354,7 @@ public class LogTrackPlugin extends GenericPlugin {
             debugLog(message, "Reporting Event");
         }
 
-        return new TrackEvent(getName(),
-                              time,
-                              level,
-                              source,
-                              message);
+        return event;
     }
 
     public void reportEvent(long time,
@@ -530,6 +543,8 @@ public class LogTrackPlugin extends GenericPlugin {
         super.init(manager);
         
         this.manager = (LogTrackPluginManager)manager;
+
+        this.folder = new LogMessageFolder(this);
     }
 
     public LogTrackPluginManager getManager() {
