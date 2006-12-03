@@ -60,9 +60,9 @@ public class EscalationWebMediator
         return eventsBoss.listAllEscalationName(sessionId);
     }
 
-    public int removeEscalation(int sessionId, Integer id) throws
+    public void removeEscalation(int sessionId, Integer id) throws
         PermissionException, SessionTimeoutException, SessionNotFoundException
     {
-        return eventsBoss.deleteEscalationById(sessionId, new Integer[]{id});
+        eventsBoss.deleteEscalationById(sessionId, new Integer[]{id});
     }
 }

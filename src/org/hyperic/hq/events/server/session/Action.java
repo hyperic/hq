@@ -58,6 +58,25 @@ public class Action
 
     private ActionValue     _valueObj;
 
+    public static Action newInstance(JSONObject json) throws JSONException
+    {
+        String className = json.getString("className");
+        if (className.endsWith("EmailAction")) {
+            return newEmailAction(json.getJSONObject("config"));
+        } else if (className.endsWith("SyslogAction")) {
+            return newSyslogAction(json.getJSONObject("config"));
+        }
+        throw new JSONException("unsupport Action class " + className);
+    }
+
+    public static Action newEmailAction(JSONObject json) throws JSONException
+    {
+        EmailActionConfig config = new EmailActionConfig();
+        config.setType(json.getInt(EmailActionConfig.CFG_TYPE));
+        config.setNames(json.getString(EmailActionConfig.CFG_NAMES));
+        return createAction(config);
+    }
+
     public static Action newEmailAction(int type, Set notifs) {
         EmailActionConfig config = new EmailActionConfig();
         config.setType(type);
@@ -75,6 +94,15 @@ public class Action
         sa.setVersion(version);
         
         return createAction(sa);
+    }
+
+    public static Action newSyslogAction(JSONObject json) throws JSONException
+    {
+        return newSyslogAction(
+            json.getString(SyslogActionConfig.CFG_META),
+            json.getString(SyslogActionConfig.CFG_PROD),
+            json.getString(SyslogActionConfig.CFG_VER)
+        );
     }
 
     private static Action createAction(ActionConfigInterface config)

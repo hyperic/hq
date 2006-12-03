@@ -170,16 +170,16 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
                                                _dsMapping);
         }
     }
-    
+
     protected void rollbackUserTransaction() throws Exception {
         if (!isRunningOnServer()) {
             UserTransaction tx = (UserTransaction)
                 _context.lookup("javax.transaction.UserTransaction");
-            
+
             tx.setRollbackOnly();
         }
     }
-    
+
     /**
      * Initialising the context and mock container
      */
@@ -188,26 +188,28 @@ public abstract class MockBeanTestBase extends OptionalCactusTestCase
          * container.  Inside container we want to rely on the "real" JNDI 
          * provided by that container. 
          */
-        if (!isRunningOnServer()) {
+        if (isRunningOnServer()) {
+            MockContextFactory.setDelegateEnvironment(
+                (new InitialContext()).getEnvironment() );
+        } else {
             /* We need to set MockContextFactory as our JNDI provider.
-             * This method sets the necessary system properties. 
+             * This method sets the necessary system properties.
              */
             MockContextFactory.setAsInitial();
         }
+
         // create the initial context that will be used for binding EJBs
         _context = new InitialContext();
         
         // Create an instance of the MockContainer
         _container = new MockContainer(_context);
-
-        AspectSystem sys = AspectSystemFactory.getAspectSystem();
-        sys.addFirst(new SessionBeanPointcut(), 
-                     new TransactionManager(TransactionPolicy.REQUIRED));
-        
         
         if (!isRunningOnServer()) {
             // bind jta transaction
             // we use MockTransaction outside of the app server
+            AspectSystem sys = AspectSystemFactory.getAspectSystem();
+            sys.addFirst(new SessionBeanPointcut(),
+                new TransactionManager(TransactionPolicy.REQUIRED));
             MockUserTransaction mockTransaction = new MockUserTransaction();
             _context.rebind("javax.transaction.UserTransaction", 
                             mockTransaction);

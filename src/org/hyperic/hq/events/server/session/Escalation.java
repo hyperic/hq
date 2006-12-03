@@ -85,12 +85,39 @@ public class Escalation extends PersistedObject
         return new Escalation();
     }
 
+    public static Escalation newInstance(Integer subjectId,
+                                         JSONObject json) throws JSONException
+    {
+        return new Escalation(subjectId, json.getJSONObject("escalation"));
+    }
+
     // Constructors
 
     /**
      * default constructor
      */
-    public Escalation() {
+    protected Escalation() {
+    }
+
+    protected Escalation(Integer subjectId, JSONObject json)
+        throws JSONException
+    {
+        setSubjectId(subjectId);
+        setName(json.getString("name"));
+        setAllowPause(json.optBoolean("allowPause"));
+        setMaxWaitTime(json.optInt("maxWaitTime"));
+        setAllowPause(json.optBoolean("notifyAll"));
+        setActions(
+            getEscalationActions(json.getJSONArray("actions")));
+    }
+
+    private List getEscalationActions(JSONArray jarr) throws JSONException
+    {
+        ArrayList actions = new ArrayList();
+        for (int i = 0; i < jarr.length(); i++) {
+            actions.add(EscalationAction.newInstance((JSONObject)jarr.get(i)));
+        }
+        return actions;
     }
 
     public String getName() {

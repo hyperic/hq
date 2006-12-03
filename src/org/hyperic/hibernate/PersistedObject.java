@@ -45,7 +45,11 @@ public abstract class PersistedObject
 
     // for hibernate optimistic locks -- don't mess with this.
     // Named ugly-style since we already use VERSION in some of our tables.
-    private long    _version_;
+    // really need to use Long instead of primitive value
+    // because the database column can allow null version values.
+    // The version column IS NULLABLE for migrated schemas. e.g. HQ upgrade
+    // from 2.7.5.
+    private Long    _version_;
 
     // list of searchable fields
     private List searchable = new ArrayList(0);
@@ -66,10 +70,10 @@ public abstract class PersistedObject
     }
 
     public long get_version_() {
-        return _version_;
+        return _version_ != null ? _version_.longValue() : 0;
     }
 
-    protected void set_version_(long newVer) {
+    protected void set_version_(Long newVer) {
         _version_ = newVer;
     }
 

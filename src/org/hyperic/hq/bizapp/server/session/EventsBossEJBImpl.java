@@ -1447,19 +1447,32 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     }
 
     /**
+     * save escalation
+     * @param sessionID
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void deleteEscalationById(int sessionID, Integer id)
+        throws SessionTimeoutException, SessionNotFoundException,
+        PermissionException
+    {
+        deleteEscalationById(sessionID, new Integer[]{id});
+    }
+
+    /**
      * remove escalation by id
      *
      * @return number of deleted rows
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public int deleteEscalationById(int sessionID, Integer[] ids)
+    public void deleteEscalationById(int sessionID, Integer[] ids)
         throws SessionTimeoutException, SessionNotFoundException,
         PermissionException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         EscalationMediator mediator = EscalationMediator.getInstance();
-        return mediator.deleteEscalationById(subject.getId(), ids);
+        mediator.deleteEscalationById(subject.getId(), ids);
     }
 
     /**
@@ -1530,6 +1543,22 @@ public class EventsBossEJBImpl extends BizappSessionEJB
 
     private AppdefEntityID getAppdefEntityID(AlertDefinitionValue ad) {
         return new AppdefEntityID(ad.getAppdefType(), ad.getAppdefId());
+    }
+
+    /**
+     * save escalation
+     * @param sessionID
+     * @param escalation
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void saveEscalation(int sessionID, JSONObject escalation)
+        throws SessionTimeoutException, SessionNotFoundException, JSONException,
+        PermissionException
+    {
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        EscalationMediator med = EscalationMediator.getInstance();
+        med.saveEscalation(subject.getId(), escalation);
     }
 
     /**

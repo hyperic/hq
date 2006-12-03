@@ -27,9 +27,17 @@ public class JSONResult
             throws IOException, JSONException
     {
         if (array != null) {
-            w.write(pretty ? array.toString(2) : array.toString());
+            if (pretty) {
+                w.write(array.toString(2));
+            } else {
+                array.write(w);
+            }
         } else if (object != null) {
-            w.write(pretty ? object.toString(2) : object.toString());
+            if (pretty) {
+                w.write(object.toString(2));
+            } else {
+                object.write(w);
+            }
         }
     }
 }

@@ -45,6 +45,11 @@ public class EscalationAction implements Serializable, Json
     private Action action;
     private long waitTime;
 
+    public static EscalationAction newInstance(JSONObject json)
+        throws JSONException
+    {
+        return new EscalationAction(json);
+    }
     /**
      *
      * @param type  Action Type
@@ -82,6 +87,12 @@ public class EscalationAction implements Serializable, Json
      * default constructor
      */
     protected EscalationAction() {
+    }
+
+    protected EscalationAction(JSONObject json) throws JSONException
+    {
+        setWaitTime(json.optLong("waitTime"));
+        setAction(Action.newInstance(json.getJSONObject("action")));
     }
 
     /**

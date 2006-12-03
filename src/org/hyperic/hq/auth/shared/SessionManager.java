@@ -47,7 +47,7 @@ public class SessionManager {
     /**
      * The singleton instance
      */
-    private static SessionManager _manager = null;
+    private static SessionManager _manager = new SessionManager();
 
     /**
      * The timeout for all user sessions.  
@@ -62,11 +62,7 @@ public class SessionManager {
     /**
      * @return The singleton instance of the SessionManager
      */
-    public synchronized static SessionManager getInstance() {
-        if (_manager == null) {
-            _manager = new SessionManager();
-        }
-        
+    public static SessionManager getInstance() {
         return _manager;
     }
 

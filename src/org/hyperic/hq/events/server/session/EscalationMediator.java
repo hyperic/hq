@@ -27,6 +27,8 @@ import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.config.ConfigResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
+import org.json.JSONException;
 
 import javax.ejb.CreateException;
 import javax.naming.NamingException;
@@ -205,14 +207,11 @@ public class EscalationMediator extends Mediator
         }
     }
 
-    public void save(PersistedObject p) throws PermissionException
+    public void saveEscalation(Integer subjectId, JSONObject escalation)
+        throws JSONException, PermissionException
     {
-        transactionManager.save(p);
-    }
-
-    public void remove(PersistedObject p) throws PermissionException
-    {
-        transactionManager.delete(p);
+        Escalation e = Escalation.newInstance(subjectId, escalation);
+        DAOFactory.getDAOFactory().getEscalationDAO().save(e);
     }
 
     public Escalation findEscalationById(Escalation e)
@@ -225,11 +224,11 @@ public class EscalationMediator extends Mediator
         return DAOFactory.getDAOFactory().getEscalationDAO().findById(id);
     }
 
-    public int deleteEscalationById(Integer subjectId, Integer[] ids)
+    public void deleteEscalationById(Integer subjectId, Integer[] ids)
         throws PermissionException
     {
-        return DAOFactory.getDAOFactory().getEscalationDAO()
-                .deleteById(subjectId, ids);
+        DAOFactory.getDAOFactory().getEscalationDAO()
+            .deleteById(subjectId, ids);
     }
 
     public Collection findAll(Integer subjectId) throws PermissionException

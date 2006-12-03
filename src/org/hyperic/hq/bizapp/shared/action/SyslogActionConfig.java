@@ -34,9 +34,9 @@ import org.hyperic.util.config.StringConfigOption;
 
 public class SyslogActionConfig implements ActionConfigInterface {
     
-    private final static String CFG_META = "meta";
-    private final static String CFG_PROD = "product";
-    private final static String CFG_VER  = "version";
+    public final static String CFG_META = "meta";
+    public final static String CFG_PROD = "product";
+    public final static String CFG_VER  = "version";
     
     private static String implementor =
         "org.hyperic.hq.bizapp.server.action.log.SyslogAction";

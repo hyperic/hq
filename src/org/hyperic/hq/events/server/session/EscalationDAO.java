@@ -177,13 +177,15 @@ public class EscalationDAO extends HibernateDAO
                 .uniqueResult();
     }
 
-    public int deleteById(Integer subjectId, Integer[] ids)
+    public void deleteById(Integer subjectId, Integer[] ids)
         throws PermissionException
     {
         SessionBase.canRemoveEscalation(subjectId);
-        String sql = "delete Escalation where id in (:ids)";
-        return getSession().createQuery(sql)
-                .setParameterList("ids", ids)
-                .executeUpdate();
+        for (int i = 0; i < ids.length; i++) {
+            Escalation e = get(ids[i]);
+            if (e != null) {
+                remove(e);
+            }
+        }
     }
 }
