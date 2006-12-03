@@ -111,7 +111,7 @@ var help = '<hq:help/>';
         <tr valign="top">
           <td width="20%" class="BlockLabel" valign="center"><fmt:message key="dash.settings.FormLabel.Metric"/></td>
           <td width="80%" class="BlockContent" colspan="3" valign="center">
-             <html:select property="metric">
+             <html:select property="metric" onclick="MetricViewerForm.submit()">
              <html:option value="-1" disabled="true"><fmt:message key="dash.settings.metricViewer.selectMetric"/></html:option>
              <c:forEach var="metric" items="${metrics}">
                  <c:if test="${metric.defaultOn}">
