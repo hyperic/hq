@@ -535,6 +535,11 @@
               parameter="mode">
       </action>
       
+      <action path="/admin/config/RemoveEscalation"
+      		    type="org.hyperic.hq.ui.action.admin.config.RemoveEscalationAction">
+        <forward name="success" path="/admin/config/Config.do?mode=escalate"/>
+      </action>
+
       <!--end admin CONFIG -->
 	  
       <!-- resource hub -->

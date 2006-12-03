@@ -1,6 +1,7 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
 <%@ taglib uri="jstl-fmt" prefix="fmt" %>
+<%@ taglib uri="struts-html-el" prefix="html" %>
 <%@ taglib uri="struts-tiles" prefix="tiles" %>
 <%@ taglib uri="struts-logic" prefix="logic" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
@@ -32,6 +33,9 @@
 <tiles:insert page="/admin/config/AdminHomeNav.jsp"/>
 
 <table id="escalations" width="100%" cellpadding="0" cellspacing="0"><tr class="ListRow"><td colspan="2" class="ListHeaderInactiveSorted">Escalation Scheme</td></tr></table>
+
+<!-- Do the delete button here so that we don't have to try to duplicate it in javascript -->
+<span id="deleteBtn" style="display: none;"><html:img page="/images/tbb_delete.gif" border="0" onmouseout="imageSwap(this, imagePath + 'tbb_delete', '');" onmousedown="imageSwap(this, imagePath + 'tbb_delete', '_gray')"/></span>
 
 <script langugage="text/Javascript">
   var escJson = eval( '( { "escalations":<c:out value="${escalations}" escapeXml="false"/> })' );
@@ -68,7 +72,7 @@
     td = document.createElement("td");
     td.setAttribute('class', 'ListCell');
     td.setAttribute('style', 'text-align: right');
-    td.innerHTML = '[-' + schemes[i].id + '-]';
+    td.innerHTML = '<a href="<html:rewrite action="/admin/config/RemoveEscalation"/>' + '?esc=' + schemes[i].id + '">' + $('deleteBtn').innerHTML + '</a>';
     tr.appendChild(td);
 
     $('escalations').appendChild(tr);
