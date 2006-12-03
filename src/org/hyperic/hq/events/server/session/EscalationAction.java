@@ -92,7 +92,8 @@ public class EscalationAction implements Serializable, Json
     protected EscalationAction(JSONObject json) throws JSONException
     {
         setWaitTime(json.optLong("waitTime"));
-        setAction(Action.newInstance(json.getJSONObject("action")));
+        setAction(Action.newInstance(
+            json.getJSONObject(new Action().getJsonName())));
     }
 
     /**
@@ -140,8 +141,13 @@ public class EscalationAction implements Serializable, Json
     public JSONObject toJSON()  throws JSONException
     {
         return new JSONObject()
-                .put("action", action.toJSON())
+                .put(action.getJsonName(), action.toJSON())
                 .put("waitTime", waitTime);
+    }
+
+    public String getJsonName()
+    {
+        return "escalationAction";
     }
 
     public int hashCode() {

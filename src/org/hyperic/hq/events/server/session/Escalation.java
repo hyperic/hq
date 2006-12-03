@@ -41,8 +41,6 @@ import java.util.Iterator;
 public class Escalation extends PersistedObject
         implements Json
 {
-
-    public static final String JSON_ESCALATION = "escalation";
     // Fields
 
     private String name;
@@ -89,7 +87,8 @@ public class Escalation extends PersistedObject
     public static Escalation newInstance(Integer subjectId,
                                          JSONObject json) throws JSONException
     {
-        return new Escalation(subjectId, json.getJSONObject("escalation"));
+        return new Escalation(
+            subjectId, json.getJSONObject(new Escalation().getJsonName()));
     }
 
     // Constructors
@@ -219,7 +218,12 @@ public class Escalation extends PersistedObject
         if (getId() != null) {
             json.put("id", getId());
         }
-        return new JSONObject().put("escalation", json);
+        return json;
+    }
+
+    public String getJsonName()
+    {
+        return "escalation";
     }
 
     public boolean equals(Object obj) {

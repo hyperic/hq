@@ -1492,7 +1492,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         Escalation e =
             EscalationMediator.getInstance()
                 .findByEscalationName(subject.getId(), name);
-        return e != null ? e.toJSON() : null;
+        return e != null
+            ? new JSONObject().put(e.getJsonName(), e.toJSON()) : null;
     }
 
     /**
@@ -1512,7 +1513,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         Escalation e =
             EscalationMediator.getInstance()
                 .findEscalationByAlertDefId(subject.getId(), id);
-        return e != null ? e.toJSON() : null;
+        return e != null
+            ? new JSONObject().put(e.getJsonName(), e.toJSON()) : null;
     }
 
     /**

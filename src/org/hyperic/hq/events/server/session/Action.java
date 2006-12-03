@@ -229,7 +229,12 @@ public class Action
             throw new SystemException(e);
         }
     }
-  
+
+    public String getJsonName()
+    {
+        return "action";
+    }
+
     public String toString() {
         return "(id=" + getId() + ", class=" + _className + ")";
     }

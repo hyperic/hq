@@ -8,4 +8,5 @@ import org.json.JSONException;
 public interface Json
 {
     public JSONObject toJSON() throws JSONException;
+    public String getJsonName();
 }

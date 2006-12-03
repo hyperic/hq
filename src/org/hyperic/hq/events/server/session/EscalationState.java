@@ -259,6 +259,11 @@ public class EscalationState extends PersistedObject
                 .put("updateBy", updateBy);
     }
 
+    public String getJsonName()
+    {
+        return "escalationState";
+    }
+
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;

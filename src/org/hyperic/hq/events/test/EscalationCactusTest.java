@@ -85,6 +85,8 @@ public class EscalationCactusTest
         int sessionID = sessionMgr.put(overlord);
         String jsonString = makeJsonEscalation();
 
+        String ename = Escalation.newInstance().getJsonName();
+
         JSONObject json = new JSONObject(jsonString);
         eventsBoss.saveEscalation(sessionID, json);
 
@@ -94,18 +96,18 @@ public class EscalationCactusTest
         assertNotNull(json_saved);
 
         // flip notify bit
-        boolean notify = json_saved.getJSONObject("escalation")
+        boolean notify = json_saved.getJSONObject(ename)
             .getBoolean("notifyAll");
-        json_saved.getJSONObject("escalation")
+        json_saved.getJSONObject(ename)
             .put("notifyAll", !notify);
         eventsBoss.saveEscalation(sessionID, json_saved);
         json_saved =
             eventsBoss.jsonByEscalationName(sessionID, BOGUS_NAME1);
-        boolean notify_update = json_saved.getJSONObject("escalation")
+        boolean notify_update = json_saved.getJSONObject(ename)
             .getBoolean("notifyAll");
         assertTrue(notify != notify_update);
 
-        int id = json_saved.getJSONObject("escalation")
+        int id = json_saved.getJSONObject(ename)
             .getInt("id");
         eventsBoss.deleteEscalationById(sessionID, new Integer(id));
 
@@ -129,7 +131,7 @@ public class EscalationCactusTest
         e.getActions().add(act2);
         e.getActions().add(act3);
 
-        return e.toJSON().toString();
+        return new JSONObject().put(e.getJsonName(), e.toJSON()).toString();
     }
 
     private EscalationAction createEmailAction(String[] users)
