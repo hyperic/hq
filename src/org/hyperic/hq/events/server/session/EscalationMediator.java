@@ -1,6 +1,3 @@
-/**
- *
- */
 package org.hyperic.hq.events.server.session;
 
 import org.hyperic.hq.Mediator;
@@ -21,7 +18,6 @@ import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.Notify;
 import org.hyperic.hibernate.LockSet;
-import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.config.ConfigResponse;
@@ -47,8 +43,6 @@ public class EscalationMediator extends Mediator
     private static final int DEFAULT_LOCKSET_SIZE = 1024;
     private static final LockSet stateLocks=new LockSet(DEFAULT_LOCKSET_SIZE);
     private static Log log = LogFactory.getLog(EscalationMediator.class);
-    private static boolean MOCKTEST =
-        "true".equals(System.getProperty("hq.mocktest"));
 
     private static String ESCALATION_SERVICE_MBEAN =
         "hyperic.jmx:type=Service,name=EscalationService";
@@ -73,10 +67,6 @@ public class EscalationMediator extends Mediator
             throw new SystemException(e);
         } catch (NamingException e) {
             throw new SystemException(e);
-        }
-        // MBEAN Service lookup does not work in mock unit test env.
-        if (MOCKTEST) {
-            return;
         }
         try {
             ObjectName name = new ObjectName(ESCALATION_SERVICE_MBEAN);
@@ -105,9 +95,6 @@ public class EscalationMediator extends Mediator
         List states = findScheduledEscalationState();
         if (log.isDebugEnabled()) {
             log.debug("Found " + states.size() + " scheduled escalations.");
-        }
-        if (MOCKTEST) {
-            return;
         }
         for (Iterator s = states.iterator(); s.hasNext(); ) {
             final EscalationState state = (EscalationState)s.next();
