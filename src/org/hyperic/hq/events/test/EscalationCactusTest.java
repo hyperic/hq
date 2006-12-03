@@ -1,34 +1,20 @@
 package org.hyperic.hq.events.test;
 
-import org.hyperic.hq.test.HQEJBTestBase;
 import org.hyperic.hq.test.HQCactusBase;
 import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.hq.events.server.session.EscalationAction;
-import org.hyperic.hq.events.server.session.EscalationState;
-import org.hyperic.hq.events.server.session.Action;
-import org.hyperic.hq.events.server.session.EscalationMediator;
-import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.bizapp.shared.EventsBossLocal;
 import org.hyperic.hq.bizapp.shared.EventsBossUtil;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
-import org.hyperic.hq.common.shared.TransactionManagerUtil;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.auth.shared.SessionManager;
-import org.hibernate.ObjectNotFoundException;
 import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionFormBean;
 import org.apache.struts.action.DynaActionForm;
 import org.apache.struts.action.ActionMapping;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.json.JSONException;
 
-import javax.naming.NamingException;
-import javax.ejb.EJBException;
-import javax.ejb.CreateException;
 import java.util.HashSet;
 import java.util.Random;
 
