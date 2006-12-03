@@ -1,3 +1,28 @@
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
 <plugin name="mule">
   <classpath>
     <include name="pdk/lib/mx4j"/>
@@ -6,11 +31,9 @@
   <filter name="template"
           value="${OBJECT_NAME}:${alias}"/>
 
-  <filter name="domain" value="Mule"/>
-
   <server name="Mule" version="1.3">
     <property name="OBJECT_NAME"
-              value="${domain}:type=org.mule.ManagementContext,name=MuleServerInfo"/>
+              value="%domain%:type=org.mule.ManagementContext,name=MuleServerInfo"/>
 
     <property name="PROC_HOME_PROPERTY"
               value="mule.home"/>
@@ -20,6 +43,9 @@
               value="service:jmx:rmi:///jndi/rmi://localhost:1099/server"/>
 
     <config include="jmx">
+      <option name="domain"
+              description="JMX Domain"
+              default="Mule_Dot_Net_Stock_Quote_Sample_using_REST"/>
     </config>
 
     <plugin type="autoinventory"
@@ -34,6 +60,9 @@
       <property name="Copyright"/>
       <property name="Version"/>
     </properties>
+
+    <plugin type="control"
+            class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
 
     <actions include="start,stop"/>
 
@@ -54,7 +83,7 @@
 
     <service name="Endpoint">
       <property name="OBJECT_NAME"
-                value="${domain}:type=org.mule.Endpoint,component=*,name=*"/>
+                value="%domain%:type=org.mule.Endpoint,component=*,name=*"/>
 
       <plugin type="autoinventory"/>
 
@@ -62,6 +91,9 @@
         <property name="Synchronous"/>
         <property name="Type"/>
       </properties>
+
+      <plugin type="control"
+              class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
 
       <actions include="disconnect,connect"/>
 
@@ -72,7 +104,7 @@
 
     <service name="Connector">
       <property name="OBJECT_NAME"
-                value="${domain}:type=org.mule.Connector,name=*"/>
+                value="%domain%:type=org.mule.Connector,name=*"/>
 
       <config>
         <option name="name"
@@ -86,6 +118,9 @@
         <property name="Protocol"/>
       </properties>
 
+      <plugin type="control"
+              class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
+
       <actions include="startConnector,stopConnector"/>
 
       <metric name="Availability"
@@ -95,7 +130,7 @@
 
     <service name="Router">
       <property name="OBJECT_NAME"
-                value="${domain}:type=org.mule.Statistics,component=*,router=*"/>
+                value="%domain%:type=org.mule.Statistics,component=*,router=*"/>
 
       <config>
         <option name="component"
@@ -132,7 +167,7 @@
 
     <service name="Component">
       <property name="OBJECT_NAME"
-                value="${domain}:type=org.mule.Component,name=*"/>
+                value="%domain%:type=org.mule.Component,name=*"/>
 
       <config>
         <option name="name"
@@ -145,6 +180,9 @@
       <properties>
         <property name="MaxQueueSize" description="Max Queue Size"/>
       </properties>
+
+      <plugin type="control"
+              class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
 
       <actions include="pause,forceStop,resume,stop,start"/>
 
