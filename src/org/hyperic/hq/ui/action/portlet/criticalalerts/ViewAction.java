@@ -28,6 +28,8 @@ package org.hyperic.hq.ui.action.portlet.criticalalerts;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Date;
+import java.text.DateFormat;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -112,13 +114,16 @@ public class ViewAction extends BaseAction {
         List a = new ArrayList();
         for (Iterator i = criticalAlerts.iterator(); i.hasNext(); ) {
             DashboardAlertBean bean = (DashboardAlertBean)i.next();
+            DateFormat df = DateFormat.getDateTimeInstance();
+            String date = df.format(new Date(bean.getCtime()));
+
             JSONObject alert = new JSONObject();
             alert.put("alertId", bean.getAlertId());
             alert.put("appdefKey",
                       bean.getResource().getEntityId().getAppdefKey());
             alert.put("resourceName", bean.getResource().getName());
             alert.put("alertDefName", bean.getAlertDefName());
-            alert.put("cTime", bean.getCtime());
+            alert.put("cTime", date);
 
             a.add(alert);
         }
