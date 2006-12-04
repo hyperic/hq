@@ -140,17 +140,12 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      * Find the group that has the given ID.
      * @param whoami user requesting to find the group
      * @param id The ID of the role you're looking for.
-     * @return The value-object of the group of the given ID.
-     * @throws PermissionException 
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami does not have viewResourceGroup
-     * operation for requested group.
      * @ejb:interface-method
      */
     public ResourceGroup findResourceGroupById(AuthzSubjectValue whoami,
-                                                    Integer id)
-        throws PermissionException {
+                                               Integer id)
+        throws PermissionException 
+    {
         ResourceGroup groupLocal = getResourceGroupDAO().findById(id);
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
