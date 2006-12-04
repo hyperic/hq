@@ -56,6 +56,7 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.json.JSONArray;
 
 /**
  * A dispatcher for the alerts portal.
@@ -238,15 +239,21 @@ public class PortalAction extends ResourceController {
     {
         setResource(request);
         Portal portal = Portal.createPortal();
-        setTitle(request,portal,"alert.config.platform.props.ViewDef.escalation.Title");
+        setTitle(request, portal,
+                 "alert.config.platform.props.ViewDef.escalation.Title");
         portal.addPortlet(new Portlet(".events.config.view.escalation"),1);
-        // JW - this shouldn't be a dialog ... portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
-        // Get the list of users
         ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
         Integer sessionId = RequestUtils.getSessionId(request);
+
+        // Get the list of escalations
+        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
+        JSONArray arr = eb.listAllEscalationName(sessionId.intValue());
+        request.setAttribute("escalations", arr);
+
+        // Get the list of users
+        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
         PageList availableUsers =
             authzBoss.getAllSubjects(sessionId, PageControl.PAGE_ALL);
         request.setAttribute(Constants.AVAIL_USERS_ATTR, availableUsers);
