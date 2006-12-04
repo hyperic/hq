@@ -43,9 +43,10 @@ public class AlertDAO extends HibernateDAO {
     }
 
     int deleteByIds(Integer[] ids) {
-        String sql = "delete Alert where id in " + DBUtil.makeInSet(ids);
+        String sql = "delete Alert where id in (:ids)";
 
         return getSession().createQuery(sql)
+            .setParameterList("ids", ids)
             .executeUpdate();
     }
 
