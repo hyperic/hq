@@ -111,9 +111,11 @@ import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterGroupEntityResource;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterGroupMemExclude;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterInternalService;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
+import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -2293,6 +2295,18 @@ public class AppdefBossEJBImpl
         return findGroupByName(sessionId, groupName, PageControl.PAGE_ALL);
     }
 
+    /**
+     * @ejb:interface-method
+     */
+    public ResourceGroup findGroupById(int sessionId, Integer groupId) 
+        throws PermissionException, SessionException
+    {
+        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        
+        return getResourceGroupManager().findResourceGroupById(subject, 
+                                                               groupId);
+    }
+    
     /**
      * @ejb:interface-method
      */
