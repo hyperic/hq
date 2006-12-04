@@ -89,7 +89,7 @@ var help = '<hq:help/>';
         <tr valign="top">
           <td width="20%" class="BlockLabel" valign="center"><fmt:message key="dash.settings.FormLabel.ResourceType"/></td>
           <td width="80%" class="BlockContent" colspan="3" valign="center">
-              <html:select property="resourceType" onclick="MetricViewerForm.submit()">
+              <html:select property="resourceType" onchange="MetricViewerForm.submit()">
               <html:option value="-1" disabled="true"><fmt:message key="dash.settings.metricViewer.selectResourceType"/></html:option>
               <html:option value="-1" disabled="true"><fmt:message key="dash.settings.metricViewer.platformTypes"/></html:option>
               <c:forEach var="type" items="${platformTypes}">
@@ -111,7 +111,7 @@ var help = '<hq:help/>';
         <tr valign="top">
           <td width="20%" class="BlockLabel" valign="center"><fmt:message key="dash.settings.FormLabel.Metric"/></td>
           <td width="80%" class="BlockContent" colspan="3" valign="center">
-             <html:select property="metric" onclick="MetricViewerForm.submit()">
+             <html:select property="metric" onchange="MetricViewerForm.submit()">
              <html:option value="-1" disabled="true"><fmt:message key="dash.settings.metricViewer.selectMetric"/></html:option>
              <c:forEach var="metric" items="${metrics}">
                  <c:if test="${metric.defaultOn}">
