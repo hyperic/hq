@@ -41,11 +41,10 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Initializer for HQ database, may contain database specific routines
- *
  */
 public class DatabaseInitializer {
-    String logCtx = DatabaseInitializer.class.getName();
-    Log log = LogFactory.getLog(logCtx);
+    private String logCtx = DatabaseInitializer.class.getName();
+    private Log log = LogFactory.getLog(logCtx);
     
     public static void init() {
         new DatabaseInitializer();
