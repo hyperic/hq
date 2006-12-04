@@ -153,12 +153,11 @@
 
     onloads.push( initEsc );
 
-/* this is where we need to define the GET URL for the returned JSON (var url = 'sample5.html';) needs to be replaced. Right now it's just being written into a div at the bottom of the page */
-
 	function sendEscForm () {
-		var url = 'sample5.html';
-		var pars = 'escForm=' + Form.serialize('escalationForm');
-		var myAjax = new Ajax.Request( url, {method: 'get', parameters: pars, onComplete: showResponse} );
+		var adId = $('ad').value
+		var url = '/escalation/saveEscalation';
+		var pars = 'escForm=' + Form.serialize('escalationForm') + 'ad' + adId
+		var myAjax = new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse} );
 	}
 
     function configure(id) {
@@ -218,6 +217,7 @@
  
 <form name="escalationForm" id="escalationForm" onsubmit="sendEscForm();return false;">
   <input type="hidden" value="0" id="theValue">
+  <input type="hidden" value="<c:out value=${alertDef.id}/>" id="ad"/>
   <table width="100%" cellpadding="3" cellspacing="0" border="0">
     <tbody>
       <tr class="tableRowHeader">

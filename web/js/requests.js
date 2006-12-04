@@ -333,7 +333,7 @@ var tmp = eval('(' + originalRequest.responseText + ')');
 	function showMetricsResponse(originalRequest) {
 	
 	var metricText = eval("(" + originalRequest.responseText + ")");
-	var metricValues = metricText.metricViewer;
+	var metricValues = metricText.metricValues;
 	var metricTable = document.getElementById('metricTable');
 	var resourceNameHeader = metricValues.resourceTypeName;
 	var resourceLoadTypeHeader = metricValues.metricName;
@@ -374,13 +374,10 @@ var tmp = eval('(' + originalRequest.responseText + ')');
 		tr.appendChild(td2);
 		td2.setAttribute((document.all ? 'className' : 'class'), "metricName");
 		
-		if (metricValues.values[i].value) {
-		td2.appendChild(document.createTextNode(metricValues.values[i].value));
-		}
-		
-
 	
-	}
+		td2.appendChild(document.createTextNode(metricValues.values[i].value));
+		
+		}
 	
 	} else {
 	$('noMetricValues').style.display = '';
