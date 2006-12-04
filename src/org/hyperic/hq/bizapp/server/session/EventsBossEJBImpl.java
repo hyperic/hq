@@ -1452,6 +1452,21 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
+    public void deleteEscalationByName(int sessionID, String name)
+        throws SessionTimeoutException, SessionNotFoundException,
+        PermissionException
+    {
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        EscalationMediator mediator = EscalationMediator.getInstance();
+        mediator.deleteEscalationByName(subject.getId(), name);
+    }
+
+    /**
+     * save escalation
+     * @param sessionID
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
     public void deleteEscalationById(int sessionID, Integer id)
         throws SessionTimeoutException, SessionNotFoundException,
         PermissionException

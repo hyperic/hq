@@ -103,14 +103,17 @@ public class Escalation extends PersistedObject
         throws JSONException
     {
         setSubjectId(subjectId);
-        int id = json.optInt("id");
-        if (id > 0) {
-            setId(new Integer(id));
-        }
+        setIdVersion(json);
         setName(json.getString("name"));
         setAllowPause(json.optBoolean("allowPause"));
         setMaxWaitTime(json.optLong("maxWaitTime"));
         setNotifyAll(json.optBoolean("notifyAll"));
+        long cTime = json.optLong("creationTime");
+        if (cTime > 0) {
+            setCreationTime(cTime);
+            long mTime = json.getLong("modifiedTime");
+            setModifiedTime(mTime);
+        }
         setActions(
             getEscalationActions(json.getJSONArray("actions")));
     }
@@ -217,6 +220,7 @@ public class Escalation extends PersistedObject
                 .put("actions", actionArray);
         if (getId() != null) {
             json.put("id", getId());
+            json.put("_version_", get_version_());
         }
         return json;
     }

@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.ArrayList;
 
 import org.hyperic.dao.DAOFactory;
+import org.json.JSONObject;
+import org.json.JSONException;
 
 /**
  * Base class for all HQ persisted objects.
@@ -128,5 +130,15 @@ public abstract class PersistedObject
         result = 37*result + (_id != null ? _id.hashCode() : 0);
 
         return result;
+    }
+
+    protected void setIdVersion(JSONObject json)
+        throws JSONException
+    {
+        int id = json.optInt("id");
+        if (id > 0) {
+            setId(new Integer(id));
+            set_version_(new Long(json.getLong("_version_")));
+        }
     }
 }

@@ -218,6 +218,13 @@ public class EscalationMediator extends Mediator
         return DAOFactory.getDAOFactory().getEscalationDAO().findById(id);
     }
 
+    public void deleteEscalationByName(Integer subjectId, String name)
+        throws PermissionException
+    {
+        DAOFactory.getDAOFactory().getEscalationDAO()
+            .deleteByName(subjectId, name);
+    }
+
     public void deleteEscalationById(Integer subjectId, Integer[] ids)
         throws PermissionException
     {

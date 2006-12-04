@@ -68,10 +68,7 @@ public class Action
         } else {
             throw new JSONException("Unsupported Action class " + className);
         }
-        int id = json.optInt("id");
-        if (id > 0) {
-            action.setId(new Integer(id));
-        }
+        action.setIdVersion(json);
         return action;
     }
 
@@ -222,6 +219,7 @@ public class Action
                     .put("config", conf.toProperties());
             if (getId() != null) {
                 json.put("id", getId());
+                json.put("_version_", get_version_());
             }
             return json;
         } catch (EncodingException e) {

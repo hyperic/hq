@@ -6,9 +6,12 @@ import org.hyperic.hq.events.server.session.EscalationAction;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.bizapp.shared.EventsBossLocal;
 import org.hyperic.hq.bizapp.shared.EventsBossUtil;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.auth.shared.SessionManager;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.WebUser;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.DynaActionForm;
 import org.apache.struts.action.ActionMapping;
@@ -43,16 +46,14 @@ import java.util.Random;
  * USA.
  */
 
-public class EscalationCactusTest
-    extends HQCactusBase
+public class EscalationCactusTest extends HQCactusBase
 {
     private final String BOGUS_NAME1 =
         "bogus1 " + (new Random()).nextInt(10000);
 
-    SessionManager sessionMgr = SessionManager.getInstance();
-
     private EventsBossLocal eventsBoss;
-    private AuthzSubjectValue overlord;
+
+    private int sessionID;
 
     public EscalationCactusTest(String testName)
     {
@@ -62,30 +63,18 @@ public class EscalationCactusTest
     public void setUp() throws Exception
     {
         super.setUp();
-        if (!isCactusMode()) {
-            throw new Exception("this test is for in-container testing");
-        }
         eventsBoss = EventsBossUtil.getLocalHome().create();
-        overlord = AuthzSubjectManagerUtil.getLocalHome().create()
-            .getOverlord();
+        sessionID = SessionManager.getInstance().put(getOverlord());
     }
 
-    private ActionForm createForm()
+    public void tearDown() throws Exception
     {
-        return new DynaActionForm();
+        super.tearDown();
     }
 
-    private ActionMapping createMap()
+    private void createEscalation() throws Exception
     {
-        return new ActionMapping();
-    }
-
-    public void testCreateEscalation() throws Exception
-    {
-        int sessionID = sessionMgr.put(overlord);
         String jsonString = makeJsonEscalation();
-
-        String ename = Escalation.newInstance().getJsonName();
 
         JSONObject json = new JSONObject(jsonString);
         eventsBoss.saveEscalation(sessionID, json);
@@ -94,26 +83,102 @@ public class EscalationCactusTest
         JSONObject json_saved =
             eventsBoss.jsonByEscalationName(sessionID, BOGUS_NAME1);
         assertNotNull(json_saved);
+    }
+
+    public void testEscalationCrud() throws Exception
+    {
+        createEscalation();
+
+        JSONObject json;
+        String ename = Escalation.newInstance().getJsonName();
 
         // flip notify bit
-        boolean notify = json_saved.getJSONObject(ename)
-            .getBoolean("notifyAll");
-        json_saved.getJSONObject(ename)
-            .put("notifyAll", !notify);
-        eventsBoss.saveEscalation(sessionID, json_saved);
-        json_saved =
+        json =
             eventsBoss.jsonByEscalationName(sessionID, BOGUS_NAME1);
-        boolean notify_update = json_saved.getJSONObject(ename)
+        boolean notify = json.getJSONObject(ename)
+            .getBoolean("notifyAll");
+        json.getJSONObject(ename)
+            .put("notifyAll", !notify);
+        eventsBoss.saveEscalation(sessionID, json);
+        json = eventsBoss.jsonByEscalationName(sessionID, BOGUS_NAME1);
+        boolean notify_update = json.getJSONObject(ename)
             .getBoolean("notifyAll");
         assertTrue(notify != notify_update);
 
-        int id = json_saved.getJSONObject(ename)
-            .getInt("id");
+        // test for null update
+        long creationTime = json.getJSONObject(ename)
+            .getLong("creationTime");
+        long modifiedTime = json.getJSONObject(ename)
+            .getLong("modifiedTime");
+        eventsBoss.saveEscalation(sessionID, json);
+        json = eventsBoss.jsonByEscalationName(sessionID, BOGUS_NAME1);
+        long creationTime1 = json.getJSONObject(ename)
+            .getLong("creationTime");
+        long modifiedTime1 = json.getJSONObject(ename)
+            .getLong("modifiedTime");
+        assertTrue(
+            creationTime == creationTime1 &&
+            modifiedTime == modifiedTime1);
+
+        // test for real update
+        json.getJSONObject(ename).put("maxWaitTime", 120000);
+        eventsBoss.saveEscalation(sessionID, json);
+        json = eventsBoss.jsonByEscalationName(sessionID, BOGUS_NAME1);
+        creationTime1 = json.getJSONObject(ename)
+            .getLong("creationTime");
+        modifiedTime1 = json.getJSONObject(ename)
+            .getLong("modifiedTime");
+        long maxWaitTime = json.getJSONObject(ename)
+            .getLong("maxWaitTime");
+        assertTrue(
+            creationTime == creationTime1 &&
+            modifiedTime < modifiedTime1 &&
+            maxWaitTime == 120000);
+
+        int id = json.getJSONObject(ename).getInt("id");
+        removeEscalation(id);
+    }
+
+    public void testWebEscalationCrud() throws Exception
+    {
+        // login
+        webLogin();
+        createEscalation();
+
+        // should stream result directly to the response.writer
+        setRequestPathInfo("/escalation/jsonByEscalationName/" + BOGUS_NAME1);
+        actionPerform();
+
+        JSONObject json =
+            eventsBoss.jsonByEscalationName(sessionID, BOGUS_NAME1);
+        assertNotNull(json);
+
+        String ename = Escalation.newInstance().getJsonName();
+        setRequestPathInfo("/escalation/removeEscalation/" +
+                           json.getJSONObject(ename).getInt("id"));
+        actionPerform();
+        json =
+            eventsBoss.jsonByEscalationName(sessionID, BOGUS_NAME1);
+        assertNull(json);
+    }
+
+    private WebUser webLogin()
+    {
+        setRequestPathInfo("/j_security_check");
+        addRequestParameter("j_username", "hqadmin");
+        addRequestParameter("j_password", "hqadmin");
+        actionPerform();
+        assertNotNull(getSession().getAttribute(Constants.WEBUSER_SES_ATTR));
+        return (WebUser)getSession().getAttribute(Constants.WEBUSER_SES_ATTR);
+    }
+
+    private void removeEscalation(int id)
+        throws Exception
+    {
         eventsBoss.deleteEscalationById(sessionID, new Integer(id));
-
-        json_saved = eventsBoss.jsonByEscalationName(sessionID, BOGUS_NAME1);
-        assertNull(json_saved);
-
+        JSONObject json =
+            eventsBoss.jsonByEscalationName(sessionID, BOGUS_NAME1);
+        assertNull(json);
     }
 
     private String makeJsonEscalation() throws JSONException

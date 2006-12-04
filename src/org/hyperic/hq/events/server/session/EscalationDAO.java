@@ -209,4 +209,16 @@ public class EscalationDAO extends HibernateDAO
             }
         }
     }
+
+    public void deleteByName(Integer subjectId, String name)
+        throws PermissionException
+    {
+        SessionBase.canRemoveEscalation(subjectId);
+        String sql = "from Escalation where name = ?";
+        Escalation e = (Escalation)getSession().createQuery(sql)
+            .setString(0, name).uniqueResult();
+        if (e != null) {
+            remove(e);
+        }
+    }
 }
