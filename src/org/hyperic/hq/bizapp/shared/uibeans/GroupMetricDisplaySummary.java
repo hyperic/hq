@@ -34,49 +34,38 @@ import java.io.Serializable;
 
 /**
  * This bean encapsulates the data used to display a list of group metrics
- * 
- * 
  */
-public class GroupMetricDisplaySummary extends MetricConfigSummary
-    implements Serializable {
-    private int    totalMembers;
-    private int    activeMembers = 0;
+public class GroupMetricDisplaySummary 
+    extends MetricConfigSummary
+    implements Serializable 
+{
+    private int _totalMembers;
+    private int _activeMembers;
     
-    /**
-     * Default constructor.
-     */
     public GroupMetricDisplaySummary() {
     }
     
-    /**
-     * Constructor with id, name and category.
-     */
     public GroupMetricDisplaySummary(int id, String name, String category) {
         super(id, name, category);
     }
     
-    /**
-     * Increment the number of active members.
-     */
     public void incrementMember() {
-        this.activeMembers++;
+        _activeMembers++;
     }
 
     public int getActiveMembers() {
-        return activeMembers;
+        return _activeMembers;
     }
 
     public void setActiveMembers(int i) {
-        activeMembers = i;
+        _activeMembers = i;
     }
 
     public int getTotalMembers() {
-        return totalMembers;
+        return _totalMembers;
     }
 
     public void setTotalMembers(int i) {
-        totalMembers = i;
+        _totalMembers = i;
     }
 }
-
-// EOF
