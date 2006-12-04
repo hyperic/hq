@@ -121,10 +121,15 @@
 	    d.removeChild(olddiv);
 	}
 	
-	function addOption(sel, val, txt) {
+	function addOption(sel, val, txt, selected) {
 		var o = document.createElement("OPTION");
 		var t = document.createTextNode(txt);
 		o.setAttribute("value",val);
+
+        if (selected) {
+          o.setAttribute("selected", "true");
+        }
+
 		o.appendChild(t);
 		sel.appendChild(o);
 	}
@@ -141,8 +146,17 @@
         var escalationSel = $('escId');
         var schemes = escJson.escalations;
         for (var i = 0; i < schemes.length; i++) {
-		    addOption(escalationSel , schemes[i].id, schemes[i].name);
+            <c:if test="${not empty param.escId}">
+              if (schemes[i].name == '<c:out value="${param.escId}"/>')
+		        addOption(escalationSel , schemes[i].name, schemes[i].name, true);
+              else
+            </c:if>
+		    addOption(escalationSel , schemes[i].name, schemes[i].name);
         }
+
+        <c:if test="${not empty param.escId}">
+           $('escName').value = '<c:out value="${param.escId}"/>';
+        </c:if>
 
         /*
 		$('submit').onclick = function () {
@@ -213,7 +227,28 @@
                     return true;
                   }});
     }
+
+    function schemeChange(sel) {
+      document.EscalationSchemeForm.escId.value =
+        sel.options[sel.selectedIndex].value;
+      document.EscalationSchemeForm.submit();
+    }
+
 </script>
+
+<html:form action="/alerts/ConfigEscalation">
+  <html:hidden property="mode"/>
+  <input type="hidden" name="ad" value="<c:out value="${alertDef.id}"/>"/>
+  <c:choose>
+    <c:when test="${not empty Resource}">
+      <input type="hidden" name="eid" value="<c:out value="${Resource.entityId}"/>"/>
+    </c:when>
+    <c:otherwise>
+      <input type="hidden" name="aetid" value="<c:out value="${ResourceType.appdefTypeKey}"/>"/>
+    </c:otherwise>
+  </c:choose>
+  <html:hidden property="escId"/>
+</html:form>
  
 <form name="escalationForm" id="escalationForm" onsubmit="sendEscForm();return false;">
   <input type="hidden" value="0" id="theValue">
@@ -222,11 +257,15 @@
     <tbody>
       <tr class="tableRowHeader">
         <td align="right">
-          <select id="escId" name="escId">
-            <option selected value="0">
-              Create New Escalation
+          Escalation Scheme:
+          <select id="escId" name="escId" onchange="schemeChange(this)">
+            <option value="">
+              Create New 
             </option>
           </select>
+          
+          Name:
+          <input type=text size=25 name='escName' id='escName'/>
         </td>
       </tr>
         <tr class="tableRowAction">

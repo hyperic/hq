@@ -329,7 +329,7 @@
 
   <definition name=".events.config.view.escalation"
               extends=".events.config.view.definition"
-              controllerUrl="/alerts/ViewDefinition.do">
+              controllerUrl="/alerts/ViewDefinitionEscalation.do">
      <put name="notificationsTile" value=".events.config.view.notifications.escalation" />
   </definition>
 

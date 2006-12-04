@@ -72,6 +72,8 @@ initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 </script>
 <!-- FORM -->
+<c:choose>
+<c:when test="${not empty addMode}">
 <html:form action="${formAction}">
 <html:hidden property="ad" value="${alertDef.id}"/>
 <c:choose>
@@ -88,7 +90,6 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <tiles:put name="selfUrl" beanName="selfUrl"/>
 </tiles:insert>
 
-<c:if test="${not empty addMode}">
 <%-- if the attributes are not available, we can't display this tile: an error probably occured --%>
   <c:choose>
     <c:when test="${null == notifyList || empty listSize}">
@@ -117,9 +118,15 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
       </tiles:insert>
     </c:otherwise>
   </c:choose>
-</c:if>
 
 </html:form>
+</c:when>
+<c:otherwise>
+<tiles:insert beanName="notificationsTile">
+  <tiles:put name="selfUrl" beanName="selfUrl"/>
+</tiles:insert>
+</c:otherwise>
+</c:choose>
 
 <!-- / FORM -->
 <br>

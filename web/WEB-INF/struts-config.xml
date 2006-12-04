@@ -201,6 +201,9 @@
         <form-bean name="AddAlertOthersForm"
                    type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AddOthersForm" />
 
+        <form-bean name="EscalationSchemeForm"
+                   type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EscalationSchemeForm" />
+
          <!-- / -->  
 
         <!-- resource monitor forms -->
@@ -2514,6 +2517,18 @@
       <action path="/alerts/ViewDefinition"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ViewDefinitionAction">
+        <set-property property="title" value="2.2.3.2"/>
+      </action>
+
+      <action path="/alerts/ConfigEscalation"
+              name="EscalationSchemeForm"
+              forward=".events.config.layout">
+      </action>
+
+      <action path="/alerts/ViewDefinitionEscalation"
+              scope="request"
+              name="EscalationSchemeForm"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ViewEscalationAction">
         <set-property property="title" value="2.2.3.2"/>
       </action>
 
