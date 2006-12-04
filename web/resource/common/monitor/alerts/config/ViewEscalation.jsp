@@ -134,11 +134,24 @@
 		$('example').innerHTML = newData;
 	}
 
-	function init () {
+	function initEsc () {
+        // Set up the escalation dropdown
+        var escJson = eval( '( { "escalations":<c:out value="${escalations}" escapeXml="false"/> })' );
+
+        var escalationSel = $('escId');
+        var schemes = escJson.escalations;
+        for (var i = 0; i < schemes.length; i++) {
+		    addOption(escalationSel , schemes[i].id, schemes[i].name);
+        }
+
+        /*
 		$('submit').onclick = function () {
-		sendEscForm();
+		  sendEscForm();
 		}
+        */
 	}
+
+    onloads.push( initEsc );
 
 /* this is where we need to define the GET URL for the returned JSON (var url = 'sample5.html';) needs to be replaced. Right now it's just being written into a div at the bottom of the page */
 
@@ -191,10 +204,19 @@
     }
 </script>
  
-<form name="escalationForm" id="escalationForm" onsubmit="sendEscForm ();return false;">
+<form name="escalationForm" id="escalationForm" onsubmit="sendEscForm();return false;">
   <input type="hidden" value="0" id="theValue">
   <table width="100%" cellpadding="3" cellspacing="0" border="0">
     <tbody>
+      <tr class="tableRowHeader">
+        <td align="right">
+          <select id="escId" name="escId">
+            <option selected value="0">
+              Create New Escalation
+            </option>
+          </select>
+        </td>
+      </tr>
         <tr class="tableRowAction">
         <td id="section" width="100%">
             <ul id="testlist">
