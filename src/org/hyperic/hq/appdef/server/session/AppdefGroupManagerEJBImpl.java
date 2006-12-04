@@ -63,6 +63,7 @@ import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilter;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -256,8 +257,8 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     private AppdefGroupValue createGroup(AuthzSubjectValue subject, int gType,
                                          int adType, int adResType, String name,
                                          String description, String location)
-        throws GroupCreationException, GroupDuplicateNameException {
-
+        throws GroupCreationException, GroupDuplicateNameException 
+    {
         // groups must have at minimum a name between 1 and 100 chars.
         if (name == null || name.length() == 0 || name.length() > 100 )
             throw new GroupCreationException ("Name must be between 1 and "+
@@ -300,7 +301,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * Lookup and return a group value object by its name.
      * @param Spider subject value.
      * @param groupName - the unique group name.
-     * @return AppdefGroupValue object
      * @throws AppdefGroupNotFoundException when group cannot be located in db.
      * @throws PermissionException if the caller is not authorized.
      * @ejb:interface-method
@@ -308,13 +308,13 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      */
     public AppdefGroupValue findGroupByName(AuthzSubjectValue subject,
                                             String groupName)
-        throws AppdefGroupNotFoundException, PermissionException {
+        throws AppdefGroupNotFoundException, PermissionException 
+    {
         return findGroup(subject, null, groupName, PageControl.PAGE_ALL);
     }
 
     /**
      * Lookup and return a group value object by its name.
-     * @param Spider subject value.
      * @param groupName - the unique group name.
      * @param pc - page control
      * @return AppdefGroupValue object
@@ -325,7 +325,8 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      */
     public AppdefGroupValue findGroupByName(AuthzSubjectValue subject,
                                             String groupName, PageControl pc)
-        throws AppdefGroupNotFoundException, PermissionException {
+        throws AppdefGroupNotFoundException, PermissionException 
+    {
         return findGroup(subject, null, groupName, pc);
     }
 
@@ -406,7 +407,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
                                        String groupName, PageControl pc)
         throws AppdefGroupNotFoundException, PermissionException
     {
-        AppdefGroupValue retVal = null;
+        AppdefGroupValue retVal;
 
         try {
             GroupManagerLocal manager = getGroupManager();
@@ -442,8 +443,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
    
             // register any visitors
             registerVisitors(retVal);
-        }
-        catch (GroupNotFoundException e) {
+        } catch (GroupNotFoundException e) {
             log.debug("findGroup() Unable to find group:" + id); 
             throw new AppdefGroupNotFoundException ("Unable to find group:",e);
         }
