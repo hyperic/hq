@@ -243,20 +243,6 @@ public class PortalAction extends ResourceController {
                  "alert.config.platform.props.ViewDef.escalation.Title");
         portal.addPortlet(new Portlet(".events.config.view.escalation"),1);
         request.setAttribute(Constants.PORTAL_KEY, portal);
-
-        ServletContext ctx = getServlet().getServletContext();
-        Integer sessionId = RequestUtils.getSessionId(request);
-
-        // Get the list of escalations
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
-        JSONArray arr = eb.listAllEscalationName(sessionId.intValue());
-        request.setAttribute("escalations", arr);
-
-        // Get the list of users
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
-        PageList availableUsers =
-            authzBoss.getAllSubjects(sessionId, PageControl.PAGE_ALL);
-        request.setAttribute(Constants.AVAIL_USERS_ATTR, availableUsers);
         
         return null;
     }
