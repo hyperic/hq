@@ -976,6 +976,9 @@ public class ConfigManagerEJBImpl
         PreparedStatement ps = null;
         ResultSet rs = null;
         String sql;
+        
+        // XXX -- This is throwing an exception when I try to AI import
+        //        a platform with no IP address
 
         if(id.getType() == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
             sql = SQL_PLATFORM_IPS;
