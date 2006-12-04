@@ -8,6 +8,7 @@ import org.hyperic.hq.common.SystemException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.servlet.ServletException;
 import java.util.HashMap;
 import java.io.Writer;
@@ -88,18 +89,23 @@ public class JsonActionContext extends HashMap
         return pretty != null;
     }
 
+    public HttpSession getSession()
+    {
+        return getRequest().getSession();
+    }
+
     private ActionMapping getMapping()
     {
-        return(ActionMapping)get(ACTION_MAPPING);
+        return (ActionMapping)get(ACTION_MAPPING);
     }
 
     private HttpServletRequest getRequest()
     {
-        return(HttpServletRequest)get(ACTION_REQUEST);
+        return (HttpServletRequest)get(ACTION_REQUEST);
     }
 
     private HttpServletResponse getResponse()
     {
-        return(HttpServletResponse)get(ACTION_RESPONSE);
+        return (HttpServletResponse)get(ACTION_RESPONSE);
     }
 }

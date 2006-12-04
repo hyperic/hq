@@ -32,6 +32,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Random;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -69,6 +71,7 @@ import org.hyperic.hq.bizapp.server.trigger.frequency.CounterTrigger;
 import org.hyperic.hq.bizapp.server.trigger.frequency.DurationTrigger;
 import org.hyperic.hq.bizapp.server.trigger.frequency.FrequencyTriggerInterface;
 import org.hyperic.hq.bizapp.shared.uibeans.DashboardAlertBean;
+import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.ActionCreateException;
@@ -84,6 +87,7 @@ import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggerEvent;
 import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.hq.events.server.session.RegisteredTriggerNotifier;
+import org.hyperic.hq.events.server.session.EscalationAction;
 import org.hyperic.hq.events.shared.ActionManagerLocal;
 import org.hyperic.hq.events.shared.ActionManagerUtil;
 import org.hyperic.hq.events.shared.ActionValue;
@@ -1556,6 +1560,49 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                 .put("name", esc.getName()));
         }
         return jarr;
+    }
+
+
+    /**
+     * fake escalation data for short term fix.  will be removed soon
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public JSONObject makeJsonEscalation() throws JSONException
+    {
+        EscalationAction act1 = createEmailAction(
+            new String[] {"joe@gmail.com", "bob@yahoo.com"});
+
+        EscalationAction act2 = createEmailAction(
+            new String[] {"paul@att.com", "bill@google.com"});
+
+        EscalationAction act3 = createSyslogAction("meta", "tomcat", "5.0");
+
+        Escalation e = Escalation.newInstance("escalation " +
+                                              (new Random()).nextInt(10000));
+        e.getActions().add(act1);
+        e.getActions().add(act2);
+        e.getActions().add(act3);
+
+        return new JSONObject().put(e.getJsonName(), e.toJSON());
+    }
+
+    private EscalationAction createEmailAction(String[] users)
+    {
+        HashSet u = new HashSet();
+        for (int i=0; i<users.length; i++) {
+            u.add(users[i]);
+        }
+        return EscalationAction.newEmailAction(
+            EmailActionConfig.TYPE_EMAILS, u, 60000);
+    }
+
+    private EscalationAction createSyslogAction(String metaProject, String proj,
+                                                String version)
+    {
+        return EscalationAction.newSyslogAction(metaProject, proj, version,
+            60000);
     }
 
     private AppdefEntityID getAppdefEntityID(AlertDefinitionValue ad) {

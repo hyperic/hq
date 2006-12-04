@@ -2719,10 +2719,10 @@
       </action>
 
       <!-- JSON APIs for escalation -->
-      <!--action path="/escalation/save*"
+      <action path="/escalation/save*"
               scope="request"
               type="org.hyperic.hq.ui.json.action.escalation.crud.Save{1}"
-              /-->
+              />
 
       <action path="/escalation/remove*/*"
               scope="request"

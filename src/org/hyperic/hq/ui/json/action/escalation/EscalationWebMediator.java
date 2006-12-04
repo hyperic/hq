@@ -65,4 +65,19 @@ public class EscalationWebMediator
     {
         eventsBoss.deleteEscalationById(sessionId, new Integer[]{id});
     }
+
+    public void saveEscalation(int sessionId, JSONObject json)
+        throws
+        PermissionException,
+        SessionTimeoutException,
+        SessionNotFoundException,
+        JSONException
+    {
+        eventsBoss.saveEscalation(sessionId, json);
+    }
+
+    public JSONObject makeJsonEscalation() throws JSONException
+    {
+        return eventsBoss.makeJsonEscalation();
+    }
 }
