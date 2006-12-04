@@ -276,6 +276,60 @@ var tmp = eval('(' + originalRequest.responseText + ')');
 		rTimer = setTimeout(requestRecentAlerts,60000); //Refresh in 60 seconds
 	}
 	
+	function showAvailSummary(originalRequest) {
+		var availText = eval("(" + originalRequest.responseText + ")");
+		var availList = availText.availSummary;
+		var availTable = document.getElementById('availTable');
+		
+		if (availList.length <1) {
+	
+			$('noAvailSummary').style.display = '';
+			} else {
+			
+			for(var i=availTable.childNodes.length-1; i>1; i--){
+				availTable.removeChild(availTable.childNodes[i]);
+			}
+		
+			for(i=0;i < availList.length; i++) {
+			
+		
+			var tr  = document.createElement('tr');
+			var td1 = document.createElement('td');
+			var td2 = document.createElement('td');
+			var up = availList[i].numUp;
+			var down = availList[i].numDown;
+		   
+			
+				availTable.appendChild(tr);
+				tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
+				
+				
+				tr.appendChild(td1);
+				td1.setAttribute((document.all ? 'className' : 'class'), "resourceTypeName");
+				
+				td1.appendChild(document.createTextNode(availList[i].resourceTypeName));
+				
+				
+				
+				tr.appendChild(td2);
+				td2.setAttribute((document.all ? 'className' : 'class'), "availResourceStatus");
+				
+				if (down > '0') {
+				td2.innerHTML = '<span style=color:red;>' + down + '</span>' + " / " + up;
+				} else {
+				td2.innerHTML = down + " / " + up;
+				}
+				
+				//td2.appendChild(document.createTextNode(availList[i].numDown));
+				//td2.appendChild(document.createTextNode(availList[i].numUp));
+					
+				
+			}	
+		}
+		
+		rTimer = setTimeout('showAvailSummary();',60000); //Refresh in 60 seconds
+	}
+	
 	function showMetricsResponse(originalRequest) {
 	
 	var metricText = eval("(" + originalRequest.responseText + ")");

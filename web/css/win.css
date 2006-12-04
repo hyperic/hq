@@ -848,6 +848,15 @@ ul.boxy li {
   text-wrap:none;
 }
 
+.availResourceStatus {
+width:10%;
+padding-top:3px;
+padding-bottom:3px;
+padding-right:3px;
+border-bottom:1px solid #D5D8DE;
+text-align:center;
+}
+
 #section #testlist { 
   list-style-type:none;
   margin:0;
