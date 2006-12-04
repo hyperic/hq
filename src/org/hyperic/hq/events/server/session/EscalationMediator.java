@@ -259,6 +259,13 @@ public class EscalationMediator extends Mediator
         return dao.findByAlertDefinitionId(subjectId, id);
     }
 
+    public Escalation findByEscalationId(Integer subjectId, Integer id)
+        throws PermissionException
+    {
+        EscalationDAO dao = DAOFactory.getDAOFactory().getEscalationDAO();
+        return dao.findById(subjectId, id);
+    }
+
     public EscalationState getEscalationState(Escalation e, Integer alertDefId)
     {
         EscalationStateDAO dao =

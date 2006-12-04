@@ -46,6 +46,13 @@ public class EscalationWebMediator
         return eventsBoss.jsonByEscalationName(sessionId, name);
     }
 
+    public JSONObject jsonByEscalationId(int sessionId, Integer id)
+        throws JSONException, PermissionException, SessionTimeoutException,
+               SessionNotFoundException
+    {
+        return eventsBoss.jsonByEscalationId(sessionId, id);
+    }
+
     public JSONObject jsonEscalationByAlertDefId(int sessionId,
                                                  Integer alertDefId) throws
         JSONException, PermissionException, SessionTimeoutException,

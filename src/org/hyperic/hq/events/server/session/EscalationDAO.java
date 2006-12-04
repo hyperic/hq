@@ -108,6 +108,13 @@ public class EscalationDAO extends HibernateDAO
         return (Escalation)super.findById(id);
     }
 
+    public Escalation findById(Integer subjectId, Integer id)
+        throws PermissionException
+    {
+        SessionBase.canViewEscalation(subjectId);
+        return (Escalation)super.findById(id);
+    }
+
     public Escalation findByName(String name) {
         String sql = "from Escalation where name=?";
         return (Escalation)getSession().createQuery(sql)

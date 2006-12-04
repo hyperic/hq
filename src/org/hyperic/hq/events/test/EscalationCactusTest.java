@@ -111,7 +111,10 @@ public class EscalationCactusTest extends HQCactusBase
         long modifiedTime = json.getJSONObject(ename)
             .getLong("modifiedTime");
         eventsBoss.saveEscalation(sessionID, json);
-        json = eventsBoss.jsonByEscalationName(sessionID, BOGUS_NAME1);
+        json = eventsBoss.jsonByEscalationId(sessionID,
+                                             new Integer(
+                                                 json.getJSONObject(ename)
+                                                     .getInt("id")));
         long creationTime1 = json.getJSONObject(ename)
             .getLong("creationTime");
         long modifiedTime1 = json.getJSONObject(ename)
