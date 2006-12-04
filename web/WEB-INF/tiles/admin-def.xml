@@ -12,7 +12,7 @@
     <put name="titleImg" value="spacer.gif"/>
   </definition>
 
-  <definition name=".admin.user.layout"
+  <definition name=".admin.user.main.layout"
               extends=".admin.main.layout">
     <put name="titleBgStyle" value="PageTitleUserBg"/>
     <put name="titleImg" value="title_user.gif"/>
@@ -34,7 +34,7 @@
   <!--admin user portlets-->      
   <definition name=".admin.user.List"
               controllerUrl="/admin/user/List.do"
-              extends=".admin.user.layout">
+              extends=".admin.user.main.layout">
     <put name="titleKey" value="admin.user.ListUsers"/>  
     <put name="configTile" value="/admin/user/ListUsers.jsp"/>
   </definition>
