@@ -65,7 +65,8 @@ public final class JMXFilter implements Filter {
     
     private ContextInfo jmxContextInfo = new ContextInfo();
     private String contextName;
-
+    private ServletContext context;
+    
     /* Default to 8k.  This is 1k smaller than the default in Java of 9k.
      * We do that because this way we control the flush, and we can gaurantee
      * that we won't write a partial line to the log.
@@ -154,8 +155,6 @@ public final class JMXFilter implements Filter {
         this.jmxFilterServlet = jmxFilterServlet;
     }
 
-    private ServletContext context;
-    
     public ServletContext getServletContext() {
         return context;
     }
