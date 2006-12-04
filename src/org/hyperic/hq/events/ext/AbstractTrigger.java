@@ -265,12 +265,9 @@ public abstract class AbstractTrigger implements TriggerInterface {
         Alert alertpojo = alman.findAlertById(alert.getId());
         Escalation esc = alertpojo.getAlertDefinition().getEscalation();
         if (esc != null) {
-            Integer escalationId = esc.getId();
-            if (escalationId != null) {
-                // invoke escalation chain
-                EscalationMediator emed = EscalationMediator.getInstance();
-                emed.startEscalation(escalationId, alert.getId());
-            }
+            // invoke escalation chain
+            EscalationMediator emed = EscalationMediator.getInstance();
+            emed.startEscalation(esc.getId(), alert.getId());
         } else {
             AlertConditionLog[] logs =
                 (AlertConditionLog[])alertpojo
