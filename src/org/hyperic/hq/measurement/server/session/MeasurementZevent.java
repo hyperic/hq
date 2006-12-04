@@ -22,7 +22,7 @@ public class MeasurementZevent
         }
         
         /**
-         * Returns the id of the {@link RawMeasurement} that the event is
+         * Returns the id of the {@link DerivedMeasurement} that the event is
          * for.
          */
         public int getId() {
