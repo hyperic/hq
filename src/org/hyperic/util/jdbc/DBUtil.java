@@ -750,7 +750,7 @@ public class DBUtil {
         for (int i=0; i<o.length; i++) {
             if (i > 0)
                 b.append(", ");
-            b.append(o);
+            b.append(o[i]);
         }
         b.append(")");
         return b.toString();
