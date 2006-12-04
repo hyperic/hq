@@ -1,3 +1,11 @@
+<%@ page language="java" %>
+<%@ page errorPage="/common/Error.jsp" %>
+<%@ taglib uri="struts-html-el" prefix="html" %>
+<%@ taglib uri="struts-tiles" prefix="tiles" %>
+<%@ taglib uri="jstl-fmt" prefix="fmt" %>
+<%@ taglib uri="display" prefix="display" %>
+<%@ taglib uri="jstl-c" prefix="c" %>
+
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -22,14 +30,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
-<%@ page language="java" %>
-<%@ page errorPage="/common/Error.jsp" %>
-<%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
-<%@ taglib uri="display" prefix="display" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
 
 <script type="text/javascript">
     function getGroupOrder() {
@@ -72,7 +72,7 @@
         
         
         //remDiv.innerHTML ="<a href=\"javascript:;\" onclick=\"removeEvent(\'" + escLi + "\');Behaviour.apply();\"><img src=\"images/tbb_delete.gif\" height=\"16\" width=\"46\" border=\"0\" >";
-        
+        remDiv.innerHTML = $('remove').innerHTML;
         
 		escLi.appendChild(escTable);
 		escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
@@ -88,16 +88,18 @@
 		td2.setAttribute('width', '25%');
 		
 		td2.appendChild(select1);
-		select1.setAttribute('id', 'select1');
-		select1.name = "select1_" + liID;
-		addOption(select1, 'Role', 'role');
-		addOption(select1, 'sysadmin1', 'sysadmin1');
-		addOption(select1, 'sysadmin2', 'sysadmin2');
-		addOption(select1, 'VP of Engineering', 'VP of Engineering');
+		select1.setAttribute('id', 'who' + liID);
+		select1.name = "who" + liID;
+        <c:if test="${not empty AvailableRoles}">
+		addOption(select1, 'Roles', 'Roles');
+        </c:if>
+		addOption(select1, 'Users', 'Users');
+		addOption(select1, 'Others', 'Others');
 		
 		escTr1.appendChild(td3);
 		td3.setAttribute('width', '50%');
 		td3.appendChild(anchor);
+        anchor.setAttribute('href', "javascript:configure('" + liID + "')");
 		anchor.appendChild(document.createTextNode('Configure'));       
 		
 		escTable.appendChild(escTr2);
@@ -111,7 +113,6 @@
 		addOption(select2, '20', '20 minutes');
 		addOption(select2, '10', '10 minutes');
 		addOption(select2, '5', '5 minutes');
-        
 	}
 	
 	function removeElement(divNum) {
@@ -146,52 +147,60 @@
 		var pars = 'escForm=' + Form.serialize('escalationForm');
 		var myAjax = new Ajax.Request( url, {method: 'get', parameters: pars, onComplete: showResponse} );
 	}
+
+    function configure(id) {
+      var sel = $('who' + id);
+      var selval = sel.options[sel.selectedIndex].value;
+
+      if (selval == 'Users') {
+        // Select checkboxes based on existing configs
+        configureUsers();
+      }
+      else if (selval == 'Others') {
+        // Set the inner text
+        configureOthers();
+      }
+      else if (selval == 'Roles') {
+        // Select checkboxes based on existing configs
+        configureRoles();
+      }
+    }
+
+    function configureOthers() {
+      Dialog.confirm('<textarea name=emailAddresses cols=80 rows=3></textarea>',
+                  {windowParameters: {className:'dialog', width:305, height:200,
+                   resize:false, draggable:false},
+                  okLabel: "OK", cancelLabel: "Cancel",
+                  ok:function(win) {
+                    // Do something
+                    new Effect.Shake(Windows.focusedWindow.getId());
+                    return true;
+                  }});
+    }
+
+    function configureUsers() {
+      Dialog.confirm($('usersList').innerHTML,
+                  {windowParameters: {className:'dialog', width:305, height:200,
+                   resize:false, draggable:false},
+                  okLabel: "OK", cancelLabel: "Cancel",
+                  ok:function(win) {
+                    // Do something
+                    new Effect.Shake(Windows.focusedWindow.getId());
+                    return true;
+                  }});
+    }
 </script>
-<style type="text/css">
-  #section #testlist { 
-      list-style-type:none;
-      margin:0;
-      padding:0;
-   }
-   #section #testlist li {
-    
-     font:13px Verdana;
-     margin:0;
-     margin-left:20px;
-     padding-left:20px;
-     padding:4px;
-     cursor:move;
-   }
-   
-   .escTbl {
-   width:100%;
-    margin-top:10px;
-   margin-bottom:10px;
-   }
-   
-   #testlist li {
-   list-style: none; 
-   width:90%;
-   border-bottom:1px solid gray;
-   }
  
- .remove {
- float:right;
- margin-right:10px;
- }
-</style>
- 
-<body bgcolor="#FFFFFF" style="margin:15px;" onload="init();">
   <table width="100%" cellpadding="3" cellspacing="0" border="0">
     <tbody>
       <tr>
         <td colspan="2" id="section" width="100%">
-          <form name="escalationForm" id="escalationForm">
+          <form name="escalationForm" id="escalationForm" onsubmit="sendEscForm ();return false;">
             <input type="hidden" value="0" id="theValue">
             <ul id="testlist">
               <li id="testlist_row_1" class="lineitem">
-                <div class="remove">
-                  <a href="#" style="text-decoration:none;"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0" /></a>
+                <div id="remove" class="remove">
+                  <a href="#" style="text-decoration:none;"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"/></a>
                 </div>
                 <table cellpadding="0" cellspacing="0" border="0" width="100%">
                   <tr>
@@ -206,24 +215,20 @@
                         SMS
                       </option>
                     </select></td>
-                    <td style="padding-right:20px;"><select name="who">
-                      <option value="Sys Admin 1">
-                        Sys Admin 1
+                    <td style="padding-right:20px;"><select id="who10001" name="who10001">
+                      <c:if test="${not empty AvailableRoles}">
+                      <option value="Roles">
+                        Roles
                       </option>
-                      <option value="Sys Admin 2">
-                        Sys Admin 2
+                      </c:if>
+                      <option value="Users">
+                        Users
                       </option>
-                      <option value="Sys Admin Manager">
-                        Sys Admin Manager
-                      </option>
-                      <option value="VP of Engineering">
-                        VP of Engineering
-                      </option>
-                      <option selected value="Role">
-                        Role
+                      <option value="Others">
+                        Others
                       </option>
                     </select></td>
-                    <td width="45%"><a href="">Configure...</a></td>
+                    <td width="45%"><a href="javascript:configure(10001)">Configure...</a></td>
                   </tr>
                   <tr>
                     <td colspan="3" style="padding-top:5px;padding-bottom:5px;padding-left:30px;">Then wait <select name="time">
@@ -240,16 +245,20 @@
                   </tr>
                 </table>
               </li>
-            </ul><br>
-            <a href="#" onclick="addRow();" style="text-decoration:none;"><html:img page="/images/tbb_addtolist.gif" height="16" width="85" border="0" /></a><br>
+            </ul>
+            <table width="100%" cellpadding="5" cellspacing="0" border="0" class="ToolbarContent">
+              <tr>
+                <td width="40"><a href="#" onclick="addRow();" style="text-decoration:none;"><html:img page="/images/tbb_addtolist.gif" height="16" width="85" border="0"/></a></td>
+              </tr>
+            </table>
             <br>
           </form>
         </td>
       </tr>
       <tr>
-        <td style="padding-left:5px;padding-top:10px;padding-bottom:5px;border-top:1px solid #d9d9d9;" colspan="2">If the alert is acknowledged:<br></td>
+        <td class="BlockTitle" colspan="2">If the alert is acknowledged:</td>
       </tr>
-      <tr>
+      <tr class="ListRow">
         <td style="padding-left:15px;padding-bottom:10px;" colspan="2">
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
@@ -285,9 +294,9 @@
         </td>
       </tr>
       <tr>
-        <td style="padding-left:5px;padding-top:10px;border-top:1px solid #d9d9d9;padding-bottom:5px;" colspan="2">If the alert is fixed:<br></td>
+        <td  class="BlockTitle" colspan="2">If the alert is fixed:<br></td>
       </tr>
-      <tr>
+      <tr class="ListRow">
         <td style="padding-left:15px;padding-bottom:10px;" colspan="2">
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
@@ -299,16 +308,35 @@
           </table>
         </td>
       </tr>
-      <tr>
-        <td align="right"><input type="button" onclick="submitEscForm();" id="submit" value="submit">&nbsp;&nbsp; &nbsp;<input name="Cancel" id="cancel" type="button" value="Cancel"><!--<input type="button" onClick="getGroupOrder();Behaviour.apply()" value="Debug: Show serialized list order">--></td>
-      </tr>
-      <tr>
-        <td>
-          <br>
-          <div id="example"></div>
-        </td>
-      </tr>
     </tbody>
   </table>
-</body>
-</html>
+
+<tiles:insert definition=".form.buttons">
+  <tiles:put name="noCancel" value="true"/>
+</tiles:insert>
+
+<div id="usersList" style="display: none;">
+  <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
+  <table width="100%" cellpadding="2" cellspacing="0" border="0">
+  <tr class="ListRow">
+    <td class="ListCell">
+      <input type=checkbox name=u<c:out value="${user.id}"/>><c:out value="${user.name}"/></input>
+    </td>
+  </tr>
+  </table>
+  </c:forEach>
+</div>
+
+<c:if test="${not empty AvailableRoles}">
+<div id="rolesList" style="display: none;">
+  <c:forEach var="role" items="${AvailableRoles}" varStatus="status">
+  <table width="100%" cellpadding="2" cellspacing="0" border="0">
+  <tr class="ListRow">
+    <td class="ListCell">
+      <input type=checkbox name=r<c:out value="${role.id}"/>><c:out value="${role.name}"/></input>
+    </td>
+  </tr>
+  </table>
+  </c:forEach>
+</div>
+</c:if>

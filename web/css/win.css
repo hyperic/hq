@@ -64,7 +64,7 @@ A.ListHeaderLink:hover {color: #004680; text-decoration: underline;}
 .ListHeaderOff {text-align: left; font-weight: bold; background-color: #DBE3F5; padding: 3px; border-top: solid #ABB1C7; border-bottom: solid #C6CFE5; border-width: 1px; color: #999999;}
 .ListHeaderInactiveCenter {text-align: center; font-weight: bold; background-color: #DBE3F5; padding: 3px; border-top: solid #ABB1C7; border-bottom: solid #C6CFE5; border-width: 1px;}
 
-.ListRow, .tableRowEven {background-color: #F2F4F7;}
+.ListRow, .tableRowEven, .lineitem {background-color: #F2F4F7;}
 .ListRowSelected, .tableRowAction, .tableRowOdd {text-align: left; background-color: #EBEDF2;}
 
 .ListCell, .ListCellSelected, .tableCell, .redTableCell {padding: 3px; border-bottom: solid #D5D8DE; border-width: 1px; vertical-align: middle; }
@@ -773,76 +773,108 @@ ul.boxy li {
 }
 
 .accordionTabTitleBar {
-   font-size           : 12px;
-   padding             : 4px 6px 4px 6px;
-   border-style        : solid none solid none;
-   border-top-color    : #DDDDDD;
-   border-bottom-color : #666666;
-   border-width        : 1px 0px 1px 0px;
+  font-size           : 12px;
+  padding             : 4px 6px 4px 6px;
+  border-style        : solid none solid none;
+  border-top-color    : #DDDDDD;
+  border-bottom-color : #666666;
+  border-width        : 1px 0px 1px 0px;
 }
 
 .resource {
-width:60%;
-padding-top:3px;
-padding-bottom:3px;
-padding-left:3px;
-border-bottom:1px solid #D5D8DE;
+  width:60%;
+  padding-top:3px;
+  padding-bottom:3px;
+  padding-left:3px;
+  border-bottom:1px solid #D5D8DE;
 }
 
 .availability {
-width:10%;
-padding-top:3px;
-padding-bottom:3px;
-border-bottom:1px solid #D5D8DE;
-text-align:center;
+  width:10%;
+  padding-top:3px;
+  padding-bottom:3px;
+  border-bottom:1px solid #D5D8DE;
+  text-align:center;
 }
 
 .alerts {
-width:10%;
-padding-top:3px;
-padding-bottom:3px;
-border-bottom:1px solid #D5D8DE;
-text-align:center;
+  width:10%;
+  padding-top:3px;
+  padding-bottom:3px;
+  border-bottom:1px solid #D5D8DE;
+  text-align:center;
 }
 
 .oob {
-width:10%;
-padding-top:3px;
-padding-bottom:3px;
-padding-right:3px;
-border-bottom:1px solid #D5D8DE;
-text-align:center;
+  width:10%;
+  padding-top:3px;
+  padding-bottom:3px;
+  padding-right:3px;
+  border-bottom:1px solid #D5D8DE;
+  text-align:center;
 }
 
 .resourceName {
-width:50%;
-padding-top:3px;
-padding-bottom:3px;
-padding-left:3px;
-border-bottom:1px solid #D5D8DE;
+  width:50%;
+  padding-top:3px;
+  padding-bottom:3px;
+  padding-left:3px;
+  border-bottom:1px solid #D5D8DE;
 }
-.resourceTypeName {
-width:20%;
-padding-top:3px;
-padding-bottom:3px;
-padding-left:3px;
-border-bottom:1px solid #D5D8DE;
 
+.resourceTypeName {
+  width:20%;
+  padding-top:3px;
+  padding-bottom:3px;
+  padding-left:3px;
+  border-bottom:1px solid #D5D8DE;
 }
+
 .throughput {
-width:10%;
-padding-top:3px;
-padding-bottom:3px;
-border-bottom:1px solid #D5D8DE;
-text-align:center;
+  width:10%;
+  padding-top:3px;
+  padding-bottom:3px;
+  border-bottom:1px solid #D5D8DE;
+  text-align:center;
 }
 
 .metricName {
-width:20%;
-padding-top:3px;
-padding-bottom:3px;
-padding-right:3px;
-border-bottom:1px solid #D5D8DE;
-text-align:center;
-text-wrap:none;
+  width:20%;
+  padding-top:3px;
+  padding-bottom:3px;
+  padding-right:3px;
+  border-bottom:1px solid #D5D8DE;
+  text-align:center;
+  text-wrap:none;
 }
+
+#section #testlist { 
+  list-style-type:none;
+  margin:0;
+  padding:0;
+}
+
+#section #testlist li {
+  font:13px Verdana;
+  margin:0;
+  padding:4px;
+  cursor:move;
+}
+   
+.escTbl {
+  width:100%;
+  margin-top:10px;
+  margin-bottom:10px;
+}
+   
+#testlist li {
+   list-style: none; 
+   width: 100%;
+   border-bottom:1px solid gray;
+}
+ 
+.remove {
+  float:right;
+  margin-right:10px;
+}
+

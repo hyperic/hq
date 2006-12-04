@@ -46,10 +46,13 @@ function setFoot() {
   }
 }
 
+var aboutShown = false;
+
 function about() {
   Dialog.info($('about').innerHTML,
               {windowParameters: {className:'dialog', width:305, height:200,
                resize:false, draggable:false}});
+  aboutShown = true;
 }
 
 function closeAbout(e) {
@@ -57,7 +60,10 @@ function closeAbout(e) {
       bodyClicked(e);
   }
 
-  Dialog.closeInfo();
+  if (aboutShown) {
+    Dialog.closeInfo();
+    aboutShown = false;
+  }
 }
 
 document.body.onclick = closeAbout;
