@@ -37,8 +37,6 @@ import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -74,14 +72,25 @@ public class ModifyAction extends BaseAction {
             (WebUser) session.getAttribute(Constants.WEBUSER_SES_ATTR);
 
         String forwardStr = Constants.SUCCESS_URL;
-        
-        String key = ViewAction.RESOURCES_KEY;
-        if (pForm.getToken() != null) {
-            key += pForm.getToken();
+
+        String token = pForm.getToken();
+
+        // For multi-portlet configurations
+        String resKey = ViewAction.RESOURCES_KEY;
+        String countKey = PropertiesForm.ALERT_NUMBER;
+        String priorityKey = PropertiesForm.PRIORITY;
+        String timeKey = PropertiesForm.PAST;
+        String selOrAllKey = PropertiesForm.SELECTED_OR_ALL;
+        if (token != null) {
+            resKey += token;
+            countKey += token;
+            priorityKey += token;
+            timeKey += token;
+            selOrAllKey += token;
         }
-        
+
         if(pForm.isRemoveClicked()){
-            DashboardUtils.removeResources(pForm.getIds(), key, user);
+            DashboardUtils.removeResources(pForm.getIds(), resKey, user);
             forwardStr = "review";
         }
 
@@ -96,16 +105,11 @@ public class ModifyAction extends BaseAction {
         String prioritity      = pForm.getPriority();
         String selectedOrAll   = pForm.getSelectedOrAll();
 
-        user.setPreference(PropertiesForm.ALERT_NUMBER,
-                           numberOfAlerts.toString());
-        user.setPreference(PropertiesForm.PAST, past);
-        user.setPreference(PropertiesForm.PRIORITY, prioritity); 
-        user.setPreference(PropertiesForm.SELECTED_OR_ALL, selectedOrAll);
+        user.setPreference(countKey, numberOfAlerts.toString());
+        user.setPreference(timeKey, past);
+        user.setPreference(priorityKey, prioritity);
+        user.setPreference(selOrAllKey, selectedOrAll);
 
-        LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
-            " in criticalalerts/ModifyAction " +
-            " for " + user.getId() + " at "+System.currentTimeMillis() +
-            " user.prefs = " + user.getPreferences());
         boss.setUserPrefs(user.getSessionId(), user.getId(),
                           user.getPreferences());
         session.removeAttribute(Constants.USERS_SES_PORTAL);

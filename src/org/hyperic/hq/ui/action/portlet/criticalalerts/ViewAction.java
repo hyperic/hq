@@ -79,24 +79,29 @@ public class ViewAction extends BaseAction {
         } catch (ParameterNotFoundException e) {
             token = null;
         }
-        
-        String key = ViewAction.RESOURCES_KEY;
+
+        // For multi-portlet configurations
+        String resKey = ViewAction.RESOURCES_KEY;
+        String countKey = PropertiesForm.ALERT_NUMBER;
+        String priorityKey = PropertiesForm.PRIORITY;
+        String timeKey = PropertiesForm.PAST;
+        String selOrAllKey = PropertiesForm.SELECTED_OR_ALL;
         if (token != null) {
-            key += token;
+            resKey += token;
+            countKey += token;
+            priorityKey += token;
+            timeKey += token;
+            selOrAllKey += token;
         }
 
-        List entityIds = DashboardUtils.preferencesAsEntityIds(key, user);
+        List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, user);
         AppdefEntityID[] arrayIds =
             (AppdefEntityID[])entityIds.toArray(new AppdefEntityID[0]);
 
-        int count = Integer.parseInt(
-                user.getPreference(PropertiesForm.ALERT_NUMBER));
-        int priority = Integer.parseInt(
-                user.getPreference(PropertiesForm.PRIORITY));
-        long timeRange = Long
-                .parseLong(user.getPreference(PropertiesForm.PAST));
-        boolean all = "all".equals(
-                user.getPreference(PropertiesForm.SELECTED_OR_ALL));
+        int count = Integer.parseInt(user.getPreference(countKey));
+        int priority = Integer.parseInt(user.getPreference(priorityKey));
+        long timeRange = Long.parseLong(user.getPreference(timeKey));
+        boolean all = "all".equals(user.getPreference(selOrAllKey));
 
         int sessionID = user.getSessionId().intValue();
         PageControl pc = new PageControl();
@@ -107,8 +112,8 @@ public class ViewAction extends BaseAction {
         }
 
         PageList criticalAlerts =
-            eventBoss.findAlerts(sessionID, count, priority, timeRange, arrayIds,
-                                 pc);
+            eventBoss.findAlerts(sessionID, count, priority, timeRange,
+                                 arrayIds, pc);
 
         JSONObject alerts = new JSONObject();
         List a = new ArrayList();
