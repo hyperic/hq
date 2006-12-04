@@ -45,22 +45,22 @@ import org.hyperic.util.config.InvalidOptionValueException;
 public class WebUser {
 
     public static final String PREF_FAV_RESOURCE_METRICS_PREFIX =
-    ".resource.common.monitor.visibility.favoriteMetrics";
+        ".resource.common.monitor.visibility.favoriteMetrics";
 
     public static final String PREF_METRIC_RANGE =
-    ".resource.common.monitor.visibility.metricRange";
+        ".resource.common.monitor.visibility.metricRange";
 
     public static final String PREF_METRIC_RANGE_LASTN =
-    ".resource.common.monitor.visibility.metricRange.lastN";
+        ".resource.common.monitor.visibility.metricRange.lastN";
 
     public static final String PREF_METRIC_RANGE_UNIT =
-    ".resource.common.monitor.visibility.metricRange.unit";
+        ".resource.common.monitor.visibility.metricRange.unit";
 
     public static final String PREF_METRIC_RANGE_RO =
-    ".resource.common.monitor.visibility.metricRange.ro";
+        ".resource.common.monitor.visibility.metricRange.ro";
 
     public static final String PREF_METRIC_THRESHOLD =
-    ".resource.common.monitor.visibility.metricThreshold";
+        ".resource.common.monitor.visibility.metricThreshold";
 
     // delimiter for preferences that are muti-valued and stringified
     public static final String PREF_LIST_DELIM = ",";
@@ -68,200 +68,162 @@ public class WebUser {
     // preference key namespace delimiter
     private static final String DOT = ".";
 
-    private AuthzSubjectValue subject;
-    private Integer sessionId;
-    
-    private String password;
-    
-    private ConfigResponse preferences;
-
+    private AuthzSubjectValue _subject;
+    private Integer _sessionId;
+    private String _password;
+    private ConfigResponse _preferences;
     /** Indicates whether or not the user has an entry in the
       * principals table */
-    private boolean hasPrincipal;
+    private boolean _hasPrincipal;
 
     public WebUser() {
-        this.sessionId = null;
+        _sessionId = null;
     }
     
     public WebUser(AuthzSubjectValue subject) {
-        this.subject = subject;
-        this.sessionId = null;
-        this.hasPrincipal = false;
+        _subject = subject;
+        _sessionId = null;
+        _hasPrincipal = false;
     }
     
     public WebUser(AuthzSubjectValue subject, Integer sessionId,
                    String password, ConfigResponse preferences,
                    boolean hasPrincipal) {
                        
-        this.subject = subject;
-        this.sessionId = sessionId;
-        this.setPassword(password);
-        this.setPreferences(preferences);
-        this.hasPrincipal = hasPrincipal;
-    }
-    
-    
-    /** Return the <code>AuthzSubjectValue</code> represented by this
-     * web user.
-     */
-    public AuthzSubjectValue getSubject() {
-        return this.subject;
+        _subject = subject;
+        _sessionId = sessionId;
+        setPassword(password);
+        setPreferences(preferences);
+        _hasPrincipal = hasPrincipal;
     }
 
-    /** Return the id as an <code>Integer</code> for this web user */
+    /**
+     * Return the AuthzSubjectValue represented by this web user.
+     */
+    public AuthzSubjectValue getSubject() {
+        return _subject;
+    }
+
     public Integer getId() {
-        if (this.subject == null) {
+        if (_subject == null) {
             return null;
         }
-        return this.subject.getId();
+        return _subject.getId();
     }
     
-    /** Return the BizApp session id as an <code>Integer</code> for
-     * this web user
+    /**
+     * Return the BizApp session id as an Integer for this web user
      */
     public Integer getSessionId() {
-        return this.sessionId;
+        return _sessionId;
     }
     
-    /** Set the BizApp session id as an <code>Integer</code> for this
-     * web user
+    /**
+     * Set the BizApp session id as an Integer for this web user
      * @param sessionId the new session id
      */
     public void setSessionId(Integer sessionId) {
-        this.sessionId = sessionId;
-    }
-    
-    /** Facade method for AuthzSubjectValue.getName */
-    public String getUsername() {
-        if (this.subject == null) {
-            return null;
-        }
-        return this.subject.getName();
-    }
-    
-    /** Facade method for AuthzSubjectValue.setName
-     * @param username the username
-     */
-    public void setUsername(String username) {
-        this.subject.setName(username);
+        _sessionId = sessionId;
     }
 
-    /** Facade method for AuthzSubjectValue.getName */
+    public String getUsername() {
+        if (_subject == null) {
+            return null;
+        }
+        return _subject.getName();
+    }
+
+    public void setUsername(String username) {
+        _subject.setName(username);
+    }
+
     public String getName() {
         return getUsername();
     }
     
     public String getSmsaddress() {
-        return this.subject.getSMSAddress();
+        return _subject.getSMSAddress();
     }
     
     public void setSmsaddress(String s) {
-        this.subject.setSMSAddress(s);
+        _subject.setSMSAddress(s);
     }
-    
-    /** Facade method for AuthzSubjectValue.getFirstName */
+
     public String getFirstName() {
-        if (this.subject == null) {
+        if (_subject == null) {
             return null;
         }
-        return this.subject.getFirstName();
+        return _subject.getFirstName();
     }
-    
-    /** Facade method for AuthzSubjectValue.setFirstName
-     * @param name the firstName
-     */
+
     public void setFirstName(String name) {
-        this.subject.setFirstName(name);
+        _subject.setFirstName(name);
     }
 
-    /** Facade method for AuthzSubjectValue.getLastName */
     public String getLastName() {
-        if (this.subject == null) {
+        if (_subject == null) {
             return null;
         }
-        return this.subject.getLastName();
+        return _subject.getLastName();
     }
-    
-    /** Facade method for AuthzSubjectValue.setLastName
-     * @param name the lastName
-     */
+
     public void setLastName(String name) {
-        this.subject.setLastName(name);
+        _subject.setLastName(name);
     }
 
-    /** Facade method for AuthzSubjectValue.getEmailAddress */
     public String getEmailAddress(){
-        if (this.subject == null) {
+        if (_subject == null) {
             return null;
         }
-        return this.subject.getEmailAddress();
+        return _subject.getEmailAddress();
     }
-    
-    /** Facade method for AuthzSubjectValue.setEmailAddress
-     * @param name the emailAddress
-     */
+
     public void setEmailAddress(String emailAddress) {
-        this.subject.setEmailAddress(emailAddress);
+        _subject.setEmailAddress(emailAddress);
     }
 
-    /** Facade method for AuthzSubjectValue.getAuthDsn */
     public String getAuthDsn() {
-        if (this.subject == null) {
+        if (_subject == null) {
             return null;
         }
-        return this.subject.getAuthDsn();
+        return _subject.getAuthDsn();
     }
 
-    /** Facade method for AuthzSubjectValue.setAuthDsn
-     * @param name the phoneNumber
-     */
     public void setAuthDsn(String phoneNumber) {
-        this.subject.setAuthDsn(phoneNumber);
+        _subject.setAuthDsn(phoneNumber);
     }
-    
-    /** Facade method for AuthzSubjectValue.getPhoneNumber */
+
     public String getPhoneNumber() {
-        if (this.subject == null) {
+        if (_subject == null) {
             return null;
         }
-        return this.subject.getPhoneNumber();
+        return _subject.getPhoneNumber();
     }
 
-    /** Facade method for AuthzSubjectValue.setPhoneNumber
-     * @param name the phoneNumber
-     */
     public void setPhoneNumber(String phoneNumber) {
-        this.subject.setPhoneNumber(phoneNumber);
-    }
-    
-    /** Facade method for AuthzSubjectValue.getDepartment */
-    public String getDepartment() {
-        if (this.subject == null) {
-            return null;
-        }
-        return this.subject.getDepartment();
+        _subject.setPhoneNumber(phoneNumber);
     }
 
-    /** Facade method for AuthzSubjectValue.setDepartment
-     * @param name the department
-     */
-    public void setDepartment(String department) {
-        this.subject.setDepartment(department);
+    public String getDepartment() {
+        if (_subject == null) {
+            return null;
+        }
+        return _subject.getDepartment();
     }
-    
-    /** Facade method for AuthzSubjectValue.getActive */
+
+    public void setDepartment(String department) {
+        _subject.setDepartment(department);
+    }
+
     public boolean getActive() {
-        if (this.subject == null) {
+        if (_subject == null) {
             return false;
         }
-        return this.subject.getActive();
+        return _subject.getActive();
     }
 
-    /** Facade method for AuthzSubjectValue.setActive
-     * @param active the flag
-     */
     public void setActive(boolean active) {
-        this.subject.setActive(active);
+        _subject.setActive(active);
     }
     
     /** Return a human readable serialization of this object */
@@ -275,21 +237,34 @@ public class WebUser {
         return(str.toString());
     }
     
-    public String getPassword() { return this.password; }
-    public void setPassword(String password) { this.password = password; }
-    
-    public boolean getHasPrincipal() { return this.hasPrincipal; }
-    public void setHasPrincipal(boolean hasPrincipal) { 
-        this.hasPrincipal = hasPrincipal;
+    public String getPassword() {
+        return _password;
+    }
+
+    public void setPassword(String password) {
+        _password = password;
     }
     
-    public ConfigResponse getPreferences() { return this.preferences; }
+    public boolean getHasPrincipal() {
+        return _hasPrincipal;
+    }
+
+    public void setHasPrincipal(boolean hasPrincipal) {
+        _hasPrincipal = hasPrincipal;
+    }
+    
+    public ConfigResponse getPreferences() {
+        return _preferences;
+    }
+
     public void setPreferences(ConfigResponse preferences) {
-        this.preferences = preferences;
+        _preferences = preferences;
     }
     
-    public String getPreference(String key) throws InvalidOptionException {
-        String value = preferences.getValue(key);
+    public String getPreference(String key)
+        throws InvalidOptionException
+    {
+        String value = _preferences.getValue(key);
         
         if (value == null)
             throw new InvalidOptionException("preference" + key +
@@ -298,7 +273,7 @@ public class WebUser {
     }
 
     public String getPreference(String key, String def) {
-        String value = preferences.getValue(key);
+        String value = _preferences.getValue(key);
         
         if (value == null)
             return def;
@@ -342,7 +317,7 @@ public class WebUser {
     
     public void setPreference(String key, Object value)
         throws InvalidOptionValueException, InvalidOptionException {
-        String val = null;
+        String val;
         if (value == null) {
             val = "";
         }
@@ -352,11 +327,11 @@ public class WebUser {
         else {
             val = value.toString();
         }
-        this.preferences.setValue(key, val);
+        _preferences.setValue(key, val);
     }
 
     public void unsetPreference(String key) {
-        this.preferences.unsetValue(key);
+        _preferences.unsetValue(key);
     }
 
     /**
@@ -371,8 +346,8 @@ public class WebUser {
     /**
      * Method getResourceFavoriteMetricsKey.
      * 
-     * Encapsulates the logic for how the favorite metrics key for a particular appdef
-     * type is calculated
+     * Encapsulates the logic for how the favorite metrics key for a particular
+     * appdef type is calculated
      * 
      * @param appdefTypeName i.e. application, platform, server, service
      * @return String the calculated preferences key
@@ -400,16 +375,16 @@ public class WebUser {
 
         //  properties may be empty or unparseable strings (ex:
         //  "null"). if so, use their default values.
-        Boolean ro = null;
+        Boolean ro;
         try {
-            ro = new Boolean(getPreference(PREF_METRIC_RANGE_RO));
+            ro = Boolean.valueOf(getPreference(PREF_METRIC_RANGE_RO));
         }
         catch (NumberFormatException nfe) {
             ro = MonitorUtils.DEFAULT_VALUE_RANGE_RO;
         }
         m.put(MonitorUtils.RO, ro);
 
-        Integer lastN = null;
+        Integer lastN;
         try {
             lastN = new Integer(getPreference(PREF_METRIC_RANGE_LASTN));
         }
@@ -418,7 +393,7 @@ public class WebUser {
         }
         m.put(MonitorUtils.LASTN, lastN);
 
-        Integer unit = null;
+        Integer unit;
         try {
             unit = new Integer(getPreference(PREF_METRIC_RANGE_UNIT));
         }
