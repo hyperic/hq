@@ -122,7 +122,6 @@
               path="/portlet/availSummary/AddResources.jsp"/>
 
   <definition name=".dashContent.metricViewer"
-              controllerUrl="/dashboard/ViewMetrics.do"
               path="/portlet/metricViewer/View.jsp">
               <put name="adminUrl" value="/dashboard/Admin.do?mode=metricViewer" />
               <put name="portletName" value=".dashContent.metricViewer"/>
