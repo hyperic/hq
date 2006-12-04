@@ -52,24 +52,20 @@ public class DateFormatter extends VarSetterBaseTag {
      * A string which contains the long, or the expression,
      * we hope to convert into a Long, and format as a date.
      */
-    private String value = null;
-    
-    /** Holds value of property time. */
-    private Boolean time = Boolean.FALSE;
-    
-    /** Holds value of property showTime. */
-    private Boolean showTime = Boolean.TRUE;
+    private String _value = null;
+    private Boolean _time = Boolean.FALSE;
+    private Boolean _showTime = Boolean.TRUE;
     
     public DateFormatter() {
         super();
     }
     
     public String getValue() {
-        return this.value;
+        return _value;
     }
     
     public void setValue(String v) {
-        this.value = v;
+        _value = v;
     }
     
     /**
@@ -80,14 +76,13 @@ public class DateFormatter extends VarSetterBaseTag {
      * decide if should format as a time.
      *
      * @param date The long to convert to a date.
-     * @param asTime Whether to format this date as a time.
      */
     private String formatDate(Long date) {
-        int unit = time.booleanValue() ? UnitsConstants.UNIT_DURATION :
-                                         UnitsConstants.UNIT_DATE;
+        int unit = _time.booleanValue() ? UnitsConstants.UNIT_DURATION :
+            UnitsConstants.UNIT_DATE;
         String key = Constants.UNIT_FORMAT_PREFIX_KEY + "epoch-millis";
         
-        if (!showTime.booleanValue())
+        if (!_showTime.booleanValue())
             key += ".dateonly";
         
         String formatString =
@@ -95,9 +90,10 @@ public class DateFormatter extends VarSetterBaseTag {
                                  key);
         DateSpecifics specs = new DateSpecifics();
         specs.setDateFormat(new SimpleDateFormat(formatString));
-        FormattedNumber fmtd = UnitsFormat.format(
-            new UnitNumber(date.doubleValue(), unit, UnitsConstants.SCALE_MILLI), 
-            pageContext.getRequest().getLocale(), specs);
+        FormattedNumber fmtd =
+            UnitsFormat.format(new UnitNumber(date.doubleValue(), unit,
+                                              UnitsConstants.SCALE_MILLI),
+                               pageContext.getRequest().getLocale(), specs);
         return fmtd.toString();
     }
     
@@ -110,7 +106,9 @@ public class DateFormatter extends VarSetterBaseTag {
         
         try {
             newDate = (Long) ExpressionUtil.evalNotNull("dateFormatter",
-                    "value", value, Long.class, this, pageContext);
+                                                        "value", _value,
+                                                        Long.class, this,
+                                                        pageContext);
         } catch (NullAttributeException ne) {
             newDate = new Long(System.currentTimeMillis());
         }
@@ -123,49 +121,31 @@ public class DateFormatter extends VarSetterBaseTag {
     	    try { 
     		  pageContext.getOut().write(d);
     	    } catch (IOException ioe) {
-    		  throw new JspException(getClass().getName() + " Could not output date.");
+    		  throw new JspException(getClass().getName() +
+                                     " Could not output date.");
 	       }
 	   }
 
 	   return SKIP_BODY;
     }
 
-    /** Reset the values of the tag.
-     */
     public void release() {
-        value = null;
+        _value = null;
     }
-    
-    /** Getter for property time.
-     * @return Value of property time.
-     *
-     */
+
     public Boolean getTime() {
-        return this.time;
+        return _time;
     }
-    
-    /** Setter for property time.
-     * @param time New value of property time.
-     *
-     */
+
     public void setTime(Boolean time) {
-        this.time = time;
+        _time = time;
     }
-    
-    /** Getter for property showTime.
-     * @return Value of property showTime.
-     *
-     */
+
     public Boolean getShowTime() {
-        return this.showTime;
+        return _showTime;
     }
-    
-    /** Setter for property showTime.
-     * @param time New value of property showTime.
-     *
-     */
+
     public void setShowTime(Boolean showTime) {
-        this.showTime = showTime;
+        _showTime = showTime;
     }
-    
 }
