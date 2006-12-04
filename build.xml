@@ -855,10 +855,6 @@
        <fileset dir="${plugin.dir}/jdbc" includes="lib/mysql*.jar" />
     </hqplugin>
 
-    <hqplugin name="bugzilla">
-       <fileset dir="${plugin.dir}/jdbc" includes="lib/mysql*.jar" />
-    </hqplugin>
-
     <hqplugin name="sybase">
        <fileset dir="${plugin.dir}/jdbc" includes="lib/sybase*.jar" />
     </hqplugin>
