@@ -59,6 +59,7 @@ import org.hyperic.hq.events.server.session.EscalationMediator;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertConditionLog;
 import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
@@ -262,12 +263,14 @@ public abstract class AbstractTrigger implements TriggerInterface {
 
         // get alert pojo so retrieve array of AlertCondtionLogs
         Alert alertpojo = alman.findAlertById(alert.getId());
-        Integer escalationId =
-            alertpojo.getAlertDefinition().getEscalation().getId();
-        if (escalationId != null) {
-            // invoke escalation chain
-            EscalationMediator emed = EscalationMediator.getInstance();
-            emed.startEscalation(escalationId, alert.getId());
+        Escalation esc = alertpojo.getAlertDefinition().getEscalation();
+        if (esc != null) {
+            Integer escalationId = esc.getId();
+            if (escalationId != null) {
+                // invoke escalation chain
+                EscalationMediator emed = EscalationMediator.getInstance();
+                emed.startEscalation(escalationId, alert.getId());
+            }
         } else {
             AlertConditionLog[] logs =
                 (AlertConditionLog[])alertpojo
