@@ -252,7 +252,7 @@
  
 <form name="escalationForm" id="escalationForm" onsubmit="sendEscForm();return false;">
   <input type="hidden" value="0" id="theValue">
-  <input type="hidden" value="<c:out value=${alertDef.id}/>" id="ad"/>
+  <input type="hidden" value="<c:out value="${alertDef.id}"/>" id="ad"/>
   <table width="100%" cellpadding="3" cellspacing="0" border="0">
     <tbody>
       <tr class="tableRowHeader">
