@@ -58,6 +58,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
+import org.hyperic.hq.appdef.shared.AppdefGroupManagerUtil;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
@@ -71,6 +73,7 @@ import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.VirtualManagerLocal;
 import org.hyperic.hq.appdef.shared.VirtualManagerUtil;
+import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -2970,6 +2973,48 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }        
         summaries.setTotalSize(resources.getTotalSize());
         return summaries;
+    }
+
+    /**
+     * Given a group of resources, find all the scheduled measurements
+     * which are common to everyone in the group.
+     * 
+     *  TODO:  We may want to make this more flexible by considering 
+     *         availability to be the same even though it's actually a 
+     *         different metric.
+     *  
+     * @return a map of {@link Integer} template IDs onto {@link String} 
+     *         descriptions
+     * @ejb:interface-method
+     */
+    public Map findCommonGroupMetrics(int sessionId, AppdefEntityID groupId)
+        throws SessionException, PermissionException, 
+               AppdefEntityNotFoundException, GroupNotCompatibleException
+    {
+        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        List vals = findGroupMeasurements(sessionId, groupId, null, 
+                                          PageControl.PAGE_ALL);
+        Map res = new HashMap();
+        AppdefGroupManagerLocal gMan;
+
+        try {
+            gMan = AppdefGroupManagerUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
+        
+        int numGroupMembers = gMan.findGroup(subject, groupId).getTotalSize();
+        
+        for (Iterator i=vals.iterator(); i.hasNext(); ) {
+            GroupMetricDisplaySummary sum = (GroupMetricDisplaySummary)i.next();
+            
+            if (sum.getActiveMembers() != numGroupMembers)
+                continue;
+            
+            res.put(sum.getTemplateId(), sum.getLabel());
+        }
+
+        return res;
     }
 
     /**
