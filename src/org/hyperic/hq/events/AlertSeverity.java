@@ -24,4 +24,8 @@ public class AlertSeverity
     public static List getAll() {
         return HypericEnum.getAll(HypericEnum.class);
     }
+    
+    public static AlertSeverity findByCode(int code) {
+        return (AlertSeverity)findByCode(AlertSeverity.class, code);
+    }
 }
