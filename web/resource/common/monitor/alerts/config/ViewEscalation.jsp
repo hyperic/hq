@@ -191,12 +191,12 @@
     }
 </script>
  
+<form name="escalationForm" id="escalationForm" onsubmit="sendEscForm ();return false;">
+  <input type="hidden" value="0" id="theValue">
   <table width="100%" cellpadding="3" cellspacing="0" border="0">
     <tbody>
-      <tr>
-        <td colspan="2" id="section" width="100%">
-          <form name="escalationForm" id="escalationForm" onsubmit="sendEscForm ();return false;">
-            <input type="hidden" value="0" id="theValue">
+        <tr class="tableRowAction">
+        <td id="section" width="100%">
             <ul id="testlist">
               <li id="testlist_row_1" class="lineitem">
                 <div id="remove" class="remove">
@@ -252,14 +252,13 @@
               </tr>
             </table>
             <br>
-          </form>
         </td>
       </tr>
       <tr>
-        <td class="BlockTitle" colspan="2">If the alert is acknowledged:</td>
+        <td class="tableRowHeader">If the alert is acknowledged:</td>
       </tr>
       <tr class="ListRow">
-        <td style="padding-left:15px;padding-bottom:10px;" colspan="2">
+        <td style="padding-left:15px;padding-bottom:10px;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
               <td style="padding-top:2px;padding-bottom:2px;"><input type="radio" name="pause" value="pauseTime"> Allow user to pause escalation for <select name="time">
@@ -294,10 +293,10 @@
         </td>
       </tr>
       <tr>
-        <td  class="BlockTitle" colspan="2">If the alert is fixed:<br></td>
+        <td  class="tableRowHeader">If the alert is fixed:<br></td>
       </tr>
       <tr class="ListRow">
-        <td style="padding-left:15px;padding-bottom:10px;" colspan="2">
+        <td style="padding-left:15px;padding-bottom:10px;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
               <td style="padding-top:2px;padding-bottom:2px;"><input type="radio" name="pause" value="pauseTime"> Notify only previously notified users of the fix</td>
@@ -314,6 +313,8 @@
 <tiles:insert definition=".form.buttons">
   <tiles:put name="noCancel" value="true"/>
 </tiles:insert>
+
+</form>
 
 <div id="usersList" style="display: none;">
   <c:forEach var="user" items="${AvailableUsers}" varStatus="status">

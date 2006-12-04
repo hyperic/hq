@@ -851,6 +851,7 @@ ul.boxy li {
 #section #testlist { 
   list-style-type:none;
   margin:0;
+  margin-right: 5px;
   padding:0;
 }
 
