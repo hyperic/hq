@@ -202,6 +202,18 @@
                     return true;
                   }});
     }
+
+    function configureRoles() {
+      Dialog.confirm($('rolesList').innerHTML,
+                  {windowParameters: {className:'dialog', width:305, height:200,
+                   resize:false, draggable:false},
+                  okLabel: "OK", cancelLabel: "Cancel",
+                  ok:function(win) {
+                    // Do something
+                    new Effect.Shake(Windows.focusedWindow.getId());
+                    return true;
+                  }});
+    }
 </script>
  
 <form name="escalationForm" id="escalationForm" onsubmit="sendEscForm();return false;">
