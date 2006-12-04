@@ -346,14 +346,10 @@
         <include name="commons-modeler.jar" />
         <include name="commons-collections.jar" />
         <include name="commons-dbcp.jar" />
-        <include name="commons-validator.jar" />
         <include name="commons-httpclient-2.0.jar" />
         <include name="commons-pool.jar" />
         <include name="commons-services.jar" />
-        <include name="jstl.jar" />
-        <include name="standard.jar" />
-        <include name="struts.jar" />
-        <include name="struts-el.jar" />
+        <include name="log4j.jar" />
         <include name="quartz-1.5.1.jar" />
         <include name="quartz-oracle-1.5.1.jar" />
         <include name="instantj-1.6.jar" />
@@ -478,20 +474,16 @@
 
     <copy todir="${ear.dir}/hq.war/WEB-INF/lib/" >
       <fileset dir="${thirdparty.lib}" >
-        <include name="backport-util-concurrent.jar" />
         <include name="commons-beanutils.jar" />
         <include name="commons-digester.jar" />
-        <include name="commons-logging.jar" />
-        <include name="commons-collections.jar" />        
+        <include name="commons-collections.jar" />
         <include name="commons-validator.jar" />
         <include name="commons-dbcp.jar" />        
-        <include name="log4j.jar" />
         <include name="jstl.jar" />
         <include name="standard.jar" />
         <include name="struts.jar" />               
         <include name="struts-el.jar" />
-        <include name="snmp4j.jar" />
-      </fileset> 
+      </fileset>
     </copy>
 
     <!--copy todir="${ear.dir}/hq.war/WEB-INF/classes" >
@@ -540,7 +532,7 @@
    </target>
 
   <target name="pack-remote" description="Create the remote war directory structure ( use if you modify .jsp or other web files, but no sources )"
-          depends="pack-ear">
+          depends="pack-ear,pack-test">
     <property name="web.ear" value="${build.dir}/web.ear"/>
     <mkdir dir="${web.ear}/META-INF" />
     <copy tofile="${web.ear}/META-INF/application.xml"
