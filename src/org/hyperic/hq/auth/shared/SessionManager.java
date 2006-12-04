@@ -199,6 +199,15 @@ public class SessionManager {
     }
 
     /**
+     * Simply perform an authentication when you don't need the actual subject
+     */
+    public void authenticate(int sessionId)
+        throws SessionException
+    {
+        getSubject(sessionId);
+    }
+    
+    /**
      * Remove the indicated session
      *
      * @param sessionId The session id
