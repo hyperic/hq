@@ -36,6 +36,7 @@ import java.util.Map;
 import javax.servlet.ServletException;
 
 import org.hyperic.hq.ui.beans.ConfigValues;
+import org.hyperic.util.HypericEnum;
 import org.hyperic.util.config.BooleanConfigOption;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
@@ -44,6 +45,7 @@ import org.hyperic.util.config.StringConfigOption;
 
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.apache.struts.util.LabelValueBean;
 
 /**
  * Utilities class that provides general convenience methods.
@@ -203,5 +205,20 @@ public class ActionUtils {
             newPath.append(URLEncoder.encode(value.toString(),
                                              "UTF-8"));
         }
+    }
+    
+    /**
+     * Convert a list of {@link HypericEnum}s into a list of 
+     * {@link LabelValueBean}s
+     */
+    public static List convertEnumsToLabelBeans(List enums) {
+        List res = new ArrayList(enums.size());
+        
+        for (Iterator i=enums.iterator(); i.hasNext(); ) {
+            HypericEnum e = (HypericEnum)i.next();
+            
+            res.add(new LabelValueBean(e.getDescription(), e.getCode() + "")); 
+        }
+        return res;
     }
 }
