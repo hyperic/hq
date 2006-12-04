@@ -1814,13 +1814,13 @@ has already been defined.
       <schema-insert table="EAM_RES_GRP_RES_MAP"
                      insertCmd="(RESOURCE_GROUP_ID, RESOURCE_ID, CID) VALUES (0, 401, 6)"/>
       <schema-insert table="EAM_OPERATION"
-                     insertCmd="(ID, VERSION_COL, NAME, RESOURCE_TYPE_ID, CID) VALUES (412, 0, 'createEscalation', 401, 412)"/>
+                     insertCmd="(ID, VERSION_COL, NAME, RESOURCE_TYPE_ID, CID) VALUES (412, 0, 'createEscalation', 0, 412)"/>
       <schema-insert table="EAM_OPERATION"
-                     insertCmd="(ID, VERSION_COL, NAME, RESOURCE_TYPE_ID, CID) VALUES (413, 0, 'modifyEscalation', 401, 413)"/>
+                     insertCmd="(ID, VERSION_COL, NAME, RESOURCE_TYPE_ID, CID) VALUES (413, 0, 'modifyEscalation', 0, 413)"/>
       <schema-insert table="EAM_OPERATION"
-                     insertCmd="(ID, VERSION_COL, NAME, RESOURCE_TYPE_ID, CID) VALUES (414, 0, 'removeEscalation', 401, 414)"/>
+                     insertCmd="(ID, VERSION_COL, NAME, RESOURCE_TYPE_ID, CID) VALUES (414, 0, 'removeEscalation', 0, 414)"/>
       <schema-insert table="EAM_OPERATION"
-                     insertCmd="(ID, VERSION_COL, NAME, RESOURCE_TYPE_ID, CID) VALUES (415, 0, 'viewEscalation', 401, 415)"/>
+                     insertCmd="(ID, VERSION_COL, NAME, RESOURCE_TYPE_ID, CID) VALUES (415, 0, 'viewEscalation', 0, 415)"/>
       <schema-insert table="EAM_ROLE_OPERATION_MAP"
                      insertCmd="(ROLE_ID, OPERATION_ID, CID) VALUES (0, 412, 68)"/>
       <schema-insert table="EAM_ROLE_OPERATION_MAP"
