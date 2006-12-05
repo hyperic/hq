@@ -70,9 +70,9 @@ public class ViewEscalationAction extends ViewDefinitionAction {
         // Look for the escalation request parameter
         try {
             if (eForm.getEscId() != null && eForm.getEscId().length() > 0) {
-                JSONObject escalation = EscalationWebMediator.getInstance()
-                    .jsonByEscalationName(sessionId.intValue(),
-                                          eForm.getEscId());
+                JSONObject escalation =
+                    eb.jsonByEscalationName(sessionId.intValue(),
+                                            eForm.getEscId());
                 request.setAttribute("escalationJSON", escalation.toString());
             }
         } catch (ParameterNotFoundException e) {

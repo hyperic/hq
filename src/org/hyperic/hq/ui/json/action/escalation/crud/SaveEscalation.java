@@ -23,11 +23,6 @@ public class SaveEscalation extends BaseAction
     {
         EscalationWebMediator wmed = EscalationWebMediator.getInstance();
         // fake data
-        JSONObject json = wmed.makeJsonEscalation();
-        wmed.saveEscalation(context.getSessionId(), json);
-        // for cactus test
-        context.getSession().setAttribute("escalationName",
-                                          json.getJSONObject("escalation")
-                                              .get("name"));
+        wmed.saveEscalation(context, context.getSessionId(), null);
     }
 }

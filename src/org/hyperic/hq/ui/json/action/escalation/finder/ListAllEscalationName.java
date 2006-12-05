@@ -22,7 +22,7 @@ public class ListAllEscalationName extends BaseAction
                SessionNotFoundException, RemoteException
     {
         JSONArray array = EscalationWebMediator.getInstance()
-                .listAllEscalationName(context.getSessionId());
+                .listAllEscalationName(context, context.getSessionId());
         context.setJSONResult(new JSONResult(array));
     }
 }

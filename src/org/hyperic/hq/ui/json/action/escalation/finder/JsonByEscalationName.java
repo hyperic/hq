@@ -23,8 +23,9 @@ public class JsonByEscalationName extends BaseAction
                SessionNotFoundException,
                RemoteException
     {
-        JSONObject escalation = EscalationWebMediator.getInstance()
-                .jsonByEscalationName(context.getSessionId(),context.getName());
+        JSONObject escalation = EscalationWebMediator
+            .getInstance()
+            .jsonByEscalationName(context, context.getSessionId(), context.getName());
         context.setJSONResult(new JSONResult(escalation));
     }
 }

@@ -23,7 +23,7 @@ public class JsonEscalationByAlertDefId extends BaseAction
     {
         JSONObject escalation = EscalationWebMediator.getInstance()
                 .jsonEscalationByAlertDefId(
-                        context.getSessionId(), context.getId());
+                        context, context.getSessionId(), context.getId());
         context.setJSONResult(new JSONResult(escalation));
     }
 }

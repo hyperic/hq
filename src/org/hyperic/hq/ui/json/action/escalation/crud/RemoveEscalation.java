@@ -20,6 +20,7 @@ public class RemoveEscalation extends BaseAction
                RemoteException
     {
         EscalationWebMediator.getInstance()
-                .removeEscalation(context.getSessionId(),context.getId());
+                .removeEscalation(
+                    context, context.getSessionId(),context.getId());
     }
 }
