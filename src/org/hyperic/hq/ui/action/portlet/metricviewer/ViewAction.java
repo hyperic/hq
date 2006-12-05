@@ -32,7 +32,7 @@ import java.util.Comparator;
 import java.util.ArrayList;
 
 /**
- * This action class is used by the Availability Summary portlet.  It's main
+ * This action class is used by the Metric Viewer portlet.  It's main
  * use is to generate the JSON objects required for display into the UI.
  */
 public class ViewAction extends BaseAction {
