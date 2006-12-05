@@ -25,10 +25,14 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
+import javax.servlet.ServletRequest;
+
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.action.resource.ResourceForm;
 
 public class EscalationSchemeForm extends ResourceForm {
-    private String _escId = null;
+    private String _escId;
+    private String _escName;
 
     public String getEscId() {
         return _escId;
@@ -43,5 +47,19 @@ public class EscalationSchemeForm extends ResourceForm {
     }
 
     public void setMode(String mode) {
+    }
+
+    public String getEscName() {
+        return _escName;
+    }
+
+    public void setEscName(String escName) {
+        _escName = escName;
+    }
+
+    public void reset(ActionMapping mapping, ServletRequest request) {
+        super.reset(mapping, request);
+        _escId = "";
+        _escName = "";
     }
 }
