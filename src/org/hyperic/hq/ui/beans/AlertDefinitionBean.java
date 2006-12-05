@@ -32,60 +32,55 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
  ******************************************************************************/
 
 public final class AlertDefinitionBean {
-    private long ctime;
-
-    private Integer alertDefId;
-
-    private String name;
-
-    private String description;
-
-    private boolean enabled;
-
-    private Integer type;
-
-    private Integer parentId;
+    private long    _ctime;
+    private Integer _alertDefId;
+    private String  _name;
+    private String  _description;
+    private boolean _enabled;
+    private Integer _type;
+    private Integer _parentId;
 
     public AlertDefinitionBean(Integer alertDefId, long ctime, String name,
                                String description, boolean enabled,
-                               Integer parentId) {
-        this.alertDefId = alertDefId;
-        this.ctime = ctime;
-        this.name = name;
-        this.description = description;
-        this.enabled = enabled;
-        this.parentId = parentId;
+                               Integer parentId) 
+    {
+        _alertDefId  = alertDefId;
+        _ctime       = ctime;
+        _name        = name;
+        _description = description;
+        _enabled     = enabled;
+        _parentId    = parentId;
     }
 
     public Integer getAlertDefId() {
-        return alertDefId;
+        return _alertDefId;
     }
 
     public String getName() {
-        return name;
+        return _name;
     }
 
     public String getDescription() {
-        return description;
+        return _description;
     }
 
     public boolean getEnabled() {
-        return enabled;
+        return _enabled;
     }
 
     public long getCtime() {
-        return ctime;
+        return _ctime;
     }
 
     public Integer getType() {
-        return type;
+        return _type;
     }
 
     public Integer getParentId() {
-        return parentId;
+        return _parentId;
     }
 
     public void setAppdefEntityID(AppdefEntityID aeid) {
-        this.type = new Integer(aeid.getType());
+        _type = new Integer(aeid.getType());
     }
 }
