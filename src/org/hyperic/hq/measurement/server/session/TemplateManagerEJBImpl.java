@@ -743,6 +743,9 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
+    /**
+     * @ejb:create-method
+     */
     public void ejbCreate() throws CreateException {
         try {
             valuePager = Pager.getPager(VALUE_PROCESSOR);
