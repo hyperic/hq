@@ -1,14 +1,11 @@
 {
 var rtimer = null;
 
-function requestProblemResources() {
-	new Ajax.Request("/dashboard/ViewResourceHealth.do", {method: 'get', onComplete:showProblemResponse, onFailure :reportError});
-}
-
 function showProblemResponse(originalRequest) {
 	var response = eval("(" + originalRequest.responseText + ")");
-	var mList = response.problems.resourceName;
-	var table = document.getElementById('problemResourcesTable');
+	var mList = response.problems;
+    alert(mList);
+    var table = document.getElementById('problemResourcesTable');
 	
 	for(var i=table.childNodes.length-1; i>2; i--){
         table.removeChild(table.childNodes[i]);
@@ -38,10 +35,10 @@ function showProblemResponse(originalRequest) {
 		td1.setAttribute((document.all ? 'className' : 'class'), "resource");
 		td1.setAttribute("id", (mList[i].resource));
 		
-		if (mList[i].resource) {
+		if (mList[i].resourceName) {
 		td1.appendChild(newanchor);
-		newanchor.appendChild(document.createTextNode(mList[i].resource));
-		newanchor.setAttribute('href', (mList[i].resource));
+		newanchor.appendChild(document.createTextNode(mList[i].resourceName));
+		newanchor.setAttribute('href', (mList[i].resourceName));
 		}
 		
 		tr.appendChild(td2);
