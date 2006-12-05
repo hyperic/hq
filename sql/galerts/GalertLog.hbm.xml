@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+      "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="org.hyperic.hq.galerts.server.session">
+  <class name="GalertLog" table="EAM_GALERT_LOGS">
+    <id name="id" type="integer">
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_GALERT_LOGS_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name ="VERSION_COL" default="0" />
+    </version>
+    
+    <property name="timestamp">
+      <column name="TIMESTAMP" not-null="true"/>
+    </property>
+
+    <many-to-one name="alertDef">
+      <column name="DEF_ID" not-null="false"/>
+    </many-to-one>
+
+    <many-to-one name="group">
+      <column name="GROUP_ID" not-null="true"/>
+    </many-to-one>
+
+    <property name="shortReason">
+      <column name="SHORT_REASON" length="256" not-null="true"/>
+    </property>
+
+    <property name="longReason">
+      <column name="LONG_REASON" length="2048" not-null="true"/>
+    </property>
+
+    <property name="partitionEnum">
+      <column name="PARTITION" not-null="true"/>
+    </property>    
+  </class>
+</hibernate-mapping>

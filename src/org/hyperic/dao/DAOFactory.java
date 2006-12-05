@@ -75,6 +75,7 @@ import org.hyperic.hq.events.server.session.TriggerDAO;
 import org.hyperic.hq.events.server.session.EscalationStateDAO;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfoDAO;
 import org.hyperic.hq.galerts.server.session.GalertDefDAO;
+import org.hyperic.hq.galerts.server.session.GalertLogDAO;
 import org.hyperic.hq.galerts.server.session.GtriggerTypeInfoDAO;
 import org.hyperic.hq.measurement.server.session.BaselineDAO;
 import org.hyperic.hq.measurement.server.session.CategoryDAO;
@@ -168,7 +169,7 @@ public abstract class DAOFactory {
     public abstract ExecutionStrategyTypeInfoDAO 
         getExecutionStrategyTypeInfoDAO();
     public abstract GalertDefDAO getGalertDefDAO();
-
+    public abstract GalertLogDAO getGalertLogDAO();
 
     public abstract HibernateDAO getDAO(Class pojo);
 

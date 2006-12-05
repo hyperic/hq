@@ -25,6 +25,8 @@ import org.hyperic.hq.galerts.server.session.ExecutionStrategyType;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfo;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertDefPartition;
+import org.hyperic.hq.galerts.server.session.ExecutionReason;
+import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -47,6 +49,7 @@ public class GalertManagerEJBImpl
 
     private ExecutionStrategyTypeInfoDAO _stratTypeDAO;
     private GalertDefDAO                 _defDAO;
+    private GalertLogDAO                 _logDAO;
     private CrispoManagerLocal           _crispoMan;
     
     public GalertManagerEJBImpl() {
@@ -54,7 +57,8 @@ public class GalertManagerEJBImpl
         
         _stratTypeDAO = f.getExecutionStrategyTypeInfoDAO();
         _defDAO       = f.getGalertDefDAO();
-
+        _logDAO       = f.getGalertLogDAO();
+        
         try {
             _crispoMan = CrispoManagerUtil.getLocalHome().create();
         } catch(Exception e) {
@@ -130,6 +134,45 @@ public class GalertManagerEJBImpl
         return _defDAO.findById(id); 
     }
     
+    /**
+     * @ejb:interface-method  
+     */
+    public GalertLog createAlertLog(GalertDef def, ExecutionReason reason) { 
+        GalertLog newLog = new GalertLog(def, reason, 
+                                         System.currentTimeMillis());
+        
+        _logDAO.save(newLog);
+        return newLog;
+    }
+    
+    /**
+     * @ejb:interface-method  
+     */
+    public List findAlertLogs(GalertDef def) {
+        return _logDAO.findAll(def.getGroup());
+    }
+
+    /**
+     * @ejb:interface-method  
+     */
+    public List findAlertLogs(ResourceGroup group) {
+        return _logDAO.findAll(group);
+    }
+
+    /**
+     * @ejb:interface-method  
+     */
+    public void deleteAlertLog(GalertLog log) {
+        _logDAO.remove(log);
+    }
+    
+    /**
+     * @ejb:interface-method  
+     */
+    public void deleteAlertLogs(ResourceGroup group) {
+        _logDAO.removeAll(group);
+    }
+
     /**
      * Register an execution strategy.  
      * @ejb:interface-method
