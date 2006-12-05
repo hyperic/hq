@@ -13,8 +13,10 @@ import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.units.FormattedNumber;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionForm;
@@ -86,7 +88,8 @@ public class ViewAction extends BaseAction {
                                                          tids);
             // handle DataNotAvailable
             if (val[0] != null) {
-                MetricSummary summary = new MetricSummary(rValue, val[0]);
+                MetricSummary summary = new MetricSummary(rValue, template,
+                                                          val[0]);
                 sortedSet.add(summary);
             }
         }
@@ -98,7 +101,7 @@ public class ViewAction extends BaseAction {
         for (Iterator i = sortedSet.iterator(); i.hasNext() && count-- > 0; ) {
             MetricSummary s = (MetricSummary)i.next();
             JSONObject val = new JSONObject();
-            val.put("value", s.getMetricValue().getValue());
+            val.put("value", s.getFormattedValue());
             val.put("resourceId", s.getAppdefResourceValue().getId());
             val.put("resourceTypeId",
                     s.getAppdefResourceValue().getEntityId().getType());
@@ -118,10 +121,14 @@ public class ViewAction extends BaseAction {
 
     private class MetricSummary {
         private AppdefResourceValue _resource;
+        private MeasurementTemplateValue _template;
         private MetricValue _val;
 
-        public MetricSummary(AppdefResourceValue resource, MetricValue val) {
+        public MetricSummary(AppdefResourceValue resource,
+                             MeasurementTemplateValue template,
+                             MetricValue val) {
             _resource = resource;
+            _template = template;
             _val = val;
         }
 
@@ -131,6 +138,12 @@ public class ViewAction extends BaseAction {
 
         public MetricValue getMetricValue() {
             return _val;
+        }
+
+        public String getFormattedValue() {
+            FormattedNumber fn = UnitsConvert.convert(_val.getValue(),
+                                                      _template.getUnits());
+            return fn.toString();
         }
 
         public String toString() {
