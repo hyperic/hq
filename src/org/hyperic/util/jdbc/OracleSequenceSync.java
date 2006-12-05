@@ -193,14 +193,4 @@ public class OracleSequenceSync {
         aMap.put(table, key);
         return aMap;
     }
-    
-    private String getTableFromSequence(String aSequence) {
-        Map aMap = getTableAndKeyFromSequence(aSequence);
-        return (String)aMap.keySet().iterator().next();
-    }
-
-    private String getKeyFromSequence(String aSequence) {
-        Map aMap = getTableAndKeyFromSequence(aSequence);
-        return (String)aMap.entrySet().iterator().next();    
-    }
 }

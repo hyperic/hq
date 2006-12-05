@@ -101,19 +101,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         
     private Pager valuePager = null;
 
-    RawMeasurementManagerLocal rmMan = null;
-    private RawMeasurementManagerLocal getRmMan() {
-        try {
-            if (rmMan == null)
-                rmMan = RawMeasurementManagerUtil.getLocalHome().create();
-            return rmMan;
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-    }
-
     /**
      * Create a DerivedMeasurement Template
      * @todo This needs to support Designate and DefaultOn
@@ -756,10 +743,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    /**
-     * @see javax.ejb.SessionBean#ejbCreate()
-     * @ejb:create-method
-     */
     public void ejbCreate() throws CreateException {
         try {
             valuePager = Pager.getPager(VALUE_PROCESSOR);
@@ -768,31 +751,16 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    /**
-     * @see javax.ejb.SessionBean#ejbPostCreate()
-     */
     public void ejbPostCreate() {}
 
-    /**
-     * @see javax.ejb.SessionBean#ejbActivate()
-     */
     public void ejbActivate() {}
 
-    /**
-     * @see javax.ejb.SessionBean#ejbPassivate()
-     */
     public void ejbPassivate() {}
 
-    /**
-     * @see javax.ejb.SessionBean#ejbRemove()
-     */
     public void ejbRemove() {
         this.ctx = null;
     }
 
-    /**
-     * @see javax.ejb.SessionBean#setSessionContext(SessionContext)
-     */
     public void setSessionContext(SessionContext ctx)
         throws EJBException, RemoteException {
         this.ctx = ctx;

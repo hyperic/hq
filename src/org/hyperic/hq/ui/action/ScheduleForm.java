@@ -50,8 +50,6 @@ import org.hyperic.hq.scheduler.ScheduleMonthlyValue;
  */
 public class ScheduleForm extends CalendarForm  {
 
-    //------------------------------------- instance variables
-  
     /** A flag to indicate whether or not this should be 
      * scheduled immediately.
      *
@@ -93,8 +91,6 @@ public class ScheduleForm extends CalendarForm  {
 
     private List controlActions;
     private Integer numControlActions;
-    
-    //-------------------------------------public methods
 
     /**
      * This method constructs a schedule time value object
@@ -245,15 +241,7 @@ public class ScheduleForm extends CalendarForm  {
     {
         return startTime.equals(START_NOW);
     }
-    
-    private String fmtTime(int s) {
-        if (s < 10) {
-            return "0" + s;
-        } else {
-            return new Integer(s).toString();
-        }
-    }
-    
+
     public void reset(ActionMapping mapping, HttpServletRequest request) {
         this.startTime = START_NOW;
         Calendar cal = Calendar.getInstance();
@@ -547,7 +535,7 @@ public class ScheduleForm extends CalendarForm  {
     }
     
     /** Setter for property startTime.
-     * @param now New value of property startTime.
+     * @param st New value of property startTime.
      *
      */
     public void setStartTime(java.lang.String st) {
@@ -579,7 +567,7 @@ public class ScheduleForm extends CalendarForm  {
     }
     
     /** Setter for property numControlActions.
-     * @param controlActions New value of property numControlActions.
+     * @param num New value of property numControlActions.
      *
      */
     public void setNumControlActions(Integer num) {

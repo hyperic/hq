@@ -172,10 +172,10 @@ public class NewAutoDiscoveryAction extends BaseAction {
                                          ActionMapping mapping,
                                          Map params, boolean doReturnPath)
         throws Exception {
-            return constructForward(request, mapping, Constants.SCHEDULE_TYPE_CHG_URL,
+            return constructForward(request, mapping,
+                                    Constants.SCHEDULE_TYPE_CHG_URL,
                                     params, doReturnPath);
     }
-
 
     private void buildAutoDiscoveryScan(HttpServletRequest request,
                                         PlatformAutoDiscoveryForm newForm,        
@@ -190,13 +190,15 @@ public class NewAutoDiscoveryAction extends BaseAction {
         Integer scheduleId = newForm.getSid();
         
         // update the ScanConfiguration from the form obect 
-        ServerTypeValue[] serverTypeValObjs = pValue.getPlatformType().getServerTypeValues();
+        ServerTypeValue[] serverTypeValObjs =
+            pValue.getPlatformType().getServerTypeValues();
         
         Map serverDetectors = aiboss.getServerSignatures(sessionId,
                                               newForm.getSelectedServerTypes(
                                                          serverTypeValObjs));
         
-        ServerSignature[] serverDetectorArray = new ServerSignature[serverDetectors.size()];
+        ServerSignature[] serverDetectorArray =
+            new ServerSignature[serverDetectors.size()];
         serverDetectors.values().toArray(serverDetectorArray);
         
         String ptName = pValue.getPlatformType().getName();
@@ -205,8 +207,10 @@ public class NewAutoDiscoveryAction extends BaseAction {
         ScanConfiguration scanConfig = new ScanConfiguration();
         ConfigResponse oldCr
             = NewAutoDiscoveryPrepAction.getConfigResponse(ptName);
-        ConfigResponse cr = BizappUtils.buildSaveConfigOptions(request, oldCr, 
-                                                        scanMethod.getConfigSchema(), errors);        
+        ConfigResponse cr =
+            BizappUtils.buildSaveConfigOptions(request, oldCr,
+                                               scanMethod.getConfigSchema(),
+                                               errors);
         
         // Only setup the FileScan if server types were actually selected
         if (serverDetectorArray.length > 0) {
@@ -218,14 +222,8 @@ public class NewAutoDiscoveryAction extends BaseAction {
         // one transaction.                                   
         removeAISchedule(aiboss, sessionId, scheduleId);
         
-        if (newForm.getIsNow())
-        {
-            ScanStateCore ssc =
-                aiboss.getScanStatus(
-                    sessionId,
-                    pValue.getId().intValue());
-                    
-            aiboss.startScan(sessionId, 
+        if (newForm.getIsNow()) {
+            aiboss.startScan(sessionId,
                              pValue.getId().intValue(), 
                              scanConfig.getCore(),
                              null, null, /* No scanName or scanDesc for 
@@ -233,9 +231,7 @@ public class NewAutoDiscoveryAction extends BaseAction {
                              null);
                              
             waitForScanStart(sessionId, aiboss, pValue.getId().intValue());
-        }
-        else
-        {
+        } else {
             ScheduleValue val = newForm.createSchedule();
             aiboss.startScan(sessionId, 
                              pValue.getId().intValue(), 
@@ -244,7 +240,6 @@ public class NewAutoDiscoveryAction extends BaseAction {
                              newForm.getDescription(),
                              val);
         }
-        
     }
 
     /**
@@ -255,11 +250,6 @@ public class NewAutoDiscoveryAction extends BaseAction {
         throws Exception {}
     
     private void waitForScanStart(int sessionId, AIBoss boss, int platformId)
-        throws Exception {
-        Thread.sleep(2000);
-    }
-    
-    private void waitForScanStart(int sessionId, AIBoss boss, String agentToken)
         throws Exception {
         Thread.sleep(2000);
     }

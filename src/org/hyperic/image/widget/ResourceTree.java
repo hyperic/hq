@@ -873,17 +873,6 @@ public class ResourceTree extends WebImage
         }
     }
 
-    private IResourceTreeNode getNodeWithUpChildren(IResourceTreeNode[] nodes) {
-        IResourceTreeNode result = null;
-        
-        for(int i = 0;i < nodes.length;i++) {
-            if(nodes[i].hasUpChildren() == true)
-                result = nodes[i];   
-        }
-        
-        return result;
-    }
-
     private void swapNodes(Rectangle[] rects, int start, int end) {
         if( (end - start) < 1 || rects.length <= 1 )
             return;
@@ -896,8 +885,7 @@ public class ResourceTree extends WebImage
             x += (rects[i].width + space);
         }
     }   
-     
-    //*********** Static Methods ****************
+
     public static BufferedImage getIcon(int type) {
         BufferedImage result;
         
@@ -917,8 +905,7 @@ public class ResourceTree extends WebImage
         
         return result;
     }
-    
-    //*********** Inner Classes *****************
+
     private class CalcResult
     {
         private Rectangle         bounding;

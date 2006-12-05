@@ -62,58 +62,6 @@ public class ImageUtil
         return copy;
     }   
 
-    /**
-     * Copy pixels from an RGB color model to an Indexed color model.
-     */
-    private static void copyPixels(BufferedImage src, BufferedImage dst, byte[][] rgb) {
-        // Get Destination Index Colors
-        IndexColorModel model = (IndexColorModel)dst.getColorModel();
-        
-        int size = model.getMapSize();
-        byte r[] = new byte[size];
-        byte g[] = new byte[size];
-        byte b[] = new byte[size];
-        
-        model.getReds(r);
-        model.getGreens(g);
-        model.getBlues(b);
-
-        // Get Source Pixels
-        int     i;
-        Raster  srcRaster = src.getRaster();
-        int[][] srcPixels  = new int[srcRaster.getNumBands()][];
-        
-        for(int band = 0;band < srcRaster.getNumBands();band++) {
-            srcPixels[band] = srcRaster.getSamples(0, 0, srcRaster.getWidth(),
-                                                   srcRaster.getHeight(), band,
-                                                   (int[])null);
-        }
-        
-        // Get Destination Pixels
-        WritableRaster dstRaster = dst.getRaster();
-        int[] dstPixels = new int[dstRaster.getWidth() * dstRaster.getHeight()];
-        
-        // Index Pixels
-        for(int pixel = 0;pixel < dstPixels.length;pixel++) {
-            // Find the Color in the Index                        
-            for(i = 0;i < r.length;i++) {
-                byte red   = (byte)srcPixels[0][pixel];
-                byte green = (byte)srcPixels[1][pixel];
-                byte blue  = (byte)srcPixels[2][pixel];
-
-                if(red == r[i] && green == g[i] && blue == b[i]) {
-                    dstPixels[pixel] = i;
-                    break;
-                }
-            }
-            
-            if(i == r.length)
-                System.out.println("Missing Color");
-        }
-        
-        dstRaster.setPixels(0, 0, dstRaster.getWidth(), dstRaster.getHeight(), dstPixels);
-    }
-
     private static void copyPixels(BufferedImage src, BufferedImage dst) {
         // Get Destination Index Colors
         IndexColorModel model = (IndexColorModel)dst.getColorModel();
@@ -163,24 +111,6 @@ public class ImageUtil
         dstRaster.setPixels(0, 0, dstRaster.getWidth(), dstRaster.getHeight(), dstPixels);
     }
 
-    private static byte[] findUnusedColor(byte[][] clrs) {
-        byte r = 1;
-        byte g = 1;
-        byte b = 1;
-        
-        for(int i = 0;i < clrs.length;i++) {
-            if(r != clrs[0][i] && g != clrs[1][i] && b != clrs[2][i])
-                break;
-                
-            r++;
-            g++;
-            b++;                
-        }
-        
-        byte[] result = {r,g,b}; 
-        return result;
-    }
-    
     /**
      * Loads an image from a file on disk or in an archive (e.g., .jar).
      * @param path The name of the image file to load. This should be a relative
@@ -239,13 +169,13 @@ public class ImageUtil
                 clrs[1][nextClr]   = green;
                 clrs[2][nextClr++] = blue;
 
-//                System.out.println("{"+Integer.toHexString(red & 0x000000FF)+','+
-//                                   Integer.toHexString(green & 0x0000FF00 >> 8)+','+
-//                                   Integer.toHexString(blue & 0x00FF0000 >> 16)+'}');
+                //System.out.println("{"+Integer.toHexString(red & 0x000000FF)+','+
+                //                     Integer.toHexString(green & 0x0000FF00 >> 8)+','+
+                //                     Integer.toHexString(blue & 0x00FF0000 >> 16)+'}');
             }
         }
 
-//        System.out.println("Colors: " + nextClr);
+        //System.out.println("Colors: " + nextClr);
         
         return clrs;
     }

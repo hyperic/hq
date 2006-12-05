@@ -148,7 +148,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                                               long interval)
         throws FinderException
     {
-        DerivedMeasurement m = 
+        DerivedMeasurement m =
             getDerivedMeasurementDAO().findByTemplateForInstance(tid, iid);
         if (m == null) {
             // Fix me

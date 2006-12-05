@@ -49,20 +49,11 @@ public class ApplicationInventoryPortalAction extends ResourceInventoryPortalAct
     
     protected static Log log =
         LogFactory.getLog(ApplicationInventoryPortalAction.class.getName());
-        
-    //-------------------------------------instance variables
-    private final String RESOURCE_PAGER = "org.hyperic.hq.appdef.server.session.PagerProcessor_service";
+
+    private final String RESOURCE_PAGER =
+        "org.hyperic.hq.appdef.server.session.PagerProcessor_service";
     private static Pager resourcePager = null;
 
-    //-------------------------------------constructors
-    private void init() throws Exception{
-        if (resourcePager == null)
-            resourcePager = Pager.getPager(RESOURCE_PAGER);            
-    }
-    
-	/* (non-Javadoc)
-	 * @see org.hyperic.hq.ui.action.BaseDispatchAction#getKeyMethodMap()
-	 */
     private static Properties keyMethodMap = new Properties();
     static {
         keyMethodMap.setProperty(Constants.MODE_NEW, "newResource");
@@ -89,8 +80,8 @@ public class ApplicationInventoryPortalAction extends ResourceInventoryPortalAct
                                      ActionForm form,
                                      HttpServletRequest request,
                                      HttpServletResponse response)
-        throws Exception {
-
+        throws Exception
+    {
         log.debug("newResource(...) creating new application");
         Portal portal = Portal
              .createPortal("resource.application.inventory.NewApplicationTitle",
@@ -105,8 +96,8 @@ public class ApplicationInventoryPortalAction extends ResourceInventoryPortalAct
                                       ActionForm form,
                                       HttpServletRequest request,
                                       HttpServletResponse response)
-        throws Exception {
-
+        throws Exception
+    {
         setResource(request);
         super.viewResource(mapping,form,request,response);
         Portal portal = Portal
@@ -121,8 +112,8 @@ public class ApplicationInventoryPortalAction extends ResourceInventoryPortalAct
                                       ActionForm form,
                                       HttpServletRequest request,
                                       HttpServletResponse response)
-            throws Exception {
-
+            throws Exception
+    {
         setResource(request);
         Portal portal = Portal
             .createPortal("resource.application.inventory.EditGeneralPropertiesTitle",
@@ -136,8 +127,8 @@ public class ApplicationInventoryPortalAction extends ResourceInventoryPortalAct
                                       ActionForm form,
                                       HttpServletRequest request,
                                       HttpServletResponse response)
-            throws Exception {
-
+            throws Exception
+    {
         setResource(request);
         Portal portal = Portal
             .createPortal("resource.application.inventory.EditApplicationPropertiesTitle",
@@ -151,8 +142,8 @@ public class ApplicationInventoryPortalAction extends ResourceInventoryPortalAct
                                              ActionForm form,
                                              HttpServletRequest request,
                                              HttpServletResponse response)
-        throws Exception {
-
+        throws Exception
+    {
         setResource(request);
         Portal portal = Portal
             .createPortal(Constants.CHANGE_OWNER_TITLE,
@@ -167,8 +158,8 @@ public class ApplicationInventoryPortalAction extends ResourceInventoryPortalAct
                                            ActionForm form,
                                            HttpServletRequest request,
                                            HttpServletResponse response)
-        throws Exception {
-
+        throws Exception
+    {
         setResource(request);
 
         Portal portal = Portal
@@ -226,6 +217,4 @@ public class ApplicationInventoryPortalAction extends ResourceInventoryPortalAct
 
         return null;
     }
-
-  
 }

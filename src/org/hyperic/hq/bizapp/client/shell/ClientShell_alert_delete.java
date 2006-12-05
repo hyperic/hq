@@ -83,8 +83,7 @@ public class ClientShell_alert_delete extends ShellCommandBase
     {
         AppdefEntityID entity;
         ParseResult parseRes;
-        Long from, to, interval;
-        Object oValue;
+        Long from, to;
 
         try {
             parseRes = this.paramParser.parseParams(args);
@@ -103,8 +102,6 @@ public class ClientShell_alert_delete extends ShellCommandBase
 
         from   = (Long)parseRes.getValue(BLOCK_FROM);
         to     = (Long)parseRes.getValue(BLOCK_TO);
-
-        PrintStream out = getOutStream();
         
         int count;
         if (entity != null) {
@@ -118,14 +115,6 @@ public class ClientShell_alert_delete extends ShellCommandBase
         this.getOutStream().println("Total of " + count + " alerts deleted");
     }
 
-    private List findAllAlerts() throws ShellCommandExecException {
-        try {
-            return this.entityFetcher.findAllAlerts();
-        } catch(Exception exc){
-            throw new ShellCommandExecException("Error getting alerts", exc);
-        }
-    }
-    
     private int deleteResourceAlerts(AppdefEntityID aeid)
         throws ShellCommandExecException 
     {
@@ -180,9 +169,6 @@ public class ClientShell_alert_delete extends ShellCommandBase
         
     }
 
-    /* (non-Javadoc)
-     * @see org.hyperic.util.paramParser.BlockHandler#handleBlock(org.hyperic.util.paramParser.ParseResult, org.hyperic.util.paramParser.FormatParser[])
-     */
     public void handleBlock(ParseResult result, FormatParser[] blockVals) {
         String blockName;
 

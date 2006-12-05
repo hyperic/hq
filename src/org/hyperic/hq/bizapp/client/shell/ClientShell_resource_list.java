@@ -68,17 +68,6 @@ public class ClientShell_resource_list
                                       shell.getAuthenticator());
     }
 
-    private String getHeader(String type, int nEnts){
-        PrintfFormat pFmt = new PrintfFormat("%-15s %d %s found");
-        Object[] fmt = new Object[3];
-
-        fmt[0] = type + ":";
-        fmt[1] = new Integer(nEnts);
-        fmt[2] = nEnts == 1 ? "entity" : "entities";
-
-        return pFmt.sprintf(fmt);
-    }
-
     private void printApps(PageControl control)
         throws NamingException, ClientShellAuthenticationException,
                PageFetchException

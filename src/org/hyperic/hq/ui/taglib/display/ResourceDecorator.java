@@ -56,13 +56,8 @@ import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
  */
 public class ResourceDecorator extends ColumnDecorator implements Tag {
 
-    //----------------------------------------------------static variables
-
-    private static final Locale defaultLocale = Locale.getDefault();
     private static Log log =
         LogFactory.getLog(ResourceDecorator.class.getName());
-
-    //----------------------------------------------------instance variables
 
     private String baseKey;
     private String bundle = org.apache.struts.Globals.MESSAGES_KEY;
@@ -76,17 +71,12 @@ public class ResourceDecorator extends ColumnDecorator implements Tag {
     private boolean resourceIdIsSet = false;
     private String resourceId = new String();
     private String resourceTypeId = new String();
-    
-    /** Holds value of property resourceName. */
+
     private String resourceName;
-    
-    //----------------------------------------------------constructors
 
     public ResourceDecorator() {
         super();
     }
-
-    //----------------------------------------------------public methods
 
     public String getBaseKey() {
         return baseKey != null ? baseKey : "";
@@ -232,23 +222,6 @@ public class ResourceDecorator extends ColumnDecorator implements Tag {
             return typeName;
         }
     }
-    
-    private String doFunction(AppdefEntityID entityId) {
-        if (entityId == null) {
-            return "";
-        }
-
-        String typeName = entityId.getTypeName();
-        String key = getBaseKey() + '.' + typeName;
-        try {
-            String msg = RequestUtils.message(context, bundle, locale, key);
-            return msg != null ? msg : typeName;
-        }
-        catch (JspException je) {
-            log.debug("can't look up message [" + key + "]: ", je);
-            return typeName;
-        }
-    }
 
     private String doType(AppdefResourceValue resource) {
         try {
@@ -306,55 +279,30 @@ public class ResourceDecorator extends ColumnDecorator implements Tag {
         return ExpressionUtil.evalNotNull("resourcedecorator", name, value,
                                           type, this, context);
     }
-    
-    /** Getter for property resourceId.
-     * @return Value of property resourceId.
-     *
-     */
+
     public String getResourceId() {
         return this.resourceId;
     }
-    
-    /** Setter for property resourceId.
-     * @param resourceId New value of property resourceId.
-     *
-     */
+
     public void setResourceId(String resourceId) {
         resourceIdIsSet = true;
         this.resourceId = resourceId;
     }
-    
-    /** Getter for property resourceTypeId.
-     * @return Value of property resourceTypeId.
-     *
-     */
+
     public String getResourceTypeId() {        
         return this.resourceTypeId;
     }
-    
-    /** Setter for property resourceTypeId.
-     * @param resourceTypeId New value of property resourceTypeId.
-     *
-     */
+
     public void setResourceTypeId(String resourceTypeId) {
         resourceTypeIdIsSet = true;
         this.resourceTypeId = resourceTypeId;
     }    
 
-    /** Getter for property resourceName.
-     * @return Value of property resourceName.
-     *
-     */
     public String getResourceName() {
         return this.resourceName;
     }
-    
-    /** Setter for property resourceName.
-     * @param resourceName New value of property resourceName.
-     *
-     */
+
     public void setResourceName(String resourceName) {
         this.resourceName = resourceName;
     }
-    
 }
