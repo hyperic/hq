@@ -43,6 +43,7 @@ import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.pager.PageList;
+import org.hyperic.util.config.InvalidOptionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -98,17 +99,43 @@ public class PrepareAction extends TilesAction {
         // shouldn't
         SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
 
-        // set all the form properties
-        Integer numberOfAlerts = new Integer(user.getPreference(countKey));
-        long past = Long.parseLong(user.getPreference(timeKey));
-        String prioritity = user.getPreference(priorityKey);
-        String selectedOrAll = user.getPreference(selOrAllKey);
+        // Set all the form properties, falling back to the default user
+        // preferences if the key is not set. (In the case of multi-portlet)
+        Integer numberOfAlerts;
+        long past;
+        String priority;
+        String selectedOrAll;
+
+        try {
+            numberOfAlerts = new Integer(user.getPreference(countKey));
+        } catch (InvalidOptionException e) {
+            numberOfAlerts =
+                new Integer(user.getPreference(PropertiesForm.ALERT_NUMBER)); 
+        }
+
+        try {
+            past = Long.parseLong(user.getPreference(timeKey));
+        } catch (InvalidOptionException e) {
+            past = Long.parseLong(user.getPreference(PropertiesForm.PAST));
+        }
+
+        try {
+            priority = user.getPreference(priorityKey);
+        } catch (InvalidOptionException e) {
+            priority = user.getPreference(PropertiesForm.PRIORITY);
+        }
+
+        try {
+            selectedOrAll = user.getPreference(selOrAllKey);
+        } catch (InvalidOptionException e) {
+            selectedOrAll = user.getPreference(PropertiesForm.SELECTED_OR_ALL);
+        }
 
         DashboardUtils.verifyResources(resKey, ctx, user);
 
         pForm.setNumberOfAlerts(numberOfAlerts);
         pForm.setPast(past);
-        pForm.setPriority(prioritity);
+        pForm.setPriority(priority);
         pForm.setSelectedOrAll(selectedOrAll);
 
         List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, user);
