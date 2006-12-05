@@ -166,23 +166,15 @@
   </c:otherwise>
 </c:choose>
 </table>
+  <div id="advancedAnchor" style="position: relative; visibility: hidden;"></div>
   <div id="advancedDisplay" class="dialog" style="width:600px;filter: alpha(opacity=0);opacity: 0;">
-        <table cellpadding="2">
-          <tr>
-            <td width="100%">
-            <tiles:insert definition=".resource.common.monitor.visibility.embeddedMetricDisplayRange">
-              <c:if test="${not empty form}">
-                <tiles:put name="form" beanName="form"/>
-                <tiles:put name="formName" beanName="formName"/>
-              </c:if>
-            </tiles:insert>
-            <td align="right" valign="top">
-              <a href="javascript:cancelAdvanced()"><html:img page="/images/dash-icon_delete.gif" border="0"/></a>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </div>
+    <tiles:insert definition=".resource.common.monitor.visibility.embeddedMetricDisplayRange">
+      <c:if test="${not empty form}">
+        <tiles:put name="form" beanName="form"/>
+        <tiles:put name="formName" beanName="formName"/>
+      </c:if>
+    </tiles:insert>
+  </div>
 <!--  /  -->
 <script language="javascript">
   function hideAdvanced() {

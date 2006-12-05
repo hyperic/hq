@@ -44,6 +44,7 @@
 <tiles:importAttribute name="portletName" ignore="true"/>
 <tiles:importAttribute name="rssBase" ignore="true"/>
 <tiles:importAttribute name="dragDrop" ignore="true"/>
+<tiles:importAttribute name="cancelAdvanced" ignore="true"/>
 
 <c:if test="${not empty rssBase}">
   <c:url var="rssUrl" value="${rssBase}">
@@ -125,6 +126,11 @@
     </c:if>
     <c:if test="${not empty useFromSideBar}">
     <td rowspan="2"><html:img page="/images/spacer.gif" width="5" height="1" border="0"/></td>
+    </c:if>
+    <c:if test="${not empty cancelAdvanced}">
+    <td class="BlockTitle" align="right">
+      <a href="javascript:cancelAdvanced()"><html:img page="/images/dash-icon_delete.gif" border="0"/></a>
+    </td>
     </c:if>
   </tr>
 </table>

@@ -75,19 +75,10 @@
     </td>
     <td class="BlockContent">
       <div id="advancedDisplay" class="dialog" style="width:600px;filter: alpha(opacity=0);opacity: 0;">
-        <table cellpadding="2">
-          <tr>
-            <td width="100%">
-            <tiles:insert definition=".resource.common.monitor.visibility.embeddedMetricDisplayRange">
-              <tiles:put name="form" beanName="form"/>
-              <tiles:put name="formName" beanName="formName"/>
-            </tiles:insert>
-            </td>
-            <td align="right" valign="top">
-              <a href="javascript:cancelAdvanced()"><html:img page="/images/dash-icon_delete.gif" border="0"/></a>
-            </td>
-          </tr>
-        </table>
+        <tiles:insert definition=".resource.common.monitor.visibility.embeddedMetricDisplayRange">
+          <tiles:put name="form" beanName="form"/>
+          <tiles:put name="formName" beanName="formName"/>
+        </tiles:insert>
       </td>
     </div>
     </td>

@@ -70,6 +70,7 @@
 <!-- Content Block Title -->
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="resource.common.monitor.visibility.MetricDisplayRangeTab"/>
+  <tiles:put name="cancelAdvanced" value="true"/>
 </tiles:insert>
 
 <tiles:insert definition=".portlet.error"/>
@@ -264,22 +265,19 @@
 </table>
 
 <script language="javascript">
-  function hideAdvanced() {
-    var advancedDiv = $('advancedDisplay');
-    new Effect.Fade(advancedDiv, {duration: 0});
-  }
-
   function showAdvanced() {
-    new Rico.Effect.Position( 'advancedDisplay',
-                               advancedDisplay.offsetLeft - advancedDisplay.offsetWidth,
-                               null, // move across x axis
+    if ($('advancedAnchor') != null) {
+      $('advancedDisplay').style.display = "";
+      new Rico.Effect.Position('advancedDisplay',
+                               null, // move across y axis
+                               $('advancedAnchor').offsetTop - $('advancedDisplay').offsetHeight,
                                0,
                                1, // 1 steps
                                {}
                              );
+    }
 
     new Effect.Appear('advancedDisplay', {to: 0.85});
-    $('advancedDisplay').style.visibility = "visible";
     if ($('simpleRn')) {
         $('simpleRn').style.visibility = "hidden";
         $('simpleRn').disabled = true;
