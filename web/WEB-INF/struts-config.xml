@@ -2577,7 +2577,7 @@
       </action>
 
       <action path="/alerts/SaveEscalation"
-              type="org.hyperic.hq.ui.action.BaseAction" 
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.SaveEscalationAction" 
               name="EscalationForm"
               scope="request"
               input="/alerts/Config.do?mode=viewEscalation">

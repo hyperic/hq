@@ -243,10 +243,10 @@
   <input type="hidden" name="ad" value="<c:out value="${alertDef.id}"/>"/>
   <c:choose>
     <c:when test="${not empty Resource}">
-      <input type="hidden" name="eid" value="<c:out value="${Resource.entityId}"/>"/>
+      <html:hidden property="eid" value="${Resource.entityId}"/>
     </c:when>
     <c:otherwise>
-      <input type="hidden" name="aetid" value="<c:out value="${ResourceType.appdefTypeKey}"/>"/>
+      <html:hidden property="aetid" value="${ResourceType.appdefTypeKey}"/>
     </c:otherwise>
   </c:choose>
   <html:hidden property="escId"/>
@@ -254,7 +254,15 @@
  
 <html:form action="/alerts/SaveEscalation" styleId="EscalationForm">
   <input type="hidden" value="0" id="theValue">
-  <input type="hidden" value="<c:out value="${alertDef.id}" />" id="ad"/>
+  <c:choose>
+    <c:when test="${not empty Resource}">
+      <html:hidden property="eid" value="${Resource.entityId}"/>
+    </c:when>
+    <c:otherwise>
+      <html:hidden property="aetid" value="${ResourceType.appdefTypeKey}"/>
+    </c:otherwise>
+  </c:choose>
+  <html:hidden styleId="ad" property="ad" value="${alertDef.id}"/>
   <table width="100%" cellpadding="3" cellspacing="0" border="0">
     <tbody>
       <tr class="tableRowHeader">
