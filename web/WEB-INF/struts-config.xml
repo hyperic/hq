@@ -192,7 +192,11 @@
         <form-bean name="RemoveNotificationsForm"
                    type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.RemoveNotificationsForm"/>
 
-        <form-bean name="EditAlertDefinitionSyslogActionForm"
+        <!-- Place holder -->
+        <form-bean name="EscalationForm"
+                   type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.RemoveNotificationsForm"/>
+
+         <form-bean name="EditAlertDefinitionSyslogActionForm"
                    type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.SyslogActionForm"/>
 
         <form-bean name="AddAlertUsersForm"
@@ -2575,7 +2579,7 @@
 
       <action path="/alerts/SaveEscalation"
               type="org.hyperic.hq.ui.action.BaseAction" 
-              name="RemoveNotificationsForm"
+              name="EscalationForm"
               scope="request"
               input="/alerts/Config.do?mode=viewEscalation">
               <forward name="success" path="/alerts/Config.do?mode=viewEscalation" redirect="true"/>

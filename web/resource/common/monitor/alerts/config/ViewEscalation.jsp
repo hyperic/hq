@@ -172,7 +172,7 @@
 	function sendEscForm () {
 	alert('called');
 		var adId = $('ad').value;
-		var escFormSerial = Form.serialize('escalationForm');
+		var escFormSerial = Form.serialize('EscalationForm');
 		var url = '/escalation/saveEscalation';
 		var pars = "escForm=" + escFormSerial + "ad=" + adId;
 		new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse} );
@@ -254,7 +254,7 @@
   <html:hidden property="escId"/>
 </html:form>
  
-<form name="escalationForm" id="escalationForm" action="" method="POST">
+<html:form action="/alerts/SaveEscalation" styleId="EscalationForm">
 
 
   <input type="hidden" value="0" id="theValue">
@@ -393,7 +393,7 @@
   <tiles:put name="noCancel" value="true"/>
 </tiles:insert>
 
-</form>
+</html:form>
 
 <div id="example"></div>
 <div id="usersList" style="display: none;">
