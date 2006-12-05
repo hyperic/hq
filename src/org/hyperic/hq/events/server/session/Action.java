@@ -36,17 +36,17 @@ import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.bizapp.shared.action.SyslogActionConfig;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.Json;
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.json.JSON;
 import org.json.JSONObject;
 import org.json.JSONException;
 
 public class Action  
     extends PersistedObject
-    implements Json
+    implements JSON
 {
     private String          _className;
     private byte[]          _config;
@@ -210,8 +210,7 @@ public class Action
         setConfig(val.getConfig());
     }
 
-    public JSONObject toJSON() throws JSONException
-    {
+    public JSONObject toJSON() {
         try {
             ConfigResponse conf = ConfigResponse.decode(getConfig());
             JSONObject json = new JSONObject()
@@ -224,6 +223,8 @@ public class Action
             return json;
         } catch (EncodingException e) {
             // can't happen
+            throw new SystemException(e);
+        } catch (JSONException e) {
             throw new SystemException(e);
         }
     }
