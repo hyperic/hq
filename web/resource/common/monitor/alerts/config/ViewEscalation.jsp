@@ -342,33 +342,24 @@
         <td style="padding-left:15px;padding-bottom:10px;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
-              <td style="padding-top:2px;padding-bottom:2px;"><input type="radio" name="pause" value="pauseTime"> Allow user to pause escalation for <select name="time">
-                <option value="10 minutes">
+              <td style="padding-top:2px;padding-bottom:2px;"><html:radio property="allowPause" value="true"/> Allow user to pause escalation for
+              <html:select property="pauseRange">
+                <html:option value="300000">
                   5 minutes
-                </option>
-                <option value="10 minutes">
-                  10 minutes
-                </option>
-                <option selected value="20 minutes">
-                  20 minutes
-                </option>
-              </select> min<br></td>
+                </html:option>
+                <html:option value="600000">
+                  10 <fmt:message key="admin.settings.Minutes"/>
+                </html:option>
+                <html:option value="1200000">
+                  20 <fmt:message key="admin.settings.Minutes"/>
+                </html:option>
+                <html:option value="1800000">
+                  30 <fmt:message key="admin.settings.Minutes"/>
+                </html:option>
+              </html:select></td>
             </tr>
             <tr>
-              <td style="padding-top:2px;padding-bottom:2px;"><input type="radio" name="pause" value="pauseTime"> Allow user to pause escalation for <select name="time">
-                <option value="10">
-                  5 minutes
-                </option>
-                <option value="10">
-                  10 minutes
-                </option>
-                <option selected value="20">
-                  20 minutes
-                </option>
-              </select> min</td>
-            </tr>
-            <tr>
-              <td style="padding-top:2px;padding-bottom:2px;"><input type="radio" name="pause" value="pauseTime"> Continue escalation without pausing</td>
+              <td style="padding-top:2px;padding-bottom:2px;"><html:radio property="allowPause" value="false"/> Continue escalation without pausing</td>
             </tr>
           </table>
         </td>
@@ -380,10 +371,10 @@
         <td style="padding-left:15px;padding-bottom:10px;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
-              <td style="padding-top:2px;padding-bottom:2px;"><input type="radio" name="pause" value="pauseTime"> Notify only previously notified users of the fix</td>
+              <td style="padding-top:2px;padding-bottom:2px;"><html:radio property="notification" value="0"/> Notify only previously notified users of the fix</td>
             </tr>
             <tr>
-              <td style="padding-top:2px;padding-bottom:2px;"><input type="radio" name="pause" value="pauseTime"> Notify entire escalation chain of the fix</td>
+              <td style="padding-top:2px;padding-bottom:2px;"><html:radio property="notification" value="1"/> Notify entire escalation chain of the fix</td>
             </tr>
           </table>
         </td>
