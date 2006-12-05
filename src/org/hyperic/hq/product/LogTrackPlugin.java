@@ -241,7 +241,7 @@ public class LogTrackPlugin extends GenericPlugin {
             if (debugLogging) {
                 debugLog(message, "No pattern match configured");
             }
-            return true;
+            return !this.folder.shouldFold(event, ".*");
         }
 
         message = stripNewLines(message);
@@ -443,6 +443,16 @@ public class LogTrackPlugin extends GenericPlugin {
                          this.matcher + "'");
             }
         }
+
+        this.folder = new LogMessageFolder(this);
+
+        if (this.matcher == null) {
+            if (this.folder.getRepeatMax() ==
+                LogMessageFolder.DEFAULT_REPEAT_MAX)
+            {
+                this.folder.setRepeatMax(100);
+            }
+        }
     }
 
     protected boolean supportsPatternMatching() {
@@ -543,8 +553,6 @@ public class LogTrackPlugin extends GenericPlugin {
         super.init(manager);
         
         this.manager = (LogTrackPluginManager)manager;
-
-        this.folder = new LogMessageFolder(this);
     }
 
     public LogTrackPluginManager getManager() {
