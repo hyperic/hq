@@ -10,6 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.util.json.JSON;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Utility class for typesafe enums.  People implementing such enums should
  * subclass this class.  
@@ -23,7 +28,9 @@ import java.util.Set;
  *       every class that uses an enum.  Don't have the time now.. :-(
  *           http://www.hibernate.org/203.html
  */
-public abstract class HypericEnum {
+public abstract class HypericEnum 
+    implements JSON
+{
     private static final Map _enumsByClass = new HashMap();
     
     private final int    _code;
@@ -61,6 +68,22 @@ public abstract class HypericEnum {
         return _desc;
     }
     
+    public String getJsonName() {
+        return getClass().getName();
+    }
+
+    public JSONObject toJSON() {
+        try {
+            JSONObject res = new JSONObject()
+                .put("code", getCode())
+                .put("description", getDescription());
+
+            return res;
+        } catch(JSONException e) {
+            throw new SystemException(e);
+        }
+    }
+
     private static Comparator CODE_COMPARATOR = new Comparator() {
         public int compare(Object o1, Object o2) {
             HypericEnum e1, e2;
