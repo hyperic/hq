@@ -110,11 +110,11 @@ public class ListDefinitionsAction extends TilesAction {
 
         context.putAttribute(Constants.RESOURCE_ATTR,
                              RequestUtils.getResource(request));
-        context.putAttribute(Constants.RESOURCE_OWNER_ATTR,request.getAttribute(Constants.RESOURCE_OWNER_ATTR));
-        context.putAttribute(Constants.RESOURCE_MODIFIER_ATTR,request.getAttribute(Constants.RESOURCE_MODIFIER_ATTR));
+        context.putAttribute(Constants.RESOURCE_OWNER_ATTR, request
+                             .getAttribute(Constants.RESOURCE_OWNER_ATTR));
+        context.putAttribute(Constants.RESOURCE_MODIFIER_ATTR, request
+                             .getAttribute(Constants.RESOURCE_MODIFIER_ATTR));
         request.setAttribute( Constants.ALERT_DEFS_ATTR, uiBeans );
-        request.setAttribute( Constants.LIST_SIZE_ATTR,
-                              new Integer(alertDefs.getTotalSize()));
 
         return null;
     }
