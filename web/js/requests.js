@@ -4,8 +4,7 @@ var rtimer = null;
 function showProblemResponse(originalRequest) {
 	var response = eval("(" + originalRequest.responseText + ")");
 	var mList = response.problems;
-    alert(mList);
-    var table = document.getElementById('problemResourcesTable');
+	var table = document.getElementById('problemResourcesTable');
 	
 	for(var i=table.childNodes.length-1; i>2; i--){
         table.removeChild(table.childNodes[i]);
