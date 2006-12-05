@@ -31,13 +31,14 @@ package org.hyperic.hq.ui.beans;
  */
 public class EscalationActionBean {
     private String _actionType;
-    private int _emailType;
+    private String _emailType;
     private String _configuration;
     private String _syslogMeta;
     private String _syslogProduct;
     private String _syslogVersion;
     private String _snmpOid;
     private String _snmpAddress;
+    private long   _waitTime;
 
     public String getActionType() {
         return _actionType;
@@ -55,11 +56,11 @@ public class EscalationActionBean {
         _configuration = configuration;
     }
 
-    public int getEmailType() {
+    public String getEmailType() {
         return _emailType;
     }
 
-    public void setEmailType(int emailType) {
+    public void setEmailType(String emailType) {
         _emailType = emailType;
     }
 
@@ -101,5 +102,13 @@ public class EscalationActionBean {
 
     public void setSyslogVersion(String syslogVersion) {
         _syslogVersion = syslogVersion;
+    }
+
+    public long getWaitTime() {
+        return _waitTime;
+    }
+
+    public void setWaitTime(long waitTime) {
+        _waitTime = waitTime;
     }
 }
