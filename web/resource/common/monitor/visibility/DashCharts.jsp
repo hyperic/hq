@@ -110,7 +110,7 @@
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
 </head>
 
-<body bgcolor="#DBE3F5" onload="$('slowScreenSplash').style.display = 'none';">
+<body bgcolor="#DBE3F5" <c:if test="${not empty chartDataKeys}">onload="$('slowScreenSplash').style.display = 'none';"</c:if>>
 <!-- <c:out value="${IndicatorViewsForm.addMetric}"/> -->
 <c:forEach var="id" items="${IndicatorViewsForm.metric}">
 <!-- <c:out value="metric: ${id}"/> -->
@@ -191,7 +191,14 @@
 </ul>
 
 <div id="slowScreenSplash" align="center" class="dialog" style="top:15%;left:25%;padding:5px;">
-<fmt:message key="resource.common.monitor.visibility.request.wait"/>
+<c:choose>
+<c:when test="${not empty chartDataKeys}">
+  <fmt:message key="resource.common.monitor.visibility.request.wait"/>
+</c:when>
+<c:otherwise>
+  <fmt:message key="resource.common.monitor.visibility.no.indicators"/>
+</c:otherwise>
+</c:choose>
 </div>
 
 </body>
