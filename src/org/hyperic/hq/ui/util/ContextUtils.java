@@ -44,6 +44,7 @@ import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
+import org.hyperic.hq.bizapp.shared.GalertBoss;
 import org.hyperic.hq.bizapp.shared.EventLogBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
@@ -267,4 +268,11 @@ public class ContextUtils {
             ServiceLocator sl = getServiceLocator(ctx);
             return sl.getControlBoss();
         }
+    
+    public static GalertBoss getGalertBoss(ServletContext ctx)
+        throws ServiceLocatorException 
+    {
+        ServiceLocator sl = getServiceLocator(ctx);
+        return sl.getGalertBoss();
+    }
 }

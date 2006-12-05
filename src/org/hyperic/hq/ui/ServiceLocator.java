@@ -56,6 +56,8 @@ import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.EventsBossHome;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBossHome;
+import org.hyperic.hq.bizapp.shared.GalertBoss;
+import org.hyperic.hq.bizapp.shared.GalertBossHome;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.bizapp.shared.ProductBossHome;
 import org.hyperic.hq.ui.exception.ServiceLocatorException;
@@ -98,6 +100,9 @@ public class ServiceLocator {
 
     private static final String CONTROL_NAME = ControlBossHome.JNDI_NAME;
     private static final Class CONTROL_CLASS = ControlBossHome.class;
+
+    private static final String GALERT_NAME = GalertBossHome.JNDI_NAME;
+    private static final Class GALERT_CLASS = GalertBossHome.class;
 
     private final static String CONTEXT_FACTORY_NAME =
         "ejb-remote-config.context-factory";
@@ -360,4 +365,17 @@ public class ServiceLocator {
                 throw new ServiceLocatorException(e);
             }
         }
+
+    public GalertBoss getGalertBoss()
+        throws ServiceLocatorException 
+    {
+        GalertBossHome home = (GalertBossHome)lookup(GALERT_NAME, GALERT_CLASS);
+                                                      
+        try {
+            return (GalertBoss) home.create();
+        } catch (Exception e) {
+            throw new ServiceLocatorException(e);
+        }
+    }
+
 }

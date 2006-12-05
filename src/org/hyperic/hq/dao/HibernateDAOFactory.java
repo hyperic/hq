@@ -24,74 +24,19 @@
  */
 package org.hyperic.hq.dao;
 
+import java.util.HashMap;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
-import org.hyperic.hq.authz.server.session.AuthzSubjectDAO;
-import org.hyperic.hq.authz.server.session.OperationDAO;
-import org.hyperic.hq.authz.server.session.ResourceDAO;
-import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
-import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceType;
-import org.hyperic.hq.authz.server.session.Role;
-import org.hyperic.hq.authz.server.session.Operation;
-import org.hyperic.hq.authz.server.session.Virtual;
-import org.hyperic.hq.common.server.session.CrispoDAO;
-import org.hyperic.hq.common.server.session.Crispo;
-import org.hyperic.hq.common.ConfigProperty;
-import org.hyperic.hq.control.server.session.ControlHistoryDAO;
-import org.hyperic.hq.control.server.session.ControlScheduleDAO;
-import org.hyperic.hq.control.server.session.ControlHistory;
-import org.hyperic.hq.control.server.session.ControlSchedule;
-import org.hyperic.hq.events.server.session.ActionDAO;
-import org.hyperic.hq.events.server.session.AlertActionLogDAO;
-import org.hyperic.hq.events.server.session.AlertConditionDAO;
-import org.hyperic.hq.events.server.session.AlertConditionLogDAO;
-import org.hyperic.hq.events.server.session.AlertDAO;
-import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
-import org.hyperic.hq.events.server.session.EventLogDAO;
-import org.hyperic.hq.events.server.session.TriggerDAO;
-import org.hyperic.hq.events.server.session.EscalationDAO;
-import org.hyperic.hq.events.server.session.EscalationStateDAO;
-import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.AlertCondition;
-import org.hyperic.hq.events.server.session.Action;
-import org.hyperic.hq.events.server.session.RegisteredTrigger;
-import org.hyperic.hq.events.server.session.AlertActionLog;
-import org.hyperic.hq.events.server.session.AlertConditionLog;
-import org.hyperic.hq.events.server.session.Alert;
-import org.hyperic.hq.events.server.session.Escalation;
-import org.hyperic.hq.events.server.session.EscalationState;
-import org.hyperic.hq.events.server.session.EventLog;
-import org.hyperic.hq.measurement.server.session.CategoryDAO;
-import org.hyperic.hq.measurement.server.session.BaselineDAO;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
-import org.hyperic.hq.measurement.server.session.MeasurementArgDAO;
-import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
-import org.hyperic.hq.measurement.server.session.MetricProblemDAO;
-import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
-import org.hyperic.hq.measurement.server.session.RawMeasurementDAO;
-import org.hyperic.hq.measurement.server.session.ScheduleRevNumDAO;
-import org.hyperic.hq.measurement.server.session.Baseline;
-import org.hyperic.hq.measurement.server.session.Category;
-import org.hyperic.hq.measurement.server.session.MonitorableType;
-import org.hyperic.hq.measurement.server.session.RawMeasurement;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
-import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
-import org.hyperic.hq.measurement.server.session.MeasurementArg;
-import org.hyperic.hq.measurement.server.session.MetricProblem;
-import org.hyperic.hq.measurement.server.session.ScheduleRevNum;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.AppSvcDependency;
+import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Cprop;
 import org.hyperic.hq.appdef.CpropKey;
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
@@ -102,15 +47,73 @@ import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.auth.Principal;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectDAO;
+import org.hyperic.hq.authz.server.session.Operation;
+import org.hyperic.hq.authz.server.session.OperationDAO;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceDAO;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
+import org.hyperic.hq.authz.server.session.ResourceType;
+import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
+import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.authz.server.session.Virtual;
+import org.hyperic.hq.autoinventory.AIHistory;
+import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
+import org.hyperic.hq.autoinventory.AISchedule;
 import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.autoinventory.AIService;
-import org.hyperic.hq.autoinventory.AIIp;
-import org.hyperic.hq.autoinventory.AIHistory;
-import org.hyperic.hq.autoinventory.AISchedule;
+import org.hyperic.hq.common.ConfigProperty;
+import org.hyperic.hq.common.server.session.Crispo;
+import org.hyperic.hq.common.server.session.CrispoDAO;
+import org.hyperic.hq.control.server.session.ControlHistory;
+import org.hyperic.hq.control.server.session.ControlHistoryDAO;
+import org.hyperic.hq.control.server.session.ControlSchedule;
+import org.hyperic.hq.control.server.session.ControlScheduleDAO;
+import org.hyperic.hq.events.server.session.Action;
+import org.hyperic.hq.events.server.session.ActionDAO;
+import org.hyperic.hq.events.server.session.Alert;
+import org.hyperic.hq.events.server.session.AlertActionLog;
+import org.hyperic.hq.events.server.session.AlertActionLogDAO;
+import org.hyperic.hq.events.server.session.AlertCondition;
+import org.hyperic.hq.events.server.session.AlertConditionDAO;
+import org.hyperic.hq.events.server.session.AlertConditionLog;
+import org.hyperic.hq.events.server.session.AlertConditionLogDAO;
+import org.hyperic.hq.events.server.session.AlertDAO;
+import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
+import org.hyperic.hq.events.server.session.Escalation;
+import org.hyperic.hq.events.server.session.EscalationDAO;
+import org.hyperic.hq.events.server.session.EscalationState;
+import org.hyperic.hq.events.server.session.EscalationStateDAO;
+import org.hyperic.hq.events.server.session.EventLog;
+import org.hyperic.hq.events.server.session.EventLogDAO;
+import org.hyperic.hq.events.server.session.RegisteredTrigger;
+import org.hyperic.hq.events.server.session.TriggerDAO;
+import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfoDAO;
+import org.hyperic.hq.galerts.server.session.GalertDefDAO;
+import org.hyperic.hq.galerts.server.session.GtriggerTypeInfoDAO;
+import org.hyperic.hq.measurement.server.session.Baseline;
+import org.hyperic.hq.measurement.server.session.BaselineDAO;
+import org.hyperic.hq.measurement.server.session.Category;
+import org.hyperic.hq.measurement.server.session.CategoryDAO;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
+import org.hyperic.hq.measurement.server.session.MeasurementArg;
+import org.hyperic.hq.measurement.server.session.MeasurementArgDAO;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
+import org.hyperic.hq.measurement.server.session.MetricProblem;
+import org.hyperic.hq.measurement.server.session.MetricProblemDAO;
+import org.hyperic.hq.measurement.server.session.MonitorableType;
+import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
+import org.hyperic.hq.measurement.server.session.RawMeasurement;
+import org.hyperic.hq.measurement.server.session.RawMeasurementDAO;
+import org.hyperic.hq.measurement.server.session.ScheduleRevNum;
+import org.hyperic.hq.measurement.server.session.ScheduleRevNumDAO;
 import org.hyperic.hq.product.Plugin;
-
-import java.util.HashMap;
 
 public class HibernateDAOFactory extends DAOFactory {
     private static SessionFactory sessionFactory = Util.getSessionFactory();
@@ -195,6 +198,8 @@ public class HibernateDAOFactory extends DAOFactory {
         addDAO(new ServiceDAO(this));
         addDAO(new ServiceTypeDAO(this));
         addDAO(new VirtualDAO(this));
+        addDAO(new GalertDefDAO(this));
+        addDAO(new GtriggerTypeInfoDAO(this));
     }
 
     public ActionDAO getActionDAO() {
@@ -413,4 +418,15 @@ public class HibernateDAOFactory extends DAOFactory {
         return (ControlScheduleDAO)getDAO(ControlSchedule.class);
     }
 
+    public GalertDefDAO getGalertDefDAO() {
+        return new GalertDefDAO(this);
+    }
+
+    public ExecutionStrategyTypeInfoDAO getExecutionStrategyTypeInfoDAO() {
+        return new ExecutionStrategyTypeInfoDAO(this);
+    }
+
+    public GtriggerTypeInfoDAO getGtriggerTypeInfoDAO() {
+        return new GtriggerTypeInfoDAO(this);
+    }
 }
