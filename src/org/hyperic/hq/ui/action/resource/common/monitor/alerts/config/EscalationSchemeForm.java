@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
-import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.action.resource.ResourceForm;
@@ -57,7 +57,7 @@ public class EscalationSchemeForm extends ResourceForm {
         _escName = escName;
     }
 
-    public void reset(ActionMapping mapping, ServletRequest request) {
+    public void reset(ActionMapping mapping, HttpServletRequest request) {
         super.reset(mapping, request);
         _escId = "";
         _escName = "";

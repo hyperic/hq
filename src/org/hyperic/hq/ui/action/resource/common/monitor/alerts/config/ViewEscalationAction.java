@@ -73,7 +73,6 @@ public class ViewEscalationAction extends ViewDefinitionAction {
                 JSONObject escalation = EscalationWebMediator.getInstance()
                     .jsonByEscalationName(sessionId.intValue(),
                                           eForm.getEscId());
-                eForm.setEscName(eForm.getEscId());
                 request.setAttribute("escalationJSON", escalation.toString());
             }
         } catch (ParameterNotFoundException e) {
