@@ -10,12 +10,16 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.json.JSONObject;
 import org.json.JSONException;
 
+import java.rmi.RemoteException;
+
 /**
  */
 public class JsonEscalationByAlertDefId extends BaseAction
 {
-    public void execute(JsonActionContext context) throws JSONException,
-        PermissionException, SessionTimeoutException, SessionNotFoundException
+    public void execute(JsonActionContext context)
+        throws JSONException,
+               PermissionException, SessionTimeoutException,
+               SessionNotFoundException, RemoteException
     {
         JSONObject escalation = EscalationWebMediator.getInstance()
                 .jsonEscalationByAlertDefId(

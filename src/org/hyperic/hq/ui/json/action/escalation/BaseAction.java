@@ -13,6 +13,7 @@ import org.json.JSONException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.rmi.RemoteException;
 
 /**
  */
@@ -31,9 +32,12 @@ public abstract class BaseAction extends Action
         return null;
     }
 
-    public abstract void execute(JsonActionContext context) throws
-        PermissionException, SessionTimeoutException, SessionNotFoundException,
-        JSONException;
+    public abstract void execute(JsonActionContext context)
+        throws PermissionException,
+               SessionTimeoutException,
+               SessionNotFoundException,
+               JSONException,
+               RemoteException;
 
     protected void streamResult(JsonActionContext context)
             throws JSONException, IOException

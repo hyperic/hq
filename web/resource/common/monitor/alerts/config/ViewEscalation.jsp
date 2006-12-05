@@ -158,11 +158,10 @@
            $('escName').value = '<c:out value="${param.escId}"/>';
         </c:if>
 
-        /*
 		$('submit').onclick = function () {
-		  sendEscForm();
+            alert('here');
+            sendEscForm();
 		}
-        */
 	}
 
     onloads.push( initEsc );
@@ -174,7 +173,7 @@
 		var adId = $('ad').value;
 		var escFormSerial = Form.serialize('EscalationForm');
 		var url = '/escalation/saveEscalation';
-		var pars = "escForm=" + escFormSerial + "ad=" + adId;
+		var pars = "escForm=" + escFormSerial + "&ad=" + adId;
 		new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse} );
 	}
 

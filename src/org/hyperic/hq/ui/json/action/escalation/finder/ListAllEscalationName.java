@@ -10,12 +10,16 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.rmi.RemoteException;
+
 /**
  */
 public class ListAllEscalationName extends BaseAction
 {
-    public void execute(JsonActionContext context) throws JSONException,
-        PermissionException, SessionTimeoutException, SessionNotFoundException
+    public void execute(JsonActionContext context)
+        throws JSONException,
+               PermissionException, SessionTimeoutException,
+               SessionNotFoundException, RemoteException
     {
         JSONArray array = EscalationWebMediator.getInstance()
                 .listAllEscalationName(context.getSessionId());

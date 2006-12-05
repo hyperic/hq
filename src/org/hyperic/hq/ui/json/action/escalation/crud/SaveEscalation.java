@@ -9,6 +9,8 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.rmi.RemoteException;
+
 /**
  */
 public class SaveEscalation extends BaseAction
@@ -17,7 +19,7 @@ public class SaveEscalation extends BaseAction
         throws PermissionException,
                SessionTimeoutException,
                SessionNotFoundException,
-               JSONException
+               JSONException, RemoteException
     {
         EscalationWebMediator wmed = EscalationWebMediator.getInstance();
         // fake data
