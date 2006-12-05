@@ -121,15 +121,10 @@
 	    d.removeChild(olddiv);
 	}
 	
-	function addOption(sel, val, txt, selected) {
+	function addOption(sel, val, txt) {
 		var o = document.createElement("OPTION");
 		var t = document.createTextNode(txt);
 		o.setAttribute("value",val);
-
-        if (selected) {
-          o.setAttribute("selected", "true");
-        }
-
 		o.appendChild(t);
 		sel.appendChild(o);
 	}
@@ -146,17 +141,8 @@
         var escalationSel = $('escId');
         var schemes = escJson.escalations;
         for (var i = 0; i < schemes.length; i++) {
-            <c:if test="${not empty param.escId}">
-              if (schemes[i].name == '<c:out value="${param.escId}"/>')
-		        addOption(escalationSel , schemes[i].name, schemes[i].name, true);
-              else
-            </c:if>
-		    addOption(escalationSel , schemes[i].name, schemes[i].name);
+		    addOption(escalationSel , schemes[i].id, schemes[i].name);
         }
-
-        <c:if test="${not empty param.escId}">
-           $('escName').value = '<c:out value="${param.escId}"/>';
-        </c:if>
 
         /*
 		$('submit').onclick = function () {
@@ -167,11 +153,15 @@
 
     onloads.push( initEsc );
 
+
+
 	function sendEscForm () {
-		var adId = $('ad').value
+	alert('called');
+		var adId = $('ad').value;
+		var escFormSerial = Form.serialize('escalationForm');
 		var url = '/escalation/saveEscalation';
-		var pars = 'escForm=' + Form.serialize('escalationForm') + 'ad' + adId
-		var myAjax = new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse} );
+		var pars = "escForm=" + escFormSerial + "ad=" + adId;
+		new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse} );
 	}
 
     function configure(id) {
@@ -227,45 +217,22 @@
                     return true;
                   }});
     }
-
-    function schemeChange(sel) {
-      document.EscalationSchemeForm.escId.value =
-        sel.options[sel.selectedIndex].value;
-      document.EscalationSchemeForm.submit();
-    }
-
 </script>
-
-<html:form action="/alerts/ConfigEscalation">
-  <html:hidden property="mode"/>
-  <input type="hidden" name="ad" value="<c:out value="${alertDef.id}"/>"/>
-  <c:choose>
-    <c:when test="${not empty Resource}">
-      <input type="hidden" name="eid" value="<c:out value="${Resource.entityId}"/>"/>
-    </c:when>
-    <c:otherwise>
-      <input type="hidden" name="aetid" value="<c:out value="${ResourceType.appdefTypeKey}"/>"/>
-    </c:otherwise>
-  </c:choose>
-  <html:hidden property="escId"/>
-</html:form>
  
-<form name="escalationForm" id="escalationForm" onsubmit="sendEscForm();return false;">
+<form name="escalationForm" id="escalationForm" action="" method="POST">
+
+
   <input type="hidden" value="0" id="theValue">
-  <input type="hidden" value="<c:out value="${alertDef.id}"/>" id="ad"/>
+  <input type="hidden" value="<c:out value="${alertDef.id}" />" id="ad"/>
   <table width="100%" cellpadding="3" cellspacing="0" border="0">
     <tbody>
       <tr class="tableRowHeader">
         <td align="right">
-          Escalation Scheme:
-          <select id="escId" name="escId" onchange="schemeChange(this)">
-            <option value="">
-              Create New 
+          <select id="escId" name="escId">
+            <option selected value="0">
+              Create New Escalation
             </option>
           </select>
-          
-          Name:
-          <input type=text size=25 name='escName' id='escName'/>
         </td>
       </tr>
         <tr class="tableRowAction">
@@ -389,6 +356,7 @@
 
 </form>
 
+<div id="example"></div>
 <div id="usersList" style="display: none;">
   <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
   <table width="100%" cellpadding="2" cellspacing="0" border="0">
@@ -404,6 +372,7 @@
 <c:if test="${not empty AvailableRoles}">
 <div id="rolesList" style="display: none;">
   <c:forEach var="role" items="${AvailableRoles}" varStatus="status">
+  
   <table width="100%" cellpadding="2" cellspacing="0" border="0">
   <tr class="ListRow">
     <td class="ListCell">
@@ -411,6 +380,7 @@
     </td>
   </tr>
   </table>
+ 
   </c:forEach>
 </div>
 </c:if>
