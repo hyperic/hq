@@ -333,7 +333,8 @@ var tmp = eval('(' + originalRequest.responseText + ')');
 	var metricTable = document.getElementById('metricTable');
 	var resourceNameHeader = metricValues.resourceTypeName;
 	var resourceLoadTypeHeader = metricValues.metricName;
-	
+	var urlColon = ":"
+	var resUrl = $('viewResUrl').href;
 	if (metricValues && metricValues != 0) {
 	
 	for(var i=metricTable.childNodes.length-1; i>1; i--){
@@ -343,7 +344,7 @@ var tmp = eval('(' + originalRequest.responseText + ')');
 	for (i=0; i<metricValues.values.length; i++) {
 	//alert(metricValues.values.length);
 	
-
+	var newanchor = document.createElement("a");
 	var tr  = document.createElement('tr');
 	var td1 = document.createElement('td');
     var td2 = document.createElement('td');
@@ -364,7 +365,9 @@ var tmp = eval('(' + originalRequest.responseText + ')');
 		tr.appendChild(td1);
 		td1.setAttribute((document.all ? 'className' : 'class'), "resource");
 		if (metricValues.values[i].resourceName) {
-		td1.appendChild(document.createTextNode(metricValues.values[i].resourceName));
+		td1.appendChild(newanchor);
+		newanchor.appendChild(document.createTextNode(metricValues.values[i].resourceName));
+		newanchor.setAttribute('href', (resUrl + metricValues.values[i].resourceTypeId + urlColon + metricValues.values[i].resourceId));
 		}
 		
 		tr.appendChild(td2);
