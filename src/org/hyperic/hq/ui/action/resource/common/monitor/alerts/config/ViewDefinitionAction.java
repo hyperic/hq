@@ -31,7 +31,12 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.events.EventConstants;
@@ -41,13 +46,6 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.actions.TilesAction;
 
 /**
  * View an alert definition.
@@ -68,7 +66,6 @@ public class ViewDefinitionAction extends TilesAction {
         log.trace("alertDefId=" + alertDefId);
 
         int sessionID = RequestUtils.getSessionId(request).intValue();
-        AuthzBoss ab = ContextUtils.getAuthzBoss(ctx);
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
         MeasurementBoss mb = ContextUtils.getMeasurementBoss(ctx);
 
@@ -100,7 +97,8 @@ public class ViewDefinitionAction extends TilesAction {
             if (!canEditConditions)
                 break;
         }
-        request.setAttribute( "canEditConditions", new Boolean(canEditConditions) );
+        request.setAttribute("canEditConditions",
+                             new Boolean(canEditConditions));
         List alertDefConditions = AlertDefUtil.getAlertConditionBeanList(
                 sessionID, request, mb, acvList,
                 EventConstants.TYPE_ALERT_DEF_ID.equals(adv.getParentId()));
