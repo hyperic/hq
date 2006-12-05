@@ -37,6 +37,11 @@ public class AlertActionLogDAO extends HibernateDAO {
         return (AlertActionLog)super.findById(id);
     }
 
+    public void save(AlertActionLog entity)
+    {
+        super.save(entity);
+    }
+
     public void savePersisted(PersistedObject entity)
     {
         save((AlertActionLog)entity);

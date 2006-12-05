@@ -1497,9 +1497,6 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     /**
      * retrieve escalation JSONObject by name.
      *
-     * Escalation finders begin with find* to be consistent with
-     * DAO finder convention
-     *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
@@ -1518,9 +1515,6 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     /**
      * retrieve escalation JSONObject by alert definition id.
      *
-     * Escalation json finders begin with json* to be consistent with
-     * DAO finder convention
-     *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
@@ -1537,10 +1531,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     }
 
     /**
-     * retrieve escalation JSONObject by alert definition id.
-     *
-     * Escalation json finders begin with json* to be consistent with
-     * DAO finder convention
+     * retrieve escalation JSONObject by escalation id.
      *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
