@@ -4,7 +4,7 @@
       "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
-<hibernate-mapping package="com.hyperic.hq.galerts.server.session">
+<hibernate-mapping package="org.hyperic.hq.galerts.server.session">
   <class name="GtriggerInfo" table="EAM_GTRIGGERS">
     <id name="id" type="integer">
       <column name="ID" not-null="true" />
