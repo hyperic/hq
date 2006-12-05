@@ -62,10 +62,11 @@ public class DerivedMeasurementDAO extends HibernateDAO {
     }
 
     List findByIds(Integer ids[]) {
-        String sql = "from DerivedMeasurement where id IN " +
-            DBUtil.makeInSet(ids);
+        String sql = "from DerivedMeasurement where id IN (:ids)";
 
-        return getSession().createQuery(sql).list();
+        return getSession().createQuery(sql)
+            .setParameterList("ids", ids)
+            .list();
     }
 
     public DerivedMeasurement findByTemplateForInstance(Integer tid,
