@@ -26,6 +26,7 @@
 package org.hyperic.hq.zevents;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,6 +37,8 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticThread;
 
@@ -46,7 +49,7 @@ import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
  * The Zevent subsystem is an event system for fast, non-reliable transmission
  * of events.  Important data should not be transmitted on this bus, since
  * it is not persisted, and there is never any guarantee of receipt.  
- * 
+
  * This manager provides no transactional guarantees, so the caller must 
  * rollback additions of listeners if the transaction fails. 
  */
@@ -231,6 +234,23 @@ public class ZeventManager {
             e.enterQueue();
             _eventQueue.put(e);
         }
+    }
+    
+    /**
+     * Enqueue events if the current running transaction successfully commits.
+     * @see #enqueueEvents(List)
+     */
+    public void enqueueEventsAfterCommit(final List events) {
+        HQApp.getInstance().addTransactionListener(new TransactionListener() {
+            public void afterCommit(boolean success) {
+                try {
+                    if (success)
+                        enqueueEvents(events);
+                } catch(InterruptedException e) {
+                    _log.warn("Interrupted while enqueueing events");
+                }
+            }
+        });
     }
     
     public void enqueueEvent(Zevent event) throws InterruptedException {
