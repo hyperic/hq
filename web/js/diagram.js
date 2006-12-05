@@ -38,19 +38,19 @@ function toggleDiagram(eId) {
 }
 
 function hideDiagram(thisDiv) {
-  new Effect.SlideUp(thisDiv);
+  new Effect.SlideUp(thisDiv, { duration: 0.2 });
   showFormElements();
   diagShown = false;
 }
 
 function showDiagram(thisDiv) {
-  new Effect.SlideDown(thisDiv);
+  new Effect.SlideDown(thisDiv, { duration: 0.2 });
   hideFormElements();
 
   diagShown = true;
 
   diagramDiv = thisDiv;
-  setTimeout("makeDiagramVisible()", 500);
+  setTimeout("makeDiagramVisible()", 200);
 }
 
 function makeDiagramVisible(eId) {
@@ -58,12 +58,12 @@ function makeDiagramVisible(eId) {
 }
 
 function show(menu) {
-  new Effect.SlideDown(menu);
+  new Effect.SlideDown(menu, { duration: 0.2 });
   menu.shown = true;
 }
 
 function hide(menu) {
-  new Effect.SlideUp(menu);
+  new Effect.SlideUp(menu, { duration: 0.2 });
   menu.shown = false;
 }
 
