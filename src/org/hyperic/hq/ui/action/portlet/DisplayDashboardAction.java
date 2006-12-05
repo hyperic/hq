@@ -42,8 +42,6 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.util.config.InvalidOptionException;
 
-/**
- */
 public class DisplayDashboardAction extends TilesAction {
 
     public ActionForward execute(ComponentContext context,

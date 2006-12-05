@@ -53,12 +53,9 @@ import org.hyperic.hq.ui.util.DashboardUtils;
 
 public class AddPortletAction extends BaseAction {
 
-    // --------------------------------------------------------- Public Methods
-    
     /**
-     *
      * @param mapping The ActionMapping used to select this instance
-     * @param actionForm The optional ActionForm bean for this request (if any)
+     * @param form The optional ActionForm bean for this request (if any)
      * @param request The HTTP request we are processing
      * @param response The HTTP response we are creating
      *
@@ -119,6 +116,5 @@ public class AddPortletAction extends BaseAction {
         session.removeAttribute(Constants.USERS_SES_PORTAL);
 
         return mapping.findForward(Constants.SUCCESS_URL);
-    
     }
 }
