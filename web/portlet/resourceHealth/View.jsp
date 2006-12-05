@@ -42,7 +42,7 @@
   <tiles:put name="dragDrop" value="true"/>
 </tiles:insert>
 
-< html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="visibility:hidden;"></html:link>
+<html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="visibility:hidden;"></html:link>
   <!-- JSON available at /dashboard/ViewResourceHealth.do -->
 <script type="text/javascript">
 function requestFavoriteResources() {
@@ -56,19 +56,19 @@ onloads.push(requestFavoriteResources);
  	<tbody>
 	<tr class="tableRowHeader">
 		<th width="50%" class="tableRowInactive">
-			Resource Name
+			<fmt:message key="dash.home.TableHeader.ResourceName"/>
 		</th>
 		<th width="20%" class="tableRowInactive">
-			Resource Type
+			<fmt:message key="dash.home.TableHeader.Type"/>
 		</th>
 		<th width="10%" align="center" class="tableRowInactive">
-			Throughput
+			<fmt:message key="resource.common.monitor.visibility.PerformanceTH"/>
 		</th>
 		<th width="10%" align="center" class="tableRowInactive">
-			Availability
+			<fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/>
 		</th>
 		<th width="10%" align="center" class="tableRowInactive">
-			Alerts
+			<fmt:message key="dash.home.TableHeader.Alerts"/>
 		</th>
 	</tr>
 	 <!-- table rows are inserted here dynamically -->
