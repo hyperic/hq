@@ -285,19 +285,21 @@ public class EscalationMediator extends Mediator
     {
         EscalationState state =
             setEscalationState(subjectID, alertID, false);
-        AuthzSubject subj =
-            DAOFactory.getDAOFactory().getAuthzSubjectDAO()
-                .findById(subjectID);
-        // TODO: refine message content
-        String message = new StringBuffer()
-            .append(subj.getFirstName())
-            .append(" ")
-            .append(subj.getLastName())
-            .append(" has acknowledged the alert. The alert id number is ")
-            .append(alertID)
-            .append(".")
-            .toString();
-        notifyEscalation(alertID, state, message);
+        if (state != null) {
+            AuthzSubject subj =
+                DAOFactory.getDAOFactory().getAuthzSubjectDAO()
+                    .findById(subjectID);
+            // TODO: refine message content
+            String message = new StringBuffer()
+                .append(subj.getFirstName())
+                .append(" ")
+                .append(subj.getLastName())
+                .append(" has acknowledged the alert. The alert id number is ")
+                .append(alertID)
+                .append(".")
+                .toString();
+            notifyEscalation(alertID, state, message);
+        }
     }
 
     public void fixAlert(Integer subjectID, Integer alertID)
@@ -305,19 +307,21 @@ public class EscalationMediator extends Mediator
     {
         EscalationState state =
             setEscalationState(subjectID, alertID, true);
-        AuthzSubject subj =
-            DAOFactory.getDAOFactory().getAuthzSubjectDAO()
-                .findById(subjectID);
-        // TODO: refine message content
-        String message = new StringBuffer()
-            .append(subj.getFirstName())
-            .append(" ")
-            .append(subj.getLastName())
-            .append(" has fixed the alert. The alert id number is ")
-            .append(alertID)
-            .append(".")
-            .toString();
-        notifyEscalation(alertID, state, message);
+        if (state != null) {
+            AuthzSubject subj =
+                DAOFactory.getDAOFactory().getAuthzSubjectDAO()
+                    .findById(subjectID);
+            // TODO: refine message content
+            String message = new StringBuffer()
+                .append(subj.getFirstName())
+                .append(" ")
+                .append(subj.getLastName())
+                .append(" has fixed the alert. The alert id number is ")
+                .append(alertID)
+                .append(".")
+                .toString();
+            notifyEscalation(alertID, state, message);
+        }
     }
 
     private void notifyEscalation(Integer alertId,
@@ -354,23 +358,26 @@ public class EscalationMediator extends Mediator
         Escalation escalation =
             alert.getAlertDefinition().getEscalation();
 
-        EscalationState state =
-            getEscalationState(escalation, alertDefId);
+        if (escalation != null) {
+            EscalationState state =
+                getEscalationState(escalation, alertDefId);
 
-        if (state != null) {
-            if (fixed) {
-                state.setFixed(true);
-            } else {
-                state.setAcknowledge(true);
+            if (state != null) {
+                if (fixed) {
+                    state.setFixed(true);
+                } else {
+                    state.setAcknowledge(true);
+                }
+                AuthzSubject subject =
+                    DAOFactory.getDAOFactory().getAuthzSubjectDAO()
+                        .findById(subjectID);
+                state.setUpdateBy(subject.getFirstName());
+                DAOFactory.getDAOFactory().getEscalationStateDAO()
+                    .save(state);
             }
-            AuthzSubject subject =
-                DAOFactory.getDAOFactory().getAuthzSubjectDAO()
-                    .findById(subjectID);
-            state.setUpdateBy(subject.getFirstName());
-            DAOFactory.getDAOFactory().getEscalationStateDAO()
-                .save(state);
+            return state;
         }
-        return state;
+        return null;
     }
 
     private void scheduleAction(Integer escalationId, Integer alertDefId,
