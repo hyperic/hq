@@ -140,6 +140,14 @@ public class ProductPluginDeployer
     public ProductPluginDeployer() {
         super();
         
+        //native libraries are deployed into another directory
+        //which is not next to sigar.jar, so we drop this hint
+        //to find it.
+        System.setProperty("org.hyperic.sigar.path",
+                           System.getProperty("jboss.server.home.dir") +
+                           //XXX un-hardcode this path.
+                           "/deploy/hq.ear/sigar_bin/lib");
+        
         // Initialize database
         DatabaseInitializer.init();
         
@@ -151,14 +159,6 @@ public class ProductPluginDeployer
             _log.info("Loaded custom properties from: " + propFile);
         }
 
-        //native libraries are deployed into another directory
-        //which is not next to sigar.jar, so we drop this hint
-        //to find it.
-        System.setProperty("org.hyperic.sigar.path",
-                           System.getProperty("jboss.server.home.dir") +
-                           //XXX un-hardcode this path.
-                           "/deploy/hq.ear/sigar_bin/lib");
-        
         try {
             _readyMgrName = new ObjectName(READY_MGR_NAME);
         } catch (MalformedObjectNameException e) {
