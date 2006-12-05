@@ -88,7 +88,6 @@
         </tiles:insert>
     </c:otherwise>
 </c:choose>
-&nbsp;<br>
 
 <tiles:insert definition=".portlet.confirm"/>
 <tiles:insert definition=".portlet.error"/>

@@ -68,8 +68,6 @@ var pageData = new Array();
 </c:otherwise>
 </c:choose>
 
-&nbsp;<br>
-	  
 <tiles:insert definition=".portlet.confirm"/>
 <tiles:insert definition=".portlet.error"/>
 
