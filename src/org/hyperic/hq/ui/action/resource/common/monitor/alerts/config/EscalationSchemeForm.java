@@ -41,6 +41,7 @@ public class EscalationSchemeForm extends ResourceForm {
     private boolean _allowPause;
     private long    _pauseRange;
     private int     _notification;
+    private int     _ad;
 
     public String getEscId() {
         return _escId;
@@ -70,7 +71,7 @@ public class EscalationSchemeForm extends ResourceForm {
     }
 
     public void setAllowPause(boolean allowPause) {
-        this._allowPause = allowPause;
+        _allowPause = allowPause;
     }
 
     public int getNotification() {
@@ -78,7 +79,7 @@ public class EscalationSchemeForm extends ResourceForm {
     }
 
     public void setNotification(int notification) {
-        this._notification = notification;
+        _notification = notification;
     }
 
     public long getPauseRange() {
@@ -86,7 +87,15 @@ public class EscalationSchemeForm extends ResourceForm {
     }
 
     public void setPauseRange(long pauseRange) {
-        this._pauseRange = pauseRange;
+        _pauseRange = pauseRange;
+    }
+
+    public int getAd() {
+        return _ad;
+    }
+
+    public void setAd(int ad) {
+        _ad = ad;
     }
 
     public EscalationActionBean[] getActions() {
