@@ -244,27 +244,25 @@ var tmp = eval('(' + originalRequest.responseText + ')');
 		td1.innerHTML = "<input type=checkbox name=alerts value=" + aList[i].alertId + " onclick=\"ToggleSelection(this, widgetProperties, false);\" class=listMember>";
 	
 		tr.appendChild(td2);
-		td2.setAttribute((document.all ? 'className' : 'class'), "resourceName");
+		td2.setAttribute((document.all ? 'className' : 'class'), "ListCell");
 		
-		if (aList[i].resourceName && aList[i].appdefKey && aList[i].alertId) {
+		if (aList[i].cTime && aList[i].appdefKey && aList[i].alertId) {
 		td2.appendChild(alertAnchor);
-		alertAnchor.appendChild(document.createTextNode(aList[i].resourceName));
-		//alertAnchor.setAttribute('href', (aList[i].resourceName));
+		alertAnchor.appendChild(document.createTextNode(aList[i].cTime));
 		alertAnchor.setAttribute('href', (alertUrl + aList[i].appdefKey + urlAmp + aList[i].alertId));
 		}
 		
 		tr.appendChild(td3);
-		td3.setAttribute((document.all ? 'className' : 'class'), "ListCell");
+		td3.setAttribute((document.all ? 'className' : 'class'), "alertType");
 		if (aList[i].alertDefName) {
 		td3.appendChild(document.createTextNode(aList[i].alertDefName));
 		}
 		
 		tr.appendChild(td4);
-		td4.setAttribute((document.all ? 'className' : 'class'), "ListCell");
+		td4.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlert");
 		
-		if (aList[i].cTime) {
-		td4.appendChild(document.createTextNode(aList[i].cTime));
-		td4.setAttribute('align', 'center');
+		if (aList[i].resourceName) {
+		td4.appendChild(document.createTextNode(aList[i].resourceName));
 		}
  		
 	}

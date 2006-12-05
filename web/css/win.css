@@ -815,13 +815,23 @@ ul.boxy li {
 }
 
 .resourceName {
-  width:50%;
-  padding-top:3px;
-  padding-bottom:3px;
-  padding-left:3px;
+  width:49%;
+  padding:3px;
   border-bottom:1px solid #D5D8DE;
 }
 
+.resourceNameAlert {
+width:49%;
+  padding:3px;
+  border-bottom:1px solid #D5D8DE;
+}
+
+.alertType {
+padding: 3px; 
+border-bottom: 1px solid #D5D8DE; 
+text-align: middle; 
+width:20%;
+}
 .resourceTypeName {
   width:20%;
   padding-top:3px;
