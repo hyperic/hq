@@ -20,8 +20,6 @@ import org.hyperic.util.units.FormattedNumber;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionForm;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,8 +36,6 @@ import java.util.ArrayList;
  * use is to generate the JSON objects required for display into the UI.
  */
 public class ViewAction extends BaseAction {
-
-    private Log _log = LogFactory.getLog("METRIC VIEWER");
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -111,8 +107,6 @@ public class ViewAction extends BaseAction {
         metricValues.put("values", values);
         JSONObject res = new JSONObject();
         res.put("metricValues", metricValues);
-
-        _log.info(res.toString(2));
 
         response.getWriter().write(res.toString());
 
