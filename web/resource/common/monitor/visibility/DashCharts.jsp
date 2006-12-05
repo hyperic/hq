@@ -190,7 +190,7 @@
 </c:forEach>
 </ul>
 
-<div id="slowScreenSplash" align="center" class="dialog" style="top:15%;left:25%;padding:5px;">
+<div id="slowScreenSplash" align="center" class="dialog" style="top:20%;left:35%;padding:5px;">
 <c:choose>
 <c:when test="${not empty chartDataKeys}">
   <fmt:message key="resource.common.monitor.visibility.request.wait"/>
