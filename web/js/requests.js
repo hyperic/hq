@@ -5,7 +5,9 @@ function showProblemResponse(originalRequest) {
 	var response = eval("(" + originalRequest.responseText + ")");
 	var mList = response.problems;
 	var table = document.getElementById('problemResourcesTable');
-	
+	var urlColon = ":"
+	var resUrl = $('viewResUrl').href;
+
 	for(var i=table.childNodes.length-1; i>2; i--){
         table.removeChild(table.childNodes[i]);
     }
@@ -37,7 +39,7 @@ function showProblemResponse(originalRequest) {
 		if (mList[i].resourceName) {
 		td1.appendChild(newanchor);
 		newanchor.appendChild(document.createTextNode(mList[i].resourceName));
-		newanchor.setAttribute('href', (mList[i].resourceName));
+		newanchor.setAttribute('href', (resUrl + mList[i].resourceType + urlColon + mList[i].resourceId));
 		}
 		
 		tr.appendChild(td2);
