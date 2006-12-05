@@ -324,7 +324,6 @@
   <definition name=".events.config.view.notifications.escalation"
               extends=".events.config.view.notifications">
      <put name="notificationsTile" value=".events.config.view.notifications.escalation.details"/>
-     <put name="formAction" value="/alerts/SaveEscalation"/>
   </definition>
 
   <definition name=".events.config.view.escalation"

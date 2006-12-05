@@ -29,7 +29,7 @@
   USA.
  --%>
 
-<tiles:importAttribute name="formAction"/>
+<tiles:importAttribute name="formAction" ignore="true"/>
 <tiles:importAttribute name="addMode" ignore="true"/>
 <tiles:importAttribute name="defaultSortColumn" ignore="true"/>
 
@@ -71,9 +71,10 @@ var pageData = new Array();
 initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 </script>
-<!-- FORM -->
+
 <c:choose>
-<c:when test="${not empty addMode}">
+<c:when test="${not empty formAction}">
+<!-- FORM -->
 <html:form action="${formAction}">
 <html:hidden property="ad" value="${alertDef.id}"/>
 <c:choose>
