@@ -236,6 +236,10 @@ public class ZeventManager {
         }
     }
     
+    public void enqueueEventAfterCommit(Zevent event) {
+        enqueueEventsAfterCommit(Collections.singletonList(event));
+    }
+    
     /**
      * Enqueue events if the current running transaction successfully commits.
      * @see #enqueueEvents(List)
