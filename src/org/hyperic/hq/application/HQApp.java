@@ -54,6 +54,7 @@ public class HQApp {
         if (listeners == null) {
             listeners = new ArrayList(1);
             _txListeners.set(listeners);
+            scheduleCommitCallback();
         }
         
         listeners.add(listener);
