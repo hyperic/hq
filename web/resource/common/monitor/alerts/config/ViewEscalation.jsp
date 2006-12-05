@@ -154,9 +154,8 @@
 		    addOption(escalationSel , schemes[i].name, schemes[i].name);
         }
 
-        <c:if test="${not empty param.escId}">
-           $('escName').value = '<c:out value="${param.escId}"/>';
-        </c:if>
+        document.EscalationForm.escName.value =
+            document.EscalationSchemeForm.escId.value;
 
 		$('submit').onclick = function () {
             alert('here');
@@ -254,8 +253,6 @@
 </html:form>
  
 <html:form action="/alerts/SaveEscalation" styleId="EscalationForm">
-
-
   <input type="hidden" value="0" id="theValue">
   <input type="hidden" value="<c:out value="${alertDef.id}" />" id="ad"/>
   <table width="100%" cellpadding="3" cellspacing="0" border="0">
@@ -263,14 +260,12 @@
       <tr class="tableRowHeader">
         <td align="right">
           Escalation Scheme:
-          <select id="escId" name="escId" onchange="schemeChange(this)">
-            <option value="">
-              Create New 
-            </option>
-          </select>
+          <html:select styleId="escId" property="escId" onchange="schemeChange(this)">
+            <html:option value="" key="common.label.CreateNew"/>
+          </html:select>
           
-          Name:
-          <input type=text size=25 name='escName' id='escName'/>
+          <fmt:message key="common.label.Name"/>
+          <html:text size="25" property="escName" styleId="escName"/>
         </td>
       </tr>
         <tr class="tableRowAction">

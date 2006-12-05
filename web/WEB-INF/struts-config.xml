@@ -192,11 +192,7 @@
         <form-bean name="RemoveNotificationsForm"
                    type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.RemoveNotificationsForm"/>
 
-        <!-- Place holder -->
-        <form-bean name="EscalationForm"
-                   type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.RemoveNotificationsForm"/>
-
-         <form-bean name="EditAlertDefinitionSyslogActionForm"
+        <form-bean name="EditAlertDefinitionSyslogActionForm"
                    type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.SyslogActionForm"/>
 
         <form-bean name="AddAlertUsersForm"
@@ -206,6 +202,9 @@
                    type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AddOthersForm" />
 
         <form-bean name="EscalationSchemeForm"
+                   type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EscalationSchemeForm" />
+
+        <form-bean name="EscalationForm"
                    type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EscalationSchemeForm" />
 
          <!-- / -->  
