@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.ui.beans;
+package org.hyperic.hq.bizapp.shared.uibeans;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 
@@ -32,24 +32,23 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
  ******************************************************************************/
 
 public final class AlertDefinitionBean {
-    private long    _ctime;
+    private long _ctime;
     private Integer _alertDefId;
-    private String  _name;
-    private String  _description;
+    private String _name;
+    private String _description;
     private boolean _enabled;
     private Integer _type;
     private Integer _parentId;
 
     public AlertDefinitionBean(Integer alertDefId, long ctime, String name,
                                String description, boolean enabled,
-                               Integer parentId) 
-    {
-        _alertDefId  = alertDefId;
-        _ctime       = ctime;
-        _name        = name;
+                               Integer parentId) {
+        _alertDefId = alertDefId;
+        _ctime = ctime;
+        _name = name;
         _description = description;
-        _enabled     = enabled;
-        _parentId    = parentId;
+        _enabled = enabled;
+        _parentId = parentId;
     }
 
     public Integer getAlertDefId() {

@@ -38,9 +38,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.Constants;
@@ -54,9 +54,6 @@ import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
-import org.json.JSONArray;
 
 /**
  * A dispatcher for the alerts portal.
@@ -82,12 +79,14 @@ public class PortalAction extends ResourceController {
      * We override this in case the resource has been deleted
      * ... simply ignore that fact.
      */
-    protected void setResource(HttpServletRequest request) throws Exception {
+    protected AppdefEntityID setResource(HttpServletRequest request)
+        throws Exception {
         try {
-            super.setResource(request);
+            return super.setResource(request);
         } catch (ParameterNotFoundException e) {
             log.warn("No resource found.");
         }
+        return null;
     }
 
     private void setTitle(HttpServletRequest request, Portal portal,
@@ -269,9 +268,9 @@ public class PortalAction extends ResourceController {
                                          HttpServletResponse response)
         throws Exception
     {
-        setResource(request);
+        AppdefEntityID aeid = setResource(request);
 
-        super.setNavMapLocation(request, mapping, Constants.ALERT_CONFIG_LOC);
+        setNavMapLocation(request, mapping, Constants.ALERT_CONFIG_LOC);
                                   
         // clean out the return path 
         SessionUtils.resetReturnPath(request.getSession());
@@ -291,7 +290,13 @@ public class PortalAction extends ResourceController {
                                             Constants.APPDEF_RES_TYPE_ID);
             portal.addPortlet(new Portlet(".admin.alerts.List"), 1);
         } catch (ParameterNotFoundException e) {
-            portal.addPortlet(new Portlet(".events.config.list"), 1);
+            if (aeid != null &&
+                aeid.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+                portal.addPortlet(new Portlet(".events.group.config.list"), 1);
+            }
+            else {
+                portal.addPortlet(new Portlet(".events.config.list"), 1);
+            }
         }
         request.setAttribute(Constants.PORTAL_KEY, portal);
 

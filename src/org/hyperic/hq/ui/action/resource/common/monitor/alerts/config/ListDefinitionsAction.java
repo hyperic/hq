@@ -36,9 +36,9 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.bizapp.shared.uibeans.AlertDefinitionBean;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.beans.AlertDefinitionBean;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -85,8 +85,7 @@ public class ListDefinitionsAction extends TilesAction {
             request.setAttribute("section", AppdefEntityConstants.typeToString(
                                  appEntId.getType()));
             alertDefs =
-                boss.findAlertDefinitions(sessionId.intValue(),
-                    (AppdefEntityTypeID) appEntId, pc);
+                boss.findAlertDefinitions(sessionId.intValue(), appEntId, pc);
         } catch (ParameterNotFoundException e) {
             appEntId = RequestUtils.getEntityId(request);
             try {

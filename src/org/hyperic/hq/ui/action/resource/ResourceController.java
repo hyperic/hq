@@ -65,12 +65,13 @@ public abstract class ResourceController extends BaseDispatchAction {
     protected static final Log log =
         LogFactory.getLog(ResourceController.class.getName());
     
-    protected void setResource(HttpServletRequest request)
+    protected AppdefEntityID setResource(HttpServletRequest request)
         throws Exception {
-        this.setResource(request, false);
+        return setResource(request, false);
     }
     
-    protected void setResource(HttpServletRequest request, boolean config)
+    protected AppdefEntityID setResource(HttpServletRequest request,
+                                         boolean config)
         throws Exception {
         AppdefEntityID entityId = null;
         
@@ -80,11 +81,12 @@ public abstract class ResourceController extends BaseDispatchAction {
             // not a problem, this can be null
         }
         
-        setResource(request, entityId, config);
+        return setResource(request, entityId, config);
     }
     
-    protected void setResource(HttpServletRequest request, AppdefEntityID entityId,
-                               boolean config)
+    protected AppdefEntityID setResource(HttpServletRequest request,
+                                         AppdefEntityID entityId,
+                                         boolean config)
         throws Exception {
         Integer sessionId = RequestUtils.getSessionId(request);
 
@@ -190,6 +192,7 @@ public abstract class ResourceController extends BaseDispatchAction {
                 throw AppdefEntityNotFoundException.build(entityId);
             }
         }
+        return entityId;
     }
 
     protected void fetchReturnPathParams(HttpServletRequest request,
