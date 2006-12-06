@@ -6,6 +6,7 @@ import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.util.config.InvalidOptionException;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionForm;
@@ -46,23 +47,37 @@ public class ModifyAction extends BaseAction {
             return forward;
         }
 
+        String token = pForm.getToken();
+
+        // For multi-portlet configuration
+        String numKey = PropertiesForm.NUM_TO_SHOW;
+        String resKey = PropertiesForm.RESOURCES;
+        String resTypeKey = PropertiesForm.RES_TYPE;
+        String metricKey = PropertiesForm.METRIC;
+        if (token != null) {
+            numKey += token;
+            resKey += token;
+            resTypeKey += token;
+            metricKey += token;
+        }
+
         Integer numberToShow = pForm.getNumberToShow();
-
-        user.setPreference(PropertiesForm.NUM_TO_SHOW,
-                           numberToShow.toString());
-
         String resourceType = pForm.getResourceType();
+        String metric = pForm.getMetric();
 
         // If the selected resource type does not match the previous value,
         // clear out the resources
-        if (!resourceType.equals(user.getPreference(PropertiesForm.RES_TYPE))) {
-            user.setPreference(PropertiesForm.RESOURCES, "");
+        try {
+            if (!resourceType.equals(user.getPreference(resTypeKey))) {
+                user.setPreference(resKey, "");
+            }
+        } catch (InvalidOptionException e) {
+            // Ok, not set yet..
         }
 
-        user.setPreference(PropertiesForm.RES_TYPE, resourceType);
-
-        String metric = pForm.getMetric();
-        user.setPreference(PropertiesForm.METRIC, metric);
+        user.setPreference(resTypeKey, resourceType);
+        user.setPreference(numKey, numberToShow.toString());
+        user.setPreference(metricKey, metric);
 
         boss.setUserPrefs(user.getSessionId(), user.getId(),
                           user.getPreferences());

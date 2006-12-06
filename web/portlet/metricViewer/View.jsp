@@ -31,11 +31,13 @@
 <%@ taglib uri="display" prefix="display" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
 
+<tiles:importAttribute name="portlet"/>
+
 <html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="visibility:hidden;"></html:link>
 
 <script type="text/javascript">
 function requestMetricsResponse() {
-var metricsUrl = "<html:rewrite page="/dashboard/ViewMetrics.do"/>"
+var metricsUrl = "<html:rewrite page="/dashboard/ViewMetrics.do?token=${portlet.token}"/>"
 	new Ajax.Request(metricsUrl, {method: 'get', onSuccess:showMetricsResponse, onFailure :reportError});
 	}
 onloads.push(requestMetricsResponse);
@@ -45,20 +47,26 @@ onloads.push(requestMetricsResponse);
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="dash.home.MetricViewer"/>
   <tiles:put name="adminUrl" beanName="adminUrl" />
-  <tiles:put name="portletName" beanName="portletName" />
   <tiles:put name="dragDrop" value="true"/>
+
+  <c:if test="${not empty portlet.token}">
+    <tiles:put name="adminToken" beanName="portlet" beanProperty="token"/>
+    <c:set var="tableName" value="metricTable${portlet.token}"/>
+  </c:if>
+  <c:if test="${empty portlet.token}">
+    <c:set var="tableName" value="metricTable"/>
+  </c:if>
+  <tiles:put name="portletName"><c:out value="${portlet.fullUrl}"/></tiles:put>
 </tiles:insert>
 
-  <!-- JSON available at /dashboard/ViewMetrics.do -->
-  
-  <table class="table" width="100%" border="0" cellspacing="0" cellpadding="0" id="metricTable" >
+  <table class="table" width="100%" border="0" cellspacing="0" cellpadding="0" id="<c:out value="${tableName}"/>">
   	<tbody>
 	<tr class="tableRowHeader">
-		<th width="90%" class="tableRowInactive" id="resourceNameType" nowrap>
-		Resource
+		<th width="90%" class="tableRowInactive" id="resourceTypeName" nowrap>
+		Resource Type
 		</th>
-		<th width="10%" align="center" nowrap class="tableRowInactive" id="resourceLoadType">
-		Load Avg
+		<th width="10%" align="center" nowrap class="tableRowInactive" id="resourceMetric">
+	    Metric
 		</th>
 	</tr>
 	

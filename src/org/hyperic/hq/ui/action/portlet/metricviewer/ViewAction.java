@@ -2,8 +2,10 @@ package org.hyperic.hq.ui.action.portlet.metricviewer;
 
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
@@ -20,6 +22,8 @@ import org.hyperic.util.units.FormattedNumber;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionForm;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,6 +41,8 @@ import java.util.ArrayList;
  */
 public class ViewAction extends BaseAction {
 
+    private Log _log = LogFactory.getLog("METRIC VIEWER");
+    
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
@@ -50,16 +56,32 @@ public class ViewAction extends BaseAction {
             Constants.WEBUSER_SES_ATTR);
         int sessionId = user.getSessionId().intValue();
 
-        List entityIds =
-            DashboardUtils.preferencesAsEntityIds(PropertiesForm.RESOURCES,
-                                                  user);
+        String token;
+        try {
+            token = RequestUtils.getStringParameter(request, "token");
+        } catch (ParameterNotFoundException e) {
+            token = null;
+        }
+
+        // For multi-portlet configuration
+        String numKey = PropertiesForm.NUM_TO_SHOW;
+        String resKey = PropertiesForm.RESOURCES;
+        String resTypeKey = PropertiesForm.RES_TYPE;
+        String metricKey = PropertiesForm.METRIC;
+        if (token != null) {
+            numKey += token;
+            resKey += token;
+            resTypeKey += token;
+            metricKey += token;
+        }
+
+        List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, user);
         AppdefEntityID[] arrayIds =
             (AppdefEntityID[])entityIds.toArray(new AppdefEntityID[0]);
 
-        int count = Integer.parseInt(user.
-            getPreference(PropertiesForm.NUM_TO_SHOW));
+        int count = Integer.parseInt(user.getPreference(numKey));
 
-        String metric = user.getPreference(PropertiesForm.METRIC);
+        String metric = user.getPreference(metricKey);
         if (metric == null || metric.length() == 0) {
             return null;
         }
@@ -70,7 +92,7 @@ public class ViewAction extends BaseAction {
         MeasurementTemplateValue template =
             (MeasurementTemplateValue)metricTemplates.get(0);
 
-        String resource = user.getPreference(PropertiesForm.RES_TYPE);
+        String resource = user.getPreference(resTypeKey);
         AppdefEntityTypeID typeId = new AppdefEntityTypeID(resource);
         AppdefResourceTypeValue typeVal =
             appdefBoss.findResourceTypeById(sessionId, typeId);
@@ -108,6 +130,13 @@ public class ViewAction extends BaseAction {
         JSONObject res = new JSONObject();
         res.put("metricValues", metricValues);
 
+        if (token != null) {
+            res.put("token", token);
+        } else {
+            res.put("token", JSONObject.NULL);
+        }
+
+        _log.info(res.toString(2));
         response.getWriter().write(res.toString());
 
         return null;

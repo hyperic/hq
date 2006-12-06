@@ -32,8 +32,9 @@
 
 
 <html:form method="POST" action="/dashboard/metricviewer/AddResourcesAction">
-<html:hidden property="key" value=".dashContent.metricviewer.resources"/>
-
+<html:hidden property="key"/>
+<html:hidden property="token"/>
+    
 <tiles:insert definition=".portlet.error"/>
 
 <tiles:insert definition=".page.title">

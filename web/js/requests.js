@@ -324,11 +324,18 @@
 
         var metricText = eval("(" + originalRequest.responseText + ")");
         var metricValues = metricText.metricValues;
-        var metricTable = document.getElementById('metricTable');
         var resourceNameHeader = metricValues.resourceTypeName;
         var resourceLoadTypeHeader = metricValues.metricName;
         var urlColon = ":"
         var resUrl = $('viewResUrl').href;
+        var metricTable;
+        var token = metricText.token;
+        if (token != null) {
+            metricTable = document.getElementById('metricTable' + token);
+        } else {
+            metricTable = document.getElementById('metricTable');
+        }
+
         if (metricValues && metricValues != 0) {
 
             for (var i = metricTable.childNodes.length - 1; i > 1; i--) {
@@ -342,18 +349,16 @@
                 var tr = document.createElement('tr');
                 var td1 = document.createElement('td');
                 var td2 = document.createElement('td');
-                var oTextNode = $('resourceNameType').childNodes[0];
-                var lTextNode = $('resourceLoadType').childNodes[0];
+                var oTextNode = $('resourceTypeName').childNodes[0];
+                var lTextNode = $('resourceMetric').childNodes[0];
                 var oReplaceNode = oTextNode.replaceData(0, 27, resourceNameHeader);
                 var lReplaceNode = lTextNode.replaceData(0, 35, resourceLoadTypeHeader);
-
 
                 metricTable.appendChild(tr);
                 tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
                 if (metricValues.resourceName && metricValues.metricName) {
                     oReplaceNode;
                     lReplaceNode;
-
                 }
 
                 tr.appendChild(td1);

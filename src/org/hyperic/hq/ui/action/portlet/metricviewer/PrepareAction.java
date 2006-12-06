@@ -21,6 +21,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.InvalidOptionException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -49,30 +50,47 @@ public class PrepareAction extends TilesAction {
         int sessionId = RequestUtils.getSessionId(request).intValue();
         WebUser user =
             (WebUser)session.getAttribute(Constants.WEBUSER_SES_ATTR);
-        String key = ".dashContent.metricviewer.resources";
         PropertiesForm pForm = (PropertiesForm) form;
         PageList resources = new PageList();
 
-        Integer numberToShow =
-            new Integer(user.getPreference(PropertiesForm.NUM_TO_SHOW));
-        pForm.setNumberToShow(numberToShow);
+        String token = pForm.getToken();
 
-        String resourceType = user.getPreference(PropertiesForm.RES_TYPE);
+        // For multi-portlet configuration
+        String numKey = PropertiesForm.NUM_TO_SHOW;
+        String resKey = PropertiesForm.RESOURCES;
+        String resTypeKey = PropertiesForm.RES_TYPE;
+        String metricKey = PropertiesForm.METRIC;
+        if (token != null) {
+            numKey += token;
+            resKey += token;
+            resTypeKey += token;
+            metricKey += token;
+        }
+
+        // We set defaults here rather than in DefaultUserPreferences.properites
+        Integer numberToShow = new Integer(user.getPreference(numKey, "10"));
+        String resourceType = user.getPreference(resTypeKey, "");
+        String metric = user.getPreference(metricKey, "");
+        List resourceList;
+        try {
+            resourceList =
+                user.getPreferenceAsList(resKey,
+                                         StringConstants.DASHBOARD_DELIMITER);
+        } catch (InvalidOptionException e) {
+            resourceList = new ArrayList();
+        }
+
+        pForm.setNumberToShow(numberToShow);
         if (resourceType != null && resourceType.length() != 0) {
             pForm.setResourceType(resourceType);
         }
-
-        String metric = user.getPreference(PropertiesForm.METRIC);
         pForm.setMetric(metric);
-
-        List resourceList =
-            user.getPreferenceAsList(key, StringConstants.DASHBOARD_DELIMITER);
 
         Iterator i = resourceList.iterator();
         while(i.hasNext()) {
             ArrayList resourceIds =
                 (ArrayList) StringUtil.explode((String) i.next(), ":");
-
+            // XXX: Fix me: AppdefEntityID has a constructor for this
             Iterator j = resourceIds.iterator();
             int type = Integer.parseInt( (String) j.next() );
             int id = Integer.parseInt( (String) j.next() );

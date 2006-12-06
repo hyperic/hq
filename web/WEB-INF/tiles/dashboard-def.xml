@@ -153,6 +153,7 @@
             <putList name="multi.narrow"/>
             <putList name="multi.wide">
               <add value=".dashContent.criticalAlerts"/>
+              <add value=".dashContent.metricViewer"/>
             </putList>
   </definition>
 

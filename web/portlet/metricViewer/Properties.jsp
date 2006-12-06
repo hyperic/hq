@@ -151,7 +151,13 @@ var help = '<hq:help/>';
 
       <c:url var="addToListUrl" value="/Admin.do" context="/dashboard">
           <c:param name="mode" value="metricViewerAddResources"/>
-          <c:param name="key" value=".dashContent.metricviewer.resources"/>
+          <c:if test="${not empty MetricViewerForm.token}">
+            <c:param name="key" value=".dashContent.metricviewer.resources${MetricViewerForm.token}"/>
+            <c:param name="token" value="${MetricViewerForm.token}"/>
+          </c:if>
+          <c:if test="${empty MetricViewerForm.token}">
+            <c:param name="key" value=".dashContent.metricviewer.resources"/>
+          </c:if>
           <c:param name="ff" value="${MetricViewerForm.appdefType}"/>
           <c:param name="ft" value="${MetricViewerForm.appdefTypeID}"/>
       </c:url>
@@ -166,6 +172,7 @@ var help = '<hq:help/>';
       </tiles:insert>
 
       <tiles:insert definition=".form.buttons"/>
+      <html:hidden property="token"/>
       </html:form>
 
     </td>
