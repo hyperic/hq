@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.events.AlertNotFoundException;
@@ -96,7 +97,11 @@ public class PortalAction extends ResourceController {
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         setTitle(aeid, portal, "alerts.alert.platform.AlertList.Title");
         portal.setDialog(false);
-        portal.addPortlet(new Portlet(".events.alert.list"), 1);
+        if (aeid.getType() != AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+            portal.addPortlet(new Portlet(".events.alert.list"), 1);
+        } else {
+            portal.addPortlet(new Portlet(".events.group.alert.list"), 1);
+        }
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
