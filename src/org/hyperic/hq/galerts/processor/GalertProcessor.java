@@ -1,5 +1,6 @@
 package org.hyperic.hq.galerts.processor;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -9,6 +10,8 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
@@ -38,6 +41,8 @@ public class GalertProcessor {
     private static final Object CFG_LOCK = new Object();
     private static final Log _log = LogFactory.getLog(GalertProcessor.class);
 
+    private static boolean _initialized = false;
+    
     private final GalertManagerLocal _aMan; 
     private final ZeventManager      _zMan;
     
@@ -102,16 +107,11 @@ public class GalertProcessor {
      * 
      * @param defId Id of a {@link GalertDef} to load.
      */
-    public void loadOrReload(Integer defId) {
-        MemGalertDef def;
+    private void handleUpdate(MemGalertDef def) {
+        _log.info("Handling load/update of alert def: " + def.getName());
         
-        _log.info("Attempting to load galert=" + defId);
-        def = new MemGalertDef(_aMan.findById(defId));
-        
-        // If we get here, that means the def is as loaded as it can possibly be
-        // evict all the old shit && add in the new
         synchronized (CFG_LOCK) {
-            MemGalertDef oldDef = (MemGalertDef)_alertDefs.get(defId);
+            MemGalertDef oldDef = (MemGalertDef)_alertDefs.get(def.getId());
 
             // Out with the old
             if (oldDef != null) {
@@ -120,8 +120,8 @@ public class GalertProcessor {
             
             // In with the new
             addListeners(def);
-            _alertDefs.put(defId, def);
-            _log.info("galert[id=" + defId + ",name=" + def.getName() +
+            _alertDefs.put(def.getId(), def);
+            _log.info("galert[id=" + def.getId() + ",name=" + def.getName() +
                       "] loaded");
         }
     }
@@ -129,7 +129,8 @@ public class GalertProcessor {
     /**
      * Remove an alert definition from the processor. 
      */
-    public void unload(Integer defId) {
+    private void handleUnload(Integer defId) {
+        _log.info("Handling unload of alertdef[" + defId + "]");
         synchronized (CFG_LOCK) {
             MemGalertDef oldDef = (MemGalertDef)_alertDefs.get(defId);
             
@@ -181,8 +182,80 @@ public class GalertProcessor {
             }
         }
     }
+    
+    /**
+     * Call this if an alert-def is created or updated.  The internal state
+     * of the processor will be updated after the current transaction 
+     * successfully commits.
+     */
+    public void alertDefUpdated(GalertDef def) {
+        final boolean isUnload = !def.isEnabled(); 
+        final Integer defId = def.getId();
+        final MemGalertDef memDef;
+        
+        if (isUnload) {
+            memDef = null;
+        } else {
+            memDef = new MemGalertDef(def);
+        }
+        
+        HQApp.getInstance().addTransactionListener(new TransactionListener() {
+            public void afterCommit(boolean success) {
+                if (success) {
+                    if (isUnload) {
+                        handleUnload(defId);
+                    } else {
+                        handleUpdate(memDef);
+                    }
+                }
+            }
+        });
+    }
+    
+    /**
+     * Call this if an alert-def is deleted.  After the transaction is
+     * successfully committed, it will be removed from the processor.
+     */
+    public void alertDefDeleted(final Integer defId) {
+        HQApp.getInstance().addTransactionListener(new TransactionListener() {
+            public void afterCommit(boolean success) {
+                if (success) {
+                    handleUnload(defId);
+                }
+            }
+        });
+    }
 
-    public boolean canLoadAlertDef(GalertDef def) {
+    /**
+     * Called to initialize the state of the processor.  This should be
+     * called during application startup with all the alert definitions
+     * in the system.
+     */
+    public void startupInitialize(Collection galertDefs) {
+        synchronized (CFG_LOCK) {
+            if (_initialized)
+                return;
+            _initialized = true;
+        }
+        
+        for (Iterator i=galertDefs.iterator(); i.hasNext(); ) {
+            GalertDef def = (GalertDef)i.next();
+            MemGalertDef memDef;
+
+            if (!def.isEnabled())
+                continue;
+                
+            try {
+                memDef = new MemGalertDef(def);
+                handleUpdate(memDef);
+            } catch(Exception e) {
+                _log.warn("Unable to load alert definition[id=" + 
+                          def.getId() + ",name=" + def.getName(), e);
+            }
+        }
+    }
+    
+    public boolean validateAlertDef(GalertDef def) {
         try {
             new MemGalertDef(def);
             return true;

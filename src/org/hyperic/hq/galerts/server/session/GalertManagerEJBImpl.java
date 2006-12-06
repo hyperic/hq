@@ -262,7 +262,7 @@ public class GalertManagerEJBImpl
  
             _defDAO.save(t);
         }
-        GalertProcessor.getInstance().canLoadAlertDef(def);
+        GalertProcessor.getInstance().alertDefUpdated(def);
     }
     
     /**
@@ -278,7 +278,7 @@ public class GalertManagerEJBImpl
                                                      stratCrispo); 
         
         _stratTypeDAO.save(res);
-        GalertProcessor.getInstance().canLoadAlertDef(def);
+        GalertProcessor.getInstance().alertDefUpdated(def);
         return res;
     }
     
@@ -295,7 +295,7 @@ public class GalertManagerEJBImpl
         def = new GalertDef(name, description, severity, enabled, group);
 
         _defDAO.save(def);
-        GalertProcessor.getInstance().canLoadAlertDef(def);
+        GalertProcessor.getInstance().validateAlertDef(def);
         return def;
     }
 
@@ -307,6 +307,7 @@ public class GalertManagerEJBImpl
      */  
     public void deleteAlertDef(GalertDef def) {
         List nukeCrispos = new ArrayList();
+        Integer defId = def.getId();
         
         for (Iterator i=def.getStrategies().iterator(); i.hasNext(); ) {
             ExecutionStrategyInfo strat = (ExecutionStrategyInfo)i.next();
@@ -323,6 +324,7 @@ public class GalertManagerEJBImpl
 
             _crispoMan.deleteCrispo(c);
         }
+        GalertProcessor.getInstance().alertDefDeleted(defId);
     }
     
     /**
@@ -330,6 +332,7 @@ public class GalertManagerEJBImpl
      */
     public void startup() {
         _log.warn("Galert manager starting up!");
+        GalertProcessor.getInstance().startupInitialize(_defDAO.findAll());
     }
     
     public void ejbCreate() {}

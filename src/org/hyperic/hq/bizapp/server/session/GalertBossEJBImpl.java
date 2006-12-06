@@ -20,7 +20,6 @@ import org.hyperic.hq.bizapp.shared.uibeans.AlertDefinitionBean;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.server.session.Escalation;
-import org.hyperic.hq.galerts.processor.GalertProcessor;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyType;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfo;
@@ -154,16 +153,6 @@ public class GalertBossEJBImpl
         _galertMan.configureTriggers(def, partition, triggerInfos, configs);
     }
 
-    /**
-     * @ejb:interface-method
-     */
-    public void loadAlertDef(int sessionId, Integer defId) 
-        throws SessionException
-    {
-        _sessMan.authenticate(sessionId);
-        GalertProcessor.getInstance().loadOrReload(defId);
-    }
-    
     /**
      * Find all the group alert definitions for a given appdef group.
      * 

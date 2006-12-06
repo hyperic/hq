@@ -65,6 +65,8 @@ import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.hq.product.PluginException;
 
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.galerts.shared.GalertManagerLocal;
+import org.hyperic.hq.galerts.shared.GalertManagerUtil;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerUtil;
 
@@ -427,6 +429,18 @@ public class ProductPluginDeployer
         } catch (DeploymentException e) {
             _log.error(e.getMessage(), e);
         }
+        
+        // Initialize the group alerts subsystem
+        try {
+            GalertManagerLocal groupMan = 
+                GalertManagerUtil.getLocalHome().create();
+
+            groupMan.startup();
+        } catch (Exception e) {
+            _log.error("Unable to startup group manager", e);
+            throw new SystemException(e);           
+        }
+        
         // Do any inventory cleanups
         UpgradeUtil.removeOldResources();
         

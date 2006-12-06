@@ -28,11 +28,13 @@ import org.hyperic.hq.galerts.server.session.GtriggerInfo;
 class MemGalertDef {
     private final Log _log = LogFactory.getLog(MemGalertDef.class);
 
+    private Integer _id;
     private String  _name;
     private Set     _strategies = new HashSet();
     private Map     _interestedEvents = new HashMap();
     
     MemGalertDef(GalertDef def) {
+        _id    = def.getId();
         _name  = def.getName();
             
         for (Iterator i=def.getStrategies().iterator(); i.hasNext(); ) {
@@ -42,6 +44,10 @@ class MemGalertDef {
         }
     }
 
+    Integer getId() {
+        return _id;
+    }
+    
     private void initializeStrategy(ExecutionStrategyInfo sInfo,
                                     ResourceGroup group) 
     {
