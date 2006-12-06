@@ -12,6 +12,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.ServletException;
 import javax.servlet.ServletContext;
 import java.util.HashMap;
+import java.util.Map;
 import java.io.Writer;
 import java.io.IOException;
 
@@ -88,6 +89,11 @@ public class JsonActionContext extends HashMap
     {
         String pretty = getRequest().getParameter("pretty");
         return pretty != null;
+    }
+
+    public Map getParameterMap()
+    {
+        return getRequest().getParameterMap();
     }
 
     public ServletContext getServletContext()
