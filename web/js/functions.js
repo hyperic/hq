@@ -342,7 +342,7 @@ function accord(tab) {
     tab = 0;
 
   new Rico.Accordion( 'propertiesAccordion',
-                     { panelHeight: 300,
+                     { panelHeight: 325,
                        expandedBg: '#60a5ea',
                        hoverBg: '#70b5fa',
                        collapsedBg: '#BBBBBB',
