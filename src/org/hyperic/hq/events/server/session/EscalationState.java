@@ -12,8 +12,10 @@ public class EscalationState extends PersistedObject
     public final static int ALERT_TYPE_CLASSIC = 0;
     public final static int ALERT_TYPE_GROUP   = 1;
     
-    public static EscalationState newInstance(Escalation e, Integer aid) {
-        return new EscalationState(e, aid.intValue());
+    public static EscalationState newInstance(
+        Escalation e, Integer aid, int type
+    ) {
+        return new EscalationState(e, aid.intValue(), type);
     }
 
     /**
@@ -73,9 +75,10 @@ public class EscalationState extends PersistedObject
     protected EscalationState(){
     }
 
-    protected EscalationState(Escalation e, int aid) {
+    protected EscalationState(Escalation e, int aid, int type) {
         _escalation = e;
         _alertDefinitionId = aid;
+        _alertType = type;
     }
 
     /**
@@ -312,7 +315,7 @@ public class EscalationState extends PersistedObject
                     ", alertId=" + _alertId +
                     ", currentLevel=" + _currentLevel +
                     ", fixed=" + _fixed +
-                    ", active"+ _active +
+                    ", active="+ _active +
                     ", acknowledge=" + _acknowledge +
                     ", pause=" + _pauseEscalation +
                     ", scheduleRunTime=" + _scheduleRunTime +

@@ -77,7 +77,7 @@ public class EscalationCactusTest extends HQCactusBase
         String jsonString = makeJsonEscalation();
 
         JSONObject json = new JSONObject(jsonString);
-        eventsBoss.saveEscalation(sessionID, json);
+        eventsBoss.saveEscalation(sessionID, null, json);
 
         // read after save
         JSONObject json_saved =
@@ -99,7 +99,7 @@ public class EscalationCactusTest extends HQCactusBase
             .getBoolean("notifyAll");
         json.getJSONObject(ename)
             .put("notifyAll", !notify);
-        eventsBoss.saveEscalation(sessionID, json);
+        eventsBoss.saveEscalation(sessionID, null, json);
         json = eventsBoss.jsonByEscalationName(sessionID, BOGUS_NAME1);
         boolean notify_update = json.getJSONObject(ename)
             .getBoolean("notifyAll");
@@ -110,7 +110,7 @@ public class EscalationCactusTest extends HQCactusBase
             .getLong("creationTime");
         long modifiedTime = json.getJSONObject(ename)
             .getLong("modifiedTime");
-        eventsBoss.saveEscalation(sessionID, json);
+        eventsBoss.saveEscalation(sessionID, null, json);
         json = eventsBoss.jsonByEscalationId(sessionID,
                                              new Integer(
                                                  json.getJSONObject(ename)
@@ -125,7 +125,7 @@ public class EscalationCactusTest extends HQCactusBase
 
         // test for real update
         json.getJSONObject(ename).put("maxWaitTime", 120000);
-        eventsBoss.saveEscalation(sessionID, json);
+        eventsBoss.saveEscalation(sessionID, null, json);
         json = eventsBoss.jsonByEscalationName(sessionID, BOGUS_NAME1);
         creationTime1 = json.getJSONObject(ename)
             .getLong("creationTime");
@@ -149,6 +149,7 @@ public class EscalationCactusTest extends HQCactusBase
 
         // should stream result directly to the response.writer
         setRequestPathInfo("/escalation/saveEscalation");
+        setSaveEscalationParams();
         actionPerform();
         assertNotNull(getSession().getAttribute("escalationName"));
 
@@ -181,13 +182,42 @@ public class EscalationCactusTest extends HQCactusBase
         return (WebUser)getSession().getAttribute(Constants.WEBUSER_SES_ATTR);
     }
 
+    private void setSaveEscalationParams()
+    {
+        addRequestParameter("action_row2", new String[]{"Email"});
+        addRequestParameter("who_row2", new String[]{"Others"});
+        addRequestParameter("users_row2", new String[]{"hqadmin@hyperic.com," +
+                                                       " admin@cypress.com" +
+                                                       " joe@kinko.com"});
+        addRequestParameter("time_row2", new String[]{"120000"});
+
+        addRequestParameter("action_row0", new String[]{"Email"});
+        addRequestParameter("who_row0", new String[]{"Others"});
+        addRequestParameter("users_row0", new String[]{"joe@gmail.com polly@yahoo.com," +
+                                          "kim@mac.com"});
+        addRequestParameter("time_row0", new String[]{"120000"});
+
+        addRequestParameter("action_row1", new String[]{"Syslog"});
+        addRequestParameter("who_row1", new String[]{"Others"});
+        addRequestParameter("meta_row1", new String[]{"meta data"});
+        addRequestParameter("product_row1", new String[]{"product info"});
+        addRequestParameter("version_row1", new String[]{"version number"});
+        addRequestParameter("time_row1", new String[]{"120000"});
+
+        addRequestParameter("allowPause", new String[]{"true"});
+        addRequestParameter("notification", new String[]{"0"});
+        addRequestParameter("maxwaittime", new String[]{"300000"});
+        addRequestParameter("escName", new String[]{"My escalation"});
+        addRequestParameter("ad", new String[]{"10001"});
+    }
+
     private void removeEscalation(int id)
         throws Exception
     {
-//        eventsBoss.deleteEscalationById(sessionID, new Integer(id));
-//        JSONObject json =
-//            eventsBoss.jsonByEscalationName(sessionID, BOGUS_NAME1);
-//        assertNull(json);
+        eventsBoss.deleteEscalationById(sessionID, new Integer(id));
+        JSONObject json =
+            eventsBoss.jsonByEscalationName(sessionID, BOGUS_NAME1);
+        assertNull(json);
     }
 
     private String makeJsonEscalation() throws JSONException

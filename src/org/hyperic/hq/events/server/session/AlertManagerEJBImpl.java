@@ -367,8 +367,11 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * delegate to EscalationMediator inside JTA context
      * @ejb:interface-method
      */
-    public void dispatchAction(EscalationState state)
+    public void dispatchAction(Integer stateId)
     {
+        EscalationStateDAO dao =
+            DAOFactory.getDAOFactory().getEscalationStateDAO();
+        EscalationState state = dao.findById(stateId);
         EscalationMediator.getInstance().dispatchAction(state);
     }
 

@@ -84,12 +84,13 @@ public class EscalationWebMediator
     }
 
     public void saveEscalation(JsonActionContext context,
-                               int sessionId, JSONObject json)
+                               int sessionId, Integer alertDefId,
+                               JSONObject json)
         throws PermissionException,
                SessionTimeoutException,
                SessionNotFoundException,
                JSONException, RemoteException
     {
-        getEventsBoss(context).saveEscalation(sessionId, json);
+        getEventsBoss(context).saveEscalation(sessionId, alertDefId, json);
     }
 }

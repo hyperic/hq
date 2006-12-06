@@ -129,7 +129,7 @@ public class EscalationMediator extends Mediator
             escalationServiceMBean.run(new Runnable() {
                 public void run()
                 {
-                    alertManagerLocal.dispatchAction(state);
+                    alertManagerLocal.dispatchAction(state.getId());
                 }
             });
         }
@@ -295,9 +295,9 @@ public class EscalationMediator extends Mediator
      *         is already in progress.
      */
     private void activateEscalation(final Escalation e,
-                                       final Integer alertDefId,
-                                       final int alertId,
-                                       final int alertType)
+                                    final Integer alertDefId,
+                                    final int alertId,
+                                    final int alertType)
     {
         if (e == null) {
             return;
@@ -319,7 +319,8 @@ public class EscalationMediator extends Mediator
                         EscalationState state =
                             getEscalationState(e, alertDefId, alertType);
                         if (state == null) {
-                            state = EscalationState.newInstance(e, alertDefId);
+                            state = EscalationState.newInstance(
+                                e, alertDefId, alertType);
                             DAOFactory.getDAOFactory().getEscalationStateDAO()
                                 .save(state);
                         }
@@ -328,6 +329,8 @@ public class EscalationMediator extends Mediator
                         }
                         state.setActive(true);
                         state.setAlertId(alertId);
+                        DAOFactory.getDAOFactory().getEscalationStateDAO()
+                            .save(state);
                         return context;
                     }
                 });
@@ -339,10 +342,11 @@ public class EscalationMediator extends Mediator
                 return;
             }
         }
-        beginEscalation(e, alertDefId);
+        beginEscalation(e, alertDefId, alertType);
     }
 
-    public void saveEscalation(Integer subjectId, JSONObject escalation)
+    public void saveEscalation(Integer subjectId, Integer alertDefId,
+                               JSONObject escalation)
         throws JSONException, PermissionException
     {
         EscalationDAO dao = DAOFactory.getDAOFactory().getEscalationDAO();
@@ -353,6 +357,15 @@ public class EscalationMediator extends Mediator
         } else {
             // merge updated values
             dao.merge(e);
+        }
+
+        if (alertDefId != null) {
+            // save escalation with alert definition
+            AlertDefinitionDAO adao = DAOFactory.getDAOFactory()
+                .getAlertDefDAO();
+            AlertDefinition adef = adao.findById(alertDefId);
+            adef.setEscalation(e);
+            adao.save(adef);
         }
     }
 
@@ -605,13 +618,12 @@ public class EscalationMediator extends Mediator
         }
     }
 
-    private void beginEscalation(Escalation e, Integer alertDefId)
+    private void beginEscalation(Escalation e, Integer alertDefId, int type)
     {
         List ealist = e.getActions();
         EscalationAction ea = (EscalationAction)ealist.get(0);
         EscalationState state =
-            getEscalationState(e, alertDefId,
-                               EscalationState.ALERT_TYPE_GROUP);
+            getEscalationState(e, alertDefId, type);
         logEscalation(ea.getAction(), state, "Start Escalation");
         if (log.isDebugEnabled()) {
             log.debug("Start escalation. alert def ID=" +  alertDefId +

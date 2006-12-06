@@ -48,6 +48,7 @@ public class SaveEscalation extends BaseAction
     private static String NOTIFICATION = "notification";
     private static String MAX_WAITTIME = "maxwaittime";
 
+    private static String ALERTDEF_ID = "ad";
     private static String ID = "pid";
     private static String VERSION = "pversion";
     private static String NAME = "escName";
@@ -70,47 +71,25 @@ public class SaveEscalation extends BaseAction
         JSONArray jarr = new JSONArray();
         for (Iterator i=actions.iterator(); i.hasNext();) {
             Object obj = i.next();
+            JSONObject action;
             if (obj instanceof EmailActionData) {
                 EmailActionData email = (EmailActionData)obj;
-                JSONObject config = new JSONObject()
-                    .put("listType", email.listType)
-                    .put("names", email.names);
-                
-                JSONObject action = new JSONObject()
-                    .put("config", config)
-                    .put("className", "EmailAction");
-                if (update && email.id > 0) {
-                    action.put("id", email.id)
-                        .put("_version_", email._version_);
-                }
-
-                JSONObject escalationAction = new JSONObject()
-                    .put("action", action)
-                    .put("waitTime", email.waitTime);
-
-                jarr.put(escalationAction);
-            } else {
+                action = email.toJSON();
+            } else if (obj instanceof SyslogActionData) {
                 SyslogActionData slog = (SyslogActionData)obj;
-                JSONObject config = new JSONObject()
-                    .put("meta", slog.meta)
-                    .put("product", slog.product)
-                    .put("version", slog.version);
-
-                JSONObject action = new JSONObject()
-                    .put("config", config)
-                    .put("className", "SyslogAction");
-                if (update && slog.id > 0) {
-                    action.put("id", slog.id)
-                        .put("_version_", slog._version_);
-                }
-
-                JSONObject escalationAction = new JSONObject()
-                    .put("action", action)
-                    .put("waitTime", slog.waitTime);
-
-                jarr.put(escalationAction);
+                action = slog.toJSON();
+            } else {
+                throw new IllegalArgumentException("Unsupported object type "
+                                                   +obj.getClass().getName());
             }
+            ActionData data = (ActionData)obj;
+            JSONObject escalationAction = new JSONObject()
+                .put("action", action)
+                .put("waitTime", data.waitTime);
+
+            jarr.put(escalationAction);
         }
+
         JSONObject json = new JSONObject()
             .put("name", ((String[])map.get(NAME))[0])
             .put("allowPause",
@@ -124,16 +103,28 @@ public class SaveEscalation extends BaseAction
                      ((String[])map.get(MAX_WAITTIME))[0]).longValue())
             .put("actions", jarr);
 
-        int id = Integer.valueOf(
-            ((String[])map.get(ID))[0]).intValue();
-        long version = Long.valueOf(
-            ((String[])map.get(VERSION))[0]).longValue();
-        if (update && id > 0) {
-            json.put("id", id)
-                .put("_version_", version);
+        if (map.get(ID) != null) {
+            int id = Integer.valueOf(
+                ((String[])map.get(ID))[0]).intValue();
+            long version;
+            if (map.get(VERSION) != null) {
+                version = Long.valueOf(
+                    ((String[])map.get(VERSION))[0]).longValue();
+            } else {
+                version = 0;
+            }
+            if (update && id > 0) {
+                json.put("id", id)
+                    .put("_version_", version);
+            }
         }
+        Integer alertDefId = Integer.valueOf(
+            ((String[])map.get(ALERTDEF_ID))[0]);
         JSONObject escalation = new JSONObject().put("escalation", json);
-        wmed.saveEscalation(context, context.getSessionId(), escalation);
+        wmed.saveEscalation(context, context.getSessionId(), alertDefId,
+                            escalation);
+        context.getSession().setAttribute("escalationName",
+                                          ((String[])map.get(NAME))[0]);
     }
 
     private List parseActions(JsonActionContext context)
@@ -155,7 +146,7 @@ public class SaveEscalation extends BaseAction
                         (String[])map.get(USER_PREFIX + row),
                         (String[])map.get(WAITTIME_PREFIX + row)
                     ));
-                } else {
+                } else if ("syslog".equalsIgnoreCase(values[0])) {
                     actions.add(new SyslogActionData(
                         (String[])map.get(ID_PREFIX + row),
                         (String[])map.get(VERS_PREFIX + row),
@@ -164,6 +155,9 @@ public class SaveEscalation extends BaseAction
                         (String[])map.get(VERSION_PREFIX + row),
                         (String[])map.get(WAITTIME_PREFIX + row)
                     ));
+                } else {
+                    throw new IllegalArgumentException(
+                        "Unsupported action type " + values[0]);
                 }
             }
         }
@@ -197,21 +191,42 @@ public class SaveEscalation extends BaseAction
         return rowMap;
     }
 
-    private static class EmailActionData
+    private static class ActionData
     {
         int id;
         long _version_;
+        long waitTime;
+
+        ActionData(String[]idarr, String[]varr, String[] timearr)
+        {
+            if (idarr != null) {
+                id = Integer.valueOf(idarr[0]).intValue();
+                _version_ = Long.valueOf(varr[0]).longValue();
+            }
+            waitTime = Long.valueOf(timearr[0]).longValue();
+        }
+
+        JSONObject toJSON() throws JSONException
+        {
+            JSONObject json = new JSONObject();
+            if (id > 0) {
+                json.put("id", id)
+                    .put("_version_", _version_);
+            }
+            return json;
+        }
+    }
+
+    private static class EmailActionData extends ActionData
+    {
         int listType;
         String names;
-        long waitTime;
 
         EmailActionData(String[] ida, String[] vers, String[] type,
                         String[] narr, String[] time)
         {
-            if (ida != null) {
-                id = Integer.valueOf(ida[0]).intValue();
-                _version_ = Long.valueOf(vers[0]).longValue();
-            }
+            super(ida, vers, time);
+
             if ("users".equalsIgnoreCase(type[0])) {
                 listType = EmailActionConfig.TYPE_USERS;
             } else if ("roles".equalsIgnoreCase(type[0])) {
@@ -232,32 +247,53 @@ public class SaveEscalation extends BaseAction
                 }
                 names = buf.toString();
             }
+        }
 
-            waitTime = Long.valueOf(time[0]).longValue();
+        public JSONObject toJSON() throws JSONException
+        {
+            JSONObject action = super.toJSON()
+                .put("className", "EmailAction");
+
+            JSONObject config =  new JSONObject()
+                .put("listType", listType)
+                .put("names", names);
+
+            action.put("config", config);
+
+            return action;
         }
     }
 
-    private static class SyslogActionData
+    private static class SyslogActionData extends ActionData
     {
-        int id;
-        long _version_;
         String meta;
         String product;
         String version;
-        long waitTime;
 
         SyslogActionData(String[] ida, String[] vs, String[] met,
                          String[] prod, String[] vers,
                          String[] time)
         {
-            if (ida != null) {
-                id = Integer.valueOf(ida[0]).intValue();
-                _version_ = Long.valueOf(vs[0]).longValue();
-            }
+            super(ida, vs, time);
+
             meta = met[0];
             product = prod[0];
             version = vers[0];
-            waitTime = Long.valueOf(time[0]).longValue();
+        }
+
+        public JSONObject toJSON() throws JSONException
+        {
+            JSONObject action = super.toJSON()
+                .put("className", "SyslogAction");
+
+            JSONObject config =  super.toJSON()
+                .put("meta", meta)
+                .put("version", version)
+                .put("product", product);
+            
+            action.put("config", config);
+
+            return action;
         }
     }
 }

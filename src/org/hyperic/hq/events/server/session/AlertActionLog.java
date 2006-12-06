@@ -79,7 +79,9 @@ public class AlertActionLog
 
         _valueObj.setId(getId());
         _valueObj.setDetail(getDetail() == null ? "" : getDetail());
-        _valueObj.setActionId(getAction().getId());
+        if (getAction() != null) {
+            _valueObj.setActionId(getAction().getId());
+        }
         return _valueObj;
     }
 
