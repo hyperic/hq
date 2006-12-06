@@ -13,11 +13,11 @@ public class GalertDefDAO
         super(GalertDef.class, f);
     }
 
-    GalertDef findById(Integer id) {
+    public GalertDef findById(Integer id) {
         return (GalertDef)super.findById(id);
     }
 
-    void save(GalertDef def) {
+    public void save(GalertDef def) {
         super.save(def);
     }
 

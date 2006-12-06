@@ -77,7 +77,7 @@ public class EscalationCactusTest extends HQCactusBase
         String jsonString = makeJsonEscalation();
 
         JSONObject json = new JSONObject(jsonString);
-        eventsBoss.saveEscalation(sessionID, null, json);
+        eventsBoss.saveEscalation(sessionID, null, 0, json);
 
         // read after save
         JSONObject json_saved =
@@ -99,7 +99,7 @@ public class EscalationCactusTest extends HQCactusBase
             .getBoolean("notifyAll");
         json.getJSONObject(ename)
             .put("notifyAll", !notify);
-        eventsBoss.saveEscalation(sessionID, null, json);
+        eventsBoss.saveEscalation(sessionID, null, 0, json);
         json = eventsBoss.jsonByEscalationName(sessionID, BOGUS_NAME1);
         boolean notify_update = json.getJSONObject(ename)
             .getBoolean("notifyAll");
@@ -110,7 +110,7 @@ public class EscalationCactusTest extends HQCactusBase
             .getLong("creationTime");
         long modifiedTime = json.getJSONObject(ename)
             .getLong("modifiedTime");
-        eventsBoss.saveEscalation(sessionID, null, json);
+        eventsBoss.saveEscalation(sessionID, null, 0, json);
         json = eventsBoss.jsonByEscalationId(sessionID,
                                              new Integer(
                                                  json.getJSONObject(ename)
@@ -125,7 +125,7 @@ public class EscalationCactusTest extends HQCactusBase
 
         // test for real update
         json.getJSONObject(ename).put("maxWaitTime", 120000);
-        eventsBoss.saveEscalation(sessionID, null, json);
+        eventsBoss.saveEscalation(sessionID, null, 0, json);
         json = eventsBoss.jsonByEscalationName(sessionID, BOGUS_NAME1);
         creationTime1 = json.getJSONObject(ename)
             .getLong("creationTime");
@@ -207,7 +207,8 @@ public class EscalationCactusTest extends HQCactusBase
         addRequestParameter("allowPause", new String[]{"true"});
         addRequestParameter("notification", new String[]{"0"});
         addRequestParameter("maxwaittime", new String[]{"300000"});
-        addRequestParameter("escName", new String[]{"My escalation"});
+        addRequestParameter("escName", new String[]{"My escalation" +
+                                                    (new Random()).nextInt(10000)});
         addRequestParameter("ad", new String[]{"10001"});
     }
 

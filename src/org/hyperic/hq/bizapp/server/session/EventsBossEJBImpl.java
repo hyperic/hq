@@ -1629,13 +1629,13 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * @ejb:transaction type="REQUIRED"
      */
     public void saveEscalation(int sessionID, Integer alertDefId,
-                               JSONObject escalation)
+                               int alertType, JSONObject escalation)
         throws SessionTimeoutException, SessionNotFoundException, JSONException,
         PermissionException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         EscalationMediator med = EscalationMediator.getInstance();
-        med.saveEscalation(subject.getId(), alertDefId, escalation);
+        med.saveEscalation(subject.getId(), alertDefId, alertType, escalation);
     }
 
     /**

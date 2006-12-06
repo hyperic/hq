@@ -7,6 +7,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
+import org.hyperic.hq.events.server.session.EscalationState;
 import org.json.JSONException;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -122,7 +123,11 @@ public class SaveEscalation extends BaseAction
             ((String[])map.get(ALERTDEF_ID))[0]);
         JSONObject escalation = new JSONObject().put("escalation", json);
         wmed.saveEscalation(context, context.getSessionId(), alertDefId,
+                            EscalationState.ALERT_TYPE_GROUP,
                             escalation);
+//        wmed.saveEscalation(context, context.getSessionId(), alertDefId,
+//                            EscalationState.ALERT_TYPE_CLASSIC,
+//                            escalation);
         context.getSession().setAttribute("escalationName",
                                           ((String[])map.get(NAME))[0]);
     }

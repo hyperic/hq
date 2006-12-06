@@ -49,6 +49,7 @@ import org.hyperic.hq.galerts.server.session.GalertActionLogDAO;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.hq.galerts.server.session.GalertLogDAO;
+import org.hyperic.hq.galerts.server.session.GalertDefDAO;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
 import org.hyperic.hq.galerts.shared.GalertManagerUtil;
 import org.hyperic.hq.product.server.MBeanUtil;
@@ -346,7 +347,7 @@ public class EscalationMediator extends Mediator
     }
 
     public void saveEscalation(Integer subjectId, Integer alertDefId,
-                               JSONObject escalation)
+                               int alertType, JSONObject escalation)
         throws JSONException, PermissionException
     {
         EscalationDAO dao = DAOFactory.getDAOFactory().getEscalationDAO();
@@ -361,11 +362,22 @@ public class EscalationMediator extends Mediator
 
         if (alertDefId != null) {
             // save escalation with alert definition
-            AlertDefinitionDAO adao = DAOFactory.getDAOFactory()
-                .getAlertDefDAO();
-            AlertDefinition adef = adao.findById(alertDefId);
-            adef.setEscalation(e);
-            adao.save(adef);
+            switch(alertType) {
+                case EscalationState.ALERT_TYPE_CLASSIC:
+                    AlertDefinitionDAO adao = DAOFactory.getDAOFactory()
+                        .getAlertDefDAO();
+                    AlertDefinition adef = adao.findById(alertDefId);
+                    adef.setEscalation(e);
+                    adao.save(adef);
+                    break;
+                case EscalationState.ALERT_TYPE_GROUP:
+                    GalertDefDAO gdao
+                        = DAOFactory.getDAOFactory().getGalertDefDAO();
+                    GalertDef gdef = gdao.findById(alertDefId);
+                    gdef.setEscalation(e);
+                    gdao.save(gdef);
+                    break;
+            }
         }
     }
 
