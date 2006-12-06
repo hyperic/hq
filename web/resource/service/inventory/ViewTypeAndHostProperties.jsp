@@ -37,22 +37,21 @@
 
 <!--  TYPE AND HOST PROPERTIES CONTENTS -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
-	<tr>
-		<td width="20%" class="BlockLabel"><fmt:message key="resource.service.inventory.type.Type"/></td>
-		<td width="30%" class="BlockContent"><c:out value="${Resource.serviceType.name}"/></td>
+    <tr>
         <c:choose>
             <c:when test="${empty ParentResource}">
-		    <td width="20%" class="BlockLabel"><fmt:message key="resource.service.inventory.type.HostServer"/></td>
-		    <td width="30%" class="BlockContent"><html:link page="/resource/server/Inventory.do?mode=view&type=${Resource.server.entityId.type}&rid=${Resource.server.id}"><c:out value="${Resource.server.name}"/></html:link></td>
+            <td width="20%" class="BlockLabel"><fmt:message key="resource.service.inventory.type.HostServer"/></td>
+            <td width="30%" class="BlockContent"><html:link page="/resource/server/Inventory.do?mode=view&type=${Resource.server.entityId.type}&rid=${Resource.server.id}"><c:out value="${Resource.server.name}"/></html:link></td>
             </c:when>
             <c:otherwise>
-		    <td width="20%" class="BlockLabel"><fmt:message key="resource.server.inventory.type.HostPlatform"/></td>
-		    <td width="30%" class="BlockContent"><html:link page="/resource/platform/Inventory.do?mode=view&type=${ParentResource.entityId.type}&rid=${ParentResource.id}"><c:out value="${ParentResource.name}"/></html:link></td>
+            <td width="20%" class="BlockLabel"><fmt:message key="resource.server.inventory.type.HostPlatform"/></td>
+            <td width="30%" class="BlockContent"><html:link page="/resource/platform/Inventory.do?mode=view&type=${ParentResource.entityId.type}&rid=${ParentResource.id}"><c:out value="${ParentResource.name}"/></html:link></td>
             </c:otherwise>
         </c:choose>
-	</tr>
-	<tr>
-      <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
+        <td width="50%" class="BlockLabel">&nbsp;</td>
+    </tr>
+    <tr>
+      <td colspan="3" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
     </tr>
 </table>
 
