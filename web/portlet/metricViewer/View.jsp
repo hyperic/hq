@@ -31,8 +31,6 @@
 <%@ taglib uri="display" prefix="display" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
 
-<html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="visibility:hidden;"></html:link>
-
 <script type="text/javascript">
 function requestMetricsResponse() {
 var metricsUrl = "<html:rewrite page="/dashboard/ViewMetrics.do"/>"

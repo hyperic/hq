@@ -36,23 +36,23 @@
 
 <script type="text/javascript">
     function getGroupOrder() {
-		var sections = $('testlist');
+		var sections = $('order');
 		var alerttext = '';
-		var sectionID = $('testlist');
+		var sectionID = $('order');
 		var order = Sortable.serialize(sectionID);
 		
-		rowSeq = Sortable.sequence($('testlist'))+ '\n';
+		rowSeq = Sortable.sequence($('order'))+ '\n';
 		return rowSeq;
 		alert(rowSeq);
 	}
 	
 	function addRow() {
-		var ni = $('testlist');
+		var ni = $('order');
         var numi = document.getElementById('theValue');
         var num = (document.getElementById('theValue').value -1)+ 2;
         
         numi.value = num;
-        var liID = 'row_'+num;
+        var liID = 'row'+num;
         var escLi = document.createElement('li');
         var remDiv = document.createElement('div');
         var escTable = document.createElement('table');
@@ -69,7 +69,7 @@
 		
 		ni.appendChild(escLi);
 		escLi.setAttribute((document.all ? 'className' : 'class'), "lineitem");
-        escLi.setAttribute('id', liID);
+        escLi.setAttribute('id', 'row' + liID);
         
         escLi.appendChild(remDiv);
         remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
@@ -96,8 +96,8 @@
 		td2.setAttribute('width', '25%');
 		
 		td2.appendChild(select1);
-		select1.setAttribute('id', 'who' + liID);
-		select1.name = "who" + liID;
+		select1.setAttribute('id', 'who_' + liID);
+		select1.name = "who_" + liID;
         <c:if test="${not empty AvailableRoles}">
 		addOption(select1, 'Roles', '<fmt:message key="monitoring.events.MiniTabs.Roles"/>')
         </c:if>
@@ -177,7 +177,7 @@
     
  /*   
 	function submitForm() {
-	//var sort = Sortable.create('testlist',{tag:'li',only:'section',handle:'handle'});
+	//var sort = Sortable.create('order',{tag:'li',only:'section',handle:'handle'});
 	var url = '<html:rewrite action="/escalation/saveEscalation"/>';
 	text = Sortable.serialize('EscalationForm');
 	alert(text);
@@ -299,7 +299,7 @@ sections = ['section'];
 	}
 
 	function createGroupSortable() {
-		Sortable.create('testlist',{tag:'li',only:'section',handle:'handle'});
+		Sortable.create('order',{tag:'li',only:'section',handle:'handle'});
 	}
 
 </script>
@@ -349,14 +349,15 @@ sections = ['section'];
       </tr>
         <tr class="tableRowAction">
         <td id="section" width="100%">
-            <ul id="testlist">
-              <li id="row_0" class="lineitem">
-                <div id="remove" class="remove" style="padding-top:10px;">
+
+            <ul id="order">
+              <li id="order_row1" class="lineitem">
+				<div id="remove" class="remove" style="padding-top:10px;">
                   <a href="#" style="text-decoration:none;"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"/></a>
                 </div>
                 <table cellpadding="3" cellspacing="0" border="0" width="100%">
                   <tr>
-                    <td width="25%"><select name="action_row_0">
+                    <td width="25%"><select name="action_row0">
                       <option selected value="Email">
                         Email
                       </option>
@@ -367,7 +368,7 @@ sections = ['section'];
                         SMS
                       </option>
                     </select></td>
-                    <td width="25%" style="padding-right:20px;"><select id="who_row_0" name="who_row_0">
+                    <td width="25%" style="padding-right:20px;"><select id="who_row_0" name="who_row0">
                       <c:if test="${not empty AvailableRoles}">
                       <option value="Roles">
                         <fmt:message key="monitoring.events.MiniTabs.Roles"/>
@@ -383,7 +384,7 @@ sections = ['section'];
                     <td width="50%"><a href="javascript:configure('_row_0')">Configure...</a></td>
                   </tr>
                   <tr>
-                    <td colspan="3" style="padding-top:5px;padding-bottom:5px;">Then wait <select name="time_row_0">
+                    <td colspan="3" style="padding-top:5px;padding-bottom:5px;">Then wait <select name="time_row0">
                       <option value="0">
                         <fmt:message key="common.label.None"/>
                       </option>

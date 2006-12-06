@@ -83,7 +83,7 @@ Ajax.Responders.register({
 				<input type="checkbox" onclick="ToggleAll(this, widgetProperties, false)" name="listToggleAll">
 			</td>
 			<td width="20%" class="ListHeaderInactiveSorted" align="left">
-				Date / Time<img src="images/tb_sortdown.gif" height="9" width="9" border="0">
+				Date / Time<html:img page="/images/tb_sortdown.gif" height="9" width="9" border="0" />
 			</td>
 			<td width="20%" class="ListHeaderInactive">
 				Alert Name
