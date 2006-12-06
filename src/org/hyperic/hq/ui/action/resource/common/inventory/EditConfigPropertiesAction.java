@@ -92,13 +92,13 @@ public class EditConfigPropertiesAction extends BaseAction {
 
         switch (aeid.getType()) {
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            forwardParams.put(Constants.ACCORDION_PARAM, "6");
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
             forwardParams.put(Constants.ACCORDION_PARAM, "5");
             break;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+            forwardParams.put(Constants.ACCORDION_PARAM, "4");
+            break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            forwardParams.put(Constants.ACCORDION_PARAM, "3");
+            forwardParams.put(Constants.ACCORDION_PARAM, "2");
             break;
         }
         
