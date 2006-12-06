@@ -176,7 +176,7 @@
  /*   
 	function submitForm() {
 	//var sort = Sortable.create('testlist',{tag:'li',only:'section',handle:'handle'});
-	var url = '/escalation/saveEscalation';
+	var url = '<html:rewrite action="/escalation/saveEscalation"/>';
 	text = Sortable.serialize('EscalationForm');
 	alert(text);
 	var params = 'postText=' + text;
@@ -189,7 +189,7 @@
 	function sendEscForm() {
 		var adId = $('ad').value;
 		var escFormSerial = Form.serialize('EscalationForm');
-		var url = '/escalation/SaveEscalation';
+	    var url = '<html:rewrite action="/escalation/saveEscalation"/>';
 		var pars = "escForm=" + escFormSerial + "&ad=" + adId;
 		new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse} );
 	}
