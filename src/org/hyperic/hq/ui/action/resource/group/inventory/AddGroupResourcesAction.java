@@ -81,7 +81,7 @@ public class AddGroupResourcesAction extends BaseAction {
 
         HashMap forwardParams = new HashMap(2);
         forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
-        forwardParams.put(Constants.ACCORDION_PARAM, "2");
+        forwardParams.put(Constants.ACCORDION_PARAM, "1");
         
         try {
             ActionForward forward = checkSubmit(request, mapping, form,

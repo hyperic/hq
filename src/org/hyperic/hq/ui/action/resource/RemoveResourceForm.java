@@ -29,9 +29,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.ui.action.BaseValidatorForm;
-
 import org.apache.struts.action.ActionMapping;
 
 /**
@@ -39,17 +36,13 @@ import org.apache.struts.action.ActionMapping;
  * 
  *
  */
-public class RemoveResourceForm extends BaseValidatorForm {
+public class RemoveResourceForm extends ResourceForm {
 
     //-------------------------------------instance variables
 
     private Integer[] resources;
     protected Integer resourceType;
     protected List resourceTypes;
-    private Integer rid;
-    private Integer type;
-
-    //-------------------------------------constructors
 
     public RemoveResourceForm() {
         super();
@@ -117,38 +110,6 @@ public class RemoveResourceForm extends BaseValidatorForm {
         this.resourceTypes = resourceTypes;
     }
 
-    /**
-     * Returns the rid.
-     * @return String
-     */
-    public Integer getRid() {
-        return rid;
-    }
-
-    /**
-     * Sets the rid.
-     * @param rid The rid to set
-     */
-    public void setRid(Integer rid) {
-        this.rid = rid;
-    }
-
-    /**
-     * Returns the type.
-     * @return String
-     */
-    public Integer getType() {
-        return type;
-    }
-
-    /**
-     * Sets the type.
-     * @param type The type to set
-     */
-    public void setType(Integer type) {
-        this.type = type;
-    }
-
     public Integer getPss() {
         return getPs();
     }
@@ -164,16 +125,13 @@ public class RemoveResourceForm extends BaseValidatorForm {
         resources = new Integer[0];
         resourceType = null;
         resourceTypes = null;
-        rid = null;
     }
 
     public String toString() {
         StringBuffer s = new StringBuffer(super.toString());
 
         s.append(" rid=");
-        s.append(rid);
         s.append(" type=");
-        s.append(type);
         s.append(" resources=");
         s.append(resources);
         s.append(" resourceType=");

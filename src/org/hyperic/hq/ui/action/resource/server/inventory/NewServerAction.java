@@ -78,7 +78,7 @@ public class NewServerAction extends BaseAction {
                                    newForm.getRid());
 
             forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
-            forwardParams.put(Constants.ACCORDION_PARAM, "4");
+            forwardParams.put(Constants.ACCORDION_PARAM, "2");
 
             ActionForward forward = checkSubmit(request, mapping, form,
 						forwardParams, YES_RETURN_PATH);

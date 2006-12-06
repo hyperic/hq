@@ -95,7 +95,7 @@ public class EditConfigPropertiesAction extends BaseAction {
             forwardParams.put(Constants.ACCORDION_PARAM, "5");
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            forwardParams.put(Constants.ACCORDION_PARAM, "4");
+            forwardParams.put(Constants.ACCORDION_PARAM, "3");
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
             forwardParams.put(Constants.ACCORDION_PARAM, "2");
