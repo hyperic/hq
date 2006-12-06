@@ -568,17 +568,17 @@ public class AI2AppdefDiff {
         if ((appdefDescr == null) ||
             (appdefDescr.trim().length() == 0) ||
             //e.g. may have vmguest info appended
-            ((aiDescr != null) && aiDescr.startsWith(appdefDescr)))
+            ((aiDescr != null) && aiDescr.startsWith(appdefDescr + " ")))
         {
-            if (aiPlatform.getDescription() != null) {
+            if (aiDescr != null) {
                 aiPlatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
                 addDiff(aiPlatform,
                         AIQueueConstants.Q_PLATFORM_PROPERTIES_CHANGED);
                 log.info("Description changed for " + aiPlatform.getFqdn() +
                          " from: '" +
-                         appdefPlatform.getDescription() +
+                         appdefDescr +
                          "', to: '" +
-                         aiPlatform.getDescription() + "'");
+                         aiDescr + "'");
             }
         }
         else {
