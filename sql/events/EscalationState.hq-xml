@@ -26,6 +26,9 @@
       <property name="alertDefinitionId" type="integer">
         <column name="ALERT_DEF_ID" not-null="true" />
       </property>
+      <property name="alertType" type="integer">
+        <column name="ALERT_TYPE" not-null="true" />
+      </property>
     </properties>
 
     <property name="currentLevel" type="integer">
