@@ -77,7 +77,6 @@ public class GalertProcessor {
 
         _log.info("Processing event: " + event);
         synchronized (CFG_LOCK) {
-            _log.warn("Listeners = " + _listeners);
             Set listeners = (Set)_listeners.get(source);
             
             if (listeners == null)
@@ -86,7 +85,6 @@ public class GalertProcessor {
             listenerDupe = new HashSet(listeners);
         }
         
-        _log.info("Listeners for source = " + listenerDupe);
         for (Iterator i=listenerDupe.iterator(); i.hasNext(); ) {
             Gtrigger t = (Gtrigger)i.next();
             
