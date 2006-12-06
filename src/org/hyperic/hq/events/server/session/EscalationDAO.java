@@ -187,12 +187,6 @@ public class EscalationDAO extends HibernateDAO
         remove((Escalation)entity);
     }
 
-    public void clearActiveEscalation(Integer escalationId, Integer alertDefId)
-    {
-        DAOFactory.getDAOFactory().getEscalationStateDAO()
-            .clearActiveEscalation(findById(escalationId), alertDefId);
-    }
-
     public Escalation findByAlertDefinitionId(Integer subjectId, Integer id)
         throws PermissionException
     {
