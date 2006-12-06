@@ -46,7 +46,7 @@ import org.hyperic.util.config.InvalidOptionValueException;
  * Utilities class that provides general convenience methods.
  */
 public class DashboardUtils {
-    public static final char MULTI_PORTLET_TOKEN = '@';
+    public static final char MULTI_PORTLET_TOKEN = '_';
 
     public static List listAsResources(List list, ServletContext ctx,
                                        WebUser user)
