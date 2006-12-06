@@ -13,7 +13,7 @@ public class GalertLogDAO
         super(GalertLog.class, f);
     }
 
-    GalertLog findById(Integer id) {
+    public GalertLog findById(Integer id) {
         return (GalertLog)super.findById(id);
     }
 

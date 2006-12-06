@@ -1,5 +1,9 @@
 package org.hyperic.hq.galerts.server.session;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 
@@ -15,6 +19,7 @@ public class GalertLog
     private String             _shortReason;
     private String             _longReason;
     private GalertDefPartition _partition;
+    private Collection         _actionLog = new ArrayList();
     
     protected GalertLog() {}
     
@@ -81,6 +86,18 @@ public class GalertLog
         return _partition.getCode();
     }
     
+    protected void setActionLogBag(Collection actionLog) {
+        _actionLog = actionLog;
+    }
+
+    protected Collection getActionLogBag() {
+        return _actionLog;
+    }
+
+    public Collection getActionLog() {
+        return Collections.unmodifiableCollection(_actionLog);
+    }
+
     public ExecutionReason getExecutionReason() {
         return new ExecutionReason(getShortReason(), getLongReason(),
                                    _partition);
