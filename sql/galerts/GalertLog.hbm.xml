@@ -41,7 +41,7 @@
       <column name="PARTITION" not-null="true"/>
     </property>    
 
-    <bag name="gactionLogBag" table="EAM_ALERT_ACTION_LOG"
+    <bag name="actionLogBag" table="EAM_ALERT_ACTION_LOG"
          cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
          inverse="true">
       <key column="GALERT_ID" />
