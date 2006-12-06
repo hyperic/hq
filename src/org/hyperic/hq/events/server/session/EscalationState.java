@@ -9,6 +9,9 @@ import org.json.JSONException;
 public class EscalationState extends PersistedObject
     implements Cloneable, JSON
 {
+    public final static int ALERT_TYPE_CLASSIC = 0;
+    public final static int ALERT_TYPE_GROUP   = 1;
+    
     public static EscalationState newInstance(Escalation e, Integer aid) {
         return new EscalationState(e, aid.intValue());
     }
@@ -65,6 +68,7 @@ public class EscalationState extends PersistedObject
     private Escalation _escalation;
     private int _alertDefinitionId;
     private int _alertId;
+    private int _alertType;
 
     protected EscalationState(){
     }
@@ -206,6 +210,14 @@ public class EscalationState extends PersistedObject
         _alertId = alertId;
     }
 
+    public int getAlertType() {
+        return _alertType;
+    }
+
+    public void setAlertType(int alertType) {
+        _alertType = alertType;
+    }
+
     public JSONObject toJSON() {
         try {
             return new JSONObject()
@@ -222,7 +234,8 @@ public class EscalationState extends PersistedObject
                 .put("alertDefinitionId", _alertDefinitionId)
                 .put("alertId", _alertId)
                 .put("escalationId", _escalation.getId())
-                .put("updateBy", _updateBy);
+                .put("updateBy", _updateBy)
+                .put("alertType", _alertType);
         } catch(JSONException e) {
             throw new SystemException(e);
         }
@@ -247,6 +260,7 @@ public class EscalationState extends PersistedObject
                _pauseWaitTime == o.getPauseWaitTime() &&
                _scheduleRunTime == o.getScheduleRunTime() &&
                _acknowledge == o.isAcknowledge() &&
+               _alertType == o.getAlertType() &&
                _fixed == o.isFixed() &&
                _active == o.isActive() &&
                _pauseEscalation == o.isPauseEscalation() &&
@@ -270,6 +284,7 @@ public class EscalationState extends PersistedObject
         result = 37*result + _currentLevel;
         result = 37*result + _alertDefinitionId;
         result = 37*result + _alertId;
+        result = 37*result + _alertType;
         result = 37*result + (int)(_creationTime ^ (_creationTime >>> 32));
         result = 37*result + (int)(_modifiedTime ^ (_modifiedTime >>> 32));
         result = 37*result + (int)(_pauseWaitTime ^ (_pauseWaitTime >>> 32));
