@@ -50,6 +50,7 @@ import org.hyperic.hq.dao.ConfigPropertyDAO;
 import org.hyperic.hq.dao.ConfigResponseDAO;
 import org.hyperic.hq.dao.CpropDAO;
 import org.hyperic.hq.dao.CpropKeyDAO;
+import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.dao.HibernateDAOFactory;
 import org.hyperic.hq.dao.PlatformDAO;
 import org.hyperic.hq.dao.PlatformTypeDAO;
@@ -62,18 +63,18 @@ import org.hyperic.hq.dao.ServiceClusterDAO;
 import org.hyperic.hq.dao.ServiceDAO;
 import org.hyperic.hq.dao.ServiceTypeDAO;
 import org.hyperic.hq.dao.VirtualDAO;
-import org.hyperic.hq.dao.HibernateDAO;
-import org.hyperic.hq.events.server.session.EscalationDAO;
 import org.hyperic.hq.events.server.session.ActionDAO;
 import org.hyperic.hq.events.server.session.AlertActionLogDAO;
 import org.hyperic.hq.events.server.session.AlertConditionDAO;
 import org.hyperic.hq.events.server.session.AlertConditionLogDAO;
 import org.hyperic.hq.events.server.session.AlertDAO;
 import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
+import org.hyperic.hq.events.server.session.EscalationDAO;
+import org.hyperic.hq.events.server.session.EscalationStateDAO;
 import org.hyperic.hq.events.server.session.EventLogDAO;
 import org.hyperic.hq.events.server.session.TriggerDAO;
-import org.hyperic.hq.events.server.session.EscalationStateDAO;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfoDAO;
+import org.hyperic.hq.galerts.server.session.GalertActionLogDAO;
 import org.hyperic.hq.galerts.server.session.GalertDefDAO;
 import org.hyperic.hq.galerts.server.session.GalertLogDAO;
 import org.hyperic.hq.galerts.server.session.GtriggerTypeInfoDAO;
@@ -170,6 +171,7 @@ public abstract class DAOFactory {
         getExecutionStrategyTypeInfoDAO();
     public abstract GalertDefDAO getGalertDefDAO();
     public abstract GalertLogDAO getGalertLogDAO();
+    public abstract GalertActionLogDAO getGalertActionLogDAO();
 
     public abstract HibernateDAO getDAO(Class pojo);
 

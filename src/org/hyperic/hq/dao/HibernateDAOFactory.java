@@ -93,6 +93,7 @@ import org.hyperic.hq.events.server.session.EventLogDAO;
 import org.hyperic.hq.events.server.session.RegisteredTrigger;
 import org.hyperic.hq.events.server.session.TriggerDAO;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfoDAO;
+import org.hyperic.hq.galerts.server.session.GalertActionLogDAO;
 import org.hyperic.hq.galerts.server.session.GalertDefDAO;
 import org.hyperic.hq.galerts.server.session.GalertLogDAO;
 import org.hyperic.hq.galerts.server.session.GtriggerTypeInfoDAO;
@@ -433,5 +434,9 @@ public class HibernateDAOFactory extends DAOFactory {
     
     public GalertLogDAO getGalertLogDAO() {
         return new GalertLogDAO(this);
+    }
+
+    public GalertActionLogDAO getGalertActionLogDAO() {
+        return new GalertActionLogDAO(this);
     }
 }
