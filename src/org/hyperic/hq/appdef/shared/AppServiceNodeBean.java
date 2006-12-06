@@ -172,7 +172,7 @@ public class AppServiceNodeBean extends ServiceValue implements java.io.Serializ
      * @return Boolean
      */
     public Boolean getCluster() {
-        return new Boolean(getParentId().equals(CLUSTER_PARENT_ID));
+        return new Boolean(CLUSTER_PARENT_ID.equals(getParentId()));
     }
 
     /**
