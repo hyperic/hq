@@ -294,13 +294,13 @@ public class EscalationMediator extends Mediator
      *         the caller now owns the escalation chain. false escalation chain
      *         is already in progress.
      */
-    private boolean activateEscalation(final Escalation e,
+    private void activateEscalation(final Escalation e,
                                        final Integer alertDefId,
                                        final int alertId,
                                        final int alertType)
     {
         if (e == null) {
-            return false;
+            return;
         }
         
         synchronized(stateLocks.getLock(new StateLock(alertDefId.intValue(),
@@ -331,29 +331,15 @@ public class EscalationMediator extends Mediator
                         return context;
                     }
                 });
-            
             if (context == null) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Escalation already in progress. alert=" + alertId
-                              + ", escalation=" + e);
+                    log.debug("Escalation already in progress. alert=" +
+                              alertId + ", escalation=" + e);
                 }
-                
-                return false;
+                return;
             }
         }
-
-        List ealist = e.getActions();
-        EscalationAction ea = (EscalationAction)ealist.get(0);
-        EscalationState state =
-            getEscalationState(e, alertDefId,
-                               EscalationState.ALERT_TYPE_GROUP);
-        logEscalation(ea.getAction(), state, "Start Escalation");
-        if (log.isDebugEnabled()) {
-            log.debug("Start escalation. alert def ID=" +  alertDefId +
-                      ", escalation=" + e + ", state=" + state);
-        }            
-        dispatchAction(state);
-        return true;
+        beginEscalation(e, alertDefId);
     }
 
     public void saveEscalation(Integer subjectId, JSONObject escalation)
@@ -617,6 +603,21 @@ public class EscalationMediator extends Mediator
                           ", state=" + state + "action=" + ea);
             }
         }
+    }
+
+    private void beginEscalation(Escalation e, Integer alertDefId)
+    {
+        List ealist = e.getActions();
+        EscalationAction ea = (EscalationAction)ealist.get(0);
+        EscalationState state =
+            getEscalationState(e, alertDefId,
+                               EscalationState.ALERT_TYPE_GROUP);
+        logEscalation(ea.getAction(), state, "Start Escalation");
+        if (log.isDebugEnabled()) {
+            log.debug("Start escalation. alert def ID=" +  alertDefId +
+                      ", escalation=" + e + ", state=" + state);
+        }
+        dispatchAction(state);
     }
 
     public void dispatchAction(EscalationState state)
