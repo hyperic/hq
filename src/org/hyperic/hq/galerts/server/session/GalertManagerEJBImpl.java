@@ -13,12 +13,15 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.shared.CrispoManagerLocal;
 import org.hyperic.hq.common.shared.CrispoManagerUtil;
+import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.server.session.Escalation;
+import org.hyperic.hq.events.server.session.EscalationMediator;
 import org.hyperic.hq.galerts.processor.GalertProcessor;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyType;
@@ -327,6 +330,22 @@ public class GalertManagerEJBImpl
         GalertProcessor.getInstance().alertDefDeleted(defId);
     }
     
+    /**
+     * start escalation inside JTA context for Galerts
+     * @ejb:interface-method
+     */
+    public void startEscalation(Integer id, ExecutionReason reason)
+    {
+        try {
+            GalertDef def = _defDAO.findById(id);
+            EscalationMediator.getInstance().startGEscalation(def, reason);
+        } catch (ActionExecuteException e) {
+            _log.error("Unable to execute actions", e);
+        } catch (PermissionException e) {
+            _log.error("No permission to begin escalation", e);
+        }
+    }
+
     /**
      * @ejb:interface-method  
      */
