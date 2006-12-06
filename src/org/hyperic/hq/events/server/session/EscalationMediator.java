@@ -1,40 +1,63 @@
 package org.hyperic.hq.events.server.session;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.ejb.CreateException;
+import javax.ejb.FinderException;
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
+import javax.naming.NamingException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.LockSet;
+import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.Mediator;
 import org.hyperic.hq.TransactionContext;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.product.server.MBeanUtil;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.TransactionManagerLocal;
 import org.hyperic.hq.common.shared.TransactionManagerUtil;
-import org.hyperic.hq.events.server.mbean.EscalationSchedulerMBean;
-import org.hyperic.hq.events.shared.AlertManagerLocal;
-import org.hyperic.hq.events.shared.AlertManagerUtil;
-import org.hyperic.hq.events.InvalidActionDataException;
+import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionInterface;
+import org.hyperic.hq.events.AlertCreateException;
+import org.hyperic.hq.events.AlertFiredEvent;
+import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.Notify;
-import org.hyperic.hibernate.LockSet;
-import org.hyperic.dao.DAOFactory;
-import org.hyperic.util.config.EncodingException;
+import org.hyperic.hq.events.TriggerFiredEvent;
+import org.hyperic.hq.events.server.mbean.EscalationSchedulerMBean;
+import org.hyperic.hq.events.shared.AlertConditionLogValue;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
+import org.hyperic.hq.events.shared.AlertManagerLocal;
+import org.hyperic.hq.events.shared.AlertManagerUtil;
+import org.hyperic.hq.events.shared.AlertValue;
+import org.hyperic.hq.galerts.server.session.ExecutionReason;
+import org.hyperic.hq.galerts.server.session.GalertActionLog;
+import org.hyperic.hq.galerts.server.session.GalertActionLogDAO;
+import org.hyperic.hq.galerts.server.session.GalertDef;
+import org.hyperic.hq.galerts.server.session.GalertLog;
+import org.hyperic.hq.galerts.server.session.GalertLogDAO;
+import org.hyperic.hq.galerts.shared.GalertManagerLocal;
+import org.hyperic.hq.galerts.shared.GalertManagerUtil;
+import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.util.config.ConfigResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
+import org.hyperic.util.config.EncodingException;
+import org.hyperic.util.config.InvalidOptionException;
+import org.hyperic.util.config.InvalidOptionValueException;
 import org.json.JSONException;
-
-import javax.ejb.CreateException;
-import javax.naming.NamingException;
-import javax.management.ObjectName;
-import javax.management.MalformedObjectNameException;
-import javax.management.ReflectionException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
-import javax.management.AttributeNotFoundException;
-import java.util.List;
-import java.util.Iterator;
-import java.util.Collection;
+import org.json.JSONObject;
 
 public class EscalationMediator extends Mediator
 {
@@ -68,9 +91,8 @@ public class EscalationMediator extends Mediator
         }
         try {
             ObjectName name = new ObjectName(ESCALATION_SERVICE_MBEAN);
-            escalationServiceMBean =
-                (EscalationSchedulerMBean)
-                    MBeanUtil.getMBeanServer().getAttribute(name, "Instance");
+            escalationServiceMBean = (EscalationSchedulerMBean)
+                MBeanUtil.getMBeanServer().getAttribute(name, "Instance");
         } catch (MalformedObjectNameException e) {
             throw new SystemException(e);
         } catch (ReflectionException e) {
@@ -102,10 +124,7 @@ public class EscalationMediator extends Mediator
             escalationServiceMBean.run(new Runnable() {
                 public void run()
                 {
-                    alertManagerLocal.dispatchAction(
-                        state.getEscalation().getId(),
-                        new Integer(state.getAlertDefinitionId()),
-                        new Integer(state.getAlertId()));
+                    alertManagerLocal.dispatchAction(state);
                 }
             });
         }
@@ -113,41 +132,136 @@ public class EscalationMediator extends Mediator
 
     /**
      * escalation entry point
-     *
-     * @param escalationId
+     * @param event TODO
      * @param alertId
+     *
+     * @throws PermissionException 
      */
-    public void startEscalation(Integer escalationId, Integer alertId)
+    public void startEscalation(Integer alertDefId, TriggerFiredEvent event)
+        throws ActionExecuteException, PermissionException
     {
-        Alert alert =
-            DAOFactory.getDAOFactory().getAlertDAO().findById(alertId);
-        Integer alertDefId = alert.getAlertDefinition().getId();
-        Escalation escalation = findEscalationById(escalationId);
-
-        if (setActiveEscalation(escalation, alertDefId, alertId.intValue())) {
-            List ealist = escalation.getActions();
-            EscalationAction ea = (EscalationAction)ealist.get(0);
-            logEscalation(ea.getAction(), alert, "Start Escalation");
-            if (log.isDebugEnabled()) {
-                EscalationState state =
-                    getEscalationState(escalation, alertDefId);
-                log.debug("Start escalation. alert=" +  alert +
-                          ", escalation=" + escalation + ", state=" +
-                          state);
-            }
-            // Escalation is not active, start escalation.
-            dispatchAction(escalationId, alertDefId, alertId);
-        } else {
-            logEscalation(null, alert, "Escalation already in progress.");
-            // escalation is active, so do not start another escalation
-            // for this chain.
-            if (log.isDebugEnabled()) {
-                EscalationState state =
-                    getEscalationState(escalation, alertDefId);
-                log.debug("Escalation already in progress. alert=" +  alert +
-                          ", escalation=" + escalation + ", state="+ state);
-            }
+        AlertManagerLocal alman;
+        AlertDefinitionManagerLocal aman;
+        AlertDefinition alertDef;
+    
+        try {
+            aman = AlertDefinitionManagerUtil.getLocalHome().create();
+            alman = AlertManagerUtil.getLocalHome().create();
+        } catch (NamingException e) {
+            throw new SystemException(e);
+        } catch (CreateException e) {
+            throw new SystemException(e);
         }
+        
+        try {
+            alertDef = aman.getByIdNoCheck(alertDefId);
+        } catch (FinderException e) {
+            throw new ActionExecuteException("Bad alert definition ID: " +
+                                             alertDefId, e);
+        }
+        
+        Escalation esc = alertDef.getEscalation();
+        
+        if (isEscalationActive(esc, alertDef.getId(),
+                               EscalationState.ALERT_TYPE_CLASSIC)) {
+            return;
+        }
+    
+        Alert alert = createAlert(event, alman, alertDef);        
+        activateEscalation(esc, alertDefId, alert.getId().intValue(),
+                           EscalationState.ALERT_TYPE_CLASSIC);
+    }
+
+    /**
+     * escalation entry point
+     * @param event TODO
+     * @param alertId
+     *
+     * @throws PermissionException 
+     */
+    public void startGEscalation(GalertDef def, ExecutionReason reason)
+        throws ActionExecuteException, PermissionException
+    {
+        GalertManagerLocal gaMan;
+        
+        try {
+            gaMan = GalertManagerUtil.getLocalHome().create();
+        } catch (NamingException e) {
+            throw new SystemException(e);
+        } catch (CreateException e) {
+            throw new SystemException(e);
+        }
+        
+        Escalation esc = def.getEscalation();
+        
+        if (isEscalationActive(esc, def.getId(),
+                               EscalationState.ALERT_TYPE_GROUP)) {
+            return;
+        }
+
+        GalertLog alert = gaMan.createAlertLog(def, reason);
+        activateEscalation(esc, def.getId(), alert.getId().intValue(),
+                           EscalationState.ALERT_TYPE_GROUP);
+    }
+
+    private Alert createAlert(TriggerFiredEvent event, AlertManagerLocal alman,
+                              AlertDefinition alertDef)
+        throws PermissionException, ActionExecuteException {
+        // Start the Alert object
+        AlertValue alert = new AlertValue();
+        alert.setAlertDefId(alertDef.getId());
+
+        // Create time is the same as the fired event
+        alert.setCtime(event.getTimestamp());
+
+        // Now create the alert
+        alert = alman.createAlert(alert);
+
+        // Create the trigger event map
+        HashMap trigMap = new HashMap();
+        TriggerFiredEvent[] tfes = event.getRootEvents();
+        for (int i = 0; i < tfes.length; i++) {
+            trigMap.put(tfes[i].getInstanceId(), tfes[i]);
+        }
+    
+        // Create a alert condition logs for every condition
+        Collection conds = alertDef.getConditions();
+        for (Iterator it = conds.iterator(); it.hasNext(); ) {
+            AlertCondition cond = (AlertCondition) it.next();
+            AlertConditionLogValue clog = new AlertConditionLogValue();
+            clog.setCondition(cond.getAlertConditionValue());
+            if (trigMap.containsKey(cond.getTrigger().getId())) {
+                clog.setValue(trigMap.get(
+                    cond.getTrigger().getId()).toString());
+            } 
+            alert.addConditionLog(clog);
+        }
+    
+        // Update the alert
+        Alert alertpojo;
+        try {
+            // get alert pojo so retrieve array of AlertCondtionLogs
+            alertpojo = alman.updateAlert(alert);
+        } catch (AlertCreateException e) {
+            throw new ActionExecuteException("Unable to update alert: " +
+                                             alert.getId(), e);
+        }
+        
+        // Regardless of whether or not the actions succeed, we will send an
+        // AlertFiredEvent
+        Messenger sender = new Messenger();
+        sender.publishMessage(EventConstants.EVENTS_TOPIC,
+                              new AlertFiredEvent(event, alert.getId(),
+                                                  alertDef));
+
+        Collection actions = alertDef.getActions();
+        // Iterate through the actions
+        for (Iterator it = actions.iterator(); it.hasNext(); ) {
+            Action act = (Action) it.next();
+            executeAction(alertpojo, act);
+        }
+        
+        return alertpojo;
     }
 
     /**
@@ -157,16 +271,55 @@ public class EscalationMediator extends Mediator
      *
      * This method is not cluster-safe.
      *
-     * @param e
-     * @param alertDefId
+     * @param e the Escalation
+     * @param alertDefId the alert definition ID
      * @return true if escalation state changed from inactive to active. I.e,
      *         the caller now owns the escalation chain.
      *         false escalation chain is already in progress.
      */
-    private boolean setActiveEscalation(final Escalation e,
-                                        final Integer alertDefId,
-                                        final int alertId)
+    private boolean isEscalationActive(Escalation e,
+                                       Integer alertDefId,
+                                       int alertType)
     {
+        if (e != null ) {
+            EscalationState state = getEscalationState(e, alertDefId, alertType);
+            if (state != null && state.isActive()) {
+                // escalation is active, so do not start another escalation
+                // for this chain.
+                if (log.isDebugEnabled()) {
+                    log.debug("Escalation already in progress. alert def ID=" +
+                              alertDefId + ", escalation=" + e +
+                              ", state="+ state);
+                }
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * set escalation state to active and take ownership of the escalation
+     * chain. The caller is guaranteed that no other thread will have access to
+     * this escalation chain.
+     * 
+     * This method is not cluster-safe.
+     * 
+     * @param e
+     * @param alertDefId
+     * @return true if escalation state changed from inactive to active. I.e,
+     *         the caller now owns the escalation chain. false escalation chain
+     *         is already in progress.
+     */
+    private boolean activateEscalation(final Escalation e,
+                                       final Integer alertDefId,
+                                       final int alertId,
+                                       final int alertType)
+    {
+        if (e == null) {
+            return false;
+        }
+        
         synchronized(stateLocks.getLock(alertDefId)) {
             // the point of this is to make sure people wait
             // while we check on the active bit in a new JTA context
@@ -179,13 +332,13 @@ public class EscalationMediator extends Mediator
                     public TransactionContext run(TransactionContext context)
                     {
                         EscalationState state =
-                            getEscalationState(e, alertDefId);
+                            getEscalationState(e, alertDefId, alertType);
                         if (state == null) {
                             state = EscalationState.newInstance(e, alertDefId);
                             DAOFactory.getDAOFactory().getEscalationStateDAO()
                                 .save(state);
                         }
-                        if(state.isActive()) {
+                        else if(state.isActive()) {
                             return null;
                         }
                         state.setActive(true);
@@ -193,7 +346,26 @@ public class EscalationMediator extends Mediator
                         return context;
                     }
                 });
-            return context != null;
+            
+            if (context != null) {
+                List ealist = e.getActions();
+                EscalationAction ea = (EscalationAction)ealist.get(0);
+                EscalationState state =
+                    getEscalationState(e, alertDefId,
+                                       EscalationState.ALERT_TYPE_GROUP);
+                logEscalation(ea.getAction(), state, "Start Escalation");
+                if (log.isDebugEnabled()) {
+                    log.debug("Start escalation. alert def ID=" +  alertDefId +
+                              ", escalation=" + e + ", state=" + state);
+                }            
+                dispatchAction(state);
+                return true;
+            }
+            else if (log.isDebugEnabled()) {
+                log.debug("Escalation already in progress. alert=" +  alertId
+                          + ", escalation=" + e);
+            }
+            return false;
         }
     }
 
@@ -240,13 +412,6 @@ public class EscalationMediator extends Mediator
         return DAOFactory.getDAOFactory().getEscalationDAO().findAll(subjectId);
     }
 
-    public void clearActiveEscalation(Integer escalationId, Integer alertDefId)
-    {
-        // clear active status for this alertDef
-        DAOFactory.getDAOFactory().getEscalationDAO()
-                .clearActiveEscalation(escalationId, alertDefId);
-    }
-
     public Escalation findByEscalationName(Integer subjectId, String name)
         throws PermissionException
     {
@@ -269,11 +434,24 @@ public class EscalationMediator extends Mediator
         return dao.findById(subjectId, id);
     }
 
-    public EscalationState getEscalationState(Escalation e, Integer alertDefId)
+    public EscalationState getEscalationState(Escalation e, Integer alertDefId,
+                                              int alertType)
     {
         EscalationStateDAO dao =
             DAOFactory.getDAOFactory().getEscalationStateDAO();
-        return dao.getEscalationState(e, alertDefId);
+        return dao.getEscalationState(e, alertDefId, alertType);
+    }
+
+    private Alert getAlert(int alertId)
+    {
+        AlertDAO dao = DAOFactory.getDAOFactory().getAlertDAO();
+        return dao.findById(new Integer(alertId));
+    }
+
+    private GalertLog getGalert(int alertId)
+    {
+        GalertLogDAO dao = DAOFactory.getDAOFactory().getGalertLogDAO();
+        return dao.findById(new Integer(alertId));
     }
 
     public List findScheduledEscalationState()
@@ -287,7 +465,8 @@ public class EscalationMediator extends Mediator
         throws PermissionException, ActionExecuteException
     {
         EscalationState state =
-            setEscalationState(subjectID, alertID, false);
+            setEscalationState(subjectID, alertID,
+                               EscalationState.ALERT_TYPE_CLASSIC, false);
         if (state != null) {
             AuthzSubject subj =
                 DAOFactory.getDAOFactory().getAuthzSubjectDAO()
@@ -302,7 +481,7 @@ public class EscalationMediator extends Mediator
                 .append(".")
                 .toString();
             AlertDAO adao = DAOFactory.getDAOFactory().getAlertDAO();
-            logEscalation(null, adao.findById(alertID),
+            logEscalation(null, state,
                           "Alert acknowledged by " + state.getUpdateBy());
             notifyEscalation(alertID, state, message);
         }
@@ -312,7 +491,8 @@ public class EscalationMediator extends Mediator
         throws PermissionException, ActionExecuteException
     {
         EscalationState state =
-            setEscalationState(subjectID, alertID, true);
+            setEscalationState(subjectID, alertID,
+                               EscalationState.ALERT_TYPE_CLASSIC, true);
         if (state != null) {
             AuthzSubject subj =
                 DAOFactory.getDAOFactory().getAuthzSubjectDAO()
@@ -327,7 +507,7 @@ public class EscalationMediator extends Mediator
                 .append(".")
                 .toString();
             AlertDAO adao = DAOFactory.getDAOFactory().getAlertDAO();
-            logEscalation(null, adao.findById(alertID),
+            logEscalation(null, state,
                           "Alert fixed by " + state.getUpdateBy());
             notifyEscalation(alertID, state, message);
         }
@@ -354,22 +534,34 @@ public class EscalationMediator extends Mediator
     }
 
     private EscalationState setEscalationState(Integer subjectID,
-                                               Integer alertID,
+                                               Integer alertId,
+                                               int alertType,
                                                boolean fixed)
         throws PermissionException
     {
         SessionBase.canModifyEscalation(subjectID);
 
-        Alert alert =
-            DAOFactory.getDAOFactory().getAlertDAO().findById(alertID);
-        Integer alertDefId =
-            alert.getAlertDefinition().getId();
-        Escalation escalation =
-            alert.getAlertDefinition().getEscalation();
+        Escalation escalation;
+        Integer alertDefId;
+        switch(alertType) {
+        case EscalationState.ALERT_TYPE_CLASSIC:
+            Alert alert = getAlert(alertId.intValue());
+            alertDefId = alert.getAlertDefinition().getId();
+            escalation = alert.getAlertDefinition().getEscalation();
+            break;
+        case EscalationState.ALERT_TYPE_GROUP:
+            GalertLog galert = getGalert(alertId.intValue());
+            alertDefId = galert.getAlertDef().getId();
+            escalation = galert.getAlertDef().getEscalation();
+            break;
+        default:
+            log.error("alertType " + alertType + " unknown");
+            return null;            // Unknown alert type, can't do anything
+        }
 
         if (escalation != null) {
             EscalationState state =
-                getEscalationState(escalation, alertDefId);
+                getEscalationState(escalation, alertDefId, alertType);
 
             if (state != null) {
                 if (fixed) {
@@ -389,32 +581,28 @@ public class EscalationMediator extends Mediator
         return null;
     }
 
-    private void scheduleAction(Integer escalationId, Integer alertDefId,
-                                Integer alertId)
+    private void scheduleAction(EscalationState state)
     {
-        EscalationDAO dao = DAOFactory.getDAOFactory().getEscalationDAO();
-        Escalation  escalation = dao.findById(escalationId);
+        Escalation  escalation = state.getEscalation();
         EscalationStateDAO sdao =
             DAOFactory.getDAOFactory().getEscalationStateDAO();
 
-        EscalationState state = getEscalationState(escalation, alertDefId);
         if (state == null) {
             log.error("Escalation state not found. escalation="+escalation+
-                ", alertDefId="+ alertDefId +", alertId="+ alertId);
+                ", alert Id="+ state.getAlertId());
             return;
         }
-        Alert alert =
-            DAOFactory.getDAOFactory().getAlertDAO().get(alertId);
-        if (state.isFixed() || alert == null) {
+
+        if (state.isFixed()) {
             // fixed so no need to schedule
             if (state.isFixed()) {
                 if (log.isInfoEnabled()) {
-                    log.info("Escalation fixed. alert=" +  alert +
+                    log.info("Escalation fixed. alert=" +  state.getAlertId() +
                              ", escalation=" +
                              escalation + ", state=" + state);
                 }
             } else {
-                logEscalation(null, alert,
+                logEscalation(null, state,
                               "Escalation stopped. Can't find alert.");
                 log.error("Stopping Escalation chain as the Alert " +
                           "was not found. escalation=" + escalation +
@@ -430,11 +618,11 @@ public class EscalationMediator extends Mediator
             //  next alert to fire.  DO NOT schedule next job.
             resetEscalationState(state);
             sdao.save(state);
-            logEscalation(null, alert,
+            logEscalation(null, state,
                           "End of escalation chain. Stop escalation.");
             if (log.isInfoEnabled()) {
-                log.info("End escalation. alert=" +  alert + ", escalation=" +
-                         escalation + ", state=" + state);
+                log.info("End escalation. alert=" +  state.getAlertId() +
+                         ", escalation=" + escalation + ", state=" + state);
             }
         } else {
             EscalationAction ea =
@@ -444,46 +632,54 @@ public class EscalationMediator extends Mediator
                                      ea.getWaitTime());
             state.setCurrentLevel(nextlevel);
             sdao.save(state);
-            logEscalation(ea.getAction(), alert,
+            logEscalation(ea.getAction(), state,
                           "Escalation scheduled to run in " +
                           ea.getWaitTime()/60000 + " minutes.");
             if (log.isDebugEnabled()) {
-                log.debug("schedule next action. alert=" +  alert +
-                          ", escalation=" + escalation + ", state=" +
-                          state + "action=" + ea);
+                log.debug("schedule next action. escalation=" + escalation +
+                          ", state=" + state + "action=" + ea);
             }
         }
     }
 
-    public void dispatchAction(Integer escalationId, Integer alertDefId,
-                               Integer alertId)
+    public void dispatchAction(EscalationState state)
     {
-        EscalationDAO dao = DAOFactory.getDAOFactory().getEscalationDAO();
         EscalationStateDAO sdao =
             DAOFactory.getDAOFactory().getEscalationStateDAO();
 
-        Alert alert =
-            DAOFactory.getDAOFactory().getAlertDAO().get(alertId);
-        Escalation escalation = dao.findById(escalationId);
-        EscalationState state = getEscalationState(escalation, alertDefId);
+        Escalation escalation = state.getEscalation();
+
         if (state == null) {
-            logEscalation(null, alert, "Escalation stopped. Can't find state.");
+            logEscalation(null, state, "Escalation stopped. Can't find state.");
             // log error and stop escalation chain
             log.error("Escalation state not found, stop chain. " +
-                "escalation=" + escalation + ", alertDefid="+ alertDefId +
-                ", alertId="+alertId);
+                "escalation=" + escalation + ", alertId=" + state.getAlertId());
             return;
         }
+
+        PersistedObject alert;
+        switch(state.getAlertType()) {
+        case EscalationState.ALERT_TYPE_CLASSIC:
+            alert = getAlert(state.getAlertId());
+            break;
+        case EscalationState.ALERT_TYPE_GROUP:
+            alert = getGalert(state.getAlertId());
+            break;
+        default:
+            log.error("alertType " + state.getAlertType() + " unknown");
+            return;
+        }
+        
         if (state.isFixed() || alert == null) {
             // fixed so stop.
             if (state.isFixed()) {
                 if (log.isInfoEnabled()) {
-                    log.info("Escalation fixed. alert=" +  alert +
+                    log.info("Escalation fixed. alert=" +  state.getAlertId() +
                              ", escalation=" +
                              escalation + ", state=" + state);
                 }
             } else {
-                logEscalation(null, alert,
+                logEscalation(null, state,
                               "Escalation stopped. Can't find alert.");
                 log.error("Stopping Escalation as the alert was not " +
                           "found. " +
@@ -501,12 +697,13 @@ public class EscalationMediator extends Mediator
             // reset the pause escalation flag to avoid wait loop.
             state.setPauseEscalation(false);
             sdao.save(state);
-            logEscalation(null, alert,
+            logEscalation(null, state,
                           "Escalation rescheduled to run in " +
                           remainder/60000 + " minutes.");
             if (log.isDebugEnabled()) {
-                log.debug("Pause for additional wait time. alert=" +  alert +
-                          ", escalation=" + escalation + ", state=" +
+                log.debug("Pause for additional wait time. alert=" +
+                          state.getAlertId() + ", escalation=" + escalation +
+                          ", state=" +
                           state);
             }
             return;
@@ -514,25 +711,20 @@ public class EscalationMediator extends Mediator
         int curlevel = state.getCurrentLevel();
         if (curlevel >= escalation.getActions().size()) {
             throw new IllegalStateException("current level out of bounds: " +
-                                            "alert="+ alert + ", escalation=" +
+                                            "alert="+ state.getAlertId() +
+                                            ", escalation=" +
                                             escalation+ ", state=" + state);
         }
 
         try {
-            dispatchAction(escalation, alert, state);
+            // XXX - Actions only know to execute alert definitions, not
+            // galert definitions
+            if (state.getAlertType() == EscalationState.ALERT_TYPE_CLASSIC) {            
+                dispatchAction(escalation, (Alert) alert, state);
+            }
 
             // schedule next action;
-            scheduleAction(escalation.getId(), alertDefId, alertId);
-        } catch (ClassNotFoundException e) {
-            throw new SystemException(e);
-        } catch (IllegalAccessException e) {
-            throw new SystemException(e);
-        } catch (InstantiationException e) {
-            throw new SystemException(e);
-        } catch (EncodingException e) {
-            throw new SystemException(e);
-        } catch (InvalidActionDataException e) {
-            throw new SystemException(e);
+            scheduleAction(state);
         } catch (ActionExecuteException e) {
             throw new SystemException(e);
         } catch (PermissionException e) {
@@ -557,10 +749,7 @@ public class EscalationMediator extends Mediator
 
     private void dispatchAction(Escalation escalation, Alert alert,
                                 EscalationState state)
-        throws ClassNotFoundException, IllegalAccessException,
-        InstantiationException, EncodingException,
-        InvalidActionDataException, ActionExecuteException,
-        PermissionException
+        throws ActionExecuteException, PermissionException
     {
         EscalationAction ea =
             escalation.getCurrentAction(state.getCurrentLevel());
@@ -571,20 +760,58 @@ public class EscalationMediator extends Mediator
                       ", escalation=" + escalation + ", state=" +
                       state + ", action="+ea);
         }
-        // prepare, instantiate,  and invoke action
-        Class ac = Class.forName(a.getClassName());
-        ActionInterface action = (ActionInterface) ac.newInstance();
-        action.init(ConfigResponse.decode(action.getConfigSchema(),
-                                          a.getConfig()));
+        executeAction(alert, a);
+    }
 
-        Collection coll = alert.getConditionLog();
-        AlertConditionLog[] logs =
-            (AlertConditionLog[]) coll.toArray(new AlertConditionLog[0]);
+    private void executeAction(Alert alert, Action act)
+        throws ActionExecuteException, PermissionException {
+        try {
+            // prepare, instantiate,  and invoke action
+            Class ac = Class.forName(act.getClassName());
+            ActionInterface action = (ActionInterface) ac.newInstance();
+            action.init(ConfigResponse.decode(action.getConfigSchema(),
+                                              act.getConfig()));
 
-        String detail = action.execute(
-            alert.getAlertDefinition(), logs, alert.getId());
+            Collection coll = alert.getConditionLog();
+            AlertConditionLog[] logs =
+                (AlertConditionLog[]) coll.toArray(new AlertConditionLog[0]);
 
-        logEscalation(ea.getAction(), alert, detail);
+            String detail = action.execute(
+                alert.getAlertDefinition(), logs, alert.getId());
+
+            AlertActionLog alog = new AlertActionLog(alert, detail, act);
+            AlertActionLogDAO dao =
+                DAOFactory.getDAOFactory().getAlertActionLogDAO();
+            dao.save(alog);
+        } catch (ClassNotFoundException e) {
+            // Can't execute if we can't lookup up the class
+            throw new ActionExecuteException(
+                "Action class not found for ID " + act.getId(), e);
+        } catch (InstantiationException e) {
+            // Can't execute if we can't instantiate the object
+            throw new ActionExecuteException(
+                "Cannot instantiate action for ID " + act.getId(), e);
+        } catch (InvalidActionDataException e) {
+            // Can't execute if we can't instantiate the object
+            throw new ActionExecuteException(
+                "Cannot initialize action for ID " + act.getId(), e);
+        } catch (IllegalAccessException e) {
+            // Can't execute if we can't access the class
+            throw new ActionExecuteException(
+                "Cannot access action for ID " + act.getId(), e);
+        } catch (EncodingException e) {
+            // Can't execute if we can't decode the config
+            throw new ActionExecuteException(
+                "Cannot decode action config for ID " + act.getId(), e);
+        } catch (InvalidOptionException e) {
+            // Can't execute if we can't decode the config
+            throw new ActionExecuteException(
+                "Action config contains invalid option for ID " +
+                act.getId(), e);
+        } catch (InvalidOptionValueException e) {
+            // Can't execute if we don't have good config, just log it
+            log.debug("Bad action config value for ID " + act.getId(), e);
+        }
     }
 
     private void resetEscalationState(EscalationState state)
@@ -594,14 +821,27 @@ public class EscalationMediator extends Mediator
         state.setActive(false);
     }
 
-    private void logEscalation(Action action,
-                               Alert alert,
+    private void logEscalation(Action action, EscalationState state,
                                String detail)
     {
-        AlertActionLog alog =
-            new AlertActionLog(alert, detail, action);
-        AlertActionLogDAO dao =
-            DAOFactory.getDAOFactory().getAlertActionLogDAO();
-        dao.save(alog);
+        switch(state.getAlertType()) {
+        case EscalationState.ALERT_TYPE_CLASSIC:
+            Alert alert = getAlert(state.getAlertId());
+            AlertActionLog alog = new AlertActionLog(alert, detail, action);
+            AlertActionLogDAO dao =
+                DAOFactory.getDAOFactory().getAlertActionLogDAO();
+            dao.save(alog);
+            break;
+        case EscalationState.ALERT_TYPE_GROUP:
+            GalertLog galert = getGalert(state.getAlertId());
+            GalertActionLog glog = new GalertActionLog(galert, detail, action);
+            GalertActionLogDAO gdao =
+                DAOFactory.getDAOFactory().getGalertActionLogDAO();
+            gdao.save(glog);
+            break;
+        default:
+            log.error("alertType " + state.getAlertType() + " unknown");
+            break;            // Unknown alert type, can't do anything
+        }
     }
 }

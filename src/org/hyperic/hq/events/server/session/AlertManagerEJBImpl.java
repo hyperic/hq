@@ -50,6 +50,7 @@ import org.hyperic.hq.events.shared.AlertActionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.events.server.session.Alert;
+import org.hyperic.hq.events.server.session.EscalationState;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -111,9 +112,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public AlertValue updateAlert(AlertValue val)
-        throws AlertCreateException
-    {
+    public Alert updateAlert(AlertValue val) throws AlertCreateException {
         Alert alert;
         
         alert = getAlertDAO().findById(val.getId());
@@ -144,7 +143,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                 DAOFactory.getDAOFactory().getDAO(log.getClass())
                     .savePersisted(log);
             }
-            return alert.getAlertValue();
+            return alert;
         } catch(PermissionException e){
             throw new AlertCreateException(e);
         }
@@ -368,13 +367,9 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * delegate to EscalationMediator inside JTA context
      * @ejb:interface-method
      */
-    public void dispatchAction(Integer escalationId, Integer alertDefId,
-                               Integer alertId)
+    public void dispatchAction(EscalationState state)
     {
-        EscalationMediator.getInstance().dispatchAction(
-            escalationId,
-            alertDefId,
-            alertId);
+        EscalationMediator.getInstance().dispatchAction(state);
     }
 
     public void ejbCreate() throws CreateException {
