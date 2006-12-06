@@ -103,24 +103,14 @@ var pageData = new Array();
 <!-- new -->
 <div id="panel3">
 <div id="panelHeader" class="accordionTabTitleBar">
-  <fmt:message key="resource.server.inventory.ServiceCountsTab"/>
+  <fmt:message key="resource.server.inventory.ServicesTab"/>
 </div>
 <div id="panelContent">
 <tiles:insert definition=".resource.server.inventory.serviceCounts">
   <tiles:put name="serviceCount" beanName="NumChildResources"/>
   <tiles:put name="serviceTypeMap" beanName="ResourceTypeMap"/>
 </tiles:insert>
-</div>
-</div>
-
-<div id="panel4">
-<div id="panelHeader" class="accordionTabTitleBar">
-  <fmt:message key="resource.server.inventory.ServicesTab"/>
-</div>
-<div id="panelContent">
 <html:form action="/resource/server/inventory/RemoveServices">
-<input type="hidden" name="rid" value="<c:out value="${Resource.id}"/>"/>
-<input type="hidden" name="type" value="<c:out value="${entityId.type}"/>"/>
 <tiles:insert definition=".resource.server.inventory.services">
   <tiles:put name="server" beanName="Resource"/>
   <tiles:put name="services" beanName="ChildResources"/>
@@ -128,11 +118,13 @@ var pageData = new Array();
   <tiles:put name="selfAction" beanName="selfAction"/>
   <tiles:put name="autoInventory" beanName="autoInventory"/>
 </tiles:insert>
+<input type=hidden name="eid" value="<c:out value="${entityId}"/>/>
+<input type="hidden" name="accord" value="2"/>
 </html:form>
 </div>
 </div>
 
-<div id="panel5">
+<div id="panel4">
 <div id="panelHeader" class="accordionTabTitleBar">
   <fmt:message key="resource.common.inventory.groups.GroupsTab"/>
 </div>
@@ -140,6 +132,7 @@ var pageData = new Array();
 <html:form action="/resource/server/inventory/RemoveGroups">
 <input type="hidden" name="rid" value="<c:out value="${Resource.id}"/>"/>
 <input type="hidden" name="type" value="<c:out value="${entityId.type}"/>"/>
+<input type="hidden" name="accord" value="3"/>
 <tiles:insert definition=".resource.common.inventory.groups">
   <tiles:put name="resource" beanName="Resource"/>
   <tiles:put name="groups" beanName="AllResGrps"/>
@@ -149,7 +142,7 @@ var pageData = new Array();
 </div>
 </div>
 
-<div id="panel6">
+<div id="panel5">
 <div id="panelHeader" class="accordionTabTitleBar">
   <fmt:message key="resource.common.inventory.configProps.ConfigurationPropertiesTab"/>
 </div>
