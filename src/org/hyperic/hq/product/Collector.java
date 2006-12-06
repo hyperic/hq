@@ -307,6 +307,10 @@ public abstract class Collector implements Runnable {
         this.result.setValue(key, val);
     }
 
+    protected void addValues(Map values) {
+        this.result.addValues(values);
+    }
+
     protected CollectorResult getResult() {
         return this.result;
     }
