@@ -561,12 +561,19 @@ public class AI2AppdefDiff {
         if ( aiPlatform.getName() == null ) {
             aiPlatform.setName(appdefPlatform.getName());
         }
-        
-        String description = appdefPlatform.getDescription();
-        if ((description == null) || (description.trim().length() == 0)) {
+
+        String aiDescr = aiPlatform.getDescription();
+        String appdefDescr = appdefPlatform.getDescription();
+
+        if ((appdefDescr == null) ||
+            (appdefDescr.trim().length() == 0) ||
+            //e.g. may have vmguest info appended
+            ((aiDescr != null) && aiDescr.startsWith(appdefDescr)))
+        {
             if (aiPlatform.getDescription() != null) {
                 aiPlatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
-                addDiff(aiPlatform, AIQueueConstants.Q_PLATFORM_PROPERTIES_CHANGED);
+                addDiff(aiPlatform,
+                        AIQueueConstants.Q_PLATFORM_PROPERTIES_CHANGED);
                 log.info("Description changed for " + aiPlatform.getFqdn() +
                          " from: '" +
                          appdefPlatform.getDescription() +
@@ -576,7 +583,7 @@ public class AI2AppdefDiff {
         }
         else {
             //don't overwrite existing appdef description
-            aiPlatform.setDescription(description);
+            aiPlatform.setDescription(appdefDescr);
         }
     }
 
