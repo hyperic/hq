@@ -83,13 +83,60 @@ var pageData = new Array();
 </div>
 <div id="panel3">
 <div id="panelHeader" class="accordionTabTitleBar">
-  <fmt:message key="resource.platform.inventory.ServerCountsTab"/>
+  <fmt:message key="resource.platform.inventory.servers.ServersTab"/>
 </div>
 <div id="panelContent">
 <tiles:insert definition=".resource.platform.inventory.serverCounts">
   <tiles:put name="serverCount" beanName="ChildResources" beanProperty="totalSize"/>
   <tiles:put name="serverTypeMap" beanName="ResourceTypeMap"/>
 </tiles:insert>
+
+<html:form action="/resource/platform/inventory/RemoveServers">
+
+<c:set var="svrAction" value="${selfAction}"/>
+<c:if test="${not empty param.fs}">
+  <c:set var="svrAction" value="${svrAction}&fs=${param.fs}"/>
+</c:if>
+<c:if test="${not empty param.ps}">
+  <c:set var="svrAction" value="${svrAction}&ps=${param.ps}"/>
+</c:if>
+<c:if test="${not empty param.psg}">
+  <c:set var="svrAction" value="${svrAction}&psg=${param.psg}"/>
+</c:if>
+<c:if test="${not empty param.pn}">
+  <c:set var="svrAction" value="${svrAction}&pn=${param.pn}"/>
+</c:if>
+<c:if test="${not empty param.png}">
+  <c:set var="svrAction" value="${svrAction}&png=${param.png}"/>
+</c:if>
+<c:if test="${not empty param.so}">
+  <c:set var="svrAction" value="${svrAction}&so=${param.so}"/>
+</c:if>
+<c:if test="${not empty param.sog}">
+  <c:set var="svrAction" value="${svrAction}&sog=${param.sog}"/>
+</c:if>
+<c:if test="${not empty param.sc}">
+  <c:set var="svrAction" value="${svrAction}&sc=${param.sc}"/>
+</c:if>
+<c:if test="${not empty param.scg}">
+  <c:set var="svrAction" value="${svrAction}&scg=${param.scg}"/>
+</c:if>
+<c:if test="${not empty param.resourceType}">
+  <c:set var="svrAction" value="${svrAction}&resourceType=${param.resourceType}"/>
+</c:if>
+
+<tiles:insert definition=".resource.platform.inventory.servers">
+  <tiles:put name="platform" beanName="Resource"/>
+  <tiles:put name="servers" beanName="ChildResources"/>
+  <tiles:put name="serverCount" beanName="ChildResources" beanProperty="totalSize"/>
+  <tiles:put name="selfAction" beanName="svrAction"/>
+</tiles:insert>
+
+<html:hidden property="rid"/>
+<html:hidden property="type"/>
+<input type="hidden" name="accord" value="2"/>
+</html:form>
+
 </div>
 </div>
 <c:set var="svcAction" value="${selfAction}"/>
@@ -137,58 +184,6 @@ var pageData = new Array();
 </div>
 <div id="panel5">
 <div id="panelHeader" class="accordionTabTitleBar">
-  <fmt:message key="resource.platform.inventory.servers.ServersTab"/>
-</div>
-<div id="panelContent">
-<html:form action="/resource/platform/inventory/RemoveServers">
-
-<c:set var="svrAction" value="${selfAction}"/>
-<c:if test="${not empty param.fs}">
-  <c:set var="svrAction" value="${svrAction}&fs=${param.fs}"/>
-</c:if>
-<c:if test="${not empty param.ps}">
-  <c:set var="svrAction" value="${svrAction}&ps=${param.ps}"/>
-</c:if>
-<c:if test="${not empty param.psg}">
-  <c:set var="svrAction" value="${svrAction}&psg=${param.psg}"/>
-</c:if>
-<c:if test="${not empty param.pn}">
-  <c:set var="svrAction" value="${svrAction}&pn=${param.pn}"/>
-</c:if>
-<c:if test="${not empty param.png}">
-  <c:set var="svrAction" value="${svrAction}&png=${param.png}"/>
-</c:if>
-<c:if test="${not empty param.so}">
-  <c:set var="svrAction" value="${svrAction}&so=${param.so}"/>
-</c:if>
-<c:if test="${not empty param.sog}">
-  <c:set var="svrAction" value="${svrAction}&sog=${param.sog}"/>
-</c:if>
-<c:if test="${not empty param.sc}">
-  <c:set var="svrAction" value="${svrAction}&sc=${param.sc}"/>
-</c:if>
-<c:if test="${not empty param.scg}">
-  <c:set var="svrAction" value="${svrAction}&scg=${param.scg}"/>
-</c:if>
-<c:if test="${not empty param.resourceType}">
-  <c:set var="svrAction" value="${svrAction}&resourceType=${param.resourceType}"/>
-</c:if>
-
-<tiles:insert definition=".resource.platform.inventory.servers">
-  <tiles:put name="platform" beanName="Resource"/>
-  <tiles:put name="servers" beanName="ChildResources"/>
-  <tiles:put name="serverCount" beanName="ChildResources" beanProperty="totalSize"/>
-  <tiles:put name="selfAction" beanName="svrAction"/>
-</tiles:insert>
-
-<html:hidden property="rid"/>
-<html:hidden property="type"/>
-</html:form>
-
-</div>
-</div>
-<div id="panel6">
-<div id="panelHeader" class="accordionTabTitleBar">
   <fmt:message key="resource.common.inventory.groups.GroupsTab"/>
 </div>
 <div id="panelContent">
@@ -208,7 +203,7 @@ var pageData = new Array();
 </div>
 </div>
 
-<div id="panel7">
+<div id="panel6">
 <div id="panelHeader" class="accordionTabTitleBar">
   <fmt:message key="resource.common.inventory.configProps.ConfigurationPropertiesTab"/>
 </div>
