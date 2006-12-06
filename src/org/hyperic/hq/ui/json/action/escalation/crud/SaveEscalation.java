@@ -15,11 +15,7 @@ import java.rmi.RemoteException;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -27,22 +23,22 @@ import java.util.StringTokenizer;
  */
 public class SaveEscalation extends BaseAction
 {
-    private static String ID_PREFIX = "pid_";
-    private static String VERS_PREFIX = "pversion_";
+    private static String ID_PREFIX = "pid_row";
+    private static String VERS_PREFIX = "pversion_row";
     // action type
-    private static String ACTION_PREFIX = "action_";
+    private static String ACTION_PREFIX = "action_row";
 
     // email action parameter
-    private static String WHO_PREFIX = "who_";
-    private static String USER_PREFIX = "users_";
+    private static String WHO_PREFIX = "who_row";
+    private static String USER_PREFIX = "users_row";
 
     // syslog action parameter
-    private static String META_PREFIX = "meta_";
-    private static String PRODUCT_PREFIX = "product_";
-    private static String VERSION_PREFIX = "version_";
+    private static String META_PREFIX = "meta_row";
+    private static String PRODUCT_PREFIX = "product_row";
+    private static String VERSION_PREFIX = "version_row";
 
     // action waittime
-    private static String WAITTIME_PREFIX = "waittime_";
+    private static String WAITTIME_PREFIX = "time_row";
 
     // action list order
     private static String ORDER = "order";
@@ -54,7 +50,7 @@ public class SaveEscalation extends BaseAction
 
     private static String ID = "pid";
     private static String VERSION = "pversion";
-    private static String NAME = "pname";
+    private static String NAME = "escName";
     private static String PUPDATE = "pupdate";
 
     public void execute(JsonActionContext context)
@@ -65,6 +61,11 @@ public class SaveEscalation extends BaseAction
     {
         EscalationWebMediator wmed = EscalationWebMediator.getInstance();
         List actions = parseActions(context);
+
+        Map map = context.getParameterMap();
+        boolean update = false;
+//            Boolean.valueOf(
+//                ((String[])map.get(PUPDATE))[0]).booleanValue();
 
         JSONArray jarr = new JSONArray();
         for (Iterator i=actions.iterator(); i.hasNext();) {
@@ -78,7 +79,7 @@ public class SaveEscalation extends BaseAction
                 JSONObject action = new JSONObject()
                     .put("config", config)
                     .put("className", "EmailAction");
-                if (email.id > 0) {
+                if (update && email.id > 0) {
                     action.put("id", email.id)
                         .put("_version_", email._version_);
                 }
@@ -98,7 +99,7 @@ public class SaveEscalation extends BaseAction
                 JSONObject action = new JSONObject()
                     .put("config", config)
                     .put("className", "SyslogAction");
-                if (slog.id > 0) {
+                if (update && slog.id > 0) {
                     action.put("id", slog.id)
                         .put("_version_", slog._version_);
                 }
@@ -110,22 +111,28 @@ public class SaveEscalation extends BaseAction
                 jarr.put(escalationAction);
             }
         }
-        Map map = context.getParameterMap();
-        JSONObject escalation = new JSONObject()
+        JSONObject json = new JSONObject()
+            .put("name", ((String[])map.get(NAME))[0])
             .put("allowPause",
-                 Boolean.valueOf((String)map.get(ALLOW_PAUSE)).booleanValue())
+                 Boolean.valueOf(
+                     ((String[])map.get(ALLOW_PAUSE))[0]).booleanValue())
             .put("notifyAll",
-                 Boolean.valueOf((String)map.get(NOTIFICATION)).booleanValue())
+                 Boolean.valueOf(
+                     ((String[])map.get(NOTIFICATION))[0]).booleanValue())
             .put("maxWaitTime",
-                 Long.valueOf((String)map.get(MAX_WAITTIME)).longValue())
+                 Long.valueOf(
+                     ((String[])map.get(MAX_WAITTIME))[0]).longValue())
             .put("actions", jarr);
 
-        int id = Integer.valueOf((String)map.get(ID)).intValue();
-        long version = Long.valueOf((String)map.get(VERSION)).longValue();
-        if (id > 0) {
-            escalation.put("id", id)
+        int id = Integer.valueOf(
+            ((String[])map.get(ID))[0]).intValue();
+        long version = Long.valueOf(
+            ((String[])map.get(VERSION))[0]).longValue();
+        if (update && id > 0) {
+            json.put("id", id)
                 .put("_version_", version);
         }
+        JSONObject escalation = new JSONObject().put("escalation", json);
         wmed.saveEscalation(context, context.getSessionId(), escalation);
     }
 
@@ -177,7 +184,7 @@ public class SaveEscalation extends BaseAction
                 key.startsWith(VERSION_PREFIX) ||
                 key.startsWith(WAITTIME_PREFIX)
                 ) {
-                String rowString = key.substring(key.indexOf("_"));
+                String rowString = key.substring(key.indexOf("_row")+4);
                 Integer row = Integer.valueOf(rowString);
                 List content = (List)rowMap.get(row);
                 if (content == null) {
@@ -190,7 +197,8 @@ public class SaveEscalation extends BaseAction
         return rowMap;
     }
 
-    private static class EmailActionData {
+    private static class EmailActionData
+    {
         int id;
         long _version_;
         int listType;
@@ -200,8 +208,10 @@ public class SaveEscalation extends BaseAction
         EmailActionData(String[] ida, String[] vers, String[] type,
                         String[] narr, String[] time)
         {
-            id = Integer.valueOf(ida[0]).intValue();
-            _version_ = Long.valueOf(vers[0]).longValue();
+            if (ida != null) {
+                id = Integer.valueOf(ida[0]).intValue();
+                _version_ = Long.valueOf(vers[0]).longValue();
+            }
             if ("users".equalsIgnoreCase(type[0])) {
                 listType = EmailActionConfig.TYPE_USERS;
             } else if ("roles".equalsIgnoreCase(type[0])) {
@@ -211,21 +221,24 @@ public class SaveEscalation extends BaseAction
             }
 
             // name list
-            StringTokenizer tokens = new StringTokenizer(narr[0], " ,");
-            StringBuffer buf = new StringBuffer();
-            while(tokens.hasMoreTokens()) {
-                if (buf.length() > 0) {
-                    buf.append(",");
+            if (narr != null) {
+                StringTokenizer tokens = new StringTokenizer(narr[0], " ,");
+                StringBuffer buf = new StringBuffer();
+                while(tokens.hasMoreTokens()) {
+                    if (buf.length() > 0) {
+                        buf.append(",");
+                    }
+                    buf.append(tokens.nextToken());
                 }
-                buf.append(tokens.nextToken());
+                names = buf.toString();
             }
-            names = buf.toString();
 
             waitTime = Long.valueOf(time[0]).longValue();
         }
     }
 
-    private static class SyslogActionData {
+    private static class SyslogActionData
+    {
         int id;
         long _version_;
         String meta;
@@ -235,9 +248,12 @@ public class SaveEscalation extends BaseAction
 
         SyslogActionData(String[] ida, String[] vs, String[] met,
                          String[] prod, String[] vers,
-                         String[] time) {
-            id = Integer.valueOf(ida[0]).intValue();
-            _version_ = Long.valueOf(vs[0]).longValue();
+                         String[] time)
+        {
+            if (ida != null) {
+                id = Integer.valueOf(ida[0]).intValue();
+                _version_ = Long.valueOf(vs[0]).longValue();
+            }
             meta = met[0];
             product = prod[0];
             version = vers[0];
