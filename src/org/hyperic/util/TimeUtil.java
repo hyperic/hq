@@ -36,7 +36,8 @@ import org.hyperic.util.units.UnitNumber;
 
 public class TimeUtil
 {
-    public static final String DATE_FORMAT    = "MM-dd-yy-HH-mm-ss";
+    public static final String DATE_FORMAT         = "MM-dd-yy-HH-mm-ss";
+    public static final String DISPLAY_DATE_FORMAT = "MM/dd/yyyy hh:mm:ss aaa";
     
     public static final long MILLIS_IN_MINUTE = 1000 * 60;
     public static final long MILLIS_IN_HOUR   = MILLIS_IN_MINUTE * 60;
