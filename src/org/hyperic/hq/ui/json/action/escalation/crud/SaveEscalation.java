@@ -50,6 +50,7 @@ public class SaveEscalation extends BaseAction
     private static String MAX_WAITTIME = "maxwaittime";
 
     private static String ALERTDEF_ID = "ad";
+    private static String ALERTDEF_TYPE = "adType";
     private static String ID = "pid";
     private static String VERSION = "pversion";
     private static String NAME = "escName";
@@ -121,13 +122,11 @@ public class SaveEscalation extends BaseAction
         }
         Integer alertDefId = Integer.valueOf(
             ((String[])map.get(ALERTDEF_ID))[0]);
+        int alertDefType = Integer.valueOf(
+            ((String[])map.get(ALERTDEF_TYPE))[0]).intValue();
         JSONObject escalation = new JSONObject().put("escalation", json);
         wmed.saveEscalation(context, context.getSessionId(), alertDefId,
-                            EscalationState.ALERT_TYPE_GROUP,
-                            escalation);
-//        wmed.saveEscalation(context, context.getSessionId(), alertDefId,
-//                            EscalationState.ALERT_TYPE_CLASSIC,
-//                            escalation);
+                            alertDefType, escalation);
         context.getSession().setAttribute("escalationName",
                                           ((String[])map.get(NAME))[0]);
     }

@@ -209,7 +209,9 @@ public class EscalationCactusTest extends HQCactusBase
         addRequestParameter("maxwaittime", new String[]{"300000"});
         addRequestParameter("escName", new String[]{"My escalation" +
                                                     (new Random()).nextInt(10000)});
+
         addRequestParameter("ad", new String[]{"10001"});
+        addRequestParameter("adType", new String[]{"0"});
     }
 
     private void removeEscalation(int id)
