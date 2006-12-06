@@ -108,7 +108,7 @@
 		td3.setAttribute('width', '50%');
 		td3.appendChild(anchor);
         anchor.setAttribute('href', "javascript:configure('" + liID + "')");
-		anchor.appendChild(document.createTextNode('Configure'));       
+		anchor.appendChild(document.createTextNode('Configure...'));       
 		
 		escTable.appendChild(escTr2);
 		escTr2.appendChild(td4);
@@ -118,10 +118,12 @@
 		td4.appendChild(select2);
 		select2.setAttribute('id', 'waittime');
 		select2.name = "waittime_" + liID;
-		addOption(select2, '20', '20 minutes');
-		addOption(select2, '10', '10 minutes');
-		addOption(select2, '5', '5 minutes');
-	}
+		addOption(select2, '0', '<fmt:message key="common.label.None"/>');
+		addOption(select2, '300000', '5 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>');
+		addOption(select2, '600000', '10 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/> ');
+		addOption(select2, '1200000', '20 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/> ');
+		addOption(select2, '1800000', '30 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/> ');
+    }
 	
 	function removeRow(obj) {
 		var oLi = obj.parentNode.parentNode;
@@ -382,14 +384,20 @@ sections = ['section'];
                   </tr>
                   <tr>
                     <td colspan="3" style="padding-top:5px;padding-bottom:5px;">Then wait <select name="time_row_0">
-                      <option value="10">
-                        5 minutes
+                      <option value="0">
+                        <fmt:message key="common.label.None"/>
                       </option>
-                      <option value="10">
-                        10 minutes
+                      <option value="300000">
+                      5 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>
                       </option>
-                      <option selected value="20">
-                        20 minutes
+                      <option value="600000">
+                      10 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/> 
+                      </option>
+                      <option value="1200000">
+                      20 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>
+                      </option>
+                      <option value="1800000">
+                      30 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>
                       </option>
                     </select></td>
                   </tr>
@@ -434,16 +442,16 @@ sections = ['section'];
         </td>
       </tr>
       <tr>
-        <td  class="tableRowHeader">If the alert is fixed:<br></td>
+        <td  class="tableRowHeader">If the alert state has changed:<br></td>
       </tr>
       <tr class="ListRow">
         <td style="padding-left:15px;padding-bottom:10px;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
-              <td style="padding-top:2px;padding-bottom:2px;"><input type=radio name="notification" value="0"/> Notify only previously notified users of the fix</td>
+              <td style="padding-top:2px;padding-bottom:2px;"><input type=radio name="notification" value="0"/> Notify previously notified users of the change</td>
             </tr>
             <tr>
-              <td style="padding-top:2px;padding-bottom:2px;"><input type=radio name="notification" value="1"/> Notify entire escalation chain of the fix</td>
+              <td style="padding-top:2px;padding-bottom:2px;"><input type=radio name="notification" value="1"/> Notify entire escalation chain of the change</td>
             </tr>
           </table>
         </td>
