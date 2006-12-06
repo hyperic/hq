@@ -198,10 +198,12 @@ public class HibernateDAOFactory extends DAOFactory {
         addDAO(new ServerDAO(this));
         addDAO(new ServerTypeDAO(this));
         addDAO(new ServiceDAO(this));
+        addDAO(new ServiceClusterDAO(this));
         addDAO(new ServiceTypeDAO(this));
         addDAO(new VirtualDAO(this));
         addDAO(new GalertDefDAO(this));
         addDAO(new GtriggerTypeInfoDAO(this));
+        addDAO(new GalertActionLogDAO(this));
     }
 
     public ActionDAO getActionDAO() {
