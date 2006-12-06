@@ -144,7 +144,7 @@
 
 	function showResponse(originalRequest) {
 		
-		$('example').innerHTML = "<span style=font-weight:bold;>Escalation Saved</span>";
+		$('example').innerHTML = "<span style=font-weight:bold;>Escalation Saved: " + Form.serialize('EscalationForm') + "</span>";
 	}
 
 	function initEsc () {
@@ -189,7 +189,7 @@
 	function sendEscForm() {
 		var adId = $('ad').value;
 		var escFormSerial = Form.serialize('EscalationForm');
-		var url = '/alerts/saveEscalation';
+		var url = '/escalation/SaveEscalation';
 		var pars = "escForm=" + escFormSerial + "&ad=" + adId;
 		new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse} );
 	}
@@ -316,14 +316,11 @@ sections = ['section'];
   <html:hidden property="escId"/>
 </html:form>
  
-<html:form action="/alerts/SaveEscalation" styleId="EscalationForm">
+<form action="<html:rewrite action="/escalation/SaveEscalation"/>" name="EscalationForm" id="EscalationForm">
 <input type="hidden" value="0" id="pid">
 <input type="hidden" value="0" id="pversion">
 
 <input type="hidden" value="0" id="if the escalation is new or not">
-
-
-
 
   <input type="hidden" value="0" id="theValue">
   <c:choose>
@@ -334,18 +331,18 @@ sections = ['section'];
       <html:hidden property="aetid" value="${ResourceType.appdefTypeKey}"/>
     </c:otherwise>
   </c:choose>
-  <html:hidden styleId="ad" property="ad" value="${alertDef.id}"/>
+  <input type=hidden id="ad" name="ad" value="<c:out value="${alertDef.id}"/>"/>
   <table width="100%" cellpadding="3" cellspacing="0" border="0">
     <tbody>
       <tr class="tableRowHeader">
         <td align="right">
           Escalation Scheme:
-          <html:select styleId="escId" property="escId" onchange="schemeChange(this)">
-            <html:option value="" key="common.label.CreateNew"/>
-          </html:select>
+          <select id="escId" name="escId" onchange="schemeChange(this)">
+            <option value=""><fmt:message key="common.label.CreateNew"/></option>
+          </select>
           
           <fmt:message key="common.label.Name"/>
-          <html:text size="25" property="escName" styleId="escName"/>
+          <input type=text size="25" name="escName" id="escName"/>
         </td>
       </tr>
         <tr class="tableRowAction">
@@ -414,7 +411,7 @@ sections = ['section'];
         <td style="padding-left:15px;padding-bottom:10px;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
-              <td style="padding-top:2px;padding-bottom:2px;"><html:radio property="allowPause" value="true"/> Allow user to pause escalation for
+              <td style="padding-top:2px;padding-bottom:2px;"><input type=radio name="allowPause" value="true"/> Allow user to pause escalation for
               <select id="pauseRange" name="pauseRange">
                 <option value="300000">
                   5 minutes
@@ -431,7 +428,7 @@ sections = ['section'];
               </select></td>
             </tr>
             <tr>
-              <td style="padding-top:2px;padding-bottom:2px;"><html:radio property="allowPause" value="false"/> Continue escalation without pausing</td>
+              <td style="padding-top:2px;padding-bottom:2px;"><input type=radio name="allowPause" value="false"/> Continue escalation without pausing</td>
             </tr>
           </table>
         </td>
@@ -443,10 +440,10 @@ sections = ['section'];
         <td style="padding-left:15px;padding-bottom:10px;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
-              <td style="padding-top:2px;padding-bottom:2px;"><html:radio property="notification" value="0"/> Notify only previously notified users of the fix</td>
+              <td style="padding-top:2px;padding-bottom:2px;"><input type=radio name="notification" value="0"/> Notify only previously notified users of the fix</td>
             </tr>
             <tr>
-              <td style="padding-top:2px;padding-bottom:2px;"><html:radio property="notification" value="1"/> Notify entire escalation chain of the fix</td>
+              <td style="padding-top:2px;padding-bottom:2px;"><input type=radio name="notification" value="1"/> Notify entire escalation chain of the fix</td>
             </tr>
           </table>
         </td>
@@ -458,7 +455,7 @@ sections = ['section'];
  <input type=button value="Submit" onclick="sendEscForm();" id="submit"></input>
 
 
-</html:form>
+</form>
 
 <div id="example" style="padding:10px;"></div>
 
