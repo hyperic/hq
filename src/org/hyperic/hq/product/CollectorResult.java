@@ -111,6 +111,10 @@ public class CollectorResult {
         return this.values;
     }
 
+    public void addValues(Map values) {
+        this.values.putAll(values);
+    }
+
     public void setValue(String key, double val) {
         this.values.put(key, new Double(val));
     }
