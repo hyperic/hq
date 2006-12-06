@@ -99,10 +99,10 @@
 		select1.setAttribute('id', 'who' + liID);
 		select1.name = "who" + liID;
         <c:if test="${not empty AvailableRoles}">
-		addOption(select1, 'Roles', 'Roles');
+		addOption(select1, 'Roles', '<fmt:message key="monitoring.events.MiniTabs.Roles"/>')
         </c:if>
-		addOption(select1, 'Users', 'Users');
-		addOption(select1, 'Others', 'Others');
+		addOption(select1, 'Users', '<fmt:message key="monitoring.events.MiniTabs.CAMusers"/>');
+		addOption(select1, 'Others', '<fmt:message key="monitoring.events.MiniTabs.OR"/>');
 		
 		escTr1.appendChild(td3);
 		td3.setAttribute('width', '50%');
@@ -338,7 +338,7 @@ sections = ['section'];
         <td align="right">
           Escalation Scheme:
           <select id="escId" name="escId" onchange="schemeChange(this)">
-            <option value=""><fmt:message key="common.label.CreateNew"/></option>
+            <option value="0"><fmt:message key="common.label.CreateNew"/></option>
           </select>
           
           <fmt:message key="common.label.Name"/>
@@ -348,13 +348,13 @@ sections = ['section'];
         <tr class="tableRowAction">
         <td id="section" width="100%">
             <ul id="testlist">
-              <li id="testlist_row_1" class="lineitem">
+              <li id="row_0" class="lineitem">
                 <div id="remove" class="remove" style="padding-top:10px;">
                   <a href="#" style="text-decoration:none;"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"/></a>
                 </div>
                 <table cellpadding="3" cellspacing="0" border="0" width="100%">
                   <tr>
-                    <td width="25%"><select name="action">
+                    <td width="25%"><select name="action_row_0">
                       <option selected value="Email">
                         Email
                       </option>
@@ -365,23 +365,23 @@ sections = ['section'];
                         SMS
                       </option>
                     </select></td>
-                    <td width="25%" style="padding-right:20px;"><select id="who10001" name="who10001">
+                    <td width="25%" style="padding-right:20px;"><select id="who_row_0" name="who_row_0">
                       <c:if test="${not empty AvailableRoles}">
                       <option value="Roles">
-                        Roles
+                        <fmt:message key="monitoring.events.MiniTabs.Roles"/>
                       </option>
                       </c:if>
                       <option value="Users">
-                        Users
+                        <fmt:message key="monitoring.events.MiniTabs.CAMusers"/>
                       </option>
                       <option value="Others">
-                        Others
+                        <fmt:message key="monitoring.events.MiniTabs.OR"/>
                       </option>
                     </select></td>
-                    <td width="50%"><a href="javascript:configure(10001)">Configure...</a></td>
+                    <td width="50%"><a href="javascript:configure('_row_0')">Configure...</a></td>
                   </tr>
                   <tr>
-                    <td colspan="3" style="padding-top:5px;padding-bottom:5px;">Then wait <select name="time">
+                    <td colspan="3" style="padding-top:5px;padding-bottom:5px;">Then wait <select name="time_row_0">
                       <option value="10">
                         5 minutes
                       </option>
