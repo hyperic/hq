@@ -1,5 +1,7 @@
 package org.hyperic.hq.bizapp.server.session;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -12,6 +14,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -25,15 +29,20 @@ import org.hyperic.hq.galerts.server.session.ExecutionStrategyType;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfo;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertDefPartition;
+import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.hq.galerts.server.session.GtriggerType;
 import org.hyperic.hq.galerts.server.session.GtriggerTypeInfo;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
 import org.hyperic.hq.galerts.shared.GalertManagerUtil;
 import org.hyperic.hq.galerts.shared.GtriggerManagerLocal;
 import org.hyperic.hq.galerts.shared.GtriggerManagerUtil;
+import org.hyperic.util.TimeUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 /** 
@@ -231,6 +240,51 @@ public class GalertBossEJBImpl
         _galertMan.update(def, escalation);
     }
 
+    /**
+     * retrieve all escalation policy names as a Array of JSONObject.
+     *
+     * Escalation json finders begin with json* to be consistent with
+     * DAO finder convention
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public JSONArray findAlertLogs(int sessionId, Integer gid, long past)
+        throws JSONException, SessionTimeoutException, SessionNotFoundException,
+        PermissionException
+    {
+        AuthzSubjectValue subj = _sessMan.getSubject(sessionId);
+
+        ResourceGroup g;
+        try {
+            g = ResourceGroupManagerUtil.getLocalHome().create()
+                .findResourceGroupById(subj, gid);
+        } catch (CreateException e) {
+            throw new SystemException(e);
+        } catch (NamingException e) {
+            throw new SystemException(e);
+        }
+        
+        List alertLogs = _galertMan.findAlertLogsByTimeWindow(g, past);
+
+        JSONArray jarr = new JSONArray();
+        for (Iterator i = alertLogs.iterator(); i.hasNext(); ) {
+            GalertLog log = (GalertLog)i.next();
+            
+            // Format the alertTime
+            SimpleDateFormat df =
+                new SimpleDateFormat(TimeUtil.DISPLAY_DATE_FORMAT);
+            String date = df.format(new Date(log.getTimestamp()));
+            
+            jarr.put(new JSONObject()
+                .put("id", log.getId())
+                .put("time", date)
+                .put("name", log.getAlertDef().getName())
+                .put("reason", log.getExecutionReason().getShortReason()));
+        }
+        return jarr;
+    }
+    
     /**
     * @ejb:create-method
     */

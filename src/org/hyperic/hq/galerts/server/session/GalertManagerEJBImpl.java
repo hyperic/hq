@@ -165,6 +165,13 @@ public class GalertManagerEJBImpl
     /**
      * @ejb:interface-method  
      */
+    public List findAlertLogsByTimeWindow(ResourceGroup group, long past) {
+        return _logDAO.findByTimeWindow(group, past, true);
+    }
+
+    /**
+     * @ejb:interface-method  
+     */
     public void deleteAlertLog(GalertLog log) {
         _logDAO.remove(log);
     }
