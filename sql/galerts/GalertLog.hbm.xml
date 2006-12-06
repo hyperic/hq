@@ -40,5 +40,13 @@
     <property name="partitionEnum">
       <column name="PARTITION" not-null="true"/>
     </property>    
+
+    <bag name="gactionLogBag" table="EAM_ALERT_ACTION_LOG"
+         cascade="save-update,delete,evict,persist,merge,all-delete-orphan"
+         inverse="true">
+      <key column="GALERT_ID" />
+      <one-to-many class="GalertActionLog" />
+    </bag>
+
   </class>
 </hibernate-mapping>

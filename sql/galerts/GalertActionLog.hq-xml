@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+      "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="org.hyperic.hq.galerts.server.session">
+
+  <class name="GalertActionLog" table="EAM_ALERT_ACTION_LOG">
+    <id name="id" type="integer">
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_ALERT_ACTION_LOG_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <property name="detail" type="string">
+      <column name="DETAIL" not-null="true" length="500" />
+    </property>
+
+    <many-to-one name="galertLog" class="GalertLog">
+      <column name="GALERT_ID" index="GALERT_ACTION_LOG_IDX" />
+    </many-to-one>
+
+    <many-to-one name="action" class="org.hyperic.hq.events.server.session.Action">
+      <column name="ACTION_ID" />
+    </many-to-one>
+  </class>
+
+</hibernate-mapping>
+
