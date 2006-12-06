@@ -56,14 +56,16 @@ public class EscalationStateDAO extends HibernateDAO
         remove((EscalationState)entity);
     }
 
-    public EscalationState getEscalationState(Escalation e, Integer alertDefId)
+    public EscalationState getEscalationState(Escalation e, Integer alertDefId,
+                                              int alertType)
     {
         String sql = "from EscalationState where escalation=? and " +
-                     "alertDefinitionId=?";
+                     "alertDefinitionId=? and alertType=?";
         EscalationState state =
             (EscalationState)getSession().createQuery(sql)
                 .setEntity(0, e)
                 .setInteger(1, alertDefId.intValue())
+                .setInteger(2, alertType)
                 .uniqueResult();
         return state;
     }
@@ -74,13 +76,6 @@ public class EscalationStateDAO extends HibernateDAO
         return getSession().createQuery(sql)
             .setEntity(0, e)
             .executeUpdate();
-    }
-
-    public void clearActiveEscalation(Escalation e, Integer alertDefId)
-    {
-        EscalationState state = getEscalationState(e, alertDefId);
-        state.setActive(false);
-        save(state);
     }
 
     public List findScheduledEscalationState()
