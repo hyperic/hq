@@ -106,23 +106,10 @@
 </tiles:insert>
 </div>
 </div>
-<div id="panel2">
-<div id="panelHeader" class="accordionTabTitleBar">
-<!--  TYPE AND HOST PROPERTIES TITLE -->
-  <fmt:message key="resource.group.inventory.ResourceCountsTab"/>
-</div>
-<div id="panelContent">
-<!-- RESOURCE COUNTS SECTION -->
-<tiles:insert page="/resource/group/inventory/ResourceCounts.jsp">
-    <tiles:put name="resourceCount" beanName="NumChildResources" />
-    <tiles:put name="resourceTypeMap" beanName="ResourceTypeMap"/>
-</tiles:insert>
-</div>
-</div>
 
 <c:if test="${not empty Applications}">
 <!-- LIST APPLICATIONS SECTION -->
-<div id="panel3">
+<div id="panel2">
 <div id="panelHeader" class="accordionTabTitleBar">
   <fmt:message key="resource.service.inventory.ApplicationsTab"/>
 </div>
@@ -137,7 +124,7 @@
 </c:if>
 
 <!-- LIST RESOURCES SECTION -->
-<div id="panel4">
+<div id="panel3">
 <div id="panelHeader" class="accordionTabTitleBar">
 <!--  RESOURCES, COMPATIBLE TITLE -->
 <fmt:message key="resource.group.inventory.ResourcesTab"/>
@@ -163,6 +150,10 @@
 <!--  /  -->
 </div>
 <div id="panelContent">
+<tiles:insert page="/resource/group/inventory/ResourceCounts.jsp">
+    <tiles:put name="resourceCount" beanName="NumChildResources" />
+    <tiles:put name="resourceTypeMap" beanName="ResourceTypeMap"/>
+</tiles:insert>
 <tiles:insert page="/resource/group/inventory/ListResources.jsp"/>
 </div>
 </div>
