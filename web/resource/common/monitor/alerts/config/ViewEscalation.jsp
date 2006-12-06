@@ -83,7 +83,7 @@
         
 		escLi.appendChild(escTable);
 		escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
-		escTable.setAttribute('border', '1');
+		escTable.setAttribute('border', '0');
 		
 		escTable.appendChild(escTr1);
 		escTr1.appendChild(td1);
