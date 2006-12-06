@@ -90,7 +90,7 @@
 		select3.setAttribute('id', 'Email_' + liID);
 		select3.name = "Email_" + liID;
 		addOption(select3, 'Email', 'Email');
-       	addOption(select3, 'Syslog', 'Sys Log');
+       	addOption(select3, 'Syslog', 'Syslog');
            
 		escTr1.appendChild(td2);
 		td2.setAttribute('width', '25%');
@@ -361,11 +361,8 @@ sections = ['section'];
                       <option selected value="Email">
                         Email
                       </option>
-                      <option value="SMTP">
-                        SMTP trap
-                      </option>
-                      <option value="SMS">
-                        SMS
+                      <option value="Syslog">
+                        Syslog
                       </option>
                     </select></td>
                     <td width="25%" style="padding-right:20px;"><select id="who_row_0" name="who_row0">
@@ -421,7 +418,7 @@ sections = ['section'];
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
               <td style="padding-top:2px;padding-bottom:2px;"><input type=radio name="allowPause" value="true"/> Allow user to pause escalation for
-              <select id="pauseRange" name="pauseRange">
+              <select id="pauseRange" name="maxWaitTime">
                 <option value="300000">
                   5 minutes
                 </option>
