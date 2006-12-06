@@ -30,6 +30,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
+<script language="JavaScript" src="<html:rewrite page="/js/scriptaculous.js"/>" type="text/javascript"></script>
+<script src="<html:rewrite page="/js/dashboard.js"/>" type="text/javascript"></script>
+<script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
 
 <script type="text/javascript">
     function getGroupOrder() {
@@ -61,6 +64,7 @@
 		var td4 = document.createElement('td');
 		var select1 = document.createElement("select");
 		var select2 = document.createElement("select");
+		var select3 = document.createElement("select");
 		var anchor = document.createElement("a");
 		
 		ni.appendChild(escLi);
@@ -69,10 +73,10 @@
         
         escLi.appendChild(remDiv);
         remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
+        remDiv.style.paddingTop = "10px;"
         
-        
-        //remDiv.innerHTML ="<a href=\"javascript:;\" onclick=\"removeEvent(\'" + escLi + "\');Behaviour.apply();\"><img src=\"images/tbb_delete.gif\" height=\"16\" width=\"46\" border=\"0\" >";
-        remDiv.innerHTML = $('remove').innerHTML;
+        remDiv.innerHTML ='<a href="#" onclick="removeRow(this);"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
+      
         
 		escLi.appendChild(escTable);
 		escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
@@ -81,9 +85,13 @@
 		escTr1.appendChild(td1);
 		td1.setAttribute('width', '25%');
 
-		td1.appendChild(document.createTextNode('Email: '));    
-		
-	       
+		td1.appendChild(document.createTextNode('Email: '));
+		td1.appendChild(select3);
+		select3.setAttribute('id', 'Email_' + liID);
+		select3.name = "Email_" + liID;
+		addOption(select3, 'Email', 'Email');
+       	addOption(select3, 'Syslog', 'Sys Log');
+           
 		escTr1.appendChild(td2);
 		td2.setAttribute('width', '25%');
 		
@@ -108,17 +116,17 @@
 		td4.appendChild(document.createTextNode('Then wait: '));
 		
 		td4.appendChild(select2);
-		select2.setAttribute('id', 'select1');
-		select2.name = "select2_" + liID;
+		select2.setAttribute('id', 'waittime');
+		select2.name = "waittime_" + liID;
 		addOption(select2, '20', '20 minutes');
 		addOption(select2, '10', '10 minutes');
 		addOption(select2, '5', '5 minutes');
 	}
 	
-	function removeElement(divNum) {
-		var d = document.getElementById('testlist');
-		var olddiv = document.getElementById(divNum);
-	    d.removeChild(olddiv);
+	function removeRow(obj) {
+		var oLi = obj.parentNode.parentNode;
+		var root = oLi.parentNode;
+		root.removeChild(oLi);
 	}
 	
 	function addOption(sel, val, txt, selected) {
@@ -134,9 +142,9 @@
 		sel.appendChild(o);
 	}
 
-	function showResponse (originalRequest) {
-		var newData = eval("(" + originalRequest.responseText + ")");
-		$('example').innerHTML = newData;
+	function showResponse(originalRequest) {
+		
+		$('example').innerHTML = "<span style=font-weight:bold;>Escalation Saved</span>";
 	}
 
 	function initEsc () {
@@ -154,24 +162,34 @@
 		    addOption(escalationSel , schemes[i].name, schemes[i].name);
         }
 
-        document.EscalationForm.escName.value =
-            document.EscalationSchemeForm.escId.value;
-
+        document.EscalationForm.escName.value = document.EscalationSchemeForm.escId.value;
+	
 		$('submit').onclick = function () {
-            alert('here');
             sendEscForm();
+            return false;
 		}
+	
 	}
 
     onloads.push( initEsc );
+    
+ /*   
+	function submitForm() {
+	//var sort = Sortable.create('testlist',{tag:'li',only:'section',handle:'handle'});
+	var url = '/escalation/saveEscalation';
+	text = Sortable.serialize('EscalationForm');
+	alert(text);
+	var params = 'postText=' + text;
+	ajaxEngine.sendRequest(example, {method:'post',parameters: pars, onComplete: showResponse});
+	}
+*/
 
 
 
-	function sendEscForm () {
-	alert('called');
+	function sendEscForm() {
 		var adId = $('ad').value;
 		var escFormSerial = Form.serialize('EscalationForm');
-		var url = '/escalation/saveEscalation';
+		var url = '/alerts/saveEscalation';
 		var pars = "escForm=" + escFormSerial + "&ad=" + adId;
 		new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse} );
 	}
@@ -235,6 +253,52 @@
         sel.options[sel.selectedIndex].value;
       document.EscalationSchemeForm.submit();
     }
+    
+ /*   
+    function renameFormInput() {
+    var EscalationForm = document.forms[1];
+    var formEls = EscalationForm.elements;
+    var formVals = formEls.values;
+    alert(formVals);
+    for (var i = 0; i < formVals.length; i++) {
+    	alert(formVals);
+    }
+}
+*/
+
+sections = ['section'];
+
+	function createNewSection(name) {
+		var name = $F('sectionName');
+		if (name != '') {
+			var newDiv = Builder.node('div', {id: 'group' + (sections.length + 1), className: 'section', style: 'display:none;' }, [
+				Builder.node('h3', {className: 'handle'}, name)
+			]);
+
+			sections.push(newDiv.id);
+			$('page').appendChild(newDiv);
+			Effect.Appear(newDiv.id);
+			destroyLineItemSortables();
+			createLineItemSortables();
+			createGroupSortable();
+		}
+	}
+
+	function createLineItemSortables() {
+		for(var i = 0; i < sections.length; i++) {
+			Sortable.create(sections[i],{tag:'li',dropOnEmpty: true, containment: sections,only:'lineitem'});
+		}
+	}
+
+	function destroyLineItemSortables() {
+		for(var i = 0; i < sections.length; i++) {
+			Sortable.destroy(sections[i]);
+		}
+	}
+
+	function createGroupSortable() {
+		Sortable.create('testlist',{tag:'li',only:'section',handle:'handle'});
+	}
 
 </script>
 
@@ -253,6 +317,14 @@
 </html:form>
  
 <html:form action="/alerts/SaveEscalation" styleId="EscalationForm">
+<input type="hidden" value="0" id="pid">
+<input type="hidden" value="0" id="pversion">
+
+<input type="hidden" value="0" id="if the escalation is new or not">
+
+
+
+
   <input type="hidden" value="0" id="theValue">
   <c:choose>
     <c:when test="${not empty Resource}">
@@ -280,12 +352,12 @@
         <td id="section" width="100%">
             <ul id="testlist">
               <li id="testlist_row_1" class="lineitem">
-                <div id="remove" class="remove">
+                <div id="remove" class="remove" style="padding-top:10px;">
                   <a href="#" style="text-decoration:none;"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"/></a>
                 </div>
-                <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <table cellpadding="3" cellspacing="0" border="0" width="100%">
                   <tr>
-                    <td><select name="action">
+                    <td width="25%"><select name="action">
                       <option selected value="Email">
                         Email
                       </option>
@@ -296,7 +368,7 @@
                         SMS
                       </option>
                     </select></td>
-                    <td style="padding-right:20px;"><select id="who10001" name="who10001">
+                    <td width="25%" style="padding-right:20px;"><select id="who10001" name="who10001">
                       <c:if test="${not empty AvailableRoles}">
                       <option value="Roles">
                         Roles
@@ -309,10 +381,10 @@
                         Others
                       </option>
                     </select></td>
-                    <td width="45%"><a href="javascript:configure(10001)">Configure...</a></td>
+                    <td width="50%"><a href="javascript:configure(10001)">Configure...</a></td>
                   </tr>
                   <tr>
-                    <td colspan="3" style="padding-top:5px;padding-bottom:5px;padding-left:30px;">Then wait <select name="time">
+                    <td colspan="3" style="padding-top:5px;padding-bottom:5px;">Then wait <select name="time">
                       <option value="10">
                         5 minutes
                       </option>
@@ -343,20 +415,20 @@
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
               <td style="padding-top:2px;padding-bottom:2px;"><html:radio property="allowPause" value="true"/> Allow user to pause escalation for
-              <html:select property="pauseRange">
-                <html:option value="300000">
+              <select id="pauseRange" name="pauseRange">
+                <option value="300000">
                   5 minutes
-                </html:option>
-                <html:option value="600000">
-                  10 <fmt:message key="admin.settings.Minutes"/>
-                </html:option>
-                <html:option value="1200000">
-                  20 <fmt:message key="admin.settings.Minutes"/>
-                </html:option>
-                <html:option value="1800000">
-                  30 <fmt:message key="admin.settings.Minutes"/>
-                </html:option>
-              </html:select></td>
+                </option>
+                <option value="600000">
+                  10 
+                </option>
+                <option value="1200000">
+                  20 
+                </option>
+                <option value="1800000">
+                  30 
+                </option>
+              </select></td>
             </tr>
             <tr>
               <td style="padding-top:2px;padding-bottom:2px;"><html:radio property="allowPause" value="false"/> Continue escalation without pausing</td>
@@ -382,13 +454,14 @@
     </tbody>
   </table>
 
-<tiles:insert definition=".form.buttons">
-  <tiles:put name="noCancel" value="true"/>
-</tiles:insert>
+<br><br>
+ <input type=button value="Submit" onclick="sendEscForm();" id="submit"></input>
+
 
 </html:form>
 
-<div id="example"></div>
+<div id="example" style="padding:10px;"></div>
+
 <div id="usersList" style="display: none;">
   <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
   <table width="100%" cellpadding="2" cellspacing="0" border="0">
@@ -412,7 +485,6 @@
     </td>
   </tr>
   </table>
- 
   </c:forEach>
 </div>
 </c:if>
