@@ -48,6 +48,7 @@ import org.apache.commons.logging.LogFactory;
 public class MeasurementPlugin extends GenericPlugin {
 
     public static final String PROP_TEMPLATE_CONFIG = "template-config";
+    public static final String TYPE_COLLECTOR = "collector"; //plugin type
 
     private static final String HELP_PLATFORM_ALL = "ALL";
 
@@ -445,13 +446,13 @@ public class MeasurementPlugin extends GenericPlugin {
         if (this.collector == null) {
             if (this.data != null) {
                 String name =
-                    this.data.getPlugin("collector",
+                    this.data.getPlugin(TYPE_COLLECTOR,
                                         getTypeInfo().getName());
 
                 if (name == null) {
                     String msg =
                         "No measurement plugin or collector defined for: " +
-                        getName();
+                        getTypeInfo().getName();
                     throw new MetricInvalidException(msg);                    
                 }
 

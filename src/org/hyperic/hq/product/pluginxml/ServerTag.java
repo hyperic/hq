@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.hyperic.hq.product.MeasurementPlugin;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
@@ -167,15 +168,21 @@ class ServerTag
     private void putSavedTypes(TypeInfo[] types) {
         putScratch(this.typeName, types);
     }
+
+    private void includePlugin(String type, String from, String to) {
+        String plugin =
+            this.data.getPlugin(type, from);
+        if (plugin != null) {
+            this.data.addPlugin(type, to, plugin);
+        }        
+    }
     
     private void includePlugins(String from, String to) {
         for (int j=0; j<ProductPlugin.TYPES.length; j++) {
-            String plugin =
-                this.data.getPlugin(ProductPlugin.TYPES[j], from);
-            if (plugin != null) {
-                this.data.addPlugin(ProductPlugin.TYPES[j], to, plugin);
-            }
+            includePlugin(ProductPlugin.TYPES[j], from, to);
         }
+        //XXX should just copy everything
+        includePlugin(MeasurementPlugin.TYPE_COLLECTOR, from, to);
     }
     
     private void includeConfigSchema(String from, String to) {
