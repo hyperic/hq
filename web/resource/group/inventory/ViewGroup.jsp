@@ -99,6 +99,10 @@
   <fmt:message key="resource.common.inventory.props.GeneralPropertiesTab"/>
 </div>
 <div id="panelContent">
+<tiles:insert page="/resource/group/inventory/ResourceCounts.jsp">
+    <tiles:put name="resourceCount" beanName="NumChildResources" />
+    <tiles:put name="resourceTypeMap" beanName="ResourceTypeMap"/>
+</tiles:insert>
 <tiles:insert definition=".resource.common.inventory.generalProperties.view">
   <tiles:put name="resource" beanName="Resource"/>
   <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
@@ -150,10 +154,6 @@
 <!--  /  -->
 </div>
 <div id="panelContent">
-<tiles:insert page="/resource/group/inventory/ResourceCounts.jsp">
-    <tiles:put name="resourceCount" beanName="NumChildResources" />
-    <tiles:put name="resourceTypeMap" beanName="ResourceTypeMap"/>
-</tiles:insert>
 <tiles:insert page="/resource/group/inventory/ListResources.jsp"/>
 </div>
 </div>
