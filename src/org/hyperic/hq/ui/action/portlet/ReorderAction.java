@@ -32,8 +32,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -46,16 +44,12 @@ import org.hyperic.hq.ui.util.SessionUtils;
 
 public class ReorderAction extends BaseAction {
 
-    public static final String delim = Constants.DASHBOARD_DELIMITER;
-
-    private static final Log log
-        = LogFactory.getLog(ReorderAction.class.getName());
-
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
-        throws Exception {
+        throws Exception
+    {
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
         ServletContext ctx = getServlet().getServletContext();
@@ -65,9 +59,9 @@ public class ReorderAction extends BaseAction {
         String widePortlets =
             request.getParameter("narrowList_false[]");
 
-        String columnKey = null;
+        String columnKey;
         StringBuffer ordPortlets = new StringBuffer();
-        StringTokenizer st = null;
+        StringTokenizer st;
         if (narrowPortlets != null) {
             columnKey = Constants.USER_PORTLETS_FIRST;
             st = new StringTokenizer(narrowPortlets, "&=");
@@ -82,17 +76,16 @@ public class ReorderAction extends BaseAction {
 
         while (st.hasMoreTokens()) {
             String token = st.nextToken();
-            if (token.startsWith("narrowList_")
-                    || token.startsWith(".dashContent.addContent"))
+            if (token.startsWith("narrowList_") ||
+                token.startsWith(".dashContent.addContent"))
                 continue;
             
-            ordPortlets.append(delim);
+            ordPortlets.append(Constants.DASHBOARD_DELIMITER);
             ordPortlets.append(token);
         }
         
         // tokenize and reshuffle
-        if (columnKey != null &&
-            !user.getPreference(columnKey).equals(ordPortlets.toString())) {
+        if (!user.getPreference(columnKey).equals(ordPortlets.toString())) {
             user.setPreference(columnKey, ordPortlets.toString());
             boss.setUserPrefs(user.getSessionId(), user.getId(), 
                               user.getPreferences());
@@ -100,5 +93,4 @@ public class ReorderAction extends BaseAction {
         }
         return mapping.findForward(Constants.AJAX_URL);
     }
-
 }
