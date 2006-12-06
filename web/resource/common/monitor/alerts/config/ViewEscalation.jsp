@@ -55,6 +55,8 @@
         var liID = 'row'+num;
         var escLi = document.createElement('li');
         var remDiv = document.createElement('div');
+        var emailDiv = document.createElement('div');
+        var sysDiv = document.createElement('div');
         var escTable = document.createElement('table');
         var escTr1 = document.createElement('tr');
         var escTr2 = document.createElement('tr');
@@ -62,6 +64,7 @@
 		var td2 = document.createElement('td');
 		var td3 = document.createElement('td');
 		var td4 = document.createElement('td');
+		var td5 = document.createElement('td');
 		var select1 = document.createElement("select");
 		var select2 = document.createElement("select");
 		var select3 = document.createElement("select");
@@ -80,50 +83,84 @@
         
 		escLi.appendChild(escTable);
 		escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
+		escTable.setAttribute('border', '1');
 		
 		escTable.appendChild(escTr1);
 		escTr1.appendChild(td1);
-		td1.setAttribute('width', '25%');
 
-		td1.appendChild(document.createTextNode('Email: '));
-		td1.appendChild(select3);
-		select3.setAttribute('id', 'Email_' + liID);
-		select3.name = "Email_" + liID;
-		addOption(select3, 'Email', 'Email');
-       	addOption(select3, 'Syslog', 'Syslog');
-           
-		escTr1.appendChild(td2);
-		td2.setAttribute('width', '25%');
-		
-		td2.appendChild(select1);
-		select1.setAttribute('id', 'who_' + liID);
-		select1.name = "who_" + liID;
-        <c:if test="${not empty AvailableRoles}">
-		addOption(select1, 'Roles', '<fmt:message key="monitoring.events.MiniTabs.Roles"/>')
-        </c:if>
-		addOption(select1, 'Users', '<fmt:message key="monitoring.events.MiniTabs.CAMusers"/>');
-		addOption(select1, 'Others', '<fmt:message key="monitoring.events.MiniTabs.OR"/>');
-		
-		escTr1.appendChild(td3);
-		td3.setAttribute('width', '50%');
-		td3.appendChild(anchor);
-        anchor.setAttribute('href', "javascript:configure('" + liID + "')");
-		anchor.appendChild(document.createTextNode('Configure...'));       
+		td1.setAttribute('colspan', '4');
+		td1.appendChild(document.createTextNode('Then wait '));
+		td1.appendChild(select1);
+		select1.setAttribute('id', 'waittime_' + liID);
+		select1.name = "waittime_" + liID;
+		addOption(select1, '0', '<fmt:message key="common.label.None"/>');
+		addOption(select1, '300000', '5 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>');
+		addOption(select1, '600000', '10 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/> ');
+		addOption(select1, '1200000', '20 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/> ');
+		addOption(select1, '1800000', '30 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/> ');
 		
 		escTable.appendChild(escTr2);
-		escTr2.appendChild(td4);
-		td4.setAttribute('colspan', '3');
-		td4.appendChild(document.createTextNode('Then wait: '));
+		escTr2.appendChild(td2);
+		td2.setAttribute('width', '20%');
+		td2.setAttribute('valign', 'top');
+		td2.style.paddingBottom = "10px";
 		
-		td4.appendChild(select2);
-		select2.setAttribute('id', 'waittime');
-		select2.name = "waittime_" + liID;
-		addOption(select2, '0', '<fmt:message key="common.label.None"/>');
-		addOption(select2, '300000', '5 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>');
-		addOption(select2, '600000', '10 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/> ');
-		addOption(select2, '1200000', '20 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/> ');
-		addOption(select2, '1800000', '30 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/> ');
+		td2.appendChild(select2);
+		select2.setAttribute('id', 'Email_' + liID);
+		select2.name = "action_" + liID;
+		addOption(select2, 'Email', 'Email');
+       	addOption(select2, 'Syslog', 'Sys Log');
+           		
+		escTr2.appendChild(td3);
+		td3.setAttribute('width', '20%');
+		td3.setAttribute('valign', 'top');
+		td3.style.paddingRight = "20px";
+		
+		td3.appendChild(select3);
+		select3.setAttribute('id', 'who_' + liID);
+		select3.name = "who_" + liID;
+        <c:if test="${not empty AvailableRoles}">
+		addOption(select3, 'Roles', '<fmt:message key="monitoring.events.MiniTabs.Roles"/>')
+        </c:if>
+		addOption(select3, 'Users', '<fmt:message key="monitoring.events.MiniTabs.CAMusers"/>');
+		addOption(select3, 'Others', '<fmt:message key="monitoring.events.MiniTabs.OR"/>');
+		
+		escTr2.appendChild(td4);
+		td4.setAttribute('width', '10%');
+		td4.setAttribute('valign', 'top');
+		td4.appendChild(anchor);
+        anchor.setAttribute('href', "javascript:showDisplay();");
+		anchor.appendChild(document.createTextNode('Configure...'));   
+		
+		escTr2.appendChild(td5);
+		td5.setAttribute('width', '40%');
+		
+		td5.appendChild(emailDiv);
+		emailDiv.style.display = 'none';
+		emailDiv.setAttribute('id', 'emailinput');
+		emailDiv.setAttribute('class', 'escInput');
+		emailDiv.setAttribute('width', '40%');
+		emailDiv.innerHTML = "email addresses (comma separated):<br><textarea rows=3 cols=35 id=emailinput_" + liID + "></textarea>";
+		
+		td5.appendChild(sysDiv);
+		sysDiv.style.display = 'none';
+		sysDiv.setAttribute('class', 'escInput');
+		sysDiv.setAttribute('id', 'sysloginput');
+		sysDiv.setAttribute('width', '40%');
+		sysDiv.innerHTML = "meta: <input type=text name=meta_" + liID + " size=40><br>" + "product: <input type=text name=product_" + liID + "size=40><br>" + "version: <input type=text name=version_" + liID + "size=40><br>";
+		
+		
     }
+	
+	function showDisplay() { 
+	$(emailinput).style.display='';
+	$(sysloginput).style.display='';
+	}
+	
+	function hideDisplay() { 
+	$(emailinput).style.display='none';
+	$(sysloginput).style.display='none';
+	}
 	
 	function removeRow(obj) {
 		var oLi = obj.parentNode.parentNode;
@@ -355,52 +392,84 @@ sections = ['section'];
 				<div id="remove" class="remove" style="padding-top:10px;">
                   <a href="#" style="text-decoration:none;"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"/></a>
                 </div>
+
                 <table cellpadding="3" cellspacing="0" border="0" width="100%">
-                  <tr>
-                    <td width="25%"><select name="action_row0">
-                      <option selected value="Email">
-                        Email
-                      </option>
-                      <option value="Syslog">
-                        Syslog
-                      </option>
-                    </select></td>
-                    <td width="25%" style="padding-right:20px;"><select id="who_row_0" name="who_row0">
-                      <c:if test="${not empty AvailableRoles}">
-                      <option value="Roles">
-                        <fmt:message key="monitoring.events.MiniTabs.Roles"/>
-                      </option>
-                      </c:if>
-                      <option value="Users">
-                        <fmt:message key="monitoring.events.MiniTabs.CAMusers"/>
-                      </option>
-                      <option value="Others">
-                        <fmt:message key="monitoring.events.MiniTabs.OR"/>
-                      </option>
-                    </select></td>
-                    <td width="50%"><a href="javascript:configure('_row_0')">Configure...</a></td>
-                  </tr>
-                  <tr>
-                    <td colspan="3" style="padding-top:5px;padding-bottom:5px;">Then wait <select name="time_row0">
-                      <option value="0">
-                        <fmt:message key="common.label.None"/>
-                      </option>
-                      <option value="300000">
-                      5 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>
-                      </option>
-                      <option value="600000">
-                      10 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/> 
-                      </option>
-                      <option value="1200000">
-                      20 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>
-                      </option>
-                      <option value="1800000">
-                      30 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>
-                      </option>
-                    </select></td>
-                  </tr>
-                </table>
-              </li>
+					<tr>
+						<td colspan="4" style="padding-top:5px;padding-bottom:5px;">
+							Then wait 
+							<select name="time_row0">
+								<option value="0">
+									<fmt:message key="common.label.None" />
+								</option>
+								<option value="300000">
+									5 
+									<fmt:message key="alert.config.props.CB.Enable.TimeUnit.1" />
+								</option>
+								<option value="600000">
+									10 
+									<fmt:message key="alert.config.props.CB.Enable.TimeUnit.1" />
+								</option>
+								<option value="1200000">
+									20 
+									<fmt:message key="alert.config.props.CB.Enable.TimeUnit.1" />
+								</option>
+								<option value="1800000">
+									30 
+									<fmt:message key="alert.config.props.CB.Enable.TimeUnit.1" />
+								</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td width="20%" valign="top" style="padding-bottom:10px;">
+							<select name="action_row0">
+								<option selected value="Email">
+									Email 
+								</option>
+								<option value="SMTP">
+									Sys log 
+								</option>
+							</select>
+						</td>
+						<td width="20%" style="padding-right:20px;" valign="top">
+							<select id="who_row0" name="who_row0">
+								<c:if test="${not empty AvailableRoles}">
+									<option value="Roles">
+										<fmt:message key="monitoring.events.MiniTabs.Roles" />
+									</option>
+								</c:if>
+								<option value="Users">
+									<fmt:message key="monitoring.events.MiniTabs.CAMusers" />
+								</option>
+								<option value="Others">
+									<fmt:message key="monitoring.events.MiniTabs.OR" />
+								</option>
+							</select>
+						</td>
+						<td width="10%" valign="top">
+							<a href="javascript:configure('_row0')">
+								Configure...</a>
+						</td>
+						<td width="40%" valign="top">
+							<div id="emailinput" style="display:none;">
+								email addresses (comma separated): 
+								<br>
+				<textarea rows="3" cols="35" id="emailinput_0"></textarea>
+							</div>
+							<div id="syslog" style="display:none;">
+								meta: 
+								<input type="text" name="meta_0" value="" size="40">
+								<br>
+								product: 
+								<input type="text" name="product_0" value="" size="40">
+								<br>
+								version: 
+								<input type="text" name="version_0" value="" size="40">
+								<br>
+							</div>
+					</tr>
+				</table>
+				</li>
             </ul>
             <table width="100%" cellpadding="5" cellspacing="0" border="0" class="ToolbarContent">
               <tr>
@@ -418,7 +487,9 @@ sections = ['section'];
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
               <td style="padding-top:2px;padding-bottom:2px;"><input type=radio name="allowPause" value="true"/> Allow user to pause escalation for
-              <select id="pauseRange" name="maxWaitTime">
+
+              <select id="maxWaitTime" name="maxWaitTime">
+
                 <option value="300000">
                   5 minutes
                 </option>
