@@ -88,20 +88,12 @@ var pageData = new Array();
   <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
   <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
 </tiles:insert>
-</div>
-</div>
-<div id="panel2">
-<div id="panelHeader" class="accordionTabTitleBar">
-<!--  TYPE AND HOST PROPERTIES TITLE -->
-  <fmt:message key="resource.server.inventory.TypeAndHostPropertiesTab"/>
-</div>
-<div id="panelContent">
 <tiles:insert page="/resource/server/inventory/ViewTypeAndHostProperties.jsp"/>
 </div>
 </div>
 
 <!-- new -->
-<div id="panel3">
+<div id="panel2">
 <div id="panelHeader" class="accordionTabTitleBar">
   <fmt:message key="resource.server.inventory.ServicesTab"/>
 </div>
@@ -124,7 +116,7 @@ var pageData = new Array();
 </div>
 </div>
 
-<div id="panel4">
+<div id="panel3">
 <div id="panelHeader" class="accordionTabTitleBar">
   <fmt:message key="resource.common.inventory.groups.GroupsTab"/>
 </div>
@@ -142,7 +134,7 @@ var pageData = new Array();
 </div>
 </div>
 
-<div id="panel5">
+<div id="panel4">
 <div id="panelHeader" class="accordionTabTitleBar">
   <fmt:message key="resource.common.inventory.configProps.ConfigurationPropertiesTab"/>
 </div>
