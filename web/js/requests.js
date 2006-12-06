@@ -384,7 +384,7 @@ var tmp = eval('(' + originalRequest.responseText + ')');
 	$('noMetricValues').style.display = '';
 	}
 	
-		rTimer = setTimeout(requestMetricsPortal,60000); //Refresh in 60 seconds
+		rTimer = setTimeout(requestMetricsResponse,60000); //Refresh in 60 seconds
 	}
 	
 
