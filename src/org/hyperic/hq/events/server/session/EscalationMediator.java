@@ -75,15 +75,20 @@ public class EscalationMediator extends Mediator
         return instance;
     }
 
+    private AlertDefinitionManagerLocal alertDefManagerLocal;
     private AlertManagerLocal alertManagerLocal;
     private TransactionManagerLocal transactionManager;
     private EscalationSchedulerMBean escalationServiceMBean;
+    private GalertManagerLocal galertManagerLocal;
 
     protected EscalationMediator()
     {
         try {
+            alertDefManagerLocal =
+                AlertDefinitionManagerUtil.getLocalHome().create();
             alertManagerLocal = AlertManagerUtil.getLocalHome().create();
             transactionManager = TransactionManagerUtil.getLocalHome().create();
+            galertManagerLocal = GalertManagerUtil.getLocalHome().create();
         } catch (CreateException e) {
             throw new SystemException(e);
         } catch (NamingException e) {
@@ -133,28 +138,16 @@ public class EscalationMediator extends Mediator
     /**
      * escalation entry point
      * @param event TODO
-     * @param alertId
      *
      * @throws PermissionException 
      */
     public void startEscalation(Integer alertDefId, TriggerFiredEvent event)
         throws ActionExecuteException, PermissionException
     {
-        AlertManagerLocal alman;
-        AlertDefinitionManagerLocal aman;
         AlertDefinition alertDef;
     
         try {
-            aman = AlertDefinitionManagerUtil.getLocalHome().create();
-            alman = AlertManagerUtil.getLocalHome().create();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
-        
-        try {
-            alertDef = aman.getByIdNoCheck(alertDefId);
+            alertDef = alertDefManagerLocal.getByIdNoCheck(alertDefId);
         } catch (FinderException e) {
             throw new ActionExecuteException("Bad alert definition ID: " +
                                              alertDefId, e);
@@ -167,31 +160,22 @@ public class EscalationMediator extends Mediator
             return;
         }
     
-        Alert alert = createAlert(event, alman, alertDef);        
+        Alert alert = createAlert(event, alertDef);
         activateEscalation(esc, alertDefId, alert.getId().intValue(),
                            EscalationState.ALERT_TYPE_CLASSIC);
     }
 
     /**
-     * escalation entry point
-     * @param event TODO
-     * @param alertId
+     * escalation entry point for Galert
+     * TODO: There needs to be a event correlation module
+     * and the entry to the escalation/workflow should come from
+     * the event correlation module and not Galert.
      *
      * @throws PermissionException 
      */
     public void startGEscalation(GalertDef def, ExecutionReason reason)
         throws ActionExecuteException, PermissionException
     {
-        GalertManagerLocal gaMan;
-        
-        try {
-            gaMan = GalertManagerUtil.getLocalHome().create();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
-        
         Escalation esc = def.getEscalation();
         
         if (isEscalationActive(esc, def.getId(),
@@ -199,13 +183,12 @@ public class EscalationMediator extends Mediator
             return;
         }
 
-        GalertLog alert = gaMan.createAlertLog(def, reason);
+        GalertLog alert = galertManagerLocal.createAlertLog(def, reason);
         activateEscalation(esc, def.getId(), alert.getId().intValue(),
                            EscalationState.ALERT_TYPE_GROUP);
     }
 
-    private Alert createAlert(TriggerFiredEvent event, AlertManagerLocal alman,
-                              AlertDefinition alertDef)
+    private Alert createAlert(TriggerFiredEvent event, AlertDefinition alertDef)
         throws PermissionException, ActionExecuteException {
         // Start the Alert object
         AlertValue alert = new AlertValue();
@@ -215,7 +198,7 @@ public class EscalationMediator extends Mediator
         alert.setCtime(event.getTimestamp());
 
         // Now create the alert
-        alert = alman.createAlert(alert);
+        alert = alertManagerLocal.createAlert(alert);
 
         // Create the trigger event map
         HashMap trigMap = new HashMap();
@@ -241,7 +224,7 @@ public class EscalationMediator extends Mediator
         Alert alertpojo;
         try {
             // get alert pojo so retrieve array of AlertCondtionLogs
-            alertpojo = alman.updateAlert(alert);
+            alertpojo = alertManagerLocal.updateAlert(alert);
         } catch (AlertCreateException e) {
             throw new ActionExecuteException("Unable to update alert: " +
                                              alert.getId(), e);
@@ -320,7 +303,9 @@ public class EscalationMediator extends Mediator
             return false;
         }
         
-        synchronized(stateLocks.getLock(alertDefId)) {
+        synchronized(stateLocks.getLock(new StateLock(alertDefId.intValue(),
+                                                      alertType)))
+        {
             // the point of this is to make sure people wait
             // while we check on the active bit in a new JTA context
             // so by the time the transaction is over
@@ -480,7 +465,6 @@ public class EscalationMediator extends Mediator
                 .append(alertID)
                 .append(".")
                 .toString();
-            AlertDAO adao = DAOFactory.getDAOFactory().getAlertDAO();
             logEscalation(null, state,
                           "Alert acknowledged by " + state.getUpdateBy());
             notifyEscalation(alertID, state, message);
@@ -506,7 +490,6 @@ public class EscalationMediator extends Mediator
                 .append(alertID)
                 .append(".")
                 .toString();
-            AlertDAO adao = DAOFactory.getDAOFactory().getAlertDAO();
             logEscalation(null, state,
                           "Alert fixed by " + state.getUpdateBy());
             notifyEscalation(alertID, state, message);
@@ -595,18 +578,10 @@ public class EscalationMediator extends Mediator
 
         if (state.isFixed()) {
             // fixed so no need to schedule
-            if (state.isFixed()) {
-                if (log.isInfoEnabled()) {
-                    log.info("Escalation fixed. alert=" +  state.getAlertId() +
-                             ", escalation=" +
-                             escalation + ", state=" + state);
-                }
-            } else {
-                logEscalation(null, state,
-                              "Escalation stopped. Can't find alert.");
-                log.error("Stopping Escalation chain as the Alert " +
-                          "was not found. escalation=" + escalation +
-                          ", state=" + state);
+            if (log.isInfoEnabled()) {
+                log.info("Escalation fixed. alert=" +  state.getAlertId() +
+                         ", escalation=" +
+                         escalation + ", state=" + state);
             }
             resetEscalationState(state);
             sdao.save(state);
@@ -842,6 +817,56 @@ public class EscalationMediator extends Mediator
         default:
             log.error("alertType " + state.getAlertType() + " unknown");
             break;            // Unknown alert type, can't do anything
+        }
+    }
+
+    private class StateLock {
+        int id;
+        int type;
+
+        public int getType()
+        {
+            return type;
+        }
+
+        public void setType(int type)
+        {
+            this.type = type;
+        }
+
+        public int getId()
+        {
+            return id;
+        }
+
+        public void setId(int id)
+        {
+            this.id = id;
+        }
+
+        StateLock(int id, int type)
+        {
+            this.id = id;
+            this.type = type;
+        }
+
+        public boolean equals(Object o)
+        {
+            if (o == null || !(o instanceof StateLock)) {
+                return false;
+            }
+            StateLock l = (StateLock)o;
+            return id == l.getId() && type == l.getType();
+        }
+
+        public int hashCode()
+        {
+            int result = 17;
+
+            result = 37*result + id;
+            result = 37*result + type;
+
+            return result;
         }
     }
 }
