@@ -867,20 +867,22 @@ border-bottom:1px solid #D5D8DE;
 text-align:center;
 }
 
-#section #order { 
+#order { 
   list-style-type:none;
   margin:0;
   margin-right: 5px;
   padding:0;
 }
 
-#order #order li {
+#order li {
   font:13px Verdana;
   margin:0;
   padding:4px;
   cursor:move;
    list-style-type:none;
-  
+   list-style: none; 
+   width: 100%;
+   border-bottom:1px solid gray;
 }
    
 .escTbl {
@@ -889,12 +891,6 @@ text-align:center;
   margin-bottom:10px;
 }
    
-#order li {
-   list-style: none; 
-   width: 100%;
-   border-bottom:1px solid gray;
-}
- 
 .remove {
   float:right;
   margin-right:10px;
