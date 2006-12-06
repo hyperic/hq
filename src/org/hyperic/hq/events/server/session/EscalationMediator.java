@@ -332,26 +332,28 @@ public class EscalationMediator extends Mediator
                     }
                 });
             
-            if (context != null) {
-                List ealist = e.getActions();
-                EscalationAction ea = (EscalationAction)ealist.get(0);
-                EscalationState state =
-                    getEscalationState(e, alertDefId,
-                                       EscalationState.ALERT_TYPE_GROUP);
-                logEscalation(ea.getAction(), state, "Start Escalation");
+            if (context == null) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Start escalation. alert def ID=" +  alertDefId +
-                              ", escalation=" + e + ", state=" + state);
-                }            
-                dispatchAction(state);
-                return true;
+                    log.debug("Escalation already in progress. alert=" + alertId
+                              + ", escalation=" + e);
+                }
+                
+                return false;
             }
-            else if (log.isDebugEnabled()) {
-                log.debug("Escalation already in progress. alert=" +  alertId
-                          + ", escalation=" + e);
-            }
-            return false;
         }
+
+        List ealist = e.getActions();
+        EscalationAction ea = (EscalationAction)ealist.get(0);
+        EscalationState state =
+            getEscalationState(e, alertDefId,
+                               EscalationState.ALERT_TYPE_GROUP);
+        logEscalation(ea.getAction(), state, "Start Escalation");
+        if (log.isDebugEnabled()) {
+            log.debug("Start escalation. alert def ID=" +  alertDefId +
+                      ", escalation=" + e + ", state=" + state);
+        }            
+        dispatchAction(state);
+        return true;
     }
 
     public void saveEscalation(Integer subjectId, JSONObject escalation)
