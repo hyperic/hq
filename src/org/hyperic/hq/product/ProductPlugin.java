@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.product;
 
+import java.io.File;
 import java.util.List;
 
 import org.hyperic.hq.product.pluginxml.PluginData;
@@ -199,5 +200,17 @@ public abstract class ProductPlugin extends GenericPlugin {
             return this.data.getTypes();
         }
         return new TypeInfo[0];
+    }
+
+    protected File getWorkDir(String type) {
+        String pdk =
+            this.manager.getProperty(ProductPluginManager.PROP_PDK_DIR);
+        if (pdk == null) {
+            return null;
+        }
+
+        return ClientPluginDeployer.getSubDirectory(pdk,
+                                                    type,
+                                                    getName());
     }
 }

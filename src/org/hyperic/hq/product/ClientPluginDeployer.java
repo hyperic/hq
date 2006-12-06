@@ -102,6 +102,38 @@ public class ClientPluginDeployer {
         return (Handler)handlers.get(name + 's');
     }
 
+    public static File getSubDirectory(String root,
+                                       String name,
+                                       String plugin) {
+        //e.g. check /.../pdk/$name exists
+        File pluginDir = new File(root, name);
+        if (!pluginDir.exists()) {
+            log.debug(pluginDir + " does not exist.");
+            return null;
+        }
+
+        String subdir =
+            WORK_DIR + File.separator +
+            name + File.separator +
+            plugin;
+
+        File dir = new File(root, subdir);
+
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                log.error("mkdir(" + dir + ") failed for plugin: " +
+                          plugin);
+                return null;
+            }
+            else {
+                log.debug("mkdir(" + dir + ") succeeded for plugin: " +
+                          plugin);
+            }
+        }
+
+        return dir;        
+    }
+
     public static class Handler {
         private String name;
         private boolean isExecutable;
@@ -123,33 +155,9 @@ public class ClientPluginDeployer {
         }
 
         public File getSubDirectory(ClientPluginDeployer deployer) {
-            //e.g. check /.../pdk/$name exists
-            File pluginDir = new File(deployer.pdk, this.name);
-            if (!pluginDir.exists()) {
-                log.debug(pluginDir + " does not exist.");
-                return null;
-            }
-
-            String subdir =
-                WORK_DIR + File.separator +
-                this.name + File.separator +
-                deployer.plugin;
-
-            File dir = new File(deployer.pdk, subdir);
-
-            if (!dir.exists()) {
-                if (!dir.mkdirs()) {
-                    log.error("mkdir(" + dir + ") failed for plugin: " +
-                              deployer.plugin);
-                    return null;
-                }
-                else {
-                    log.debug("mkdir(" + dir + ") succeeded for plugin: " +
-                              deployer.plugin);
-                }
-            }
-
-            return dir;
+            return ClientPluginDeployer.getSubDirectory(deployer.pdk,
+                                                        this.name,
+                                                        deployer.plugin);
         }
     }
 
