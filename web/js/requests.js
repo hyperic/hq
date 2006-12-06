@@ -276,7 +276,9 @@ var tmp = eval('(' + originalRequest.responseText + ')');
 		var availText = eval("(" + originalRequest.responseText + ")");
 		var availList = availText.availSummary;
 		var availTable = document.getElementById('availTable');
-		
+		var browseUrl = $('browseUrl').href;
+		var urlColon = ":";
+		var urlParams = "&view=list&ft=";		
 		if (availList.length <1) {
 	
 			$('noAvailSummary').style.display = '';
@@ -292,6 +294,7 @@ var tmp = eval('(' + originalRequest.responseText + ')');
 			var tr  = document.createElement('tr');
 			var td1 = document.createElement('td');
 			var td2 = document.createElement('td');
+			var newanchor = document.createElement("a");
 			var up = availList[i].numUp;
 			var down = availList[i].numDown;
 		   
@@ -302,11 +305,10 @@ var tmp = eval('(' + originalRequest.responseText + ')');
 				
 				tr.appendChild(td1);
 				td1.setAttribute((document.all ? 'className' : 'class'), "resourceTypeName");
-				
-				td1.appendChild(document.createTextNode(availList[i].resourceTypeName));
-				
-				
-				
+
+				td1.appendChild(newanchor);
+				newanchor.appendChild(document.createTextNode(availList[i].resourceTypeName));
+				newanchor.setAttribute('href', (browseUrl + availList[i].appdefType + urlParams + availList[i].appdefType + urlColon + availList[i].appdefTypeId));
 				tr.appendChild(td2);
 				td2.setAttribute((document.all ? 'className' : 'class'), "availResourceStatus");
 				

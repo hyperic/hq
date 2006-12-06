@@ -41,6 +41,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.util.pager.PageList;
 import org.json.JSONObject;
@@ -87,12 +88,12 @@ public class ViewAction extends BaseAction {
         Map res = new HashMap();
         for (Iterator i = resources.iterator(); i.hasNext(); ) {
             AppdefResourceValue rValue = (AppdefResourceValue)i.next();
-            String type = rValue.getAppdefResourceTypeValue().getName();
-
-            AvailSummary summary = (AvailSummary)res.get(type);
+            AppdefResourceTypeValue type = rValue.getAppdefResourceTypeValue();
+            String name = type.getName();
+            AvailSummary summary = (AvailSummary)res.get(name);
             if (summary == null) {
                 summary = new AvailSummary(type);
-                res.put(type, summary);
+                res.put(name, summary);
             }
                 
             double avail = mBoss.getAvailability(sessionId,
@@ -112,6 +113,8 @@ public class ViewAction extends BaseAction {
             typeSummary.put("resourceTypeName", summary.getTypeName());
             typeSummary.put("numUp", summary.getNumUp());
             typeSummary.put("numDown", summary.getNumDown());
+            typeSummary.put("appdefType", summary.getAppdefType());
+            typeSummary.put("appdefTypeId", summary.getAppdefTypeId());
 
             types.add(typeSummary);
         }
@@ -124,12 +127,12 @@ public class ViewAction extends BaseAction {
     }
 
     private class AvailSummary {
-        private String _typeName;
+        private AppdefResourceTypeValue _type;
         private int _numUp = 0;
         private int _numDown = 0;
 
-        public AvailSummary(String typeName) {
-            _typeName = typeName;
+        public AvailSummary(AppdefResourceTypeValue type) {
+            _type = type;
         }
 
         public void setAvailability(double avail) {
@@ -141,7 +144,15 @@ public class ViewAction extends BaseAction {
         }
 
         public String getTypeName() {
-            return _typeName;
+            return _type.getName();
+        }
+
+        public int getAppdefType() {
+            return _type.getAppdefTypeId();
+        }
+
+        public Integer getAppdefTypeId() {
+            return _type.getId();
         }
 
         public int getNumUp() {

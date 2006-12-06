@@ -30,7 +30,8 @@
   USA.
  --%>
 
- 
+<html:link page="/ResourceHub.do?ff=" linkName="browseUrl" styleId="browseUrl" style="visibility:hidden;"></html:link>
+
 <script type="text/javascript">
 function requestAvailSummary() {
 var availResourcesUrl = "<html:rewrite page="/dashboard/ViewAvailSummary.do"/>"
