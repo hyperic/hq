@@ -78,6 +78,7 @@ var pageData = new Array();
   <fmt:message key="resource.common.inventory.props.GeneralPropertiesTab"/>
 </div>
 <div id="panelContent">
+<tiles:insert page="/resource/service/inventory/ViewTypeAndHostProperties.jsp"/>
 <tiles:insert definition=".resource.common.inventory.generalProperties.view">
   <tiles:put name="resource" beanName="Resource"/>
   <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
@@ -85,18 +86,8 @@ var pageData = new Array();
 </tiles:insert>
 </div>
 </div>
-<div id="panel2">
-<div id="panelHeader" class="accordionTabTitleBar">
-<!--  TYPE AND HOST PROPERTIES TITLE -->
-  <fmt:message key="resource.server.inventory.TypeAndHostPropertiesTab"/>
-</div>
-<div id="panelContent">
-<tiles:insert page="/resource/service/inventory/ViewTypeAndHostProperties.jsp"/>
-</div>
-</div>
-
 <c:if test="${not empty Applications}">
-<div id="panel3">
+<div id="panel2">
 <div id="panelHeader" class="accordionTabTitleBar">
   <fmt:message key="resource.service.inventory.ApplicationsTab"/>
 </div>
@@ -110,7 +101,7 @@ var pageData = new Array();
 </div>
 </c:if>
 
-<div id="panel4">
+<div id="panel3">
 <div id="panelHeader" class="accordionTabTitleBar">
   <fmt:message key="resource.common.inventory.groups.GroupsTab"/>
 </div>
@@ -126,7 +117,7 @@ var pageData = new Array();
 </div>
 </div>
 
-<div id="panel5">
+<div id="panel4">
 <div id="panelHeader" class="accordionTabTitleBar">
   <fmt:message key="resource.common.inventory.configProps.ConfigurationPropertiesTab"/>
 </div>
