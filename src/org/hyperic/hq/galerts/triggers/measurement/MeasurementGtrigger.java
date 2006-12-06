@@ -104,20 +104,43 @@ public class MeasurementGtrigger
         else
             leftHand = numMatched; 
         
-        _log.info("Checking if " + _sizeCompare + " " + leftHand +
+        _log.info("Checking if " + _sizeCompare + " " + _numResources +
                   (_isPercent ? "%" : "") +
                   " of the resources reported " + _metricName + 
                   " " + _comparator + " " + _metricVal);
+        _log.info("Number of resources matching condition: " + numMatched);
         
         if (_sizeCompare.isTrue(leftHand, _numResources)) {
-            String shortReason, longReason;
+            StringBuffer sr, lr;
             FireReason reason;
-                
-            shortReason = _sizeCompare + " " + leftHand + 
-                (_isPercent ? "%" : "") + " of the resources reported " +
-                _metricName + " " + _comparator + " " + _metricVal;
-            longReason = shortReason;
-            reason = new FireReason(shortReason, longReason);
+            String leftHandStr = leftHand + (_isPercent ? "%" : ""); 
+            
+            sr = new StringBuffer();
+            lr = new StringBuffer();
+            
+            sr.append(_sizeCompare)
+              .append(" ")
+              .append(leftHandStr)
+              .append(" of the resources reported ")
+              .append(_metricName)
+              .append(" ")
+              .append(_comparator)
+              .append(" ")
+              .append(_metricVal);
+            
+            lr.append(_sizeCompare)
+              .append(" ")
+              .append(leftHandStr)
+              .append(" of the resources (")
+              .append(numMatched)
+              .append(") reported ")
+              .append(_metricName)
+              .append(" ")
+              .append(_comparator)
+              .append(" ")
+              .append(_metricVal);
+          
+            reason = new FireReason(sr.toString(), lr.toString());
             _log.info("Trigger firing");
             setFired(reason);
         } else {
