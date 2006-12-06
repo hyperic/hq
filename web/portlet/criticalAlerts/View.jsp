@@ -44,7 +44,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 
 <script type="text/javascript">
 function requestRecentAlerts() {
-	var critAlertUrl = "<html:rewrite page="/dashboard/ViewCriticalAlerts.do"/>"
+	var critAlertUrl = "<html:rewrite page="/dashboard/ViewCriticalAlerts.do?token=${portlet.token}"/>"
 	new Ajax.Request(critAlertUrl, {method: 'get', onSuccess:showRecentAlerts, onFailure :reportError});
 }
 onloads.push(requestRecentAlerts);
@@ -68,6 +68,10 @@ Ajax.Responders.register({
   <tiles:put name="adminUrl" beanName="adminUrl" />
   <c:if test="${not empty portlet.token}">
     <tiles:put name="adminToken" beanName="portlet" beanProperty="token"/>
+    <c:set var="tableName" value="recentAlertsTable${portlet.token}"/>
+  </c:if>
+  <c:if test="${empty portlet.token}">
+    <c:set var="tableName" value="recentAlertsTable"/>
   </c:if>
   <tiles:put name="portletName"><c:out value="${portlet.fullUrl}"/></tiles:put>
   <tiles:put name="rssBase" beanName="rssUrl" />
@@ -75,8 +79,7 @@ Ajax.Responders.register({
 </tiles:insert>
 
   <!-- JSON available at /dashboard/ViewCriticalAlerts.do -->
-
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" id="recentAlertsTable">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${tableName}"/>">
   	<tbody>
 		<tr class="ListRow">
 			<td width="1%" class="ListHeaderCheckbox">

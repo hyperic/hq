@@ -134,6 +134,11 @@ public class ViewAction extends BaseAction {
         }
 
         alerts.put("criticalAlerts", a);
+        if (token != null) {
+            alerts.put("token", token);
+        } else {
+            alerts.put("token", JSONObject.NULL);
+        }
 
         response.getWriter().write(alerts.toString());
 

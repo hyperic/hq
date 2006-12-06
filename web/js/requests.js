@@ -209,9 +209,14 @@ var tmp = eval('(' + originalRequest.responseText + ')');
 	function showRecentAlerts(originalRequest) {
 	var alertText = eval("(" + originalRequest.responseText + ")");
 	var aList = alertText.criticalAlerts;
-	var alertTable = document.getElementById('recentAlertsTable');
-	
-	
+	var token = alertText.token;
+	var alertTable;
+	if (alertText.token != null) {
+		alertTable = document.getElementById('recentAlertsTable' + token);
+	} else {
+		alertTable = document.getElementById('recentAlertsTable');
+	}
+    
 	if (aList != 0) {
 	
 	for(var i=alertTable.childNodes.length-1; i>1; i--){
