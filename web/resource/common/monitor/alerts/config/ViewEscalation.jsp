@@ -107,47 +107,44 @@
 		
 		td2.appendChild(select2);
 		select2.setAttribute('id', 'Email_' + liID);
-		select2.onchange = function(){onchange_handler(this);} 
+        td2.style.paddingLeft = "20px";
+        td2.style.paddingTop = "5px";
+        td2.style.paddingBottom = "10px";
+        select2.onchange = function(){onchange_handler(this);}
 		select2.name = "action_" + liID;
 		addOption(select2, 'Email', 'Email');
        	addOption(select2, 'Syslog', 'Sys Log');
        	
-       	function onchange_handler(el) {
-        //alert(el+", value="+ el.options[el.selectedIndex].value );
-        var index= el.options[el.selectedIndex].value
-     
-         if (index == "Email") {
-			 // If the current option is mtg - show time; show attend
-			showEmailInput();
-			hideSyslogInput();
-		   }
-		   else if (index == "Syslog") {
-			hideEmailInput();
-			showSyslogInput();
-		   }
-        } 
-       	
 		escTr2.appendChild(td3);
 		td3.setAttribute('width', '20%');
 		td3.setAttribute('valign', 'top');
-		td3.style.paddingRight = "20px";
+        td3.style.paddingRight = "20px";
+        td3.id = "whoSelect";
 		
-		td3.appendChild(select3);
-		select3.setAttribute('id', 'who_' + liID);
-		select3.name = "who_" + liID;
+        td3.appendChild(select3);
+        select3.name = "who_" + liID;
         <c:if test="${not empty AvailableRoles}">
 		addOption(select3, 'Roles', '<fmt:message key="monitoring.events.MiniTabs.Roles"/>')
         </c:if>
 		addOption(select3, 'Users', '<fmt:message key="monitoring.events.MiniTabs.CAMusers"/>');
 		addOption(select3, 'Others', '<fmt:message key="monitoring.events.MiniTabs.OR"/>');
 		
-		//escTr2.appendChild(td4);
-		//td4.setAttribute('width', '10%');
-		//td4.setAttribute('valign', 'top');
-		//td4.setAttribute('id', 'configureTd');
-		//td4.appendChild(anchor);
-        //anchor.setAttribute('href', "javascript:showDisplay();");
-		//anchor.appendChild(document.createTextNode('Configure...'));   
+		function onchange_handler(el) {
+        //alert(el+", value="+ el.options[el.selectedIndex].value );
+        var index= el.options[el.selectedIndex].value
+
+         if (index == "Email") {
+			 // If the current option is mtg - show time; show attend
+			showEmailInput();
+			hideSyslogInput();
+            $('whoSelect').style.display = '';
+           }
+		   else if (index == "Syslog") {
+			hideEmailInput();
+			showSyslogInput();
+            $('whoSelect').style.display = 'none';
+           }
+        } 
 		
 		escTr2.appendChild(td4);
 		td5.setAttribute('width', '50%');
@@ -172,11 +169,13 @@
         
         if (index == "Email") {
 			$('emailinput0').style.display='';
-			$('syslog0').style.display='none';
-		   } else if (index == "Syslog") {
+			$('syslog0').style.display = 'none';
+            $('who').style.display = '';
+           } else if (index == "Syslog") {
 			$('emailinput0').style.display='none';
 			$('syslog0').style.display='';
-		   }
+           $('who').style.display = 'none';
+           }
         } 
 
 
@@ -456,7 +455,7 @@ sections = ['section'];
 						</td>
 					</tr>
 					<tr>
-						<td width="20%" valign="top" style="padding-bottom:10px;">
+						<td width="20%" valign="top" style="padding-bottom:10px;padding-left:20px;padding-top:5px;">
 							<select name="action_row0" onchange="onchange_staticRow(this);">
 								<option selected value="Email">
 									Email 
@@ -466,7 +465,7 @@ sections = ['section'];
 								</option>
 							</select>
 						</td>
-						<td width="20%" style="padding-right:20px;" valign="top">
+						<td width="20%" style="padding-right:20px;" valign="top" id="who">
 							<select id="who_row0" name="who_row0">
 								<c:if test="${not empty AvailableRoles}">
 									<option value="Roles">
