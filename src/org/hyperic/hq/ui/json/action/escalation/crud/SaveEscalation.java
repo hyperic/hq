@@ -3,6 +3,7 @@ package org.hyperic.hq.ui.json.action.escalation.crud;
 import org.hyperic.hq.ui.json.action.escalation.BaseAction;
 import org.hyperic.hq.ui.json.action.escalation.EscalationWebMediator;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
+import org.hyperic.hq.ui.json.JSONResult;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -50,7 +51,7 @@ public class SaveEscalation extends BaseAction
     private static String MAX_WAITTIME = "maxwaittime";
 
     private static String ALERTDEF_ID = "ad";
-    private static String ALERTDEF_TYPE = "adType";
+    private static String GALERTDEF_ID = "gad";
     private static String ID = "pid";
     private static String VERSION = "pversion";
     private static String NAME = "escName";
@@ -120,15 +121,26 @@ public class SaveEscalation extends BaseAction
                     .put("_version_", version);
             }
         }
-        Integer alertDefId = Integer.valueOf(
-            ((String[])map.get(ALERTDEF_ID))[0]);
-        int alertDefType = Integer.valueOf(
-            ((String[])map.get(ALERTDEF_TYPE))[0]).intValue();
+        String[] ad = (String[])map.get(ALERTDEF_ID);
+        String[] gad = (String[])map.get(GALERTDEF_ID);
+        JSONObject result;
         JSONObject escalation = new JSONObject().put("escalation", json);
-        wmed.saveEscalation(context, context.getSessionId(), alertDefId,
-                            alertDefType, escalation);
+        if (ad != null) {
+            Integer alertDefId = Integer.valueOf((ad)[0]);
+            result = wmed.saveEscalation(context, context.getSessionId(),
+                                         alertDefId, 0, escalation);
+        } else if (gad != null) {
+            Integer alertDefId = Integer.valueOf((gad)[0]);
+            result = wmed.saveEscalation(context, context.getSessionId(),
+                                         alertDefId, 1, escalation);
+        } else {
+            throw new IllegalArgumentException("Required attribute 'ad' or " +
+                                               "'gad' is not defined");
+        }
+        context.setJSONResult(new JSONResult(result));
         context.getSession().setAttribute("escalationName",
                                           ((String[])map.get(NAME))[0]);
+
     }
 
     private List parseActions(JsonActionContext context)

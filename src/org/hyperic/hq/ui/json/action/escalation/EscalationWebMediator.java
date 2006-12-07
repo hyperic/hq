@@ -52,7 +52,8 @@ public class EscalationWebMediator
 
     public JSONObject jsonEscalationByAlertDefId(JsonActionContext context,
                                                  int sessionId,
-                                                 Integer alertDefId)
+                                                 Integer alertDefId,
+                                                 int alertType)
         throws JSONException,
                PermissionException,
                SessionTimeoutException,
@@ -60,7 +61,7 @@ public class EscalationWebMediator
                RemoteException
     {
         return getEventsBoss(context)
-            .jsonEscalationByAlertDefId(sessionId, alertDefId);
+            .jsonEscalationByAlertDefId(sessionId, alertDefId, alertType);
     }
 
     public JSONArray listAllEscalationName(JsonActionContext context,
@@ -83,7 +84,7 @@ public class EscalationWebMediator
             .deleteEscalationById(sessionId, new Integer[]{id});
     }
 
-    public void saveEscalation(JsonActionContext context,
+    public JSONObject saveEscalation(JsonActionContext context,
                                int sessionId, Integer alertDefId,
                                int alertType, JSONObject json)
         throws PermissionException,
@@ -93,5 +94,7 @@ public class EscalationWebMediator
     {
         getEventsBoss(context).saveEscalation(sessionId, alertDefId,
                                               alertType, json);
+        return getEventsBoss(context)
+            .jsonEscalationByAlertDefId(sessionId, alertDefId, alertType);
     }
 }

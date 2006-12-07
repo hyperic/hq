@@ -1518,7 +1518,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public JSONObject jsonEscalationByAlertDefId(int sessionID, Integer id)
+    public JSONObject jsonEscalationByAlertDefId(int sessionID, Integer id,
+                                                 int alertType)
         throws SessionTimeoutException, SessionNotFoundException,
         PermissionException, JSONException
     {

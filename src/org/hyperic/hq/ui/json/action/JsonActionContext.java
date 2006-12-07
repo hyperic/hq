@@ -56,6 +56,12 @@ public class JsonActionContext extends HashMap
         return Integer.valueOf(id);
     }
 
+    public int getAlertDefType()
+    {
+        // TODO: implement for galertDef
+        return 0;
+    }
+
     public String getName()
     {
         return getMapping().getParameter();
