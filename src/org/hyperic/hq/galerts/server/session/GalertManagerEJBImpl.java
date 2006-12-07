@@ -134,7 +134,8 @@ public class GalertManagerEJBImpl
      * @ejb:interface-method  
      */
     public GalertDef findById(Integer id) {
-        return _defDAO.findById(id); 
+        GalertDef def = _defDAO.findById(id);
+        return def.getGalertDefValue();
     }
     
     /**
