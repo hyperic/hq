@@ -1,10 +1,10 @@
-<%@ page language="java" %>
-<%@ page errorPage="/common/Error.jsp" %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
-<%@ taglib uri="hq" prefix="hq" %>
+<%@ page language="java"%>
+<%@ page errorPage="/common/Error.jsp"%>
+<%@ taglib uri="struts-tiles" prefix="tiles"%>
+<%@ taglib uri="struts-html-el" prefix="html"%>
+<%@ taglib uri="jstl-c" prefix="c"%>
+<%@ taglib uri="jstl-fmt" prefix="fmt"%>
+<%@ taglib uri="hq" prefix="hq"%>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -31,65 +31,65 @@
  --%>
 
 
-<tiles:importAttribute name="listItems" ignore="true"/>
-<tiles:importAttribute name="listSize" ignore="true"/>
-<tiles:importAttribute name="pageSizeMenuDisabled" ignore="true"/>
-<tiles:importAttribute name="pageSizeParam" ignore="true"/>
-<tiles:importAttribute name="pageSizeAction" ignore="true"/>
-<tiles:importAttribute name="pageNumParam" ignore="true"/>
-<tiles:importAttribute name="pageNumAction" ignore="true"/>
-<tiles:importAttribute name="defaultSortColumn" ignore="true"/>
+<tiles:importAttribute name="listItems" ignore="true" />
+<tiles:importAttribute name="listSize" ignore="true" />
+<tiles:importAttribute name="pageSizeMenuDisabled" ignore="true" />
+<tiles:importAttribute name="pageSizeParam" ignore="true" />
+<tiles:importAttribute name="pageSizeAction" ignore="true" />
+<tiles:importAttribute name="pageNumParam" ignore="true" />
+<tiles:importAttribute name="pageNumAction" ignore="true" />
+<tiles:importAttribute name="defaultSortColumn" ignore="true" />
 
 <c:if test="${empty pageSizeParam}">
-  <c:set var="pageSizeParam" value="ps"/>
+  <c:set var="pageSizeParam" value="ps" />
 </c:if>
 
 <c:if test="${empty defaultSortColumn}">
-  <c:set var="defaultSortColumn" value="1"/>
+  <c:set var="defaultSortColumn" value="1" />
 </c:if>
 <c:if test="${empty pageNumParam}">
-  <c:set var="pageNumParam" value="pn"/>
+  <c:set var="pageNumParam" value="pn" />
 </c:if>
 
-<c:set var="pageNumber" value="${param[pageNumParam]}"/>
+<c:set var="pageNumber" value="${param[pageNumParam]}" />
 
-  <td width="100%">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" class="ToolbarContent">
-      <tr>   
-      <c:choose>
-        <c:when test="${empty pageSizeMenuDisabled}">
-        <td width="100%" align="right" nowrap><b><fmt:message key="ListToolbar.Total"/>&nbsp;<c:out value="${listSize}" default="0"/></b></td>
-        <td><html:img page="/images/spacer.gif" width="10" height="1" border="0"/></td>
-        <td align="right" nowrap><b><fmt:message key="ListToolbar.ItemsPerPageLabel"/></b></td>
-        <td><html:img page="/images/spacer.gif" width="10" height="1" border="0"/></td>
-        <td>
-          <html:select property="${pageSizeParam}" size="1" onchange="goToSelectLocation(this, '${pageSizeParam}',  '${pageSizeAction}');">
-            <html:option value="15" key="ListToolbar.ItemsPerPage.15"/>
-            <c:if test="${listSize > 30}">
-              <html:option value="30" key="ListToolbar.ItemsPerPage.30"/>
-            </c:if>  
-            <c:if test="${listSize > 45}">
-              <html:option value="45" key="ListToolbar.ItemsPerPage.45"/>
-            </c:if>              
-              <html:option value="-1" key="ListToolbar.ItemsPerPage.ALL"/>            
-          </html:select>
-        </td>
-        </c:when>
-        <c:otherwise>
+<td width="100%">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"
+  class="ToolbarContent">
+  <tr>
+    <c:choose>
+      <c:when test="${empty pageSizeMenuDisabled}">
+        <td width="100%" align="right" nowrap><b><fmt:message
+          key="ListToolbar.Total" />&nbsp;<span id="pagingTotal"><c:out
+          value="${listSize}" default="0" /></span></b></td>
+        <td><html:img page="/images/spacer.gif" width="10" height="1"
+          border="0" /></td>
+        <td align="right" nowrap><b><fmt:message
+          key="ListToolbar.ItemsPerPageLabel" /></b></td>
+        <td><html:img page="/images/spacer.gif" width="10" height="1"
+          border="0" /></td>
+        <td><html:select property="${pageSizeParam}" size="1"
+          onchange="goToSelectLocation(this, '${pageSizeParam}',  '${pageSizeAction}');">
+          <html:option value="15" key="ListToolbar.ItemsPerPage.15" />
+          <c:if test="${listSize > 30}">
+            <html:option value="30" key="ListToolbar.ItemsPerPage.30" />
+          </c:if>
+          <c:if test="${listSize > 45}">
+            <html:option value="45" key="ListToolbar.ItemsPerPage.45" />
+          </c:if>
+          <html:option value="-1" key="ListToolbar.ItemsPerPage.ALL" />
+        </html:select></td>
+      </c:when>
+      <c:otherwise>
         <td width="100%" align="right">&nbsp;</td>
-        </c:otherwise>
-      </c:choose>
-        <td>
-      <c:if test="${not empty listItems}">
-          <hq:paginate action="${pageNumAction}" 
-                           items="${listItems}" 
-                           defaultSortColumn="${defaultSortColumn}" 
-                           listTotalSize="${listSize}" 
-                           pageValue="${pageNumParam}"
-                           pageNumber="${pageNumber}"
-                           pageSizeValue="${pageSizeParam}"/>
-      </c:if>
-        </td>                            
-      </tr>
-    </table>
-  </td>
+      </c:otherwise>
+    </c:choose>
+    <td><c:if test="${not empty listItems}">
+      <hq:paginate action="${pageNumAction}" items="${listItems}"
+        defaultSortColumn="${defaultSortColumn}" listTotalSize="${listSize}"
+        pageValue="${pageNumParam}" pageNumber="${pageNumber}"
+        pageSizeValue="${pageSizeParam}" />
+    </c:if></td>
+  </tr>
+</table>
+</td>
