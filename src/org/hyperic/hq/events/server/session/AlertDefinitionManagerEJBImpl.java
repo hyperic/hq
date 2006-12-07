@@ -276,7 +276,7 @@ public class AlertDefinitionManagerEJBImpl
             // definition, but we won't remove the old conditions.
             AlertConditionValue[] conds = adval.getConditions();
 
-            aldef.clearConditions();
+            getAlertDefDAO().clearConditions(aldef);
             for (int i = 0; i < conds.length; i++) {
                 RegisteredTrigger trigger = 
                     getTriggerDAO().findById(conds[i].getTriggerId());
@@ -295,7 +295,7 @@ public class AlertDefinitionManagerEJBImpl
             // definition, but we won't remove the old conditions.
             ActionValue[] actions = adval.getActions();
 
-            aldef.clearActions();
+            getAlertDefDAO().clearActions(aldef);
             for (int i = 0; i <  actions.length; i++) {
                 Action parent = null;
                 

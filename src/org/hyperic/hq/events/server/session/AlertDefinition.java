@@ -99,14 +99,6 @@ public class AlertDefinition
         _triggers.remove(t);
     }
 
-    protected void clearActions() {
-        _actions.clear();
-    }
-    
-    protected void clearConditions() {
-        _conditions.clear();
-    }
-    
     protected void addCondition(AlertCondition c) {
         _conditions.add(c);
     }

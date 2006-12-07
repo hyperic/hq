@@ -24,9 +24,11 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.dao.HibernateDAO;
 
@@ -39,6 +41,26 @@ public class AlertDefinitionDAO extends HibernateDAO {
         super.remove(def);
     }
 
+    void clearConditions(AlertDefinition def) {
+        Collection conds = def.getConditionsBag();
+        clearCollection(conds);
+    }
+
+    void clearActions(AlertDefinition def) {
+        Collection acts = def.getActionsBag();
+        clearCollection(acts);
+    }
+
+    private void clearCollection(Collection coll) {
+        // Convert to arraylist first
+        PersistedObject[] pobjs =
+            (PersistedObject[]) coll.toArray(new PersistedObject[0]);
+        coll.clear();
+        for (int i = 0; i < pobjs.length; i++) {
+            super.remove(pobjs[i]);
+        }
+    }
+    
     public List findByAppdefEntity(int type, int id) {
         return findByAppdefEntity(type, id, "d.name");
     }
