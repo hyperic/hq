@@ -322,7 +322,8 @@ public class AlertDefUtil {
                PermissionException,
                ParameterNotFoundException
     {
-        AlertDefinitionValue adv = (AlertDefinitionValue)request.getAttribute(Constants.ALERT_DEFINITION_ATTR);
+        AlertDefinitionValue adv = (AlertDefinitionValue)
+            request.getAttribute(Constants.ALERT_DEFINITION_ATTR);
         if (null == adv) {
             String adS = request.getParameter(Constants.ALERT_DEFINITION_PARAM);
             if (null == adS) {
@@ -330,9 +331,9 @@ public class AlertDefUtil {
             } else {
                 Integer ad = new Integer(adS);
                 adv = eb.getAlertDefinition(sessionID, ad);
+                request.setAttribute(Constants.ALERT_DEFINITION_ATTR, adv);
             }
             log.trace( "adv.id=" + adv.getId() );
-
         }
 
         return adv;

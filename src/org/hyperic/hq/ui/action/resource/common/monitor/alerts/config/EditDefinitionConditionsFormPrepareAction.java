@@ -34,6 +34,7 @@ import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 
@@ -54,11 +55,8 @@ public class EditDefinitionConditionsFormPrepareAction
         ServletContext ctx = getServlet().getServletContext();
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
 
-        Integer alertDefId = new Integer( request.getParameter("ad") );
-        log.trace("alertDefId=" + alertDefId);
-        
-        AlertDefinitionValue adv = eb.getAlertDefinition(sessionID, alertDefId);
-        request.setAttribute(Constants.ALERT_DEFINITION_ATTR, adv);
+        AlertDefinitionValue adv =
+            AlertDefUtil.getAlertDefinition(request, sessionID, eb);
 
         MeasurementBoss mb = ContextUtils.getMeasurementBoss(ctx);
         defForm.importConditionsEnablement(adv, sessionID, mb);
