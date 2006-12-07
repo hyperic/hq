@@ -309,7 +309,7 @@ public class AIPlatformDAO extends HibernateDAO
             // log.info("UQS: Adding new Server: " + aiserver);
             AIServer ais = new AIServer();
             ais.setAIServerValue(aiserver);
-            serverSet.add(ais);
+            p.addAIServer(ais);
         }
     }
 

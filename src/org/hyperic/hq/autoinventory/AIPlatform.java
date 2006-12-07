@@ -298,6 +298,14 @@ public class AIPlatform extends PlatformBase
         this.aiservers = aiservers;
     }
 
+    public void addAIServer(AIServer server)
+    {
+        if (server != null) {
+            aiservers.add(server);
+            server.setAIPlatform(this);
+        }
+    }
+
     private AIPlatformValue aipValue = new AIPlatformValue();
     /**
      * @deprecated use (this) AIPlatformValue object
