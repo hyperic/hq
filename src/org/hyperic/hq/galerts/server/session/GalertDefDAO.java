@@ -49,4 +49,13 @@ public class GalertDefDAO
             .setParameter("type", strat)
             .uniqueResult()).intValue();
     }
+    /**
+     * Return GalertDef like a "value" object, parallel to existing API.
+     * This guarantees that the pojo has been loaded
+     * @return this with the values loaded
+     */
+    GalertDef getGalertDefValue(GalertDef def) {
+        initialize(def.getStrategySet());
+        return def;
+    }
 }

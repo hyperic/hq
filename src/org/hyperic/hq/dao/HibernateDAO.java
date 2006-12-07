@@ -31,6 +31,7 @@ import java.util.List;
 
 import org.hibernate.LockMode;
 import org.hibernate.Session;
+import org.hibernate.Hibernate;
 import org.hibernate.type.Type;
 import org.hibernate.criterion.Example;
 import org.hyperic.dao.DAOFactory;
@@ -135,6 +136,11 @@ public abstract class HibernateDAO {
 
     protected void remove(Object entity) {
         getSession().delete(entity);
+    }
+
+    protected void initialize(Object proxy)
+    {
+        Hibernate.initialize(proxy);
     }
 
     public PersistedObject findPersistedList(PersistedObject entity) {

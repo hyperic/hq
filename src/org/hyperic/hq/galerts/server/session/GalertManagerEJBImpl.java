@@ -135,7 +135,7 @@ public class GalertManagerEJBImpl
      */
     public GalertDef findById(Integer id) {
         GalertDef def = _defDAO.findById(id);
-        return def.getGalertDefValue();
+        return _defDAO.getGalertDefValue(def);
     }
     
     /**
