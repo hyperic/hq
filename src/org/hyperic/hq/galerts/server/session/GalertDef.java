@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.hibernate.Hibernate;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.common.server.session.Crispo;
@@ -133,5 +134,15 @@ public class GalertDef
                 return s;
         }
         return null;
+    }
+
+    /**
+     * Return GalertDef like a "value" object, parallel to existing API.
+     * This guarantees that the pojo has been loaded
+     * @return this with the values loaded
+     */
+    GalertDef getGalertDefValue() {
+        Hibernate.initialize(this);
+        return this;
     }
 }
