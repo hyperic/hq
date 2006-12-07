@@ -387,7 +387,7 @@ public class AlertDefinition
         setName(val.getName());
         setCtime(val.getCtime());
         setMtime(val.getMtime());
-        if (val.parentIdHasBeenSet()) {
+        if (val.parentIdHasBeenSet() && val.getParentId() != null) {
             setParent(aDAO.findById(val.getParentId()));
         }
         setDescription(val.getDescription());

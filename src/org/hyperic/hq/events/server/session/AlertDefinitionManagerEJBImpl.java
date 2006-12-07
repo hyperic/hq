@@ -319,8 +319,10 @@ public class AlertDefinitionManagerEJBImpl
 
         // Now set the alertdef
         aldef.setAlertDefinitionValueNoRels(adval);
-        EscalationDAO edao = DAOFactory.getDAOFactory().getEscalationDAO();
-        aldef.setEscalation(edao.findById(adval.getEscalationId()));
+        if (adval.isEscalationIdHasBeenSet()) {
+            EscalationDAO edao = DAOFactory.getDAOFactory().getEscalationDAO();
+            aldef.setEscalation(edao.findById(adval.getEscalationId()));
+        }
         
         return aldef.getAlertDefinitionValue();
     }
