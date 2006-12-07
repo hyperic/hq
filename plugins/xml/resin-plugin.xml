@@ -26,222 +26,293 @@
  -->
 
 <plugin name="resin">
-  <classpath>
-    <include name="pdk/lib/mx4j"/>
-  </classpath>
+    <classpath>
+        <include name="pdk/lib/mx4j"/>
+    </classpath>
 
-  <filter name="template"
-          value="${OBJECT_NAME}:${alias}"/>
+    <filter name="template"
+            value="${OBJECT_NAME}:${alias}"/>
 
-  <filter name="THREAD_OBJ"
-          value="resin:type=ThreadPool"/>
+    <filter name="THREAD_OBJ"
+            value="resin:type=ThreadPool"/>
 
-  <metrics name="port">
-    <metric name="Availability"
-            template="${OBJECT_NAME}:Active"
-            indicator="true"/>
+    <!-- Generic 3.x type is known to work with 3.0.20, 3.0.21, and 3.0.22. -->
+    <server name="Resin"
+            version="3.x"
+            description="Resin 3.x">
 
-    <metric name="Total Connection Count"
-            collectionType="trendsup"
-            indicator="true"/>
+        <property name="OBJECT_NAME"
+                  value="resin:type=Server"/>
 
-    <metric name="Active Connection Count"
-            indicator="true"/>
+        <property name="PROC_MAIN_CLASS"
+                  value="com.caucho.server.resin.Resin"/>
 
-    <metric name="Thread Count"
-            collectionType="trendsup"
-            indicator="true"/>
+        <property name="PROC_HOME_PROPERTY"
+                  value="resin.home"/>
 
-    <metric name="Active Thread Count"
-            indicator="true"/>
+        <!-- Availability mappings -->
+        <property name="State.active" value="1.0"/>
+        <property name="State.stopped" value="0.0"/>
+        <property name="State.stopped-lazy" value="-0.01"/>
 
-    <metric name="Idle Thread Count"/>
-  </metrics>
+        <plugin type="autoinventory"
+                class="org.hyperic.hq.product.jmx.MxServerDetector"/>
 
-  <server name="Resin"
-          version="3.x"
-          description="Resin 3.x">
+        <plugin type="control"
+                class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
 
-    <property name="OBJECT_NAME"
-              value="resin:type=ResinServer"/>
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
 
-    <property name="PROC_MAIN_CLASS"
-              value="com.caucho.server.resin.Resin"/>
+        <config>
+            <option name="jmx.url"
+                    description="JMX URL to MBeanServer"
+                    default="service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi"/>
 
-    <property name="PROC_HOME_PROPERTY"
-              value="resin.home"/>
+            <option name="jmx.username"
+                    description="JMX username"
+                    optional="true"
+                    default="system"/>
 
-    <!-- Availability mappings -->
-    <property name="State.active" value="1.0"/>
-    <property name="State.stopped" value="0.0"/>
-    <property name="State.stopped-lazy" value="-0.01"/>
+            <option name="jmx.password"
+                    description="JMX password"
+                    optional="true"
+                    default="manager"
+                    type="secret"/>
+        </config>
 
-    <plugin type="autoinventory"
-            class="org.hyperic.hq.product.jmx.MxServerDetector"/>
+        <properties>
+            <property name="RedeployMode" description="Redeploy Mode"/>
+            <property name="Id" description="Server Id"/>
+            <property name="SelectManagerEnabled" description="Select Manager Enabled"/>
+            <property name="StartupMode" description="Startup Mode"/>
+        </properties>
 
-    <plugin type="control"
-            class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
+        <actions include="restart"/>
 
-    <plugin type="measurement"
-            class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
+        <metric name="Availability"
+                template="${OBJECT_NAME}:State"
+                indicator="true"/>
 
-    <config>
-      <option name="jmx.url"
-              description="JMX URL to MBeanServer"
-              default="service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi"/>
+B       <metric name="Invocation Cache Hit Count"
+                alias="InvocationCacheHitCountTotal"
+                collectionType="trendsup"/>
 
-      <option name="jmx.username"
-              description="JMX username"
-              optional="true"
-              default="system"/>
+        <metric name="Invocation Cache Miss Count"
+                alias="InvocationCacheMissCountTotal"
+                collectionType="trendsup"/>
 
-      <option name="jmx.password"
-              description="JMX password"
-              optional="true"
-              default="manager"
-              type="secret"/>
-    </config>
+        <metric name="Keepalive Count"
+                alias="KeepaliveCountTotal"
+                collectionType="trendsup"/>
 
-    <properties>
-      <property name="ResinHome" description="Resin Home"/>
-      <property name="ServerRoot" description="Server Root"/>
-      <property name="ServerId" description="Server Id"/>>
-    </properties>
+        <metric name="Request Count"
+                alias="RequestCountTotal"
+                collectionType="trendsup"
+                indicator="true"/>
 
-    <actions include="restart"/>
+        <metric name="Request Read Bytes"
+                alias="RequestReadBytesTotal"
+                collectionType="trendsup"
+                units="b"
+                indicator="true"/>
 
-    <metric name="Availability" 
-            template="${OBJECT_NAME}:State"
-            indicator="true"/> 
+        <metric name="Request Time"
+                alias="RequestTimeTotal"
+                collectionType="trendsup"
+                units="ms"/>
 
-    <metric name="Thread Count"
-            template="${THREAD_OBJ}:${alias}"
-            indicator="true"/>
+        <metric name="Request Write Bytes"
+                alias="RequestWriteBytesTotal"
+                collectionType="trendsup"
+                units="b"
+                indicator="true"/>
 
-    <metric name="Thread Max"
-            template="${THREAD_OBJ}:${alias}"
-            type="static"/>
+        <metric name="Runtime Memory"
+                units="b"/>
 
-    <metric name="Spare Thread Min"
-            template="${THREAD_OBJ}:${alias}"/>
+        <metric name="Runtime Memory Free"
+                units="b"/>
 
-    <metric name="Idle Thread Count"
-            template="${THREAD_OBJ}:${alias}"/>
+        <metric name="Thread Active"
+                alias="ThreadActiveCount"
+                indicator="true"/>
 
-    <metric name="Active Thread Count"
-            template="${THREAD_OBJ}:${alias}"
-            indicator="true"/>
+        <metric name="Thread Keepalive"
+                alias="ThreadKeepaliveCount"/>
 
-    <service name="Multiple Host Port">
-      <property name="OBJECT_NAME"
-                value="resin:type=Port,Server=*,port=*"/>
-      <config>
-        <option name="Server"
-                description="Server name"/>
-        <option name="port"
-                description="Port"/>
-      </config>
+        <service name="Port">
+            <property name="OBJECT_NAME"
+                      value="resin:type=Port,name=*"/>
+            <config>
+                <option name="name"
+                        description="Port name"/>
+            </config>
 
-      <properties>
-        <property name="ProtocolName" description="ProtocolName"/>
-      </properties>
+            <properties>
+                <property name="Address" description="Address"/>
+                <property name="ProtocolName" description="Protocol"/>
+                <property name="ConnectionMax" description="Max Connections"/>
+                <property name="KeepAliveMax" description="Max Keepalives"/>
+                <property name="Port" description="Port"/>
+                <property name="SSL" description="SSL Enabled"/>
+                <property name="SelectKeepaliveCount"
+                          description="Select Keepalive"/>
+            </properties>
 
-      <plugin type="autoinventory"/>
+            <plugin type="autoinventory"/>
 
-      <metrics include="port"/>
-    </service>
+            <!-- Availability mappings -->
+            <property name="State.active" value="1.0"/>
+            <property name="State.stopped" value="0.0"/>
+            <property name="State.stopped-lazy" value="-0.01"/>
 
-    <service name="Single Host Port">
-      <property name="OBJECT_NAME"
-                value="resin:type=Port,Server=*,port=*,host=*"/>
-      <config>
-        <option name="Server"
-                description="Server name"/>
-        <option name="port"
-                description="Port"/>
-        <option name="host"
-                description="Host"/>
-      </config>
+            <metric name="Availability"
+                    template="${OBJECT_NAME}:State"
+                    indicator="true"/>
 
-      <properties>
-        <property name="ProtocolName" description="ProtocolName"/>
-      </properties>
+            <metric name="Client Disconnect Count"
+                    alias="ClientDisconnectCountTotal"
+                    collectionType="trendsup"/>
 
-      <plugin type="autoinventory"/>
+            <metric name="Keepalive Count"
+                    alias="KeepaliveCountTotal"
+                    collectionType="trendsup"/>
 
-      <metrics include="port"/>
-    </service>
+            <metric name="Read Bytes"
+                    alias="ReadBytesTotal"
+                    collectionType="trendsup"
+                    units="b"
+                    indicator="true"/>
 
-    <service name="Connection Pool">
-      <property name="OBJECT_NAME"
-                value="resin:type=ConnectionPool,name=*"/>
-      <config>
-        <option name="name"
-                description="Connection Pool name"/>
-      </config>
+            <metric name="Write Bytes"
+                    alias="WriteBytesTotal"
+                    collectionType="trendsup"
+                    units="b"
+                    indicator="true"/>
 
-      <plugin type="autoinventory"/>
+            <metric name="Request Count"
+                    alias="RequestCountTotal"
+                    collectionType="trendsup"
+                    indicator="true"/>
 
-      <!-- No state attribute -->
-      <metric name="Availability"
-              indicator="true"/>
+            <metric name="Request Time"
+                    alias="RequestTimeTotal"
+                    collectionType="trendsup"
+                    units="ms"/>
 
-      <metric name="Connection Count"
-              collectionType="trendsup"
-              indicator="true"/>
+            <metric name="Thread Active Count"/>
 
-      <metric name="Active Connection Count"
-              indicator="true"/>
+            <metric name="Thread Count"/>
 
-      <metric name="Idle Connection Count"/>
+            <metric name="Thread Idle Count"/>
 
-    </service>
+            <metric name="Thread Keepalive Count"/>
 
-    <service name="Webapp">
-      <property name="OBJECT_NAME"
-                value="resin:type=WebApp,Server=*,Host=*,WebApp=*,name=*"/>
+        </service>
 
-      <!-- Availability mappings -->
-      <property name="State.active" value="1.0"/>
-      <property name="State.stopped-lazy" value="-0.01"/>
+        <service name="Connection Pool">
+            <property name="OBJECT_NAME"
+                      value="resin:type=ConnectionPool,Host=*,WebApp=*,name=*"/>
+            <config>
+                <option name="Host"
+                        description="Connection Pool Host"/>
+                <option name="WebApp"
+                        description="Connection Pool WebApp"/>
+                <option name="name"
+                        description="Connection Pool name"/>
+            </config>
 
-      <config>
-        <option name="Server"
-                description="Server name"/>
-        <option name="Host"
-                description="Host"/>
-        <option name="WebApp"
-                description="WebApp"/>
-        <option name="name"
-                description="name"/>
-      </config>
+            <properties>
+                <property name="MaxConnections" description="Max Connections"/>
+                <property name="MaxActiveTime" description="Max Active Time"/>
+                <property name="MaxCreateConnections" description="Max Create Connections"/>
+                <property name="MaxIdleTiem" description="Max Idle Time"/>
+                <property name="MaxOverflowConnections" description="Max Overflow Connections"/>
+                <property name="MaxPoolTime" description="Max Pool Time"/>
+            </properties>
 
-      <plugin type="autoinventory"/>
+            <plugin type="autoinventory"/>
 
-      <metric name="Availability"
-              template="${OBJECT_NAME}:State"
-              indicator="true"/>
+            <!-- No state attribute, use existance of MBean -->
+            <metric name="Availability"
+                    indicator="true"/>
 
-      <metric name="Session Create Count"
-              collectionType="trendsup"
-              indicator="true"/>
+            <metric name="Connection Active Count"
+                    indicator="true"/>
 
-      <metric name="Session Active Count"
-              indicator="true"/>
+            <metric name="Connection Count"
+                    indicator="true"/>
 
-      <metric name="Session Timeout Count"
-              collectionType="trendsup"/>
+            <metric name="Connection Idle Count"
+                    indicator="true"/>
 
-      <plugin type="control"/>
+        </service>
 
-      <actions include="start,stop,update,restart"/>
+        <service name="Webapp">
+            <property name="OBJECT_NAME"
+                      value="resin:type=WebApp,Host=*,name=*"/>
 
-    </service>
+            <!-- Availability mappings -->
+            <property name="State.active" value="1.0"/>
+            <property name="State.stopped" value="0.0"/>
+            <property name="State.stopped-lazy" value="-0.01"/>
 
-  </server>
+            <config>
+                <option name="Host"
+                        description="Host"/>
+                <option name="WebApp"
+                        description="WebApp"/>
+                <option name="name"
+                        description="name"/>
+            </config>
 
-  <help name="Resin 3.x">
-    <![CDATA[
+            <properties>
+                <property name="RedeployMode" description="Redeploy Mode"/>
+                <property name="StartupMode" description="Startup Mode"/>
+            </properties>
+
+            <plugin type="autoinventory"/>
+
+            <metric name="Availability"
+                    template="${OBJECT_NAME}:State"
+                    indicator="true"/>
+
+            <metric name="Client Disconnect Count"
+                    alias="ClientDisconnectCountTotal"/>
+
+            <metric name="Request Count"
+                    alias="RequestCountTotal"
+                    collectionType="trendsup"
+                    indicator="true"/>
+
+            <metric name="Request Read Bytes"
+                    alias="RequestReadBytesTotal"
+                    collectionType="trendsup"
+                    units="b"
+                    indicator="true"/>
+
+            <metric name="Request Time"
+                    alias="RequestTimeTotal"
+                    collectionType="trendsup"
+                    units="ms"/>
+
+            <metric name="Request Write Bytes"
+                    alias="RequestWriteBytesTotal"
+                    collectionType="trendsup"
+                    units="b"
+                    indicator="true"/>
+
+            <plugin type="control"/>
+
+            <actions include="start,stop,update,restart"/>
+
+        </service>
+
+    </server>
+
+    <help name="Resin 3.x">
+        <![CDATA[
     <p>
       <h3>Configure Resin ${product.version} for Monitoring</h3>
     </p>
