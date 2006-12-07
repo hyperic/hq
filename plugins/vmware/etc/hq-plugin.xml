@@ -275,6 +275,17 @@
             indicator="true"
             template="server:Type=Server:${name}"/>
 
+    <metric name="Memory Available for VMs"
+            template="sigar:Type=Mem:ActualFree"
+            indicator="true"
+            units="B"/>
+
+    <metric name="Memory Used by VMs"
+            query="State.Name.eq=vmware-vmx"
+            template="sigar:Type=MultiProcMem,Arg=${query}:Resident"
+            indicator="true"
+            units="B"/>
+
     <service name="VM">
       <plugin type="measurement"
               class="org.hyperic.hq.product.MeasurementPlugin"/>
