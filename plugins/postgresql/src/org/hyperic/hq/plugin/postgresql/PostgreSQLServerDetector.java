@@ -63,8 +63,9 @@ public class PostgreSQLServerDetector
     private static final String POSTGRESQL_VERSION = "postmaster (PostgreSQL)";
     //likely will only work w/ linux due to permissions
     //and setting of argv[0] to the full binary path.
+    //State.Name == 'postgres' on OSX, 'postmaster' elsewhere
     private static final String PTQL_QUERY =
-        "State.Name.eq=postmaster,Args.0.ew=postmaster";
+        "State.Name.re=post(master|gres),Args.0.ew=postmaster";
 
     // Table discovery query
     private static final String TABLE_QUERY = 
