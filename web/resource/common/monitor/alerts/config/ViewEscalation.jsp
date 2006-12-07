@@ -107,10 +107,26 @@
 		
 		td2.appendChild(select2);
 		select2.setAttribute('id', 'Email_' + liID);
+		select2.onchange = function(){onchange_handler(this);} 
 		select2.name = "action_" + liID;
 		addOption(select2, 'Email', 'Email');
        	addOption(select2, 'Syslog', 'Sys Log');
-           		
+       	
+       	function onchange_handler(el) {
+        //alert(el+", value="+ el.options[el.selectedIndex].value );
+        var index= el.options[el.selectedIndex].value
+     
+         if (index == "Email") {
+			 // If the current option is mtg - show time; show attend
+			showEmailInput();
+			hideSyslogInput();
+		   }
+		   else if (index == "Syslog") {
+			hideEmailInput();
+			showSyslogInput();
+		   }
+        } 
+       	
 		escTr2.appendChild(td3);
 		td3.setAttribute('width', '20%');
 		td3.setAttribute('valign', 'top');
@@ -125,36 +141,59 @@
 		addOption(select3, 'Users', '<fmt:message key="monitoring.events.MiniTabs.CAMusers"/>');
 		addOption(select3, 'Others', '<fmt:message key="monitoring.events.MiniTabs.OR"/>');
 		
+		//escTr2.appendChild(td4);
+		//td4.setAttribute('width', '10%');
+		//td4.setAttribute('valign', 'top');
+		//td4.setAttribute('id', 'configureTd');
+		//td4.appendChild(anchor);
+        //anchor.setAttribute('href', "javascript:showDisplay();");
+		//anchor.appendChild(document.createTextNode('Configure...'));   
+		
 		escTr2.appendChild(td4);
-		td4.setAttribute('width', '10%');
-		td4.setAttribute('valign', 'top');
-		td4.appendChild(anchor);
-        anchor.setAttribute('href', "javascript:showDisplay();");
-		anchor.appendChild(document.createTextNode('Configure...'));   
+		td5.setAttribute('width', '50%');
 		
-		escTr2.appendChild(td5);
-		td5.setAttribute('width', '40%');
-		
-		td5.appendChild(emailDiv);
-		emailDiv.style.display = 'none';
+		td4.appendChild(emailDiv);
+		//emailDiv.style.display = 'none';
 		emailDiv.setAttribute('id', 'emailinput');
 		emailDiv.setAttribute('class', 'escInput');
 		emailDiv.setAttribute('width', '40%');
 		emailDiv.innerHTML = "email addresses (comma separated):<br><textarea rows=3 cols=35 id=emailinput_" + liID + "></textarea>";
 		
-		td5.appendChild(sysDiv);
+		td4.appendChild(sysDiv);
 		sysDiv.style.display = 'none';
 		sysDiv.setAttribute('class', 'escInput');
 		sysDiv.setAttribute('id', 'sysloginput');
 		sysDiv.setAttribute('width', '40%');
 		sysDiv.innerHTML = "meta: <input type=text name=meta_" + liID + " size=40><br>" + "product: <input type=text name=product_" + liID + "size=40><br>" + "version: <input type=text name=version_" + liID + "size=40><br>";
-		
-		
-    }
-	
-	function showDisplay() { 
+	}
+	    
+     function onchange_staticRow(el) {
+    	 var index= el.options[el.selectedIndex].value
+        
+        if (index == "Email") {
+			$('emailinput0').style.display='';
+			$('syslog0').style.display='none';
+		   } else if (index == "Syslog") {
+			$('emailinput0').style.display='none';
+			$('syslog0').style.display='';
+		   }
+        } 
+
+
+	function showEmailInput() { 
 	$(emailinput).style.display='';
+	}
+	
+	function hideEmailInput() { 
+	$(emailinput).style.display='none';
+	}
+	
+	function showSyslogInput() {
 	$(sysloginput).style.display='';
+	}
+	
+	function hideSyslogInput() {
+	$(sysloginput).style.display='none';
 	}
 	
 	function hideDisplay() { 
@@ -182,7 +221,6 @@
 	}
 
 	function showResponse(originalRequest) {
-		
 		$('example').innerHTML = "<span style=font-weight:bold;>Escalation Saved: " + Form.serialize('EscalationForm') + "</span>";
 	}
 
@@ -207,7 +245,6 @@
             sendEscForm();
             return false;
 		}
-	
 	}
 
     onloads.push( initEsc );
@@ -222,8 +259,6 @@
 	ajaxEngine.sendRequest(example, {method:'post',parameters: pars, onComplete: showResponse});
 	}
 */
-
-
 
 	function sendEscForm() {
 		var adId = $('ad').value;
@@ -422,11 +457,11 @@ sections = ['section'];
 					</tr>
 					<tr>
 						<td width="20%" valign="top" style="padding-bottom:10px;">
-							<select name="action_row0">
+							<select name="action_row0" onchange="onchange_staticRow(this);">
 								<option selected value="Email">
 									Email 
 								</option>
-								<option value="SMTP">
+								<option value="Syslog">
 									Sys log 
 								</option>
 							</select>
@@ -446,17 +481,13 @@ sections = ['section'];
 								</option>
 							</select>
 						</td>
-						<td width="10%" valign="top">
-							<a href="javascript:configure('_row0')">
-								Configure...</a>
-						</td>
-						<td width="40%" valign="top">
-							<div id="emailinput" style="display:none;">
+						<td width="60%" valign="top">
+							<div id="emailinput0">
 								email addresses (comma separated): 
 								<br>
 				<textarea rows="3" cols="35" id="emailinput_0"></textarea>
 							</div>
-							<div id="syslog" style="display:none;">
+							<div id="syslog0" style="display:none;">
 								meta: 
 								<input type="text" name="meta_0" value="" size="40">
 								<br>
