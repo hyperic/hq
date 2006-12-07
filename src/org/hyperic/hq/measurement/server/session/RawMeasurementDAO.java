@@ -26,11 +26,16 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hibernate.Query;
 
 /**
  * CRUD methods, finders, etc. for RawMeasurement
@@ -73,20 +78,34 @@ public class RawMeasurementDAO extends HibernateDAO {
             .setInteger(1, appdefId).list();
     }
 
-    int deleteByInstances(AppdefEntityID[] ids) {
+    int deleteByInstances(AppdefEntityID[] ids)
+    {
+        Map map = AppdefUtil.groupByAppdefType(ids);
         StringBuffer sql = new StringBuffer()
-            .append("delete RawMeasurement r where r.id in " +
-                    "(select m.id from RawMeasurement m " +
-                    "join m.template as t " +
-                    "join t.monitorableType as mt where ")
-            .append(
-                AppdefUtil.getHQLWhereByAppdefType("mt.appdefType",
-                                                   "m.instanceId",
-                                                   ids))
-            .append(")");
-
-        return getSession().createQuery(sql.toString()).
-            executeUpdate();
+            .append("delete RawMeasurement where ");
+        for (int i = 0; i < map.size(); i++) {
+            if (i > 0) {
+                sql.append(" or ");
+            }
+            sql.append(" id in " +
+                       "(select m.id from RawMeasurement m " +
+                       "join m.template as t " +
+                       "join t.monitorableType as mt where ")
+                .append("mt.appdefType=")
+                .append(":appdefType"+i)
+                .append(" and ")
+                .append("m.instanceId in (:list" + i + ")")
+                .append(") ");
+        }
+        int j = 0;
+        Query q = getSession().createQuery(sql.toString());
+        for (Iterator i = map.keySet().iterator(); i.hasNext(); j++) {
+            Integer appdefType = (Integer)i.next();
+            List list = (List)map.get(appdefType);
+            q.setInteger("appdefType"+j, appdefType.intValue())
+                .setParameterList("list"+j, list);
+        }
+        return q.executeUpdate();
     }
 
     RawMeasurement findByDsnForInstance(String dsn, Integer id) {

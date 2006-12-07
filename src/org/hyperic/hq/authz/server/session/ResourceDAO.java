@@ -28,6 +28,9 @@ package org.hyperic.hq.authz.server.session;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,6 +42,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hibernate.Query;
 
 /**
  * CRUD methods, finders, etc. for Resource
@@ -141,38 +145,58 @@ public class ResourceDAO extends HibernateDAO
         return is;
     }
 
-    private String getResourceHQL(AppdefEntityID[] ids) {
-        return new StringBuffer(
-            "select r.id from Resource r, " +
-            "ResourceType rt where r.resourceType.id=rt.id and ")
-            .append(
-                AppdefUtil.getHQLWhereByAuthzType("rt.name", "r.instanceId",
-                                                  ids))
-            .toString();
+    private Map groupByAuthzType(AppdefEntityID[] ids) {
+
+        HashMap m = new HashMap();
+        for (int i = 0; i < ids.length; i++) {
+            String type =
+                AppdefUtil.appdefTypeIdToAuthzTypeStr(ids[i].getType());
+            ArrayList idList = (ArrayList)m.get(type);
+            if (idList == null) {
+                idList = new ArrayList();
+                m.put(type, idList);
+            }
+            idList.add(ids[i].getId());
+        }
+        return m;
     }
 
-    private int deleteResourceMap(AppdefEntityID[] ids) {
-        StringBuffer sql = new StringBuffer(
-            "delete ResGrpResMap where id.resource.id in (")
-            .append(getResourceHQL(ids))
-            .append(")");
-        
-        return getSession().createQuery(sql.toString())
-            .executeUpdate();
+    private int deleteResourceObject(AppdefEntityID[] ids, String object,
+                                     String col)
+    {
+        Map map = groupByAuthzType(ids);
+        StringBuffer sql = new StringBuffer()
+            .append("delete ")
+            .append(object)
+            .append(" where ");
+        for (int i = 0; i < map.size(); i++) {
+            if (i > 0) {
+                sql.append(" or ");
+            }
+            sql.append(col)
+                .append(" in (")
+                .append("select r.id from Resource r, " +
+                        "ResourceType rt where r.resourceType.id=rt.id and ")
+                .append("rt.name = :rtname" + i + " and " )
+                .append("r.instanceId in (:list" +  i + ") ")
+                .append(") ");
+        }
+        int j = 0;
+        Query q = getSession().createQuery(sql.toString());
+        for (Iterator i = map.keySet().iterator(); i.hasNext(); j++) {
+            String rtname = (String)i.next();
+            List list = (List)map.get(rtname);
+            q.setString("rtname" + j, rtname)
+                .setParameterList("list" + j, list);
+        }
+        return q.executeUpdate();
     }
 
     public int deleteByInstances(AppdefEntityID[] ids) {
         // kludge to work around hiberate's limitation to define
         // on-delete="cascade" on many-to-many relationships
-        deleteResourceMap(ids);
-
-        StringBuffer sql = new StringBuffer(
-            "delete Resource where id in (")
-            .append(getResourceHQL(ids))
-            .append(")");
-
-        return getSession().createQuery(sql.toString())
-            .executeUpdate();
+        deleteResourceObject(ids, "ResGrpResMap", "id.resource.id");
+        return deleteResourceObject(ids, "Resource", "id");
     }
 
     public Resource findByInstanceId(ResourceType type, Integer id) {

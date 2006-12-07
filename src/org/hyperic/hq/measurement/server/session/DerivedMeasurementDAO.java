@@ -26,12 +26,17 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.util.jdbc.DBUtil;
+import org.hibernate.Query;
 
 /**
  * CRUD methods, finders, etc. for DerivedMeasurement
@@ -104,20 +109,35 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .setInteger(1, id).list();
     }
 
-    int deleteByInstances(AppdefEntityID[] ids) {
+    int deleteByInstances(AppdefEntityID[] ids)
+    {
+        Map map = AppdefUtil.groupByAppdefType(ids);
         StringBuffer sql = new StringBuffer()
-            .append("delete DerivedMeasurement where id in " +
-                    "(select m.id from DerivedMeasurement m " +
-                    "join m.template t " +
-                    "join t.monitorableType mt where " +
-                    "  m.interval is not null and ")
-            .append(AppdefUtil.getHQLWhereByAppdefType("mt.appdefType",
-                                                       "m.instanceId",
-                                                       ids))
-            .append(")");
-
-        return getSession().createQuery(sql.toString())
-            .executeUpdate();
+            .append("delete DerivedMeasurement where ");
+        for (int i = 0; i < map.size(); i++) {
+            if (i > 0) {
+                sql.append(" or ");
+            }
+            sql.append(" id in " +
+                       "(select m.id from DerivedMeasurement m " +
+                       "join m.template t " +
+                       "join t.monitorableType mt where " +
+                       "  m.interval is not null and ")
+                .append("mt.appdefType=")
+                .append(":appdefType"+i)
+                .append(" and ")
+                .append("m.instanceId in (:list" + i + ")")
+                .append(") ");
+        }
+        int j = 0;
+        Query q = getSession().createQuery(sql.toString());
+        for (Iterator i = map.keySet().iterator(); i.hasNext(); j++) {
+            Integer appdefType = (Integer)i.next();
+            List list = (List)map.get(appdefType);
+            q.setInteger("appdefType"+j, appdefType.intValue())
+                .setParameterList("list"+j, list);
+        }
+        return q.executeUpdate();
     }
 
     List findByInstance(int type, int id, boolean enabled) {

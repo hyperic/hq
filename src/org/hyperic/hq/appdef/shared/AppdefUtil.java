@@ -31,6 +31,7 @@ import org.hyperic.hq.authz.shared.ResourceValue;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Map;
 
 /** AppdefUtil - utility methods for appdef entities and
 * brethren.
@@ -145,9 +146,8 @@ public class AppdefUtil {
                  && server.getRuntimeAutodiscovery() );
     }
 
-    public static String getHQLWhereByAppdefType(String col1, String col2,
-                                            AppdefEntityID[] ids) {
-
+    public static Map groupByAppdefType(AppdefEntityID[] ids)
+    {
         HashMap m = new HashMap();
         for (int i = 0; i < ids.length; i++) {
             Integer type = new Integer(ids[i].getType());
@@ -158,67 +158,7 @@ public class AppdefUtil {
             }
             idList.add(ids[i].getId());
         }
-        int h = 0;
-        StringBuffer sql = new StringBuffer();
-        for (Iterator i = m.keySet().iterator(); i.hasNext(); h++) {
-            Integer appdefType = (Integer)i.next();
-            if (h > 0) {
-                sql.append(" or ");
-            }
-            sql.append("(")
-                .append(col1)
-                .append("=" + appdefType +" and ")
-                .append(col2)
-                .append(" in (");
-            ArrayList idList = (ArrayList)m.get(appdefType);
-            int k = 0;
-            for (Iterator j=idList.iterator(); j.hasNext(); k++) {
-                if (k > 0) {
-                    sql.append(",");
-                }
-                sql.append(j.next());
-            }
-            sql.append("))");
-        }
-        return sql.toString();
-    }
-
-    public static String getHQLWhereByAuthzType(String col1, String col2,
-                                           AppdefEntityID[] ids) {
-
-        HashMap m = new HashMap();
-        for (int i = 0; i < ids.length; i++) {
-            String type = appdefTypeIdToAuthzTypeStr(ids[i].getType());
-            ArrayList idList = (ArrayList)m.get(type);
-            if (idList == null) {
-                idList = new ArrayList();
-                m.put(type, idList);
-            }
-            idList.add(ids[i].getId());
-        }
-        int h = 0;
-        StringBuffer sql = new StringBuffer();
-        for (Iterator i = m.keySet().iterator(); i.hasNext(); h++) {
-            String type = (String)i.next();
-            if (h > 0) {
-                sql.append(" or ");
-            }
-            sql.append("(")
-                .append(col1)
-                .append("='" + type +"' and ")
-                .append(col2)
-                .append(" in (");
-            ArrayList idList = (ArrayList)m.get(type);
-            int k = 0;
-            for (Iterator j=idList.iterator(); j.hasNext(); k++) {
-                if (k > 0) {
-                    sql.append(",");
-                }
-                sql.append(j.next());
-            }
-            sql.append("))");
-        }
-        return sql.toString();
+        return m;
     }
 
     private AppdefUtil () {}
