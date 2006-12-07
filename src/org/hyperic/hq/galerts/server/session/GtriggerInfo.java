@@ -64,4 +64,16 @@ public class GtriggerInfo
     protected int getListIndex() {
         return _listIndex;
     }
+    
+    /**
+     * Return GtriggerInfo like a "value" object, parallel to existing
+     * API.  This guarantees that the pojo values have been loaded.
+     * @return this with the values loaded
+     */
+    GtriggerInfo getGtriggerInfoValue() {
+        getConfig();
+        getStrategy();
+        getTypeInfo();
+        return this;
+    }
 }

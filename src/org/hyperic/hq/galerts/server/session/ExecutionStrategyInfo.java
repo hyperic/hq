@@ -2,6 +2,7 @@ package org.hyperic.hq.galerts.server.session;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.hyperic.hibernate.PersistedObject;
@@ -115,6 +116,24 @@ public class ExecutionStrategyInfo
     
     protected void setTriggerList(List triggers) {
         _triggers = triggers;
+    }
+    
+    /**
+     * Return ExecutionStrategyInfo like a "value" object, parallel to existing
+     * API.  This guarantees that the pojo values have been loaded.
+     * @return this with the values loaded
+     */
+    ExecutionStrategyInfo getExecutionStrategyInfoValue() {
+        getAlertDef();
+        getConfig();
+        getPartition();
+        getType();
+        for (Iterator it = getTriggers().iterator(); it.hasNext(); ) {
+            GtriggerInfo trig = (GtriggerInfo) it.next();
+            trig.getGtriggerInfoValue();
+        }
+        
+        return this;
     }
 
     public int hashCode() {

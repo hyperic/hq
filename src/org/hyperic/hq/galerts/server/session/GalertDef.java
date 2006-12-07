@@ -138,11 +138,16 @@ public class GalertDef
 
     /**
      * Return GalertDef like a "value" object, parallel to existing API.
-     * This guarantees that the pojo has been loaded
+     * This guarantees that the pojo values have been loaded.
      * @return this with the values loaded
      */
     GalertDef getGalertDefValue() {
-        Hibernate.initialize(this);
+        getEscalation();
+        getGroup();
+        for (Iterator it = getStrategies().iterator(); it.hasNext(); ) {
+            ExecutionStrategyInfo strat = (ExecutionStrategyInfo) it.next();
+            strat.getExecutionStrategyInfoValue();
+        }        
         return this;
     }
 }
