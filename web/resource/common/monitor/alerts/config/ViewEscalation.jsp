@@ -377,7 +377,14 @@ sections = ['section'];
 
 <html:form action="/alerts/ConfigEscalation">
   <html:hidden property="mode"/>
-  <input type="hidden" name="ad" value="<c:out value="${alertDef.id}"/>"/>
+  <c:choose>
+    <c:when test="${not empty param.ad}">
+  	  <input type=hidden id="ad" name="ad" value="<c:out value="${param.ad}"/>"/>
+  	</c:when>
+  	<c:when test="${not empty param.gad}">
+  	  <input type=hidden id="gad" name="gad" value="<c:out value="${param.gad}"/>"/>
+  	</c:when>
+  </c:choose>
   <c:choose>
     <c:when test="${not empty Resource}">
       <html:hidden property="eid" value="${Resource.entityId}"/>
@@ -404,8 +411,15 @@ sections = ['section'];
       <html:hidden property="aetid" value="${ResourceType.appdefTypeKey}"/>
     </c:otherwise>
   </c:choose>
-  <input type=hidden id="ad" name="ad" value="<c:out value="${alertDef.id}"/>"/>
-  <table width="100%" cellpadding="3" cellspacing="0" border="0">
+  <c:choose>
+    <c:when test="${not empty param.ad}">
+  	  <input type=hidden id="ad" name="ad" value="<c:out value="${param.ad}"/>"/>
+  	</c:when>
+  	<c:when test="${not empty param.gad}">
+  	  <input type=hidden id="gad" name="gad" value="<c:out value="${param.gad}"/>"/>
+  	</c:when>
+  </c:choose>
+    <table width="100%" cellpadding="3" cellspacing="0" border="0">
     <tbody>
       <tr class="tableRowHeader">
         <td align="right">
