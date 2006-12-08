@@ -81,6 +81,10 @@ public class ResourceGroupDAO extends HibernateDAO
         return (ResourceGroup) super.findById(id);
     }
 
+    public ResourceGroup get(Integer id) {
+        return (ResourceGroup) super.get(id);
+    }
+
     public void save(ResourceGroup entity) {
         super.save(entity);
     }

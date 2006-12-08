@@ -396,7 +396,7 @@ sections = ['section'];
   <html:hidden property="escId"/>
 </html:form>
  
-<form action="<html:rewrite action="/escalation/SaveEscalation"/>" name="EscalationForm" id="EscalationForm">
+<form action="<html:rewrite action="/escalation/saveEscalation"/>" name="EscalationForm" id="EscalationForm">
 <input type="hidden" value="0" id="pid">
 <input type="hidden" value="0" id="pversion">
 
@@ -419,6 +419,7 @@ sections = ['section'];
   	  <input type=hidden id="gad" name="gad" value="<c:out value="${param.gad}"/>"/>
   	</c:when>
   </c:choose>
+<input type="hidden" id="ffff" name="ggg" value="<c:out value="${escalation.id}"/>" />
     <table width="100%" cellpadding="3" cellspacing="0" border="0">
     <tbody>
       <tr class="tableRowHeader">
@@ -498,7 +499,7 @@ sections = ['section'];
 							<div id="emailinput0">
 								email addresses (comma separated): 
 								<br>
-				<textarea rows="3" cols="35" id="emailinput_0"></textarea>
+				<textarea rows="3" cols="35" name="users_row0" id="emailinput_0"></textarea>
 							</div>
 							<div id="syslog0" style="display:none;">
 								meta: 
@@ -532,7 +533,7 @@ sections = ['section'];
             <tr>
               <td style="padding-top:2px;padding-bottom:2px;"><input type=radio name="allowPause" value="true"/> Allow user to pause escalation for
 
-              <select id="maxWaitTime" name="maxWaitTime">
+              <select id="maxWaitTime" name="maxwaittime">
 
                 <option value="300000">
                   5 minutes

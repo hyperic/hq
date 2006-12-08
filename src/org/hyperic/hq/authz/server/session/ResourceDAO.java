@@ -109,12 +109,18 @@ public class ResourceDAO extends HibernateDAO
 
     public void remove(Resource entity) {
         // remove resource from all resourceGroups
+        // Currently the resourceGroup collection is the inverse=true
+        // end of many-to-many with ResourceGroup
+        // Have to iterate thru resoucegroups and remove from each group
+        // the resource belongs to.  Wish Hibernate supported cascade deletes
+        // on many-to-many collections.
         ResourceGroupDAO dao = DAOFactory.getDAOFactory().getResourceGroupDAO();
         for(Iterator i=entity.getResourceGroups().iterator(); i.hasNext();) {
             ResourceGroup rg = (ResourceGroup)i.next();
-            ResourceGroup resourceGroup =
-                dao.findById(rg.getId());
-            resourceGroup.getResourceSet().remove(entity);
+            ResourceGroup resourceGroup = dao.get(rg.getId());
+            if (resourceGroup != null) {
+                resourceGroup.getResourceSet().remove(entity);
+            }
         }
         entity.getResourceGroups().clear();
         super.remove(entity);
