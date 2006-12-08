@@ -137,6 +137,7 @@ public class SaveEscalation extends BaseAction
             throw new IllegalArgumentException("Required attribute 'ad' or " +
                                                "'gad' is not defined");
         }
+        context.setJSONResult(new JSONResult(result));
         context.getSession().setAttribute("escalation", result);
 
     }

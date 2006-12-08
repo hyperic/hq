@@ -191,9 +191,9 @@ public class EscalationDAO extends HibernateDAO
         throws PermissionException
     {
         SessionBase.canViewEscalation(subjectId);
-        String sql = "select e from AlertDefinition d " +
-                "join Escalation e " +
-                "where d.id = ?";
+        String sql = "select e from AlertDefinition d, " +
+                "Escalation e " +
+                "where e.id = d.escalation.id and d.id = ?";
         return (Escalation)getSession().createQuery(sql)
                 .setInteger(0, id.intValue())
                 .uniqueResult();
