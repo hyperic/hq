@@ -152,24 +152,24 @@
             category="UTILIZATION"
             collectionType="dynamic"
             units="percentage"/>
-    <metric name="User Cpu Seconds"
+    <metric name="User Cpu Time"
             alias="CpuUserSec"
             template="sigar:Type=Cpu:User"
             category="UTILIZATION"
             collectionType="trendsup"
-            units="sec"/>
-    <metric name="System Cpu Seconds"
+            units="ms"/>
+    <metric name="System Cpu Time"
             alias="CpuSysSec"
             template="sigar:Type=Cpu:Sys"
             category="UTILIZATION"
             collectionType="trendsup"
-            units="sec"/>
-    <metric name="Cpu Idle Seconds"
+            units="ms"/>
+    <metric name="Cpu Idle Time"
             alias="CpuIdleSec"
             template="sigar:Type=Cpu:Idle"
             category="UTILIZATION"
             collectionType="trendsup"
-            units="sec"/>
+            units="ms"/>
     <metric name="Swap Free"
             alias="SwapFree"
             template="sigar:Type=Swap:Free"
@@ -252,12 +252,12 @@
             collectionType="dynamic"
             units="percentage"/>
 
-    <metric name="Cpu Wait Seconds"
+    <metric name="Cpu Wait Time"
             alias="CpuWaitSec"
             template="sigar:Type=Cpu:Wait"
             category="UTILIZATION"
             collectionType="trendsup"
-            units="sec"/>
+            units="ms"/>
   </metrics>
 
   <metrics name="Linux" include="system-common-unix,cpu-wait,tcp">
@@ -692,30 +692,30 @@
             indicator="true"
             collectionType="dynamic"
             units="percentage"/>
-    <metric name="User Cpu Seconds"
+    <metric name="User Cpu Time"
             alias="CpuUserSec"
             template="sigar:Type=CpuList,Arg=%cpu%:User"
             category="UTILIZATION"
             collectionType="trendsup"
-            units="sec"/>
-    <metric name="System Cpu Seconds"
+            units="ms"/>
+    <metric name="System Cpu Time"
             alias="CpuSysSec"
             template="sigar:Type=CpuList,Arg=%cpu%:Sys"
             category="UTILIZATION"
             collectionType="trendsup"
-            units="sec"/>
-    <metric name="Cpu Idle Seconds"
+            units="ms"/>
+    <metric name="Cpu Idle Time"
             alias="CpuIdleSec"
             template="sigar:Type=CpuList,Arg=%cpu%:Idle"
             category="UTILIZATION"
             collectionType="trendsup"
-            units="sec"/>
-    <metric name="Cpu Wait Seconds"
+            units="ms"/>
+    <metric name="Cpu Wait Time"
             alias="CpuWaitSec"
             template="sigar:Type=CpuList,Arg=%cpu%:Wait"
             category="UTILIZATION"
             collectionType="trendsup"
-            units="sec"/>
+            units="ms"/>
   </metrics>
 
   <metrics name="Process">
@@ -744,23 +744,23 @@
 
     <metric name="Cpu System Time"
             alias="SystemTime"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:Stime:%process.query%"
+            template="sigar.ptql:Type=ProcTime,Arg=$!:Sys:%process.query%"
             category="UTILIZATION"
-            units="sec"
+            units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu User Time"
             alias="UserTime"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:Utime:%process.query%"
+            template="sigar.ptql:Type=ProcTime,Arg=$!:User:%process.query%"
             category="UTILIZATION"
-            units="sec"
+            units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu Total Time"
             alias="TotalTime"
             template="sigar.ptql:Type=ProcTime,Arg=$!:Total:%process.query%"
             category="UTILIZATION"
-            units="sec"
+            units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu Usage"
@@ -823,21 +823,21 @@
             alias="SystemTime"
             template="sigar:Type=MultiProcCpu,Arg=%process.query%:Sys"
             category="UTILIZATION"
-            units="sec"
+            units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu User Time"
             alias="UserTime"
             template="sigar:Type=MultiProcCpu,Arg=%process.query%:User"
             category="UTILIZATION"
-            units="sec"
+            units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu Total Time"
             alias="TotalTime"
             template="sigar:Type=MultiProcCpu,Arg=%process.query%:Total"
             category="UTILIZATION"
-            units="sec"
+            units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu Usage"
@@ -878,23 +878,23 @@
 
     <metric name="Cpu System Time"
             alias="SystemTime"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:Stime:${service.ptql}"
+            template="sigar.ptql:Type=ProcTime,Arg=$!:Sys:${service.ptql}"
             category="UTILIZATION"
-            units="sec"
+            units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu User Time"
             alias="UserTime"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:Utime:${service.ptql}"
+            template="sigar.ptql:Type=ProcTime,Arg=$!:User:${service.ptql}"
             category="UTILIZATION"
-            units="sec"
+            units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu Total Time"
             alias="TotalTime"
             template="sigar.ptql:Type=ProcTime,Arg=$!:Total:${service.ptql}"
             category="UTILIZATION"
-            units="sec"
+            units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu Usage"

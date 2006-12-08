@@ -39,17 +39,17 @@
 
 <metric name="Process Cpu System Time"
         template="sigar:Type=ProcCpu,Arg=%process.query%:Sys"
-        units="sec"
+        units="ms"
         collectionType="trendsup"/>
 
 <metric name="Process Cpu User Time"
         template="sigar:Type=ProcCpu,Arg=%process.query%:User"
-        units="sec"
+        units="ms"
         collectionType="trendsup"/>
 
 <metric name="Process Cpu Total Time"
         template="sigar:Type=ProcCpu,Arg=%process.query%:Total"
-        units="sec"
+        units="ms"
         collectionType="trendsup"/>
 
 <metric name="Process Cpu Usage"

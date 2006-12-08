@@ -101,23 +101,23 @@
 
     <metric name="Cpu System Time"
             alias="SystemTime"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:Stime:%process.query%"
+            template="sigar.ptql:Type=ProcTime,Arg=$!:Sys:%process.query%"
             category="UTILIZATION"
-            units="sec"
+            units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu User Time"
             alias="UserTime"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:Utime:%process.query%"
+            template="sigar.ptql:Type=ProcTime,Arg=$!:User:%process.query%"
             category="UTILIZATION"
-            units="sec"
+            units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu Total Time"
             alias="TotalTime"
             template="sigar.ptql:Type=ProcTime,Arg=$!:Total:%process.query%"
             category="UTILIZATION"
-            units="sec"
+            units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu Usage"

@@ -44,18 +44,18 @@
             collectionType="dynamic"/>
 
     <metric name="Cpu System Time"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:Stime:%process.query%"
-            units="sec"
+            template="sigar.ptql:Type=ProcTime,Arg=$!:Sys:%process.query%"
+            units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu User Time"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:Utime:%process.query%"
-            units="sec"
+            template="sigar.ptql:Type=ProcTime,Arg=$!:User:%process.query%"
+            units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu Total Time"
             template="sigar.ptql:Type=ProcTime,Arg=$!:Total:%process.query%"
-            units="sec"
+            units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu Usage"

@@ -48,21 +48,21 @@
             collectionType="dynamic"/>
     <metric name="Time Spent in System Mode"
             alias="SystemTimeUsed"
-            template="sigar:Type=ProcTime,Arg=$$:Stime"
+            template="sigar:Type=ProcTime,Arg=$$:Sys"
             category="UTILIZATION"
-            units="sec"
+            units="ms"
             collectionType="trendsup"/>
     <metric name="Time Spent in User Mode"
             alias="UserTimeUsed"
-            template="sigar:Type=ProcTime,Arg=$$:Utime"
+            template="sigar:Type=ProcTime,Arg=$$:User"
             category="UTILIZATION"
-            units="sec"
+            units="ms"
             collectionType="trendsup"/>
     <metric name="Cpu Total Time"
             alias="CpuTotalTime"
             template="sigar:Type=ProcTime,Arg=$$:Total"
             category="UTILIZATION"
-            units="sec"
+            units="ms"
             collectionType="trendsup"/>
     <metric name="Open File Descriptors"
             alias="OpenFd"
