@@ -175,11 +175,24 @@ public class VMwareDetector
             return null;
         }
 
+        if (!getTypeInfo().getName().equals(info.toString())) {
+            return null;
+        }
+
         return info;
     }
 
     private ServerResource getWin32Server()
         throws PluginException {
+
+        Properties props = new Properties();
+        props.setProperty(VMwareConnectParams.PROP_AUTHD_PORT,
+                          VMwareConnectParams.DEFAULT_AUTHD_PORT);
+
+        VMwareProductInfo info = getProductInfo(props);
+        if (info == null) {
+            return null;
+        }
 
         String[] products = {
             "GSX Server", "Server"
@@ -206,14 +219,10 @@ public class VMwareDetector
             return null;
         }
 
-        Properties props = new Properties();
-        props.setProperty(VMwareConnectParams.PROP_AUTHD_PORT,
-                          VMwareConnectParams.DEFAULT_AUTHD_PORT);
-
         ServerResource server = createServerResource(path);
         server.setProductConfig(new ConfigResponse(props));
         server.setMeasurementConfig();
-        setCustomProperties(server, getProductInfo(props));
+        setCustomProperties(server, info);
         return server;
     }
 
@@ -241,10 +250,6 @@ public class VMwareDetector
 
         VMwareProductInfo info = getProductInfo(props);
         if (info == null) {
-            return null;
-        }
-
-        if (!getTypeInfo().getName().equals(info.toString())) {
             return null;
         }
 
