@@ -190,7 +190,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @param who
      * @param newValue
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:transaction type="Required"
      */
     public ApplicationValue updateApplication(AuthzSubjectValue subject,
                                               ApplicationValue newValue)
