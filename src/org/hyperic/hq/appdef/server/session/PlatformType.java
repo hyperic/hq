@@ -205,6 +205,7 @@ public class PlatformType extends AppdefResourceType {
         Platform p = new Platform();
 
         p.setName(pv.getName());
+        p.setDescription(pv.getDescription());
         p.setCertdn(pv.getCertdn());
         p.setCommentText(pv.getCommentText());
         p.setCpuCount(pv.getCpuCount());
