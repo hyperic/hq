@@ -84,6 +84,7 @@
         <include name="oracle.jdbc.driver.OracleDriver"/>
         <include name="com.microsoft.jdbc.sqlserver.SQLServerDriver"/>
         <include name="com.mysql.jdbc.Driver"/>
+        <include name="com.ibm.db2.jcc.DB2Driver"/>
       </option>
       <option name="jdbcUrl"
               description="JDBC Connection URL"/>
@@ -122,6 +123,11 @@
   <p>
   If the <b>MS SQL 2000</b> driver is selected, the JDBC URL syntax is: 
   <i>jdbc:microsoft:sqlserver://localhost:1433;databasename=test</i>
+  </p> 
+
+  <p>
+  If the <b>DB2</b> driver is selected, the JDBC URL syntax is: 
+  <i>jdbc:db2://localhost:50000/test</i>
   </p> 
   ]]>
   </help>
