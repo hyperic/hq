@@ -26,6 +26,10 @@
  -->
 
 <plugin package="org.hyperic.hq.plugin.mysql">
+  <classpath>
+    <include name="pdk/lib/jdbc/mysql-connector-java-3.0.12-production-bin.jar"/>
+  </classpath>
+
   <!-- we use a dummy jmx object name -->
   <filter name="domain" value="mysql"/>
 

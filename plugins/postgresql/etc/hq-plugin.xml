@@ -26,6 +26,10 @@
  -->
 
 <plugin package="org.hyperic.hq.plugin.postgresql">
+  <classpath>
+    <include name="pdk/lib/jdbc/postgresql-7.4.3.jar"/>
+  </classpath>
+
   <!-- we use a dummy jmx object name -->
   <filter name="domain" value="postgresql"/>
 

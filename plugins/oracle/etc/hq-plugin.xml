@@ -27,6 +27,10 @@
 
 <plugin package="org.hyperic.hq.plugin.oracle">
 
+  <classpath>
+    <include name="pdk/lib/jdbc/oracle12.jar"/>
+  </classpath>
+
   <!-- we use a dummy jmx object name -->
   <filter name="domain" value="oracle"/>
 

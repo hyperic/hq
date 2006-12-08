@@ -653,6 +653,17 @@
       <include name="org/hyperic/hq/product/jmx/*.class" />
     </jar>
 
+    <!-- Copy jdbc drivers for use with jdbc based plugins -->
+    <mkdir dir="${pdk.lib}/jdbc"/>
+    <copy toDir="${pdk.lib}/jdbc">
+       <fileset dir="${thirdparty.lib}/oracle_jdbc" includes="oracle12.jar" />
+       <fileset dir="${thirdparty.lib}/mysql_jdbc" includes="mysql*.jar" />
+       <fileset dir="${thirdparty.lib}/sybase_jdbc" includes="sybase*.jar" />
+       <!-- Postgres plugin uses the 7.4.3 driver -->
+       <fileset dir="${thirdparty.lib}/postgresql" includes="postgresql-7.4.3.jar"/>
+       <fileset dir="${thirdparty.lib}/mssql_jdbc" includes="ms*.jar" />
+    </copy>
+
     <!-- requires ${pdk.lib} we just created -->
     <taskdef name="hqplugin" 
              classname="org.hyperic.hq.product.ant.PluginJar"
@@ -666,45 +677,24 @@
   <!-- Build the plugins -->
   <target name="pack-plugins" depends="init-taskdefs,pack-pdk-lib">
     <mkdir dir="${plugin.dir}"/>
-    <!-- Copy jdbc drivers for inclusion in jdbc based plugins -->
-    <mkdir dir="${plugin.dir}/jdbc"/>
-    <mkdir dir="${plugin.dir}/jdbc/lib"/>
-    <copy toDir="${plugin.dir}/jdbc/lib">
-       <fileset dir="${thirdparty.lib}/oracle_jdbc" includes="oracle12.jar" />
-       <fileset dir="${thirdparty.lib}/mysql_jdbc" includes="mysql*.jar" />
-       <fileset dir="${thirdparty.lib}/sybase_jdbc" includes="sybase*.jar" />
-       <!-- Postgres plugin uses the 7.4.3 driver -->
-       <fileset dir="${thirdparty.lib}/postgresql" includes="postgresql-7.4.3.jar"/>
-       <fileset dir="${thirdparty.lib}/mssql_jdbc" includes="ms*.jar" />
-    </copy>
 
     <hqplugin name="apache"/>
 
     <hqplugin name="iplanet"/>
 
-    <hqplugin name="oracle">
-       <fileset dir="${plugin.dir}/jdbc" includes="lib/oracle12.jar"/>
-    </hqplugin>
+    <hqplugin name="oracle"/>
 
     <hqplugin name="db2">
        <fileset dir="${db2monitor.dir}" includes="lib/*"/>
     </hqplugin>
 
-    <hqplugin name="postgresql">
-       <fileset dir="${plugin.dir}/jdbc" includes="lib/postgresql-7.4.3.jar"/>
-    </hqplugin>
+    <hqplugin name="postgresql"/>
 
-    <hqplugin name="mysql">
-       <fileset dir="${plugin.dir}/jdbc" includes="lib/mysql*.jar" />
-    </hqplugin>
+    <hqplugin name="mysql"/>
 
-    <hqplugin name="bugzilla">
-       <fileset dir="${plugin.dir}/jdbc" includes="lib/mysql*.jar" />
-    </hqplugin>
+    <hqplugin name="bugzilla"/>
 
-    <hqplugin name="sybase">
-       <fileset dir="${plugin.dir}/jdbc" includes="lib/sybase*.jar" />
-    </hqplugin>
+    <hqplugin name="sybase"/>
 
     <hqplugin name="servlet"/>
 
@@ -734,14 +724,7 @@
 
     <hqplugin name="postfix"/>
 
-    <hqplugin name="sqlquery">
-       <fileset dir="${plugin.dir}/jdbc">
-          <include name="lib/postgresql-7.4.3.jar"/>
-          <include name="lib/oracle12.jar"/>
-          <include name="lib/ms*.jar"/>
-          <include name="lib/mysql*.jar"/>
-       </fileset>
-    </hqplugin>
+    <hqplugin name="sqlquery"/>
 
     <hqplugin name="netdevice"/>
 
