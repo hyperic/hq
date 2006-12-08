@@ -76,7 +76,7 @@
     </many-to-one>
 
     <many-to-one name="category" class="Category">
-      <column name="CATEGORY_ID" />
+      <column name="CATEGORY_ID" not-null="true"/>
     </many-to-one>
 
     <bag name="measurementArgs" table="EAM_MEASUREMENT_ARG"
