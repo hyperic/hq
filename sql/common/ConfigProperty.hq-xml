@@ -21,10 +21,10 @@
 
     <properties name="configPropertyId" unique="true">
       <property name="prefix" type="string">
-        <column name="PREFIX" not-null="false" index="EAM_CONFIGURATION_KEY_INDX" length="80" />
+        <column name="PREFIX" not-null="false" length="80" />
       </property>
       <property name="key" type="string">
-        <column name="PROPKEY" not-null="false" index="EAM_CONFIGURATION_KEY_INDX" length="80" />
+        <column name="PROPKEY" not-null="false" length="80" />
       </property>
     </properties>
 
