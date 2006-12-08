@@ -22,10 +22,10 @@
 
     <properties name="resTypeOper" unique="true">
       <property name="name" type="string">
-        <column name="NAME" index="EAM_OPNAME_RES_TYPE_IDX, EAM_OPNAME_IDX" not-null="true" length="100" />
+        <column name="NAME" index="EAM_OPNAME_IDX" not-null="true" length="100" />
       </property>
       <many-to-one name="resourceType" class="ResourceType">
-        <column name="RESOURCE_TYPE_ID" not-null="false" index="EAM_OPNAME_RES_TYPE_IDX" />
+        <column name="RESOURCE_TYPE_ID" not-null="false" />
       </many-to-one>
     </properties>
 

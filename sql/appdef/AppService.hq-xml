@@ -23,14 +23,14 @@
     <properties name="appServiceId" unique="true">
       <many-to-one name="service" 
                    class="org.hyperic.hq.appdef.server.session.Service">
-        <column name="SERVICE_ID" index="EAM_SERVICE_KEY" not-null="false" />
+        <column name="SERVICE_ID" not-null="false" />
       </many-to-one>
       <many-to-one name="serviceCluster" class="ServiceCluster">
-        <column name="CLUSTER_ID" index="EAM_SERVICE_KEY" not-null="false" />
+        <column name="CLUSTER_ID" not-null="false" />
       </many-to-one>
       <many-to-one name="application" 
                    class="org.hyperic.hq.appdef.server.session.Application">
-        <column name="APPLICATION_ID" index="EAM_SERVICE_KEY" not-null="false" />
+        <column name="APPLICATION_ID" not-null="false" />
       </many-to-one>
     </properties>
 

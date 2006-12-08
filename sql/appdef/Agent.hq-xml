@@ -21,10 +21,10 @@
 
     <properties name="agentId" unique="true">
       <property name="address" type="string">
-        <column name="ADDRESS" index="AGENT_ADDRESS_PORT" not-null="true" length="64" />
+        <column name="ADDRESS" not-null="true" length="64" />
       </property>
       <property name="port" type="integer">
-        <column name="PORT" index="AGENT_ADDRESS_PORT" not-null="true" />
+        <column name="PORT" not-null="true" />
       </property>
     </properties>
 

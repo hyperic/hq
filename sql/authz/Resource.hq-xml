@@ -21,11 +21,11 @@
 
     <properties name="resourceTypeInstance" unique="true">
       <many-to-one name="resourceType" class="ResourceType" >
-        <column name="RESOURCE_TYPE_ID" index="EAM_RESOURCE_INSTANCE_KEY, EAM_RESOURCE_IDX_TYPE" unique="false" not-null="false" />
+        <column name="RESOURCE_TYPE_ID" index="EAM_RESOURCE_IDX_TYPE" unique="false" not-null="false" />
       </many-to-one>
 
       <property name="instanceId" type="integer">
-        <column name="INSTANCE_ID" index="EAM_RESOURCE_INSTANCE_KEY, EAM_RESOURCE_INSTANCE_ID" not-null="false" />
+        <column name="INSTANCE_ID" index="EAM_RESOURCE_INSTANCE_ID" not-null="false" />
       </property>
     </properties>
 

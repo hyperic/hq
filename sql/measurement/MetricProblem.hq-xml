@@ -10,10 +10,10 @@
     <!-- move to EE only -->
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="measurementId" type="integer">
-        <column name="MEASUREMENT_ID" index="METRIC_PROB_ID_IDX, METRIC_PROB_TIME_IDX" not-null="true" />
+        <column name="MEASUREMENT_ID" index="METRIC_PROB_ID_IDX" not-null="true" />
       </key-property>
       <key-property name="timestamp" type="long">
-        <column name="TIMESTAMP" index="METRIC_PROB_TIME_IDX" not-null="true" />
+        <column name="TIMESTAMP" not-null="true" />
       </key-property>
     </composite-id>
 

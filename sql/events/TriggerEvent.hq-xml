@@ -9,11 +9,11 @@
   <class name="TriggerEvent" table="EAM_TRIGGER_EVENT">
     <composite-id name="id" class="TriggerEventId">
       <key-property name="triggerId" type="integer">
-        <column name="TRIGGER_ID" index="EAM_TRIGGER_EVENT_REF" not-null="true" />
+        <column name="TRIGGER_ID" not-null="true" />
       </key-property>
 
       <key-many-to-one name="eventId" class="Event">
-        <column name="EVENT_ID" index="EAM_TRIGGER_EVENT_REF" not-null="true" />
+        <column name="EVENT_ID" not-null="true" />
       </key-many-to-one>
     </composite-id>
 

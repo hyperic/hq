@@ -22,10 +22,10 @@
     <properties name="ipId" unique="true">
       <many-to-one name="platform" 
                    class="org.hyperic.hq.appdef.server.session.Platform">
-        <column name="PLATFORM_ID" index="EAM_IP_IDX" not-null="false" />
+        <column name="PLATFORM_ID" not-null="false" />
       </many-to-one>
       <property name="address" type="string">
-        <column name="ADDRESS" index="EAM_IP_IDX" not-null="true" length="64" />
+        <column name="ADDRESS" not-null="true" length="64" />
       </property>
     </properties>
 

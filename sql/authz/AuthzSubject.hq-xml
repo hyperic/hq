@@ -22,11 +22,11 @@
 
     <properties name="subjNameByDsn" unique="true">
       <property name="name" type="string">
-        <column name="NAME" index="EAM_SUBJECT_AUTH_KEY" not-null="true" length="100" />
+        <column name="NAME" not-null="true" length="100" />
       </property>
 
       <property name="authDsn" type="string">
-        <column name="DSN" index="EAM_SUBJECT_AUTH_KEY" not-null="true" length="100" />
+        <column name="DSN" not-null="true" length="100" />
       </property>
     </properties>
 
