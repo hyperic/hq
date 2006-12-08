@@ -62,8 +62,19 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         for (Iterator i = mt.getRawMeasurementArgs().iterator(); i.hasNext();) {
             MeasurementArg raw = (MeasurementArg)i.next();
             MeasurementTemplate derived = raw.getTemplate();
+            // clear measurement arg collection for cascade delete
+            derived.getMeasurementArgs().clear();
             dm.add(derived);
         }
+        // clear collection to avoid ObjectDeletedException
+        //
+        // must clear the raw measurement collection as
+        // the derived measurement template also references the same
+        // measurement arg instance. If we don't clear rawMeasurement
+        // collection, then Hibernate will throw a ObjectDeletedException
+        // complaining the RawMeasurement arg will be resaved..
+        mt.getRawMeasurementArgs().clear();
+        
         // remove all dependent derived measurements and
         // its measurements
         for (Iterator i=dm.iterator(); i.hasNext();) {
