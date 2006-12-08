@@ -721,7 +721,7 @@
   <metrics name="Process">
     <metric name="Availability"
             alias="Availability"
-            template="sigar.ptql:Type=ProcState,Arg=$!:State:%process.query%"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
             category="AVAILABILITY"
             indicator="true"
             units="percentage"
@@ -729,14 +729,14 @@
 
     <metric name="Virtual Memory Size"
             alias="VirtualMemSize"
-            template="sigar.ptql:Type=ProcMem,Arg=$!:Size:%process.query%"
+            template="sigar:Type=ProcMem,Arg=%process.query%:Size"
             category="UTILIZATION"
             units="B"
             collectionType="dynamic"/>
 
     <metric name="Resident Memory Size"
             alias="ResidentMemSize"
-            template="sigar.ptql:Type=ProcMem,Arg=$!:Resident:%process.query%"
+            template="sigar:Type=ProcMem,Arg=%process.query%:Resident"
             category="UTILIZATION"
             indicator="true"
             units="B"
@@ -744,28 +744,28 @@
 
     <metric name="Cpu System Time"
             alias="SystemTime"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:Sys:%process.query%"
+            template="sigar:Type=ProcTime,Arg=%process.query%:Sys"
             category="UTILIZATION"
             units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu User Time"
             alias="UserTime"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:User:%process.query%"
+            template="sigar:Type=ProcTime,Arg=%process.query%:User"
             category="UTILIZATION"
             units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu Total Time"
             alias="TotalTime"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:Total:%process.query%"
+            template="sigar:Type=ProcTime,Arg=%process.query%:Total"
             category="UTILIZATION"
             units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu Usage"
             alias="Usage"
-            template="sigar.ptql:Type=ProcCpu,Arg=$!:Percent:%process.query%"
+            template="sigar:Type=ProcCpu,Arg=%process.query%:Percent"
             category="UTILIZATION"
             indicator="true"
             units="percentage"
@@ -773,20 +773,20 @@
 
     <metric name="Start Time"
             alias="StartTime"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:StartTime:%process.query%"
+            template="sigar:Type=ProcTime,Arg=%process.query%:StartTime"
             category="AVAILABILITY"
             units="epoch-millis"
             collectionType="static"/>
 
     <metric name="Open File Descriptors"
             alias="OpenFd"
-            template="sigar.ptql:Type=ProcFd,Arg=$!:Total:%process.query%"
+            template="sigar:Type=ProcFd,Arg=%process.query%:Total"
             category="UTILIZATION"
             units="none"
             collectionType="dynamic"/>
 
     <metric name="Threads"
-            template="sigar.ptql:Type=ProcState,Arg=$!:Threads:%process.query%"/>
+            template="sigar:Type=ProcState,Arg=%process.query%:Threads"/>
   </metrics>
 
   <metrics name="MultiProcess">
@@ -863,14 +863,14 @@
 
     <metric name="Memory Size"
             alias="MemSize"
-            template="sigar.ptql:Type=ProcMem,Arg=$!:Size:${service.ptql}"
+            template="sigar:Type=ProcMem,Arg=${service.ptql}:Size"
             category="UTILIZATION"
             units="B"
             collectionType="dynamic"/>
 
     <metric name="Resident Memory Size"
             alias="ResidentMemSize"
-            template="sigar.ptql:Type=ProcMem,Arg=$!:Resident:${service.ptql}"
+            template="sigar:Type=ProcMem,Arg=${service.ptql}:Resident"
             category="UTILIZATION"
             indicator="true"
             units="B"
@@ -878,28 +878,28 @@
 
     <metric name="Cpu System Time"
             alias="SystemTime"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:Sys:${service.ptql}"
+            template="sigar:Type=ProcTime,Arg=${service.ptql}:Sys"
             category="UTILIZATION"
             units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu User Time"
             alias="UserTime"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:User:${service.ptql}"
+            template="sigar:Type=ProcTime,Arg=${service.ptql}:User"
             category="UTILIZATION"
             units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu Total Time"
             alias="TotalTime"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:Total:${service.ptql}"
+            template="sigar:Type=ProcTime,Arg=${service.ptql}:Total"
             category="UTILIZATION"
             units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu Usage"
             alias="Usage"
-            template="sigar.ptql:Type=ProcCpu,Arg=$!:Percent:${service.ptql}"
+            template="sigar:Type=ProcCpu,Arg=${service.ptql}:Percent"
             category="UTILIZATION"
             indicator="true"
             units="percentage"
@@ -907,21 +907,21 @@
 
     <metric name="Start Time"
             alias="StartTime"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:StartTime:${service.ptql}"
+            template="sigar:Type=ProcTime,Arg=${service.ptql}:StartTime"
             category="AVAILABILITY"
             units="epoch-millis"
             collectionType="static"/>
 
     <metric name="Open Handles"
             alias="OpenHandles"
-            template="sigar.ptql:Type=ProcFd,Arg=$!:Total:${service.ptql}"
+            template="sigar:Type=ProcFd,Arg=${service.ptql}:Total"
             category="UTILIZATION"
             indicator="true"
             units="none"
             collectionType="dynamic"/>
 
     <metric name="Threads"
-            template="sigar.ptql:Type=ProcState,Arg=$!:Threads:${service.ptql}"/>
+            template="sigar:Type=ProcState,Arg=${service.ptql}:Threads"/>
   </metrics>
 
   <help name="AIX">

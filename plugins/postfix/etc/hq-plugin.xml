@@ -31,40 +31,40 @@
   <!-- Process metrics -->
   <metrics name="process">
     <metric name="Availability"
-            template="sigar.ptql:Type=ProcState,Arg=$!:State:%process.query%"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
             indicator="true"/>
 
     <metric name="Virtual Memory Size"
-            template="sigar.ptql:Type=ProcMem,Arg=$!:Size:%process.query%"
+            template="sigar:Type=ProcMem,Arg=%process.query%:Size"
             units="B"/>
 
     <metric name="Resident Memory Size"
-            template="sigar.ptql:Type=ProcMem,Arg=$!:Resident:%process.query%"
+            template="sigar:Type=ProcMem,Arg=%process.query%:Resident"
             units="B"
             collectionType="dynamic"/>
 
     <metric name="Cpu System Time"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:Sys:%process.query%"
+            template="sigar:Type=ProcTime,Arg=%process.query%:Sys"
             units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu User Time"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:User:%process.query%"
+            template="sigar:Type=ProcTime,Arg=%process.query%:User"
             units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu Total Time"
-            template="sigar.ptql:Type=ProcTime,Arg=$!:Total:%process.query%"
+            template="sigar:Type=ProcTime,Arg=%process.query%:Total"
             units="ms"
             collectionType="trendsup"/>
 
     <metric name="Cpu Usage"
-            template="sigar.ptql:Type=ProcCpu,Arg=$!:Percent:%process.query%"
+            template="sigar:Type=ProcCpu,Arg=%process.query%:Percent"
             indicator="true"
             units="percentage"/>
 
     <metric name="Open File Descriptors"
-            template="sigar.ptql:Type=ProcFd,Arg=$!:Total:%process.query%"/>
+            template="sigar:Type=ProcFd,Arg=%process.query%:Total"/>
   </metrics>
 
   <metrics name="queue">
