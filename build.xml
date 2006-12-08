@@ -692,8 +692,6 @@
 
     <hqplugin name="mysql"/>
 
-    <hqplugin name="bugzilla"/>
-
     <hqplugin name="sybase"/>
 
     <hqplugin name="servlet"/>
