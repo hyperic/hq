@@ -27,6 +27,13 @@ package org.hyperic.hibernate;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.management.MBeanServerFactory;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import javax.management.MalformedObjectNameException;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanRegistrationException;
+import javax.management.NotCompliantMBeanException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,6 +42,7 @@ import org.hibernate.EmptyInterceptor;
 import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
 import org.hibernate.Hibernate;
+import org.hibernate.jmx.StatisticsService;
 import org.hibernate.cache.NoCacheProvider;
 import org.hibernate.stat.Statistics;
 import org.hibernate.stat.SecondLevelCacheStatistics;
@@ -55,6 +63,7 @@ import org.hyperic.hq.common.DiagnosticObject;
 import java.sql.Connection;
 import java.util.Properties;
 import java.util.Iterator;
+import java.util.ArrayList;
 
 /**
  * from hibernate caveat emptor with modifications to optimize initial 
@@ -93,6 +102,7 @@ public class Util {
             if (jndiName != null) {
                 // Let Hibernate bind the factory to JNDI
                 configuration.buildSessionFactory();
+                createHQHibernateStatMBean();
             } else {
                 // or use static variable handling
                 sessionFactory = configuration.buildSessionFactory();
@@ -137,6 +147,23 @@ public class Util {
             }
         };
         DiagnosticThread.addDiagnosticObject(cacheDiagnostics);
+    }
+
+    private static void createHQHibernateStatMBean()
+        throws MalformedObjectNameException, InstanceAlreadyExistsException,
+               MBeanRegistrationException, NotCompliantMBeanException
+    {
+        //get the available MBean servers
+        ArrayList list = MBeanServerFactory.findMBeanServer(null);
+        //take the first one
+        MBeanServer server = (MBeanServer) list.get(0);
+        //build the MBean name
+        ObjectName on =
+            new ObjectName("Hibernate:type=statistics,application=hq");
+        StatisticsService mBean = new StatisticsService();
+        mBean.setSessionFactory(getSessionFactory());
+        server.registerMBean(mBean, on);
+        log.info("HQ Hibernate Statistics MBean registered " + on);
     }
 
     private static void mockTestConfig() {
