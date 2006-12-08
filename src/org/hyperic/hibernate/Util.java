@@ -59,6 +59,7 @@ import org.hibernate.dialect.function.ClassicCountFunction;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hyperic.hq.common.DiagnosticThread;
 import org.hyperic.hq.common.DiagnosticObject;
+import org.hyperic.hq.product.server.MBeanUtil;
 
 import java.sql.Connection;
 import java.util.Properties;
@@ -153,10 +154,9 @@ public class Util {
         throws MalformedObjectNameException, InstanceAlreadyExistsException,
                MBeanRegistrationException, NotCompliantMBeanException
     {
-        //get the available MBean servers
-        ArrayList list = MBeanServerFactory.findMBeanServer(null);
-        //take the first one
-        MBeanServer server = (MBeanServer) list.get(0);
+        // get MBeanServer
+        MBeanServer server = MBeanUtil.getMBeanServer();
+
         //build the MBean name
         ObjectName on =
             new ObjectName("Hibernate:type=statistics,application=hq");
