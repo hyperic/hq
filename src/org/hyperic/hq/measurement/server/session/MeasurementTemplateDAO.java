@@ -132,7 +132,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
                     cat = catDAO.create(info.getCategory());
                 }
             } else {
-                cat = null;
+                cat = mt.getCategory();
             }
         } else {
             throw new IllegalArgumentException("category has null value");
