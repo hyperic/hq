@@ -224,7 +224,7 @@
                 <property name="MaxConnections" description="Max Connections"/>
                 <property name="MaxActiveTime" description="Max Active Time"/>
                 <property name="MaxCreateConnections" description="Max Create Connections"/>
-                <property name="MaxIdleTiem" description="Max Idle Time"/>
+                <property name="MaxIdleTime" description="Max Idle Time"/>
                 <property name="MaxOverflowConnections" description="Max Overflow Connections"/>
                 <property name="MaxPoolTime" description="Max Pool Time"/>
             </properties>
@@ -480,7 +480,7 @@
                 <property name="MaxConnections" description="Max Connections"/>
                 <property name="MaxActiveTime" description="Max Active Time"/>
                 <property name="MaxCreateConnections" description="Max Create Connections"/>
-                <property name="MaxIdleTiem" description="Max Idle Time"/>
+                <property name="MaxIdleTime" description="Max Idle Time"/>
                 <property name="MaxOverflowConnections" description="Max Overflow Connections"/>
                 <property name="MaxPoolTime" description="Max Pool Time"/>
             </properties>
