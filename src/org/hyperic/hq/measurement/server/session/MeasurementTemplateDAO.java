@@ -240,7 +240,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
 
     List findByMeasurementArg(Integer tId) {
         String sql =
-            "select distinct t from MeasurementTemplate t " +
+            "select t from MeasurementTemplate t " +
             "join t.measurementArgs args " +
             "where args.templateArg.id=?";
 
@@ -251,7 +251,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
     MeasurementTemplate findByArgAndTemplate(Integer tId,
                                              String template) {
         String sql =
-            "select distinct t from MeasurementTemplate t " +
+            "select t from MeasurementTemplate t " +
             "join t.measurementArgs args " +
             "where args.templateArg.id=? and t.template=?";
         
@@ -261,8 +261,23 @@ public class MeasurementTemplateDAO extends HibernateDAO {
     }
 
     List findDerivedByMonitorableType(String name) {
+        // Oracle doesn't like 'distinct' qualifier on select when
+        // there are BLOB attributes.  The Oracle exception is
+        // (ORA-00932: inconsistent datatypes: expected - got BLOB)
+        // I am removing the 'distinct' qualifier so that
+        // Oracle does not blow up on the select query.
+        // I think the distinct qualifier is unnecessary in this
+        // query as the results I believe are already distinct.
+        //
+        // Some other options which may work with the distinct qualifier:
+        // 1. Use HQL projection to selectively return non-binary attributes
+        //
+        // 2. More exotic solution may be lazy property loading for
+        // binary or BLOB attributes(?), but requires hibernate proxy
+        // byte code instrumentation (RISKY!).
+        //
         String sql =
-            "select distinct m from MeasurementTemplate m " +
+            "select m from MeasurementTemplate m " +
             "join m.monitorableType mt " +
             "where mt.name = ? and " +
             "m.defaultInterval > 0 " +
