@@ -6,9 +6,11 @@ import java.util.Collections;
 
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.events.AlertDefinitionInterface;
+import org.hyperic.hq.events.AlertInterface;
 
 public class GalertLog
-    extends PersistedObject
+    extends PersistedObject implements AlertInterface
 { 
     public static int MAX_SHORT_REASON = 256;
     public static int MAX_LONG_REASON  = 2048;
@@ -46,6 +48,10 @@ public class GalertLog
         _def = def;
     }
 
+    public AlertDefinitionInterface getAlertDefinitionInterface() {
+        return getAlertDef();
+    }
+
     public long getTimestamp() {
         return _timestamp;
     }
@@ -62,7 +68,7 @@ public class GalertLog
         _group = group;
     }
     
-    protected String getShortReason() {
+    public String getShortReason() {
         return _shortReason;
     }
     
@@ -70,7 +76,7 @@ public class GalertLog
         _shortReason = txt;
     }
     
-    protected String getLongReason() {
+    public String getLongReason() {
         return _longReason;
     }
     

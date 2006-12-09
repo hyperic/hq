@@ -5,15 +5,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.hibernate.Hibernate;
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.common.server.session.Crispo;
+import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.server.session.Escalation;
 
 public class GalertDef 
-    extends PersistedObject
+    extends PersistedObject implements AlertDefinitionInterface
 { 
     private String        _name;
     private String        _desc;
@@ -149,5 +150,21 @@ public class GalertDef
             strat.getExecutionStrategyInfoValue();
         }        
         return this;
+    }
+
+    public int getAppdefId() {
+        return getGroup().getId().intValue();
+    }
+
+    public int getAppdefType() {
+        return AppdefEntityConstants.APPDEF_TYPE_GROUP;
+    }
+
+    public int getPriority() {
+        return getSeverity().getCode();
+    }
+
+    public boolean isNotifyFiltered() {
+        return false;
     }
 }
