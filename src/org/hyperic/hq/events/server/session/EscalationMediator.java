@@ -19,7 +19,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.LockSet;
-import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.Mediator;
 import org.hyperic.hq.TransactionContext;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -663,7 +662,7 @@ public class EscalationMediator extends Mediator
             return;
         }
 
-        PersistedObject alert;
+        AlertInterface alert;
         switch(state.getAlertType()) {
         case EscalationState.ALERT_TYPE_CLASSIC:
             alert = getAlert(state.getAlertId());
@@ -723,11 +722,7 @@ public class EscalationMediator extends Mediator
         }
 
         try {
-            // XXX - Actions only know to execute alert definitions, not
-            // galert definitions
-            if (state.getAlertType() == EscalationState.ALERT_TYPE_CLASSIC) {            
-                dispatchAction(escalation, (Alert) alert, state);
-            }
+            dispatchAction(escalation, alert, state);
 
             // schedule next action;
             scheduleAction(state);
@@ -753,7 +748,7 @@ public class EscalationMediator extends Mediator
         }
     }
 
-    private void dispatchAction(Escalation escalation, Alert alert,
+    private void dispatchAction(Escalation escalation, AlertInterface alert,
                                 EscalationState state)
         throws ActionExecuteException, PermissionException
     {
