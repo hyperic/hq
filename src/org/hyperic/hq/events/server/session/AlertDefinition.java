@@ -33,6 +33,7 @@ import java.util.Iterator;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
@@ -41,7 +42,7 @@ import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 
 public class AlertDefinition 
-    extends PersistedObject
+    extends PersistedObject implements AlertDefinitionInterface
 {
     private String            _name;
     private long              _ctime;

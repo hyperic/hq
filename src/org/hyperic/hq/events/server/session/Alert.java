@@ -32,12 +32,14 @@ import java.util.Iterator;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.events.AlertDefinitionInterface;
+import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertValue;
 
 public class Alert 
-    extends PersistedObject
+    extends PersistedObject implements AlertInterface
 {
     private long            _ctime;
     private AlertDefinition _alertDefinition;
@@ -83,6 +85,10 @@ public class Alert
         _ctime = ctime;
     }
     
+    public long getTimestamp() {
+        return getCtime();
+    }
+
     public AlertDefinition getAlertDefinition() {
         return _alertDefinition;
     }
@@ -91,6 +97,10 @@ public class Alert
         _alertDefinition = alertDefinition;
     }
 
+    public AlertDefinitionInterface getAlertDefinitionInterface() {
+        return getAlertDefinition();
+    }
+    
     public Collection getActionLog() {
         return Collections.unmodifiableCollection(_actionLog);
     }
