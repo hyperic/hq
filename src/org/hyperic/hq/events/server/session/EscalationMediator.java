@@ -364,8 +364,8 @@ public class EscalationMediator extends Mediator
             // save escalation with alert definition
             switch(alertType) {
             case EscalationState.ALERT_TYPE_CLASSIC:
-                AlertDefinitionDAO adao = DAOFactory.getDAOFactory()
-                    .getAlertDefDAO();
+                AlertDefinitionDAO adao =
+                    DAOFactory.getDAOFactory().getAlertDefDAO();
                 AlertDefinition adef = adao.findById(alertDefId);
                 adef.setEscalation(e);
                 adao.save(adef);
@@ -443,18 +443,21 @@ public class EscalationMediator extends Mediator
         return dao.getEscalationState(e, alertDefId, alertType);
     }
 
-    private Alert getAlert(int alertId)
-    {
-        AlertDAO dao = DAOFactory.getDAOFactory().getAlertDAO();
-        return dao.findById(new Integer(alertId));
-    }
+    private AlertInterface getAlert(int alertType, int alertId) {
+        switch(alertType) {
+        case EscalationState.ALERT_TYPE_CLASSIC:
+            AlertDAO dao = DAOFactory.getDAOFactory().getAlertDAO();
+            return dao.findById(new Integer(alertId));
+        case EscalationState.ALERT_TYPE_GROUP:
+            GalertLogDAO gdao = DAOFactory.getDAOFactory().getGalertLogDAO();
+            return gdao.findById(new Integer(alertId));
+        default:
+            log.error("alertType " + alertType + " unknown");
+            return null;            // Unknown alert type, can't do anything
+        }
 
-    private GalertLog getGalert(int alertId)
-    {
-        GalertLogDAO dao = DAOFactory.getDAOFactory().getGalertLogDAO();
-        return dao.findById(new Integer(alertId));
     }
-
+    
     public List findScheduledEscalationState()
     {
         EscalationStateDAO dao =
@@ -542,21 +545,9 @@ public class EscalationMediator extends Mediator
 
         Escalation escalation;
         Integer alertDefId;
-        switch(alertType) {
-        case EscalationState.ALERT_TYPE_CLASSIC:
-            Alert alert = getAlert(alertId.intValue());
-            alertDefId = alert.getAlertDefinition().getId();
-            escalation = alert.getAlertDefinition().getEscalation();
-            break;
-        case EscalationState.ALERT_TYPE_GROUP:
-            GalertLog galert = getGalert(alertId.intValue());
-            alertDefId = galert.getAlertDef().getId();
-            escalation = galert.getAlertDef().getEscalation();
-            break;
-        default:
-            log.error("alertType " + alertType + " unknown");
-            return null;            // Unknown alert type, can't do anything
-        }
+        AlertInterface alert = getAlert(alertType, alertId.intValue());
+        alertDefId = alert.getAlertDefinitionInterface().getId();
+        escalation = alert.getAlertDefinitionInterface().getEscalation();
 
         if (escalation != null) {
             EscalationState state =
@@ -662,18 +653,8 @@ public class EscalationMediator extends Mediator
             return;
         }
 
-        AlertInterface alert;
-        switch(state.getAlertType()) {
-        case EscalationState.ALERT_TYPE_CLASSIC:
-            alert = getAlert(state.getAlertId());
-            break;
-        case EscalationState.ALERT_TYPE_GROUP:
-            alert = getGalert(state.getAlertId());
-            break;
-        default:
-            log.error("alertType " + state.getAlertType() + " unknown");
-            return;
-        }
+        AlertInterface alert = getAlert(state.getAlertType(),
+                                        state.getAlertId());
         
         if (state.isFixed() || alert == null) {
             // fixed so stop.
@@ -808,15 +789,7 @@ public class EscalationMediator extends Mediator
                 detail = action.execute((Alert) alert);
             }
 
-            // XXX - Actions only know to execute alert definitions, not
-            // galert definitions
-            if (alertType == EscalationState.ALERT_TYPE_CLASSIC) {            
-                AlertActionLog alog =
-                    new AlertActionLog((Alert) alert, detail, act);
-                AlertActionLogDAO dao =
-                    DAOFactory.getDAOFactory().getAlertActionLogDAO();
-                dao.save(alog);
-            }
+            logActionDetail(alertType, alert, act, detail);
         } catch (ClassNotFoundException e) {
             // Can't execute if we can't lookup up the class
             throw new ActionExecuteException(
@@ -848,6 +821,29 @@ public class EscalationMediator extends Mediator
         }
     }
 
+    private void logActionDetail(int alertType, AlertInterface alert,
+                                  Action act, String detail) {
+        switch(alertType) {
+        case EscalationState.ALERT_TYPE_CLASSIC:
+            AlertActionLog alog =
+                new AlertActionLog((Alert) alert, detail, act);
+            AlertActionLogDAO dao =
+                DAOFactory.getDAOFactory().getAlertActionLogDAO();
+            dao.save(alog);
+            break;
+        case EscalationState.ALERT_TYPE_GROUP:
+            GalertActionLog glog =
+                new GalertActionLog((GalertLog) alert, detail, act);
+            GalertActionLogDAO gdao =
+                DAOFactory.getDAOFactory().getGalertActionLogDAO();
+            gdao.save(glog);
+            break;
+        default:
+            log.error("alertType " + alertType + " unknown");
+            break;            // Unknown alert type, can't do anything
+        }
+    }
+
     private void resetEscalationState(EscalationState state)
     {
         state.setCurrentLevel(0);
@@ -858,25 +854,9 @@ public class EscalationMediator extends Mediator
     private void logEscalation(Action action, EscalationState state,
                                String detail)
     {
-        switch(state.getAlertType()) {
-        case EscalationState.ALERT_TYPE_CLASSIC:
-            Alert alert = getAlert(state.getAlertId());
-            AlertActionLog alog = new AlertActionLog(alert, detail, action);
-            AlertActionLogDAO dao =
-                DAOFactory.getDAOFactory().getAlertActionLogDAO();
-            dao.save(alog);
-            break;
-        case EscalationState.ALERT_TYPE_GROUP:
-            GalertLog galert = getGalert(state.getAlertId());
-            GalertActionLog glog = new GalertActionLog(galert, detail, action);
-            GalertActionLogDAO gdao =
-                DAOFactory.getDAOFactory().getGalertActionLogDAO();
-            gdao.save(glog);
-            break;
-        default:
-            log.error("alertType " + state.getAlertType() + " unknown");
-            break;            // Unknown alert type, can't do anything
-        }
+        AlertInterface alert = getAlert(state.getAlertType(),
+                                        state.getAlertId());
+        logActionDetail(state.getAlertType(), alert, action, detail);
     }
 
     private class StateLock {
