@@ -33,7 +33,11 @@
         </xsl:copy>
     </xsl:template>
 
-    <!-- good idea to lazy load binary attributes, can be quite large -->
+    <!-- good idea(?) to lazy load binary attributes, can be quite large.
+         Hibernate requires proxy byte code
+         instrumentation for lazy property loading as well in addtion to
+         setting lazy="true". Otherwise, lazy="true" has no effect.
+         -->
     <xsl:template match="property[@type='binary']">
         <xsl:copy>
             <xsl:attribute name="lazy">
