@@ -25,7 +25,11 @@
 
 package org.hyperic.hq.events;
 
+import org.hyperic.hq.events.server.session.Escalation;
+
 public interface AlertDefinitionInterface {
+    public Integer getId();
+    public Escalation getEscalation();
     public String getName();
     public String getDescription();
     public int getPriority();
