@@ -26,10 +26,7 @@
 package org.hyperic.hq.events;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
-import org.hyperic.hq.events.shared.AlertConditionLogValue;
-import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.AlertConditionLog;
+import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.util.config.ConfigResponse;
 
 /** Interface to be implemented by all Action classes
@@ -37,16 +34,24 @@ import org.hyperic.util.config.ConfigResponse;
 public interface ActionInterface extends ActionConfigInterface {
     
     /** Execute the action
+     * @param longReason TODO
      * @throws org.hyperic.hq.events.ActionExecuteException if execution causes an error
      */
-    public String execute(AlertDefinition alertdef,
-                          AlertConditionLog[] logs,
-                          Integer alertId)
+    public String execute(AlertInterface alert,
+                          String shortReason,
+                          String longReason)
         throws ActionExecuteException;
+    
+    
+    public String execute(Alert alert) throws ActionExecuteException;
     
     /** Inherit configuration from parent action
      */
     public void setParentActionConfig(AppdefEntityID aeid,
                                       ConfigResponse config)
         throws InvalidActionDataException;
+    
+    /** Whether or not it supports AlertInterface
+     */
+    public boolean isAlertInterfaceSupported();
 }

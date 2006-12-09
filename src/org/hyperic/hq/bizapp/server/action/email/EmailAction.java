@@ -27,26 +27,25 @@ package org.hyperic.hq.bizapp.server.action.email;
 
 import java.text.MessageFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Collection;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
-import javax.mail.internet.InternetAddress;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.common.SystemException;
@@ -54,13 +53,15 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionInterface;
+import org.hyperic.hq.events.AlertDefinitionInterface;
+import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.Notify;
-import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertCondition;
 import org.hyperic.hq.events.server.session.AlertConditionLog;
-import org.hyperic.hq.events.server.session.Alert;
+import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -73,23 +74,19 @@ import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.NumberUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.units.FormattedNumber;
-import org.hyperic.dao.DAOFactory;
 
-/**
- */
-public class EmailAction extends EmailActionConfig implements ActionInterface,
-    Notify
+public class EmailAction extends EmailActionConfig
+    implements ActionInterface, Notify
 {
-    private static final String LINK_FORMAT =
+    protected static final String LINK_FORMAT =
         "alerts/Alerts.do?mode=viewAlert&eid={0,number,#}:{1,number,#}&a={2,number,#}";
 
-    private static final String NOTAVAIL = "Not Available";
     private static final String SEPARATOR =
         "\n\n------------------------------------------\n\n";
 
     public static final String RES_NAME_HOLDER = "RES_NAME_REPL";
 
-    private static String baseUrl = null;
+    protected static String baseUrl = null;
 
     private Log log = LogFactory.getLog( EmailAction.class.getName() );
 
@@ -108,7 +105,7 @@ public class EmailAction extends EmailActionConfig implements ActionInterface,
         return subjMan;
     }
 
-    private String createPriority(AlertDefinition alertdef) {
+    protected String createPriority(AlertDefinitionInterface alertdef) {
         StringBuffer pri = new StringBuffer();
         for (int i = 0; i < alertdef.getPriority(); i++) {
             pri.append('!');
@@ -116,7 +113,7 @@ public class EmailAction extends EmailActionConfig implements ActionInterface,
         return pri.toString();
     }
 
-    private String createSubject(AlertDefinition alertdef) {
+    protected String createSubject(AlertDefinitionInterface alertdef) {
         // XXX - Where can I get product name?
         StringBuffer subj = new StringBuffer("[HQ] ")
             .append(createPriority(alertdef))
@@ -125,142 +122,6 @@ public class EmailAction extends EmailActionConfig implements ActionInterface,
             .append(" ")
             .append(RES_NAME_HOLDER);
         return subj.toString();
-    }
-
-    private String createConditions(Collection cconds,
-                                    AlertConditionLog[] logs,
-                                    String indent)
-        throws NamingException, CreateException, MeasurementNotFoundException
-    {
-        StringBuffer text = new StringBuffer();
-        AlertCondition[] conds =
-            (AlertCondition[])cconds.toArray(new AlertCondition[0]);
-        for (int i = 0; i < conds.length; i++) {
-            if (i == 0) {
-                text.append("\n").append(indent).append("If Condition: ");
-            }
-            else {
-                text.append("\n").append(indent)
-                    .append(conds[i].isRequired() ? "AND " : "OR ");
-            }
-
-//            TriggerFiredEvent event = (TriggerFiredEvent)
-//            eventMap.get( conds[i].getTriggerId() );
-
-            switch (conds[i].getType()) {
-                case EventConstants.TYPE_THRESHOLD:
-                case EventConstants.TYPE_BASELINE:
-                    text.append(conds[i].getName()).append(" ")
-                        .append(conds[i].getComparator()).append(" ");
-
-                    DerivedMeasurementValue dmv =
-                        DerivedMeasurementManagerUtil.getLocalHome().create()
-                        .getMeasurement(
-                            new Integer(conds[i].getMeasurementId()));
-
-                    if (conds[i].getType() == EventConstants.TYPE_BASELINE) {
-                        text.append(conds[i].getThreshold());
-                        text.append("% of ");
-
-                        if (MeasurementConstants.BASELINE_OPT_MAX
-                            .equals(conds[i].getOptionStatus())) {
-                            text.append("Max Value");
-                        }
-                        else if (MeasurementConstants.BASELINE_OPT_MIN
-                            .equals(conds[i].getOptionStatus())) {
-                            text.append("Min Value");
-                        }
-                        else {
-                            text.append("Baseline");
-                        }
-                    }
-                    else {
-                        FormattedNumber th =
-                            UnitsConvert.convert(conds[i].getThreshold(),
-                                                 dmv.getTemplate().getUnits());
-                        text.append(th.toString());
-                    }
-                    
-                    // Make sure the event is present to be displayed
-                    /*
-                        FormattedNumber av = UnitsConvert.convert
-                            ( val, dmv.getTemplate().getUnits() );*/
-                    text.append(" (actual value = ")
-                        .append( logs[i].getValue() )
-                        .append(")");
-                    break;
-                case EventConstants.TYPE_CONTROL:
-                    text.append(conds[i].getName());
-                    break;
-                case EventConstants.TYPE_CHANGE:
-                    DerivedMeasurementValue dmv2 =
-                        DerivedMeasurementManagerUtil.getLocalHome().create()
-                            .getMeasurement(
-                                new Integer(conds[i].getMeasurementId()));
-                    text.append(conds[i].getName()).append(" value changed");
-                    // Parse out old value.  This is a hack.
-                    // Basically, we use the MessageFormat from the
-                    // ValueChangeTrigger class to parse out the
-                    // arguments from the event's message which was
-                    // created from the same message format.  This is
-                    // the best we can do until we track previous
-                    // values more explicitly. (JW)
-                    text.append(" (");
-                    try {
-                        Object[] values = ValueChangeTrigger.MESSAGE_FMT
-                            .parse(logs[i].getValue());
-                        text.append("old value = ");
-                        if ( log.isTraceEnabled() ) {
-                            log.trace("event message = " +
-                                      logs[i].getValue());
-                            for (int x=0; x<values.length; ++x) {
-                                log.trace("values["+x+"] = " + values[x]);
-                            }
-                        }
-                        if (2 == values.length) {
-                            text.append(values[1]);
-                        } else {
-                            text.append(NOTAVAIL);
-                        }
-                    } catch (ParseException e) {
-                        text.append(NOTAVAIL);
-                    }
-
-                    double val = NumberUtil.stringAsNumber
-                        ( logs[i].getValue() ).doubleValue();
-                    FormattedNumber av = UnitsConvert.convert
-                        ( val, dmv2.getTemplate().getUnits() );
-                    text.append(", new value = ")
-                        .append( av.toString() )
-                        .append(")");
-                    break;
-                case EventConstants.TYPE_CUST_PROP:
-                    text.append(conds[i].getName())
-                        .append(" value changed");
-                    text.append("\n").append(indent).append(logs[i].getValue());
-                    break;
-                case EventConstants.TYPE_LOG:
-                    text.append("Event/Log Level(")
-                        .append(ResourceLogEvent.getLevelString(
-                                Integer.parseInt(conds[i].getName())))
-                        .append(")");
-                    if (conds[i].getOptionStatus() != null &&
-                        conds[i].getOptionStatus().length() > 0) {
-                        text.append(" and matching substring ")
-                            .append('"')
-                            .append(conds[i].getOptionStatus())
-                            .append('"');
-                    }
-                    
-                    text.append("\n").append(indent).append("Log: ")
-                        .append(logs[i].getValue());
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        return text.toString();
     }
 
     private String getBaseURL()
@@ -277,31 +138,23 @@ public class EmailAction extends EmailActionConfig implements ActionInterface,
         return baseUrl;
     }
 
-    private String createLink(AlertDefinition alertdef, Integer aid)
+    protected String createLink(AppdefEntityID aeid, Integer aid)
         throws ConfigPropertyException, CreateException, NamingException {
         StringBuffer text = new StringBuffer();
 
-            // Create link
-            Object[] args = {
-                new Integer( alertdef.getAppdefType() ),
-                new Integer( alertdef.getAppdefId() ),
-                aid
-            };
-            String alertUrl = MessageFormat.format(LINK_FORMAT, args);
-            text.append(getBaseURL()).append(alertUrl);
+        // Create link
+        Object[] args = { new Integer(aeid.getType()), aeid.getId(), aid };
+        String alertUrl = MessageFormat.format(LINK_FORMAT, args);
+        text.append(getBaseURL()).append(alertUrl);
 
         return text.toString();
     }
 
-    private String createText(AlertDefinition alertdef,
-                              AlertConditionLog[] logs, AppdefEntityID aeid,
-                              Integer alertId)
+    protected String createText(AlertDefinitionInterface alertdef,
+                                String longReason, AppdefEntityID aeid,
+                                Integer alertId)
         throws NamingException, CreateException, MeasurementNotFoundException
     {
-        // XXX: Ashamed of myself, this is definitely not localizable
-        // um, when we figger out how we want to make the user's locale something
-        // that is accessible to the backend, this should be un-hardcoded
-        SimpleDateFormat dformat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aaa");
 //        String alertTime = dformat.format(new Date(event.getTimestamp()));
 
         // Organize the events by trigger
@@ -316,7 +169,7 @@ public class EmailAction extends EmailActionConfig implements ActionInterface,
             .append(RES_NAME_HOLDER).append(" ")
             .append(aeid.getTypeName())
             .append(" has generated the following alert -\n")
-            .append(this.createConditions(alertdef.getConditions(), logs, ""))
+            .append(longReason)
             .append(SEPARATOR);
 
         text.append("ALERT DETAIL")
@@ -332,7 +185,7 @@ public class EmailAction extends EmailActionConfig implements ActionInterface,
         text.append("\n- Condition Set: ");
 
         // Get the conditions
-        text.append(this.createConditions(alertdef.getConditions(), logs, "    "));
+        text.append(longReason);
 
         // The rest of the alert details
         text.append("\n- Alert Severity: ")
@@ -343,7 +196,7 @@ public class EmailAction extends EmailActionConfig implements ActionInterface,
         try {
             // Create the links
             text.append("\nFor additional detail about this alert, go to ")
-                .append(this.createLink(alertdef, alertId))
+                .append(createLink(aeid, alertId))
                 .append(SEPARATOR);
 
             // Public Service Announcement
@@ -365,38 +218,35 @@ public class EmailAction extends EmailActionConfig implements ActionInterface,
         return text.toString();
     }
 
+    public boolean isAlertInterfaceSupported() {
+        return true;
+    }
+
     /** Execute the action
      *
      */
-    public String execute(AlertDefinition alertdef,
-                          AlertConditionLog[] logs, Integer alertId)
+    public String execute(AlertInterface alert,
+                          String shortReason, String longReason)
         throws ActionExecuteException {
-        AlertManagerLocal aman = null;
-
-        try {
-            aman = AlertManagerUtil.getLocalHome().create();
-        } catch (CreateException e1) {
-            // Don't let it affect the action execution
-        } catch (NamingException e1) {
-            // Don't let it affect the action execution
-        }
-
         try {
             InternetAddress[] to = lookupEmailAddr();
 
 
             EmailFilter filter = EmailFilter.getInstance();
 
-            AppdefEntityID appEnt = new AppdefEntityID(alertdef.getAppdefType(),
-                                                       alertdef.getAppdefId());
+            AlertDefinitionInterface alertDef =
+                alert.getAlertDefinitionInterface();
+            AppdefEntityID appEnt = new AppdefEntityID(alertDef.getAppdefType(),
+                                                       alertDef.getAppdefId());
 
-            filter.sendAlert(appEnt, to, createSubject(alertdef),
-                             createText(alertdef, logs, appEnt, alertId),
-                             alertdef.isNotifyFiltered());
+            filter.sendAlert(appEnt, to, createSubject(alertDef),
+                             createText(alertDef, longReason, appEnt,
+                                        alert.getId()),
+                             alertDef.isNotifyFiltered());
 
             StringBuffer result = new StringBuffer();
             // XXX: Should get this strings into a resource file
-            switch (this.getType()) {
+            switch (getType()) {
                 case TYPE_USERS :
                     result.append("HQ Users Notified: ");
                     break;
@@ -405,7 +255,7 @@ public class EmailAction extends EmailActionConfig implements ActionInterface,
                     result.append("Other Recipients Notified: ");
                     break;
             }
-            result.append(this.getNames());
+            result.append(getNames());
 
             return result.toString();
         } catch (javax.ejb.CreateException e) {
@@ -419,6 +269,21 @@ public class EmailAction extends EmailActionConfig implements ActionInterface,
         }
     }
 
+    public String execute(Alert alert) throws ActionExecuteException {
+        AlertManagerLocal aman = null;
+
+        try {
+            aman = AlertManagerUtil.getLocalHome().create();
+        } catch (CreateException e1) {
+            // Don't let it affect the action execution
+        } catch (NamingException e1) {
+            // Don't let it affect the action execution
+        }
+
+        return execute(alert, aman.getShortReason(alert),
+                       aman.getLongReason(alert));
+    }
+
     private InternetAddress[] lookupEmailAddr()
         throws ActionExecuteException
     {
@@ -427,10 +292,10 @@ public class EmailAction extends EmailActionConfig implements ActionInterface,
         Integer uid;
         int i = 0;
         List validAddresses = new ArrayList();
-        for (Iterator it = this.getUsers().iterator(); it.hasNext(); i++) {
+        for (Iterator it = getUsers().iterator(); it.hasNext(); i++) {
             try {
                 AuthzSubjectValue overlord = getSubjMan().getOverlord();
-                switch (this.getType()) {
+                switch (getType()) {
                     case TYPE_USERS :
                         uid = (Integer) it.next();
                         AuthzSubjectValue who =
@@ -474,7 +339,7 @@ public class EmailAction extends EmailActionConfig implements ActionInterface,
     public void setParentActionConfig(AppdefEntityID aeid,
                                       ConfigResponse config)
         throws InvalidActionDataException {
-        this.init(config);
+        init(config);
     }
 
     public void send(Integer alertId, String message)

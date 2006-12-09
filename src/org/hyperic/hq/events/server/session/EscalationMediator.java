@@ -32,6 +32,7 @@ import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.AlertCreateException;
 import org.hyperic.hq.events.AlertFiredEvent;
+import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.Notify;
@@ -47,9 +48,9 @@ import org.hyperic.hq.galerts.server.session.ExecutionReason;
 import org.hyperic.hq.galerts.server.session.GalertActionLog;
 import org.hyperic.hq.galerts.server.session.GalertActionLogDAO;
 import org.hyperic.hq.galerts.server.session.GalertDef;
+import org.hyperic.hq.galerts.server.session.GalertDefDAO;
 import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.hq.galerts.server.session.GalertLogDAO;
-import org.hyperic.hq.galerts.server.session.GalertDefDAO;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
 import org.hyperic.hq.galerts.shared.GalertManagerUtil;
 import org.hyperic.hq.product.server.MBeanUtil;
@@ -242,7 +243,7 @@ public class EscalationMediator extends Mediator
         // Iterate through the actions
         for (Iterator it = actions.iterator(); it.hasNext(); ) {
             Action act = (Action) it.next();
-            executeAction(alertpojo, act);
+            executeAction(EscalationState.ALERT_TYPE_CLASSIC, alertpojo, act);
         }
         
         return alertpojo;
@@ -363,20 +364,23 @@ public class EscalationMediator extends Mediator
         if (alertDefId != null) {
             // save escalation with alert definition
             switch(alertType) {
-                case EscalationState.ALERT_TYPE_CLASSIC:
-                    AlertDefinitionDAO adao = DAOFactory.getDAOFactory()
-                        .getAlertDefDAO();
-                    AlertDefinition adef = adao.findById(alertDefId);
-                    adef.setEscalation(e);
-                    adao.save(adef);
-                    break;
-                case EscalationState.ALERT_TYPE_GROUP:
-                    GalertDefDAO gdao
-                        = DAOFactory.getDAOFactory().getGalertDefDAO();
-                    GalertDef gdef = gdao.findById(alertDefId);
-                    gdef.setEscalation(e);
-                    gdao.save(gdef);
-                    break;
+            case EscalationState.ALERT_TYPE_CLASSIC:
+                AlertDefinitionDAO adao = DAOFactory.getDAOFactory()
+                    .getAlertDefDAO();
+                AlertDefinition adef = adao.findById(alertDefId);
+                adef.setEscalation(e);
+                adao.save(adef);
+                break;
+            case EscalationState.ALERT_TYPE_GROUP:
+                GalertDefDAO gdao
+                    = DAOFactory.getDAOFactory().getGalertDefDAO();
+                GalertDef gdef = gdao.findById(alertDefId);
+                gdef.setEscalation(e);
+                gdao.save(gdef);
+                break;
+            default:
+                log.error("alertType " + alertType + " unknown");
+                break;
             }
         }
     }
@@ -762,10 +766,10 @@ public class EscalationMediator extends Mediator
                       ", escalation=" + escalation + ", state=" +
                       state + ", action="+ea);
         }
-        executeAction(alert, a);
+        executeAction(state.getAlertType(), alert, a);
     }
 
-    private void executeAction(Alert alert, Action act)
+    private void executeAction(int alertType, AlertInterface alert, Action act)
         throws ActionExecuteException, PermissionException {
         try {
             // prepare, instantiate,  and invoke action
@@ -773,18 +777,51 @@ public class EscalationMediator extends Mediator
             ActionInterface action = (ActionInterface) ac.newInstance();
             action.init(ConfigResponse.decode(action.getConfigSchema(),
                                               act.getConfig()));
+            
+            String detail;
+            if (action.isAlertInterfaceSupported()) {
+                String shortReason, longReason;
+                
+                switch(alertType) {
+                case EscalationState.ALERT_TYPE_CLASSIC:
+                    AlertManagerLocal aman = null;
+    
+                    try {
+                        aman = AlertManagerUtil.getLocalHome().create();
+                    } catch (CreateException e) {
+                        throw new SystemException(e);
+                    } catch (NamingException e) {
+                        throw new SystemException(e);
+                    }
+                    
+                    shortReason = aman.getShortReason((Alert) alert);
+                    longReason = aman.getLongReason((Alert) alert);
+                    break;
+                case EscalationState.ALERT_TYPE_GROUP:
+                    GalertLog galert = (GalertLog) alert;
+                    shortReason = galert.getShortReason();
+                    longReason = galert.getLongReason();
+                    break;
+                default:
+                    log.error("alertType " + alertType + " unknown");
+                    return;            // Unknown alert type, can't do anything
+                }
 
-            Collection coll = alert.getConditionLog();
-            AlertConditionLog[] logs =
-                (AlertConditionLog[]) coll.toArray(new AlertConditionLog[0]);
+                detail = action.execute(alert, shortReason, longReason);
+            }
+            else {
+                detail = action.execute((Alert) alert);
+            }
 
-            String detail = action.execute(
-                alert.getAlertDefinition(), logs, alert.getId());
-
-            AlertActionLog alog = new AlertActionLog(alert, detail, act);
-            AlertActionLogDAO dao =
-                DAOFactory.getDAOFactory().getAlertActionLogDAO();
-            dao.save(alog);
+            // XXX - Actions only know to execute alert definitions, not
+            // galert definitions
+            if (alertType == EscalationState.ALERT_TYPE_CLASSIC) {            
+                AlertActionLog alog =
+                    new AlertActionLog((Alert) alert, detail, act);
+                AlertActionLogDAO dao =
+                    DAOFactory.getDAOFactory().getAlertActionLogDAO();
+                dao.save(alog);
+            }
         } catch (ClassNotFoundException e) {
             // Can't execute if we can't lookup up the class
             throw new ActionExecuteException(

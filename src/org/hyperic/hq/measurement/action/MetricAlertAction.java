@@ -25,25 +25,27 @@
 
 package org.hyperic.hq.measurement.action;
 
+import java.util.Collection;
+import java.util.Iterator;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionInterface;
-import org.hyperic.hq.events.InvalidActionDataException;
+import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.AlertConditionLog;
+import org.hyperic.hq.events.InvalidActionDataException;
+import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertCondition;
-import org.hyperic.hq.events.shared.AlertConditionLogValue;
-import org.hyperic.hq.events.shared.AlertConditionValue;
+import org.hyperic.hq.events.server.session.AlertConditionLog;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.MetricProblemDAO;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
-import org.hyperic.dao.DAOFactory;
 
 /**
  * Log the fact that an alert was generated due to some measurement
@@ -51,37 +53,44 @@ import org.hyperic.dao.DAOFactory;
 public class MetricAlertAction implements ActionInterface {
     private Log log = LogFactory.getLog(MetricAlertAction.class);
 
-    public String execute(AlertDefinition alertdef,
-                          AlertConditionLog[] logs, Integer alertId)
-        throws ActionExecuteException {
+    public boolean isAlertInterfaceSupported() {
+        return false;
+    }
+
+    public String execute(Alert alert) throws ActionExecuteException {
         MetricProblemDAO dao =
             DAOFactory.getDAOFactory().getMetricProblemDAO();
         StringBuffer actLog = new StringBuffer();
 
-        // Organize the events by trigger
-//        TriggerFiredEvent[] firedEvents = event.getRootEvents();
-        for (int i = 0; i < logs.length; i++) {
-            // Go through the TriggerFiredEvent's root events
-            for (int j = 0; j < logs.length; j++) {
-                AlertCondition cond = logs[j].getCondition();
-                if (cond.getType() == EventConstants.TYPE_THRESHOLD ||
-                    cond.getType() == EventConstants.TYPE_BASELINE) {
-                    dao.create(new Integer(cond.getMeasurementId()),
-                               System.currentTimeMillis(),
-                               MeasurementConstants.PROBLEM_TYPE_ALERT,
-                               alertId);
+        Collection logs = alert.getConditionLog();
+        for (Iterator it = logs.iterator(); it.hasNext(); ) {
+            AlertConditionLog log = (AlertConditionLog) it.next();
+            AlertCondition cond = log.getCondition();
+            if (cond.getType() == EventConstants.TYPE_THRESHOLD ||
+                cond.getType() == EventConstants.TYPE_BASELINE) {
+                dao.create(new Integer(cond.getMeasurementId()),
+                           System.currentTimeMillis(),
+                           MeasurementConstants.PROBLEM_TYPE_ALERT,
+                           alert.getId());
 
-                    // Append to action log
-                    actLog.append("MeasurementAlert added for mid: ");
-                    actLog.append(cond.getMeasurementId());
-                    actLog.append(" aid: ");
-                    actLog.append(alertId);
-                    actLog.append("\n");
-                }
+                // Append to action log
+                actLog.append("MeasurementAlert added for mid: ");
+                actLog.append(cond.getMeasurementId());
+                actLog.append(" aid: ");
+                actLog.append(alert.getId());
+                actLog.append("\n");
             }
         }
 
         return actLog.toString();
+    }
+
+    public String execute(AlertInterface alert, String shortReason,
+                          String longReason)
+        throws ActionExecuteException {
+        // Not supported
+        throw new UnsupportedOperationException(
+            "MetricAlertAction does not support generic operations");
     }
 
     public ConfigSchema getConfigSchema() {
@@ -108,6 +117,6 @@ public class MetricAlertAction implements ActionInterface {
     public void setParentActionConfig(AppdefEntityID aeid,
                                       ConfigResponse config)
         throws InvalidActionDataException {
-        this.init(config);
+        init(config);
     }
 }

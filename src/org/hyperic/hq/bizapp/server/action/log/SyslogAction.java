@@ -31,7 +31,8 @@
 
 package org.hyperic.hq.bizapp.server.action.log;
 
-import java.util.Collection;
+import javax.ejb.CreateException;
+import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,113 +41,40 @@ import org.hyperic.hq.bizapp.server.action.email.EmailFilter;
 import org.hyperic.hq.bizapp.shared.action.SyslogActionConfig;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionInterface;
+import org.hyperic.hq.events.AlertDefinitionInterface;
+import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.Notify;
+import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.AlertCondition;
-import org.hyperic.hq.events.server.session.AlertConditionLog;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.events.shared.AlertManagerLocal;
+import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.dao.DAOFactory;
 
-/**
- *
- */
 public class SyslogAction extends SyslogActionConfig
     implements ActionInterface, Notify
 {
     private Log log = LogFactory.getLog(SyslogAction.class.getName());
     
-    private static final int PRI_HIGH = 3;
-    private static final int PRI_MED  = 2;
-    private static final int PRI_LOW  = 1;
-    
     /** Creates a new instance of SharedEmailAction */
     public SyslogAction() {
     }
 
-    private String createConditions(Collection cconds,
-                                    AlertConditionLog[] logs, String indent) {
-        StringBuffer text = new StringBuffer();
-
-        AlertCondition[] conds =
-            (AlertCondition[])cconds.toArray(new AlertCondition[0]);
-        for (int i = 0; i < conds.length; i++) {
-            if (i == 0) {
-                text.append(indent).append("If ");
-            } else {
-                text.append(indent).append(
-                    conds[i].isRequired() ? " AND " : " OR ");
-            }
-
-            switch (conds[i].getType()) {
-                case EventConstants.TYPE_THRESHOLD :
-                    text
-                        .append(conds[i].getName())
-                        .append(" ")
-                        .append(conds[i].getComparator())
-                        .append(" ")
-                        .append(conds[i].getThreshold());
-
-                    text.append(" (actual value = ");
-
-                    // Make sure the event is present to be displayed
-                    text.append(logs[i].getCondition().getTrigger().getId());
-
-                    text.append(")");
-                    break;
-                default :
-                    break;
-            }
-        }
-
-        return text.toString();
-    }
-
-    private int convertToDBPriority(int priority) {
+    protected int convertToDBPriority(int priority) {
         // Deutsche Bank priority numbers
         switch (priority) {
-            case PRI_HIGH :
+            case EventConstants.PRIORITY_HIGH :
                 return 5;
-            case PRI_MED :
+            case EventConstants.PRIORITY_MEDIUM :
                 return 4;
             default :
-            case PRI_LOW :
+            case EventConstants.PRIORITY_LOW :
                 return 2;
         }
     }
 
-    /** Execute the action
-     *
-     */
-    public String execute(AlertDefinition alertdef,
-                          AlertConditionLog[] logs, Integer alertId)
-        throws ActionExecuteException {
-//        TriggerFiredEvent[] firedEvents = event.getRootEvents();
-//        HashMap eventMap = new HashMap();
-//        for (int i = 0; i < firedEvents.length; i++) {
-//            eventMap.put(
-//                firedEvents[i].getInstanceId(),
-//                firedEvents[i].toString());
-//        }
-        
-        EmailFilter filter = EmailFilter.getInstance();
-        AppdefEntityID aeid = new AppdefEntityID(alertdef.getAppdefType(),
-                                                 alertdef.getAppdefId());
-        String resName = filter.getAppdefEntityName(aeid);
-        resName = this.hackDBString(resName);
-
-        log.error("DB_1 " + this.convertToDBPriority(alertdef.getPriority()) +
-                  ' ' + this.getMeta() + '/' + this.getProduct() +'/' +
-                  this.getVersion() + ' ' + resName + " :" +
-                  alertdef.getName() + " - " +
-                  this.createConditions(alertdef.getConditions(), logs,""));
-        
-        return "success";
-    }
-    
     /*
      * Hack for Deutsche Bank
      * 
@@ -157,16 +85,65 @@ public class SyslogAction extends SyslogActionConfig
      * Alternatively, if you'd rather, we can substitute this field with the
      * Resource ID, but I think the former is more user friendly.
      */
-    private String hackDBString(String resName) {
+    protected String hackDBString(String resName) {
         resName = StringUtil.replace(resName, " ", "_");
         resName = StringUtil.replace(resName, "Q", "q");
         return resName;
     }
 
+    public boolean isAlertInterfaceSupported() {
+       return true;
+    }
+
+    /** Execute the action
+     *
+     */
+    public String execute(AlertInterface alert, String shortReason,
+                          String longReason)
+        throws ActionExecuteException {
+//        TriggerFiredEvent[] firedEvents = event.getRootEvents();
+//        HashMap eventMap = new HashMap();
+//        for (int i = 0; i < firedEvents.length; i++) {
+//            eventMap.put(
+//                firedEvents[i].getInstanceId(),
+//                firedEvents[i].toString());
+//        }
+        
+        EmailFilter filter = EmailFilter.getInstance();
+        AlertDefinitionInterface alertDef =
+            alert.getAlertDefinitionInterface();
+        AppdefEntityID aeid = new AppdefEntityID(alertDef.getAppdefType(),
+                                                 alertDef.getAppdefId());
+        String resName = filter.getAppdefEntityName(aeid);
+        resName = hackDBString(resName);
+
+        log.error("DB_1 " + convertToDBPriority(alertDef.getPriority()) +
+                  ' ' + getMeta() + '/' + getProduct() +'/' +
+                  getVersion() + ' ' + resName + " :" +
+                  alertDef.getName() + " - " + longReason);
+        
+        return "success";
+    }
+    
+    public String execute(Alert alert) throws ActionExecuteException {
+        AlertManagerLocal aman = null;
+
+        try {
+            aman = AlertManagerUtil.getLocalHome().create();
+        } catch (CreateException e1) {
+            // Don't let it affect the action execution
+        } catch (NamingException e1) {
+            // Don't let it affect the action execution
+        }
+
+        return execute(alert, aman.getShortReason(alert),
+                       aman.getLongReason(alert));
+    }
+
     public void setParentActionConfig(AppdefEntityID aeid,
                                       ConfigResponse config)
         throws InvalidActionDataException {
-        this.init(config);
+        init(config);
     }
 
     public void send(Integer alertId, String message)

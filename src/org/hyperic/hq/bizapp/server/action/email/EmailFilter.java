@@ -270,6 +270,10 @@ public class EmailFilter {
 
             m.setSubject(subject);
             m.setContent(body, "text/plain");
+            
+            if (log.isDebugEnabled()) {
+                log.debug("Sending Alert Email: " + body);
+            }
 
             // Send to each recipient individually (for D.B. SMS)
             for (int i = 0; i < addresses.length; i++) {
