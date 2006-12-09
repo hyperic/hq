@@ -38,7 +38,6 @@ import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.ProcMem;
 import org.hyperic.sigar.ProcCpu;
-import org.hyperic.sigar.ProcState;
 
 import org.hyperic.hq.product.Metric;
 
@@ -278,8 +277,11 @@ public class VMwareMetrics extends HashMap {
             vm.getProductInfo(VM.PRODINFO_PRODUCT) == VM.PRODUCT_ESX;
 
         if (isOn) {
-            //XXX getPid() gone in 3.0
-            //getProcessMetrics(vm.getPid(), metrics);
+            //vm.getPid() is gone in 3.0
+            Long pid = VMCollector.getPid(config);
+            if (pid != null) {
+                getProcessMetrics(pid.longValue(), metrics);
+            }
 
             if (isESX) {
                 /* GSX does not support these metrics */
@@ -323,12 +325,6 @@ public class VMwareMetrics extends HashMap {
         Sigar sigar = new Sigar();
 
         try {
-            ProcState state = sigar.getProcState(pid);
-            if (!state.getName().equals("vmware-vmx")) {
-                //we are likely a remote client
-                noProcessMetrics(metrics);
-                return;
-            }
             ProcMem mem = sigar.getProcMem(pid);
             ProcCpu cpu = sigar.getProcCpu(pid);
 
