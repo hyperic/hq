@@ -85,21 +85,37 @@
 		escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
 		escTable.setAttribute('border', '0');
 		
+        // Put the "wait" select after other options
+		escTable.appendChild(escTr2);
 		escTable.appendChild(escTr1);
+
 		escTr1.appendChild(td1);
 
 		td1.setAttribute('colspan', '4');
-		td1.appendChild(document.createTextNode('Then wait '));
+        td1.appendChild(document.createTextNode('<fmt:message key="alert.config.escalation.then"/> '));
 		td1.appendChild(select1);
 		select1.setAttribute('id', 'waittime_' + liID);
 		select1.name = "waittime_" + liID;
-		addOption(select1, '0', '<fmt:message key="common.label.None"/>');
-		addOption(select1, '300000', '5 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>');
-		addOption(select1, '600000', '10 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/> ');
-		addOption(select1, '1200000', '20 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/> ');
-		addOption(select1, '1800000', '30 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/> ');
-		
-		escTable.appendChild(escTr2);
+        addOption(select1, '0', '<fmt:message key="alert.config.escalation.end"/>');
+        addOption(select1, '300000', '<fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="5"/>
+                                    </fmt:message>');
+        addOption(select1, '600000', '<fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="10"/>
+                                    </fmt:message>');
+        addOption(select1, '1200000', '<fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="20"/>
+                                    </fmt:message>');
+        addOption(select1, '1800000', '<fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="30"/>
+                                    </fmt:message>');
+        addOption(select1, '2400000', '<fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="45"/>
+                                    </fmt:message>');
+        addOption(select1, '3000000', '<fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="60"/>
+                                    </fmt:message>');
+
 		escTr2.appendChild(td2);
 		td2.setAttribute('width', '20%');
 		td2.setAttribute('valign', 'top');
@@ -443,78 +459,92 @@ sections = ['section'];
                 </div>
 
                 <table cellpadding="3" cellspacing="0" border="0" width="100%">
-					<tr>
-						<td colspan="4" style="padding-top:5px;padding-bottom:5px;">
-							Then wait 
-							<select name="time_row0">
-								<option value="0">
-									<fmt:message key="common.label.None" />
-								</option>
-								<option value="300000">
-									5 
-									<fmt:message key="alert.config.props.CB.Enable.TimeUnit.1" />
-								</option>
-								<option value="600000">
-									10 
-									<fmt:message key="alert.config.props.CB.Enable.TimeUnit.1" />
-								</option>
-								<option value="1200000">
-									20 
-									<fmt:message key="alert.config.props.CB.Enable.TimeUnit.1" />
-								</option>
-								<option value="1800000">
-									30 
-									<fmt:message key="alert.config.props.CB.Enable.TimeUnit.1" />
-								</option>
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<td width="20%" valign="top" style="padding-bottom:10px;padding-left:20px;padding-top:5px;">
-							<select name="action_row0" onchange="onchange_staticRow(this);">
-								<option selected value="Email">
-									Email 
-								</option>
-								<option value="Syslog">
-									Sys log 
-								</option>
-							</select>
-						</td>
-						<td width="20%" style="padding-right:20px;" valign="top" id="who">
-							<select id="who_row0" name="who_row0">
-								<c:if test="${not empty AvailableRoles}">
-									<option value="Roles">
-										<fmt:message key="monitoring.events.MiniTabs.Roles" />
-									</option>
-								</c:if>
-								<option value="Users">
-									<fmt:message key="monitoring.events.MiniTabs.CAMusers" />
-								</option>
-								<option value="Others">
-									<fmt:message key="monitoring.events.MiniTabs.OR" />
-								</option>
-							</select>
-						</td>
-						<td width="60%" valign="top">
-							<div id="emailinput0">
-								email addresses (comma separated): 
-								<br>
-				<textarea rows="3" cols="35" name="users_row0" id="emailinput_0"></textarea>
-							</div>
-							<div id="syslog0" style="display:none;">
-								meta: 
-								<input type="text" name="meta_0" value="" size="40">
-								<br>
-								product: 
-								<input type="text" name="product_0" value="" size="40">
-								<br>
-								version: 
-								<input type="text" name="version_0" value="" size="40">
-								<br>
-							</div>
-					</tr>
-				</table>
-				</li>
+                    <tr>
+                        <td width="20%" valign="top" style="padding-bottom:10px;padding-left:20px;padding-top:5px;">
+                            <select name="action_row0" onchange="onchange_staticRow(this);">
+                                <option selected value="Email">
+                                    Email 
+                                </option>
+                                <option value="Syslog">
+                                    Sys log 
+                                </option>
+                            </select>
+                        </td>
+                        <td width="20%" style="padding-right:20px;" valign="top" id="who">
+                            <select id="who_row0" name="who_row0">
+                                <c:if test="${not empty AvailableRoles}">
+                                    <option value="Roles">
+                                        <fmt:message key="monitoring.events.MiniTabs.Roles" />
+                                    </option>
+                                </c:if>
+                                <option value="Users">
+                                    <fmt:message key="monitoring.events.MiniTabs.CAMusers" />
+                                </option>
+                                <option value="Others">
+                                    <fmt:message key="monitoring.events.MiniTabs.OR" />
+                                </option>
+                            </select>
+                        </td>
+                        <td width="60%" valign="top">
+                            <div id="emailinput0">
+                                email addresses (comma separated): 
+                                <br>
+                <textarea rows="3" cols="35" name="users_row0" id="emailinput_0"></textarea>
+                            </div>
+                            <div id="syslog0" style="display:none;">
+                                meta: 
+                                <input type="text" name="meta_0" value="" size="40">
+                                <br>
+                                product: 
+                                <input type="text" name="product_0" value="" size="40">
+                                <br>
+                                version: 
+                                <input type="text" name="version_0" value="" size="40">
+                                <br>
+                            </div>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="padding-top:5px;padding-bottom:5px;">
+                            <fmt:message key="alert.config.escalation.then"/>
+                            <select name="time_row0">
+                                <option value="0">
+                                    <fmt:message key="alert.config.escalation.end"/>
+                                </option>
+                                <option value="300000">
+                                    <fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="5"/>
+                                    </fmt:message>
+                                </option>
+                                <option value="600000">
+                                    <fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="10"/>
+                                    </fmt:message>
+                                </option>
+                                <option value="1200000">
+                                    <fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="20"/>
+                                    </fmt:message>
+                                </option>
+                                <option value="1800000">
+                                    <fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="30"/>
+                                    </fmt:message>
+                                </option>
+                                <option value="2400000">
+                                    <fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="45"/>
+                                    </fmt:message>
+                                </option>
+                                <option value="3000000">
+                                    <fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="60"/>
+                                    </fmt:message>
+                                </option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+                </li>
             </ul>
             <table width="100%" cellpadding="5" cellspacing="0" border="0" class="ToolbarContent">
               <tr>
