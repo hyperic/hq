@@ -114,40 +114,6 @@ public class Util {
             log.error("Building SessionFactory failed.", ex);
             throw new ExceptionInInitializerError(ex);
         }
-
-        // Add second level cache statistics to the diagnostics
-        DiagnosticObject cacheDiagnostics = new DiagnosticObject() {
-            public String getStatus() {
-
-                Statistics stats = getSessionFactory().getStatistics();
-                String[] caches = stats.getSecondLevelCacheRegionNames();
-
-                String separator = System.getProperty("line.separator");
-                StringBuffer buf = new StringBuffer();
-                for (int i = 0; i < caches.length; i++) {
-                    SecondLevelCacheStatistics cacheStats =
-                        stats.getSecondLevelCacheStatistics(caches[i]);
-
-                    buf.append(separator)
-                        .append("Cache: ")
-                        .append(caches[i])
-                        .append(" elements=")
-                        .append(cacheStats.getElementCountInMemory())
-                        .append(" (")
-                        .append(cacheStats.getSizeInMemory())
-                        .append(" bytes) hits=")
-                        .append(cacheStats.getHitCount())
-                        .append(" misses=")
-                        .append(cacheStats.getMissCount());
-                }
-                return buf.toString();
-            }
-            
-            public String toString() {
-                return "Hibernate Cache";
-            }
-        };
-        DiagnosticThread.addDiagnosticObject(cacheDiagnostics);
     }
 
     private static void createHQHibernateStatMBean()
