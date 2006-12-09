@@ -26,6 +26,7 @@
 package org.hyperic.hq.plugin.memcached;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.hyperic.hq.plugin.netservices.NetServicesCollector;
 import org.hyperic.hq.plugin.netservices.SocketWrapper;
@@ -36,6 +37,9 @@ public class MemcachedStats
     private static final String STATS_CMD = "stats" + SocketWrapper.CRLF;
     private static final String END = "END";
     private static final String STAT = "STAT";
+    private static final String GET_HITS = "get_hits";
+    private static final String GET_CMD = "cmd_get";
+    private static final String HIT_RATIO = "hit_ratio";
 
     public void collect() {
         SocketWrapper socket = null;
@@ -72,6 +76,20 @@ public class MemcachedStats
             }
 
             endTime();
+
+            Map values = getResult().getValues();
+            String get_hits = (String)values.get(GET_HITS);
+            String get_cmd = (String)values.get(GET_CMD);
+
+            if ((get_hits != null) && (get_cmd != null)) {
+                double hits = Double.parseDouble(get_hits);
+                double gets = Double.parseDouble(get_cmd);
+                double hit_ratio = 0;
+                if (hits != 0) {
+                    hit_ratio = hits / gets;
+                }
+                setValue(HIT_RATIO, hit_ratio * 100);
+            }
         } catch (IOException e) {
             setAvailability(false);
             if (getMessage() == null) {

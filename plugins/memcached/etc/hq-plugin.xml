@@ -77,7 +77,6 @@
     <metric name="User CPU"
             alias="rusage_user"
             category="PERFORMANCE"
-            indicator="true"
             units="percent"/>
 
     <metric name="System CPU"
@@ -143,5 +142,10 @@
             alias="get_misses"
             collectionType="trendsup"/>
             category="THROUGHPUT"/>
+
+    <metric name="Hit Ratio"
+            alias="hit_ratio"
+            units="percent"
+            indicator="true"/>
   </server>
 </plugin>
