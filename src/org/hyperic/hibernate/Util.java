@@ -27,7 +27,6 @@ package org.hyperic.hibernate;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.management.MBeanServerFactory;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.MalformedObjectNameException;
@@ -44,8 +43,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Hibernate;
 import org.hibernate.jmx.StatisticsService;
 import org.hibernate.cache.NoCacheProvider;
-import org.hibernate.stat.Statistics;
-import org.hibernate.stat.SecondLevelCacheStatistics;
 import org.hibernate.transaction.JTATransactionFactory;
 
 import org.hibernate.cfg.Configuration;
@@ -57,14 +54,11 @@ import org.hibernate.dialect.function.ClassicSumFunction;
 import org.hibernate.dialect.function.ClassicCountFunction;
 
 import org.hibernate.engine.SessionFactoryImplementor;
-import org.hyperic.hq.common.DiagnosticThread;
-import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.product.server.MBeanUtil;
 
 import java.sql.Connection;
 import java.util.Properties;
 import java.util.Iterator;
-import java.util.ArrayList;
 
 /**
  * from hibernate caveat emptor with modifications to optimize initial 
