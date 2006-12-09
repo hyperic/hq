@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.events.server.session;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -43,18 +44,24 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger;
 import org.hyperic.hq.events.AlertCreateException;
-import org.hyperic.hq.events.server.session.EscalationMediator;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.events.server.session.Alert;
-import org.hyperic.hq.events.server.session.EscalationState;
+import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.UnitsConvert;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
+import org.hyperic.hq.measurement.shared.ResourceLogEvent;
+import org.hyperic.util.NumberUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.hyperic.util.units.FormattedNumber;
 
 /** 
  * The alert manager.
@@ -68,8 +75,8 @@ import org.hyperic.util.pager.SortAttribute;
  * @ejb:transaction type="REQUIRED"
  */
 public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
-    private final String _logCtx = AlertManagerEJBImpl.class.getName();
-    private final Log    _log = LogFactory.getLog(_logCtx);
+    private final Log _log =
+        LogFactory.getLog(AlertManagerEJBImpl.class.getName());
     private final String VALUE_PROCESSOR =
         PagerProcessor_events.class.getName();
 
@@ -355,7 +362,153 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     }
 
     /**
+     * Get the long reason for an alert
+     * @ejb:interface-method
+     */
+    public String getShortReason(Alert alert) {
+        // Get the short reason for the alert
+        return alert.getAlertDefinition().getName();
+    }
+    
+    /**
+     * Get the long reason for an alert
+     * @ejb:interface-method
+     */
+    public String getLongReason(Alert alert) {
+        final String NOTAVAIL = "Not Available";
+        final String indent = "    ";
+
+        // Get the alert definition's conditions
+        Collection cconds = alert.getAlertDefinition().getConditions();
+        Collection clogs = alert.getConditionLog();
+        
+        AlertCondition[] conds =
+            (AlertCondition[])cconds.toArray(new AlertCondition[0]);
+        AlertConditionLog[] logs =
+            (AlertConditionLog[]) clogs.toArray(new AlertConditionLog[0]);
+
+        StringBuffer text = new StringBuffer();
+        for (int i = 0; i < conds.length; i++) {
+            if (i == 0) {
+                text.append("\n").append(indent).append("If Condition: ");
+            }
+            else {
+                text.append("\n").append(indent)
+                    .append(conds[i].isRequired() ? "AND " : "OR ");
+            }
+
+//            TriggerFiredEvent event = (TriggerFiredEvent)
+//            eventMap.get( conds[i].getTriggerId() );
+
+            DerivedMeasurementDAO dmDao =
+                DAOFactory.getDAOFactory().getDerivedMeasurementDAO();
+            DerivedMeasurement dmv;
+            
+            switch (conds[i].getType()) {
+            case EventConstants.TYPE_THRESHOLD:
+            case EventConstants.TYPE_BASELINE:
+                text.append(conds[i].getName()).append(" ")
+                        .append(conds[i].getComparator()).append(" ");
+
+                dmv = dmDao.findById(new Integer(conds[i].getMeasurementId()));
+
+                if (conds[i].getType() == EventConstants.TYPE_BASELINE) {
+                    text.append(conds[i].getThreshold());
+                    text.append("% of ");
+
+                    if (MeasurementConstants.BASELINE_OPT_MAX.equals(conds[i]
+                            .getOptionStatus())) {
+                        text.append("Max Value");
+                    } else if (MeasurementConstants.BASELINE_OPT_MIN
+                            .equals(conds[i].getOptionStatus())) {
+                        text.append("Min Value");
+                    } else {
+                        text.append("Baseline");
+                    }
+                } else {
+                    FormattedNumber th = UnitsConvert.convert(conds[i]
+                            .getThreshold(), dmv.getTemplate().getUnits());
+                    text.append(th.toString());
+                }
+
+                // Make sure the event is present to be displayed
+                /*
+                 * FormattedNumber av = UnitsConvert.convert ( val,
+                 * dmv.getTemplate().getUnits() );
+                 */
+                text.append(" (actual value = ").append(logs[i].getValue())
+                        .append(")");
+                break;
+            case EventConstants.TYPE_CONTROL:
+                text.append(conds[i].getName());
+                break;
+            case EventConstants.TYPE_CHANGE:
+                dmv =
+                    dmDao.findById(new Integer(conds[i].getMeasurementId()));
+                text.append(conds[i].getName()).append(" value changed");
+                // Parse out old value. This is a hack.
+                // Basically, we use the MessageFormat from the
+                // ValueChangeTrigger class to parse out the
+                // arguments from the event's message which was
+                // created from the same message format. This is
+                // the best we can do until we track previous
+                // values more explicitly. (JW)
+                text.append(" (");
+                try {
+                    Object[] values = ValueChangeTrigger.MESSAGE_FMT
+                            .parse(logs[i].getValue());
+                    text.append("old value = ");
+                    if (log.isTraceEnabled()) {
+                        log.trace("event message = " + logs[i].getValue());
+                        for (int x = 0; x < values.length; ++x) {
+                            log.trace("values[" + x + "] = " + values[x]);
+                        }
+                    }
+                    if (2 == values.length) {
+                        text.append(values[1]);
+                    } else {
+                        text.append(NOTAVAIL);
+                    }
+                } catch (ParseException e) {
+                    text.append(NOTAVAIL);
+                }
+
+                double val = NumberUtil.stringAsNumber(logs[i].getValue())
+                        .doubleValue();
+                FormattedNumber av = UnitsConvert.convert(val, dmv
+                        .getTemplate().getUnits());
+                text.append(", new value = ").append(av.toString()).append(")");
+                break;
+            case EventConstants.TYPE_CUST_PROP:
+                text.append(conds[i].getName()).append(" value changed");
+                text.append("\n").append(indent).append(logs[i].getValue());
+                break;
+            case EventConstants.TYPE_LOG:
+                text.append("Event/Log Level(")
+                        .append(
+                                ResourceLogEvent.getLevelString(Integer
+                                        .parseInt(conds[i].getName())))
+                        .append(")");
+                if (conds[i].getOptionStatus() != null
+                        && conds[i].getOptionStatus().length() > 0) {
+                    text.append(" and matching substring ").append('"')
+                            .append(conds[i].getOptionStatus()).append('"');
+                }
+
+                text.append("\n").append(indent).append("Log: ")
+                        .append(logs[i].getValue());
+                break;
+            default:
+                break;
+            }
+        }
+
+        return text.toString();
+    }
+
+    /**
      * delegate to EscalationMediator inside JTA context
+     * 
      * @ejb:interface-method
      */
     public void processEscalation()
@@ -365,6 +518,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
 
     /**
      * delegate to EscalationMediator inside JTA context
+     * 
      * @ejb:interface-method
      */
     public void dispatchAction(Integer stateId)
