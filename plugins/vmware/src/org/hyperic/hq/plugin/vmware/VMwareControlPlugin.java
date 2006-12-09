@@ -53,6 +53,8 @@ public class VMwareControlPlugin
     public void configure(ConfigResponse config)
         throws PluginException
     {
+        VMwareProductPlugin.checkIsLoaded();
+
         super.configure(config);
         this.props = config.toProperties();
     }

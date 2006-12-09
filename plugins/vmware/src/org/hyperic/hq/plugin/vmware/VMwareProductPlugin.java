@@ -35,6 +35,18 @@ import org.hyperic.sigar.vmware.VMControlLibrary;
 
 public class VMwareProductPlugin extends ProductPlugin {
 
+    private static boolean isLoaded = false;
+
+    static boolean isLoaded() {
+        return isLoaded;
+    }
+
+    static void checkIsLoaded() throws PluginException {
+        if (!isLoaded()) {
+            throw new PluginException("VMware control library not available");
+        }
+    }
+
     public void init(PluginManager manager)
         throws PluginException {
 
@@ -48,8 +60,8 @@ public class VMwareProductPlugin extends ProductPlugin {
             } catch (IOException e) {
                 getLog().error(e.getMessage());
             }
-
-            if (VMControlLibrary.isLoaded()) {
+            isLoaded = VMControlLibrary.isLoaded();
+            if (isLoaded) {
                 getLog().info("Using vmcontrol library=" +
                               VMControlLibrary.getSharedLibrary());
             }

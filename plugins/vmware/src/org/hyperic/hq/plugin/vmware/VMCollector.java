@@ -103,6 +103,7 @@ public class VMCollector extends Collector {
     }
 
     protected void init() throws PluginException {
+        VMwareProductPlugin.checkIsLoaded();
 
         this.config = getProperty("Config");
         setSource(new File(this.config).getName());
