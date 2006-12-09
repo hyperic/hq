@@ -33,6 +33,24 @@
         </xsl:copy>
     </xsl:template>
 
+    <!-- good idea to lazy load binary attributes, can be quite large -->
+    <xsl:template match="property[@type='binary']">
+        <xsl:copy>
+            <xsl:attribute name="lazy">
+                <xsl:value-of select="'true'" />
+            </xsl:attribute>
+            <xsl:apply-templates mode="binary-property" select="@*" />
+            <xsl:apply-templates select="node()" />
+        </xsl:copy>
+    </xsl:template>
+
+    <!-- pass thru all binary property attributes -->
+    <xsl:template mode="binary-property" match="@*">
+        <xsl:apply-templates select="current()"/>
+    </xsl:template>
+    <!-- except for the lazy attribute -->
+    <xsl:template mode="binary-property" match="@lazy" />
+
     <xsl:template match="bag[many-to-many]">
       <xsl:copy>
         <xsl:attribute name="inverse">
