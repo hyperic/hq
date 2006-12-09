@@ -67,9 +67,11 @@ public class VMCollector extends Collector {
 
                     String[] args = sigar.getProcArgs(pids[i]);
                     for (int j=0; j<args.length; j++) {
-                        if (args[j].endsWith(".vmx")) {
-                            pidMap.put(args[j], new Long(pids[i]));
-                            log.debug(args[j] + " pid=" + pids[i]);
+                        String arg = args[j];
+                        if (arg.endsWith(".vmx")) {
+                            arg = arg.toLowerCase();
+                            pidMap.put(arg, new Long(pids[i]));
+                            log.debug(arg + " pid=" + pids[i]);
                         }
                     }
                 } catch (SigarException e) {
@@ -84,7 +86,7 @@ public class VMCollector extends Collector {
     }
 
     static Long getPid(String vmx) {
-        return (Long)pidMap.get(vmx);
+        return (Long)pidMap.get(vmx.toLowerCase());
     }
 
     public void collect() {
