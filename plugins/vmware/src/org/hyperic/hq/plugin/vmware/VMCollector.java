@@ -26,17 +26,70 @@
 package org.hyperic.hq.plugin.vmware;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.sigar.ProcState;
+import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.vmware.VMwareException;
 
 public class VMCollector extends Collector {
 
     private String config;
+    private static Map pidMap = new HashMap();
+    private final static String VMWARE_VMX = "vmware-vmx";
+    private static final String VMKLOAD_APP = "vmkload_app";
+    private static final Log log =
+        LogFactory.getLog(VMCollector.class.getName());
+
+    //create a map of VM .vmx config file to process pid
+    private void getPids() {
+        Sigar sigar = new Sigar();
+        pidMap.clear();
+
+        try {
+            long[] pids = sigar.getProcList();
+            for (int i=0; i<pids.length; i++) {
+                try {
+                    ProcState state =
+                        sigar.getProcState(pids[i]);
+                    String name = state.getName();
+                    if (!(name.equals(VMWARE_VMX) ||
+                          name.equals(VMKLOAD_APP)))
+                    {
+                        continue;
+                    }
+
+                    String[] args = sigar.getProcArgs(pids[i]);
+                    for (int j=0; j<args.length; j++) {
+                        if (args[j].endsWith(".vmx")) {
+                            pidMap.put(args[j], new Long(pids[i]));
+                            log.debug(args[j] + " pid=" + pids[i]);
+                        }
+                    }
+                } catch (SigarException e) {
+                }
+            }
+        } catch (SigarException e) {
+        } finally {
+            sigar.close();
+        }
+
+        log.debug("Found " + pidMap.size() + " VM processes");
+    }
+
+    static Long getPid(String vmx) {
+        return (Long)pidMap.get(vmx);
+    }
 
     public void collect() {
+        getPids(); //XXX we should call this less often
+
         try {
             Map values =
                 VMwareMetrics.getInstance(getProperties(), this.config);
