@@ -745,10 +745,6 @@
     <plugin type="autoinventory"
             class="DotNetDetector"/>
 
-    <scan registry="SOFTWARE\Microsoft\.NETFramework">
-      <include name="InstallRoot"/>
-    </scan>
-
     <metrics>
       <include name="dotnet-avail"/>
       <include name="clr-memory"/>
@@ -782,4 +778,13 @@
       </config>
     </service>
   </server>
+
+  <server name=".NET"
+          version="2.0"
+          include="1.1"/>
+
+  <server name=".NET"
+          version="3.0"
+          include="2.0"/>
+
 </plugin>
