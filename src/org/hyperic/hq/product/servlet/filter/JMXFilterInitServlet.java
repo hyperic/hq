@@ -122,6 +122,13 @@ public class JMXFilterInitServlet extends HttpServlet {
             
             if(servletPath.equals("")) servletPath = File.separator;
             if(contextName.equals("")) contextName = File.separator;
+
+            final String[] escape = { ":", ",", "=" };
+            for (int i=0; i<escape.length; i++) {
+                servletPath =
+                    JMXFilter.replace(servletPath, escape[i], "_");
+            }
+
             ObjectName oname = new ObjectName(DOMAIN + 
                                               ":type=Servlet,name="
                                               + servletPath + 
