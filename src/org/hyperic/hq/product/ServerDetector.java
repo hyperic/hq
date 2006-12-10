@@ -749,17 +749,26 @@ public abstract class ServerDetector
     
     private void mergeConfigDefaults(ConfigResponse config,
                                      ConfigSchema schema) {
+        mergeConfigDefaults(config, schema, true);
+    }
+
+    private void mergeConfigDefaults(ConfigResponse config,
+                                     ConfigSchema schema,
+                                     boolean allowOverride) {
 
         List options = schema.getOptions();
         for (int i=0; i<options.size(); i++) {
             ConfigOption opt = (ConfigOption)options.get(i);
             String key = opt.getName();
 
-            //commandline or agent.properties
-            String propValue = this.properties.getProperty(key);
-            if (propValue != null) {
-                config.setValue(key, propValue);
-                continue;
+            if (allowOverride) {
+                //commandline or agent.properties
+                String propValue =
+                    this.properties.getProperty(key);
+                if (propValue != null) {
+                    config.setValue(key, propValue);
+                    continue;
+                }
             }
 
             if (config.getValue(key) == null) {
@@ -834,7 +843,7 @@ public abstract class ServerDetector
     protected void setCustomProperties(ServerResource server,
                                        ConfigResponse config) {
         ConfigSchema cprops = getCustomPropertiesSchema();
-        mergeConfigDefaults(config, cprops);
+        mergeConfigDefaults(config, cprops, false);
         server.setCustomProperties(config);
     }
 
