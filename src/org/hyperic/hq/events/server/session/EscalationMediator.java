@@ -555,9 +555,12 @@ public class EscalationMediator extends Mediator
 
             if (state != null) {
                 if (fixed) {
-                    // escalation runtime needs to know when
-                    // alert is fixed.
-                    state.setFixed(true);
+                    if(state.isActive() &&
+                       alertId.intValue() == state.getAlertId()) {
+                        // escalation runtime needs to know when
+                        // alert is fixed so it can stop the escalation chain.
+                        state.setFixed(true);
+                    }
                     // mark alert as fixed as well
                     alert.setFixed(true);
                 } else {
