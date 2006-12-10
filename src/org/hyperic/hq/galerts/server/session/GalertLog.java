@@ -14,7 +14,8 @@ public class GalertLog
 { 
     public static int MAX_SHORT_REASON = 256;
     public static int MAX_LONG_REASON  = 2048;
-    
+
+    private boolean            fixed;
     private GalertDef          _def;
     private long               _timestamp;
     private ResourceGroup      _group;
@@ -107,6 +108,16 @@ public class GalertLog
     public ExecutionReason getExecutionReason() {
         return new ExecutionReason(getShortReason(), getLongReason(),
                                    _partition);
+    }
+
+    public boolean isFixed()
+    {
+        return fixed;
+    }
+
+    public void setFixed(boolean fixed)
+    {
+        this.fixed = fixed;
     }
 
     public int hashCode() {

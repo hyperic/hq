@@ -41,6 +41,7 @@ import org.hyperic.hq.events.shared.AlertValue;
 public class Alert 
     extends PersistedObject implements AlertInterface
 {
+    private boolean         fixed;
     private long            _ctime;
     private AlertDefinition _alertDefinition;
     private Collection      _actionLog    = new ArrayList();
@@ -76,7 +77,17 @@ public class Alert
         _conditionLog.add(res);
         return res;
     }
-    
+
+    public boolean isFixed()
+    {
+        return fixed;
+    }
+
+    public void setFixed(boolean fixed)
+    {
+        this.fixed = fixed;
+    }
+
     public long getCtime() {
         return _ctime;
     }

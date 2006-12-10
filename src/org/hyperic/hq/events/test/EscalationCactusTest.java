@@ -163,13 +163,13 @@ public class EscalationCactusTest extends HQCactusBase
             eventsBoss.jsonByEscalationName(sessionID, name);
         assertNotNull(json);
 
-//        String ename = Escalation.newInstance().getJsonName();
-//        setRequestPathInfo("/escalation/removeEscalation/" +
-//                           json.getJSONObject(ename).getInt("id"));
-//        actionPerform();
-//        json =
-//            eventsBoss.jsonByEscalationName(sessionID, name);
-//        assertNull(json);
+        String ename = Escalation.newInstance().getJsonName();
+        setRequestPathInfo("/escalation/removeEscalation/" +
+                           json.getJSONObject(ename).getInt("id"));
+        actionPerform();
+        json =
+            eventsBoss.jsonByEscalationName(sessionID, name);
+        assertNull(json);
     }
 
     private WebUser webLogin()

@@ -555,7 +555,11 @@ public class EscalationMediator extends Mediator
 
             if (state != null) {
                 if (fixed) {
+                    // escalation runtime needs to know when
+                    // alert is fixed.
                     state.setFixed(true);
+                    // mark alert as fixed as well
+                    alert.setFixed(true);
                 } else {
                     state.setAcknowledge(true);
                 }
@@ -849,6 +853,7 @@ public class EscalationMediator extends Mediator
         state.setCurrentLevel(0);
         state.setScheduleRunTime(0);
         state.setActive(false);
+        state.setFixed(false);
     }
 
     private void logEscalation(Action action, EscalationState state,

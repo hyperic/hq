@@ -18,6 +18,10 @@
       <column name="DETAIL" not-null="true" length="500" />
     </property>
 
+    <property name="fixed" type="boolean">
+      <column name="FIXED" not-null="true" />
+    </property>
+
     <many-to-one name="galertLog" class="GalertLog">
       <column name="GALERT_ID" index="GALERT_ACTION_LOG_IDX" />
     </many-to-one>
