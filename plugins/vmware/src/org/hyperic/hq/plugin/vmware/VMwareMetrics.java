@@ -121,7 +121,7 @@ public class VMwareMetrics extends HashMap {
             String cpu = getResource(server, SYS_CPU_NUMBER);
             int num = Integer.parseInt(cpu);
 
-            metrics.put(CPU_NUMBER, cpu);
+            metrics.put(SYS_CPU_NUMBER, cpu);
 
             for (int i=0; i<vars.length; i++) {
                 double val = 0;
