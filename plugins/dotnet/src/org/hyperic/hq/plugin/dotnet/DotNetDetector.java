@@ -26,6 +26,7 @@
 package org.hyperic.hq.plugin.dotnet;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -33,8 +34,8 @@ import org.apache.commons.logging.LogFactory;
 
 import org.hyperic.util.config.ConfigResponse;
 
+import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.RegistryServerDetector;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
@@ -45,62 +46,102 @@ import org.hyperic.sigar.win32.Win32Exception;
 
 public class DotNetDetector
     extends ServerDetector
-    implements RegistryServerDetector {
+    implements AutoServerDetector {
 
-    static final String SERVER_NAME = ".NET";
-    
-    static final String APP_NAME    = "Application";
+    static final String PROP_APP = "app.name";
 
-    static final String PROP_APP    = "app.name";
-    
-    static Log log = LogFactory.getLog("DotNetDetector");
+    private static final String APP_NAME = "Application";
 
-    public List getServerResources(ConfigResponse platformConfig, String path, RegistryKey current) 
-        throws PluginException {
+    private static final String REG_KEY =
+        "SOFTWARE\\Microsoft\\.NETFramework";
 
-        if (!(path.indexOf(SERVER_NAME) > 0)) {
-            return null;
-        }
+    private static Log log =
+        LogFactory.getLog(DotNetDetector.class.getName());
 
-        log.debug("checking path=" + path);
+    private RegistryKey getRegistryKey(String path)
+        throws Win32Exception {
+
+        return RegistryKey.LocalMachine.openSubKey(path);
+    }
+
+    private String getVersion() {
+        RegistryKey key = null;
+        List versions = new ArrayList();
 
         try {
-            boolean found = false;
-            String keyName = current.getSubKeyName() + "\\policy";
-            RegistryKey key =
-               RegistryKey.LocalMachine.openSubKey(keyName);
-
+            key = getRegistryKey(REG_KEY + "\\policy");
             String[] names = key.getSubKeyNames();
-            String version = null;
-            String thisVersion = getTypeInfo().getVersion();
+
             for (int i=0; i<names.length; i++) {
                 if (names[i].charAt(0) == 'v') {
-                    version = names[i].substring(1);
-                    log.debug("found version=" + version);
-                    if (version.equals(thisVersion)) {
-                        log.debug("reporting version=" + version);
-                        found = true;
-                        break;
-                    }
+                    String version = names[i].substring(1);
+                    versions.add(version);
                 }
             }
-
-            if (!found) {
-                return null;
-            }
-
-            ServerResource server = createServerResource(path);
-            
-            server.setProductConfig();
-            //server.setControlConfig(...); N/A
-            server.setMeasurementConfig();
-
-            ArrayList servers = new ArrayList();
-            servers.add(server);
-            return servers;
         } catch (Win32Exception e) {
+            return null;            
+        } finally {
+            if (key != null) {
+                key.close();
+            }
+        }
+
+        int size = versions.size();
+        if (size == 0) {
             return null;
         }
+
+        Collections.sort(versions);
+
+        log.debug("Found .NET versions=" + versions);
+
+        //all runtime versions have the same metrics,
+        //so just discover the highest version
+        return (String)versions.get(size-1);
+    }
+
+    private String getInstallPath() {
+        RegistryKey key = null;
+        try {
+            key = getRegistryKey(REG_KEY);
+            return key.getStringValue("InstallRoot").trim();
+        } catch (Win32Exception e) {
+            return null;
+        } finally {
+            if (key != null) {
+                key.close();
+            }
+        }
+    }
+
+    public List getServerResources(ConfigResponse platformConfig)
+        throws PluginException {
+
+        String thisVersion = getTypeInfo().getVersion();
+        String version = getVersion();
+        if (version == null) {
+            return null;
+        }
+        if (!thisVersion.equals(version)) {
+            return null;
+        }
+
+        String path = getInstallPath();
+        if (path == null) {
+            log.debug("Found .NET version=" + version +
+                      ", path=" + path);
+            return null;
+        }
+
+        ServerResource server = createServerResource(path);
+            
+        server.setProductConfig();
+        //server.setControlConfig(...); N/A
+        server.setMeasurementConfig();
+
+        List servers = new ArrayList();
+        servers.add(server);
+        return servers;
     }
 
     protected List discoverServices(ConfigResponse serverConfig) 

@@ -36,7 +36,6 @@ public class DotNetMeasurementPlugin
     private static final String DATA_DOMAIN = ".NET CLR Data";
     private static final String DATA_PREFIX = "SqlClient: ";
     private static final String RUNTIME_NAME = "_Global_";
-    private static final String AVAIL_PROPS  = "Type=Availability";
 
     protected String getAttributeName(Metric metric) {
         //avoiding Metric parse errors on ':' in DATA_PREFIX.
