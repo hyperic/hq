@@ -272,7 +272,7 @@
 
     <properties>
       <property name="version"
-                description="VMWare Version"/>
+                description="VMware Version"/>
 
       <property name="build"
                 description="Build"/>
@@ -359,7 +359,7 @@
 
     <properties>
       <property name="version"
-                description="VMWare Version"/>
+                description="VMware Version"/>
 
       <property name="build"
                 description="Build"/>
