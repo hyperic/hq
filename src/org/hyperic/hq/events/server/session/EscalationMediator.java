@@ -249,17 +249,6 @@ public class EscalationMediator extends Mediator
     }
 
     /**
-     * set escalation state to active and take ownership of the escalation
-     * chain.  The caller is guaranteed that no other thread will have
-     * access to this escalation chain.
-     *
-     * This method is not cluster-safe.
-     *
-     * @param e the Escalation
-     * @param alertDefId the alert definition ID
-     * @return true if escalation state changed from inactive to active. I.e,
-     *         the caller now owns the escalation chain.
-     *         false escalation chain is already in progress.
      */
     private boolean isEscalationActive(Escalation e,
                                        Integer alertDefId,
