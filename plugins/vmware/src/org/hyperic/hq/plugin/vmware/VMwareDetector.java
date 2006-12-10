@@ -397,16 +397,88 @@ public class VMwareDetector
         return StringUtil.replace(encoded, "+", "%20");
     }
 
+    private List getServices(ConfigResponse serverConfig,
+                             VM vm, String name)
+        throws VMwareException { 
+
+        List services = new ArrayList();
+
+        int state = vm.getExecutionState();
+        String displayName = vm.getDisplayName();
+
+        ServiceResource service = new ServiceResource();
+        service.setType(this, VM_NAME);
+        service.setServiceName(serviceName(displayName, VM_NAME));
+
+        ConfigResponse config = new ConfigResponse();
+        config.setValue(PROP_VM_CONFIG, name);
+
+        String logdir =
+            isWin32() ? WIN32_EVENTLOG_DIR : UNIX_EVENTLOG_DIR;
+        String logfile =
+            logdir + "event-" + vmLogName(name) + ".log";
+        config.setValue(VMwareEventLogPlugin.PROP_FILES_SERVICE,
+                        logfile);
+
+        config.setValue(VMwareConfigTrackPlugin.PROP_FILES_SERVICE,
+                        name);
+
+        service.setProductConfig(config);
+
+        log.debug(displayName + "=" + VM.EXECUTION_STATES[state]);
+
+        ConfigResponse cprops = new ConfigResponse();
+
+        String[] keys =
+            getCustomPropertiesSchema(service.getType()).getOptionNames();
+
+        //XXX use VM.getConfig if remote
+        Properties props = loadProperties(new File(name));
+        for (int k=0; k<keys.length; k++) {
+            String value = props.getProperty(keys[k]);
+            if (value != null) {
+                cprops.setValue(keys[k], value);
+            }
+        }
+
+        if (state == VM.EXECUTION_STATE_ON) {
+            service.setMeasurementConfig();
+
+            if (isESX()) {
+                try {
+                    discoverDisks(vm, services, displayName, name);
+                } catch (VMwareException e) {
+                    //XXX 3.0.0 bug disk.HTL not defined
+                    log.error("Failed to discover VM Disks: " + e);
+                }
+                discoverNICs(vm, services, displayName, name);
+            }
+
+            getGuestProps(vm, cprops);
+
+            setGuestInfo(displayName, vm, serverConfig);
+        }
+
+        service.setCustomProperties(cprops);
+        service.setControlConfig();
+
+        services.add(service);
+
+        return services;
+    }
+
     private List getServices(ConfigResponse serverConfig)
         throws PluginException {
 
         List services = new ArrayList();
-        
+        boolean isServerConnected = false;
+        VMwareConnectParams params =
+            new VMwareConnectParams(serverConfig.toProperties());
+        VMwareServer server = new VMwareServer();
+
         try {
-            VMwareConnectParams params =
-                new VMwareConnectParams(serverConfig.toProperties());
-            VMwareServer server = new VMwareServer();
             server.connect(params);
+            isServerConnected = true;
 
             List names = server.getRegisteredVmNames();
             log.debug("Found " + names.size() + " registered VMs");
@@ -414,76 +486,31 @@ public class VMwareDetector
             for (int i=0; i<names.size(); i++) {
                 String name = (String)names.get(i);
                 VM vm = new VM();
-                vm.connect(params, name);
-
-                int state = vm.getExecutionState();
-                String displayName = vm.getDisplayName();
-
-                ServiceResource service = new ServiceResource();
-                service.setType(this, VM_NAME);
-                service.setServiceName(serviceName(displayName, VM_NAME));
-
-                ConfigResponse config = new ConfigResponse();
-                config.setValue(PROP_VM_CONFIG, name);
-
-                String logdir =
-                    isWin32() ? WIN32_EVENTLOG_DIR : UNIX_EVENTLOG_DIR;
-                String logfile =
-                    logdir + "event-" + vmLogName(name) + ".log";
-                config.setValue(VMwareEventLogPlugin.PROP_FILES_SERVICE,
-                                logfile);
-
-                config.setValue(VMwareConfigTrackPlugin.PROP_FILES_SERVICE,
-                                name);
-                
-                service.setProductConfig(config);
-
-                log.debug(displayName + "=" + VM.EXECUTION_STATES[state]);
-                ConfigResponse cprops = new ConfigResponse();
-
-                String[] keys =
-                    getCustomPropertiesSchema(service.getType()).getOptionNames();
-
-                //XXX use VM.getConfig if remote
-                Properties props = loadProperties(new File(name));
-                for (int k=0; k<keys.length; k++) {
-                    String value = props.getProperty(keys[k]);
-                    if (value != null) {
-                        cprops.setValue(keys[k], value);
+                boolean isVmConnected = false;
+                try {
+                    vm.connect(params, name);
+                    isVmConnected = true;
+                    services.addAll(getServices(serverConfig, vm, name));
+                } catch (VMwareException e) {
+                    log.error("Error discovering " + name + " services: " +
+                              e.getMessage(), e);
+                } finally {
+                    if (isVmConnected) {
+                        vm.disconnect();
                     }
+                    vm.dispose();
                 }
-
-                if (state == VM.EXECUTION_STATE_ON) {
-                    service.setMeasurementConfig();
-
-                    if (isESX()) {
-                        try {
-                            discoverDisks(vm, services, displayName, name);
-                        } catch (VMwareException e) {
-                            //XXX 3.0.0 bug disk.HTL not defined
-                            log.error("Failed to discover VM Disks: " + e);
-                        }
-                        discoverNICs(vm, services, displayName, name);
-                    }
-
-                    getGuestProps(vm, cprops);
-
-                    setGuestInfo(displayName, vm, serverConfig);
-                }
-
-                service.setCustomProperties(cprops);
-                service.setControlConfig();
-
-                services.add(service);
-
-                vm.disconnect();
-                vm.dispose();
             }
-
-            server.disconnect();
-            server.dispose();
         } catch (VMwareException e) {
-            throw new PluginException("Error discovering VMs: " + e, e);
+            throw new PluginException("Error discovering VMs: " +
+                                      e.getMessage(), e);
+        } finally {
+            params.dispose();
+
+            if (isServerConnected) {
+                server.disconnect();
+            }
+            server.dispose();
         }
 
         return services;
