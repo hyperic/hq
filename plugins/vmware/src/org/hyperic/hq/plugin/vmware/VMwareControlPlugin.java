@@ -43,13 +43,6 @@ public class VMwareControlPlugin
     private VMwareConnectParams params;
     private VM vm;
 
-    public VMwareControlPlugin() {
-        super();
-        setName("vmware");
-        //give waitForState enough time
-        setTimeout(DEFAULT_TIMEOUT * 10);
-    }
-
     public void configure(ConfigResponse config)
         throws PluginException
     {
@@ -57,22 +50,6 @@ public class VMwareControlPlugin
 
         super.configure(config);
         this.props = config.toProperties();
-    }
-
-    protected boolean isRunning() { 
-        boolean isConnected = (this.vm != null);
-        try {
-            if (!isConnected) {
-                connectVM();
-            }
-            return this.vm.getExecutionState() == VM.EXECUTION_STATE_ON;
-        } catch (VMwareException e) {
-            return false;
-        } finally {
-            if (!isConnected) {
-                disconnectVM();
-            }
-        } 
     }
 
     private void checkState(int state) throws VMwareException {
@@ -114,7 +91,6 @@ public class VMwareControlPlugin
             connectVM();
             checkState(VM.EXECUTION_STATE_OFF);
             this.vm.start();
-            waitForState(STATE_STARTED);
         } finally {
             disconnectVM();
         }
@@ -125,7 +101,6 @@ public class VMwareControlPlugin
             connectVM();
             checkState(VM.EXECUTION_STATE_ON);
             this.vm.stop();
-            waitForState(STATE_STOPPED);
         } finally {
             disconnectVM();
         }
@@ -136,7 +111,6 @@ public class VMwareControlPlugin
             connectVM();
             checkState(VM.EXECUTION_STATE_ON);
             this.vm.reset();
-            waitForState(STATE_STARTED);
         } finally {
             disconnectVM();
         }
@@ -147,7 +121,6 @@ public class VMwareControlPlugin
             connectVM();
             checkState(VM.EXECUTION_STATE_ON);
             this.vm.suspend();
-            waitForState(STATE_STOPPED);
         } finally {
             disconnectVM();
         }
@@ -158,7 +131,6 @@ public class VMwareControlPlugin
             connectVM();
             checkState(VM.EXECUTION_STATE_SUSPENDED);
             this.vm.resume();
-            waitForState(STATE_STARTED);
         } finally {
             disconnectVM();
         }
