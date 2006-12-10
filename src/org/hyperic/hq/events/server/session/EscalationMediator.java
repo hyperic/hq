@@ -414,7 +414,7 @@ public class EscalationMediator extends Mediator
         throws PermissionException
     {
         EscalationDAO dao = DAOFactory.getDAOFactory().getEscalationDAO();
-         return dao.findByAlertDefinitionId(subjectId, id);
+        return dao.findByAlertDefinitionId(subjectId, id);
     }
 
     public Escalation findByEscalationId(Integer subjectId, Integer id)
