@@ -26,114 +26,135 @@
 
 <plugin name="vmware" class="VMwareProductPlugin">
 
-  <property name="template-config"
-            value="authd.client.port=%authd.client.port%,host=%host%,user=%user%,pass=%pass%"/>
+  <config name="authd">
+    <option name="authd.client.port"
+            type="port"
+            description="Authentication Server Port"
+            default="0"/>
 
-  <filter name="default.config"
-          value="/var/lib/vmware/Virtual Machines/Red Hat Linux/redhat.vmx"/>
+    <option name="host"
+            description="Authentication Server Hostname"/>
+
+    <option name="user"
+            description="Username"/>
+
+    <option name="pass"
+            type="secret"
+              description="Password"/>
+  </config>
+
+  <config name="vm">
+    <option name="vm.config"
+            description="VM config file"
+            default="/var/lib/vmware/VirtualMachines/Linux/redhat.vmx"/>
+  </config>
+
+  <!-- service template -->
+  <filter name="template"
+          value="vm:Config=%vm.config%,${authd.config}:${attr}"/>
 
   <metrics name="vm-avail">
     <metric name="Availability"
             indicator="true"
-	    template="vm:Config=%vm.config%:State"/>
+            attr="State"/>
   </metrics>
 
   <metrics name="vm-process">
     <metric name="Process Virtual Memory Size"
-            template="vm:Config=%vm.config%:ProcSize"
+            attr="ProcSize"
             units="B"/>
 
     <metric name="Process Resident Memory Size"
-            template="vm:Config=%vm.config%:ProcResident"
+            attr="ProcResident"
             units="B"/>
 
     <metric name="Process Page Faults"
-            template="vm:Config=%vm.config%:ProcPageFaults"
+            attr="ProcPageFaults"
             collectionType="trendsup"/>
 
     <metric name="Process Cpu System Time"
-            template="vm:Config=%vm.config%:ProcSysTime"
+            attr="ProcSysTime"
             units="ms"
             collectionType="trendsup"/>
 
     <metric name="Process Cpu User Time"
-            template="vm:Config=%vm.config%:ProcUserTime"
+            attr="ProcUserTime"
             units="ms"
             collectionType="trendsup"/>
 
     <metric name="Process Uptime"
-            template="vm:Config=%vm.config%:ProcUptime"
+            attr="ProcUptime"
             category="AVAILABILITY"
             units="ms"
             collectionType="static"/>
 
     <metric name="Process Cpu Total Time"
-            template="vm:Config=%vm.config%:ProcTotalTime"
+            attr="ProcTotalTime"
             units="ms"
             collectionType="trendsup"/>
 
     <metric name="Process Cpu Usage"
-            template="vm:Config=%vm.config%:ProcCpuUsage"
+            attr="ProcCpuUsage"
             units="percentage"/>
   </metrics>
 
   <metrics name="vm-esx">
     <metric name="VM Cpu Wait"
-            template="vm:Config=%vm.config%:cpu.waitsec"
+            attr="cpu.waitsec"
             units="sec"
             collectionType="trendsup"/>
 
     <metric name="VM Cpu Used"
-            template="vm:Config=%vm.config%:cpu.usedsec"
+            attr="cpu.usedsec"
             indicator="true"
             units="sec"
             collectionType="trendsup"/>
 
     <metric name="VM Cpu Sys"
-            template="vm:Config=%vm.config%:cpu.syssec"
+            attr="cpu.syssec"
             units="sec"/>
 
     <metric name="VM Memory Shares"
-            template="vm:Config=%vm.config%:mem.shares"/>
+            attr="mem.shares"/>
 
     <metric name="VM Memory Minimum"
-            template="vm:Config=%vm.config%:mem.min"
+            attr="mem.min"
             units="KB"
             collectionType="static"/>
 
     <metric name="VM Memory Maximum"
-            template="vm:Config=%vm.config%:mem.max"
+            attr="mem.max"
             units="KB"
             collectionType="static"/>
 
     <metric name="VM Memory Size"
-            template="vm:Config=%vm.config%:mem.size"
+            attr="mem.size"
             indicator="true"
             units="KB"/>
 
     <metric name="VM Memory Ctl"
-            template="vm:Config=%vm.config%:mem.memctl"
+            attr="mem.memctl"
             units="KB"/>
 
     <metric name="VM Memory Swapped"
-            template="vm:Config=%vm.config%:mem.swapped"
+            attr="mem.swapped"
             indicator="true"
             units="KB"/>
 
     <metric name="VM Memory Shared"
-            template="vm:Config=%vm.config%:mem.shared"
+            attr="mem.shared"
             units="KB"/>
 
     <metric name="VM Memory Active"
-            template="vm:Config=%vm.config%:mem.active"
+            attr="mem.active"
             units="KB"/>
 
     <metric name="VM Memory Overhead"
-            template="vm:Config=%vm.config%:mem.overhd"
+            attr="mem.overhd"
             units="KB"/>
 
     <metric name="VM Uptime"
-            template="vm:Config=%vm.config%:Uptime"
+            attr="Uptime"
             category="AVAILABILITY"
             units="sec"
             collectionType="static"/>
@@ -142,26 +163,26 @@
   <metrics name="vm-disk">
     <metric name="Availability"
             indicator="true"
-	    template="vm:Config=%vm.config%:disk.%vm.disk%.avail"/>
+	    attr="disk.%vm.disk%.avail"/>
 
     <metric name="Reads"
-            template="vm:Config=%vm.config%:disk.%vm.disk%.reads"
+            attr="disk.%vm.disk%.reads"
             indicator="true"
             collectionType="trendsup"/>
 
     <metric name="Writes"
-            template="vm:Config=%vm.config%:disk.%vm.disk%.writes"
+            attr="disk.%vm.disk%.writes"
             indicator="true"
             collectionType="trendsup"/>
 
     <metric name="Bytes Read"
-            template="vm:Config=%vm.config%:disk.%vm.disk%.KBread"
+            attr="disk.%vm.disk%.KBread"
             indicator="true"
             units="KB"
             collectionType="trendsup"/>
 
     <metric name="Bytes Written"
-            template="vm:Config=%vm.config%:disk.%vm.disk%.KBwritten"
+            attr="disk.%vm.disk%.KBwritten"
             indicator="true"
             units="KB"
             collectionType="trendsup"/>
@@ -170,63 +191,67 @@
   <metrics name="vm-nic">
     <metric name="Availability"
             indicator="true"
-	    template="vm:Config=%vm.config%:net.%vm.nic%.avail"/>
+	    attr="net.%vm.nic%.avail"/>
 
     <metric name="Packets Transmitted"
-            template="vm:Config=%vm.config%:net.%vm.nic%.totPktsTx"
+            attr="net.%vm.nic%.totPktsTx"
             indicator="true"
             collectionType="trendsup"/>
 
     <metric name="Packets Received"
-            template="vm:Config=%vm.config%:net.%vm.nic%.totPktsRx"
+            attr="net.%vm.nic%.totPktsRx"
             indicator="true"
             units="none"
             collectionType="trendsup"/>
 
     <metric name="Bytes Transmitted"
-            template="vm:Config=%vm.config%:net.%vm.nic%.totKBTx"
+            attr="net.%vm.nic%.totKBTx"
             category="THROUGHPUT"
             indicator="true"
             units="KB"
             collectionType="trendsup"/>
 
     <metric name="Bytes Received"
-            template="vm:Config=%vm.config%:net.%vm.nic%.totKBRx"
+            attr="net.%vm.nic%.totKBRx"
             category="THROUGHPUT"
             indicator="true"
             units="KB"
             collectionType="trendsup"/>
   </metrics>
 
+  <!-- server template -->
+  <filter name="template"
+          value="server:${authd.config}:${attr}"/>
+
   <metrics name="esx-server">
     <metric name="Availability"
-            indicator="true"
-            template="server:Type=Server:${name}"/>
+            attr="${name}"
+            indicator="true"/>
 
     <metric name="Memory Available for VMs"
-            template="server:Type=Server:system.mem.avail"
+            attr="system.mem.avail"
             indicator="true"
             units="KB"/>
 
     <metric name="Memory Used by VMs"
-            template="server:Type=Server:system.mem.size"
+            attr="system.mem.size"
             indicator="true"
             units="KB"/>
 
     <metric name="CPU Used"
-            template="server:Type=Server:system.cpu.usedsec"
+            attr="system.cpu.usedsec"
             indicator="true"
             collectionType="trendsup"
             units="sec"/>
 
     <metric name="CPU Idle"
-            template="server:Type=Server:system.cpu.idlesec"
+            attr="system.cpu.idlesec"
             indicator="true"
             collectionType="trendsup"
             units="sec"/>
 
     <metric name="Number of CPUs"
-            template="server:Type=Server:system.cpu.number"
+            attr="system.cpu.number"
             collectionType="static"/>
   </metrics>
 
@@ -243,26 +268,11 @@
     <plugin type="autoinventory"
             class="VMwareDetector"/>
 
-    <config>
-      <option name="authd.client.port"
-              type="port"
-              description="Authentication Server Port"
-              default="0"/>
-
-      <option name="host"
-              description="Authentication Server Hostname"/>
-
-      <option name="user"
-              description="Username"/>
-
-      <option name="pass"
-              type="secret"
-              description="Password"/>
-    </config>
+    <config include="authd"/>
 
     <properties>
       <property name="version"
-                description="VMWare Version"/>
+                description="VMware Version"/>
 
       <property name="build"
                 description="Build"/>
@@ -273,7 +283,7 @@
 
     <metric name="Availability"
             indicator="true"
-            template="server:Type=Server:${name}"/>
+            attr="${name}"/>
 
     <metric name="Memory Available for VMs"
             template="sigar:Type=Mem:ActualFree"
@@ -314,11 +324,7 @@
         <include name="saveScreenshot"/>
       </actions>
 
-      <config>
-        <option name="vm.config"
-                description="VM config file"
-                default="${default.config}"/>
-      </config>
+      <config include="vm"/>
 
       <metrics include="vm-avail,vm-process"/>
     </service>
@@ -349,29 +355,11 @@
     <plugin type="autoinventory"
             class="VMwareDetector"/>
 
-    <config>
-      <option name="authd.client.port"
-              optional="true"
-              type="int"
-              description="Authentication Server Port"/>
-
-      <option name="host"
-              optional="true"
-              description="Authentication Server Hostname"/>
-
-      <option name="user"
-              optional="true"
-              description="Username"/>
-
-      <option name="pass"
-              optional="true"
-              type="secret"
-              description="Password"/>
-    </config>
+    <config include="authd"/>
 
     <properties>
       <property name="version"
-                description="VMWare Version"/>
+                description="VMware Version"/>
 
       <property name="build"
                 description="Build"/>
@@ -410,11 +398,7 @@
         <include name="saveScreenshot"/>
       </actions>
 
-      <config>
-        <option name="vm.config"
-                description="VM config file"
-                default="${default.config}"/>
-      </config>
+      <config include="vm"/>
 
       <properties>
          <property name="guestOS"
@@ -449,11 +433,7 @@
       <plugin type="collector"
               class="org.hyperic.hq.plugin.vmware.VMCollector"/>
 
-      <config>
-        <option name="vm.config"
-                description="VM config file"
-                default="${default.config}"/>
-
+      <config include="vm">
         <option name="vm.disk"
                 description="VM disk"
                 default="vmhba0:1:0"/>
@@ -469,11 +449,7 @@
       <plugin type="collector"
               class="org.hyperic.hq.plugin.vmware.VMCollector"/>
 
-      <config>
-        <option name="vm.config"
-                description="VM config file"
-                default="${default.config}"/>
-
+      <config include="vm">
         <option name="vm.nic"
                 description="VM NIC"
                 default="00:0c:29:3d:34:8c"/>

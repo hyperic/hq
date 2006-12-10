@@ -121,7 +121,7 @@ public class VMwareMetrics extends HashMap {
             String cpu = getResource(server, SYS_CPU_NUMBER);
             int num = Integer.parseInt(cpu);
 
-            metrics.put(CPU_NUMBER, cpu);
+            metrics.put(SYS_CPU_NUMBER, cpu);
 
             for (int i=0; i<vars.length; i++) {
                 double val = 0;
@@ -182,7 +182,15 @@ public class VMwareMetrics extends HashMap {
         }
     }
 
-    public static synchronized Map getInstance(Properties props)
+    public static Map getInstance(Properties props)
+        throws VMwareException {
+
+        synchronized (VMwareConnectParams.LOCK) {
+            return getMetrics(props);
+        }
+    }
+
+    private static Map getMetrics(Properties props)
         throws VMwareException {
 
         VMwareMetrics metrics = (VMwareMetrics)cache.get(props);
@@ -217,8 +225,8 @@ public class VMwareMetrics extends HashMap {
         return metrics;
     }
 
-    public static synchronized Map getInstance(Properties props,
-                                               String config)
+    public static Map getInstance(Properties props,
+                                  String config)
         throws VMwareException {
 
         synchronized (VMwareConnectParams.LOCK) {

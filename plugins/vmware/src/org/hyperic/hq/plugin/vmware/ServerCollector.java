@@ -47,6 +47,8 @@ public class ServerCollector extends Collector {
     }
 
     protected void init() throws PluginException {
+        VMwareProductPlugin.checkIsLoaded();
+
         setSource(getPlugin().getName());
     }
 }
