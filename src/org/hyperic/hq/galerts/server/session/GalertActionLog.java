@@ -34,6 +34,7 @@ public class GalertActionLog
     private String _detail;
     private GalertLog  _galertLog;
     private Action _action;
+    private boolean _fixed;
 
     protected GalertActionLog() {
     }
@@ -66,5 +67,13 @@ public class GalertActionLog
     
     protected void setAction(Action action) {
         _action = action;
+    }
+
+    protected boolean isFixed() {
+        return _fixed;
+    }
+
+    protected void setFixed(boolean fixed) {
+        _fixed = fixed;
     }
 }
