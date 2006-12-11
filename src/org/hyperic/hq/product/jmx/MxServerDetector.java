@@ -54,6 +54,8 @@ public class MxServerDetector
     static final String PROP_SERVICE_NAME = "name";
     private static final String PROC_MAIN_CLASS    = "PROC_MAIN_CLASS";
     private static final String PROC_HOME_PROPERTY = "PROC_HOME_PROPERTY";
+    private static final String INSTALLPATH_MATCH = "INSTALLPATH_MATCH";
+    private static final String INSTALLPATH_NOMATCH = "INSTALLPATH_NOMATCH";
     private static final String PROP_PROCESS_QUERY = "process.query";
     protected static final String PROC_JAVA = "State.Name.sw=java";
     protected static final String SUN_JMX_PORT = 
@@ -180,7 +182,8 @@ public class MxServerDetector
         List servers = new ArrayList();
         List procs = getServerProcessList();
         String versionFile = getTypeProperty("VERSION_FILE");
-
+        String installPathMatch = getTypeProperty(INSTALLPATH_MATCH);
+        String installPathNoMatch = getTypeProperty(INSTALLPATH_NOMATCH);
         for (int i=0; i<procs.size(); i++) {
             MxProcess process = (MxProcess)procs.get(i);
             String dir = process.getInstallPath();
@@ -190,6 +193,23 @@ public class MxServerDetector
                 File file = new File(dir, versionFile);
                 if (!file.exists()) {
                     getLog().debug(file + " does not exist, skipping");
+                    continue;
+                }
+            }
+
+            // Optional use of INSTALLPATH_MATCH & INSTALLPATH_NOMATCH
+            if (installPathMatch != null) {
+                if (!(dir.indexOf(installPathMatch) != -1)) {
+                    getLog().debug(dir + " not a match for " +
+                                   installPathMatch + ", skipping");
+                    continue;
+                }
+            }
+
+            if (installPathNoMatch != null) {
+                if (dir.indexOf(installPathNoMatch) != -1) {
+                    getLog().debug(dir + " is a match for " +
+                                   installPathNoMatch + ", skipping");
                     continue;
                 }
             }
