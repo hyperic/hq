@@ -139,8 +139,10 @@
 		
         td3.appendChild(select3);
         select3.name = "who_" + liID;
+        select3.onchange = function(){onchange_who(this);}
+        addOption(select3, 'Select', 'Select users to send escalation to');
         <c:if test="${not empty AvailableRoles}">
-		addOption(select3, 'Roles', '<fmt:message key="monitoring.events.MiniTabs.Roles"/>')
+        addOption(select3, 'Roles', '<fmt:message key="monitoring.events.MiniTabs.Roles"/>')
         </c:if>
 		addOption(select3, 'Users', '<fmt:message key="monitoring.events.MiniTabs.CAMusers"/>');
 		addOption(select3, 'Others', '<fmt:message key="monitoring.events.MiniTabs.OR"/>');
@@ -150,7 +152,7 @@
         var index= el.options[el.selectedIndex].value
 
          if (index == "Email") {
-			 // If the current option is mtg - show time; show attend
+
 			showEmailInput();
 			hideSyslogInput();
             $('whoSelect').style.display = '';
@@ -160,9 +162,23 @@
 			showSyslogInput();
             $('whoSelect').style.display = 'none';
            }
-        } 
+        }
+
+        function onchange_who(el) {
+        //alert(el+", value="+ el.options[el.selectedIndex].value );
+        var index= el.options[el.selectedIndex].value
+
+         if (index == "Roles") {
+			configureRoles();
+           }
+		   else if (index == "Users") {
+           configureUsers();
+           } else if (index == "Others") {
+             configureOthers();
+         }
+        }
 		
-		escTr2.appendChild(td4);
+        escTr2.appendChild(td4);
 		td5.setAttribute('width', '50%');
 		
 		td4.appendChild(emailDiv);
@@ -192,10 +208,22 @@
 			$('syslog0').style.display='';
            $('who').style.display = 'none';
            }
-        } 
+        }
+
+    function onchange_staticRowWho(el) {
+    	 var index= el.options[el.selectedIndex].value
+
+        if (index == "Roles") {
+			configureRoles();
+           } else if (index == "Users") {
+		    configureUsers();
+        }  else if (index == "Users") {
+           configureOthers();
+        }
+    }
 
 
-	function showEmailInput() { 
+    function showEmailInput() {
 	$(emailinput).style.display='';
 	}
 	
@@ -342,18 +370,7 @@
         sel.options[sel.selectedIndex].value;
       document.EscalationSchemeForm.submit();
     }
-    
- /*   
-    function renameFormInput() {
-    var EscalationForm = document.forms[1];
-    var formEls = EscalationForm.elements;
-    var formVals = formEls.values;
-    alert(formVals);
-    for (var i = 0; i < formVals.length; i++) {
-    	alert(formVals);
-    }
-}
-*/
+
 
 sections = ['section'];
 
@@ -411,6 +428,9 @@ sections = ['section'];
   </c:choose>
   <html:hidden property="escId"/>
 </html:form>
+
+<tiles:insert definition=".portlet.confirm"/>
+<tiles:insert definition=".portlet.error"/>
  
 <form action="<html:rewrite action="/escalation/saveEscalation"/>" name="EscalationForm" id="EscalationForm">
 <input type="hidden" value="0" id="pid">
@@ -471,7 +491,11 @@ sections = ['section'];
                             </select>
                         </td>
                         <td width="20%" style="padding-right:20px;" valign="top" id="who">
-                            <select id="who_row0" name="who_row0">
+                            <select id="who_row0" name="who_row0" onchange="onchange_staticRowWho(this);">
+                                <option selected value="Select">
+                                Select users to send escalation to
+                                </option>
+
                                 <c:if test="${not empty AvailableRoles}">
                                     <option value="Roles">
                                         <fmt:message key="monitoring.events.MiniTabs.Roles" />
