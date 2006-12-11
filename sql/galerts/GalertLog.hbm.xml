@@ -21,6 +21,10 @@
       <column name="TIMESTAMP" not-null="true"/>
     </property>
 
+    <property name="fixed" type="boolean">
+      <column name="FIXED" not-null="true"/>
+    </property>
+
     <many-to-one name="alertDef">
       <column name="DEF_ID" not-null="false"/>
     </many-to-one>
