@@ -47,6 +47,10 @@
         <property name="PROC_HOME_PROPERTY"
                   value="resin.home"/>
 
+        <!-- 3.0.19 is handled seperately -->
+        <property name="INSTALLPATH_NOMATCH"
+                  value="3.0.19"/>
+
         <!-- Availability mappings -->
         <property name="State.active" value="1.0"/>
         <property name="State.stopped" value="0.0"/>
@@ -326,6 +330,9 @@
 
         <property name="PROC_HOME_PROPERTY"
                   value="resin.home"/>
+
+        <property name="INSTALLPATH_MATCH"
+                  value="3.0.19"/>
 
         <!-- Availability mappings -->
         <property name="State.active" value="1.0"/>
