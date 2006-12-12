@@ -89,7 +89,7 @@
             <property name="StartupMode" description="Startup Mode"/>
         </properties>
 
-        <actions include="restart"/>
+        <actions include="stop,start,update,restart"/>
 
         <metric name="Availability"
                 template="${OBJECT_NAME}:State"
