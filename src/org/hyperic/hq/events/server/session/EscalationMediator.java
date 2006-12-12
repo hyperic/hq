@@ -549,25 +549,28 @@ public class EscalationMediator extends Mediator
                 new StateLock(alertDefId.intValue(), alertType))) {
                 EscalationState state =
                     getEscalationState(escalation, alertDefId, alertType);
-
-                if (state != null) {
-                    if (fixed) {
-                        if(state.isActive() &&
-                           alertId.intValue() == state.getAlertId()) {
-                            // escalation runtime needs to know when
-                            // alert is fixed so it can stop the escalation chain.
-                            resetEscalationState(state);
-                        }
-                        // mark alert as fixed as well
-                        alert.setFixed(true);
-                    } else {
-                        setPauseWaitTime(state, pauseWaitTime);
-                        state.setAcknowledge(true);
-                    }
-                    state.setUpdateBy(subject.getFirstName());
-                    DAOFactory.getDAOFactory().getEscalationStateDAO()
-                        .save(state);
+                if (state == null) {
+                    log.error("Can't find escalation state. escalation="+
+                              escalation + ", alertDefId="+alertDefId+
+                              ", alertType=" + alertType);
+                    return null;
                 }
+                if (fixed) {
+                    if(state.isActive() &&
+                       alertId.intValue() == state.getAlertId()) {
+                        // escalation runtime needs to know when
+                        // alert is fixed so it can stop the escalation chain.
+                        resetEscalationState(state);
+                    }
+                    // mark alert as fixed as well
+                    alert.setFixed(true);
+                } else {
+                    setPauseWaitTime(state, pauseWaitTime);
+                    state.setAcknowledge(true);
+                }
+                state.setUpdateBy(subject.getFirstName());
+                DAOFactory.getDAOFactory().getEscalationStateDAO()
+                    .save(state);
                 return state;
             }
         }
@@ -587,11 +590,9 @@ public class EscalationMediator extends Mediator
             EscalationState s =
                 getEscalationState(e, new Integer(alertDefId), alertType);
             if (s == null) {
-                if (log.isInfoEnabled()) {
-                    log.info("Can't find escalation state. escalation=" +
-                             e + ", alertDefId="+alertDefId +
-                             ", alertType=" + alertType);
-                }
+                log.error("Can't find escalation state. escalation=" +
+                          e + ", alertDefId="+alertDefId +
+                          ", alertType=" + alertType);
                 return;
             }
             if (!s.isActive()) {
@@ -640,13 +641,12 @@ public class EscalationMediator extends Mediator
         EscalationState state =
             getEscalationState(e, alertDefId, type);
         if (state == null) {
-            logEscalation(null, state, "Escalation stopped. Can't find state.");
             // log error and stop escalation chain
             log.error("Escalation state not found, stop chain. Escalation=" +e+
                       ", alertDefId=" + alertDefId + ", alertType=" + type);
             return;
         }
-        if (state.isActive() == false) {
+        if (!state.isActive()) {
             if (log.isInfoEnabled()) {
                 logEscalation(ea.getAction(), state,
                               "End Escalation. alert def ID=" +  alertDefId +
@@ -709,10 +709,8 @@ public class EscalationMediator extends Mediator
             EscalationState s =
                 getEscalationState(e, new Integer(alertDefId), alertType);
             if (s == null) {
-                if (log.isInfoEnabled()) {
-                    log.info("Can't find Escalation State. escalation=" + e +
-                             ", alertDefId=" + alertDefId + ", alertType="+alertType);
-                }
+                log.error("Can't find Escalation State. escalation=" + e +
+                          ", alertDefId=" + alertDefId + ", alertType="+alertType);
                 return;
             }
             if (s.isActive()) {
