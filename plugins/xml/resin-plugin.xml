@@ -199,7 +199,7 @@
 
     <service name="Webapp">
       <property name="OBJECT_NAME"
-                value="resin:type=WebApp,Server=*,Host=*,WebApp=*,name=*"/>
+                value="resin:type=WebApp,Server=*,Host=*,name=*"/>
 
       <!-- Availability mappings -->
       <property name="State.active" value="1.0"/>
@@ -210,8 +210,6 @@
                 description="Server name"/>
         <option name="Host"
                 description="Host"/>
-        <option name="WebApp"
-                description="WebApp"/>
         <option name="name"
                 description="name"/>
       </config>
