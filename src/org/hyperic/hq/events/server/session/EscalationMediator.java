@@ -458,51 +458,103 @@ public class EscalationMediator extends Mediator
                                  long pauseWaitTime)
         throws PermissionException, ActionExecuteException
     {
+        setEscalationAcknowledged(subjectID, alertID,
+                                  EscalationState.ALERT_TYPE_CLASSIC,
+                                  pauseWaitTime);
+    }
+
+    public void acknowledgeGalert(Integer subjectID, Integer alertID,
+                                  long pauseWaitTime)
+        throws PermissionException, ActionExecuteException
+    {
+        setEscalationAcknowledged(subjectID, alertID,
+                                  EscalationState.ALERT_TYPE_GROUP,
+                                  pauseWaitTime);
+    }
+
+    private void setEscalationAcknowledged(Integer subjectID, Integer alertID,
+                                           int alertType, long pauseWaitTime)
+        throws PermissionException, ActionExecuteException
+    {
         EscalationState state =
-            setEscalationState(subjectID, alertID,
-                               EscalationState.ALERT_TYPE_CLASSIC, false,
+            setEscalationState(subjectID, alertID, alertType, false,
                                pauseWaitTime);
         if (state != null) {
             AuthzSubject subj =
                 DAOFactory.getDAOFactory().getAuthzSubjectDAO()
                     .findById(subjectID);
             // TODO: refine message content
-            String message = new StringBuffer()
+            StringBuffer message = new StringBuffer()
                 .append(subj.getFirstName())
                 .append(" ")
                 .append(subj.getLastName())
-                .append(" has acknowledged the alert. The alert id number is ")
-                .append(alertID)
-                .append(".")
-                .toString();
+                .append(" has acknowledged the ");
+            
+            switch (state.getAlertType()) {
+            case EscalationState.ALERT_TYPE_GROUP:
+                message.append("group alert");
+                break;
+            case EscalationState.ALERT_TYPE_CLASSIC:
+            default:
+                message.append("alert");
+                break;
+            }
+
+            message.append(". The alert id number is ")
+                   .append(alertID)
+                   .append(".");
             logEscalation(null, state,
                           "Alert acknowledged by " + state.getUpdateBy());
-            notifyEscalation(alertID, state, message);
+            notifyEscalation(alertID, state, message.toString());
         }
     }
 
     public void fixAlert(Integer subjectID, Integer alertID)
         throws PermissionException, ActionExecuteException
     {
+        setEscalationFixed(subjectID, alertID,
+                           EscalationState.ALERT_TYPE_CLASSIC);
+    }
+
+    public void fixGalert(Integer subjectID, Integer alertID)
+        throws PermissionException, ActionExecuteException
+    {
+        setEscalationFixed(subjectID, alertID,
+                           EscalationState.ALERT_TYPE_GROUP);
+    }
+
+    private void setEscalationFixed(Integer subjectID, Integer alertID,
+                                    int alertType)
+        throws ActionExecuteException, PermissionException
+    {
         EscalationState state =
-            setEscalationState(subjectID, alertID,
-                               EscalationState.ALERT_TYPE_CLASSIC, true, 0);
+            setEscalationState(subjectID, alertID, alertType, true, 0);
+
         if (state != null) {
-            AuthzSubject subj =
-                DAOFactory.getDAOFactory().getAuthzSubjectDAO()
+            AuthzSubject subj = DAOFactory.getDAOFactory().getAuthzSubjectDAO()
                     .findById(subjectID);
             // TODO: refine message content
-            String message = new StringBuffer()
+            StringBuffer message = new StringBuffer()
                 .append(subj.getFirstName())
                 .append(" ")
                 .append(subj.getLastName())
-                .append(" has fixed the alert. The alert id number is ")
-                .append(alertID)
-                .append(".")
-                .toString();
-            logEscalation(null, state,
-                          "Alert fixed by " + state.getUpdateBy());
-            notifyEscalation(alertID, state, message);
+                .append(" has fixed the ");
+
+            switch (state.getAlertType()) {
+            case EscalationState.ALERT_TYPE_GROUP:
+                message.append("group alert");
+                break;
+            case EscalationState.ALERT_TYPE_CLASSIC:
+            default:
+                message.append("alert");
+                break;
+            }
+
+            message.append(". The alert id number is ").append(alertID)
+                   .append(".");
+
+            logEscalation(null, state, "Alert fixed by " + state.getUpdateBy());
+            notifyEscalation(alertID, state, message.toString());
         }
     }
 
@@ -569,8 +621,7 @@ public class EscalationMediator extends Mediator
                     state.setAcknowledge(true);
                 }
                 state.setUpdateBy(subject.getFirstName());
-                DAOFactory.getDAOFactory().getEscalationStateDAO()
-                    .save(state);
+                DAOFactory.getDAOFactory().getEscalationStateDAO().save(state);
                 return state;
             }
         }
@@ -710,7 +761,8 @@ public class EscalationMediator extends Mediator
                 getEscalationState(e, new Integer(alertDefId), alertType);
             if (s == null) {
                 log.error("Can't find Escalation State. escalation=" + e +
-                          ", alertDefId=" + alertDefId + ", alertType="+alertType);
+                          ", alertDefId=" + alertDefId + ", alertType=" +
+                          alertType);
                 return;
             }
             if (s.isActive()) {
