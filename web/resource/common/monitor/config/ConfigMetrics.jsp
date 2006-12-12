@@ -83,6 +83,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     <c:when test="${not empty ResourceType}">
      <tiles:put name="titleName"><html:link page="/admin/config/EditDefaults.do?mode=monitor"><fmt:message key="admin.home.ResourceTemplates"/></html:link> >
         <bean:write name="ResourceType" property="name"/> <c:out value="${section}"/>s</tiles:put>
+      <tiles:put name="linkUrl" value=""/>
     </c:when>
     <c:otherwise>
       <tiles:put name="titleName"><hq:inventoryHierarchy resource="${entityId.appdefKey}" /></tiles:put>
