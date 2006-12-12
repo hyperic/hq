@@ -30,7 +30,7 @@
   </definition>
   
   <definition name=".dashContent.admin.savedQueries"
-              controllerUrl="/dashboard/EditSavedQueries.do"                             
+              controllerUrl="/dashboard/PrepareSavedQueries.do"                             
               path="/portlet/savedQueries/Properties.jsp">
               <put name="portletName"      value=".dashContent.savedCharts" />
   </definition>
@@ -53,7 +53,7 @@
               <put name="portletName"      value=".dashContent.resourceHealth" />
   </definition>  
   <definition name=".dashContent.admin.resourceHealth"  
-              controllerUrl="/dashboard/EditResourceHealth.do"
+              controllerUrl="/dashboard/PrepareResourceHealth.do"
               path="/portlet/resourceHealth/Properties.jsp">
               <put name="portletName"      value=".dashContent.resourceHealth" />
   </definition>
@@ -81,7 +81,7 @@
               <put name="portletName"      value=".dashContent.criticalAlerts" />
   </definition>   
   <definition name=".dashContent.admin.criticalAlerts" 
-              controllerUrl="/dashboard/EditCriticalAlerts.do"
+              controllerUrl="/dashboard/PrepareCriticalAlerts.do"
               path="/portlet/criticalAlerts/Properties.jsp">
               <put name="portletName"      value=".dashContent.criticalAlerts" />
   </definition>
@@ -93,7 +93,7 @@
               <put name="portletName"      value=".dashContent.summaryCounts" />              
   </definition>
   <definition name=".dashContent.admin.summaryCounts"  
-              controllerUrl="/dashboard/EditSummaryCounts.do"
+              controllerUrl="/dashboard/PrepareSummaryCounts.do"
               path="/portlet/summaryCounts/Properties.jsp">
               <put name="portletName"      value=".dashContent.summaryCounts" />
   </definition>       
@@ -113,7 +113,7 @@
   </definition>
 
   <definition name=".dashContent.admin.availSummary" 
-              controllerUrl="/dashboard/EditAvailSummary.do"
+              controllerUrl="/dashboard/PrepareAvailSummary.do"
               path="/portlet/availSummary/Properties.jsp">   
               <put name="portletName" value=".dashContent.availSummary" />
   </definition>
@@ -128,7 +128,7 @@
   </definition>
 
   <definition name=".dashContent.admin.metricViewer"
-              controllerUrl="/dashboard/EditMetricViewer.do"
+              controllerUrl="/dashboard/PrepareMetricViewer.do"
               path="/portlet/metricViewer/Properties.jsp">
               <put name="portletName" value=".dashContent.metricViewer" />
   </definition>
@@ -144,7 +144,7 @@
   </definition>  
 
   <definition name=".dashContent.admin.controlActions"
-              controllerUrl="/dashboard/EditControlActions.do"
+              controllerUrl="/dashboard/PrepareControlActions.do"
               path="/portlet/controlactions/Properties.jsp">
               <put name="portletName" value=".dashContent.controlActions" />
   </definition> 
