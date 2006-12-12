@@ -2612,6 +2612,7 @@
               name="AddAlertUsersForm"
               scope="request"
               input="/alerts/Config.do?mode=addUsers">
+          <set-property property="title" value="2.2.3.2.1"/>
           <forward name="cancel" path="/alerts/Config.do?mode=viewUsers"
                    redirect="true"/>
           <forward name="reset" path="/alerts/Config.do?mode=addUsers"
@@ -2620,8 +2621,6 @@
           <forward name="remove" path="/alerts/Config.do?mode=addUsers"/>
           <forward name="failure" path="/alerts/Config.do?mode=addUsers"/>
           <forward name="success" path="/alerts/Config.do?mode=viewUsers"/>
-
-          <set-property property="title" value="2.2.3.2.1"/>
       </action>
 
       <action path="/alerts/config/AddOthers*"
@@ -2629,14 +2628,13 @@
               name="AddAlertOthersForm"
               scope="request"
               input="/alerts/Config.do?mode=addOthers">
+          <set-property property="title" value="2.2.3.2.1"/>
           <forward name="cancel" path="/alerts/Config.do?mode=viewOthers"
                    redirect="true"/>
           <forward name="reset" path="/alerts/Config.do?mode=addOthers"
                    redirect="true"/>
           <forward name="failure" path="/alerts/Config.do?mode=addOthers"/>
           <forward name="success" path="/alerts/Config.do?mode=viewOthers"/>
-
-          <set-property property="title" value="2.2.3.2.1"/>
       </action>
 
       <action path="/alerts/AlertsPortal"
