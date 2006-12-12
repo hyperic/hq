@@ -51,6 +51,10 @@ public class RegisteredTrigger
         setFrequency(val.getFrequency());
     }
     
+    /** Get the old style value object
+     * @return RegisteredTriggerValue object
+     * @deprecated
+     */
     public RegisteredTriggerValue getRegisteredTriggerValue() {
         if (_valueObj == null)
             _valueObj = new RegisteredTriggerValue();
