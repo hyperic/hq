@@ -92,6 +92,4 @@ public class SingletonDisplaySummary extends ResourceTypeDisplaySummary
         sb.append(",entityId=").append(entityId);
         return sb.toString();
     }
-
-
 }
