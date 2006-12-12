@@ -21,7 +21,6 @@
             var td4 = document.createElement('td');
             var newanchor = document.createElement("a");
 
-
             table.appendChild(tr);
 
             if (i % 2 == 0) {
@@ -57,8 +56,6 @@
                     case "orange":
                         td2.innerHTML = "<img src=images/icon_available_orange.gif>";
                         break;
-                    case "green":
-                        td2.innerHTML = "<img src=images/icon_available_green.gif>";
                     default:
                         td2.innerHTML = "<img src=images/icon_available_error.gif>";
                 }
@@ -167,9 +164,6 @@
                         case "orange":
                             td4.innerHTML = "<img src=images/icon_available_orange.gif>";
                             break;
-                        case "green":
-                            td4.innerHTML = "<img src=images/icon_available_green.gif>";
-                            break;
                         default:
                             td4.innerHTML = "<img src=images/icon_available_error.gif>";
                     }
@@ -187,11 +181,9 @@
                     td5.innerHTML = "&nbsp;";
                 }
             }
-
         } else {
             $('noFaveResources').style.display = '';
         }
-
         //var rTimer = setTimeout(showFavoriteResponse,20000); //Refresh in 60 seconds
     }
 
@@ -259,9 +251,7 @@
                 if (aList[i].resourceName) {
                     td4.appendChild(document.createTextNode(aList[i].resourceName));
                 }
-
             }
-
         } else {
             $('noCritAlerts').style.display = '';
         }
@@ -311,7 +301,6 @@
                 } else {
                     td2.innerHTML = down + " / " + up;
                 }
-
                 //td2.appendChild(document.createTextNode(availList[i].numDown));
                 //td2.appendChild(document.createTextNode(availList[i].numUp));
             }
@@ -372,10 +361,7 @@
 
                 tr.appendChild(td2);
                 td2.setAttribute((document.all ? 'className' : 'class'), "metricName");
-
-
                 td2.appendChild(document.createTextNode(metricValues.values[i].value));
-
             }
 
         } else {
