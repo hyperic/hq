@@ -89,6 +89,10 @@ var pageData = new Array();
   <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
 </tiles:insert>
 <tiles:insert page="/resource/server/inventory/ViewTypeAndHostProperties.jsp"/>
+<tiles:insert definition=".resource.server.inventory.serviceCounts">
+  <tiles:put name="serviceCount" beanName="NumChildResources"/>
+  <tiles:put name="serviceTypeMap" beanName="ResourceTypeMap"/>
+</tiles:insert>
 </div>
 </div>
 
@@ -98,10 +102,6 @@ var pageData = new Array();
   <fmt:message key="resource.server.inventory.ServicesTab"/>
 </div>
 <div id="panelContent">
-<tiles:insert definition=".resource.server.inventory.serviceCounts">
-  <tiles:put name="serviceCount" beanName="NumChildResources"/>
-  <tiles:put name="serviceTypeMap" beanName="ResourceTypeMap"/>
-</tiles:insert>
 <html:form action="/resource/server/inventory/RemoveServices">
 <tiles:insert definition=".resource.server.inventory.services">
   <tiles:put name="server" beanName="Resource"/>

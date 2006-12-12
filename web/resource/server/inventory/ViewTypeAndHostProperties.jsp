@@ -33,8 +33,8 @@
 <!--  TYPE AND HOST PROPERTIES CONTENTS -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
 	<tr>
-		<td width="20%" class="BlockLabel"><fmt:message key="resource.server.inventory.type.Type"/></td>
-		<td width="30%" class="BlockContent" colspan="3"><c:out value="${Resource.installPath}"/></td>
+		<td width="20%" class="BlockLabel"><fmt:message key="resource.server.inventory.type.InstallPath"/></td>
+		<td width="30%" class="BlockContent"><c:out value="${Resource.installPath}"/></td>
 		<td width="20%" class="BlockLabel"><fmt:message key="resource.server.inventory.type.HostPlatform"/></td>
 		<td width="30%" class="BlockContent"><html:link page="/resource/platform/Inventory.do?mode=view&type=${Resource.platform.entityId.type}&rid=${Resource.platform.id}"><c:out value="${Resource.platform.name}"/></html:link></td>
 	</tr>
