@@ -94,7 +94,8 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
         // registering the trigger with the dispatcher, and updateTrigger()
         // is updating it with the dispatcher.  Seems like this should all
         // be done here in the manager
-        return getTriggerDAO().create(val).getRegisteredTriggerValue();
+        getTriggerDAO().create(val);        // DAO method will set ID on val obj
+        return val;
     }
 
     /**
