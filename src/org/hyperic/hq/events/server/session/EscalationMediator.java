@@ -503,6 +503,34 @@ public class EscalationMediator extends Mediator
             notifyEscalation(alertID, state, message.toString());
         }
     }
+    
+    /**
+     * Mark the alert associated with the alert definition and its escalation
+     * as fixed
+     * @param subjectId the subject (should be overlord)
+     * @param alertDefId the alert definition ID
+     * @throws ActionExecuteException if alert definition ID is invalid
+     * @throws PermissionException should never happen
+     */
+    public void fixAlertDefinition(Integer subjectId, Integer alertDefId)
+        throws ActionExecuteException, PermissionException {
+        AlertDefinition alertDef;
+    
+        try {
+            alertDef = alertDefManagerLocal.getByIdNoCheck(alertDefId);
+        } catch (FinderException e) {
+            throw new ActionExecuteException("Bad alert definition ID: " +
+                                             alertDefId, e);
+        }
+
+        if (alertDef.getEscalation() != null) {
+            EscalationState state =
+                getEscalationState(alertDef.getEscalation(), alertDef.getId(),
+                                   EscalationState.ALERT_TYPE_CLASSIC);
+            
+            fixAlert(subjectId, new Integer(state.getAlertId()));
+        }
+    }
 
     public void fixAlert(Integer subjectID, Integer alertID)
         throws PermissionException, ActionExecuteException
