@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Date;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -47,10 +48,12 @@ import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.hyperic.util.units.DateFormatter;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.apache.struts.util.MessageResources;
 import org.json.JSONObject;
 
 /**
@@ -117,9 +120,15 @@ public class ViewAction extends BaseAction {
 
         JSONObject alerts = new JSONObject();
         List a = new ArrayList();
+
+        MessageResources res = getResources(request);
+        String formatString =
+            res.getMessage(Constants.UNIT_FORMAT_PREFIX_KEY + "epoch-millis");
+
+        SimpleDateFormat df = new SimpleDateFormat(formatString);
         for (Iterator i = criticalAlerts.iterator(); i.hasNext(); ) {
-            DashboardAlertBean bean = (DashboardAlertBean)i.next();
-            DateFormat df = DateFormat.getDateTimeInstance();
+            DashboardAlertBean bean = (DashboardAlertBean) i.next();
+
             String date = df.format(new Date(bean.getCtime()));
 
             JSONObject alert = new JSONObject();
