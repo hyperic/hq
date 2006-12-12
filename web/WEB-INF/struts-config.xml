@@ -657,10 +657,6 @@
       </action>
 
       <!-- resource platform actions -->      
-      <action path="/resource/platform/Inventory"
-              forward=".resource.platform.inventory.layout">
-      </action>
-
       <action path="/resource/platform/InventoryPortal"
               parameter="mode"
               input="/resource/platform/Inventory.do"
@@ -1148,10 +1144,6 @@
       <!--  /application monitoring config -->
           
       <!-- resource server actions -->
-      <action path="/resource/server/Inventory"
-              forward=".resource.server.inventory.layout">
-      </action>
-          
       <action path="/resource/server/InventoryPortal"
               parameter="mode"
               input="/resource/server/Inventory.do"
@@ -1390,10 +1382,6 @@
       <!-- / end resource server control -->
 
       <!-- resource service actions -->
-      <action path="/resource/service/Inventory"
-              forward=".resource.service.inventory.layout">
-      </action>
-          
       <action path="/resource/service/InventoryPortal"
               parameter="mode"
               type="org.hyperic.hq.ui.action.resource.service.inventory.ServiceInventoryPortalAction"
@@ -1595,10 +1583,6 @@
       <!-- / -->
 
       <!-- application actions -->
-      <action path="/resource/application/Inventory"
-              forward=".resource.application.inventory.layout">
-      </action>
-          
       <action path="/resource/application/InventoryPortal"
               parameter="mode"
               input="/resource/application/Inventory.do"
@@ -1789,10 +1773,6 @@
       </action>
 
       <!-- resource group actions -->
-      <action path="/resource/group/Inventory"
-              forward=".resource.group.inventory.layout">
-      </action>
-      
       <action path="/resource/group/inventory/NewGroupFormPrepare"
               name="GroupForm"
               scope="request"
@@ -2536,6 +2516,10 @@
         <forward name="success" path="/resource/{1}/Inventory.do?mode=view"/>
       </action>
 
+      <action path="/resource/*/Inventory"
+              forward=".resource.{1}.inventory.layout">
+      </action>
+      
       <action path="/welcome" forward="/welcome.jsp" >
         <set-property property="title" value="EXAMPLE" />
       </action>
