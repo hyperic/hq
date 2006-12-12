@@ -1176,18 +1176,11 @@
         <set-property property="title" value="2.3.6.0"/>
       </action>
 
-      <action path="/resource/server/inventory/RemoveServices" 
+      <action path="/resource/*/inventory/RemoveServices" 
               name="RemoveResourceForm"
               type="org.hyperic.hq.ui.action.resource.server.inventory.RemoveServiceAction"
               scope="request" input="/resource/server/inventory/ViewServer.jsp">
-              <forward name="success" path="/resource/server/Inventory.do?mode=view" redirect="true" />
-      </action>
-
-      <action path="/resource/platform/inventory/RemoveServices" 
-              name="RemoveResourceForm"
-              type="org.hyperic.hq.ui.action.resource.server.inventory.RemoveServiceAction"
-              scope="request" input="/resource/server/inventory/ViewServer.jsp">
-              <forward name="success" path="/resource/platform/Inventory.do?mode=view" redirect="true" />
+              <forward name="success" path="/resource/{1}/Inventory.do?mode=view" redirect="true" />
       </action>
 
       <action path="/resource/server/inventory/EditGeneralFormPrepare"
@@ -1210,19 +1203,6 @@
         <forward name="reset"   path="/resource/server/Inventory.do?mode=edit"
                  redirect="true"/>
         <forward name="failure" path="/resource/server/Inventory.do?mode=edit"/>
-      </action>
-          
-      <action path="/resource/server/inventory/ChangeOwner"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.ChangeResourceOwnerAction"
-              name="ChangeResourceOwnerForm"
-              scope="request"
-              input="/resource/server/Inventory.do?mode=changeOwner">
-        <set-property property="workflow" value="resource/ChangeOwner"/>                
-        <forward name="cancel" path="/resource/server/Inventory.do?mode=view" redirect="true"/>
-        <forward name="reset" path="/resource/server/Inventory.do?mode=changeOwner"/>
-        <forward name="failure" path="/resource/server/Inventory.do?mode=changeOwner"/>
-        <forward name="success" path="/resource/server/Inventory.do?mode=view"/>
-        <forward name="lostRights" path="/ResourceHub.do"/>
       </action>
           
       <action path="/resource/server/inventory/EditTypeHostFormPrepare"
@@ -1430,19 +1410,6 @@
         <forward name="reset"   path="/resource/service/Inventory.do?mode=edit"
                  redirect="true"/>
         <forward name="failure" path="/resource/service/Inventory.do?mode=edit"/>
-      </action>
-
-      <action path="/resource/service/inventory/ChangeOwner"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.ChangeResourceOwnerAction"
-              name="ChangeResourceOwnerForm"
-              scope="request"
-              input="/resource/service/Inventory.do?mode=changeOwner">
-        <set-property property="workflow" value="resource/ChangeOwner"/>                
-        <forward name="cancel" path="/resource/service/Inventory.do?mode=view" redirect="true"/>
-        <forward name="reset" path="/resource/service/Inventory.do?mode=changeOwner"/>
-        <forward name="failure" path="/resource/service/Inventory.do?mode=changeOwner"/>
-        <forward name="success" path="/resource/service/Inventory.do?mode=view"/>
-        <forward name="lostRights" path="/ResourceHub.do"/>
       </action>
 
       <action path="/resource/service/inventory/RemoveApp" 
@@ -1655,19 +1622,6 @@
         <forward name="failure" path="/resource/application/Inventory.do?mode=editResource"/>
       </action>
 
-      <action path="/resource/application/inventory/ChangeOwner"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.ChangeResourceOwnerAction"
-              name="ChangeResourceOwnerForm"
-              scope="request"
-              input="/resource/application/Inventory.do?mode=changeOwner">
-        <set-property property="workflow" value="resource/ChangeOwner"/>                
-        <forward name="cancel" path="/resource/application/Inventory.do?mode=view" redirect="true"/>
-        <forward name="reset" path="/resource/application/Inventory.do?mode=changeOwner"/>
-        <forward name="failure" path="/resource/application/Inventory.do?mode=changeOwner"/>
-        <forward name="success" path="/resource/application/Inventory.do?mode=view"/>
-        <forward name="lostRights" path="/ResourceHub.do"/>
-      </action>
-
       <action path="/resource/application/inventory/RemoveServices" 
               name="RemoveAppServicesForm"
               type="org.hyperic.hq.ui.action.resource.application.inventory.RemoveServicesAction"
@@ -1848,18 +1802,6 @@
               <forward name="success" path="/resource/group/Inventory.do?mode=view" redirect="true"/>
       </action>
 
-      <action path="/resource/group/inventory/ChangeOwner"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.ChangeResourceOwnerAction"
-              name="ChangeResourceOwnerForm"
-              scope="request"
-              input="/resource/group/Inventory.do?mode=changeOwner">
-        <set-property property="workflow" value="resource/ChangeOwner"/>                
-        <forward name="cancel" path="/resource/group/Inventory.do?mode=view" redirect="true"/>
-        <forward name="reset" path="/resource/group/Inventory.do?mode=changeOwner"/>
-        <forward name="failure" path="/resource/group/Inventory.do?mode=changeOwner"/>
-        <forward name="success" path="/resource/group/Inventory.do?mode=view"/>
-        <forward name="lostRights" path="/ResourceHub.do"/>
-      </action>
       <!-- / -->
 
       <!-- group monitoring actions -->          
@@ -2520,6 +2462,19 @@
               forward=".resource.{1}.inventory.layout">
       </action>
       
+      <action path="/resource/*/inventory/ChangeOwner"
+              type="org.hyperic.hq.ui.action.resource.common.inventory.ChangeResourceOwnerAction"
+              name="ChangeResourceOwnerForm"
+              scope="request"
+              input="/resource/{1}/Inventory.do?mode=changeOwner">
+        <set-property property="workflow" value="resource/ChangeOwner"/>                
+        <forward name="cancel" path="/resource/{1}/Inventory.do?mode=view" redirect="true"/>
+        <forward name="reset" path="/resource/{1}/Inventory.do?mode=changeOwner"/>
+        <forward name="failure" path="/resource/{1}/Inventory.do?mode=changeOwner"/>
+        <forward name="success" path="/resource/{1}/Inventory.do?mode=view"/>
+        <forward name="lostRights" path="/ResourceHub.do"/>
+      </action>
+
       <action path="/welcome" forward="/welcome.jsp" >
         <set-property property="title" value="EXAMPLE" />
       </action>
