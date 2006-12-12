@@ -490,20 +490,13 @@
                        redirect="true"/>
       </action>      
 
-      <action path="/admin/user/RegisterFormPrepare"
+      <action path="/admin/user/Register*"
               name="RegisterUserForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.admin.user.RegisterFormPrepareAction">              
-        <set-property property="workflow" value="user/Register"/>
-        <set-property property="title" value="4.1.1.3"/>
-      </action>
-
-      <action path="/admin/user/Register" 
-              type="org.hyperic.hq.ui.action.admin.user.RegisterAction"
-              name="RegisterUserForm"
-              scope="request"
+              type="org.hyperic.hq.ui.action.admin.user.Register{1}Action"
               input="/admin/user/UserAdmin.do?mode=register">
         <set-property property="workflow" value="user/Register"/>
+        <set-property property="title" value="4.1.1.3"/>
         <exception key="exception.user.alreadyExists"
                    type="javax.ejb.CreateException"
                    path="/admin/user/UserAdmin.do?mode=register"/>
@@ -515,10 +508,10 @@
       <!-- end user admin actions / -->
 
       <!--CONFIG -->
-      <action path="/admin/config/Config"              
+      <action path="/admin/config/Config"
               forward=".admin.config.layout">
       </action>
-                  
+
       <action path="/admin/config/ConfigPortal" 
               parameter="mode"
               type="org.hyperic.hq.ui.action.admin.config.ConfigAction">
@@ -536,13 +529,13 @@
       </action>
 
       <action path="/admin/config/EditResourceTypeDefaults"
-                  type="org.hyperic.hq.ui.action.admin.config.EditDefaultsAction"
-                  scope="request"
+              type="org.hyperic.hq.ui.action.admin.config.EditDefaultsAction"
+              scope="request"
               parameter="mode">
       </action>
       
       <action path="/admin/config/RemoveEscalation"
-                  type="org.hyperic.hq.ui.action.admin.config.RemoveEscalationAction">
+              type="org.hyperic.hq.ui.action.admin.config.RemoveEscalationAction">
         <forward name="success" path="/admin/config/Config.do?mode=escalate"/>
       </action>
 
@@ -657,13 +650,9 @@
               scope="request"         
               type="org.hyperic.hq.ui.action.resource.common.control.QuickControlPrepareAction" >
       </action>
-                  
-      <action path="/resource/common/control/CurrentStatus"
-              type="org.hyperic.hq.ui.action.resource.common.control.CurrentStatusAction"> 
-      </action>      
-      
-      <action path="/resource/common/control/UpdatedStatus"
-              type="org.hyperic.hq.ui.action.resource.common.control.UpdateStatusAction"> 
+
+      <action path="/resource/common/control/*Status"
+              type="org.hyperic.hq.ui.action.resource.common.control.{1}StatusAction"> 
         <forward name="success" path="/resource/common/control/CurrentStatusAJAX.jsp"/>
       </action>
 
@@ -736,18 +725,12 @@
         <forward name="lostRights" path="/ResourceHub.do"/>
       </action>
 
-      <action path="/resource/platform/inventory/EditPlatformTypeNetworkPropertiesFormPrepare"
+      <action path="/resource/platform/inventory/EditPlatformTypeNetworkProperties*"
               name="EditPlatformTypeNetworkPropertiesForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.platform.inventory.EditPlatformTypeNetworkPropertiesFormPrepareAction">              
-              <set-property property="title" value="2.2.6.2"/> 
-      </action>
-
-      <action path="/resource/platform/inventory/EditPlatformTypeNetworkProperties"
-              type="org.hyperic.hq.ui.action.resource.platform.inventory.EditPlatformTypeNetworkPropertiesAction"
-              name="EditPlatformTypeNetworkPropertiesForm"
-              scope="request"
+              type="org.hyperic.hq.ui.action.resource.platform.inventory.EditPlatformTypeNetworkProperties{1}Action"
               input="/resource/platform/Inventory.do?mode=editType">
+        <set-property property="title" value="2.2.6.2"/> 
         <forward name="cancel" path="/resource/platform/Inventory.do?mode=view"
                  redirect="true"/>
         <forward name="reset" path="/resource/platform/Inventory.do?mode=editType"
@@ -761,16 +744,6 @@
       <action path="/resource/platform/inventory/RemoveServers" 
               type="org.hyperic.hq.ui.action.resource.platform.inventory.RemoveServersAction"
               name="RemoveServersForm"
-              scope="request"
-              input="/resource/platform/inventory.do?mode=view">
-        <set-property property="title" value="2.2.6"/>
-        <forward name="failure" path="/resource/platform/Inventory.do?mode=view"/>
-        <forward name="success" path="/resource/platform/Inventory.do?mode=view"/>
-      </action>
-
-      <action path="/resource/platform/inventory/RemoveGroups" 
-              type="org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsAction"
-              name="RemoveResourceGroupsForm"
               scope="request"
               input="/resource/platform/inventory.do?mode=view">
         <set-property property="title" value="2.2.6"/>
@@ -1225,15 +1198,6 @@
               <forward name="success" path="/resource/platform/Inventory.do?mode=view" redirect="true" />
       </action>
 
-      <action path="/resource/server/inventory/RemoveGroups" 
-              type="org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsAction"
-              name="RemoveResourceGroupsForm"
-              scope="request"
-              input="/resource/server/inventory.do?mode=view">
-        <forward name="failure" path="/resource/server/Inventory.do?mode=view"/>
-        <forward name="success" path="/resource/server/Inventory.do?mode=view"/>
-      </action>
-
       <action path="/resource/server/inventory/EditGeneralFormPrepare"
               name="GeneralServerForm"
               scope="request"
@@ -1493,15 +1457,6 @@
         <forward name="lostRights" path="/ResourceHub.do"/>
       </action>
 
-      <action path="/resource/service/inventory/RemoveGroups" 
-              type="org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsAction"
-              name="RemoveResourceGroupsForm"
-              scope="request"
-              input="/resource/platform/inventory.do?mode=view">
-        <forward name="failure" path="/resource/service/Inventory.do?mode=view"/>
-        <forward name="success" path="/resource/service/Inventory.do?mode=view"/>
-      </action>
-          
       <action path="/resource/service/inventory/RemoveApp" 
               name="RemoveResourceForm"
               type="org.hyperic.hq.ui.action.resource.service.inventory.RemoveAppAction"
@@ -1727,15 +1682,6 @@
         <forward name="failure" path="/resource/application/Inventory.do?mode=changeOwner"/>
         <forward name="success" path="/resource/application/Inventory.do?mode=view"/>
         <forward name="lostRights" path="/ResourceHub.do"/>
-      </action>
-
-      <action path="/resource/application/inventory/RemoveGroups" 
-              type="org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsAction"
-              name="RemoveResourceGroupsForm"
-              scope="request"
-              input="/resource/application/inventory.do?mode=view">
-        <forward name="failure" path="/resource/application/Inventory.do?mode=view"/>
-        <forward name="success" path="/resource/application/Inventory.do?mode=view"/>
       </action>
 
       <action path="/resource/application/inventory/RemoveServices" 
@@ -2578,6 +2524,16 @@
       <action path="/resource/common/monitor/visibility/EventDetails"
               type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.EventDetailsAction" >
         <forward name="success" path="/common/AJAXResponse.jsp"/>
+      </action>
+
+      <action path="/resource/*/inventory/RemoveGroups" 
+              type="org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsAction"
+              name="RemoveResourceGroupsForm"
+              scope="request"
+              input="/resource/{1}/Inventory.do?mode=view">
+        <set-property property="title" value="2.2.6"/>
+        <forward name="failure" path="/resource/{1}/Inventory.do?mode=view"/>
+        <forward name="success" path="/resource/{1}/Inventory.do?mode=view"/>
       </action>
 
       <action path="/welcome" forward="/welcome.jsp" >
