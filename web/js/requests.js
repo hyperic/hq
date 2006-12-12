@@ -169,6 +169,7 @@
                             break;
                         case "green":
                             td4.innerHTML = "<img src=images/icon_available_green.gif>";
+                            break;
                         default:
                             td4.innerHTML = "<img src=images/icon_available_error.gif>";
                     }
