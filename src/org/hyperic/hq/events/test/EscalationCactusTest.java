@@ -209,7 +209,7 @@ public class EscalationCactusTest extends HQCactusBase
 
         addRequestParameter("allowPause", new String[]{"true"});
         addRequestParameter("notification", new String[]{"0"});
-        addRequestParameter("maxWaitTime", new String[]{"300000"});
+        addRequestParameter("maxwaittime", new String[]{"300000"});
         addRequestParameter("escName", new String[]{"My escalation" +
                                                     (new Random()).nextInt(10000)});
 
