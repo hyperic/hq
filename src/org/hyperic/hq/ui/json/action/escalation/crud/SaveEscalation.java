@@ -48,7 +48,7 @@ public class SaveEscalation extends BaseAction
     // escalation attributes
     private static String ALLOW_PAUSE = "allowPause";
     private static String NOTIFICATION = "notification";
-    private static String MAX_WAITTIME = "maxwaittime";
+    private static String MAX_WAITTIME = "maxWaitTime";
 
     private static String ALERTDEF_ID = "ad";
     private static String GALERTDEF_ID = "gad";

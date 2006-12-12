@@ -153,7 +153,8 @@ public class PortalAction extends ResourceController {
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
 
         Integer alertId = new Integer( request.getParameter("a") );
-        eb.acknowledgeAlert(sessionID, alertId);
+        // pass pause escalation time
+        eb.acknowledgeAlert(sessionID, alertId, 60000);
         
         return viewAlert(mapping, form, request, response);
     }

@@ -42,6 +42,7 @@ public class AlertValue
    extends java.lang.Object
    implements java.io.Serializable
 {
+   private boolean fixed;
    private Integer id;
    private boolean idHasBeenSet = false;
    private Integer alertDefId;
@@ -81,7 +82,17 @@ public class AlertValue
 
    }
 
-   public Integer getId()
+    public boolean isFixed()
+    {
+        return fixed;
+    }
+
+    public void setFixed(boolean fixed)
+    {
+        this.fixed = fixed;
+    }
+
+    public Integer getId()
    {
 	  return this.id;
    }

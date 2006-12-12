@@ -58,13 +58,6 @@
       <column name="WAIT_TIME" not-null="true"/>
     </property>
 
-    <property name="fixed" type="boolean">
-      <meta attribute="field-description"><![CDATA[
-        If fixed, then stop escalation chain. (terminal condition)
-        ]]></meta>
-      <column name="FIXED" not-null="true"/>
-    </property>
-
     <property name="acknowledge" type="boolean">
       <meta attribute="field-description"><![CDATA[
         "updateBy" has taken ownership of this issue at the

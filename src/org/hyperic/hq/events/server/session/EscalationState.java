@@ -46,11 +46,6 @@ public class EscalationState extends PersistedObject
     private long _pauseWaitTime;
 
     /**
-     * If fixed, then stop escalation chain. (terminal condition)
-     */
-    private boolean _fixed;
-
-    /**
      * "updateBy" has taken ownership of this issue at the
      * current escalation level.
      */
@@ -126,17 +121,6 @@ public class EscalationState extends PersistedObject
 
     public void setPauseWaitTime(long pauseWaitTime) {
         _pauseWaitTime = pauseWaitTime;
-    }
-
-    /**
-     * *         If fixed, then stop escalation chain. (terminal condition)
-     */
-    public boolean isFixed() {
-        return _fixed;
-    }
-
-    public void setFixed(boolean fixed) {
-        _fixed = fixed;
     }
 
     /**
@@ -231,7 +215,6 @@ public class EscalationState extends PersistedObject
                 .put("pauseWaitTime", _pauseWaitTime)
                 .put("scheduleRunTime", _scheduleRunTime)
                 .put("acknowledge", _acknowledge)
-                .put("fixed", _fixed)
                 .put("active", _active)
                 .put("pauseEscalation", _pauseEscalation)
                 .put("alertDefinitionId", _alertDefinitionId)
@@ -264,7 +247,6 @@ public class EscalationState extends PersistedObject
                _scheduleRunTime == o.getScheduleRunTime() &&
                _acknowledge == o.isAcknowledge() &&
                _alertType == o.getAlertType() &&
-               _fixed == o.isFixed() &&
                _active == o.isActive() &&
                _pauseEscalation == o.isPauseEscalation() &&
                _alertDefinitionId == o.getAlertDefinitionId() &&
@@ -281,7 +263,6 @@ public class EscalationState extends PersistedObject
         int result = 17;
 
         result = 37*result + (_acknowledge ? 0 : 1);
-        result = 37*result + (_fixed ? 0 : 1);
         result = 37*result + (_pauseEscalation ? 0 : 1);
         result = 37*result + (_active ? 0 : 1);
         result = 37*result + _currentLevel;
@@ -314,7 +295,6 @@ public class EscalationState extends PersistedObject
                     ", alertDefId=" + _alertDefinitionId +
                     ", alertId=" + _alertId +
                     ", currentLevel=" + _currentLevel +
-                    ", fixed=" + _fixed +
                     ", active="+ _active +
                     ", acknowledge=" + _acknowledge +
                     ", pause=" + _pauseEscalation +

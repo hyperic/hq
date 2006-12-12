@@ -1643,13 +1643,14 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void acknowledgeAlert(int sessionID, Integer alertID)
+    public void acknowledgeAlert(int sessionID, Integer alertID,
+                                 long pauseWaitTime)
         throws SessionTimeoutException, SessionNotFoundException,
         PermissionException, ActionExecuteException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         EscalationMediator med = EscalationMediator.getInstance();
-        med.acknowledgeAlert(subject.getId(), alertID);
+        med.acknowledgeAlert(subject.getId(), alertID, pauseWaitTime);
     }
 
     /**

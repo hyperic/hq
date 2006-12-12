@@ -151,9 +151,12 @@ public class EscalationCactusTest extends HQCactusBase
         setRequestPathInfo("/escalation/saveEscalation");
         setSaveEscalationParams();
         actionPerform();
-        assertNotNull(getSession().getAttribute("escalationName"));
+        assertNotNull(getSession().getAttribute("escalation"));
 
-        String name = (String)getSession().getAttribute("escalationName");
+        JSONObject ejson =
+            (JSONObject)getSession().getAttribute("escalation");
+
+        String name = ejson.getJSONObject("escalation").getString("name");
 
         // should stream result directly to the response.writer
         setRequestPathInfo("/escalation/jsonByEscalationName/" + name);
@@ -206,12 +209,11 @@ public class EscalationCactusTest extends HQCactusBase
 
         addRequestParameter("allowPause", new String[]{"true"});
         addRequestParameter("notification", new String[]{"0"});
-        addRequestParameter("maxwaittime", new String[]{"300000"});
+        addRequestParameter("maxWaitTime", new String[]{"300000"});
         addRequestParameter("escName", new String[]{"My escalation" +
                                                     (new Random()).nextInt(10000)});
 
-        addRequestParameter("ad", new String[]{"10001"});
-        addRequestParameter("adType", new String[]{"0"});
+//        addRequestParameter("ad", new String[]{"10001"});
     }
 
     private void removeEscalation(int id)

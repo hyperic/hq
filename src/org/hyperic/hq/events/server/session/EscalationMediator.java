@@ -454,12 +454,14 @@ public class EscalationMediator extends Mediator
         return dao.findScheduledEscalationState();
     }
 
-    public void acknowledgeAlert(Integer subjectID, Integer alertID)
+    public void acknowledgeAlert(Integer subjectID, Integer alertID,
+                                 long pauseWaitTime)
         throws PermissionException, ActionExecuteException
     {
         EscalationState state =
             setEscalationState(subjectID, alertID,
-                               EscalationState.ALERT_TYPE_CLASSIC, false);
+                               EscalationState.ALERT_TYPE_CLASSIC, false,
+                               pauseWaitTime);
         if (state != null) {
             AuthzSubject subj =
                 DAOFactory.getDAOFactory().getAuthzSubjectDAO()
@@ -484,7 +486,7 @@ public class EscalationMediator extends Mediator
     {
         EscalationState state =
             setEscalationState(subjectID, alertID,
-                               EscalationState.ALERT_TYPE_CLASSIC, true);
+                               EscalationState.ALERT_TYPE_CLASSIC, true, 0);
         if (state != null) {
             AuthzSubject subj =
                 DAOFactory.getDAOFactory().getAuthzSubjectDAO()
@@ -527,7 +529,8 @@ public class EscalationMediator extends Mediator
     private EscalationState setEscalationState(Integer subjectID,
                                                Integer alertId,
                                                int alertType,
-                                               boolean fixed)
+                                               boolean fixed,
+                                               long pauseWaitTime)
         throws PermissionException
     {
         SessionBase.canModifyEscalation(subjectID);
@@ -539,83 +542,93 @@ public class EscalationMediator extends Mediator
         escalation = alert.getAlertDefinitionInterface().getEscalation();
 
         if (escalation != null) {
-            EscalationState state =
-                getEscalationState(escalation, alertDefId, alertType);
+            AuthzSubject subject =
+                DAOFactory.getDAOFactory().getAuthzSubjectDAO()
+                    .findById(subjectID);
+            synchronized(stateLocks.getLock(
+                new StateLock(alertDefId.intValue(), alertType))) {
+                EscalationState state =
+                    getEscalationState(escalation, alertDefId, alertType);
 
-            if (state != null) {
-                if (fixed) {
-                    if(state.isActive() &&
-                       alertId.intValue() == state.getAlertId()) {
-                        // escalation runtime needs to know when
-                        // alert is fixed so it can stop the escalation chain.
-                        state.setFixed(true);
+                if (state != null) {
+                    if (fixed) {
+                        if(state.isActive() &&
+                           alertId.intValue() == state.getAlertId()) {
+                            // escalation runtime needs to know when
+                            // alert is fixed so it can stop the escalation chain.
+                            resetEscalationState(state);
+                        }
+                        // mark alert as fixed as well
+                        alert.setFixed(true);
+                    } else {
+                        setPauseWaitTime(state, pauseWaitTime);
+                        state.setAcknowledge(true);
                     }
-                    // mark alert as fixed as well
-                    alert.setFixed(true);
-                } else {
-                    state.setAcknowledge(true);
+                    state.setUpdateBy(subject.getFirstName());
+                    DAOFactory.getDAOFactory().getEscalationStateDAO()
+                        .save(state);
                 }
-                AuthzSubject subject =
-                    DAOFactory.getDAOFactory().getAuthzSubjectDAO()
-                        .findById(subjectID);
-                state.setUpdateBy(subject.getFirstName());
-                DAOFactory.getDAOFactory().getEscalationStateDAO()
-                    .save(state);
+                return state;
             }
-            return state;
         }
         return null;
     }
 
     private void scheduleAction(EscalationState state)
     {
-        Escalation  escalation = state.getEscalation();
         EscalationStateDAO sdao =
             DAOFactory.getDAOFactory().getEscalationStateDAO();
 
-        if (state == null) {
-            log.error("Escalation state not found. escalation="+escalation+
-                ", alert Id="+ state.getAlertId());
-            return;
-        }
+        Escalation e = state.getEscalation();
+        int alertDefId = state.getAlertDefinitionId();
+        int alertType = state.getAlertType();
 
-        if (state.isFixed()) {
-            // fixed so no need to schedule
-            if (log.isInfoEnabled()) {
-                log.info("Escalation fixed. alert=" +  state.getAlertId() +
-                         ", escalation=" +
-                         escalation + ", state=" + state);
+        synchronized(stateLocks.getLock(new StateLock(alertDefId, alertType))) {
+            EscalationState s =
+                getEscalationState(e, new Integer(alertDefId), alertType);
+            if (s == null) {
+                if (log.isInfoEnabled()) {
+                    log.info("Can't find escalation state. escalation=" +
+                             e + ", alertDefId="+alertDefId +
+                             ", alertType=" + alertType);
+                }
+                return;
             }
-            resetEscalationState(state);
-            sdao.save(state);
-            return;
-        }
-        int nextlevel = state.getCurrentLevel() + 1;
-        if (nextlevel >= escalation.getActions().size()) {
-            // at the end of escalation chain, so reset and wait for
-            //  next alert to fire.  DO NOT schedule next job.
-            resetEscalationState(state);
-            sdao.save(state);
-            logEscalation(null, state,
-                          "End of escalation chain. Stop escalation.");
-            if (log.isInfoEnabled()) {
-                log.info("End escalation. alert=" +  state.getAlertId() +
-                         ", escalation=" + escalation + ", state=" + state);
+            if (!s.isActive()) {
+                if (log.isInfoEnabled()) {
+                    log.info("Escalation is no longer active. " +
+                             "Stop escalation. state="+s);
+                }
+                return;
             }
-        } else {
-            EscalationAction ea =
-                escalation.getCurrentAction(state.getCurrentLevel());
-            // schedule next run time
-            state.setScheduleRunTime(System.currentTimeMillis() +
-                                     ea.getWaitTime());
-            state.setCurrentLevel(nextlevel);
-            sdao.save(state);
-            logEscalation(ea.getAction(), state,
-                          "Escalation scheduled to run in " +
-                          ea.getWaitTime()/60000 + " minutes.");
-            if (log.isDebugEnabled()) {
-                log.debug("schedule next action. escalation=" + escalation +
-                          ", state=" + state + "action=" + ea);
+            int nextlevel = s.getCurrentLevel() + 1;
+            if (nextlevel >= e.getActions().size()) {
+                // at the end of escalation chain, so reset and wait for
+                //  next alert to fire.  DO NOT schedule next job.
+                resetEscalationState(s);
+                sdao.save(s);
+                logEscalation(null, s,
+                              "End of escalation chain. Stop escalation.");
+                if (log.isInfoEnabled()) {
+                    log.info("End escalation. alert=" +  s.getAlertId() +
+                             ", escalation=" + e + ", state=" + s);
+                }
+            } else {
+                EscalationAction ea = e.getCurrentAction(s.getCurrentLevel());
+                // schedule next run time
+                long schedule = System.currentTimeMillis() + ea.getWaitTime();
+                s.setScheduleRunTime(schedule);
+                s.setCurrentLevel(nextlevel);
+                s.setAcknowledge(false);
+                sdao.save(s);
+
+                logEscalation(ea.getAction(), s,
+                              "Escalation scheduled to run in " +
+                              ea.getWaitTime()/60000 + " minutes.");
+                if (log.isDebugEnabled()) {
+                    log.debug("schedule next action. escalation=" + e +
+                              ", state=" + s + "action=" + ea);
+                }
             }
         }
     }
@@ -626,6 +639,21 @@ public class EscalationMediator extends Mediator
         EscalationAction ea = (EscalationAction)ealist.get(0);
         EscalationState state =
             getEscalationState(e, alertDefId, type);
+        if (state == null) {
+            logEscalation(null, state, "Escalation stopped. Can't find state.");
+            // log error and stop escalation chain
+            log.error("Escalation state not found, stop chain. Escalation=" +e+
+                      ", alertDefId=" + alertDefId + ", alertType=" + type);
+            return;
+        }
+        if (state.isActive() == false) {
+            if (log.isInfoEnabled()) {
+                logEscalation(ea.getAction(), state,
+                              "End Escalation. alert def ID=" +  alertDefId +
+                              ", escalation=" + e + ", state=" + state);
+            }
+            return;
+        }
         logEscalation(ea.getAction(), state, "Start Escalation");
         if (log.isDebugEnabled()) {
             log.debug("Start escalation. alert def ID=" +  alertDefId +
@@ -636,58 +664,15 @@ public class EscalationMediator extends Mediator
 
     public void dispatchAction(EscalationState state)
     {
-        EscalationStateDAO sdao =
-            DAOFactory.getDAOFactory().getEscalationStateDAO();
-
         Escalation escalation = state.getEscalation();
-
-        if (state == null) {
-            logEscalation(null, state, "Escalation stopped. Can't find state.");
-            // log error and stop escalation chain
-            log.error("Escalation state not found, stop chain. " +
-                "escalation=" + escalation + ", alertId=" + state.getAlertId());
-            return;
-        }
 
         AlertInterface alert = getAlert(state.getAlertType(),
                                         state.getAlertId());
         
-        if (state.isFixed() || alert == null) {
-            // fixed so stop.
-            if (state.isFixed()) {
-                if (log.isInfoEnabled()) {
-                    log.info("Escalation fixed. alert=" +  state.getAlertId() +
-                             ", escalation=" +
-                             escalation + ", state=" + state);
-                }
-            } else {
-                logEscalation(null, state,
-                              "Escalation stopped. Can't find alert.");
-                log.error("Stopping Escalation as the alert was not " +
-                          "found. " +
-                          "escalation=" + escalation + ", state=" + state);
-            }
-            resetEscalationState(state);
-            sdao.save(state);
-            return;
-        }
         // check to see if there is remaining pauseWaitTime
-        long remainder = getRemainingPauseWaitTime(escalation, state);
+        long remainder = getRemainingPauseWaitTime(state);
         if (remainder > 0) {
-            // reschedule
-            state.setScheduleRunTime(System.currentTimeMillis()+remainder);
-            // reset the pause escalation flag to avoid wait loop.
-            state.setPauseEscalation(false);
-            sdao.save(state);
-            logEscalation(null, state,
-                          "Escalation rescheduled to run in " +
-                          remainder/60000 + " minutes.");
-            if (log.isDebugEnabled()) {
-                log.debug("Pause for additional wait time. alert=" +
-                          state.getAlertId() + ", escalation=" + escalation +
-                          ", state=" +
-                          state);
-            }
+            rescheduleEscalation(state, remainder);
             return;
         }
         int curlevel = state.getCurrentLevel();
@@ -710,18 +695,64 @@ public class EscalationMediator extends Mediator
         }
     }
 
-    private long getRemainingPauseWaitTime(Escalation e, EscalationState s)
+    private void rescheduleEscalation(EscalationState state, long remainder)
     {
-        if (e.isAllowPause() && s.isPauseEscalation()) {
-            long waitTime =
-                e.getCurrentAction(s.getCurrentLevel()).getWaitTime();
-            long remainder = s.getPauseWaitTime() - waitTime;
+        EscalationStateDAO sdao =
+            DAOFactory.getDAOFactory().getEscalationStateDAO();
 
+        int alertDefId = state.getAlertDefinitionId();
+        int alertType = state.getAlertType();
+        Escalation e = state.getEscalation();
+        
+        synchronized(stateLocks.getLock(new StateLock(alertDefId, alertType))) {
+            // make sure the escalation is still active before reschedule
+            EscalationState s =
+                getEscalationState(e, new Integer(alertDefId), alertType);
+            if (s == null) {
+                if (log.isInfoEnabled()) {
+                    log.info("Can't find Escalation State. escalation=" + e +
+                             ", alertDefId=" + alertDefId + ", alertType="+alertType);
+                }
+                return;
+            }
+            if (s.isActive()) {
+                s.setScheduleRunTime(System.currentTimeMillis()+remainder);
+                // reset the pause escalation flag to avoid wait loop.
+                s.setPauseEscalation(false);
+                sdao.save(s);
+                logEscalation(null, s,
+                              "Escalation rescheduled to run in " +
+                              remainder/60000 + " minutes.");
+                if (log.isDebugEnabled()) {
+                    log.debug("Pause for additional wait time. alert=" +
+                              s.getAlertId() + ", escalation=" + e +
+                              ", state=" +
+                              s);
+                }
+            }
+        }
+    }
+
+    private long getRemainingPauseWaitTime(EscalationState s)
+    {
+        Escalation e = s.getEscalation();
+        if (e.isAllowPause() && s.isPauseEscalation()) {
+            long remainder = s.getPauseWaitTime() - System.currentTimeMillis();
             // remaining pause wait time has to be greater than 1
             // minute to qualify
             return remainder > 60000 ? remainder : 0;
         } else {
             return 0;
+        }
+    }
+
+    private void setPauseWaitTime(EscalationState s, long pauseWaitTime)
+    {
+        Escalation e = s.getEscalation();
+        if (e.isAllowPause()) {
+            long waitTime = System.currentTimeMillis() + pauseWaitTime;
+            s.setPauseWaitTime(waitTime);
+            s.setPauseEscalation(true);
         }
     }
 
@@ -845,7 +876,6 @@ public class EscalationMediator extends Mediator
         state.setCurrentLevel(0);
         state.setScheduleRunTime(0);
         state.setActive(false);
-        state.setFixed(false);
     }
 
     private void logEscalation(Action action, EscalationState state,

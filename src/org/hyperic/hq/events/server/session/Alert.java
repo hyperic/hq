@@ -186,7 +186,8 @@ public class Alert
         AlertDefinition def = aDao.findById(val.getAlertDefId());
         AlertActionLogDAO alDao = daoFactory.getAlertActionLogDAO();
         AlertConditionLogDAO aclDao = daoFactory.getAlertConditionLogDAO();
-        
+
+        setFixed(false);
         setAlertDefinition(def);
         setCtime(val.getCtime());
 
