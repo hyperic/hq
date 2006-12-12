@@ -117,7 +117,7 @@ public class JsonActionContext extends HashMap
         return (ActionMapping)get(ACTION_MAPPING);
     }
 
-    private HttpServletRequest getRequest()
+    public HttpServletRequest getRequest()
     {
         return (HttpServletRequest)get(ACTION_REQUEST);
     }

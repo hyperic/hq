@@ -138,7 +138,7 @@ public class SaveEscalation extends BaseAction
                                                "'gad' is not defined");
         }
         context.setJSONResult(new JSONResult(result));
-        context.getSession().setAttribute("escalation", result);
+        context.getRequest().setAttribute("escalation", result);
 
     }
 
