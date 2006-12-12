@@ -80,7 +80,7 @@
                 indicator="true"/>
 
         <!-- Define MBean operations as control actions -->
-        <actions include="restart"/>
+        <actions include="start,stop,update,restart"/>
 
     </service>
 
