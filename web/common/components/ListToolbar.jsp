@@ -90,7 +90,6 @@
         <td><html:img page="/images/spacer.gif" width="10" height="1" alt="" border="0"/></td>
         <td>
           <select name="active" id="active" size="1">
-          	<option></option>
               <option value="1"><fmt:message key="alert.config.props.PB.ActiveYes"/></option>
               <option value="2"><fmt:message key="alert.config.props.PB.ActiveNo"/></option>
           </select>
