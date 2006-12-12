@@ -186,7 +186,7 @@
 		emailDiv.setAttribute('id', 'emailinput');
 		emailDiv.setAttribute('class', 'escInput');
 		emailDiv.setAttribute('width', '40%');
-		emailDiv.innerHTML = "email addresses (comma separated):<br><textarea rows=3 cols=35 id=emailinput_" + liID + "></textarea>";
+		emailDiv.innerHTML = "email addresses (comma separated):<br><textarea rows=3 cols=35 id=emailinput_" + liID + " name=emailinput_" + liID + "></textarea>";
 		
 		td4.appendChild(sysDiv);
 		sysDiv.style.display = 'none';
@@ -214,11 +214,11 @@
     	 var index= el.options[el.selectedIndex].value
 
         if (index == "Roles") {
-			configureRoles();
+			configureRoles(this);
            } else if (index == "Users") {
-		    configureUsers();
+		    configureUsers(this);
         }  else if (index == "Users") {
-           configureOthers();
+           configureOthers(this);
         }
     }
 
@@ -304,11 +304,35 @@
 */
 
 	function sendEscForm() {
-		var adId = $('ad').value;
-		var escFormSerial = Form.serialize('EscalationForm');
+		var adId;
+        var gadId;
+        var eId;
+        var aetId;
+        var escFormSerial = Form.serialize('EscalationForm');
 	    var url = '<html:rewrite action="/escalation/saveEscalation"/>';
-		var pars = "escForm=" + escFormSerial + "&ad=" + adId;
-		new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse} );
+        if ($('gad')) {
+           gadId == $('gad').value;
+        } else {
+            gadId == '';
+        }
+        if ($('ad')){
+            adId == $('ad').value;
+        } else {
+            adId == '';
+        }
+        if ($('eid')){
+            eID = $('eid').value;
+        } else {
+           eId == '';
+        }
+        if ($('aetid')) {
+            aetId = $('aetid').value;
+        } else {
+            aetId == '';;
+        }
+
+        var pars = "escForm=" + escFormSerial + "&ad=" + adId + "&gad=" + gadId + "&eid=" + eId + "aetid=" + aetId;
+		new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse, onFailure :reportError} );
 	}
 
     function configure(id) {
@@ -329,7 +353,19 @@
       }
     }
 
-    function configureOthers() {
+
+    function insertRoles() {
+		var roleDiv = $(rolesList).innerHTML;
+        var roles = rolesText.rolesList;
+		var rolesTd = document.getElementById('rolesTd');
+
+
+        for(i=0;i < roles.length; i++) {
+          alert(roles);
+        }
+    }
+
+    function configureOthers(el) {
       Dialog.confirm('<textarea name=emailAddresses cols=80 rows=3></textarea>',
                   {windowParameters: {className:'dialog', width:305, height:200,
                    resize:false, draggable:false},
@@ -341,7 +377,7 @@
                   }});
     }
 
-    function configureUsers() {
+    function configureUsers(el) {
       Dialog.confirm($('usersList').innerHTML,
                   {windowParameters: {className:'dialog', width:305, height:200,
                    resize:false, draggable:false},
@@ -353,7 +389,7 @@
                   }});
     }
 
-    function configureRoles() {
+    function configureRoles(el) {
       Dialog.confirm($('rolesList').innerHTML,
                   {windowParameters: {className:'dialog', width:305, height:200,
                    resize:false, draggable:false},
@@ -405,6 +441,11 @@ sections = ['section'];
 	function createGroupSortable() {
 		Sortable.create('order',{tag:'li',only:'section',handle:'handle'});
 	}
+
+    function reportError(originalRequest) {
+        alert('Error ' + originalRequest.status + ' -- ' + originalRequest.statusText);
+    }
+
 
 </script>
 
@@ -633,13 +674,13 @@ sections = ['section'];
 
 </form>
 
-<div id="example" style="padding:10px;"></div>
+<div id="example" style="padding:10px;width:725px;overflow:auto;"></div>
 
 <div id="usersList" style="display: none;">
   <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
   <table width="100%" cellpadding="2" cellspacing="0" border="0">
   <tr class="ListRow">
-    <td class="ListCell">
+    <td class="ListCell" id="usersTd">
       <input type=checkbox name=u<c:out value="${user.id}"/>><c:out value="${user.name}"/></input>
     </td>
   </tr>
@@ -653,7 +694,7 @@ sections = ['section'];
   
   <table width="100%" cellpadding="2" cellspacing="0" border="0">
   <tr class="ListRow">
-    <td class="ListCell">
+    <td class="ListCell" id="rolesTd">
       <input type=checkbox name=r<c:out value="${role.id}"/>><c:out value="${role.name}"/></input>
     </td>
   </tr>
