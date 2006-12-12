@@ -2435,16 +2435,12 @@
               <forward name="failure" path="/alerts/Config.do?mode=list" redirect="true"/>
       </action>
       
-      <action path="/alerts/ViewEscalation"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ViewDefinitionNotificationsEmailsAction">
-        <set-property property="title" value="2.2.3.3"/>
-      </action>
-
-      <action path="/alerts/SaveEscalation"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.SaveEscalationAction" 
+      <action path="/alerts/*Escalation"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.{1}EscalationAction"
               name="EscalationForm"
               scope="request"
               input="/alerts/Config.do?mode=viewEscalation">
+        <set-property property="title" value="2.2.3.3"/>
               <forward name="success" path="/alerts/Config.do?mode=viewEscalation" redirect="true"/>
               <forward name="failure" path="/alerts/Config.do?mode=list" redirect="true"/>
       </action>
