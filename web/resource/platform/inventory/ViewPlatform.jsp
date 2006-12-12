@@ -68,6 +68,10 @@ var pageData = new Array();
   <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
   <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
 </tiles:insert>
+<tiles:insert definition=".resource.platform.inventory.serverCounts">
+  <tiles:put name="serverCount" beanName="ChildResources" beanProperty="totalSize"/>
+  <tiles:put name="serverTypeMap" beanName="ResourceTypeMap"/>
+</tiles:insert>
 </div>
 </div>
 <div id="panel2">
@@ -86,10 +90,6 @@ var pageData = new Array();
   <fmt:message key="resource.platform.inventory.servers.ServersTab"/>
 </div>
 <div id="panelContent">
-<tiles:insert definition=".resource.platform.inventory.serverCounts">
-  <tiles:put name="serverCount" beanName="ChildResources" beanProperty="totalSize"/>
-  <tiles:put name="serverTypeMap" beanName="ResourceTypeMap"/>
-</tiles:insert>
 
 <html:form action="/resource/platform/inventory/RemoveServers">
 
