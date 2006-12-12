@@ -118,7 +118,9 @@ public class EscalationMediator extends Mediator
     public void processEscalation()
     {
         // get all scheduled escalations
-        List states = findScheduledEscalationState();
+        EscalationStateDAO dao =
+            DAOFactory.getDAOFactory().getEscalationStateDAO();
+        List states = dao.findScheduledEscalationState();
         if (log.isDebugEnabled()) {
             log.debug("Found " + states.size() + " scheduled escalations.");
         }
@@ -447,13 +449,6 @@ public class EscalationMediator extends Mediator
 
     }
     
-    public List findScheduledEscalationState()
-    {
-        EscalationStateDAO dao =
-            DAOFactory.getDAOFactory().getEscalationStateDAO();
-        return dao.findScheduledEscalationState();
-    }
-
     public void acknowledgeAlert(Integer subjectID, Integer alertID,
                                  long pauseWaitTime)
         throws PermissionException, ActionExecuteException
@@ -617,7 +612,12 @@ public class EscalationMediator extends Mediator
                     // mark alert as fixed as well
                     alert.setFixed(true);
                 } else {
-                    setPauseWaitTime(state, pauseWaitTime);
+                    if (escalation.isAllowPause()) {
+                        long waitTime =
+                            System.currentTimeMillis() + pauseWaitTime;
+                        state.setPauseWaitTime(waitTime);
+                        state.setPauseEscalation(true);
+                    }
                     state.setAcknowledge(true);
                 }
                 state.setUpdateBy(subject.getFirstName());
@@ -735,7 +735,16 @@ public class EscalationMediator extends Mediator
         }
 
         try {
-            dispatchAction(escalation, alert, state);
+            EscalationAction ea =
+                escalation.getCurrentAction(state.getCurrentLevel());
+            Action a = ea.getAction();
+            
+            if (log.isDebugEnabled()) {
+                log.debug("escalation in progress. alert=" +  alert +
+                          ", escalation=" + escalation + ", state=" +
+                          state + ", action="+ea);
+            }
+            executeAction(state.getAlertType(), alert, a);
 
             // schedule next action;
             scheduleAction(state);
@@ -794,32 +803,6 @@ public class EscalationMediator extends Mediator
         } else {
             return 0;
         }
-    }
-
-    private void setPauseWaitTime(EscalationState s, long pauseWaitTime)
-    {
-        Escalation e = s.getEscalation();
-        if (e.isAllowPause()) {
-            long waitTime = System.currentTimeMillis() + pauseWaitTime;
-            s.setPauseWaitTime(waitTime);
-            s.setPauseEscalation(true);
-        }
-    }
-
-    private void dispatchAction(Escalation escalation, AlertInterface alert,
-                                EscalationState state)
-        throws ActionExecuteException, PermissionException
-    {
-        EscalationAction ea =
-            escalation.getCurrentAction(state.getCurrentLevel());
-        Action a = ea.getAction();
-
-        if (log.isDebugEnabled()) {
-            log.debug("escalation in progress. alert=" +  alert +
-                      ", escalation=" + escalation + ", state=" +
-                      state + ", action="+ea);
-        }
-        executeAction(state.getAlertType(), alert, a);
     }
 
     private void executeAction(int alertType, AlertInterface alert, Action act)
