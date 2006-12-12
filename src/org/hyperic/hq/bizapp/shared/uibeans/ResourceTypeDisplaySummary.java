@@ -40,16 +40,17 @@ import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 public abstract class ResourceTypeDisplaySummary
     implements Serializable, Comparable {
 
-    private AppdefResourceTypeValue resourceType = null;
-    private Integer appdefTypeId     = null;
-    private Double  availability     = null;
-    private Integer availTempl       = null;
-    private Double  throughput       = null;        // aka "usage"
-    private String  throughputUnits;
-    private Integer throughputTempl  = null;
-    private Double  performance      = null;        // aka "response time"
-    private Integer performTempl     = null;
-    private Integer numResources     = null;
+    private AppdefResourceTypeValue _resourceType = null;
+    private Integer _appdefTypeId     = null;
+    private Double  _availability     = null;
+    private Integer _availTempl       = null;
+    private Double  _throughput       = null; // aka "usage"
+    private String  _throughputUnits;
+    private Integer _throughputTempl  = null;
+    private Double  _performance      = null;
+    private String  _performanceUnits = null;
+    private Integer _performTempl     = null;
+    private Integer _numResources     = null;
     
     /**
      * Constructor for ResourceTypeDisplaySummary.
@@ -68,38 +69,25 @@ public abstract class ResourceTypeDisplaySummary
     public abstract int getSummaryType();
 
     public Double getAvailability() {
-        return availability;
+        return _availability;
     }
     
     public void setAvailability(Double availability) {
-        this.availability = availability;
+        _availability = availability;
     }
     
     /**
-     * Method getThruput.
-     * 
-     * Returns the accumulated thruput for the resource
-     * 
-     * @return Double
+     * @return Double The value for the Throughput metric
      */
     public Double getThroughput() {
-        return throughput;
+        return _throughput;
     }
-    
-    /**
-     * Method setThruput.
-     * 
-     * Assigns the accumulated thruput for the resource
-     * 
-     * @param throughput The throughput to set
-     */
+
     public void setThroughput(Double throughput) {
-        this.throughput = throughput;
+        _throughput = throughput;
     }
     
     /**
-     * Method getPerformance.
-     * 
      * Returns the performance for the resource.  Performance is a unit measured
      * for the resource type that is user specified (not per resource or per
      * user but per resource type).
@@ -107,7 +95,7 @@ public abstract class ResourceTypeDisplaySummary
      * @return Double
      */
     public Double getPerformance() {
-        return performance;
+        return _performance;
     }
     
     /**
@@ -120,19 +108,16 @@ public abstract class ResourceTypeDisplaySummary
      * @param performance The performance to set
      */
     public void setPerformance(Double performance) {
-        this.performance = performance;
+        _performance = performance;
     }
 
     /**
      * Returns the resourceType.
-     * 
-     * Returns the name of the resource type for display in UI i.e. "Apache
-     * Virtual Host" or "Weblogic war"
-     * 
+     *
      * @return AppdefResourceTypeValue
      */
     public AppdefResourceTypeValue getResourceType() {
-        return resourceType;
+        return _resourceType;
     }
 
     /**
@@ -144,95 +129,85 @@ public abstract class ResourceTypeDisplaySummary
      * @param resourceType The resourceType to set
      */
     public void setResourceType(AppdefResourceTypeValue resourceType) {
-        this.resourceType = resourceType;
+        _resourceType = resourceType;
     }
 
-    /**
-     * Returns the number of resources represented by the summary.
-     */
     public Integer getNumResources() {
-        return numResources;
+        return _numResources;
     }
 
-    /**
-     * Sets the number of resources represented by the summary.
-     *
-     * @param i the number of resources
-     */
     public void setNumResources(Integer i) {
-        numResources = i;
+        _numResources = i;
     }
 
-    /**
-     * @return the AppdefEntityId type id
-     */
     public Integer getAppdefTypeId() {
-        if (appdefTypeId == null && resourceType != null)
-            appdefTypeId = new Integer(resourceType.getAppdefTypeId());
-        return appdefTypeId;
+        if (_appdefTypeId == null && _resourceType != null)
+            _appdefTypeId = new Integer(_resourceType.getAppdefTypeId());
+        return _appdefTypeId;
     }
 
-    /**
-     * @param integer
-     */
     public void setAppdefTypeId(Integer integer) {
-        appdefTypeId = integer;
+        _appdefTypeId = integer;
     }
 
-    /**
-     * Get throughputUnits.
-     * @return throughputUnits as String.
-     */
     public String getThroughputUnits() {
-        return throughputUnits;
+        return _throughputUnits;
     }
-    
-    /**
-     * Set throughputUnits.
-     *
-     * @param throughputUnits the value to set.
-     */
+
     public void setThroughputUnits(String throughputUnits) {
-        this.throughputUnits = throughputUnits;
+        _throughputUnits = throughputUnits;
     }
 
     public Integer getAvailTempl() {
-        return availTempl;
+        return _availTempl;
     }
+
     public void setAvailTempl(Integer availTempl) {
-        this.availTempl = availTempl;
+        _availTempl = availTempl;
     }
+
     public Integer getPerformTempl() {
-        return performTempl;
+        return _performTempl;
     }
+
     public void setPerformTempl(Integer performTempl) {
-        this.performTempl = performTempl;
+        _performTempl = performTempl;
     }
+
+    public void setPerformanceUnits(String units) {
+        _performanceUnits = units;
+    }
+
+    public String getPerformanceUnits() {
+        return _performanceUnits;
+    }
+
     public Integer getThroughputTempl() {
-        return throughputTempl;
+        return _throughputTempl;
     }
+
     public void setThroughputTempl(Integer throughputTempl) {
-        this.throughputTempl = throughputTempl;
+        _throughputTempl = throughputTempl;
     }
+
     public String toString() {
         StringBuffer sb = new StringBuffer(this.getClass().getName());
-        sb.append("(resourceType=").append(resourceType);
-        sb.append(",throughput=").append(throughput);
-        sb.append(",throughputUnits=").append(throughputUnits);
-        sb.append(",performance=").append(performance);
-        sb.append(",appdefTypeId=").append(appdefTypeId);
-        sb.append(",numResources=").append(numResources);
-        sb.append(",availTempl=").append(availTempl);
-        sb.append(",throughputTempl=").append(throughputTempl);
-        sb.append(",perfTempl=").append(performTempl);
+        sb.append("(resourceType=").append(_resourceType);
+        sb.append(",throughput=").append(_throughput);
+        sb.append(",throughputUnits=").append(_throughputUnits);
+        sb.append(",performance=").append(_performance);
+        sb.append(",appdefTypeId=").append(_appdefTypeId);
+        sb.append(",numResources=").append(_numResources);
+        sb.append(",availTempl=").append(_availTempl);
+        sb.append(",throughputTempl=").append(_throughputTempl);
+        sb.append(",perfTempl=").append(_performTempl);
         sb.append("))");
         return sb.toString();
     }
 
     public int compareTo(Object o) {
         ResourceTypeDisplaySummary rtds = (ResourceTypeDisplaySummary) o;
-        return this.getResourceType().getName().compareTo(
-            rtds.getResourceType().getName());
+        return getResourceType().getName().
+            compareTo(rtds.getResourceType().getName());
     }
-    
 }
