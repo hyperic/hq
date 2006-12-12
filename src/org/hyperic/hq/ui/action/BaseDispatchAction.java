@@ -131,7 +131,9 @@ public abstract class BaseDispatchAction extends DispatchAction {
      *
      * @return          Resource key / method name map
      */
-    protected abstract Properties getKeyMethodMap();
+    protected Properties getKeyMethodMap() {
+        return new Properties();
+    }
 
     /**
      * Method to overload if the controller wants to be an origin 

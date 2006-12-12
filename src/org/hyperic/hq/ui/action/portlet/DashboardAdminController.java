@@ -25,70 +25,41 @@
 
 package org.hyperic.hq.ui.action.portlet;
 
-import java.util.Properties;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.Portal;
-import org.hyperic.hq.ui.action.BaseDispatchAction;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.Portal;
+import org.hyperic.hq.ui.action.BaseDispatchAction;
 
 /**
  * A <code>Controller</code> that sets up dashboard portlets
  */
 public class DashboardAdminController extends BaseDispatchAction {
 
-    protected static Log log = LogFactory.
-        getLog(DashboardAdminController.class.getName());
+    protected static Log log =
+        LogFactory.getLog(DashboardAdminController.class.getName());
     
-    private static Properties keyMethodMap = new Properties();
-    static {
-        keyMethodMap.setProperty("savedQueries",     "savedQueries");
-        keyMethodMap.setProperty("resourceHealth",   "resourceHealth");
-        keyMethodMap.setProperty("recentlyApproved", "recentlyApproved");
-        keyMethodMap.setProperty("criticalAlerts",   "criticalAlerts");
-        keyMethodMap.setProperty("summaryCounts",    "summaryCounts");
-        keyMethodMap.setProperty("autoDiscovery",    "autoDiscovery");
-        keyMethodMap.setProperty("changeLayout",     "changeLayout");
-        keyMethodMap.setProperty("controlActions",   "controlActions");
-        keyMethodMap.setProperty("rsrcHealthAddResources",
-                                 "rsrcHealthAddResources");
-        keyMethodMap.setProperty("crtAlertsAddResources",
-                                 "crtAlertsAddResources");
-        keyMethodMap.setProperty("availSummary", "availSummary");
-        keyMethodMap.setProperty("availSummaryAddResources",
-                                 "availSummaryAddResources");
-        keyMethodMap.setProperty("metricViewer", "metricViewer");
-        keyMethodMap.setProperty("metricViewerAddResources",
-                                 "metricViewerAddResources");
+    private ActionForward setPortal(HttpServletRequest request, String title,
+                                    String content) {
+        Portal portal = Portal.createPortal(title, content);
+        portal.setDialog(true);        
+        request.setAttribute(Constants.PORTAL_KEY, portal);
+        return null;
     }
     
-    protected Properties getKeyMethodMap() {
-        return keyMethodMap;
-    }
-             
     public ActionForward savedQueries(ActionMapping mapping,
                                       ActionForm form,
                                       HttpServletRequest request,
                                       HttpServletResponse response)
         throws Exception {
-        
-        Portal portal = 
-            Portal.createPortal("dash.settings.PageTitle.SQ",
-                                ".dashContent.admin.savedQueries");
-        
-        portal.setDialog(true);
-        
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-        
-        return null;
+        return setPortal(request, "dash.settings.PageTitle.SQ",
+                  ".dashContent.admin.savedQueries");
     }
 
     public ActionForward resourceHealth(ActionMapping mapping,
@@ -96,16 +67,8 @@ public class DashboardAdminController extends BaseDispatchAction {
                                         HttpServletRequest request,
                                         HttpServletResponse response)
         throws Exception {
-        
-        Portal portal = 
-            Portal.createPortal("dash.settings.PageTitle.RH",
-                                ".dashContent.admin.resourceHealth");
-        
-        portal.setDialog(true);
-        
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-        
-        return null;
+        return setPortal(request, "dash.settings.PageTitle.RH",
+                  ".dashContent.admin.resourceHealth");
     }
 
     public ActionForward recentlyApproved(ActionMapping mapping,
@@ -113,16 +76,8 @@ public class DashboardAdminController extends BaseDispatchAction {
                                           HttpServletRequest request,
                                           HttpServletResponse response)
         throws Exception {
-        
-        Portal portal = 
-            Portal.createPortal("dash.settings.PageTitle.RA",
-                                ".dashContent.admin.recentlyApproved");
-        
-        portal.setDialog(true);
-        
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-        
-        return null;
+        return setPortal(request, "dash.settings.PageTitle.RA",
+                  ".dashContent.admin.recentlyApproved");
     }
 
     public ActionForward criticalAlerts(ActionMapping mapping,
@@ -130,32 +85,16 @@ public class DashboardAdminController extends BaseDispatchAction {
                                         HttpServletRequest request,
                                         HttpServletResponse response)
         throws Exception {
-        
-        Portal portal = 
-            Portal.createPortal("dash.settings.PageTitle.A",
-                                ".dashContent.admin.criticalAlerts");
-        
-        portal.setDialog(true);
-        
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-        
-        return null;
+        return setPortal(request, "dash.settings.PageTitle.A",
+                  ".dashContent.admin.criticalAlerts");
     }
     public ActionForward summaryCounts(ActionMapping mapping,
                                        ActionForm form,
                                        HttpServletRequest request,
                                        HttpServletResponse response)
         throws Exception {
-        
-        Portal portal = 
-            Portal.createPortal("dash.settings.PageTitle.SC",
-                                ".dashContent.admin.summaryCounts");
-        
-        portal.setDialog(true);
-        
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-        
-        return null;
+        return setPortal(request, "dash.settings.PageTitle.SC",
+                  ".dashContent.admin.summaryCounts");
     }
     
     public ActionForward autoDiscovery(ActionMapping mapping,
@@ -163,50 +102,26 @@ public class DashboardAdminController extends BaseDispatchAction {
                                        HttpServletRequest request,
                                        HttpServletResponse response)
         throws Exception {
-        
-        Portal portal = 
-            Portal.createPortal("dash.settings.PageTitle.AD",
-                                ".dashContent.admin.autoDiscovery");
-        
-        portal.setDialog(true);
-        
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-        
-        return null;
+        return setPortal(request, "dash.settings.PageTitle.AD",
+                  ".dashContent.admin.autoDiscovery");
     }
     
-    public ActionForward rsrcHealthAddResources(ActionMapping mapping,
-                                        ActionForm form,
-                                        HttpServletRequest request,
-                                        HttpServletResponse response)
+    public ActionForward resourceHealthAddResources(ActionMapping mapping,
+                                                    ActionForm form,
+                                                    HttpServletRequest request,
+                                                    HttpServletResponse response)
         throws Exception {
-        
-        Portal portal = 
-            Portal.createPortal("dash.settings.PageTitle.RH.addResources",
-                                ".dashContent.admin.resourcehealth.addResources");
-        
-        portal.setDialog(true);
-        
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-        
-        return null;
+        return setPortal(request, "dash.settings.PageTitle.RH.addResources",
+                  ".dashContent.admin.resourcehealth.addResources");
     }
         
-    public ActionForward crtAlertsAddResources(ActionMapping mapping,
-                                               ActionForm form,
-                                               HttpServletRequest request,
-                                               HttpServletResponse response)
+    public ActionForward criticalAlertsAddResources(ActionMapping mapping,
+                                                    ActionForm form,
+                                                    HttpServletRequest request,
+                                                    HttpServletResponse response)
         throws Exception {
-        
-        Portal portal = 
-            Portal.createPortal("dash.settings.PageTitle.A.addResources",
-                                ".dashContent.admin.criticalAlerts.addResources");
-        
-        portal.setDialog(true);
-        
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-        
-        return null;
+        return setPortal(request, "dash.settings.PageTitle.A.addResources",
+                  ".dashContent.admin.criticalAlerts.addResources");
     }
     
     public ActionForward changeLayout(ActionMapping mapping,
@@ -214,48 +129,26 @@ public class DashboardAdminController extends BaseDispatchAction {
                                       HttpServletRequest request,
                                       HttpServletResponse response)
         throws Exception {
-        
-        Portal portal = 
-            Portal.createPortal("dash.settings.PageTitle.PL",
-                                ".dashContent.admin.changeLayout");
-        
-        portal.setDialog(true);
-        
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-        
-        return null;
+        return setPortal(request, "dash.settings.PageTitle.PL",
+                  ".dashContent.admin.changeLayout");
     }
 
     public ActionForward controlActions(ActionMapping mapping,
                                         ActionForm form,
                                         HttpServletRequest request,
                                         HttpServletResponse response)
-        throws Exception
-    {
-        Portal portal =
-            Portal.createPortal("dash.settings.PageTitle.CA",
-                               ".dashContent.admin.controlActions");
-        portal.setDialog(true);
-            
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-            
-        return null;
+        throws Exception {
+        return setPortal(request, "dash.settings.PageTitle.CA",
+                  ".dashContent.admin.controlActions");
     }
 
     public ActionForward availSummary(ActionMapping mapping,
                                       ActionForm form,
                                       HttpServletRequest request,
                                       HttpServletResponse response)
-        throws Exception
-    {
-        Portal portal =
-            Portal.createPortal("dash.settings.PageTitle.AS",
-                                ".dashContent.admin.availSummary");
-        portal.setDialog(true);
-
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-
-        return null;
+        throws Exception {
+        return setPortal(request, "dash.settings.PageTitle.AS",
+                  ".dashContent.admin.availSummary");
     }
 
     public ActionForward availSummaryAddResources(ActionMapping mapping,
@@ -263,47 +156,25 @@ public class DashboardAdminController extends BaseDispatchAction {
                                                   HttpServletRequest request,
                                                   HttpServletResponse response)
         throws Exception {
-
-        Portal portal =
-            Portal.createPortal("dash.settings.PageTitle.A.addResources",
-                                ".dashContent.admin.availSummary.addResources");
-        portal.setDialog(true);
-
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-
-        return null;
+        return setPortal(request, "dash.settings.PageTitle.A.addResources",
+                  ".dashContent.admin.availSummary.addResources");
     }
 
     public ActionForward metricViewer(ActionMapping mapping,
                                       ActionForm form,
                                       HttpServletRequest request,
                                       HttpServletResponse response)
-        throws Exception
-    {
-        Portal portal =
-            Portal.createPortal("dash.settings.PageTitle.MV",
-                                ".dashContent.admin.metricViewer");
-        portal.setDialog(true);
-
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-
-        return null;
-
+        throws Exception {
+        return setPortal(request, "dash.settings.PageTitle.MV",
+                  ".dashContent.admin.metricViewer");
     }
 
     public ActionForward metricViewerAddResources(ActionMapping mapping,
                                                   ActionForm form,
                                                   HttpServletRequest request,
                                                   HttpServletResponse response)
-        throws Exception
-    {
-        Portal portal =
-            Portal.createPortal("dash.settings.PageTitle.A.addResources",
-                                ".dashContent.admin.metricViewer.addResources");
-        portal.setDialog(true);
-
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-
-        return null;
+        throws Exception {
+        return setPortal(request, "dash.settings.PageTitle.A.addResources",
+                  ".dashContent.admin.metricViewer.addResources");
     }
 }

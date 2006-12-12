@@ -31,7 +31,7 @@
  --%>
 
 
-<html:form method="POST" action="/dashboard/metricviewer/AddResourcesAction">
+<html:form method="POST" action="/dashboard/metricViewer/AddResourcesAction">
 <html:hidden property="key"/>
 <html:hidden property="token"/>
     

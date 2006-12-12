@@ -37,7 +37,7 @@
 
 <script type="text/javascript">
 function requestMetricsResponse() {
-var metricsUrl = "<html:rewrite page="/dashboard/ViewMetrics.do?token=${portlet.token}"/>"
+var metricsUrl = "<html:rewrite page="/dashboard/ViewMetricViewer.do?token=${portlet.token}"/>"
 	new Ajax.Request(metricsUrl, {method: 'get', onSuccess:showMetricsResponse, onFailure :reportError});
 	}
 onloads.push(requestMetricsResponse);

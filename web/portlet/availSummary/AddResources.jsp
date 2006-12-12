@@ -31,7 +31,7 @@
  --%>
 
 
-<html:form method="POST" action="/dashboard/availsummary/AddResourcesAction">
+<html:form method="POST" action="/dashboard/availSummary/AddResourcesAction">
 <html:hidden property="key" value=".dashContent.availsummary.resources"/>
 
 <tiles:insert definition=".portlet.error"/>

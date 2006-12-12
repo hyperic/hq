@@ -2356,56 +2356,17 @@
         <set-property property="title" value="1.1.1"/>
       </action>
 
-      <action path="/dashboard/resourcehealth/AddResourcesAction"
+      <action path="/dashboard/*/AddResourcesAction"
               type="org.hyperic.hq.ui.action.portlet.addresource.AddResourcesAction"
               name="DashboardAddResourceHealthForm"
               scope="request"
-              input="/dashboard/Admin.do?mode=rsrcHealthAddResources">
-              <forward name="cancel"  path="/dashboard/Admin.do?mode=resourceHealth"/>
-              <forward name="reset"   path="/dashboard/Admin.do?mode=rsrcHealthAddResources"/>
-              <forward name="add"     path="/dashboard/Admin.do?mode=rsrcHealthAddResources"/>
-              <forward name="remove"  path="/dashboard/Admin.do?mode=rsrcHealthAddResources"/>
-              <forward name="failure" path="/dashboard/Admin.do?mode=rsrcHealthAddResources"/>
-              <forward name="success" path="/dashboard/Admin.do?mode=resourceHealth"/>
-      </action>
-
-      <action path="/dashboard/criticalalerts/AddResourcesAction"
-              type="org.hyperic.hq.ui.action.portlet.addresource.AddResourcesAction"
-              name="DashboardAddResourceHealthForm"
-              scope="request"
-              input="/dashboard/Admin.do?mode=crtAlertsAddResources">              
-              <forward name="cancel"  path="/dashboard/Admin.do?mode=criticalAlerts"/>
-              <forward name="reset"   path="/dashboard/Admin.do?mode=crtAlertsAddResources"/>
-              <forward name="add"     path="/dashboard/Admin.do?mode=crtAlertsAddResources"/>
-              <forward name="remove"  path="/dashboard/Admin.do?mode=crtAlertsAddResources"/>
-              <forward name="failure" path="/dashboard/Admin.do?mode=crtAlertsAddResources"/>
-              <forward name="success" path="/dashboard/Admin.do?mode=criticalAlerts"/>
-      </action>
-
-      <action path="/dashboard/availsummary/AddResourcesAction"
-              type="org.hyperic.hq.ui.action.portlet.addresource.AddResourcesAction"
-              name="DashboardAddResourceHealthForm"
-              scope="request"
-              input="/dashboard/Admin.do?mode=availSummaryAddResources">
-              <forward name="cancel"  path="/dashboard/Admin.do?mode=availSummary"/>
-              <forward name="reset"   path="/dashboard/Admin.do?mode=availSummaryAddResources"/>
-              <forward name="add"     path="/dashboard/Admin.do?mode=availSummaryAddResources"/>
-              <forward name="remove"  path="/dashboard/Admin.do?mode=availSummaryAddResources"/>
-              <forward name="failure" path="/dashboard/Admin.do?mode=availSummaryAddResources"/>
-              <forward name="success" path="/dashboard/Admin.do?mode=availSummary"/>
-      </action>
-
-      <action path="/dashboard/metricviewer/AddResourcesAction"
-              type="org.hyperic.hq.ui.action.portlet.addresource.AddResourcesAction"
-              name="DashboardAddResourceHealthForm"
-              scope="request"
-              input="/dashboard/Admin.do?mode=metricViewerAddResources">
-              <forward name="cancel"  path="/dashboard/Admin.do?mode=metricViewer"/>
-              <forward name="reset"   path="/dashboard/Admin.do?mode=metricViewerAddResources"/>
-              <forward name="add"     path="/dashboard/Admin.do?mode=metricViewerAddResources"/>
-              <forward name="remove"  path="/dashboard/Admin.do?mode=metricViewerAddResources"/>
-              <forward name="failure" path="/dashboard/Admin.do?mode=metricViewerAddResources"/>
-              <forward name="success" path="/dashboard/Admin.do?mode=metricViewer"/>
+              input="/dashboard/Admin.do?mode={1}AddResources">              
+        <forward name="cancel"  path="/dashboard/Admin.do?mode={1}"/>
+        <forward name="reset"   path="/dashboard/Admin.do?mode={1}AddResources"/>
+        <forward name="add"     path="/dashboard/Admin.do?mode={1}AddResources"/>
+        <forward name="remove"  path="/dashboard/Admin.do?mode={1}AddResources"/>
+        <forward name="failure" path="/dashboard/Admin.do?mode={1}AddResources"/>
+        <forward name="success" path="/dashboard/Admin.do?mode={1}"/>
       </action>
 
       <!-- / -->

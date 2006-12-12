@@ -31,7 +31,7 @@
  --%>
 
 
-<html:form method="POST" action="/dashboard/resourcehealth/AddResourcesAction">
+<html:form method="POST" action="/dashboard/resourceHealth/AddResourcesAction">
 <html:hidden property="key" value=".dashContent.resourcehealth.resources"/>
 
 <tiles:insert definition=".portlet.error"/>

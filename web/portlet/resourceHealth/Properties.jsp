@@ -95,7 +95,7 @@ var help = '<hq:help/>';
       </script>
 
       <tiles:insert definition=".toolbar.addToList">
-        <tiles:put name="addToListUrl" value="/dashboard/Admin.do?mode=rsrcHealthAddResources&key=.dashContent.resourcehealth.resources"/>  
+        <tiles:put name="addToListUrl" value="/dashboard/Admin.do?mode=resourceHealthAddResources&key=.dashContent.resourcehealth.resources"/>  
         <tiles:put name="listItems" beanName="resourceHealthList"/>
         <tiles:put name="listSize" beanName="resourceHealthList" beanProperty="totalSize"/>
         <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>  

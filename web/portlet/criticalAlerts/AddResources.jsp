@@ -31,7 +31,7 @@
  --%>
 
 
-<html:form method="POST" action="/dashboard/criticalalerts/AddResourcesAction">
+<html:form method="POST" action="/dashboard/criticalAlerts/AddResourcesAction">
 <html:hidden property="key"/>
 <html:hidden property="token"/>
 

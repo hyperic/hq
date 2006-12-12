@@ -55,7 +55,7 @@
   </tr>
   <tr valign="top"> 
     <td colspan='2'>
-    <html:form action="/portlet/admin/ModifySummaryCounts.do">
+    <html:form action="/dashboard/ModifySummaryCounts.do">
 
     <!-- Content Block Title: Display Settings -->
     <tiles:insert definition=".header.tab">
