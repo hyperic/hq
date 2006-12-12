@@ -2539,35 +2539,19 @@
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ViewDefinitionSyslogActionAction"/>
 
-      <action path="/alerts/ViewNotificationsOthers"
+      <action path="/alerts/ViewNotifications*"
               name="RemoveNotificationsForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ViewDefinitionNotificationsEmailsAction">
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ViewDefinitionNotifications{1}Action">
         <set-property property="title" value="2.2.3.2"/>
       </action>
               
-      <action path="/alerts/ViewNotificationsUsers"
+      <action path="/alerts/Remove*"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.Remove{1}Action" 
               name="RemoveNotificationsForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ViewDefinitionNotificationsUsersAction">
-        <set-property property="title" value="2.2.3.2"/>
-      </action>
-
-      <action path="/alerts/RemoveOthers"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.RemoveOthersAction" 
-              name="RemoveNotificationsForm"
-              scope="request"
-              input="/alerts/Config.do?mode=viewOthers">
-              <forward name="success" path="/alerts/Config.do?mode=viewOthers" redirect="true"/>
-              <forward name="failure" path="/alerts/Config.do?mode=list" redirect="true"/>
-      </action>
-      
-      <action path="/alerts/RemoveUsers"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.RemoveUsersAction" 
-              name="RemoveNotificationsForm"
-              scope="request"
-              input="/alerts/Config.do?mode=viewUsers">
-              <forward name="success" path="/alerts/Config.do?mode=viewUsers" redirect="true"/>
+              input="/alerts/Config.do?mode=view{1}">
+              <forward name="success" path="/alerts/Config.do?mode=view{1}" redirect="true"/>
               <forward name="failure" path="/alerts/Config.do?mode=list" redirect="true"/>
       </action>
       
@@ -2623,47 +2607,37 @@
               forward=".events.alerts.layout">
       </action>
 
-      <action   path="/alerts/config/AddUsers"
-                type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AddUsersAction"
-                name="AddAlertUsersForm"
-                scope="request"
-                input="/alerts/Config.do?mode=addUsers">
-        <forward name="cancel" path="/alerts/Config.do?mode=viewUsers"
-                 redirect="true"/>
-        <forward name="reset" path="/alerts/Config.do?mode=addUsers"
-                 redirect="true"/>
-        <forward name="add" path="/alerts/Config.do?mode=addUsers"/>
-        <forward name="remove" path="/alerts/Config.do?mode=addUsers"/>
-        <forward name="failure" path="/alerts/Config.do?mode=addUsers"/>
-        <forward name="success" path="/alerts/Config.do?mode=viewUsers"/>
-    </action>
+      <action path="/alerts/config/AddUsers*"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AddUsers{1}Action"
+              name="AddAlertUsersForm"
+              scope="request"
+              input="/alerts/Config.do?mode=addUsers">
+          <forward name="cancel" path="/alerts/Config.do?mode=viewUsers"
+                   redirect="true"/>
+          <forward name="reset" path="/alerts/Config.do?mode=addUsers"
+                   redirect="true"/>
+          <forward name="add" path="/alerts/Config.do?mode=addUsers"/>
+          <forward name="remove" path="/alerts/Config.do?mode=addUsers"/>
+          <forward name="failure" path="/alerts/Config.do?mode=addUsers"/>
+          <forward name="success" path="/alerts/Config.do?mode=viewUsers"/>
 
-    <action path="/events/config/AddUsersFormPrepare"
-                name="AddAlertUsersForm"
-                scope="request"
-                type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AddUsersFormPrepareAction">
-      <set-property property="title" value="2.2.3.2.1"/>
-    </action>
+          <set-property property="title" value="2.2.3.2.1"/>
+      </action>
 
-    <action   path="/alerts/config/AddOthers"
-        type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AddOthersAction"
-                name="AddAlertOthersForm"
-                scope="request"
-                input="/alerts/Config.do?mode=addOthers">
-            <forward name="cancel" path="/alerts/Config.do?mode=viewOthers"
-                redirect="true"/>
-            <forward name="reset" path="/alerts/Config.do?mode=addOthers"
-                redirect="true"/>
-            <forward name="failure" path="/alerts/Config.do?mode=addOthers"/>
-            <forward name="success" path="/alerts/Config.do?mode=viewOthers"/>
-    </action>
+      <action path="/alerts/config/AddOthers*"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AddOthers{1}Action"
+              name="AddAlertOthersForm"
+              scope="request"
+              input="/alerts/Config.do?mode=addOthers">
+          <forward name="cancel" path="/alerts/Config.do?mode=viewOthers"
+                   redirect="true"/>
+          <forward name="reset" path="/alerts/Config.do?mode=addOthers"
+                   redirect="true"/>
+          <forward name="failure" path="/alerts/Config.do?mode=addOthers"/>
+          <forward name="success" path="/alerts/Config.do?mode=viewOthers"/>
 
-    <action path="/events/config/AddOthersFormPrepare"
-                name="AddAlertOthersForm"
-                scope="request"
-                type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AddOthersFormPrepareAction">
-      <set-property property="title" value="2.2.3.2.1"/>
-    </action>
+          <set-property property="title" value="2.2.3.2.1"/>
+      </action>
 
       <action path="/alerts/AlertsPortal"
               parameter="mode"

@@ -196,11 +196,11 @@
 
   <!-- mockups -->
   <definition name =".events.config.addusers"
-        controllerUrl="/events/config/AddUsersFormPrepare.do"
+        controllerUrl="/alerts/config/AddUsersFormPrepare.do"
         path="/resource/common/monitor/alerts/config/AddEventUsers.jsp"/>
     
   <definition name =".events.config.addothers"
-      controllerUrl="/events/config/AddOthersFormPrepare.do"
+      controllerUrl="/alerts/config/AddOthersFormPrepare.do"
       path="/resource/common/monitor/alerts/config/AddEventOthers.jsp"/>
     
   <definition name=".events.config.conditions.enablement.frequency"

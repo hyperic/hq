@@ -51,13 +51,13 @@ import org.apache.struts.util.LabelValueBean;
  * View an alert definition -- notified roles.
  *
  */
-public class ViewDefinitionNotificationsEmailsAction
+public class ViewDefinitionNotificationsOthersAction
     extends ViewDefinitionNotificationsAction
 {
     private static final String[] SORT_ATTRS = { "label" };
 
     private Log log =
-        LogFactory.getLog( ViewDefinitionNotificationsEmailsAction.class.getName() );
+        LogFactory.getLog( ViewDefinitionNotificationsOthersAction.class.getName() );
 
     public int getNotificationType() { return EmailActionConfig.TYPE_EMAILS; }
 
