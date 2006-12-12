@@ -42,7 +42,8 @@
 
     -->
     <service name="CurrentWebApp"
-             server="Resin 3.0.19"
+             server="Resin"
+             version="3.0.19"
              description="Resin 3.0.19 CurrentWebapp example">
 
         <property name="OBJECT_NAME"
@@ -60,10 +61,10 @@
             <property name="SessionTimeout" description="Session Timeout"/>
         </properties>
 
-
         <filter name="template"
                 value="${OBJECT_NAME}:${alias}"/>
 
+        <!-- Define MBean attributes as metrics -->
         <metric name="Availability"
                 template="${OBJECT_NAME}:Availability"
                 indicator="true"/>
@@ -77,6 +78,9 @@
 
         <metric name="Session Timeout Count"
                 indicator="true"/>
+
+        <!-- Define MBean operations as control actions -->
+        <actions include="restart"/>
 
     </service>
 
