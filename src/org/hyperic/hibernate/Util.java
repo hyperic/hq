@@ -43,6 +43,8 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Hibernate;
 import org.hibernate.jmx.StatisticsService;
 import org.hibernate.cache.NoCacheProvider;
+import org.hibernate.stat.Statistics;
+import org.hibernate.stat.SecondLevelCacheStatistics;
 import org.hibernate.transaction.JTATransactionFactory;
 
 import org.hibernate.cfg.Configuration;
@@ -54,6 +56,8 @@ import org.hibernate.dialect.function.ClassicSumFunction;
 import org.hibernate.dialect.function.ClassicCountFunction;
 
 import org.hibernate.engine.SessionFactoryImplementor;
+import org.hyperic.hq.common.DiagnosticThread;
+import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.product.server.MBeanUtil;
 
 import java.sql.Connection;
@@ -108,6 +112,40 @@ public class Util {
             log.error("Building SessionFactory failed.", ex);
             throw new ExceptionInInitializerError(ex);
         }
+
+        // Add second level cache statistics to the diagnostics
+        DiagnosticObject cacheDiagnostics = new DiagnosticObject() {
+            public String getStatus() {
+
+                Statistics stats = getSessionFactory().getStatistics();
+                String[] caches = stats.getSecondLevelCacheRegionNames();
+
+                String separator = System.getProperty("line.separator");
+                StringBuffer buf = new StringBuffer();
+                for (int i = 0; i < caches.length; i++) {
+                    SecondLevelCacheStatistics cacheStats =
+                        stats.getSecondLevelCacheStatistics(caches[i]);
+
+                    buf.append(separator)
+                        .append("Cache: ")
+                        .append(caches[i])
+                        .append(" elements=")
+                        .append(cacheStats.getElementCountInMemory())
+                        .append(" (")
+                        .append(cacheStats.getSizeInMemory())
+                        .append(" bytes) hits=")
+                        .append(cacheStats.getHitCount())
+                        .append(" misses=")
+                        .append(cacheStats.getMissCount());
+    }
+                return buf.toString();
+            }
+
+            public String toString() {
+                return "Hibernate Cache";
+            }
+        };
+        DiagnosticThread.addDiagnosticObject(cacheDiagnostics);
     }
 
     private static void createHQHibernateStatMBean()
