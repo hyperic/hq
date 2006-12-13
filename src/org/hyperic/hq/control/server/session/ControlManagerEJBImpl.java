@@ -510,10 +510,9 @@ public class ControlManagerEJBImpl implements SessionBean {
             status = ControlConstants.STATUS_FAILED;
         }
 
-        int len = message.length();
-        if (message != null && len > 500) {
+        if (message != null && message.length() > 500) {
             // Show last 500 characters from the command output
-            msg = message.substring(len - 500);
+            msg = message.substring(message.length() - 500);
         } else {
             msg = message;
         }
