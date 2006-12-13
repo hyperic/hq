@@ -23,6 +23,8 @@ public class GalertDef
     private ResourceGroup _group;
     private Escalation    _escalation;
     private Set           _strategies = new HashSet();
+    private long          _ctime;
+    private long          _mtime;
     
     protected GalertDef() {}
     
@@ -35,6 +37,8 @@ public class GalertDef
         _enabled    = enabled;
         _group      = group;
         _escalation = null;
+        _ctime      = System.currentTimeMillis();
+        _mtime      = _ctime;
     }
         
     ExecutionStrategyInfo 
@@ -166,5 +170,21 @@ public class GalertDef
 
     public boolean isNotifyFiltered() {
         return false;
+    }
+
+    public long getCtime() {
+        return _ctime;
+    }
+
+    public void setCtime(long ctime) {
+        _ctime = ctime;
+    }
+
+    public long getMtime() {
+        return _mtime;
+    }
+
+    public void setMtime(long mtime) {
+        _mtime = mtime;
     }
 }
