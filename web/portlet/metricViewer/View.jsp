@@ -63,10 +63,10 @@ onloads.push(requestMetricsResponse);
   	<tbody>
 	<tr class="tableRowHeader">
 		<th width="90%" class="tableRowInactive" id="resourceTypeName" nowrap>
-		Resource Type
+		<fmt:message key="dash.home.TableHeader.Type"/>
 		</th>
 		<th width="10%" align="center" nowrap class="tableRowInactive" id="resourceMetric">
-	    Metric
+	    <fmt:message key="dash.home.TableHeader.Metric"/>
 		</th>
 	</tr>
 	
