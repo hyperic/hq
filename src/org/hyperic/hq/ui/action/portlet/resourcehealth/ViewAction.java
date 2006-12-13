@@ -111,19 +111,20 @@ public class ViewAction extends BaseAction {
      * given metric is not valid, unknown is returned.
      */
     private String getAvailString(Double availability) {
-        double avail = availability.doubleValue();
+        if (availability != null) {
+            double avail = availability.doubleValue();
 
-        if (avail == MeasurementConstants.AVAIL_UP) {
+            if (avail == MeasurementConstants.AVAIL_UP) {
                 return "green";
-        } else if (avail == MeasurementConstants.AVAIL_DOWN) {
+            } else if (avail == MeasurementConstants.AVAIL_DOWN) {
                 return "red";
-        } else if (avail == MeasurementConstants.AVAIL_PAUSED) {
+            } else if (avail == MeasurementConstants.AVAIL_PAUSED) {
                 return "orange";
-        } else if (avail == MeasurementConstants.AVAIL_WARN) {
+            } else if (avail == MeasurementConstants.AVAIL_WARN) {
                 return "yellow";
-        } else {
-                return "unknown";
+            }
         }
+        return "unknown";
     }
 
     private List getResources(String key, MeasurementBoss boss, WebUser user)
