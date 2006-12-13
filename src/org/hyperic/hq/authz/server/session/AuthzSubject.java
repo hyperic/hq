@@ -213,6 +213,7 @@ public class AuthzSubject extends AuthzNamedBean {
         setDepartment(authzSubjectValue.getDepartment());
         setEmailAddress(authzSubjectValue.getEmailAddress());
         setFirstName(authzSubjectValue.getFirstName());
+        setLastName(authzSubjectValue.getLastName());
         setName(authzSubjectValue.getName());
         setPhoneNumber(authzSubjectValue.getPhoneNumber());
         setSMSAddress(authzSubjectValue.getSMSAddress());
