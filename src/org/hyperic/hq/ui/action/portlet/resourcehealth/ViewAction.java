@@ -42,6 +42,8 @@ import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.UnitsConvert;
+import org.hyperic.util.units.FormattedNumber;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -86,9 +88,12 @@ public class ViewAction extends BaseAction {
             res.put("resourceTypeName", bean.getResourceTypeName());
             res.put("resourceTypeId", bean.getResourceTypeId());
             res.put("resourceId", bean.getResourceId());
-            res.put("performance", bean.getPerformance());
-            res.put("throughput", bean.getThroughput());
-            res.put("throughputUnits", bean.getThroughputUnits());
+            res.put("performance",
+                    getFormattedValue(bean.getPerformance(),
+                                      bean.getPerformanceUnits()));
+            res.put("throughput",
+                    getFormattedValue(bean.getThroughput(),
+                                      bean.getThroughputUnits()));
             res.put("availability", getAvailString(bean.getAvailability()));
             res.put("monitorable", bean.getMonitorable());
             res.put("alerts", bean.getAlerts());
@@ -100,6 +105,15 @@ public class ViewAction extends BaseAction {
 
         response.getWriter().write(favorites.toString());
 
+        return null;
+    }
+
+    private String getFormattedValue(Double value, String units) {
+        if (value != null) {
+            FormattedNumber fn = UnitsConvert.convert(value.doubleValue(),
+                                                      units);
+            return fn.toString();
+        }
         return null;
     }
 
