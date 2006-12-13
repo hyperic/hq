@@ -22,8 +22,6 @@ import org.hyperic.util.units.FormattedNumber;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionForm;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,8 +39,6 @@ import java.util.ArrayList;
  */
 public class ViewAction extends BaseAction {
 
-    private Log _log = LogFactory.getLog("METRIC VIEWER");
-    
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
@@ -136,7 +132,6 @@ public class ViewAction extends BaseAction {
             res.put("token", JSONObject.NULL);
         }
 
-        _log.info(res.toString(2));
         response.getWriter().write(res.toString());
 
         return null;
