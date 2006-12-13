@@ -2,6 +2,8 @@
 <%@ page errorPage="/common/Error.jsp" %>
 <%@ taglib uri="struts-html-el" prefix="html" %>
 <%@ taglib uri="jstl-fmt" prefix="fmt" %>
+<%@ taglib uri="struts-tiles" prefix="tiles" %>
+<%@ taglib uri="jstl-c" prefix="c" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -27,6 +29,10 @@
   USA.
  --%>
 
+<!-- Content Block Title: Notification -->
+<tiles:insert definition=".header.tab">
+  <tiles:put name="tabKey" value="monitoring.events.MiniTabs.Escalation"/>
+</tiles:insert>
 
 <script language="JavaScript" type="text/javascript">
   var isButtonClicked = false;
@@ -39,26 +45,28 @@
   }
 </script>
 
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<table cellpadding="0" border="0" width="100%" class="BlockContent">
   <tr>
-    <td colspan="2"><html:img page="/images/spacer.gif" width="1" height="10" border="0"/></td>
-  </tr>
-  <tr>
-    <td colspan="2" class="ToolbarLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-  </tr>
-  <tr>
-    <td colspan="2"><html:img page="/images/spacer.gif" width="1" height="10" border="0"/></td>
-  </tr>
-  <tr align=left valign=bottom>
-    <td width="20%">&nbsp;</td>
+    <td rowspan="2">&nbsp;</td>
     <td width="80%">
-      <table cellpadding="0" cellspacing="10" border="0">
-        <tr>
-          <td><input type=SUBMIT name="mode" value="<fmt:message key="resource.common.alert.action.acknowledge.label"/>"/></td>
-          <td><html:img page="/images/spacer.gif" width="10" height="1" border="0"/></td>
-          <td><input type=SUBMIT name="mode" value="<fmt:message key="resource.common.alert.action.fixed.label"/>"/></td>
-        </tr>
-      </table>
+      <input type=checkbox name="pause" value="true"/>
+      <fmt:message key="alert.escalation.pause"/>
+      <select name="pauseTime">
+        <option value="300000">5</option>
+        <option value="600000">10</option>
+        <option value="900000">15</option>
+        <option value="1200000">20</option>
+        <option value="1800000">30</option>
+        <option value="3600000">60</option>
+      </select>
+      <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>
     </td>
   </tr>
+  <tr>
+    <td style="padding: 10px;">
+    <span style="padding-right: 10px;"><input type=SUBMIT name="mode" value="<fmt:message key="resource.common.alert.action.acknowledge.label"/>"/></span>
+    <span style="padding-left: 10px;"><input type=SUBMIT name="mode" value="<fmt:message key="resource.common.alert.action.fixed.label"/>"/></span></td>
+  </tr>
 </table>
+<br/>
+

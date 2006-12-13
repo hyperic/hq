@@ -144,17 +144,26 @@ public class PortalAction extends ResourceController {
     }
 
     public ActionForward acknowledgeAlert(ActionMapping mapping,
-                                  ActionForm form,
-                                  HttpServletRequest request,
-                                  HttpServletResponse response)
+                                          ActionForm form,
+                                          HttpServletRequest request,
+                                          HttpServletResponse response)
         throws Exception {
         ServletContext ctx = getServlet().getServletContext();
         int sessionID = RequestUtils.getSessionId(request).intValue();
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
 
         Integer alertId = new Integer( request.getParameter("a") );
+        
+        long pause = 0;
+        try {
+            RequestUtils.getStringParameter(request, "pause");
+            pause =
+                RequestUtils.getIntParameter(request, "pauseTime").longValue();
+        } catch(ParameterNotFoundException e) {
+            // Don't ened to pause
+        }
         // pass pause escalation time
-        eb.acknowledgeAlert(sessionID, alertId, 60000);
+        eb.acknowledgeAlert(sessionID, alertId, pause);
         
         return viewAlert(mapping, form, request, response);
     }

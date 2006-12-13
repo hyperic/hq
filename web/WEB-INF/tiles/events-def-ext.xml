@@ -51,6 +51,7 @@
         controllerUrl="/alerts/ViewAlert.do">
     <putList name="actionList">
       <add value=".events.alert.view.notifications"/>
+      <add value=".events.alert.view.escalation"/>
     </putList>
   </definition>
 

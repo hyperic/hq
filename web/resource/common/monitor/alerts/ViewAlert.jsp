@@ -28,7 +28,6 @@
   USA.
  --%>
 
-
 <tiles:importAttribute name="actionList"/>
 
 <%-- Don't insert the sub-tiles if there is no alert and no alertDef. --%>
@@ -54,8 +53,6 @@
   &nbsp;<br>
   <tiles:insert beanName="action"/>
 </c:forEach>
-
-<tiles:insert page="/resource/common/monitor/alerts/AcknowledgeButtons.jsp"/>
 
 <tiles:insert definition=".events.alert.view.nav" flush="true"/>
 
