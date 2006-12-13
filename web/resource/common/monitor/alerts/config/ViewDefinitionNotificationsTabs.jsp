@@ -45,7 +45,7 @@
       <table width="100%" border="0" cellspacing="0" cellpadding="0">
         <tr> 
           <c:choose>
-          <c:when test="${param.mode == 'viewUsers' || param.mode == 'viewDefinition'}">
+          <c:when test="${param.mode == 'viewUsers'}">
             <td valign="top" width="15"><html:img page="/images/miniTabs_left_on.gif" width="11" height="19" alt="" border="0"/></td>
             <td class="MiniTabOn" nowrap><fmt:message key="monitoring.events.MiniTabs.CAMusers"/></td>
             <td valign="top" width="17"><html:img page="/images/miniTabs_right_on.gif" width="11" height="19" alt="" border="0"/></td>
@@ -88,7 +88,7 @@
       <table width="100%" border="0" cellspacing="0" cellpadding="0">
         <tr> 
           <c:choose>
-          <c:when test="${param.mode == 'viewEscalation'}">
+          <c:when test="${param.mode == 'viewEscalation' || param.mode == 'viewDefinition'}">
             <td valign="top" width="15"><html:img page="/images/miniTabs_left_on.gif" width="11" height="19" alt="" border="0"/></td>
             <td class="MiniTabOn" nowrap><fmt:message key="monitoring.events.MiniTabs.Escalation"/></td>
             <td valign="top" width="17"><html:img page="/images/miniTabs_right_on.gif" width="11" height="19" alt="" border="0"/></td>

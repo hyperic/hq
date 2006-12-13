@@ -68,7 +68,7 @@ public class PortalAction extends ResourceController {
         keyMethodMap.setProperty(Constants.MODE_LIST, "listDefinitions");
         keyMethodMap.setProperty(Constants.MODE_NEW, "newDefinition");
         keyMethodMap.setProperty(Constants.MODE_VIEW, "listDefinitions");
-        keyMethodMap.setProperty("viewDefinition", "viewUsers");
+        keyMethodMap.setProperty("viewDefinition", "viewEscalation");
     }
 
     protected Properties getKeyMethodMap() {
