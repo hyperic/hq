@@ -142,12 +142,12 @@ public class RawMeasurementDAO extends HibernateDAO {
 
     List findByDerivedMeasurement(Integer did) {
         String sql =
-            "select distinct r from RawMeasurement r " +
-            "join r.template t " +
-            "join t.measurementArgs a, " +
+            "select distinct r from RawMeasurement r, " +
             "DerivedMeasurement m " +
+            "join m.template t " +
+            "join t.measurementArgs a " +
             "where r.instanceId = m.instanceId and " +
-            "t.id = a.templateArg.id and " +
+            "a.templateArg.id = r.template.id and " +
             "m.id = ? ";
 
         return getSession().createQuery(sql)
