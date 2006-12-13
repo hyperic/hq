@@ -49,7 +49,8 @@
   <metric name="Query Execution Max Time"
           template="${OBJECT_NAME}:QueryExecutionMaxTime"
           category="PERFORMANCE"
-          indicator="true"/>
+          indicator="true"
+          units="ms"/>
 
   <metric name="Entity Update Count"
           template="${OBJECT_NAME}:EntityUpdateCount"
