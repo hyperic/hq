@@ -80,37 +80,14 @@
         escLi.appendChild(remDiv);
         remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
         remDiv.style.paddingTop = "10px;"
-        
         remDiv.innerHTML ='<a href="#" onclick="removeRow(this);"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
-      
-        escLi.appendChild(usersDiv);
-        usersDiv.setAttribute('id', 'usersDiv_' + liID);
-        usersDiv.style.display = 'none';
-        if($('usersList')) {
-        usersDiv.innerHTML = $('usersList').innerHTML;
-        var usersInputList = usersDiv.getElementsByTagName('input');
-         for(i=0;i < usersInputList.length; i++) {
-                var inputNamesArr = usersInputList[i];
-                inputNamesArr.name = inputNamesArr.name + "_" + liID;
-            }
-         }
         
-        escLi.appendChild(rolesDiv);
-        rolesDiv.setAttribute('id', 'rolesDiv' + liID);
-        rolesDiv.style.display = 'none';
-        if($('rolesList')) {
-        rolesDiv.innerHTML = $('rolesList').innerHTML;
-        var rolesInputList = rolesDiv.getElementsByTagName('input');
-         for(i=0;i < rolesInputList.length; i++) {
-                var inputRolesArr = rolesInputList[i];
-                inputRolesArr.name =  inputRolesArr.name + "_" + liID;
-            }
-        }
 
-        escLi.appendChild(othersDiv);
-        othersDiv.setAttribute('id', 'othersDiv_' + liID);
-        othersDiv.style.display = 'none';
-        othersDiv.innerHTML = "<textarea rows=3 cols=35 id=othersList_" + liID + " name=othersList_" + liID + "></textarea>"
+       // escLi.appendChild(othersDiv);
+       // othersDiv.setAttribute('id', 'othersDiv_' + liID);
+       // othersDiv.style.display = '';
+       // othersDiv.style.border = '1px solid blue';
+       // othersDiv.innerHTML = "<textarea rows=3 cols=35 id=othersList_" + liID + " name=othersList_" + liID + "></textarea>"
 
 
         escLi.appendChild(escTable);
@@ -123,7 +100,7 @@
 
 		escTr1.appendChild(td1);
 
-		td1.setAttribute('colspan', '4');
+		td1.setAttribute('colspan', '3');
         td1.appendChild(document.createTextNode('<fmt:message key="alert.config.escalation.then"/> '));
 		td1.appendChild(select1);
 		select1.setAttribute('id', 'waittime_' + liID);
@@ -178,46 +155,14 @@
         </c:if>
 		addOption(select3, 'Users', '<fmt:message key="monitoring.events.MiniTabs.CAMusers"/>');
 		addOption(select3, 'Others', '<fmt:message key="monitoring.events.MiniTabs.OR"/>');
-		
-		function onchange_handler(el) {
-        //alert(el+", value="+ el.options[el.selectedIndex].value );
-        var index= el.options[el.selectedIndex].value
 
-         if (index == "Email") {
-
-			showEmailInput();
-			hideSyslogInput();
-            $('whoSelect').style.display = '';
-           }
-		   else if (index == "Syslog") {
-			hideEmailInput();
-			showSyslogInput();
-            $('whoSelect').style.display = 'none';
-           }
-        }
-
-        function onchange_who(el) {
-        //alert(el+", value="+ el.options[el.selectedIndex].value );
-        var index= el.options[el.selectedIndex].value
-        var nodeId = el.id;
-         if (index == "Roles") {
-			//insertRoles(nodeId);
-             configureRoles(nodeId);
-           } else if (index == "Users") {
-             //insertUsers(nodeId);
-              configureUsers(nodeId);
-           } else if (index == "Others") {
-             //insertOthers(nodeId);
-             configureOthers(nodeId);
-         }
-        }
 		
         escTr2.appendChild(td4);
 		td5.setAttribute('width', '50%');
 		
 		td4.appendChild(emailDiv);
-		//emailDiv.style.display = 'none';
-		emailDiv.setAttribute('id', 'emailinput');
+		emailDiv.style.display = 'none';
+		emailDiv.setAttribute('id', 'emailinput' + liID);
 		emailDiv.setAttribute('class', 'escInput');
 		emailDiv.setAttribute('width', '40%');
 		emailDiv.innerHTML = "email addresses (comma separated):<br><textarea rows=3 cols=35 id=emailinput_" + liID + " name=emailinput_" + liID + "></textarea>";
@@ -229,17 +174,92 @@
 		sysDiv.setAttribute('width', '40%');
 		sysDiv.innerHTML = "meta: <input type=text name=meta_" + liID + " size=40><br>" + "product: <input type=text name=product_" + liID + " size=40><br>" + "version: <input type=text name=version_" + liID + " size=40><br>";
 
+        td4.appendChild(usersDiv);
+        usersDiv.setAttribute('id', 'usersDiv' + liID);
+        usersDiv.style.display = 'none';
+        usersDiv.style.border = '0px';
+        if($('usersList')) {
+        usersDiv.innerHTML = $('usersList').innerHTML;
+        var usersInputList = usersDiv.getElementsByTagName('input');
+         for(i=0;i < usersInputList.length; i++) {
+                var inputNamesArr = usersInputList[i];
+                inputNamesArr.name = inputNamesArr.name + "_" + liID;
+            }
+         }
+
+        td4.appendChild(rolesDiv);
+            rolesDiv.setAttribute('id', 'rolesDiv' + liID);
+            rolesDiv.style.display = 'none';
+            rolesDiv.style.border = '0px';
+            if($('rolesList')) {
+            rolesDiv.innerHTML = $('rolesList').innerHTML;
+            var rolesInputList = rolesDiv.getElementsByTagName('input');
+             for(i=0;i < rolesInputList.length; i++) {
+                    var inputRolesArr = rolesInputList[i];
+                    inputRolesArr.name =  inputRolesArr.name + "_" + liID;
+                }
+            }
+
+        
+          function onchange_handler(el) {
+        //alert(el+", value="+ el.options[el.selectedIndex].value );
+        var index= el.options[el.selectedIndex].value
+
+         if (index == "Email") {
+
+
+			hideSyslogInput();
+            $('whoSelect').style.display = '';
+           }
+		   else if (index == "Syslog") {
+
+			showSyslogInput();
+            $('whoSelect').style.display = 'none';
+           }
+        }
+
+        function onchange_who(el) {
+        //alert(el+", value="+ el.options[el.selectedIndex].value );
+        var index= el.options[el.selectedIndex].value
+        var idStr = el.id;
+        var getId = idStr.split('_');
+        var rolesDivIn = $('rolesDiv' + getId[1]);
+        var usersDivIn = $('usersDiv' + getId[1]);
+        var emailDivIn = $('emailinput' + getId[1]);
+
+         if (index == "Roles") {
+			 rolesDivIn.style.display = '';
+             usersDivIn.style.display = 'none';
+             emailDivIn.style.display = 'none';
+             //configureRoles(nodeId);
+           } else if (index == "Users") {
+             //insertUsers(nodeId);
+             usersDivIn.style.display = '';
+             rolesDivIn.style.display = 'none';
+             emailDivIn.style.display = 'none';
+              //configureUsers(nodeId);
+           } else if (index == "Others") {
+             emailDivIn.style.display = '';
+             usersDivIn.style.display = 'none';
+             rolesDivIn.style.display = 'none';
+             //configureOthers(nodeId);
+         }
+        }
+
+
+
+
     }
 	    
      function onchange_staticRow(el) {
     	 var index= el.options[el.selectedIndex].value
         
         if (index == "Email") {
-			$('emailinput0').style.display='';
+
 			$('syslog0').style.display = 'none';
             $('who').style.display = '';
            } else if (index == "Syslog") {
-			$('emailinput0').style.display='none';
+			
 			$('syslog0').style.display='';
            $('who').style.display = 'none';
            }
@@ -249,11 +269,20 @@
     	 var index= el.options[el.selectedIndex].value
          var nodeId = el.id;
         if (index == "Roles") {
-			configureRoles(nodeId);
+			//configureRoles(nodeId);
+            $('rolesDiv_row0').style.display='';
+            $('emailinput0').style.display='none';
+            $('rolesDiv_row0').style.display='none';
            } else if (index == "Users") {
-		    configureUsers(nodeId);
-           } else if (index == "Users") {
-           configureOthers(nodeId);
+		    $('usersDiv_row0').style.display='';
+            //configureUsers(nodeId);
+            $('emailinput0').style.display='none';
+            $('rolesDiv_row0').style.display='none';
+           } else if (index == "Others") {
+           //configureOthers(nodeId);
+            $('emailinput0').style.display='';
+            $('usersDiv_row0').style.display='none';
+            $('rolesDiv_row0').style.display='none';
         }
     }
 
@@ -584,37 +613,7 @@ sections = ['section'];
 				<div id="remove" class="remove" style="padding-top:10px;">
                   <a href="#" style="text-decoration:none;"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"/></a>
                 </div>
-                  <div id="usersDiv_row0" style="padding:2px;display:none;">
 
-                          <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
-                          <table width="100%" cellpadding="2" cellspacing="0" border="0">
-                          <tr class="ListRow">
-                            <td class="ListCell">
-                              <input type=checkbox name=user<c:out value="${user.id}"/>_row0><c:out value="${user.name}"/></input>
-                            </td>
-                          </tr>
-                          </table>
-                          </c:forEach>
-                 </div>
-                  <div id="othersDiv_row0" style="padding:2px;display:none;">
-                  <textarea rows=3 cols=35 id="othersList_row0" name="othersList_row0"></textarea>
-                </div>
-                <div id="rolesDiv_row0" style="padding:2px;display:none;">
-                <c:if test="${not empty AvailableRoles}">
-                    <div id="rolesList" style="display: none;">
-                      <c:forEach var="role" items="${AvailableRoles}" varStatus="status">
-
-                      <table width="100%" cellpadding="2" cellspacing="0" border="0">
-                      <tr class="ListRow">
-                        <td class="ListCell">
-                          <input type=checkbox name=role<c:out value="${role.id}"/>_row0><c:out value="${role.name}"/></input>
-                        </td>
-                      </tr>
-                      </table>
-                      </c:forEach>
-                    </div>
-                    </c:if>
-                </div>
 
                 <table cellpadding="3" cellspacing="0" border="0" width="100%">
                     <tr>
@@ -648,10 +647,10 @@ sections = ['section'];
                             </select>
                         </td>
                         <td width="60%" valign="top">
-                            <div id="emailinput0">
+                            <div id="emailinput0" style="display:none;">
                                 email addresses (comma separated): 
                                 <br>
-                <textarea rows="3" cols="35" name="users_row0" id="emailinput_row0"></textarea>
+                                <textarea rows="3" cols="35" name="users_row0" id="emailinput_row0"></textarea>
                             </div>
                             <div id="syslog0" style="display:none;">
                                 meta: 
@@ -664,6 +663,38 @@ sections = ['section'];
                                 <input type="text" name="version_row0" value="" size="40">
                                 <br>
                             </div>
+                           <div id="usersDiv_row0" style="padding:2px;display:none;">
+
+                          <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
+                          <table width="100%" cellpadding="2" cellspacing="0" border="0">
+                          <tr class="ListRow">
+                            <td class="ListCell">
+                              <input type=checkbox name=user<c:out value="${user.id}"/>_row0><c:out value="${user.name}"/></input>
+                            </td>
+                          </tr>
+                          </table>
+                          </c:forEach>
+                            </div>
+                            <div id="othersDiv_row0" style="padding:2px;display:none;">
+                            <textarea rows=3 cols=35 id="othersList_row0" name="othersList_row0"></textarea>
+                            </div>
+                            <div id="rolesDiv_row0" style="padding:2px;display:none;">
+                            <c:if test="${not empty AvailableRoles}">
+                                <div id="rolesList" style="display: none;">
+                                  <c:forEach var="role" items="${AvailableRoles}" varStatus="status">
+
+                                  <table width="100%" cellpadding="2" cellspacing="0" border="0">
+                                  <tr class="ListRow">
+                                    <td class="ListCell">
+                                      <input type=checkbox name=role<c:out value="${role.id}"/>_row0><c:out value="${role.name}"/></input>
+                                    </td>
+                                  </tr>
+                                  </table>
+                                  </c:forEach>
+                                </div>
+                                </c:if>
+                            </div>
+                          </td>
                     </tr>
                     <tr>
                         <td colspan="4" style="padding-top:5px;padding-bottom:5px;">
@@ -767,13 +798,7 @@ sections = ['section'];
 
 <br><br>
  <input type=button value="Submit" onclick="sendEscForm();" id="submit"></input>
-
-
-</form>
-
-<div id="example" style="padding:10px;width:725px;overflow:auto;"></div>
-
-<div id="usersList" style="display: none;">
+ <div id="usersList" style="display: none;">
   <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
   <table width="100%" cellpadding="2" cellspacing="0" border="0">
   <tr class="ListRow">
@@ -788,7 +813,7 @@ sections = ['section'];
 <c:if test="${not empty AvailableRoles}">
 <div id="rolesList" style="display: none;">
   <c:forEach var="role" items="${AvailableRoles}" varStatus="status">
-  
+
   <table width="100%" cellpadding="2" cellspacing="0" border="0">
   <tr class="ListRow">
     <td class="ListCell">
@@ -799,3 +824,9 @@ sections = ['section'];
   </c:forEach>
 </div>
 </c:if>
+
+</form>
+
+<div id="example" style="padding:10px;width:725px;overflow:auto;"></div>
+
+
