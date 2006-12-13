@@ -911,6 +911,9 @@ public class EscalationMediator extends Mediator
 
     private void logActionDetail(int alertType, AlertInterface alert,
                                   Action act, String detail) {
+        if (log.isDebugEnabled()) {
+            log.debug("LOG: " + detail);
+        }
         switch(alertType) {
         case EscalationState.ALERT_TYPE_CLASSIC:
             AlertActionLog alog =
