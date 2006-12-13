@@ -55,6 +55,9 @@
         var liID = 'row'+num;
         var escLi = document.createElement('li');
         var remDiv = document.createElement('div');
+        var usersDiv = document.createElement('div');
+        var rolesDiv = document.createElement('div');
+        var othersDiv = document.createElement('div');
         var emailDiv = document.createElement('div');
         var sysDiv = document.createElement('div');
         var escTable = document.createElement('table');
@@ -80,8 +83,37 @@
         
         remDiv.innerHTML ='<a href="#" onclick="removeRow(this);"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
       
+        escLi.appendChild(usersDiv);
+        usersDiv.setAttribute('id', 'usersDiv_' + liID);
+        usersDiv.style.display = 'none';
+        if($('usersList')) {
+        usersDiv.innerHTML = $('usersList').innerHTML;
+        var usersInputList = usersDiv.getElementsByTagName('input');
+         for(i=0;i < usersInputList.length; i++) {
+                var inputNamesArr = usersInputList[i];
+                inputNamesArr.name = inputNamesArr.name + "_" + liID;
+            }
+         }
         
-		escLi.appendChild(escTable);
+        escLi.appendChild(rolesDiv);
+        rolesDiv.setAttribute('id', 'rolesDiv' + liID);
+        rolesDiv.style.display = 'none';
+        if($('rolesList')) {
+        rolesDiv.innerHTML = $('rolesList').innerHTML;
+        var rolesInputList = rolesDiv.getElementsByTagName('input');
+         for(i=0;i < rolesInputList.length; i++) {
+                var inputRolesArr = rolesInputList[i];
+                inputRolesArr.name =  inputRolesArr.name + "_" + liID;
+            }
+        }
+
+        escLi.appendChild(othersDiv);
+        othersDiv.setAttribute('id', 'othersDiv_' + liID);
+        othersDiv.style.display = 'none';
+        othersDiv.innerHTML = "<textarea rows=3 cols=35 id=othersList_" + liID + " name=othersList_" + liID + "></textarea>"
+
+
+        escLi.appendChild(escTable);
 		escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
 		escTable.setAttribute('border', '0');
 		
@@ -135,10 +167,10 @@
 		td3.setAttribute('width', '20%');
 		td3.setAttribute('valign', 'top');
         td3.style.paddingRight = "20px";
-        td3.id = "whoSelect";
 		
         td3.appendChild(select3);
         select3.name = "who_" + liID;
+        select3.id = "who_" + liID;
         select3.onchange = function(){onchange_who(this);}
         addOption(select3, 'Select', 'Select users to send escalation to');
         <c:if test="${not empty AvailableRoles}">
@@ -167,14 +199,16 @@
         function onchange_who(el) {
         //alert(el+", value="+ el.options[el.selectedIndex].value );
         var index= el.options[el.selectedIndex].value
-
+        var nodeId = el.id;
          if (index == "Roles") {
-			configureRoles();
-           }
-		   else if (index == "Users") {
-           configureUsers();
+			//insertRoles(nodeId);
+             configureRoles(nodeId);
+           } else if (index == "Users") {
+             //insertUsers(nodeId);
+              configureUsers(nodeId);
            } else if (index == "Others") {
-             configureOthers();
+             //insertOthers(nodeId);
+             configureOthers(nodeId);
          }
         }
 		
@@ -193,8 +227,9 @@
 		sysDiv.setAttribute('class', 'escInput');
 		sysDiv.setAttribute('id', 'sysloginput');
 		sysDiv.setAttribute('width', '40%');
-		sysDiv.innerHTML = "meta: <input type=text name=meta_" + liID + " size=40><br>" + "product: <input type=text name=product_" + liID + "size=40><br>" + "version: <input type=text name=version_" + liID + "size=40><br>";
-	}
+		sysDiv.innerHTML = "meta: <input type=text name=meta_" + liID + " size=40><br>" + "product: <input type=text name=product_" + liID + " size=40><br>" + "version: <input type=text name=version_" + liID + " size=40><br>";
+
+    }
 	    
      function onchange_staticRow(el) {
     	 var index= el.options[el.selectedIndex].value
@@ -212,13 +247,13 @@
 
     function onchange_staticRowWho(el) {
     	 var index= el.options[el.selectedIndex].value
-
+         var nodeId = el.id;
         if (index == "Roles") {
-			configureRoles(this);
+			configureRoles(nodeId);
            } else if (index == "Users") {
-		    configureUsers(this);
-        }  else if (index == "Users") {
-           configureOthers(this);
+		    configureUsers(nodeId);
+           } else if (index == "Users") {
+           configureOthers(nodeId);
         }
     }
 
@@ -338,35 +373,58 @@
     function configure(id) {
       var sel = $('who' + id);
       var selval = sel.options[sel.selectedIndex].value;
-
+        alert(id);
       if (selval == 'Users') {
         // Select checkboxes based on existing configs
-        configureUsers();
+        insertUsers(this.id);
       }
       else if (selval == 'Others') {
         // Set the inner text
-        configureOthers();
+        insertOthers(this.id);
       }
       else if (selval == 'Roles') {
         // Select checkboxes based on existing configs
-        configureRoles();
+        insertRoles(this.id);
       }
     }
 
-
-    function insertRoles() {
-		var roleDiv = $(rolesList).innerHTML;
-        var roles = rolesText.rolesList;
-		var rolesTd = document.getElementById('rolesTd');
-
-
-        for(i=0;i < roles.length; i++) {
-          alert(roles);
+   /*
+    function insertRoles(el) {
+            var idStr = el.id;
+            var getId = idStr.split('_');
+            var rolesDivIn = $('rolesDiv' + getId[1]);
+            rolesInfo = $('rolesList').innerHTML;
+            rolesDivIn.innerHTML = rolesInfo;
+        
+            configureRoles(rolesDivIn);
         }
-    }
+
+    function insertUsers(el) {
+            var idStr = el;
+            var getId = idStr.split('_');
+            var usersDivIn = $('usersDiv_' + getId[1]);
+
+            usersInfo = $('usersList').innerHTML;
+            usersDivIn.innerHTML = usersInfo;
+
+            configureUsers(usersDivIn);
+        }
+
+    function insertOthers(el) {
+            var idStr = el.id;
+            var getId = idStr.split('_');
+            var othersDivIn = $('othersDiv' + getId[1]);
+          
+            configureOthers(othersDivIn + getId[1]);
+        }
+  */
 
     function configureOthers(el) {
-      Dialog.confirm('<textarea name=emailAddresses cols=80 rows=3></textarea>',
+            var idStr = el;
+            var getId = idStr.split('_');
+            var othersDivIn = $('othersDiv_' + getId[1]);
+        
+      Dialog.confirm(othersDivIn.innerHTML,
                   {windowParameters: {className:'dialog', width:305, height:200,
                    resize:false, draggable:false},
                   okLabel: "OK", cancelLabel: "Cancel",
@@ -378,19 +436,27 @@
     }
 
     function configureUsers(el) {
-      Dialog.confirm($('usersList').innerHTML,
+            var idStr = el;
+            var getId = idStr.split('_');
+            var usersDivIn = $('usersDiv_' + getId[1]);
+
+      Dialog.confirm(usersDivIn.innerHTML,
                   {windowParameters: {className:'dialog', width:305, height:200,
                    resize:false, draggable:false},
                   okLabel: "OK", cancelLabel: "Cancel",
                   ok:function(win) {
                     // Do something
-                    new Effect.Shake(Windows.focusedWindow.getId());
+                    new Effect.Fade(Windows.focusedWindow.getId());
                     return true;
                   }});
     }
 
     function configureRoles(el) {
-      Dialog.confirm($('rolesList').innerHTML,
+            var idStr = el.id;
+            var getId = idStr.split('_');
+            var rolesDivIn = $('rolesDiv' + getId[1]);
+    
+      Dialog.confirm(rolesDivIn.innerHTML,
                   {windowParameters: {className:'dialog', width:305, height:200,
                    resize:false, draggable:false},
                   okLabel: "OK", cancelLabel: "Cancel",
@@ -518,6 +584,37 @@ sections = ['section'];
 				<div id="remove" class="remove" style="padding-top:10px;">
                   <a href="#" style="text-decoration:none;"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"/></a>
                 </div>
+                  <div id="usersDiv_row0" style="padding:2px;display:none;">
+
+                          <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
+                          <table width="100%" cellpadding="2" cellspacing="0" border="0">
+                          <tr class="ListRow">
+                            <td class="ListCell">
+                              <input type=checkbox name=user<c:out value="${user.id}"/>_row0><c:out value="${user.name}"/></input>
+                            </td>
+                          </tr>
+                          </table>
+                          </c:forEach>
+                 </div>
+                  <div id="othersDiv_row0" style="padding:2px;display:none;">
+                  <textarea rows=3 cols=35 id="othersList_row0" name="othersList_row0"></textarea>
+                </div>
+                <div id="rolesDiv_row0" style="padding:2px;display:none;">
+                <c:if test="${not empty AvailableRoles}">
+                    <div id="rolesList" style="display: none;">
+                      <c:forEach var="role" items="${AvailableRoles}" varStatus="status">
+
+                      <table width="100%" cellpadding="2" cellspacing="0" border="0">
+                      <tr class="ListRow">
+                        <td class="ListCell">
+                          <input type=checkbox name=role<c:out value="${role.id}"/>_row0><c:out value="${role.name}"/></input>
+                        </td>
+                      </tr>
+                      </table>
+                      </c:forEach>
+                    </div>
+                    </c:if>
+                </div>
 
                 <table cellpadding="3" cellspacing="0" border="0" width="100%">
                     <tr>
@@ -554,24 +651,24 @@ sections = ['section'];
                             <div id="emailinput0">
                                 email addresses (comma separated): 
                                 <br>
-                <textarea rows="3" cols="35" name="users_row0" id="emailinput_0"></textarea>
+                <textarea rows="3" cols="35" name="users_row0" id="emailinput_row0"></textarea>
                             </div>
                             <div id="syslog0" style="display:none;">
                                 meta: 
-                                <input type="text" name="meta_0" value="" size="40">
+                                <input type="text" name="meta_row0" value="" size="40">
                                 <br>
                                 product: 
-                                <input type="text" name="product_0" value="" size="40">
+                                <input type="text" name="product_row0" value="" size="40">
                                 <br>
                                 version: 
-                                <input type="text" name="version_0" value="" size="40">
+                                <input type="text" name="version_row0" value="" size="40">
                                 <br>
                             </div>
                     </tr>
                     <tr>
                         <td colspan="4" style="padding-top:5px;padding-bottom:5px;">
                             <fmt:message key="alert.config.escalation.then"/>
-                            <select name="time_row0">
+                            <select name="waittime_row0">
                                 <option value="0">
                                     <fmt:message key="alert.config.escalation.end"/>
                                 </option>
@@ -680,8 +777,8 @@ sections = ['section'];
   <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
   <table width="100%" cellpadding="2" cellspacing="0" border="0">
   <tr class="ListRow">
-    <td class="ListCell" id="usersTd">
-      <input type=checkbox name=u<c:out value="${user.id}"/>><c:out value="${user.name}"/></input>
+    <td class="ListCell">
+      <input type=checkbox name=user<c:out value="${user.id}"/>><c:out value="${user.name}"/></input>
     </td>
   </tr>
   </table>
@@ -694,8 +791,8 @@ sections = ['section'];
   
   <table width="100%" cellpadding="2" cellspacing="0" border="0">
   <tr class="ListRow">
-    <td class="ListCell" id="rolesTd">
-      <input type=checkbox name=r<c:out value="${role.id}"/>><c:out value="${role.name}"/></input>
+    <td class="ListCell">
+      <input type=checkbox name=role<c:out value="${role.id}"/>><c:out value="${role.name}"/></input>
     </td>
   </tr>
   </table>
