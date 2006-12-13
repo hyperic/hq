@@ -75,7 +75,7 @@
 <tiles:insert definition=".page.title.events.group">
   <tiles:put name="titleKey"><c:out value="${titleKey}"/></tiles:put>
   <tiles:put name="titleName" beanName="Resource" beanProperty="name"/>
-  <tiles:put name="subTitleName" beanName="alertDef" beanProperty="name"/>
+  <tiles:put name="subTitleName" beanName="NewGroupAlertDefinitionForm" beanProperty="name"/>
 </tiles:insert>
 </c:when>
 </c:choose>
