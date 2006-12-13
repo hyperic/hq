@@ -937,6 +937,7 @@ public class EscalationMediator extends Mediator
         state.setCurrentLevel(0);
         state.setScheduleRunTime(0);
         state.setActive(false);
+        state.setAcknowledge(false);
     }
 
     private void logEscalation(Action action, EscalationState state,
