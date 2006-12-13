@@ -154,7 +154,6 @@
         </c:if>
         addOption(select3, 'Users', '<fmt:message key="monitoring.events.MiniTabs.CAMusers"/>');
         addOption(select3, 'Others', '<fmt:message key="monitoring.events.MiniTabs.OR"/>');
-
         
         escTr2.appendChild(td4);
         td5.setAttribute('width', '50%');
@@ -178,19 +177,18 @@
         usersDiv.style.display = 'none';
         usersDiv.style.border = '0px';
         if($('usersList')) {
-        usersDiv.innerHTML = $('usersList').innerHTML;
-        var usersInputList = usersDiv.getElementsByTagName('input');
-         for(i=0;i < usersInputList.length; i++) {
-                var inputNamesArr = usersInputList[i];
-                inputNamesArr.name = inputNamesArr.name + "_" + liID;
-            }
-         }
+          usersDiv.innerHTML = $('usersList').innerHTML;
+          var usersInputList = usersDiv.getElementsByTagName('input');
+          for(i=0;i < usersInputList.length; i++) {
+              var inputNamesArr = usersInputList[i];
+              inputNamesArr.name = inputNamesArr.name + "_" + liID;
+          }
+        }
 
         td4.appendChild(rolesDiv);
-            rolesDiv.setAttribute('id', 'rolesDiv' + liID);
-            rolesDiv.style.display = 'none';
-            rolesDiv.style.border = '0px';
-
+        rolesDiv.setAttribute('id', 'rolesDiv' + liID);
+        rolesDiv.style.display = 'none';
+        rolesDiv.style.border = '0px';
         if($('rolesList')) {
           rolesDiv.innerHTML = $('rolesList').innerHTML;
           var rolesInputList = rolesDiv.getElementsByTagName('input');
@@ -200,8 +198,6 @@
               }
           }
       }
-    
-      onloads.push(addRow);
 
       function onchange_handler(el) {
         //alert(el+", value="+ el.options[el.selectedIndex].value );
@@ -227,15 +223,20 @@
         var emailDivIn = $('emailinput' + getId[1]);
 
         if (index == "Roles") {
+           /*
            rolesDivIn.style.display = '';
            usersDivIn.style.display = 'none';
            emailDivIn.style.display = 'none';
-           //configureRoles(nodeId);
+           */
+           configureRoles(idStr);
          } else if (index == "Users") {
            //insertUsers(nodeId);
+           /*
            usersDivIn.style.display = '';
            rolesDivIn.style.display = 'none';
            emailDivIn.style.display = 'none';
+           */
+           configureUsers(idStr);
             //configureUsers(nodeId);
          } else if (index == "Others") {
            emailDivIn.style.display = '';
@@ -321,7 +322,9 @@
     }
 
     function showResponse(originalRequest) {
-        $('example').innerHTML = "<span style=font-weight:bold;>Escalation Saved: " + Form.serialize('EscalationForm') + "</span>";
+        $('example').innerHTML =
+           "<span style=font-weight:bold;>Escalation Saved: " +
+            Form.serialize('EscalationForm') + "</span>";
     }
 
     function initEsc () {
@@ -345,6 +348,11 @@
             sendEscForm();
             return false;
         }
+
+    
+      <c:if test="${empty param.escId}">
+        addRow();
+      </c:if>
     }
 
     onloads.push( initEsc );
@@ -451,39 +459,52 @@
                    resize:false, draggable:false},
                   okLabel: "OK", cancelLabel: "Cancel",
                   ok:function(win) {
-                    // Do something
+                  // Do something
                     new Effect.Shake(Windows.focusedWindow.getId());
                     return true;
                   }});
     }
 
     function configureUsers(el) {
-            var idStr = el;
-            var getId = idStr.split('_');
-            var usersDivIn = $('usersDiv_' + getId[1]);
+      var idStr = el;
+      var getId = idStr.split('_');
+      var usersDivIn = $('usersDiv' + getId[1]);
 
-      Dialog.confirm(usersDivIn.innerHTML,
+      Dialog.confirm('<div id="usersConfigWindow">' + usersDivIn.innerHTML +
+                     '</div>',
                   {windowParameters: {className:'dialog', width:305, height:200,
                    resize:false, draggable:false},
                   okLabel: "OK", cancelLabel: "Cancel",
                   ok:function(win) {
-                    // Do something
+                    var usersInputList =
+                      usersDivIn.getElementsByTagName('input');
+                    var updatedInputList =
+                      $('usersConfigWindow').getElementsByTagName('input');
+                      
+                    for(i = 0; i < usersInputList.length; i++) {
+                        if (updatedInputList[i].checked) {
+                          usersInputList[i].setAttribute("checked", "true");
+                        }
+                    }
+                    alert(usersDivIn.innerHTML);
                     new Effect.Fade(Windows.focusedWindow.getId());
                     return true;
                   }});
     }
 
     function configureRoles(el) {
-            var idStr = el.id;
-            var getId = idStr.split('_');
-            var rolesDivIn = $('rolesDiv' + getId[1]);
+      var idStr = el;
+      var getId = idStr.split('_');
+      var rolesDivIn = $('rolesDiv' + getId[1]);
     
-      Dialog.confirm(rolesDivIn.innerHTML,
+      Dialog.confirm('<div id="rolesConfigWindow">' + rolesDivIn.innerHTML +
+                     '</div>',
                   {windowParameters: {className:'dialog', width:305, height:200,
                    resize:false, draggable:false},
                   okLabel: "OK", cancelLabel: "Cancel",
                   ok:function(win) {
                     // Do something
+                    alert($('rolesConfigWindow').innerHTML);
                     new Effect.Shake(Windows.focusedWindow.getId());
                     return true;
                   }});
@@ -660,29 +681,28 @@ sections = ['section'];
 <br>
 <br>
 <input type="button" value="Submit" onclick="sendEscForm();" id="submit"></input>
-<div id="usersList" style="display: none;"><c:forEach var="user"
-  items="${AvailableUsers}" varStatus="status">
-  <table width="100%" cellpadding="2" cellspacing="0" border="0">
-    <tr class="ListRow">
-      <td class="ListCell"><input type="checkbox" name="user"
-        <c:out value="${user.id}"/>><c:out value="${user.name}" /><input></input>
-      </td>
-    </tr>
-  </table>
-</c:forEach></div>
+<div id="usersList" style="display: none;">
+<div class="ListHeader">Select Users</div>
+<ul class="boxy">
+  <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
+    <li class="ListRow"><input type="checkbox" name="user"
+      value="<c:out value="${user.id}"/>"> <BLK><c:out
+      value="${user.name}" /></BLK></input></li>
+  </c:forEach>
+</ul>
+</div>
 
 <c:if test="${not empty AvailableRoles}">
-  <div id="rolesList" style="display: none;"><c:forEach var="role"
-    items="${AvailableRoles}" varStatus="status">
-
-    <table width="100%" cellpadding="2" cellspacing="0" border="0">
-      <tr class="ListRow">
-        <td class="ListCell"><input type="checkbox" name="role"
-          <c:out value="${role.id}"/>><c:out value="${role.name}" /><input></input>
-        </td>
-      </tr>
-    </table>
-  </c:forEach></div>
+  <div id="rolesList" style="display: none;">
+  <div class="ListHeader">Select Roles</div>
+  <ul class="boxy">
+    <c:forEach var="role" items="${AvailableRoles}" varStatus="status">
+      <li class="ListRow"><input type="checkbox" name="role"
+        value="<c:out value="${role.id}"/>"> <BLK><c:out
+        value="${role.name}" /></BLK></input></li>
+    </c:forEach>
+  </ul>
+  </div>
 </c:if></form>
 
 <div id="example" style="padding:10px;width:725px;overflow:auto;"></div>
