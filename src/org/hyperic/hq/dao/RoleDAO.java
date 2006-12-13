@@ -156,7 +156,7 @@ public class RoleDAO extends HibernateDAO {
     {
         return getSession()
             .createQuery("from Role r join fetch r.subjects s " +
-                         "where r.system = ? and s.subject.id = ? " +
+                         "where r.system = ? and s.id = ? " +
                          "order by r.sortName " +
                          (asc ? "asc" : "desc"))
             .setBoolean(0, system)
@@ -171,7 +171,7 @@ public class RoleDAO extends HibernateDAO {
     {
         return getSession()
             .createQuery("from Role r join fetch r.subjects s " +
-                         "where r.system = ? and s.subject.id = ? " +
+                         "where r.system = ? and s.id = ? " +
                          "order by r.sortName " +
                          (asc ? "asc" : "desc"))
             .setBoolean(0, system)
