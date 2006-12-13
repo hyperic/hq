@@ -196,10 +196,13 @@
         var aList = alertText.criticalAlerts;
         var token = alertText.token;
         var alertTable;
+        var alertFunc;
         if (alertText.token != null) {
             alertTable = document.getElementById('recentAlertsTable' + token);
+            alertFunc = 'requestRecentAlerts' + token + '()';
         } else {
             alertTable = document.getElementById('recentAlertsTable');
+            alertFunc = 'requestRecentAlerts()';
         }
 
         if (aList != 0) {
@@ -256,7 +259,7 @@
             $('noCritAlerts').style.display = '';
         }
 
-        rTimer = setTimeout(requestRecentAlerts, 60000);
+        rTimer = setTimeout(alertFunc, 60000);
         //Refresh in 60 seconds
     }
 

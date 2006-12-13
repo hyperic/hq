@@ -43,11 +43,11 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 </script>
 
 <script type="text/javascript">
-function requestRecentAlerts() {
+function requestRecentAlerts<c:out value="${portlet.token}"/>() {
 	var critAlertUrl = "<html:rewrite page="/dashboard/ViewCriticalAlerts.do?token=${portlet.token}"/>"
 	new Ajax.Request(critAlertUrl, {method: 'get', onSuccess:showRecentAlerts, onFailure :reportError});
 }
-onloads.push(requestRecentAlerts);
+onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
 Ajax.Responders.register({
 	onCreate: function() {
 		if($('loading') && Ajax.activeRequestCount > 0)
