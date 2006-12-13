@@ -486,7 +486,6 @@
                           usersInputList[i].setAttribute("checked", "true");
                         }
                     }
-                    alert(usersDivIn.innerHTML);
                     new Effect.Fade(Windows.focusedWindow.getId());
                     return true;
                   }});
@@ -503,9 +502,17 @@
                    resize:false, draggable:false},
                   okLabel: "OK", cancelLabel: "Cancel",
                   ok:function(win) {
-                    // Do something
-                    alert($('rolesConfigWindow').innerHTML);
-                    new Effect.Shake(Windows.focusedWindow.getId());
+                    var rolesInputList =
+                      rolesDivIn.getElementsByTagName('input');
+                    var updatedInputList =
+                      $('rolesConfigWindow').getElementsByTagName('input');
+                      
+                    for(i = 0; i < rolesInputList.length; i++) {
+                        if (updatedInputList[i].checked) {
+                          rolesInputList[i].setAttribute("checked", "true");
+                        }
+                    }
+                    new Effect.Fade(Windows.focusedWindow.getId());
                     return true;
                   }});
     }
