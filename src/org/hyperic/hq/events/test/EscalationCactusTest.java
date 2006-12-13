@@ -205,7 +205,7 @@ public class EscalationCactusTest extends HQCactusBase
         addRequestParameter("meta_row1", new String[]{"meta data"});
         addRequestParameter("product_row1", new String[]{"product info"});
         addRequestParameter("version_row1", new String[]{"version number"});
-        addRequestParameter("time_row1", new String[]{"120000"});
+        addRequestParameter("waittime_row1", new String[]{"120000"});
 
         addRequestParameter("allowPause", new String[]{"true"});
         addRequestParameter("notification", new String[]{"0"});

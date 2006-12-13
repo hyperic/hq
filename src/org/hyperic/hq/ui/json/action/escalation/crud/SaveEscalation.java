@@ -40,7 +40,7 @@ public class SaveEscalation extends BaseAction
     private static String VERSION_PREFIX = "version_row";
 
     // action waittime
-    private static String WAITTIME_PREFIX = "time_row";
+    private static String WAITTIME_PREFIX = "waittime_row";
 
     // action list order
     private static String ORDER = "order";
