@@ -3085,6 +3085,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 summary.setThroughputTempl(dmv.getTemplate().getId());
             } else if (category.equals(MeasurementConstants.CAT_PERFORMANCE)) {
                 summary.setPerformance(theValue);
+                summary.setPerformanceUnits(dmv.getTemplate().getUnits());
                 summary.setPerformTempl(dmv.getTemplate().getId());
             }
             
