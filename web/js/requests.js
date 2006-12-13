@@ -319,11 +319,14 @@
         var urlColon = ":"
         var resUrl = $('viewResUrl').href;
         var metricTable;
+        var metricFunc
         var token = metricText.token;
         if (token != null) {
             metricTable = document.getElementById('metricTable' + token);
+            metricFunc = 'requestMetricsResponse' + token + '()';
         } else {
             metricTable = document.getElementById('metricTable');
+            metricFunc = 'requestMetricsResponse()'
         }
 
         if (metricValues && metricValues != 0) {
@@ -375,7 +378,7 @@
             $('noMetricValues').style.display = '';
         }
 
-        rTimer = setTimeout(requestMetricsResponse, 60000);
+        rTimer = setTimeout(metricFunc, 60000);
         //Refresh in 60 seconds
     }
 }

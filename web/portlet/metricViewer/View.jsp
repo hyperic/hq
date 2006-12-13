@@ -36,11 +36,11 @@
 <html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="visibility:hidden;"></html:link>
 
 <script type="text/javascript">
-function requestMetricsResponse() {
+function requestMetricsResponse<c:out value="${portlet.token}"/>() {
 var metricsUrl = "<html:rewrite page="/dashboard/ViewMetricViewer.do?token=${portlet.token}"/>"
 	new Ajax.Request(metricsUrl, {method: 'get', onSuccess:showMetricsResponse, onFailure :reportError});
-	}
-onloads.push(requestMetricsResponse);
+}
+onloads.push(requestMetricsResponse<c:out value="${portlet.token}"/>);
 </script>
 
 <div class="effectsPortlet">
