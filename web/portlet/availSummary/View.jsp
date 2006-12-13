@@ -62,8 +62,13 @@ Ajax.Responders.register({
     <table class="table" width="100%" border="0" cellspacing="0" cellpadding="0" id="availTable">
       <tbody>
         <tr class="tableRowHeader">
-          <th width="90%" class="tableRowInactive">Resource Type</th>
-          <th width="10%" align="center" class="tableRowInactive"><span style="color:red">*</span> / *</th>
+          <th width="75%" class="tableRowInactive"><fmt:message key="dash.home.TableHeader.Type"/></th>
+          <th width="25%" align="center" class="tableRowInactive">
+              <span style="color:red">
+                  <fmt:message key="resource.hub.legend.unavailable"/>
+              </span>
+              / <fmt:message key="resource.hub.legend.available"/>
+          </th>
         </tr>
         <!-- table rows are inserted here dynamically -->
       </tbody>
