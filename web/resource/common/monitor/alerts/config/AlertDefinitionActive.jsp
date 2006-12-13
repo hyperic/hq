@@ -28,21 +28,17 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
-
 <tiles:importAttribute name="alertDef"/>
 
+<td width="30%" class="BlockContent">
 <c:choose>
   <c:when test="${alertDef.enabled}">
-    <td width="30%" class="BlockContent">
       <html:img page="/images/icon_available_green.gif" width="12" height="12" border="0"/>
       <fmt:message key="alert.config.props.PB.ActiveYes"/>
-    </td>
   </c:when>
   <c:otherwise>
-    <td width="30%" class="BlockContent">
       <html:img page="/images/icon_available_red.gif" width="12" height="12" border="0"/>
       <fmt:message key="alert.config.props.PB.ActiveNo"/>
-    </td>
   </c:otherwise>
 </c:choose>
+</td>
