@@ -43,7 +43,7 @@
               controllerUrl="/admin/user/EditUserFormPrepare.do"
               extends=".admin.main.layout">
     <put name="titleKey" value="admin.user.edit"/>  
-    <put name="configTile" value="/admin/user/NewUser.jsp"/>
+    <put name="configTile" value="/admin/user/EditUser.jsp"/>
   </definition>
   <definition name=".admin.user.New"
               controllerUrl="/admin/user/NewFormPrepare.do"
