@@ -60,18 +60,9 @@ onloads.push(requestMetricsResponse);
 </tiles:insert>
 
   <table class="table" width="100%" border="0" cellspacing="0" cellpadding="0" id="<c:out value="${tableName}"/>">
-  	<tbody>
-	<tr class="tableRowHeader">
-		<th width="90%" class="tableRowInactive" id="resourceTypeName" nowrap>
-		<fmt:message key="dash.home.TableHeader.Type"/>
-		</th>
-		<th width="10%" align="center" nowrap class="tableRowInactive" id="resourceMetric">
-	    <fmt:message key="dash.home.TableHeader.Metric"/>
-		</th>
-	</tr>
-	
- <!-- table rows are inserted here dynamically -->
- 	</tbody>
+    <tbody>
+    <!-- table rows are inserted here dynamically -->
+    </tbody>
  </table>
   <table width="100%" cellpadding="0" cellspacing="0" border="0" id="noMetricValues" style="display:none;">
     <tr class="ListRow">

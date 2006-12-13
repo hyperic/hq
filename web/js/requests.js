@@ -332,24 +332,31 @@
                 metricTable.removeChild(metricTable.childNodes[i]);
             }
 
-            for (i = 0; i < metricValues.values.length; i++) {
-                //alert(metricValues.values.length);
+            // Create table headers
+            var trHeader = document.createElement('tr');
+            var th1 = document.createElement('th');
+            var th2 = document.createElement('th');
 
+            metricTable.appendChild(trHeader);
+            trHeader.setAttribute("class", "tableRowHeader");
+            trHeader.appendChild(th1);
+            th1.setAttribute("width", "90%");
+            th1.setAttribute("class", "tableRowInactive");
+            th1.appendChild(document.createTextNode(resourceNameHeader));
+            trHeader.appendChild(th2);
+            th2.setAttribute("width", "10%");
+            th2.setAttribute("class", "tableRowInactive");
+            th2.setAttribute("nowrap", true);
+            th2.appendChild(document.createTextNode(resourceLoadTypeHeader));
+
+            for (i = 0; i < metricValues.values.length; i++) {
                 var newanchor = document.createElement("a");
                 var tr = document.createElement('tr');
                 var td1 = document.createElement('td');
                 var td2 = document.createElement('td');
-                var oTextNode = $('resourceTypeName').childNodes[0];
-                var lTextNode = $('resourceMetric').childNodes[0];
-                var oReplaceNode = oTextNode.replaceData(0, 27, resourceNameHeader);
-                var lReplaceNode = lTextNode.replaceData(0, 35, resourceLoadTypeHeader);
 
                 metricTable.appendChild(tr);
                 tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
-                if (metricValues.resourceName && metricValues.metricName) {
-                    oReplaceNode;
-                    lReplaceNode;
-                }
 
                 tr.appendChild(td1);
                 td1.setAttribute((document.all ? 'className' : 'class'), "resource");
