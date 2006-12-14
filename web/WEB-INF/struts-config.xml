@@ -543,8 +543,9 @@
       
       <!-- resource hub -->
       <action path="/ResourceHub"
-              forward=".resource.hub.layout">
-      </action>
+              name="ResourceHubForm"
+              scope="request"
+              forward=".resource.hub.layout"/>
       
       <action path="/Resource"
               type="org.hyperic.hq.ui.action.resource.DetermineLocationAction">
@@ -557,32 +558,11 @@
               <forward name="autogroup" path="/resource/autogroup/monitor/Visibility.do?mode=currentHealth"/>
       </action>
 
-      <action path="/resource/hub/Metrics"
-              type="org.hyperic.hq.ui.action.resource.hub.ResourceMetricValuesAction"/>
-
-      <action path="/resource/hub/ResourceHubPortal"
-              name="ResourceHubForm"
-              scope="request"
-              type="org.hyperic.hq.ui.action.resource.hub.ResourceHubPortalAction"
-              input="/ResourceHub.do">
-        <set-property property="title" value="2.0"/>
-      </action>
-
-      <action path="/resource/hub/ResourceHub"
-              type="org.hyperic.hq.ui.action.resource.hub.ResourceHubPortalAction"
-              name="ResourceHubForm"
-              scope="request"
-              input="/ResourceHub.do">
-        <set-property property="title" value="2.0"/>
-        <forward name="failure" path="/ResourceHub.do"/>
-        <forward name="success" path="/ResourceHub.do"/>
-      </action>
-
       <!-- resource hub -->
-      <action path="/resource/hub/RemoveResource"
-              type="org.hyperic.hq.ui.action.resource.hub.RemoveResourceAction"
+      <action path="/resource/hub/*"
               name="ResourceHubForm"
               scope="request"
+              type="org.hyperic.hq.ui.action.resource.hub.{1}Action"
               input="/ResourceHub.do">
         <set-property property="title" value="2.0"/>
         <forward name="failure" path="/ResourceHub.do"/>

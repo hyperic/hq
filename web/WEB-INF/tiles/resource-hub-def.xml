@@ -26,6 +26,6 @@
 
   <definition name=".resource.hub.metrics"
               path="/resource/hub/ResourceMetrics.jsp"
-              controllerUrl="/resource/hub/Metrics.do"/>
+              controllerUrl="/resource/hub/ResourceMetricValues.do"/>
 
 </tiles-definitions>

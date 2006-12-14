@@ -47,7 +47,7 @@ function checkGroup() {
   <tiles:put name="dragDrop" value="true"/>
 </tiles:insert>
 <!-- fixme: there's no "minimize" functionality on this block, only "close" -->
-<html:form action="/resource/hub/ResourceHub" onsubmit="checkGroup()">
+<html:form action="/ResourceHub" onsubmit="checkGroup()">
 <html:hidden property="g" value="1"/>
 <!-- Content Block Contents -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
