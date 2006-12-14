@@ -37,6 +37,8 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.events.EventConstants;
@@ -62,7 +64,16 @@ public class ViewDefinitionAction extends TilesAction {
         throws Exception
     {            
         ServletContext ctx = getServlet().getServletContext();
-        Integer alertDefId = new Integer( request.getParameter("ad") );
+        AppdefEntityID aeid = RequestUtils.getEntityId(request);
+        
+        // If group entity, do nothing
+        if (aeid.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+            return null;
+        }
+        
+        Integer alertDefId =
+            RequestUtils.getIntParameter(request,
+                                         Constants.ALERT_DEFINITION_PARAM);
         log.trace("alertDefId=" + alertDefId);
 
         int sessionID = RequestUtils.getSessionId(request).intValue();
