@@ -2465,6 +2465,11 @@
               type="org.hyperic.hq.ui.json.action.escalation.crud.Save{1}"
               />
 
+      <action path="/escalation/update*"
+              scope="request"
+              type="org.hyperic.hq.ui.json.action.escalation.crud.Update{1}"
+              />
+
       <action path="/escalation/remove*/*"
               scope="request"
               type="org.hyperic.hq.ui.json.action.escalation.crud.Remove{1}"
