@@ -106,8 +106,10 @@ public class DashboardUtils {
         String first = user.getPreference(Constants.USER_PORTLETS_FIRST);
         String second = user.getPreference(Constants.USER_PORTLETS_SECOND);
 
-        first = StringUtil.remove(first, portlet);
-        second = StringUtil.remove(second, portlet);
+        first =
+            StringUtil.remove(first,  portlet + Constants.DASHBOARD_DELIMITER);
+        second =
+            StringUtil.remove(second, portlet + Constants.DASHBOARD_DELIMITER);
 
         first = StringUtil.replace(first,  Constants.EMPTY_DELIMITER,
                                    Constants.DASHBOARD_DELIMITER);

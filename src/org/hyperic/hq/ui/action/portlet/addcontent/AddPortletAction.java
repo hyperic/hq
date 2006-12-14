@@ -43,6 +43,7 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.util.StringUtil;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -103,7 +104,12 @@ public class AddPortletAction extends BaseAction {
             portlet = portletName.toString();
         }
         
-        String preferences = Constants.DASHBOARD_DELIMITER + portlet;
+        String preferences = Constants.DASHBOARD_DELIMITER + portlet +
+                             Constants.DASHBOARD_DELIMITER;
+        // Clean up the delimiters
+        preferences = StringUtil.replace(preferences, Constants.EMPTY_DELIMITER,
+                                         Constants.DASHBOARD_DELIMITER);
+
         user.setPreference(prefKey, userPrefs + preferences);
         
         LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
