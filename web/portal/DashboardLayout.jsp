@@ -67,6 +67,12 @@
     }
 
     if (portletOptions) {
+        // Make sure that we are not re-inserting
+        for (var i = 0; i < portletOptions.length; i++) {
+            if (portletOptions[i].value == name) {
+                return;
+            }
+        }
         portletOptions[portletOptions.length] = new Option(label, name);
 
         // Make sure div is visible
