@@ -212,6 +212,20 @@ public class GalertBossEJBImpl
     /**
      * @ejb:interface-method
      */
+    public void deleteAlertDefs(int sessionId, Integer[] defIds) 
+        throws SessionException
+    {
+        _sessMan.authenticate(sessionId);
+        
+        for (int i = 0; i < defIds.length; i++) {
+            GalertDef def = _galertMan.findById(defIds[i]);
+            _galertMan.deleteAlertDef(def);
+        }
+    }    
+
+    /**
+     * @ejb:interface-method
+     */
     public GalertDef findDefinition(int sessionId, Integer id)
         throws SessionException
     {

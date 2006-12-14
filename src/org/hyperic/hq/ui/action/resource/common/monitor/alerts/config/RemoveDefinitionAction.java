@@ -32,9 +32,11 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.bizapp.shared.GalertBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -87,13 +89,19 @@ public class RemoveDefinitionAction extends BaseAction {
 
         ServletContext ctx = getServlet().getServletContext();
         EventsBoss boss = ContextUtils.getEventsBoss(ctx);
+        GalertBoss gBoss = ContextUtils.getGalertBoss(ctx);
 
         boolean enable = false;
 
         if (rdForm.getSetActiveInactive().equals("y")) {
             enable = rdForm.getActive().intValue() == 1;
 
-            boss.enableAlertDefinitions(sessionId.intValue(), defs, enable);
+            if (adeId.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+                // XXX - implement enable function in gboss
+            } else {
+                boss.enableAlertDefinitions(sessionId.intValue(), defs, enable);
+            }
+                
             RequestUtils.setConfirmation(request,
                 "alerts.config.confirm.activeInactive");
             return returnSuccess(request, mapping, params);
@@ -105,15 +113,26 @@ public class RemoveDefinitionAction extends BaseAction {
                                                         defs);
                 params.put(Constants.APPDEF_RES_TYPE_ID, rdForm.getAetid());
             }
-            else
-                boss.deleteAlertDefinitions(sessionId.intValue(), defs);
+            else {
+                if (adeId.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP)
+                {
+                    gBoss.deleteAlertDefs(sessionId.intValue(), defs);
+                } else {
+                    boss.deleteAlertDefinitions(sessionId.intValue(), defs);
+                }
+            }
             
             RequestUtils.setConfirmation(request,
                 "alerts.config.confirm.deleteConfig");
         }
         else {
             // Delete the alerts for the definitions
-            boss.deleteAlertsForDefinitions(sessionId.intValue(), defs);
+            if (adeId.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+                // XXX - implement alert deletion in gBoss
+            }
+            else {
+                boss.deleteAlertsForDefinitions(sessionId.intValue(), defs);
+            }
 
             RequestUtils.setConfirmation(request,
                 "alerts.config.confirm.deleteAlerts");
