@@ -6,18 +6,18 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.dao.HibernateDAO;
 
-public class GalertDefDAO
+class GalertDefDAO
     extends HibernateDAO
 {
-    public GalertDefDAO(DAOFactory f) {
+    GalertDefDAO(DAOFactory f) {
         super(GalertDef.class, f);
     }
 
-    public GalertDef findById(Integer id) {
+    GalertDef findById(Integer id) {
         return (GalertDef)super.findById(id);
     }
 
-    public void save(GalertDef def) {
+    void save(GalertDef def) {
         super.save(def);
     }
 

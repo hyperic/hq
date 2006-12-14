@@ -115,7 +115,7 @@ public class GalertDef
         return _escalation;
     }
     
-    public void setEscalation(Escalation escalation) {
+    protected void setEscalation(Escalation escalation) {
         _escalation = escalation;
     }
     

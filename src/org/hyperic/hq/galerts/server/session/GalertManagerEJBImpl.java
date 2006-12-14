@@ -59,7 +59,7 @@ public class GalertManagerEJBImpl
         DAOFactory f = DAOFactory.getDAOFactory();
         
         _stratTypeDAO = f.getExecutionStrategyTypeInfoDAO();
-        _defDAO       = f.getGalertDefDAO();
+        _defDAO       = new GalertDefDAO(f);
         _logDAO       = f.getGalertLogDAO();
         
         try {

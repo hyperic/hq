@@ -47,7 +47,6 @@ import org.hyperic.hq.galerts.server.session.ExecutionReason;
 import org.hyperic.hq.galerts.server.session.GalertActionLog;
 import org.hyperic.hq.galerts.server.session.GalertActionLogDAO;
 import org.hyperic.hq.galerts.server.session.GalertDef;
-import org.hyperic.hq.galerts.server.session.GalertDefDAO;
 import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.hq.galerts.server.session.GalertLogDAO;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
@@ -69,10 +68,9 @@ public class EscalationMediator extends Mediator
     private static String ESCALATION_SERVICE_MBEAN =
         "hyperic.jmx:type=Service,name=EscalationService";
 
-    private static EscalationMediator instance = new EscalationMediator();
+    private static final EscalationMediator instance = new EscalationMediator();
 
-    public static EscalationMediator getInstance()
-    {
+    public static EscalationMediator getInstance() {
         return instance;
     }
 
@@ -82,32 +80,17 @@ public class EscalationMediator extends Mediator
     private EscalationSchedulerMBean escalationServiceMBean;
     private GalertManagerLocal galertManagerLocal;
 
-    protected EscalationMediator()
-    {
+    protected EscalationMediator() {
         try {
             alertDefManagerLocal =
                 AlertDefinitionManagerUtil.getLocalHome().create();
             alertManagerLocal = AlertManagerUtil.getLocalHome().create();
             transactionManager = TransactionManagerUtil.getLocalHome().create();
             galertManagerLocal = GalertManagerUtil.getLocalHome().create();
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-        try {
             ObjectName name = new ObjectName(ESCALATION_SERVICE_MBEAN);
             escalationServiceMBean = (EscalationSchedulerMBean)
                 MBeanUtil.getMBeanServer().getAttribute(name, "Instance");
-        } catch (MalformedObjectNameException e) {
-            throw new SystemException(e);
-        } catch (ReflectionException e) {
-            throw new SystemException(e);
-        } catch (InstanceNotFoundException e) {
-            throw new SystemException(e);
-        } catch (MBeanException e) {
-            throw new SystemException(e);
-        } catch (AttributeNotFoundException e) {
+        } catch (Exception e) {
             throw new SystemException(e);
         }
     }
@@ -362,26 +345,21 @@ public class EscalationMediator extends Mediator
                 adao.save(adef);
                 break;
             case EscalationState.ALERT_TYPE_GROUP:
-                GalertDefDAO gdao
-                    = DAOFactory.getDAOFactory().getGalertDefDAO();
-                GalertDef gdef = gdao.findById(alertDefId);
-                gdef.setEscalation(e);
-                gdao.save(gdef);
+                GalertDef gdef = galertManagerLocal.findById(alertDefId);
+                galertManagerLocal.update(gdef, e);
                 break;
             default:
-                log.error("alertType " + alertType + " unknown");
-                break;
+                throw new IllegalStateException("Unhandled alert type [" + 
+                                                alertType + "]");
             }
         }
     }
 
-    public Escalation findEscalationById(Escalation e)
-    {
+    public Escalation findEscalationById(Escalation e) {
         return findEscalationById(e.getId());
     }
 
-    public Escalation findEscalationById(Integer id)
-    {
+    public Escalation findEscalationById(Integer id) {
         return DAOFactory.getDAOFactory().getEscalationDAO().findById(id);
     }
 

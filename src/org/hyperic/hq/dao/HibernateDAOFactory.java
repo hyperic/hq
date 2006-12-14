@@ -94,7 +94,6 @@ import org.hyperic.hq.events.server.session.RegisteredTrigger;
 import org.hyperic.hq.events.server.session.TriggerDAO;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfoDAO;
 import org.hyperic.hq.galerts.server.session.GalertActionLogDAO;
-import org.hyperic.hq.galerts.server.session.GalertDefDAO;
 import org.hyperic.hq.galerts.server.session.GalertLogDAO;
 import org.hyperic.hq.galerts.server.session.GtriggerTypeInfoDAO;
 import org.hyperic.hq.measurement.server.session.Baseline;
@@ -201,7 +200,6 @@ public class HibernateDAOFactory extends DAOFactory {
         addDAO(new ServiceClusterDAO(this));
         addDAO(new ServiceTypeDAO(this));
         addDAO(new VirtualDAO(this));
-        addDAO(new GalertDefDAO(this));
         addDAO(new GtriggerTypeInfoDAO(this));
         addDAO(new GalertActionLogDAO(this));
     }
@@ -420,10 +418,6 @@ public class HibernateDAOFactory extends DAOFactory {
 
     public ControlScheduleDAO getControlScheduleDAO() {
         return (ControlScheduleDAO)getDAO(ControlSchedule.class);
-    }
-
-    public GalertDefDAO getGalertDefDAO() {
-        return new GalertDefDAO(this);
     }
 
     public ExecutionStrategyTypeInfoDAO getExecutionStrategyTypeInfoDAO() {
