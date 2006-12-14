@@ -63,7 +63,7 @@ public class PortalAction extends ResourceController {
     protected static Log log =
         LogFactory.getLog(PortalAction.class.getName());
 
-    private static Properties keyMethodMap = new Properties();
+    protected static Properties keyMethodMap = new Properties();
     static {
         keyMethodMap.setProperty(Constants.MODE_LIST, "listDefinitions");
         keyMethodMap.setProperty(Constants.MODE_NEW, "newDefinition");
