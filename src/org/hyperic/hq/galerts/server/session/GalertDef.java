@@ -176,7 +176,7 @@ public class GalertDef
         return _ctime;
     }
 
-    public void setCtime(long ctime) {
+    protected void setCtime(long ctime) {
         _ctime = ctime;
     }
 
@@ -184,7 +184,7 @@ public class GalertDef
         return _mtime;
     }
 
-    public void setMtime(long mtime) {
+    protected void setMtime(long mtime) {
         _mtime = mtime;
     }
 }
