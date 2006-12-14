@@ -1,7 +1,6 @@
 net/hyperic/**/shared/*Local.class
 net/hyperic/**/shared/*LocalHome.class
 org/hyperic/hq/common/shared/license/**
-org/hyperic/hq/**/server/**
 org/hyperic/tools/license/**
 org/hyperic/hq/agent/**
 org/hyperic/hq/events/ext/**
