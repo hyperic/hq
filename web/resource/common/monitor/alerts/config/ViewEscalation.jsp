@@ -148,7 +148,7 @@
         select3.name = "who_" + liID;
         select3.id = "who_" + liID;
         select3.onchange = function(){onchange_who(this);}
-        addOption(select3, 'Select', 'Select users to send escalation to');
+        addOption(select3, 'Select', '<fmt:message key="alert.config.escalation.notify.who"/>');
         <c:if test="${not empty AvailableRoles}">
         addOption(select3, 'Roles', '<fmt:message key="monitoring.events.MiniTabs.Roles"/>')
         </c:if>
@@ -570,11 +570,12 @@ sections = ['section'];
 <table width="100%" cellpadding="3" cellspacing="0" border="0">
   <tbody>
     <tr class="tableRowHeader">
-      <td align="right">Escalation Scheme: <select id="escId" name="escId"
-        onchange="schemeChange(this)">
-        <option value="0"><fmt:message key="common.label.CreateNew" /></option>
-      </select> <fmt:message key="common.label.Name" /> <input type="text" size="25"
-        name="escName" id="escName" /></td>
+      <td align="right"><fmt:message key="alert.config.escalation.scheme"/>
+        <select id="escId" name="escId" onchange="schemeChange(this)">
+          <option value=""><fmt:message key="common.label.CreateNew" /></option>
+        </select>
+        <fmt:message key="common.label.Name" />
+        <input type="text" size="25" name="escName" id="escName" /></td>
     </tr>
     <tr class="tableRowAction">
       <td id="section" width="100%">
@@ -598,40 +599,44 @@ sections = ['section'];
       <td style="padding-left:15px;padding-bottom:10px;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td style="padding-top:2px;padding-bottom:2px;"><input
-            type="radio" name="allowPause" value="true" /> Allow user to pause
-          escalation for <select id="maxWaitTime" name="maxwaittime">
-
-            <option value="300000">5 minutes</option>
-            <option value="600000">10</option>
-            <option value="1200000">20</option>
-            <option value="1800000">30</option>
+          <td style="padding-top:2px;padding-bottom:2px;">
+            <input type="radio" name="allowPause" value="true" />
+            <fmt:message key="alert.config.escalation.allow.pause"/>
+            <select id="maxWaitTime" name="maxwaittime">
+            <option value="300000">5 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
+            <option value="600000">10 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
+            <option value="1200000">20 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
+            <option value="1800000">30 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
           </select></td>
         </tr>
         <tr>
-          <td style="padding-top:2px;padding-bottom:2px;"><input
-            type="radio" name="allowPause" value="false" /> Continue escalation
-          without pausing</td>
+          <td style="padding-top:2px;padding-bottom:2px;">
+            <input type="radio" name="allowPause" value="false" checked="true"/>
+            <fmt:message key="alert.config.escalation.allow.continue"/>
+            </td>
         </tr>
       </table>
       </td>
     </tr>
     <tr>
-      <td class="tableRowHeader">If the alert state has changed:<br>
+      <td class="tableRowHeader">
+        <fmt:message key="alert.config.escalation.state.change"/><br>
       </td>
     </tr>
     <tr class="ListRow">
       <td style="padding-left:15px;padding-bottom:10px;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td style="padding-top:2px;padding-bottom:2px;"><input
-            type="radio" name="notification" value="0" /> Notify previously
-          notified users of the change</td>
+          <td style="padding-top:2px;padding-bottom:2px;">
+            <input type="radio" name="notification" value="0" checked="true"/> 
+            <fmt:message key="alert.config.escalation.state.change.notify.previous"/>
+          </td>
         </tr>
         <tr>
-          <td style="padding-top:2px;padding-bottom:2px;"><input
-            type="radio" name="notification" value="1" /> Notify entire
-          escalation chain of the change</td>
+          <td style="padding-top:2px;padding-bottom:2px;">
+            <input type="radio" name="notification" value="1" />
+            <fmt:message key="alert.config.escalation.state.change.notify.all"/>
+          </td>
         </tr>
       </table>
       </td>
