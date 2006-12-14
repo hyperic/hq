@@ -32,7 +32,9 @@
 
 
 <html:form method="POST" action="/dashboard/availSummary/AddResourcesAction">
-<html:hidden property="key" value=".dashContent.availsummary.resources"/>
+
+<html:hidden property="key"/>
+<html:hidden property="token"/>
 
 <tiles:insert definition=".portlet.error"/>
 

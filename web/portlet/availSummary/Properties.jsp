@@ -113,8 +113,19 @@ var help = '<hq:help/>';
 
       </display:table>
 
+      <c:url var="availAddToListUrl" value="/Admin.do" context="/dashboard">
+          <c:param name="mode" value="availSummaryAddResources"/>
+          <c:if test="${not empty AvailSummaryForm.token}">
+            <c:param name="key" value=".dashContent.availsummary.resources${AvailSummaryForm.token}"/>
+            <c:param name="token" value="${AvailSummaryForm.token}"/>
+          </c:if>
+          <c:if test="${empty AvailSummaryForm.token}">
+            <c:param name="key" value=".dashContent.availsummary.resources"/>
+          </c:if>
+      </c:url>
+
       <tiles:insert definition=".toolbar.addToList">
-        <tiles:put name="addToListUrl" value="/dashboard/Admin.do?mode=availSummaryAddResources&key=.dashContent.availsummary.resources"/>
+        <tiles:put name="addToListUrl" beanName="availAddToListUrl"/>
         <tiles:put name="listItems" beanName="availSummaryList"/>
         <tiles:put name="listSize" beanName="availSummaryTotalSize"/>
         <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>

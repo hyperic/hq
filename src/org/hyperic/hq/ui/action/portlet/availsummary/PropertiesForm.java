@@ -29,11 +29,14 @@ import org.hyperic.hq.ui.action.portlet.DashboardBaseForm;
 
 public class PropertiesForm extends DashboardBaseForm  {
 
+    public final static String RESOURCES =
+        ".dashContent.availsummary.resources";
     public final static String NUM_TO_SHOW =
         ".dashContent.availsummary.numToShow";
 
     private Integer _numberToShow;
     private String[] _ids;
+    private String _token;
 
     public PropertiesForm() {
         super();
@@ -53,5 +56,13 @@ public class PropertiesForm extends DashboardBaseForm  {
 
     public void setNumberToShow(Integer numberToShow) {
         _numberToShow = numberToShow;
+    }
+
+    public void setToken(String token) {
+        _token = token;
+    }
+
+    public String getToken() {
+        return _token;
     }
 }

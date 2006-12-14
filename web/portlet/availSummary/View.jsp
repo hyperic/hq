@@ -30,14 +30,16 @@
   USA.
  --%>
 
+<tiles:importAttribute name="portlet"/>
+
 <html:link page="/ResourceHub.do?ff=" linkName="browseUrl" styleId="browseUrl" style="visibility:hidden;"></html:link>
 
 <script type="text/javascript">
-function requestAvailSummary() {
-var availResourcesUrl = "<html:rewrite page="/dashboard/ViewAvailSummary.do"/>"
+function requestAvailSummary<c:out value="${portlet.token}"/>() {
+    var availResourcesUrl = "<html:rewrite page="/dashboard/ViewAvailSummary.do?token=${portlet.token}"/>"
 	new Ajax.Request(availResourcesUrl, {method: 'get', onSuccess:showAvailSummary, onFailure :reportError});
-	}
-onloads.push(requestAvailSummary);
+}
+onloads.push(requestAvailSummary<c:out value="${portlet.token}"/>);
 Ajax.Responders.register({
 	onCreate: function() {
 	       if($('loading') && Ajax.activeRequestCount > 0)
@@ -49,17 +51,26 @@ Ajax.Responders.register({
 	}
 });
 </script>
-<!-- JSON available at /dashboard/ViewAvailSummary.do -->
- 
+
 <div class="effectsPortlet">
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="dash.home.AvailSummary"/>
   <tiles:put name="adminUrl" beanName="adminUrl" />
   <tiles:put name="portletName" beanName="portletName" />
   <tiles:put name="dragDrop" value="true"/>
+
+  <c:if test="${not empty portlet.token}">
+    <tiles:put name="adminToken" beanName="portlet" beanProperty="token"/>
+    <c:set var="tableName" value="availTable${portlet.token}"/>
+  </c:if>
+  <c:if test="${empty portlet.token}">
+    <c:set var="tableName" value="availTable"/>
+  </c:if>
+  <tiles:put name="portletName"><c:out value="${portlet.fullUrl}"/></tiles:put>
+
 </tiles:insert>
    <!-- Content Block  -->
-    <table class="table" width="100%" border="0" cellspacing="0" cellpadding="0" id="availTable">
+    <table class="table" width="100%" border="0" cellspacing="0" cellpadding="0" id="<c:out value="${tableName}"/>">
       <tbody>
         <tr class="tableRowHeader">
           <th width="75%" class="tableRowInactive"><fmt:message key="dash.home.TableHeader.Type"/></th>

@@ -41,10 +41,12 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.InvalidOptionException;
 
 import java.util.List;
 import java.util.Iterator;
@@ -65,22 +67,40 @@ public class PrepareAction extends TilesAction {
         Integer sessionId = RequestUtils.getSessionId(request);
         WebUser user =
             (WebUser)session.getAttribute(Constants.WEBUSER_SES_ATTR);
-        String key = ".dashContent.availsummary.resources";
         PropertiesForm pForm = (PropertiesForm) form;
         PageList resources = new PageList();
 
-        Integer numberToShow =
-            new Integer(user.getPreference(PropertiesForm.NUM_TO_SHOW));
+        String token;
+        try {
+            token = RequestUtils.getStringParameter(request, "token");
+        } catch (ParameterNotFoundException e) {
+            token = null;
+        }
 
+        String resKey = PropertiesForm.RESOURCES;
+        String numKey = PropertiesForm.NUM_TO_SHOW;
+        if (token != null) {
+            resKey += token;
+            numKey += token;
+        }
+
+        // We set defaults here rather than in DefaultUserPreferences.properites
+        Integer numberToShow = new Integer(user.getPreference(numKey, "10"));
         pForm.setNumberToShow(numberToShow);
         
-        List resourceList =
-            user.getPreferenceAsList(key, StringConstants.DASHBOARD_DELIMITER);
+        List resourceList;
+        try {
+            resourceList =
+                user.getPreferenceAsList(resKey,
+                                         StringConstants.DASHBOARD_DELIMITER);
+        } catch (InvalidOptionException e) {
+            resourceList = new ArrayList();
+        }
 
         Iterator i = resourceList.iterator();
 
         while(i.hasNext()) {
-
+            // XXX: Fix me: AppdefEntityID has a constructor for this
             ArrayList resourceIds =
                 (ArrayList) StringUtil.explode((String) i.next(), ":");
 

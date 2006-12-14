@@ -36,8 +36,10 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
@@ -73,14 +75,25 @@ public class ViewAction extends BaseAction {
         WebUser user = (WebUser) request.getSession().getAttribute(
             Constants.WEBUSER_SES_ATTR);
 
-        String key = ".dashContent.availsummary.resources";
+        String token;
+        try {
+            token = RequestUtils.getStringParameter(request, "token");
+        } catch (ParameterNotFoundException e) {
+            token = null;
+        }
 
-        List entityIds = DashboardUtils.preferencesAsEntityIds(key, user);
+        String resKey = PropertiesForm.RESOURCES;
+        String numKey = PropertiesForm.NUM_TO_SHOW;
+        if (token != null) {
+            resKey += token;
+            numKey += token;
+        }
+
+        List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, user);
         AppdefEntityID[] arrayIds =
             (AppdefEntityID[])entityIds.toArray(new AppdefEntityID[0]);
 
-        int count = Integer.parseInt(user.
-            getPreference(PropertiesForm.NUM_TO_SHOW));
+        int count = Integer.parseInt(user.getPreference(numKey, "10"));
 
         int sessionId = user.getSessionId().intValue();
         PageList resources = appdefBoss.findByIds(sessionId, arrayIds);
@@ -121,6 +134,12 @@ public class ViewAction extends BaseAction {
 
         availSummary.put("availSummary", types);
 
+        if (token != null) {
+            availSummary.put("token", token);
+        } else {
+            availSummary.put("token", JSONObject.NULL);
+        }
+        
         response.getWriter().write(availSummary.toString());
 
         return null;

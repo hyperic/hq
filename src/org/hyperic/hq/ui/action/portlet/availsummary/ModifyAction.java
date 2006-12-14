@@ -37,8 +37,6 @@ import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -60,11 +58,17 @@ public class ModifyAction extends BaseAction {
 
         String forwardStr = Constants.SUCCESS_URL;
 
+        String token = pForm.getToken();
+
+        String numKey = PropertiesForm.NUM_TO_SHOW;
+        String resKey = PropertiesForm.RESOURCES;
+        if (token != null) {
+            numKey += token;
+            resKey += token;
+        }
+
         if(pForm.isRemoveClicked()){
-            DashboardUtils
-                .removeResources(pForm.getIds(),
-                                 ".dashContent.availsummary.resources",
-                                 user);
+            DashboardUtils.removeResources(pForm.getIds(), resKey, user);
             forwardStr = "review";
         }
 
@@ -75,9 +79,7 @@ public class ModifyAction extends BaseAction {
         }
 
         Integer numberToShow = pForm.getNumberToShow();
-
-        user.setPreference(PropertiesForm.NUM_TO_SHOW,
-                           numberToShow.toString());
+        user.setPreference(numKey, numberToShow.toString());
 
         boss.setUserPrefs(user.getSessionId(), user.getId(),
                           user.getPreferences());

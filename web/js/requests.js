@@ -266,10 +266,20 @@
     function showAvailSummary(originalRequest) {
         var availText = eval("(" + originalRequest.responseText + ")");
         var availList = availText.availSummary;
-        var availTable = document.getElementById('availTable');
         var browseUrl = $('browseUrl').href;
         var urlColon = ":";
         var urlParams = "&view=list&ft=";
+        var token = availText.token;
+        var availTable;
+        var availFunc;
+        if (token != null) {
+            availTable = document.getElementById('availTable' + token);
+            availFunc = 'requestAvailSummary' + token + '()';
+        } else {
+            availTable = document.getElementById('availTable');
+            availFunc = 'requestAvailSummary()';
+        }
+        
         if (availList.length < 1) {
             $('noAvailSummary').style.display = '';
         } else {
@@ -278,7 +288,7 @@
                 availTable.removeChild(availTable.childNodes[i]);
             }
 
-            for (i = 0; i < availList.length; i++) {
+            for (var i = 0; i < availList.length; i++) {
 
                 var tr = document.createElement('tr');
                 var td1 = document.createElement('td');
@@ -304,13 +314,10 @@
                 } else {
                     td2.innerHTML = down + " / " + up;
                 }
-                //td2.appendChild(document.createTextNode(availList[i].numDown));
-                //td2.appendChild(document.createTextNode(availList[i].numUp));
             }
         }
 
-        rTimer = setTimeout('showAvailSummary();', 60000);
-        //Refresh in 60 seconds
+        rTimer = setTimeout(availFunc, 60000);
     }
 
     function showMetricsResponse(originalRequest) {
@@ -329,7 +336,7 @@
             metricFunc = 'requestMetricsResponse' + token + '()';
         } else {
             metricTable = document.getElementById('metricTable');
-            metricFunc = 'requestMetricsResponse()'
+            metricFunc = 'requestMetricsResponse()';
         }
 
         if (metricValues && metricValues != 0) {
