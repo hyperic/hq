@@ -91,7 +91,7 @@
   <c:when test="${not empty titleBgStyle && not empty titleImg}">
     <td width="14%"><html:img page="/images/${titleImg}" width="202" height="32" alt="" border="0" style="float: right;"/></td>
     <td width="1%" nowrap>
-      <html:img page="/images/title_pagedown.gif" width="20" height="20" alt="" border="0" hspace="10" onmousedown="toggleMenu('recent');"/>
+      <html:img page="/images/title_pagedown.gif" width="20" height="20" alt="" border="0" hspace="10" onmousedown="toggleMenu('recent');" styleId="recentImg"/>
       <html:link href="" onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');return false;"><html:img page="/images/title_pagehelp.gif" width="20" height="20" alt="" border="0" hspace="10"/></html:link>
     <div style="clear: all"></div>
     <div id="recent" style="position:absolute; display: none; z-index: 300; right: 55px;">
@@ -185,7 +185,7 @@
 
   <td colspan="2">
     <c:if test="${not empty linkUrl}">
-      <span class="LinkBox" onclick="toggleMenu('toolMenu');"><fmt:message key="resource.toolsmenu.text"/><html:img page="/images/arrow_dropdown.gif" border="0"/></a></span>
+      <span class="LinkBox" onclick="toggleMenu('toolMenu');" id="toolMenuSpan"><fmt:message key="resource.toolsmenu.text"/><html:img page="/images/arrow_dropdown.gif" border="0"/></a></span>
     <div style="clear: all"></div>
     <div id="toolMenu" style="display: none; position: absolute; margin-top: 2px; margin-left: -2px;">
 <tiles:insert attribute="linkUrl">

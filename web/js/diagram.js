@@ -98,6 +98,14 @@ function bodyClicked(e) {
                                  'navMapImage' != target.name)) ) {
     hideDiagram('diagramDiv');
   }
+
+  if ( (!target.id || target.id != 'toolMenuSpan') && $('toolMenu').shown ) {
+    hide($('toolMenu'));
+  }
+
+  if ( (!target.id || target.id != 'recentImg') && $('recent').shown ) {
+    hide($('recent'));
+  }
 }
 
 document.body.onclick = bodyClicked;
