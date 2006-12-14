@@ -113,7 +113,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
     {
         Map map = AppdefUtil.groupByAppdefType(ids);
         StringBuffer sql = new StringBuffer()
-            .append("delete DerivedMeasurement where ");
+            .append("DerivedMeasurement where ");
         for (int i = 0; i < map.size(); i++) {
             if (i > 0) {
                 sql.append(" or ");
@@ -129,8 +129,26 @@ public class DerivedMeasurementDAO extends HibernateDAO {
                 .append("m.instanceId in (:list" + i + ")")
                 .append(") ");
         }
+        // delete baselines
+        StringBuffer bsql = new StringBuffer()
+            .append("delete Baseline where baselineId.derivedMeasurement.id in " +
+                    "(select id from ")
+            .append(sql)
+            .append(")");
+        Query q = getSession().createQuery(bsql.toString());
+        executeUpdate(map, q);
+
+        StringBuffer dsql = new StringBuffer()
+            .append("delete ")
+            .append(sql);
+        // delete derived measurements
+        q = getSession().createQuery(dsql.toString());
+        return executeUpdate(map, q);
+    }
+
+    private int executeUpdate(Map map, Query q)
+    {
         int j = 0;
-        Query q = getSession().createQuery(sql.toString());
         for (Iterator i = map.keySet().iterator(); i.hasNext(); j++) {
             Integer appdefType = (Integer)i.next();
             List list = (List)map.get(appdefType);
