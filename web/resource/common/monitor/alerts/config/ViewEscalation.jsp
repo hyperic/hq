@@ -41,12 +41,12 @@
         var alerttext = '';
         var sectionID = $('order');
         var order = Sortable.serialize(sectionID);
-        
+
         rowSeq = Sortable.sequence($('order'))+ '\n';
         return rowSeq;
         alert(rowSeq);
     }
-    
+
     function addRow() {
         var ni = $('order');
         var numi = document.getElementById('theValue');
@@ -82,12 +82,6 @@
         remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
         remDiv.style.paddingTop = "10px;"
         remDiv.innerHTML ='<a href="#" onclick="removeRow(this);"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
-
-       // escLi.appendChild(othersDiv);
-       // othersDiv.setAttribute('id', 'othersDiv_' + liID);
-       // othersDiv.style.display = '';
-       // othersDiv.style.border = '1px solid blue';
-       // othersDiv.innerHTML = "<textarea rows=3 cols=35 id=othersList_" + liID + " name=othersList_" + liID + "></textarea>"
 
         escLi.appendChild(escTable);
         escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
@@ -167,8 +161,8 @@
         
         td4.appendChild(sysDiv);
         sysDiv.style.display = 'none';
-        sysDiv.setAttribute('class', 'escInput');
-        sysDiv.setAttribute('id', 'sysloginput');
+        sysDiv.setAttribute('class', 'escInput'+ liID);
+        sysDiv.setAttribute('id', 'sysloginput'+ liID);
         sysDiv.setAttribute('width', '40%');
         sysDiv.innerHTML = "meta: <input type=text name=meta_" + liID + " size=40><br>" + "product: <input type=text name=product_" + liID + " size=40><br>" + "version: <input type=text name=version_" + liID + " size=40><br>";
 
@@ -204,12 +198,12 @@
         var index= el.options[el.selectedIndex].value
 
          if (index == "Email") {
-            hideSyslogInput();
-            $('whoSelect').style.display = '';
+            hideSyslogInput(el);
+            showWhoSelect(el);
          }
          else if (index == "Syslog") {
-            showSyslogInput();
-            $('whoSelect').style.display = 'none';
+            showSyslogInput(el);
+            hideWhoSelect(el);
          }
       }
 
@@ -235,22 +229,34 @@
         }
       }
 
-    function showEmailInput() {
-    $(emailinput).style.display='';
+    function showWhoSelect(el) {
+        var idStr = el.id;
+        var getId = idStr.split('_');
+        var whoSelector = $('who_' + getId[1]);
+        whoSelector.style.display='';
+    }
+
+    function hideWhoSelect(el) {
+        var idStr = el.id;
+        var getId = idStr.split('_');
+        var whoSelector = $('who_' + getId[1]);
+        whoSelector.style.display='none';
     }
     
-    function hideEmailInput() { 
-    $(emailinput).style.display='none';
+    function showSyslogInput(el) {
+        var idStr = el.id;
+        var getId = idStr.split('_');
+        var syslogDivIn = $('sysloginput' + getId[1]);
+        syslogDivIn.style.display='';
     }
     
-    function showSyslogInput() {
-    $(sysloginput).style.display='';
+    function hideSyslogInput(el) {
+        var idStr = el.id;
+        var getId = idStr.split('_');
+        var syslogDivIn = $('sysloginput' + getId[1]);
+        syslogDivIn.style.display='none';
     }
-    
-    function hideSyslogInput() {
-    $(sysloginput).style.display='none';
-    }
-    
+            
     function hideDisplay() { 
     $(emailinput).style.display='none';
     $(sysloginput).style.display='none';
@@ -311,16 +317,6 @@
 
     onloads.push( initEsc );
     
- /*   
-    function submitForm() {
-    //var sort = Sortable.create('order',{tag:'li',only:'section',handle:'handle'});
-    var url = '<html:rewrite action="/escalation/saveEscalation"/>';
-    text = Sortable.serialize('EscalationForm');
-    alert(text);
-    var params = 'postText=' + text;
-    ajaxEngine.sendRequest(example, {method:'post',parameters: pars, onComplete: showResponse});
-    }
-*/
 
     function sendEscForm() {
         var adId;
@@ -347,7 +343,7 @@
         if ($('aetid')) {
             aetId = $('aetid').value;
         } else {
-            aetId == '';;
+            aetId == '';
         }
 
         var pars = "escForm=" + escFormSerial + "&ad=" + adId + "&gad=" + gadId + "&eid=" + eId + "aetid=" + aetId;
@@ -379,7 +375,7 @@
             var rolesDivIn = $('rolesDiv' + getId[1]);
             rolesInfo = $('rolesList').innerHTML;
             rolesDivIn.innerHTML = rolesInfo;
-        
+
             configureRoles(rolesDivIn);
         }
 
@@ -398,7 +394,7 @@
             var idStr = el.id;
             var getId = idStr.split('_');
             var othersDivIn = $('othersDiv' + getId[1]);
-          
+
             configureOthers(othersDivIn + getId[1]);
         }
   */
