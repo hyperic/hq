@@ -107,8 +107,12 @@
         ajaxEngine.sendRequest( 'getRecentAlerts' );
         refreshCount++;
 
-        if (refreshCount < 30)
+        if (refreshCount < 30) {
           setRefresh();
+        } else {
+          top.location = "<html:rewrite action="/Logout"/>";
+        }
+
       }
 
       function setRefresh() {
