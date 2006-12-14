@@ -692,7 +692,7 @@ sections = ['section'];
 <div class="ListHeader">Select Users</div>
 <ul class="boxy">
   <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
-    <li class="ListRow"><input type="checkbox" name="user"
+    <li class="ListRow"><input type="checkbox" name="users"
       value="<c:out value="${user.id}"/>"> <BLK><c:out
       value="${user.name}" /></BLK></input></li>
   </c:forEach>
@@ -704,7 +704,7 @@ sections = ['section'];
   <div class="ListHeader">Select Roles</div>
   <ul class="boxy">
     <c:forEach var="role" items="${AvailableRoles}" varStatus="status">
-      <li class="ListRow"><input type="checkbox" name="role"
+      <li class="ListRow"><input type="checkbox" name="roles"
         value="<c:out value="${role.id}"/>"> <BLK><c:out
         value="${role.name}" /></BLK></input></li>
     </c:forEach>

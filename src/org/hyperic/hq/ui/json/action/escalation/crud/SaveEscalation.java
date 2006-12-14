@@ -33,6 +33,8 @@ public class SaveEscalation extends BaseAction
     // email action parameter
     private static String WHO_PREFIX = "who_row";
     private static String USER_PREFIX = "users_row";
+    private static String ROLE_PREFIX = "roles_row";
+    private static String OTHER_PREFIX = "emailInput_row";
 
     // syslog action parameter
     private static String META_PREFIX = "meta_row";
@@ -125,11 +127,11 @@ public class SaveEscalation extends BaseAction
         String[] gad = (String[])map.get(GALERTDEF_ID);
         JSONObject result;
         JSONObject escalation = new JSONObject().put("escalation", json);
-        if (ad != null) {
+        if (ad != null && !"undefined".equals(ad[0])) {
             Integer alertDefId = Integer.valueOf((ad)[0]);
             result = wmed.saveEscalation(context, context.getSessionId(),
                                          alertDefId, 0, escalation);
-        } else if (gad != null) {
+        } else if (gad != null && !"undefined".equals(gad[0])) {
             Integer alertDefId = Integer.valueOf((gad)[0]);
             result = wmed.saveEscalation(context, context.getSessionId(),
                                          alertDefId, 1, escalation);
@@ -159,6 +161,8 @@ public class SaveEscalation extends BaseAction
                         (String[])map.get(VERS_PREFIX + row),
                         (String[])map.get(WHO_PREFIX + row),
                         (String[])map.get(USER_PREFIX + row),
+                        (String[])map.get(ROLE_PREFIX + row),
+                        (String[])map.get(OTHER_PREFIX + row),
                         (String[])map.get(WAITTIME_PREFIX + row)
                     ));
                 } else if ("syslog".equalsIgnoreCase(values[0])) {
@@ -188,6 +192,8 @@ public class SaveEscalation extends BaseAction
             if (key.startsWith(ACTION_PREFIX) ||
                 key.startsWith(WHO_PREFIX) ||
                 key.startsWith(USER_PREFIX) ||
+                key.startsWith(ROLE_PREFIX) ||
+                key.startsWith(OTHER_PREFIX) ||
                 key.startsWith(META_PREFIX) ||
                 key.startsWith(PRODUCT_PREFIX) ||
                 key.startsWith(VERSION_PREFIX) ||
@@ -238,21 +244,28 @@ public class SaveEscalation extends BaseAction
         String names;
 
         EmailActionData(String[] ida, String[] vers, String[] type,
-                        String[] narr, String[] time)
+                        String[] narr, String[] roles, String[] others,
+                        String[] time)
         {
             super(ida, vers, time);
 
+            String[] namesarr;
             if ("users".equalsIgnoreCase(type[0])) {
                 listType = EmailActionConfig.TYPE_USERS;
+                namesarr = narr;
             } else if ("roles".equalsIgnoreCase(type[0])) {
                 listType = EmailActionConfig.TYPE_ROLES;
+                namesarr = roles;
             } else if ("others".equalsIgnoreCase(type[0])) {
                 listType = EmailActionConfig.TYPE_EMAILS;
+                namesarr = others;
+            } else {
+                throw new IllegalArgumentException("Invalid type " + type[0]);
             }
 
             // name list
             if (narr != null) {
-                StringTokenizer tokens = new StringTokenizer(narr[0], " ,");
+                StringTokenizer tokens = new StringTokenizer(namesarr[0], " ,");
                 StringBuffer buf = new StringBuffer();
                 while(tokens.hasMoreTokens()) {
                     if (buf.length() > 0) {
