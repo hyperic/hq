@@ -46,9 +46,6 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 
-/**
- * Prepares the list and form for the saved queries properties page.
- */
 public class PrepareAction extends TilesAction {
 
     public ActionForward execute(ComponentContext context,

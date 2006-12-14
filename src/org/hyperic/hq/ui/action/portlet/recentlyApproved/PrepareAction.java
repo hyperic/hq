@@ -25,13 +25,10 @@
 
 package org.hyperic.hq.ui.action.portlet.recentlyApproved;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -48,8 +45,6 @@ public class PrepareAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception {
 
-        Log log = LogFactory.getLog(PrepareAction.class.getName());
-        ServletContext ctx = getServlet().getServletContext();
         PropertiesForm pForm = (PropertiesForm) form;
 
         HttpSession session = request.getSession();

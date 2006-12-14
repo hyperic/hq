@@ -88,14 +88,8 @@ public class PrepareAction extends TilesAction {
 
         Iterator i = resourceList.iterator();
         while(i.hasNext()) {
-            ArrayList resourceIds =
-                (ArrayList) StringUtil.explode((String) i.next(), ":");
-            // XXX: Fix me: AppdefEntityID has a constructor for this
-            Iterator j = resourceIds.iterator();
-            int type = Integer.parseInt( (String) j.next() );
-            int id = Integer.parseInt( (String) j.next() );
-
-            AppdefEntityID entityID = new AppdefEntityID(type, id);
+            String appdefKey = (String)i.next();
+            AppdefEntityID entityID = new AppdefEntityID(appdefKey);
             AppdefResourceValue resource =
                 appdefBoss.findById(sessionId, entityID);
             resources.add(resource);

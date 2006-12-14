@@ -36,17 +36,11 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 
-/**
- * An <code>Action</code> that loads the admin screen for a portlet 
- */
 public class PrepareAction extends BaseAction {
 
-    // --------------------------------------------------------- Public Methods
-    
     /**
-     *
      * @param mapping The ActionMapping used to select this instance
-     * @param actionForm The optional ActionForm bean for this request (if any)
+     * @param form The optional ActionForm bean for this request (if any)
      * @param request The HTTP request we are processing
      * @param response The HTTP response we are creating
      *
@@ -65,24 +59,27 @@ public class PrepareAction extends BaseAction {
         WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
 
         Integer lastCompleted = new Integer(
-                user.getPreference(".dashContent.controlActions.lastCompleted") );
+                user.getPreference(".dashContent.controlActions.lastCompleted"));
         Integer mostFrequent = new Integer(
-                user.getPreference(".dashContent.controlActions.mostFrequent") );
+                user.getPreference(".dashContent.controlActions.mostFrequent"));
         Integer nextScheduled = new Integer(
-                user.getPreference(".dashContent.controlActions.nextScheduled") );
-        boolean useLastCompleted = new Boolean(
-                user.getPreference(".dashContent.controlActions.useLastCompleted")).booleanValue();
-        boolean useMostFrequent =  new Boolean(
-                user.getPreference(".dashContent.controlActions.useMostFrequent")).booleanValue(); 
-        boolean useNextScheduled = new Boolean(
-                user.getPreference(".dashContent.controlActions.useNextScheduled")).booleanValue();
+                user.getPreference(".dashContent.controlActions.nextScheduled"));
+        boolean useLastCompleted = Boolean.valueOf(user.
+            getPreference(".dashContent.controlActions.useLastCompleted")).
+            booleanValue();
+        boolean useMostFrequent = Boolean.valueOf(user.
+            getPreference(".dashContent.controlActions.useMostFrequent")).
+            booleanValue();
+        boolean useNextScheduled = Boolean.valueOf(user.
+            getPreference(".dashContent.controlActions.useNextScheduled")).
+            booleanValue();
         long past = Long.parseLong(
-                user.getPreference(".dashContent.controlActions.past"));
+            user.getPreference(".dashContent.controlActions.past"));
 
         pForm.setLastCompleted(lastCompleted);
         pForm.setMostFrequent(mostFrequent);
         pForm.setNextScheduled(nextScheduled);
-        pForm.setUseLastCompleted(useLastCompleted );
+        pForm.setUseLastCompleted(useLastCompleted);
         pForm.setUseMostFrequent(useMostFrequent);
         pForm.setUseNextScheduled(useNextScheduled);
         pForm.setPast(past);

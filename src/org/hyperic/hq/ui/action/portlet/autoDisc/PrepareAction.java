@@ -25,13 +25,10 @@
 
 package org.hyperic.hq.ui.action.portlet.autoDisc;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -44,7 +41,7 @@ public class PrepareAction extends BaseAction {
 
     /**
      * @param mapping The ActionMapping used to select this instance
-     * @param actionForm The optional ActionForm bean for this request (if any)
+     * @param form The optional ActionForm bean for this request (if any)
      * @param request The HTTP request we are processing
      * @param response The HTTP response we are creating
      *
@@ -56,15 +53,15 @@ public class PrepareAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        
-        Log log = LogFactory.getLog(PrepareAction.class.getName());
-        ServletContext ctx = getServlet().getServletContext();
+
         PropertiesForm pForm = (PropertiesForm) form;
 
         HttpSession session = request.getSession();
-        WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
+        WebUser user =
+            (WebUser) session.getAttribute(Constants.WEBUSER_SES_ATTR);
 
-        Integer range = new Integer(user.getPreference(".dashContent.autoDiscovery.range") );
+        Integer range =
+            new Integer(user.getPreference(".dashContent.autoDiscovery.range"));
 
         pForm.setRange(range);
         return null;

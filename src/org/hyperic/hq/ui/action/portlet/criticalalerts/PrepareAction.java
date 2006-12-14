@@ -45,17 +45,12 @@ import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.config.InvalidOptionException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 
-/**
- * Prepares the list and form for the saved queries properties page.
- */
 public class PrepareAction extends TilesAction {
 
     public ActionForward execute(ComponentContext context,
@@ -64,11 +59,8 @@ public class PrepareAction extends TilesAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-            
-        Log log = LogFactory.getLog(PrepareAction.class.getName());
+
         PropertiesForm pForm = (PropertiesForm) form;
-        
-        log.trace("getting resource helath info for user ");
 
         ServletContext ctx = getServlet().getServletContext();
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
