@@ -55,9 +55,6 @@ public class UpdateEscalation extends BaseAction
         List actions = parseActions(context);
 
         Map map = context.getParameterMap();
-        boolean update = false;
-//            Boolean.valueOf(
-//                ((String[])map.get(PUPDATE))[0]).booleanValue();
 
         JSONArray jarr = new JSONArray();
         for (Iterator i=actions.iterator(); i.hasNext();) {
@@ -140,7 +137,6 @@ public class UpdateEscalation extends BaseAction
         Map rows = groupKeysByRow(context);
         for(Iterator i = rows.keySet().iterator(); i.hasNext();) {
             Integer id = (Integer)i.next();
-            List keys = (List)rows.get(id);
             String[] className = (String[])map.get(CLASSNAME_PREFIX + id);
             if (className == null) {
                 throw new IllegalArgumentException("action className not found.");
