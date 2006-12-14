@@ -223,63 +223,17 @@
         var emailDivIn = $('emailinput' + getId[1]);
 
         if (index == "Roles") {
-           /*
-           rolesDivIn.style.display = '';
-           usersDivIn.style.display = 'none';
            emailDivIn.style.display = 'none';
-           */
            configureRoles(idStr);
          } else if (index == "Users") {
-           //insertUsers(nodeId);
-           /*
-           usersDivIn.style.display = '';
-           rolesDivIn.style.display = 'none';
            emailDivIn.style.display = 'none';
-           */
            configureUsers(idStr);
             //configureUsers(nodeId);
          } else if (index == "Others") {
            emailDivIn.style.display = '';
-           usersDivIn.style.display = 'none';
-           rolesDivIn.style.display = 'none';
            //configureOthers(nodeId);
         }
       }
-
-
-     function onchange_staticRow(el) {
-     	var index= el.options[el.selectedIndex].value
-        
-        if (index == "Email") {
-          $('syslog0').style.display = 'none';
-          $('who').style.display = '';
-        } else if (index == "Syslog") {
-          $('syslog0').style.display='';
-          $('who').style.display = 'none';
-        }
-     }
-
-    function onchange_staticRowWho(el) {
-         var index= el.options[el.selectedIndex].value
-         var nodeId = el.id;
-        if (index == "Roles") {
-            //configureRoles(nodeId);
-            $('rolesDiv_row0').style.display='';
-            $('emailinput0').style.display='none';
-            $('rolesDiv_row0').style.display='none';
-           } else if (index == "Users") {
-            $('usersDiv_row0').style.display='';
-            //configureUsers(nodeId);
-            $('emailinput0').style.display='none';
-            $('rolesDiv_row0').style.display='none';
-           } else if (index == "Others") {
-           //configureOthers(nodeId);
-            $('emailinput0').style.display='';
-            $('usersDiv_row0').style.display='none';
-            $('rolesDiv_row0').style.display='none';
-        }
-    }
-
 
     function showEmailInput() {
     $(emailinput).style.display='';
