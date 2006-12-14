@@ -70,12 +70,7 @@ public class PrepareAction extends TilesAction {
         PropertiesForm pForm = (PropertiesForm) form;
         PageList resources = new PageList();
 
-        String token;
-        try {
-            token = RequestUtils.getStringParameter(request, "token");
-        } catch (ParameterNotFoundException e) {
-            token = null;
-        }
+        String token = pForm.getToken();
 
         String resKey = PropertiesForm.RESOURCES;
         String numKey = PropertiesForm.NUM_TO_SHOW;

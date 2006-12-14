@@ -18,8 +18,6 @@ public class PropertiesForm extends DashboardBaseForm {
     private String _metric;
     private Integer _numberToShow;
     private String[] _ids;
-    private String _token;
-    
     public PropertiesForm() {
         super();
     }
@@ -69,13 +67,5 @@ public class PropertiesForm extends DashboardBaseForm {
 
     public void setMetric(String metric) {
         _metric = metric;
-    }
-
-    public String getToken() {
-        return _token;
-    }
-
-    public void setToken(String token) {
-        _token = token;
     }
 }

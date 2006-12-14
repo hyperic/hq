@@ -25,6 +25,9 @@
 
 package org.hyperic.hq.ui.action.portlet;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.action.BaseValidatorForm;
 
 /**
@@ -35,6 +38,7 @@ public class DashboardBaseForm extends BaseValidatorForm  {
 
     /** Holds value of property portletName. */
     private String _portletName;
+    private String _token;
     
     //-------------------------------------constructors
 
@@ -57,6 +61,20 @@ public class DashboardBaseForm extends BaseValidatorForm  {
      */
     public void setPortletName(String portletName) {
         _portletName = portletName;
+    }
+
+    public void setToken(String token) {
+        _token = token;
+    }
+
+    public String getToken() {
+        return _token;
+    }
+
+    public void reset(ActionMapping mapping, HttpServletRequest request) {
+        super.reset(mapping, request);
+        _portletName = null;
+        _token = null;
     }
     
 }

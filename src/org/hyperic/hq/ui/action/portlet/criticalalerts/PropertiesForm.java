@@ -46,8 +46,6 @@ public class PropertiesForm extends DashboardBaseForm  {
     private String _selectedOrAll;
     private String _key;
     private String[] _ids;
-    private String _token;
-
     public PropertiesForm() {
         super();
     }
@@ -103,13 +101,5 @@ public class PropertiesForm extends DashboardBaseForm  {
 
     public void setIds(String[] ids) {
         _ids = ids;
-    }
-
-    public String getToken() {
-        return _token;
-    }
-
-    public void setToken(String token) {
-        _token = token;
     }
 }
