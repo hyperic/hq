@@ -102,17 +102,21 @@
       <script language="JavaScript1.2">
       <!--
       var refreshCount = 0;
+      var autoLogout = true;
       
       function refreshAlerts() {
+        Effect.Appear('loading',{duration: 0.50, queue: 'end'});
+
         ajaxEngine.sendRequest( 'getRecentAlerts' );
         refreshCount++;
 
         if (refreshCount < 30) {
           setRefresh();
-        } else {
-          top.location = "<html:rewrite action="/Logout"/>";
+        } else if (autoLogout) {
+          top.location.href = "<html:rewrite action="/Logout"/>";
         }
 
+        Effect.Fade('loading',{duration: 0.50, queue: 'end'});
       }
 
       function setRefresh() {

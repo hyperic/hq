@@ -38,6 +38,8 @@
   if (top != self)
     top.location.href = self.document.location;
 
+  autoLogout = false;
+
   // Register the removePortlet method
   ajaxEngine.registerRequest( 'removePortlet',
                               '<html:rewrite page="/dashboard/RemovePortlet.do"/>' );
