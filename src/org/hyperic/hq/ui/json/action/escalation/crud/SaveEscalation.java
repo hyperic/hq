@@ -34,7 +34,7 @@ public class SaveEscalation extends BaseAction
     private static String WHO_PREFIX = "who_row";
     private static String USER_PREFIX = "users_row";
     private static String ROLE_PREFIX = "roles_row";
-    private static String OTHER_PREFIX = "emailInput_row";
+    private static String OTHER_PREFIX = "emailinput_row";
 
     // syslog action parameter
     private static String META_PREFIX = "meta_row";
@@ -264,7 +264,7 @@ public class SaveEscalation extends BaseAction
             }
 
             // name list
-            if (narr != null) {
+            if (namesarr != null) {
                 StringTokenizer tokens = new StringTokenizer(namesarr[0], " ,");
                 StringBuffer buf = new StringBuffer();
                 while(tokens.hasMoreTokens()) {
