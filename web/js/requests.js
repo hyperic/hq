@@ -270,18 +270,21 @@
         var urlColon = ":";
         var urlParams = "&view=list&ft=";
         var token = availText.token;
+        var noAvailTable;
         var availTable;
         var availFunc;
         if (token != null) {
             availTable = document.getElementById('availTable' + token);
+            noAvailTable = 'noAvailTable' + token;
             availFunc = 'requestAvailSummary' + token + '()';
         } else {
             availTable = document.getElementById('availTable');
+            noAvailTable = 'noAvailTable';
             availFunc = 'requestAvailSummary()';
         }
         
         if (availList.length < 1) {
-            $('noAvailSummary').style.display = '';
+            $(noAvailTable).style.display = '';
         } else {
 
             for (var i = availTable.childNodes.length - 1; i > 1; i--) {

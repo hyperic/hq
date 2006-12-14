@@ -62,9 +62,11 @@ Ajax.Responders.register({
   <c:if test="${not empty portlet.token}">
     <tiles:put name="adminToken" beanName="portlet" beanProperty="token"/>
     <c:set var="tableName" value="availTable${portlet.token}"/>
+    <c:set var="noTableName" value="noAvailTable${portlet.token}"/>
   </c:if>
   <c:if test="${empty portlet.token}">
     <c:set var="tableName" value="availTable"/>
+    <c:set var="noTableName" value="noAvailTable"/>
   </c:if>
   <tiles:put name="portletName"><c:out value="${portlet.fullUrl}"/></tiles:put>
 
@@ -84,9 +86,11 @@ Ajax.Responders.register({
         <!-- table rows are inserted here dynamically -->
       </tbody>
     </table>
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" id="noAvailSummary" style="display:none;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${noTableName}"/>" style="display:none;">
       <tr class="ListRow">
-        <td class="ListCell"></td>
+        <td class="ListCell">
+          <fmt:message key="dash.home.no.resource.to.display"/>    
+        </td>
       </tr>
     </table>
   </div>
