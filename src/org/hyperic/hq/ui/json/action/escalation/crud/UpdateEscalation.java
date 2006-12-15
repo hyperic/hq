@@ -44,6 +44,9 @@ public class UpdateEscalation extends BaseAction
     
     private static String ALERTDEF_ID = "ad";
     private static String GALERTDEF_ID = "gad";
+    
+    // action list order
+    private static String ORDER = "rowOrder";
 
     public void execute(JsonActionContext context)
         throws PermissionException,
