@@ -1153,6 +1153,7 @@
         <include name="jdom_b8.jar" />
         <include name="jsch-0.1.23.jar"/>
         <include name="getopt.jar"/>
+        <include name="json.jar"/>
       </fileset>
 
       <fileset dir="${sigar.lib}" includes="*.*" />
