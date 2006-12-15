@@ -138,6 +138,7 @@ public class ViewAction extends BaseAction {
             alert.put("resourceName", bean.getResource().getName());
             alert.put("alertDefName", bean.getAlertDefName());
             alert.put("cTime", date);
+            alert.put("fixed", bean.isFixed());
 
             a.add(alert);
         }
