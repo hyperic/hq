@@ -131,7 +131,8 @@ public class ListAlertAction extends TilesAction {
             AlertBean bean = new AlertBean(av.getId(), av.getCtime(),
                                            adv.getId(), adv.getName(),
                                            adv.getPriority(), appEntId.getId(),
-                                           new Integer(appEntId.getType()));
+                                           new Integer(appEntId.getType()),
+                                           av.isFixed());
 
             AlertConditionLogValue[] condLogs = av.getConditionLogs();
             if (condLogs.length > 1) {

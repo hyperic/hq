@@ -294,12 +294,11 @@ styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
 onclick="ToggleSelection(this,widgetProperties)"
 styleClass="listMember"/> </display:column>
 
-<display:column width="20%" property="priority"
+<display:column width="15%" property="priority"
 title="alerts.alert.AlertList.ListHeader.Priority">
 <display:prioritydecorator
 flagKey="alerts.alert.alertlist.listheader.priority"/>
 </display:column>
-
 
 <display:column width="20%" property="ctime" sort="true" sortAttr="2"
 defaultSort="true" title="alerts.alert.AlertList.ListHeader.AlertDate"
@@ -307,9 +306,8 @@ href="/alerts/Alerts.do?mode=viewAlert&eid=${Resource.entityId.appdefKey}"
 paramId="a" paramProperty="id" ><display:datedecorator/>
 </display:column>
 
-<display:column width="20%" property="name" sort="true"
-sortAttr="1" defaultSort="false"
-title="alerts.alert.AlertList.ListHeader.AlertDefinition"
+<display:column width="20%" property="name" sort="true" sortAttr="1"
+defaultSort="false" title="alerts.alert.AlertList.ListHeader.AlertDefinition"
 href="/alerts/Config.do?mode=viewDefinition&eid=${Resource.entityId.appdefKey}"
 paramId="ad" paramProperty="alertDefId"/>
 
@@ -318,6 +316,11 @@ title="alerts.alert.AlertList.ListHeader.AlertCondition"/>
 
 <display:column width="20%" property="value"
 title="alerts.alert.AlertList.ListHeader.ActualValue" />
+
+<display:column width="5%" property="fixed"
+                title="alerts.alert.AlertList.ListHeader.Fixed">
+  <display:booleandecorator flagKey="yesno"/>
+</display:column>
 
 </display:table>
 

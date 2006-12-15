@@ -33,144 +33,154 @@ import java.io.Serializable;
  */
 public class AlertBean implements Serializable {
     // alert fields
-    private Integer id;
-    private long ctime;
+    private Integer _id;
+    private long _ctime;
 
     // alert def fields
-    private Integer alertDefId;
-    private String name;
-    private int priority;
-    private String conditionName;
-    private String comparator;
-    private String threshold;
-    private String value;
-    private boolean multiCondition;
+    private Integer _alertDefId;
+    private String _name;
+    private int _priority;
+    private String _conditionName;
+    private String _comparator;
+    private String _threshold;
+    private String _value;
+    private boolean _multiCondition;
+    private boolean _fixed;
 
     // resource fields
-    private Integer rid;
-    private Integer type;
+    private Integer _rid;
+    private Integer _type;
 
     public AlertBean() { }
 
     public AlertBean(Integer id, long ctime,
                      Integer alertDefId, String name, int priority,
-                     Integer rid, Integer type) {
-        this.id = id;
-        this.ctime = ctime;
-        this.alertDefId = alertDefId;
-        this.name = name;
-        this.priority = priority;
-        this.rid = rid;
-        this.type = type;
+                     Integer rid, Integer type, boolean fixed) {
+        _id = id;
+        _ctime = ctime;
+        _alertDefId = alertDefId;
+        _name = name;
+        _priority = priority;
+        _rid = rid;
+        _type = type;
+        _fixed = fixed;
     }
 
     public Integer getId() {
-        return id;
+        return _id;
     }
 
     public void setId(Integer id) {
-        this.id = id;
+        _id = id;
     }
 
     public long getCtime() {
-        return ctime;
+        return _ctime;
     }
 
     public void setCtime(long ctime) {
-        this.ctime=ctime;
+        _ctime=ctime;
     }
 
     public Integer getAlertDefId() {
-        return alertDefId;
+        return _alertDefId;
     }
 
     public void setAlertDefId(Integer alertDefId) {
-        this.alertDefId = alertDefId;
+        _alertDefId = alertDefId;
     }
 
     public String getName() {
-        return name;
+        return _name;
     }
 
     public void setName(String name) {
-        this.name = name;
+        _name = name;
     }
 
     public int getPriority() {
-        return priority;
+        return _priority;
     }
 
     public void setPriority(int priority) {
-        this.priority=priority;
+        _priority=priority;
     }
 
     public String getConditionName() {
-        return comparator;
+        return _comparator;
     }
 
     public void setConditionName(String conditionName) {
-        this.conditionName = conditionName;
+        _conditionName = conditionName;
     }
 
     public String getComparator() {
-        return comparator;
+        return _comparator;
     }
 
     public void setComparator(String comparator) {
-        this.comparator = comparator;
+        _comparator = comparator;
     }
 
     public String getThreshold() {
-        return threshold;
+        return _threshold;
     }
 
     public void setThreshold(String threshold) {
-        this.threshold = threshold;
+        _threshold = threshold;
     }
 
     public String getValue() {
-        return value;
+        return _value;
     }
 
     public void setValue(String value) {
-        this.value = value;
+        _value = value;
     }
 
     public boolean isMultiCondition() {
-        return multiCondition;
+        return _multiCondition;
     }
 
     public void setMultiCondition(boolean multiCondition) {
-        this.multiCondition = multiCondition;
+        _multiCondition = multiCondition;
     }
 
     public Integer getRid() {
-        return rid;
+        return _rid;
     }
 
     public void setRid(Integer rid) {
-        this.rid=rid;
+        _rid=rid;
     }
 
     public Integer getType() {
-        return type;
+        return _type;
     }
 
     public void setType(Integer type) {
-        this.type=type;
+        _type=type;
     }
 
     /**
      * Return the formatted alert condition.
      */
     public String getConditionFmt() {
-        if (multiCondition) {
-            return conditionName;
+        if (_multiCondition) {
+            return _conditionName;
         } else {
-            return conditionName.trim() + " " +
-                comparator.trim() + " " +
-                threshold;
+            return _conditionName.trim() + " " +
+                _comparator.trim() + " " +
+                _threshold;
         }
+    }
+
+    public boolean isFixed() {
+        return _fixed;
+    }
+
+    public void setFixed(boolean fixed) {
+        _fixed = fixed;
     }
 
     public String toString() {
@@ -193,6 +203,8 @@ public class AlertBean implements Serializable {
             .append( getRid() )
             .append(" type=")
             .append( getType() )
+            .append(" fixed=")
+            .append( isFixed() )
             .append('}');
 
         return str.toString();
