@@ -594,37 +594,36 @@ public class EscalationMediator extends Mediator
         alertDefId = alert.getAlertDefinitionInterface().getId();
         escalation = alert.getAlertDefinitionInterface().getEscalation();
 
-        synchronized(stateLocks.getLock(
-            new StateLock(alertDefId.intValue(), alertType))) {
-            // mark alert as fixed
-            if (fixed) {
-                alert.setFixed(true);
-            }
-    
-            if (escalation != null) {
-                AuthzSubject subject =
-                    DAOFactory.getDAOFactory().getAuthzSubjectDAO()
-                        .findById(subjectID);
-                    EscalationState state = getEscalationState(escalation,
-                                                           alertDefId,
-                                                           alertType);
+        // mark alert as fixed
+        if (fixed) {
+            alert.setFixed(true);
+        }
+
+        if (escalation != null) {
+            AuthzSubject subject =
+                DAOFactory.getDAOFactory().getAuthzSubjectDAO()
+                    .findById(subjectID);
+            synchronized(stateLocks.getLock(
+                new StateLock(alertDefId.intValue(), alertType))) {
+                EscalationState state =
+                    getEscalationState(escalation, alertDefId, alertType);
                 if (state == null) {
-                    log.error("Can't find escalation state. escalation="
-                            + escalation + ", alertDefId=" + alertDefId
-                            + ", alertType=" + alertType);
+                    log.error("Can't find escalation state. escalation="+
+                              escalation + ", alertDefId="+alertDefId+
+                              ", alertType=" + alertType);
                     return null;
                 }
                 if (fixed) {
-                    if (state.isActive()
-                            && alertId.intValue() == state.getAlertId()) {
+                    if(state.isActive() &&
+                       alertId.intValue() == state.getAlertId()) {
                         // escalation runtime needs to know when
                         // alert is fixed so it can stop the escalation chain.
                         resetEscalationState(state);
                     }
                 } else {
                     if (escalation.isAllowPause()) {
-                        long waitTime = System.currentTimeMillis()
-                                + pauseWaitTime;
+                        long waitTime =
+                            System.currentTimeMillis() + pauseWaitTime;
                         state.setPauseWaitTime(waitTime);
                         state.setPauseEscalation(true);
                     }
@@ -635,7 +634,6 @@ public class EscalationMediator extends Mediator
                 return state;
             }
         }
-        
         return null;
     }
 
