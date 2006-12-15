@@ -344,9 +344,7 @@
             noMetricTable = 'noMetricTable';
             metricFunc = 'requestMetricsResponse()';
         }
-
-        alert(token);
-
+        
         if (metricValues.values) {
 
             for (var i = metricTable.childNodes.length - 1; i > 1; i--) {
