@@ -38,7 +38,7 @@
 <script type="text/javascript">
 function requestMetricsResponse<c:out value="${portlet.token}"/>() {
 var metricsUrl = "<html:rewrite page="/dashboard/ViewMetricViewer.do?token=${portlet.token}"/>"
-	new Ajax.Request(metricsUrl, {method: 'get', onSuccess:showMetricsResponse, onFailure :reportError});
+	new Ajax.Request(metricsUrl, {method: 'get', onSuccess:showMetricsResponse, onFailure:reportError});
 }
 onloads.push(requestMetricsResponse<c:out value="${portlet.token}"/>);
 </script>
@@ -52,9 +52,11 @@ onloads.push(requestMetricsResponse<c:out value="${portlet.token}"/>);
   <c:if test="${not empty portlet.token}">
     <tiles:put name="adminToken" beanName="portlet" beanProperty="token"/>
     <c:set var="tableName" value="metricTable${portlet.token}"/>
+    <c:set var="noTableName" value="noMetricTable${portlet.token}"/>
   </c:if>
   <c:if test="${empty portlet.token}">
     <c:set var="tableName" value="metricTable"/>
+    <c:set var="noTableName" value="noMetricTable"/>
   </c:if>
   <tiles:put name="portletName"><c:out value="${portlet.fullUrl}"/></tiles:put>
 </tiles:insert>
@@ -64,7 +66,7 @@ onloads.push(requestMetricsResponse<c:out value="${portlet.token}"/>);
     <!-- table rows are inserted here dynamically -->
     </tbody>
  </table>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" id="noMetricValues" style="display:none;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${noTableName}"/>" style="display:none;">
     <tr class="ListRow">
       <td class="ListCell"><fmt:message key="dash.home.no.resource.to.display"/></td>
     </tr>

@@ -332,17 +332,22 @@
         var urlColon = ":"
         var resUrl = $('viewResUrl').href;
         var metricTable;
+        var noMetricTable;
         var metricFunc
         var token = metricText.token;
         if (token != null) {
             metricTable = document.getElementById('metricTable' + token);
+            noMetricTable = 'noMetricTable' + token;
             metricFunc = 'requestMetricsResponse' + token + '()';
         } else {
             metricTable = document.getElementById('metricTable');
+            noMetricTable = 'noMetricTable';
             metricFunc = 'requestMetricsResponse()';
         }
 
-        if (metricValues && metricValues != 0) {
+        alert(token);
+
+        if (metricValues.values) {
 
             for (var i = metricTable.childNodes.length - 1; i > 1; i--) {
                 metricTable.removeChild(metricTable.childNodes[i]);
@@ -388,7 +393,7 @@
             }
 
         } else {
-            $('noMetricValues').style.display = '';
+            $(noMetricTable).style.display = '';
         }
 
         rTimer = setTimeout(metricFunc, 60000);

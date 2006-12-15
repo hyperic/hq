@@ -19,6 +19,7 @@ import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.units.FormattedNumber;
+import org.hyperic.util.config.InvalidOptionException;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionForm;
@@ -71,16 +72,27 @@ public class ViewAction extends BaseAction {
             metricKey += token;
         }
 
+        JSONObject res = new JSONObject();
+        if (token != null) {
+            res.put("token", token);
+        } else {
+            res.put("token", JSONObject.NULL);
+        }
+
+        // Load resources
         List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, user);
         AppdefEntityID[] arrayIds =
             (AppdefEntityID[])entityIds.toArray(new AppdefEntityID[0]);
+        int count = Integer.parseInt(user.getPreference(numKey, "10"));
+        String metric = user.getPreference(metricKey, "");
 
-        int count = Integer.parseInt(user.getPreference(numKey));
-
-        String metric = user.getPreference(metricKey);
-        if (metric == null || metric.length() == 0) {
+        // Validate
+        if (arrayIds.length == 0 || count == 0 || metric.length() == 0) {
+            res.put("metricValues", new JSONObject());
+            response.getWriter().write(res.toString());
             return null;
         }
+
         Integer[] tids = new Integer[] { new Integer(metric) };
         PageList metricTemplates =
             mBoss.findMeasurementTemplates(sessionId, tids,
@@ -123,14 +135,7 @@ public class ViewAction extends BaseAction {
             values.add(val);
         }
         metricValues.put("values", values);
-        JSONObject res = new JSONObject();
         res.put("metricValues", metricValues);
-
-        if (token != null) {
-            res.put("token", token);
-        } else {
-            res.put("token", JSONObject.NULL);
-        }
 
         response.getWriter().write(res.toString());
 
