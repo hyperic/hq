@@ -36,7 +36,7 @@ public class RecentAlertBean extends AlertBean {
     public RecentAlertBean(Integer id, long ctime,
                            Integer alertDefId, String name, int priority,
                            Integer rid, Integer type, String resourceName) {
-        super(id, ctime, alertDefId, name, priority, rid, type);
+        super(id, ctime, alertDefId, name, priority, rid, type, false);
         this.resourceName = resourceName;
     }
 
