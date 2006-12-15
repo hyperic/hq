@@ -594,6 +594,9 @@ public class EscalationMediator extends Mediator
         alertDefId = alert.getAlertDefinitionInterface().getId();
         escalation = alert.getAlertDefinitionInterface().getEscalation();
 
+        // mark alert as fixed
+        alert.setFixed(true);
+
         if (escalation != null) {
             AuthzSubject subject =
                 DAOFactory.getDAOFactory().getAuthzSubjectDAO()
@@ -615,8 +618,6 @@ public class EscalationMediator extends Mediator
                         // alert is fixed so it can stop the escalation chain.
                         resetEscalationState(state);
                     }
-                    // mark alert as fixed as well
-                    alert.setFixed(true);
                 } else {
                     if (escalation.isAllowPause()) {
                         long waitTime =
