@@ -33,54 +33,73 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 public final class DashboardAlertBean
     implements java.io.Serializable
 {
-    private long ctime ;
-    private Integer alertDefId ;
-    private Integer alertId;
-    private String alertDefName;
-    private AppdefResourceValue resource;
+    private long _ctime ;
+    private Integer _alertDefId ;
+    private Integer _alertId;
+    private String _alertDefName;
+    private AppdefResourceValue _resource;
+    private boolean _fixed;
     
-    public DashboardAlertBean() {}
+    public DashboardAlertBean(long ctime, Integer alertDefId, Integer alertId,
+                              String alertDefName, AppdefResourceValue resource,
+                              boolean fixed) {
+        super();
+        _ctime = ctime;
+        _alertDefId = alertDefId;
+        _alertId = alertId;
+        _alertDefName = alertDefName;
+        _resource = resource;
+        _fixed = fixed;
+    }
 
     public long getCtime() {
-        return ctime;
+        return _ctime;
     }
 
     public void setCtime(long ctime) {
-        this.ctime = ctime;
+        _ctime = ctime;
     }
     
     public Integer getAlertId() {
-        return alertId;
+        return _alertId;
     }
     
     public void setAlertId(Integer alertId) {
-        this.alertId = alertId;
+        _alertId = alertId;
     }
     
     public Integer getAlertDefId() {
-        return alertDefId;
+        return _alertDefId;
     }
 
     public void setAlertDefId(Integer alertDefId) {
-        this.alertDefId = alertDefId;
+        _alertDefId = alertDefId;
     }
 
     public String getAlertDefName() {
-        return this.alertDefName;
+        return _alertDefName;
     }
 
     public void setAlertDefName(String alertDefName) {
-        this.alertDefName = alertDefName;
+        _alertDefName = alertDefName;
     }
 
     public AppdefResourceValue getResource() {
-        return this.resource;
+        return _resource;
     }
 
     public void setResource(AppdefResourceValue resource) {
-        this.resource = resource;
+        _resource = resource;
     }
     
+    public boolean isFixed() {
+        return _fixed;
+    }
+
+    public void setFixed(boolean fixed) {
+        _fixed = fixed;
+    }
+
     public String toString()
     {
 	    StringBuffer str = new StringBuffer("[");
@@ -90,6 +109,8 @@ public final class DashboardAlertBean
          .append(getAlertDefId())
          .append("ctime=")
          .append(getCtime())
+         .append("fixed=")
+         .append(isFixed())
          .append("]");
 
         return(str.toString());

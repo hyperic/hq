@@ -1329,13 +1329,12 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                 }
             }
             
-            DashboardAlertBean bean = new DashboardAlertBean();
-            bean.setResource(resource);
-            bean.setAlertId(alert.getId());
-            bean.setAlertDefName(name);
-            bean.setCtime(alert.getCtime());                
-
-            uiBeans.add(bean);
+            uiBeans.add(new DashboardAlertBean(alert.getCtime(),
+                                               alert.getAlertDefId(),
+                                               alert.getId(),
+                                               name,
+                                               resource,
+                                               alert.isFixed()));
         }
 
         // Lastly, set the total size
