@@ -218,6 +218,7 @@
                 var td2 = document.createElement('td');
                 var td3 = document.createElement('td');
                 var td4 = document.createElement('td');
+                var td5 = document.createElement('td');
                 var alertAnchor = document.createElement("a");
                 var checkBox = document.createElement("input");
                 var urlAmp = "&a="
@@ -253,6 +254,14 @@
 
                 if (aList[i].resourceName) {
                     td4.appendChild(document.createTextNode(aList[i].resourceName));
+                }
+                tr.appendChild(td5);
+                td5.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlert");
+
+                if (aList[i].fixed) {
+                    td5.appendChild(document.createTextNode("Yes"));
+                } else {
+                    td5.appendChild(document.createTextNode("No"));
                 }
             }
         } else {
