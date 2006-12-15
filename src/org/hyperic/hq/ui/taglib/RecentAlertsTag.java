@@ -151,7 +151,8 @@ public class RecentAlertsTag extends TagSupport {
                                         0,
                                         adeId.getId(),
                                         new Integer( adeId.getType() ),
-                                        av.getResource().getName()));
+                                        av.getResource().getName(),
+                                        av.isFixed()));
             }
 
             RecentAlertBean[] recentAlerts =
