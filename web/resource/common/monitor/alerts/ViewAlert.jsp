@@ -3,6 +3,7 @@
 <%@ taglib uri="struts-html-el" prefix="html" %>
 <%@ taglib uri="struts-tiles" prefix="tiles" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
+<%@ taglib uri="jstl-fmt" prefix="fmt" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -35,6 +36,7 @@
 
 <form name="AlertForm" action="<html:rewrite action="/alerts/Alerts"/>">
 <input type=hidden name="a" value="<c:out value="${a}"/>"/>
+<input type=hidden name="mode" id="mode" value=""/>
 
 <tiles:insert definition=".page.title.events">
   <tiles:put name="titleKey" value="alert.current.detail.PageTitle"/>
@@ -53,6 +55,22 @@
   &nbsp;<br>
   <tiles:insert beanName="action"/>
 </c:forEach>
+
+<table cellpadding="5" cellspacing="0" border="0" class="BlockContent">
+<tr>
+  <td width="50%">&nbsp;</td>
+  <td>
+<tiles:insert page="/common/components/ActionButton.jsp">
+  <tiles:put name="labelKey" value="resource.common.alert.action.fixed.label"/>
+  <tiles:put name="buttonHref" value="javascript:document.forms[0].submit();"/>
+  <tiles:put name="buttonClick">$('mode').setAttribute('value', '<fmt:message key="resource.common.alert.action.fixed.label"/>')</tiles:put>
+  <tiles:put name="disabled" beanName="alert" beanProperty="fixed"/>
+</tiles:insert>
+  </td>
+  <td width="50%">&nbsp;</td>
+</tr>
+</table>
+<br/>
 
 <tiles:insert definition=".events.alert.view.nav" flush="true"/>
 

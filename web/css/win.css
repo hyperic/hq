@@ -23,6 +23,10 @@ A.NotBold:hover, .DropDown A:hover {color: #003399; font-weight: normal; text-de
 .NormalText {color: #000000; font-weight: normal;}
 .BoldText {font-weight: bold;}
 
+/* BUTTON */
+.Button { background-repeat: repeat-x; }
+.Button A:hover { color: #C6CFE5; text-decoration: none; } 
+
 /* LOGO */
 .logo{background-color: #b4b4b4;}
 .logoSm{background-color: #d2d2d2;}
@@ -900,3 +904,4 @@ text-align:center;
  margin:0;
   width: 100%;
 }
+

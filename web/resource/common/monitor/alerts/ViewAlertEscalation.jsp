@@ -47,8 +47,8 @@
 
 <table cellpadding="0" border="0" width="100%" class="BlockContent">
   <tr>
-    <td rowspan="2">&nbsp;</td>
-    <td width="80%">
+    <td rowspan="2" width="20%">&nbsp;</td>
+    <td nowrap="true">
       <input type=checkbox name="pause" value="true"/>
       <fmt:message key="alert.escalation.pause"/>
       <select name="pauseTime">
@@ -61,11 +61,17 @@
       </select>
       <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>
     </td>
+    <td rowspan="2" width="60%">&nbsp;</td>
   </tr>
   <tr>
-    <td style="padding: 10px;">
-    <span style="padding-right: 10px;"><input type=SUBMIT name="mode" value="<fmt:message key="resource.common.alert.action.acknowledge.label"/>"/></span>
-    <span style="padding-left: 10px;"><input type=SUBMIT name="mode" value="<fmt:message key="resource.common.alert.action.fixed.label"/>"/></span></td>
+    <td style="padding: 10px;" align="middle">
+<tiles:insert page="/common/components/ActionButton.jsp">
+  <tiles:put name="labelKey" value="resource.common.alert.action.acknowledge.label"/>
+  <tiles:put name="buttonHref" value="javascript:document.forms[0].submit();"/>
+  <tiles:put name="buttonClick">$('mode').setAttribute('value', '<fmt:message key="resource.common.alert.action.acknowledge.label"/>')</tiles:put>
+  <tiles:put name="disabled" beanName="alert" beanProperty="fixed"/>
+</tiles:insert>
+    </td>
   </tr>
 </table>
 <br/>
