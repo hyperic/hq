@@ -45,10 +45,24 @@
   }
 </script>
 
-<table cellpadding="0" border="0" width="100%" class="BlockContent">
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
+  <c:forEach var="log" varStatus="status" items="${alert.actionLogs}">
+    <c:if test="${empty log.actionId}">
   <tr>
-    <td rowspan="2" width="20%">&nbsp;</td>
-    <td nowrap="true">
+    <td width="20%" class="BlockLabel" style="border-bottom: solid #D5D8DE 1px;">
+    <fmt:message key="alert.current.detail.escalation.action">
+      <fmt:param value="${status.count}"/>
+    </fmt:message>
+    </td>
+    <td colspan="3"  class="BlockContent" style="padding-left: 4px; border-bottom: solid #D5D8DE 1px;">
+      <c:out value="${log.detail}"/>
+    </td>
+  </tr>
+    </c:if>
+  </c:forEach>
+  <tr>
+    <td rowspan="2" width="20%" class="BlockLabel">&nbsp;</td>
+    <td nowrap="true" class="BlockContent" style="padding: 10px;">
       <input type=checkbox name="pause" value="true"/>
       <fmt:message key="alert.escalation.pause"/>
       <select name="pauseTime">
@@ -61,10 +75,10 @@
       </select>
       <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>
     </td>
-    <td rowspan="2" width="60%">&nbsp;</td>
+    <td rowspan="2" width="60%" class="BlockLabel">&nbsp;</td>
   </tr>
   <tr>
-    <td style="padding: 10px;" align="middle">
+    <td class="BlockLabel" style="padding-left: 60px; padding-bottom: 10px;">
 <tiles:insert page="/common/components/ActionButton.jsp">
   <tiles:put name="labelKey" value="resource.common.alert.action.acknowledge.label"/>
   <tiles:put name="buttonHref" value="javascript:document.forms[0].submit();"/>
@@ -72,6 +86,9 @@
   <tiles:put name="disabled" beanName="alert" beanProperty="fixed"/>
 </tiles:insert>
     </td>
+  </tr>
+  <tr>
+    <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" height="1" width="1" border="0"/></td>
   </tr>
 </table>
 <br/>
