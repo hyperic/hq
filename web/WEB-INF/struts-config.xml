@@ -2328,6 +2328,8 @@
       </action>
 
       <action path="/alerts/Alerts"
+              name="RemoveAlertsForm"
+              scope="request"
               forward=".events.alerts.layout">
       </action>
 
