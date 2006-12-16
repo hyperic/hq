@@ -166,8 +166,9 @@ public class GalertManagerEJBImpl
     /**
      * @ejb:interface-method  
      */
-    public List findAlertLogsByTimeWindow(ResourceGroup group, long past) {
-        return _logDAO.findByTimeWindow(group, past, true);
+    public PageList findAlertLogsByTimeWindow(ResourceGroup group, long begin,
+                                              PageControl pc) {
+        return _logDAO.findByTimeWindow(group, begin, pc);
     }
 
     /**

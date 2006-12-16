@@ -30,12 +30,15 @@ import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.LockMode;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.type.Type;
 import org.hibernate.criterion.Example;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
 
 /**
  * Hibernate Data Access Object
@@ -162,5 +165,17 @@ public abstract class HibernateDAO {
         throws PermissionException
     {
         throw new UnsupportedOperationException("removePersisted not supported");
+    }
+
+    protected PageList getPagedResults(Query q, int total, PageControl pc) {
+        if (pc.getPagesize() != PageControl.SIZE_UNLIMITED) {
+            q.setMaxResults(pc.getPagesize());
+        }
+        
+        if (pc.getPageEntityIndex() != 0) {
+            q.setFirstResult(pc.getPageEntityIndex());
+        }
+        
+        return new PageList(q.list(), total);
     }
 }

@@ -2,9 +2,13 @@ package org.hyperic.hq.galerts.server.session;
 
 import java.util.List;
 
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
 
 public class GalertLogDAO
     extends HibernateDAO
@@ -34,16 +38,27 @@ public class GalertLogDAO
             .list();
     }
 
-    List findByTimeWindow(ResourceGroup g, long past, boolean asc) {
+    PageList findByTimeWindow(ResourceGroup g, long begin, PageControl pc) {
         String sql = "from GalertLog l " +
-                     "where l.group = :group and l.timestamp > :time " + 
-                     "order by l.timestamp " + (asc ? "asc" : "desc");
-        
-        long begin = System.currentTimeMillis() - past;
-        return getSession().createQuery(sql)
-            .setParameter("group", g)
-            .setLong("time", begin)
-            .list();
+                     "where l.group = :group and l.timestamp > :time "; 
+                     
+        Integer count = (Integer)
+            getSession().createQuery("select count(*) " + sql)
+                        .setParameter("group", g)
+                        .setLong("time", begin)
+                        .uniqueResult();
+
+        if (count.intValue() > 0) {
+            Query q = getSession()
+                .createQuery(sql + "order by l.timestamp " +
+                             (pc.isDescending() ? "desc" : "asc"))
+                .setParameter("group", g)
+                .setLong("time", begin);
+            
+            return getPagedResults(q, count.intValue(), pc);
+        }
+
+        return new PageList();
     }
 
     void removeAll(ResourceGroup g) {

@@ -263,7 +263,8 @@ public class GalertBossEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public JSONArray findAlertLogs(int sessionId, Integer gid, long past)
+    public JSONObject findAlertLogs(int sessionId, Integer gid, long begin,
+                                   PageControl pc)
         throws JSONException, SessionTimeoutException, SessionNotFoundException,
         PermissionException
     {
@@ -279,7 +280,7 @@ public class GalertBossEJBImpl
             throw new SystemException(e);
         }
         
-        List alertLogs = _galertMan.findAlertLogsByTimeWindow(g, past);
+        PageList alertLogs = _galertMan.findAlertLogsByTimeWindow(g, begin, pc);
 
         JSONArray jarr = new JSONArray();
         for (Iterator i = alertLogs.iterator(); i.hasNext(); ) {
@@ -296,7 +297,12 @@ public class GalertBossEJBImpl
                 .put("name", log.getAlertDef().getName())
                 .put("reason", log.getExecutionReason().getShortReason()));
         }
-        return jarr;
+        
+        JSONObject jobj = new JSONObject();
+        jobj.put("logs", jarr);
+        jobj.put("total", alertLogs.getTotalSize());
+        
+        return jobj;
     }
     
     /**
