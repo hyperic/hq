@@ -322,9 +322,9 @@
                 td2.setAttribute((document.all ? 'className' : 'class'), "availResourceStatus");
 
                 if (down > '0') {
-                    td2.innerHTML = '<span style=color:red;>' + down + '</span>' + " / " + up;
+                    td2.innerHTML = '<span style=color:red;>' + down + '</span>' + " | " + up;
                 } else {
-                    td2.innerHTML = down + " / " + up;
+                    td2.innerHTML = down + " | " + up;
                 }
             }
         }

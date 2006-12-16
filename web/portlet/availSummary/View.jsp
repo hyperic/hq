@@ -80,7 +80,8 @@ Ajax.Responders.register({
               <span style="color:red">
                   <fmt:message key="resource.hub.legend.unavailable"/>
               </span>
-              / <fmt:message key="resource.hub.legend.available"/>
+              <fmt:message key="common.label.Pipe"/>
+              <fmt:message key="resource.hub.legend.available"/>
           </th>
         </tr>
         <!-- table rows are inserted here dynamically -->
