@@ -171,12 +171,19 @@ public class Alert
         _alertVal.cleanConditionLog();
 
         _alertVal.removeAllActionLogs();
+        _alertVal.removeAllEscalationLogs();
         for (Iterator i=getActionLog().iterator(); i.hasNext(); ) {
             AlertActionLog l = (AlertActionLog)i.next();
-          
-            _alertVal.addActionLog(l.getAlertActionLogValue());
+            AlertActionLogValue logVal = l.getAlertActionLogValue();
+            _alertVal.addActionLog(logVal);
+            
+            // No alert definition means escalation log
+            if (l.getAction().getAlertDefinition() == null) {
+                _alertVal.addEscalationLog(logVal);
+            }
         }
         _alertVal.cleanActionLog();
+        _alertVal.cleanEscalationLog();
       
         return _alertVal;
     }
