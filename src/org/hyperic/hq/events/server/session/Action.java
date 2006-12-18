@@ -31,18 +31,19 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.events.shared.ActionValue;
-import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.bizapp.shared.action.SyslogActionConfig;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.events.ActionConfigInterface;
+import org.hyperic.hq.events.NoOpAction;
+import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.StringUtil;
-import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.json.JSON;
-import org.json.JSONObject;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 public class Action  
     extends PersistedObject
@@ -65,6 +66,8 @@ public class Action
             action = newEmailAction(json.getJSONObject("config"));
         } else if (className.endsWith("SyslogAction")) {
             action = newSyslogAction(json.getJSONObject("config"));
+        } else if (className.endsWith("NoOpAction")) {
+            action = newNoOpAction(json.getJSONObject("config"));
         } else {
             throw new JSONException("Unsupported Action class " + className);
         }
@@ -77,6 +80,7 @@ public class Action
         EmailActionConfig config = new EmailActionConfig();
         config.setType(json.getInt(EmailActionConfig.CFG_TYPE));
         config.setNames(json.getString(EmailActionConfig.CFG_NAMES));
+        config.setSms(json.getBoolean(EmailActionConfig.CFG_SMS));
         return createAction(config);
     }
 
@@ -108,6 +112,17 @@ public class Action
         );
     }
 
+    public static Action newNoOpAction()
+    {
+        NoOpAction na = new NoOpAction();        
+        return createAction(na);
+    }
+
+    public static Action newNoOpAction(JSONObject json) throws JSONException
+    {
+        return newNoOpAction();
+    }
+    
     private static Action createAction(ActionConfigInterface config)
     {
         Action act = new Action();
@@ -115,7 +130,7 @@ public class Action
         try {
             act.setConfig(config.getConfigResponse().encode());
         } catch (EncodingException e) {
-            throw new IllegalArgumentException("Can't encode email config " +
+            throw new IllegalArgumentException("Can't encode action config " +
                                                "response");
         }
         return act;
