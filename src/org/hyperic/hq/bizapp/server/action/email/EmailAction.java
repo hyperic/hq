@@ -26,9 +26,7 @@
 package org.hyperic.hq.bizapp.server.action.email;
 
 import java.text.MessageFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -46,7 +44,6 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
@@ -59,21 +56,12 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.Alert;
-import org.hyperic.hq.events.server.session.AlertCondition;
-import org.hyperic.hq.events.server.session.AlertConditionLog;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
-import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
-import org.hyperic.hq.measurement.UnitsConvert;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerUtil;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
-import org.hyperic.hq.measurement.shared.ResourceLogEvent;
 import org.hyperic.util.ConfigPropertyException;
-import org.hyperic.util.NumberUtil;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.units.FormattedNumber;
 
 public class EmailAction extends EmailActionConfig
     implements ActionInterface, Notify
@@ -97,7 +85,7 @@ public class EmailAction extends EmailActionConfig
     public EmailAction() {
     }
 
-    private AuthzSubjectManagerLocal getSubjMan()
+    protected AuthzSubjectManagerLocal getSubjMan()
         throws NamingException, CreateException {
         if (subjMan == null) {
             subjMan = AuthzSubjectManagerUtil.getLocalHome().create();
@@ -231,7 +219,6 @@ public class EmailAction extends EmailActionConfig
         try {
             InternetAddress[] to = lookupEmailAddr();
 
-
             EmailFilter filter = EmailFilter.getInstance();
 
             AlertDefinitionInterface alertDef =
@@ -239,24 +226,13 @@ public class EmailAction extends EmailActionConfig
             AppdefEntityID appEnt = new AppdefEntityID(alertDef.getAppdefType(),
                                                        alertDef.getAppdefId());
 
-            filter.sendAlert(appEnt, to, createSubject(alertDef),
-                             createText(alertDef, longReason, appEnt,
-                                        alert.getId()),
+            String body = isSms() ? shortReason :
+                                    createText(alertDef, longReason, appEnt,
+                                               alert.getId());
+            filter.sendAlert(appEnt, to, createSubject(alertDef), body,
                              alertDef.isNotifyFiltered());
 
-            StringBuffer result = new StringBuffer();
-            // XXX: Should get this strings into a resource file
-            switch (getType()) {
-                case TYPE_USERS :
-                    result.append("HQ Users Notified: ");
-                    break;
-                default :
-                case TYPE_EMAILS :
-                    result.append("Other Recipients Notified: ");
-                    break;
-            }
-            result.append(getNames());
-
+            StringBuffer result = getLog();
             return result.toString();
         } catch (javax.ejb.CreateException e) {
             throw new ActionExecuteException(e);
@@ -284,11 +260,26 @@ public class EmailAction extends EmailActionConfig
                        aman.getLongReason(alert));
     }
 
-    private InternetAddress[] lookupEmailAddr()
+    protected StringBuffer getLog() {
+        StringBuffer result = new StringBuffer();
+        // XXX: Should get this strings into a resource file
+        switch (getType()) {
+        case TYPE_USERS :
+            result.append("HQ Users Notified: ");
+            break;
+        default :
+        case TYPE_EMAILS :
+            result.append("Other Recipients Notified: ");
+            break;
+        }
+        result.append(getNames());
+        return result;
+    }
+
+    protected InternetAddress[] lookupEmailAddr()
         throws ActionExecuteException
     {
         // First, look up the addresses
-        String smsAddr;
         Integer uid;
         int i = 0;
         List validAddresses = new ArrayList();
@@ -296,26 +287,29 @@ public class EmailAction extends EmailActionConfig
             try {
                 AuthzSubjectValue overlord = getSubjMan().getOverlord();
                 switch (getType()) {
-                    case TYPE_USERS :
-                        uid = (Integer) it.next();
-                        AuthzSubjectValue who =
-                            getSubjMan().findSubjectById(overlord, uid);
+                case TYPE_USERS:
+                    uid = (Integer) it.next();
+                    AuthzSubjectValue who =
+                        getSubjMan().findSubjectById(overlord, uid);
+                    if (isSms()) {
+                        validAddresses.add(
+                            new InternetAddress(who.getSMSAddress()));
+                    } else {
                         validAddresses.add(
                             new InternetAddress(who.getEmailAddress()));
-                        smsAddr = who.getSMSAddress();
-                        if(smsAddr != null && !smsAddr.equals("")) {
-                            validAddresses.add(
-                                new InternetAddress(smsAddr));
-                        }
-                        break;
-                    default :
-                    case TYPE_EMAILS :
-                        validAddresses.add(
-                            new InternetAddress((String) it.next(), true));
-                        break;
+                    }
+                    break;
+                default:
+                case TYPE_EMAILS:
+                    validAddresses.add(new InternetAddress((String) it.next(),
+                                                           true));
+                    break;
                 }
             } catch (FinderException e) {
                 // This one is no good, continue
+                continue;
+            } catch (AddressException e) {
+                log.warn("Mail address invalid", e);
                 continue;
             } catch (CreateException e) {
                 throw new ActionExecuteException("Session EJB error", e);
@@ -325,8 +319,6 @@ public class EmailAction extends EmailActionConfig
                 continue;
             } catch (NamingException e) {
                 throw new ActionExecuteException("Session EJB error", e);
-            } catch (AddressException e) {
-                throw new ActionExecuteException("Mail address", e);
             }
         }
 
@@ -355,8 +347,7 @@ public class EmailAction extends EmailActionConfig
             log.error("alert not found (id="+alertId+").");
             return;
         }
-        AlertDefinition alertdef =
-            alert.getAlertDefinition();
+        AlertDefinition alertdef = alert.getAlertDefinition();
         
         InternetAddress[] to = lookupEmailAddr();
 
