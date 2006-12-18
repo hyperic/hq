@@ -120,7 +120,9 @@
         select2.onchange = function(){onchange_handler(this);}
         select2.name = "action_" + liID;
         addOption(select2, 'Email', 'Email');
-           addOption(select2, 'Syslog', 'Sys Log');
+        addOption(select2, 'SMS', 'SMS');
+        addOption(select2, 'Syslog', 'Sys Log');
+        addOption(select2, 'NoOp', 'Suppress Alerts');
            
         escTr2.appendChild(td3);
         td3.setAttribute('width', '20%');
@@ -128,6 +130,7 @@
         td3.style.paddingRight = "20px";
         
         td3.appendChild(select3);
+        td3.style.paddingTop = "5px";
         select3.name = "who_" + liID;
         select3.id = "who_" + liID;
         select3.onchange = function(){onchange_who(this);}
@@ -200,13 +203,18 @@
         //alert(el+", value="+ el.options[el.selectedIndex].value );
         var index= el.options[el.selectedIndex].value
 
-         if (index == "Email") {
+         if (index == "Email" || index == "SMS" || index == "NoOp") {
             hideSyslogInput(el);
-            showWhoSelect(el);
          }
-         else if (index == "Syslog") {
+         else {
             showSyslogInput(el);
+         }
+
+         if (index == "Syslog" || index == "NoOp") {
             hideWhoSelect(el);
+         }
+         else {
+            showWhoSelect(el);
          }
       }
 
@@ -261,8 +269,8 @@
     }
             
     function hideDisplay() { 
-    $(emailinput).style.display='none';
-    $(sysloginput).style.display='none';
+        $(emailinput).style.display='none';
+        $(sysloginput).style.display='none';
     }
     
     function removeRow(obj) {
@@ -308,6 +316,10 @@
         document.EscalationForm.escName.value = document.EscalationSchemeForm.escId.value;
     
         $('submit').onclick = function () {
+            if ($('escName').value == "") {
+                alert('<fmt:message key="alert.config.error.escalation.name.required"/>');
+                return false;
+            }
             sendEscForm();
             return false;
         }
