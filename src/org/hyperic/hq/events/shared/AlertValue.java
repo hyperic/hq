@@ -51,6 +51,7 @@ public class AlertValue
    private boolean ctimeHasBeenSet = false;
    private java.util.Collection ConditionLogs = new java.util.ArrayList();
    private java.util.Collection ActionLogs = new java.util.ArrayList();
+   private java.util.Collection EscalationLogs = new java.util.ArrayList();
 
    public AlertValue()
    {
@@ -79,7 +80,7 @@ public class AlertValue
 	  this.ConditionLogs = otherValue.ConditionLogs;
 	// TODO Clone is better no ?
 	  this.ActionLogs = otherValue.ActionLogs;
-
+	  this.EscalationLogs = otherValue.EscalationLogs;
    }
 
     public boolean isFixed()
@@ -201,24 +202,24 @@ public class AlertValue
 
    public org.hyperic.hq.events.shared.AlertActionLogValue[] getActionLogs()
    {
-	  return (org.hyperic.hq.events.shared.AlertActionLogValue[])this.ActionLogs.toArray(new org.hyperic.hq.events.shared.AlertActionLogValue[ActionLogs.size()]);
+      return (org.hyperic.hq.events.shared.AlertActionLogValue[])this.ActionLogs.toArray(new org.hyperic.hq.events.shared.AlertActionLogValue[ActionLogs.size()]);
    }
 
    public void addActionLog(org.hyperic.hq.events.shared.AlertActionLogValue added)
    {
-	  this.ActionLogs.add(added);
-	  if ( ! this.addedActionLogs.contains(added))
-		 this.addedActionLogs.add(added);
+      this.ActionLogs.add(added);
+      if ( ! this.addedActionLogs.contains(added))
+         this.addedActionLogs.add(added);
    }
 
    public void removeActionLog(org.hyperic.hq.events.shared.AlertActionLogValue removed)
    {
-	  this.ActionLogs.remove(removed);
-	  this.removedActionLogs.add(removed);
-	  if (this.addedActionLogs.contains(removed))
-		 this.addedActionLogs.remove(removed);
-	  if (this.updatedActionLogs.contains(removed))
-		 this.updatedActionLogs.remove(removed);
+      this.ActionLogs.remove(removed);
+      this.removedActionLogs.add(removed);
+      if (this.addedActionLogs.contains(removed))
+         this.addedActionLogs.remove(removed);
+      if (this.updatedActionLogs.contains(removed))
+         this.updatedActionLogs.remove(removed);
    }
 
    public void removeAllActionLogs()
@@ -229,20 +230,74 @@ public class AlertValue
 
    public void updateActionLog(org.hyperic.hq.events.shared.AlertActionLogValue updated)
    {
-	  if ( ! this.updatedActionLogs.contains(updated))
-		 this.updatedActionLogs.add(updated);
+      if ( ! this.updatedActionLogs.contains(updated))
+         this.updatedActionLogs.add(updated);
    }
 
    public void cleanActionLog(){
-	  this.addedActionLogs = new java.util.ArrayList();
-	  this.removedActionLogs = new java.util.ArrayList();
-	  this.updatedActionLogs = new java.util.ArrayList();
+      this.addedActionLogs = new java.util.ArrayList();
+      this.removedActionLogs = new java.util.ArrayList();
+      this.updatedActionLogs = new java.util.ArrayList();
    }
 
    public void copyActionLogsFrom(org.hyperic.hq.events.shared.AlertValue from)
    {
-	  // TODO Clone the List ????
-	  this.ActionLogs = from.ActionLogs;
+      // TODO Clone the List ????
+      this.ActionLogs = from.ActionLogs;
+   }
+
+   protected java.util.Collection addedEscalationLogs = new java.util.ArrayList();
+   protected java.util.Collection removedEscalationLogs = new java.util.ArrayList();
+   protected java.util.Collection updatedEscalationLogs = new java.util.ArrayList();
+
+   public java.util.Collection getAddedEscalationLogs() { return addedEscalationLogs; }
+   public java.util.Collection getRemovedEscalationLogs() { return removedEscalationLogs; }
+   public java.util.Collection getUpdatedEscalationLogs() { return updatedEscalationLogs; }
+
+   public org.hyperic.hq.events.shared.AlertActionLogValue[] getEscalationLogs()
+   {
+      return (org.hyperic.hq.events.shared.AlertActionLogValue[])this.EscalationLogs.toArray(new org.hyperic.hq.events.shared.AlertActionLogValue[EscalationLogs.size()]);
+   }
+
+   public void addEscalationLog(org.hyperic.hq.events.shared.AlertActionLogValue added)
+   {
+      this.EscalationLogs.add(added);
+      if ( ! this.addedEscalationLogs.contains(added))
+         this.addedEscalationLogs.add(added);
+   }
+
+   public void removeEscalationLog(org.hyperic.hq.events.shared.AlertActionLogValue removed)
+   {
+      this.EscalationLogs.remove(removed);
+      this.removedEscalationLogs.add(removed);
+      if (this.addedEscalationLogs.contains(removed))
+         this.addedEscalationLogs.remove(removed);
+      if (this.updatedEscalationLogs.contains(removed))
+         this.updatedEscalationLogs.remove(removed);
+   }
+
+   public void removeAllEscalationLogs()
+   {
+        // DOH. Clear the collection - javier 2/24/03
+        this.EscalationLogs.clear();
+   }
+
+   public void updateEscalationLog(org.hyperic.hq.events.shared.AlertActionLogValue updated)
+   {
+      if ( ! this.updatedEscalationLogs.contains(updated))
+         this.updatedEscalationLogs.add(updated);
+   }
+
+   public void cleanEscalationLog(){
+      this.addedEscalationLogs = new java.util.ArrayList();
+      this.removedEscalationLogs = new java.util.ArrayList();
+      this.updatedEscalationLogs = new java.util.ArrayList();
+   }
+
+   public void copyEscalationLogsFrom(org.hyperic.hq.events.shared.AlertValue from)
+   {
+      // TODO Clone the List ????
+      this.EscalationLogs = from.EscalationLogs;
    }
 
    public String toString()
