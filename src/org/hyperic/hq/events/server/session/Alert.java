@@ -177,8 +177,9 @@ public class Alert
             AlertActionLogValue logVal = l.getAlertActionLogValue();
             _alertVal.addActionLog(logVal);
             
-            // No alert definition means escalation log
-            if (l.getAction().getAlertDefinition() == null) {
+            // No action or alert definition means escalation log
+            if (l.getAction() == null ||
+                l.getAction().getAlertDefinition() == null) {
                 _alertVal.addEscalationLog(logVal);
             }
         }
