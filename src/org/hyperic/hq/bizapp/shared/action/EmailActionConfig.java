@@ -37,6 +37,7 @@ import java.util.StringTokenizer;
 
 import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.events.InvalidActionDataException;
+import org.hyperic.util.config.BooleanConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.IntegerConfigOption;
@@ -50,6 +51,7 @@ import org.hyperic.util.config.StringConfigOption;
 public class EmailActionConfig implements ActionConfigInterface {
     public static final String CFG_TYPE  = "listType";
     public static final String CFG_NAMES = "names";
+    public static final String CFG_SMS   = "sms";
     
     public static final int TYPE_EMAILS  = 1;
     public static final int TYPE_USERS   = 2;
@@ -58,14 +60,10 @@ public class EmailActionConfig implements ActionConfigInterface {
     private static String implementor =
         "org.hyperic.hq.bizapp.server.action.email.EmailAction";
     
-    /** Holds value of property type. */
-    private int type;
-    
-    /** Holds value of property names. */
-    private String names;
-    
-    /** Holds value of property users. */
-    private List users;
+    private int _type;
+    private String _names;
+    private List _users;
+    private boolean _sms = false;
     
     /** Creates a new instance of SharedEmailAction */
     public EmailActionConfig() {
@@ -74,6 +72,7 @@ public class EmailActionConfig implements ActionConfigInterface {
     public ConfigSchema getConfigSchema() {
         IntegerConfigOption type;
         StringConfigOption recip;
+        BooleanConfigOption sms;
         ConfigSchema res = new ConfigSchema();
 
         // Determine the type of recipients
@@ -90,6 +89,10 @@ public class EmailActionConfig implements ActionConfigInterface {
         recip.setMinLength(0);
         res.addOption(recip);
 
+        // If SMS
+        sms = new BooleanConfigOption(CFG_SMS, "Send to users' SMS", false);
+        res.addOption(sms);
+
         return res;
     }
 
@@ -99,8 +102,9 @@ public class EmailActionConfig implements ActionConfigInterface {
     public ConfigResponse getConfigResponse()
         throws InvalidOptionException, InvalidOptionValueException {
         ConfigResponse response = new ConfigResponse();
-        response.setValue(CFG_TYPE, String.valueOf(this.getType()));
-        response.setValue(CFG_NAMES, this.getNames());
+        response.setValue(CFG_TYPE, String.valueOf(getType()));
+        response.setValue(CFG_NAMES, getNames());
+        response.setValue(CFG_SMS, isSms());
         return response;
     }
 
@@ -115,13 +119,16 @@ public class EmailActionConfig implements ActionConfigInterface {
             throw new InvalidActionDataException(CFG_TYPE +
                                                  " is a required option");
 
-        type = Integer.parseInt(sType);
-
-        users = new ArrayList();
+        _type = Integer.parseInt(sType);
+        
+        String sSms = config.getValue(CFG_SMS);
+        _sms = Boolean.valueOf(sSms).booleanValue();
+        
+        _users = new ArrayList();
 
         // Parse the recipients
-        names = config.getValue(CFG_NAMES);
-        StringTokenizer st = new StringTokenizer(names, ",;");
+        _names = config.getValue(CFG_NAMES);
+        StringTokenizer st = new StringTokenizer(_names, ",;");
         if (sType == null)
             throw new InvalidActionDataException(CFG_NAMES +
                                                  " is a required option");
@@ -129,30 +136,31 @@ public class EmailActionConfig implements ActionConfigInterface {
         while (st.hasMoreTokens()) {
             String input = st.nextToken();
             
-            switch (type) {
-                case TYPE_USERS :
-                case TYPE_ROLES :
-                    try {
-                        users.add(new Integer(input));
-                    } catch (NumberFormatException e) {
-                        throw new InvalidActionDataException(
+            switch (_type) {
+            case TYPE_USERS:
+            case TYPE_ROLES:
+                try {
+                    _users.add(new Integer(input));
+                } catch (NumberFormatException e) {
+                    throw new InvalidActionDataException(
                             "ID is not a valid integer");
-                    }
-                    break;
-                default :
-                case TYPE_EMAILS :
-                    users.add(input);
-                    break;
+                }
+                break;
+            default:
+            case TYPE_EMAILS:
+                _users.add(input);
+                break;
             }
         }
     }
     
     /**
      * Returns the type.
+     * 
      * @return int
      */
     public int getType() {
-        return type;
+        return _type;
     }
 
     /**
@@ -160,7 +168,7 @@ public class EmailActionConfig implements ActionConfigInterface {
      * @param type The type to set
      */
     public void setType(int type) {
-        this.type = type;
+        _type = type;
     }
 
     /**
@@ -168,7 +176,7 @@ public class EmailActionConfig implements ActionConfigInterface {
      * @return String
      */
     public String getNames() {
-        return names;
+        return _names;
     }
 
     /**
@@ -176,7 +184,7 @@ public class EmailActionConfig implements ActionConfigInterface {
      * @param names The names to set
      */
     public void setNames(String names) {
-        this.names = names;
+        _names = names;
     }
 
     /**
@@ -184,7 +192,7 @@ public class EmailActionConfig implements ActionConfigInterface {
      * @return List
      */
     public List getUsers() {
-        return users;
+        return _users;
     }
 
     /**
@@ -192,7 +200,15 @@ public class EmailActionConfig implements ActionConfigInterface {
      * @param users The users to set
      */
     public void setUsers(List users) {
-        this.users = users;
+        _users = users;
+    }
+
+    public boolean isSms() {
+        return _sms;
+    }
+
+    public void setSms(boolean sms) {
+        _sms = sms;
     }
 
     /**
