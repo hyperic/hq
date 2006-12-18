@@ -36,24 +36,13 @@
 <script src='<html:rewrite page="/js/effects.js"/>' type="text/javascript"></script>
 
 <script type="text/javascript">
-    function getGroupOrder() {
-        var sections = $('order');
-        var alerttext = '';
-        var sectionID = $('order');
-        var order = Sortable.serialize(sectionID);
-
-        rowSeq = Sortable.sequence($('order'))+ '\n';
-        return rowSeq;
-        alert(rowSeq);
-    }
-
     function addRow() {
-        var ni = $('order');
+        var ni = $('rowOrder');
         var numi = document.getElementById('theValue');
         var num = (document.getElementById('theValue').value -1)+ 2;
         
         numi.value = num;
-        var liID = 'row'+num;
+        var liID = num;
         var escLi = document.createElement('li');
         var remDiv = document.createElement('div');
         var usersDiv = document.createElement('div');
@@ -73,11 +62,11 @@
         var select2 = document.createElement("select");
         var select3 = document.createElement("select");
         var anchor = document.createElement("a");
-        
+
         ni.appendChild(escLi);
         escLi.setAttribute((document.all ? 'className' : 'class'), "lineitem");
-        escLi.setAttribute('id', 'row' + liID);
-        
+        escLi.setAttribute('id','row_'+ liID);
+
         escLi.appendChild(remDiv);
         remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
         remDiv.style.paddingTop = "10px;"
@@ -191,8 +180,22 @@
                   inputRolesArr.name =  inputRolesArr.name + "_" + liID;
               }
           }
-      }
 
+        Sortable.create('rowOrder',{ghosting:true,constraint:false});
+
+      }
+      /*
+      function rowIDs(liID){
+         var rows = liID.id;
+
+        for(i=0;i < rows.length; i++) {
+              var rowIdList = rows[i].id;
+              var rowSplit = rowIdList.split('_');
+              var rowListID = rowSplit[1];
+            alert(rowListID)
+            }
+        }
+       */
       function onchange_handler(el) {
         //alert(el+", value="+ el.options[el.selectedIndex].value );
         var index= el.options[el.selectedIndex].value
@@ -316,13 +319,14 @@
     }
 
     onloads.push( initEsc );
-    
+
 
     function sendEscForm() {
         var adId;
         var gadId;
         var eId;
         var aetId;
+        var rowOrder = Sortable.serialize('rowOrder');
         var escFormSerial = Form.serialize('EscalationForm');
         var url = '<html:rewrite action="/escalation/saveEscalation"/>';
         if ($('gad')) {
@@ -346,14 +350,15 @@
             aetId == '';
         }
 
-        var pars = "escForm=" + escFormSerial + "&ad=" + adId + "&gad=" + gadId + "&eid=" + eId + "aetid=" + aetId;
+        var pars = "rowOrder=" + rowOrder + "escForm=" + escFormSerial + "&ad=" + adId + "&gad=" + gadId + "&eid=" + eId + "aetid=" + aetId;
         new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse, onFailure :reportError} );
+        $('example2').innerHTML = rowOrder;
     }
 
     function configure(id) {
       var sel = $('who' + id);
       var selval = sel.options[sel.selectedIndex].value;
-        alert(id);
+        
       if (selval == 'Users') {
         // Select checkboxes based on existing configs
         insertUsers(this.id);
@@ -367,37 +372,6 @@
         insertRoles(this.id);
       }
     }
-
-   /*
-    function insertRoles(el) {
-            var idStr = el.id;
-            var getId = idStr.split('_');
-            var rolesDivIn = $('rolesDiv' + getId[1]);
-            rolesInfo = $('rolesList').innerHTML;
-            rolesDivIn.innerHTML = rolesInfo;
-
-            configureRoles(rolesDivIn);
-        }
-
-    function insertUsers(el) {
-            var idStr = el;
-            var getId = idStr.split('_');
-            var usersDivIn = $('usersDiv_' + getId[1]);
-
-            usersInfo = $('usersList').innerHTML;
-            usersDivIn.innerHTML = usersInfo;
-
-            configureUsers(usersDivIn);
-        }
-
-    function insertOthers(el) {
-            var idStr = el.id;
-            var getId = idStr.split('_');
-            var othersDivIn = $('othersDiv' + getId[1]);
-
-            configureOthers(othersDivIn + getId[1]);
-        }
-  */
 
     function configureOthers(el) {
             var idStr = el;
@@ -473,45 +447,20 @@
       document.EscalationSchemeForm.submit();
     }
 
-
-sections = ['section'];
-
-    function createNewSection(name) {
-        var name = $F('sectionName');
-        if (name != '') {
-            var newDiv = Builder.node('div', {id: 'group' + (sections.length + 1), className: 'section', style: 'display:none;' }, [
-                Builder.node('h3', {className: 'handle'}, name)
-            ]);
-
-            sections.push(newDiv.id);
-            $('page').appendChild(newDiv);
-            Effect.Appear(newDiv.id);
-            destroyLineItemSortables();
-            createLineItemSortables();
-            createGroupSortable();
-        }
-    }
-
-    function createLineItemSortables() {
-        for(var i = 0; i < sections.length; i++) {
-            Sortable.create(sections[i],{tag:'li',dropOnEmpty: true, containment: sections,only:'lineitem'});
-        }
-    }
-
-    function destroyLineItemSortables() {
-        for(var i = 0; i < sections.length; i++) {
-            Sortable.destroy(sections[i]);
-        }
-    }
-
-    function createGroupSortable() {
-        Sortable.create('order',{tag:'li',only:'section',handle:'handle'});
-    }
-
     function reportError(originalRequest) {
         alert('Error ' + originalRequest.status + ' -- ' + originalRequest.statusText);
     }
 
+    function getGroupOrder() {
+        var sectionID = $('rowOrder');
+        var order = Sortable.serialize(sectionID);
+		var alerttext = Sortable.serialize('rowOrder') + '\n';
+
+		alert(alerttext);
+
+	}
+
+    //onloads.push(Behaviour.apply());
 
 </script>
 
@@ -574,9 +523,9 @@ sections = ['section'];
         <input type="text" size="25" name="escName" id="escName" /></td>
     </tr>
     <tr class="tableRowAction">
-      <td id="section" width="100%">
+      <td class="section" width="100%">
 
-      <ul id="order"></ul>
+      <ul id="rowOrder"></ul>
       <table width="100%" cellpadding="5" cellspacing="0" border="0"
         class="ToolbarContent">
         <tr>
@@ -609,6 +558,7 @@ sections = ['section'];
           <td style="padding-top:2px;padding-bottom:2px;">
             <input type="radio" name="allowPause" value="false" checked="true"/>
             <fmt:message key="alert.config.escalation.allow.continue"/>
+
             </td>
         </tr>
       </table>
@@ -642,7 +592,9 @@ sections = ['section'];
 
 <br>
 <br>
-<input type="button" value="Submit" onclick="sendEscForm();" id="submit"></input>
+<input type="button" value="Submit" onclick="sendEscForm();" id="submit"></input> <br><br>
+
+
 <div id="usersList" style="display: none;">
 <div class="ListHeader">Select Users</div>
 <ul class="boxy">
@@ -667,6 +619,8 @@ sections = ['section'];
   </div>
 </c:if></form>
 
+
 <div id="example" style="padding:10px;width:725px;overflow:auto;"></div>
+<div id="example2" style="padding:10px;width:725px;overflow:auto;"></div>
 
 

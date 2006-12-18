@@ -871,14 +871,14 @@ border-bottom:1px solid #D5D8DE;
 text-align:center;
 }
 
-#order { 
+#rowOrder {
   list-style-type:none;
   margin:0;
   margin-right: 5px;
   padding:0;
 }
 
-#order li {
+#rowOrder li {
   font:13px Verdana;
   margin:0;
   padding:4px;
@@ -905,3 +905,5 @@ text-align:center;
   width: 100%;
 }
 
+.lineitem {    
+}
