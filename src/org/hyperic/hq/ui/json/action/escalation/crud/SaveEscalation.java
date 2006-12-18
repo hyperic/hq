@@ -1,3 +1,28 @@
+/*                                                                 
+ * NOTE: This copyright does *not* cover user programs that use HQ 
+ * program services by normal system calls through the application 
+ * program interfaces provided as part of the Hyperic Plug-in Development 
+ * Kit or the Hyperic Client Development Kit - this is merely considered 
+ * normal use of the program, and does *not* fall under the heading of 
+ * "derived work". 
+ *  
+ * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * This file is part of HQ.         
+ *  
+ * HQ is free software; you can redistribute it and/or modify 
+ * it under the terms version 2 of the GNU General Public License as 
+ * published by the Free Software Foundation. This program is distributed 
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without 
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+ * PARTICULAR PURPOSE. See the GNU General Public License for more 
+ * details. 
+ *                
+ * You should have received a copy of the GNU General Public License 
+ * along with this program; if not, write to the Free Software 
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 
+ * USA. 
+ */
+
 package org.hyperic.hq.ui.json.action.escalation.crud;
 
 import org.hyperic.hq.ui.json.action.escalation.BaseAction;
@@ -8,7 +33,6 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
-import org.hyperic.hq.events.server.session.EscalationState;
 import org.json.JSONException;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -21,8 +45,6 @@ import java.util.TreeMap;
 import java.util.List;
 import java.util.StringTokenizer;
 
-/**
- */
 public class SaveEscalation extends BaseAction
 {
     // action type
@@ -75,6 +97,9 @@ public class SaveEscalation extends BaseAction
             } else if (obj instanceof SyslogActionData) {
                 SyslogActionData slog = (SyslogActionData)obj;
                 action = slog.toJSON();
+            } else if (obj instanceof NoOpActionData) {
+                NoOpActionData noop = (NoOpActionData)obj;
+                action = noop.toJSON();
             } else {
                 throw new IllegalArgumentException("Unsupported object type "
                                                    +obj.getClass().getName());
@@ -138,6 +163,16 @@ public class SaveEscalation extends BaseAction
                         (String[])map.get(USER_PREFIX + row),
                         (String[])map.get(ROLE_PREFIX + row),
                         (String[])map.get(OTHER_PREFIX + row),
+                        false,
+                        (String[])map.get(WAITTIME_PREFIX + row)
+                    ));
+                } else if ("sms".equalsIgnoreCase(values[0])) {
+                    actions.add(new EmailActionData(
+                        (String[])map.get(WHO_PREFIX + row),
+                        (String[])map.get(USER_PREFIX + row),
+                        (String[])map.get(ROLE_PREFIX + row),
+                        (String[])map.get(OTHER_PREFIX + row),
+                        true,
                         (String[])map.get(WAITTIME_PREFIX + row)
                     ));
                 } else if ("syslog".equalsIgnoreCase(values[0])) {
@@ -145,6 +180,10 @@ public class SaveEscalation extends BaseAction
                         (String[])map.get(META_PREFIX + row),
                         (String[])map.get(PRODUCT_PREFIX + row),
                         (String[])map.get(VERSION_PREFIX + row),
+                        (String[])map.get(WAITTIME_PREFIX + row)
+                    ));
+                } else if ("noop".equalsIgnoreCase(values[0])) {
+                    actions.add(new NoOpActionData(
                         (String[])map.get(WAITTIME_PREFIX + row)
                     ));
                 } else {
@@ -184,14 +223,30 @@ public class SaveEscalation extends BaseAction
         }
         return rowMap;
     }
+    
+    private static class NoOpActionData extends ActionData
+    {
+        NoOpActionData(String[] timearr) {
+            super(null, null, timearr);
+        }
+        
+        public JSONObject toJSON() throws JSONException
+        {
+            JSONObject action = super.toJSON().put("className", "NoOpAction");
+            action.put("config", new JSONObject());
+
+            return action;
+        }        
+    }
 
     private static class EmailActionData extends ActionData
     {
         int listType;
         String names;
+        boolean _sms;
 
         EmailActionData(String[] type, String[] narr, String[] roles,
-                        String[] others, String[] time)
+                        String[] others, boolean sms, String[] time)
         {
             super(null, null, time);
 
@@ -221,6 +276,8 @@ public class SaveEscalation extends BaseAction
                 }
                 names = buf.toString();
             }
+            
+            _sms = sms;
         }
 
         public JSONObject toJSON() throws JSONException
@@ -230,7 +287,8 @@ public class SaveEscalation extends BaseAction
 
             JSONObject config =  new JSONObject()
                 .put("listType", listType)
-                .put("names", names);
+                .put("names", names)
+                .put("sms", _sms);
 
             action.put("config", config);
 
