@@ -56,8 +56,8 @@ public class PagerProcessor_events implements PagerProcessor {
                 return ((AlertDefinition) o).getAlertDefinitionValue();
             }
         } catch (Exception e) {
-            throw new SystemException("Error converting to value object: " + e,
-                                      e);
+            throw new SystemException("Error converting " + o +
+                                      " to value object: " + e, e);
         }
         
         if (log.isDebugEnabled())
