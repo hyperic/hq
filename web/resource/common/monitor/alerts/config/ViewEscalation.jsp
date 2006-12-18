@@ -42,7 +42,7 @@
         var num = (document.getElementById('theValue').value -1)+ 2;
         
         numi.value = num;
-        var liID = num;
+        var liID = 'row'+num;
         var escLi = document.createElement('li');
         var remDiv = document.createElement('div');
         var usersDiv = document.createElement('div');
