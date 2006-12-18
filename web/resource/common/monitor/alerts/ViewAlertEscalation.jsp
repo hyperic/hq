@@ -46,8 +46,7 @@
 </script>
 
 <table cellpadding="0" cellspacing="0" border="0" width="100%">
-  <c:forEach var="log" varStatus="status" items="${alert.actionLogs}">
-    <c:if test="${empty log.actionId}">
+  <c:forEach var="log" varStatus="status" items="${alert.escalationLogs}">
   <tr>
     <td width="20%" class="BlockLabel" style="border-bottom: solid #D5D8DE 1px;">
     <fmt:message key="alert.current.detail.escalation.action">
@@ -58,7 +57,6 @@
       <c:out value="${log.detail}"/>
     </td>
   </tr>
-    </c:if>
   </c:forEach>
   <tr>
     <td rowspan="2" width="20%" class="BlockLabel">&nbsp;</td>
