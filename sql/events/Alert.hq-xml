@@ -30,7 +30,7 @@
       <column name="ALERT_DEFINITION_ID" index="ALERT_IDX_ALERTDEFINITION" />
     </many-to-one>
 
-    <bag name="actionLogBag" table="EAM_ALERT_ACTION_LOG">
+    <bag name="actionLogBag" table="EAM_ALERT_ACTION_LOG" order-by="ID">
       <key column="ALERT_ID" />
       <one-to-many class="AlertActionLog" />
     </bag>
