@@ -9,6 +9,7 @@
     <!ENTITY hibernate-build SYSTEM "build_util/hibernate-build.xml">
     <!ENTITY dbsetup-build SYSTEM "build_util/dbsetup-build.xml">
     <!ENTITY test-build SYSTEM "build_util/test-build.xml">
+    <!ENTITY aspectj-build SYSTEM "build_util/aspectj-build.xml">
 ]>
 
 <project name="HQ" default="build" basedir=".">
@@ -133,13 +134,23 @@
     <path location="${build.dir}/classes" />
   </path>
 
+  <path id="jboss-aop.path">
+    <pathelement path="${thirdparty.lib}/aop/javassist.jar"/>
+      <pathelement path="${thirdparty.lib}/aop/jboss-aop.jar"/>
+      <pathelement path="${thirdparty.lib}/aop/jboss-common.jar"/>
+      <pathelement path="${thirdparty.lib}/aop/trove.jar"/>
+      <pathelement path="${thirdparty.lib}/aop/concurrent.jar"/>
+  </path>
+    
   <!-- Source common targets -->
   &util-build;
   &test-build;
-
+  &aspectj-build;
+    
   <target name="init-props" unless="init-props.notrequired">
      <property file="${version.properties}" />
      <property name="release.comment" value="Development Build"/>
+     <property name="aspectdir" value="${basedir}/etc/aspects"/>
 
      <echo>${release.comment}, version: ${version}, build number: ${build}</echo>
      <property name="init-props.notrequired" value="true"/>
@@ -161,6 +172,14 @@
         </javac>
       </sequential>
     </macrodef>
+    
+    <taskdef 
+           resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties">
+      <classpath>
+        <pathelement location="${thirdparty.lib}/aop/aspectjtools.jar"/>
+      </classpath>
+    </taskdef>
+
     <property name="init-internal-taskdefs.notrequired" value="true"/>
   </target>
 
@@ -179,7 +198,6 @@
       
     <property name="init-taskdefs.notrequired" value="true"/>
   </target>
-
 
   <!-- ==================== Compile java sources ==================== -->
   <target name="compile" description="Compile sources" 
@@ -312,6 +330,7 @@
 
     <!-- TODO: Create separate jars for each component -->
     <jar file="${ear.dir}/hq.jar" basedir="${build.dir}/classes" >
+      <include name="SessionAspect*"/>
       <include name="images/**" />
       <include name="org/hyperic/**" />
       <exclude name="org/hyperic/hq/ui/**" />
@@ -396,6 +415,9 @@
           <exclude name="sigar.jar" />
        </fileset>
     </copy>
+
+    <copy tofile="${ear.dir}/lib/aspectjrt.jar" 
+          file="${thirdparty.lib}/aop/aspectjrt.jar" />
 
     <copy tofile="${ear.dir}/lib/jakarta-oro.jar" 
           file="${thirdparty.lib}/jakarta-oro-2.0.7.jar" />
@@ -1174,7 +1196,8 @@
           depends="init,xdoclet,hibernate-pojo,build" >
   </target>
 
- <target name="build" depends="init,compile,pack" description="Compile and pack - no code generation" >
+ <target name="build" depends="init,compile,aspectize-classes,pack" 
+         description="Compile and pack - no code generation" >
     <!--  Triger jboss reloading -->
   </target>
 
