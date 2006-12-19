@@ -63,14 +63,16 @@ import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.dao.RoleDAO;
+import org.hyperic.hq.hibernate.RequiresSession;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 
 /**
  * This is the parent class for all Authz Session Beans
  */
-public abstract class AuthzSession {
-
+public abstract class AuthzSession 
+    implements RequiresSession
+{ 
     public static final Log log
         = LogFactory.getLog(AuthzSession.class.getName());
 
@@ -369,12 +371,6 @@ public abstract class AuthzSession {
     /**
      * Filter a collection of groupLocal objects to only include those viewable
      * by the specified user
-     * @throws NamingException 
-     * @throws FinderException 
-     * @throws PermissionException 
-     * @ 
-     * @throws NamingException 
-     * @throws PermissionException 
      */
     protected Collection filterViewableGroups(AuthzSubjectValue who,
                                               Collection groups)

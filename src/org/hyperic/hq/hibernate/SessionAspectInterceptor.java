@@ -26,10 +26,13 @@ public class SessionAspectInterceptor {
     private SessionAspectInterceptor() {
     }
 
-    private boolean setupSessionInternal() {
+    private boolean setupSessionInternal(String dbgTxt) {
         Session s = (Session)_sessions.get();
         
         if (s == null) {
+            if (dbgTxt != null)
+                _log.info("New Session:  [" + dbgTxt + "]");
+            
             if (_log.isDebugEnabled()) {
                 _log.debug("Setting up session for Thread[" + 
                            Thread.currentThread().getName() + "]");
@@ -41,8 +44,8 @@ public class SessionAspectInterceptor {
         return false;
     }
     
-    public static boolean setupSession() {
-        return INSTANCE.setupSessionInternal();
+    public static boolean setupSession(String dbgTxt) {
+        return INSTANCE.setupSessionInternal(dbgTxt);
     }
     
     private void cleanupSessionInternal() {
