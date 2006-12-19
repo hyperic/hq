@@ -54,8 +54,6 @@ import org.jboss.deployment.SubDeployerSupport;
 import org.jboss.deployment.DeploymentInfo;
 import org.jboss.deployment.DeploymentException;
 
-import org.hyperic.hq.product.server.UpgradeUtil;
-
 import org.hyperic.hq.product.shared.ProductManagerLocal;
 import org.hyperic.hq.product.shared.ProductManagerUtil;
 
@@ -440,9 +438,6 @@ public class ProductPluginDeployer
             _log.error("Unable to startup group manager", e);
             throw new SystemException(e);           
         }
-        
-        // Do any inventory cleanups
-        UpgradeUtil.removeOldResources();
         
         setReady(true);
     }
