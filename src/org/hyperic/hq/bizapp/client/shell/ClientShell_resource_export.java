@@ -459,7 +459,8 @@ public class ClientShell_resource_export
         ps.println(s1 + "<service name=\"" + s.getName() + "\"");
         ps.println(s2 + "type=\"" + st.getName() + "\"");
 
-        if (s.getParentId().intValue() != 0) {
+        if (s.getParentId() != null &&
+            s.getParentId().intValue() != 0) {
             ps.println(s2 + "parentservice=\"" + s.getParentId() + "\"");
         }
 
