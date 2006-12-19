@@ -80,7 +80,6 @@ public class GalertProcessor {
         ZeventSourceId source = event.getSourceId();
         Set listenerDupe;
 
-        _log.info("Processing event: " + event);
         synchronized (CFG_LOCK) {
             Set listeners = (Set)_listeners.get(source);
             
