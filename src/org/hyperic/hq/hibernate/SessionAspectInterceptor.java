@@ -30,8 +30,10 @@ public class SessionAspectInterceptor {
         Session s = (Session)_sessions.get();
         
         if (s == null) {
-            _log.info("Setting up session for Thread[" + 
-                      Thread.currentThread().getName() + "]");
+            if (_log.isDebugEnabled()) {
+                _log.debug("Setting up session for Thread[" + 
+                           Thread.currentThread().getName() + "]");
+            }
             s = _factory.openSession();
             _sessions.set(s);
             return true;
@@ -47,8 +49,11 @@ public class SessionAspectInterceptor {
         Session s = (Session)_sessions.get();
         
         try {
-            _log.info("Closing session for Thread[" + 
-                      Thread.currentThread().getName() + "]");
+            if (_log.isDebugEnabled()) {
+                _log.debug("Closing session for Thread[" + 
+                           Thread.currentThread().getName() + "]");
+            }
+            
             _sessions.set(null);
             s.close();
         } catch(HibernateException e) {
