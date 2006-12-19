@@ -19,7 +19,6 @@ import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.units.FormattedNumber;
-import org.hyperic.util.config.InvalidOptionException;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionForm;
@@ -65,11 +64,13 @@ public class ViewAction extends BaseAction {
         String resKey = PropertiesForm.RESOURCES;
         String resTypeKey = PropertiesForm.RES_TYPE;
         String metricKey = PropertiesForm.METRIC;
+        String descendingKey = PropertiesForm.DECSENDING;
         if (token != null) {
             numKey += token;
             resKey += token;
             resTypeKey += token;
             metricKey += token;
+            descendingKey += token;
         }
 
         JSONObject res = new JSONObject();
@@ -85,6 +86,8 @@ public class ViewAction extends BaseAction {
             (AppdefEntityID[])entityIds.toArray(new AppdefEntityID[0]);
         int count = Integer.parseInt(user.getPreference(numKey, "10"));
         String metric = user.getPreference(metricKey, "");
+        boolean isDescending =
+            Boolean.valueOf(user.getPreference(descendingKey, "true")).booleanValue();
 
         // Validate
         if (arrayIds.length == 0 || count == 0 || metric.length() == 0) {
@@ -106,7 +109,8 @@ public class ViewAction extends BaseAction {
             appdefBoss.findResourceTypeById(sessionId, typeId);
 
         PageList resources = appdefBoss.findByIds(sessionId, arrayIds);
-        TreeSet sortedSet = new TreeSet(new MetricSummaryComparator());
+        TreeSet sortedSet =
+            new TreeSet(new MetricSummaryComparator(isDescending));
         for (Iterator i = resources.iterator(); i.hasNext(); ) {
             AppdefResourceValue rValue = (AppdefResourceValue)i.next();
             MetricValue[] val = mBoss.getLastMetricValue(sessionId,
@@ -176,6 +180,12 @@ public class ViewAction extends BaseAction {
 
     private class MetricSummaryComparator implements Comparator {
 
+        private boolean _decending;
+
+        public MetricSummaryComparator(boolean decending) {
+            _decending = decending;
+        }
+
         public int compare(Object o1, Object o2) {
             MetricSummary s1 = (MetricSummary)o1;
             MetricSummary s2 = (MetricSummary)o2;
@@ -188,9 +198,17 @@ public class ViewAction extends BaseAction {
                 String n2 = s2.getAppdefResourceValue().getName();
                 return n1.compareTo(n2);
             } else if (m1.getValue() < m2.getValue()) {
-                return 1;
+                if (_decending) {
+                    return 1;
+                } else {
+                    return -1;
+                }
             } else {
-                return -1;
+                if (_decending) {
+                    return -1;
+                } else {
+                    return 1;
+                }
             }
         }
     }

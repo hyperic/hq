@@ -121,6 +121,15 @@ var help = '<hq:help/>';
              </html:select>
           </td>
         </tr>
+        <tr valign="top">
+            <td width="20%" class="BlockLabel" valign="center"><fmt:message key="dash.settings.FormLabel.SortOrder"/></td>
+            <td width="80%" class="BlockContent" colspan="3" valign="center">
+               <html:select property="descending">
+                 <html:option value="true"><fmt:message key="dash.settings.metricViewer.descending"/></html:option>
+                 <html:option value="false"><fmt:message key="dash.settings.metricViewer.ascending"/></html:option>
+               </html:select>
+            </td>
+        </tr>
         <tr>
           <td colspan="4" class="BlockContent"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
         </tr>

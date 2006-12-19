@@ -5,8 +5,6 @@ import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionForm;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -20,7 +18,6 @@ import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.InvalidOptionException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,8 +29,6 @@ import java.util.Iterator;
 import java.util.ArrayList;
 
 public class PrepareAction extends TilesAction {
-
-    private Log _log = LogFactory.getLog("METRIC VIEWER");
 
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
@@ -60,17 +55,20 @@ public class PrepareAction extends TilesAction {
         String resKey = PropertiesForm.RESOURCES;
         String resTypeKey = PropertiesForm.RES_TYPE;
         String metricKey = PropertiesForm.METRIC;
+        String descendingKey = PropertiesForm.DECSENDING;
         if (token != null) {
             numKey += token;
             resKey += token;
             resTypeKey += token;
             metricKey += token;
+            descendingKey += token;
         }
 
         // We set defaults here rather than in DefaultUserPreferences.properites
         Integer numberToShow = new Integer(user.getPreference(numKey, "10"));
         String resourceType = user.getPreference(resTypeKey, "");
         String metric = user.getPreference(metricKey, "");
+        String descending = user.getPreference(descendingKey, "true");
         List resourceList;
         try {
             resourceList =
@@ -85,7 +83,8 @@ public class PrepareAction extends TilesAction {
             pForm.setResourceType(resourceType);
         }
         pForm.setMetric(metric);
-
+        pForm.setDescending(descending);
+        
         Iterator i = resourceList.iterator();
         while(i.hasNext()) {
             String appdefKey = (String)i.next();
@@ -96,6 +95,7 @@ public class PrepareAction extends TilesAction {
         }
 
         resources.setTotalSize(resources.size());
+        request.setAttribute("descending", descending);
         request.setAttribute("metricViewerList", resources);
         request.setAttribute("metricViewerTotalSize",
                              new Integer(resources.getTotalSize()));

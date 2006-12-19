@@ -54,16 +54,19 @@ public class ModifyAction extends BaseAction {
         String resKey = PropertiesForm.RESOURCES;
         String resTypeKey = PropertiesForm.RES_TYPE;
         String metricKey = PropertiesForm.METRIC;
+        String descendingKey = PropertiesForm.DECSENDING;
         if (token != null) {
             numKey += token;
             resKey += token;
             resTypeKey += token;
             metricKey += token;
+            descendingKey += token;
         }
 
         Integer numberToShow = pForm.getNumberToShow();
         String resourceType = pForm.getResourceType();
         String metric = pForm.getMetric();
+        String descending = pForm.getDescending();
 
         // If the selected resource type does not match the previous value,
         // clear out the resources
@@ -78,6 +81,7 @@ public class ModifyAction extends BaseAction {
         user.setPreference(resTypeKey, resourceType);
         user.setPreference(numKey, numberToShow.toString());
         user.setPreference(metricKey, metric);
+        user.setPreference(descendingKey, descending);
 
         boss.setUserPrefs(user.getSessionId(), user.getId(),
                           user.getPreferences());
