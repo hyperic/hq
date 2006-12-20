@@ -38,21 +38,34 @@
 
 
 <script type="text/javascript">
-onloads.push(showViewEscResponse);
+//onloads.push(requestViewEscalation);
 
- /*
+
  function requestViewEscalation() {
-        //var alertDefId = $('alertDefId').value;
-        //var url = "/escalation/jsonEscalationByAlertDefId/" + alertDefId;
-        //new Ajax.Request(url, {method: 'get', onSuccess:showViewEscResponse, onFailure :reportError});
+        var alertDefId = $('alertDefId').value;
+        var url = '../escalation/jsonEscalationByAlertDefId.do?id=' + alertDefId;
+        new Ajax.Request(url, {method: 'get', onSuccess:showViewEscResponse, onFailure :reportError});
 
-        new Ajax.Request("<html:rewrite page="/js/sampleEsc.html"/>", {method: 'get', onSuccess:showViewEscResponse, onFailure :reportError});
-		}
-		*/
+        }
 
-function showViewEscResponse() {
 
+function showViewEscResponse(originalRequest) {
+
+        var viewEscText = eval("(" + originalRequest.responseText + ")");
+		var escTextActions = viewEscText.escalation;
+        var escTextAction = escTextActions.actions;
         var escViewUL = $('viewEscalationUL');
+
+        escViewUL.innerHTML = viewEscText;
+        escViewUL.innerHTML = "<br><br>" + sviewEscText.action;
+                
+        for(var i=escViewUL.childNodes.length-1; i>1; i--){
+			escViewUL.removeChild(escViewUL.childNodes[i]);
+		}
+
+		for (i=0; i<escTextAction.action.length; i++) {
+        //alert(escTextAction.action.config[i])
+
 
         var num = $('alertDefId').value;
 		var liID = 'row'+num;
@@ -151,7 +164,7 @@ function showViewEscResponse() {
         }
 
         Sortable.create(escViewUL,{ghosting:true,constraint:false});
-
+       }
 
 }
 
@@ -754,7 +767,7 @@ function showViewEscResponse() {
 
  <form name="viewEscalation" id="viewEscalation">
 
-      <input type="hidden" id="alertDefId" name="alertDefId" value='<c:out value="${param.ad}"/>' />
+      <input type="hidden" id="alertDefId" name="alertDefId" value='<c:out value="${alertDef.id}"/>' />
    
     
      <table width="100%" cellpadding="3" cellspacing="0" border="0">
@@ -769,6 +782,10 @@ function showViewEscResponse() {
         </tbody>
      </table>
 
+
+     <br>
+<br>
+<input type="button" value="check escalation values" onclick="requestViewEscalation();" id="submit"></input> <br><br>
  </form>
 
 <div id="example" style="padding:10px;width:725px;overflow:auto;"></div>
