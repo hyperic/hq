@@ -23,12 +23,6 @@
     <param-value>false</param-value>
   </context-param>
   
-  <!-- Hibernate session filter -->
-  <filter>
-    <filter-name>Hibernate-Session-Filter</filter-name>
-    <filter-class>org.hyperic.hibernate.filter.SessionFilter</filter-class>
-  </filter>      
-  
   <!-- authen filter -->
   <filter>
     <filter-name>Authentication-Filter</filter-name>
@@ -36,11 +30,6 @@
       org.hyperic.hq.ui.AuthenticationFilter
     </filter-class>
   </filter>  
-
-  <filter-mapping>
-    <filter-name>Hibernate-Session-Filter</filter-name>
-    <url-pattern>/*</url-pattern>
-  </filter-mapping>
 
   <filter-mapping>
     <filter-name>Authentication-Filter</filter-name>
