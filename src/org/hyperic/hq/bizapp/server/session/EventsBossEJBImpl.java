@@ -1549,6 +1549,24 @@ public class EventsBossEJBImpl extends BizappSessionEJB
     }
 
     /**
+     * retrieve escalation object by escalation id.
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public Escalation findEscalationById(int sessionID, Integer id)
+        throws SessionTimeoutException, SessionNotFoundException,
+        PermissionException, JSONException
+    {
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        Escalation e = EscalationMediator.getInstance()
+                .findByEscalationId(subject.getId(), id);
+        e.isAllowPause();       // Temporarily get around lazy loading problem
+        e.getMaxWaitTime();
+        return e;
+    }
+
+    /**
      * retrieve all escalation policy names as a Array of JSONObject.
      *
      * Escalation json finders begin with json* to be consistent with
