@@ -31,6 +31,13 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.tiles.ComponentContext;
+import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.events.EventConstants;
@@ -47,14 +54,6 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.NumberUtil;
 import org.hyperic.util.units.FormatSpecifics;
 import org.hyperic.util.units.FormattedNumber;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
-import org.apache.struts.tiles.actions.TilesAction;
 
 /**
  * View an alert.
@@ -74,9 +73,7 @@ public class ViewAlertAction extends TilesAction {
         throws Exception
     {
         // pass-through the alertId
-        Integer alertId = new Integer( request.getParameter("a") );
-        log.trace("alertId=" + alertId);
-        request.setAttribute("a", alertId);
+        Integer alertId = RequestUtils.getIntParameter(request, "a");
         
         ServletContext ctx = getServlet().getServletContext();
         int sessionID = RequestUtils.getSessionId(request).intValue();
@@ -89,11 +86,16 @@ public class ViewAlertAction extends TilesAction {
         AlertDefinitionValue adv =
             eb.getAlertDefinition( sessionID, av.getAlertDefId() );
         request.setAttribute(Constants.ALERT_DEFINITION_ATTR, adv);
+        
+        if (adv.getEscalationId() != null) {
+            request.setAttribute("escalation",
+                                 eb.findEscalationById(sessionID,
+                                                       adv.getEscalationId()));
+        }            
 
         // conditions
         AlertConditionLogValue[] condLogs = av.getConditionLogs();
-        AlertConditionValue[] conds =
-            new AlertConditionValue[condLogs.length];
+        AlertConditionValue[] conds = new AlertConditionValue[condLogs.length];
         for (int i = 0; i < condLogs.length; i++) {
             conds[i] = condLogs[i].getCondition();
         }
