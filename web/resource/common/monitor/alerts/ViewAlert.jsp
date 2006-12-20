@@ -35,7 +35,7 @@
 <c:if test="${not empty alert and not empty alertDef}">
 
 <form name="AlertForm" action="<html:rewrite action="/alerts/Alerts"/>">
-<input type=hidden name="a" value="<c:out value="${a}"/>"/>
+<input type=hidden name="a" value="<c:out value="${alert.id}"/>"/>
 <input type=hidden name="mode" id="mode" value=""/>
 
 <tiles:insert definition=".page.title.events">

@@ -29,6 +29,7 @@
   USA.
  --%>
 
+<c:if test="${not empty escalation}">
 <!-- Content Block Title: Notification -->
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="monitoring.events.MiniTabs.Escalation"/>
@@ -61,17 +62,29 @@
   <tr>
     <td rowspan="2" width="20%" class="BlockLabel">&nbsp;</td>
     <td nowrap="true" class="BlockContent" style="padding: 10px;">
+  <c:if test="${escalation.allowPause}">
       <input type=checkbox name="pause" value="true"/>
       <fmt:message key="alert.escalation.pause"/>
       <select name="pauseTime">
         <option value="300000">5</option>
+        <c:if test="${escalation.maxWaitTime >= 600000}">
         <option value="600000">10</option>
+        <c:if test="${escalation.maxWaitTime >= 900000}">
         <option value="900000">15</option>
+        <c:if test="${escalation.maxWaitTime >= 1200000}">
         <option value="1200000">20</option>
+        <c:if test="${escalation.maxWaitTime >= 1800000}">
         <option value="1800000">30</option>
+        <c:if test="${escalation.maxWaitTime >= 3600000}">
         <option value="3600000">60</option>
+        </c:if>
+        </c:if>
+        </c:if>
+        </c:if>
+        </c:if>
       </select>
       <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>
+  </c:if>&nbsp;
     </td>
     <td rowspan="2" width="60%" class="BlockLabel">&nbsp;</td>
   </tr>
@@ -90,4 +103,4 @@
   </tr>
 </table>
 <br/>
-
+</c:if>
