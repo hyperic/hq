@@ -1,20 +1,22 @@
 package org.hyperic.hq.ui.json.action;
 
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.action.ActionForm;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.json.JSONResult;
-import org.hyperic.hq.common.SystemException;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.servlet.ServletException;
-import javax.servlet.ServletContext;
-import java.util.HashMap;
-import java.util.Map;
-import java.io.Writer;
-import java.io.IOException;
+
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.ui.action.BaseActionMapping;
+import org.hyperic.hq.ui.json.JSONResult;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * context for json struts action apis
@@ -52,7 +54,7 @@ public class JsonActionContext extends HashMap
 
     public Integer getId()
     {
-        String id = getMapping().getParameter();
+        String id = RequestUtils.getStringParameter(getRequest(), "id");
         return Integer.valueOf(id);
     }
 
@@ -112,9 +114,9 @@ public class JsonActionContext extends HashMap
         return getRequest().getSession();
     }
 
-    private ActionMapping getMapping()
+    private BaseActionMapping getMapping()
     {
-        return (ActionMapping)get(ACTION_MAPPING);
+        return (BaseActionMapping)get(ACTION_MAPPING);
     }
 
     public HttpServletRequest getRequest()
