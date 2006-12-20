@@ -32,6 +32,9 @@
 
 <tiles:insert page="/admin/config/AdminHomeNav.jsp"/>
 
+<tiles:insert definition=".portlet.error"/>
+<tiles:insert definition=".portlet.confirm"/>
+
 <table id="escalations" width="100%" cellpadding="0" cellspacing="0"><tr class="ListRow"><td colspan="2" class="ListHeaderInactiveSorted">Escalation Scheme</td></tr></table>
 
 <!-- Do the delete button here so that we don't have to try to duplicate it in javascript -->
