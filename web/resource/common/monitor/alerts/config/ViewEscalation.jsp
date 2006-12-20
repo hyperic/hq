@@ -641,9 +641,6 @@ function showViewEscResponse(originalRequest) {
   <html:hidden property="escId" />
 </html:form>
 
-<tiles:insert definition=".portlet.confirm" />
-<tiles:insert definition=".portlet.error" />
-
 <form action='<html:rewrite action="/escalation/saveEscalation"/>'
   name="EscalationForm" id="EscalationForm" onchange="hideExample();"><input type="hidden"
   value="0" id="pid"> <input type="hidden" value="0" id="pversion">
