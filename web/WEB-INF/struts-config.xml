@@ -2488,13 +2488,11 @@
               type="org.hyperic.hq.ui.json.action.escalation.finder.ListAll{1}Name"
               parameter="{2}"/>
 
-      <action path="/escalation/jsonEscalationByAlertDefId"
-              type="org.hyperic.hq.ui.json.action.escalation.finder.JsonEscalationByAlertDefId" />
-
-      <action path="/escalation/json/*/*"
-              type="org.hyperic.hq.ui.json.action.escalation.finder.Json{1}"
+      <action path="/escalation/json*ByAlertDefId/*"
+              scope="request"
+              type="org.hyperic.hq.ui.json.action.escalation.finder.Json{1}ByAlertDefId"
               parameter="{2}"/>
-      
+
   </action-mappings>
 
 <!-- ===================================== Controller Configuration -->
