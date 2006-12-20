@@ -88,6 +88,7 @@ function showViewEscResponse(originalRequest) {
         var emailDiv = document.createElement('div');
         var sysDiv = document.createElement('div');
         var escTable = document.createElement('table');
+        var escTableBody = document.createElement('tbody');
         var escTr1 = document.createElement('tr');
         var escTr2 = document.createElement('tr');
         var td1 = document.createElement('td');
@@ -119,7 +120,7 @@ function showViewEscResponse(originalRequest) {
         viewLi.appendChild(escTable);
         escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
         escTable.setAttribute('border', '0');
-
+        escTable.appendChild(escTableBody);
         // Put the "wait" select after other options
         escTable.appendChild(escTr2);
         escTable.appendChild(escTr1);
@@ -194,6 +195,7 @@ function showViewEscResponse(originalRequest) {
         var emailDiv = document.createElement('div');
         var sysDiv = document.createElement('div');
         var escTable = document.createElement('table');
+        var escTableBody = document.createElement('tbody');
         var escTr1 = document.createElement('tr');
         var escTr2 = document.createElement('tr');
         var td1 = document.createElement('td');
@@ -218,7 +220,7 @@ function showViewEscResponse(originalRequest) {
         escLi.appendChild(escTable);
         escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
         escTable.setAttribute('border', '0');
-        
+        escTable.appendChild(escTableBody);
         // Put the "wait" select after other options
         escTable.appendChild(escTr2);
         escTable.appendChild(escTr1);
