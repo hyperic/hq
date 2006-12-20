@@ -26,12 +26,38 @@ public class SessionAspectInterceptor {
     private SessionAspectInterceptor() {
     }
 
+    public interface SessionRunner {
+        void run() throws Exception;
+        String getName();
+    }
+    
+    public static void runInSession(SessionRunner r) 
+        throws Exception
+    {
+        INSTANCE.runInSessionInternal(r);
+    }
+    
+    private void runInSessionInternal(SessionRunner r) 
+        throws Exception
+    {
+        boolean setup = false;
+        
+        try {
+            setup = setupSessionInternal(r.getName());
+            r.run();
+        } finally {
+            if (setup)
+                cleanupSessionInternal();
+        }
+    }
+    
     private boolean setupSessionInternal(String dbgTxt) {
         Session s = (Session)_sessions.get();
         
         if (s == null) {
-            if (dbgTxt != null)
+            if (dbgTxt != null && false /* Disabled for now */) {
                 _log.info("New Session:  [" + dbgTxt + "]");
+            }
             
             if (_log.isDebugEnabled()) {
                 _log.debug("Setting up session for Thread[" + 
@@ -58,6 +84,7 @@ public class SessionAspectInterceptor {
             }
             
             _sessions.set(null);
+            s.flush();
             s.close();
         } catch(HibernateException e) {
             _log.warn("Error closing session", e);
