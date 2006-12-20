@@ -15,6 +15,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.ui.action.BaseActionMapping;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.json.JSONResult;
 import org.hyperic.hq.ui.util.RequestUtils;
 
@@ -54,7 +55,12 @@ public class JsonActionContext extends HashMap
 
     public Integer getId()
     {
-        String id = RequestUtils.getStringParameter(getRequest(), "id");
+        String id;
+        try {
+            id = RequestUtils.getStringParameter(getRequest(), "id");
+        } catch (ParameterNotFoundException e) {
+            id = getMapping().getParameter();
+        }
         return Integer.valueOf(id);
     }
 
