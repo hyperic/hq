@@ -35,6 +35,7 @@ public class UpdateEscalation extends BaseAction
     // action names
     private static final String LIST_TYPE_PRFIX = "listType_";
     private static final String NAMES_PREFIX = "names_";
+    private static final String SMS_PREFIX = "sms_";
     private static final String VERSION_PREFIX = "_version__";
     private static final String CLASSNAME_PREFIX = "className_";
     private static final String PRODUCT_PREFIX = "product_";
@@ -69,6 +70,9 @@ public class UpdateEscalation extends BaseAction
             } else if (obj instanceof SyslogActionData) {
                 SyslogActionData slog = (SyslogActionData)obj;
                 action = slog.toJSON();
+            } else if (obj instanceof NoOpActionData) {
+                NoOpActionData noop = (NoOpActionData)obj;
+                action = noop.toJSON();
             } else {
                 throw new IllegalArgumentException("Unsupported object type "
                                                    +obj.getClass().getName());
@@ -150,6 +154,7 @@ public class UpdateEscalation extends BaseAction
                     (String[])map.get(VERS_PREFIX + id),
                     (String[])map.get(LIST_TYPE_PRFIX + id),
                     (String[])map.get(NAMES_PREFIX + id),
+                    (String[])map.get(SMS_PREFIX + id),
                     (String[])map.get(WAITTIME_PREFIX + id)
                 ));
             } else if (className[0].equals("SyslogAction")) {
@@ -159,6 +164,10 @@ public class UpdateEscalation extends BaseAction
                     (String[])map.get(META_PREFIX + id),
                     (String[])map.get(PRODUCT_PREFIX + id),
                     (String[])map.get(VERSION_PREFIX + id),
+                    (String[])map.get(WAITTIME_PREFIX + id)
+                ));
+            } else if (className[0].equals("NoOpAction")) {
+                actions.add(new NoOpActionData(
                     (String[])map.get(WAITTIME_PREFIX + id)
                 ));
             } else {
@@ -177,6 +186,7 @@ public class UpdateEscalation extends BaseAction
             String key = (String)i.next();
             if (key.startsWith(LIST_TYPE_PRFIX) ||
                 key.startsWith(NAMES_PREFIX) ||
+                key.startsWith(SMS_PREFIX) ||
                 key.startsWith(VERSION_PREFIX) ||
                 key.startsWith(PRODUCT_PREFIX) ||
                 key.startsWith(CLASSNAME_PREFIX) ||
@@ -197,13 +207,29 @@ public class UpdateEscalation extends BaseAction
         return idMap;
     }
 
+    private static class NoOpActionData extends ActionData
+    {
+        NoOpActionData(String[] timearr) {
+            super(null, null, timearr);
+        }
+
+        public JSONObject toJSON() throws JSONException
+        {
+            JSONObject action = super.toJSON().put("className", "NoOpAction");
+            action.put("config", new JSONObject());
+
+            return action;
+        }
+    }
+
     private static class EmailActionData extends ActionData
     {
         int listType;
         String names;
+        boolean sms;
 
         EmailActionData(Integer id, String[] vers, String[] type,
-                        String[] namesarr, String[] time)
+                        String[] namesarr, String[] smsarr, String[] time)
         {
             super(new String[]{""+id}, vers, time);
 
@@ -228,6 +254,7 @@ public class UpdateEscalation extends BaseAction
                 buf.append(tokens.nextToken());
             }
             names = buf.toString();
+            sms = Boolean.valueOf(smsarr[0]).booleanValue();
         }
 
         public JSONObject toJSON() throws JSONException
@@ -237,7 +264,8 @@ public class UpdateEscalation extends BaseAction
 
             JSONObject config =  new JSONObject()
                 .put("listType", listType)
-                .put("names", names);
+                .put("names", names)
+                .put("sms", sms);
 
             action.put("config", config);
 
