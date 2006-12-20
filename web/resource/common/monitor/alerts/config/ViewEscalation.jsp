@@ -38,12 +38,20 @@
 
 
 <script type="text/javascript">
-//onloads.push(requestViewEscalation);
+onloads.push(requestViewEscalation);
+
+
+        function hideExample() {
+            $('example').style.display= 'none';
+        }
 
 
  function requestViewEscalation() {
         var alertDefId = $('alertDefId').value;
-        var url = '../escalation/jsonEscalationByAlertDefId.do?id=' + alertDefId;
+        var urlPart1 = '<html:rewrite page="/escalation/jsonEscalationByAlertDefId/';
+        var urlPart2 = '.do"/>';
+        var url = urlPart1 + alertDefId + urlPart2;
+        //var url = "../escalation/jsonEscalationByAlertDefId.do?id=" + alertDefId;
         new Ajax.Request(url, {method: 'get', onSuccess:showViewEscResponse, onFailure :reportError});
 
         }
@@ -51,14 +59,17 @@
 
 function showViewEscResponse(originalRequest) {
 
-        var viewEscText = eval("(" + originalRequest.responseText + ")");
+        var viewEscText = eval('(' + originalRequest.responseText + ')');
 		var escTextActions = viewEscText.escalation;
         var escTextAction = escTextActions.actions;
         var escViewUL = $('viewEscalationUL');
 
         escViewUL.innerHTML = viewEscText;
-        escViewUL.innerHTML = "<br><br>" + sviewEscText.action;
-                
+        //escViewUL.innerHTML = "<br><br>" + viewEscText.action;
+
+        //alert(viewEscText)
+        //alert(escTextAction)
+
         for(var i=escViewUL.childNodes.length-1; i>1; i--){
 			escViewUL.removeChild(escViewUL.childNodes[i]);
 		}
@@ -425,9 +436,8 @@ function showViewEscResponse(originalRequest) {
     }
 
     function showResponse(originalRequest) {
-        $('example').innerHTML =
-           "<span style=font-weight:bold;>Escalation Saved: " +
-            Form.serialize('EscalationForm') + "</span>";
+        $('example').innerHTML ="<span style=font-weight:bold;><CENTER>Escalation Saved</CENTER></span>";
+        $('example').style.display= '';
     }
 
     function initEsc () {
@@ -635,7 +645,7 @@ function showViewEscResponse(originalRequest) {
 <tiles:insert definition=".portlet.error" />
 
 <form action='<html:rewrite action="/escalation/saveEscalation"/>'
-  name="EscalationForm" id="EscalationForm"><input type="hidden"
+  name="EscalationForm" id="EscalationForm" onchange="hideExample();"><input type="hidden"
   value="0" id="pid"> <input type="hidden" value="0" id="pversion">
 
 <input type="hidden" value="0" id="if the escalation is new or not"> <input
@@ -770,7 +780,7 @@ function showViewEscResponse(originalRequest) {
       <input type="hidden" id="alertDefId" name="alertDefId" value='<c:out value="${alertDef.id}"/>' />
    
     
-     <table width="100%" cellpadding="3" cellspacing="0" border="0">
+     <table width="100%" cellpadding="3" cellspacing="0" border="0" style="display:none">
         <tbody>
          <tr class="tableRowAction">
             <td class="section" width="100%">
@@ -785,10 +795,10 @@ function showViewEscResponse(originalRequest) {
 
      <br>
 <br>
-<input type="button" value="check escalation values" onclick="requestViewEscalation();" id="submit"></input> <br><br>
+<input type="button" value="check escalation values" onclick="requestViewEscalation();" id="submit" style="display:none"></input>
  </form>
 
-<div id="example" style="padding:10px;width:725px;overflow:auto;"></div>
-<div id="example2" style="padding:10px;width:725px;overflow:auto;"></div>
+<div id="example" style="padding:15px;width:200px;margin:auto;border:1px solid gray;background-color:#D5D8DE;display:none;"></div>
+<div id="example2" style="padding:10px;width:725px;overflow:auto;display:none;"></div>
 
 
