@@ -60,8 +60,12 @@ public class RemoveEscalationAction extends BaseAction {
         ServletContext ctx = getServlet().getServletContext();
         EventsBoss boss = ContextUtils.getEventsBoss(ctx);
 
-        boss.deleteEscalationById(sessionId.intValue(),
-                                  new Integer[] { escId });
+        try {
+            boss.deleteEscalationById(sessionId.intValue(), escId);
+        } catch(Exception e) {
+            RequestUtils.setError(request,
+                "admin.config.error.escalation.CannotDelete");
+        }
 
         return returnSuccess(request, mapping);
     }
