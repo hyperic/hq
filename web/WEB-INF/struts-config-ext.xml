@@ -89,21 +89,6 @@
         <forward name="reset" path="/resource/common/monitor/Visibility.do"/>
       </action>
 
-      <action path="/alerts/New"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.NewDefinitionAction"
-              name="NewAlertDefinitionForm"
-              scope="request"
-              input="/alerts/Config.do?mode=new">
-        <forward name="cancel" path="/alerts/Config.do?mode=list"
-                 redirect="true"/>
-        <forward name="reset" path="/alerts/Config.do?mode=new"
-                 redirect="true"/>
-        <forward name="failure" path="/alerts/Config.do?mode=new"/>
-        <forward name="success" path="/alerts/Config.do?mode=viewUsers"/>
-        <forward name="add" path="/alerts/Config.do?mode=new"/>
-        <forward name="remove" path="/alerts/Config.do?mode=new"/>
-      </action>
-      
       <action path="/alerts/NewFormPrepare"
               name="NewAlertDefinitionForm"
               scope="request"
