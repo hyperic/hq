@@ -35,7 +35,126 @@
 <script src='<html:rewrite page="/js/dashboard.js"/>' type="text/javascript"></script>
 <script src='<html:rewrite page="/js/effects.js"/>' type="text/javascript"></script>
 
+
+
 <script type="text/javascript">
+onloads.push(showViewEscResponse);
+
+ /*
+ function requestViewEscalation() {
+        //var alertDefId = $('alertDefId').value;
+        //var url = "/escalation/jsonEscalationByAlertDefId/" + alertDefId;
+        //new Ajax.Request(url, {method: 'get', onSuccess:showViewEscResponse, onFailure :reportError});
+
+        new Ajax.Request("<html:rewrite page="/js/sampleEsc.html"/>", {method: 'get', onSuccess:showViewEscResponse, onFailure :reportError});
+		}
+		*/
+
+function showViewEscResponse() {
+
+        var escViewUL = $('viewEscalationUL');
+
+        var num = $('alertDefId').value;
+		var liID = 'row'+num;
+        var viewLi = document.createElement('li');
+        var remDiv = document.createElement('div');
+        var usersDiv = document.createElement('div');
+        var rolesDiv = document.createElement('div');
+        var othersDiv = document.createElement('div');
+        var emailDiv = document.createElement('div');
+        var sysDiv = document.createElement('div');
+        var escTable = document.createElement('table');
+        var escTr1 = document.createElement('tr');
+        var escTr2 = document.createElement('tr');
+        var td1 = document.createElement('td');
+        var td2 = document.createElement('td');
+        var td3 = document.createElement('td');
+        var td4 = document.createElement('td');
+        var td5 = document.createElement('td');
+        var select1 = document.createElement("select");
+        var select2 = document.createElement("select");
+        var select3 = document.createElement("select");
+        var anchor = document.createElement("a");
+        var waitTimeInfo = " ";
+        var emailInfo = " ";
+        var roleInfo = " ";
+        var metaInfo = " ";
+        var productInfo = " ";
+        var versionInfo = " ";
+
+        escViewUL.appendChild(viewLi)
+       
+        viewLi.setAttribute((document.all ? 'className' : 'class'), "lineitem");
+        viewLi.setAttribute('id','row_'+ liID);
+
+        viewLi.appendChild(remDiv);
+        remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
+        remDiv.style.paddingTop = "10px;"
+        remDiv.innerHTML ='<a href="#" onclick="removeRow(this);"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
+
+        viewLi.appendChild(escTable);
+        escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
+        escTable.setAttribute('border', '0');
+
+        // Put the "wait" select after other options
+        escTable.appendChild(escTr2);
+        escTable.appendChild(escTr1);
+
+        escTr1.appendChild(td1);
+
+        td1.setAttribute('colspan', '3');
+        td1.innerHTML = "waittime:" + waitTimeInfo + "<br>";
+
+        escTr2.appendChild(td2);
+        td2.setAttribute('width', '20%');
+        td2.setAttribute('valign', 'top');
+        td2.style.paddingBottom = "10px";
+
+        td2.innerHTML = "Notify via:" + emailInfo + "<br>";
+        td2.style.paddingLeft = "0px";
+        td2.style.paddingTop = "5px";
+        td2.style.paddingBottom = "10px";
+
+        escTr2.appendChild(td3);
+        td3.setAttribute('width', '20%');
+        td3.setAttribute('valign', 'top');
+        td3.style.paddingRight = "20px";
+
+        td3.innerHTML = "Roles:" + roleInfo + "<br>";
+        td3.style.paddingTop = "5px";
+
+        escTr2.appendChild(td4);
+        td5.setAttribute('width', '50%');
+
+
+        td4.appendChild(sysDiv);
+        sysDiv.style.display = 'none';
+        sysDiv.setAttribute('class', 'escInput'+ liID);
+        sysDiv.setAttribute('id', 'sysloginput'+ liID);
+        sysDiv.setAttribute('width', '40%');
+        sysDiv.innerHTML = "meta:"  + metaInfo + "<br>" + "product:" + productInfo + "<br>" + "version:" + versionInfo + "<br>";
+
+        td4.appendChild(usersDiv);
+        usersDiv.setAttribute('id', 'usersDiv' + liID);
+        usersDiv.style.display = 'none';
+        usersDiv.style.border = '0px';
+        if($('usersList')) {
+          usersDiv.innerHTML = $('usersList').innerHTML;
+        }
+
+        td4.appendChild(rolesDiv);
+        rolesDiv.setAttribute('id', 'rolesDiv' + liID);
+        rolesDiv.style.display = 'none';
+        rolesDiv.style.border = '0px';
+        if($('rolesList')) {
+          rolesDiv.innerHTML = $('rolesList').innerHTML;
+        }
+
+        Sortable.create(escViewUL,{ghosting:true,constraint:false});
+
+
+}
+
     function addRow() {
         var ni = $('rowOrder');
         var numi = document.getElementById('theValue');
@@ -123,7 +242,7 @@
         addOption(select2, 'SMS', 'SMS');
         addOption(select2, 'Syslog', 'Sys Log');
         addOption(select2, 'NoOp', 'Suppress Alerts');
-           
+
         escTr2.appendChild(td3);
         td3.setAttribute('width', '20%');
         td3.setAttribute('valign', 'top');
@@ -629,8 +748,28 @@
     </c:forEach>
   </ul>
   </div>
-</c:if></form>
+</c:if>
 
+</form>
+
+ <form name="viewEscalation" id="viewEscalation">
+
+      <input type="hidden" id="alertDefId" name="alertDefId" value='<c:out value="${param.ad}"/>' />
+   
+    
+     <table width="100%" cellpadding="3" cellspacing="0" border="0">
+        <tbody>
+         <tr class="tableRowAction">
+            <td class="section" width="100%">
+            <ul id="viewEscalationUL">
+
+            </ul>
+            </td>
+        </tr>
+        </tbody>
+     </table>
+
+ </form>
 
 <div id="example" style="padding:10px;width:725px;overflow:auto;"></div>
 <div id="example2" style="padding:10px;width:725px;overflow:auto;"></div>

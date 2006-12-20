@@ -888,12 +888,29 @@ text-align:center;
    border-bottom:1px solid gray;
 }
    
+##viewEscalationUL {
+  list-style-type:none;
+  margin:0;
+  margin-right: 5px;
+  padding:0;
+}
+
+#viewEscalationUL li {
+  font:13px Verdana;
+  margin:0;
+  padding:0px;
+   list-style-type:none;
+   list-style: none;
+   width: 100%;
+   border-bottom:1px solid gray;
+}
+
 .escTbl {
   width:100%;
   margin-top:10px;
   margin-bottom:10px;
 }
-   
+
 .remove {
   float:right;
   margin-right:10px;
@@ -905,5 +922,6 @@ text-align:center;
   width: 100%;
 }
 
-.lineitem {    
+.lineitem {
 }
+
