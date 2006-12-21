@@ -31,6 +31,12 @@ public class SessionAspectInterceptor {
         String getName();
     }
     
+    /**
+     * Run the passed runner in a session.  If there is no session for the 
+     * current thread, one will be created for the operation and subsequently
+     * closed.  If a session is already in process, no additional sessions
+     * will be created. 
+     */
     public static void runInSession(SessionRunner r) 
         throws Exception
     {
@@ -70,6 +76,11 @@ public class SessionAspectInterceptor {
         return false;
     }
     
+    /**
+     * Create a session if it does not exist.
+     * @param dbgTxt text to print when creating a session
+     * @return true if a session was created
+     */
     public static boolean setupSession(String dbgTxt) {
         return INSTANCE.setupSessionInternal(dbgTxt);
     }
@@ -91,6 +102,9 @@ public class SessionAspectInterceptor {
         }
     }
 
+    /**
+     * Close the current session.
+     */
     public static void cleanupSession() {
         INSTANCE.cleanupSessionInternal();
     }
