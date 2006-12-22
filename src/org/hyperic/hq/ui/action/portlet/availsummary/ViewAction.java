@@ -89,7 +89,9 @@ public class ViewAction extends BaseAction {
             numKey += token;
         }
 
+        DashboardUtils.verifyResources(resKey, ctx, user);
         List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, user);
+
         AppdefEntityID[] arrayIds =
             (AppdefEntityID[])entityIds.toArray(new AppdefEntityID[0]);
 
