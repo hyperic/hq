@@ -40,12 +40,6 @@
 <script type="text/javascript">
 onloads.push(requestViewEscalation);
 
-
-        function hideExample() {
-            $('example').style.display= 'none';
-        }
-
-
  function requestViewEscalation() {
         var alertDefId = $('alertDefId').value;
         var urlPart1 = '<html:rewrite page="/escalation/jsonEscalationByAlertDefId/';
@@ -58,27 +52,56 @@ onloads.push(requestViewEscalation);
 
 
 function showViewEscResponse(originalRequest) {
+      var tmp = eval('(' + originalRequest.responseText + ')');
+       /*
+        //var esc ='({"escalation":{"creationTime":1166136864502,"notifyAll":false,"_version_":0,"modifiedTime":1166136864502,"actions":[{"action":{"config":{"listType":"2","names":"1"},"_version_":0,"className":"org.hyperic.hq.bizapp.server.action.email.EmailAction","id":10037},"waitTime":600000},{"action":{"config":{"product":"prod","meta":"meta","version":"vers"},"_version_":0,"className":"org.hyperic.hq.bizapp.server.action.log.SyslogAction","id":10038},"waitTime":0}],"allowPause":true,"name":"kkkkkkkkk","id":10013,"maxWaitTime":300000}})';
+        //var m=eval(esc);
+        //alert("m.escalation.name=" + m.escalation.name);
+        // var actions = tmp.escalation.actions[0].action;
+        //alert(actions)
+        //alert(viewEscText.escalation.creationTime)
+        */
+        var creationTime = tmp.escalation.creationTime;
+        var notifyAll = tmp.escalation.notifyAll
+        var _version_ = tmp.escalation._version_;
+        var modifiedTime = tmp.escalation.modifiedTime;
+        var actions = tmp.escalation.actions;
+        var allowPause = tmp.escalation.allowPause;
+        var escName = tmp.escalation.name;
+        var id = tmp.escalation.id;
+        var maxWaitTime = tmp.escalation.maxWaitTime;
 
-        var viewEscText = eval('(' + originalRequest.responseText + ')');
-		var escTextActions = viewEscText.escalation;
-        var escTextAction = escTextActions.actions;
+
+
+        //alert("tmp.escalation.actions[0].action.config" + tmp.escalation.actions[0].action.config);
+
+        /*
+        for (i = 0; i <  tmp.escalation.actions[0].action.config.length; i++) {
+        alert(tmp.escalation.actions[0].action[0].config[i].childNodes)
+        }
+        */
+
+
         var escViewUL = $('viewEscalationUL');
-
-        escViewUL.innerHTML = viewEscText;
-        //escViewUL.innerHTML = "<br><br>" + viewEscText.action;
-
-        //alert(viewEscText)
-        //alert(escTextAction)
 
         for(var i=escViewUL.childNodes.length-1; i>1; i--){
 			escViewUL.removeChild(escViewUL.childNodes[i]);
 		}
 
-		for (i=0; i<escTextAction.action.length; i++) {
-        //alert(escTextAction.action.config[i])
+        for (i = 0; i < actions.length; i++) {
+        var actionConfig = actions[i].action.config;
+        var configListType = actionConfig.listType;
+        var configNames = actionConfig.names;
+        var configSms = actionConfig.sms;
+        var actionId = actions[i].action.id;
+        var actionsClassName = actions[i].action.className;
+        var actionsVersion = actions[i].action._version_;
+
+         //alert(actionsClassName)
+           //escViewUL.innerHTML = escText.creationTime.nodeValue;
 
 
-        var num = $('alertDefId').value;
+        var num = actionId;
 		var liID = 'row'+num;
         var viewLi = document.createElement('li');
         var remDiv = document.createElement('div');
@@ -100,15 +123,17 @@ function showViewEscResponse(originalRequest) {
         var select2 = document.createElement("select");
         var select3 = document.createElement("select");
         var anchor = document.createElement("a");
-        var waitTimeInfo = " ";
+
         var emailInfo = " ";
         var roleInfo = " ";
         var metaInfo = " ";
         var productInfo = " ";
         var versionInfo = " ";
 
+        $('escNameText').innerHTML = "Escalation Name: " + escName + "<br>";
+
         escViewUL.appendChild(viewLi)
-       
+
         viewLi.setAttribute((document.all ? 'className' : 'class'), "lineitem");
         viewLi.setAttribute('id','row_'+ liID);
 
@@ -120,22 +145,28 @@ function showViewEscResponse(originalRequest) {
         viewLi.appendChild(escTable);
         escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
         escTable.setAttribute('border', '0');
+            escTable.style.width = "100%";
         escTable.appendChild(escTableBody);
-        // Put the "wait" select after other options
-        escTable.appendChild(escTr2);
-        escTable.appendChild(escTr1);
+
+        escTableBody.appendChild(escTr2);
+        escTableBody.appendChild(escTr1);
 
         escTr1.appendChild(td1);
 
         td1.setAttribute('colspan', '3');
-        td1.innerHTML = "waittime:" + waitTimeInfo + "<br>";
+        td1.innerHTML = "waittime: " + maxWaitTime + "<br>";
 
         escTr2.appendChild(td2);
         td2.setAttribute('width', '20%');
         td2.setAttribute('valign', 'top');
         td2.style.paddingBottom = "10px";
-
-        td2.innerHTML = "Notify via:" + emailInfo + "<br>";
+        if (configListType = "1"){
+        td2.innerHTML = "Email:  " + emailInfo + "<br>";
+        } else if (configListType = "2") {
+            td2.innerHTML = "Notify HQ USers: ";
+        } else  if (configListType = "3") {
+            td2.innerHTML = "Notify the following Roles: " + emailInfo + "<br>";
+        }
         td2.style.paddingLeft = "0px";
         td2.style.paddingTop = "5px";
         td2.style.paddingBottom = "10px";
@@ -145,7 +176,15 @@ function showViewEscResponse(originalRequest) {
         td3.setAttribute('valign', 'top');
         td3.style.paddingRight = "20px";
 
-        td3.innerHTML = "Roles:" + roleInfo + "<br>";
+        if (configListType = "1") {
+        td3.innerHTML = emailInfo + "<br>";
+        }
+        if (configListType = "2") {
+        td3.innerHTML = configNames + "<br>";
+        }
+        if (configListType = "3") {
+        td3.innerHTML = roleInfo + "<br>";
+        }
         td3.style.paddingTop = "5px";
 
         escTr2.appendChild(td4);
@@ -163,9 +202,8 @@ function showViewEscResponse(originalRequest) {
         usersDiv.setAttribute('id', 'usersDiv' + liID);
         usersDiv.style.display = 'none';
         usersDiv.style.border = '0px';
-        if($('usersList')) {
-          usersDiv.innerHTML = $('usersList').innerHTML;
-        }
+        usersDiv.innerHTML = configNames;
+
 
         td4.appendChild(rolesDiv);
         rolesDiv.setAttribute('id', 'rolesDiv' + liID);
@@ -184,7 +222,7 @@ function showViewEscResponse(originalRequest) {
         var ni = $('rowOrder');
         var numi = document.getElementById('theValue');
         var num = (document.getElementById('theValue').value -1)+ 2;
-        
+
         numi.value = num;
         var liID = 'row'+num;
         var escLi = document.createElement('li');
@@ -222,8 +260,8 @@ function showViewEscResponse(originalRequest) {
         escTable.setAttribute('border', '0');
         escTable.appendChild(escTableBody);
         // Put the "wait" select after other options
-        escTable.appendChild(escTr2);
-        escTable.appendChild(escTr1);
+        escTableBody.appendChild(escTr2);
+        escTableBody.appendChild(escTr1);
 
         escTr1.appendChild(td1);
 
@@ -256,7 +294,7 @@ function showViewEscResponse(originalRequest) {
         td2.setAttribute('width', '20%');
         td2.setAttribute('valign', 'top');
         td2.style.paddingBottom = "10px";
-        
+
         td2.appendChild(select2);
         select2.setAttribute('id', 'Email_' + liID);
         td2.style.paddingLeft = "20px";
@@ -273,7 +311,7 @@ function showViewEscResponse(originalRequest) {
         td3.setAttribute('width', '20%');
         td3.setAttribute('valign', 'top');
         td3.style.paddingRight = "20px";
-        
+
         td3.appendChild(select3);
         td3.style.paddingTop = "5px";
         select3.name = "who_" + liID;
@@ -285,17 +323,17 @@ function showViewEscResponse(originalRequest) {
         </c:if>
         addOption(select3, 'Users', '<fmt:message key="monitoring.events.MiniTabs.CAMusers"/>');
         addOption(select3, 'Others', '<fmt:message key="monitoring.events.MiniTabs.OR"/>');
-        
+
         escTr2.appendChild(td4);
         td5.setAttribute('width', '50%');
-        
+
         td4.appendChild(emailDiv);
         emailDiv.style.display = 'none';
         emailDiv.setAttribute('id', 'emailinput' + liID);
         emailDiv.setAttribute('class', 'escInput');
         emailDiv.setAttribute('width', '40%');
         emailDiv.innerHTML = "email addresses (comma separated):<br><textarea rows=3 cols=35 id=emailinput_" + liID + " name=emailinput_" + liID + "></textarea>";
-        
+
         td4.appendChild(sysDiv);
         sysDiv.style.display = 'none';
         sysDiv.setAttribute('class', 'escInput'+ liID);
@@ -398,32 +436,32 @@ function showViewEscResponse(originalRequest) {
         var whoSelector = $('who_' + getId[1]);
         whoSelector.style.display='none';
     }
-    
+
     function showSyslogInput(el) {
         var idStr = el.id;
         var getId = idStr.split('_');
         var syslogDivIn = $('sysloginput' + getId[1]);
         syslogDivIn.style.display='';
     }
-    
+
     function hideSyslogInput(el) {
         var idStr = el.id;
         var getId = idStr.split('_');
         var syslogDivIn = $('sysloginput' + getId[1]);
         syslogDivIn.style.display='none';
     }
-            
-    function hideDisplay() { 
+
+    function hideDisplay() {
         $(emailinput).style.display='none';
         $(sysloginput).style.display='none';
     }
-    
+
     function removeRow(obj) {
         var oLi = obj.parentNode.parentNode;
         var root = oLi.parentNode;
         root.removeChild(oLi);
     }
-    
+
     function addOption(sel, val, txt, selected) {
         var o = document.createElement("OPTION");
         var t = document.createTextNode(txt);
@@ -458,7 +496,7 @@ function showViewEscResponse(originalRequest) {
         }
 
         document.EscalationForm.escName.value = document.EscalationSchemeForm.escId.value;
-    
+
         $('submit').onclick = function () {
             if ($('escName').value == "") {
                 alert('<fmt:message key="alert.config.error.escalation.name.required"/>');
@@ -468,7 +506,7 @@ function showViewEscResponse(originalRequest) {
             return false;
         }
 
-    
+
       <c:if test="${empty param.escId}">
         addRow();
       </c:if>
@@ -514,7 +552,7 @@ function showViewEscResponse(originalRequest) {
     function configure(id) {
       var sel = $('who' + id);
       var selval = sel.options[sel.selectedIndex].value;
-        
+
       if (selval == 'Users') {
         // Select checkboxes based on existing configs
         insertUsers(this.id);
@@ -533,7 +571,7 @@ function showViewEscResponse(originalRequest) {
             var idStr = el;
             var getId = idStr.split('_');
             var othersDivIn = $('othersDiv_' + getId[1]);
-        
+
       Dialog.confirm(othersDivIn.innerHTML,
                   {windowParameters: {className:'dialog', width:305, height:200,
                    resize:false, draggable:false},
@@ -560,7 +598,7 @@ function showViewEscResponse(originalRequest) {
                       usersDivIn.getElementsByTagName('input');
                     var updatedInputList =
                       $('usersConfigWindow').getElementsByTagName('input');
-                      
+
                     for(i = 0; i < usersInputList.length; i++) {
                         if (updatedInputList[i].checked) {
                           usersInputList[i].setAttribute("checked", "true");
@@ -575,7 +613,7 @@ function showViewEscResponse(originalRequest) {
       var idStr = el;
       var getId = idStr.split('_');
       var rolesDivIn = $('rolesDiv' + getId[1]);
-    
+
       Dialog.confirm('<div id="rolesConfigWindow">' + rolesDivIn.innerHTML +
                      '</div>',
                   {windowParameters: {className:'dialog', width:305, height:200,
@@ -586,7 +624,7 @@ function showViewEscResponse(originalRequest) {
                       rolesDivIn.getElementsByTagName('input');
                     var updatedInputList =
                       $('rolesConfigWindow').getElementsByTagName('input');
-                      
+
                     for(i = 0; i < rolesInputList.length; i++) {
                         if (updatedInputList[i].checked) {
                           rolesInputList[i].setAttribute("checked", "true");
@@ -615,6 +653,10 @@ function showViewEscResponse(originalRequest) {
 		alert(alerttext);
 
 	}
+
+    function hideExample() {
+            $('example').style.display= 'none';
+    }
 
     //onloads.push(Behaviour.apply());
 
@@ -727,7 +769,7 @@ function showViewEscResponse(originalRequest) {
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td style="padding-top:2px;padding-bottom:2px;">
-            <input type="radio" name="notification" value="0" checked="true"/> 
+            <input type="radio" name="notification" value="0" checked="true"/>
             <fmt:message key="alert.config.escalation.state.change.notify.previous"/>
           </td>
         </tr>
@@ -777,11 +819,14 @@ function showViewEscResponse(originalRequest) {
  <form name="viewEscalation" id="viewEscalation">
 
       <input type="hidden" id="alertDefId" name="alertDefId" value='<c:out value="${alertDef.id}"/>' />
-   
-    
-     <table width="100%" cellpadding="3" cellspacing="0" border="0" style="display:none">
+
+
+     <table width="100%" cellpadding="3" cellspacing="0" border="0" style="border:1px solid gray;">
         <tbody>
-         <tr class="tableRowAction">
+         <tr>
+             <td id="escNameText" class="tableRowHeader"></td>
+         </tr>
+         <tr>
             <td class="section" width="100%">
             <ul id="viewEscalationUL">
 
@@ -792,12 +837,12 @@ function showViewEscResponse(originalRequest) {
      </table>
 
 
-     <br>
+ <br>
 <br>
-<input type="button" value="check escalation values" onclick="requestViewEscalation();" id="submit" style="display:none"></input>
+<input type="button" value="check escalation values" onclick="requestViewEscalation();" id="checkEsc"></input>
  </form>
 
 <div id="example" style="padding:15px;width:200px;margin:auto;border:1px solid gray;background-color:#D5D8DE;display:none;"></div>
-<div id="example2" style="padding:10px;width:725px;overflow:auto;display:none;"></div>
+<div id="example2" style="padding:10px;width:725px;overflow:auto;"></div>
 
 
