@@ -131,7 +131,8 @@
                 if (fList[i].resourceTypeName) {
                     td2.appendChild(document.createTextNode(fList[i].resourceTypeName));
                 } else {
-                    td2.innerHTML = "&nbsp;";
+                    // XXX: use common.value.notavail
+                    td2.innerHTML = "N/A";
                 }
 
                 tr.appendChild(td3);
@@ -142,7 +143,8 @@
                     td3.appendChild(document.createTextNode(fList[i].throughput));
 
                 } else {
-                    td3.innerHTML = "&nbsp;";
+                    // XXX: use common.value.notavail
+                    td3.innerHTML = "N/A";
                 }
 
                 tr.appendChild(td4);
@@ -169,7 +171,8 @@
                     }
 
                 } else {
-                    td4.innerHTML = "&nbsp;";
+                    // XXX: use common.value.notavail
+                    td4.innerHTML = "N/A";
                 }
 
                 tr.appendChild(td5);
@@ -178,7 +181,7 @@
                 if (fList[i].alerts) {
                     td5.appendChild(document.createTextNode(fList[i].alerts));
                 } else {
-                    td5.innerHTML = "&nbsp;";
+                    td5.innerHTML = "0";
                 }
             }
         } else {
