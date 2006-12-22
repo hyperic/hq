@@ -111,17 +111,13 @@ public class AuthzSubjectManagerEJBImpl
                  AuthzConstants.rootResourceId,
                  AuthzConstants.subjectOpCreateSubject);
         AuthzSubjectDAO dao = getSubjectDAO();
-        // Make sure there's not already a system subject with that name
-        try {
-            AuthzSubject existing =
-                dao.findByAuth(subject.getName(), AuthzConstants.overlordDsn);
-            if (existing != null)
-                throw new CreateException("A system user already exists with " +
-                                          subject.getName());
-        } catch (ObjectNotFoundException e) {
-            // continue, we expected not to have found an existing user
+
+        AuthzSubject existing = dao.findByName(subject.getName());
+        if (existing != null) {
+            throw new CreateException("A system user already exists with " +
+                                      subject.getName());
         }
-        
+
         AuthzSubject whoamiPojo =
             dao.findByAuth(whoami.getName(), whoami.getAuthDsn());
 
