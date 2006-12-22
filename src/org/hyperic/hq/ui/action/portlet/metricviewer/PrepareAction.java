@@ -9,6 +9,7 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.StringConstants;
@@ -71,6 +72,7 @@ public class PrepareAction extends TilesAction {
         String descending = user.getPreference(descendingKey, "true");
         List resourceList;
         try {
+            DashboardUtils.verifyResources(resKey, ctx, user);
             resourceList =
                 user.getPreferenceAsList(resKey,
                                          StringConstants.DASHBOARD_DELIMITER);
