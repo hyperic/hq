@@ -92,8 +92,8 @@ public class MiniResourceTreeGenerator {
     /**
      * Generate a tree which includes the passed IDs.
      *
-     * @param ids       An array of IDs to generate the tree from
-     * @param traversal One of TRAVERSE_*
+     * @param ids An array of IDs to generate the tree from
+     * @param ts Only include resources with a ctime greater than ts
      *
      * @return a new MiniResourceTree
      */
