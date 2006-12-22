@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.appdef.shared.miniResourceTree;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.MiniResourceValue;
 
 import java.util.ArrayList;
