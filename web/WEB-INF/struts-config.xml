@@ -870,6 +870,16 @@
               type="org.hyperic.hq.ui.action.resource.{1}.monitor.VisibilityPortalAction">
       </action>
 
+      <action path="/resource/*/monitor/Config"
+              forward=".resource.{1}.monitor.config.layout">
+      </action>
+
+      <action path="/resource/*/monitor/ConfigPortal"
+              parameter="mode"
+              type="org.hyperic.hq.ui.action.resource.{1}.monitor.ConfigPortalAction"
+              input="/resource/{1}/monitor/Config.do?mode=configure">
+      </action>      
+     
       <action path="/resource/common/monitor/visibility/MetricDisplayRangeFormPrepare"
               name="MetricDisplayRangeForm"
               scope="request"
@@ -951,16 +961,6 @@
       </action>
 
       <!-- platform monitoring config -->    
-      <action path="/resource/platform/monitor/Config"
-              forward=".resource.platform.monitor.config.layout">
-      </action>
-
-      <action path="/resource/platform/monitor/ConfigPortal"
-              parameter="mode"
-              type="org.hyperic.hq.ui.action.resource.platform.monitor.PlatformConfigPortalAction"
-              input="/resource/platform/monitor/Config.do?mode=configure">
-      </action>      
-     
       <action path="/resource/platform/monitor/config/ConfigMetricsFormPrepare"
               name="MonitoringConfigForm"
               scope="request"
@@ -1008,16 +1008,6 @@
       <!-- / -->
 
       <!-- server monitoring config -->    
-      <action path="/resource/server/monitor/Config"
-              forward=".resource.server.monitor.config.layout">
-      </action>
- 
-      <action path="/resource/server/monitor/ConfigPortal"
-              parameter="mode"
-              type="org.hyperic.hq.ui.action.resource.server.monitor.ServerConfigPortalAction"
-              input="/resource/server/monitor/Config.do?mode=configure">
-      </action>      
-     
       <action path="/resource/server/monitor/config/ConfigMetricsFormPrepare"
               name="MonitoringConfigForm"
               scope="request"
@@ -1059,16 +1049,6 @@
       </action>
 
       <!-- application monitoring config -->      
-      <action path="/resource/application/monitor/Config"
-              forward=".resource.application.monitor.config.layout">
-      </action>
- 
-      <action path="/resource/application/monitor/ConfigPortal"
-              parameter="mode"
-              type="org.hyperic.hq.ui.action.resource.application.monitor.ApplicationConfigPortalAction"
-              input="/resource/application/monitor/Config.do?mode=configure">
-      </action>      
-     
       <action path="/resource/application/monitor/config/ConfigMetricsFormPrepare"
               name="MonitoringConfigForm"
               scope="request"
@@ -1415,16 +1395,6 @@
               forward="/resource/service/monitor/Visibility.do?mode=resourceMetrics"/>
 
       <!-- application service config -->      
-      <action path="/resource/service/monitor/Config"
-              forward=".resource.service.monitor.config.layout">
-      </action>
- 
-      <action path="/resource/service/monitor/ConfigPortal"
-              parameter="mode"
-              type="org.hyperic.hq.ui.action.resource.service.monitor.ServiceConfigPortalAction"
-              input="/resource/service/monitor/Config.do?mode=configure">
-      </action>      
-     
       <action path="/resource/service/monitor/config/ConfigMetricsFormPrepare"
               name="MonitoringConfigForm"
               scope="request"
@@ -1764,16 +1734,6 @@
       </action>
 
       <!-- group monitoring config -->    
-      <action path="/resource/group/monitor/Config"
-              forward=".resource.group.monitor.config.layout">
-      </action>
- 
-      <action path="/resource/group/monitor/ConfigPortal"
-              parameter="mode"
-              input="/resource/group/monitor/Config.do?mode=configure"
-              type="org.hyperic.hq.ui.action.resource.group.monitor.GroupConfigPortalAction">
-      </action>      
-     
       <action path="/resource/group/monitor/config/ConfigMetricsFormPrepare"
               name="MonitoringConfigForm"
               scope="request"
@@ -1887,16 +1847,6 @@
       </action>
 
       <!-- autogroup monitoring config -->    
-      <action path="/resource/autogroup/monitor/Config"
-              forward=".resource.autogroup.monitor.config.layout">
-      </action>
- 
-      <action path="/resource/autogroup/monitor/ConfigPortal"
-              parameter="mode"
-              input="/resource/autogroup/monitor/Config.do?mode=configure"
-              type="org.hyperic.hq.ui.action.resource.autogroup.monitor.AutoGroupConfigPortalAction">
-      </action>      
-     
       <action path="/resource/autogroup/monitor/config/ConfigMetricsFormPrepare"
               name="MonitoringConfigForm"
               scope="request"

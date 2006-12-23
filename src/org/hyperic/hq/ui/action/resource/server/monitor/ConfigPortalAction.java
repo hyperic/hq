@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.ui.action.resource.service.monitor;
+package org.hyperic.hq.ui.action.resource.server.monitor;
 
 import java.util.Properties;
 
@@ -40,22 +40,22 @@ import org.apache.struts.action.ActionMapping;
 
 
 /**
- * This action prepares the portal for configuring the service monitoring pages.
+ * This action prepares the portal for configuring the server monitoring pages.
  */
-public class ServiceConfigPortalAction extends ResourceConfigPortalAction {
+public class ConfigPortalAction extends ResourceConfigPortalAction {
 
     private static final String CONFIG_METRICS_PORTAL
-        = ".resource.service.monitor.config.ConfigMetrics";
+        = ".resource.server.monitor.config.ConfigMetrics";
     private static final String CONFIG_METRICS_TITLE
-        = "resource.service.monitor.visibility.config.ConfigureVisibility.Title";
+        = "resource.server.monitor.visibility.config.ConfigureVisibility.Title";
  
     /* (non javadoc)
      * @see org.hyperic.hq.ui.action.BaseDispatchAction#getKeyMethodMap()
      */
     protected Properties getKeyMethodMap() {
         Properties map = new Properties();
-        map.setProperty(Constants.MODE_CONFIGURE, "configMetrics");
-        map.setProperty(Constants.MODE_LIST, "configMetrics");
+        map.put(Constants.MODE_CONFIGURE, "configMetrics");
+        map.put(Constants.MODE_LIST, "configMetrics");
         return map;
     }
 

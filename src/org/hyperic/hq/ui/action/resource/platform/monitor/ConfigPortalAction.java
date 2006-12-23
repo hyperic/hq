@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.ui.action.resource.application.monitor;
+package org.hyperic.hq.ui.action.resource.platform.monitor;
 
 import java.util.Properties;
 
@@ -40,28 +40,23 @@ import org.apache.struts.action.ActionMapping;
 
 
 /**
- * This action prepares the portal for configuring the application monitoring pages.
+ * This action prepares the portal for configuring the 
+ * platform monitoring pages.
  */
-public class ApplicationConfigPortalAction extends ResourceConfigPortalAction {
+public class ConfigPortalAction extends ResourceConfigPortalAction {
 
     private static final String CONFIG_METRICS_PORTAL
-        = ".resource.application.monitor.config.ConfigMetrics";
+        = ".resource.platform.monitor.config.ConfigMetrics";
     private static final String CONFIG_METRICS_TITLE
-        = "resource.application.monitor.visibility.config.ConfigureVisibility.Title";
+        = "resource.platform.monitor.visibility.config.ConfigureVisibility.Title";
  
-    private static final String ADD_METRICS_PORTAL
-        = ".resource.application.monitor.config.AddMetrics";
-    private static final String ADD_METRICS_TITLE
-        = "resource.application.monitor.visibility.config.AddMetrics.Title";
-    
     /* (non javadoc)
      * @see org.hyperic.hq.ui.action.BaseDispatchAction#getKeyMethodMap()
      */
     protected Properties getKeyMethodMap() {
         Properties map = new Properties();
-        map.setProperty(Constants.MODE_ADD_METRICS, "addMetrics");
-        map.setProperty(Constants.MODE_CONFIGURE,   "configMetrics");
-        map.setProperty(Constants.MODE_LIST,        "configMetrics");
+        map.setProperty(Constants.MODE_CONFIGURE, "configMetrics");
+        map.setProperty(Constants.MODE_LIST, "configMetrics");
         return map;
     }
 
@@ -72,7 +67,8 @@ public class ApplicationConfigPortalAction extends ResourceConfigPortalAction {
                                        HttpServletResponse response)
         throws Exception {
         
-        setResource(request);       
+        setResource(request);
+        
         super.configMetrics(mapping,form,request,response);
         
         Portal portal = Portal.createPortal( CONFIG_METRICS_TITLE, 
@@ -81,22 +77,5 @@ public class ApplicationConfigPortalAction extends ResourceConfigPortalAction {
         return null;
     
     }
-
-    /** mode=addMetrics */
-    public ActionForward addMetrics(ActionMapping mapping,
-                                    ActionForm form,
-                                    HttpServletRequest request,
-                                    HttpServletResponse response)
-        throws Exception {
-        
-        setResource(request);
-        Portal portal = Portal.createPortal( ADD_METRICS_TITLE,
-            ADD_METRICS_PORTAL);
-        portal.setDialog(true);
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-        return null;
-    
-    }
-
   
 }
