@@ -108,41 +108,6 @@
               input="/alerts/Config.do"
               type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.PortalAction"/>
 
-      <action path="/alerts/EditProperties"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EditDefinitionPropertiesAction"
-              name="EditAlertDefinitionPropertiesForm"
-              scope="request"
-              input="/alerts/Config.do?mode=editProperties">
-        <forward name="cancel" path="/alerts/Config.do?mode=viewUsers" redirect="true"/>
-        <forward name="reset" path="/alerts/Config.do?mode=editProperties" redirect="true"/>
-        <forward name="failure" path="/alerts/Config.do?mode=editProperties"/>
-        <forward name="success" path="/alerts/Config.do?mode=viewUsers" redirect="true"/>
-      </action>
-      
-      <action path="/alerts/EditConditions"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EditDefinitionConditionsAction"
-              name="EditAlertDefinitionConditionsForm"
-              scope="request"
-              input="/alerts/Config.do?mode=editConditions">
-        <forward name="cancel" path="/alerts/Config.do?mode=viewUsers" redirect="true"/>
-        <forward name="reset" path="/alerts/Config.do?mode=editConditions" redirect="true"/>
-        <forward name="success" path="/alerts/Config.do?mode=viewUsers" redirect="true"/>
-        <forward name="failure" path="/alerts/Config.do?mode=editConditions"/>
-        <forward name="add" path="/alerts/Config.do?mode=editConditions"/>
-        <forward name="remove" path="/alerts/Config.do?mode=editConditions"/>
-      </action>
-      
-      <action path="/alerts/EditSyslogAction"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EditDefinitionSyslogActionAction"
-              name="EditAlertDefinitionSyslogActionForm"
-              scope="request"
-              input="/alerts/Config.do?mode=editSyslogAction">
-        <forward name="cancel" path="/alerts/Config.do?mode=viewUsers" redirect="true"/>
-        <forward name="reset" path="/alerts/Config.do?mode=editSyslogAction" redirect="true"/>
-        <forward name="failure" path="/alerts/Config.do?mode=editSyslogAction"/>
-        <forward name="success" path="/alerts/Config.do?mode=viewDefinition" redirect="true"/>
-      </action>
-      
       <action path="/resource/common/monitor/visibility/ViewChartFormPrepare"
               name="ViewChartForm"
               scope="request"
