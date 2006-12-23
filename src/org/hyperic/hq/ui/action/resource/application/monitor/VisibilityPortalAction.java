@@ -32,6 +32,11 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
@@ -41,15 +46,8 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ResourceVisibilityPortalAction;
 import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 
 
 /**
@@ -59,10 +57,10 @@ import org.apache.struts.action.ActionMapping;
  * rendered as their own subtabs, the subtabs will have to be identify
  * themselves when clicked on.
  */
-public class ApplicationVisibilityPortalAction extends ResourceVisibilityPortalAction {
+public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
 
     protected static Log log =
-        LogFactory.getLog(ApplicationVisibilityPortalAction.class.getName());
+        LogFactory.getLog(VisibilityPortalAction.class.getName());
     // XXX duplicated from the ServiceVisibilityPortalAction... refactoring needed
     private static final String ERR_SERVER_PERMISSION =
         "resource.service.monitor.visibility.error.ServerPermission";
@@ -72,8 +70,6 @@ public class ApplicationVisibilityPortalAction extends ResourceVisibilityPortalA
      */
     public Properties getKeyMethodMap() {
         Properties map = new Properties();
-        map.setProperty(Constants.MODE_MON_CUR,  "currentHealth");
-        map.setProperty(Constants.MODE_MON_PERF, "performance");
         map.setProperty(Constants.MODE_MON_URL,  "urlDetail");
         return map;
     }
@@ -142,13 +138,6 @@ public class ApplicationVisibilityPortalAction extends ResourceVisibilityPortalA
     	    // setResource already set a request error
     	    return;
     	}
-
-        Boolean perfAttr = (Boolean) request
-            .getAttribute(Constants.PERFORMANCE_SUPPORTED_ATTR);
-        boolean isPerfSupported = perfAttr != null && perfAttr.booleanValue();
-
-    	AppdefEntityID entityId = resource.getEntityId();
-        String mode = RequestUtils.getMode(request);
     }
     
     private void setServersCurrentHealth(HttpServletRequest request)
@@ -172,13 +161,6 @@ public class ApplicationVisibilityPortalAction extends ResourceVisibilityPortalA
             ServletContext ctx = getServlet().getServletContext();
             MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx); 
             
-            List currentHealthTimeframe =
-                MonitorUtils.calculateTimeFrame(
-                        MonitorUtils.DEFAULT_CURRENTHEALTH_LASTN,
-                        MonitorUtils.UNIT_HOURS);
-            
-            long begin = ((Long) currentHealthTimeframe.get(0)).longValue();
-            long end = ((Long) currentHealthTimeframe.get(1)).longValue();             
             if (log.isTraceEnabled()) {
                 log.trace("finding servers current health for resource [" +
                           app.getEntityId() + "]");

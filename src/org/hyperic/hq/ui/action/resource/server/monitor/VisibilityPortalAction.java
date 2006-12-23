@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.ui.action.resource.service.monitor;
+package org.hyperic.hq.ui.action.resource.server.monitor;
 
 import java.util.List;
 import java.util.Properties;
@@ -34,9 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
@@ -52,41 +50,49 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
 /**
- * A <code>BaseDispatchAction</code> that sets up service
+ * A <code>BaseDispatchAction</code> that sets up server
  * monitor portals.
  */
-public class ServiceVisibilityPortalAction extends ResourceVisibilityPortalAction {
+public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
+
+    private static final String TITLE_CURRENT_HEALTH =
+        "resource.server.monitor.visibility.CurrentHealthTitle";
+
+    private static final String PORTLET_CURRENT_HEALTH =
+        ".resource.server.monitor.visibility.CurrentHealth";
+
+    private static final String TITLE_SERVER_METRICS =
+        "resource.server.monitor.visibility.ServerMetricsTitle";
+
+    private static final String PORTLET_SERVER_METRICS =
+        ".resource.server.monitor.visibility.ServerMetrics";
+
+    private static final String TITLE_PERFORMANCE =
+        "resource.server.monitor.visibility.PerformanceTitle";
+
+    private static final String PORTLET_PERFORMANCE =
+        ".resource.server.monitor.visibility.Performance";
+
+    private static final String ERR_PLATFORM_PERMISSION =
+        "resource.server.monitor.visibility.error.PlatformPermission";
 
     protected static Log log =
-        LogFactory.getLog(ServiceVisibilityPortalAction.class.getName());
-    private static final String ERR_SERVER_PERMISSION =
-        "resource.service.monitor.visibility.error.ServerPermission";
-
-    private static Properties keyMethodMap = new Properties();
-    static {
-        keyMethodMap.setProperty(Constants.MODE_MON_CUR,     "currentHealth");
-        keyMethodMap.setProperty(Constants.MODE_MON_RES_METS,"resourceMetrics");
-        keyMethodMap.setProperty(Constants.MODE_MON_PERF,    "performance");
-    }
-    
-    protected Properties getKeyMethodMap() {
-        return keyMethodMap;
-    }
+        LogFactory.getLog(VisibilityPortalAction.class.getName());
 
     public ActionForward currentHealth(ActionMapping mapping,
                                        ActionForm form,
                                        HttpServletRequest request,
                                        HttpServletResponse response)
         throws Exception {
+            
         setResource(request);
+        findHostHealths(request);
 
-        findServersHealths(request);
-        
         super.currentHealth(mapping,form,request,response);
 
         Portal portal =
-            Portal.createPortal("resource.service.monitor.visibility.CurrentHealthTitle",
-            ".resource.service.monitor.visibility.CurrentHealth");
+            Portal.createPortal(TITLE_CURRENT_HEALTH,
+                                PORTLET_CURRENT_HEALTH);
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
@@ -96,16 +102,16 @@ public class ServiceVisibilityPortalAction extends ResourceVisibilityPortalActio
                                          HttpServletRequest request,
                                          HttpServletResponse response)
         throws Exception {
+            
         setResource(request);
-
-        findServersHealths(request);
+        findHostHealths(request);
+        
         
         super.resourceMetrics(mapping,form,request,response);
         
-       //findHostHealths(request);
         Portal portal =
-            Portal.createPortal("resource.service.monitor.visibility.ServiceMetricsTitle",
-            ".resource.service.monitor.visibility.ServiceMetrics");
+            Portal.createPortal(TITLE_SERVER_METRICS,
+                                PORTLET_SERVER_METRICS);
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
@@ -115,64 +121,52 @@ public class ServiceVisibilityPortalAction extends ResourceVisibilityPortalActio
                                      HttpServletRequest request,
                                      HttpServletResponse response)
         throws Exception {
+            
+        super.performance(mapping,form,request,response);            
+            
         setResource(request);
-        
-        super.performance(mapping,form,request,response);
-        
+
         Portal portal =
-            Portal.createPortal("resource.service.monitor.visibility.PerformanceTitle",
-            ".resource.service.monitor.visibility.Performance");
+            Portal.createPortal(TITLE_PERFORMANCE,
+                                PORTLET_PERFORMANCE);
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
 
-    private void findServersHealths(HttpServletRequest request)
-            throws Exception {
-        AppdefEntityID entityId = null;
+    private void findHostHealths(HttpServletRequest request)
+        throws Exception {
         Exception thrown = null;
-        
+        AppdefEntityID entityId = null;
         try {
             int sessionId = RequestUtils.getSessionId(request).intValue();
             entityId = RequestUtils.getEntityId(request);
-    
+
             ServletContext ctx = getServlet().getServletContext();
             MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
-    
-            // for a regular service, there can only be one
+
+            // no need to page host platform health summaries, as
+            // there can only be one
             PageControl pc = PageControl.PAGE_ALL;
-            AppdefBoss aboss = ContextUtils.getAppdefBoss(ctx);
-            ServiceValue sv = aboss.findServiceById(sessionId, entityId.getId());
-            // check for platform services
-            List healths = null;
-            if(sv.getServer().getServerType().getVirtual()) {
-                request.setAttribute(Constants.PLATFORM_SERVICE_ATTR, "true");
-                AppdefEntityID platId = 
-                    aboss.findPlatformByDependentID(sessionId, entityId).getEntityId();
-                healths = 
-                    boss.findPlatformsCurrentHealth(sessionId,
-                                                    platId, pc);
-            } else {
-                // for a "clustered services" there'd be many... does
-                // that get handled here or the group monitoring?
-                healths =
-                    boss.findServersCurrentHealth(sessionId, entityId, pc);
-                
-            }
+
+            if (log.isDebugEnabled())
+                log.debug("getting host platform health for resource [" +
+                      entityId + "]");
+            List healths =
+                boss.findPlatformsCurrentHealth(sessionId, entityId, pc);
             request.setAttribute(Constants.HOST_HEALTH_SUMMARIES_ATTR,
-                    healths);
-        } 
-        catch (AppdefEntityNotFoundException e) {
-            thrown = e;
-            RequestUtils.setError(request, Constants.ERR_RESOURCE_NOT_FOUND);
+                                 healths);
         }
         catch (PermissionException e) {
             thrown = e;
-            request.setAttribute(Constants.ERR_SERVER_HEALTH_ATTR, ERR_SERVER_PERMISSION);
-        }
-        finally {
+            request.setAttribute(Constants.ERR_PLATFORM_HEALTH_ATTR, ERR_PLATFORM_PERMISSION);
+        }        
+        catch (AppdefEntityNotFoundException e) {
+            thrown = e;
+            RequestUtils.setError(request, Constants.ERR_RESOURCE_NOT_FOUND);
+        }        
+        finally { 
             if (thrown != null && log.isDebugEnabled())
                 log.debug("resource [" + entityId + "] access error", thrown);
         }
-
     }
 }

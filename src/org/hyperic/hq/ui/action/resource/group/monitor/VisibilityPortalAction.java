@@ -26,12 +26,16 @@
 package org.hyperic.hq.ui.action.resource.group.monitor;
 
 import java.util.List;
-import java.util.Properties;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -46,17 +50,11 @@ import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-
 /**
  * A <code>BaseDispatchAction</code> that sets up compatible group monitor
  * portals.
  */
-public class GroupVisibilityPortalAction extends ResourceVisibilityPortalAction {
+public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
 
     private static final String TITLE_CURRENT_HEALTH = "resource.group.monitor.visibility.CurrentHealthTitle";
 
@@ -71,22 +69,14 @@ public class GroupVisibilityPortalAction extends ResourceVisibilityPortalAction 
     private static final String PORTLET_PERFORMANCE = ".resource.group.monitor.visibility.Performance";
 
     protected static Log log =
-        LogFactory.getLog(GroupVisibilityPortalAction.class.getName());
+        LogFactory.getLog(VisibilityPortalAction.class.getName());
 
     private static final String host_type = "hostType";
-
-    protected Properties getKeyMethodMap() {
-        Properties map = new Properties();
-        map.setProperty(Constants.MODE_MON_CUR, "currentHealth");
-        map.setProperty(Constants.MODE_MON_RES_METS, "resourceMetrics");
-        map.setProperty(Constants.MODE_MON_PERF, "performance");
-        return map;
-    }
 
     public ActionForward currentHealth(ActionMapping mapping, ActionForm form,
                                        HttpServletRequest request,
                                        HttpServletResponse response)
-                                                                    throws Exception {
+        throws Exception {
         setResource(request);
         findResourceHealths(request);
 
@@ -103,7 +93,7 @@ public class GroupVisibilityPortalAction extends ResourceVisibilityPortalAction 
                                          ActionForm form,
                                          HttpServletRequest request,
                                          HttpServletResponse response)
-                                                                      throws Exception {
+        throws Exception {
         setResource(request);
         findResourceHealths(request);
 
@@ -118,7 +108,7 @@ public class GroupVisibilityPortalAction extends ResourceVisibilityPortalAction 
     public ActionForward performance(ActionMapping mapping, ActionForm form,
                                      HttpServletRequest request,
                                      HttpServletResponse response)
-                                                                  throws Exception {
+        throws Exception {
         setResource(request);
 
         super.performance(mapping, form, request, response);
@@ -130,7 +120,7 @@ public class GroupVisibilityPortalAction extends ResourceVisibilityPortalAction 
     }
 
     private void findResourceHealths(HttpServletRequest request)
-                                                                throws Exception {
+        throws Exception {
         AppdefEntityID entityId = null;
 
         int sessionId = RequestUtils.getSessionId(request).intValue();
@@ -159,7 +149,8 @@ public class GroupVisibilityPortalAction extends ResourceVisibilityPortalAction 
     }
 
     private void setHostsCurrentHealth(HttpServletRequest request,
-                                       AppdefGroupValue group) throws Exception {
+                                       AppdefGroupValue group)
+        throws Exception {
         AppdefEntityID entityId = null;
 
         try {

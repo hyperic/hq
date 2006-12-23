@@ -28,12 +28,16 @@ package org.hyperic.hq.ui.action.resource.autogroup.monitor;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -47,17 +51,11 @@ import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-
 /**
  * A <code>BaseDispatchAction</code> that sets up autogroup
  * monitor portals.
  */
-public class AutoGroupVisibilityPortalAction
+public class VisibilityPortalAction
     extends ResourceVisibilityPortalAction {
 
     private static final String TITLE_CURRENT_HEALTH =
@@ -79,15 +77,7 @@ public class AutoGroupVisibilityPortalAction
         "resource.autogroup.monitor.visibility.PerformanceTitle";
 
     private static Log log =
-        LogFactory.getLog(AutoGroupVisibilityPortalAction.class.getName());
-
-    protected Properties getKeyMethodMap() {
-        Properties map = new Properties();
-        map.setProperty(Constants.MODE_MON_CUR,      "currentHealth");
-        map.setProperty(Constants.MODE_MON_RES_METS, "resourceMetrics");
-        map.setProperty(Constants.MODE_MON_PERF,     "performance");
-        return map;
-    }
+        LogFactory.getLog(VisibilityPortalAction.class.getName());
 
     public ActionForward currentHealth(ActionMapping mapping,
                                        ActionForm form,

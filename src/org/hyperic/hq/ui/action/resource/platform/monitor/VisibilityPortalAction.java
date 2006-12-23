@@ -25,38 +25,29 @@
 
 package org.hyperic.hq.ui.action.resource.platform.monitor;
 
-import java.util.Properties;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.Portal;
-import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ResourceVisibilityPortalAction;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.Portal;
+import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ResourceVisibilityPortalAction;
 
 /**
  * A <code>BaseDispatchAction</code> that sets up platform
  * monitor portals.
  */
-public class PlatformVisibilityPortalAction extends ResourceVisibilityPortalAction {
+public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
 
     private static final String TITLE_CURRENT_HEALTH =
         "resource.platform.monitor.visibility.CurrentHealthTitle";
 
     private static final String PORTLET_CURRENT_HEALTH =
         ".resource.platform.monitor.visibility.CurrentHealth";
-
-    private static final String TITLE_FAVORITE_METRICS =
-        "resource.platform.monitor.visibility.FavoriteMetricsTitle";
-
-    private static final String PORTLET_FAVORITE_METRICS =
-        ".resource.platform.monitor.visibility.FavoriteMetrics";
 
     private static final String TITLE_PLATFORM_METRICS =
         "resource.platform.monitor.visibility.PlatformMetricsTitle";
@@ -71,19 +62,7 @@ public class PlatformVisibilityPortalAction extends ResourceVisibilityPortalActi
         ".resource.platform.monitor.visibility.Performance";
 
     protected static Log log =
-        LogFactory.getLog(PlatformVisibilityPortalAction.class.getName());
-
-    protected Properties getKeyMethodMap() {
-        Properties map = new Properties();
-        map.setProperty(Constants.MODE_MON_CUR,       "currentHealth");
-        map.setProperty(Constants.MODE_MON_RES_METS,  "resourceMetrics");
-        
-        /**
-         * if we get a performance, send the user to currentHealth page 
-         */
-        map.setProperty(Constants.MODE_MON_PERF,      "performance");
-        return map;
-    }
+        LogFactory.getLog(VisibilityPortalAction.class.getName());
 
     public ActionForward currentHealth(ActionMapping mapping,
                                        ActionForm form,

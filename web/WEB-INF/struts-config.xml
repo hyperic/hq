@@ -650,8 +650,8 @@
         <set-property property="title" value="2.2.1"/>
       </action>
 
-      <action path="/resource/platform/inventory/NewPlatform"
-              type="org.hyperic.hq.ui.action.resource.platform.inventory.NewPlatformAction"
+      <action path="/resource/platform/inventory/*Platform"
+              type="org.hyperic.hq.ui.action.resource.platform.inventory.{1}PlatformAction"
               name="NewPlatformForm"
               scope="request"
               validate="true"
@@ -665,11 +665,6 @@
         <forward name="remove" path="/resource/platform/Inventory.do?mode=new"/>
         <forward name="failure" path="/resource/platform/Inventory.do?mode=new"/>
         <forward name="success" path="/resource/platform/Inventory.do?mode=view"/>
-      </action>
-
-      <action path="/resource/platform/inventory/ViewPlatform"
-              type="org.hyperic.hq.ui.action.resource.platform.inventory.ViewPlatformAction">
-        <set-property property="title" value="2.2.6"/>
       </action>
 
       <action path="/resource/platform/inventory/EditPlatformGeneralProperties"
@@ -865,14 +860,14 @@
       <!-- / -->
           
       <!-- common monitoring actions -->
-      <action path="/resource/common/monitor/Visibility"
-              forward=".resource.common.monitor.visibility.layout">
+      <action path="/resource/*/monitor/Visibility"
+              forward=".resource.{1}.monitor.visibility.layout">
       </action>
 
-      <action path="/resource/common/monitor/VisibilityPortal"
+      <action path="/resource/*/monitor/VisibilityPortal"
               parameter="mode"
-              input="/resource/common/monitor/Visibility.do"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.VisibilityPortalAction">
+              input="/resource/{1}/monitor/Visibility.do"
+              type="org.hyperic.hq.ui.action.resource.{1}.monitor.VisibilityPortalAction">
       </action>
 
       <action path="/resource/common/monitor/visibility/MetricDisplayRangeFormPrepare"
@@ -931,16 +926,6 @@
       </action>
 
       <!-- platform monitoring actions -->      
-      <action path="/resource/platform/monitor/Visibility"
-              forward=".resource.platform.monitor.visibility.layout">
-      </action>
-
-      <action path="/resource/platform/monitor/VisibilityPortal"
-              parameter="mode"
-              input="/resource/platform/monitor/Visibility.do"
-              type="org.hyperic.hq.ui.action.resource.platform.monitor.PlatformVisibilityPortalAction">
-      </action>
-
       <action path="/resource/platform/monitor/visibility/PlatformCurrentHealth"
               name="IndicatorViewsForm"
               scope="request"
@@ -996,16 +981,6 @@
       <!-- / -->
       
       <!-- server monitoring actions -->      
-      <action path="/resource/server/monitor/Visibility"
-              forward=".resource.server.monitor.visibility.layout">
-      </action>
-
-      <action path="/resource/server/monitor/VisibilityPortal"
-              parameter="mode"
-              input="/resource/server/monitor/Visibility.do"
-              type="org.hyperic.hq.ui.action.resource.server.monitor.ServerVisibilityPortalAction">
-      </action>
-
       <action path="/resource/server/monitor/visibility/ServerCurrentHealth"
               name="IndicatorViewsForm"
               scope="request"
@@ -1064,16 +1039,6 @@
             
       <!-- application monitoring -->
        <!-- application monitoring visibility -->
-      <action path="/resource/application/monitor/Visibility"
-              forward=".resource.application.monitor.visibility.layout">
-      </action>
-
-      <action path="/resource/application/monitor/VisibilityPortal"
-              parameter="mode"
-              input="/resource/application/monitor/Visibility.do"
-              type="org.hyperic.hq.ui.action.resource.application.monitor.ApplicationVisibilityPortalAction">
-      </action>
-
       <action path="/resource/application/monitor/visibility/ApplicationCurrentHealth"
               name="IndicatorViewsForm"
               scope="request"
@@ -1432,16 +1397,6 @@
       </action>
 
       <!-- service monitoring -->
-      <action path="/resource/service/monitor/Visibility"
-              forward=".resource.service.monitor.visibility.layout">
-      </action>
-
-      <action path="/resource/service/monitor/VisibilityPortal"
-              parameter="mode"
-              input="/resource/service/monitor/Visibility.do"
-              type="org.hyperic.hq.ui.action.resource.service.monitor.ServiceVisibilityPortalAction">
-      </action>
-
       <action path="/resource/service/monitor/visibility/ServiceCurrentHealth"
               name="IndicatorViewsForm"
               scope="request"
@@ -1785,16 +1740,6 @@
       <!-- / -->
 
       <!-- group monitoring actions -->          
-      <action path="/resource/group/monitor/Visibility"
-              forward=".resource.group.monitor.visibility.layout">
-      </action>
-
-      <action path="/resource/group/monitor/VisibilityPortal"
-              parameter="mode"
-              input="/resource/group/monitor/Visibility.do"
-              type="org.hyperic.hq.ui.action.resource.group.monitor.GroupVisibilityPortalAction">
-      </action>
-
       <action path="/resource/group/monitor/visibility/GroupCurrentHealth"
               name="IndicatorViewsForm"
               scope="request"
@@ -1912,16 +1857,6 @@
       <!-- / end resource group control -->
 
       <!-- autogroup monitoring actions -->          
-      <action path="/resource/autogroup/monitor/Visibility"
-              forward=".resource.autogroup.monitor.visibility.layout">
-      </action>
-
-      <action path="/resource/autogroup/monitor/VisibilityPortal"
-              parameter="mode"
-              input="/resource/autogroup/monitor/Visibility.do"
-              type="org.hyperic.hq.ui.action.resource.autogroup.monitor.AutoGroupVisibilityPortalAction">
-      </action>
-
       <action path="/resource/autogroup/monitor/visibility/AutoGroupCurrentHealth"
               name="IndicatorViewsForm"
               scope="request"

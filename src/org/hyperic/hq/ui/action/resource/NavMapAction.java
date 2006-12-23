@@ -43,7 +43,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.action.resource.application.monitor.ApplicationVisibilityPortalAction;
+import org.hyperic.hq.ui.action.resource.application.monitor.VisibilityPortalAction;
 import org.hyperic.hq.ui.util.ActionUtils;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -182,8 +182,8 @@ public class NavMapAction extends BaseAction {
             
             if (Constants.MONITOR_VISIBILITY_LOC
                     .equalsIgnoreCase(currentResType)) {
-                ApplicationVisibilityPortalAction portal =
-                    new ApplicationVisibilityPortalAction();
+                VisibilityPortalAction portal =
+                    new VisibilityPortalAction();
                 Map tabs = portal.getKeyMethodMap();
 
                 if (!tabs.containsKey(mode))
