@@ -347,6 +347,12 @@ public class AlertDefinition
         if (getActOnTrigger() != null) {
             _value.setActOnTriggerId(getActOnTrigger().getId().intValue());
         }
+        if (getEscalation() != null) {
+            _value.setEscalationId(getEscalation().getId());
+        }
+        else {
+            _value.setEscalationId(null);
+        }
 
         _value.removeAllTriggers();
         for (Iterator i=getTriggers().iterator(); i.hasNext(); ) {
