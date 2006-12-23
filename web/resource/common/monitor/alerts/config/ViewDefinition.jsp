@@ -31,10 +31,10 @@
   <tiles:put name="titleKey" value="alert.config.props.ViewDef.PageTitle"/>
 </tiles:insert>
 
+<tiles:insert definition=".events.config.view.nav"/>
+
 <tiles:insert definition=".portlet.error"/>
 <tiles:insert definition=".portlet.confirm"/>
-
-<tiles:insert definition=".events.config.view.nav"/>
 
 <tiles:insert definition=".events.config.view.properties"/>
 
