@@ -258,14 +258,14 @@ public class ResourceDAO extends HibernateDAO
                      "  (subj.id = :subjId or r.owner.id = :subjId) and " +
                      "  (" +
                      "   rt.name = 'covalentEAMService' or " +
-                     "   rt.name = 'covalentAuthzResourceGroup') and " +
-                     "  (" +
-                     "   op.name = 'viewService' or " +
-                     "   op.name = 'viewResourceGroup') and " +
-                     "   0 = (select count(*) from Resource r2 " +
+                     "   (rt.name = 'covalentAuthzResourceGroup' and " +
+                     "   0 < (select count(*) from Resource r2 " +
                      "        join r2.resourceGroups rg2 " +
                      "        where r.id = r2.id and rg2.groupType = 15 and" +
-                     "              rg2.clusterId != -1) " +
+                     "              rg2.clusterId != -1) )) and " +
+                     "  (" +
+                     "   op.name = 'viewService' or " +
+                     "   op.name = 'viewResourceGroup') " +
                      "order by r.sortName ";
         List resources =
             getSession().createQuery(sql)
@@ -298,14 +298,14 @@ public class ResourceDAO extends HibernateDAO
                    "  r.system = ? and " +
                    "  (" +
                    "   rt.name = 'covalentEAMService' or " +
-                   "   rt.name = 'covalentAuthzResourceGroup') and " +
-                   "  (" +
-                   "   op.name = 'viewService' or " +
-                   "   op.name = 'viewResourceGroup') and " +
-                   "   0 = (select count(*) from Resource r2 " +
+                   "   (rt.name = 'covalentAuthzResourceGroup' and " +
+                   "   0 < (select count(*) from Resource r2 " +
                    "        join r2.resourceGroups rg2 " +
                    "        where r.id = r2.id and rg2.groupType = 15 and" +
-                   "              rg2.clusterId != -1) " +
+                   "              rg2.clusterId != -1))) and " +
+                   "  (" +
+                   "   op.name = 'viewService' or " +
+                   "   op.name = 'viewResourceGroup') " +
                    "order by r.sortName ";
         
         List resources =
