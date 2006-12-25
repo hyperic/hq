@@ -69,7 +69,7 @@
       <html:link href="javascript:displayStackTrace()"><fmt:message key="error.Error.StackTraceHereLink"/></html:link>         
       </span>
       <fmt:message key="error.Error.ReturnTo"/>
-      <html:link href="javascript:hideStackTrace()"><fmt:message key="error.Error.PreviousPageLink"/></html:link> 
+      <html:link href="javascript:history.back(1)"><fmt:message key="error.Error.PreviousPageLink"/></html:link> 
       <html:link page="/Dashboard.do"><fmt:message key="error.Error.DashboardLink"/></html:link> 
       <html:link page="/ResourceHub.do"><fmt:message key="error.Error.ResourceHubLink"/></html:link> 
       </p>
