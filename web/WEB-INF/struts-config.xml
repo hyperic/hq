@@ -605,30 +605,20 @@
               <forward name="adhocGroup" path="/resource/group/Inventory.do?mode=view"/>
       </action>
 
-      <action path="/resource/common/control/ListScheduled"
+      <action path="/resource/common/control/List*"
               name="RemoveControlJobsForm"
               scope="request"               
-              type="org.hyperic.hq.ui.action.resource.common.control.ListScheduledAction" >
+              type="org.hyperic.hq.ui.action.resource.common.control.List{1}Action" >
       </action>
       
-      <action path="/resource/common/control/ListHistory"
-              name="RemoveControlJobsForm"
-              scope="request"            
-              type="org.hyperic.hq.ui.action.resource.common.control.ListHistoryAction" >
-        <set-property property="title" value="2.3.7.3"/>
-      </action>
-      
-      <action path="/resource/common/control/ListDetail"  
-              name="RemoveControlJobsForm"
-              scope="request"
-              type="org.hyperic.hq.ui.action.BaseTilesAction" >
-        <set-property property="title" value="2.3.7"/>
-      </action>
-
-      <action path="/resource/common/control/QuickControlPrepareAction"
+      <action path="/resource/*/control/QuickControl*" 
               name="QuickControlForm"
-              scope="request"         
-              type="org.hyperic.hq.ui.action.resource.common.control.QuickControlPrepareAction" >
+              scope="request"
+              input="/resource/{1}/Control.do?mode=view"          
+              type="org.hyperic.hq.ui.action.resource.common.control.QuickControl{2}Action" >
+        <forward name="new" path="/resource/{1}/Control.do?mode=new"/>              
+        <forward name="failure" path="/resource/{1}/Control.do?mode=view" redirect="true"/>
+        <forward name="success" path="/resource/{1}/Control.do?mode=view" redirect="true"/>
       </action>
 
       <action path="/resource/common/control/*Status"
@@ -719,23 +709,6 @@
               input="/resource/platform/inventory.do?mode=view">
         <set-property property="title" value="2.2.6"/>
         <forward name="failure" path="/resource/platform/Inventory.do?mode=view"/>
-        <forward name="success" path="/resource/platform/Inventory.do?mode=view"/>
-      </action>
-
-      <action path="/resource/platform/inventory/AddPlatformGroups"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.AddResourceGroupsAction"
-              name="AddResourceGroupsForm"
-              scope="request"
-              input="/resource/platform/Inventory.do?mode=addGroups">
-        <forward name="cancel"  path="/resource/platform/Inventory.do?mode=view"
-                 redirect="true"/>
-        <forward name="reset"   path="/resource/platform/Inventory.do?mode=addGroups"
-                 redirect="true"/>
-        <forward name="new"     path="/resource/group/Inventory.do?mode=new"
-                 redirect="true"/>
-        <forward name="add"     path="/resource/platform/Inventory.do?mode=addGroups"/>
-        <forward name="remove"  path="/resource/platform/Inventory.do?mode=addGroups"/>
-        <forward name="failure" path="/resource/platform/Inventory.do?mode=addGroups"/>
         <forward name="success" path="/resource/platform/Inventory.do?mode=view"/>
       </action>
 
@@ -1171,23 +1144,6 @@
               <forward name="success" path="/resource/server/Inventory.do?mode=view" redirect="true"/>
       </action>
 
-      <action path="/resource/server/inventory/AddServerGroups"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.AddResourceGroupsAction"
-              name="AddResourceGroupsForm"
-              scope="request"
-              input="/resource/server/Inventory.do?mode=addGroups">
-        <forward name="cancel"  path="/resource/server/Inventory.do?mode=view"
-                 redirect="true"/>
-        <forward name="reset"   path="/resource/server/Inventory.do?mode=addGroups"
-                 redirect="true"/>
-        <forward name="new"     path="/resource/group/Inventory.do?mode=new"
-                 redirect="true"/>
-        <forward name="add"     path="/resource/server/Inventory.do?mode=addGroups"/>
-        <forward name="remove"  path="/resource/server/Inventory.do?mode=addGroups"/>
-        <forward name="failure" path="/resource/server/Inventory.do?mode=addGroups"/>
-        <forward name="success" path="/resource/server/Inventory.do?mode=view"/>
-      </action>
-                          
       <!-- / -->
 
       <!-- resource server control -->
@@ -1261,16 +1217,6 @@
         <forward name="success" path="/resource/server/Control.do?mode=view" redirect="true" />
       </action>
      
-      <action path="/resource/server/control/QuickControl" 
-              name="QuickControlForm"
-              scope="request"
-              input="/resource/server/Control.do?mode=view"          
-              type="org.hyperic.hq.ui.action.resource.common.control.QuickControlAction" >
-        <forward name="new" path="/resource/server/Control.do?mode=new"/>              
-        <forward name="failure" path="/resource/server/Control.do?mode=view" redirect="true"/>
-        <forward name="success" path="/resource/server/Control.do?mode=view" redirect="true"/>
-      </action>
-
       <action path="/resource/server/control/EditAddToGroups"
               scope="request"
               type="org.apache.struts.tiles.actions.TilesAction"/>
@@ -1345,23 +1291,6 @@
               <forward name="success" path="/resource/service/Inventory.do?mode=view" redirect="true"/>
       </action>
           
-      <action path="/resource/service/inventory/AddServiceGroups"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.AddResourceGroupsAction"
-              name="AddResourceGroupsForm"
-              scope="request"
-              input="/resource/service/Inventory.do?mode=addGroups">
-        <forward name="cancel"  path="/resource/service/Inventory.do?mode=view"
-                 redirect="true"/>
-        <forward name="reset"   path="/resource/service/Inventory.do?mode=addGroups"
-                 redirect="true"/>
-        <forward name="new"     path="/resource/group/Inventory.do?mode=new"
-                 redirect="true"/>
-        <forward name="add"     path="/resource/service/Inventory.do?mode=addGroups"/>
-        <forward name="remove"  path="/resource/service/Inventory.do?mode=addGroups"/>
-        <forward name="failure" path="/resource/service/Inventory.do?mode=addGroups"/>
-        <forward name="success" path="/resource/service/Inventory.do?mode=view"/>
-      </action>
-
       <action path="/resource/service/inventory/EditConfigProperties"
         type="org.hyperic.hq.ui.action.resource.common.inventory.EditConfigPropertiesAction"
                           name="CommonConfigForm"
@@ -1430,16 +1359,6 @@
         <forward name="success" path="/resource/service/Control.do?mode=view" redirect="true" />
       </action>
      
-      <action path="/resource/service/control/QuickControl" 
-              name="QuickControlForm"
-              scope="request"
-              input="/resource/service/Control.do?mode=view"          
-              type="org.hyperic.hq.ui.action.resource.common.control.QuickControlAction" >
-        <forward name="new" path="/resource/service/Control.do?mode=new"/>              
-        <forward name="failure" path="/resource/service/Control.do?mode=view" redirect="true"/>
-        <forward name="success" path="/resource/service/Control.do?mode=view" redirect="true"/>
-      </action>
-
       <!-- resource service control. this reuses the forms, action classes, and
            jsp's for server control, it just makes them available at different
            urls.  -->
@@ -1581,24 +1500,6 @@
         <forward name="failure" 
               path="/resource/application/Inventory.do?mode=listServiceDependencies"
               redirect="true"/>
-      </action>
-
-
-      <action path="/resource/application/inventory/AddApplicationGroups"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.AddResourceGroupsAction"
-              name="AddResourceGroupsForm"
-              scope="request"
-              input="/resource/application/Inventory.do?mode=addGroups">
-        <forward name="cancel"  path="/resource/application/Inventory.do?mode=view"
-                 redirect="true"/>
-        <forward name="reset"   path="/resource/application/Inventory.do?mode=addGroups"
-                 redirect="true"/>
-        <forward name="new"     path="/resource/group/Inventory.do?mode=new"
-                 redirect="true"/>
-        <forward name="add"     path="/resource/application/Inventory.do?mode=addGroups"/>
-        <forward name="remove"  path="/resource/application/Inventory.do?mode=addGroups"/>
-        <forward name="failure" path="/resource/application/Inventory.do?mode=addGroups"/>
-        <forward name="success" path="/resource/application/Inventory.do?mode=view"/>
       </action>
 
       <action path="/resource/application/inventory/AddApplicationServiceFormPrepare"
@@ -1799,16 +1700,6 @@
         <forward name="success" path="/resource/group/Control.do?mode=view" redirect="true" />
       </action>
               
-      <action path="/resource/group/control/QuickControl" 
-              name="QuickControlForm"
-              scope="request"
-              input="/resource/group/Control.do"          
-              type="org.hyperic.hq.ui.action.resource.common.control.QuickControlAction">
-        <forward name="new" path="/resource/group/Control.do?mode=new"/>
-        <forward name="failure" path="/resource/group/Control.do?mode=view" redirect="true"/>
-        <forward name="success" path="/resource/group/Control.do?mode=view" redirect="true"/>
-      </action>
-      
       <action path="/resource/group/control/ListDetail"       
               type="org.hyperic.hq.ui.action.resource.group.control.ListDetailAction" >
         <set-property property="title" value="2.4.7.5"/>
@@ -2390,6 +2281,23 @@
         <forward name="failure" path="/resource/{1}/Inventory.do?mode=changeOwner"/>
         <forward name="success" path="/resource/{1}/Inventory.do?mode=view"/>
         <forward name="lostRights" path="/ResourceHub.do"/>
+      </action>
+
+      <action path="/resource/*/inventory/Add*Groups"
+              type="org.hyperic.hq.ui.action.resource.common.inventory.AddResourceGroupsAction"
+              name="AddResourceGroupsForm"
+              scope="request"
+              input="/resource/{1}/Inventory.do?mode=addGroups">
+        <forward name="cancel"  path="/resource/{1}/Inventory.do?mode=view"
+                 redirect="true"/>
+        <forward name="reset"   path="/resource/{1}/Inventory.do?mode=addGroups"
+                 redirect="true"/>
+        <forward name="new"     path="/resource/group/Inventory.do?mode=new"
+                 redirect="true"/>
+        <forward name="add"     path="/resource/{1}/Inventory.do?mode=addGroups"/>
+        <forward name="remove"  path="/resource/{1}/Inventory.do?mode=addGroups"/>
+        <forward name="failure" path="/resource/{1}/Inventory.do?mode=addGroups"/>
+        <forward name="success" path="/resource/{1}/Inventory.do?mode=view"/>
       </action>
 
       <action path="/welcome" forward="/welcome.jsp" >
