@@ -62,7 +62,7 @@
   <tr>
     <td rowspan="2" width="20%" class="BlockLabel">&nbsp;</td>
     <td nowrap="true" class="BlockContent" style="padding: 10px;">
-  <c:if test="${escalation.allowPause}">
+  <c:if test="${escalation.allowPause && not alert.acknowledged}">
       <input type=checkbox name="pause" value="true"/>
       <fmt:message key="alert.escalation.pause"/>
       <select name="pauseTime">
@@ -94,7 +94,14 @@
   <tiles:put name="labelKey" value="resource.common.alert.action.acknowledge.label"/>
   <tiles:put name="buttonHref" value="javascript:document.forms[0].submit();"/>
   <tiles:put name="buttonClick">$('mode').setAttribute('value', '<fmt:message key="resource.common.alert.action.acknowledge.label"/>')</tiles:put>
-  <tiles:put name="disabled" beanName="alert" beanProperty="fixed"/>
+  <c:choose>
+    <c:when test="${alert.acknowledged}">
+      <tiles:put name="disabled" value="true"/>
+    </c:when>
+    <c:otherwise>
+      <tiles:put name="disabled" beanName="alert" beanProperty="fixed"/>
+    </c:otherwise>
+  </c:choose>
 </tiles:insert>
     </td>
   </tr>
