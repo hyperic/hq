@@ -41,7 +41,7 @@ import org.jboss.system.ServiceMBean;
  * JSR-77.666
  * if only the MBean
  *   jboss.management.single:
- *   J2EEServer=Single,j2eeType=J2EEApplication,name=covalent-eam.ear
+ *   J2EEServer=Single,j2eeType=J2EEApplication,_name=covalent-eam.ear
  *   (class org.jboss.management.j2ee.J2EEApplication)
  * was an EventProvider, we would not need this class.  cannot find
  * a way to receive notification when said application has been fully
@@ -54,43 +54,42 @@ import org.jboss.system.ServiceMBean;
  */
 
 public class EjbModuleLifecycle
-    implements NotificationListener {
-
+    implements NotificationListener 
+{
     private static final int SERVICE_STARTED = ServiceMBean.STARTED;
     private static final int SERVICE_STOPPED = ServiceMBean.STOPPED;
 
     private static final String SCOPE = "jboss.j2ee:service=EjbModule,*";
 
-    private boolean running = false;
-    private boolean notifyStopped = false;
-
-    private ObjectName scope;
-    private QueryExp query;
-    private int numModules = 0;
-    private int startedModules = 0;
-    private MBeanServer server;
-    private EjbModuleLifecycleListener listener;
-    private String name;
+    private boolean                    _running = false;
+    private boolean                    _notifyStopped = false;
+    private ObjectName                 _scope;
+    private int                        _numModules = 0;
+    private int                        _startedModules = 0;
+    private MBeanServer                _server;
+    private EjbModuleLifecycleListener _listener;
+    private String                     _name;
 
     public EjbModuleLifecycle(MBeanServer server,
                               EjbModuleLifecycleListener listener,
-                              String name) {
-        this.server = server;
-        this.listener = listener;
-        this.name = name;
+                              String name) 
+    {
+        _server   = server;
+        _listener = listener;
+        _name     = name;
     }
 
     public boolean isRunning() {
-        return this.running;
+        return _running;
     }
 
     private Iterator getIterator() {
         // return this.server.queryNames(this.scope, this.query).iterator(); 
-        return this.server.queryNames(this.scope, null).iterator();
+        return _server.queryNames(_scope, null).iterator();
     }
 
     private boolean apply(ObjectName obj) {
-      //XXX jboss seems unhappy with this.query.apply(obj)
+        //XXX jboss seems unhappy with this.query.apply(obj)
         String prop = obj.getKeyProperty("url"); //3.0
       
         if (prop == null) {
@@ -99,20 +98,17 @@ public class EjbModuleLifecycle
         if (prop == null) {
             return false;
         }
-        return prop.indexOf(this.name) > -1;
+        return prop.indexOf(_name) > -1;
     }
 
     public void start() {
         try {
-            this.scope = new ObjectName(SCOPE);
+            _scope = new ObjectName(SCOPE);
         } catch (Exception e) {
             //aint gonna happen
             e.printStackTrace();
         }
 
-        this.query = Query.match(Query.attr("Module"),
-                                 Query.value(this.name));
-        
         for (Iterator it = getIterator(); it.hasNext();) { 
             ObjectName obj = (ObjectName)it.next();
 
@@ -121,8 +117,8 @@ public class EjbModuleLifecycle
                     continue;
                 }
 
-                server.addNotificationListener(obj, this, null, null);
-                numModules++;
+                _server.addNotificationListener(obj, this, null, null);
+                _numModules++;
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -137,19 +133,18 @@ public class EjbModuleLifecycle
                 if (!apply(obj)) {
                     continue;
                 }
-                server.removeNotificationListener(obj, this);
+                _server.removeNotificationListener(obj, this);
             } catch (Exception e) {
             }
         }
 
-        notifyStopped = false;
-        running = false;
-        numModules = 0;
-        startedModules = 0;
+        _notifyStopped  = false;
+        _running        = false;
+        _numModules     = 0;
+        _startedModules = 0;
     }
 
-    public void handleNotification(Notification notification, Object handback)
-    {
+    public void handleNotification(Notification notification, Object handback) {
         if (!(notification instanceof AttributeChangeNotification)) {
             //we should never get anything but.
             return;
@@ -165,26 +160,26 @@ public class EjbModuleLifecycle
         int state = ((Integer)attrChange.getNewValue()).intValue();
 
         switch (state) {
-          case SERVICE_STOPPED:
-            if (!notifyStopped) {
-                running = false;
-                notifyStopped = true;
-                this.listener.ejbModuleStopped();
+        case SERVICE_STOPPED:
+            if (!_notifyStopped) {
+                _running = false;
+                _notifyStopped = true;
+                _listener.ejbModuleStopped();
             }
             return;
-          case SERVICE_STARTED:
+        case SERVICE_STARTED:
             //fallthrough
             break;
-          default:
+        default:
             return;
         }
 
-        if (++startedModules != numModules) {
+        if (++_startedModules != _numModules) {
             return;
         }
 
-        running = true;
+        _running = true;
 
-        this.listener.ejbModuleStarted();
+        _listener.ejbModuleStarted();
     }
 }

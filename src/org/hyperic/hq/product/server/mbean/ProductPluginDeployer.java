@@ -530,9 +530,9 @@ public class ProductPluginDeployer
 
         try {
             urlScanner = new ObjectName(URL_SCANNER_NAME);
-            this.server.invoke(urlScanner, "addURL",
-                               new Object[] { dir.toURL() },
-                               new String[] { URL.class.getName() });
+            server.invoke(urlScanner, "addURL",
+                          new Object[] { dir.toURL() },
+                          new String[] { URL.class.getName() });
         } catch (Exception e) {
             _log.error(msg, e);
         }        
@@ -571,7 +571,6 @@ public class ProductPluginDeployer
      * HighAvailService and with other components is such that the only thing
      * this method does is queue up the plugins that are ready for deployment. 
      * The actual deployment occurs when the startDeployer() method is called.
-     * @throws Exception
      */
     public void start() throws Exception { 
     
