@@ -889,20 +889,21 @@ text-align:center;
 }
    
 ##viewEscalationUL {
-  list-style-type:none;
   margin:0;
-  margin-right: 5px;
+  margin-right: 0px;
   padding:0;
+  width:100%;
+  background-color:#F2F4F7;
 }
 
 #viewEscalationUL li {
   font:13px Verdana;
   margin:0;
   padding:0px;
-   list-style-type:none;
-   list-style: none;
-   width: 100%;
-   
+  list-style: none;
+  width: 100%;
+  border-bottom:1px solid gray;
+  background-color:#F2F4F7;
 }
 
 .escTbl {
@@ -925,3 +926,10 @@ text-align:center;
 .lineitem {
 }
 
+.escConfirmation {
+ padding:10px;
+ width:200px;
+ margin:auto;
+ border:1px solid gray;
+ background-color:#D5D8DE;
+}

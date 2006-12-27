@@ -47,7 +47,6 @@ onloads.push(requestViewEscalation);
         var url = urlPart1 + alertDefId + urlPart2;
         //var url = "../escalation/jsonEscalationByAlertDefId.do?id=" + alertDefId;
         new Ajax.Request(url, {method: 'get', onSuccess:showViewEscResponse, onFailure :reportError});
-
         }
 
 
@@ -97,10 +96,6 @@ function showViewEscResponse(originalRequest) {
         var actionsClassName = actions[i].action.className;
         var actionsVersion = actions[i].action._version_;
 
-         //alert(actionsClassName)
-           //escViewUL.innerHTML = escText.creationTime.nodeValue;
-
-
         var num = actionId;
 		var liID = 'row'+num;
         var viewLi = document.createElement('li');
@@ -136,6 +131,9 @@ function showViewEscResponse(originalRequest) {
 
         viewLi.setAttribute((document.all ? 'className' : 'class'), "lineitem");
         viewLi.setAttribute('id','row_'+ liID);
+        viewLi.style.margin = "0px";
+        viewLi.style.padding = "0px";
+        //viewLi.style.border = "1px solid purple;"
 
         viewLi.appendChild(remDiv);
         remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
@@ -145,7 +143,9 @@ function showViewEscResponse(originalRequest) {
         viewLi.appendChild(escTable);
         escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
         escTable.setAttribute('border', '0');
-            escTable.style.width = "100%";
+        escTable.style.width = "100%";
+        escTable.setAttribute('cellspacing','3');
+        escTable.style.paddingLeft = "10px";
         escTable.appendChild(escTableBody);
 
         escTableBody.appendChild(escTr2);
@@ -707,6 +707,7 @@ function showViewEscResponse(originalRequest) {
   </c:when>
 </c:choose> <input type="hidden" id="ffff" name="ggg"
   value='<c:out value="${escalation.id}"/>' />
+
 <table width="100%" cellpadding="3" cellspacing="0" border="0">
   <tbody>
     <tr class="tableRowHeader">
@@ -715,11 +716,13 @@ function showViewEscResponse(originalRequest) {
           <option value=""><fmt:message key="common.label.CreateNew" /></option>
         </select>
         <fmt:message key="common.label.Name" />
-        <input type="text" size="25" name="escName" id="escName" /></td>
+        <input type="text" size="25" name="escName" id="escName" />
+        </td>
     </tr>
+
     <tr class="tableRowAction">
       <td class="section" width="100%">
-
+      <div id="example" style="display:none;" class="escConfirmation"></div>
       <ul id="rowOrder"></ul>
       <table width="100%" cellpadding="5" cellspacing="0" border="0"
         class="ToolbarContent">
@@ -816,25 +819,23 @@ function showViewEscResponse(originalRequest) {
 
 </form>
 
- <form name="viewEscalation" id="viewEscalation">
+<form name="viewEscalation" id="viewEscalation">
 
       <input type="hidden" id="alertDefId" name="alertDefId" value='<c:out value="${alertDef.id}"/>' />
-
-
-     <table width="100%" cellpadding="3" cellspacing="0" border="0" style="border:1px solid gray;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tbody>
          <tr>
              <td id="escNameText" class="tableRowHeader"></td>
          </tr>
          <tr>
             <td class="section" width="100%">
-            <ul id="viewEscalationUL">
+            <ul id="viewEscalationUL" style="margin-left:-40px;">
 
             </ul>
             </td>
         </tr>
-        </tbody>
-     </table>
+  </tbody>
+</table>
 
 
  <br>
@@ -842,7 +843,7 @@ function showViewEscResponse(originalRequest) {
 <input type="button" value="check escalation values" onclick="requestViewEscalation();" id="checkEsc"></input>
  </form>
 
-<div id="example" style="padding:15px;width:200px;margin:auto;border:1px solid gray;background-color:#D5D8DE;display:none;"></div>
+
 <div id="example2" style="padding:10px;width:725px;overflow:auto;"></div>
 
 
