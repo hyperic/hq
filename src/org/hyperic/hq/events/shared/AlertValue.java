@@ -43,6 +43,7 @@ public class AlertValue
    implements java.io.Serializable
 {
    private boolean fixed;
+   private boolean acknowledged;
    private Integer id;
    private boolean idHasBeenSet = false;
    private Integer alertDefId;
@@ -91,6 +92,14 @@ public class AlertValue
     public void setFixed(boolean fixed)
     {
         this.fixed = fixed;
+    }
+
+    public boolean isAcknowledged() {
+        return acknowledged;
+    }
+
+    public void setAcknowledged(boolean acknowledged) {
+        this.acknowledged = acknowledged;
     }
 
     public Integer getId()
