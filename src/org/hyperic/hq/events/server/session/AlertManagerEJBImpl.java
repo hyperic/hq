@@ -200,7 +200,22 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public AlertValue getById(Integer id) {
-        return getAlertDAO().findById(id).getAlertValue();
+        AlertValue ret = getAlertDAO().findById(id).getAlertValue();
+        // Find out if it has been acknowledged
+        AlertDefinition def = getAlertDefDAO().findById(ret.getAlertDefId());
+        if (def.getEscalation() != null) {
+            EscalationState state = EscalationMediator.getInstance()
+                    .getEscalationState(def.getEscalation(), def.getId(),
+                                        EscalationState.ALERT_TYPE_CLASSIC);
+            // Make sure that we are still on the same alert
+            if (state.isActive() && state.getAlertId() == id.intValue()) {
+                ret.setAcknowledged(state.isAcknowledge());
+            } else {
+                // Do not allow acknowlegment anymore
+                ret.setAcknowledged(true);
+            }
+        }
+        return ret;
     }
 
     /**
