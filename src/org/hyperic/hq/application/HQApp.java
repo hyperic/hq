@@ -45,8 +45,7 @@ public class HQApp {
     }
     
     /**
-     * Register a listener to be called after a tx has been successfully
-     * committed.
+     * Register a listener to be called after a tx has been committed.
      */
     public void addTransactionListener(TransactionListener listener) {
         List listeners = (List)_txListeners.get();
