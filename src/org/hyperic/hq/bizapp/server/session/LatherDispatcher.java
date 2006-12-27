@@ -27,6 +27,7 @@ package org.hyperic.hq.bizapp.server.session;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -41,6 +42,8 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.security.auth.login.LoginException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
@@ -114,9 +117,6 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.security.SecurityUtil;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class LatherDispatcher
     extends BizappSessionEJB
@@ -326,15 +326,15 @@ public class LatherDispatcher
         agentVal.setAgentToken(agentToken);
 
         // Check the to see if it already exists
-        Integer pk = null;
+        Collection pks = null;
         try {
             AgentValue origAgent =
                 getAgentManager().getAgent(agentIP, port);
             
             try {
-                pk = getPlatformManager().
-                    getPlatformPkByAgentToken(getOverlord(),
-                                              origAgent.getAgentToken());
+                pks = getPlatformManager().
+                    getPlatformPksByAgentToken(getOverlord(),
+                                               origAgent.getAgentToken());
             } catch (Exception e) {
                 // No platforms found, no a big deal
             }
@@ -364,40 +364,44 @@ public class LatherDispatcher
         RegisterAgent_result result =
             new RegisterAgent_result("token:" + agentToken);
 
-        if (pk != null)
-            try {
-                PlatformValue platform = getPlatformManager()
-                    .getPlatformById(getOverlord(), pk);
-                
-                // Send the agent the schedule
-                // Tell HQ we have a new agent starting.  This forces an update
-                // of the metric schedule.
-                getPlatformManager().sendAppdefEvent(
-                    getOverlord(),
-                    new AppdefEntityID(
-                        AppdefEntityConstants.APPDEF_TYPE_PLATFORM, pk),
-                    AppdefEvent.ACTION_UPDATE);
-                
-                ServerLightValue[] servers = platform.getServerValues();
-                for (int i = 0; i < servers.length; i++) {
+        if (pks != null) {
+            for (Iterator it = pks.iterator(); it.hasNext(); ) {
+                Integer pk = (Integer) it.next();
+                try {
+                    PlatformValue platform = getPlatformManager()
+                        .getPlatformById(getOverlord(), pk);
+                    
+                    // Send the agent the schedule
+                    // Tell HQ we have a new agent starting.  This forces an
+                    // update of the metric schedule.
                     getPlatformManager().sendAppdefEvent(
-                         getOverlord(), servers[i].getEntityId(),
-                         AppdefEvent.ACTION_UPDATE);
+                        getOverlord(),
+                        new AppdefEntityID(
+                            AppdefEntityConstants.APPDEF_TYPE_PLATFORM, pk),
+                        AppdefEvent.ACTION_UPDATE);
                     
-                    ServerValue server = getServerManager()
-                        .getServerById(getOverlord(), servers[i].getId());
-                    
-                    ServiceLightValue[] services = server.getServiceValues();
-                    for (int j = 0; j < services.length; j++) {
+                    ServerLightValue[] servers = platform.getServerValues();
+                    for (int i = 0; i < servers.length; i++) {
                         getPlatformManager().sendAppdefEvent(
-                            getOverlord(), services[j].getEntityId(),
-                            AppdefEvent.ACTION_UPDATE);
+                             getOverlord(), servers[i].getEntityId(),
+                             AppdefEvent.ACTION_UPDATE);
+                        
+                        ServerValue server = getServerManager()
+                            .getServerById(getOverlord(), servers[i].getId());
+                        
+                        ServiceLightValue[] services = server.getServiceValues();
+                        for (int j = 0; j < services.length; j++) {
+                            getPlatformManager().sendAppdefEvent(
+                                getOverlord(), services[j].getEntityId(),
+                                AppdefEvent.ACTION_UPDATE);
+                        }
                     }
+                } catch (Exception e) {
+                    // Shouldn't happen, not fatal if by chance it does.  The
+                    // agent schedule will not be immediately updated.
                 }
-            } catch (Exception e) {
-                // Shouldn't happen, not fatal if by chance it does.  The
-                // agent schedule will not be immediately updated.
             }
+        }
 
         return result;
     }

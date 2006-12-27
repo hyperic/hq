@@ -294,14 +294,14 @@ public class PlatformDAO extends HibernateDAO {
             .list();
     }
 
-    public Platform findByAgentToken(String token)
+    public Collection findByAgentToken(String token)
     {
         String sql = "select p from Platform p join fetch p.agent a " +
                      "where a.agentToken=?";
-        return (Platform)getSession()
+        return getSession()
             .createQuery(sql)
             .setString(0, token)
-            .uniqueResult();
+            .list();
     }
 
     public Collection findByIpAddr(String addr)

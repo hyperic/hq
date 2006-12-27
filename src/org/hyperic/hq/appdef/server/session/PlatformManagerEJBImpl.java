@@ -923,20 +923,22 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public Integer getPlatformPkByAgentToken(AuthzSubjectValue subject,
-                                             String agentToken)
-        throws FinderException, PermissionException, PlatformNotFoundException
+    public Collection getPlatformPksByAgentToken(AuthzSubjectValue subject,
+                                                String agentToken)
+        throws PlatformNotFoundException
     {
-        Platform p = getPlatformDAO().findByAgentToken(agentToken);
-        if (p == null) {
+        Collection platforms = getPlatformDAO().findByAgentToken(agentToken);
+        if (platforms == null || platforms.size() == 0) {
             throw new PlatformNotFoundException(
                 "Platform with agent token " + agentToken + " not found");
         }
-        checkViewPermission(
-            subject,
-            new AppdefEntityID(
-                AppdefEntityConstants.APPDEF_TYPE_PLATFORM, p.getId()));
-        return p.getId();
+        
+        List pks = new ArrayList();
+        for (Iterator it = platforms.iterator(); it.hasNext(); ) {
+            Platform plat = (Platform) it.next();
+            pks.add(plat.getId());
+        }
+        return pks;
     }
 
     /**
