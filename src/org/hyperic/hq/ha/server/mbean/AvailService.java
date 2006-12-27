@@ -25,17 +25,12 @@
 
 package org.hyperic.hq.ha.server.mbean;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import javax.management.ReflectionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycle;
@@ -49,39 +44,35 @@ import org.hyperic.hq.common.shared.util.EjbModuleLifecycleListener;
 public class AvailService 
     implements AvailServiceMBean, MBeanRegistration, EjbModuleLifecycleListener
 {
-
-    protected Log log = LogFactory.getLog(AvailService.class.getName());
-    protected MBeanServer server = null;
-    protected EjbModuleLifecycle listener = null;
+    private final Log _log = LogFactory.getLog(AvailService.class);
+    private MBeanServer        _server;
+    private EjbModuleLifecycle _listener;
     
     public AvailService() {}
 
     /**
      * @jmx:managed-operation
      */
-    public void stop()
-    {
-        log.info("Stopping AvailService");
-        listener.stop();
+    public void stop() {
+        _log.info("Stopping AvailService");
+        _listener.stop();
     }
 
     /**
      * @jmx:managed-operation
      */
-    public void start() throws ApplicationException
-    {
-        log.info("Starting AvailService");
-        listener = new EjbModuleLifecycle(server, this,
+    public void start() {
+        _log.info("Starting AvailService");
+        _listener = new EjbModuleLifecycle(_server, this,
                                           HQConstants.EJB_MODULE_PATTERN);   
-        listener.start();
+        _listener.start();
     }
 
     /**
      * @jmx:managed-operation
      */
-    public void restart()
-    {
-        this.log.info("Restarting HighAvailService");
+    public void restart() {
+        _log.info("Restarting HighAvailService");
         ejbModuleStarted();
     }
 
@@ -96,10 +87,8 @@ public class AvailService
     public void destroy() {}
 
     
-    public ObjectName preRegister(MBeanServer server, ObjectName name)
-            throws Exception 
-    {
-        this.server = server;
+    public ObjectName preRegister(MBeanServer server, ObjectName name) {
+        _server = server;
         return name;
     }
 
@@ -111,8 +100,7 @@ public class AvailService
 
     public void ejbModuleStopped() {}
 
-    public void ejbModuleStarted()
-    {
+    public void ejbModuleStarted() {
         // start the ProductPluginDeployer service
         startPluginDeployer();
         startSchedulerService();
@@ -137,27 +125,16 @@ public class AvailService
                    "startPurgeService");
     }
     
-    private void startMBean (String shortName,
-                             String mbeanName,
-                             String method) {
+    private void startMBean(String shortName, String mbeanName,
+                            String method) 
+    {
         try {
-            log.info("Starting " + shortName);
+            _log.info("Starting " + shortName);
 
             ObjectName objName = new ObjectName(mbeanName);
-            server.invoke(objName, method, new Object[] {}, new String[] {});
-        }
-        catch (MalformedObjectNameException e) {
-            throw new SystemException(e);
-        }
-        catch (InstanceNotFoundException e) {
-            throw new SystemException(e);
-        }
-        catch (MBeanException e) {
-            throw new SystemException(e);
-        }
-        catch (ReflectionException e) {
+            _server.invoke(objName, method, new Object[] {}, new String[] {});
+        } catch (Exception e) {
             throw new SystemException(e);
         }
     }
-
 }

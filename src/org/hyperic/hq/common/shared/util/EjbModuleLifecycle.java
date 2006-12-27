@@ -27,13 +27,11 @@ package org.hyperic.hq.common.shared.util;
 
 import java.util.Iterator;
 
-import javax.management.ObjectName;
-import javax.management.MBeanServer;
-import javax.management.Query;
-import javax.management.QueryExp;
 import javax.management.AttributeChangeNotification;
+import javax.management.MBeanServer;
 import javax.management.Notification;
 import javax.management.NotificationListener;
+import javax.management.ObjectName;
 
 import org.jboss.system.ServiceMBean;
 
