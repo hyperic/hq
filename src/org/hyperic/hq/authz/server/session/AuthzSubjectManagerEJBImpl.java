@@ -30,11 +30,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
@@ -45,14 +41,13 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -343,51 +338,25 @@ public class AuthzSubjectManagerEJBImpl
             return new PageList();
         }
 
-        PageControl allPc = new PageControl(pc);
-        // get all subjects, sorted but not paged
-        allPc.setSortattribute(pc.getSortattribute());
-        allPc.setSortorder(pc.getSortorder());
-        List all = getAllSubjects(subject, allPc);
-        
-        // build an index of ids 
-        int numToFind = 0;
-        HashMap index = new HashMap();
-        for (int i=0; i<ids.length; i++) {
-            Integer id = ids[i];
-            index.put(id, id);
-            numToFind++;
-        }
+        // find the requested subjects
+        Collection subjects =
+            getSubjectDAO().findById_orderName(ids, pc.isAscending());
 
         // check permission unless the list includes only the id of
         // the subject being requested. This is ugly mostly because
         // we're using a list api to possibly look up a single Item
-        if(!((index.size() == 1) && index.containsKey(subject.getId()))) {
+        if(subjects.size() > 0) {
             log.debug("Checking if Subject: " + subject.getName() +
-                " can list subjects.");
+                      " can list subjects.");
             PermissionManager pm = PermissionManagerFactory.getInstance(); 
             pm.check(subject.getId(), getRootResourceType(),
                      AuthzConstants.rootResourceId,
                      AuthzConstants.subjectOpViewSubject);
         }
 
-        // find the requested subjects
-        List subjects = new ArrayList(ids.length);
-        Iterator i = all.iterator();
-        while (i.hasNext()) {
-            AuthzSubjectValue s = (AuthzSubjectValue) i.next();
-            Integer id = (Integer) index.get(s.getId());
-            if (id != null) {
-                subjects.add(s);
-            }
-            if (subjects.size() == numToFind) {
-                break;
-            }
-        }
-
         // return the appropriate page for the found subjects
-
-        PageList plist = new PageList();
-        plist = subjectPager.seek(subjects, pc.getPagenum(), pc.getPagesize());
+        PageList plist = subjectPager.seek(subjects, pc.getPagenum(),
+                                           pc.getPagesize());
         plist.setTotalSize(subjects.size());        
         
         return plist;
