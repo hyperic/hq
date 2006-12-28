@@ -27,6 +27,8 @@ package org.hyperic.hq.authz.server.session;
 
 import java.util.Collection;
 
+import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Order;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -114,28 +116,35 @@ public class AuthzSubjectDAO extends HibernateDAO
             .uniqueResult();
     }
 
+    public Collection findById_orderName(Integer[] ids, boolean asc)
+    {
+        return getSession().createCriteria(AuthzSubject.class)
+            .add(Expression.in("id", ids))
+            .add(Expression.eq("system", Boolean.FALSE))
+            .addOrder( asc ? Order.asc("sortName") : Order.desc("sortName"))
+            .list();
+    }
+    
+    public Collection findAll_order(String col, boolean asc) {
+        return getSession().createCriteria(AuthzSubject.class)
+            .add(Expression.eq("system", Boolean.FALSE))
+            .addOrder( asc ? Order.asc(col) : Order.desc(col))
+            .list();
+    }
+
     public Collection findAll_orderName(boolean asc)
     {
-        return getSession()
-            .createQuery("from AuthzSubject WHERE system = false " +
-                         "order by sortName " + (asc ? "asc" : "desc"))
-            .list();
+        return findAll_order("sortName", asc);
     }
 
     public Collection findAll_orderFirstName(boolean asc)
     {
-        return getSession()
-            .createQuery("from AuthzSubject WHERE system = false " +
-                         "order by firstName " + (asc ? "asc" : "desc"))
-            .list();
+        return findAll_order("firstName", asc);
     }
 
     public Collection findAll_orderLastName(boolean asc)
     {
-        return getSession()
-            .createQuery("from AuthzSubject WHERE system = false " +
-                         "order by lastName " + (asc ? "asc" : "desc"))
-            .list();
+        return findAll_order("lastName", asc);
     }
 
     public Collection findAllRoot_orderName(boolean asc)
