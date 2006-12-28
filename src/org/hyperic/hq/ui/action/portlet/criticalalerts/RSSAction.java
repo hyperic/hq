@@ -119,9 +119,29 @@ public class RSSAction extends BaseRSSAction {
                                    UnitsConstants.SCALE_MILLI), 
                                    request.getLocale(), specs);
 
+            String desc;
+            if (alert.isFixed()) {
+                desc = fmtd.toString() + " " +
+                    res.getMessage("parenthesis", res.getMessage(
+                                   "resource.common.alert.action.fixed.label"));
+            }
+            else {
+                desc = "<table cellspacing=4><tr>" +
+                          "<td>" + fmtd.toString() + "</td>" +
+                          "<td><a href='" + feed.getBaseUrl() +
+                          "/alerts/Alerts.do?mode=FIXED&a=" +
+                          alert.getAlertId() + "'>" +
+                          res.getMessage(
+                              "resource.common.alert.action.fixed.label") +
+                          "</a></td><td><a href='" + feed.getBaseUrl() +
+                          "/alerts/Alerts.do?mode=ACKNOWLEDGE&a=" +
+                          alert.getAlertId() + "'>" +
+                          res.getMessage(
+                              "resource.common.alert.action.acknowledge.label")+
+                          "</a></td></tr></table>";
+            }
             feed.addItem(alert.getResource().getName() + " " +
-                         alert.getAlertDefName(), link, fmtd.toString(),
-                         alert.getCtime());
+                         alert.getAlertDefName(), link, desc, alert.getCtime());
         }
         request.setAttribute("rssFeed", feed);
         
