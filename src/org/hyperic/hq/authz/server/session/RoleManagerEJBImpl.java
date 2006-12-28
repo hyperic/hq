@@ -1845,31 +1845,18 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         Role roleLocal = lookupRole(roleId);
 
         /** TODO PermissionCheck scope for viewSubject **/
-        Collection noRoles;
         Collection otherRoles;
         pc = PageControl.initDefaults(pc, SortAttribute.SUBJECT_NAME);
         int attr = pc.getSortattribute();
         AuthzSubjectDAO dao = getSubjectDAO();
         switch (attr) {
         case SortAttribute.SUBJECT_NAME:
-            noRoles = dao.findWithNoRoles_orderName(roleId, pc.isAscending());
             otherRoles = dao.findByNotRoleId_orderName(roleLocal.getId(),
                                                        pc.isAscending());
             break;
 
         default:
             throw new FinderException("Unrecognized sort attribute: " + attr);
-        }
-
-        // FIXME- merging these two sorted lists probably causes the
-        // final list to not be sorted correctly. fix this by
-        // combining the two finders into one!
-        for(Iterator i = otherRoles.iterator(); i.hasNext();) {
-            AuthzSubject subj = (AuthzSubject)i.next();
-            // fix for 6740... dont add users twice
-            if(!noRoles.contains(subj)) {
-                noRoles.add(subj);
-            }
         }
 
         // build an index of subjectIds

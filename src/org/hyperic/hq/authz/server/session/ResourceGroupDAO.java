@@ -154,10 +154,10 @@ public class ResourceGroupDAO extends HibernateDAO
     public Collection findByNotRoleId_orderName(Integer roleId, boolean asc)
     {
         return getSession()
-            .createQuery("select disctinct g from ResourceGroup g " +
-                         "where g.id not in " +
-                         "(select g2.id from ResourceGroup g2 join " +
-                         "fetch g2.roles r where r.id = ? ) and " +
+            .createQuery("from ResourceGroup g " +
+                         "join fetch g.roles r " +
+                         "where r.id = ? and g.id not in " +
+                         "(select id from r.resourceGroups) and " +
                          "g.system = false order by g.sortName " +
                          (asc ? "asc" : "desc"))
             .setInteger(0, roleId.intValue())

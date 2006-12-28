@@ -182,9 +182,10 @@ public class RoleDAO extends HibernateDAO {
     public Collection findBySystemAndAvailableForSubject_orderName(
         boolean system, Integer sid, boolean asc) {
         return getSession()
-            .createQuery("from Role r join fetch r.subjects s " +
-                         "where system = ? and s.subject.id = ? and " +
-                         "r.id != s.role.id order by r.sortName " +
+            .createQuery("select distinct r from Role r, AuthzSubject s " +
+                         "where r.system = ? and s.id = ? and " +
+                         "r.id not in (select id from s.roles) " +
+                         "order by r.sortName " +
                          (asc ? "asc" : "desc"))
             .setBoolean(0, system)
             .setInteger(1, sid.intValue())
@@ -194,9 +195,8 @@ public class RoleDAO extends HibernateDAO {
     public Role findAvailableRoleForSubject(Integer roleId,
                                             Integer subjectid) {
         return (Role)getSession()
-            .createQuery("from Role r join fetch r.subjects s " +
-                         "where r.id = ? and s.subject.id = ? and " +
-                         "r.id != s.role.id ")
+            .createQuery("from Role r where r.id = ? and ? not in " +
+                         "(select id from r.subjects) ")
             .setInteger(0, roleId.intValue())
             .setInteger(1, subjectid.intValue())
             .uniqueResult();
