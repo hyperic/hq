@@ -235,6 +235,7 @@ public class AlertDefUtil {
                 
                 textValue = new StringBuffer(
                         RequestUtils.message(request, msgKey, args.toArray()));
+                break;
             default:
                 // do nothing
                 continue;
