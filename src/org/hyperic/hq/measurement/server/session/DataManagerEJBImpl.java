@@ -1250,7 +1250,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 i = this.setStatementArguments(stmt, i, subids);
                 
                 if (constrain) {
-                    stmt.setLong(i++, System.currentTimeMillis() - timerange);
+                    stmt.setLong(i++, timerange);
 
                     if (log.isTraceEnabled())
                         log.trace("arg" + (i-1) + ": " + timerange);
