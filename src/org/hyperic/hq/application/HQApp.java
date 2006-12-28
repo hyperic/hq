@@ -19,8 +19,44 @@ public class HQApp {
     private static final HQApp INSTANCE = new HQApp(); 
     private final Log _log = LogFactory.getLog(HQApp.class);
     
-    private ThreadLocal _txListeners = new ThreadLocal();
-
+    private ThreadLocal _txListeners    = new ThreadLocal();
+    private List        _startupClasses = new ArrayList();
+    
+    /**
+     * Adds a class to the list of classes to invoke when the application has
+     * started.
+     */
+    public void addStartupClass(String className) {
+        synchronized (_startupClasses) {
+            _startupClasses.add(className);
+        }
+    }
+    
+    /**
+     * Execute the registered startup classes.
+     */
+    public void runStartupClasses() {
+        List classNames;
+        
+        synchronized (_startupClasses) {
+            classNames = new ArrayList(_startupClasses);
+        }
+        
+        for (Iterator i=classNames.iterator(); i.hasNext(); ) {
+            String name = (String)i.next();
+            
+            try {
+                Class c = Class.forName(name);
+                StartupListener l = (StartupListener)c.newInstance();
+     
+                _log.info("Executing startup: " + name);
+                l.hqStarted();
+            } catch(Exception e) {
+                _log.warn("Error executing startup listener [" + name + "]", e);
+            }
+        }
+    }
+    
     private void scheduleCommitCallback() {
         SessionImpl s = (SessionImpl)
             Util.getSessionFactory().getCurrentSession();

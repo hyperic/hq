@@ -26,6 +26,8 @@
 package org.hyperic.hq.product.server.mbean;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -46,28 +48,21 @@ import javax.management.NotificationBroadcasterSupport;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
-import javax.naming.InitialContext;
-
-import org.jboss.deployment.SubDeployerSupport;
-import org.jboss.deployment.DeploymentInfo;
-import org.jboss.deployment.DeploymentException;
-
-import org.hyperic.hq.product.shared.ProductManagerLocal;
-import org.hyperic.hq.product.shared.ProductManagerUtil;
-
-import org.hyperic.hq.product.PluginInfo;
-import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.product.ProductPluginManager;
-import org.hyperic.hq.product.PluginException;
-
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.galerts.shared.GalertManagerLocal;
-import org.hyperic.hq.galerts.shared.GalertManagerUtil;
-import org.hyperic.hq.measurement.shared.SRNManagerLocal;
-import org.hyperic.hq.measurement.shared.SRNManagerUtil;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.PluginInfo;
+import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.ProductPluginManager;
+import org.hyperic.hq.product.shared.ProductManagerLocal;
+import org.hyperic.hq.product.shared.ProductManagerUtil;
+import org.hyperic.util.file.FileUtil;
+import org.jboss.deployment.DeploymentException;
+import org.jboss.deployment.DeploymentInfo;
+import org.jboss.deployment.SubDeployerSupport;
 
 /**
  * ProductPlugin deployer.
@@ -417,22 +412,34 @@ public class ProductPluginDeployer
         //but we are not "done" since a plugin can be dropped into
         //hq-plugins at anytime.
         pluginNotify("deployer", DEPLOYER_CLEARED);
-
-        // Initialize the SRNCache within a transaction
-        getSRNManager().initializeCache();
-        
-        // Initialize the group alerts subsystem
-        try {
-            GalertManagerLocal groupMan = 
-                GalertManagerUtil.getLocalHome().create();
-
-            groupMan.startup();
-        } catch (Exception e) {
-            _log.error("Unable to startup group manager", e);
-            throw new SystemException(e);           
-        }
+        loadStartupClasses();
         
         setReady(true);
+    }
+    
+    private void loadStartupClasses() {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        InputStream is = 
+            loader.getResourceAsStream("META-INF/startup_classes.txt"); 
+        HQApp app = HQApp.getInstance();
+        List lines;
+        
+        try {
+            lines = FileUtil.readLines(is);
+        } catch(IOException e) {
+            throw new SystemException(e);
+        }
+        
+        for (Iterator i=lines.iterator(); i.hasNext(); ) {
+            String className = (String)i.next();
+            
+            className = className.trim();
+            if (className.length() == 0 || className.startsWith("#"))
+                continue;
+            
+            app.addStartupClass(className);
+        }
+        app.runStartupClasses();
     }
 
     private void pluginNotify(String name, String type) {
@@ -461,14 +468,6 @@ public class ProductPluginDeployer
                                             newValue);
 
         _broadcaster.sendNotification(notif);
-    }
-
-    private SRNManagerLocal getSRNManager() {
-        try {
-            return SRNManagerUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
     }
 
     private ProductManagerLocal getProductManager() {
