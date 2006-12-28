@@ -35,9 +35,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.ejb.CreateException;
-import javax.naming.NamingException;
-
 import javax.management.Attribute;
 import javax.management.AttributeChangeNotification;
 import javax.management.ListenerNotFoundException;
@@ -49,6 +46,7 @@ import javax.management.NotificationBroadcasterSupport;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
+import javax.naming.InitialContext;
 
 import org.jboss.deployment.SubDeployerSupport;
 import org.jboss.deployment.DeploymentInfo;
@@ -93,7 +91,7 @@ public class ProductPluginDeployer
     private static final String PRODUCT = "HQ";
     private static final String PLUGIN_DIR = "hq-plugins";
 
-    private Log _log = LogFactory.getLog(ProductPluginDeployer.class.getName());
+    private Log _log = LogFactory.getLog(ProductPluginDeployer.class);
 
     private ProductPluginManager _ppm;
     private List                 _plugins = new ArrayList();
@@ -421,12 +419,7 @@ public class ProductPluginDeployer
         pluginNotify("deployer", DEPLOYER_CLEARED);
 
         // Initialize the SRNCache within a transaction
-        try {
-            SRNManagerLocal srnManager = getSRNManager();
-            srnManager.initializeCache();
-        } catch (DeploymentException e) {
-            _log.error(e.getMessage(), e);
-        }
+        getSRNManager().initializeCache();
         
         // Initialize the group alerts subsystem
         try {
@@ -470,24 +463,18 @@ public class ProductPluginDeployer
         _broadcaster.sendNotification(notif);
     }
 
-    private SRNManagerLocal getSRNManager()
-        throws DeploymentException 
-    {
+    private SRNManagerLocal getSRNManager() {
         try {
             return SRNManagerUtil.getLocalHome().create();
-        } catch (NamingException e) {
-            throw new DeploymentException("Failed to lookup SRNManager", e);
-        } catch (CreateException e) {
-            throw new DeploymentException("Failed to create SRNManager", e);
+        } catch (Exception e) {
+            throw new SystemException(e);
         }
     }
 
     private ProductManagerLocal getProductManager() {
         try {
             return ProductManagerUtil.getLocalHome().create();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
+        } catch (Exception e) {
             throw new SystemException(e);
         }
     }
@@ -573,8 +560,9 @@ public class ProductPluginDeployer
      * The actual deployment occurs when the startDeployer() method is called.
      */
     public void start() throws Exception { 
-    
-        if(_isStarted) return;
+        if(_isStarted) 
+            return;
+
         _isStarted = true;
         
         super.start();
