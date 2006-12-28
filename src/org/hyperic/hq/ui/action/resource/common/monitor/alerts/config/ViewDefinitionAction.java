@@ -46,6 +46,7 @@ import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 
@@ -64,11 +65,16 @@ public class ViewDefinitionAction extends TilesAction {
         throws Exception
     {            
         ServletContext ctx = getServlet().getServletContext();
-        AppdefEntityID aeid = RequestUtils.getEntityId(request);
         
-        // If group entity, do nothing
-        if (aeid.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
-            return null;
+        try {
+            AppdefEntityID aeid = RequestUtils.getEntityId(request);
+            
+            // If group entity, do nothing
+            if (aeid.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+                return null;
+            }
+        } catch (ParameterNotFoundException e) {
+            // Global alert definition
         }
         
         Integer alertDefId =
