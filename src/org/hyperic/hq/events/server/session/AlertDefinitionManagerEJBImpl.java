@@ -40,11 +40,10 @@ import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 import javax.naming.NamingException;
 
-import org.hibernate.Hibernate;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
@@ -161,8 +160,14 @@ public class AlertDefinitionManagerEJBImpl
         throws AlertDefinitionCreateException, ActionCreateException,
                FinderException, PermissionException 
     {
-        canManageAlerts(subj,
-                        new AppdefEntityID(a.getAppdefType(), a.getAppdefId()));
+        if (EventConstants.TYPE_ALERT_DEF_ID.equals(a.getParentId())) {
+            canManageAlerts(subj, new AppdefEntityTypeID(a.getAppdefType(),
+                                                         a.getAppdefId()));
+        }
+        else {
+            canManageAlerts(subj, new AppdefEntityID(a.getAppdefType(),
+                                                     a.getAppdefId()));
+        }
         AlertDefinition res = new AlertDefinition();
         TriggerDAO tDAO = getTriggerDAO();
         ActionDAO aDAO = getActionDAO();
