@@ -61,7 +61,7 @@ public class Messenger {
     private static Object _factory;
 
     // Static HashMap of Topics and Queues
-    private static HashMap _tAndQs;
+    private static HashMap _tAndQs = new HashMap();
 
     // Instance variables
     private QueueConnection _qConn;
