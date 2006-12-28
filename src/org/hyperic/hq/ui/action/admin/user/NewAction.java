@@ -86,6 +86,7 @@ public class NewAction extends BaseAction {
         user.setLastName    ( userForm.getLastName() );
         user.setDepartment  ( userForm.getDepartment() );
         user.setEmailAddress( userForm.getEmailAddress() );
+        user.setSMSAddress  ( userForm.getSmsAddress() );
         user.setPhoneNumber ( userForm.getPhoneNumber() );
         user.setAuthDsn     ( HQConstants.ApplicationName );
 
