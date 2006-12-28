@@ -60,12 +60,12 @@ public class PostgreSQLServerDetector
 
     private Log log =  LogFactory.getLog("PostgreSQLServerDetector");
 
-    private static final String POSTGRESQL_VERSION = "postmaster (PostgreSQL)";
+    private static final String POSTGRESQL_VERSION = "(PostgreSQL)";
     //likely will only work w/ linux due to permissions
     //and setting of argv[0] to the full binary path.
     //State.Name == 'postgres' on OSX, 'postmaster' elsewhere
     private static final String PTQL_QUERY =
-        "State.Name.re=post(master|gres),Args.0.ew=postmaster";
+        "State.Name.re=post(master|gres),State.Name.Pne=$1,Args.0.re=.*post(master|gres)$";
 
     // Table discovery query
     private static final String TABLE_QUERY = 
@@ -82,9 +82,11 @@ public class PostgreSQLServerDetector
     static final String VERSION_74 = "7.4";
     static final String VERSION_80 = "8.0";
     static final String VERSION_81 = "8.1";
+    static final String VERSION_82 = "8.2";
 
     static final String HQ_SERVER_DB = "HQ PostgreSQL";
     static final String HQ_SERVER_DB81 = "HQ PostgreSQL 8.1";
+    static final String HQ_SERVER_DB82 = "HQ PostgreSQL 8.2";
 
     private static List getServerProcessList() {
         ArrayList servers = new ArrayList();
@@ -273,6 +275,21 @@ public class PostgreSQLServerDetector
                     name = getPlatformName() + " " +
                         HQ_SERVER_DB81;
                     server.setIdentifier(HQ_SERVER_DB81);
+                } else {
+                    name = getPlatformName() + " " +
+                        SERVER_NAME + " " + version;
+                }
+
+                server.setName(name);
+                servers.add(server);
+            }
+        } else if (getTypeInfo().getVersion().equals(VERSION_82)) {
+            if (version.indexOf(VERSION_82) != -1) {
+                String name;
+                if (installPath.indexOf("hqdb") != -1) {
+                    name = getPlatformName() + " " +
+                            HQ_SERVER_DB82;
+                    server.setIdentifier(HQ_SERVER_DB82);
                 } else {
                     name = getPlatformName() + " " +
                         SERVER_NAME + " " + version;

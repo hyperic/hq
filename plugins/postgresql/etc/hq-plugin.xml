@@ -242,6 +242,7 @@
   <help name="PostgreSQL 7.4" include="PostgreSQL"/>
   <help name="PostgreSQL 8.0" include="PostgreSQL"/>
   <help name="PostgreSQL 8.1" include="PostgreSQL"/>
+  <help name="PostgreSQL 8.2" include="PostgreSQL"/>
 
   <server name="PostgreSQL" 
           version="7.4">
@@ -324,5 +325,10 @@
   <server name="PostgreSQL"
           version="8.1"
           include="8.0"/>
+
+  <!-- Define 8.2 server type -->
+  <server name="PostgreSQL"
+          version="8.2"
+          include="8.1"/>
 
 </plugin>
