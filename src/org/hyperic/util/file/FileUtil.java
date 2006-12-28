@@ -34,16 +34,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.InputStreamReader;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FileUtil {
     private static IntHashMap invalidChars = null;
 
+    private FileUtil(){}
+    
     /**
      * Try REALLY hard to find a writable place to create a file.
      * @param preferredDir The preferred directory.  If this is not a
@@ -353,5 +358,23 @@ public class FileUtil {
         }
     
         return path;
+    }
+    
+    /**
+     * Read all the lines from a stream into a list
+     */
+    public static List readLines(InputStream is)
+        throws IOException
+    {
+        List res = new ArrayList();
+        InputStreamReader isR = new InputStreamReader(is);
+        BufferedReader br = new BufferedReader(isR);
+        String s;
+        
+        while ((s = br.readLine()) != null) {
+            res.add(s);
+        }
+        
+        return res;
     }
 }
