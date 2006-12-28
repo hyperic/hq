@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -132,6 +133,10 @@ public abstract class SessionBase {
      */
     protected void canManageAlerts(AuthzSubjectValue subject, AppdefEntityID id)
         throws PermissionException {
+        if (id instanceof AppdefEntityTypeID) {
+            return;             // Can't check resoure type alert permission
+        }
+
         int type = id.getType();
         String rtName = null;
         String opName = null;
@@ -160,6 +165,7 @@ public abstract class SessionBase {
                 throw new InvalidAppdefTypeException("Unknown type: " +
                     type);
         }
+
         // now check
         checkPermission(subject.getId(), rtName, id.getId(), opName);
     }
