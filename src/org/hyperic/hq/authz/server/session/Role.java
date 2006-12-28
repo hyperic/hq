@@ -61,7 +61,7 @@ public class Role extends AuthzNamedBean {
         return cid;
     }
     
-    public void setCid(Integer val) {
+    void setCid(Integer val) {
         cid = val;
     }
 
@@ -69,42 +69,42 @@ public class Role extends AuthzNamedBean {
         return description;
     }
     
-    public void setDescription(String val) {
+    void setDescription(String val) {
         description = val;
     }
     public boolean isSystem() {
         return system;
     }
     
-    public void setSystem(boolean fsystem) {
+    void setSystem(boolean fsystem) {
         system = fsystem;
     }
     public Resource getResource() {
         return resource;
     }
     
-    public void setResource(Resource resourceId) {
+    void setResource(Resource resourceId) {
         resource = resourceId;
     }
     public Collection getResourceGroups() {
         return resourceGroups;
     }
     
-    public void setResourceGroups(Collection val) {
+    void setResourceGroups(Collection val) {
         resourceGroups = val;
     }
     public Collection getOperations() {
         return operations;
     }
     
-    public void setOperations(Collection val) {
+    void setOperations(Collection val) {
         operations = val;
     }
     public Collection getSubjects() {
         return subjects;
     }
     
-    public void setSubjects(Collection val) {
+    void setSubjects(Collection val) {
         subjects = val;
     }
 
@@ -129,7 +129,7 @@ public class Role extends AuthzNamedBean {
         return roleValue;
     }
 
-    public void setRoleValue(RoleValue val) {
+    void setRoleValue(RoleValue val) {
         setId(val.getId());
         setName(val.getName());
         setDescription(val.getDescription());

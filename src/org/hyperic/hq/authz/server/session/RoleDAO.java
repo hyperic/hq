@@ -23,24 +23,17 @@
  * USA.
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.authz.server.session;
 
 import java.util.Collection;
 import java.util.HashSet;
 
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceDAO;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
-import org.hyperic.hq.authz.server.session.ResourceType;
-import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
-import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleValue;
+import org.hyperic.hq.dao.HibernateDAO;
 
 /**
  * CRUD methods, finders, etc. for Role
@@ -50,7 +43,7 @@ public class RoleDAO extends HibernateDAO {
         super(Role.class, f);
     }
 
-    public Role create(AuthzSubject creator, RoleValue createInfo) {
+    Role create(AuthzSubject creator, RoleValue createInfo) {
         Role role = new Role(createInfo);
         // Save it at this point to get an ID
         save(role);
@@ -112,15 +105,15 @@ public class RoleDAO extends HibernateDAO {
         return (Role) super.findById(id);
     }
     
-    public void save(Role entity) {
+    void save(Role entity) {
         super.save(entity);
     }
 
-    public Role merge(Role entity) {
+    Role merge(Role entity) {
         return (Role) super.merge(entity);
     }
 
-    public void remove(Role entity) {
+    void remove(Role entity) {
         super.remove(entity);
     }
 

@@ -58,6 +58,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
 import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.authz.server.session.RoleDAO;
 import org.hyperic.hq.authz.server.session.Virtual;
 import org.hyperic.hq.autoinventory.AIHistory;
 import org.hyperic.hq.autoinventory.AIIp;

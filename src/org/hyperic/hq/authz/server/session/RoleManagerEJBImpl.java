@@ -46,7 +46,6 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
-import org.hyperic.hq.dao.RoleDAO;
 import org.hyperic.hq.authz.server.session.AuthzSession;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectDAO;
