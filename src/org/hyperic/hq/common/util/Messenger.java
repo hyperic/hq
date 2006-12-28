@@ -49,46 +49,37 @@ import javax.naming.NamingException;
 /**
  */
 public class Messenger {
-    private static Log log = LogFactory.getLog(Messenger.class);
+    private static Log _log = LogFactory.getLog(Messenger.class);
 
     // Static Strings for everyone
     public static final String CONN_FACTORY_JNDI = "java:/ConnectionFactory";
 
     // Static InitialContext for convenience
-    private static InitialContext ic = null;
+    private static InitialContext _ic;
 
     // Static ConnectionFactory for convenience
-    private static Object factory = null;
+    private static Object _factory;
 
     // Static HashMap of Topics and Queues
-    private static HashMap tAndQs = new HashMap();
+    private static HashMap _tAndQs;
 
     // Instance variables
-    QueueConnection qConn = null;
-    QueueSession qSession = null;
-    TopicConnection tConn = null;
-    TopicSession tSession = null;
+    private QueueConnection _qConn;
+    private QueueSession    _qSession;
+    private TopicConnection _tConn;
+    private TopicSession    _tSession;
 
-    /**
-     * Constructor for Messenger.
-     */
     public Messenger() {
     }
 
-    /**
-     * Constructor for Messenger.
-     */
     public Messenger(QueueConnection qConn, QueueSession qSession) {
-        this.qConn = qConn;
-        this.qSession = qSession;
+        _qConn    = qConn;
+        _qSession = qSession;
     }
 
-    /**
-     * Constructor for Messenger.
-     */
     public Messenger(TopicConnection tConn, TopicSession tSession) {
-        this.tConn = tConn;
-        this.tSession = tSession;
+        _tConn    = tConn;
+        _tSession = tSession;
     }
 
     /**
@@ -98,33 +89,33 @@ public class Messenger {
         QueueConnection conn = null;
         QueueSession session = null;
         try {
-            if (ic == null)
-                ic = new InitialContext();
+            if (_ic == null)
+                _ic = new InitialContext();
 
-            if (factory == null)
-                factory = ic.lookup(CONN_FACTORY_JNDI);
+            if (_factory == null)
+                _factory = _ic.lookup(CONN_FACTORY_JNDI);
 
-            QueueConnectionFactory qFactory = (QueueConnectionFactory) factory;
+            QueueConnectionFactory qFactory = (QueueConnectionFactory) _factory;
 
-            if (!tAndQs.containsKey(name)) {
+            if (!_tAndQs.containsKey(name)) {
                 // Static Queue for convenience
-                Queue queue = (Queue) ic.lookup(name);
-                tAndQs.put(name, queue);
+                Queue queue = (Queue) _ic.lookup(name);
+                _tAndQs.put(name, queue);
             }
 
-            Queue queue = (Queue) tAndQs.get(name);
+            Queue queue = (Queue) _tAndQs.get(name);
 
             // Now create a connection to send a message
-            if (qConn != null)
-                conn = qConn;
+            if (_qConn != null)
+                conn = _qConn;
             else
                 conn = qFactory.createQueueConnection();
 
             if (conn == null)
-                log.error("QueueConnection cannot be created");
+                _log.error("QueueConnection cannot be created");
             
-            if (qSession != null)
-                session = qSession;
+            if (_qSession != null)
+                session = _qSession;
             else
                 session = conn.createQueueSession(false,
                                                   Session.AUTO_ACKNOWLEDGE);
@@ -135,15 +126,15 @@ public class Messenger {
             msg.setObject(sObj);
             sender.send(msg);
         } catch (NamingException e) {
-            log.error("Naming error for " + name + ": " + e.toString());
+            _log.error("Naming error for " + name + ": " + e.toString());
         } catch (Exception e) {
-            log.error("Failed to send message ", e);
+            _log.error("Failed to send message ", e);
         } finally {
             // Close connections if we created them
-            try { if (qSession == null) session.close(); }
-            catch (Exception e) { log.warn("Error closing session: " + e, e); }
-            try { if (qConn == null) conn.close(); }
-            catch (Exception e) { log.warn("Error closing conn: " + e, e); }
+            try { if (_qSession == null) session.close(); }
+            catch (Exception e) { _log.warn("Error closing session: " + e, e); }
+            try { if (_qConn == null) conn.close(); }
+            catch (Exception e) { _log.warn("Error closing conn: " + e, e); }
         }
     }
 
@@ -154,33 +145,33 @@ public class Messenger {
         TopicConnection conn = null;
         TopicSession session = null;
         try {
-            if (ic == null)
-                ic = new InitialContext();
+            if (_ic == null)
+                _ic = new InitialContext();
 
-            if (factory == null)
-                factory = ic.lookup(CONN_FACTORY_JNDI);
+            if (_factory == null)
+                _factory = _ic.lookup(CONN_FACTORY_JNDI);
 
-            TopicConnectionFactory tFactory = (TopicConnectionFactory) factory;
+            TopicConnectionFactory tFactory = (TopicConnectionFactory) _factory;
 
-            if (!tAndQs.containsKey(name)) {
+            if (!_tAndQs.containsKey(name)) {
                 // Static Queue for convenience
-                Topic topic = (Topic) ic.lookup(name);
-                tAndQs.put(name, topic);
+                Topic topic = (Topic) _ic.lookup(name);
+                _tAndQs.put(name, topic);
             }
 
-            Topic topic = (Topic) tAndQs.get(name);
+            Topic topic = (Topic) _tAndQs.get(name);
 
             // Now create a connection to send a message
-            if (tConn != null)
-                conn = tConn;
+            if (_tConn != null)
+                conn = _tConn;
             else
                 conn = tFactory.createTopicConnection();
 
             if (conn == null)
-                log.error("TopicConnection cannot be created");
+                _log.error("TopicConnection cannot be created");
             
-            if (tSession != null)
-                session = tSession;
+            if (_tSession != null)
+                session = _tSession;
             else
                 session = conn.createTopicSession(false,
                                                   Session.AUTO_ACKNOWLEDGE);
@@ -191,16 +182,15 @@ public class Messenger {
             msg.setObject(sObj);
             publisher.publish(msg);
         } catch (NamingException e) {
-            log.error("Naming error for " + name + ": " + e.toString());
+            _log.error("Naming error for " + name + ": " + e.toString());
         } catch (Exception e) {
-            log.error("Failed to publish message: ", e);
+            _log.error("Failed to publish message: ", e);
         } finally {
             // Close connections if we created them
-            try { if (tSession == null) session.close(); }
-            catch (Exception e) { log.warn("Error closing session: " + e, e); }
-            try { if (tConn == null) conn.close(); }
-            catch (Exception e) { log.warn("Error closing conn: " + e, e); }
+            try { if (_tSession == null) session.close(); }
+            catch (Exception e) { _log.warn("Error closing session: " + e, e); }
+            try { if (_tConn == null) conn.close(); }
+            catch (Exception e) { _log.warn("Error closing conn: " + e, e); }
         }
     }
-
 }
