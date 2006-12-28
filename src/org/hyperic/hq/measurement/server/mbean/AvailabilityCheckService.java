@@ -218,7 +218,7 @@ public class AvailabilityCheckService
                                                    
             long[] theMissing;
             try {
-                theMissing = this.getDataMan().getMissingDataTimestamps(
+                theMissing = getDataMan().getMissingDataTimestamps(
                         dmVo.getId(), dmVo.getInterval(), begin, end);
             } catch (DataNotAvailableException e) {
                 log.error("Failed in AvailabilityCheckService", e);
@@ -227,7 +227,7 @@ public class AvailabilityCheckService
             
             // Go through the data and add missing data points
             MetricValue mval;
-            for (int i = 0; i < theMissing.length; i++) {
+            for (int i = theMissing.length - 1; i >= 0; i--) {
                 if (log.isDebugEnabled())
                     log.debug("Metric ID: " + dmVo.getId() +
                               " missing data at " + theMissing[i]);
@@ -235,7 +235,7 @@ public class AvailabilityCheckService
                 // Insert the missing data point
                 mval = new MetricValue(
                     MeasurementConstants.AVAIL_DOWN, theMissing[i]);
-                this.getDataMan().addData(dmVo.getId(), mval, false);
+                getDataMan().addData(dmVo.getId(), mval, false);
             }
             
             // Check SRN to see if somehow the agent lost the schedule
@@ -344,7 +344,7 @@ public class AvailabilityCheckService
                                                        
                 long[] theMissing;
                 try {
-                    theMissing = this.getDataMan().getMissingDataTimestamps(
+                    theMissing = getDataMan().getMissingDataTimestamps(
                             dmVo.getId(), dmVo.getInterval(), begin, end);
                 } catch (DataNotAvailableException e) {
                     log.error("Failed in AvailabilityCheckService", e);
@@ -353,7 +353,7 @@ public class AvailabilityCheckService
                 
                 // Go through the data and add missing data points
                 MetricValue mval;
-                for (int i = 0; i < theMissing.length; i++) {
+                for (int i = theMissing.length - 1; i >= 0; i--) {
                     if (log.isDebugEnabled())
                         log.debug("Metric ID: " + dmVo.getId() +
                                   " missing data at " + theMissing[i]);
@@ -361,7 +361,7 @@ public class AvailabilityCheckService
                     // Insert the missing data point
                     mval = new MetricValue(
                         MeasurementConstants.AVAIL_DOWN, theMissing[i]);
-                    this.getDataMan().addData(dmVo.getId(), mval, false);
+                    getDataMan().addData(dmVo.getId(), mval, false);
                 }
             }
         } catch (CreateException e) {
