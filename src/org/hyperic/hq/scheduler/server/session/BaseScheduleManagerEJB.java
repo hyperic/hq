@@ -56,7 +56,7 @@ public abstract class BaseScheduleManagerEJB {
     public static final String SCHED_SEPARATOR = "-";
     private int dbType;
 
-    protected SchedulerLocal scheduler;
+    protected SchedulerLocal _scheduler;
 
     private String jobPrefix;
     private String schedulePrefix;
@@ -120,7 +120,7 @@ public abstract class BaseScheduleManagerEJB {
 
         try {
             // Get a reference to the scheduler
-            this.scheduler = SchedulerUtil.getLocalHome().create();
+            this._scheduler = SchedulerUtil.getLocalHome().create();
 
             // Setup the pagers
             this.historyPager = Pager.getPager(getHistoryPagerClass());
