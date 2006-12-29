@@ -706,7 +706,7 @@ public class ControlScheduleManagerEJBImpl
         for (int i = 0; i < ids.length; i++) {
             try {
                 cScheduleLocal = cScheduleLocalHome.findById(ids[i]);
-                this.scheduler.deleteJob(cScheduleLocal.getJobName(), GROUP);
+                this._scheduler.deleteJob(cScheduleLocal.getJobName(), GROUP);
                 cScheduleLocalHome.remove(cScheduleLocal);
             } catch (Exception e) {
                 this.log.error("Unable to remove job: " + e.getMessage());
@@ -733,7 +733,7 @@ public class ControlScheduleManagerEJBImpl
         for (Iterator i = jobs.iterator(); i.hasNext();) {
             ControlSchedule cScheduleLocal = (ControlSchedule)i.next();
             try {
-                this.scheduler.deleteJob(cScheduleLocal.getJobName(),
+                this._scheduler.deleteJob(cScheduleLocal.getJobName(),
                                          GROUP);
             } catch (SchedulerException e) {
                 this.log.error("Unable to remove job " +
@@ -779,7 +779,7 @@ public class ControlScheduleManagerEJBImpl
         try {
             this.log.debug("Scheduling job for immediate execution: " + 
                            jobDetail);
-            this.scheduler.scheduleJob(jobDetail, trigger);
+            this._scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
             this.log.error("Unable to schedule job: " + e.getMessage(), e);
         }
@@ -830,7 +830,7 @@ public class ControlScheduleManagerEJBImpl
                 SimpleTrigger trigger = new SimpleTrigger(triggerName, 
                                                           GROUP, 
                                                           schedule.getStart());
-                this.scheduler.scheduleJob(jobDetail, trigger);
+                this._scheduler.scheduleJob(jobDetail, trigger);
                 Date nextFire = trigger.getFireTimeAfter(new Date());
                 if (nextFire == null) {
                     throw new ScheduleWillNeverFireException();
@@ -852,7 +852,7 @@ public class ControlScheduleManagerEJBImpl
                     new CronTrigger(triggerName, GROUP, jobName, GROUP,
                                     schedule.getStart(), schedule.getEnd(),
                                     cronStr);
-                this.scheduler.scheduleJob(jobDetail, trigger);
+                this._scheduler.scheduleJob(jobDetail, trigger);
 
                 // Quartz used to throw an exception on scheduleJob if the
                 // job would never fire.  Guess that is not the case anymore
