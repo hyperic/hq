@@ -198,7 +198,11 @@ public class AISchedule extends PersistedObject
             aIScheduleValue.setScanName(
                 (getScanName() == null) ? "" : getScanName());
             aIScheduleValue.setScanDesc(
-            (getScanDesc() == null) ? "" : getScanDesc());
+                (getScanDesc() == null) ? "" : getScanDesc());
+            
+            if (getConfig() != null) {
+                aIScheduleValue.setConfig(getConfig());
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
