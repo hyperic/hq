@@ -76,41 +76,34 @@ public class NewAutoDiscoveryPrepAction extends WorkflowPrepareAction {
         throws Exception {
 
         PlatformAutoDiscoveryForm newForm = (PlatformAutoDiscoveryForm) form;
-        int sessionId;
-        AIBoss aiboss = null;
-        AppdefBoss appdefboss = null;
-
 
         try {
             ServletContext ctx = getServlet().getServletContext();
-    
-            appdefboss = ContextUtils.getAppdefBoss(ctx);
-            aiboss = ContextUtils.getAIBoss(ctx);
-            sessionId = RequestUtils.getSessionIdInt(request);
 
             AppdefEntityID aeid = RequestUtils.getEntityId(request);
             newForm.setRid(aeid.getId());
             newForm.setType(new Integer(aeid.getType()));
 
-            PlatformValue pValue = (PlatformValue)RequestUtils.getResource(request);
-            newForm.setServerTypes(BizappUtils.buildSupportedAIServerTypes(ctx, request, pValue));
+            PlatformValue pValue =
+                (PlatformValue) RequestUtils.getResource(request);
+            newForm.setServerTypes(BizappUtils
+                    .buildSupportedAIServerTypes(ctx, request, pValue));
 
-            loadScanConfig(newForm, request, 
-                           pValue.getPlatformType().getName());
-            request.setAttribute("platformSpecificScanMsg", 
-                                 getPSScanMessage(false, 
-                                                  pValue.getPlatformType().getName()));
+            loadScanConfig(newForm, request, pValue.getPlatformType().getName());
+            request.setAttribute("platformSpecificScanMsg",
+                                 getPSScanMessage(false, pValue
+                                         .getPlatformType().getName()));
         } catch (AgentConnectionException e) {
             RequestUtils
-                .setError(request,
-                          "resource.platform.inventory.configProps.NoAgentConnection");
+                    .setError(request,
+                              "resource.platform.inventory.configProps.NoAgentConnection");
             return null;
         } catch (AgentNotFoundException e) {
             RequestUtils
-                .setError(request,
-                          "resource.platform.inventory.configProps.NoAgentConnection");
+                    .setError(request,
+                              "resource.platform.inventory.configProps.NoAgentConnection");
             return null;
-        } 
+        }
         return null;
     }
 
@@ -171,13 +164,6 @@ public class NewAutoDiscoveryPrepAction extends WorkflowPrepareAction {
         aForm.buildConfigOptions(schema, resp);
     }
     
-    public List buildSelectedServerTypes(PlatformTypeValue ptValue) 
-        throws Exception {
-        List sList = new ArrayList();
-        CollectionUtils.addAll(sList, ptValue.getServerTypeValues());
-        return sList;
-    }
-
     private static final String WINDOWS_MSG
         = "resource.autodiscovery.AutoDiscoveryHeader.windows";
     private static final String UNIX_MSG
