@@ -25,6 +25,14 @@
 
 package org.hyperic.hq.ui.action.resource.platform.autodiscovery;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,19 +40,17 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
+import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.autoinventory.ScanMethod;
 import org.hyperic.hq.autoinventory.ScanMethodConfig;
+import org.hyperic.hq.autoinventory.ServerSignature;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigSchema;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
@@ -104,20 +110,32 @@ public class EditAutoDiscoveryPrepAction extends NewAutoDiscoveryPrepAction {
         aForm.setScanMethod(scanMethod.getName());
         // load the schedule
         aForm.populateFromSchedule(sched.getScheduleValue(), request.getLocale());
+        
+        PlatformValue pValue = (PlatformValue)RequestUtils.getResource(request);
+        List selSvrs =
+            buildSelectedServerTypes(pValue.getPlatformType(),
+                                     sched.getConfigObj().getServerSignatures());
+        Integer[] selSvrIds = new Integer[selSvrs.size()];
+        int i = 0;
+        for (Iterator it = selSvrs.iterator(); it.hasNext(); i++) {
+            ServerTypeValue stv = (ServerTypeValue) it.next();
+            selSvrIds[i] = stv.getId();
+        }
+        aForm.setSelectedServerTypeIds(selSvrIds);
     }
     
     /**
-     * This method just returns the ServerTypeValue object passed to it. 
+     * Get the selected server types. 
      */
-    public List buildSelectedServerTypes(PlatformValue pValue) 
+    public List buildSelectedServerTypes(PlatformTypeValue ptValue,
+                                         ServerSignature[] serverSigs) 
         throws Exception 
     {          
         List serverDetectorList = new ArrayList();
-        CollectionUtils.addAll(serverDetectorList, 
-                               ((AIScheduleValue)schedule.get()).getConfigObj().getServerSignatures());
+        CollectionUtils.addAll(serverDetectorList, serverSigs);
         
         return BizappUtils.buildServerTypesFromServerSig(
-                                pValue.getPlatformType().getServerTypeValues(),
+                                ptValue.getServerTypeValues(),
                                 serverDetectorList.iterator() );
     }
 }
