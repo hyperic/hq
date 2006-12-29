@@ -340,7 +340,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public PageList findAlerts(AuthzSubjectValue subj, int count, int priority,
-                               long timeRange, List includes, PageControl pc) 
+                               long timeRange, List includes) 
         throws PermissionException 
     {
         AlertDAO aDao = getAlertDAO();
@@ -351,15 +351,15 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         List alerts;
             
         if (priority == EventConstants.PRIORITY_ALL) {
-            alerts = aDao.findByCreateTime(current - timeRange, current);
+            alerts = aDao.findByCreateTime(current - timeRange, current, count);
         } else {
             alerts = aDao.findByCreateTimeAndPriority(current - timeRange,
-                                                      current, priority);
+                                                      current, priority, count);
         }
             
         List result = new ArrayList();
         Iterator it = alerts.iterator();
-        for (int i = 0; result.size() < count && it.hasNext(); i++) {
+        for (int i = 0; it.hasNext(); i++) {
             Alert alert = (Alert) it.next();
             AlertDefinition alertdef = alert.getAlertDefinition();
             
@@ -373,7 +373,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             result.add(alert);
         }
             
-        return valuePager.seek(result, pc);
+        return valuePager.seek(result, PageControl.PAGE_ALL);
     }
 
     /**

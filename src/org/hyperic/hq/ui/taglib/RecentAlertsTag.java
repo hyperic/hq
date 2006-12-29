@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.FinderException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -41,19 +40,16 @@ import javax.servlet.jsp.tagext.TagSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.DashboardAlertBean;
-import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.ui.beans.RecentAlertBean;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.pager.PageControl;
 
 /**
  * <p>A JSP tag that will get the recent alerts for a user and put them
@@ -130,8 +126,8 @@ public class RecentAlertsTag extends TagSupport {
             int sessionId = RequestUtils.getSessionId(request).intValue();
             // Recent alerts in the last two hours
             List userAlerts =
-                eb.findAlerts(sessionId, 2, 0, 2 * MeasurementConstants.HOUR,
-                              null, null);
+                eb.findAlerts(sessionId, maxAlerts, 0,
+                              2 * MeasurementConstants.HOUR, null);
 
             if ( log.isTraceEnabled() ) {
                 log.trace("found " + userAlerts.size() + " recent alerts");

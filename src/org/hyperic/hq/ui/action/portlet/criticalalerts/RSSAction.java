@@ -96,8 +96,7 @@ public class RSSAction extends BaseRSSAction {
             long timeRange = Long.parseLong(preferences
                 .getValue(".dashContent.criticalalerts.past").trim());
 
-            list = boss.findAlerts(user, count, priority, timeRange, null,
-                                   new PageControl());
+            list = boss.findAlerts(user, count, priority, timeRange, null);
         } catch (Exception e) {
             throw new ServletException("Error finding recent alerts", e);
         }

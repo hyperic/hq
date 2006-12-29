@@ -25,13 +25,13 @@
 package org.hyperic.hq.events.server.session;
 
 import java.util.List;
-import java.io.Serializable;
 
+import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Order;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.dao.HibernateDAO;
-import org.hyperic.util.jdbc.DBUtil;
-import org.hyperic.hibernate.PersistedObject;
 
 public class AlertDAO extends HibernateDAO {
     public AlertDAO(DAOFactory f) {
@@ -55,16 +55,6 @@ public class AlertDAO extends HibernateDAO {
         return (Alert)super.get(id);
     }
 
-    public List findByCreateTime(long begin, long end) {
-        String sql = "from Alert a where a.ctime between :timeStart and " +
-            ":timeEnd order by a.ctime desc";
-        
-        return getSession().createQuery(sql)
-            .setLong("timeStart", begin)
-            .setLong("timeEnd", end)
-            .list();
-    }
-
     int deleteByCreateTime(long begin, long end) {
         String sql = "delete Alert a where a.ctime between :timeStart and " +
             ":timeEnd order by a.ctime desc";
@@ -79,17 +69,27 @@ public class AlertDAO extends HibernateDAO {
         return findByEntity(id, "a.ctime DESC");
     }
 
-    public List findByCreateTimeAndPriority(long begin, long end, int priority){
+    public List findByCreateTime(long begin, long end, int count) {
+        return getSession().createCriteria(Alert.class)
+                .add(Expression.between("ctime", new Long(begin), new Long(end)))
+                .addOrder(Order.desc("ctime"))
+                .setMaxResults(count)
+                .list();
+    }
+
+    public List findByCreateTimeAndPriority(long begin, long end, int priority,
+                                            int count) {
         String sql = "from Alert a where a.ctime between :begin and :end " + 
             "and (a.alertDefinition.priority = :priority " +
             "     or a.alertDefinition.priority > :priority) " +
             "order by a.ctime desc"; 
         
         return getSession().createQuery(sql)
-            .setLong("begin", begin)
-            .setLong("end", end)
-            .setInteger("priority", priority)
-            .list();
+                .setLong("begin", begin)
+                .setLong("end", end)
+                .setInteger("priority", priority)
+                .setMaxResults(count)
+                .list();
     }
     
     public List findByAppdefEntityInRange(AppdefEntityID id, long begin,

@@ -29,10 +29,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.HashSet;
 import java.util.Random;
 
 import javax.ejb.CreateException;
@@ -70,24 +70,24 @@ import org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger;
 import org.hyperic.hq.bizapp.server.trigger.frequency.CounterTrigger;
 import org.hyperic.hq.bizapp.server.trigger.frequency.DurationTrigger;
 import org.hyperic.hq.bizapp.server.trigger.frequency.FrequencyTriggerInterface;
-import org.hyperic.hq.bizapp.shared.uibeans.DashboardAlertBean;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
+import org.hyperic.hq.bizapp.shared.uibeans.DashboardAlertBean;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.ActionCreateException;
+import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.AlertConditionCreateException;
 import org.hyperic.hq.events.AlertDefinitionCreateException;
 import org.hyperic.hq.events.AlertNotFoundException;
-import org.hyperic.hq.events.server.session.EscalationMediator;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerCreateException;
-import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggerEvent;
 import org.hyperic.hq.events.server.session.Escalation;
-import org.hyperic.hq.events.server.session.RegisteredTriggerNotifier;
 import org.hyperic.hq.events.server.session.EscalationAction;
+import org.hyperic.hq.events.server.session.EscalationMediator;
+import org.hyperic.hq.events.server.session.RegisteredTriggerNotifier;
 import org.hyperic.hq.events.shared.ActionManagerLocal;
 import org.hyperic.hq.events.shared.ActionManagerUtil;
 import org.hyperic.hq.events.shared.ActionValue;
@@ -815,6 +815,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                     
                 // Triggers are deleted by the manager
                 getRTM().deleteAlertDefinitionTriggers(child.getId());
+                child.removeAllTriggers();
                 createTriggers(subject, child);
                 triggers.addAll(Arrays.asList(adval.getTriggers()));
             
@@ -825,7 +826,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         else {
             // First, get rid of the current triggers
             getRTM().deleteAlertDefinitionTriggers(adval.getId());
-            
+            adval.removeAllTriggers();
+
             // Now create the new triggers
             createTriggers(subject, adval);
             triggers.addAll(Arrays.asList(adval.getTriggers()));
@@ -1232,12 +1234,11 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * @throws LoginException
      * @ejb:interface-method
      */
-    public PageList findAlerts(String username, int count, int priority,
-                               long timeRange, AppdefEntityID[] ids,
-                               PageControl pc)
+    public List findAlerts(String username, int count, int priority,
+                               long timeRange, AppdefEntityID[] ids)
         throws LoginException, ApplicationException, ConfigPropertyException {
         int sessionId = getAuthManager().getUnauthSessionId(username);
-        return findAlerts(sessionId, count, priority, timeRange, ids, pc);
+        return findAlerts(sessionId, count, priority, timeRange, ids);
     }
     
     /**
@@ -1249,9 +1250,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * @param ids the IDs of resources to include or null for ALL
      * @ejb:interface-method
      */
-    public PageList findAlerts(int sessionID, int count, int priority,
-                               long timeRange, AppdefEntityID[] ids,
-                               PageControl pc)
+    public List findAlerts(int sessionID, int count, int priority,
+                               long timeRange, AppdefEntityID[] ids)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
         AuthzSubjectValue subject  = manager.getSubject(sessionID);
@@ -1272,9 +1272,8 @@ public class EventsBossEJBImpl extends BizappSessionEJB
             timer.reset();
         }
         
-        PageList alerts =
-            getAM().findAlerts(subject, count, priority, timeRange,
-                               appentResources, pc);
+        List alerts = getAM().findAlerts(subject, count, priority, timeRange,
+                                         appentResources);
 
         if (log.isDebugEnabled()) {
             log.debug("findAlerts(): " + timer + " seconds");
@@ -1287,7 +1286,7 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         IntHashMap nameMap = new IntHashMap();
         ArrayList badIds = new ArrayList();
         
-        PageList uiBeans = new PageList();
+        List uiBeans = new ArrayList();
         for (Iterator it = alerts.iterator(); it.hasNext(); ){
             AlertValue alert = (AlertValue) it.next();
             Integer adId = alert.getAlertDefId();
@@ -1337,9 +1336,6 @@ public class EventsBossEJBImpl extends BizappSessionEJB
                                                alert.isFixed()));
         }
 
-        // Lastly, set the total size
-        uiBeans.setTotalSize(alerts.getTotalSize());
-        
         if (log.isDebugEnabled())
             log.debug("create UI beans: " + timer + " seconds");
         

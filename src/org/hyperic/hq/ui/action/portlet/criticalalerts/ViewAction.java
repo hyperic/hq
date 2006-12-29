@@ -25,35 +25,30 @@
 
 package org.hyperic.hq.ui.action.portlet.criticalalerts;
 
-import java.util.Iterator;
-import java.util.List;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.util.MessageResources;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.DashboardAlertBean;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
-import org.hyperic.util.units.DateFormatter;
-
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.util.MessageResources;
 import org.json.JSONObject;
 
 /**
@@ -107,16 +102,14 @@ public class ViewAction extends BaseAction {
         boolean all = "all".equals(user.getPreference(selOrAllKey));
 
         int sessionID = user.getSessionId().intValue();
-        PageControl pc = new PageControl();
-        pc.setPagesize(10);
 
         if (all) {
             arrayIds = null;
         }
 
-        PageList criticalAlerts =
+        List criticalAlerts =
             eventBoss.findAlerts(sessionID, count, priority, timeRange,
-                                 arrayIds, pc);
+                                 arrayIds);
 
         JSONObject alerts = new JSONObject();
         List a = new ArrayList();
