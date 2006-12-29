@@ -40,7 +40,6 @@
 <html:hidden property="rid"/>
 <html:hidden property="type"/>
 <html:hidden property="sid"/>
-<html:hidden property="aiPid"/>
     
 <tiles:insert definition=".portlet.confirm"/>
 <tiles:insert definition=".portlet.error"/>
