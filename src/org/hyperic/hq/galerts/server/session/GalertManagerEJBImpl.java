@@ -11,6 +11,8 @@ import javax.ejb.SessionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.authz.server.session.GroupChangeCallback;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -93,7 +95,6 @@ public class GalertManagerEJBImpl
     
     /**
      * Update the escalation of an alert def
-     * 
      * @ejb:interface-method  
      */
     public void update(GalertDef def, Escalation escalation) {
@@ -360,6 +361,19 @@ public class GalertManagerEJBImpl
      */
     public void startup() {
         _log.warn("Galert manager starting up!");
+        
+        HQApp.getInstance().registerCallbackListener(GroupChangeCallback.class, 
+                                                     new GroupChangeCallback()
+        {
+            public void postGroupCreate(ResourceGroup g) {
+                _log.info("postGroupCreate: " + g);
+            }
+
+            public void preGroupDelete(ResourceGroup g) {
+                _log.info("preGroupDelete: " + g);
+            }
+        });
+        
         GalertProcessor.getInstance().startupInitialize(_defDAO.findAll());
     }
     

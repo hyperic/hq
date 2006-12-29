@@ -73,19 +73,21 @@ import org.hyperic.util.pager.SortAttribute;
  * @ejb:util generate="physical"
  * @ejb:transaction type="REQUIRED"
  */
-public class ResourceGroupManagerEJBImpl extends AuthzSession implements SessionBean {
+public class ResourceGroupManagerEJBImpl 
+    extends AuthzSession 
+    implements SessionBean 
+{
+    private Log _log = LogFactory.getLog(ResourceGroupManagerEJBImpl.class);
 
-    protected Log log = LogFactory.getLog("org.hyperic.hq.authz.server." +
-                                          "session.ResourceGroupManagerEJBImpl");
-    private Pager resourcePager = null;
-    private Pager groupPager = null;
-    private Pager ownedGroupPager = null;
+    private Pager _resourcePager;
+    private Pager _groupPager;
+    private Pager _ownedGroupPager;
     private final String RESOURCE_PAGER =
-        "org.hyperic.hq.authz.server.session.PagerProcessor_resource";
+        PagerProcessor_resource.class.getName();
     private final String GROUP_PAGER = 
-        "org.hyperic.hq.authz.server.session.PagerProcessor_resourceGroup";
-    private final String OWNEDGROUP_PAGER = 
-        "org.hyperic.hq.authz.server.session.PagerProcessor_ownedResourceGroup";
+        PagerProcessor_resourceGroup.class.getName();
+    private final String OWNEDGROUP_PAGER =
+        PagerProcessor_ownedResourceGroup.class.getName();
 
     /**
      * List the ResourceGroups associated with this resource.
@@ -99,8 +101,7 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
         Resource resLocal = getResourceDAO().findById(res.getId());
         /** TODO PermissionCheck **/
         return (ResourceGroupValue[])
-            fromPojos(resLocal.getResourceGroups(),
-                      org.hyperic.hq.authz.shared.ResourceGroupValue.class);
+            fromPojos(resLocal.getResourceGroups(), ResourceGroupValue.class);
     }
 
     /**
@@ -108,32 +109,30 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      * @param whoami The current running user.
      * @param group The group o be created.
      * @param roles Roles to associate with the new ResourceGroup. Use null
-     * if you want to associate operations later.
-     * @param resources Resources to add to the new role. Use null to add subjects later.
-     * @return ResourceValue for the role.
-     * @exception CreateException Unable to create the specified entity.
-     * @exception NamingException
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami may not perform createResource on the given type.
+     *              if you want to associate operations later.
+     * @param resources Resources to add to the new role. Use null to add 
+     *                  subjects later.
+     * @exception PermissionException whoami may not perform createResource 
+     *                                on the given type.
      * @ejb:interface-method
      */
     public ResourceGroupValue createResourceGroup(AuthzSubjectValue whoami,
                                                   ResourceGroupValue group,
                                                   RoleValue[] roles,
                                                   ResourceValue[] resources)
-        throws PermissionException {
-        ResourceGroup groupLocal;
+        throws PermissionException 
+    {
 		AuthzSubject whoamiLocal = getSubjectDAO().findById(whoami.getId());
-        group.setModifiedBy(whoamiLocal.getName());
-        groupLocal = getResourceGroupDAO().create(whoamiLocal, group);
-        
-        /* associated resources */
-        groupLocal.setResourceSet(toPojos(resources));
-        
-        /* associated roles */
-        groupLocal.setRoles(toPojos(roles));
+        ResourceGroup res;
 
-        return groupLocal.getResourceGroupValue();
+        group.setModifiedBy(whoamiLocal.getName());
+
+        res = getResourceGroupDAO().create(whoamiLocal, group);
+        res.setResourceSet(toPojos(resources));
+        res.setRoles(toPojos(roles));
+
+        GroupingStartupListener.getCallbackObj().postGroupCreate(res);
+        return res.getResourceGroupValue();
     }
 
     /**
@@ -166,12 +165,14 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      * @ejb:interface-method
      */
     public ResourceGroup findResourceGroupByName(AuthzSubjectValue whoami,
-                                                      String name)
-        throws PermissionException, FinderException {
+                                                 String name)
+        throws PermissionException, FinderException 
+    {
         ResourceGroup resGroup = getResourceGroupDAO().findByName(name);
         if (resGroup == null) {
             throw new FinderException("resource group not found");
         }
+
         PermissionManager pm = PermissionManagerFactory.getInstance();
         pm.check(whoami.getId(),
                  resGroup.getResource().getResourceType(),
@@ -185,18 +186,20 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      * @param whoami The current running user.
      * @param group The ResourceGroup to save.
      * @throws PermissionException whoami may not perform modifyResourceGroup on
-     *  this group.
+     *                             this group.
      * @ejb:interface-method
      */
     public void saveResourceGroup(AuthzSubjectValue whoami,
                                   ResourceGroupValue group)
-        throws PermissionException {
+        throws PermissionException 
+    {
         ResourceGroup groupLocal = lookupGroup(group);
         PermissionManager pm = PermissionManagerFactory.getInstance();
         pm.check(whoami.getId(),
                  groupLocal.getResource().getResourceType(),
                  groupLocal.getId(),
                  AuthzConstants.groupOpModifyResourceGroup);
+
         // check if the name has changed. If it has, update the resource
         if(!group.getName().equals(groupLocal.getName())) {
             groupLocal.getResource().setName(group.getName());
@@ -208,19 +211,22 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      * Delete the specified ResourceGroup.
      * @param whoami The current running user.
      * @param group The group to delete.
-     * @throws PermissionException 
      * @ejb:interface-method
      */
     public void removeResourceGroup(AuthzSubjectValue whoami,
                                     ResourceGroupValue group)
-        throws PermissionException{
+        throws PermissionException
+    {
         ResourceGroupDAO dao = getResourceGroupDAO();
         ResourceGroup resGrp = dao.findById(group.getId());
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
+
         pm.check(whoami.getId(),
                  resGrp.getResource().getResourceType(),
                  resGrp.getId(),
                  AuthzConstants.groupOpRemoveResourceGroup);
+
+        GroupingStartupListener.getCallbackObj().preGroupDelete(resGrp);
         dao.remove(resGrp);
     }
 
@@ -235,7 +241,8 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
     public void addResources(AuthzSubjectValue whoami,
                              ResourceGroupValue group,
                              ResourceValue[] resources)
-        throws PermissionException {
+        throws PermissionException 
+    {
         ResourceGroupDAO grpDao = getResourceGroupDAO();
         ResourceGroup resGroup = grpDao.findByName(group.getName());
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
@@ -253,18 +260,14 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
 
     /**
      * Add a resource to a group by resource id and resource type
-     * @param subjectValue - whoami
-     * @param resourceGroup - the group you want to modify
-     * @param resId - resource Id
-     * @param resourceType - the type of resource
-     * @throws PermissionException 
      * @ejb:interface-method
      */
     public ResourceGroupValue addResource(AuthzSubjectValue whoami,
                                           ResourceGroupValue group,
                                           Integer instId, 
                                           ResourceTypeValue type)
-        throws PermissionException {
+        throws PermissionException 
+    {
         ResourceGroupDAO dao = getResourceGroupDAO();
         // reassociate group to session
         ResourceGroup resGroup = dao.findByName(group.getName());
@@ -286,14 +289,13 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      * RemoveResources from a group.
      * @param whoami The current running user.
      * @param group The group .
-     * @param resources The resources to disassociate.
-     * @throws PermissionException 
      * @ejb:interface-method
      */
     public void removeResources(AuthzSubjectValue whoami,
                                 ResourceGroupValue group,
                                 ResourceValue[] resVals)
-        throws PermissionException {
+        throws PermissionException 
+    {
         ResourceGroupDAO grpDao = getResourceGroupDAO();
         ResourceGroup groupLocal = grpDao.findByName(group.getName());
 
@@ -315,12 +317,12 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      * Disassociate all resources from this group.
      * @param whoami The current running user.
      * @param group The group.
-     * @throws PermissionException 
      * @ejb:interface-method
      */
     public void removeAllResources(AuthzSubjectValue whoami,
                                    ResourceGroupValue group)
-        throws PermissionException {
+        throws PermissionException 
+    {
         ResourceGroupDAO dao = getResourceGroupDAO();
         ResourceGroup resGroup = dao.findByName(group.getName());
 
@@ -345,7 +347,8 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
     public void setResources(AuthzSubjectValue whoami,
                              ResourceGroupValue group,
                              ResourceValue[] resources)
-        throws PermissionException {
+        throws PermissionException 
+    {
         ResourceGroup groupLocal =
             getResourceGroupDAO().findById(group.getId());
 
@@ -369,7 +372,8 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      */
     public PageList getResources(AuthzSubjectValue whoami,
                                  ResourceGroupValue groupValue,
-                                 PageControl pc) {
+                                 PageControl pc) 
+    {
         Collection resources;
         pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
 
@@ -384,10 +388,10 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
             if (pc.isDescending()) {
                 ArrayList reversed = new ArrayList(resources);
                 Collections.reverse(reversed);
-                return resourcePager.seek(reversed, pc.getPagenum(),
+                return _resourcePager.seek(reversed, pc.getPagenum(),
                                           pc.getPagesize());
             } else {
-                return resourcePager.seek(resources, pc.getPagenum(),
+                return _resourcePager.seek(resources, pc.getPagenum(),
                                            pc.getPagesize());
             }
         default:
@@ -398,35 +402,28 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
 
     /**
      * Get all the resource groups including the root resource group.
-     * @param subject
-     * @return groupList
-     * @throws NamingException 
-     * @throws FinderException 
-     * @throws PermissionException 
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
     public List getAllResourceGroups(AuthzSubjectValue subject, PageControl pc)
-        throws PermissionException, FinderException, NamingException {
+        throws PermissionException, FinderException, NamingException 
+    {
         return getAllResourceGroups(subject, pc, false);
     }
 
     /**
      * Get all the resource groups that contain a particular resource. Exclude
-     *  the root 
-     * resource group.
-     * @param subject
-     * @return groupList
-     * @throws FinderException 
-     * @throws PermissionException 
+     * the root resource group. 
+     * 
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
-    public PageList getAllResourceGroupsResourceInclusive(AuthzSubjectValue 
-                                                          subject,
-                                                          PageControl pc,
-                                                          ResourceValue resource)
-        throws PermissionException, FinderException {
+    public PageList 
+        getAllResourceGroupsResourceInclusive(AuthzSubjectValue subject, 
+                                              PageControl pc,
+                                              ResourceValue resource)
+        throws PermissionException, FinderException 
+    {
         List toBePaged = new ArrayList();
 
         try {
@@ -468,23 +465,19 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
         catch (NamingException e) {
             throw new SystemException(e);
         }
-        return ownedGroupPager.seek(toBePaged, pc.getPagenum(), pc.getPagesize());
+        return _ownedGroupPager.seek(toBePaged, pc.getPagenum(), pc.getPagesize());
     }   
 
     /**
      * Get all the resource groups excluding the root resource group.
-     * @param subject
-     * @return groupList
-     * @throws NamingException 
-     * @throws FinderException 
-     * @throws PermissionException 
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
     public PageList getAllResourceGroups(AuthzSubjectValue subject,
                                          PageControl pc,
                                          boolean excludeRoot)
-        throws PermissionException, FinderException, NamingException {
+        throws PermissionException, FinderException, NamingException 
+    {
         // first get the list of groups subject can view
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         List groupIds =
@@ -507,16 +500,13 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
             }
         }
 
-        return ownedGroupPager.seek(groups, pc.getPagenum(), pc.getPagesize());
+        return _ownedGroupPager.seek(groups, pc.getPagenum(), pc.getPagesize());
     }   
 
-    /** Get the resource groups with the specified ids
-     * @param subject
+    /** 
+     * Get the resource groups with the specified ids
      * @param ids the resource group ids
      * @param pc Paging information for the request
-     * @throws NamingException 
-     * @throws FinderException 
-     * @throws PermissionException 
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      *
@@ -524,7 +514,8 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
     public PageList getResourceGroupsById(AuthzSubjectValue whoami,
                                           Integer[] ids,
                                           PageControl pc)
-        throws PermissionException, FinderException, NamingException {
+        throws PermissionException, FinderException, NamingException 
+    {
         if (ids.length == 0)
             return new PageList();
         
@@ -549,7 +540,7 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
         }
 
         PageList plist =
-            groupPager.seek(groups, pc.getPagenum(), pc.getPagesize());
+            _groupPager.seek(groups, pc.getPagenum(), pc.getPagesize());
         plist.setTotalSize(groups.size());
 
         return plist;
@@ -561,12 +552,12 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      * @param subject The subject.
      * @param roles The roles to associate with the group.
      * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
      * @exception PermissionException whoami may not perform addRole on this group.
      * @ejb:interface-method
      */
     public void addRoles(AuthzSubjectValue whoami, ResourceGroupValue group,
-                         RoleValue[] roles) {
+                         RoleValue[] roles) 
+    {
         Set roleLocals = toPojos(roles);
         Iterator it = roleLocals.iterator();
         ResourceGroup groupLocal = lookupGroup(group);
@@ -591,7 +582,8 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      */
     public void removeRoles(AuthzSubjectValue whoami, ResourceGroupValue group,
                             RoleValue[] roles)
-        throws FinderException, NamingException, PermissionException {
+        throws FinderException, NamingException, PermissionException 
+    {
         Set roleLocals = toPojos(roles);
         Iterator it = roleLocals.iterator();
         ResourceGroup groupLocal = lookupGroup(group);
@@ -608,15 +600,16 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      * @param whoami The current running user.
      * @param group The group.
      * @exception FinderException Unable to find a given or dependent entities.
-     * @exception NamingException
      * @exception PermissionException whoami may not perform removeRole on this group.
      * @ejb:interface-method
      */
     public void removeAllRoles(AuthzSubjectValue whoami,
                                ResourceGroupValue group)
-        throws FinderException, NamingException, PermissionException {
+        throws FinderException, NamingException, PermissionException 
+    {
         ResourceGroup groupLocal = lookupGroup(group);
-        removeRoles(whoami, group, (RoleValue[])fromLocals(groupLocal.getRoles(), org.hyperic.hq.authz.shared.RoleValue.class));
+        removeRoles(whoami, group, (RoleValue[])fromLocals(groupLocal.getRoles(), 
+                                                           RoleValue.class));
     }
 
     /**
@@ -625,14 +618,15 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      * @param whoami The current running user.
      * @param group This group.
      * @param roles Operations to associate with this group.
-     * @exception NamingException
      * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami is not allowed to perform setRoles on this group.
+     * @exception PermissionException whoami is not allowed to perform setRoles 
+     *                                on this group.
      * @ejb:interface-method
      */
     public void setRoles(AuthzSubjectValue whoami, ResourceGroupValue group,
                          RoleValue[] roles)
-        throws NamingException, FinderException, PermissionException {
+        throws NamingException, FinderException, PermissionException 
+    {
         toPojos(roles);
         
         /* remove all roles */
@@ -647,14 +641,15 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      * @param whoami The current running user.
      * @param group This group.
      * @return Array of roles in this role.
-     * @exception NamingException
      * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami is not allowed to perform listRoles on this group.
+     * @exception PermissionException whoami is not allowed to perform listRoles 
+     *                                on this group.
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
     public RoleValue[] getRoles(AuthzSubjectValue whoami,
-                                ResourceGroupValue groupValue) {
+                                ResourceGroupValue groupValue) 
+    {
         ResourceGroup groupLocal = lookupGroup(groupValue);
         /**
          This is no longer required. Viewing dependent entities is
@@ -664,8 +659,7 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
                    groupLocal.getId(),
                    AuthzConstants.groupOpListRoles);
         **/
-        return (RoleValue[])this.fromLocals(groupLocal.getRoles(),
-                        org.hyperic.hq.authz.shared.RoleValue.class);
+        return (RoleValue[])fromLocals(groupLocal.getRoles(), RoleValue.class);
     }
 
     /**
@@ -675,7 +669,6 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      * to sync up your value-object.
      * @param old Your current value-object.
      * @return A new ResourceGroup value-object.
-     * @exception NamingException
      * @exception FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
      */
@@ -687,7 +680,6 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
     /**
      * Get the Resource entity associated with this ResourceGroup.
      * @param subject This subject.
-     * @exception NamingException
      * @exception FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
@@ -706,7 +698,8 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      * @ejb:transaction type="SUPPORTS"
      */
     public AuthzSubjectValue getResourceGroupOwner(Integer gid)
-        throws NamingException, FinderException, CreateException {
+        throws NamingException, FinderException, CreateException 
+    {
         ResourceManagerLocal rmLoc =
             ResourceManagerUtil.getLocalHome().create();
 
@@ -721,8 +714,6 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
      * Set a ResourceGroup modifiedBy attribute
      * @param whoami user requesting to find the group
      * @param id The ID of the role you're looking for.
-     * @exception NamingException - JNDI failure
-     * @exception FinderException Unable to find a group by id
      * @ejb:interface-method
      */
     public void setGroupModifiedBy(AuthzSubjectValue whoami, Integer id) {
@@ -732,9 +723,9 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
 
     public void ejbCreate() throws CreateException {
         try {
-            resourcePager = Pager.getPager(RESOURCE_PAGER);
-            groupPager = Pager.getPager(GROUP_PAGER);
-            ownedGroupPager = Pager.getPager(OWNEDGROUP_PAGER);
+            _resourcePager   = Pager.getPager(RESOURCE_PAGER);
+            _groupPager      = Pager.getPager(GROUP_PAGER);
+            _ownedGroupPager = Pager.getPager(OWNEDGROUP_PAGER);
         } catch (Exception e) {
             throw new CreateException("Could not create value pager: " + e);
         }
@@ -744,4 +735,3 @@ public class ResourceGroupManagerEJBImpl extends AuthzSession implements Session
     public void ejbActivate() { }
     public void ejbPassivate() { }
 }
-
