@@ -253,6 +253,44 @@
       </table>
     </td>
   </tr>
-
+  <tr>
+    <td class="BlockLabel"><fmt:message key="admin.settings.EventLogPurge"/></td>
+    <td class="BlockContent">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+<logic:messagesPresent property="elPurgeVal">
+          <td class="ErrorField">
+            <html:text size="2" property="maintIntervalVal" />
+          </td>
+          <td class="ErrorField" width="100%"><fmt:message key="admin.settings.Days"/>
+            <html:hidden property="elPurge" value="${CONST_DAYS}"/>
+          </td>
+</logic:messagesPresent>          
+<logic:messagesNotPresent property="elPurgeVal">
+          <td class="BlockContent">
+            <html:text size="2" property="elPurgeVal" />
+          </td>
+          <td class="BlockContent" width="100%"><fmt:message key="admin.settings.Days"/>
+            <html:hidden property="elPurge" value="${CONST_DAYS}"/>
+          </td>
+</logic:messagesNotPresent>          
+        </tr>
+<logic:messagesPresent property="elPurgeVal">
+        <tr>
+          <td class="ErrorField" colspan="2">
+            <span class="ErrorFieldContent">- <html:errors property="elPurgeVal"/></span>            
+          </td>
+        </tr>
+</logic:messagesPresent>
+<logic:messagesNotPresent property="elPurgeVal">
+        <tr>
+          <td class="BlockContent" colspan="2">
+          </td>
+        </tr>
+</logic:messagesNotPresent>
+      </table>
+    </td>
+    <td class="BlockLabel" colspan="2" width="30%"></td>
+  </tr>
 </table>
 
