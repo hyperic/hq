@@ -190,10 +190,12 @@ public class PermissionManagerImpl
                 if(!pc.isAscending()) {
                     sql = sql + "DESC";
                 }
-                sql = StringUtil.replace(sql, "DB_FALSE_TOKEN",
-                                         falseToken);
+                sql = StringUtil.replace(sql, "DB_FALSE_TOKEN", falseToken);
                 stmt = conn.prepareStatement(sql);
                 stmt.setString(1, resType);
+                // Support wildcards
+                resName = resName.replace('*', '%');
+                resName = resName.replace('?', '_');
                 stmt.setString(2, resName);
                 stmt.setInt(3, AppdefUtil.resNameToAppdefTypeId(resType));
                 stmt.setString(4, resName);
