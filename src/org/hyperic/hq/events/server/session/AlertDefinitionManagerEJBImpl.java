@@ -216,7 +216,7 @@ public class AlertDefinitionManagerEJBImpl
                 // Triggers were already created by bizapp, so we only need
                 // to add them to our list
                 trig = tDAO.findById(triggers[i].getId());
-                res.addTrigger(trig);
+                trig.setAlertDefinition(res);
             }
         }
 
@@ -313,10 +313,13 @@ public class AlertDefinitionManagerEJBImpl
         // Find out the last trigger ID (bizapp should have created them)
         RegisteredTriggerValue[] triggers = adval.getTriggers();
         if (triggers.length > 0) {
-            RegisteredTriggerValue last = triggers[triggers.length - 1];
-            RegisteredTrigger t = getTriggerDAO().findById(last.getId());
+            RegisteredTrigger t = null;
+            for (int i = 0; i < triggers.length; i++) {
+                t = getTriggerDAO().findById(triggers[i].getId());
+                t.setAlertDefinition(aldef);
+            }
 
-            aldef.setActOnTrigger(t);
+            adval.setActOnTriggerId(t.getId().intValue());
         }
 
         // Lastly, the modification time
