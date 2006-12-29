@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.action.Executable;
 import org.hibernate.impl.SessionImpl;
 import org.hyperic.hibernate.Util;
+import org.hyperic.util.callback.CallbackDispatcher;
 
 /**
  * This class represents the central concept of the Hyperic HQ application.  
@@ -19,8 +20,23 @@ public class HQApp {
     private static final HQApp INSTANCE = new HQApp(); 
     private final Log _log = LogFactory.getLog(HQApp.class);
     
-    private ThreadLocal _txListeners    = new ThreadLocal();
-    private List        _startupClasses = new ArrayList();
+    private ThreadLocal        _txListeners    = new ThreadLocal();
+    private List               _startupClasses = new ArrayList();
+    private CallbackDispatcher _callbacks = new CallbackDispatcher();
+    
+    /**
+     * @see CallbackDispatcher#generateCaller(Class)
+     */
+    public Object registerCallbackCaller(Class iFace) {
+        return _callbacks.generateCaller(iFace);
+    }
+    
+    /**
+     * @see CallbackDispatcher#registerListener(Class, Object)
+     */
+    public void registerCallbackListener(Class iFace, Object listener) {
+        _callbacks.registerListener(iFace, listener);
+    }
     
     /**
      * Adds a class to the list of classes to invoke when the application has
