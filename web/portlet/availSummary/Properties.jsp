@@ -135,6 +135,7 @@ var help = '<hq:help/>';
       </tiles:insert>
 
       <tiles:insert definition=".form.buttons"/>
+      <html:hidden property="token"/>
       </html:form>
 
     </td>
