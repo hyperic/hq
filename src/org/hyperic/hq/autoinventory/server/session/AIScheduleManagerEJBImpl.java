@@ -25,10 +25,10 @@
 
 package org.hyperic.hq.autoinventory.server.session;
 
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
+
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
@@ -37,43 +37,37 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.quartz.CronTrigger;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.SimpleTrigger;
-import org.quartz.SchedulerException;
-
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocalHome;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformManagerLocalHome;
+import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.autoinventory.AISchedule;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
-import org.hyperic.hq.autoinventory.AISchedule;
+import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.scheduler.ScheduleValue;
-import org.hyperic.hq.scheduler.ScheduleParser;
+import org.hyperic.hq.dao.AIHistoryDAO;
+import org.hyperic.hq.dao.AIScheduleDAO;
 import org.hyperic.hq.scheduler.ScheduleParseException;
+import org.hyperic.hq.scheduler.ScheduleParser;
+import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.hq.scheduler.server.session.BaseScheduleManagerEJB;
-
-import org.hyperic.util.jdbc.BlobColumn;
-import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.SortAttribute;
-import org.hyperic.hq.dao.AIScheduleDAO;
-import org.hyperic.hq.dao.AIHistoryDAO;
-import org.hyperic.dao.DAOFactory;
+import org.quartz.CronTrigger;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleTrigger;
 
 /** 
  * Manager for dealing with scheduled autoinventory scans.
@@ -94,7 +88,7 @@ public class AIScheduleManagerEJBImpl
     public static final String AI_SCHED_TABLE_COL_ID = "ID";
     public static final String AI_SCHED_TABLE_COL_BL = "CONFIG";
 
-    private static final Log log = 
+    private static final Log _log = 
         LogFactory.getLog(AIScheduleManagerEJBImpl.class.getName());
 
     private final String JOB_PREFIX      = "aiScan";
@@ -122,13 +116,11 @@ public class AIScheduleManagerEJBImpl
                                 ScheduleValue schedule)
     {
         String scheduleString;
-        Boolean scheduled;
-        if (schedule == null) {
-            scheduled = Boolean.FALSE;
-            scheduleString = "Single execution";
-        } else {
-            scheduled = Boolean.TRUE;
+        Boolean scheduled = new Boolean(schedule != null);
+        if (scheduled.booleanValue()) {
             scheduleString = schedule.getScheduleString();
+        } else {
+            scheduleString = "Single execution";
         }
 
         // Quartz 1.5 requires Strings in the JobDataMap to be non-null
@@ -169,8 +161,7 @@ public class AIScheduleManagerEJBImpl
                DuplicateAIScanNameException, ScheduleWillNeverFireException
     {
         // Scheduled jobs are persisted in the autoinventory subsystem
-        AIScheduleDAO asdao =
-            DAOFactory.getDAOFactory().getAIScheduleDAO();
+        AIScheduleDAO asdao = DAOFactory.getDAOFactory().getAIScheduleDAO();
 
         // find the os for the platform
         PlatformValue pValue = null;
@@ -199,23 +190,21 @@ public class AIScheduleManagerEJBImpl
         JobDetail jobDetail = new JobDetail(jobName, GROUP, jobClass);
 
         setupJobData(jobDetail, subject, id, scanConfig, scanName, scanDesc, 
-                     pValue.getPlatformType().getName(),
-                     schedule);
+                     pValue.getPlatformType().getName(), schedule);
 
         // On-demand scans will have no schedule
         if (schedule == null) {
             jobDetail.setVolatility(true);
-            SimpleTrigger trigger = new SimpleTrigger(triggerName, 
-                                                      GROUP);
+            SimpleTrigger trigger = new SimpleTrigger(triggerName, GROUP);
             trigger.setVolatility(true);
             
             try {
-                log.info("Scheduling job for immediate execution: " + 
-                              jobDetail);
-                this.scheduler.scheduleJob(jobDetail, trigger);
+                _log.info("Scheduling job for immediate execution: " + 
+                          jobDetail);
+                _scheduler.scheduleJob(jobDetail, trigger);
                 return;
             } catch (SchedulerException e) {
-                log.error("Unable to schedule job: " + e.getMessage());
+                _log.error("Unable to schedule job: " + e.getMessage());
                 return;
             }
         }
@@ -224,16 +213,9 @@ public class AIScheduleManagerEJBImpl
         try {
             cronStr = ScheduleParser.getCronString(schedule);
         } catch (ScheduleParseException e) {
-            log.error("Unable to get cron string: " + e.getMessage());
+            _log.error("Unable to get cron string: " + e.getMessage());
             throw new AutoinventoryException(e);
         }
-
-        BlobColumn configBlob = 
-            DBUtil.getBlobColumn( getDbType(),
-                                  HQConstants.DATASOURCE,
-                                  AI_SCHED_TABLE, 
-                                  AI_SCHED_TABLE_COL_ID, 
-                                  AI_SCHED_TABLE_COL_BL);
 
         // Single scheduled actions do not have cron strings
         if (cronStr == null) {
@@ -245,7 +227,7 @@ public class AIScheduleManagerEJBImpl
                 if (nextFire == null) {
                     throw new ScheduleWillNeverFireException();
                 }
-                this.scheduler.scheduleJob(jobDetail, trigger);
+                _scheduler.scheduleJob(jobDetail, trigger);
 
                 checkUniqueName(asdao, scanName);
                 AISchedule aiLoc =
@@ -256,15 +238,13 @@ public class AIScheduleManagerEJBImpl
                                  nextFire.getTime(),
                                  triggerName,
                                  jobName);
-                configBlob.setId(aiLoc.getId());
-                configBlob.setBlobData(scanConfig.serialize());
-                configBlob.update();
+                aiLoc.setConfig(scanConfig.serialize());
             } catch (DuplicateAIScanNameException e) {
                 throw e;
             } catch (ScheduleWillNeverFireException e) {
                 throw e;
             } catch (Exception e) {
-                log.error("Unable to schedule job: " + e.getMessage());
+                _log.error("Unable to schedule job: " + e.getMessage());
                 throw new AutoinventoryException(e);
             }
         } else {        
@@ -279,7 +259,7 @@ public class AIScheduleManagerEJBImpl
                 if (nextFire == null) {
                     throw new ScheduleWillNeverFireException();
                 }
-                this.scheduler.scheduleJob(jobDetail, trigger);
+                _scheduler.scheduleJob(jobDetail, trigger);
 
                 checkUniqueName(asdao, scanName);
                 AISchedule aiLoc =
@@ -289,19 +269,17 @@ public class AIScheduleManagerEJBImpl
                                  nextFire.getTime(),
                                  triggerName,
                                  jobName);
-                configBlob.setId(aiLoc.getId());
-                configBlob.setBlobData(scanConfig.serialize());
-                configBlob.update();
+                aiLoc.setConfig(scanConfig.serialize());
             } catch (DuplicateAIScanNameException e) {
                 throw e;
             } catch (ScheduleWillNeverFireException e) {
                 throw e;
             } catch (ParseException e) {
-                log.error("Unable to setup cron trigger: " +
+                _log.error("Unable to setup cron trigger: " +
                                e.getMessage());
                 throw new AutoinventoryException(e);
             } catch (Exception e) {
-                log.error("Unable to schedule job: " + e.getMessage());
+                _log.error("Unable to schedule job: " + e.getMessage());
                 throw new AutoinventoryException(e);
             }
         }
@@ -315,8 +293,7 @@ public class AIScheduleManagerEJBImpl
     public PageList findScheduledJobs(AuthzSubjectValue subject, 
                                       AppdefEntityID id, PageControl pc)
         throws FinderException {
-        AIScheduleDAO sl =
-            DAOFactory.getDAOFactory().getAIScheduleDAO();
+        AIScheduleDAO sl = DAOFactory.getDAOFactory().getAIScheduleDAO();
         Collection schedule;
 
         // default the sorting to the next fire time
@@ -355,23 +332,7 @@ public class AIScheduleManagerEJBImpl
         throws NamingException, FinderException, CreateException
     {
         AIScheduleDAO sl = DAOFactory.getDAOFactory().getAIScheduleDAO();
-
-        AIScheduleValue aiVo = sl.findById(id).getAIScheduleValue();
-
-        BlobColumn configBlob =
-            DBUtil.getBlobColumn( getDbType(),
-                                  HQConstants.DATASOURCE,
-                                  AI_SCHED_TABLE,
-                                  AI_SCHED_TABLE_COL_ID,
-                                  AI_SCHED_TABLE_COL_BL);
-        try {
-            configBlob.setId(aiVo.getId());
-            configBlob.select();
-            aiVo.setConfig(configBlob.getBlobData());
-        } catch (SQLException e) {
-            throw new SystemException(e);
-        }
-        return aiVo;
+        return sl.findById(id).getAIScheduleValue();
     }
 
     /**
@@ -437,14 +398,13 @@ public class AIScheduleManagerEJBImpl
                             Integer ids[])
         throws NamingException, AutoinventoryException
     {
-        AIScheduleDAO asdao
-            = DAOFactory.getDAOFactory().getAIScheduleDAO();
+        AIScheduleDAO asdao = DAOFactory.getDAOFactory().getAIScheduleDAO();
         AISchedule aiScheduleLocal;
 
         for (int i = 0; i < ids.length; i++) { 
             try {
                 aiScheduleLocal = asdao.findById(ids[i]);
-                this.scheduler.deleteJob(aiScheduleLocal.getJobName(), GROUP);
+                _scheduler.deleteJob(aiScheduleLocal.getJobName(), GROUP);
                 asdao.remove(aiScheduleLocal);
             } catch (Exception e) {
                 throw new AutoinventoryException("Unable to remove job: " +
