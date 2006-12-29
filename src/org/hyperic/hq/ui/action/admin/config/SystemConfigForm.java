@@ -48,6 +48,7 @@ public class SystemConfigForm extends BaseValidatorForm {
     private String alertPurgeVal = "0";
     private String alertPurge    = "";
     private boolean reindex = false;
+    protected String elPurgeVal = "0";
 
     public String toString() {
         StringBuffer buf = new StringBuffer(super.toString());
@@ -78,6 +79,7 @@ public class SystemConfigForm extends BaseValidatorForm {
         maintIntervalVal = null;
         alertPurge = "";
         alertPurgeVal = null;
+        elPurgeVal = "0";
     }
 
     public void loadConfigProperties (Properties prop){
@@ -104,6 +106,10 @@ public class SystemConfigForm extends BaseValidatorForm {
         Long alertPurgeLong = new Long(alertPurgeValStr);
         alertPurge = findTimeUnit(alertPurgeLong.longValue());
         alertPurgeVal = calcTimeUnit(alertPurgeLong.longValue());
+
+        String elPurgeValStr = prop.getProperty(org.hyperic.hq.common.shared.HQConstants.EventLogPurge);
+        Long elPurgeLong = new Long(elPurgeValStr);
+        elPurgeVal = calcTimeUnit(elPurgeLong.longValue());
     }
     
     /**
@@ -173,6 +179,13 @@ public class SystemConfigForm extends BaseValidatorForm {
             convertToMillisecond(Long.parseLong(alertPurgeVal), alertPurge);
         
         prop.setProperty(HQConstants.AlertPurge, String.valueOf(alertPurgeLong));
+
+        long elPurgeLong =
+            convertToMillisecond(Long.parseLong(elPurgeVal),
+                                 Constants.DAYS_LABEL);
+        
+        prop.setProperty(org.hyperic.hq.common.shared.HQConstants.EventLogPurge,
+                         String.valueOf(elPurgeLong));
 
         return prop;
     }
@@ -275,5 +288,13 @@ public class SystemConfigForm extends BaseValidatorForm {
         ActionErrors errors = super.validate(mapping, request);
                     
         return errors;
+    }
+
+    public String getElPurgeVal() {
+        return elPurgeVal;
+    }
+
+    public void setElPurgeVal(String elPurgeVal) {
+        this.elPurgeVal = elPurgeVal;
     }
 }
