@@ -130,16 +130,40 @@ public class EmailFilter {
         }
         return appEnt.toString();
     }
-
+    
+    private void replaceAppdefEntityHolders(AppdefEntityID appEnt,
+                                            String[] strs) {
+        if (init()) {
+            try {
+                AppdefEntityValue entVal =
+                    new AppdefEntityValue(appEnt, overlord);
+                String name = entVal.getName();
+                String desc = entVal.getDescription();
+                
+                for (int i = 0; i < strs.length; i++) {
+                    strs[i] = strs[i].replaceAll(EmailAction.RES_NAME_HOLDER,
+                                                 name);
+                    strs[i] = strs[i].replaceAll(EmailAction.RES_DESC_HOLDER,
+                                                 desc);
+                }
+            } catch (AppdefEntityNotFoundException e) {
+                log.error("Entity ID invalid: " + e);
+            } catch (PermissionException e) {
+                // Should never happen, because we are overlord
+                log.error("Overlord not allowed to lookup resource: " + e);
+            }
+        }
+    }
+    
     public void sendAlert(AppdefEntityID appEnt, InternetAddress[] addresses,
                           String subject, String body, boolean filter)
         throws NamingException {
         if (appEnt != null) {
-            String resName = this.getAppdefEntityName(appEnt);
-            
             // Replace the resource name
-            subject = subject.replaceAll(EmailAction.RES_NAME_HOLDER, resName);
-            body = body.replaceAll(EmailAction.RES_NAME_HOLDER, resName);
+            String[] replStrs = new String[] { subject, body };
+            replaceAppdefEntityHolders(appEnt, replStrs);
+            subject = replStrs[0];
+            body = replStrs[1];
             
             // See if alert needs to be filtered
             if (filter && init()) {
@@ -294,7 +318,7 @@ public class EmailFilter {
         AppdefEntityID platEntId = new AppdefEntityID(
             AppdefEntityConstants.APPDEF_TYPE_PLATFORM, platId);
 
-        String platName = this.getAppdefEntityName(platEntId);
+        String platName = getAppdefEntityName(platEntId);
         
         Hashtable cache = (Hashtable) alertBuffer.remove(platId);
         

@@ -73,6 +73,7 @@ public class EmailAction extends EmailActionConfig
         "\n\n------------------------------------------\n\n";
 
     public static final String RES_NAME_HOLDER = "RES_NAME_REPL";
+    public static final String RES_DESC_HOLDER = "RES_DESC_REPL";
 
     protected static String baseUrl = null;
 
@@ -162,6 +163,7 @@ public class EmailAction extends EmailActionConfig
 
         text.append("ALERT DETAIL")
             .append("\n- Resource Name: ").append(RES_NAME_HOLDER)
+            .append("\n- Resource Description: ").append(RES_DESC_HOLDER)
             .append("\n- Alert Name: ").append(alertdef.getName());
         
         if (alertdef.getDescription() != null &&
