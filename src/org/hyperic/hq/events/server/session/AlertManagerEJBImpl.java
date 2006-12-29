@@ -394,54 +394,53 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         final String indent = "    ";
 
         // Get the alert definition's conditions
-        Collection cconds = alert.getAlertDefinition().getConditions();
         Collection clogs = alert.getConditionLog();
         
-        AlertCondition[] conds =
-            (AlertCondition[])cconds.toArray(new AlertCondition[0]);
-        AlertConditionLog[] logs =
-            (AlertConditionLog[]) clogs.toArray(new AlertConditionLog[0]);
+        AlertConditionLog[] logs = (AlertConditionLog[])
+            clogs.toArray(new AlertConditionLog[clogs.size()]);
 
         StringBuffer text = new StringBuffer();
-        for (int i = 0; i < conds.length; i++) {
+        for (int i = 0; i < logs.length; i++) {
+            AlertCondition cond = logs[i].getCondition();
+
             if (i == 0) {
                 text.append("\n").append(indent).append("If Condition: ");
             }
             else {
                 text.append("\n").append(indent)
-                    .append(conds[i].isRequired() ? "AND " : "OR ");
+                    .append(cond.isRequired() ? "AND " : "OR ");
             }
 
 //            TriggerFiredEvent event = (TriggerFiredEvent)
-//            eventMap.get( conds[i].getTriggerId() );
+//            eventMap.get( cond.getTriggerId() );
 
             DerivedMeasurementDAO dmDao =
                 DAOFactory.getDAOFactory().getDerivedMeasurementDAO();
             DerivedMeasurement dmv;
             
-            switch (conds[i].getType()) {
+            switch (cond.getType()) {
             case EventConstants.TYPE_THRESHOLD:
             case EventConstants.TYPE_BASELINE:
-                text.append(conds[i].getName()).append(" ")
-                        .append(conds[i].getComparator()).append(" ");
+                text.append(cond.getName()).append(" ")
+                        .append(cond.getComparator()).append(" ");
 
-                dmv = dmDao.findById(new Integer(conds[i].getMeasurementId()));
+                dmv = dmDao.findById(new Integer(cond.getMeasurementId()));
 
-                if (conds[i].getType() == EventConstants.TYPE_BASELINE) {
-                    text.append(conds[i].getThreshold());
+                if (cond.getType() == EventConstants.TYPE_BASELINE) {
+                    text.append(cond.getThreshold());
                     text.append("% of ");
 
-                    if (MeasurementConstants.BASELINE_OPT_MAX.equals(conds[i]
+                    if (MeasurementConstants.BASELINE_OPT_MAX.equals(cond
                             .getOptionStatus())) {
                         text.append("Max Value");
                     } else if (MeasurementConstants.BASELINE_OPT_MIN
-                            .equals(conds[i].getOptionStatus())) {
+                            .equals(cond.getOptionStatus())) {
                         text.append("Min Value");
                     } else {
                         text.append("Baseline");
                     }
                 } else {
-                    FormattedNumber th = UnitsConvert.convert(conds[i]
+                    FormattedNumber th = UnitsConvert.convert(cond
                             .getThreshold(), dmv.getTemplate().getUnits());
                     text.append(th.toString());
                 }
@@ -455,12 +454,12 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                         .append(")");
                 break;
             case EventConstants.TYPE_CONTROL:
-                text.append(conds[i].getName());
+                text.append(cond.getName());
                 break;
             case EventConstants.TYPE_CHANGE:
                 dmv =
-                    dmDao.findById(new Integer(conds[i].getMeasurementId()));
-                text.append(conds[i].getName()).append(" value changed");
+                    dmDao.findById(new Integer(cond.getMeasurementId()));
+                text.append(cond.getName()).append(" value changed");
                 // Parse out old value. This is a hack.
                 // Basically, we use the MessageFormat from the
                 // ValueChangeTrigger class to parse out the
@@ -495,19 +494,19 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                 text.append(", new value = ").append(av.toString()).append(")");
                 break;
             case EventConstants.TYPE_CUST_PROP:
-                text.append(conds[i].getName()).append(" value changed");
+                text.append(cond.getName()).append(" value changed");
                 text.append("\n").append(indent).append(logs[i].getValue());
                 break;
             case EventConstants.TYPE_LOG:
                 text.append("Event/Log Level(")
                         .append(
                                 ResourceLogEvent.getLevelString(Integer
-                                        .parseInt(conds[i].getName())))
+                                        .parseInt(cond.getName())))
                         .append(")");
-                if (conds[i].getOptionStatus() != null
-                        && conds[i].getOptionStatus().length() > 0) {
+                if (cond.getOptionStatus() != null
+                        && cond.getOptionStatus().length() > 0) {
                     text.append(" and matching substring ").append('"')
-                            .append(conds[i].getOptionStatus()).append('"');
+                            .append(cond.getOptionStatus()).append('"');
                 }
 
                 text.append("\n").append(indent).append("Log: ")
