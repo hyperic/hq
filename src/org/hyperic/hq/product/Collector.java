@@ -25,10 +25,12 @@
 
 package org.hyperic.hq.product;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -542,58 +544,69 @@ public abstract class Collector implements Runnable {
     }
 
     private static void check(PluginContainer container) {
+        boolean isDebug = log.isDebugEnabled();
         log.debug("Running " + container.name + " collectors");
+        List pluginCollectors;
+        
+        //copy so we don't block PluginCollector.get()
         synchronized (container.collectors) {
-            for (Iterator it = container.collectors.values().iterator();
-                 it.hasNext();)
-            {
-                Collector collector = (Collector)it.next();
-                CollectorResult result =
-                    (CollectorResult)container.results.get(collector.props);
-                if ((result != null) && !result.collected) {
-                    if (log.isDebugEnabled()) {
-                        log.debug(collector +
-                                  " ran " + lastRun(result.timestamp) +
-                                  " but hasn't been collected yet, skipping.");
-                    }
-                    continue;
-                }
+            Collection values = container.collectors.values();
+            pluginCollectors = new ArrayList(values.size());
+            pluginCollectors.addAll(values);
+        }
 
-                boolean setClassLoader = 
-                    PluginLoader.setClassLoader(collector);
-
-                try {
-                    collector.run();
-                } catch (Exception e) {
-                    log.error("Error running " + container.name + 
-                              " collector: " + e, e);
-                    continue;
-                } // XXX: catch NoClassDefFoundError ?
-                finally {
-                    if (setClassLoader) {
-                        PluginLoader.resetClassLoader(collector);
-                    }
+        for (int i=0; i<pluginCollectors.size(); i++) {
+            Collector collector = (Collector)pluginCollectors.get(i);
+            CollectorResult result =
+                (CollectorResult)container.results.get(collector.props);
+            if ((result != null) && !result.collected) {
+                if (isDebug) {
+                    log.debug(collector +
+                              " ran " + lastRun(result.timestamp) +
+                              " but hasn't been collected yet, skipping.");
                 }
-
-                result = new CollectorResult(collector);
-                if (log.isDebugEnabled()) {
-                    log.debug(result);
-                }
-                container.results.put(collector.props, result);
+                continue;
             }
+
+            boolean setClassLoader = 
+                PluginLoader.setClassLoader(collector);
+
+            try {
+                collector.run();
+            } catch (Exception e) {
+                log.error("Error running " + container.name + 
+                          " collector: " + e, e);
+                continue;
+            } // XXX: catch NoClassDefFoundError ?
+            finally {
+                if (setClassLoader) {
+                    PluginLoader.resetClassLoader(collector);
+                }
+            }
+
+            result = new CollectorResult(collector);
+            if (isDebug) {
+                log.debug(result);
+            }
+            container.results.put(collector.props, result);
         }        
     }
 
     static void check() {
         //XXX may want to split containers into multiple threads
+        List pluginContainers;
+
+        //copy so we don't block PluginCollector.get()
         synchronized (containers) {
-            for (Iterator it = containers.values().iterator();
-                 it.hasNext();)
-            {
-                PluginContainer collector =
-                    (PluginContainer)it.next();
-                check(collector);
-            }
+            Collection values = containers.values();
+            pluginContainers = new ArrayList(values.size());
+            pluginContainers.addAll(values);
+        }
+
+        for (int i=0; i<pluginContainers.size(); i++) {
+            PluginContainer collector =
+                (PluginContainer)pluginContainers.get(i);
+            check(collector);
         }
     }
 
