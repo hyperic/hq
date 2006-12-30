@@ -27,18 +27,26 @@ package org.hyperic.hq.plugin.weblogic;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import org.hyperic.sigar.win32.RegistryKey;
+import org.hyperic.sigar.win32.Service;
+import org.hyperic.sigar.win32.ServiceConfig;
 import org.hyperic.sigar.win32.Win32Exception;
 import org.hyperic.util.timer.StopWatch;
 
 public class WeblogicFinder {
 
+    private static final String REG_SERVICES =
+        "System\\CurrentControlSet\\Services\\";
+
     private static final HashMap skipDirs = new HashMap();
+
+    private static List windowsServices;
 
     static {
         skipDirs.put("ldap", Boolean.TRUE);
@@ -46,75 +54,155 @@ public class WeblogicFinder {
         skipDirs.put(".wlnotdelete", Boolean.TRUE);
     }
 
-    //this is all we have to go on.
-    //weblogic doesnt put anything else useful in the registry.
-    public static final String UNINSTALL_KEY =
-        "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall";
-
-    public static final String PRODUCT_NAME =
-        "BEA WebLogic Platform";
-
-    private static final String[] VERSIONS = {
-        WeblogicProductPlugin.VERSION_81,
-        WeblogicProductPlugin.VERSION_70,
-    };
-
-    /**
-     * guess WebLogic installpath using the registry.
-     * returns most recent version found.
-     */
-    public static File getRegistryInstallPath() {
-        List dirs = getRegistryInstallPaths();
-
-        if (dirs.size() == 0) {
-            return null;
+    private static String getCanonicalPath(String path) {
+        try {
+            return new File(path).getCanonicalPath();
+        } catch (IOException e) {
+            return path;
         }
-
-        return (File)dirs.get(0);
     }
 
-    static File getRegistryInstallPath(String version) {
-        String uninstallKey = 
-            WeblogicFinder.UNINSTALL_KEY + "\\" +
-            WeblogicFinder.PRODUCT_NAME + " " +
-            version;
+    private static class WeblogicService {
+        private ServiceConfig _config;
+        private String _cmdLine;
+        private String _execDir;
+        private String _binaryPath;
 
-        RegistryKey key = null;
-        try {
-            key = RegistryKey.LocalMachine.openSubKey(uninstallKey);
-            String val = key.getStringValue("DisplayIcon");
-            if (val == null) {
-                return null;
-            }
-            val = val.trim();
-            
-            File dir = getInstallRoot(new File(val).getParentFile());
-            if (dir != null) {
-                return dir;
-            }
-        } catch (Win32Exception e) {
-        } catch (UnsatisfiedLinkError e) {
-        } finally {
-            if (key != null) {
+        private WeblogicService(ServiceConfig config)
+            throws Win32Exception {
+
+            _config = config;
+            String path =
+                REG_SERVICES + config.getName() + "\\Parameters";
+            RegistryKey key = 
+                RegistryKey.LocalMachine.openSubKey(path);
+            try {
+                _cmdLine = key.getStringValue("CmdLine").trim();
+                _execDir = key.getStringValue("ExecDir").trim();
+                _execDir = getCanonicalPath(_execDir);
+            } finally {
                 key.close();
             }
         }
 
-        return null;
-    }
-    
-    public static List getRegistryInstallPaths() {
-        List dirs = new ArrayList();
+        private String getBinaryPath() {
+            if (_binaryPath == null) {
+                _binaryPath =
+                    getCanonicalPath(_config.getPath().trim());
+            }
+            return _binaryPath;
+        }
 
-        for (int i=0; i<VERSIONS.length; i++) {
-            File dir =
-                getRegistryInstallPath(VERSIONS[i]);
-            if (dir != null) {
-                dirs.add(dir);
+        private String getExecDir() {
+            return _execDir;
+        }
+
+        private boolean isServer() {
+            return _cmdLine.endsWith("weblogic.Server");
+        }
+
+        private boolean isManagedServer() {
+            return _cmdLine.indexOf("-Dweblogic.management.server") != -1;
+        }
+
+        private boolean isAdminServer() {
+            return isServer() && !isManagedServer();
+        }
+    }
+
+    private static List getWindowsServices() {
+        if (windowsServices == null) {
+            windowsServices = new ArrayList();
+        }
+        else {
+            return windowsServices;
+        }
+        List names;
+
+        try {
+             names = Service.getServiceNames();
+        } catch (Win32Exception e) {
+            return windowsServices;
+        }
+
+        for (int i=0; i<names.size(); i++) {
+            Service service = null;
+            try {
+                service = new Service((String)names.get(i));
+                ServiceConfig config = service.getConfig();
+                String path = config.getPath().trim();
+                if (!path.endsWith("beasvc.exe")) {
+                    continue;
+                }
+                WeblogicService beaSvc =
+                    new WeblogicService(config);
+                windowsServices.add(beaSvc);
+            } catch (Win32Exception e){
+                continue;
+            } finally {
+                if (service != null) {
+                    service.close();
+                }
             }
         }
 
-        return dirs;
+        return windowsServices;
+    }
+
+    static File getServiceInstallPath() {
+        return getServiceInstallPath(null);
+    }
+
+    static File getServiceInstallPath(String version) {
+        WeblogicService service = getWeblogicService(version, false);
+        if (service == null) {
+            return null;
+        }
+
+        File dir = getInstallRoot(service.getBinaryPath());
+        return dir;
+    }
+
+    static File getAdminServicePath(String version) {
+        WeblogicService service = getWeblogicService(version, true);
+        if (service == null) {
+            return null;
+        }
+
+        return new File(service.getExecDir());
+    }
+
+    private static WeblogicService getWeblogicService(String version,
+                                                      boolean adminOnly) {
+        List services = getWindowsServices();
+        int size = services.size();
+        if (size == 0) {
+            return null;
+        }
+
+        int v = 0;
+        if (version != null) {
+            v = version.charAt(0);
+        }
+
+        for (int i=0; i<size; i++) {
+            WeblogicService service =
+                (WeblogicService)services.get(i);
+
+            if (adminOnly && !service.isAdminServer()) {
+                continue;
+            }
+
+            if (v != 0) {
+                if (service.getBinaryPath().indexOf(v) == -1) {
+                    continue;
+                }
+            }
+
+            return service;
+        }
+
+        return null;
     }
 
     public static File getInstallRoot(String dir) {
@@ -222,19 +310,18 @@ public class WeblogicFinder {
     }
 
     public static void main(String[] args) throws Exception {
-        List dirs = getRegistryInstallPaths();
-
-        StopWatch timer = new StopWatch();
-
-        for (int i=0; i<dirs.size(); i++) {
-            File dir = (File)dirs.get(i);
-
-            List searchDirs = getSearchDirs(dir);
-            for (int j=0; j<searchDirs.size(); j++) {
-                seekAndDisplay((File)searchDirs.get(j));
-            }
+        String path;
+        if (args.length == 0) {
+            path = WeblogicDetector.getRunningInstallPath();
+        }
+        else {
+            path = args[0];
         }
 
-        System.out.println("Entire search took: " + timer);
+        File dir = new File(path);
+        List searchDirs = getSearchDirs(dir);
+        for (int j=0; j<searchDirs.size(); j++) {
+            seekAndDisplay((File)searchDirs.get(j));
+        }
     }
 }

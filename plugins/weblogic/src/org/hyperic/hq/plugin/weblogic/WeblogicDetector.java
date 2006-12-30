@@ -103,7 +103,8 @@ public class WeblogicDetector
         }
     }
     
-    public List getServerResources(ConfigResponse platformConfig, String path) throws PluginException {
+    public List getServerResources(ConfigResponse platformConfig, String path)
+        throws PluginException {
         return getServerList(path);
     }
 
@@ -119,24 +120,10 @@ public class WeblogicDetector
 
         if (isWin32()) {
             String version = getTypeInfo().getVersion();
-
-            File root =
-                WeblogicFinder.getRegistryInstallPath(version);
-            if (root == null) {
-                return servers;
-            }
-
-            List dirs = WeblogicFinder.getSearchDirs(root);
-            for (int i=0; i<dirs.size(); i++) {
-                File dir = (File)dirs.get(i);
-
+            File dir = WeblogicFinder.getAdminServicePath(version);
+            if (dir != null) {
                 search(dir, servers);
-
-                if ((i == 0) && (servers.size() > 0)) {
-                    //dont bother searching samples if we found user_projects
-                    break;
-                }
-            }            
+            }
         }
 
         return servers;
