@@ -84,8 +84,13 @@ public class BaseServerQuery extends WeblogicQuery {
     }
 
     public String getListenAddress() {
-        return getAttribute(ATTR_LISTEN_ADDR,
-                            "localhost");
+        String addr = getAttribute(ATTR_LISTEN_ADDR);
+        if ((addr == null) || (addr.length() == 0)) {
+            return "localhost";
+        }
+        else {
+            return addr;
+        }
     }
 
     public String getListenPort() {
