@@ -31,18 +31,19 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentManagerUtil;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
@@ -59,9 +60,6 @@ import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerUtil;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * This job is responsible for verifying measurement jobs.
@@ -238,7 +236,7 @@ public class ScheduleVerificationService
             } catch (MeasurementUnscheduleException e) {
                 this.log.debug(
                     "Scheduling error during unscheduling of " + entId);
-            } catch (FinderException e) {
+            } catch (SubjectNotFoundException e) {
                 // No measurements to reschedule
             } catch (InvalidGraphException e) {
                 this.log.debug("Invalid graph for rescheduling of " + entId);

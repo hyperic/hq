@@ -25,22 +25,19 @@
 
 package org.hyperic.hq.scheduler.server.session;
 
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.ejb.CreateException;
-import javax.ejb.FinderException;
 import javax.naming.NamingException;
 
-import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.util.StringUtil;
-
 import org.quartz.Job;
-import org.quartz.JobDataMap;
 import org.quartz.JobExecutionException;
 
 public abstract class BaseJob implements Job {
@@ -79,7 +76,7 @@ public abstract class BaseJob implements Job {
             throw new JobExecutionException(e, false);
         } catch (NamingException e) {
             throw new JobExecutionException(e, false);
-        } catch (FinderException e) {
+        } catch (SubjectNotFoundException e) {
             throw new JobExecutionException(e, false);
         } catch (CreateException e) {
             throw new JobExecutionException(e, false);

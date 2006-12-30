@@ -44,6 +44,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocalHome;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
@@ -137,10 +138,11 @@ public abstract class AuthzSession
 
     /** 
      * @return The value-object of the overlord
+     * @throws SubjectNotFoundException 
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public AuthzSubjectValue findOverlord() throws NamingException {
+    public AuthzSubjectValue findOverlord() throws SubjectNotFoundException {
         return findSubjectByAuth(AuthzConstants.overlordName,
                                  AuthzConstants.overlordDsn);
     }
@@ -160,12 +162,12 @@ public abstract class AuthzSession
      * @ejb:transaction type="Required"
      */
     public AuthzSubjectValue findSubjectByAuth(String name, String authDsn)
-    {
+        throws SubjectNotFoundException {
          AuthzSubject subject = DAOFactory.getDAOFactory().getAuthzSubjectDAO()
             .findByAuth(name, authDsn);
         if (subject == null) {
-            throw new ObjectNotFoundException(
-                name, "Can't find subject: name="+name+",authDsn="+authDsn);
+            throw new SubjectNotFoundException(
+                "Can't find subject: name=" + name + ",authDsn=" + authDsn);
         }
         return subject.getAuthzSubjectValue();
     }

@@ -36,13 +36,15 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.ejb.CreateException;
-import javax.ejb.FinderException;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
@@ -66,9 +68,6 @@ import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerUtil;
 import org.hyperic.hq.measurement.shared.RawMeasurementValue;
 import org.hyperic.util.pager.PageControl;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * This class serves to provide synchronized calls into the EJBs to avoid
@@ -104,8 +103,7 @@ public class AgentScheduleSynchronizer {
     }
     
     private AuthzSubjectValue subject = null;
-    private AuthzSubjectValue getSubject()
-        throws FinderException {
+    private AuthzSubjectValue getSubject() throws SubjectNotFoundException {
         try {
             if (subject == null)
                 subject = AuthzSubjectManagerUtil.getLocalHome().create()
@@ -167,7 +165,8 @@ public class AgentScheduleSynchronizer {
 
     private DerivedMeasurementValue getDMByTemplateAndInstance(
         Integer tid, Integer instanceId)
-        throws MeasurementNotFoundException, CreateException, FinderException {
+        throws MeasurementNotFoundException, CreateException,
+               SubjectNotFoundException {
         HashMap tmplMap = (HashMap) this.dmMap.get(tid);
         if (tmplMap != null && tmplMap.containsKey(instanceId)) {
             return (DerivedMeasurementValue) tmplMap.get(instanceId);
@@ -175,8 +174,8 @@ public class AgentScheduleSynchronizer {
 
         // Otherwise, we need to look it up
         DerivedMeasurementValue dmVo =
-            this.getDMan().findMeasurement(this.getSubject(), tid, instanceId);
-        this.cacheDM(dmVo);
+            getDMan().findMeasurement(getSubject(), tid, instanceId);
+        cacheDM(dmVo);
         
         return dmVo;
     }
@@ -184,12 +183,13 @@ public class AgentScheduleSynchronizer {
 
     private RawMeasurementValue getRMByTemplateAndInstance(Integer tid, 
                                                            Integer instanceId) {
-        return this.getRMan().findMeasurement(tid, instanceId);
+        return getRMan().findMeasurement(tid, instanceId);
     }
 
     private void reschedule(AppdefEntityID entId, List dmVos)
         throws InvalidGraphException, PermissionException,
-               MeasurementScheduleException, MonitorAgentException {
+               MeasurementScheduleException, MonitorAgentException,
+               SubjectNotFoundException {
         
         HashSet agentSchedule  = new HashSet();
         HashSet serverSchedule = new HashSet();
@@ -269,9 +269,6 @@ public class AgentScheduleSynchronizer {
                         } catch (CreateException e) {
                             // Move on to the next one
                             continue;
-                        } catch (FinderException e) {
-                            // Move on to the next one
-                            continue;
                         } catch (MeasurementNotFoundException e) {
                             continue;
                         }
@@ -287,23 +284,23 @@ public class AgentScheduleSynchronizer {
             } // end if identity else
         }
 
-        this.getMeasurementProcessor().schedule(
+        getMeasurementProcessor().schedule(
             entId, graphs, agentSchedule, serverSchedule);
     }
     
     private void unschedule(AppdefEntityID eid)
         throws MeasurementUnscheduleException, PermissionException {
         log.debug("Unschedule metrics for " + eid);
-        this.getMeasurementProcessor().unschedule(eid);
+        getMeasurementProcessor().unschedule(eid);
     }
 
     public void reschedule(AppdefEntityID eid)
         throws InvalidGraphException, MeasurementScheduleException,
-               MonitorAgentException, FinderException, PermissionException,
-               MeasurementUnscheduleException {
+               MonitorAgentException, PermissionException,
+               MeasurementUnscheduleException, SubjectNotFoundException {
         log.debug("Reschedule metrics for " + eid);
-        List dms = this.getDMan().findMeasurements(this.getSubject(), eid, true,
-                                                   null, PageControl.PAGE_ALL);
+        List dms = getDMan().findMeasurements(getSubject(), eid, true,
+                                              null, PageControl.PAGE_ALL);
         
         if (dms.size() > 0)
             this.reschedule(eid, dms);
@@ -327,7 +324,7 @@ public class AgentScheduleSynchronizer {
                 log.debug("Unable to look up measurement processor", e);
             } catch (InvalidGraphException e) {
                 log.debug("Unable to create valid measurement graphs");
-            } catch (FinderException e) {
+            } catch (SubjectNotFoundException e) {
                 log.debug("Unable to look up super user");
             }
         }

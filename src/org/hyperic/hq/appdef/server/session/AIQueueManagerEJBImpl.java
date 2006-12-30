@@ -62,6 +62,7 @@ import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.Ip;
+import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -118,8 +119,7 @@ public class AIQueueManagerEJBImpl
                                    boolean updateServers,
                                    boolean isApproval,
                                    boolean isReport ) 
-        throws NamingException, CreateException, FinderException,
-               RemoveException {
+        throws NamingException, CreateException, RemoveException {
 
         // log.info("AIQmgr.queue: starting...(PLATFORM=" + aiplatform + ", updateServers=" + updateServers + ")");
         // log.info("AIQmgr.queue: aiplatform.getAIIpValues=" + StringUtil.arrayToString(aiplatform.getAIIpValues()));
@@ -189,40 +189,49 @@ public class AIQueueManagerEJBImpl
      * @param aiplatform The platform that we got from the recent autoinventory
      * data that we are wanting to queue.
      * @param updateServers If true, the platform's servers will be updated as well.
+     * @throws FinderException 
+     * @throws SubjectNotFoundException 
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
     public AIPlatformValue syncQueue ( AIPlatformValue aiplatform, 
                                        boolean isApproval ) 
-        throws NamingException, CreateException, 
-               FinderException, RemoveException {
-
+        throws NamingException, CreateException,  RemoveException,
+               FinderException {
         // Act as admin for now
-        AuthzSubjectValue subject =
-            AuthzSubjectManagerUtil.getLocalHome().create().findOverlord();
-            
+        AuthzSubjectValue subject;
+        try {
+            subject =
+                AuthzSubjectManagerUtil.getLocalHome().create().findOverlord();
+        } catch (SubjectNotFoundException e) {
+            throw new FinderException(e.getMessage());
+        }
+
         return queue(subject, aiplatform, true, isApproval, false);
     }
 
     /**
      * Retrieve the contents of the AI queue.
-     * @param showIgnored If true, even resources in the AI queue that have 
-     * the 'ignored' flag set will be returned.  By default, resources with
-     * the 'ignored' flag set are excluded when the queue is retrieved.
-     * @param showPlaceholders If true, even resources in the AI queue that are 
-     * unchanged with respect to appdef will be returned.  By default, resources
-     * that are unchanged with respect to appdef are excluded when the queue is
-     * retrieved.
-     * @return A List of AIPlatformValue objects representing the contents
-     * of the autoinventory queue.
+     * 
+     * @param showIgnored
+     *            If true, even resources in the AI queue that have the
+     *            'ignored' flag set will be returned. By default, resources
+     *            with the 'ignored' flag set are excluded when the queue is
+     *            retrieved.
+     * @param showPlaceholders
+     *            If true, even resources in the AI queue that are unchanged
+     *            with respect to appdef will be returned. By default, resources
+     *            that are unchanged with respect to appdef are excluded when
+     *            the queue is retrieved.
+     * @return A List of AIPlatformValue objects representing the contents of
+     *         the autoinventory queue.
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
     public PageList retrieveQueue ( AuthzSubjectValue subject,
                                     boolean showIgnored,
                                     boolean showPlaceholders,
-                                    PageControl pc ) 
-        throws SystemException {
+                                    PageControl pc ) {
         return retrieveQueue(subject, 
                              showIgnored, showPlaceholders, 
                              false, pc);
@@ -248,9 +257,7 @@ public class AIQueueManagerEJBImpl
                                     boolean showIgnored,
                                     boolean showPlaceholders,
                                     boolean showAlreadyProcessed,
-                                    PageControl pc ) 
-        throws SystemException {
-        
+                                    PageControl pc ) {
         // log.info("AutoinventoryManager.retrieveQueue called");
         Collection queue;
         PageList results;
@@ -355,7 +362,7 @@ public class AIQueueManagerEJBImpl
     public AIPlatformValue findAIPlatformById ( AuthzSubjectValue subject,
                                                 int aiplatformID ) 
         throws NamingException, CreateException, 
-               FinderException, RemoveException, SystemException {
+               FinderException, RemoveException {
 
         AIPlatform aiplatform;
         AIPlatformValue aiplatformValue;
@@ -376,7 +383,7 @@ public class AIQueueManagerEJBImpl
     public AIPlatformValue findAIPlatformByFqdn ( AuthzSubjectValue subject,
                                                   String fqdn ) 
         throws NamingException, CreateException, 
-               FinderException, RemoveException, SystemException {
+               FinderException, RemoveException {
 
         Collection aiplatforms;
         AIPlatform aiplatform = null;
@@ -408,7 +415,7 @@ public class AIQueueManagerEJBImpl
      */
     public AIServerValue findAIServerById ( AuthzSubjectValue subject,
                                             int serverID ) 
-        throws SystemException, FinderException {
+        throws FinderException {
 
         AIServer aiserver;
         AIServerValue aiserverValue;
@@ -426,7 +433,7 @@ public class AIQueueManagerEJBImpl
      */
     public AIServerValue findAIServerByName ( AuthzSubjectValue subject,
                                               String name ) 
-        throws SystemException, FinderException {
+        throws FinderException {
 
         // XXX Do authz check
         AIServer aiserver = getAIServerDAO().findByName(name);
@@ -445,7 +452,7 @@ public class AIQueueManagerEJBImpl
      */
     public AIIpValue findAIIpById ( AuthzSubjectValue subject,
                                             int ipID ) 
-        throws SystemException, FinderException {
+        throws FinderException {
 
         AIIp aiip = getAIIpDAO().findById(new Integer(ipID));
         AIIpValue aiipValue = aiip.getAIIpValue();
@@ -459,7 +466,7 @@ public class AIQueueManagerEJBImpl
      */
     public AIIpValue findAIIpByAddress ( AuthzSubjectValue subject,
                                          String address ) 
-        throws SystemException, FinderException {
+        throws FinderException {
 
         // XXX Do authz check
         AIIp aiip = getAIIpDAO().findByAddress(address);

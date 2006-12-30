@@ -100,7 +100,7 @@ public class AuthzSubjectManagerEJBImpl
      */
     public AuthzSubject createSubject(AuthzSubjectValue whoami,
                                       AuthzSubjectValue subject)
-        throws FinderException, PermissionException, CreateException {
+        throws PermissionException, CreateException {
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         pm.check(whoami.getId(), getRootResourceType(),
                  AuthzConstants.rootResourceId,
@@ -221,8 +221,7 @@ public class AuthzSubjectManagerEJBImpl
      */
     public AuthzSubjectValue findSubjectById(AuthzSubjectValue whoami,
                                              Integer id)
-        throws NamingException, FinderException, PermissionException {
-
+        throws PermissionException {
         AuthzSubject sub = getSubjectDAO().findById(id);
         
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
@@ -242,8 +241,8 @@ public class AuthzSubjectManagerEJBImpl
      * @ejb:interface-method
      */
     public AuthzSubjectValue findSubjectByName(AuthzSubjectValue whoami,
-        String name)
-        throws FinderException, PermissionException {
+                                               String name)
+        throws PermissionException {
         // look for the subject in the cache
         AuthzSubjectValue vo;
         vo = VOCache.getInstance().getAuthzSubject(name);

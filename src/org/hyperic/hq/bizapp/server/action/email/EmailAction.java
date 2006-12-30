@@ -31,7 +31,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.ejb.CreateException;
-import javax.ejb.FinderException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.naming.NamingException;
@@ -307,9 +306,6 @@ public class EmailAction extends EmailActionConfig
                                                            true));
                     break;
                 }
-            } catch (FinderException e) {
-                // This one is no good, continue
-                continue;
             } catch (AddressException e) {
                 log.warn("Mail address invalid", e);
                 continue;

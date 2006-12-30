@@ -41,9 +41,12 @@ import javax.naming.NamingException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
+import org.hibernate.ObjectNotFoundException;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.auth.Principal;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
-import org.hyperic.hq.auth.Principal;
+import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -52,13 +55,10 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
-import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.hq.dao.PrincipalDAO;
-import org.hyperic.dao.DAOFactory;
-
+import org.hyperic.util.ConfigPropertyException;
 import org.jboss.security.Util;
 import org.jboss.security.auth.callback.UsernamePasswordHandler;
-import org.hibernate.ObjectNotFoundException;
 
 /** The AuthManger
  *
@@ -192,7 +192,7 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @ejb:transaction type="SUPPORTS"
      */
     public int getUnauthSessionId(String user)
-        throws ApplicationException, LoginException {
+        throws ApplicationException {
         try {
             SessionManager mgr = SessionManager.getInstance();
             try {
@@ -211,7 +211,8 @@ public class AuthManagerEJBImpl implements SessionBean {
             AuthzSubjectValue subject =
                 subjMgrLocal.findSubjectByAuth(user, appName);
             if (!subject.getActive()) {
-                throw new LoginException("User account has been disabled.");
+                throw new SessionNotFoundException(
+                    "User account has been disabled.");
             }
 
             return mgr.put(subject, 30000);     // 30 seconds only
@@ -219,11 +220,10 @@ public class AuthManagerEJBImpl implements SessionBean {
             throw new SystemException("Naming Error in getSessionId", e);
         } catch (CreateException e) {
             throw new SystemException("CreateException in getSessionId", e);
-        } catch (ObjectNotFoundException e) {
-            throw new ApplicationException(
-                "Unable to find User " + user + " to create authz user entry",
-                e);
-        } 
+        } catch (SubjectNotFoundException e) {
+            throw new SessionNotFoundException("Unable to find user " + user +
+                                               " to create session");
+        }
     }
 
     /**

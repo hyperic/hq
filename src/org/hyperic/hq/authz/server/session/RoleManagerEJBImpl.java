@@ -46,6 +46,7 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSession;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectDAO;
@@ -1146,9 +1147,13 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         throws PermissionException, NamingException {
         AuthzSubject subjectLocal = lookupSubject(subjectValue);
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        pm.check(findOverlord().getId(), getRootResourceType(),
-                 AuthzConstants.rootResourceId,
-                 AuthzConstants.subjectOpViewSubject);
+        try {
+            pm.check(findOverlord().getId(), getRootResourceType(),
+                     AuthzConstants.rootResourceId,
+                     AuthzConstants.subjectOpViewSubject);
+        } catch (SubjectNotFoundException e) {
+            throw new PermissionException("Overlord not found", e);
+        }
         return subjectLocal.getRoles();
     }
 

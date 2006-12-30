@@ -44,6 +44,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
@@ -381,15 +382,16 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
 
     /**
      * Register the user by using the overlord to create him.
+     * @throws SubjectNotFoundException 
      *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
     public AuthzSubjectValue registerSubject(Integer sessionId,
                                              AuthzSubjectValue user)
-        throws NamingException, CreateException, FinderException,
-               RemoveException, PermissionException, SessionTimeoutException,
-               SessionNotFoundException {
+        throws NamingException, CreateException, RemoveException,
+               PermissionException, SessionTimeoutException,
+               SessionNotFoundException, SubjectNotFoundException {
         // check for timeout
         AuthzSubjectValue whoami = manager.getSubject(sessionId.intValue());
 
@@ -462,7 +464,8 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * @ejb:transaction type="NOTSUPPORTED"
      */
     public ConfigResponse getUserPrefs(String username)
-        throws LoginException, ApplicationException, ConfigPropertyException {
+        throws SessionNotFoundException, ApplicationException,
+               ConfigPropertyException {
         int sessionId = getAuthManager().getUnauthSessionId(username);
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         return getUserPrefs(new Integer(sessionId), subject.getId());
