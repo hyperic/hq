@@ -91,7 +91,6 @@ public class ModifyAction extends BaseAction {
 
         if(pForm.isRemoveClicked()){
             DashboardUtils.removeResources(pForm.getIds(), resKey, user);
-            forwardStr = "review";
         }
 
         ActionForward forward = checkSubmit(request, mapping, form);
