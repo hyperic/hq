@@ -54,6 +54,9 @@ A.NotBold:hover, .DropDown A:hover {color: #003399; font-weight: normal; text-de
 .BlockContentSmallText {background-color: #EBEDF2; padding: 3px; font-size: 11px; color: #000000;}
 .BlockBg {background-color: #EBEDF2;}
 
+.SmokeyLabel {padding: 3px; font-weight: bold; text-align: right;}
+.SmokeyContent {padding: 3px;}
+
 /* LIST */
 A.ListHeaderLink:link {color: #004680; text-decoration: none;}
 A.ListHeaderLink:visited {color: #004680; text-decoration: none;}

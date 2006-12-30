@@ -186,13 +186,6 @@
     }
   }
 
-  function initLiveMetrics() {
-    metricsUpdater = new MetricsUpdater();
-    ajaxEngine.registerRequest( 'getLiveMetrics', '<html:rewrite page="/resource/common/monitor/visibility/CurrentMetricValues.do"/>');
-    ajaxEngine.registerAjaxObject( 'metricsUpdater', metricsUpdater );
-    setMetricsRefresh();
-  }
-
   var lastUpdate = new Date();
 
   function getLiveMetrics() {
@@ -213,7 +206,6 @@
     setTimeout( "getLiveMetrics()", 60*1000 );
   }
 
-  onloads.push( initLiveMetrics );
 -->
 </script>
 

@@ -107,13 +107,13 @@ sometimes we don't want any left side buttons or checkboxes at all
         </c:if>
       </tiles:insert>
     </td>
-<c:if test="${useCurrent}">
     <td valign="top">
     <table width="100%" cellpadding="5" cellspacing="0" border="0" class="MonitorToolBar">
       <tr>
         <td width="100%" align="center" nowrap>
         <div id="UpdatedTime" style="color: grey">&nbsp;</div>
         </td>
+<c:if test="${useCurrent && not MetricsDisplayForm.readOnly}">
         <td align="right" nowrap>
         <script language="JavaScript">
         <!--
@@ -157,6 +157,15 @@ sometimes we don't want any left side buttons or checkboxes at all
             liveUpdate = null;
             $('refreshOff').innerHTML = "<fmt:message key="OFF"/>";
           }
+
+          function initLiveMetrics() {
+            metricsUpdater = new MetricsUpdater();
+            ajaxEngine.registerRequest( 'getLiveMetrics', '<html:rewrite page="/resource/common/monitor/visibility/CurrentMetricValues.do"/>');
+            ajaxEngine.registerAjaxObject( 'metricsUpdater', metricsUpdater );
+            setMetricsRefresh();
+          }
+
+          onloads.push( initLiveMetrics );
           -->
         </script>
         <span id="CurrentValuesLabel">
@@ -170,10 +179,10 @@ sometimes we don't want any left side buttons or checkboxes at all
         |
         <span id="refreshOff"><a href="javascript:refreshOff()"><fmt:message key="OFF"/></a></span>
         </td>
+</c:if>
       </tr>
     </table>
     </td>
-</c:if>
   </tr>
   <tr>
     <td colspan="3">
