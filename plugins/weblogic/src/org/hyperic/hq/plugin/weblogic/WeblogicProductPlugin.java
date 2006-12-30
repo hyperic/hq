@@ -157,7 +157,7 @@ public class WeblogicProductPlugin extends ProductPlugin {
 
             //fallback to registry on win32 only
             if ((path == null) && isWin32()) {
-                path = WeblogicFinder.getRegistryInstallPath();
+                path = WeblogicFinder.getServiceInstallPath();
             }
 
             if (path == null) {
