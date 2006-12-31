@@ -295,7 +295,8 @@ public class GalertBossEJBImpl
                 .put("id", log.getId())
                 .put("time", date)
                 .put("name", log.getAlertDef().getName())
-                .put("reason", log.getExecutionReason().getShortReason()));
+                .put("reason", log.getExecutionReason().getShortReason())
+                .put("fixed", log.isFixed()));
         }
         
         JSONObject jobj = new JSONObject();
