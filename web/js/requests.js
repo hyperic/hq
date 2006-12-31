@@ -209,6 +209,7 @@
         }
 
         if (aList != 0) {
+            $('noCritAlerts').style.display = 'none';
 
             for (var i = alertTable.childNodes.length - 1; i > 1; i--) {
                 alertTable.removeChild(alertTable.childNodes[i]);
@@ -227,10 +228,8 @@
                 var urlAmp = "&a="
                 var alertUrl = $('viewAlertUrl').href;
 
-
                 alertTable.appendChild(tr);
                 tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
-
 
                 tr.appendChild(td1);
                 td1.setAttribute((document.all ? 'className' : 'class'), "ListCellCheckbox");
