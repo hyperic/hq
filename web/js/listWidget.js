@@ -87,6 +87,15 @@ function ToggleButtons(widgetInstanceName, prefix, isRemove, form) {
                       "on", "group", "group");
         if (goButtonLink!=null)
             ReplaceGoButton(true);
+
+        // Enable all submit buttons
+        for (var i = 0; i < form.elements.length; i++) {
+            if (form.elements[i].type == 'submit' &&
+                form.elements[i].className == 'CompactButtonInactive') {
+                form.elements[i].disabled = false;
+                form.elements[i].className = 'CompactButton';
+            }
+        }
     } else if (numSelected == 0) {
 		ReplaceButton(prefix + "DeleteButtonDiv", prefix + "DeleteButtonTd",
                       "off", imgName, btnFunction);
@@ -96,6 +105,15 @@ function ToggleButtons(widgetInstanceName, prefix, isRemove, form) {
                       "off", "group", "group");
         if (goButtonLink != null)
             ReplaceGoButton(false);
+
+        // Disable all submit buttons
+        for (var i = 0; i < form.elements.length; i++) {
+            if (form.elements[i].type == 'submit' &&
+                form.elements[i].className == 'CompactButton') {
+                form.elements[i].disabled = true;
+                form.elements[i].className = 'CompactButtonInactive';
+            }
+        }
 	}
 }
 
@@ -357,11 +375,11 @@ function ToggleAll(e, widgetProperties, isRemove, subGroup) {
 	
 	if (e.checked) {
 		CheckAll(e, widgetInstanceName, subGroup);
-		ToggleButtons(widgetInstanceName, prefix, isRemove);
+		ToggleButtons(widgetInstanceName, prefix, isRemove, e.form);
 	}
 	else {
 		ClearAll(e, widgetInstanceName, subGroup);
-		ToggleButtons(widgetInstanceName, prefix, isRemove);
+		ToggleButtons(widgetInstanceName, prefix, isRemove, e.form);
 	}
 }
 
