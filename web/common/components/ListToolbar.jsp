@@ -37,6 +37,7 @@
 <tiles:importAttribute name="noButtons" ignore="true"/>
 <tiles:importAttribute name="newOnly" ignore="true"/>
 <tiles:importAttribute name="deleteOnly" ignore="true"/>
+<tiles:importAttribute name="alerts" ignore="true"/>
 <tiles:importAttribute name="includeGroup" ignore="true"/>
 <tiles:importAttribute name="listItems" ignore="true"/>
 <tiles:importAttribute name="listSize" ignore="true"/>
@@ -110,6 +111,10 @@
     </table>
   </div>
 </td>
+</c:if>
+<c:if test="${alerts}">
+    <td align="left" id="<c:out value="${widgetInstanceName}"/>AckButtonTd"><div id="<c:out value="${widgetInstanceName}"/>AckButtonDiv"><input type="submit" name="buttonAction" value="<fmt:message key="resource.common.alert.action.acknowledge.label"/>" class="CompactButtonInactive" disabled="true"></div></td>
+    <td align="left" id="<c:out value="${widgetInstanceName}"/>FixedButtonTd" style="m><div id="<c:out value="${widgetInstanceName}"/>FixedButtonDiv"><input type="submit" name="buttonAction" value="<fmt:message key="resource.common.alert.action.fixed.label"/>" class="CompactButtonInactive" disabled="true"></div></td>
 </c:if>
 <c:choose>
   <c:when test="${not empty pageSizeAction}">
