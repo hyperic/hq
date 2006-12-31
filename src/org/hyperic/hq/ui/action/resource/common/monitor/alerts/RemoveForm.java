@@ -25,6 +25,9 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.alerts;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.action.resource.ResourceForm;
 
 /**
@@ -34,18 +37,19 @@ import org.hyperic.hq.ui.action.resource.ResourceForm;
 public class RemoveForm extends ResourceForm  {
 
     /** Holds value of  alerts. */
-    private Integer[] alerts;
-    private Integer ad;
+    private Integer[] _alerts;
+    private Integer _ad;
     
+    private String _buttonAction;
 
     public RemoveForm() {
     }
 
     public String toString() {
-        if (alerts == null)
+        if (_alerts == null)
             return "empty";
         else
-            return alerts.toString();    
+            return _alerts.toString();    
     }
     
     /** Getter for alerts
@@ -53,7 +57,7 @@ public class RemoveForm extends ResourceForm  {
      *
      */
     public Integer[] getAlerts() {
-        return this.alerts;
+        return _alerts;
     }
     
     /** Setter for alerts
@@ -61,14 +65,29 @@ public class RemoveForm extends ResourceForm  {
      *
      */
     public void setAlerts(Integer[] alerts) {
-        this.alerts = alerts;
+        _alerts = alerts;
     }
 
     public Integer getAd() {
-        return this.ad;
+        return _ad;
     }
     
     public void setAd(Integer ad) {
-        this.ad = ad;
+        _ad = ad;
+    }
+
+    public String getButtonAction() {
+        return _buttonAction;
+    }
+
+    public void setButtonAction(String action) {
+        _buttonAction = action;
+    }
+    
+    public void reset(ActionMapping mapping, HttpServletRequest request) {
+        super.reset(mapping, request);
+        _alerts = null;
+        _ad = null;
+        _buttonAction = null;
     }
 }

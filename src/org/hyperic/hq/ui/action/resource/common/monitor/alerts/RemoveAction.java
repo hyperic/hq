@@ -38,11 +38,13 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.apache.tools.ant.taskdefs.condition.IsReference;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.xbill.DNS.ISDNRecord;
 
 /**
  * An Action that removes an alert
@@ -72,7 +74,8 @@ public class RemoveAction extends BaseAction {
         // if the remove button was clicked, we are coming from
         // the alerts list page and just want to continue
         // processing ...
-        if ( forward != null && !forward.getName().equals(Constants.REMOVE_URL) ) {
+        if (forward != null && !forward.getName().equals(Constants.REMOVE_URL))
+        {
             log.trace("returning " + forward);
             // if there is no resource type, there is probably no
             // resource -- go to dashboard on cancel
@@ -97,9 +100,20 @@ public class RemoveAction extends BaseAction {
         ServletContext ctx = getServlet().getServletContext();
         EventsBoss boss = ContextUtils.getEventsBoss(ctx);
 
-        boss.deleteAlerts(sessionId.intValue(), alertIds);
-
-        log.debug("!!!!!!!!!!!!!!!! removing alerts!!!!!!!!!!!!");
+        if (nwForm.isDeleteClicked()) {
+            log.debug("!!!!!!!!!!!!!!!! removing alerts!!!!!!!!!!!!");
+            boss.deleteAlerts(sessionId.intValue(), alertIds);
+        }
+        else if (nwForm.getButtonAction() != null) {
+            if ("ACKNOWLEDGE".equals(nwForm.getButtonAction())) {
+                log.debug("Acknowledge alerts");
+                boss.acknowledgeAlerts(sessionId.intValue(), alertIds);
+            }
+            else if ("FIXED".equals(nwForm.getButtonAction())) {
+                log.debug("Fixed alerts");
+                boss.fixAlerts(sessionId.intValue(), alertIds);
+            }
+        }
 
         if (type == null || type.intValue() == 0) {
             return returnNoResource(request, mapping);
