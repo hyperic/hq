@@ -116,7 +116,6 @@ public class ListAlertAction extends TilesAction {
             long begin = cal.getTimeInMillis();
             alerts = eb.findAlerts(sessionId, appEntId, begin,
                                    begin + Constants.DAYS, pc);
-            request.setAttribute("date", new Long(begin));
         } catch(PermissionException e) {
             // user is not allowed to see/manage alerts. 
             // return empty list for now

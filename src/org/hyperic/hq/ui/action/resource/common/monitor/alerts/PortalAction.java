@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.alerts;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
@@ -103,6 +105,19 @@ public class PortalAction extends ResourceController {
             portal.addPortlet(new Portlet(".events.group.alert.list"), 1);
         }
         request.setAttribute(Constants.PORTAL_KEY, portal);
+        
+        try {
+            GregorianCalendar cal = new GregorianCalendar();
+            Integer year = RequestUtils.getIntParameter(request, "year");
+            Integer month = RequestUtils.getIntParameter(request, "month");
+            Integer day = RequestUtils.getIntParameter(request, "day");
+            cal.set(Calendar.YEAR, year.intValue());
+            cal.set(Calendar.MONTH, month.intValue());
+            cal.set(Calendar.DAY_OF_MONTH, day.intValue());
+            request.setAttribute("date", new Long(cal.getTimeInMillis()));
+        } catch (ParameterNotFoundException e) {
+            request.setAttribute("date", new Long(System.currentTimeMillis()));
+        }
 
         return null;
     }
