@@ -140,7 +140,7 @@
 </c:url>
 
 <!-- FORM -->
-<html:form method="POST" action="/alerts/RemoveAlerts.do">
+<html:form method="GET" action="/alerts/RemoveAlerts.do">
 <html:hidden property="eid" value="${Resource.entityId}"/>
   <c:if test="${not empty param.year}">
     <input type="hidden" name="year" value="<c:out value="${param.year}"/>"/>
@@ -326,7 +326,8 @@ title="alerts.alert.AlertList.ListHeader.ActualValue" />
 
 <tiles:insert definition=".toolbar.list">
   <tiles:put name="listItems" beanName="Alerts"/>
-  <tiles:put name="deleteOnly" value="true"/>
+  <tiles:put name="noButtons" value="true"/>
+  <tiles:put name="alerts" value="true"/>
   <tiles:put name="listSize" beanName="listSize"/>
   <tiles:put name="pageNumAction" beanName="pnAction"/>
   <tiles:put name="pageSizeAction" beanName="psAction"/>
