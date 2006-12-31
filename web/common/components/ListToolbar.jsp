@@ -113,7 +113,7 @@
 </td>
 </c:if>
 <c:if test="${alerts}">
-    <td align="left" id="<c:out value="${widgetInstanceName}"/>AckButtonTd"><div id="<c:out value="${widgetInstanceName}"/>AckButtonDiv"><input type="submit" name="buttonAction" value="<fmt:message key="resource.common.alert.action.acknowledge.label"/>" class="CompactButtonInactive" disabled="true"></div></td>
+    <td width="40" align="left" id="<c:out value="${widgetInstanceName}"/>AckButtonTd"><div id="<c:out value="${widgetInstanceName}"/>AckButtonDiv"><input type="submit" name="buttonAction" value="<fmt:message key="resource.common.alert.action.acknowledge.label"/>" class="CompactButtonInactive" disabled="true"></div></td>
     <td align="left" id="<c:out value="${widgetInstanceName}"/>FixedButtonTd" style="m><div id="<c:out value="${widgetInstanceName}"/>FixedButtonDiv"><input type="submit" name="buttonAction" value="<fmt:message key="resource.common.alert.action.fixed.label"/>" class="CompactButtonInactive" disabled="true"></div></td>
 </c:if>
 <c:choose>

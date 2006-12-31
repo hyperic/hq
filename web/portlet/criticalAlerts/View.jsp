@@ -79,6 +79,7 @@ Ajax.Responders.register({
 </tiles:insert>
 
   <!-- JSON available at /dashboard/ViewCriticalAlerts.do -->
+    <html:form method="POST" action="/alerts/RemoveAlerts.do">
   <table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${tableName}"/>">
   	<tbody>
 		<tr class="ListRow">
@@ -108,5 +109,15 @@ Ajax.Responders.register({
       		<td class="ListCell"><fmt:message key="dash.home.alerts.no.resource.to.display"/></td>
     	</tr>
   </table>
+    <tiles:insert definition=".toolbar.list">                
+      <tiles:put name="noButtons" value="true"/>
+      <tiles:put name="alerts" value="true"/>
+      <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>  
+      <%--none of this is being used--%>
+      <tiles:put name="pageSizeAction" value="" />
+      <tiles:put name="pageNumAction" value=""/>    
+      <tiles:put name="defaultSortColumn" value="1"/>
+    </tiles:insert>
+  </html:form>
 
 </div>
