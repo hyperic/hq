@@ -531,7 +531,8 @@ public class EscalationMediator extends Mediator
         EscalationState state =
             setEscalationState(subjectID, alertID, alertType, true, 0);
 
-        if (state != null) {
+        if (state != null && state.isActive() &&
+            state.getAlertId() == alertID.intValue()) {
             AuthzSubject subj = DAOFactory.getDAOFactory().getAuthzSubjectDAO()
                     .findById(subjectID);
             // TODO: refine message content
