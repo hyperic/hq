@@ -1670,6 +1670,20 @@ public class EventsBossEJBImpl extends BizappSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
+    public void acknowledgeAlerts(int sessionID, Integer[] alertIDs)
+        throws SessionTimeoutException, SessionNotFoundException,
+               PermissionException, ActionExecuteException {
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        EscalationMediator med = EscalationMediator.getInstance();
+        for (int i = 0; i < alertIDs.length; i++) {
+            med.acknowledgeAlert(subject.getId(), alertIDs[i], 0);
+        }
+    }
+
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
     public void fixAlert(int sessionID, Integer alertID)
         throws SessionTimeoutException, SessionNotFoundException,
         PermissionException, ActionExecuteException
@@ -1677,6 +1691,21 @@ public class EventsBossEJBImpl extends BizappSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         EscalationMediator med = EscalationMediator.getInstance();
         med.fixAlert(subject.getId(), alertID);
+    }
+    
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void fixAlerts(int sessionID, Integer[] alertIDs)
+        throws SessionTimeoutException, SessionNotFoundException,
+        PermissionException, ActionExecuteException
+    {
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        EscalationMediator med = EscalationMediator.getInstance();
+        for (int i = 0; i < alertIDs.length; i++) {
+            med.fixAlert(subject.getId(), alertIDs[i]);
+        }
     }
     
     /**
