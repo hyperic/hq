@@ -34,6 +34,9 @@ import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.events.shared.ActionManagerLocal;
+import org.hyperic.hq.events.shared.ActionManagerUtil;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 
@@ -102,8 +105,6 @@ public class ActionManagerEJBImpl implements SessionBean {
     /**
      * Create a new action
      *
-     * @return an ActionValue
-     *
      * @ejb:interface-method
      */
     public ActionValue createAction(AlertDefinitionValue def, ActionValue val) {
@@ -121,8 +122,6 @@ public class ActionManagerEJBImpl implements SessionBean {
 
     /**
      * Update an action
-     *
-     * @return an ActionValue
      *
      * @ejb:interface-method
      */
@@ -156,6 +155,14 @@ public class ActionManagerEJBImpl implements SessionBean {
             action.setParent(null);
         } else {
             action.setParent(aDao.findById(val.getId()));
+        }
+    }
+    
+    public static ActionManagerLocal getOne() {
+        try {
+            return ActionManagerUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
         }
     }
 

@@ -34,7 +34,10 @@ import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.ext.RegisteredTriggerEvent;
+import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
+import org.hyperic.hq.events.shared.RegisteredTriggerManagerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 
 /** 
@@ -151,6 +154,14 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
                                             vals);
     }
 
+    public static RegisteredTriggerManagerLocal getOne() {
+        try {
+            return RegisteredTriggerManagerUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
+    }
+    
     public void ejbCreate() {}
 
     public void ejbRemove() {}

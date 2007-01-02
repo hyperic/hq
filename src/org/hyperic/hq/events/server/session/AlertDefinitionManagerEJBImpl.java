@@ -53,6 +53,8 @@ import org.hyperic.hq.events.AlertDefinitionCreateException;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
@@ -98,22 +100,12 @@ public class AlertDefinitionManagerEJBImpl
         return DAOFactory.getDAOFactory().getTriggerDAO();
     }
 
-    private AlertManagerLocal alertMan = null;
     private AlertManagerLocal getAlertMan() {
-        try {
-            if (alertMan == null)
-                alertMan = AlertManagerUtil.getLocalHome().create();
-            return alertMan;
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        return AlertManagerEJBImpl.getOne();
     }
 
     /** 
      * Remove alert definitions
-     * @throws PermissionException 
      */
     private void deleteAlertDefinition(AuthzSubjectValue subj,
                                        AlertDefinition alertdef, boolean force)
@@ -151,8 +143,6 @@ public class AlertDefinitionManagerEJBImpl
 
     /** 
      * Create a new alert definition
-     * @throws PermissionException 
-     * 
      * @ejb:interface-method
      */
     public AlertDefinitionValue createAlertDefinition(AuthzSubjectValue subj,
@@ -337,7 +327,6 @@ public class AlertDefinitionManagerEJBImpl
 
     /** 
      * Enable/Disable alert definitions
-     * @throws PermissionException 
      * @ejb:interface-method
      */
     public void updateAlertDefinitionsEnable(AuthzSubjectValue subj,
@@ -367,8 +356,6 @@ public class AlertDefinitionManagerEJBImpl
 
     /** 
      * Add an action to an alert definition
-     * @throws PermissionException 
-     * 
      * @ejb:interface-method
      */
     public void addAction(AuthzSubjectValue subj, Integer defId,
@@ -389,8 +376,6 @@ public class AlertDefinitionManagerEJBImpl
 
     /** 
      * Remove alert definitions
-     * @throws PermissionException 
-     *
      * @ejb:interface-method
      */
     public void deleteAlertDefinitions(AuthzSubjectValue subj, Integer[] ids)
@@ -398,13 +383,7 @@ public class AlertDefinitionManagerEJBImpl
     {
         RegisteredTriggerManagerLocal rtm;
         
-        try {
-            rtm = RegisteredTriggerManagerUtil.getLocalHome().create();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        rtm = RegisteredTriggerManagerEJBImpl.getOne();
         
         // Get rid of their triggers first
         for (int i = 0; i < ids.length; i++) {
@@ -438,13 +417,7 @@ public class AlertDefinitionManagerEJBImpl
         RegisteredTriggerManagerLocal rtm;
         AlertDefinitionDAO aDao = getAlertDefDAO();
         
-        try {
-            rtm = RegisteredTriggerManagerUtil.getLocalHome().create();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        rtm = RegisteredTriggerManagerEJBImpl.getOne();
         
         List adefs = aDao.findByAppdefEntity(aeid.getType(), aeid.getID());
         
@@ -643,7 +616,6 @@ public class AlertDefinitionManagerEJBImpl
 
     /** 
      * Get list of alert conditions for a resource
-     * @throws PermissionException 
      * @ejb:interface-method
      */
     public PageList findAlertDefinitions(AuthzSubjectValue subj,
@@ -669,8 +641,6 @@ public class AlertDefinitionManagerEJBImpl
 
     /** 
      * Get list of alert conditions for a resource or resource type
-     * @throws PermissionException 
-     *
      * @ejb:interface-method
      */
     public PageList findAlertDefinitions(AuthzSubjectValue subj,
@@ -725,7 +695,6 @@ public class AlertDefinitionManagerEJBImpl
 
     /** 
      * Get list of alert definition names for a resource
-     * @throws PermissionException 
      * @ejb:interface-method
      */
     public SortedMap findAlertDefinitionNames(AuthzSubjectValue subj,
@@ -755,11 +724,15 @@ public class AlertDefinitionManagerEJBImpl
         return ret;
     }
 
-    ///////////////////////////////////////
-    // EJB operations
+    public static AlertDefinitionManagerLocal getOne() {
+        try {
+            return AlertDefinitionManagerUtil.getLocalHome().create(); 
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
+    }
 
     /**
-     * @see javax.ejb.SessionBean#ejbCreate()
      * @ejb:create-method
      */
     public void ejbCreate() throws CreateException {

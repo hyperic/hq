@@ -45,10 +45,13 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AlertCreateException;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
+import org.hyperic.hq.events.shared.AlertManagerLocal;
+import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -543,6 +546,14 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         EscalationMediator.getInstance().dispatchAction(state);
     }
 
+    public static AlertManagerLocal getOne() {
+        try {
+            return AlertManagerUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
+    }
+    
     public void ejbCreate() throws CreateException {
         try {
             valuePager = Pager.getPager(VALUE_PROCESSOR);
