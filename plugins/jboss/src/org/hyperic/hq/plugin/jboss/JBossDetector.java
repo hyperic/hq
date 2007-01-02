@@ -219,12 +219,17 @@ public class JBossDetector
 
             //e.g. runJar == /usr/local/jboss-4.0.2/bin/run.jar
             File root = new File(runJar).getParentFile();
-
-            //sanity check
-            if (root != null) { 
-                root = root.getParentFile();
+            if ((root == null) || root.getPath().equals(".")) {
+                String cwd = getProcCwd(pids[i]);
+                if (cwd == null) {
+                    continue;
+                }
+                else {
+                    root = new File(cwd);
+                }
             }
 
+            root = root.getParentFile();
             if (root == null) {
                 continue;
             }
