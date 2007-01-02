@@ -543,7 +543,11 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         EscalationStateDAO dao =
             DAOFactory.getDAOFactory().getEscalationStateDAO();
         EscalationState state = dao.findById(stateId);
-        EscalationMediator.getInstance().dispatchAction(state);
+        
+        // Alert definition and its escalation state may have been deleted
+        if (state != null) {
+            EscalationMediator.getInstance().dispatchAction(state);
+        }
     }
 
     public static AlertManagerLocal getOne() {
