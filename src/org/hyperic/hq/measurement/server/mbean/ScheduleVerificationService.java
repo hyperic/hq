@@ -118,9 +118,6 @@ public class ScheduleVerificationService
     private AgentScheduleSynchronizer agentSync =
         AgentScheduleSynchronizer.getInstance();
     
-    //---------------------------------------------------------------------
-    //-- managed operations
-    //---------------------------------------------------------------------
     /**
      * SchedVerification service is only active on master and standalone servers
      * @jmx:managed-operation
@@ -149,8 +146,6 @@ public class ScheduleVerificationService
     }
     
     /**
-     * Send the message.
-     *
      * @jmx:managed-operation
      */
     public void hit(Date lDate) {
@@ -162,7 +157,6 @@ public class ScheduleVerificationService
             return;
         }
 
-        // First make sure that the cache is initialized
         SRNManagerLocal srnManager = getSrnManager();
 
         AgentManagerLocal agentMan;
@@ -244,9 +238,6 @@ public class ScheduleVerificationService
         }
     }
 
-    //---------------------------------------------------------------------
-    //-- mbean control methods
-    //---------------------------------------------------------------------
     /**
      * @jmx:managed-operation
      */
@@ -274,52 +265,25 @@ public class ScheduleVerificationService
     /**
      * @jmx:managed-operation
      */
-    public void destroy() {
-        // do nothing
-    }
+    public void destroy() {}
 
-    /* (non-Javadoc)
-     * @see javax.management.MBeanRegistration#preRegister(javax.management.MBeanServer, javax.management.ObjectName)
-     */
     public ObjectName preRegister(MBeanServer server, ObjectName name)
         throws Exception {
         this.server = server;
         return name;
     }
 
-    /* (non-Javadoc)
-     * @see javax.management.MBeanRegistration#postRegister(java.lang.Boolean)
-     */
-    public void postRegister(Boolean arg0) {
-        // do nothing
-    }
+    public void postRegister(Boolean arg0) {}
 
-    /* (non-Javadoc)
-     * @see javax.management.MBeanRegistration#preDeregister()
-     */
     public void preDeregister() throws Exception {
-        // do nothing
     }
 
-    /* (non-Javadoc)
-     * @see javax.management.MBeanRegistration#postDeregister()
-     */
-    public void postDeregister() {
-        // do nothing
-    }
+    public void postDeregister() {}
 
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.common.shared.util.EjbModuleLifecycleListener#ejbModuleStarted()
-     */
     public void ejbModuleStarted() {
         log.info("Starting ScheduleVerificationService");
         this.started = true;
     }
 
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.common.shared.util.EjbModuleLifecycleListener#ejbModuleStopped()
-     */
-    public void ejbModuleStopped() {
-        // do nothing
-    }
+    public void ejbModuleStopped() {}
 }

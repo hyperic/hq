@@ -77,8 +77,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * This job is responsible for filling in missing availabilty
- * metric values.
+ * This job is responsible for filling in missing availabilty metric values.
  *
  * @jmx:mbean name="hyperic.jmx:type=Service,name=AvailabilityCheck"
  * 
@@ -154,7 +153,7 @@ public class AvailabilityCheckService
 
         long current = lDate.getTime();
 
-        // Don't start backfilling until 10 minutes after app has started
+        // Don't start backfilling immediately
         if (startTime == 0) {
             startTime = current;
             return;

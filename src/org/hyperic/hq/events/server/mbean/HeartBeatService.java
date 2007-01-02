@@ -45,9 +45,6 @@ public class HeartBeatService implements HeartBeatServiceMBean {
     private String topicName = EventConstants.EVENTS_TOPIC;
     private final Log log = LogFactory.getLog(HeartBeatService.class);
 
-    //---------------------------------------------------------------------
-    //-- managed attributes
-    //---------------------------------------------------------------------
     /**
      * Get the topic name to where the heartbeat messages will be
      * sent.
@@ -68,9 +65,6 @@ public class HeartBeatService implements HeartBeatServiceMBean {
         this.topicName = topicName;
     }
 
-    //---------------------------------------------------------------------
-    //-- managed operations
-    //---------------------------------------------------------------------
     /**
      * Heartbeat service is only active on master and standalone servers.
      * @jmx:managed-operation
@@ -100,9 +94,6 @@ public class HeartBeatService implements HeartBeatServiceMBean {
         }
     }
 
-    //---------------------------------------------------------------------
-    //-- mbean control methods
-    //---------------------------------------------------------------------
     /**
      * @jmx:managed-operation
      */
@@ -131,5 +122,3 @@ public class HeartBeatService implements HeartBeatServiceMBean {
         // do nothing
     }
 }
-
-// EOF
