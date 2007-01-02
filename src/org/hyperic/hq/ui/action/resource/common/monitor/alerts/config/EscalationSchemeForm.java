@@ -130,8 +130,15 @@ public class EscalationSchemeForm extends ResourceForm {
 
     public void reset(ActionMapping mapping, HttpServletRequest request) {
         super.reset(mapping, request);
-        _escId = "";
-        _escName = "";
+        _escId = null;
+        _escName = null;
         resetActions();
+    }
+
+    public String toString() {
+        StringBuffer strOut = new StringBuffer(super.toString());
+        strOut.append("\nescId=" + _escId)
+              .append("\nescName=" + _escName);
+        return strOut.toString();
     }
 }
