@@ -84,6 +84,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerCreateException;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggerEvent;
+import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
@@ -1473,6 +1474,40 @@ public class EventsBossEJBImpl
             ? new JSONObject().put(e.getJsonName(), e.toJSON()) : null;
     }
 
+
+    /**
+     * retrieve escalation name by alert definition id.
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public String getEscalationNameByAlertDefId(int sessionID, Integer id,
+                                                int alertType)
+        throws SessionTimeoutException, SessionNotFoundException,
+               PermissionException
+    {
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        Escalation e =
+            EscalationMediator.getInstance()
+                .findEscalationByAlertDefId(subject.getId(), id);
+        return e != null ? e.getName() : null;
+    }
+
+    /**
+     * retrieve escalation name by alert definition id.
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void setEscalationByAlertDefId(int sessionID, String escName,
+                                            Integer id, int alertType)
+        throws SessionTimeoutException, SessionNotFoundException,
+               PermissionException
+    {
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        getADM().setEscalation(subject, id, escName);
+    }
+    
     /**
      * retrieve escalation JSONObject by alert definition id.
      *
@@ -1494,7 +1529,7 @@ public class EventsBossEJBImpl
 
     /**
      * retrieve escalation JSONObject by escalation id.
-     *
+     * 
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
