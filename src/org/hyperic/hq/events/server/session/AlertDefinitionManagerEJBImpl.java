@@ -62,6 +62,7 @@ import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -129,6 +130,17 @@ public class AlertDefinitionManagerEJBImpl
         if (!force && getAlertMan().getAlertCount(alertdef.getId()) > 0) {
             alertdef.setDeleted(true);
             return;
+        }
+        
+        // Delete escalation state
+        if (alertdef.getEscalation() != null) {
+            EscalationStateDAO dao =
+                DAOFactory.getDAOFactory().getEscalationStateDAO();
+            EscalationState state =
+                dao.getEscalationState(alertdef.getEscalation(),
+                                       alertdef.getId(),
+                                       EscalationState.ALERT_TYPE_CLASSIC);
+            dao.removePersisted(state);
         }
 
         // Delete the alerts
@@ -355,13 +367,29 @@ public class AlertDefinitionManagerEJBImpl
     }
 
     /** 
+     * Set the escalation on the alertdefinition
+     * @throws PermissionException 
+     * @throws PermissionException 
+     * 
+     * @ejb:interface-method
+     */
+    public void setEscalation(AuthzSubjectValue subj, Integer defId,
+                              String escName)
+        throws PermissionException {
+        AlertDefinition def = getAlertDefDAO().findById(defId);
+        canManageAlerts(subj, def);
+        Escalation e = EscalationMediator.getInstance()
+                .findByEscalationName(subj.getId(), escName);
+        def.setEscalation(e);
+    }
+
+    /** 
      * Add an action to an alert definition
      * @ejb:interface-method
      */
     public void addAction(AuthzSubjectValue subj, Integer defId,
                           ActionValue action)
-        throws FinderException, PermissionException 
-    {
+        throws PermissionException {
         AlertDefinition def = getAlertDefDAO().findById(defId);
         
         canManageAlerts(subj, def);
