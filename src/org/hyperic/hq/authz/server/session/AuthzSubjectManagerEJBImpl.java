@@ -42,6 +42,8 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -534,6 +536,14 @@ public class AuthzSubjectManagerEJBImpl
                     .getAuthzSubjectValue();
         }
         return root;
+    }
+    
+    public static AuthzSubjectManagerLocal getOne() {
+        try {
+            return AuthzSubjectManagerUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
     }
 
     public void ejbCreate() throws CreateException {

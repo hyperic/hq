@@ -32,6 +32,8 @@ import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertDefPartition;
 import org.hyperic.hq.galerts.server.session.ExecutionReason;
 import org.hyperic.hq.galerts.server.session.GalertLog;
+import org.hyperic.hq.galerts.shared.GalertManagerLocal;
+import org.hyperic.hq.galerts.shared.GalertManagerUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -342,10 +344,13 @@ public class GalertManagerEJBImpl
     
     /**
      * start escalation inside JTA context for Galerts
+     * 
+     * XXX:  Re-look at this method -- it's not correct to just swallow the
+     *       exception. -- JMT 12/29/06
+     *
      * @ejb:interface-method
      */
-    public void startEscalation(Integer id, ExecutionReason reason)
-    {
+    public void startEscalation(Integer id, ExecutionReason reason) {
         try {
             GalertDef def = _defDAO.findById(id);
             EscalationMediator.getInstance().startGEscalation(def, reason);
@@ -357,7 +362,7 @@ public class GalertManagerEJBImpl
     }
 
     /**
-     * @ejb:interface-method  
+     * @ejb:interface-method
      */
     public void startup() {
         _log.warn("Galert manager starting up!");
@@ -366,17 +371,36 @@ public class GalertManagerEJBImpl
                                                      new GroupChangeCallback()
         {
             public void postGroupCreate(ResourceGroup g) {
-                _log.info("postGroupCreate: " + g);
             }
 
+            /**
+             * Delete the GalertDefs that depend on the deleted group
+             */
             public void preGroupDelete(ResourceGroup g) {
-                _log.info("preGroupDelete: " + g);
+                Collection defs = findAlertDefs(g, PageControl.PAGE_ALL);
+                
+                for (Iterator i=defs.iterator(); i.hasNext(); ) {
+                    GalertDef def = (GalertDef)i.next();
+                    
+                    _log.info("Cascade deleting GalertDef[" + 
+                              def.getName() + "]");
+                    deleteAlertDef(def);
+                }
             }
         });
         
         GalertProcessor.getInstance().startupInitialize(_defDAO.findAll());
     }
+
     
+    public static GalertManagerLocal getOne() {
+        try {
+            return GalertManagerUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
+    }
+
     public void ejbCreate() {}
     public void ejbRemove() {}
     public void ejbActivate() {}

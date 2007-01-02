@@ -63,6 +63,7 @@ import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -187,25 +188,20 @@ public class AIQueueManagerEJBImpl
     /**
      * Re-sync an existing queued platform against appdef.
      * @param aiplatform The platform that we got from the recent autoinventory
-     * data that we are wanting to queue.
-     * @param updateServers If true, the platform's servers will be updated as well.
-     * @throws FinderException 
-     * @throws SubjectNotFoundException 
+     *                   data that we are wanting to queue.
+     * @param isApproval If true, the platform's servers will be updated as 
+     *                   well.
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public AIPlatformValue syncQueue ( AIPlatformValue aiplatform, 
-                                       boolean isApproval ) 
+    public AIPlatformValue syncQueue(AIPlatformValue aiplatform, 
+                                     boolean isApproval) 
         throws NamingException, CreateException,  RemoveException,
-               FinderException {
+               FinderException 
+    {
         // Act as admin for now
-        AuthzSubjectValue subject;
-        try {
-            subject =
-                AuthzSubjectManagerUtil.getLocalHome().create().findOverlord();
-        } catch (SubjectNotFoundException e) {
-            throw new FinderException(e.getMessage());
-        }
+        AuthzSubjectValue subject = 
+            AuthzSubjectManagerEJBImpl.getOne().findOverlord();
 
         return queue(subject, aiplatform, true, isApproval, false);
     }

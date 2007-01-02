@@ -1137,23 +1137,17 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
 
     /**
      * Get the roles for a subject
-     * @param whoami 
-     * @param subject
-     * @return Set of Roles
-     * @throws NamingException if database connection cannot be established
      * @ejb:interface-method
      */
     public Collection getRoleEJBs(AuthzSubjectValue subjectValue)
-        throws PermissionException, NamingException {
+        throws PermissionException
+    {
         AuthzSubject subjectLocal = lookupSubject(subjectValue);
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        try {
-            pm.check(findOverlord().getId(), getRootResourceType(),
-                     AuthzConstants.rootResourceId,
-                     AuthzConstants.subjectOpViewSubject);
-        } catch (SubjectNotFoundException e) {
-            throw new PermissionException("Overlord not found", e);
-        }
+
+        pm.check(findOverlord().getId(), getRootResourceType(),
+                 AuthzConstants.rootResourceId,
+                 AuthzConstants.subjectOpViewSubject);
         return subjectLocal.getRoles();
     }
 

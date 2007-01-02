@@ -31,11 +31,9 @@ import java.util.List;
 import javax.ejb.CreateException;
 import javax.naming.NamingException;
 
-import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.util.StringUtil;
 import org.quartz.Job;
 import org.quartz.JobExecutionException;
@@ -65,20 +63,13 @@ public abstract class BaseJob implements Job {
     /**
      * @return the subject using the subject Id
      */
-    protected AuthzSubjectValue getSubject(Integer subjectId)
+    protected AuthzSubjectValue getSubject(Integer subjectId) 
         throws JobExecutionException
     {
         try {
             AuthzSubjectValue overlord = getSubjectManager().findOverlord();
             return getSubjectManager().findSubjectById(overlord, subjectId); 
-            
-        } catch (PermissionException e) { // we should never get permission exception
-            throw new JobExecutionException(e, false);
-        } catch (NamingException e) {
-            throw new JobExecutionException(e, false);
-        } catch (SubjectNotFoundException e) {
-            throw new JobExecutionException(e, false);
-        } catch (CreateException e) {
+        } catch(Exception e) { 
             throw new JobExecutionException(e, false);
         }
     }

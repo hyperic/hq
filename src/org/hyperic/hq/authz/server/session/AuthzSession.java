@@ -138,13 +138,16 @@ public abstract class AuthzSession
 
     /** 
      * @return The value-object of the overlord
-     * @throws SubjectNotFoundException 
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public AuthzSubjectValue findOverlord() throws SubjectNotFoundException {
-        return findSubjectByAuth(AuthzConstants.overlordName,
-                                 AuthzConstants.overlordDsn);
+    public AuthzSubjectValue findOverlord() {
+        try {
+            return findSubjectByAuth(AuthzConstants.overlordName,
+                                     AuthzConstants.overlordDsn);
+        } catch(SubjectNotFoundException e) {
+            throw new SystemException("Unable to find overlord", e);
+        }
     }
 
     protected ResourceType getRootResourceType() {
