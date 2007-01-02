@@ -487,16 +487,16 @@ function showViewEscResponse(originalRequest) {
         var escalationSel = $('escId');
         var schemes = escJson.escalations;
         for (var i = 0; i < schemes.length; i++) {
-            <c:if test="${not empty param.escId}">
-              if (schemes[i].name == '<c:out value="${param.escId}"/>')
+            <c:if test="${not empty EscalationForm.escId}">
+              if (schemes[i].name == '<c:out value="${EscalationForm.escId}"/>')
                 addOption(escalationSel , schemes[i].name, schemes[i].name, true);
               else
             </c:if>
-            addOption(escalationSel , schemes[i].name, schemes[i].name);
+            addOption(escalationSel , schemes[i].name, schemes[i].name,
+                      schemes[i].name == document.EscalationSchemeForm.escId.value);
         }
 
         document.EscalationForm.escName.value = document.EscalationSchemeForm.escId.value;
-
         $('submit').onclick = function () {
             if ($('escName').value == "") {
                 alert('<fmt:message key="alert.config.error.escalation.name.required"/>');
@@ -715,8 +715,15 @@ function showViewEscResponse(originalRequest) {
         <select id="escId" name="escId" onchange="schemeChange(this)">
           <option value=""><fmt:message key="common.label.CreateNew" /></option>
         </select>
+        <c:choose>
+        <c:when test="${empty EscalationSchemeForm.escId}">
         <fmt:message key="common.label.Name" />
-        <input type="text" size="25" name="escName" id="escName" />
+        <input type="text" size="25" name="escName" id="escName"/>
+        </c:when>
+        <c:otherwise>
+          <input type="hidden" name="escName"/>
+        </c:otherwise>
+        </c:choose>
         </td>
     </tr>
 
