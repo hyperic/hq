@@ -57,8 +57,23 @@ public class BaseValidatorForm extends ValidatorForm  {
     
     //-------------------------------------constructors
 
+    private void setDefaults() {
+        add = new ImageButtonBean();
+        cancel = new ImageButtonBean();
+        create = new ImageButtonBean();
+        delete = new ImageButtonBean();
+        ok = new ImageButtonBean();
+        okassign = new ImageButtonBean();
+        pageSize = null;
+        reset = new ImageButtonBean();
+        remove = new ImageButtonBean();
+        enable = new ImageButtonBean();
+        userset = new ImageButtonBean();
+    }
+
     public BaseValidatorForm() {
         super();
+        setDefaults();
     }
 
     //-------------------------------------public methods
@@ -217,17 +232,7 @@ public class BaseValidatorForm extends ValidatorForm  {
     public void reset(ActionMapping mapping,
                       HttpServletRequest request) {
         super.reset(mapping, request);
-        add = new ImageButtonBean();
-        cancel = new ImageButtonBean();
-        create = new ImageButtonBean();
-        delete = new ImageButtonBean();
-        ok = new ImageButtonBean();
-        okassign = new ImageButtonBean();
-        pageSize = null;
-        reset = new ImageButtonBean();
-        remove = new ImageButtonBean();
-        enable = new ImageButtonBean();
-        userset = new ImageButtonBean();
+        setDefaults();
     }
 
     /** 
