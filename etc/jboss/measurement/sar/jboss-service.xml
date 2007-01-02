@@ -15,6 +15,7 @@
   <mbean code="org.jboss.varia.scheduler.Scheduler" 
 	 name="hyperic.jmx:service=Scheduler,name=MeasurementSchedule">
     <depends>hyperic.jmx:type=Service,name=MeasurementSchedule</depends>
+    <attribute name="TimerName">hyperic.jmx:type=service,name=MeasurementScheduleTimer</attribute>
     <attribute name="StartAtStartup">true</attribute>
     <attribute name="SchedulableMBean">hyperic.jmx:type=Service,name=MeasurementSchedule</attribute>
     <attribute name="SchedulableMBeanMethod">hit( DATE )</attribute>
