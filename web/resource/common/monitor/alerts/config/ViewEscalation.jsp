@@ -68,7 +68,7 @@ function showViewEscResponse(originalRequest) {
         var allowPause = tmp.escalation.allowPause;
         var escName = tmp.escalation.name;
         var id = tmp.escalation.id;
-        var maxWaitTime = tmp.escalation.maxWaitTime;
+        var maxWaitTime = (tmp.escalation.maxWaitTime / 10000) + " minutes";
 
 
 
@@ -79,6 +79,15 @@ function showViewEscResponse(originalRequest) {
         alert(tmp.escalation.actions[0].action[0].config[i].childNodes)
         }
         */
+        <c:if test="${not empty EscalationForm.escId}">
+              $('viewEscalation').style.display = "";
+              $('createEscTable').style.display = "none";
+        </c:if>
+        <c:if test="${empty EscalationForm.escId}">
+              $('viewEscalation').style.display = "none";
+              $('createEscTable').style.display = "";
+
+        </c:if>
 
 
         var escViewUL = $('viewEscalationUL');
@@ -101,9 +110,12 @@ function showViewEscResponse(originalRequest) {
         var viewLi = document.createElement('li');
         var remDiv = document.createElement('div');
         var usersDiv = document.createElement('div');
+        var usersTextDiv = document.createElement('div');
+        var usersEditDiv = document.createElement('div');
         var rolesDiv = document.createElement('div');
         var othersDiv = document.createElement('div');
-        var emailDiv = document.createElement('div');
+        var waitDiv = document.createElement('div');
+        var editWaitDiv = document.createElement('div');
         var sysDiv = document.createElement('div');
         var escTable = document.createElement('table');
         var escTableBody = document.createElement('tbody');
@@ -119,13 +131,21 @@ function showViewEscResponse(originalRequest) {
         var select3 = document.createElement("select");
         var anchor = document.createElement("a");
 
-        var emailInfo = " ";
+        var emailInfo = actions[i].action.config[0];
         var roleInfo = " ";
         var metaInfo = " ";
         var productInfo = " ";
         var versionInfo = " ";
 
+
         $('escNameText').innerHTML = "Escalation Name: " + escName + "<br>";
+        $('creationTime').value = creationTime;
+        $('notifyAll').value = notifyAll;
+        $('_version_').value = _version_;
+        $('modifiedTime').value = modifiedTime;
+        $('allowPause').value = allowPause;
+        $('escName').value = escName;
+        $('id').value = id;
 
         escViewUL.appendChild(viewLi)
 
@@ -133,13 +153,14 @@ function showViewEscResponse(originalRequest) {
         viewLi.setAttribute('id','row_'+ liID);
         viewLi.style.margin = "0px";
         viewLi.style.padding = "0px";
-        //viewLi.style.border = "1px solid purple;"
-
+        
+        /*
         viewLi.appendChild(remDiv);
         remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
         remDiv.style.paddingTop = "10px;"
-        remDiv.innerHTML ='<a href="#" onclick="removeRow(this);"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
-
+        remDiv.setAttribute('id','remDiv_'+ liID);
+        remDiv.innerHTML ='<a href="#" onclick="removeRow(this);"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a><br><br><b><a href="#" onclick="editEscalation(this);">Edit</a></b>';
+        */
         viewLi.appendChild(escTable);
         escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
         escTable.setAttribute('border', '0');
@@ -153,23 +174,31 @@ function showViewEscResponse(originalRequest) {
 
         escTr1.appendChild(td1);
 
-        td1.setAttribute('colspan', '3');
-        td1.innerHTML = "waittime: " + maxWaitTime + "<br>";
+        //td1.setAttribute('colspan', '3');
+        td1.appendChild(waitDiv);
+        waitDiv.id = "wait_" + liID;
+        waitDiv.innerHTML = "Wait time before escalating: " + maxWaitTime + "<br>";
+
+        td1.appendChild(editWaitDiv);
+        editWaitDiv.id = "editWait_" + liID;
 
         escTr2.appendChild(td2);
         td2.setAttribute('width', '20%');
         td2.setAttribute('valign', 'top');
         td2.style.paddingBottom = "10px";
-        if (configListType = "1"){
-        td2.innerHTML = "Email:  " + emailInfo + "<br>";
-        } else if (configListType = "2") {
-            td2.innerHTML = "Notify HQ USers: ";
-        } else  if (configListType = "3") {
-            td2.innerHTML = "Notify the following Roles: " + emailInfo + "<br>";
-        }
         td2.style.paddingLeft = "0px";
         td2.style.paddingTop = "5px";
         td2.style.paddingBottom = "10px";
+
+        td2.appendChild(usersTextDiv);
+
+        if (configListType == "1"){
+        usersTextDiv.innerHTML = "Email:  " + emailInfo + "<br>";
+        } else if (configListType == "2") {
+        usersTextDiv.innerHTML = "Notify HQ Users: ";
+        } else  if (configListType == "3") {
+        usersTextDiv.innerHTML = "Notify the following: " + emailInfo + "<br>";
+        }
 
         escTr2.appendChild(td3);
         td3.setAttribute('width', '20%');
@@ -191,13 +220,13 @@ function showViewEscResponse(originalRequest) {
         td5.setAttribute('width', '50%');
 
 
-        td4.appendChild(sysDiv);
-        sysDiv.style.display = 'none';
-        sysDiv.setAttribute('class', 'escInput'+ liID);
-        sysDiv.setAttribute('id', 'sysloginput'+ liID);
-        sysDiv.setAttribute('width', '40%');
-        sysDiv.innerHTML = "meta:"  + metaInfo + "<br>" + "product:" + productInfo + "<br>" + "version:" + versionInfo + "<br>";
-
+        td4.appendChild(usersEditDiv);
+        usersEditDiv.style.display = 'none';
+        usersEditDiv.setAttribute('class', 'escInput'+ liID);
+        usersEditDiv.setAttribute('id', 'usersEditDiv_'+ liID);
+        usersEditDiv.setAttribute('width', '40%');
+        usersEditDiv.innerHTML = " ";
+        /*
         td4.appendChild(usersDiv);
         usersDiv.setAttribute('id', 'usersDiv' + liID);
         usersDiv.style.display = 'none';
@@ -212,11 +241,59 @@ function showViewEscResponse(originalRequest) {
         if($('rolesList')) {
           rolesDiv.innerHTML = $('rolesList').innerHTML;
         }
-
+        */
+        $('pauseTimeText').innerHTML = 'Allow user to pause escalation: ' + allowPause + "<br>";
         Sortable.create(escViewUL,{ghosting:true,constraint:false});
        }
-
+    
 }
+    function editEscalation (row) {
+        var select1 = document.createElement("select");
+        var idStr = row.parentNode.parentNode.id;
+        var getId = idStr.split('_');
+        var liID = getId[1];
+        var usersEditDiv = ('usersEditDiv_'+ getId[1]);
+        //alert(idStr);
+        var editMaxWait = $('editWait_' + getId[1]);
+        $('wait_' + getId[1]).style.display = "none";
+        $('pauseTimeText').style.display="none";
+        $('pauseTimeEdit').style.display = "";
+
+        editMaxWait.appendChild(document.createTextNode('<fmt:message key="alert.config.escalation.then"/> '));
+        editMaxWait.appendChild(select1);
+        select1.setAttribute('id', 'waittime_' + liID);
+        select1.name = "waittime_" + liID;
+        addOption(select1, '0', '<fmt:message key="alert.config.escalation.end"/>');
+        addOption(select1, '300000', '<fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="5"/>
+                                    </fmt:message>');
+        addOption(select1, '600000', '<fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="10"/>
+                                    </fmt:message>');
+        addOption(select1, '1200000', '<fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="20"/>
+                                    </fmt:message>');
+        addOption(select1, '1800000', '<fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="30"/>
+                                    </fmt:message>');
+        addOption(select1, '2400000', '<fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="45"/>
+                                    </fmt:message>');
+        addOption(select1, '3000000', '<fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="60"/>
+                                    </fmt:message>');
+
+        if($('usersList')) {
+          usersEditDiv.innerHTML = $('usersList').innerHTML;
+          var usersInputList = usersEditDiv.getElementsByTagName('input');
+          for(i=0;i < usersInputList.length; i++) {
+              var inputNamesArr = usersInputList[i];
+              inputNamesArr.name = inputNamesArr.name + "_" + liID;
+          }
+        }
+
+
+    }
 
     function addRow() {
         var ni = $('rowOrder');
@@ -514,7 +591,39 @@ function showViewEscResponse(originalRequest) {
 
     onloads.push( initEsc );
 
+   function sendEditEscForm() {
+        var id;
+        var gadId;
+        var eId;
+        var aetId;
+        var rowOrder = Sortable.serialize('rowOrder');
+        var escFormSerial = Form.serialize('viewEscalation');
+        var url = '<html:rewrite action="/escalation/updateEscalation"/>';
+        if ($('gad')) {
+           gadId == $('gad').value;
+        } else {
+            gadId == '';
+        }
+        if ($('ad')){
+            adId == $('ad').value;
+        } else {
+            adId == '';
+        }
+        if ($('eid')){
+            eID = $('eid').value;
+        } else {
+           eId == '';
+        }
+        if ($('aetid')) {
+            aetId = $('aetid').value;
+        } else {
+            aetId == '';
+        }
 
+        var pars = "rowOrder=" + rowOrder + "escForm=" + escFormSerial + "&ad=" + adId + "&gad=" + gadId + "&eid=" + eId + "aetid=" + aetId;
+        new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse, onFailure :reportError} );
+
+   }
     function sendEscForm() {
         var adId;
         var gadId;
@@ -726,18 +835,23 @@ function showViewEscResponse(originalRequest) {
         </c:choose>
         </td>
     </tr>
-
+    </tbody>
+ </table>
+<table width="100%" cellpadding="3" cellspacing="0" border="0" id="createEscTable">
+    <tbody>
     <tr class="tableRowAction">
       <td class="section" width="100%">
       <div id="example" style="display:none;" class="escConfirmation"></div>
       <ul id="rowOrder"></ul>
       <table width="100%" cellpadding="5" cellspacing="0" border="0"
         class="ToolbarContent">
+          <tbody>
         <tr>
           <td width="40"><a href="#" onclick="addRow();"
             style="text-decoration:none;"><html:img
             page="/images/tbb_addtolist.gif" height="16" width="85" border="0" /></a></td>
         </tr>
+          </tbody>
       </table>
       <br>
       </td>
@@ -748,6 +862,7 @@ function showViewEscResponse(originalRequest) {
     <tr class="ListRow">
       <td style="padding-left:15px;padding-bottom:10px;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tbody>
         <tr>
           <td style="padding-top:2px;padding-bottom:2px;">
             <input type="radio" name="allowPause" value="true" />
@@ -766,6 +881,7 @@ function showViewEscResponse(originalRequest) {
 
             </td>
         </tr>
+          </tbody>
       </table>
       </td>
     </tr>
@@ -777,6 +893,7 @@ function showViewEscResponse(originalRequest) {
     <tr class="ListRow">
       <td style="padding-left:15px;padding-bottom:10px;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tbody>
         <tr>
           <td style="padding-top:2px;padding-bottom:2px;">
             <input type="radio" name="notification" value="0" checked="true"/>
@@ -789,18 +906,22 @@ function showViewEscResponse(originalRequest) {
             <fmt:message key="alert.config.escalation.state.change.notify.all"/>
           </td>
         </tr>
+          </tbody>
       </table>
       </td>
+    </tr>
+    <tr>
+        <td><br>
+<br>
+<input type="button" value="Submit" onclick="sendEscForm();" id="submit"></input> <br><br></td>
     </tr>
   </tbody>
 </table>
 
-<br>
-<br>
-<input type="button" value="Submit" onclick="sendEscForm();" id="submit"></input> <br><br>
 
 
-<div id="usersList" style="display: none;">
+
+<div id="usersList" style="display:none;">
 <div class="ListHeader">Select Users</div>
 <ul class="boxy">
   <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
@@ -826,31 +947,63 @@ function showViewEscResponse(originalRequest) {
 
 </form>
 
-<form name="viewEscalation" id="viewEscalation">
-
-      <input type="hidden" id="alertDefId" name="alertDefId" value='<c:out value="${alertDef.id}"/>' />
+<form name="viewEscalation" id="viewEscalation" style="display:none;">
+    <input type="hidden" id="alertDefId" name="alertDefId" value='<c:out value="${alertDef.id}"/>' />
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tbody>
          <tr>
              <td id="escNameText" class="tableRowHeader"></td>
          </tr>
          <tr>
-            <td class="section" width="100%">
+            <td width="100%">
             <ul id="viewEscalationUL" style="margin-left:-40px;">
 
             </ul>
             </td>
         </tr>
-  </tbody>
+  
+    <tr>
+      <td class="tableRowHeader">If the alert is acknowledged:</td>
+    </tr>
+     <tr class="ListRow">
+      <td style="padding-left:15px;padding-bottom:10px;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tbody>
+        <tr>
+          <td style="padding-top:10px;padding-bottom:2px;">
+             <div id="pauseTimeText"></div>
+            <div id="pauseTimeEdit" style="display:none;"><input type="radio" name="allowPause" value="true" />
+            <fmt:message key="alert.config.escalation.allow.pause"/>
+            <select id="maxWaitTime_<c:out value="${alertDef.id}"/>" name="maxwaittime">
+            <option value="300000">5 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
+            <option value="600000">10 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
+            <option value="1200000">20 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
+            <option value="1800000">30 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
+          </select>
+              </div>
+          </td>
+        </tr>
+          </tbody>
+      </table>
+      </td>
+    </tr>
+    </tbody>
 </table>
 
-
- <br>
 <br>
-<input type="button" value="check escalation values" onclick="requestViewEscalation();" id="checkEsc"></input>
+<br>
+<!-- <input type="button" value="Submit" onclick="sendEditEscForm();" id="submit"></input>&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" value="Cancel" onclick="clearForm();" id="submit"></input> <br><br>-->
+    <input type="hidden" value="" id="creationTime">
+    <input type="hidden" value="" id="_version_">
+    <input type="hidden" value="" id="notifyAll">
+    <input type="hidden" value="" id="modifiedTime">
+    <input type="hidden" value="" id="allowPause">
+    <input type="hidden" value="" id="escName">
+    <input type="hidden" value="" id="id">
+
+
  </form>
 
 
 <div id="example2" style="padding:10px;width:725px;overflow:auto;"></div>
-
 
