@@ -34,7 +34,10 @@ import javax.ejb.SessionContext;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.util.config.ConfigResponse;
 
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.Crispo;
+import org.hyperic.hq.common.shared.CrispoManagerLocal;
+import org.hyperic.hq.common.shared.CrispoManagerUtil;
 
 /**
  * The CRISPO (Config Response Is Sweetly Persisted ... Oy!) Manager deals
@@ -101,6 +104,14 @@ public class CrispoManagerEJBImpl implements SessionBean {
         Crispo res = Crispo.create(cfg);
         getDAO().save(res);
         return res;
+    }
+    
+    public static CrispoManagerLocal getOne() {
+        try {
+            return CrispoManagerUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
     }
     
     public void ejbCreate() { }

@@ -2,7 +2,6 @@ package org.hyperic.hq.galerts.server.session;
 
 import java.util.List;
 
-import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -67,5 +66,13 @@ public class GalertLogDAO
         getSession().createQuery(sql)
             .setParameter("group", g)
             .executeUpdate();
+    }
+    
+    void removeAll(GalertDef d) {
+        String sql = "delete from GalertLog l where l.alertDef = :def";
+        
+        getSession().createQuery(sql)
+                    .setParameter("def", d)
+                    .executeUpdate();
     }
 }

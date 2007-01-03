@@ -18,8 +18,8 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.Crispo;
+import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
 import org.hyperic.hq.common.shared.CrispoManagerLocal;
-import org.hyperic.hq.common.shared.CrispoManagerUtil;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.server.session.Escalation;
@@ -65,12 +65,7 @@ public class GalertManagerEJBImpl
         _stratTypeDAO = f.getExecutionStrategyTypeInfoDAO();
         _defDAO       = new GalertDefDAO(f);
         _logDAO       = f.getGalertLogDAO();
-        
-        try {
-            _crispoMan = CrispoManagerUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+        _crispoMan    = CrispoManagerEJBImpl.getOne();
     }
 
     /**
@@ -170,7 +165,8 @@ public class GalertManagerEJBImpl
      * @ejb:interface-method  
      */
     public PageList findAlertLogsByTimeWindow(ResourceGroup group, long begin,
-                                              PageControl pc) {
+                                              PageControl pc) 
+    {
         return _logDAO.findByTimeWindow(group, begin, pc);
     }
 
@@ -324,9 +320,13 @@ public class GalertManagerEJBImpl
         List nukeCrispos = new ArrayList();
         Integer defId = def.getId();
         
+        // Kill the logs
+        _logDAO.removeAll(def);
+        
         for (Iterator i=def.getStrategies().iterator(); i.hasNext(); ) {
             ExecutionStrategyInfo strat = (ExecutionStrategyInfo)i.next();
             
+            // Reconfigure the def to have 0 triggers (i.e. nuke the instances)
             configureTriggers(def, strat.getPartition(), Collections.EMPTY_LIST, 
                               Collections.EMPTY_LIST);
             nukeCrispos.add(strat.getConfigCrispo());

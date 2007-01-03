@@ -5,12 +5,12 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
 
 public class GalertLog
-    extends PersistedObject implements AlertInterface
+    extends PersistedObject 
+    implements AlertInterface
 { 
     public static int MAX_SHORT_REASON = 256;
     public static int MAX_LONG_REASON  = 2048;
@@ -18,7 +18,6 @@ public class GalertLog
     private boolean            _fixed;
     private GalertDef          _def;
     private long               _timestamp;
-    private ResourceGroup      _group;
     private String             _shortReason;
     private String             _longReason;
     private GalertDefPartition _partition;
@@ -35,7 +34,6 @@ public class GalertLog
         
         _def         = def;
         _timestamp   = timestamp;
-        _group       = def.getGroup();
         _shortReason = reason.getShortReason();
         _longReason  = reason.getLongReason();
         _partition   = reason.getPartition();
@@ -59,14 +57,6 @@ public class GalertLog
     
     protected void setTimestamp(long timestamp) {
         _timestamp = timestamp;
-    }
-    
-    public ResourceGroup getGroup() {
-        return _group;
-    }
-    
-    protected void setGroup(ResourceGroup group) {
-        _group = group;
     }
     
     public String getShortReason() {
@@ -110,20 +100,17 @@ public class GalertLog
                                    _partition);
     }
 
-    public boolean isFixed()
-    {
+    public boolean isFixed() {
         return _fixed;
     }
 
-    public void setFixed(boolean fixed)
-    {
-        this._fixed = fixed;
+    public void setFixed(boolean fixed) {
+        _fixed = fixed;
     }
 
     public int hashCode() {
         int hash = 1;
 
-        hash = hash * 31 + getGroup().hashCode();
         hash = hash * 31 + (int)getTimestamp();
         hash = hash * 31 + getShortReason().hashCode();
         return hash;
@@ -138,8 +125,7 @@ public class GalertLog
         
         GalertLog oe = (GalertLog)o;
 
-        return oe.getGroup().equals(getGroup()) &&
-            oe.getTimestamp() == getTimestamp() &&
-            oe.getShortReason().equals(getShortReason());
+        return oe.getTimestamp() == getTimestamp() && 
+               oe.getShortReason().equals(getShortReason());
     }
 }

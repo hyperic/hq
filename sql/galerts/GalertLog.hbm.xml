@@ -26,11 +26,7 @@
     </property>
 
     <many-to-one name="alertDef">
-      <column name="DEF_ID" not-null="false"/>
-    </many-to-one>
-
-    <many-to-one name="group">
-      <column name="GROUP_ID" not-null="true"/>
+      <column name="DEF_ID" not-null="true"/>
     </many-to-one>
 
     <property name="shortReason">
