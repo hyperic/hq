@@ -115,6 +115,10 @@ class MxObjectNameQuery extends MxServiceQuery {
         return oName;
     }
 
+    public String getMBeanClass() {
+        return getProperty(PROP_MBEAN_CLASS);
+    }
+
     public String getQueryName() {
         ObjectName name = getObjectNameProperty();
 

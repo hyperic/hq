@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.management.MBeanInfo;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
@@ -201,6 +202,8 @@ public class ServerQuery extends JBossQuery {
 
         Set services;
         ObjectName name;
+        String mbeanClass = null;
+        boolean isDebug = log.isDebugEnabled();
 
         try {
             name = new ObjectName(query.getQueryName());
@@ -214,10 +217,31 @@ public class ServerQuery extends JBossQuery {
             throw new PluginException("Cannot connecto to JBoss", e);
         }
 
+        if (query instanceof GenericServiceQuery) {
+            mbeanClass =
+                ((GenericServiceQuery)query).getMBeanClass();
+        }
+
         for (Iterator it=services.iterator(); it.hasNext();) {
             name = (ObjectName)it.next();
             if (!query.apply(name)) {
                 continue;
+            }
+
+            if (mbeanClass != null) {
+                try {
+                    MBeanInfo info = mServer.getMBeanInfo(name);
+                    if (!mbeanClass.equals(info.getClassName())) {
+                        if (isDebug) {
+                            log.debug("[" + name + "] " + info.getClassName() +
+                                      " !instanceof " + mbeanClass);
+                        }
+                        continue;
+                    }
+                } catch (Exception e) {
+                    log.error("mServer.getMBeanInfo(" + name + "): " + e);
+                    continue;
+                }
             }
 
             ServiceQuery service = query.cloneInstance();

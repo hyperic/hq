@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -106,10 +107,13 @@ public class MxServerQuery extends MxQuery {
     private void findServices(MBeanServerConnection mServer, MxServiceQuery query)
         throws PluginException {
 
+        boolean isDebug = log.isDebugEnabled();
+
         query.initialize();
 
         Set services;
         ObjectName name;
+        String mbeanClass = query.getMBeanClass();
 
         try {
             name = new ObjectName(query.getQueryName());
@@ -127,6 +131,22 @@ public class MxServerQuery extends MxQuery {
             name = (ObjectName)it.next();
             if (!query.apply(name)) {
                 continue;
+            }
+
+            if (mbeanClass != null) {
+                try {
+                    MBeanInfo info = mServer.getMBeanInfo(name);
+                    if (!mbeanClass.equals(info.getClassName())) {
+                        if (isDebug) {
+                            log.debug("[" + name + "] " + info.getClassName() +
+                                      " !instanceof " + mbeanClass);
+                        }
+                        continue;
+                    }
+                } catch (Exception e) {
+                    log.error("mServer.getMBeanInfo(" + name + "): " + e);
+                    continue;
+                }
             }
 
             MxServiceQuery service = query.cloneInstance();
