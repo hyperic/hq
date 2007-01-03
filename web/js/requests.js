@@ -201,6 +201,7 @@
         var aList = alertText.criticalAlerts;
         var token = alertText.token;
         var alertTable;
+        var tbody = document.createElement('tbody');
         var alertFunc;
         if (alertText.token != null) {
             alertTable = document.getElementById('recentAlertsTable' + token);
@@ -230,7 +231,8 @@
                 var urlAmp = "&a="
                 var alertUrl = $('viewAlertUrl').href;
 
-                alertTable.appendChild(tr);
+                alertTable.appendChild(tbody);
+                tbody.appendChild(tr);
                 tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
 
                 tr.appendChild(td1);

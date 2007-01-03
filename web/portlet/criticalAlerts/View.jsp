@@ -105,9 +105,11 @@ Ajax.Responders.register({
   </table>
     
      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="display:none;" id="noCritAlerts">
-     	<tr class="ListRow">
+         <tbody>
+         <tr class="ListRow">
       		<td class="ListCell"><fmt:message key="dash.home.alerts.no.resource.to.display"/></td>
     	</tr>
+         </tbody>
   </table>
     <tiles:insert definition=".toolbar.list">                
       <tiles:put name="noButtons" value="true"/>
