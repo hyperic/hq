@@ -87,6 +87,35 @@
     </td>
     <td rowspan="2" valign="top">
 
+<script language="JavaScript" type="text/javascript">
+    function saveToDashboard() {
+        ViewChartForm.saveChart.value='true'; 
+        var saveChartUrl = ViewChartForm.action + "?";
+        var inputList = ViewChartForm.elements;
+        var first = true;
+        for (var i = 0; i < inputList.length; i++) {
+            if (inputList[i].type == 'checkbox') {
+                if (!inputList[i].checked) {
+                    continue;
+                }
+            }
+
+            if (first) {
+                first = false;
+            }
+            else {
+                saveChartUrl += '&';
+            }
+
+            saveChartUrl += inputList[i].name + '=' + escape(inputList[i].value);
+        }
+        new Ajax.Request(saveChartUrl , {method: 'get'});
+        alert('<fmt:message key="resource.common.monitor.visibility.chart.confirm.ChartSaved"/>');
+        return false;
+    }
+
+</script>
+
 <table border="0"><tr><td class="LinkBox">
     <c:if test="${not multiResource}">
       <c:url var="alertLink" value="/alerts/Config.do">
@@ -101,7 +130,7 @@
       <html:link href="${alertLink}"><fmt:message key="resource.common.monitor.visibility.NewAlertLink"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
     </c:if>
       <html:hidden property="saveChart" value="false"/>
-      <html:link href="." onclick="ViewChartForm.saveChart.value='true'; ViewChartForm.submit(); return false;"><fmt:message key="resource.common.monitor.visibility.SaveChartToDash"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
+      <html:link href="." onclick="return saveToDashboard();"><fmt:message key="resource.common.monitor.visibility.SaveChartToDash"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
 
     <c:if test="${not empty back}">
         <html:link page="${back}"><fmt:message key="resource.common.monitor.visibility.Back2Resource"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
