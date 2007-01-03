@@ -50,6 +50,7 @@ import org.hyperic.util.config.ConfigSchema;
 public abstract class MxQuery {
     public static final String PROP_OBJECT_NAME    = "OBJECT_NAME";
     public static final String PROP_ATTRIBUTE_NAME = "ATTRIBUTE_NAME";
+    public static final String PROP_MBEAN_CLASS    = "MBEAN_CLASS";
 
     protected static final Properties EMPTY_PROPERTIES = new Properties();
     protected static final Log log = LogFactory.getLog(MxQuery.class);
@@ -68,13 +69,13 @@ public abstract class MxQuery {
     void setObjectName(ObjectName objectName) {
         this.objectName = objectName;
     }
-
-    public Properties getCustomProperties() {
-        return this.cprops;
-    }
     
     public ObjectName getObjectName() {
         return objectName;
+    }
+
+    public Properties getCustomProperties() {
+        return this.cprops;
     }
 
     public String[] getAttributeNames() {

@@ -45,6 +45,10 @@ class GenericServiceQuery extends ServiceQuery {
     void setType(String type) {
         this.type = type;        
     }
+
+    String getMBeanClass() {
+        return getProperty("MBEAN_CLASS");
+    }
     
     public ServiceQuery cloneInstance() {
         GenericServiceQuery query =
