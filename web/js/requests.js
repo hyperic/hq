@@ -85,6 +85,7 @@
 
         var fList = tmp.favorites;
         var table = document.getElementById('favoriteTable');
+        var tbody = document.createElement('tbody');
 
         if (fList) {
 
@@ -104,7 +105,8 @@
                 var urlColon = ":"
                 var resUrl = $('viewResUrl').href;
 
-                table.appendChild(tr);
+                table.appendChild(tbody);
+                tbody.appendChild(tr);
 
                 if (i % 2 == 0) {
                     tr.setAttribute((document.all ? 'className' : 'class'), "tableRowOdd");
@@ -155,19 +157,19 @@
                     td4.appendChild(document.createTextNode(fList[i].availability));
                     switch (fList[i].availability) {
                         case "green":
-                            td4.innerHTML = "<img src=images/icon_available_green.gif>";
+                            td4.innerHTML = "<img src=/images/icon_available_green.gif>";
                             break;
                         case "red":
-                            td4.innerHTML = "<img src=images/icon_available_red.gif>";
+                            td4.innerHTML = "<img src=/images/icon_available_red.gif>";
                             break;
                         case "yellow":
-                            td4.innerHTML = "<img src=images/icon_available_yellow.gif>";
+                            td4.innerHTML = "<img src=/images/icon_available_yellow.gif>";
                             break;
                         case "orange":
-                            td4.innerHTML = "<img src=images/icon_available_orange.gif>";
+                            td4.innerHTML = "<img src=/images/icon_available_orange.gif>";
                             break;
                         default:
-                            td4.innerHTML = "<img src=images/icon_available_error.gif>";
+                            td4.innerHTML = "<img src=/images/icon_available_error.gif>";
                     }
 
                 } else {

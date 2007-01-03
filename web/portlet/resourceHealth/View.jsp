@@ -75,8 +75,10 @@ onloads.push(requestFavoriteResources);
 		</tbody>
 	</table>
 	<table width="100%" cellpadding="0" cellspacing="0" border="0" id="noFaveResources" style="display:none;">
-    <tr class="ListRow">
-      <td class="ListCell"><fmt:message key="dash.home.no.resource.to.display"/></td>
-    </tr>
+        <tbody>
+        <tr class="ListRow">
+            <td class="ListCell"><fmt:message key="dash.home.no.resource.to.display"/></td>
+        </tr>
+        </tbody>
   </table>
 </div>
