@@ -562,10 +562,23 @@ function showViewEscResponse(originalRequest) {
 
         document.EscalationForm.escName.value = document.EscalationSchemeForm.escId.value;
         $('submit').onclick = function () {
-            if ($('escName').value == "") {
+            var escName = $('escName').value;
+            if (escName == "") {
                 alert('<fmt:message key="alert.config.error.escalation.name.required"/>');
                 return false;
             }
+
+            // Check to make sure the name is new
+            var escId = $('escId');
+            if (escId.options[escId.selectedIndex].value == "") {
+                for (var i = 0; i < escId.options.length; i++) {
+                    if (escName == escId.options[i].value) {
+                        alert('<fmt:message key="alert.config.error.escalation.name.dup"/>');
+                        return false;
+                    }
+                }
+            }
+
             sendEscForm();
             return false;
         }
