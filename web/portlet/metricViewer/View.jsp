@@ -62,7 +62,7 @@ onloads.push(requestMetricsResponse<c:out value="${portlet.token}"/>);
 </tiles:insert>
 
   <table class="table" width="100%" border="0" cellspacing="0" cellpadding="0" id="<c:out value="${tableName}"/>">
-    <tbody>
+    <tbody id="mtbody">
     <!-- table rows are inserted here dynamically -->
     </tbody>
  </table>
