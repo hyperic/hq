@@ -26,24 +26,17 @@ package org.hyperic.hq.galerts.server.session;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
-import org.hyperic.hibernate.PersistedObject;
 
-public class GalertActionLogDAO extends HibernateDAO {
-    public GalertActionLogDAO(DAOFactory f) {
+class GalertActionLogDAO extends HibernateDAO {
+    GalertActionLogDAO(DAOFactory f) {
         super(GalertActionLog.class, f);
     }
 
-    public GalertActionLog findById(Integer id) {
+    GalertActionLog findById(Integer id) {
         return (GalertActionLog)super.findById(id);
     }
 
-    public void save(GalertActionLog entity)
-    {
+    void save(GalertActionLog entity) {
         super.save(entity);
-    }
-
-    public void savePersisted(PersistedObject entity)
-    {
-        save((GalertActionLog)entity);
     }
 }

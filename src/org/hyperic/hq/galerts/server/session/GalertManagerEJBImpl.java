@@ -22,6 +22,7 @@ import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
 import org.hyperic.hq.common.shared.CrispoManagerLocal;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.AlertSeverity;
+import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.hq.events.server.session.EscalationMediator;
 import org.hyperic.hq.galerts.processor.GalertProcessor;
@@ -58,14 +59,16 @@ public class GalertManagerEJBImpl
     private GalertDefDAO                 _defDAO;
     private GalertLogDAO                 _logDAO;
     private CrispoManagerLocal           _crispoMan;
+    private GalertActionLogDAO           _actionLogDAO;
     
     public GalertManagerEJBImpl() {
         DAOFactory f = DAOFactory.getDAOFactory();
         
-        _stratTypeDAO = f.getExecutionStrategyTypeInfoDAO();
+        _stratTypeDAO = new ExecutionStrategyTypeInfoDAO(f); 
         _defDAO       = new GalertDefDAO(f);
-        _logDAO       = f.getGalertLogDAO();
+        _logDAO       = new GalertLogDAO(f);
         _crispoMan    = CrispoManagerEJBImpl.getOne();
+        _actionLogDAO = new GalertActionLogDAO(f);
     }
 
     /**
@@ -149,8 +152,24 @@ public class GalertManagerEJBImpl
     /**
      * @ejb:interface-method  
      */
+    public void createActionLog(GalertLog alert, String detail, Action action) {
+        GalertActionLog log = new GalertActionLog(alert, detail, action);
+        
+        _actionLogDAO.save(log);
+    }
+    
+    /**
+     * @ejb:interface-method  
+     */
     public List findAlertLogs(GalertDef def) {
         return _logDAO.findAll(def.getGroup());
+    }
+
+    /**
+     * @ejb:interface-method  
+     */
+    public GalertLog findAlertLog(Integer id) {
+        return _logDAO.findById(id);
     }
 
     /**

@@ -31,14 +31,14 @@ import org.hyperic.hq.events.server.session.Action;
 public class GalertActionLog  
     extends PersistedObject
 {
-    private String _detail;
+    private String     _detail;
     private GalertLog  _galertLog;
-    private Action _action;
+    private Action     _action;
 
     protected GalertActionLog() {
     }
    
-    public GalertActionLog(GalertLog alert, String detail, Action action) {
+    GalertActionLog(GalertLog alert, String detail, Action action) {
         _detail = detail;
         _galertLog  = alert;
         _action = action;

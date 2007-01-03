@@ -9,14 +9,14 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
-public class GalertLogDAO
+class GalertLogDAO
     extends HibernateDAO
 {
-    public GalertLogDAO(DAOFactory f) {
+    GalertLogDAO(DAOFactory f) {
         super(GalertLog.class, f);
     }
 
-    public GalertLog findById(Integer id) {
+    GalertLog findById(Integer id) {
         return (GalertLog)super.findById(id);
     }
 

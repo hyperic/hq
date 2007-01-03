@@ -7,12 +7,7 @@ import java.util.List;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
-import javax.management.AttributeNotFoundException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import javax.management.ReflectionException;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -44,11 +39,8 @@ import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.galerts.server.session.ExecutionReason;
-import org.hyperic.hq.galerts.server.session.GalertActionLog;
-import org.hyperic.hq.galerts.server.session.GalertActionLogDAO;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertLog;
-import org.hyperic.hq.galerts.server.session.GalertLogDAO;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
 import org.hyperic.hq.galerts.shared.GalertManagerUtil;
 import org.hyperic.hq.product.server.MBeanUtil;
@@ -418,13 +410,11 @@ public class EscalationMediator extends Mediator
             AlertDAO dao = DAOFactory.getDAOFactory().getAlertDAO();
             return dao.findById(new Integer(alertId));
         case EscalationState.ALERT_TYPE_GROUP:
-            GalertLogDAO gdao = DAOFactory.getDAOFactory().getGalertLogDAO();
-            return gdao.findById(new Integer(alertId));
+            return galertManagerLocal.findAlertLog(new Integer(alertId));
         default:
-            log.error("alertType " + alertType + " unknown");
-            return null;            // Unknown alert type, can't do anything
+            throw new IllegalStateException("Unknown alert type [" + 
+                                            alertType + "]");
         }
-
     }
     
     public void acknowledgeAlert(Integer subjectID, Integer alertID,
@@ -892,7 +882,8 @@ public class EscalationMediator extends Mediator
     }
 
     private void logActionDetail(int alertType, AlertInterface alert,
-                                  Action act, String detail) {
+                                  Action act, String detail) 
+    {
         if (log.isDebugEnabled()) {
             log.debug("LOG: " + detail);
         }
@@ -905,15 +896,10 @@ public class EscalationMediator extends Mediator
             dao.save(alog);
             break;
         case EscalationState.ALERT_TYPE_GROUP:
-            GalertActionLog glog =
-                new GalertActionLog((GalertLog) alert, detail, act);
-            GalertActionLogDAO gdao =
-                DAOFactory.getDAOFactory().getGalertActionLogDAO();
-            gdao.save(glog);
+            galertManagerLocal.createActionLog((GalertLog)alert, detail, act); 
             break;
         default:
-            log.error("alertType " + alertType + " unknown");
-            break;            // Unknown alert type, can't do anything
+            throw new IllegalStateException("Unknown alert type");
         }
     }
 

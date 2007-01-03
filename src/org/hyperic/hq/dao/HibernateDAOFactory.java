@@ -25,6 +25,7 @@
 package org.hyperic.hq.dao;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -94,9 +95,6 @@ import org.hyperic.hq.events.server.session.EventLogDAO;
 import org.hyperic.hq.events.server.session.RegisteredTrigger;
 import org.hyperic.hq.events.server.session.TriggerDAO;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfoDAO;
-import org.hyperic.hq.galerts.server.session.GalertActionLogDAO;
-import org.hyperic.hq.galerts.server.session.GalertLogDAO;
-import org.hyperic.hq.galerts.server.session.GtriggerTypeInfoDAO;
 import org.hyperic.hq.measurement.server.session.Baseline;
 import org.hyperic.hq.measurement.server.session.BaselineDAO;
 import org.hyperic.hq.measurement.server.session.Category;
@@ -120,7 +118,7 @@ import org.hyperic.hq.product.Plugin;
 public class HibernateDAOFactory extends DAOFactory {
     private static SessionFactory sessionFactory = Util.getSessionFactory();
     private static HibernateDAOFactory singleton = new HibernateDAOFactory();
-    private HashMap daoMap = new HashMap();
+    private Map daoMap = new HashMap();
 
     public static HibernateDAOFactory getInstance() {
         return singleton;
@@ -201,8 +199,6 @@ public class HibernateDAOFactory extends DAOFactory {
         addDAO(new ServiceClusterDAO(this));
         addDAO(new ServiceTypeDAO(this));
         addDAO(new VirtualDAO(this));
-        addDAO(new GtriggerTypeInfoDAO(this));
-        addDAO(new GalertActionLogDAO(this));
     }
 
     public ActionDAO getActionDAO() {
@@ -423,17 +419,5 @@ public class HibernateDAOFactory extends DAOFactory {
 
     public ExecutionStrategyTypeInfoDAO getExecutionStrategyTypeInfoDAO() {
         return new ExecutionStrategyTypeInfoDAO(this);
-    }
-
-    public GtriggerTypeInfoDAO getGtriggerTypeInfoDAO() {
-        return new GtriggerTypeInfoDAO(this);
-    }
-    
-    public GalertLogDAO getGalertLogDAO() {
-        return new GalertLogDAO(this);
-    }
-
-    public GalertActionLogDAO getGalertActionLogDAO() {
-        return new GalertActionLogDAO(this);
     }
 }

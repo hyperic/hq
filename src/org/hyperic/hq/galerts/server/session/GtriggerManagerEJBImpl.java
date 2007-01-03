@@ -6,8 +6,8 @@ import javax.ejb.SessionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.galerts.server.session.GtriggerType;
 import org.hyperic.hq.galerts.server.session.GtriggerTypeInfo;
+import org.hyperic.hq.galerts.server.session.GtriggerType;
 
 /**
  * @ejb:bean name="GtriggerManager"
@@ -26,7 +26,7 @@ public class GtriggerManagerEJBImpl
     private GtriggerTypeInfoDAO _ttypeDAO;
     
     public GtriggerManagerEJBImpl() {
-        _ttypeDAO = DAOFactory.getDAOFactory().getGtriggerTypeInfoDAO();
+        _ttypeDAO = new GtriggerTypeInfoDAO(DAOFactory.getDAOFactory()); 
     }
 
     /**

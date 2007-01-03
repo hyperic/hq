@@ -4,14 +4,14 @@ import org.hibernate.criterion.Expression;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
-public class GtriggerTypeInfoDAO 
+class GtriggerTypeInfoDAO 
     extends HibernateDAO
 {
-    public GtriggerTypeInfoDAO(DAOFactory f) {
+    GtriggerTypeInfoDAO(DAOFactory f) {
         super(GtriggerTypeInfo.class, f);
     }
 
-    public GtriggerTypeInfo findById(Integer id) {
+    GtriggerTypeInfo findById(Integer id) {
         return (GtriggerTypeInfo)super.findById(id);
     }
 
@@ -23,7 +23,7 @@ public class GtriggerTypeInfoDAO
         super.remove(tInfo);
     }
     
-    public GtriggerTypeInfo find(GtriggerType type) {
+    GtriggerTypeInfo find(GtriggerType type) {
         Class typeClass = type.getClass();
         
         return (GtriggerTypeInfo)
