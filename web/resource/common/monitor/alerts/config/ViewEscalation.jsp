@@ -70,15 +70,6 @@ function showViewEscResponse(originalRequest) {
         var id = tmp.escalation.id;
         var maxWaitTime = (tmp.escalation.maxWaitTime / 10000) + " minutes";
 
-
-
-        //alert("tmp.escalation.actions[0].action.config" + tmp.escalation.actions[0].action.config);
-
-        /*
-        for (i = 0; i <  tmp.escalation.actions[0].action.config.length; i++) {
-        alert(tmp.escalation.actions[0].action[0].config[i].childNodes)
-        }
-        */
         <c:if test="${not empty EscalationForm.escId}">
               $('viewEscalation').style.display = "";
               $('createEscTable').style.display = "none";
@@ -131,7 +122,7 @@ function showViewEscResponse(originalRequest) {
         var select3 = document.createElement("select");
         var anchor = document.createElement("a");
 
-        var emailInfo = actions[i].action.config[0];
+        var emailInfo = actionConfig.names;
         var roleInfo = " ";
         var metaInfo = " ";
         var productInfo = " ";
@@ -154,13 +145,6 @@ function showViewEscResponse(originalRequest) {
         viewLi.style.margin = "0px";
         viewLi.style.padding = "0px";
         
-        /*
-        viewLi.appendChild(remDiv);
-        remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
-        remDiv.style.paddingTop = "10px;"
-        remDiv.setAttribute('id','remDiv_'+ liID);
-        remDiv.innerHTML ='<a href="#" onclick="removeRow(this);"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a><br><br><b><a href="#" onclick="editEscalation(this);">Edit</a></b>';
-        */
         viewLi.appendChild(escTable);
         escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
         escTable.setAttribute('border', '0');
@@ -193,11 +177,31 @@ function showViewEscResponse(originalRequest) {
         td2.appendChild(usersTextDiv);
 
         if (configListType == "1"){
-        usersTextDiv.innerHTML = "Email:  " + emailInfo + "<br>";
+            usersTextDiv.innerHTML = "Email:  " + emailInfo + "<br>";
         } else if (configListType == "2") {
-        usersTextDiv.innerHTML = "Notify HQ Users: ";
+            var uids = emailInfo.split(',');
+            var userNames = "";
+            for (var b = 0; b < uids.length; b++) {
+                <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
+                    if (uids[b] == '<c:out value="${user.id}"/>') {
+                        userNames += '<c:out value="${user.name}" /> ';
+                    }
+                </c:forEach>
+            }
+            
+            usersTextDiv.innerHTML = "Notify HQ Users: " + userNames + "<br>";
         } else  if (configListType == "3") {
-        usersTextDiv.innerHTML = "Notify the following: " + emailInfo + "<br>";
+            var rids = emailInfo.split(',');
+            var roleNames = "";
+            for (var b = 0; b < rids.length; b++) {
+                <c:forEach var="role" items="${AvailableRoles}" varStatus="status">
+                    if (rids[b] == '<c:out value="${role.id}"/>') {
+                        roleNames += '<c:out value="${role.name}" /> ';
+                    }
+                </c:forEach>
+            }
+            
+            usersTextDiv.innerHTML = "Notify HQ Roles: " + roleNames + "<br>";
         }
 
         escTr2.appendChild(td3);
@@ -219,29 +223,12 @@ function showViewEscResponse(originalRequest) {
         escTr2.appendChild(td4);
         td5.setAttribute('width', '50%');
 
-
         td4.appendChild(usersEditDiv);
         usersEditDiv.style.display = 'none';
         usersEditDiv.setAttribute('class', 'escInput'+ liID);
         usersEditDiv.setAttribute('id', 'usersEditDiv_'+ liID);
         usersEditDiv.setAttribute('width', '40%');
         usersEditDiv.innerHTML = " ";
-        /*
-        td4.appendChild(usersDiv);
-        usersDiv.setAttribute('id', 'usersDiv' + liID);
-        usersDiv.style.display = 'none';
-        usersDiv.style.border = '0px';
-        usersDiv.innerHTML = configNames;
-
-
-        td4.appendChild(rolesDiv);
-        rolesDiv.setAttribute('id', 'rolesDiv' + liID);
-        rolesDiv.style.display = 'none';
-        rolesDiv.style.border = '0px';
-        if($('rolesList')) {
-          rolesDiv.innerHTML = $('rolesList').innerHTML;
-        }
-        */
         $('pauseTimeText').innerHTML = 'Allow user to pause escalation: ' + allowPause + "<br>";
         Sortable.create(escViewUL,{ghosting:true,constraint:false});
        }
@@ -655,7 +642,6 @@ function showViewEscResponse(originalRequest) {
 
         var pars = "rowOrder=" + rowOrder + "escForm=" + escFormSerial + "&ad=" + adId + "&gad=" + gadId + "&eid=" + eId + "aetid=" + aetId;
         new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse, onFailure :reportError} );
-        $('example2').innerHTML = rowOrder;
     }
 
     function configure(id) {
@@ -1003,7 +989,4 @@ function showViewEscResponse(originalRequest) {
 
 
  </form>
-
-
-<div id="example2" style="padding:10px;width:725px;overflow:auto;"></div>
 
