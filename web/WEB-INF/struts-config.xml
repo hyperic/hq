@@ -644,7 +644,7 @@
               type="org.hyperic.hq.ui.action.resource.platform.inventory.{1}PlatformAction"
               name="NewPlatformForm"
               scope="request"
-              validate="true"
+              validate="false"
               input="/resource/platform/Inventory.do?mode=new">
         <set-property property="title" value="2.2.6"/>
         
