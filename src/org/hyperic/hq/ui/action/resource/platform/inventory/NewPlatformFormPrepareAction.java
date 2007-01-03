@@ -104,7 +104,7 @@ public class NewPlatformFormPrepareAction extends TilesAction {
         // request.
 
         if (newForm.isAddClicked()) {
-            int nextIndex = newForm.getNumIps().intValue();
+            int nextIndex = newForm.getNumIps();
             for (int i=0; i<nextIndex+1; i++) {
                 IpValue oldIp = newForm.getIp(i);
                 if (oldIp == null) {
@@ -112,7 +112,7 @@ public class NewPlatformFormPrepareAction extends TilesAction {
                 }
             }
 
-            newForm.setNumIps(new Integer(nextIndex + 1));
+            newForm.setNumIps(nextIndex + 1);
         }
         else if (newForm.isRemoveClicked()) {
             int ri = Integer.parseInt(newForm.getRemove().getX());

@@ -115,7 +115,7 @@ public class EditPlatformTypeNetworkPropertiesFormPrepareAction
             IpValue[] savedIps = platform.getIpValues();
             int numSavedIps = savedIps != null ? savedIps.length : 0;
 
-            int nextIndex = editForm.getNumIps().intValue();
+            int nextIndex = editForm.getNumIps();
             log.trace("ips next index: " + nextIndex);
             for (int i=0; i<nextIndex+1; i++) {
                 IpValue oldIp = i < numSavedIps ? savedIps[i] : null;
@@ -124,7 +124,7 @@ public class EditPlatformTypeNetworkPropertiesFormPrepareAction
                 }
             }
 
-            editForm.setNumIps(new Integer(nextIndex + 1));
+            editForm.setNumIps(nextIndex + 1);
             log.trace("add num ips: " + editForm.getNumIps());
         }
         else if (editForm.isRemoveClicked()) {
@@ -153,7 +153,7 @@ public class EditPlatformTypeNetworkPropertiesFormPrepareAction
                 editForm.setIp(i, savedIps[i]);
             }
 
-            editForm.setNumIps(new Integer(numSavedIps));
+            editForm.setNumIps(numSavedIps);
         }
 
         // the OSType dropdown is NOT editable in edit mode hence the false

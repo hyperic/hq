@@ -53,7 +53,7 @@ public class PlatformForm extends ResourceForm  {
     private List cpuCounts;
     private String fqdn;
     private IpValue[] ips;
-    private Integer numIps;
+    private int numIps;
     private List agents = new ArrayList();
     private Integer agentId ;
     private String agentIpPort ;
@@ -122,14 +122,14 @@ public class PlatformForm extends ResourceForm  {
     public void setIps(IpValue[] ips) {
         this.ips = ips;
         int numIps = ips != null ? ips.length : 0;
-        setNumIps(new Integer(numIps));
+        setNumIps(numIps);
     }
 
-    public Integer getNumIps() {
-        return this.numIps != null ? this.numIps : new Integer(0);
+    public int getNumIps() {
+        return this.numIps;
     }
 
-    public void setNumIps(Integer numIps) {
+    public void setNumIps(int numIps) {
         this.numIps = numIps;
     }
 
@@ -167,7 +167,7 @@ public class PlatformForm extends ResourceForm  {
         this.cpuCount = null;
         this.fqdn = null;
         this.ips = new IpValue[0];
-        this.numIps = new Integer(0);
+        this.numIps = 0;
     }
 
     public String toString() {
@@ -209,7 +209,7 @@ public class PlatformForm extends ResourceForm  {
             oldIps = new IpValue[0];
         } 
         int numOldIps = oldIps.length;
-        int numNewIps = getNumIps().intValue();
+        int numNewIps = getNumIps();
 
         platform.removeAllIpValues();
 
@@ -251,7 +251,7 @@ public class PlatformForm extends ResourceForm  {
         }
 
         // don't validate if the user clicked any button other than 'ok'
-        if (! isOkClicked()) {
+        if (!isOkClicked() || getNumIps() == 0) {
             return null;
         }
 
@@ -262,31 +262,27 @@ public class PlatformForm extends ResourceForm  {
 
         // manually validate ips since i can't figure out how to do it
         // in the config file
-
         IpValue[] ips = getIps();
-        
         if (ips.length == 1) {
             String address = ips[0].getAddress();
             if (address.equals("127.0.0.1")) {
                 ActionMessage err = new ActionMessage(
-                    "resource.platform.inventory.error.IpAddressInvalid");
+                        "resource.platform.inventory.error.IpAddressInvalid");
                 errors.add("ip[0].address", err);
             }
-        }
-        else {
-            for (int i=1; i<ips.length; i++) {
+        } else {
+            for (int i = 1; i < ips.length; i++) {
                 IpValue ip = ips[i];
 
                 // address is required
                 String address = ip.getAddress();
                 if (address == null || "".equals(address)) {
                     ActionMessage err = new ActionMessage(
-                        "resource.platform.inventory.error.IpAddressIsRequired");
+                            "resource.platform.inventory.error.IpAddressIsRequired");
                     errors.add("ip[" + i + "].address", err);
                 }
             }
         }
-
         return errors.isEmpty() ? null : errors;
     }
 }
