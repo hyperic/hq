@@ -348,6 +348,7 @@
         var resUrl = $('viewResUrl').href;
         var metricTable;
         var noMetricTable;
+        var tbody = document.createElement('tbody');
         var metricFunc
         var token = metricText.token;
         if (token != null) {
@@ -371,15 +372,24 @@
             var th1 = document.createElement('th');
             var th2 = document.createElement('th');
 
-            metricTable.appendChild(trHeader);
+            metricTable.appendChild(tbody);
+            tbody.appendChild(trHeader);
             trHeader.setAttribute("class", "tableRowHeader");
             trHeader.appendChild(th1);
             th1.setAttribute("width", "90%");
             th1.setAttribute("class", "tableRowInactive");
+            th1.style.textAlign = "left";
+            th1.style.backgroundColor = "#DBE3F5";
+            th1.style.padding = "3px";
+            th1.style.borderBottom = "1px solid #D5D8DE";
             th1.appendChild(document.createTextNode(resourceNameHeader));
             trHeader.appendChild(th2);
             th2.setAttribute("width", "10%");
             th2.setAttribute("class", "tableRowInactive");
+            th2.style.backgroundColor = "#DBE3F5";
+            th2.style.padding = "3px";
+            th2.style.textAlign = "left";
+            th2.style.borderBottom = "1px solid #D5D8DE";
             th2.setAttribute("nowrap", true);
             th2.appendChild(document.createTextNode(resourceLoadTypeHeader));
 
@@ -389,7 +399,7 @@
                 var td1 = document.createElement('td');
                 var td2 = document.createElement('td');
 
-                metricTable.appendChild(tr);
+                tbody.appendChild(tr);
                 tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
 
                 tr.appendChild(td1);
