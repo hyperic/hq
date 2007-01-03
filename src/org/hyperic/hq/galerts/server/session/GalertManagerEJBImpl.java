@@ -85,9 +85,7 @@ public class GalertManagerEJBImpl
         if (enabled != null)
             def.setEnabled(enabled.booleanValue());
         
-        // TODO:  Re-configure the def in the GalertProcessor, since alerts
-        //        will need to be sent out with a different name or be
-        //        disabled.
+        GalertProcessor.getInstance().alertDefUpdated(def);
     }
     
     /**
@@ -96,6 +94,7 @@ public class GalertManagerEJBImpl
      */
     public void update(GalertDef def, Escalation escalation) {
         def.setEscalation(escalation);
+        GalertProcessor.getInstance().alertDefUpdated(def);
     }
     
     /**
@@ -263,7 +262,7 @@ public class GalertManagerEJBImpl
         strat.clearTriggers();
         
         // Now add the new triggers
-        Iterator j=configs.iterator();
+        Iterator j = configs.iterator();
         for (Iterator i=triggerInfos.iterator(); i.hasNext(); ) {
             GtriggerTypeInfo typeInfo = (GtriggerTypeInfo)i.next();
             ConfigResponse config = (ConfigResponse)j.next();
@@ -311,8 +310,7 @@ public class GalertManagerEJBImpl
     }
 
     /**
-     * Delete an alert definition.  The caller must unload it from the
-     * {@link GalertProcessor}
+     * Delete an alert definition.  
      * 
      * @ejb:interface-method
      */  
