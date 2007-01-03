@@ -141,30 +141,33 @@ public abstract class HibernateDAO {
     }
 
     public PersistedObject findPersistedList(PersistedObject entity) {
-        throw new UnsupportedOperationException("FindPersisted not supported");
+        throw new UnsupportedOperationException("findPersistedList not " +
+                                                "supported");
     }
 
     public PersistedObject findPersistedById(Integer subjectId, Serializable id)
         throws PermissionException
     {
-        throw new UnsupportedOperationException(
-            "FindPersistedById not supported");
+        throw new UnsupportedOperationException("findPersistedById " +
+                                                "not supported");
     }
 
     public PersistedObject findPersisted(PersistedObject entity)
         throws PermissionException
     {
-        throw new UnsupportedOperationException("FindPersisted not supported");
+        throw new UnsupportedOperationException("findPersisted not supported");
     }
 
     public void savePersisted(PersistedObject entity) throws PermissionException
     {
         throw new UnsupportedOperationException("savePersisted not supported");
     }
+    
     public void removePersisted(PersistedObject entity)
         throws PermissionException
     {
-        throw new UnsupportedOperationException("removePersisted not supported");
+        throw new UnsupportedOperationException("removePersisted not " +
+                                                "supported");
     }
 
     protected PageList getPagedResults(Query q, int total, PageControl pc) {

@@ -32,7 +32,6 @@ import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 
-
 /**
  * Pojo for hibernate hbm mapping file
  * TODO: fix equals and hashCode
@@ -149,5 +148,4 @@ public class ServiceTypeDAO extends HibernateDAO
             .setInteger(0, platformId)
             .list();
     }
-
 }
