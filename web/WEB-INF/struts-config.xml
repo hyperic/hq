@@ -740,20 +740,13 @@
         <forward name="dash"  path="/Dashboard.do" redirect="true"/>
       </action>
 
-      <action path="/resource/platform/autodiscovery/NewAutoDiscoveryPrep"
+      <action path="/resource/platform/autodiscovery/NewAutoDiscovery*"
               name="PlatformAutoDiscoveryForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.NewAutoDiscoveryPrepAction">
-        <set-property property="workflow" value="autodiscovery/AutoDiscoverySched"/>
-        <set-property property="title" value="2.2.7.1"/>
-      </action>
-
-      <action path="/resource/platform/autodiscovery/NewAutoDiscovery"
-              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.NewAutoDiscoveryAction"
-              name="PlatformAutoDiscoveryForm"
-              scope="request"
+              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.NewAutoDiscovery{1}Action"
               input="/resource/platform/AutoDiscovery.do?mode=new">
         <set-property property="workflow" value="autodiscovery/AutoDiscoverySched"/>
+        <set-property property="title" value="2.2.7.1"/>
         <forward name="cancel"  path="/resource/platform/Inventory.do?mode=view" redirect="true"/>
         <forward name="scanMethodChange"   path="/resource/platform/AutoDiscovery.do?mode=new"/>
         <forward name="reset"   path="/resource/platform/AutoDiscovery.do?mode=new"
@@ -763,22 +756,15 @@
         <forward name="dash"  path="/Dashboard.do" redirect="true"/>
       </action>
       
-      <action path="/resource/platform/autodiscovery/EditAutoDiscoveryPrep"
+      <action path="/resource/platform/autodiscovery/EditAutoDiscovery*"
               name="PlatformAutoDiscoveryForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.EditAutoDiscoveryPrepAction">
+              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.EditAutoDiscovery{1}Action"
+              input="/resource/platform/AutoDiscovery.do?mode=edit">
         <set-property property="workflow" value="autodiscovery/AutoDiscoverySched"/>
         <set-property property="title" value="2.2.7.4"/>
-      </action>
-      
-      <action path="/resource/platform/autodiscovery/EditAutoDiscovery"
-              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.EditAutoDiscoveryAction"
-              name="PlatformAutoDiscoveryForm"
-              scope="request"
-              input="/resource/platform/AutoDiscovery.do?mode=edit">
         <forward name="cancel"  path="/resource/platform/AutoDiscovery.do?mode=view" redirect="true"/>
-        <forward name="reset"   path="/resource/platform/AutoDiscovery.do?mode=edit"
-                                         redirect="true"/>
+        <forward name="reset"   path="/resource/platform/AutoDiscovery.do?mode=edit" redirect="true"/>
         <forward name="failure" path="/resource/platform/AutoDiscovery.do?mode=edit"/>
         <forward name="success" path="/resource/platform/AutoDiscovery.do?mode=view"/>
       </action>
@@ -796,16 +782,10 @@
         <set-property property="title" value="2.2.7.5"/>
       </action>
 
-      <action path="/resource/platform/autodiscovery/ScanControlPrep"
+      <action path="/resource/platform/autodiscovery/ScanControl*"
               scope="request"
               name="ResourceForm"
-              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.ScanControlPrepAction">
-      </action>
-      
-      <action path="/resource/platform/autodiscovery/ScanControlAction"
-              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.ScanControlAction"
-              name="ResourceForm"
-              scope="request"
+              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.ScanControl{1}Action"
               input="/resource/platform/AutoDiscovery.do?mode=view">
         <forward name="failure" path="/resource/platform/AutoDiscovery.do?mode=view"/>
         <forward name="success" path="/resource/platform/AutoDiscovery.do?mode=view"/>
@@ -853,20 +833,13 @@
               input="/resource/{1}/monitor/Config.do?mode=configure">
       </action>      
      
-      <action path="/resource/common/monitor/visibility/MetricDisplayRangeFormPrepare"
+      <action path="/resource/common/monitor/visibility/MetricDisplayRange*"
               name="MetricDisplayRangeForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricDisplayRangeFormPrepareAction">
+              input="/resource/common/monitor/Visibility.do?mode=editRange"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricDisplayRange{1}Action">
         <set-property property="workflow" value="visibility/MetricDisplayRange"/>
         <set-property property="title" value="0.2"/>
-      </action>
-
-      <action path="/resource/common/monitor/visibility/MetricDisplayRange"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricDisplayRangeAction"
-              name="MetricDisplayRangeForm"
-              scope="request"
-              input="/resource/common/monitor/Visibility.do?mode=editRange">
-        <set-property property="workflow" value="visibility/MetricDisplayRange"/>
         <forward name="reset" path="/resource/common/monitor/Visibility.do?mode=editRange"/>
         <forward name="success" path="/Resource.do"/>
       </action>

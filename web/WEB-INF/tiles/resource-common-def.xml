@@ -205,7 +205,7 @@
   <!-- control portlets -->
   <definition name=".resource.common.control.quickControl" 
               path="/resource/common/control/QuickControl.jsp" 
-              controllerUrl="/resource/common/control/QuickControlPrepareAction.do" />          
+              controllerUrl="/resource/common/control/QuickControlPrepare.do" />          
 
   <definition name=".resource.common.control.editControlActionProperties" 
               path="/resource/common/control/EditControlActionProperties.jsp" />              

@@ -53,7 +53,7 @@
 <c:url var="viewAutoInventoryResults" 
     value="/resource/platform/AutoDiscovery.do?mode=viewResults&rid=${Resource.id}&type=${entityId.type}&aiPid=${AIPlatform.id}"/>
 
-<html:form action="/resource/platform/autodiscovery/ScanControlAction"> 
+<html:form action="/resource/platform/autodiscovery/ScanControl"> 
 <html:hidden property="rid"/>
 <html:hidden property="type"/>
 
