@@ -285,6 +285,7 @@
         var token = availText.token;
         var noAvailTable;
         var availTable;
+        var tbody = document.createElement('tbody');
         var availFunc;
         if (token != null) {
             availTable = document.getElementById('availTable' + token);
@@ -313,7 +314,8 @@
                 var up = availList[i].numUp;
                 var down = availList[i].numDown;
 
-                availTable.appendChild(tr);
+                availTable.appendChild(tbody);
+                tbody.appendChild(tr);
                 tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
 
                 tr.appendChild(td1);
