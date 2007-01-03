@@ -128,8 +128,6 @@ function showViewEscResponse(originalRequest) {
         var productInfo = " ";
         var versionInfo = " ";
 
-
-        $('escNameText').innerHTML = "Escalation Name: " + escName + "<br>";
         $('creationTime').value = creationTime;
         $('notifyAll').value = notifyAll;
         $('_version_').value = _version_;
@@ -819,7 +817,7 @@ function showViewEscResponse(originalRequest) {
 <table width="100%" cellpadding="3" cellspacing="0" border="0">
   <tbody>
     <tr class="tableRowHeader">
-      <td align="right"><fmt:message key="alert.config.escalation.scheme"/>
+      <td><fmt:message key="alert.config.escalation.scheme"/>
         <select id="escId" name="escId" onchange="schemeChange(this)">
           <option value=""><fmt:message key="common.label.CreateNew" /></option>
         </select>
@@ -950,9 +948,6 @@ function showViewEscResponse(originalRequest) {
     <input type="hidden" id="alertDefId" name="alertDefId" value='<c:out value="${alertDef.id}"/>' />
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tbody>
-         <tr>
-             <td id="escNameText" class="tableRowHeader"></td>
-         </tr>
          <tr>
             <td width="100%">
             <ul id="viewEscalationUL" style="margin-left:-40px;">
