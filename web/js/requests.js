@@ -350,7 +350,7 @@
         var resUrl = $('viewResUrl').href;
         var metricTable;
         var noMetricTable;
-        var tbody = document.createElement('tbody');
+        var tbody = $('mtbody');
         var metricFunc
         var token = metricText.token;
         if (token != null) {
@@ -362,11 +362,11 @@
             noMetricTable = 'noMetricTable';
             metricFunc = 'requestMetricsResponse()';
         }
-        
-        if (metricValues.values) {
 
-            for (var i = metricTable.childNodes.length - 1; i > 1; i--) {
-                metricTable.removeChild(metricTable.childNodes[i]);
+
+        if (metricValues.values) {
+               for (var a = tbody.childNodes.length-1; a > 0; a--) {
+               tbody.removeChild(tbody.childNodes[a]);
             }
 
             // Create table headers
@@ -374,7 +374,7 @@
             var th1 = document.createElement('th');
             var th2 = document.createElement('th');
 
-            metricTable.appendChild(tbody);
+
             tbody.appendChild(trHeader);
             trHeader.setAttribute("class", "tableRowHeader");
             trHeader.appendChild(th1);
@@ -421,7 +421,7 @@
             $(noMetricTable).style.display = '';
         }
 
-        rTimer = setTimeout(metricFunc, 60000);
+        rTimer = setTimeout(metricFunc, 20000);
         //Refresh in 60 seconds
     }
 }
