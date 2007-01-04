@@ -674,16 +674,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                         findServerTypeByName(aiServer.getServerTypeName());
                 } catch (FinderException e) {
                     this.log.error("Ignoring non-existant server type: " +
-                                   aiServer.getServerTypeName());
-                    continue;
-                }
-
-                // Ignore reports for old HQ resources in case a 2.0 or 2.1 agent
-                // is run against a 2.5 server
-                String aiIdentifier = aiServer.getAutoinventoryIdentifier();
-                if (aiIdentifier.equals("HQ JBoss") ||
-                    aiIdentifier.equals("HQ Tomcat")) {
-                    this.log.info("Ingoring old resource: " + aiIdentifier);
+                                   aiServer.getServerTypeName(), e);
                     continue;
                 }
 
