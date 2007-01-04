@@ -169,7 +169,7 @@ function showViewEscResponse(originalRequest) {
       td2.appendChild(usersTextDiv);
   
       if (configListType == "1"){
-          usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.OR"/>:  " + emailInfo + "<br>";
+          usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/>:  " + emailInfo + "<br>";
       } else if (configListType == "2") {
           var uids = emailInfo.split(',');
           var userNames = "";
@@ -181,7 +181,7 @@ function showViewEscResponse(originalRequest) {
               </c:forEach>
           }
           
-          usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.CAMusers"/>: " + userNames + "<br>";
+          usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/>: " + userNames + "<br>";
       } else  if (configListType == "3") {
           var rids = emailInfo.split(',');
           var roleNames = "";
@@ -193,7 +193,7 @@ function showViewEscResponse(originalRequest) {
               </c:forEach>
           }
           
-          usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.CAMusers"/>: " + roleNames + "<br>";
+          usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/>: " + roleNames + "<br>";
       }
   
       escTr2.appendChild(td3);
@@ -380,8 +380,8 @@ function showViewEscResponse(originalRequest) {
         <c:if test="${not empty AvailableRoles}">
         addOption(select3, 'Roles', '<fmt:message key="monitoring.events.MiniTabs.Roles"/>')
         </c:if>
-        addOption(select3, 'Users', '<fmt:message key="monitoring.events.MiniTabs.CAMusers"/>');
-        addOption(select3, 'Others', '<fmt:message key="monitoring.events.MiniTabs.OR"/>');
+        addOption(select3, 'Users', '<fmt:message key="monitoring.events.MiniTabs.Users"/>');
+        addOption(select3, 'Others', '<fmt:message key="monitoring.events.MiniTabs.Others"/>');
 
         escTr2.appendChild(td4);
         td5.setAttribute('width', '50%');

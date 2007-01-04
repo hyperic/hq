@@ -29,10 +29,17 @@
   USA.
  --%>
 
+<tiles:importAttribute name="tabList"/>
 
 <tiles:importAttribute name="viewUsersUrl"/>
 <tiles:importAttribute name="viewOthersUrl"/>
+<tiles:importAttribute name="viewRolesUrl" ignore="true"/>
 <tiles:importAttribute name="viewEscalationUrl"/>
+
+<c:set var="mode" value="${param.mode}"/>
+<c:if test="${mode == 'viewDefinition'}">
+  <c:set var="mode" value="viewEscalation"/>
+</c:if>
 
 <!-- MINI-TABS -->
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
@@ -44,64 +51,38 @@
     <td nowrap>
       <table width="100%" border="0" cellspacing="0" cellpadding="0">
         <tr> 
-          <c:choose>
-          <c:when test="${param.mode == 'viewUsers'}">
-            <td valign="top" width="15"><html:img page="/images/miniTabs_left_on.gif" width="11" height="19" alt="" border="0"/></td>
-            <td class="MiniTabOn" nowrap><fmt:message key="monitoring.events.MiniTabs.CAMusers"/></td>
-            <td valign="top" width="17"><html:img page="/images/miniTabs_right_on.gif" width="11" height="19" alt="" border="0"/></td>
-          </c:when>
-          <c:otherwise>
-            <td valign="top" width="15"><html:img page="/images/miniTabs_left_off.gif" width="11" height="19" alt="" border="0"/></td>
-            <td class="MiniTabOff" nowrap><html:link
-              href="${viewUsersUrl}"><fmt:message
-              key="monitoring.events.MiniTabs.CAMusers"/></html:link></td>
-            <td valign="top" width="17"><html:img page="/images/miniTabs_right_off.gif" width="11" height="19" alt="" border="0"/></td>
-          </c:otherwise>
-          </c:choose>
-        </tr>
-      </table>
-    </td>
-    
-    <td nowrap>
-      <table width="100%" border="0" cellspacing="0" cellpadding="0">
-        <tr> 
-          <c:choose>
-          <c:when test="${param.mode == 'viewOthers'}">
-            <td valign="top" width="15"><html:img page="/images/miniTabs_left_on.gif" width="11" height="19" alt="" border="0"/></td>
-            <td class="MiniTabOn" nowrap><fmt:message key="monitoring.events.MiniTabs.OR"/></td>
-            <td valign="top" width="17"><html:img page="/images/miniTabs_right_on.gif" width="11" height="19" alt="" border="0"/></td>
-          </c:when>
-          <c:otherwise>
-            <td valign="top" width="15"><html:img page="/images/miniTabs_left_off.gif" width="11" height="19" alt="" border="0"/></td>
-            <td class="MiniTabOff" nowrap><html:link
-              href="${viewOthersUrl}"><fmt:message
-              key="monitoring.events.MiniTabs.OR"/></html:link>
-            </td>
-            <td valign="top" width="17"><html:img page="/images/miniTabs_right_off.gif" width="11" height="19" alt="" border="0"/></td>
-          </c:otherwise>
-          </c:choose>
-        </tr>
-      </table>
-    </td>
+<c:forEach var="tab" items="${tabList}">
+  <c:choose>
+    <c:when test="${tab.value == 'Escalation'}">
+      <c:set var="tabUrl" value="${viewEscalationUrl}"/>
+    </c:when>
+    <c:when test="${tab.value == 'Users'}">
+      <c:set var="tabUrl" value="${viewUsersUrl}"/>
+    </c:when>
+    <c:when test="${tab.value == 'Others'}">
+      <c:set var="tabUrl" value="${viewOthersUrl}"/>
+    </c:when>
+    <c:when test="${tab.value == 'Roles'}">
+      <c:set var="tabUrl" value="${viewRolesUrl}"/>
+    </c:when>
+  </c:choose>
 
-    <td nowrap>
-      <table width="100%" border="0" cellspacing="0" cellpadding="0">
-        <tr> 
-          <c:choose>
-          <c:when test="${param.mode == 'viewEscalation' || param.mode == 'viewDefinition'}">
+        <c:choose>
+          <c:when test="${mode == tab.link}">
             <td valign="top" width="15"><html:img page="/images/miniTabs_left_on.gif" width="11" height="19" alt="" border="0"/></td>
-            <td class="MiniTabOn" nowrap><fmt:message key="monitoring.events.MiniTabs.Escalation"/></td>
+            <td class="MiniTabOn" nowrap><fmt:message key="monitoring.events.MiniTabs.${tab.value}"/></td>
             <td valign="top" width="17"><html:img page="/images/miniTabs_right_on.gif" width="11" height="19" alt="" border="0"/></td>
           </c:when>
           <c:otherwise>
             <td valign="top" width="15"><html:img page="/images/miniTabs_left_off.gif" width="11" height="19" alt="" border="0"/></td>
-            <td class="MiniTabOff" nowrap><html:link
-              href="${viewEscalationUrl}"><fmt:message
-              key="monitoring.events.MiniTabs.Escalation"/></html:link>
-            </td>
+            <td class="MiniTabOff" nowrap>
+              <html:link href="${tabUrl}">
+              <fmt:message key="monitoring.events.MiniTabs.${tab.value}"/>
+              </html:link></td>
             <td valign="top" width="17"><html:img page="/images/miniTabs_right_off.gif" width="11" height="19" alt="" border="0"/></td>
           </c:otherwise>
-          </c:choose>
+        </c:choose>
+</c:forEach>
         </tr>
       </table>
     </td>

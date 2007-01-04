@@ -14,7 +14,16 @@
     path="/resource/common/monitor/alerts/config/ViewDefinitionNotifications.jsp"/>
 
   <definition name=".events.config.view.notifications.tabs"
-    path="/resource/common/monitor/alerts/config/ViewDefinitionNotificationsTabs.jsp"/>
+    path="/resource/common/monitor/alerts/config/ViewDefinitionNotificationsTabs.jsp">
+   <putList name="tabList">
+      <item value="Escalation" link="viewEscalation"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Users" link="viewUsers"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Others" link="viewOthers"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+   </putList> 
+  </definition>
 
   <definition name=".events.config.view.notifications.roles"
         path="/resource/common/monitor/alerts/config/ListRoles.jsp"
