@@ -120,9 +120,6 @@ public class AIQueueManagerEJBImpl
                                    boolean isReport ) 
         throws NamingException, CreateException, RemoveException {
 
-        // log.info("AIQmgr.queue: starting...(PLATFORM=" + aiplatform + ", updateServers=" + updateServers + ")");
-        // log.info("AIQmgr.queue: aiplatform.getAIIpValues=" + StringUtil.arrayToString(aiplatform.getAIIpValues()));
-
         AIPlatformDAO aiplatformLH = getAIPlatformDAO();
         PlatformDAO pmLH = getPlatformDAO();
         AIQueueManagerLocal aiqLocal = getAIQManagerLocal();
@@ -149,9 +146,6 @@ public class AIQueueManagerEJBImpl
             return null;
         }
 
-        // log.info("AIQmgr.queue (post appdef-diff): aiplatform=" + revisedAIplatform
-        // + " ips=" + StringUtil.arrayToString(revisedAIplatform.getAIIpValues()));
-
         // Synchronize current AI data into existing queue.
         revisedAIplatform = queueSynchronizer.sync(log,
                                                    subject, 
@@ -163,12 +157,8 @@ public class AIQueueManagerEJBImpl
                                                    isReport);
 
         if ( revisedAIplatform == null ) {
-            // log.info("AIQmgr.queue (post aiq-sync): aiplatform=NULL");
             return null;
         }
-
-        // log.info("AIQmgr.queue (post aiq-sync): aiplatform=" + revisedAIplatform
-        // + " ips=" + StringUtil.arrayToString(revisedAIplatform.getAIIpValues()));
 
         // OK, we do this the hard way: strip out "removed" servers
         // because we never want to show them
@@ -252,7 +242,6 @@ public class AIQueueManagerEJBImpl
                                     boolean showPlaceholders,
                                     boolean showAlreadyProcessed,
                                     PageControl pc ) {
-        // log.info("AutoinventoryManager.retrieveQueue called");
         Collection queue;
         PageList results;
         pc = PageControl.initDefaults( pc, SortAttribute.DEFAULT );
@@ -343,8 +332,6 @@ public class AIQueueManagerEJBImpl
             throw new SystemException(e);
         }
 
-        // log.info("AutoinventoryManager.retrieveQueue returning: "
-        // + StringUtil.listToString(results));
         return results; 
     }
 
@@ -497,8 +484,6 @@ public class AIQueueManagerEJBImpl
                PermissionException, ValidationException,
                RemoveException, AIQApprovalException {
 
-        // log.info("AIQ.approve starting (iplist="+ StringUtil.listToString(ipList) +")...");
-
         boolean isApproveAction
             = (action == AIQueueConstants.Q_DECISION_APPROVE);
         boolean isPurgeAction
@@ -592,7 +577,6 @@ public class AIQueueManagerEJBImpl
                                     cpropMgr, createdResources);
                 if (isApproveAction) {
                     // Approved servers are removed from the queue
-                    // (see bug 6898 for more info)
                     aiserversToRemove.add(aiserver);
                 } else if (!isPurgeAction) {
                     Integer pk =
@@ -612,8 +596,7 @@ public class AIQueueManagerEJBImpl
                     aiplatformLH.findById(id);
                 syncQueue(aiplatform.getAIPlatformValue(), isApproveAction);
             }
-            // See above note about bug 6898, now we remove
-            // approved servers from the queue
+            // See above note, now we remove approved servers from the queue
             Collection servers = aiplatform.getAIServers();
             if (servers != null) {
                 for (i=0; i<aiserversToRemove.size(); i++) {
@@ -637,8 +620,7 @@ public class AIQueueManagerEJBImpl
     public void removeFromQueue ( AIPlatform aiplatform ) throws RemoveException {
         // Remove the platform, this should recursively remove all queued 
         // servers and IPs
-        DAOFactory.getDAOFactory().getAIPlatformDAO()
-        .remove(aiplatform);
+        DAOFactory.getDAOFactory().getAIPlatformDAO().remove(aiplatform);
     }
 
     /**
@@ -735,7 +717,7 @@ public class AIQueueManagerEJBImpl
                 
             PlatformManagerLocal pmLocal = getPlatformMgrLocal();
             PageList platforms = pmLocal.findPlatformsByIpAddr(subject, address,
-                                                            null);
+                                                               null);
             if (!platforms.isEmpty()) {
                 // If we got any platforms that match this
                 // IP address, then we just take the first
@@ -748,7 +730,8 @@ public class AIQueueManagerEJBImpl
                 return pValue;
             }
         }
-        throw new PlatformNotFoundException("platform not found for ai platform: " +
+        throw new PlatformNotFoundException("platform not found for ai " +
+                                            "platform: " +
                                             aipLocal.getId());
     }
         
@@ -764,6 +747,7 @@ public class AIQueueManagerEJBImpl
             throw new CreateException("Could not create value pager:" + e);
         }
     }
+    
     public void ejbRemove   () {}
     public void ejbActivate () {}
     public void ejbPassivate() {}
