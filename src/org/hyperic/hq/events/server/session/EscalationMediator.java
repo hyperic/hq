@@ -628,7 +628,7 @@ public class EscalationMediator extends Mediator
         return null;
     }
 
-    private void scheduleAction(EscalationState state)
+    private void scheduleAction(EscalationState state, EscalationAction ea)
     {
         EscalationStateDAO sdao =
             DAOFactory.getDAOFactory().getEscalationStateDAO();
@@ -653,34 +653,20 @@ public class EscalationMediator extends Mediator
                 }
                 return;
             }
-            int nextlevel = s.getCurrentLevel() + 1;
-            if (nextlevel >= e.getActions().size()) {
-                // at the end of escalation chain, so reset and wait for
-                //  next alert to fire.  DO NOT schedule next job.
-                resetEscalationState(s);
-                sdao.save(s);
-                logEscalation(null, s,
-                              "End of escalation chain. Stop escalation.");
-                if (log.isInfoEnabled()) {
-                    log.info("End escalation. alert=" +  s.getAlertId() +
-                             ", escalation=" + e + ", state=" + s);
-                }
-            } else {
-                EscalationAction ea = e.getCurrentAction(s.getCurrentLevel());
-                // schedule next run time
-                long schedule = System.currentTimeMillis() + ea.getWaitTime();
-                s.setScheduleRunTime(schedule);
-                s.setCurrentLevel(nextlevel);
-                s.setAcknowledge(false);
-                sdao.save(s);
 
-                logEscalation(ea.getAction(), s,
-                              "Escalation scheduled to run in " +
-                              ea.getWaitTime()/60000 + " minutes.");
-                if (log.isDebugEnabled()) {
-                    log.debug("schedule next action. escalation=" + e +
-                              ", state=" + s + "action=" + ea);
-                }
+            // schedule next run time
+            long schedule = System.currentTimeMillis() + ea.getWaitTime();
+            s.setScheduleRunTime(schedule);
+            s.setCurrentLevel(s.getCurrentLevel() + 1);
+            s.setAcknowledge(false);
+            sdao.save(s);
+
+            logEscalation(ea.getAction(), s,
+                          "Escalation scheduled to run in " +
+                          ea.getWaitTime()/60000 + " minutes.");
+            if (log.isDebugEnabled()) {
+                log.debug("schedule next action. escalation=" + e +
+                          ", state=" + s + "action=" + ea);
             }
         }
     }
@@ -727,7 +713,7 @@ public class EscalationMediator extends Mediator
             return;
         }
         int curlevel = state.getCurrentLevel();
-        if (curlevel >= escalation.getActions().size()) {
+        if (curlevel > escalation.getActions().size()) {
             throw new IllegalStateException("current level out of bounds: " +
                                             "alert="+ state.getAlertId() +
                                             ", escalation=" +
@@ -747,11 +733,25 @@ public class EscalationMediator extends Mediator
             executeAction(state.getAlertType(), alert, a);
 
             // schedule next action;
-            scheduleAction(state);
+            scheduleAction(state, ea);
         } catch (ActionExecuteException e) {
             throw new SystemException(e);
         } catch (PermissionException e) {
             throw new SystemException(e);
+        } catch (IndexOutOfBoundsException e) {
+            EscalationStateDAO sdao =
+                DAOFactory.getDAOFactory().getEscalationStateDAO();
+    
+            // at the end of escalation chain, so reset and wait for
+            //  next alert to fire.  DO NOT schedule next job.
+            resetEscalationState(state);
+            sdao.save(state);
+            logEscalation(null, state,
+                          "End of escalation chain. Stop escalation.");
+            if (log.isInfoEnabled()) {
+                log.info("End escalation. alert=" +  state.getAlertId() +
+                         ", escalation=" + e + ", state=" + state);
+            }
         }
     }
 
