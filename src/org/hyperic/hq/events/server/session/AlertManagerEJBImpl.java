@@ -210,12 +210,15 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             EscalationState state = EscalationMediator.getInstance()
                     .getEscalationState(def.getEscalation(), def.getId(),
                                         EscalationState.ALERT_TYPE_CLASSIC);
-            // Make sure that we are still on the same alert
-            if (state.isActive() && state.getAlertId() == id.intValue()) {
-                ret.setAcknowledged(state.isAcknowledge());
-            } else {
-                // Do not allow acknowlegment anymore
-                ret.setAcknowledged(true);
+            
+            if (state != null) {
+                // Make sure that we are still on the same alert
+                if (state.isActive() && state.getAlertId() == id.intValue()) {
+                    ret.setAcknowledged(state.isAcknowledge());
+                } else {
+                    // Do not allow acknowlegment anymore
+                    ret.setAcknowledged(true);
+                }
             }
         }
         return ret;
