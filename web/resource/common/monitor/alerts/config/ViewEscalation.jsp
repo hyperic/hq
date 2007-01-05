@@ -132,17 +132,15 @@ function showViewEscResponse(originalRequest) {
   
       escViewUL.appendChild(viewLi)
   
-      viewLi.setAttribute((document.all ? 'className' : 'class'), "lineitem");
+      //viewLi.setAttribute((document.all ? 'className' : 'class'), "lineitem");
       viewLi.setAttribute('id','row_'+ liID);
-      viewLi.style.margin = "0px";
-      viewLi.style.padding = "0px";
+      $('row_'+ liID).style.margin = "0px";
+      $('row_'+ liID).style.padding = "0px";
       
       viewLi.appendChild(escTable);
       escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
       escTable.setAttribute('border', '0');
-      escTable.style.width = "100%";
       escTable.setAttribute('cellspacing','3');
-      escTable.style.paddingLeft = "10px";
       escTable.appendChild(escTableBody);
   
       escTableBody.appendChild(escTr2);
@@ -152,19 +150,15 @@ function showViewEscResponse(originalRequest) {
   
       //td1.setAttribute('colspan', '3');
       td1.appendChild(waitDiv);
-      waitDiv.id = "wait_" + liID;
+      waitDiv.setAttribute('id','wait_' + liID);
       waitDiv.innerHTML = "Wait time before escalating: " + actionWaitTime + "<br>";
   
       td1.appendChild(editWaitDiv);
-      editWaitDiv.id = "editWait_" + liID;
+      editWaitDiv.setAttribute('id','editWait_' + liID);
   
       escTr2.appendChild(td2);
       td2.setAttribute('width', '20%');
       td2.setAttribute('valign', 'top');
-      td2.style.paddingBottom = "10px";
-      td2.style.paddingLeft = "0px";
-      td2.style.paddingTop = "5px";
-      td2.style.paddingBottom = "10px";
   
       td2.appendChild(usersTextDiv);
   
@@ -246,24 +240,12 @@ function showViewEscResponse(originalRequest) {
         select1.setAttribute('id', 'waittime_' + liID);
         select1.name = "waittime_" + liID;
         addOption(select1, '0', '<fmt:message key="alert.config.escalation.end"/>');
-        addOption(select1, '300000', '<fmt:message key="alert.config.escalation.wait">
-                                      <fmt:param value="5"/>
-                                    </fmt:message>');
-        addOption(select1, '600000', '<fmt:message key="alert.config.escalation.wait">
-                                      <fmt:param value="10"/>
-                                    </fmt:message>');
-        addOption(select1, '1200000', '<fmt:message key="alert.config.escalation.wait">
-                                      <fmt:param value="20"/>
-                                    </fmt:message>');
-        addOption(select1, '1800000', '<fmt:message key="alert.config.escalation.wait">
-                                      <fmt:param value="30"/>
-                                    </fmt:message>');
-        addOption(select1, '2400000', '<fmt:message key="alert.config.escalation.wait">
-                                      <fmt:param value="45"/>
-                                    </fmt:message>');
-        addOption(select1, '3000000', '<fmt:message key="alert.config.escalation.wait">
-                                      <fmt:param value="60"/>
-                                    </fmt:message>');
+        addOption(select1, '300000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="5"/></fmt:message>');
+        addOption(select1, '600000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="10"/></fmt:message>');
+        addOption(select1, '1200000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="20"/></fmt:message>');
+        addOption(select1, '1800000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="30"/></fmt:message>');
+        addOption(select1, '2400000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="45"/></fmt:message>');
+        addOption(select1, '3000000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="60"/></fmt:message>');
 
         if($('usersList')) {
           usersEditDiv.innerHTML = $('usersList').innerHTML;
@@ -308,17 +290,17 @@ function showViewEscResponse(originalRequest) {
         ni.appendChild(escLi);
         escLi.setAttribute((document.all ? 'className' : 'class'), "lineitem");
         escLi.setAttribute('id','row_'+ liID);
+        //escLi.innerHTML = "here";
 
         escLi.appendChild(remDiv);
         remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
-        remDiv.style.paddingTop = "10px;"
         remDiv.innerHTML ='<a href="#" onclick="removeRow(this);"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
 
         escLi.appendChild(escTable);
         escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
         escTable.setAttribute('border', '0');
         escTable.appendChild(escTableBody);
-        // Put the "wait" select after other options
+
         escTableBody.appendChild(escTr2);
         escTableBody.appendChild(escTr1);
 
@@ -326,9 +308,11 @@ function showViewEscResponse(originalRequest) {
 
         td1.setAttribute('colspan', '3');
         td1.appendChild(document.createTextNode('<fmt:message key="alert.config.escalation.then"/> '));
+
         td1.appendChild(select1);
         select1.setAttribute('id', 'waittime_' + liID);
-        select1.name = "waittime_" + liID;
+
+        select1.setAttribute('name', 'waittime_' + liID);
         addOption(select1, '0', '<fmt:message key="alert.config.escalation.end"/>');
         addOption(select1, '300000', '<fmt:message key="alert.config.escalation.wait">
                                       <fmt:param value="5"/>
@@ -350,31 +334,30 @@ function showViewEscResponse(originalRequest) {
                                     </fmt:message>');
 
         escTr2.appendChild(td2);
-        td2.setAttribute('width', '20%');
         td2.setAttribute('valign', 'top');
-        td2.style.paddingBottom = "10px";
+        td2.setAttribute('class', 'td2');
+
+
 
         td2.appendChild(select2);
         select2.setAttribute('id', 'Email_' + liID);
-        td2.style.paddingLeft = "20px";
-        td2.style.paddingTop = "5px";
-        td2.style.paddingBottom = "10px";
+
+
         select2.onchange = function(){onchange_handler(this);}
-        select2.name = "action_" + liID;
+        select2.setAttribute('name', 'action_' + liID);
         addOption(select2, 'Email', 'Email');
         addOption(select2, 'SMS', 'SMS');
         addOption(select2, 'Syslog', 'Sys Log');
         addOption(select2, 'NoOp', 'Suppress Alerts');
 
         escTr2.appendChild(td3);
-        td3.setAttribute('width', '20%');
+        td3.setAttribute('class', 'td3');
         td3.setAttribute('valign', 'top');
-        td3.style.paddingRight = "20px";
 
         td3.appendChild(select3);
-        td3.style.paddingTop = "5px";
-        select3.name = "who_" + liID;
-        select3.id = "who_" + liID;
+
+        select3.setAttribute('name', 'who_' + liID);
+        select3.setAttribute('id', 'who_' + liID);
         select3.onchange = function(){onchange_who(this);}
         addOption(select3, 'Select', '<fmt:message key="alert.config.escalation.notify.who"/>');
         <c:if test="${not empty AvailableRoles}">
@@ -387,23 +370,24 @@ function showViewEscResponse(originalRequest) {
         td5.setAttribute('width', '50%');
 
         td4.appendChild(emailDiv);
-        emailDiv.style.display = 'none';
+        emailDiv.setAttribute('class', 'emailDiv');
         emailDiv.setAttribute('id', 'emailinput' + liID);
+        $('emailinput'+ liID).style.display = 'none';
         emailDiv.setAttribute('class', 'escInput');
         emailDiv.setAttribute('width', '40%');
         emailDiv.innerHTML = "email addresses (comma separated):<br><textarea rows=3 cols=35 id=emailinput_" + liID + " name=emailinput_" + liID + "></textarea>";
 
         td4.appendChild(sysDiv);
-        sysDiv.style.display = 'none';
         sysDiv.setAttribute('class', 'escInput'+ liID);
         sysDiv.setAttribute('id', 'sysloginput'+ liID);
+        $('sysloginput'+ liID).style.display = 'none';
         sysDiv.setAttribute('width', '40%');
         sysDiv.innerHTML = "meta: <input type=text name=meta_" + liID + " size=40><br>" + "product: <input type=text name=product_" + liID + " size=40><br>" + "version: <input type=text name=version_" + liID + " size=40><br>";
 
         td4.appendChild(usersDiv);
         usersDiv.setAttribute('id', 'usersDiv' + liID);
-        usersDiv.style.display = 'none';
-        usersDiv.style.border = '0px';
+        $('usersDiv'+ liID).style.display = 'none';
+
         if($('usersList')) {
           usersDiv.innerHTML = $('usersList').innerHTML;
           var usersInputList = usersDiv.getElementsByTagName('input');
@@ -415,8 +399,8 @@ function showViewEscResponse(originalRequest) {
 
         td4.appendChild(rolesDiv);
         rolesDiv.setAttribute('id', 'rolesDiv' + liID);
-        rolesDiv.style.display = 'none';
-        rolesDiv.style.border = '0px';
+        $('rolesDiv'+ liID).style.display = 'none';
+
         if($('rolesList')) {
           rolesDiv.innerHTML = $('rolesList').innerHTML;
           var rolesInputList = rolesDiv.getElementsByTagName('input');
@@ -425,7 +409,7 @@ function showViewEscResponse(originalRequest) {
                   inputRolesArr.name =  inputRolesArr.name + "_" + liID;
               }
           }
-
+        
         Sortable.create('rowOrder',{ghosting:true,constraint:false});
 
       }
@@ -522,16 +506,25 @@ function showViewEscResponse(originalRequest) {
     }
 
     function addOption(sel, val, txt, selected) {
-        var o = document.createElement("OPTION");
+
+
+        var o = document.createElement('option');
         var t = document.createTextNode(txt);
-        o.setAttribute("value",val);
+
+        o.setAttribute('value',val);
 
         if (selected) {
-          o.setAttribute("selected", "true");
+          o.setAttribute('selected', 'true');
         }
-
-        o.appendChild(t);
         sel.appendChild(o);
+        o.appendChild(document.createTextNode(txt));
+      
+        /*
+        var option = new Option(txt, val);
+        alert(sel.options);
+        sel.options[sel.options.length] = option;
+        option.isSelected = selected;
+        */
     }
 
     function showResponse(originalRequest) {
@@ -539,23 +532,29 @@ function showViewEscResponse(originalRequest) {
         $('example').style.display= '';
     }
 
-    function initEsc () {
+
+
+      function initEsc () {
         // Set up the escalation dropdown
         var escJson = eval( '( { "escalations":<c:out value="${escalations}" escapeXml="false"/> })' );
-
-        var escalationSel = $('escId');
+        var escalationSel = $('escIdSel');
         var schemes = escJson.escalations;
-        for (var i = 0; i < schemes.length; i++) {
+
+          for (var i = 0; i < schemes.length; i++) {
+
+            if (schemes[i].name == "")
+                continue;
+
             <c:if test="${not empty EscalationForm.escId}">
-              if (schemes[i].name == '<c:out value="${EscalationForm.escId}"/>')
+            if (schemes[i].name == '<c:out value="${EscalationForm.escId}"/>')
                 addOption(escalationSel , schemes[i].name, schemes[i].name, true);
               else
             </c:if>
+
             addOption(escalationSel , schemes[i].name, schemes[i].name,
                       schemes[i].name == document.EscalationSchemeForm.escId.value);
-        }
 
-        document.EscalationForm.escName.value = document.EscalationSchemeForm.escId.value;
+        }  document.EscalationForm.escName.value = document.EscalationSchemeForm.escId.value;
         $('submit').onclick = function () {
             var escName = $('escName').value;
             if (escName == "") {
@@ -815,7 +814,7 @@ function showViewEscResponse(originalRequest) {
   <tbody>
     <tr class="tableRowHeader">
       <td><fmt:message key="alert.config.escalation.scheme" /> <select
-        id="escId" name="escId" onchange="schemeChange(this)">
+        id="escIdSel" name="escId" onchange="schemeChange(this)">
         <option value=""><fmt:message key="common.label.CreateNew" /></option>
       </select> <c:choose>
         <c:when test="${empty EscalationSchemeForm.escId}">
@@ -948,7 +947,8 @@ function showViewEscResponse(originalRequest) {
   <tbody>
     <tr>
       <td width="100%">
-      <ul id="viewEscalationUL" style="margin-left:-40px;">
+
+      <ul id="viewEscalationUL" style="margin-left:0px;">
 
       </ul>
       </td>

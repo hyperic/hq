@@ -909,17 +909,17 @@ text-align:center;
   margin-right: 0px;
   padding:0;
   width:100%;
-  background-color:#F2F4F7;
 }
 
 #viewEscalationUL li {
   font:13px Verdana;
-  margin:0;
+  margin:0px;
   padding:0px;
   list-style: none;
   width: 100%;
   border-bottom:1px solid gray;
   background-color:#F2F4F7;
+  
 }
 
 .escTbl {
@@ -931,12 +931,13 @@ text-align:center;
 .remove {
   float:right;
   margin-right:10px;
+  margin-top:10px;
 }
 
 .escInput {
  font:10px Verdana;
- margin:0;
-  width: 100%;
+ margin:0px;
+ width: 100%;
 }
 
 .lineitem {
@@ -948,4 +949,15 @@ text-align:center;
  margin:auto;
  border:1px solid gray;
  background-color:#D5D8DE;
+}
+
+.td2 {
+ padding:5px 0px 10px 20px;
+ width:20%;
+}
+
+.td3 {
+ width:20%;
+ padding-right:20px;
+ padding-top:5px;
 }
