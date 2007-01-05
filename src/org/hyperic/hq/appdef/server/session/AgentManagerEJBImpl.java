@@ -50,7 +50,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.miniResourceTree.MiniResourceTree;
+import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -110,24 +110,23 @@ public class AgentManagerEJBImpl
     }
 
     /**
-     * Get a list of all the entities which can be serviced by an
-     * Agent.  
+     * Get a list of all the entities which can be serviced by an Agent.
      *
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public MiniResourceTree getEntitiesForAgent(AuthzSubjectValue subject,
-                                                String agentToken)
+    public ResourceTree getEntitiesForAgent(AuthzSubjectValue subject,
+                                            String agentToken)
         throws AgentNotFoundException, PermissionException
     {
-        MiniResourceTreeGenerator generator;
+        ResourceTreeGenerator generator;
 
         Agent agt = getAgentInternal(agentToken);
         PlatformDAO platHome = getPlatformDAO();
 
         Collection plats = platHome.findByAgent(agt);
         if (plats.size() == 0) {
-            return new MiniResourceTree();
+            return new ResourceTree();
         }
         AppdefEntityID[] platIds = new AppdefEntityID[plats.size()];
         int i = 0;
@@ -138,7 +137,7 @@ public class AgentManagerEJBImpl
                                    plat.getId());
         }
         
-        generator = new MiniResourceTreeGenerator(subject);
+        generator = new ResourceTreeGenerator(subject);
         try {
             return generator.generate(platIds,
                                       ResourceTreeGenerator.TRAVERSE_UP);

@@ -54,17 +54,17 @@ import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEvent;
-import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceLightValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.appdef.shared.miniResourceTree.MiniPlatformNode;
-import org.hyperic.hq.appdef.shared.miniResourceTree.MiniResourceTree;
-import org.hyperic.hq.appdef.shared.miniResourceTree.MiniServerNode;
-import org.hyperic.hq.appdef.shared.miniResourceTree.MiniServiceNode;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
+import org.hyperic.hq.appdef.shared.resourceTree.PlatformNode;
+import org.hyperic.hq.appdef.shared.resourceTree.ServerNode;
+import org.hyperic.hq.appdef.shared.resourceTree.ServiceNode;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -502,7 +502,6 @@ public class LatherDispatcher
         ScanStateCore core;
 
         core = args.getCore();
-        //log.info("AgentCallbackBoss.aiSendReport: received: " + core);
 
         aiManagerLocal = getAutoInventoryManager();
         try {
@@ -529,15 +528,10 @@ public class LatherDispatcher
         try {
             aiManagerLocal.reportAIRuntimeReport(arg.getAgentToken(), 
                                                  arg.getReport());
-        } catch(ValidationException exc){
-
-        } catch(PermissionException exc){
-
-        } catch(ApplicationException exc){
-            log.error("RUNTIME REPORT ERROR: " + exc.getMessage());
-        } catch(AutoinventoryException exc){
-
+        } catch(Exception exc){
+            log.error("Runtime report error: " + exc.getMessage(), exc);
         }
+        
         return NullLatherValue.INSTANCE;
     }
 
@@ -551,16 +545,15 @@ public class LatherDispatcher
         MeasurementGetConfigs_result res;
         MeasurementGetConfigs_args args;
         MeasurementConfigList cList;
-        MiniResourceTree tree;
+        ResourceTree tree;
         AuthzSubjectValue overlord;
         ArrayList ents;
 
         args = (MeasurementGetConfigs_args)lArgs;
         overlord = getOverlord();
         try {
-            tree = getAgentManager().
-                getEntitiesForAgent(overlord,
-                                    args.getAgentToken());
+            tree = getAgentManager().getEntitiesForAgent(overlord,
+                                                         args.getAgentToken());
         } catch(PermissionException exc){
             exc.printStackTrace();
             throw new SystemException("Overlord unable to get resource " +
@@ -569,15 +562,16 @@ public class LatherDispatcher
             throw new SystemException("Validated an agent which could " +
                                       "not be found");
         }
+
         ents = new ArrayList();
         for(Iterator p=tree.getPlatformIterator(); p.hasNext(); ){
-            MiniPlatformNode pNode = (MiniPlatformNode)p.next();
+            PlatformNode pNode = (PlatformNode)p.next();
 
             addMeasurementConfig(ents, pNode.getPlatform());
 
             try {
                 PageList services = getServiceManager().
-                    getPlatformServices(overlord, pNode.getId(),
+                    getPlatformServices(overlord, pNode.getPlatform().getId(),
                                         PageControl.PAGE_ALL);
                 for (int i = 0; i < services.size(); i++) {
                     ServiceValue val = (ServiceValue)services.get(i);
@@ -587,7 +581,7 @@ public class LatherDispatcher
                                            APPDEF_TYPE_SERVICE, val.getId());
                                            
                     addMeasurementConfig(ents, id,
-                                              val.getServiceType().getName());
+                                         val.getServiceType().getName());
                 }
             } catch (Exception e) {
                 //Shouldn't happen
@@ -596,12 +590,12 @@ public class LatherDispatcher
             }
 
             for(Iterator s=pNode.getServerIterator(); s.hasNext(); ){
-                MiniServerNode sNode = (MiniServerNode)s.next();
+                ServerNode sNode = (ServerNode)s.next();
 
                 addMeasurementConfig(ents, sNode.getServer());
 
                 for(Iterator v=sNode.getServiceIterator(); v.hasNext(); ){
-                    MiniServiceNode vNode = (MiniServiceNode)v.next();
+                    ServiceNode vNode = (ServiceNode)v.next();
 
                     addMeasurementConfig(ents, vNode.getService());
                 }
@@ -610,15 +604,15 @@ public class LatherDispatcher
 
         cList = new MeasurementConfigList();
         cList.setEntities((MeasurementConfigEntity[])
-                          ents.toArray(new MeasurementConfigEntity[0]));
-
+                          ents.toArray(new MeasurementConfigEntity[ents.size()]));
         res = new MeasurementGetConfigs_result();
         res.setConfigs(cList);
         return res;
     }
 
-    private void addMeasurementConfig(List ents, MiniResourceValue resource){
-        addMeasurementConfig(ents, resource.getEntityId(), resource.typeName);
+    private void addMeasurementConfig(List ents, AppdefResourceValue resource){
+        addMeasurementConfig(ents, resource.getEntityId(),
+                             resource.getAppdefResourceTypeValue().getName());
     }
 
     private void addMeasurementConfig(List ents, AppdefEntityID id, 
