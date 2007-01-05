@@ -220,6 +220,13 @@ public class PlatformDAO extends HibernateDAO {
             .list();
     }
 
+    public Collection findAll_orderCTime(boolean asc) {
+        return getSession()
+            .createQuery("from Platform order by ctime " +
+                         (asc ? "asc" : "desc"))
+            .list();
+    }
+
     public Platform findByName(String name)
     {
         String sql = "from Platform where name=?";
