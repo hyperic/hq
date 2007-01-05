@@ -10,8 +10,15 @@ import java.util.Set;
 
 /**
  * The CallbackDispatcher is able to generate listeners and callers for
- * the proxied callback pattern.    The Proxy Callback pattern is a way to
- * execute callbacks with type checking and declared exceptions.
+ * the Proxied Callback Pattern.    
+ * 
+ * This dispatcher holds onto the list of all the registered callers and
+ * listeners and facilities the communication between them.
+ * 
+ * DevNote:  Might be better to keep the collection of listeners as a list,
+ *           ordered by the order of registration.  Right now that information
+ *           is lost.  Alternatively we could just let the callback type 
+ *           handle the registered list of listeners. 
  */
 public class CallbackDispatcher {
     private Map _ifaceToHandler = new HashMap();
@@ -27,6 +34,12 @@ public class CallbackDispatcher {
         private void addListener(Object o) {
             synchronized (_listeners) {
                 _listeners.add(o);
+            }
+        }
+        
+        private void removeListener(Object o) {
+            synchronized (_listeners) {
+                _listeners.remove(o);
             }
         }
         
@@ -47,10 +60,12 @@ public class CallbackDispatcher {
      * Register a listener for a given interface.  If the caller has not
      * been registered, then an error will be thrown. 
      *
-     * @param iFace  Interface to listen on.  Must previously be registered
-     *               via {@link #generateCaller(Class)}
-     * @param o      Object to invoke (as a callback) when the caller executes
-     *               methods on the interface.
+     * @param iFace    Interface to listen on.  Must previously be registered
+     *                 via {@link #generateCaller(Class)}
+     *
+     * @param o        Listener which will be invoked when any of the methods
+     *                 specified in 'iFace' is called.  This object must 
+     *                 implement 'iFace'.        
      */
     public void registerListener(Class iFace, Object o) {
         CallbackHandler handler;
@@ -76,6 +91,22 @@ public class CallbackDispatcher {
     }
 
     /**
+     * Unregister a previously registered listener.
+     * 
+     * @see #registerListener(Class, Object)
+     */
+    public void unregisterListener(Class iFace, Object o) {
+        CallbackHandler handler;
+        
+        synchronized (_ifaceToHandler) {
+            handler = (CallbackHandler) _ifaceToHandler.get(iFace);
+        }
+        
+        if (handler != null)
+            handler.removeListener(o);
+    }
+  
+    /**
      * Generates a caller with the callback type of 
      * {@link CallbackType.RETURN_LAST}
      * 
@@ -86,11 +117,16 @@ public class CallbackDispatcher {
     }
     
     /**
-     * Generate an instance of an interface which can be called by the caller.
-     * When methods on this object are invoked, callbacks will be executed,
-     * and depending on the {@link CallbackType}, exceptions will be thrown
-     * and values will be returned (from the callback).
-     *
+     * Generates the 'caller' side of the caller/listener relationship.  
+     * 
+     * When methods on the returned object are invoked, the listeners 
+     * registered via {@link #registerListener(Class, Object)} for the given
+     * interface will be executed.
+     * 
+     * The execution of the callbacks, the order they are called, the 
+     * exception handling, values returned etc. are all handled by the passed 
+     * {@link CallbackType}.
+     * 
      * @param iFace Interface to generate the caller for
      * @param type  Type specifying the way that the caller will process
      *              callbacks
