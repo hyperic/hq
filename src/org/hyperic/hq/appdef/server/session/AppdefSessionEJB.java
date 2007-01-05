@@ -1231,17 +1231,21 @@ public abstract class AppdefSessionEJB
     {
         // first find all, based on the sorting attribute passed in, or
         // with no sorting if the page control is null
-        Collection ejbList;
+        Collection platforms;
         // if page control is null, find all platforms
         if (pc == null) {
-            ejbList = getPlatformDAO().findAll();
+            platforms = getPlatformDAO().findAll();
         } else {
             pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
             int attr = pc.getSortattribute();
             switch (attr) {
                 case SortAttribute.RESOURCE_NAME:
-                    ejbList =
+                    platforms =
                         getPlatformDAO().findAll_orderName(!pc.isDescending());
+                    break;
+                case SortAttribute.CTIME:
+                    platforms =
+                        getPlatformDAO().findAll_orderCTime(!pc.isDescending());
                     break;
                 default:
                     throw new FinderException("Invalid sort attribute: "+attr);
@@ -1251,14 +1255,14 @@ public abstract class AppdefSessionEJB
         List viewable = getViewablePlatformPKs(whoami);
         // and iterate over the ejbList to remove any item not in the
         // viewable list
-        for(Iterator i = ejbList.iterator(); i.hasNext();) {
-            Platform aEJB = (Platform)i.next();
-            if(!viewable.contains(aEJB.getId())) {
+        for(Iterator i = platforms.iterator(); i.hasNext();) {
+            Platform platform = (Platform)i.next();
+            if(!viewable.contains(platform.getId())) {
                 // remove the item, user cant see it
                 i.remove();
             }
         }
-        return ejbList; 
+        return platforms;
     } 
 
     protected List getViewablePlatformPKs(AuthzSubjectValue who)
