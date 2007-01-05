@@ -56,10 +56,11 @@ import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.ServiceValue;
-import org.hyperic.hq.appdef.shared.miniResourceTree.MiniPlatformNode;
-import org.hyperic.hq.appdef.shared.miniResourceTree.MiniResourceTree;
-import org.hyperic.hq.appdef.shared.miniResourceTree.MiniServerNode;
-import org.hyperic.hq.appdef.shared.miniResourceTree.MiniServiceNode;
+import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
+import org.hyperic.hq.appdef.shared.resourceTree.PlatformNode;
+import org.hyperic.hq.appdef.shared.resourceTree.ServerNode;
+import org.hyperic.hq.appdef.shared.resourceTree.ServiceNode;
+import org.hyperic.hq.appdef.server.session.ResourceTreeGenerator;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -1064,18 +1065,22 @@ public class EventsBossEJBImpl
         if(!id.isPlatform()) {
             throw new IllegalArgumentException(id + " is not a platform");
         }
-    	MiniResourceTree tree = getPlatformManager().getMiniResourceTree(subject, 
-                                        new AppdefEntityID[] { id }, 0);
+        
+        ResourceTree tree =
+            getApplicationManager().getResourceTree(subject,
+                                                    new AppdefEntityID[] { id },
+                                                    ResourceTreeGenerator.
+                                                    TRAVERSE_UP);
         List resourceIds = new ArrayList();
         resourceIds.add(id);
         // First add all the regular servers and services.
     	for(Iterator p = tree.getPlatformIterator();p.hasNext();) {
-    	    MiniPlatformNode pn = (MiniPlatformNode)p.next();
+    	    PlatformNode pn = (PlatformNode)p.next();
             for(Iterator s = pn.getServerIterator(); s.hasNext();) {
-                MiniServerNode sn = (MiniServerNode)s.next();
+                ServerNode sn = (ServerNode)s.next();
                 resourceIds.add(sn.getServer().getEntityId());
                 for(Iterator sv = sn.getServiceIterator(); sv.hasNext();) {
-                    MiniServiceNode svn = (MiniServiceNode)sv.next();
+                    ServiceNode svn = (ServiceNode)sv.next();
                     resourceIds.add(svn.getService().getEntityId());
                 }
             }
