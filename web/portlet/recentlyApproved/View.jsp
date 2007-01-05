@@ -40,61 +40,23 @@
   <tiles:put name="dragDrop" value="true"/>
 </tiles:insert>
 
-<tiles:importAttribute name="recentlyApproved"/>
+<tiles:importAttribute name="recentlyAdded"/>
 
 <c:choose >
-  <c:when test="${not empty recentlyApproved}">
+  <c:when test="${not empty recentlyAdded}">
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
-    <html:form action="/dashboard/ProcessRAList">
-    <html:hidden property="platformId"/>
       <tr>
-        <td width="3%" class="ListHeaderInactive">&nbsp;</td>
-        <td width="67%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.ResourceName"/></td>
+        <td width="70%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.ResourceName"/></td>
         <td width="30%" class="ListHeaderInactive" align="center"><fmt:message key="dash.home.TableHeader.DateTime"/></td>
       </tr>
-      <c:forEach items="${recentlyApproved}" var="platform">
+      <c:forEach items="${recentlyAdded}" var="platform">
       <tr class="ListRow">
-        <td class="ListCell">
-           <c:choose>
-             <c:when test="${platform.showServers}">
-               <a href="." onclick="RAListForm.platformId.value=<c:out
-                  value="${platform.id}"/>; 
-                  RAListForm.submit(); return false;">
-                  <html:img page="/images/icon_down_arrow.gif" border="0"/>
-               </a>
-             </c:when>
-             <c:otherwise>
-               <a href="." onclick="RAListForm.platformId.value=<c:out
-                  value="${platform.id}"/>; 
-                  RAListForm.submit(); return false;">
-                  <html:img page="/images/icon_right_arrow.gif" border="0"/>
-               </a>
-             </c:otherwise>
-           </c:choose>
         <td class="ListCell">
             <html:link page="/Resource.do?eid=1:${platform.id}"><c:out value="${platform.name}"/>&nbsp;</html:link>
-          <fmt:message key="parenthesis">
-            <fmt:param value="${platform.numResources}"/>
-          </fmt:message></td>
-        <td class="ListCell" align="center"><hq:dateFormatter value="${platform.resourceCTime}"/>&nbsp;</td>
+        </td>
+        <td class="ListCell" align="center"><hq:dateFormatter value="${platform.CTime}"/>&nbsp;</td>
       </tr>
-      <c:if test="${platform.showServers}">
-      <!-- Show the platform's servers -->
-      <c:forEach items="${platform.servers}" var="server">
-      <tr class="ListRow">
-        <td class="ListCell"></td>
-        <td class="ListCell">
-            <html:link page="/Resource.do?eid=2:${server.id}"><c:out value="${server.name}"/>&nbsp;</html:link>
-          <fmt:message key="parenthesis">
-            <fmt:param value="${server.numServices}"/>
-          </fmt:message></td>
-        <td class="ListCell" align="center"><hq:dateFormatter value="${server.CTime}"/>&nbsp;</td>
-      </tr>
-      </c:forEach> <!-- For each server -->
-      </c:if>
-
       </c:forEach> <!-- For each platform -->
-      </html:form>
     </table>
   </c:when>
   <c:otherwise>

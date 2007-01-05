@@ -61,13 +61,13 @@
               <td nowrap><fmt:message key="dash.settings.recentlyApproved.last"/></td>
               <td>
               <html:select property="range">
-                <html:option value="24">1</html:option>
-                <html:option value="120">5</html:option>
-                <html:option value="240">10</html:option>
-                <html:option value="360">15</html:option>
+                <html:option value="1"/>
+                <html:option value="5"/>
+                <html:option value="10"/>
+                <html:option value="20"/>
               </html:select>
               </td>
-              <td width="100%"><fmt:message key="dash.settings.recentlyApproved.approved"/></td>
+              <td width="100%"><fmt:message key="dash.settings.recentlyApproved.platforms"/></td>
              </tr>
            </table>
           </td>

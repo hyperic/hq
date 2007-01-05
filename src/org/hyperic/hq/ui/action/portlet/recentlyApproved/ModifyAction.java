@@ -30,14 +30,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
 import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
@@ -54,7 +51,7 @@ public class ModifyAction extends BaseAction {
 
     /**
      * @param mapping The ActionMapping used to select this instance
-     * @param actionForm The optional ActionForm bean for this request (if any)
+     * @param form The optional ActionForm bean for this request (if any)
      * @param request The HTTP request we are processing
      * @param response The HTTP response we are creating
      *
@@ -66,8 +63,7 @@ public class ModifyAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        
-        Log log = LogFactory.getLog(ModifyAction.class.getName());
+
         ServletContext ctx = getServlet().getServletContext();
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
 
@@ -82,14 +78,10 @@ public class ModifyAction extends BaseAction {
             return forward;
         }
 
-        user.setPreference(".dashContent.recentlyApproved.range", range);            
+        user.setPreference(PropertiesForm.RANGE, range);
 
-        LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
-            " in recentlyApproved/ModifyAction " +
-            " for " + user.getId() + " at " + System.currentTimeMillis() +
-            " user.prefs = " + user.getPreferences());
-
-        boss.setUserPrefs(user.getSessionId(), user.getId(), user.getPreferences() );            
+        boss.setUserPrefs(user.getSessionId(), user.getId(),
+                          user.getPreferences() );
         session.removeAttribute(Constants.USERS_SES_PORTAL);
         
         return mapping.findForward("success");

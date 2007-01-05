@@ -51,10 +51,7 @@ public class PrepareAction extends BaseAction {
         WebUser user = (WebUser) 
             session.getAttribute(Constants.WEBUSER_SES_ATTR);
 
-        // XXX: make this a constant
-        Integer range = 
-            new Integer(user.getPreference(".dashContent." +
-                                           "recentlyApproved.range"));
+        Integer range = new Integer(user.getPreference(PropertiesForm.RANGE));
 
         pForm.setRange(range);
 

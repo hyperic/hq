@@ -25,28 +25,23 @@
 
 package org.hyperic.hq.ui.action.portlet.recentlyApproved;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMapping;
-
-// XXX: remove when ImageBeanButton works
-import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.action.portlet.DashboardBaseForm;
 
 public class PropertiesForm extends DashboardBaseForm  {
 
-    private Integer range;
+    static String RANGE = ".dashContent.recentlyApproved.range";
+
+    private Integer _range;
     
     public PropertiesForm() {
         super();
     }
 
     public Integer getRange() {
-        return this.range;
+        return _range;
     }
     
     public void setRange(Integer range) {
-        this.range = range;
+        _range = range;
     }
 }

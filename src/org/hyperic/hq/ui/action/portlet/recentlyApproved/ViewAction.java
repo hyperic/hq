@@ -52,6 +52,8 @@ import org.hyperic.hq.ui.WebUser;
 
 import org.hyperic.util.timer.StopWatch;
 import org.hyperic.util.pager.PageList;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.sigar.pager.SortAttribute;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -60,10 +62,6 @@ import org.hyperic.util.pager.PageList;
  * <code>PORTAL_KEY</code> request attribute.
  */
 public class ViewAction extends TilesAction {
-
-    private static String RANGE = ".dashContent.recentlyApproved.range";
-    private static String EXPANDED_PLATFORMS 
-        = ".dashContent.recentlyApproved.expandedPlatforms";
 
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
@@ -80,43 +78,19 @@ public class ViewAction extends TilesAction {
             getAttribute(Constants.WEBUSER_SES_ATTR);
         int sessionId = user.getSessionId().intValue();
 
+        Integer range = new Integer(user.getPreference(PropertiesForm.RANGE));
+
         try {
-            // Based on the user preference, generate a timestamp of the 
-            // oldest resouce to display.
-            long range = Long.parseLong(user.getPreference(RANGE));
-            long ts = System.currentTimeMillis() - range * 3600 * 1000;
-
-            StopWatch watch = new StopWatch();
-            MiniResourceTree tree;
-
-            // Generate the resource tree based on the user's configured
-            // time range.
-            watch.markTimeBegin("ResourceTreeGeneration");
-            tree = appdefBoss.getMiniResourceTreeByCTime(sessionId, ts);
-            watch.markTimeEnd("ResourceTreeGeneration");
-
-            // Set the show servers flag on all expanded platforms.
-            // Find the list of expanded platforms for this user and make
-            // it available to the jsp.
-            List expandedPlatforms =
-                user.getPreferenceAsList(EXPANDED_PLATFORMS);
-
-            for (Iterator i = tree.getPlatformIterator(); i.hasNext();) {
-                MiniPlatformNode pNode = (MiniPlatformNode)i.next();
-                if (expandedPlatforms.contains(pNode.getId().toString())) {
-                    pNode.setShowServers(true);
-                }
-            }
-
-            // Make the list available to the jsp.
-            context.putAttribute("recentlyApproved", tree.getPlatforms());
-
-            log.debug(watch);
+            PageControl pc = new PageControl();
+            pc.setSortattribute(SortAttribute.CTIME);
+            pc.setSortorder(PageControl.SORT_DESC);
+            pc.setPagesize(range.intValue());
+            List platforms = appdefBoss.findAllPlatforms(sessionId, pc);
+            context.putAttribute("recentlyAdded", platforms);
         } catch (Exception e) {
-            // Most likely a permissions error.  Return an empty list
             List emptyList = new ArrayList();
             context.putAttribute("recentlyApproved", emptyList);
-            log.debug("Error generating tree: " + e.getMessage());
+            log.debug("Error getting recent platforms: " + e.getMessage(), e);
         }
        
         return null;
