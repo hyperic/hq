@@ -799,7 +799,7 @@
         <set-property property="workflow" value="autodiscovery/ViewResults"/>
         <forward name="cancel"  path="/Dashboard.do" redirect="true"/>
         <forward name="failure" path="/resource/platform/AutoDiscovery.do?mode=results"/>
-        <forward name="success" path="/resource/platform/AutoDiscovery.do?mode=view"/>
+        <forward name="success" path="/resource/platform/AutoDiscovery.do?mode=view" redirect="true"/>
       </action>
 
       <action path="/resource/platform/autodiscovery/RemoveSchedule"
