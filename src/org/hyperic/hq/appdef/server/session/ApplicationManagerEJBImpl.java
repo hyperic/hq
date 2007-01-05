@@ -87,7 +87,8 @@ import org.hibernate.ObjectNotFoundException;
 public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     implements SessionBean {
 
-    protected Log log = LogFactory.getLog("org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl");
+    protected Log log =
+        LogFactory.getLog(ApplicationManagerEJBImpl.class.getName());
 
     protected final String VALUE_PROCESSOR
         = "org.hyperic.hq.appdef.server.session.PagerProcessor_app";
