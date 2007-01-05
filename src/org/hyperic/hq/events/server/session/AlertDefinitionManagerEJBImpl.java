@@ -140,7 +140,9 @@ public class AlertDefinitionManagerEJBImpl
                 dao.getEscalationState(alertdef.getEscalation(),
                                        alertdef.getId(),
                                        EscalationState.ALERT_TYPE_CLASSIC);
-            dao.removePersisted(state);
+            if (state != null) {
+                dao.removePersisted(state);
+            }
         }
 
         // Delete the alerts
@@ -418,6 +420,7 @@ public class AlertDefinitionManagerEJBImpl
             AlertDefinition def = getAlertDefDAO().findById(ids[i]);            
             canManageAlerts(subj, def);
 
+            def.setActOnTrigger(null);
             rtm.deleteAlertDefinitionTriggers(ids[i]);
 
             for (Iterator it = def.getChildren().iterator(); it.hasNext(); ) {
