@@ -352,27 +352,6 @@ public class AppdefBossEJBImpl
     }
 
     /**
-     * Generate a resource tree that includes all resources created
-     * after a given time.  (In milliseconds)
-     *
-     * @ejb:interface-method
-     */
-    public MiniResourceTree getMiniResourceTreeByCTime(int sessionID,
-                                                       long timestamp)
-        throws AppdefEntityNotFoundException, PermissionException, 
-               SessionTimeoutException, SessionNotFoundException
-    {
-        AuthzSubjectValue subject = this.manager.getSubject(sessionID);
-
-        AppdefEntityID[] ids =
-            getPlatformManager().getPlatformsByResourceCTime(subject, 
-                                                             timestamp);
-        
-        return getPlatformManager().getMiniResourceTree(subject, ids, 
-                                                        timestamp);
-    }
-
-    /**
      * Generate a resource tree based on the root resources and
      * the traversal (one of ResourceTreeGenerator.TRAVERSE_*)
      *
