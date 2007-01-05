@@ -116,7 +116,8 @@ public class RSSAction extends BaseRSSAction {
 
                 StringBuffer desc =
                     new StringBuffer("<table><tr><td align=center>");
-                if (Boolean.FALSE.equals(summary.getMonitorable())) {
+                if (Boolean.FALSE.equals(summary.getMonitorable()) ||
+                    summary.getAvailability() == null) {
                     desc.append(res.getMessage("common.value.notavail"));
                 }
                 else {
