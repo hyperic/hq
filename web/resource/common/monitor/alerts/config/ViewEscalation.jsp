@@ -127,7 +127,6 @@ function showViewEscResponse(originalRequest) {
       $('_version_').value = _version_;
       $('modifiedTime').value = modifiedTime;
       $('allowPause').value = allowPause;
-      $('escName').value = escName;
       $('id').value = id;
   
       escViewUL.appendChild(viewLi)
@@ -553,8 +552,9 @@ function showViewEscResponse(originalRequest) {
 
             addOption(escalationSel , schemes[i].name, schemes[i].name,
                       schemes[i].name == document.EscalationSchemeForm.escId.value);
-
-        }  document.EscalationForm.escName.value = document.EscalationSchemeForm.escId.value;
+        }
+        
+        document.EscalationForm.escName.value = document.EscalationSchemeForm.escId.value;
         $('submit').onclick = function () {
             var escName = $('escName').value;
             if (escName == "") {
@@ -563,7 +563,7 @@ function showViewEscResponse(originalRequest) {
             }
 
             // Check to make sure the name is new
-            var escId = $('escId');
+            var escId = $('escIdSel');
             if (escId.options[escId.selectedIndex].value == "") {
                 for (var i = 0; i < escId.options.length; i++) {
                     if (escName == escId.options[i].value) {
