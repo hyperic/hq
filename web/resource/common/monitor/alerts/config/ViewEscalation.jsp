@@ -527,7 +527,7 @@ function showViewEscResponse(originalRequest) {
     }
 
     function showResponse(originalRequest) {
-        $('example').innerHTML ="<span style=font-weight:bold;><CENTER>Escalation Saved</CENTER></span>";
+        $('escMsg').innerHTML ="Escalation Saved";
         $('example').style.display= '';
     }
 
@@ -574,6 +574,8 @@ function showViewEscResponse(originalRequest) {
             }
 
             sendEscForm();
+            addOption(escId, escName, escName, true);
+            $('escNameSpan').style.visibility = 'hidden';
             return false;
         }
 
@@ -810,13 +812,26 @@ function showViewEscResponse(originalRequest) {
 </c:choose> <input type="hidden" id="ffff" name="ggg"
   value='<c:out value="${escalation.id}"/>' />
 
+<div id="example" style="display:none;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <td class="ConfirmationBlock">
+    <html:img page="/images/tt_check.gif" height="9" width="9" border="0" alt=""/>
+  </td>
+  <td class="ConfirmationBlock" width="100%">
+    <div id="escMsg"></div>
+  </td>
+</table>
+</div>
+
 <table width="100%" cellpadding="3" cellspacing="0" border="0">
   <tbody>
     <tr class="tableRowHeader">
       <td><fmt:message key="alert.config.escalation.scheme" /> <select
         id="escIdSel" name="escId" onchange="schemeChange(this)">
         <option value=""><fmt:message key="common.label.CreateNew" /></option>
-      </select> <c:choose>
+      </select>
+      <span id="escNameSpan">
+      <c:choose>
         <c:when test="${empty EscalationSchemeForm.escId}">
           <fmt:message key="common.label.Name" />
           <input type="text" size="25" name="escName" id="escName" />
@@ -824,16 +839,16 @@ function showViewEscResponse(originalRequest) {
         <c:otherwise>
           <input type="hidden" name="escName" />
         </c:otherwise>
-      </c:choose></td>
+      </c:choose>
+      </span>
+      </td>
     </tr>
   </tbody>
 </table>
-<table width="100%" cellpadding="3" cellspacing="0" border="0"
-  id="createEscTable">
+<table width="100%" cellpadding="3" cellspacing="0" border="0" id="createEscTable">
   <tbody>
     <tr class="tableRowAction">
       <td class="section" width="100%">
-      <div id="example" style="display:none;" class="escConfirmation"></div>
       <ul id="rowOrder"></ul>
       <table width="100%" cellpadding="5" cellspacing="0" border="0"
         class="ToolbarContent">
