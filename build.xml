@@ -369,7 +369,7 @@
         <include name="commons-httpclient-2.0.jar" />
         <include name="commons-pool.jar" />
         <include name="commons-services.jar" />
-        <include name="log4j.jar" />
+        <include name="log4j-1.2.14.jar" />
         <include name="quartz-1.5.1.jar" />
         <include name="quartz-oracle-1.5.1.jar" />
         <include name="instantj-1.6.jar" />
@@ -590,7 +590,7 @@
         <include name="commons-collections.jar" />        
         <include name="commons-validator.jar" />
         <include name="commons-dbcp.jar" />        
-        <include name="log4j.jar" />
+        <include name="log4j-1.2.14.jar" />
         <include name="jstl.jar" />
         <include name="standard.jar" />
         <include name="struts.jar" />               
@@ -760,7 +760,7 @@
         <include name="commons-collections.jar" />
         <include name="commons-beanutils.jar" />  
         <include name="commons-logging.jar" />
-        <include name="log4j.jar" />
+        <include name="log4j-1.2.14.jar" />
         <include name="jakarta-oro*.jar" />   <!-- RT -->
         <include name="snmp4j.jar" />        <!-- All SNMP monitoring -->
         <include name="ant.jar" />  <!-- AI scans + util.TokenReplacer -->
@@ -1165,7 +1165,7 @@
     
     <copy todir="${build.dir}/shell/lib" >
       <fileset dir="${thirdparty.lib}" >
-        <include name="log4j.jar" />
+        <include name="log4j-1.2.14.jar" />
         <include name="quartz-1.5.1.jar" />
         <include name="quartz-oracle-1.5.1.jar" />
         <include name="commons-validator.jar" />
