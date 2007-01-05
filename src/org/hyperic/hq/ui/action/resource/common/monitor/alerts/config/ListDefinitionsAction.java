@@ -84,8 +84,9 @@ public class ListDefinitionsAction extends TilesAction {
             appEntId = RequestUtils.getEntityTypeId(request);
             request.setAttribute("section", AppdefEntityConstants.typeToString(
                                  appEntId.getType()));
-            alertDefs =
-                boss.findAlertDefinitions(sessionId.intValue(), appEntId, pc);
+            alertDefs = boss.findAlertDefinitions(sessionId.intValue(),
+                                                  (AppdefEntityTypeID) appEntId,
+                                                  pc);
         } catch (ParameterNotFoundException e) {
             appEntId = RequestUtils.getEntityId(request);
             try {
