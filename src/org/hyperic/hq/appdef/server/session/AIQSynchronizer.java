@@ -41,10 +41,12 @@ import org.hyperic.hq.appdef.shared.AppdefEvent;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.miniResourceTree.MiniPlatformNode;
-import org.hyperic.hq.appdef.shared.miniResourceTree.MiniResourceTree;
-import org.hyperic.hq.appdef.shared.miniResourceTree.MiniServerNode;
-import org.hyperic.hq.appdef.shared.miniResourceTree.MiniServiceNode;
+import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
+import org.hyperic.hq.appdef.shared.ApplicationManagerUtil;
+import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
+import org.hyperic.hq.appdef.shared.resourceTree.ServiceNode;
+import org.hyperic.hq.appdef.shared.resourceTree.PlatformNode;
+import org.hyperic.hq.appdef.shared.resourceTree.ServerNode;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
@@ -57,21 +59,34 @@ import org.apache.commons.logging.Log;
  * A utility class to synchronize existing AI queue data with new AI data.
  */
 public class AIQSynchronizer {
-    private PlatformManagerLocal pm = null;
+    private PlatformManagerLocal _pm = null;
+    private ApplicationManagerLocal _am = null;
     
     private PlatformManagerLocal getPlatformMan() {
-        if (pm == null) {
+        if (_pm == null) {
             try {
-                pm = PlatformManagerUtil.getLocalHome().create();
+                _pm = PlatformManagerUtil.getLocalHome().create();
             } catch (CreateException e) {
                 throw new SystemException(e);
             } catch (NamingException e) {
                 throw new SystemException(e);
             }
         }
-        return pm;
+        return _pm;
     }
 
+    private ApplicationManagerLocal getAppMan() {
+        if (_am == null) {
+            try {
+                _am = ApplicationManagerUtil.getLocalHome().create();
+            } catch (CreateException e) {
+                throw new SystemException(e);
+            } catch (NamingException e) {
+                throw new SystemException(e);
+            }
+        }
+        return _am;
+    }
     public AIQSynchronizer () {}
 
     /**
@@ -185,25 +200,35 @@ public class AIQSynchronizer {
         // appdef events
         AppdefEntityID[] pid = new AppdefEntityID[] { platform.getEntityId() };
         try {
-            MiniResourceTree tree =
-                getPlatformMan().getMiniResourceTree(subject, pid, 0);
-            
+            ResourceTree tree;
+
+            try {
+                tree = getAppMan().getResourceTree(subject, pid,
+                                                   ResourceTreeGenerator.
+                                                   TRAVERSE_UP);
+            } catch (PermissionException e) {
+                log.error("Error sending change events", e);
+                return;
+            }
+
             for (Iterator p = tree.getPlatformIterator(); p.hasNext(); ) {
-                MiniPlatformNode pn = (MiniPlatformNode) p.next();
+                PlatformNode pn = (PlatformNode) p.next();
                 
-                pm.sendAppdefEvent(subject, pn.getPlatform().getEntityId(),
-                                   eventType);
+                getPlatformMan().sendAppdefEvent(subject,
+                                                 pn.getPlatform().getEntityId(),
+                                                 eventType);
                 
                 for(Iterator s = pn.getServerIterator(); s.hasNext();) {
-                    MiniServerNode sn = (MiniServerNode) s.next();
-                    pm.sendAppdefEvent(subject, sn.getServer().getEntityId(),
-                                       eventType);
+                    ServerNode sn = (ServerNode) s.next();
+                    getPlatformMan().sendAppdefEvent(subject,
+                                                     sn.getServer().getEntityId(),
+                                                     eventType);
                     
                     for(Iterator sv = sn.getServiceIterator(); sv.hasNext();) {
-                        MiniServiceNode svn = (MiniServiceNode)sv.next();
-                        pm.sendAppdefEvent(subject,
-                                           svn.getService().getEntityId(),
-                                           eventType);
+                        ServiceNode svn = (ServiceNode)sv.next();
+                        getPlatformMan().sendAppdefEvent(subject,
+                                                         svn.getService().getEntityId(),
+                                                         eventType);
                     }
                 }
             }
