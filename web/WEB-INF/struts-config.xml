@@ -43,9 +43,6 @@
         <!-- this is used when rendering the AI portlet and processing the queue -->
         <form-bean name="AIQueueForm"
                    type="org.hyperic.hq.ui.action.portlet.autoDisc.AIQueueForm"/>
-        <!-- form bean used to render the recently approved list -->
-        <form-bean name="RAListForm"
-                   type="org.hyperic.hq.ui.action.portlet.recentlyApproved.RAListForm"/>
         <!-- this is for configuring the AI portlet -->
         <form-bean name="AutoDiscoveryForm"
                    type="org.hyperic.hq.ui.action.portlet.autoDisc.PropertiesForm"/>
@@ -1845,17 +1842,10 @@
               type="org.hyperic.hq.ui.action.portlet.recentresources.ViewAction"/>
 
       <action path="/dashboard/ViewRecentlyApproved"
-              name="RAListForm"
               scope="request"
               type="org.hyperic.hq.ui.action.portlet.recentlyApproved.ViewAction">
       </action>
-      <action path="/dashboard/ProcessRAList"
-              name="RAListForm"
-              scope="request"
-              input="/dashboard/ViewRecentlyApproved"
-              type="org.hyperic.hq.ui.action.portlet.recentlyApproved.ProcessRAList">
-              <forward name="success" path="/Dashboard.do" redirect="true"/>
-      </action>
+
       <action path="/dashboard/EditRecentlyApproved"
               name="RecentlyApprovedForm"
               scope="request"
