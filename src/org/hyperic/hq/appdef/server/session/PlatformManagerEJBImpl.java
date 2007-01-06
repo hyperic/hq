@@ -59,7 +59,6 @@ import org.hyperic.hq.appdef.shared.AppdefGroupManagerUtil;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.IpValue;
-import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformLightValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
@@ -68,7 +67,6 @@ import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.appdef.shared.miniResourceTree.MiniResourceTree;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ConfigResponseDB;
@@ -610,150 +608,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         } catch (PlatformNotFoundException e) {
             _log.info("Error finding platform by fqdn: " + fqdn);
             return null;
-        }
-    }
-    
-    /**
-     * Generate a resource tree based on the root resources and
-     * the traversal (one of ResourceTreeGenerator.TRAVERSE_*)
-     *
-     * @ejb:interface-method
-     */
-    public MiniResourceTree getMiniResourceTree(AuthzSubjectValue subject,
-                                                AppdefEntityID[] resources,
-                                                long timestamp)
-        throws AppdefEntityNotFoundException
-    {
-        MiniResourceTreeGenerator generator;
-
-        generator = new MiniResourceTreeGenerator(subject);
-        return generator.generate(resources, timestamp);
-    }
-
-    /**
-     * Get a platform by id.
-     *
-     * Unlike it's value object counterpart this method will not throw 
-     * permission exceptions, just PlatformNotFoundException.
-     *
-     * @ejb:interface-method
-     */
-    public MiniResourceValue getMiniPlatformById(AuthzSubjectValue subject,
-                                                 Integer id)
-        throws PlatformNotFoundException {
-        final String SQL_PLAT_BY_ID =
-            "SELECT RES.ID AS RID, P.ID, T.NAME AS TNAME, P.NAME, P.CTIME " +
-            "FROM EAM_PLATFORM P, EAM_RESOURCE RES, EAM_PLATFORM_TYPE T " + 
-            PermissionManager.AUTHZ_FROM +
-            " WHERE RES.INSTANCE_ID = P.ID" +
-            " AND RES.RESOURCE_TYPE_ID = " + AuthzConstants.authzPlatform +
-            " AND P.PLATFORM_TYPE_ID = T.ID AND P.ID = ? ";
-
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String sql =
-            SQL_PLAT_BY_ID +
-            pm.getSQLWhere(subject.getId(), "P.ID");
-
-        try {
-            conn = getDBConn();
-            ps = conn.prepareStatement(sql);
-            
-            ps.setInt(1, id.intValue());
-            pm.prepareSQL(ps, 2, 
-                          subject.getId(),
-                          AuthzConstants.authzPlatform,
-                          AuthzConstants.perm_viewPlatform);
-
-            rs = ps.executeQuery();
-
-            if (rs.next()) {
-                int col = 1;
-                
-                MiniResourceValue val =
-                    new MiniResourceValue(rs.getInt(col++),
-                                          rs.getInt(col++),
-                                          AppdefEntityConstants.
-                                          APPDEF_TYPE_PLATFORM,
-                                          rs.getString(col++),
-                                          rs.getString(col++),
-                                          rs.getLong(col++));
-
-                return val;
-            } else {
-                // XXX: Could retry the query here without the authz to
-                //      see if it's a permissions issue.
-                throw new PlatformNotFoundException("Platform " + id +
-                                                    " not found");
-            }
-        } catch (SQLException e) {
-            throw new SystemException("Error looking up platform by id: " +
-                                         e, e);
-        } finally {
-            DBUtil.closeJDBCObjects(_log, conn, ps, rs);
-        }
-    }
-
-    /**
-     * Get a platform by server.
-     *
-     * @ejb:interface-method
-     */
-    public MiniResourceValue getMiniPlatformByServer(
-            AuthzSubjectValue subject, Integer id)
-        throws ServerNotFoundException {
-        final String SQL_PLATFORM_BY_SERVER =
-            "SELECT RES.ID AS RID, P.ID, T.NAME AS TNAME, P.NAME, P.CTIME " +
-            "FROM EAM_PLATFORM P, EAM_PLATFORM_TYPE T, EAM_SERVER S, " +
-            "EAM_RESOURCE RES " + 
-            PermissionManager.AUTHZ_FROM + " " +
-            "WHERE RES.INSTANCE_ID = P.ID " +
-            "AND RES.RESOURCE_TYPE_ID = " + AuthzConstants.authzPlatform + " " +
-            "AND P.ID = S.PLATFORM_ID " +
-            "AND P.PLATFORM_TYPE_ID = T.ID " +
-            "AND S.ID = ? ";
-
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        try {
-            conn = getDBConn();
-            ps = conn.prepareStatement(SQL_PLATFORM_BY_SERVER);
-            
-            ps.setInt(1, id.intValue());
-
-            rs = ps.executeQuery();
-
-            if (rs.next()) {
-                int col = 1;
-                
-                MiniResourceValue val =
-                    new MiniResourceValue(rs.getInt(col++),
-                                          rs.getInt(col++),
-                                          AppdefEntityConstants.
-                                          APPDEF_TYPE_PLATFORM,
-                                          rs.getString(col++),
-                                          rs.getString(col++),
-                                          rs.getLong(col++));
-
-                return val;
-            } else {
-                // XXX: Could retry the query here without the authz to
-                //      see if it's a permissions issue.
-                if (_log.isDebugEnabled()) {
-                    _log.debug(SQL_PLATFORM_BY_SERVER);
-                    _log.debug("arg1: " + id);
-                }
-                throw new ServerNotFoundException("Server " + id +
-                                                  " not found");
-            }
-        } catch (SQLException e) {
-            throw new SystemException("Error looking up platform by " +
-                                         "server: " + e, e);
-        } finally {
-            DBUtil.closeJDBCObjects(_log, conn, ps, rs);
         }
     }
 
