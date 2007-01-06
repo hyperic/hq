@@ -533,7 +533,7 @@ function showViewEscResponse(originalRequest) {
 
 
 
-      function initEsc () {
+    function initEsc () {
         // Set up the escalation dropdown
         var escJson = eval( '( { "escalations":<c:out value="${escalations}" escapeXml="false"/> })' );
         var escalationSel = $('escIdSel');
@@ -574,8 +574,18 @@ function showViewEscResponse(originalRequest) {
             }
 
             sendEscForm();
+
             addOption(escId, escName, escName, true);
-            $('escNameSpan').style.visibility = 'hidden';
+
+            if (reloadScheme) {
+                document.EscalationSchemeForm.escId.value = escName;
+            }
+            else {
+                $('escNameSpan').style.visibility = 'hidden';
+            }
+
+            //schemeChange(escId);
+
             return false;
         }
 
@@ -650,7 +660,7 @@ function showViewEscResponse(originalRequest) {
         }
 
         var pars = "rowOrder=" + rowOrder + "escForm=" + escFormSerial + "&ad=" + adId + "&gad=" + gadId + "&eid=" + eId + "aetid=" + aetId;
-        new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse, onFailure :reportError} );
+        new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse, onFailure: reportError} );
     }
 
     function configure(id) {
@@ -766,7 +776,7 @@ function showViewEscResponse(originalRequest) {
 
 </script>
 
-<html:form action="/alerts/ConfigEscalation">
+<html:form action="/alerts/ConfigEscalation" method="GET">
   <html:hidden property="mode" />
   <c:choose>
     <c:when test="${not empty param.ad}">
@@ -778,14 +788,16 @@ function showViewEscResponse(originalRequest) {
         value='<c:out value="${param.gad}"/>' />
     </c:when>
   </c:choose>
-  <c:choose>
-    <c:when test="${not empty Resource}">
-      <html:hidden property="eid" value="${Resource.entityId}" />
-    </c:when>
-    <c:otherwise>
-      <html:hidden property="aetid" value="${ResourceType.appdefTypeKey}" />
-    </c:otherwise>
-  </c:choose>
+  <c:if test="${not empty alertDef}">
+    <c:choose>
+      <c:when test="${not empty Resource}">
+        <html:hidden property="eid" value="${Resource.entityId}" />
+      </c:when>
+      <c:otherwise>
+        <html:hidden property="aetid" value="${ResourceType.appdefTypeKey}" />
+      </c:otherwise>
+    </c:choose>
+  </c:if>
   <html:hidden property="escId" />
 </html:form>
 

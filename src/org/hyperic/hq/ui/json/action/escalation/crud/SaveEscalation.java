@@ -138,12 +138,11 @@ public class SaveEscalation extends BaseAction
             result = wmed.saveEscalation(context, context.getSessionId(),
                                          alertDefId, 1, escalation);
         } else {
-            throw new IllegalArgumentException("Required attribute 'ad' or " +
-                                               "'gad' is not defined");
+            result = wmed.saveEscalation(context, context.getSessionId(),
+                                         null, -1, escalation);
         }
         context.setJSONResult(new JSONResult(result));
         context.getRequest().setAttribute("escalation", result);
-
     }
 
     private List parseActions(JsonActionContext context)

@@ -35,7 +35,7 @@
 <tiles:insert definition=".portlet.error"/>
 <tiles:insert definition=".portlet.confirm"/>
 
-<table id="escalations" width="100%" cellpadding="0" cellspacing="0"><tr class="ListRow"><td colspan="2" class="ListHeaderInactiveSorted">Escalation Scheme</td></tr></table>
+<table id="escalations" width="100%" cellpadding="0" cellspacing="0"><tr class="ListRow"><td colspan="2" class="TableRowHeader">Escalation Scheme</td></tr></table>
 
 <!-- Do the delete button here so that we don't have to try to duplicate it in javascript -->
 <span id="deleteBtn" style="display: none;"><html:img page="/images/tbb_delete.gif" border="0" onmouseout="imageSwap(this, imagePath + 'tbb_delete', '');" onmousedown="imageSwap(this, imagePath + 'tbb_delete', '_gray')"/></span>
@@ -69,7 +69,7 @@
 
     var td = document.createElement("td");
     td.setAttribute('class', 'ListCell');
-    td.innerHTML = schemes[i].name;
+    td.innerHTML = '<a href="<html:rewrite page="/admin/config/Config.do?mode=escalate&escId="/>' + schemes[i].name + '">' + schemes[i].name + '</a>';
     tr.appendChild(td);
 
     td = document.createElement("td");
@@ -80,8 +80,19 @@
 
     $('escalations').appendChild(tr);
   }
+
+  function changeEscalationSchemeFormAction() {
+    document.EscalationSchemeForm.action = '<html:rewrite action="/admin/config/Config.do"/>';
+    document.EscalationSchemeForm.mode.value = 'escalate';
+  }
+
+  onloads.push( changeEscalationSchemeFormAction );
+
+  var reloadScheme = true;
 </script>
 
 <br/>
+
+<tiles:insert page="/resource/common/monitor/alerts/config/ViewEscalation.jsp"/>
 <br/>
 <tiles:insert page="/admin/config/AdminHomeNav.jsp"/>

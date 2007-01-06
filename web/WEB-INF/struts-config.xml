@@ -511,6 +511,7 @@
 
       <action path="/admin/config/ConfigPortal" 
               parameter="mode"
+              name="EscalationSchemeForm"
               type="org.hyperic.hq.ui.action.admin.config.ConfigAction">
       </action>
       
