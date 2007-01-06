@@ -958,13 +958,13 @@ public class AppdefBossEJBImpl
      * the caller to know the instance-id's corresponding type. Similarly,
      * the return value is upcasted.
      * */
-    private AppdefResourceValue findById (AuthzSubjectValue subject,
-                                          AppdefEntityID entityId)
+    private AppdefResourceValue findById(AuthzSubjectValue subject,
+                                         AppdefEntityID entityId)
         throws AppdefEntityNotFoundException, PermissionException,
                SessionTimeoutException, SessionNotFoundException 
     {
         AppdefResourceValue retVal = null;
-        MiniResourceValue host = null;
+        AppdefResourceValue host = null;
         
         switch (entityId.getType()) {
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
@@ -972,16 +972,20 @@ public class AppdefBossEJBImpl
                 getPlatformManager().getPlatformById(subject, entityId.getId());
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            retVal = 
+            ServerValue server =
                 getServerManager().getServerById(subject, entityId.getId());
-            host = getPlatformManager()
-                .getMiniPlatformByServer(subject, entityId.getId());
+            host = server.getPlatform();
+            retVal = server;
+            retVal.setHostName(host.getName());
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            retVal = 
+            ServiceValue service =
                 getServiceManager().getServiceById(subject, entityId.getId());
-            host = getServerManager()
-                .getMiniServerByService(subject, entityId.getId());
+            server =
+                getServerManager().getServerById(subject,
+                                                 service.getServer().getId());
+            retVal = service;
+            retVal.setHostName(server.getPlatform().getName());
             break;
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             retVal = 
@@ -1005,9 +1009,6 @@ public class AppdefBossEJBImpl
                     + " is not a valid appdef entity type");
         }
         
-        if (host != null)
-            retVal.setHostName(host.name);
-
         return retVal;
     }
 
