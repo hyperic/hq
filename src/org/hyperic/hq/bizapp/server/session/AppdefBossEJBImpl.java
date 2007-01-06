@@ -100,7 +100,6 @@ import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.appdef.shared.miniResourceTree.MiniResourceTree;
 import org.hyperic.hq.appdef.shared.pager.AppdefGroupPagerFilterExclude;
 import org.hyperic.hq.appdef.shared.pager.AppdefGroupPagerFilterGrpEntRes;
 import org.hyperic.hq.appdef.shared.pager.AppdefGroupPagerFilterMemExclude;
