@@ -26,6 +26,7 @@
 package org.hyperic.hq.product.jmx;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -82,7 +83,12 @@ public class MBeanDumper {
                     try {
                         Object o = mServer.getAttribute(obj, name);
                         if (o != null) {
-                            value = o.toString();
+                            if (o.getClass().isArray()) {
+                                value = Arrays.asList((Object[])o).toString();
+                            }
+                            else {
+                                value = o.toString();
+                            }
                         }
                     } catch (Exception e) {
                         value = "ERROR";
