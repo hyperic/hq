@@ -981,11 +981,8 @@ public class AppdefBossEJBImpl
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
             ServiceValue service =
                 getServiceManager().getServiceById(subject, entityId.getId());
-            server =
-                getServerManager().getServerById(subject,
-                                                 service.getServer().getId());
             retVal = service;
-            retVal.setHostName(server.getPlatform().getName());
+            retVal.setHostName(service.getServer().getName());
             break;
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             retVal = 
@@ -2831,16 +2828,18 @@ public class AppdefBossEJBImpl
             
             for (Iterator i = ret.iterator(); i.hasNext(); ) {
                 AppdefResourceValue res = (AppdefResourceValue) i.next();
-                MiniResourceValue host;
+                AppdefResourceValue parent;
 
-                if (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVER)
-                    host = getPlatformManager()
-                        .getMiniPlatformByServer(subject, res.getId());
-                else
-                    host = getServerManager()
-                        .getMiniServerByService(subject, res.getId());
-                
-                res.setHostName(host.name);
+                if (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
+                    ServerValue server = getServerManager()
+                        .getServerById(subject, res.getId());
+                    res.setHostName(server.getPlatform().getName());
+
+                } else {
+                    ServiceValue service =
+                        getServiceManager().getServiceById(subject, res.getId());
+                    res.setHostName(service.getServer().getName());
+                }
             }
         }
         return ret;
