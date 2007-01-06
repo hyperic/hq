@@ -25,12 +25,17 @@
 
 package org.hyperic.hq.product.jmx;
 
+import java.util.StringTokenizer;
+
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
 public class MxNotificationPlugin
     extends LogTrackPlugin {
+
+    public static final String PROP_NOTIFICATION_LISTENER_NAME =
+        "NOTIFICATION_LISTENER_NAME";
 
     private MxNotificationListener listener = null;
 
@@ -49,6 +54,20 @@ public class MxNotificationPlugin
     }
 
     public String[] getMBeans() {
+        String listenerName =
+            getTypeProperty(PROP_NOTIFICATION_LISTENER_NAME);
+
+        if (listenerName != null) {
+            StringTokenizer tok =
+                new StringTokenizer(listenerName, "\r\n");
+            String[] mbeans = new String[tok.countTokens()];
+            int i=0;
+            while (tok.hasMoreTokens()) {
+                mbeans[i++] = tok.nextToken().trim();
+            }
+            return mbeans;
+        }
+
         String objectName = 
             getTypeProperty(MxQuery.PROP_OBJECT_NAME);
         if (objectName == null){
