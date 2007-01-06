@@ -85,8 +85,8 @@ public class EscalationWebMediator
     }
 
     public JSONObject saveEscalation(JsonActionContext context,
-                               int sessionId, Integer alertDefId,
-                               int alertType, JSONObject json)
+                                     int sessionId, Integer alertDefId,
+                                     int alertType, JSONObject json)
         throws PermissionException,
                SessionTimeoutException,
                SessionNotFoundException,
