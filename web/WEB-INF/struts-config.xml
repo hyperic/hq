@@ -532,8 +532,8 @@
               parameter="mode">
       </action>
       
-      <action path="/admin/config/RemoveEscalation"
-              type="org.hyperic.hq.ui.action.admin.config.RemoveEscalationAction">
+      <action path="/admin/config/*Escalation"
+              type="org.hyperic.hq.ui.action.admin.config.{1}EscalationAction">
         <forward name="success" path="/admin/config/Config.do?mode=escalate"/>
       </action>
 
@@ -2299,6 +2299,10 @@
               scope="request"
               type="org.hyperic.hq.ui.json.action.escalation.finder.Json{1}ByAlertDefId"
               parameter="{2}"/>
+
+      <action path="/escalation/ListAllEscalationName"
+              scope="request"
+              type="org.hyperic.hq.ui.json.action.escalation.finder.ListAllEscalationName"/>
 
   </action-mappings>
 
