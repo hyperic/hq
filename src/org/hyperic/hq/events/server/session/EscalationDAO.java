@@ -8,6 +8,7 @@ import org.hyperic.hibernate.PersistedObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.NonUniqueObjectException;
+import org.hibernate.criterion.Order;
 
 import java.util.Iterator;
 import java.util.List;
@@ -96,7 +97,8 @@ public class EscalationDAO extends HibernateDAO
     public Collection findAll(Integer subjectId) throws PermissionException
     {
         SessionBase.canViewEscalation(subjectId);
-        return super.findAll();
+        return getSession().createCriteria(getPersistentClass())
+            .addOrder( Order.asc("name")).list();
     }
 
     public void clearActions(Escalation entity) {
