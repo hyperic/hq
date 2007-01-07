@@ -35,15 +35,29 @@
 <tiles:insert definition=".portlet.error"/>
 <tiles:insert definition=".portlet.confirm"/>
 
-<table id="escalations" width="100%" cellpadding="0" cellspacing="0"><tr class="ListRow"><td colspan="2" class="TableRowHeader">Escalation Scheme</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr class="ListRow"><td colspan="2" class="TableRowHeader">Escalation Scheme</td></tr>
+<tbody id="escalations"></tbody>
+</table>
 
 <!-- Do the delete button here so that we don't have to try to duplicate it in javascript -->
 <span id="deleteBtn" style="display: none;"><html:img page="/images/tbb_delete.gif" border="0" onmouseout="imageSwap(this, imagePath + 'tbb_delete', '');" onmousedown="imageSwap(this, imagePath + 'tbb_delete', '_gray')"/></span>
 
 <script langugage="text/Javascript">
-  var escJson = eval( '( { "escalations":<c:out value="${escalations}" escapeXml="false"/> })' );
+function showEscRows(originalRequest) {
+  var escJson = eval( '( { "escalations": ' + originalRequest.responseText + ' })' );
 
   var schemes = escJson.escalations;
+
+  var escalations = $('escalations');
+  if (escalations.childNodes.length > 0) {
+    var cursor = escalations.childNodes[0];
+    while (cursor) {
+      var next = cursor.nextSibling;
+      escalations.removeChild(cursor);
+      cursor = next;
+    }
+  }
 
   if (schemes.length == 0) {
     var tr = document.createElement("tr");
@@ -55,7 +69,7 @@
     td.innerHTML = '<fmt:message key="admin.config.message.noEscalations"/>';
     tr.appendChild(td);
 
-    $('escalations').appendChild(tr);
+    escalations.appendChild(tr);
   }
 
   for (var i = 0; i < schemes.length; i++) {
@@ -78,18 +92,21 @@
     td.innerHTML = '<a href="<html:rewrite action="/admin/config/RemoveEscalation"/>' + '?esc=' + schemes[i].id + '">' + $('deleteBtn').innerHTML + '</a>';
     tr.appendChild(td);
 
-    $('escalations').appendChild(tr);
+    escalations.appendChild(tr);
   }
+}
 
-  function changeEscalationSchemeFormAction() {
+  function initEscalationSchemes() {
+    new Ajax.Request('<html:rewrite action="/escalation/ListAllEscalationName"/>', {onSuccess:showEscRows});
     document.EscalationSchemeForm.action = '<html:rewrite action="/admin/config/Config.do"/>';
     document.EscalationSchemeForm.mode.value = 'escalate';
   }
 
-  onloads.push( changeEscalationSchemeFormAction );
+  onloads.push( initEscalationSchemes );
 
   var reloadScheme = true;
 </script>
+
 
 <br/>
 

@@ -577,13 +577,12 @@ function showViewEscResponse(originalRequest) {
 
             addOption(escId, escName, escName, true);
 
+            $('escNameSpan').style.visibility = 'hidden';
+
             if (reloadScheme) {
                 document.EscalationSchemeForm.escId.value = escName;
+                setTimeout( "initEscalationSchemes()", 1000 );
             }
-            else {
-                $('escNameSpan').style.visibility = 'hidden';
-            }
-
             //schemeChange(escId);
 
             return false;

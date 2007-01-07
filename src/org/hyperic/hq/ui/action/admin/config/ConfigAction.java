@@ -99,16 +99,8 @@ public class ConfigAction extends BaseDispatchAction {
                                   HttpServletRequest request,
                                   HttpServletResponse resp)
         throws Exception {
-        ServletContext ctx = getServlet().getServletContext();
-        int sessionID = RequestUtils.getSessionId(request).intValue();
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
-    
-        JSONArray arr = eb.listAllEscalationName(sessionID);
-        request.setAttribute("escalations", arr);
-        
         createPortal(request, false, "admin.home.EscalationSchemes",
                      ".admin.config.EditEscalationConfig");
-        
         return null;        
     }
 
