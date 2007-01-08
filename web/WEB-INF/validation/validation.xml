@@ -192,7 +192,7 @@
     <form name="ApplicationForm">
       <field property="name" depends="required,maxlength">
         <arg0 name="required"
-              key="resource.application.inventory.ApplicationName"/>
+              key="common.header.Name"/>
         <var>
          <var-name>maxlength</var-name>
          <var-value>100</var-value>
@@ -248,7 +248,7 @@
     <form name="EditGeneralApplicationForm">
       <field property="name" depends="required,maxlength">
         <arg0 name="required"
-              key="resource.application.inventory.ApplicationName"/>
+              key="common.header.Name"/>
         <var>
          <var-name>maxlength</var-name>
          <var-value>100</var-value>

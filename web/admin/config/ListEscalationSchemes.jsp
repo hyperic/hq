@@ -35,10 +35,17 @@
 <tiles:insert definition=".portlet.error"/>
 <tiles:insert definition=".portlet.confirm"/>
 
-<table width="100%" cellpadding="0" cellspacing="0">
-<tr class="ListRow"><td colspan="2" class="TableRowHeader">Escalation Scheme</td></tr>
-<tbody id="escalations"></tbody>
-</table>
+<table width="100%" cellpadding="0" cellspacing="10">
+<tr>
+<td width="30%" valign="top" style="border: 2px solid grey">
+    <table width="100%" cellpadding="0" cellspacing="0">
+    <tr class="ListRow">
+      <td class="TableRowHeader"><fmt:message key="common.header.Name"/></td>
+      <td class="TableRowHeader" style="text-align: right;"><html:link page="/admin/config/Config.do?mode=escalate"><html:img src="/images/tbb_new.gif" border="0"/></html:link></td>
+    </tr>
+    <tbody id="escalations"></tbody>
+    </table>
+</td>
 
 <!-- Do the delete button here so that we don't have to try to duplicate it in javascript -->
 <span id="deleteBtn" style="display: none;"><html:img page="/images/tbb_delete.gif" border="0" onmouseout="imageSwap(this, imagePath + 'tbb_delete', '');" onmousedown="imageSwap(this, imagePath + 'tbb_delete', '_gray')"/></span>
@@ -83,7 +90,12 @@ function showEscRows(originalRequest) {
 
     var td = document.createElement("td");
     td.setAttribute('class', 'ListCell');
-    td.innerHTML = '<a href="<html:rewrite page="/admin/config/Config.do?mode=escalate&escId="/>' + schemes[i].name + '">' + schemes[i].name + '</a>';
+    if (schemes[i].name == '<c:out value="${param.escId}"/>') {
+      td.innerHTML = schemes[i].name;
+    }
+    else {
+      td.innerHTML = '<a href="<html:rewrite page="/admin/config/Config.do?mode=escalate&escId="/>' + schemes[i].name + '">' + schemes[i].name + '</a>';
+    }
     tr.appendChild(td);
 
     td = document.createElement("td");
@@ -110,6 +122,18 @@ function showEscRows(originalRequest) {
 
 <br/>
 
-<tiles:insert page="/resource/common/monitor/alerts/config/ViewEscalation.jsp"/>
+<td>
+<c:choose>
+  <c:when test="${not empty param.escId}">
+    <tiles:insert page="/admin/config/ViewEscalation.jsp"/>
+  </c:when>
+  <c:otherwise>
+    <tiles:insert page="/admin/config/NewEscalation.jsp"/>
+  </c:otherwise>
+</c:choose>
+</td>
+</tr>
+</table>
+
 <br/>
 <tiles:insert page="/admin/config/AdminHomeNav.jsp"/>

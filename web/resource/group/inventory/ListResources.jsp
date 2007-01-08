@@ -108,7 +108,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
       <display:checkboxdecorator name="resources" onclick="ToggleSelection(this, widgetProperties, true)" styleClass="listMember"/>
     </display:column>
     <display:column width="18%" property="name" sort="true" sortAttr="5"
-                    defaultSort="true" title="resource.group.inventory.NameTH" 
+                    defaultSort="true" title="common.header.Name" 
                     href="/resource/${resourceItem.entityId.typeName}/Inventory.do?mode=view&rid=${resourceItem.id}&type=${resourceItem.entityId.type}"/>
     <display:column width="18%" property="appdefResourceTypeValue.name" title="resource.group.inventory.TypeTH" />
     <display:column width="44%" property="description" title="common.header.Description" />

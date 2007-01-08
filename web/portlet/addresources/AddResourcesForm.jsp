@@ -491,7 +491,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
           <display:column width="1%" property="entityId.appdefKey" title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties)\" name=\"fromToggleAll\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
             <display:checkboxdecorator name="availableResources" onclick="ToggleSelection(this, widgetProperties)" styleClass="availableListMember"/>
           </display:column>
-          <display:column property="name" title="resource.group.inventory.NameTH" width="40%" 
+          <display:column property="name" title="common.header.Name" width="40%" 
                     sort="true" defaultSort="true" sortAttr="1"/>
           <display:column property="description" title="common.header.Description" width="59%"/>
         </display:table>
@@ -534,7 +534,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
           <display:column width="1%" property="entityId.appdefKey" title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties)\" name=\"toToggleAll\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
             <display:checkboxdecorator name="pendingResources" onclick="ToggleSelection(this, widgetProperties)" styleClass="pendingListMember"/>
           </display:column>
-          <display:column property="name" title="resource.group.inventory.NameTH" width="40%" 
+          <display:column property="name" title="common.header.Name" width="40%" 
                     sort="true" defaultSort="true" sortAttr="1"/>
           <display:column property="description" title="common.header.Description" width="59%"/>
         </display:table>
