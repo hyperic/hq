@@ -28,115 +28,86 @@ package org.hyperic.hq.appdef;
 import org.hyperic.hq.appdef.shared.ConfigResponseValue;
 import org.hyperic.hibernate.PersistedObject;
 
-/**
- *
- */
 public class ConfigResponseDB extends PersistedObject
 {
-    private byte[] productResponse;
-    private byte[] controlResponse;
-    private byte[] measurementResponse;
-    private byte[] autoInventoryResponse;
-    private byte[] responseTimeResponse;
-    private boolean userManaged;
-    private String validationError;
+    private byte[] _productResponse;
+    private byte[] _controlResponse;
+    private byte[] _measurementResponse;
+    private byte[] _autoInventoryResponse;
+    private byte[] _responseTimeResponse;
+    private boolean _userManaged;
+    private String _validationError;
 
-    // Constructors
-
-    /**
-     * default constructor
-     */
-    public ConfigResponseDB()
-    {
+    public ConfigResponseDB() {
         super();
     }
 
-    public byte[] getProductResponse()
-    {
-        return this.productResponse;
+    public byte[] getProductResponse() {
+        return _productResponse;
     }
 
-    public void setProductResponse(byte[] productResponse)
-    {
-        this.productResponse = productResponse;
+    public void setProductResponse(byte[] productResponse) {
+        _productResponse = productResponse;
     }
 
-    public byte[] getControlResponse()
-    {
-        return this.controlResponse;
+    public byte[] getControlResponse() {
+        return _controlResponse;
     }
 
-    public void setControlResponse(byte[] controlResponse)
-    {
-        this.controlResponse = controlResponse;
+    public void setControlResponse(byte[] controlResponse) {
+        _controlResponse = controlResponse;
     }
 
-    public byte[] getMeasurementResponse()
-    {
-        return this.measurementResponse;
+    public byte[] getMeasurementResponse() {
+        return _measurementResponse;
     }
 
-    public void setMeasurementResponse(byte[] measurementResponse)
-    {
-        this.measurementResponse = measurementResponse;
+    public void setMeasurementResponse(byte[] measurementResponse) {
+        _measurementResponse = measurementResponse;
     }
 
-    public byte[] getAutoInventoryResponse()
-    {
-        return this.autoInventoryResponse;
+    public byte[] getAutoInventoryResponse() {
+        return _autoInventoryResponse;
     }
 
-    public void setAutoInventoryResponse(byte[] autoInventoryResponse)
-    {
-        this.autoInventoryResponse = autoInventoryResponse;
+    public void setAutoInventoryResponse(byte[] autoInventoryResponse) {
+        _autoInventoryResponse = autoInventoryResponse;
     }
 
-    public byte[] getResponseTimeResponse()
-    {
-        return this.responseTimeResponse;
+    public byte[] getResponseTimeResponse() {
+        return _responseTimeResponse;
     }
 
-    public void setResponseTimeResponse(byte[] responseTimeResponse)
-    {
-        this.responseTimeResponse = responseTimeResponse;
+    public void setResponseTimeResponse(byte[] responseTimeResponse) {
+        _responseTimeResponse = responseTimeResponse;
     }
 
-    public boolean isUserManaged()
-    {
-        return this.userManaged;
+    public boolean isUserManaged() {
+        return _userManaged;
     }
 
-    /**
-     * added for legacy EJB Entity Bean compatibility
-     * @return
-     */
-    public boolean getUserManaged()
-    {
+    public boolean getUserManaged() {
         return isUserManaged();
     }
 
-    public void setUserManaged(boolean userManaged)
-    {
-        this.userManaged = userManaged;
+    public void setUserManaged(boolean userManaged) {
+        _userManaged = userManaged;
     }
 
-    public String getValidationError()
-    {
-        return this.validationError;
+    public String getValidationError() {
+        return _validationError;
     }
 
-    public void setValidationError(String validationErr)
-    {
-        this.validationError = validationErr;
+    public void setValidationError(String validationErr) {
+        _validationError = validationErr;
     }
 
     private ConfigResponseValue _value = new ConfigResponseValue();
     /**
-     * for legacy EJB Entity Bean compatibility
-     * @return
+     * Legacy EJB DTO pattern
+     * @deprecated Use (this) ConfigResponseDB object instead
      */
-    public ConfigResponseValue getConfigResponseValue()
-    {
+    public ConfigResponseValue getConfigResponseValue() {
         _value.setId(getId());
         _value.setProductResponse(getProductResponse());
         _value.setControlResponse(getControlResponse());
@@ -149,8 +120,7 @@ public class ConfigResponseDB extends PersistedObject
         return _value;
     }
 
-    public void setConfigResponseValue(ConfigResponseValue valueHolder)
-    {
+    public void setConfigResponseValue(ConfigResponseValue valueHolder) {
         setProductResponse( valueHolder.getProductResponse() );
         setControlResponse( valueHolder.getControlResponse() );
         setMeasurementResponse( valueHolder.getMeasurementResponse() );
@@ -160,8 +130,7 @@ public class ConfigResponseDB extends PersistedObject
         setValidationError( valueHolder.getValidationError() );
     }
 
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         return (obj instanceof ConfigResponseDB) && super.equals(obj);
     }
 }
