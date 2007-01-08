@@ -115,8 +115,7 @@ public class ConfigResponseDB extends PersistedObject
         _value.setAutoinventoryResponse(getAutoInventoryResponse());
         _value.setResponseTimeResponse(getResponseTimeResponse());
         _value.setUserManaged(getUserManaged());
-        _value.setValidationError(
-            (getValidationError() == null) ? "" : getValidationError());
+        _value.setValidationError(getValidationError());
         return _value;
     }
 
