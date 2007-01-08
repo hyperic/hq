@@ -147,7 +147,7 @@ public class ExecutableProcess extends Collector {
         this.file = new File(name);
         if (!this.file.exists()) {
             String msg =
-                "Plugin '" + this.file + "' does not exist";
+                "File '" + this.file + "' does not exist";
             throw new IllegalArgumentException(msg);
         }
         if (this.file.isAbsolute()) {
