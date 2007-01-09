@@ -28,26 +28,22 @@ package org.hyperic.hq.appdef.server.session;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigResponseValue;
-import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocalHome;
 import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
-import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ServerManagerUtil;
-import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
-import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -59,31 +55,26 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.hq.product.TypeInfo;
-import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
-import org.hyperic.util.jdbc.DBUtil;
-import org.hyperic.util.math.MathUtil;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.ConfigResponseDAO;
-import org.hyperic.hibernate.Util;
+import org.hyperic.hq.dao.ServerDAO;
+import org.hyperic.hq.dao.ServiceDAO;
+import org.hyperic.hq.dao.PlatformDAO;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.naming.NamingException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  *
@@ -191,6 +182,7 @@ public class ConfigManagerEJBImpl
         typeCache.put(new Integer(AppdefEntityConstants.APPDEF_TYPE_APPLICATION),
                       new HashMap());
     }
+
     /**
      * @ejb:interface-method
      */
@@ -338,9 +330,6 @@ public class ConfigManagerEJBImpl
             platformId = id;
             platform = getPlatformStuffForPlatform(platformId.getId());
         } 
-
-        // Load IP address for all resources
-        loadPlatformIp(platformId, platform);
 
         // Platform config
         if (platformId != null) {
@@ -736,330 +725,72 @@ public class ConfigManagerEJBImpl
     public void ejbActivate() {}
     public void ejbPassivate() {}
 
-    private Connection getDBConn()
-    {
-        return Util.getConnection();
-    }
-
-    private void disconnectDBConn()
-    {
-        Util.endConnection();
-    }
-
-    private static final String SQL_SERVERBYSERVICE
-        = "SELECT s.ID, s.INSTALLPATH FROM EAM_SERVER s, EAM_SERVICE svc "
-        + "WHERE svc.SERVER_ID = s.ID AND svc.ID = ?";
-    private ServerConfigStuff getServerStuffForService(Integer id) 
+    private ServerConfigStuff getServerStuffForService(Integer id)
         throws AppdefEntityNotFoundException {
 
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String sql = SQL_SERVERBYSERVICE;
-        try {
-            conn = getDBConn();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, id.intValue());
-            rs = ps.executeQuery();
-            if (!rs.next()) {
-                throw new ServiceNotFoundException(id);
-            }
-            return new ServerConfigStuff(rs.getInt(1),
-                                         rs.getString(2));
-        } catch (SQLException e) {
-            throw new SystemException("Error looking up config response "
-                                         + "for service: " + id + ": " + e, e);
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, null, ps, rs);
-            disconnectDBConn();
-        }
+        ServiceDAO dao = DAOFactory.getDAOFactory().getServiceDAO();
+        Service service = dao.findById(id);
+        Server server = service.getServer();
+        return new ServerConfigStuff(server.getId().intValue(),
+                                     server.getInstallPath());
     }
-    
-    private static final String SQL_SERVER
-        = "SELECT s.ID, s.INSTALLPATH FROM EAM_SERVER s "
-        + "WHERE s.ID = ?";
+
     private ServerConfigStuff getServerStuffForServer(Integer id) 
         throws AppdefEntityNotFoundException {
 
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String sql = SQL_SERVER;
-        try {
-            conn = getDBConn();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, id.intValue());
-            rs = ps.executeQuery();
-            if (!rs.next()) {
-                throw new ServerNotFoundException(id);
-            }
-            return new ServerConfigStuff(rs.getInt(1),
-                                         rs.getString(2));
-        } catch (SQLException e) {
-            throw new SystemException("Error looking up config response "
-                                         + "for server: " + id + ": " + e, e);
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, null, ps, rs);
-            disconnectDBConn();
-        }
+        ServerDAO dao = DAOFactory.getDAOFactory().getServerDAO();
+        Server server = dao.findById(id);
+
+        return new ServerConfigStuff(server.getId().intValue(),
+                                     server.getInstallPath());
     }
 
-    private static final String SQL_PLATFORMBYSERVER =
-        "SELECT p.ID, p.NAME, p.FQDN, pt.NAME FROM EAM_PLATFORM p, " +
-        "EAM_PLATFORM_TYPE pt, EAM_SERVER s WHERE s.PLATFORM_ID = p.ID " +
-        "AND p.PLATFORM_TYPE_ID = pt.id AND s.ID = ?";
     private PlatformConfigStuff getPlatformStuffForServer(Integer id) 
         throws AppdefEntityNotFoundException {
 
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String sql = SQL_PLATFORMBYSERVER;
-        try {
-            conn = getDBConn();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, id.intValue());
-            rs = ps.executeQuery();
-            if (!rs.next()) {
-                throw new ServiceNotFoundException(id);
-            }
-            return new PlatformConfigStuff(rs.getInt(1),
-                                           rs.getString(2),
-                                           rs.getString(3),
-                                           rs.getString(4));
-        } catch (SQLException e) {
-            throw new SystemException("Error looking up config response " +
-                                      "for server: " + id + ": " + e, e);
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, null, ps, rs);
-            disconnectDBConn();
-        }
+        ServerDAO dao = DAOFactory.getDAOFactory().getServerDAO();
+        Server server = dao.findById(id);
+        Platform platform = server.getPlatform();
+
+        PlatformConfigStuff pConfig =
+            new PlatformConfigStuff(platform.getId().intValue(),
+                                    platform.getName(),
+                                    platform.getFqdn(),
+                                    platform.getPlatformType().getName());
+        loadPlatformIp(platform, pConfig);
+        return pConfig;
     }
 
-    private static final String SQL_PLATFORM =
-        "SELECT p.ID, p.NAME, p.FQDN, pt.NAME FROM EAM_PLATFORM p, " +
-        "EAM_PLATFORM_TYPE pt WHERE p.PLATFORM_TYPE_ID = pt.id AND " +
-        "p.ID = ?";
     private PlatformConfigStuff getPlatformStuffForPlatform(Integer id) 
         throws AppdefEntityNotFoundException {
 
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String sql = SQL_PLATFORM;
-        try {
-            conn = getDBConn();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, id.intValue());
-            rs = ps.executeQuery();
-            if (!rs.next()) {
-                throw new PlatformNotFoundException(id);
-            }
-            return new PlatformConfigStuff(rs.getInt(1),
-                                           rs.getString(2),
-                                           rs.getString(3),
-                                           rs.getString(4));
-        } catch (SQLException e) {
-            throw new SystemException("Error looking up config response " +
-                                      "for server: " + id + ": " + e, e);
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, null, ps, rs);
-            disconnectDBConn();
-        }
+        PlatformDAO dao = DAOFactory.getDAOFactory().getPlatformDAO();
+        Platform platform = dao.findById(id);
+
+        PlatformConfigStuff pConfig =
+            new PlatformConfigStuff(platform.getId().intValue(),
+                                    platform.getName(),
+                                    platform.getFqdn(),
+                                    platform.getPlatformType().getName());
+        loadPlatformIp(platform, pConfig);
+        return pConfig;
     }
 
-    private static final String SQL_PLATFORM_IPS =
-        "SELECT address FROM EAM_IP WHERE address != '127.0.0.1' " +
-        "AND platform_id = ?";
-    private static final String SQL_PLATFORM_IPS_BY_SERVER =
-        "SELECT address FROM EAM_IP ip, EAM_SERVER s, EAM_PLATFORM p " +
-        "WHERE address != '127.0.0.1' AND s.platform_id = p.id AND " +
-        "ip.platform_id = p.id AND s.id = ?";
-    private void  loadPlatformIp(AppdefEntityID id, PlatformConfigStuff platform) 
+    private void  loadPlatformIp(Platform platform,
+                                 PlatformConfigStuff pConfig)
         throws AppdefEntityNotFoundException {
 
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String sql;
-        
-        // XXX -- This is throwing an exception when I try to AI import
-        //        a platform with no IP address
-
-        if(id.getType() == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-            sql = SQL_PLATFORM_IPS;
-        } else if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-            sql = SQL_PLATFORM_IPS_BY_SERVER;
-        } else {
-            // Not gonna happen
-            throw new IllegalArgumentException("Platform IPs cannot be " +
-                                               "looked up by type " +
-                                               id.getType());
-        }
-
-        try {
-            conn = getDBConn();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, id.getId().intValue());
-            rs = ps.executeQuery();
-            if (!rs.next()) {
-                throw new PlatformNotFoundException(id);
+        Collection ips = platform.getIps();
+        for (Iterator i = ips.iterator(); i.hasNext(); ) {
+            Ip ip = (Ip)i.next();
+            if (!ip.getAddress().equals("127.0.0.1")) {
+                // First non-loopback address
+                pConfig.ip = ip.getAddress();
+                break;
             }
-            
-            // Just get the first IP
-            platform.ip = rs.getString(1);
-
-        } catch (SQLException e) {
-            throw new SystemException("Error looking up config response " +
-                                      "for server: " + id + ": " + e, e);
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, null, ps, rs);
-            disconnectDBConn();
         }
     }
 
-    private static final String SQL_UNCONF4METRICS
-        = "SELECT res.ID AS resId, s.ID, st.NAME AS typeName, s.NAME, s.CTIME "
-        + "FROM EAM_SERVER s, EAM_SERVER_TYPE st, EAM_RESOURCE res, "
-        + "EAM_CONFIG_RESPONSE c " + PermissionManager.AUTHZ_FROM
-        + "WHERE s.SERVER_TYPE_ID = st.ID "
-        + "AND res.INSTANCE_ID = s.ID "
-        + "AND res.RESOURCE_TYPE_ID = " + AuthzConstants.authzServer + " "
-        + "AND res.ID NOT IN ( %%IGNORELIST%% ) "
-        + "AND s.CONFIG_RESPONSE_ID = c.ID "
-        + "AND (c.PRODUCT_RESPONSE IS NULL "
-        +      "OR c.MEASUREMENT_RESPONSE IS NULL) ";
-    /**
-     * @param ignoreList a List of Integers representing the resource ids
-     * (that is EAM_RESOURCE.ID) of servers that should NOT be included
-     * in the results.
-     * @return a List of MiniResourceValue objects representing the
-     * unconfigured servers in HQ (adjusted according to the pagecontrol
-     * of course)
-     * @ejb:interface-method
-     */
-    public PageList getServersNotConfiguredForMetrics
-        (AuthzSubjectValue subject, PageControl pc, List ignoreList) {
-
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String sql 
-            = SQL_UNCONF4METRICS
-            + pm.getSQLWhere(subject.getId(), "s.ID");
-        PageList results = new PageList();
-        int seekCount, i, col;
-        if (ignoreList == null ) ignoreList = new ArrayList();
-        if (ignoreList.size() == 0) ignoreList.add(MathUtil.NEGATIVE_ONE);
-        // we could cache these substitutions for a li'l performance boost
-        sql = StringUtil.replace(sql, "%%IGNORELIST%%", 
-                                 StringUtil.listToString(ignoreList));
-        try {
-            conn = getDBConn();
-            ps = conn.prepareStatement(sql);
-            pm.prepareSQL(ps, 1, subject.getId(),
-                          AuthzConstants.authzServer,
-                          AuthzConstants.perm_modifyServer);
-            rs = ps.executeQuery();
-            seekCount = DBUtil.seek(rs, pc);
-            int pageSize = pc.getPagesize();
-            boolean isUnlimited = (pageSize == PageControl.SIZE_UNLIMITED);
-            for (i=0; (isUnlimited || i<pageSize) && rs.next(); i++) {
-                col = 1;
-                results.add(new MiniResourceValue(rs.getInt(col++),
-                                                  rs.getInt(col++),
-                                       AppdefEntityConstants.APPDEF_TYPE_SERVER,
-                                                  rs.getString(col++),
-                                                  rs.getString(col++),
-                                                  rs.getLong(col++)));
-            }
-            int totalSize = DBUtil.countRows(seekCount+i, rs, conn);
-            results.setTotalSize(totalSize);
-
-        } catch (SQLException e) {
-            throw new SystemException("Error looking up resources not "
-                                         + "configured for metrics: " 
-                                         + e, e);
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, null, ps, rs);
-            disconnectDBConn();
-        }
-        return results;
-    }
-
-    private static final String SQL_SERVERS_WITH_INVALID_CONFIG
-        = "SELECT res.ID AS resId, s.ID, st.NAME as TNAME, s.NAME, s.CTIME, " +
-        "c.VALIDATIONERR "
-        + "FROM EAM_SERVER s, EAM_SERVER_TYPE st, EAM_RESOURCE res, "
-        + "EAM_CONFIG_RESPONSE c " + PermissionManager.AUTHZ_FROM
-        + "WHERE s.SERVER_TYPE_ID = st.ID "
-        + "AND res.INSTANCE_ID = s.ID "
-        + "AND res.RESOURCE_TYPE_ID = " + AuthzConstants.authzServer + " "
-        + "AND res.ID NOT IN ( %%IGNORELIST%% ) "
-        + "AND s.CONFIG_RESPONSE_ID = c.ID "
-        + "AND c.VALIDATIONERR IS NOT NULL ";
-    /**
-     * @param ignoreList a List of Integers representing the resource ids
-     * (that is EAM_RESOURCE.ID) of servers that should NOT be included
-     * in the results.
-     * @return a List of MiniResourceValue objects representing the
-     * unconfigured servers in HQ (adjusted according to the pagecontrol
-     * of course).  The "notes" attribute of each MiniResourceValue will
-     * contain the validation error string.
-     * @ejb:interface-method
-     */
-    public PageList getServersWithInvalidConfig
-        (AuthzSubjectValue subject, PageControl pc, List ignoreList) {
-
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String sql 
-            = SQL_SERVERS_WITH_INVALID_CONFIG
-            + pm.getSQLWhere(subject.getId(), "s.ID");
-        PageList results = new PageList();
-        int seekCount, i, col;
-        if (ignoreList == null ) ignoreList = new ArrayList();
-        if (ignoreList.size() == 0) ignoreList.add(MathUtil.NEGATIVE_ONE);
-        // we could cache these substitutions for a li'l performance boost
-        sql = StringUtil.replace(sql, "%%IGNORELIST%%", 
-                                 StringUtil.listToString(ignoreList));
-        try {
-            conn = getDBConn();
-            ps = conn.prepareStatement(sql);
-            pm.prepareSQL(ps, 1, subject.getId(),
-                          AuthzConstants.authzServer,
-                          AuthzConstants.perm_modifyServer);
-            rs = ps.executeQuery();
-            seekCount = DBUtil.seek(rs, pc);
-            int pageSize = pc.getPagesize();
-            boolean isUnlimited = (pageSize == PageControl.SIZE_UNLIMITED);
-            MiniResourceValue mrv;
-            for (i=0; (isUnlimited || i<pageSize) && rs.next(); i++) {
-                col = 1;
-                mrv = new MiniResourceValue(rs.getInt(col++),
-                                            rs.getInt(col++),
-                                       AppdefEntityConstants.APPDEF_TYPE_SERVER,
-                                            rs.getString(col++),
-                                            rs.getString(col++),
-                                            rs.getLong(col++),
-                                            rs.getString(col++));
-                results.add(mrv);
-            }
-            int totalSize = DBUtil.countRows(seekCount+i, rs, conn);
-            results.setTotalSize(totalSize);
-
-        } catch (SQLException e) {
-            throw new SystemException("Error looking up resources with "
-                                         + "invalid configs: " 
-                                         + e, e);
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, null, ps, rs);
-            disconnectDBConn();
-        }
-        return results;
-    }
-    
     // Utility classes used by getMergedConfig
     class ServerConfigStuff {
         public int id;
