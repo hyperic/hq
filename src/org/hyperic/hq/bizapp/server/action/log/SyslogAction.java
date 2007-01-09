@@ -48,6 +48,7 @@ import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.util.StringUtil;
@@ -58,7 +59,6 @@ public class SyslogAction extends SyslogActionConfig
 {
     private Log log = LogFactory.getLog(SyslogAction.class.getName());
     
-    /** Creates a new instance of SharedEmailAction */
     public SyslogAction() {
     }
 
@@ -91,16 +91,14 @@ public class SyslogAction extends SyslogActionConfig
         return resName;
     }
 
-    public boolean isAlertInterfaceSupported() {
-       return true;
-    }
 
     /** Execute the action
      *
      */
     public String execute(AlertInterface alert, String shortReason,
                           String longReason)
-        throws ActionExecuteException {
+        throws ActionExecuteException 
+    {
 //        TriggerFiredEvent[] firedEvents = event.getRootEvents();
 //        HashMap eventMap = new HashMap();
 //        for (int i = 0; i < firedEvents.length; i++) {
@@ -125,21 +123,6 @@ public class SyslogAction extends SyslogActionConfig
         return "success";
     }
     
-    public String execute(Alert alert) throws ActionExecuteException {
-        AlertManagerLocal aman = null;
-
-        try {
-            aman = AlertManagerUtil.getLocalHome().create();
-        } catch (CreateException e1) {
-            // Don't let it affect the action execution
-        } catch (NamingException e1) {
-            // Don't let it affect the action execution
-        }
-
-        return execute(alert, aman.getShortReason(alert),
-                       aman.getLongReason(alert));
-    }
-
     public void setParentActionConfig(AppdefEntityID aeid,
                                       ConfigResponse config)
         throws InvalidActionDataException {

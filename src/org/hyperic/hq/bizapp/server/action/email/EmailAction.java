@@ -207,16 +207,15 @@ public class EmailAction extends EmailActionConfig
         return text.toString();
     }
 
-    public boolean isAlertInterfaceSupported() {
-        return true;
-    }
-
-    /** Execute the action
-     *
+    /** 
+     * Execute the action
      */
-    public String execute(AlertInterface alert,
-                          String shortReason, String longReason)
-        throws ActionExecuteException {
+    public String execute(AlertInterface alert, String shortReason, 
+                          String longReason)
+        throws ActionExecuteException 
+    {
+        log.warn("Yay, we're executing the email action for [" + shortReason +
+                 "]");
         try {
             InternetAddress[] to = lookupEmailAddr();
 
@@ -235,30 +234,15 @@ public class EmailAction extends EmailActionConfig
 
             StringBuffer result = getLog();
             return result.toString();
-        } catch (javax.ejb.CreateException e) {
+        } catch (CreateException e) {
             throw new ActionExecuteException(e);
-        } catch (javax.naming.NamingException e) {
+        } catch (NamingException e) {
             throw new ActionExecuteException(e);
         } catch (MeasurementNotFoundException e) {
             throw new ActionExecuteException(e);
         } catch (SystemException e) {
             throw new ActionExecuteException(e);
         }
-    }
-
-    public String execute(Alert alert) throws ActionExecuteException {
-        AlertManagerLocal aman = null;
-
-        try {
-            aman = AlertManagerUtil.getLocalHome().create();
-        } catch (CreateException e1) {
-            // Don't let it affect the action execution
-        } catch (NamingException e1) {
-            // Don't let it affect the action execution
-        }
-
-        return execute(alert, aman.getShortReason(alert),
-                       aman.getLongReason(alert));
     }
 
     protected StringBuffer getLog() {
