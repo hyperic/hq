@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -59,28 +60,31 @@ import org.hibernate.NonUniqueResultException;
  */
 public class AI2AppdefDiff {
 
+    private static Log _log = LogFactory.getLog(AI2AppdefDiff.class);
+
     public AI2AppdefDiff () {}
 
     /**
      * @param aiplatform The AI platform data, including nested IPs and servers.
-     * @return A new AI platform value object, with queuestatus and diff set 
+     * @return A new AI platform value object, with queuestatus and diff set
      * correctly (including for nested IPs and servers), and only containing the
      * set of IPs and servers that should be queued (IPs and servers that are 
      * already identical to those in appdef are removed from the value object).  
      */
-    public AIPlatformValue diffAgainstAppdef ( Log log,
-                                               AuthzSubjectValue subject,
-                                               PlatformDAO pmLH,
-                                               ConfigManagerLocal cmLocal,
-                                               CPropManagerLocal cpropMgr,
-                                               AIPlatformValue aiplatform ) {
+    public AIPlatformValue diffAgainstAppdef(AuthzSubjectValue subject,
+                                             PlatformDAO pmLH,
+                                             ConfigManagerLocal cmLocal,
+                                             CPropManagerLocal cpropMgr,
+                                             AIPlatformValue aiplatform)
+    {
         Platform appdefPlatform;
         AIPlatformValue revisedAIplatform;
         int i;
 
-        if (log.isDebugEnabled()) {
-            log.debug("ai2appdef diff: AIPLATFORM=" + aiplatform);
-            log.debug("ai2appdef diff: at start:=" + StringUtil.arrayToString(aiplatform.getAIIpValues()));
+        if (_log.isDebugEnabled()) {
+            _log.debug("AIPLATFORM=" + aiplatform);
+            _log.debug("At start:=" + StringUtil.
+                arrayToString(aiplatform.getAIIpValues()));
         }
 
         // We know we'll at least need to copy all the platform-level attributes
@@ -107,14 +111,14 @@ public class AI2AppdefDiff {
         revisedAIplatform.setDiff(AIQueueConstants.Q_DIFF_NONE);
 
         // Get the appdef platform
-        appdefPlatform = getAppdefPlatform(log, pmLH, subject, aiplatform);
+        appdefPlatform = getAppdefPlatform(aiplatform);
 
         // If there was no appdef platform...
-        if ( appdefPlatform == null ) {
+        if (appdefPlatform == null) {
             // If the aiplatform has status "removed", then appdef model is
             // correct and the platform has actually been removed.  In this
             // case we return null, which notifies the caller of this condition.
-            if ( aiplatform.getQueueStatus() == AIQueueConstants.Q_STATUS_REMOVED ) {
+            if (aiplatform.getQueueStatus() == AIQueueConstants.Q_STATUS_REMOVED) {
                 return null;
             }
 
@@ -126,7 +130,7 @@ public class AI2AppdefDiff {
             // All scanned IPs must be new
             AIIpValue[] newIps = aiplatform.getAIIpValues();
             revisedAIplatform.removeAllAIIpValues();
-            for ( i=0; i<newIps.length; i++ ) {
+            for (i=0; i<newIps.length; i++) {
                 newIps[i].setQueueStatus(AIQueueConstants.Q_STATUS_ADDED);
                 revisedAIplatform.addAIIpValue(newIps[i]);
             }
@@ -134,7 +138,7 @@ public class AI2AppdefDiff {
             // All scanned servers must be new
             AIServerValue[] newServers = aiplatform.getAIServerValues();
             revisedAIplatform.removeAllAIServerValues();
-            for ( i=0; i<newServers.length; i++ ) {
+            for (i=0; i<newServers.length; i++) {
                 newServers[i].setQueueStatus(AIQueueConstants.Q_STATUS_ADDED);
                 revisedAIplatform.addAIServerValue(newServers[i]);
             }
@@ -148,8 +152,9 @@ public class AI2AppdefDiff {
         boolean isDevice = revisedAIplatform.isPlatformDevice();
         
         if (isDevice) {
-            log.info("Applying existing appdef attributes for device " +
-                     aiplatform.getPlatformTypeName() + "=" + aiplatform.getFqdn());
+            _log.info("Applying existing appdef attributes for device " +
+                      aiplatform.getPlatformTypeName() + "=" +
+                      aiplatform.getFqdn());
             if (revisedAIplatform.getCpuCount() == null) {
                 revisedAIplatform.setCpuCount(appdefPlatform.getCpuCount());
             }
@@ -183,9 +188,10 @@ public class AI2AppdefDiff {
                               crValue.getMeasurementResponse()))
             {
                 revisedAIplatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
-                addDiff(revisedAIplatform, AIQueueConstants.Q_PLATFORM_PROPERTIES_CHANGED);
-                log.info("ConfigResponse changed for " + aiplatform.getFqdn() +
-                         " '" + aiplatform.getPlatformTypeName() + "'");
+                addDiff(revisedAIplatform,
+                        AIQueueConstants.Q_PLATFORM_PROPERTIES_CHANGED);
+                _log.info("ConfigResponse changed for " + aiplatform.getFqdn() +
+                          " '" + aiplatform.getPlatformTypeName() + "'");
             }
         }
 
@@ -194,20 +200,20 @@ public class AI2AppdefDiff {
         // attributes.
 
         // Compare IPs
-        if (log.isDebugEnabled())
-            log.debug("ai2appdef diff: before IP diff:=" +
-                      StringUtil.arrayToString(revisedAIplatform.getAIIpValues()));
-        doIpDiffs(log, appdefPlatform, aiplatform, revisedAIplatform, isDevice);
-        if (log.isDebugEnabled())
-            log.debug("ai2appdef diff: after IP diff:=" +
+        if (_log.isDebugEnabled())
+            _log.debug("Before IP diff:=" +
+                       StringUtil.arrayToString(revisedAIplatform.getAIIpValues()));
+        doIpDiffs(appdefPlatform, aiplatform, revisedAIplatform, isDevice);
+        if (_log.isDebugEnabled())
+            _log.debug("After IP diff:=" +
                       StringUtil.arrayToString(revisedAIplatform.getAIIpValues()));
         
         // Compare servers
-        doServerDiffs(log, appdefPlatform, cmLocal, 
+        doServerDiffs(appdefPlatform, cmLocal,
                       cpropMgr, aiplatform, revisedAIplatform);
 
         // Compare platform attributes
-        doPlatformAttrDiff(log, appdefPlatform, revisedAIplatform);
+        doPlatformAttrDiff(appdefPlatform, revisedAIplatform);
 
         if (aiplatform.customPropertiesHasBeenSet()) {
             int id = appdefPlatform.getId().intValue();
@@ -215,19 +221,18 @@ public class AI2AppdefDiff {
                 new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM, id);
             int type =
                 appdefPlatform.getPlatformType().getId().intValue();
-            updateCprops(log, cpropMgr, aid, type,
+            updateCprops(cpropMgr, aid, type,
                          aiplatform.getCustomProperties());
         }
 
         return revisedAIplatform;
     }
 
-    private void doIpDiffs ( Log log,
-                             Platform appdefPlatform,
-                             AIPlatformValue aiPlatform,
-                             AIPlatformValue revisedAIplatform,
-                             boolean isDevice ) {
-
+    private void doIpDiffs(Platform appdefPlatform,
+                           AIPlatformValue aiPlatform,
+                           AIPlatformValue revisedAIplatform,
+                           boolean isDevice)
+    {
         // Compare IP addresses between appdef and AI data.
         // We iterate over the IPs in the AI data, removing them from
         // the appdef list as we find them.  In the end, the IPs that are
@@ -237,10 +242,9 @@ public class AI2AppdefDiff {
         appdefIps.addAll(appdefPlatform.getIps());
         List scannedIps = new ArrayList();
         scannedIps.addAll(Arrays.asList(aiPlatform.getAIIpValues()));
-        if (log.isDebugEnabled())
-            log.debug("AI2AppdefDiff: doIpDiffs:" +
-                     " appdefIps=" + StringUtil.listToString(appdefIps) +
-                     " scannedIps=" + StringUtil.listToString(scannedIps));
+        if (_log.isDebugEnabled())
+            _log.debug("appdefIps=" + StringUtil.listToString(appdefIps) +
+                       " scannedIps=" + StringUtil.listToString(scannedIps));
         Ip appdefIp = null;
         AIIpValue scannedIp = null;
         Iterator i = scannedIps.iterator();
@@ -249,7 +253,7 @@ public class AI2AppdefDiff {
             appdefIp = findAndRemoveAppdefIp(scannedIp.getAddress(), appdefIps);
 
             if (scannedIp.getQueueStatus()==AIQueueConstants.Q_STATUS_REMOVED) {
-                if ( appdefIp == null ) {
+                if (appdefIp == null) {
                     // scannedIp not found in appdef, and AI thinks it's been
                     // removed, so we're OK.  No need to add it anywhere, just
                     // continue on, and when this while loop is finished it will
@@ -350,12 +354,11 @@ public class AI2AppdefDiff {
         return null;
     }
 
-    private void doServerDiffs ( Log log,
-                                 Platform appdefPlatform,
-                                 ConfigManagerLocal cmLocal,
-                                 CPropManagerLocal cpropMgr,
-                                 AIPlatformValue aiPlatform,
-                                 AIPlatformValue revisedAIplatform ) {
+    private void doServerDiffs(Platform appdefPlatform,
+                               ConfigManagerLocal cmLocal,
+                               CPropManagerLocal cpropMgr,
+                               AIPlatformValue aiPlatform,
+                               AIPlatformValue revisedAIplatform) {
 
         // Compare servers between appdef and AI data.
         // We iterate over the servers in the AI data, removing them from
@@ -366,19 +369,18 @@ public class AI2AppdefDiff {
         appdefServers.addAll(appdefPlatform.getServers());
         List scannedServers = new ArrayList();
         scannedServers.addAll(Arrays.asList(aiPlatform.getAIServerValues()));
-        if (log.isDebugEnabled())
-            log.debug("AI2AppdefDiff: doServerDiffs:" +
-                     " appdefServers=" + StringUtil.listToString(appdefServers) +
-                     " scannedServers=" + StringUtil.listToString(scannedServers));
+        if (_log.isDebugEnabled())
+            _log.debug(" appdefServers=" + StringUtil.listToString(appdefServers) +
+                       " scannedServers=" + StringUtil.listToString(scannedServers));
         Server appdefServer;
         AIServerValue scannedServer;
         Iterator i = scannedServers.iterator();
-        while ( i.hasNext() ) {
+        while (i.hasNext()) {
             scannedServer = (AIServerValue) i.next();
             appdefServer
                 = findAndRemoveAppdefServer(scannedServer, appdefServers);
             if (scannedServer.getQueueStatus()==AIQueueConstants.Q_STATUS_REMOVED) {
-                if ( appdefServer == null ) {
+                if (appdefServer == null) {
                     // scannedServer not found in appdef, and AI thinks it's been
                     // removed, so we're OK.  No need to add it anywhere, just
                     // continue on, and when this while loop is finished it will
@@ -389,14 +391,13 @@ public class AI2AppdefDiff {
                     // removed, so just add it back to the appdef
                     // list so when this while loop is finished it will get
                     // added to the revisedAIplatform as "removed".
-
                     appdefServers.add(appdefServer);
                 }
                 continue;
             }
 
             scannedServer.setQueueStatus(AIQueueConstants.Q_STATUS_PLACEHOLDER);
-            if ( appdefServer == null ) {
+            if (appdefServer == null) {
                 // scannedServer was not found amongst appdefServers, therefore
                 // it it a new Server.
                 scannedServer.setQueueStatus(AIQueueConstants.Q_STATUS_ADDED);
@@ -409,21 +410,7 @@ public class AI2AppdefDiff {
 
                 revisedAIplatform.addAIServerValue(scannedServer);
             } else {
-                // Scanned Server does exist in appdef, do comparison 
-                /* A modified name doesn't mean that the server has actually
-                 * changed.  The plugins report a new name everytime, because
-                 * they all use UUIDs to ensure uniqueness.
-                 * if ( !scannedServer.getName().equals(appdefServer.getName()) ) {
-                 *   // Name has changed
-                 *   scannedServer.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
-                 *   addDiff(scannedServer, AIQueueConstants.Q_SERVER_NAME_CHANGED); 
-
-                 *   // Push changes up to platform
-                 *   revisedAIplatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
-                 *   addDiff(revisedAIplatform, AIQueueConstants.Q_PLATFORM_SERVERS_CHANGED);
-                 * }
-                 */
-                if ( !scannedServer.getInstallPath().equals(appdefServer.getInstallPath()) ) {
+                if (!scannedServer.getInstallPath().equals(appdefServer.getInstallPath())) {
                     // InstallPath has changed
                     scannedServer.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
                     addDiff(scannedServer, AIQueueConstants.Q_SERVER_INSTALLPATH_CHANGED); 
@@ -447,11 +434,11 @@ public class AI2AppdefDiff {
                     // we just looked it up moments ago.
                     throw new SystemException(e);
                 }
-                if ( !crValue.getUserManaged() && (
-                     !configsEqual(scannedServer.getProductConfig(), crValue.getProductResponse()) ||
-                     !configsEqual(scannedServer.getControlConfig(), crValue.getControlResponse()) ||
-                     !configsEqual(scannedServer.getMeasurementConfig(), crValue.getMeasurementResponse()) ||
-                     !configsEqual(scannedServer.getResponseTimeConfig(), crValue.getResponseTimeResponse())))
+                if (!crValue.getUserManaged() && (
+                    !configsEqual(scannedServer.getProductConfig(), crValue.getProductResponse()) ||
+                    !configsEqual(scannedServer.getControlConfig(), crValue.getControlResponse()) ||
+                    !configsEqual(scannedServer.getMeasurementConfig(), crValue.getMeasurementResponse()) ||
+                    !configsEqual(scannedServer.getResponseTimeConfig(), crValue.getResponseTimeResponse())))
                 {
                     // config was changed (and is NOT user-managed)
                     configChanged = true;
@@ -467,55 +454,31 @@ public class AI2AppdefDiff {
 
                 if (scannedServer.customPropertiesHasBeenSet()) {
                     int type = appdefServer.getServerType().getId().intValue();
-                    updateCprops(log, cpropMgr, aID, type,
+                    updateCprops(cpropMgr, aID, type,
                                  scannedServer.getCustomProperties());
                 }
 
                 revisedAIplatform.addAIServerValue(scannedServer);
             }
         }
-
-        // Whatever appdef Servers are left were not found in the scannedServers,
-        // so they must have been removed from the platform.
-        /* NOTE: disabled so that removed servers do not affect platform queue 
-           status.
-        i = appdefServers.iterator();
-        while ( i.hasNext() ) {
-            appdefServer = (ServerLocal) i.next();
-            scannedServer = new AIServerValue();
-            scannedServer.setName(appdefServer.getName());
-            scannedServer.setServerTypeName
-                (appdefServer.getServerType().getName());
-            scannedServer.setInstallPath(appdefServer.getInstallPath());
-            scannedServer.setAutoinventoryIdentifier(appdefServer.getAutoinventoryIdentifier());
-            scannedServer.setCTime(appdefServer.getCTime());
-            scannedServer.setMTime(appdefServer.getMTime());
-            scannedServer.setQueueStatus(AIQueueConstants.Q_STATUS_REMOVED);
-            revisedAIplatform.addAIServerValue(scannedServer);
-
-            // Push changes up to platform
-            revisedAIplatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
-            addDiff(revisedAIplatform, AIQueueConstants.Q_PLATFORM_SERVERS_CHANGED);
-        }
-        */
     }
 
     /**
      * Find (and remove) a scanned server within a list of appdef servers.
-     * @param aiid The server to look for, by autoinventory identifier
+     * @param scannedServer The server to look for, by autoinventory identifier
      * @param appdefServers The appdef servers to search.
      * @return The appdefServer if it was found, null if it was not.  If the
      * appdefServer was found, it is also removed from the appdefServers list.
      */
-    private Server findAndRemoveAppdefServer ( AIServerValue scannedServer,
-                                               List appdefServers ) {
+    private Server findAndRemoveAppdefServer(AIServerValue scannedServer,
+                                             List appdefServers ) {
         // Is the appdef server in the scan state?
         String aiid = scannedServer.getAutoinventoryIdentifier();
         int size = appdefServers.size();
         Server appdefServer;
-        for (int i=0; i<size; i++ ) {
+        for (int i=0; i<size; i++) {
             appdefServer = (Server) appdefServers.get(i);
-            if ( appdefServer.getAutoinventoryIdentifier().equals(aiid) ) {
+            if (appdefServer.getAutoinventoryIdentifier().equals(aiid)) {
 
                 // Found a match based on aiid, remove it from
                 // the scanned server list and return it.
@@ -528,9 +491,9 @@ public class AI2AppdefDiff {
         return null;
     }
 
-    private void doPlatformAttrDiff ( Log log,
-                                      Platform appdefPlatform,
-                                      AIPlatformValue aiPlatform ) {
+    private void doPlatformAttrDiff(Platform appdefPlatform,
+                                    AIPlatformValue aiPlatform)
+    {
         // Compare AI platform against appdef data.
         if ( !appdefPlatform.getFqdn().equals(aiPlatform.getFqdn()) ) {
             aiPlatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
@@ -541,15 +504,15 @@ public class AI2AppdefDiff {
         if (!objectsEqual(aiPlatform.getCpuCount(), appdefPlatform.getCpuCount())) {
             aiPlatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
             addDiff(aiPlatform, AIQueueConstants.Q_PLATFORM_PROPERTIES_CHANGED);
-            log.info("CpuCount changed for " + aiPlatform.getFqdn() +
-                     " from: " +
-                     appdefPlatform.getCpuCount() +
-                     ", to: " +
-                     aiPlatform.getCpuCount());
+            _log.info("CpuCount changed for " + aiPlatform.getFqdn() +
+                      " from: " +
+                      appdefPlatform.getCpuCount() +
+                      ", to: " +
+                      aiPlatform.getCpuCount());
         }
         
         // Pickup the appdef name attribute if it's not set
-        if ( aiPlatform.getName() == null ) {
+        if (aiPlatform.getName() == null) {
             aiPlatform.setName(appdefPlatform.getName());
         }
 
@@ -565,14 +528,13 @@ public class AI2AppdefDiff {
                 aiPlatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
                 addDiff(aiPlatform,
                         AIQueueConstants.Q_PLATFORM_PROPERTIES_CHANGED);
-                log.info("Description changed for " + aiPlatform.getFqdn() +
-                         " from: '" +
-                         appdefDescr +
-                         "', to: '" +
-                         aiDescr + "'");
+                _log.info("Description changed for " + aiPlatform.getFqdn() +
+                          " from: '" +
+                          appdefDescr +
+                          "', to: '" +
+                          aiDescr + "'");
             }
-        }
-        else {
+        } else {
             //don't overwrite existing appdef description
             aiPlatform.setDescription(appdefDescr);
         }
@@ -586,9 +548,8 @@ public class AI2AppdefDiff {
      * @param aiPlatform the AI platform to find in appdef
      * @return The PlatformLocal for the platform that the scan came from.
      */
-    private Platform getAppdefPlatform (Log log, PlatformDAO pmLH,
-                                        AuthzSubjectValue subject,
-                                        AIPlatformValue aiPlatform ) {
+    private Platform getAppdefPlatform(AIPlatformValue aiPlatform)
+    {
         String certdn = aiPlatform.getCertdn();
         String fqdn = aiPlatform.getFqdn();
         // First try to find by fqdn
@@ -606,8 +567,8 @@ public class AI2AppdefDiff {
                 platform = null;
             }
             if (platform == null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("FindByCertDN failed: ");
+                if (_log.isDebugEnabled()) {
+                    _log.debug("FindByCertDN failed: ");
                 }
                 return null;
             }
@@ -629,11 +590,8 @@ public class AI2AppdefDiff {
     //that is checking for differences.  however, at this point
     //we have the ai object, the existing appdef object and the cpropMgr.
     //this is simply the easiest place until server AI code is refactored.
-    private void updateCprops(Log log,
-                              CPropManagerLocal cpropMgr,
-                              AppdefEntityID id,
-                              int type,
-                              byte[] data)
+    private void updateCprops(CPropManagerLocal cpropMgr,
+                              AppdefEntityID id, int type, byte[] data)
     {
         if (data == null) {
             return;
@@ -644,14 +602,14 @@ public class AI2AppdefDiff {
         try {
             aicprops = ConfigResponse.decode(data);
         } catch (EncodingException e) {
-            log.error("Error decoding cprops for: " + id);
+            _log.error("Error decoding cprops for: " + id);
             return;
         }
 
         try {
             existing = cpropMgr.getEntries(id);
         } catch (Exception e) {
-            log.error("Error looking up cprops for: " + id, e);
+            _log.error("Error looking up cprops for: " + id, e);
             return;
         }
 
@@ -668,12 +626,13 @@ public class AI2AppdefDiff {
                     cpropMgr.setValue(id, type, key, value);
                     isChanged = true;
                 } catch (Exception e) {
-                    log.error("Error updating custom properties for: " + id, e);
+                    _log.error("Error updating custom properties for: " +
+                               id, e);
                 }
             }
         }
         String un = isChanged ? "" : "un";
-        log.debug("Custom Properties " + un + "changed for: " + id);
+        _log.debug("Custom Properties " + un + "changed for: " + id);
     }
 
     private static boolean configsEqual(byte[] c1, byte[] c2)  {

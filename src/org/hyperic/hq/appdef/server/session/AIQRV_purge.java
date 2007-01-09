@@ -38,7 +38,7 @@ import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.dao.DAOFactory;
-
+import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
 /**
@@ -47,43 +47,44 @@ import org.apache.commons.logging.Log;
  */
 public class AIQRV_purge implements AIQResourceVisitor {
 
-    public void visitPlatform ( AIPlatform aiplatform,
-                                AuthzSubjectValue subject, 
-                                Log log, 
-                                PlatformManagerLocal pmLocal,
-                                ConfigManagerLocal configMgr,
-                                CPropManagerLocal cpropMgr,
-                                List createdResources  ) 
-        throws AIQApprovalException, PermissionException {
+    private static Log _log = LogFactory.getLog(AIQRV_purge.class);
 
-        log.info("(purge) visiting platform: " + aiplatform.getId()
-                 + " fqdn=" + aiplatform.getFqdn());
+    public void visitPlatform(AIPlatform aiplatform,
+                              AuthzSubjectValue subject,
+                              PlatformManagerLocal pmLocal,
+                              ConfigManagerLocal configMgr,
+                              CPropManagerLocal cpropMgr,
+                              List createdResources)
+        throws AIQApprovalException, PermissionException
+    {
+        _log.info("Visiting platform: " + aiplatform.getId() +
+                  " fqdn=" + aiplatform.getFqdn());
         DAOFactory.getDAOFactory().getAIPlatformDAO()
             .remove(aiplatform);
     }
 
-    public void visitIp ( AIIp aiip,
-                          AuthzSubjectValue subject, 
-                          Log log, 
-                          PlatformManagerLocal pmLocal )
-        throws AIQApprovalException, PermissionException {
-        log.info("(purge) visiting ip: " + aiip.getId()
-                 + " addr=" + aiip.getAddress());
+    public void visitIp(AIIp aiip,
+                        AuthzSubjectValue subject,
+                        PlatformManagerLocal pmLocal)
+        throws AIQApprovalException, PermissionException
+    {
+        _log.info("Visiting ip: " + aiip.getId() +
+                  " addr=" + aiip.getAddress());
         DAOFactory.getDAOFactory().getAIIpDAO()
             .remove(aiip);
     }
 
-    public void visitServer ( AIServer aiserver,
-                              AuthzSubjectValue subject, 
-                              Log log, 
-                              PlatformManagerLocal pmLocal,
-                              ServerManagerLocal smLocal,
-                              ConfigManagerLocal configMgr,
-                              CPropManagerLocal cpropMgr,
-                              List createdResources )
-        throws AIQApprovalException, PermissionException {
-        log.info("(purge) visiting server: " + aiserver.getId()
-                 + " AIID=" + aiserver.getAutoinventoryIdentifier());
+    public void visitServer(AIServer aiserver,
+                            AuthzSubjectValue subject,
+                            PlatformManagerLocal pmLocal,
+                            ServerManagerLocal smLocal,
+                            ConfigManagerLocal configMgr,
+                            CPropManagerLocal cpropMgr,
+                            List createdResources)
+        throws AIQApprovalException, PermissionException
+    {
+        _log.info("Visiting server: " + aiserver.getId() +
+                  " AIID=" + aiserver.getAutoinventoryIdentifier());
         DAOFactory.getDAOFactory().getAIServerDAO()
             .remove(aiserver);
     }

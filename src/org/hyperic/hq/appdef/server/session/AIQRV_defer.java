@@ -37,8 +37,8 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIServer;
-
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * The AIQueueConstants.Q_DECISION_DEFER is essentially a NOOP.
@@ -46,38 +46,37 @@ import org.apache.commons.logging.Log;
  */
 public class AIQRV_defer implements AIQResourceVisitor {
 
-    public void visitPlatform ( AIPlatform aiplatform,
-                                AuthzSubjectValue subject, 
-                                Log log, 
-                                PlatformManagerLocal pmLocal,
-                                ConfigManagerLocal configMgr,
-                                CPropManagerLocal cpropMgr,
-                                List createdResources  ) 
-        throws AIQApprovalException, PermissionException {
+    private static Log _log = LogFactory.getLog(AIQRV_defer.class);
 
-        log.info("Visiting platform: " + aiplatform.getId()
-                 + " fqdn=" + aiplatform.getFqdn());
-    }
-
-    public void visitIp ( AIIp aiip,
-                          AuthzSubjectValue subject, 
-                          Log log, 
-                          PlatformManagerLocal pmLocal )
-        throws AIQApprovalException, PermissionException {
-        log.info("Visiting ip: " + aiip.getId()
-                 + " addr=" + aiip.getAddress());
-    }
-
-    public void visitServer ( AIServer aiserver,
-                              AuthzSubjectValue subject, 
-                              Log log, 
+    public void visitPlatform(AIPlatform aiplatform,
+                              AuthzSubjectValue subject,
                               PlatformManagerLocal pmLocal,
-                              ServerManagerLocal smLocal,
                               ConfigManagerLocal configMgr,
                               CPropManagerLocal cpropMgr,
-                              List createdResources  )
+                              List createdResources)
         throws AIQApprovalException, PermissionException {
-        log.info("Visiting server: " + aiserver.getId()
-                 + " AIID=" + aiserver.getAutoinventoryIdentifier());
+
+        _log.info("Visiting platform: " + aiplatform.getId() +
+                  " fqdn=" + aiplatform.getFqdn());
+    }
+
+    public void visitIp(AIIp aiip,
+                        AuthzSubjectValue subject,
+                        PlatformManagerLocal pmLocal)
+        throws AIQApprovalException, PermissionException {
+        _log.info("Visiting ip: " + aiip.getId() +
+                  " addr=" + aiip.getAddress());
+    }
+
+    public void visitServer(AIServer aiserver,
+                            AuthzSubjectValue subject,
+                            PlatformManagerLocal pmLocal,
+                            ServerManagerLocal smLocal,
+                            ConfigManagerLocal configMgr,
+                            CPropManagerLocal cpropMgr,
+                            List createdResources)
+        throws AIQApprovalException, PermissionException {
+        _log.info("Visiting server: " + aiserver.getId() +
+                  " AIID=" + aiserver.getAutoinventoryIdentifier());
     }
 }

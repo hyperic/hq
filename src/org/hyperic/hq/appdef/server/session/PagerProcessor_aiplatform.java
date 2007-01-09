@@ -39,7 +39,9 @@ public class PagerProcessor_aiplatform implements PagerProcessorExt {
 
     public PagerProcessor_aiplatform () {}
 
-    public PagerEventHandler getEventHandler () { return new AIPlatformPagerEventHandler(); }
+    public PagerEventHandler getEventHandler () {
+        return new AIPlatformPagerEventHandler();
+    }
 
     public boolean skipNulls () { return true; }
 
@@ -47,21 +49,22 @@ public class PagerProcessor_aiplatform implements PagerProcessorExt {
     public Object processElement ( Object o1, Object o2) {
         return processElement(o1);
     }
-    public Object processElement ( Object o ) {
 
-        if ( o == null ) return null;
+    public Object processElement (Object o) {
+
+        if (o == null) return null;
         try {
-            if ( o instanceof AIPlatform) {
+            if (o instanceof AIPlatform) {
                 // Resync to appdef
                 AIPlatform aiplatform = (AIPlatform) o;
                 AIPlatformValue value = aiplatform.getAIPlatformValue();
                 value = aiqManagerLocal.syncQueue(value, false);
                 return value;
             }
-
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             e.printStackTrace();
-            throw new IllegalStateException("Error converting to AIPlatformValue: " + e);
+            throw new IllegalStateException("Error converting to " +
+                                            "AIPlatformValue: " + e);
         }
         return o;
     }
@@ -73,11 +76,10 @@ public class PagerProcessor_aiplatform implements PagerProcessorExt {
         public void init () {
             try {
                 aiqManagerLocal = AIQueueManagerUtil.getLocalHome().create();
-            } catch ( Exception e ) {
+            } catch (Exception e) {
                 IllegalStateException ise
-                    = new IllegalStateException("Could not create "
-                                                + "AIQManagerLocal:" 
-                                                + e);
+                    = new IllegalStateException("Could not create " +
+                                                "AIQManagerLocal:" + e);
                 ise.initCause(e);
                 throw ise;
             }

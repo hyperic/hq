@@ -129,7 +129,7 @@ public class AIQueueManagerEJBImpl
         // First, calculate queuestatus and diff with respect to 
         // existing appdef data.
         AIPlatformValue revisedAIplatform
-            = appdefDiffProcessor.diffAgainstAppdef(log, subject, 
+            = appdefDiffProcessor.diffAgainstAppdef(subject,
                                                     pmLH, crmLocal, cpropMgr,
                                                     aiplatform);
 
@@ -147,8 +147,8 @@ public class AIQueueManagerEJBImpl
         }
 
         // Synchronize current AI data into existing queue.
-        revisedAIplatform = queueSynchronizer.sync(log,
-                                                   subject, 
+        revisedAIplatform = queueSynchronizer.sync(
+            subject,
                                                    aiqLocal,
                                                    aiplatformLH, 
                                                    revisedAIplatform,
@@ -529,7 +529,7 @@ public class AIQueueManagerEJBImpl
                     else throw e;
                 }
                 visitor.visitPlatform(aiplatform, 
-                                      subject, log, 
+                                      subject,
                                       pmLocal, configMgr, cpropMgr,
                                       createdResources);
                 if (!isPurgeAction) aiplatformsToResync.put(id, marker);
@@ -549,7 +549,7 @@ public class AIQueueManagerEJBImpl
                     if (isPurgeAction) continue;
                     else throw e;
                 }
-                visitor.visitIp(aiip, subject, log, pmLocal);
+                visitor.visitIp(aiip, subject, pmLocal);
                 if (!isPurgeAction) {
                     Integer pk =
                        aiip.getAIPlatform().getId();
@@ -572,7 +572,7 @@ public class AIQueueManagerEJBImpl
                     else throw e;
                 }
                 visitor.visitServer(aiserver, 
-                                    subject, log, 
+                                    subject,
                                     pmLocal, smLocal, configMgr,
                                     cpropMgr, createdResources);
                 if (isApproveAction) {

@@ -35,7 +35,7 @@ public class AIQResourceVisitorFactory {
     private static final AIQResourceVisitor RV_UNIGNORE = new AIQRV_unignore();
     private static final AIQResourceVisitor RV_PURGE    = new AIQRV_purge();
 
-    public static AIQResourceVisitor getVisitor ( int action ) {
+    public static AIQResourceVisitor getVisitor (int action) {
         switch (action) {
         case AIQueueConstants.Q_DECISION_DEFER:
             return RV_DEFER;

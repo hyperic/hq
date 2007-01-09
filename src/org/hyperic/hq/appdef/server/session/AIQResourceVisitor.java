@@ -42,28 +42,25 @@ import org.apache.commons.logging.Log;
 
 public interface AIQResourceVisitor {
 
-    public void visitPlatform ( AIPlatform aiplatform,
-                                AuthzSubjectValue subject, 
-                                Log log, 
-                                PlatformManagerLocal pmLocal,
-                                ConfigManagerLocal configMgr,
-                                CPropManagerLocal cpropMgr,
-                                List createdResources) 
-        throws AIQApprovalException, PermissionException;
-
-    public void visitIp ( AIIp aiip,
-                          AuthzSubjectValue subject, 
-                          Log log, 
-                          PlatformManagerLocal pmLocal )
-        throws AIQApprovalException, PermissionException;
-
-    public void visitServer ( AIServer aiserver,
-                              AuthzSubjectValue subject, 
-                              Log log, 
+    public void visitPlatform(AIPlatform aiplatform,
+                              AuthzSubjectValue subject,
                               PlatformManagerLocal pmLocal,
-                              ServerManagerLocal smLocal,
                               ConfigManagerLocal configMgr,
                               CPropManagerLocal cpropMgr,
-                              List createdResources )
+                              List createdResources)
+        throws AIQApprovalException, PermissionException;
+
+    public void visitIp(AIIp aiip,
+                        AuthzSubjectValue subject,
+                        PlatformManagerLocal pmLocal)
+        throws AIQApprovalException, PermissionException;
+
+    public void visitServer(AIServer aiserver,
+                            AuthzSubjectValue subject,
+                            PlatformManagerLocal pmLocal,
+                            ServerManagerLocal smLocal,
+                            ConfigManagerLocal configMgr,
+                            CPropManagerLocal cpropMgr,
+                            List createdResources)
         throws AIQApprovalException, PermissionException;
 }

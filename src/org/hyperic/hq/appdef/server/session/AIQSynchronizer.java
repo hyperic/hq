@@ -54,11 +54,13 @@ import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.dao.AIPlatformDAO;
 
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * A utility class to synchronize existing AI queue data with new AI data.
  */
 public class AIQSynchronizer {
+    private static Log _log = LogFactory.getLog(AIQSynchronizer.class);
     private PlatformManagerLocal _pm = null;
     private ApplicationManagerLocal _am = null;
     
@@ -87,29 +89,28 @@ public class AIQSynchronizer {
         }
         return _am;
     }
+
     public AIQSynchronizer () {}
 
     /**
      * @param aiPlatform The AI platform to sync into the queue.
-     * @return The synchronized platform, or null if the AI data was removed 
+     * @return The synchronized platform, or null if the AI data was removed
      * from the queue (this would happen if the platform in the queue matched
      * appdef exactly, such that the data should not be queued).
      */
-    public AIPlatformValue sync (Log log,
-                                 AuthzSubjectValue subject,
-                                 AIQueueManagerLocal aiqMgr,
-                                 AIPlatformDAO aiPlatformLH,
-                                 AIPlatformValue aiPlatform,
-                                 boolean updateServers,
-                                 boolean isApproval,
-                                 boolean isReport) 
-        throws CreateException, RemoveException, NamingException {
-
+    public AIPlatformValue sync(AuthzSubjectValue subject,
+                                AIQueueManagerLocal aiqMgr,
+                                AIPlatformDAO aiPlatformLH,
+                                AIPlatformValue aiPlatform,
+                                boolean updateServers,
+                                boolean isApproval,
+                                boolean isReport)
+        throws CreateException, RemoveException, NamingException
+    {
         // Is there an entry in the queue for this platform?
         AIPlatform existingQplatform;
 
-        existingQplatform = AIQSynchronizer.getAIQPlatform(log,
-                                                           aiPlatformLH, 
+        existingQplatform = AIQSynchronizer.getAIQPlatform(aiPlatformLH,
                                                            aiPlatform);
 
         // If the platform was unchanged with respect to appdef...
@@ -142,13 +143,12 @@ public class AIQSynchronizer {
 
             if ( existingQplatform == null ) {
                 // No existing queued platform, so we'll queue everything up.
-                log.info("AIQmgr: Queueing new platform: " + aiPlatform.getFqdn());
+                _log.info("Queueing new platform: " + aiPlatform.getFqdn());
                 AIPlatform newQPlatform = aiPlatformLH.create(aiPlatform);
-                AIPlatformValue newQPlatformValue
-                    = newQPlatform.getAIPlatformValue();
-                return newQPlatformValue;
+                return newQPlatform.getAIPlatformValue();
             } else {
-                log.info("AIQmgr: Updating existing platform: " + aiPlatform.getFqdn());
+                _log.info("Updating existing platform: " +
+                           aiPlatform.getFqdn());
                 aiPlatformLH.updateQueueState(existingQplatform,
                                               aiPlatform,
                                               updateServers,
@@ -158,16 +158,15 @@ public class AIQSynchronizer {
                 // sending an update event
                 // only if there is an approval action actually taking place
                 if(isApproval) {
-                    this.sendAppdefEvent(log, subject,
-                                         aiPlatform, AppdefEvent.ACTION_UPDATE);
+                    this.sendAppdefEvent(subject, aiPlatform,
+                                         AppdefEvent.ACTION_UPDATE);
                 }
             }
         }
         return existingQplatform.getAIPlatformValue();
     }
     
-    private void sendAppdefEvent(Log log,
-                                 AuthzSubjectValue subject,
+    private void sendAppdefEvent(AuthzSubjectValue subject,
                                  AIPlatformValue aiPlatform, int eventType)
         throws NamingException {
         PlatformValue platform;
@@ -175,11 +174,11 @@ public class AIQSynchronizer {
             platform =
                 getPlatformMan().getPlatformByAIPlatform(subject, aiPlatform);
         } catch (PermissionException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("sendAppdefEvent(): " + subject.getName() +
-                          " does not have permission to view platform " +
-                          "for certdn: " + aiPlatform.getCertdn() + " fqdn: " +
-                          aiPlatform.getFqdn());
+            if (_log.isDebugEnabled()) {
+                _log.debug("sendAppdefEvent(): " + subject.getName() +
+                           " does not have permission to view platform " +
+                           "for certdn: " + aiPlatform.getCertdn() + " fqdn: " +
+                           aiPlatform.getFqdn());
             }
             return;
         }
@@ -187,10 +186,10 @@ public class AIQSynchronizer {
         if (platform == null) {
             // I'm not sure why the platform could be null, if there's
             // supposedly an existing platform when we call this - clee
-            if (log.isDebugEnabled()) {
-                log.debug("sendAppdefEvent(): Existing platform not found " +
-                          "for certdn: " + aiPlatform.getCertdn() + " fqdn: " +
-                          aiPlatform.getFqdn());
+            if (_log.isDebugEnabled()) {
+                _log.debug("sendAppdefEvent(): Existing platform not found " +
+                           "for certdn: " + aiPlatform.getCertdn() + " fqdn: " +
+                           aiPlatform.getFqdn());
             }
             
             return;
@@ -207,7 +206,7 @@ public class AIQSynchronizer {
                                                    ResourceTreeGenerator.
                                                    TRAVERSE_UP);
             } catch (PermissionException e) {
-                log.error("Error sending change events", e);
+                _log.error("Error sending change events", e);
                 return;
             }
 
@@ -233,13 +232,12 @@ public class AIQSynchronizer {
                 }
             }
         } catch (AppdefEntityNotFoundException e1) {
-            log.error("Existing platform not found: " + platform.getEntityId());
+            _log.error("Existing platform not found: " + platform.getEntityId());
         }
     }
 
-    public static AIPlatform getAIQPlatform ( Log log,
-                                              AIPlatformDAO aiPlatformLH,
-                                              AIPlatformValue aiPlatformValue )
+    public static AIPlatform getAIQPlatform(AIPlatformDAO aiPlatformLH,
+                                            AIPlatformValue aiPlatformValue)
         throws SystemException {
 
         // Is there another platform in the queue with the same certdn?
@@ -250,17 +248,18 @@ public class AIQSynchronizer {
         // Try FQDN first
         fqdnMatches = aiPlatformLH.findByFQDN(fqdn);
         if (fqdnMatches.size() == 0) {
-            log.warn("FindByFQDN failed: "+fqdn);
+            _log.warn("FindByFQDN failed: "+fqdn);
         }
         if (fqdnMatches == null || fqdnMatches.size() != 1) {
             aiPlatform = aiPlatformLH.findByCertDN(certdn);
             if (aiPlatform == null) {
                 // Hope that we actually found some by FQDN
                 if (fqdnMatches == null || fqdnMatches.size() == 0)
-                    log.warn("FindByFQDN and FindByCertDN both failed: "+certdn);
+                    _log.warn("FindByFQDN and FindByCertDN both failed: "+
+                              certdn);
                 else
-                    log.warn("Multiple platforms matched FQDN: " +
-                             fqdn + " [" + fqdnMatches + "]");
+                    _log.warn("Multiple platforms matched FQDN: " +
+                              fqdn + " [" + fqdnMatches + "]");
                 return null;
             }
             return aiPlatform;
@@ -269,5 +268,4 @@ public class AIQSynchronizer {
         Iterator i = fqdnMatches.iterator();
         return (AIPlatform) i.next();
     }
-
 }
