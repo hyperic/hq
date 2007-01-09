@@ -86,8 +86,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This is an entity bean which is intended to abstract the
- * tables for appdef entities, for fetching configuration information.
+ *
  * @ejb:bean name="ConfigManager"
  *      jndi-name="ejb/appdef/ConfigManager"
  *      local-jndi-name="LocalConfigManager"
@@ -149,30 +148,6 @@ public class ConfigManagerEJBImpl
         }
     }
 
-    public static final String SQL_CONFIGRESPONSE_PLATFORM
-        = "SELECT c.ID, c.PRODUCT_RESPONSE, c.CONTROL_RESPONSE, "
-        + "c.MEASUREMENT_RESPONSE, c.AUTOINVENTORY_RESPONSE, "
-        + "c.RESPONSE_TIME_RESPONSE, "
-        + "c.USERMANAGED, c.VALIDATIONERR "
-        + "FROM EAM_CONFIG_RESPONSE c, EAM_PLATFORM p "
-        + "WHERE p.CONFIG_RESPONSE_ID = c.ID "
-        + "AND p.ID = ?";
-    public static final String SQL_CONFIGRESPONSE_SERVER
-        = "SELECT c.ID, c.PRODUCT_RESPONSE, c.CONTROL_RESPONSE, "
-        + "c.MEASUREMENT_RESPONSE, c.AUTOINVENTORY_RESPONSE, "
-        + "c.RESPONSE_TIME_RESPONSE, "
-        + "c.USERMANAGED, c.VALIDATIONERR "
-        + "FROM EAM_CONFIG_RESPONSE c, EAM_SERVER s "
-        + "WHERE s.CONFIG_RESPONSE_ID = c.ID "
-        + "AND s.ID = ?";
-    public static final String SQL_CONFIGRESPONSE_SERVICE
-        = "SELECT c.ID, c.PRODUCT_RESPONSE, c.CONTROL_RESPONSE, "
-        + "c.MEASUREMENT_RESPONSE, c.AUTOINVENTORY_RESPONSE, "
-        + "c.RESPONSE_TIME_RESPONSE, "
-        + "c.USERMANAGED, c.VALIDATIONERR "
-        + "FROM EAM_CONFIG_RESPONSE c, EAM_SERVICE s "
-        + "WHERE s.CONFIG_RESPONSE_ID = c.ID "
-        + "AND s.ID = ?";
     /**
      * @ejb:interface-method
      * @ejb:transaction type="Required"
@@ -180,20 +155,19 @@ public class ConfigManagerEJBImpl
     public ConfigResponseValue getConfigResponseValue (AppdefEntityID id)
         throws AppdefEntityNotFoundException {
 
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String sql = null;
+        ConfigResponseDAO dao =
+            DAOFactory.getDAOFactory().getConfigResponseDAO();
+        ConfigResponseDB config;
 
         switch(id.getType()){
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            sql = SQL_CONFIGRESPONSE_PLATFORM;
+            config = dao.findByPlatformId(id.getId());
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            sql = SQL_CONFIGRESPONSE_SERVER;
+            config = dao.findByServerId(id.getId());
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            sql = SQL_CONFIGRESPONSE_SERVICE;
+            config = dao.findByServiceId(id.getId());
             break;
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
         default:
@@ -201,33 +175,8 @@ public class ConfigManagerEJBImpl
                                                "does not support config " +
                                                "responses");
         }
-        ConfigResponseDAO cdao =
-            DAOFactory.getDAOFactory().getConfigResponseDAO();
-        try {
-            conn = cdao.getSession().connection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, id.getId().intValue());
-            rs = ps.executeQuery();
-            if (!rs.next()) {
-                throw AppdefEntityNotFoundException.build(id);
-            }
-            int i=1;
-            return new ConfigResponseValue(new Integer(rs.getInt(i++)),
-                                           DBUtil.getBlobColumn(rs, i++),
-                                           DBUtil.getBlobColumn(rs, i++),
-                                           DBUtil.getBlobColumn(rs, i++),
-                                           DBUtil.getBlobColumn(rs, i++),
-                                           DBUtil.getBlobColumn(rs, i++),
-                                           rs.getBoolean(i++),
-                                           rs.getString(i++));
 
-        } catch (SQLException e) {
-            throw new SystemException("Error looking up config response "
-                                         + "for entity: " + id + ": " + e, e);
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, null, ps, rs);
-            cdao.getSession().disconnect();
-        }
+        return config.getConfigResponseValue();
     }
 
     // A Map of entityType->entityId->pluginName
@@ -553,24 +502,6 @@ public class ConfigManagerEJBImpl
         setValidationError(subject, id, null);
     }
 
-    private static final String SQL_UPDATE_VERR_PLATFORM
-        = "UPDATE EAM_CONFIG_RESPONSE  "
-        + "SET VALIDATIONERR = ? WHERE ID = ?";
-    private static final String SQL_GET_PLAT_RESP_ID
-        = "SELECT c.ID FROM EAM_CONFIG_RESPONSE c, EAM_PLATFORM p"
-        + " WHERE c.ID = p.CONFIG_RESPONSE_ID AND p.ID = ?";
-    private static final String SQL_UPDATE_VERR_SERVER
-        = "UPDATE EAM_CONFIG_RESPONSE  "
-        + "SET VALIDATIONERR = ? WHERE ID = ?";
-    private static final String SQL_GET_SERVER_RESP_ID
-        = "SELECT c.ID FROM EAM_CONFIG_RESPONSE c, EAM_SERVER s"
-        + "  WHERE c.ID = s.CONFIG_RESPONSE_ID AND s.ID = ?";
-    private static final String SQL_UPDATE_VERR_SERVICE
-        = "UPDATE EAM_CONFIG_RESPONSE  "
-        + "SET VALIDATIONERR = ? WHERE ID = ?";
-    private static final String SQL_GET_SERVICE_RESP_ID
-        = "SELECT c.ID FROM EAM_CONFIG_RESPONSE c, EAM_SERVICE s"
-        + "  WHERE c.ID = s.CONFIG_RESPONSE_ID AND s.ID = ?";
     /**
      * Update the validation error string for a config response
      * @param validationError The error string that occured during validation.
@@ -582,23 +513,20 @@ public class ConfigManagerEJBImpl
     public void setValidationError (AuthzSubjectValue subject,
                                     AppdefEntityID id,
                                     String validationError) {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String idSql = null;
-        String updateSql = null;
+
+        ConfigResponseDAO dao =
+            DAOFactory.getDAOFactory().getConfigResponseDAO();
+        ConfigResponseDB config;
+
         switch(id.getType()){
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            updateSql = SQL_UPDATE_VERR_PLATFORM;
-            idSql = SQL_GET_PLAT_RESP_ID;
+            config = dao.findByPlatformId(id.getId());
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            updateSql = SQL_UPDATE_VERR_SERVER;
-            idSql = SQL_GET_SERVER_RESP_ID;
+            config = dao.findByServerId(id.getId());
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            updateSql = SQL_UPDATE_VERR_SERVICE;
-            idSql = SQL_GET_SERVICE_RESP_ID;
+            config = dao.findByServiceId(id.getId());
             break;
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
         default:
@@ -606,37 +534,15 @@ public class ConfigManagerEJBImpl
                                                "does not support config " +
                                                "responses");
         }
-        try {
-            conn = getDBConn();
-            // get the id of the config resp
-            ps = conn.prepareStatement(idSql);
-            ps.setInt(1, id.getID());
-            rs = ps.executeQuery();
-            rs.next();
-            int respId = rs.getInt(1);
-            rs.close();
-            // now update it
-            ps = conn.prepareStatement(updateSql);
-            if (validationError != null) {
-                if (validationError.length() > MAX_VALIDATION_ERR_LEN) {
-                    validationError =
-                        validationError.substring(0, MAX_VALIDATION_ERR_LEN-3) +
-                        "...";  
-                }
-                ps.setString(1, validationError);
-            } else {
-                ps.setNull(1, java.sql.Types.VARCHAR);
-            }
-            ps.setInt(2, respId);
-            ps.executeUpdate();
 
-        } catch (SQLException e) {
-            throw new SystemException("Error setting config response's "
-                                         + "validation error string for id: "
-                                         + id + ": " + e, e);
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, null, ps, rs);
-            disconnectDBConn();
+        if (validationError != null) {
+            if (validationError.length() > MAX_VALIDATION_ERR_LEN) {
+                validationError =
+                    validationError.substring(0, MAX_VALIDATION_ERR_LEN-3) +
+                        "...";
+            }
+
+            config.setValidationError(validationError);
         }
     }
 
