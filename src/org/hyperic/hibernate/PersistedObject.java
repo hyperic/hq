@@ -53,12 +53,6 @@ public abstract class PersistedObject
     // from 2.7.5.
     private Long    _version_;
 
-    // This is an optional feature for use by the
-    // server side to perform capability based ACL checks.
-    // One use case is to allow DAOs to perform RBAC via
-    // PermissionManager
-    private Integer subjectId;
-
     // XXX -- This is public for now, but should be made more private later
     protected void setId(Integer id) {
         _id = id;
@@ -74,18 +68,6 @@ public abstract class PersistedObject
 
     protected void set_version_(Long newVer) {
         _version_ = newVer;
-    }
-
-    public Integer getSubjectId()
-    {
-        return subjectId;
-    }
-
-    protected void setSubjectId(Integer subjectId)
-    {
-        // We expose this only to the appropriate modules
-        // to set subjects.
-        this.subjectId = subjectId;
     }
 
     public boolean equals(Object obj) {
@@ -107,15 +89,5 @@ public abstract class PersistedObject
         result = 37*result + (_id != null ? _id.hashCode() : 0);
 
         return result;
-    }
-
-    protected void setIdVersion(JSONObject json)
-        throws JSONException
-    {
-        int id = json.optInt("id");
-        if (id > 0) {
-            setId(new Integer(id));
-            set_version_(new Long(json.getLong("_version_")));
-        }
     }
 }

@@ -66,7 +66,8 @@ public class Action
 
     private ActionValue     _valueObj;
 
-    static Action newInstance(JSONObject json) throws JSONException
+    static Action newInstance(JSONObject json) 
+        throws JSONException
     {
         String className = json.getString("className");
         Action action;
@@ -79,7 +80,6 @@ public class Action
         } else {
             throw new JSONException("Unsupported Action class " + className);
         }
-        action.setIdVersion(json);
         return action;
     }
 
