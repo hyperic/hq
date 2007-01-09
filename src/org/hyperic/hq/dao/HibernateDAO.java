@@ -82,30 +82,6 @@ public abstract class HibernateDAO {
         return getSession().createCriteria(_persistentClass);
     }
 
-    /**
-     * Simple pojo attribute value search, uses Hibernate Example Criteria
-     * search.
-     *
-     * Instantiate pojo, set the pojo attribute values, then add corresponding
-     * hdm proerty names with calls to Persisted.addSearchable().
-     * 
-     * @param p
-     * @return
-     */
-    public List findByExample(final PersistedObject p) {
-        // searchable properties
-        Example.PropertySelector selector =
-            new Example.PropertySelector() {
-            public boolean include(Object val, String name, Type type) {
-                return p.getSearchable().contains(name);
-            }
-        };
-        
-        return getSession().createCriteria(getPersistentClass())
-                .add(Example.create(p).setPropertySelector(selector))
-                .list();
-    }
-
     public Collection findAll() {
         return getSession().createCriteria(getPersistentClass()).list();
     }

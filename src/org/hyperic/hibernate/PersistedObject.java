@@ -53,9 +53,6 @@ public abstract class PersistedObject
     // from 2.7.5.
     private Long    _version_;
 
-    // list of searchable fields
-    private List searchable = new ArrayList(0);
-
     // This is an optional feature for use by the
     // server side to perform capability based ACL checks.
     // One use case is to allow DAOs to perform RBAC via
@@ -77,26 +74,6 @@ public abstract class PersistedObject
 
     protected void set_version_(Long newVer) {
         _version_ = newVer;
-    }
-
-    protected void resetSearchable()
-    {
-        searchable.clear();
-    }
-
-    protected void removeSearchable(String name)
-    {
-        searchable.remove(name);
-    }
-
-    protected void addSearchable(String name)
-    {
-        searchable.add(name);
-    }
-
-    public List getSearchable()
-    {
-        return searchable;
     }
 
     public Integer getSubjectId()
