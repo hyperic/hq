@@ -634,6 +634,7 @@ function showViewEscResponse(originalRequest) {
         var eId;
         var aetId;
         var escFormSerial = Form.serialize('EscalationForm');
+        alert(escFormSerial);
         var url = '<html:rewrite action="/escalation/saveEscalation"/>';
         if ($('gad')) {
            gadId == $('gad').value;
@@ -863,7 +864,7 @@ function showViewEscResponse(originalRequest) {
           <fmt:message key="common.label.Name" />
       </td>
       <td width="80%">
-          <input type="text" size="25" name="escName" id="escName" />
+          <input type="text" size="25" name="name" id="escName" />
       </td>
     </tr>
     <tr class="ListRow">
@@ -889,7 +890,7 @@ function showViewEscResponse(originalRequest) {
             <td style="padding-top:2px;padding-bottom:2px;"><input
               type="radio" name="allowPause" value="true" /> <fmt:message
               key="alert.config.escalation.allow.pause" /> <select
-              id="maxWaitTime" name="maxwaittime">
+              id="maxWaitTime" name="maxWaitTime">
               <option value="300000">5 <fmt:message
                 key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
               <option value="600000">10 <fmt:message
@@ -920,12 +921,12 @@ function showViewEscResponse(originalRequest) {
         <tbody>
           <tr>
             <td style="padding-top:2px;padding-bottom:2px;"><input
-              type="radio" name="notification" value="0" checked="true" /> <fmt:message
+              type="radio" name="notifyAll" value="false" checked="true" /> <fmt:message
               key="alert.config.escalation.state.change.notify.previous" /></td>
           </tr>
           <tr>
             <td style="padding-top:2px;padding-bottom:2px;"><input
-              type="radio" name="notification" value="1" /> <fmt:message
+              type="radio" name="notifyAll" value="true" /> <fmt:message
               key="alert.config.escalation.state.change.notify.all" /></td>
           </tr>
         </tbody>
@@ -998,7 +999,7 @@ function showViewEscResponse(originalRequest) {
               type="radio" name="allowPause" value="true" /> <fmt:message
               key="alert.config.escalation.allow.pause" /> <select
               id="maxWaitTime_<c:out value="${alertDef.id}"/>"
-              name="maxwaittime">
+              name="maxWaitTime">
               <option value="300000">5 <fmt:message
                 key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
               <option value="600000">10 <fmt:message

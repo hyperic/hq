@@ -74,9 +74,6 @@ public class SaveEscalation extends BaseAction
     // action list order
     private static String ORDER = "rowOrder";
 
-    private static String NOTIFICATION = "notification";
-    private static String MAX_WAITTIME = "maxwaittime";
-
     public void execute(JsonActionContext context)
         throws PermissionException,
                SessionTimeoutException,
@@ -121,10 +118,10 @@ public class SaveEscalation extends BaseAction
                      ((String[])map.get(ALLOW_PAUSE))[0]).booleanValue())
             .put("notifyAll",
                  Boolean.valueOf(
-                     ((String[])map.get(NOTIFICATION))[0]).booleanValue())
+                     ((String[])map.get(NOTIFY_ALL))[0]).booleanValue())
             .put("maxWaitTime",
                  Long.valueOf(
-                     ((String[])map.get(MAX_WAITTIME))[0]).longValue())
+                     ((String[])map.get(MAX_WAIT_TIME))[0]).longValue())
             .put("actions", jarr);
         
         String[] ad = (String[])map.get(ALERTDEF_ID);
