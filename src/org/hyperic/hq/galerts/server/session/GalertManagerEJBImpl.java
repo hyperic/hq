@@ -20,11 +20,12 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
 import org.hyperic.hq.common.shared.CrispoManagerLocal;
+import org.hyperic.hq.escalation.server.session.MEscalation;
+import org.hyperic.hq.escalation.server.session.MEscalationManagerEJBImpl;
+import org.hyperic.hq.escalation.shared.MEscalationManagerLocal;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.server.session.Action;
-import org.hyperic.hq.events.server.session.Escalation;
-import org.hyperic.hq.events.server.session.EscalationMediator;
 import org.hyperic.hq.galerts.processor.GalertProcessor;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyType;
@@ -55,6 +56,7 @@ public class GalertManagerEJBImpl
 {
     private final Log _log = LogFactory.getLog(GalertManagerEJBImpl.class);
 
+    private MEscalationManagerLocal      _mescMan;
     private ExecutionStrategyTypeInfoDAO _stratTypeDAO;
     private GalertDefDAO                 _defDAO;
     private GalertLogDAO                 _logDAO;
@@ -63,7 +65,8 @@ public class GalertManagerEJBImpl
     
     public GalertManagerEJBImpl() {
         DAOFactory f = DAOFactory.getDAOFactory();
-        
+
+        _mescMan      = MEscalationManagerEJBImpl.getOne();      
         _stratTypeDAO = new ExecutionStrategyTypeInfoDAO(f); 
         _defDAO       = new GalertDefDAO(f);
         _logDAO       = new GalertLogDAO(f);
@@ -95,8 +98,11 @@ public class GalertManagerEJBImpl
      * Update the escalation of an alert def
      * @ejb:interface-method  
      */
-    public void update(GalertDef def, Escalation escalation) {
+    public void update(GalertDef def, MEscalation escalation) {
         def.setEscalation(escalation);
+        
+        // End any escalation we were previously doing.
+        MEscalationManagerEJBImpl.getOne().endEscalation(def);
         GalertProcessor.getInstance().alertDefUpdated(def);
     }
     
@@ -368,6 +374,23 @@ public class GalertManagerEJBImpl
      * @ejb:interface-method
      */
     public void startEscalation(Integer id, ExecutionReason reason) {
+        GalertDef def = findById(id);
+        
+        /*
+        _mescMan.startEscalation(alert);
+        
+        Escalation esc = def.getEscalation();
+        
+        if (isEscalationActive(esc, def.getId(),
+                               EscalationState.ALERT_TYPE_GROUP)) {
+            return;
+        }
+
+        GalertLog alert = galertManagerLocal.createAlertLog(def, reason);
+        activateEscalation(esc, def.getId(), alert.getId().intValue(),
+                           EscalationState.ALERT_TYPE_GROUP);
+
+        _mescMan.startEscalation(alert)
         try {
             GalertDef def = _defDAO.findById(id);
             EscalationMediator.getInstance().startGEscalation(def, reason);
@@ -376,6 +399,7 @@ public class GalertManagerEJBImpl
         } catch (PermissionException e) {
             _log.error("No permission to begin escalation", e);
         }
+        */
     }
 
     /**

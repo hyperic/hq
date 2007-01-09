@@ -7,5 +7,9 @@ public class GalertStartupListener
 {
     public void hqStarted() {
         GalertManagerEJBImpl.getOne().startup();
+
+        // Make sure the escalation enumeration is loaded and registered so 
+        // that the escalations run
+        GalertEscalationAlertType.class.getClass();
     }
 }

@@ -5,12 +5,14 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.escalation.server.session.Escalatable;
+import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
 
 public class GalertLog
     extends PersistedObject 
-    implements AlertInterface
+    implements AlertInterface, Escalatable
 { 
     public static int MAX_SHORT_REASON = 256;
     public static int MAX_LONG_REASON  = 2048;
@@ -37,6 +39,10 @@ public class GalertLog
         _shortReason = reason.getShortReason();
         _longReason  = reason.getLongReason();
         _partition   = reason.getPartition();
+    }
+
+    public PerformsEscalations getDefinition() {
+        return getAlertDef();
     }
 
     public GalertDef getAlertDef() {
@@ -106,6 +112,10 @@ public class GalertLog
 
     public void setFixed(boolean fixed) {
         _fixed = fixed;
+    }
+
+    public AlertInterface getAlertInfo() {
+        return this;
     }
 
     public int hashCode() {
