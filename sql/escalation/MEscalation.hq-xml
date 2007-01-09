@@ -5,11 +5,11 @@
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping package="org.hyperic.hq.escalation.server.session">
-  <class name="MEscalation" table="EAM_MESCALATION">
+  <class name="MEscalation" table="EAM_ESCALATION">
     <id name="id" type="integer">
       <column name="ID" not-null="true" />
       <generator class="sequence">
-        <param name="sequence">EAM_MESCALATION_ID_SEQ</param>
+        <param name="sequence">EAM_ESCALATION_ID_SEQ</param>
       </generator>
     </id>
 
@@ -27,7 +27,7 @@
 
     <!-- max waitTime is specified in milliseconds -->
     <property name="maxPauseTime" type="long">
-      <column name="MAX_PAUSE_TIME" not-null="true" />
+      <column name="MAX_WAIT_TIME" not-null="true" />
     </property>
 
     <property name="notifyAll" type="boolean">
@@ -42,8 +42,8 @@
       <column name="MTIME" not-null="true" />
     </property>
 
-    <list name="actionsList" table="EAM_MESCALATION_ACTION">
-      <key column="MESCALATION_ID" />
+    <list name="actionsList" table="EAM_ESCALATION_ACTION">
+      <key column="ESCALATION_ID" />
       <list-index column="IDX"/>
       <composite-element class="MEscalationAction">
         <parent name="parent"/>
