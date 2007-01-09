@@ -33,6 +33,9 @@ import java.util.Iterator;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.escalation.server.session.MEscalation;
+import org.hyperic.hq.escalation.server.session.MEscalationAlertType;
+import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
@@ -42,7 +45,8 @@ import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 
 public class AlertDefinition 
-    extends PersistedObject implements AlertDefinitionInterface
+    extends PersistedObject 
+    implements AlertDefinitionInterface, PerformsEscalations
 {
     private String            _name;
     private long              _ctime;
@@ -65,7 +69,7 @@ public class AlertDefinition
     private Collection        _conditions = new ArrayList();
     private Collection        _triggers = new ArrayList();
     private Collection        _actions = new ArrayList();
-    private Escalation        _escalation;
+    private MEscalation       _escalation;
 
     private AlertDefinitionValue      _value;
     private AlertDefinitionBasicValue _basicValue;
@@ -260,14 +264,12 @@ public class AlertDefinition
         _actOnTrigger = actOnTrigger;
     }
 
-    public Escalation getEscalation()
-    {
+    public MEscalation getEscalation() {
         return _escalation;
     }
-
-    public void setEscalation(Escalation _escalation)
-    {
-        this._escalation = _escalation;
+    
+    protected void setEscalation(MEscalation escalation) {
+        _escalation = escalation;
     }
 
     public boolean isDeleted() {
@@ -348,10 +350,10 @@ public class AlertDefinition
             _value.setActOnTriggerId(getActOnTrigger().getId().intValue());
         }
         if (getEscalation() != null) {
-            _value.setEscalationId(getEscalation().getId());
+            _value.setMEscalationId(getEscalation().getId());
         }
         else {
-            _value.setEscalationId(null);
+            _value.setMEscalationId(null);
         }
 
         _value.removeAllTriggers();
@@ -502,5 +504,13 @@ public class AlertDefinition
         }
         _basicValue.cleanAction();
         return _basicValue;
+    }
+
+    public MEscalationAlertType getAlertType() {
+        return ClassicEscalationAlertType.CLASSIC;
+    }
+
+    public AlertDefinitionInterface getDefinitionInfo() {
+        return this;
     }
 }

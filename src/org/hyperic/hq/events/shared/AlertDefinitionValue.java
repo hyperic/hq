@@ -77,8 +77,8 @@ public class AlertDefinitionValue
    private boolean rangeHasBeenSet = false;
    private int actOnTriggerId;
    private boolean actOnTriggerIdHasBeenSet = false;
-   private Integer escalationId;
-   private boolean escalationIdHasBeenSet = false;
+   private Integer mescalationId;
+   private boolean mescalationIdHasBeenSet = false;
    private boolean deleted;
    private boolean deletedHasBeenSet = false;
    private java.util.Collection Triggers = new java.util.ArrayList();
@@ -584,24 +584,24 @@ public class AlertDefinitionValue
 		 this.updatedActions.remove(removed);
    }
 
-    public boolean isEscalationIdHasBeenSet()
+    public boolean isMEscalationIdHasBeenSet()
     {
-        return escalationIdHasBeenSet;
+        return mescalationIdHasBeenSet;
     }
 
-    public void setEscalationIdHasBeenSet(boolean escalationIdHasBeenSet)
+    public void setMEscalationIdHasBeenSet(boolean escalationIdHasBeenSet)
     {
-        this.escalationIdHasBeenSet = escalationIdHasBeenSet;
+        this.mescalationIdHasBeenSet = escalationIdHasBeenSet;
     }
 
-    public Integer getEscalationId()
+    public Integer getMEscalationId()
     {
-        return escalationId;
+        return mescalationId;
     }
 
-    public void setEscalationId(Integer escalationId)
+    public void setMEscalationId(Integer escalationId)
     {
-        this.escalationId = escalationId;
+        this.mescalationId = escalationId;
     }
 
     public void removeAllActions()

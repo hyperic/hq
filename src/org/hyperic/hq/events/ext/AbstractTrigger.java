@@ -41,8 +41,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
+import org.hyperic.hq.escalation.server.session.EscalatableCreator;
+import org.hyperic.hq.escalation.server.session.MEscalationManagerEJBImpl;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.AlertCreateException;
@@ -51,13 +52,11 @@ import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.Escalation;
-import org.hyperic.hq.events.server.session.EscalationMediator;
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
+import org.hyperic.hq.events.server.session.TriggerTrackerEJBImpl;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.events.shared.TriggerTrackerLocal;
-import org.hyperic.hq.events.shared.TriggerTrackerUtil;
 
 /** Abstract class that defines a trigger, which can fire actions
  */
@@ -136,13 +135,8 @@ public abstract class AbstractTrigger implements TriggerInterface {
 
         AlertDefinitionManagerLocal aman;
         AlertDefinition adBasic;
-        try {
-            aman = AlertDefinitionManagerUtil.getLocalHome().create();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        
+        aman = AlertDefinitionManagerEJBImpl.getOne();
 
         try {
             // See if the alert def is actually enabled and if it's our job to
@@ -152,25 +146,16 @@ public abstract class AbstractTrigger implements TriggerInterface {
                 return;
             
             adBasic = aman.getByIdNoCheck(adId);
-            if (adBasic.isEnabled()) {
-                if (log.isDebugEnabled())
-                    log.debug("Trigger ID " + getId() +
-                              " causing alert definition ID " + adId +
-                              " to fire");
-            }
-            else
+            if (!adBasic.isEnabled())
                 return;
+            
+            if (log.isDebugEnabled())
+                log.debug("Trigger ID " + getId() +
+                          " causing alert definition ID " + adId + " to fire");
 
             // See if we need to supress this trigger        
             if (adBasic.getFrequencyType() == EventConstants.FREQ_NO_DUP) {
-                TriggerTrackerLocal tracker;
-                try {
-                    tracker = TriggerTrackerUtil.getLocalHome().create();
-                } catch (NamingException e) {
-                    throw new SystemException(e);
-                } catch (CreateException e) {
-                    throw new SystemException(e);
-                }
+                TriggerTrackerLocal tracker = TriggerTrackerEJBImpl.getOne();                
 
                 boolean fire = tracker.fire(getId(), getFrequency());
                 // The TriggerTracker decided if we are supposed to fire
@@ -190,8 +175,9 @@ public abstract class AbstractTrigger implements TriggerInterface {
                 log.debug("Firing trigger " + getId() + " actions");
 
             // Now start escalation
-            EscalationMediator emed = EscalationMediator.getInstance();
-            emed.startEscalation(adBasic.getId(), event);
+            EscalatableCreator creator = 
+                new ClassicEscalatableCreator(adBasic, event);
+            MEscalationManagerEJBImpl.getOne().startEscalation(adBasic, creator); 
         } catch (FinderException e) {
             throw new ActionExecuteException(
                 "Alert Definition not found for trigger: " + getId());

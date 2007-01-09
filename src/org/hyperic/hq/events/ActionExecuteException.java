@@ -33,37 +33,20 @@ package org.hyperic.hq.events;
 
 import org.hyperic.hq.common.ApplicationException;
 
-
-/**
- *
- */
 public class ActionExecuteException extends ApplicationException {
-    
-    /** Creates a new instance of ActionExecuteException */
     public ActionExecuteException() {
         super();
     }
     
-    /** Creates a new instance of ActionExecuteException
-     * @param arg0
-     */
     public ActionExecuteException(String s) {
         super(s);
     }
     
-    /** Creates a new instance of ActionExecuteException
-     * @param arg0
-     */
     public ActionExecuteException(Throwable t) {
         super(t);
     }
     
-    /** Creates a new instance of ActionExecuteException
-     * @param arg0
-     * @param arg1
-     */
     public ActionExecuteException(String s, Throwable t) {
         super(s, t);
     }
-    
 }

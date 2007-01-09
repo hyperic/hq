@@ -32,6 +32,8 @@ import java.util.Iterator;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.escalation.server.session.Escalatable;
+import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
@@ -39,9 +41,10 @@ import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertValue;
 
 public class Alert 
-    extends PersistedObject implements AlertInterface
+    extends PersistedObject 
+    implements AlertInterface
 {
-    private boolean         fixed;
+    private boolean         _fixed;
     private long            _ctime;
     private AlertDefinition _alertDefinition;
     private Collection      _actionLog    = new ArrayList();
@@ -77,15 +80,17 @@ public class Alert
         _conditionLog.add(res);
         return res;
     }
-
-    public boolean isFixed()
-    {
-        return fixed;
+    
+    public PerformsEscalations getDefinition() {
+        return getAlertDefinition();
     }
 
-    public void setFixed(boolean fixed)
-    {
-        this.fixed = fixed;
+    public boolean isFixed() {
+        return _fixed;
+    }
+
+    public void setFixed(boolean fixed) {
+        _fixed = fixed;
     }
 
     public long getCtime() {

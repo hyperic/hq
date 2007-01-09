@@ -36,17 +36,9 @@ public class NoOpAction implements ActionInterface {
 
     public String execute(AlertInterface alert, String shortReason,
                           String longReason)
-        throws ActionExecuteException {
+        throws ActionExecuteException 
+    {
         return "Suppress alerts";
-    }
-
-    public String execute(Alert alert)
-        throws ActionExecuteException {
-        return execute(alert, "", "");
-    }
-
-    public boolean isAlertInterfaceSupported() {
-        return true;
     }
 
     public void setParentActionConfig(AppdefEntityID aeid,

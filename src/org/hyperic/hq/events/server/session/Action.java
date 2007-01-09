@@ -35,12 +35,18 @@ import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.bizapp.shared.action.SyslogActionConfig;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.ActionConfigInterface;
+import org.hyperic.hq.events.ActionExecuteException;
+import org.hyperic.hq.events.ActionInterface;
+import org.hyperic.hq.events.AlertInterface;
+import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.NoOpAction;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
+import org.hyperic.util.config.InvalidOptionException;
+import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.json.JSON;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -49,6 +55,8 @@ public class Action
     extends PersistedObject
     implements JSON
 {
+    public static final String JSON_NAME = "action";
+    
     private String          _className;
     private byte[]          _config;
     private Action          _parent;
@@ -58,7 +66,7 @@ public class Action
 
     private ActionValue     _valueObj;
 
-    public static Action newInstance(JSONObject json) throws JSONException
+    static Action newInstance(JSONObject json) throws JSONException
     {
         String className = json.getString("className");
         Action action;
@@ -75,7 +83,7 @@ public class Action
         return action;
     }
 
-    public static Action newEmailAction(JSONObject json) throws JSONException
+    static Action newEmailAction(JSONObject json) throws JSONException
     {
         EmailActionConfig config = new EmailActionConfig();
         config.setType(json.getInt(EmailActionConfig.CFG_TYPE));
@@ -84,7 +92,7 @@ public class Action
         return createAction(config);
     }
 
-    public static Action newEmailAction(int type, Set notifs) {
+    static Action newEmailAction(int type, Set notifs) {
         EmailActionConfig config = new EmailActionConfig();
         config.setType(type);
         config.setNames(StringUtil.iteratorToString(notifs.iterator(), ",", ""));
@@ -92,7 +100,7 @@ public class Action
         return createAction(config);
     }
 
-    public static Action newSyslogAction(String metaProject, String project,
+    static Action newSyslogAction(String metaProject, String project,
                                          String version)
     {
         SyslogActionConfig sa = new SyslogActionConfig();
@@ -103,7 +111,7 @@ public class Action
         return createAction(sa);
     }
 
-    public static Action newSyslogAction(JSONObject json) throws JSONException
+    static Action newSyslogAction(JSONObject json) throws JSONException
     {
         return newSyslogAction(
             json.getString(SyslogActionConfig.CFG_META),
@@ -112,13 +120,12 @@ public class Action
         );
     }
 
-    public static Action newNoOpAction()
-    {
+    static Action newNoOpAction() {
         NoOpAction na = new NoOpAction();        
         return createAction(na);
     }
 
-    public static Action newNoOpAction(JSONObject json) throws JSONException
+    static Action newNoOpAction(JSONObject json) throws JSONException
     {
         return newNoOpAction();
     }
@@ -139,7 +146,7 @@ public class Action
     protected Action() {
     }
 
-    public Action(AlertDefinition def, ActionValue val, Action parent) {
+    Action(AlertDefinition def, ActionValue val, Action parent) {
         _className  = val.getClassname();
         _config     = ArrayUtil.clone(val.getConfig());
         _parent     = parent;
@@ -244,9 +251,48 @@ public class Action
         }
     }
 
-    public String getJsonName()
+    public String getJsonName() {
+        return JSON_NAME;
+    }
+
+    /**
+     * Execute the action specified by the classname and config data.
+     */
+    public String executeAction(AlertInterface alert, String shortReason, 
+                                String longReason)
+        throws ActionExecuteException
     {
-        return "action";
+        try {
+            Class ac = Class.forName(getClassName());
+            ActionInterface action = (ActionInterface) ac.newInstance();
+
+            action.init(ConfigResponse.decode(action.getConfigSchema(),
+                                              getConfig()));
+        
+            return action.execute(alert, shortReason, longReason);
+        } catch (ClassNotFoundException e) {
+            throw new ActionExecuteException("Unable to find action class [" + 
+                                             getClassName() + "]", e);
+        } catch (InstantiationException e) {
+            throw new ActionExecuteException("Error instantiating [" + 
+                                             getClassName() + "]", e);
+        } catch (InvalidActionDataException e) {
+            throw new ActionExecuteException("Error initializing action [" + 
+                                             getClassName() + "]", e);
+        } catch (IllegalAccessException e) {
+            throw new ActionExecuteException("Illegal Access for class [" + 
+                                             getClassName() + "]", e);
+        } catch (EncodingException e) {
+            throw new ActionExecuteException("Unable to decode config for " + 
+                                             "class [" + getClassName() + "]",
+                                             e);
+        } catch (InvalidOptionException e) {
+            throw new ActionExecuteException("Invalid config option for class" +
+                                             " [" + getClassName() + "]", e);
+        } catch (InvalidOptionValueException e) {
+            throw new ActionExecuteException("Invalid option value for class" +
+                                             " [" + getClassName() + "]", e);
+        }
     }
 
     public String toString() {

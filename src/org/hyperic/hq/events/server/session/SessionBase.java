@@ -184,22 +184,22 @@ public abstract class SessionBase {
                         operation);        
     }
     
-    protected static void canCreateEscalation(Integer subjectId)
+    public static void canCreateEscalation(Integer subjectId)
         throws PermissionException {
         checkEscalation(subjectId, AuthzConstants.escOpCreateEscalation);
     }
     
-    protected static void canViewEscalation(Integer subjectId)
+    public static void canViewEscalation(Integer subjectId)
         throws PermissionException {
         checkEscalation(subjectId, AuthzConstants.escOpViewEscalation);
     }
     
-    protected static void canModifyEscalation(Integer subjectId)
+    public static void canModifyEscalation(Integer subjectId)
         throws PermissionException {
         checkEscalation(subjectId, AuthzConstants.escOpModifyEscalation);
     }
     
-    protected static void canRemoveEscalation(Integer subjectId)
+    public static void canRemoveEscalation(Integer subjectId)
         throws PermissionException {
         checkEscalation(subjectId, AuthzConstants.escOpRemoveEscalation);
     }

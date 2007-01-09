@@ -37,6 +37,8 @@ import javax.ejb.SessionContext;
 import javax.naming.NamingException;
 
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.events.shared.TriggerTrackerLocal;
+import org.hyperic.hq.events.shared.TriggerTrackerUtil;
 import org.hyperic.util.jdbc.DBUtil;
 
 /**
@@ -181,6 +183,14 @@ public class TriggerTrackerEJBImpl extends SessionBase implements SessionBean {
         }
     }
 
+    public static TriggerTrackerLocal getOne() {
+        try {
+            return TriggerTrackerUtil.getLocalHome().create(); 
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
+    }    
+    
     ///////////////////////////////////////
     // EJB operations
 
@@ -220,7 +230,7 @@ public class TriggerTrackerEJBImpl extends SessionBase implements SessionBean {
         this.ctx = ctx;
     }
 
-}   // end TriggerTrackerEJB
+} 
 
 
 

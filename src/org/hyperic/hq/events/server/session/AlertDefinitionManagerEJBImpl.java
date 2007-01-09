@@ -38,7 +38,6 @@ import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
-import javax.naming.NamingException;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
@@ -47,6 +46,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.escalation.server.session.MEscalation;
+import org.hyperic.hq.escalation.server.session.MEscalationManagerEJBImpl;
 import org.hyperic.hq.events.ActionCreateException;
 import org.hyperic.hq.events.AlertConditionCreateException;
 import org.hyperic.hq.events.AlertDefinitionCreateException;
@@ -57,12 +58,9 @@ import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
-import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
-import org.hyperic.hq.events.shared.RegisteredTriggerManagerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -134,15 +132,7 @@ public class AlertDefinitionManagerEJBImpl
         
         // Delete escalation state
         if (alertdef.getEscalation() != null) {
-            EscalationStateDAO dao =
-                DAOFactory.getDAOFactory().getEscalationStateDAO();
-            EscalationState state =
-                dao.getEscalationState(alertdef.getEscalation(),
-                                       alertdef.getId(),
-                                       EscalationState.ALERT_TYPE_CLASSIC);
-            if (state != null) {
-                dao.removePersisted(state);
-            }
+            MEscalationManagerEJBImpl.getOne().endEscalation(alertdef);
         }
 
         // Delete the alerts
@@ -151,9 +141,6 @@ public class AlertDefinitionManagerEJBImpl
         // Actually remove the definition
         getAlertDefDAO().remove(alertdef);
     }
-
-    ///////////////////////////////////////
-    // operations
 
     /** 
      * Create a new alert definition
@@ -224,10 +211,12 @@ public class AlertDefinitionManagerEJBImpl
             }
         }
 
-        if (a.getEscalationId() != null) {
-            EscalationDAO edao = DAOFactory.getDAOFactory().getEscalationDAO();
+        Integer esclId = a.getMEscalationId();
+        if (esclId != null) {
+            MEscalation escalation = 
+                MEscalationManagerEJBImpl.getOne().findById(esclId);
             res.setAlertDefinitionValueNoRels(a);
-            res.setEscalation(edao.findById(a.getEscalationId()));
+            res.setEscalation(escalation);
         }
         // Alert definitions are the root of the cascade relationship, so
         // we must explicitly save them
@@ -331,9 +320,12 @@ public class AlertDefinitionManagerEJBImpl
 
         // Now set the alertdef
         aldef.setAlertDefinitionValueNoRels(adval);
-        if (adval.isEscalationIdHasBeenSet()) {
-            EscalationDAO edao = DAOFactory.getDAOFactory().getEscalationDAO();
-            aldef.setEscalation(edao.findById(adval.getEscalationId()));
+        if (adval.isMEscalationIdHasBeenSet()) {
+            Integer esclId = adval.getMEscalationId();
+            MEscalation escl = 
+                MEscalationManagerEJBImpl.getOne().findById(esclId);
+            
+            aldef.setEscalation(escl);
         }
         
         return aldef.getAlertDefinitionValue();
@@ -370,19 +362,20 @@ public class AlertDefinitionManagerEJBImpl
 
     /** 
      * Set the escalation on the alertdefinition
-     * @throws PermissionException 
-     * @throws PermissionException 
      * 
      * @ejb:interface-method
      */
     public void setEscalation(AuthzSubjectValue subj, Integer defId,
                               String escName)
-        throws PermissionException {
+        throws PermissionException 
+    {
         AlertDefinition def = getAlertDefDAO().findById(defId);
         canManageAlerts(subj, def);
-        Escalation e = EscalationMediator.getInstance()
-                .findByEscalationName(subj.getId(), escName);
-        def.setEscalation(e);
+
+        MEscalation escl = 
+            MEscalationManagerEJBImpl.getOne().findByName(escName);
+
+        def.setEscalation(escl);
     }
 
     /** 
@@ -780,6 +773,3 @@ public class AlertDefinitionManagerEJBImpl
     public void ejbRemove() {}
     public void setSessionContext(SessionContext ctx) {}
 }
-
-
-

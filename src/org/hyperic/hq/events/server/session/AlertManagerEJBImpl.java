@@ -108,12 +108,10 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public AlertValue createAlert(AlertValue val) throws PermissionException
-    {
+    public AlertValue createAlert(AlertValue val) {
         AlertDefinition def = getAlertDefDAO().findById(val.getAlertDefId());
         Alert alert = def.createAlert(val);
-        DAOFactory.getDAOFactory().getDAO(alert.getClass())
-            .savePersisted(alert);
+        getAlertDAO().save(alert);
         return alert.getAlertValue();
     }
 
@@ -122,41 +120,35 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public Alert updateAlert(AlertValue val) throws AlertCreateException {
+    public Alert updateAlert(AlertValue val) {
         Alert alert;
         
         alert = getAlertDAO().findById(val.getId());
 
-        try {
-    
-            // Go through the AlertConditionLogs and create them
-            for (Iterator i = val.getAddedConditionLogs().iterator();
-                 i.hasNext();){
-                AlertConditionLogValue aclv = (AlertConditionLogValue) i.next();
-                AlertCondition cond =
-                    getAlertConDAO().findById(aclv.getCondition().getId());
+        // Go through the AlertConditionLogs and create them
+        for (Iterator i = val.getAddedConditionLogs().iterator();
+             i.hasNext();)
+        {
+            AlertConditionLogValue aclv = (AlertConditionLogValue) i.next();
+            AlertCondition cond =
+                getAlertConDAO().findById(aclv.getCondition().getId());
             
-                AlertConditionLog log =
-                    alert.createConditionLog(aclv.getValue(), cond);
-                DAOFactory.getDAOFactory().getDAO(log.getClass())
-                    .savePersisted(log);
-            }
-            
-            // Go through the AlertActionLogs and create them
-            Collection alogs = val.getAddedActionLogs();
-            for (Iterator i = alogs.iterator(); i.hasNext(); ) {
-                AlertActionLogValue aalv = (AlertActionLogValue) i.next();
-                Action action = getActionDAO().findById(aalv.getActionId());
-                
-                AlertActionLog log =alert.createActionLog(aalv.getDetail(),
-                    action);
-                DAOFactory.getDAOFactory().getDAO(log.getClass())
-                    .savePersisted(log);
-            }
-            return alert;
-        } catch(PermissionException e){
-            throw new AlertCreateException(e);
+            AlertConditionLog log =
+                alert.createConditionLog(aclv.getValue(), cond);
+            DAOFactory.getDAOFactory().getAlertConditionLogDAO().save(log);
         }
+            
+        // Go through the AlertActionLogs and create them
+        Collection alogs = val.getAddedActionLogs();
+        for (Iterator i = alogs.iterator(); i.hasNext(); ) {
+            AlertActionLogValue aalv = (AlertActionLogValue) i.next();
+            Action action = getActionDAO().findById(aalv.getActionId());
+                
+            AlertActionLog log = alert.createActionLog(aalv.getDetail(),
+                                                      action);
+            DAOFactory.getDAOFactory().getAlertActionLogDAO().save(log);
+        }
+        return alert;
     }
 
     /** Remove alerts
@@ -204,8 +196,12 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public AlertValue getById(Integer id) {
         AlertValue ret = getAlertDAO().findById(id).getAlertValue();
+
+        // Uh -- wtf is this doing here?  -- JMT 01/03/07
+        /*
         // Find out if it has been acknowledged
         AlertDefinition def = getAlertDefDAO().findById(ret.getAlertDefId());
+
         if (def.getEscalation() != null) {
             EscalationState state = EscalationMediator.getInstance()
                     .getEscalationState(def.getEscalation(), def.getId(),
@@ -221,6 +217,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                 }
             }
         }
+        */
         return ret;
     }
 
@@ -524,33 +521,6 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         }
 
         return text.toString();
-    }
-
-    /**
-     * delegate to EscalationMediator inside JTA context
-     * 
-     * @ejb:interface-method
-     */
-    public void processEscalation()
-    {
-        EscalationMediator.getInstance().processEscalation();
-    }
-
-    /**
-     * delegate to EscalationMediator inside JTA context
-     * 
-     * @ejb:interface-method
-     */
-    public void dispatchAction(Integer stateId)
-    {
-        EscalationStateDAO dao =
-            DAOFactory.getDAOFactory().getEscalationStateDAO();
-        EscalationState state = dao.findById(stateId);
-        
-        // Alert definition and its escalation state may have been deleted
-        if (state != null) {
-            EscalationMediator.getInstance().dispatchAction(state);
-        }
     }
 
     public static AlertManagerLocal getOne() {
