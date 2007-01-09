@@ -32,12 +32,12 @@
 
 <tiles:insert page="/admin/config/AdminHomeNav.jsp"/>
 
-<tiles:insert definition=".portlet.error"/>
-<tiles:insert definition=".portlet.confirm"/>
-
 <table width="100%" cellpadding="0" cellspacing="10">
 <tr>
 <td width="30%" valign="top" style="border: 2px solid grey">
+<tiles:insert definition=".portlet.error"/>
+<tiles:insert definition=".portlet.confirm"/>
+
     <table width="100%" cellpadding="0" cellspacing="0">
     <tr class="ListRow">
       <td class="TableRowHeader"><fmt:message key="common.header.Name"/></td>
