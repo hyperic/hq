@@ -103,28 +103,23 @@ public class EscalationWebMediator {
             .deleteEscalationById(sessionId, new Integer[]{id});
     }
 
-    public JSONObject saveEscalation(JsonActionContext context,
-                                     int sessionId, Integer alertDefId,
-                                     MEscalationAlertType alertType, 
-                                     JSONObject json)
+    public void saveEscalation(JsonActionContext context, int sessionId,
+                               Integer alertDefId,
+                               MEscalationAlertType alertType, JSONObject json)
         throws PermissionException,
                SessionException, FinderException, 
                JSONException, RemoteException, DuplicateObjectException
     {
         getEventsBoss(context).saveEscalation(sessionId, alertDefId,
                                               alertType, json);
-        return getEventsBoss(context)
-            .jsonEscalationByAlertDefId(sessionId, alertDefId, alertType);
     }
 
-    public JSONObject updateEscalation(JsonActionContext context,
-                                       int sessionId, Integer id,
-                                       JSONObject json)
+    public void updateEscalation(JsonActionContext context, int sessionId,
+                                 Integer id, JSONObject json)
         throws PermissionException,
                SessionException, FinderException, 
                JSONException, RemoteException, DuplicateObjectException
     {
         getEventsBoss(context).updateEscalation(sessionId, json);
-        return getEventsBoss(context).jsonByEscalationId(sessionId, id);
     }
 }

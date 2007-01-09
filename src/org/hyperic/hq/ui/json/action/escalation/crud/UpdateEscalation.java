@@ -126,29 +126,27 @@ public class UpdateEscalation extends BaseAction
             .put("actions", jarr);
 
         Integer id = Integer.valueOf(((String[]) map.get(ID))[0]);
-
         json.put("id", id);
 
         EscalationWebMediator wmed = EscalationWebMediator.getInstance();
         String[] ad = (String[])map.get(ALERTDEF_ID);
         String[] gad = (String[])map.get(GALERTDEF_ID);
-        JSONObject result;
         JSONObject escalation = new JSONObject().put("escalation", json);
         try {
             if (ad != null && !"undefined".equals(ad[0])) {
                 Integer alertDefId = Integer.valueOf((ad)[0]);
-                result = wmed.saveEscalation(context, context.getSessionId(),
+                wmed.saveEscalation(context, context.getSessionId(),
                                              alertDefId, 
                                              ClassicEscalationAlertType.CLASSIC,
                                              escalation);
             } else if (gad != null && !"undefined".equals(gad[0])) {
                 Integer alertDefId = Integer.valueOf((gad)[0]);
-                result = wmed.saveEscalation(context, context.getSessionId(),
+                wmed.saveEscalation(context, context.getSessionId(),
                                              alertDefId, 
                                              GalertEscalationAlertType.GALERT,
                                              escalation);
             } else {
-                result = wmed.updateEscalation(context, context.getSessionId(),
+                wmed.updateEscalation(context, context.getSessionId(),
                                                id, escalation);
             }
         } catch(SessionException e) {
@@ -158,6 +156,10 @@ public class UpdateEscalation extends BaseAction
         } catch(DuplicateObjectException e) {
             throw new SystemException(e);
         }
+        
+        JSONObject result =
+            wmed.jsonByEscalationId(context, context.getSessionId(), id);
+
         context.setJSONResult(new JSONResult(result));
         context.getRequest().setAttribute("escalation", result);
     }

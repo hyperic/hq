@@ -110,8 +110,9 @@ public class SaveEscalation extends BaseAction
             jarr.put(escalationAction);
         }
 
+        String name = ((String[])map.get(NAME))[0];
         JSONObject json = new JSONObject()
-            .put("name", ((String[])map.get(NAME))[0])
+            .put("name", name)
             .put("description", ((String[])map.get(DESCRIPTION))[0])
             .put("allowPause",
                  Boolean.valueOf(
@@ -126,25 +127,24 @@ public class SaveEscalation extends BaseAction
         
         String[] ad = (String[])map.get(ALERTDEF_ID);
         String[] gad = (String[])map.get(GALERTDEF_ID);
-        JSONObject result;
         JSONObject escalation = new JSONObject().put("escalation", json);
 
         try {
             if (ad != null && !"undefined".equals(ad[0])) {
                 Integer alertDefId = Integer.valueOf((ad)[0]);
-                result = wmed.saveEscalation(context, context.getSessionId(),
+                wmed.saveEscalation(context, context.getSessionId(),
                                              alertDefId, 
                                              ClassicEscalationAlertType.CLASSIC,
                                              escalation);
             } else if (gad != null && !"undefined".equals(gad[0])) {
                 Integer alertDefId = Integer.valueOf((gad)[0]);
-                result = wmed.saveEscalation(context, context.getSessionId(),
+                wmed.saveEscalation(context, context.getSessionId(),
                                              alertDefId,
                                              GalertEscalationAlertType.GALERT,
                                              escalation);
             } else {
-                result = wmed.saveEscalation(context, context.getSessionId(),
-                                             null, null, escalation);
+                wmed.saveEscalation(context, context.getSessionId(), null,
+                                    null, escalation);
             }
         } catch(SessionException e) {
             throw new SystemException(e);
@@ -153,6 +153,9 @@ public class SaveEscalation extends BaseAction
         } catch(DuplicateObjectException e) {
             throw new SystemException(e);
         }
+
+        JSONObject result =
+            wmed.jsonByEscalationName(context, context.getSessionId(), name);
         context.setJSONResult(new JSONResult(result));
         context.getRequest().setAttribute("escalation", result);
     }

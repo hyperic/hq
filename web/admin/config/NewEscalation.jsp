@@ -526,16 +526,28 @@ function showViewEscResponse(originalRequest) {
     }
 
     function showResponse(originalRequest) {
-        $('escMsg').innerHTML ="Escalation Saved";
-        $('example').style.display= '';
-
-        if (reloadScheme) {
-          document.EscalationSchemeForm.escId.value = escName;
-          initEscalationSchemes();
+        try {
+          var escJson = eval( '(' + originalRequest.responseText + ')' );
+          document.EscalationSchemeForm.escId.value = escJson.escalation.name;
+          document.EscalationSchemeForm.submit();
+        } catch (e) {
+          $('escMsg').innerHTML ="<fmt:message key="error.Error.Tab"/>";
+          $('example').style.display= '';
         }
     }
 
-    function initEsc () {
+    function saveNewEscalation() {
+        var escName = $('escName').value;
+        if (escName == "") {
+            alert('<fmt:message key="alert.config.error.escalation.name.required"/>');
+            return false;
+        }
+
+        sendEscForm();
+        return false;
+      }
+        
+      function initEsc () {
         // Set up the escalation dropdown
         var escJson = eval( '( { "escalations":<c:out value="${escalations}" escapeXml="false"/> })' );
         var escalationSel = $('escIdSel');
@@ -557,40 +569,6 @@ function showViewEscResponse(originalRequest) {
         }
         
         document.EscalationForm.escName.value = document.EscalationSchemeForm.escId.value;
-        $('submit').onclick = function () {
-            var escName = $('escName').value;
-            if (escName == "") {
-                alert('<fmt:message key="alert.config.error.escalation.name.required"/>');
-                return false;
-            }
-
-            // Check to make sure the name is new
-            var escId = $('escIdSel');
-            if (escId.options[escId.selectedIndex].value == "") {
-                for (var i = 0; i < escId.options.length; i++) {
-                    if (escName == escId.options[i].value) {
-                        alert('<fmt:message key="alert.config.error.escalation.name.dup"/>');
-                        return false;
-                    }
-                }
-            }
-
-            sendEscForm();
-
-            addOption(escId, escName, escName, true);
-
-            $('escNameSpan').style.visibility = 'hidden';
-
-            if (reloadScheme) {
-                document.EscalationSchemeForm.escId.value = escName;
-                initEscalationSchemes();
-            }
-            //schemeChange(escId);
-
-            return false;
-        }
-
-
       <c:if test="${empty param.escId}">
         addRow();
       </c:if>
@@ -627,7 +605,8 @@ function showViewEscResponse(originalRequest) {
         var pars = "rowOrder=" + rowOrder + "escForm=" + escFormSerial + "&ad=" + adId + "&gad=" + gadId + "&eid=" + eId + "aetid=" + aetId;
         new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse, onFailure :reportError} );
 
-   }
+    }
+
     function sendEscForm() {
         var adId;
         var gadId;
@@ -823,10 +802,10 @@ function showViewEscResponse(originalRequest) {
 
 <div id="example" style="display:none;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <td class="ConfirmationBlock">
-    <html:img page="/images/tt_check.gif" height="9" width="9" border="0" alt=""/>
+  <td class="ErrorBlock">
+    <html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>
   </td>
-  <td class="ConfirmationBlock" width="100%">
+  <td class="ErrorBlock" width="100%">
     <div id="escMsg"></div>
   </td>
 </table>
@@ -932,12 +911,13 @@ function showViewEscResponse(originalRequest) {
       </table>
       </td>
     </tr>
-    <tr>
-      <td><br>
-      <br>
-      <input type="button" value="Submit" onclick="sendEscForm();" id="submit"></input>
-      <br>
-      <br>
+    <tr class="ToolbarContent"><!-- SET TOOLBAR -->
+      <td>
+        <tiles:insert page="/common/components/ActionButton.jsp">
+          <tiles:put name="labelKey" value="common.label.Save"/>
+          <tiles:put name="buttonHref" value="."/>
+          <tiles:put name="buttonClick" value="return saveNewEscalation();"/>
+        </tiles:insert>
       </td>
     </tr>
   </tbody>
@@ -1019,7 +999,6 @@ function showViewEscResponse(originalRequest) {
 
 <br>
 <br>
-<!-- <input type="button" value="Submit" onclick="sendEditEscForm();" id="submit"></input>&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" value="Cancel" onclick="clearForm();" id="submit"></input> <br><br>-->
 <input type="hidden" value="" id="creationTime"> <input type="hidden"
   value="" id="_version_"> <input type="hidden" value="" id="notifyAll">
 <input type="hidden" value="" id="modifiedTime"> <input type="hidden"
