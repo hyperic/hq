@@ -90,14 +90,16 @@ public class MEscalationManagerEJBImpl
      * @see MEscalation for information on fields
      * @ejb:interface-method  
      */
-    public MEscalation createEscalation(String name, boolean pauseAllowed, 
-                                        long maxWaitTime, boolean notifyAll) 
+    public MEscalation createEscalation(String name, String description,
+                                        boolean pauseAllowed, long maxWaitTime,
+                                        boolean notifyAll) 
         throws DuplicateObjectException
     {
         MEscalation res;
         
         assertEscalationNameIsUnique(name);
-        res = new MEscalation(name, pauseAllowed, maxWaitTime, notifyAll); 
+        res = new MEscalation(name, description, pauseAllowed, maxWaitTime,
+                              notifyAll); 
                               
         _esclDAO.save(res);
         return res;
@@ -162,7 +164,7 @@ public class MEscalationManagerEJBImpl
         throws PermissionException
     {
         SessionBase.canViewEscalation(subject.getId());
-        return _esclDAO.findAll();
+        return _esclDAO.findAllOrderByName();
     }
 
     /**
