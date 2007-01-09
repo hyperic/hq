@@ -131,7 +131,7 @@ public class HQApp {
                 }
             } 
         } finally {
-            list.clear();
+            _txListeners.set(null);
         }
     }
     
