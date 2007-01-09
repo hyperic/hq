@@ -40,7 +40,7 @@
 
  function requestViewEscalation() {
         var alertDefId = $('alertDefId').value;
-        var url = '<html:rewrite page="/escalation/jsonByEscalationName/"/>';
+        var url = '<html:rewrite page="/escalation/jsonByEscalationId/"/>';
         url += escape('<c:out value="${param.escId}"/>');
         url += '.do';
         new Ajax.Request(url, {method: 'get', onSuccess:showViewEscResponse, onFailure :reportError});

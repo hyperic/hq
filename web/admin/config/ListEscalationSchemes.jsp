@@ -90,11 +90,11 @@ function showEscRows(originalRequest) {
 
     var td = document.createElement("td");
     td.setAttribute('class', 'ListCell');
-    if (schemes[i].name == '<c:out value="${param.escId}"/>') {
+    if (schemes[i].id == '<c:out value="${param.escId}"/>') {
       td.innerHTML = schemes[i].name;
     }
     else {
-      td.innerHTML = '<a href="<html:rewrite page="/admin/config/Config.do?mode=escalate&escId="/>' + schemes[i].name + '">' + schemes[i].name + '</a>';
+      td.innerHTML = '<a href="<html:rewrite page="/admin/config/Config.do?mode=escalate&escId="/>' + schemes[i].id + '">' + schemes[i].name + '</a>';
     }
     tr.appendChild(td);
 

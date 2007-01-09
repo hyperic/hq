@@ -37,7 +37,7 @@ import org.json.JSONException;
 
 import java.rmi.RemoteException;
 
-public class JsonByEscalationName extends BaseAction
+public class JsonByEscalationId extends BaseAction
 {
     public void execute(JsonActionContext context)
         throws JSONException,
@@ -48,8 +48,8 @@ public class JsonByEscalationName extends BaseAction
     {
         JSONObject escalation = EscalationWebMediator
             .getInstance()
-            .jsonByEscalationName(context, context.getSessionId(),
-                                  context.getName());
+            .jsonByEscalationId(context, context.getSessionId(),
+                                context.getId());
         context.setJSONResult(new JSONResult(escalation));
     }
 }
