@@ -25,9 +25,13 @@
 
 package org.hyperic.hq.common;
 
-public abstract class DuplicateObjectException 
-extends ApplicationException {
+import org.hyperic.hibernate.PersistedObject;
 
+public class DuplicateObjectException 
+    extends ApplicationException 
+{
+    private PersistedObject _existing; 
+    
     public DuplicateObjectException() {
         super();
     }
@@ -46,5 +50,15 @@ extends ApplicationException {
     
     public DuplicateObjectException(String s, Throwable t) {
         super(s,t);
+    }
+    
+    public DuplicateObjectException(String s, PersistedObject existing) {
+        super(s);
+
+        _existing = existing;
+    }
+    
+    public PersistedObject getExistingObject() {
+        return _existing;
     }
 }
