@@ -77,7 +77,7 @@ public class HibernateDAOFactory extends DAOFactory {
         return sessionFactory;
     }
 
-    private HibernateDAOFactory () {}
+    protected HibernateDAOFactory () {}
 
     public ActionDAO getActionDAO() {
         return new ActionDAO(this);
