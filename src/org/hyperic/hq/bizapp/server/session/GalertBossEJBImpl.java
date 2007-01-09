@@ -22,8 +22,8 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerUtil;
 import org.hyperic.hq.bizapp.shared.uibeans.AlertDefinitionBean;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.escalation.server.session.MEscalation;
 import org.hyperic.hq.events.AlertSeverity;
-import org.hyperic.hq.events.server.session.Escalation;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyType;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfo;
@@ -247,7 +247,7 @@ public class GalertBossEJBImpl
     /**
      * @ejb:interface-method  
      */
-    public void update(int sessionId, GalertDef def, Escalation escalation) 
+    public void update(int sessionId, GalertDef def, MEscalation escalation) 
         throws SessionException
     {
         _sessMan.authenticate(sessionId);
