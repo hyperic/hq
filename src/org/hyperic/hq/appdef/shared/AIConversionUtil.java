@@ -147,33 +147,12 @@ public class AIConversionUtil {
         return service;
     }
 
-    public static void configureService (AuthzSubjectValue subject,
-                                         Log log,
-                                         Integer serviceId,
-                                         byte[] productConfig,
-                                         byte[] measurementConfig,
-                                         byte[] controlConfig,
-                                         byte[] rtConfig,
-                                         Boolean userManaged,
-                                         boolean sendConfigEvent,
-                                         ConfigManagerLocal configMgr)
-        throws ConfigFetchException, 
-               AppdefEntityNotFoundException, PermissionException,
-               FinderException {
-
-        AppdefEntityID appdefID
-            = new AppdefEntityID(
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE, serviceId);
-        configureResource(subject, log, appdefID,
-                          productConfig, measurementConfig, controlConfig,
-                          rtConfig, userManaged, sendConfigEvent, configMgr);
-    }
-    public static void configureServer (AuthzSubjectValue subject,
-                                        Log log,
-                                        Integer serverId,
+    public static void configureService(AuthzSubjectValue subject,
+                                        Integer serviceId,
                                         byte[] productConfig,
                                         byte[] measurementConfig,
                                         byte[] controlConfig,
+                                        byte[] rtConfig,
                                         Boolean userManaged,
                                         boolean sendConfigEvent,
                                         ConfigManagerLocal configMgr)
@@ -182,15 +161,34 @@ public class AIConversionUtil {
                FinderException {
 
         AppdefEntityID appdefID
+            = new AppdefEntityID(
+            AppdefEntityConstants.APPDEF_TYPE_SERVICE, serviceId);
+        configureResource(subject, appdefID,
+                          productConfig, measurementConfig, controlConfig,
+                          rtConfig, userManaged, sendConfigEvent, configMgr);
+    }
+    
+    public static void configureServer(AuthzSubjectValue subject,
+                                       Integer serverId,
+                                       byte[] productConfig,
+                                       byte[] measurementConfig,
+                                       byte[] controlConfig,
+                                       Boolean userManaged,
+                                       boolean sendConfigEvent,
+                                       ConfigManagerLocal configMgr)
+        throws ConfigFetchException, 
+               AppdefEntityNotFoundException, PermissionException,
+               FinderException {
+
+        AppdefEntityID appdefID
             = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER,
                                  serverId);
-        configureResource(subject, log, appdefID,
+        configureResource(subject, appdefID,
                           productConfig, measurementConfig, controlConfig,
                           null, userManaged, sendConfigEvent, configMgr);
     }
 
     public static void configurePlatform(AuthzSubjectValue subject,
-                                         Log log,
                                          Integer platformId,
                                          byte[] productConfig,
                                          byte[] measurementConfig,
@@ -206,7 +204,7 @@ public class AIConversionUtil {
             new AppdefEntityID(
                 AppdefEntityConstants.APPDEF_TYPE_PLATFORM, platformId);
 
-        configureResource(subject, log, appdefID,
+        configureResource(subject, appdefID,
                           productConfig, measurementConfig, controlConfig,
                           null, userManaged, sendConfigEvent, configMgr);
     }
@@ -235,10 +233,8 @@ public class AIConversionUtil {
     /**
      * @param userManaged If null, then the current setting is left unchanged.
      * If non-null, then config.setUserManaged() is called, and the setting is
-     * changed to the value of the userManaged argument.
      */
     public static AppdefEntityID[] configureResource(AuthzSubjectValue subject,
-                                                     Log log,
                                                      AppdefEntityID appdefID,
                                                      byte[] productConfig,
                                                      byte[] measurementConfig,
@@ -246,11 +242,10 @@ public class AIConversionUtil {
                                                      byte[] rtConfig,
                                                      Boolean userManaged,
                                                      boolean sendConfigEvent,
-                                                   ConfigManagerLocal configMgr)
+                                                     ConfigManagerLocal configMgr)
         throws ConfigFetchException, AppdefEntityNotFoundException, 
-               PermissionException, FinderException {
-
-        ConfigResponse config;
+               PermissionException, FinderException
+    {
         byte[] configBytes;
         ConfigResponseValue existingConfig
             = configMgr.getConfigResponseValue(appdefID);

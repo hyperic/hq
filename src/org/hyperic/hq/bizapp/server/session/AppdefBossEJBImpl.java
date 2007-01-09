@@ -85,7 +85,6 @@ import org.hyperic.hq.appdef.shared.EntityPropertyFetcher;
 import org.hyperic.hq.appdef.shared.GroupTypeValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
-import org.hyperic.hq.appdef.shared.MiniResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
@@ -3671,7 +3670,7 @@ public class AppdefBossEJBImpl
                 }
 
                 ids = AIConversionUtil.configureResource(
-                    subject, log, entityId,
+                    subject, entityId,
                     ConfigResponse.safeEncode(allConfigs.getProductConfig()),
                     ConfigResponse.safeEncode(allConfigs.getMetricConfig()),
                     ConfigResponse.safeEncode(allConfigs.getControlConfig()),

@@ -487,7 +487,7 @@ public class RuntimeReportProcessor {
                 if (isDebug) {
                     log.debug("Configuring server " + foundAppdefServer.getName());
                 }
-                AIConversionUtil.configureServer(subject, log,
+                AIConversionUtil.configureServer(subject,
                                                  foundAppdefServer.getId(),
                                                  aiserver.getProductConfig(),
                                                  aiserver.getMeasurementConfig(),
@@ -693,7 +693,7 @@ public class RuntimeReportProcessor {
             if (isDebug) {
                 log.debug("Configuring service: " + aiservice.getName());
             }
-            AIConversionUtil.configureService(subject, log,
+            AIConversionUtil.configureService(subject,
                                               foundAppdefService.getId(),
                                               aiservice.getProductConfig(),
                                               aiservice.getMeasurementConfig(),

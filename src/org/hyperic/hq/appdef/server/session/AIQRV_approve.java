@@ -176,7 +176,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
             
             if (aiplatformValue.isPlatformDevice()) {
                 try {
-                    AIConversionUtil.configurePlatform(subject, log,
+                    AIConversionUtil.configurePlatform(subject,
                                                        existingPlatformValue.getId(),
                                                        aiplatform.getProductConfig(),
                                                        aiplatform.getMeasurementConfig(),
@@ -222,7 +222,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
             if (aiplatformValue.isPlatformDevice()) {
                 try {
-                    AIConversionUtil.configurePlatform(subject, log,
+                    AIConversionUtil.configurePlatform(subject,
                                                        existingPlatform.getId(),
                                                        aiplatform.getProductConfig(),
                                                        aiplatform.getMeasurementConfig(),
@@ -540,7 +540,6 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
                 try {
                     AIConversionUtil.configureServer(subject,
-                                                     log,
                                                      serverValue.getId(),
                                                      aiserver.getProductConfig(),
                                                      aiserver.getMeasurementConfig(),
@@ -619,7 +618,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                 serverValue = smLocal.updateServer(subject, 
                                                    serverValue);
                 try {
-                    AIConversionUtil.configureServer(subject, log,
+                    AIConversionUtil.configureServer(subject,
                                                      serverValue.getId(),
                                                      aiserver.getProductConfig(),
                                                      aiserver.getMeasurementConfig(),
