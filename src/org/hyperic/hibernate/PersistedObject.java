@@ -26,12 +26,6 @@
 package org.hyperic.hibernate;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.ArrayList;
-
-import org.hyperic.dao.DAOFactory;
-import org.json.JSONObject;
-import org.json.JSONException;
 
 /**
  * Base class for all HQ persisted objects.
@@ -42,7 +36,8 @@ import org.json.JSONException;
  * & version #.
  */
 public abstract class PersistedObject 
-    implements Serializable {
+    implements Serializable 
+{
     private Integer _id;
 
     // for hibernate optimistic locks -- don't mess with this.
