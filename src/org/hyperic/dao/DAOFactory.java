@@ -51,7 +51,6 @@ import org.hyperic.hq.dao.ConfigPropertyDAO;
 import org.hyperic.hq.dao.ConfigResponseDAO;
 import org.hyperic.hq.dao.CpropDAO;
 import org.hyperic.hq.dao.CpropKeyDAO;
-import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.dao.HibernateDAOFactory;
 import org.hyperic.hq.dao.PlatformDAO;
 import org.hyperic.hq.dao.PlatformTypeDAO;
