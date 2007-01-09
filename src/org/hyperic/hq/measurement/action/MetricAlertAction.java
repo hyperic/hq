@@ -53,15 +53,18 @@ import org.hyperic.util.config.InvalidOptionValueException;
 public class MetricAlertAction implements ActionInterface {
     private Log log = LogFactory.getLog(MetricAlertAction.class);
 
-    public boolean isAlertInterfaceSupported() {
-        return false;
-    }
-
-    public String execute(Alert alert) throws ActionExecuteException {
+    public String execute(AlertInterface aIface, String shortReason, 
+                          String longReason) 
+        throws ActionExecuteException 
+    {
         MetricProblemDAO dao =
             DAOFactory.getDAOFactory().getMetricProblemDAO();
         StringBuffer actLog = new StringBuffer();
 
+        // XXX -- This is probably not a safe cast.  The information here
+        //        should probably be contained within the short/long reasons
+        //        as well -- JMT
+        Alert alert = (Alert)aIface;
         Collection logs = alert.getConditionLog();
         for (Iterator it = logs.iterator(); it.hasNext(); ) {
             AlertConditionLog log = (AlertConditionLog) it.next();
@@ -85,18 +88,9 @@ public class MetricAlertAction implements ActionInterface {
         return actLog.toString();
     }
 
-    public String execute(AlertInterface alert, String shortReason,
-                          String longReason)
-        throws ActionExecuteException {
-        // Not supported
-        throw new UnsupportedOperationException(
-            "MetricAlertAction does not support generic operations");
-    }
-
     public ConfigSchema getConfigSchema() {
         return new ConfigSchema();
     }
-
 
     public ConfigResponse getConfigResponse()
         throws InvalidOptionException, InvalidOptionValueException {
