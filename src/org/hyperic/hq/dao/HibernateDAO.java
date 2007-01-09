@@ -32,6 +32,7 @@ import org.hibernate.Criteria;
 import org.hibernate.LockMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -79,6 +80,13 @@ public abstract class HibernateDAO {
 
     public Collection findAll() {
         return getSession().createCriteria(getPersistentClass()).list();
+    }
+
+    public Collection findAllOrderByName() {
+        return getSession()
+            .createCriteria(getPersistentClass())
+            .addOrder(Order.asc("name"))
+            .list();
     }
 
     public int size() {
