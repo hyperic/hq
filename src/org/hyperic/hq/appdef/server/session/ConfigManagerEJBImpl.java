@@ -140,10 +140,14 @@ public class ConfigManagerEJBImpl
     }
 
     /**
+     *
+     * Get the ConfigResponse for the given ID, creating it if it does not
+     * already exist.
+     *
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public ConfigResponseValue getConfigResponseValue (AppdefEntityID id)
+    public ConfigResponseValue getConfigResponseValue(AppdefEntityID id)
         throws AppdefEntityNotFoundException {
 
         ConfigResponseDAO dao =
@@ -165,6 +169,10 @@ public class ConfigManagerEJBImpl
             throw new IllegalArgumentException("The passed entity type " +
                                                "does not support config " +
                                                "responses");
+        }
+
+        if (config == null) {
+            config = dao.create();
         }
 
         return config.getConfigResponseValue();
@@ -486,8 +494,8 @@ public class ConfigManagerEJBImpl
      * that the current config is valid
      * @ejb:interface-method
      */
-    public void clearValidationError (AuthzSubjectValue subject,
-                                      AppdefEntityID id) {
+    public void clearValidationError(AuthzSubjectValue subject,
+                                     AppdefEntityID id) {
         setValidationError(subject, id, null);
     }
 
@@ -499,9 +507,9 @@ public class ConfigManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void setValidationError (AuthzSubjectValue subject,
-                                    AppdefEntityID id,
-                                    String validationError) {
+    public void setValidationError(AuthzSubjectValue subject,
+                                   AppdefEntityID id,
+                                   String validationError) {
 
         ConfigResponseDAO dao =
             DAOFactory.getDAOFactory().getConfigResponseDAO();
@@ -548,7 +556,7 @@ public class ConfigManagerEJBImpl
         throws FinderException, PermissionException, 
                AppdefEntityNotFoundException {
 
-        ConfigResponseValue existing = this.getConfigResponseValue(id);
+        ConfigResponseValue existing = getConfigResponseValue(id);
         boolean configWasUpdated = false;
         boolean appdefCreated = false;
         byte[] storedConf, newConf;
