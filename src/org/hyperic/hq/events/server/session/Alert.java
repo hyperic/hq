@@ -32,7 +32,6 @@ import java.util.Iterator;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
@@ -89,7 +88,7 @@ public class Alert
         return _fixed;
     }
 
-    public void setFixed(boolean fixed) {
+    protected void setFixed(boolean fixed) {
         _fixed = fixed;
     }
 

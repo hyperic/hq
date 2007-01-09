@@ -88,6 +88,10 @@ public class AuthzSubject extends AuthzNamedBean {
         _lastName = val;
     }
 
+    public String getFullName() {
+        return getFirstName() + " " + getLastName();
+    }
+    
     public String getEmailAddress() {
         return _emailAddress;
     }

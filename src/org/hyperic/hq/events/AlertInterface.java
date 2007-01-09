@@ -26,9 +26,8 @@
 package org.hyperic.hq.events;
 
 public interface AlertInterface {
-    public Integer getId();
-    public void setFixed(boolean fixed);
-    public boolean isFixed();
-    public long getTimestamp();
-    public AlertDefinitionInterface getAlertDefinitionInterface();
+    Integer getId();
+    boolean isFixed();
+    long getTimestamp();
+    AlertDefinitionInterface getAlertDefinitionInterface();
 }

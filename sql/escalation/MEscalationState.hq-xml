@@ -44,5 +44,8 @@
       <column name="ALERT_ID" not-null="true" unique-key="escl_uniq"/>
     </property>
 
+    <many-to-one name="acknowledgedBy">
+      <column name="ACKNOWLEDGED_BY" not-null="false"/>
+    </many-to-one>
   </class>
 </hibernate-mapping>

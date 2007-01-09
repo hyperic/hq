@@ -14,15 +14,15 @@
       </generator>
     </id>
 
-    <property name="detail" type="string">
+    <property name="detail">
       <column name="DETAIL" not-null="true" length="500" />
     </property>
 
-    <many-to-one name="galertLog" class="GalertLog">
+    <many-to-one name="galertLog">
       <column name="GALERT_ID" index="GALERT_ACTION_LOG_IDX" />
     </many-to-one>
 
-    <many-to-one name="action" class="org.hyperic.hq.events.server.session.Action">
+    <many-to-one name="action">
       <column name="ACTION_ID" />
     </many-to-one>
   </class>

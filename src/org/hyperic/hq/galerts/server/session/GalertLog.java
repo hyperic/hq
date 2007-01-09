@@ -110,7 +110,7 @@ public class GalertLog
         return _fixed;
     }
 
-    public void setFixed(boolean fixed) {
+    protected void setFixed(boolean fixed) {
         _fixed = fixed;
     }
 

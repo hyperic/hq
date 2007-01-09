@@ -26,6 +26,8 @@ package org.hyperic.hq.events.server.session;
 
 import javax.ejb.FinderException;
 
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.MEscalation;
@@ -87,6 +89,20 @@ public final class ClassicEscalationAlertType
         } catch(FinderException e) {
             throw new SystemException(e);
         }
+    }
+
+    protected void fixAlert(Integer alertId, AuthzSubject fixer) {
+        Alert alert = getAlertMan().findAlertById(alertId);
+        String msg = "Fixed by " + fixer.getFullName();
+        
+        alert.setFixed(true);
+
+        AlertActionLog log = new AlertActionLog(alert, msg, null);
+            
+        AlertActionLogDAO dao = 
+            new AlertActionLogDAO(DAOFactory.getDAOFactory());
+            
+        dao.save(log);
     }
 
     private ClassicEscalationAlertType(int code, String desc) {

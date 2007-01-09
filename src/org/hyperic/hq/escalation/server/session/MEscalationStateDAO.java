@@ -57,6 +57,17 @@ class MEscalationStateDAO
             .uniqueResult();
     }
     
+    MEscalationState find(Escalatable esc) {
+        Integer alertId = esc.getAlertInfo().getId();
+        Integer alertType = 
+            new Integer(esc.getDefinition().getAlertType().getCode());
+        
+        return (MEscalationState)createCriteria()
+            .add(Expression.eq("alertTypeEnum", alertType))
+            .add(Expression.eq("alertId", alertId))
+            .uniqueResult();
+    }
+    
     Collection findStatesFor(MEscalation mesc) {
         return createCriteria()
             .add(Expression.eq("escalation", mesc))

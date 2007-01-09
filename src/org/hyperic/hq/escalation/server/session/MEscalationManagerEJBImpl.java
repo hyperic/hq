@@ -26,6 +26,7 @@ package org.hyperic.hq.escalation.server.session;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
@@ -33,6 +34,7 @@ import javax.ejb.SessionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.DuplicateObjectException;
@@ -45,6 +47,7 @@ import org.hyperic.hq.escalation.server.session.MEscalationAlertType;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.escalation.server.session.MEscalationState;
 import org.hyperic.hq.events.ActionExecutionInfo;
+import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.SessionBase;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
@@ -108,31 +111,27 @@ public class MEscalationManagerEJBImpl
 
     /**
      * Update an escalation chain
-     * @throws PermissionException 
      * 
      * @see MEscalation for information on fields
      * @ejb:interface-method  
      */
-    public MEscalation updateEscalation(AuthzSubjectValue subject, Integer id,
-                                        String name, String description,
-                                        boolean pauseAllowed, long maxWaitTime,
-                                        boolean notifyAll) 
+    public void updateEscalation(AuthzSubjectValue subject, MEscalation esc,
+                                 String name, String description,
+                                 boolean pauseAllowed, long maxWaitTime,
+                                 boolean notifyAll) 
         throws DuplicateObjectException, PermissionException
     {
         SessionBase.canModifyEscalation(subject.getId());
-        MEscalation res = _esclDAO.findById(id);
         
-        if (!res.getName().equals(name)) {
+        if (!esc.getName().equals(name)) {
             assertEscalationNameIsUnique(name);
         }
         
-        res.setName(name);
-        res.setDescription(description);
-        res.setPauseAllowed(pauseAllowed);
-        res.setMaxPauseTime(maxWaitTime);
-        res.setNotifyAll(notifyAll);
-        
-        return res;
+        esc.setName(name);
+        esc.setDescription(description);
+        esc.setPauseAllowed(pauseAllowed);
+        esc.setMaxPauseTime(maxWaitTime);
+        esc.setNotifyAll(notifyAll);
     }
 
     /**
@@ -312,10 +311,14 @@ public class MEscalationManagerEJBImpl
         if (curState == null)
             return; // Already ended
         
-        _stateDAO.remove(curState);
-        MEscalationRuntime.getInstance().unscheduleEscalation(curState);
+        endEscalation(curState);
     }
 
+    private void endEscalation(MEscalationState state) {
+        _stateDAO.remove(state);
+        MEscalationRuntime.getInstance().unscheduleEscalation(state);
+    }
+    
     /**
      * This method is only for internal use by the {@link MEscalationRuntime}.
      * It ensures that we have a session setup prior to executing any actions.
@@ -401,6 +404,89 @@ public class MEscalationManagerEJBImpl
     }
 
     /**
+     * Acknowledge an alert, potentially sending out notifications.
+     * 
+     * @param subject Person who acknowledged the alert
+     * 
+     * @ejb:interface-method  
+     */
+    public void acknowledgeAlert(AuthzSubject subject, 
+                                 MEscalationAlertType type, Integer alertId) 
+    { 
+        fixOrNotify(subject, type, alertId, false);
+    }
+
+    /**
+     * Fix an alert, potentially sending out notifications.  The state of
+     * the escalation will be terminated and the alert will be marked fixed.
+     * 
+     * @param subject Person who fixed the alert
+     * 
+     * @ejb:interface-method  
+     */
+    public void fixAlert(AuthzSubject subject, MEscalationAlertType type, 
+                         Integer alertId)
+    { 
+        fixOrNotify(subject, type, alertId, true);
+    } 
+    
+    private void fixOrNotify(AuthzSubject subject, MEscalationAlertType type, 
+                             Integer alertId, boolean fixed)
+    {
+        Escalatable esc = type.findEscalatable(alertId);
+        MEscalationState state = _stateDAO.find(esc);
+        String sFixed = fixed ? "Fix" : "Acknowledg";
+        
+        if (state == null || state.getAcknowledgedBy() != null) {
+            _log.warn(sFixed + " alertId[" + alertId + "] for type [" + 
+                      type + "], but it wasn't running or was previously " + 
+                      sFixed + ".  Button masher?");
+            return;
+        }
+        
+        if (fixed) {  
+            endEscalation(state);
+            type.fixAlert(alertId, subject);
+        } else {
+            state.setAcknowledgedBy(subject);
+        }
+
+        sendNotifications(state, esc, subject, 
+                          state.getEscalation().isNotifyAll(), fixed);
+    }
+
+    /**
+     * Send an acknowledge or fixed notification to the actions.
+     *  
+     * @param state     State specifying the escalation chain to use
+     * @param notifyAll If false, only send to previously executed actions.
+     */
+    private void sendNotifications(MEscalationState state, Escalatable alert,
+                                   AuthzSubject subject, boolean notifyAll, 
+                                   boolean fixed)
+    {
+        String msg = subject.getFullName() + " has " + 
+            (fixed ? "fixed" : "acknowledged") + " the alert raised by [" +
+            alert.getDefinition().getName() + "]";
+
+        MEscalation esc = state.getEscalation();
+        int idx = notifyAll ? esc.getActions().size()
+                            : (state.getNextAction() - 1);
+        List actions = esc.getActions();
+        
+        while (idx >= 0) {
+            MEscalationAction a = (MEscalationAction)actions.get(idx--);
+            
+            try {
+                if (a instanceof Notify)
+                    ((Notify)a).send(alert.getId(), msg);
+            } catch(Exception e) {
+                _log.warn("Unable to send notification alert", e);
+            }
+        }
+    }
+    
+    /**
      * @ejb:interface-method  
      */
     public void startup() {
@@ -412,7 +498,7 @@ public class MEscalationManagerEJBImpl
             MEscalationRuntime.getInstance().scheduleEscalation(state);
         }
     }
-    
+        
     public static MEscalationManagerLocal getOne() {
         try {
             return MEscalationManagerUtil.getLocalHome().create();

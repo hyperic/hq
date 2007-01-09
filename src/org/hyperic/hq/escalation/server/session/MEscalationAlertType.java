@@ -24,6 +24,7 @@
  */
 package org.hyperic.hq.escalation.server.session;
 
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.util.HypericEnum;
 
 /**
@@ -61,4 +62,13 @@ public abstract class MEscalationAlertType
      */
     protected abstract void setEscalation(Integer defId, 
                                           MEscalation escalation);
+    
+    /**
+     * Fix an alert.  This method should simply set the alert as fixed and not
+     * do much else.  
+     *  
+     * @param fixer    Person who fixed the alert
+     * @param alertId  AlertID to mark as fixed
+     */
+    protected abstract void fixAlert(Integer alertId, AuthzSubject fixer);
 }

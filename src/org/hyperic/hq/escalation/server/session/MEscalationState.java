@@ -25,6 +25,7 @@
 package org.hyperic.hq.escalation.server.session;
 
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 
 /**
  * The escalation state ties an escalation chain to an alert definition. 
@@ -51,6 +52,9 @@ public class MEscalationState
     // to the escalation being paused.  Once the escalation continues, the
     // flag will be reset.
     private boolean _paused;
+    
+    // If the escalation has been acknowledged, this is who did it.
+    private AuthzSubject _acknowledgedBy;
     
     protected MEscalationState(){
     }
@@ -125,5 +129,13 @@ public class MEscalationState
     
     protected void setPaused(boolean paused) {
         _paused = paused;
+    }
+    
+    public AuthzSubject getAcknowledgedBy() {
+        return _acknowledgedBy;
+    }
+    
+    protected void setAcknowledgedBy(AuthzSubject subject) {
+        _acknowledgedBy = subject;
     }
 }

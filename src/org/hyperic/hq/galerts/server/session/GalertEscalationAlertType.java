@@ -24,6 +24,7 @@
  */
 package org.hyperic.hq.galerts.server.session;
 
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.MEscalation;
 import org.hyperic.hq.escalation.server.session.MEscalationAlertType;
@@ -58,6 +59,14 @@ public final class GalertEscalationAlertType
 
     public void setEscalation(Integer defId, MEscalation escalation) {
         getGalertMan().findById(defId).setEscalation(escalation);
+    }
+
+    protected void fixAlert(Integer alertId, AuthzSubject fixer) {
+        GalertManagerLocal gMan = getGalertMan();
+        GalertLog alert = gMan.findAlertLog(alertId);
+        String msg = "Alert fixed by " + fixer.getFullName();
+        
+        gMan.createActionLog(alert, msg, null);
     }
 
     private GalertEscalationAlertType(int code, String desc) {

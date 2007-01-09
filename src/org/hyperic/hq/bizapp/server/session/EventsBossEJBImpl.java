@@ -1678,9 +1678,9 @@ public class EventsBossEJBImpl
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         JSONObject escObj = escalation.getJSONObject(MEscalation.JSON_NAME);
+        MEscalation esc;
         boolean allowPause, notifyAll;
         long maxWaitTime;
-        MEscalation res;
         JSONArray jsonActions;
         String name;
         String description;
@@ -1694,9 +1694,9 @@ public class EventsBossEJBImpl
         notifyAll   = escObj.optBoolean("notifyAll");
         jsonActions = escObj.getJSONArray("actions");
 
-        res = getMEscMan().updateEscalation(subject, new Integer(id), name,
-                                            description, allowPause,
-                                            maxWaitTime, notifyAll);
+        esc = getMEscMan().findById(new Integer(id));
+        getMEscMan().updateEscalation(subject, esc, name, description, 
+                                      allowPause, maxWaitTime, notifyAll);
     }
 
     /**
