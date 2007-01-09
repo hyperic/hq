@@ -41,9 +41,9 @@ import org.hyperic.hq.escalation.shared.MEscalationManagerLocal;
 import org.hyperic.hq.escalation.shared.MEscalationManagerUtil;
 import org.hyperic.hq.escalation.server.session.MEscalation;
 import org.hyperic.hq.escalation.server.session.Escalatable;
+import org.hyperic.hq.escalation.server.session.MEscalationAlertType;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.escalation.server.session.MEscalationState;
-import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.SessionBase;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
@@ -197,6 +197,9 @@ public class MEscalationManagerEJBImpl
     {
         MEscalationState curState = _stateDAO.find(def);
         Escalatable alert;
+
+        if (def.getEscalation() == null) 
+            return;
         
         if (curState != null) {
             // XXX -- We need to make this lookup faster.  It's possible that
@@ -341,6 +344,18 @@ public class MEscalationManagerEJBImpl
         }
     }
     
+    /**
+     * Find an escalation based on the type and ID of the definition.  
+     * 
+     * @return null if the definition defined by the ID does not have any
+     *         escalation associated with it
+     * 
+     * @ejb:interface-method  
+     */
+    public MEscalation findByDefId(MEscalationAlertType type, Integer defId) {
+        return type.findDefinition(defId).getEscalation();
+    }
+
     /**
      * @ejb:interface-method  
      */

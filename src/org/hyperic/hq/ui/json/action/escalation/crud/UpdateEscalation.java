@@ -36,6 +36,8 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
+import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -154,11 +156,15 @@ public class UpdateEscalation extends BaseAction
             if (ad != null && !"undefined".equals(ad[0])) {
                 Integer alertDefId = Integer.valueOf((ad)[0]);
                 result = wmed.saveEscalation(context, context.getSessionId(),
-                                             alertDefId, 0, escalation);
+                                             alertDefId, 
+                                             ClassicEscalationAlertType.CLASSIC,
+                                             escalation);
             } else if (gad != null && !"undefined".equals(gad[0])) {
                 Integer alertDefId = Integer.valueOf((gad)[0]);
                 result = wmed.saveEscalation(context, context.getSessionId(),
-                                             alertDefId, 1, escalation);
+                                             alertDefId, 
+                                             GalertEscalationAlertType.GALERT,
+                                             escalation);
             } else {
                 throw new IllegalArgumentException("Required attribute 'ad' or " +
                                                    "'gad' is not defined");

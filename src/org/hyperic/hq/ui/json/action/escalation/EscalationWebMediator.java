@@ -27,6 +27,7 @@ package org.hyperic.hq.ui.json.action.escalation;
 
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.common.DuplicateObjectException;
+import org.hyperic.hq.escalation.server.session.MEscalationAlertType;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -41,32 +42,24 @@ import java.rmi.RemoteException;
 
 import javax.ejb.FinderException;
 
-public class EscalationWebMediator
-{
-    private static EscalationWebMediator ourInstance =
-            new EscalationWebMediator();
+public class EscalationWebMediator {
+    private static final EscalationWebMediator ourInstance =
+        new EscalationWebMediator();
 
-    public static EscalationWebMediator getInstance()
-    {
+    public static EscalationWebMediator getInstance() { 
         return ourInstance;
     }
 
-    private EscalationWebMediator()
-    {
-    }
+    private EscalationWebMediator() {}
 
-    private EventsBoss getEventsBoss(JsonActionContext context)
-    {
+    private EventsBoss getEventsBoss(JsonActionContext context) {
         return ContextUtils.getEventsBoss(context.getServletContext());
     }
 
     public JSONObject jsonByEscalationName(JsonActionContext context,
                                            int sessionId, String name)
-        throws JSONException,
-               PermissionException,
-               SessionTimeoutException,
-               SessionNotFoundException,
-               RemoteException
+        throws JSONException, PermissionException, SessionTimeoutException,
+               SessionNotFoundException, RemoteException
     {
         return getEventsBoss(context).jsonByEscalationName(sessionId, name);
     }
@@ -82,10 +75,8 @@ public class EscalationWebMediator
     public JSONObject jsonEscalationByAlertDefId(JsonActionContext context,
                                                  int sessionId,
                                                  Integer alertDefId,
-                                                 int alertType)
-        throws JSONException,
-               PermissionException,
-               SessionException,
+                                                 MEscalationAlertType alertType)
+        throws JSONException, PermissionException, SessionException,
                RemoteException, FinderException, DuplicateObjectException
     {
         return getEventsBoss(context)
@@ -114,7 +105,8 @@ public class EscalationWebMediator
 
     public JSONObject saveEscalation(JsonActionContext context,
                                      int sessionId, Integer alertDefId,
-                                     int alertType, JSONObject json)
+                                     MEscalationAlertType alertType, 
+                                     JSONObject json)
         throws PermissionException,
                SessionException, FinderException, 
                JSONException, RemoteException, DuplicateObjectException

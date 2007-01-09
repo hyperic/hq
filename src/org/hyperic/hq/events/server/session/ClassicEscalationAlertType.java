@@ -24,8 +24,12 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import javax.ejb.FinderException;
+
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.MEscalationAlertType;
+import org.hyperic.hq.escalation.server.session.PerformsEscalations;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 
 public final class ClassicEscalationAlertType 
@@ -35,17 +39,28 @@ public final class ClassicEscalationAlertType
         new ClassicEscalationAlertType(0xdeadbeef, "Classic");
 
     private static Object INIT_LOCK = new Object();
-    private static AlertManagerLocal _alertMan;
+    private static AlertManagerLocal           _alertMan;
+    private static AlertDefinitionManagerLocal _defMan;
     
-    private AlertManagerLocal getAlertMan() {
+    private void setup() {
         synchronized (INIT_LOCK) {
             if (_alertMan == null) {
                 _alertMan = AlertManagerEJBImpl.getOne();
+                _defMan = AlertDefinitionManagerEJBImpl.getOne();
             }
         }
+    }
+    
+    private AlertManagerLocal getAlertMan() {
+        setup();
         return _alertMan;
     }
     
+    private AlertDefinitionManagerLocal getDefMan() {
+        setup();
+        return _defMan;
+    }
+
     public Escalatable findEscalatable(Integer alertId) {
         AlertManagerLocal aMan = getAlertMan();
         Alert a = aMan.findAlertById(alertId);
@@ -54,6 +69,14 @@ public final class ClassicEscalationAlertType
         shortReason = aMan.getShortReason(a);
         longReason  = aMan.getLongReason(a);
         return new ClassicEscalatable(a, shortReason, longReason);
+    }
+
+    public PerformsEscalations findDefinition(Integer defId) {
+        try {
+            return getDefMan().getByIdNoCheck(defId);
+        } catch(FinderException e) {
+            return null;
+        }
     }
 
     private ClassicEscalationAlertType(int code, String desc) {

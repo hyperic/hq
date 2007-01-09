@@ -8,5 +8,14 @@ package org.hyperic.hq.escalation.server.session;
  * must register as to find 'em.
  */
 public interface EscalatableFinder {
-    Escalatable findEscalatable(Integer alertId); 
+    /**
+     * Find an escalatable (alert) given its ID.
+     */
+    Escalatable findEscalatable(Integer alertId);
+    
+    /**
+     * Find an alert definition (or something that performs escalations)
+     * given its id.
+     */
+    PerformsEscalations findDefinition(Integer defId);
 }

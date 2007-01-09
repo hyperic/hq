@@ -1497,25 +1497,11 @@ public class EventsBossEJBImpl
      * retrieve escalation by alert definition id.
      */
     private MEscalation findEscalationByAlertDefId(AuthzSubjectValue subject,
-                                                   Integer id, int alertType) 
-        throws FinderException, PermissionException
+                                                   Integer id, 
+                                                   MEscalationAlertType type)
+        throws PermissionException
     {
-        // XXX -- ACK, borken.  We should be able to find the escalation
-        //        from the def via the MEscalationAlertType.  Fixme!
-
-        if (alertType == ClassicEscalationAlertType.CLASSIC.getCode()) {
-            Integer mescId = getADM().getById(subject, id).getMEscalationId();
-
-            if (mescId == null)
-                return null;
-            
-            return getMEscMan().findById(mescId);
-        } else if (alertType == GalertEscalationAlertType.GALERT.getCode()) {
-            return GalertManagerEJBImpl.getOne().findById(id).getEscalation();
-        } else {
-            throw new IllegalArgumentException("Unknown alert type [" + 
-                                               alertType + "]");
-        }
+        return getMEscMan().findByDefId(type, id);
     }
     
     /**
@@ -1525,7 +1511,7 @@ public class EventsBossEJBImpl
      * @ejb:transaction type="REQUIRED"
      */
     public String getEscalationNameByAlertDefId(int sessionID, Integer id,
-                                                int alertType)
+                                                MEscalationAlertType alertType)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, FinderException
     {
@@ -1540,13 +1526,12 @@ public class EventsBossEJBImpl
     /**
      * set escalation name by alert definition id.
      *
-     * XXX -- This is broken -- JMT
-     * 
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
     public void setEscalationByAlertDefId(int sessionID, String escName,
-                                            Integer id, int alertType)
+                                          Integer id, 
+                                          MEscalationAlertType alertType) 
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
@@ -1561,7 +1546,7 @@ public class EventsBossEJBImpl
      * @ejb:transaction type="REQUIRED"
      */
     public JSONObject jsonEscalationByAlertDefId(int sessionID, Integer id,
-                                                 int alertType)
+                                                 MEscalationAlertType alertType)
         throws SessionException, PermissionException, JSONException, 
                FinderException
     {
@@ -1642,7 +1627,8 @@ public class EventsBossEJBImpl
      * @ejb:transaction type="REQUIRED"
      */
     public void saveEscalation(int sessionID, Integer alertDefId,
-                               int alertType, JSONObject escalation)
+                               MEscalationAlertType alertType, 
+                               JSONObject escalation)
         throws SessionTimeoutException, SessionNotFoundException, JSONException,
                PermissionException, DuplicateObjectException
     {
@@ -1677,11 +1663,9 @@ public class EventsBossEJBImpl
         
         if (alertDefId != null) {
             // The alert def needs to use this escalation
-            if (alertType == ClassicEscalationAlertType.CLASSIC.getCode()) { 
+            if (alertType.equals(ClassicEscalationAlertType.CLASSIC)) { 
                 getADM().setEscalation(subject, alertDefId, name);
-            } else if (alertType == 
-                       GalertEscalationAlertType.GALERT.getCode()) 
-            {
+            } else if (alertType.equals(GalertEscalationAlertType.GALERT)) { 
                 GalertManagerLocal gMan = GalertManagerEJBImpl.getOne();
                 GalertDef def = gMan.findById(alertDefId); 
 
