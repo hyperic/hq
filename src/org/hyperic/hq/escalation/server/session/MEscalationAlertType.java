@@ -33,7 +33,6 @@ import org.hyperic.util.HypericEnum;
  */
 public abstract class MEscalationAlertType 
     extends HypericEnum 
-    implements EscalatableFinder
 {
     protected MEscalationAlertType(int code, String desc) {
         super(MEscalationAlertType.class, code, desc);
@@ -43,4 +42,23 @@ public abstract class MEscalationAlertType
         return (MEscalationAlertType)findByCode(MEscalationAlertType.class, 
                                                 code);
     }
+
+    /**
+     * Find an escalatable (alert) given its ID.
+     */
+    protected abstract Escalatable findEscalatable(Integer alertId);
+    
+    /**
+     * Find an alert definition (or something that performs escalations)
+     * given its id.
+     */
+    protected abstract PerformsEscalations findDefinition(Integer defId);
+    
+    /**
+     * Set the escalation for something which can .. have escalations.. ;-)
+     *
+     * @param defId ID of the definition to set the escalation for
+     */
+    protected abstract void setEscalation(Integer defId, 
+                                          MEscalation escalation);
 }

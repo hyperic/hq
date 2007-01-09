@@ -26,7 +26,9 @@ package org.hyperic.hq.events.server.session;
 
 import javax.ejb.FinderException;
 
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
+import org.hyperic.hq.escalation.server.session.MEscalation;
 import org.hyperic.hq.escalation.server.session.MEscalationAlertType;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
@@ -76,6 +78,14 @@ public final class ClassicEscalationAlertType
             return getDefMan().getByIdNoCheck(defId);
         } catch(FinderException e) {
             return null;
+        }
+    }
+    
+    public void setEscalation(Integer defId, MEscalation escalation) {
+        try {
+            getDefMan().getByIdNoCheck(defId).setEscalation(escalation);
+        } catch(FinderException e) {
+            throw new SystemException(e);
         }
     }
 

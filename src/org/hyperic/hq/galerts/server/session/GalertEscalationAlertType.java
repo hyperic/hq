@@ -25,6 +25,7 @@
 package org.hyperic.hq.galerts.server.session;
 
 import org.hyperic.hq.escalation.server.session.Escalatable;
+import org.hyperic.hq.escalation.server.session.MEscalation;
 import org.hyperic.hq.escalation.server.session.MEscalationAlertType;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
@@ -53,6 +54,10 @@ public final class GalertEscalationAlertType
 
     public PerformsEscalations findDefinition(Integer defId) {
         return getGalertMan().findById(defId);
+    }
+
+    public void setEscalation(Integer defId, MEscalation escalation) {
+        getGalertMan().findById(defId).setEscalation(escalation);
     }
 
     private GalertEscalationAlertType(int code, String desc) {

@@ -357,6 +357,17 @@ public class MEscalationManagerEJBImpl
     }
 
     /**
+     * Set the escalation for a given alert definition and type
+     * 
+     * @ejb:interface-method  
+     */
+    public void setEscalation(MEscalationAlertType type, Integer defId,
+                              MEscalation escalation) 
+    {
+        type.setEscalation(defId, escalation);
+    }
+
+    /**
      * @ejb:interface-method  
      */
     public void startup() {

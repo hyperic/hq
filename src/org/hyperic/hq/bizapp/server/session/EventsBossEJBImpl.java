@@ -1655,24 +1655,13 @@ public class EventsBossEJBImpl
                 jsonEscAction.getJSONObject(Action.JSON_NAME);
             Action a;
             
-            // XXX -- We should not be creating an Action object right here.. 
-            //        The manager should do that work.
             a = getActMan().createAction(jsonAction);
             getMEscMan().addAction(res, a, waitTime);
         }
         
         if (alertDefId != null) {
             // The alert def needs to use this escalation
-            if (alertType.equals(ClassicEscalationAlertType.CLASSIC)) { 
-                getADM().setEscalation(subject, alertDefId, name);
-            } else if (alertType.equals(GalertEscalationAlertType.GALERT)) { 
-                GalertManagerLocal gMan = GalertManagerEJBImpl.getOne();
-                GalertDef def = gMan.findById(alertDefId); 
-
-                gMan.update(def, res);
-            } else {
-                throw new IllegalStateException(); 
-            }
+            getMEscMan().setEscalation(alertType, alertDefId, res);
         }
     }
 
