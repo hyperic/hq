@@ -1639,15 +1639,17 @@ public class EventsBossEJBImpl
         MEscalation res;
         JSONArray jsonActions;
         String name;
+        String description;
         
         name        = escObj.getString("name");
+        description = escObj.getString("description");
         allowPause  = escObj.optBoolean("allowPause");
         maxWaitTime = escObj.getLong("maxWaitTime");
         notifyAll   = escObj.optBoolean("notifyAll");
         jsonActions = escObj.getJSONArray("actions");
 
-        res = getMEscMan().createEscalation(name, allowPause, maxWaitTime, 
-                                            notifyAll);
+        res = getMEscMan().createEscalation(name, description, allowPause,
+                                            maxWaitTime, notifyAll);
         for (int i=0; i<jsonActions.length(); i++) {
             JSONObject jsonEscAction = (JSONObject)jsonActions.get(i);
             long waitTime = jsonEscAction.optLong("waitTime");

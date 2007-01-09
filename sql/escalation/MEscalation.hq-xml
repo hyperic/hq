@@ -21,6 +21,10 @@
       <column name="NAME" not-null="true" length="200" unique="true"/>
     </property>
 
+    <property name="description" type="string">
+      <column name="DESCRIPTION" length="250"/>
+    </property>
+
     <property name="pauseAllowed" type="boolean">
       <column name="ALLOW_PAUSE" not-null="true" />
     </property>

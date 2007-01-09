@@ -46,6 +46,9 @@ public class MEscalation
     // Name of the escalation chain
     private String _name;
 
+    // Description of the escalation chain
+    private String _description;
+
     // Allow the escalation to be paused (up to maxWaitTime milliseconds)
     private boolean _pauseAllowed;
 
@@ -62,10 +65,11 @@ public class MEscalation
 
     protected MEscalation() {}
 
-    MEscalation(String name, boolean pauseAllowed, long maxPauseTime,
-                boolean notifyAll)
+    MEscalation(String name, String description, boolean pauseAllowed,
+                long maxPauseTime, boolean notifyAll)
     {
         _name         = name;
+        _description  = description;
         _pauseAllowed = pauseAllowed;
         _maxPauseTime = maxPauseTime;
         _notifyAll    = notifyAll;
@@ -79,6 +83,14 @@ public class MEscalation
 
     protected void setName(String name) {
         _name = name;
+    }
+
+    public String getDescription() {
+        return _description;
+    }
+
+    protected void setDescription(String description) {
+        _description = description;
     }
 
     public boolean isPauseAllowed() {
@@ -151,6 +163,7 @@ public class MEscalation
 
             JSONObject json = new JSONObject()
                 .put("name", getName())
+                .put("description", getDescription())
                 .put("allowPause", isPauseAllowed())
                 .put("maxWaitTime", getMaxPauseTime())
                 .put("notifyAll", isNotifyAll())

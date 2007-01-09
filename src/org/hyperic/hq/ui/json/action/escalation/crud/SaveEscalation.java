@@ -82,6 +82,7 @@ public class SaveEscalation extends BaseAction
     private static String ALERTDEF_ID = "ad";
     private static String GALERTDEF_ID = "gad";
     private static String NAME = "escName";
+    private static String DESCRIPTION = "description";
 
     public void execute(JsonActionContext context)
         throws PermissionException,
@@ -121,6 +122,7 @@ public class SaveEscalation extends BaseAction
 
         JSONObject json = new JSONObject()
             .put("name", ((String[])map.get(NAME))[0])
+            .put("description", ((String[])map.get(DESCRIPTION))[0])
             .put("allowPause",
                  Boolean.valueOf(
                      ((String[])map.get(ALLOW_PAUSE))[0]).booleanValue())
