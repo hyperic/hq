@@ -23,6 +23,9 @@ import org.json.JSONObject;
  * of a specific class.  This has great use in things like Web-UI where you
  * need a code representation as well as a string (rendering a listbox)
  * 
+ * This class can also be used as a dynamic enumeration as long as all the
+ * enumerations use a unique code.  
+ * 
  * XXX:  It would be good to implement the PersistentEnum stylee via 
  *       a UserType in Hibernate, so we don't have to do the conversion in
  *       every class that uses an enum.  Don't have the time now.. :-(
@@ -31,26 +34,41 @@ import org.json.JSONObject;
 public abstract class HypericEnum 
     implements JSON
 {
+    /**
+     * Hash of classes onto sets of instances.
+     * TODO:  Change the sets into hashmaps so we can do quicker lookups.
+     */
     private static final Map _enumsByClass = new HashMap();
     
-    private final int    _code;
-    private final String _desc;
+    private Class  _implClass;
+    private int    _code;
+    private String _desc;
     
-    public HypericEnum(int code, String desc) {
-        _code = code;
-        _desc = desc;
+    protected HypericEnum(int code, String desc) {
+        init(getClass(), code, desc);
+    }
+    
+    protected HypericEnum(Class c, int code, String desc) {
+        init(c, code, desc);
+    }
+    
+    private void init(Class c, int code, String desc) {
+        _implClass = c;
+        _code      = code;
+        _desc      = desc;
+        
         
         synchronized (_enumsByClass) {
-            Set vals = (Set)_enumsByClass.get(getClass());
+            Set vals = (Set)_enumsByClass.get(_implClass);
             
-            if (findByCode(getClass(), code) != null) {
+            if (getByCode(_implClass, code) != null) {
                 throw new IllegalStateException("2 enumerations of class [" + 
-                                                getClass() + "] have the " + 
+                                                _implClass + "] have the " + 
                                                 "same code[" + code + "]");
             }
             if (vals == null) {
                 vals = new HashSet();
-                _enumsByClass.put(getClass(), vals);
+                _enumsByClass.put(_implClass, vals);
             } 
             vals.add(this);
         }
@@ -69,7 +87,7 @@ public abstract class HypericEnum
     }
     
     public String getJsonName() {
-        return getClass().getName();
+        return _implClass.getName();
     }
 
     public JSONObject toJSON() {
@@ -99,6 +117,26 @@ public abstract class HypericEnum
     };
     
     /**
+     * Like {@link #findByCode(Class, int)} except returns null instead of
+     * throwing an exception
+     */
+    public static HypericEnum getByCode(Class c, int code) {
+        synchronized (_enumsByClass) {
+            Set vals = (Set)_enumsByClass.get(c);
+            
+            if (vals != null) {
+                for (Iterator i=vals.iterator(); i.hasNext(); ) {
+                    HypericEnum e = (HypericEnum)i.next();
+                
+                    if (e.getCode() == code) 
+                        return e;
+                }
+            }
+        }
+        return null;
+    }
+    
+    /**
      * Find an enum of a specific class type by code.
      *
      * @param c     A subclass of {@link HypericEnum}
@@ -106,20 +144,13 @@ public abstract class HypericEnum
      * @return the enum, else null
      */
     public static HypericEnum findByCode(Class c, int code) {
-        synchronized (_enumsByClass) {
-            Set vals = (Set)_enumsByClass.get(c);
-            
-            if (vals == null)
-                return null;
-            
-            for (Iterator i=vals.iterator(); i.hasNext(); ) {
-                HypericEnum e = (HypericEnum)i.next();
-                
-                if (e.getCode() == code) 
-                    return e;
-            }
-        }
-        return null;
+        HypericEnum res = getByCode(c, code);
+        
+        if (res != null)
+            return res;
+
+        throw new IllegalStateException("Unknown Enum Class [" + 
+                                        c.getName() + "] code=" + code);
     }
     
     /**
