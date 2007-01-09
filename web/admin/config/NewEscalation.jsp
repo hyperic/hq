@@ -634,7 +634,6 @@ function showViewEscResponse(originalRequest) {
         var eId;
         var aetId;
         var escFormSerial = Form.serialize('EscalationForm');
-        alert(escFormSerial);
         var url = '<html:rewrite action="/escalation/saveEscalation"/>';
         if ($('gad')) {
            gadId == $('gad').value;
