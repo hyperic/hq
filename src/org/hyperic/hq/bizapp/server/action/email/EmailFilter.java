@@ -58,6 +58,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
@@ -157,7 +158,7 @@ public class EmailFilter {
     
     public void sendAlert(AppdefEntityID appEnt, InternetAddress[] addresses,
                           String subject, String body, boolean filter)
-        throws NamingException {
+    {
         if (appEnt != null) {
             // Replace the resource name
             String[] replStrs = new String[] { subject, body };
@@ -275,11 +276,16 @@ public class EmailFilter {
     
     private void sendEmail(InternetAddress[] addresses,
                           String subject, String body)
-        throws NamingException {
-        Session session =
-            (Session) PortableRemoteObject.narrow(
-                new InitialContext().lookup("java:/SpiderMail"),
-                Session.class);
+    {
+        Session session;
+        try {
+            session = (Session) 
+                PortableRemoteObject.narrow(
+                               new InitialContext().lookup("java:/SpiderMail"),
+                               Session.class);
+        } catch(NamingException e) {
+            throw new SystemException(e);
+        }
 
         MimeMessage m = new MimeMessage(session);
         

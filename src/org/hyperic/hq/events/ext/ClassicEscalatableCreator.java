@@ -11,6 +11,7 @@ import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
 import org.hyperic.hq.events.ActionExecuteException;
+import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerFiredEvent;
@@ -105,8 +106,12 @@ class ClassicEscalatableCreator
             Action act = (Action) i.next();
 
             try {
-                act.executeAction(alert, shortReason, longReason);
-            } catch(ActionExecuteException e) {
+                act.executeAction(alert, 
+                                  new ActionExecutionInfo(shortReason, 
+                                                          longReason));
+            } catch(Exception e) {
+                // For any exception, just log it.  We can't afford not
+                // letting the other actions go un-processed.
                 _log.warn("Error executing action [" + act + "]", e);
             }
         }

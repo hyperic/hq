@@ -33,10 +33,10 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.ActionExecuteException;
+import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertCondition;
 import org.hyperic.hq.events.server.session.AlertConditionLog;
@@ -53,8 +53,7 @@ import org.hyperic.util.config.InvalidOptionValueException;
 public class MetricAlertAction implements ActionInterface {
     private Log log = LogFactory.getLog(MetricAlertAction.class);
 
-    public String execute(AlertInterface aIface, String shortReason, 
-                          String longReason) 
+    public String execute(AlertInterface aIface, ActionExecutionInfo info) 
         throws ActionExecuteException 
     {
         MetricProblemDAO dao =
@@ -97,7 +96,7 @@ public class MetricAlertAction implements ActionInterface {
         return new ConfigResponse();
     }
 
-    public void init(ConfigResponse config) throws InvalidActionDataException {
+    public void init(ConfigResponse config) {
     }
 
     public String getImplementor() {
@@ -110,7 +109,7 @@ public class MetricAlertAction implements ActionInterface {
 
     public void setParentActionConfig(AppdefEntityID aeid,
                                       ConfigResponse config)
-        throws InvalidActionDataException {
+    {
         init(config);
     }
 }

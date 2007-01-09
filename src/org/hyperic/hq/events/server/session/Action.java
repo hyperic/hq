@@ -36,6 +36,7 @@ import org.hyperic.hq.bizapp.shared.action.SyslogActionConfig;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.events.ActionExecuteException;
+import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.InvalidActionDataException;
@@ -258,8 +259,8 @@ public class Action
     /**
      * Execute the action specified by the classname and config data.
      */
-    public String executeAction(AlertInterface alert, String shortReason, 
-                                String longReason)
+    public String executeAction(AlertInterface alert, 
+                                ActionExecutionInfo info) 
         throws ActionExecuteException
     {
         try {
@@ -269,7 +270,7 @@ public class Action
             action.init(ConfigResponse.decode(action.getConfigSchema(),
                                               getConfig()));
         
-            return action.execute(alert, shortReason, longReason);
+            return action.execute(alert, info);
         } catch (ClassNotFoundException e) {
             throw new ActionExecuteException("Unable to find action class [" + 
                                              getClassName() + "]", e);

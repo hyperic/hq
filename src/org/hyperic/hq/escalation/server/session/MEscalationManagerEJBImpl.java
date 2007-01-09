@@ -44,6 +44,7 @@ import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.MEscalationAlertType;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.escalation.server.session.MEscalationState;
+import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.SessionBase;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
@@ -337,8 +338,9 @@ public class MEscalationManagerEJBImpl
         }
         
         try {
-            action.executeAction(esc.getAlertInfo(), esc.getShortReason(), 
-                                 esc.getLongReason());
+            action.executeAction(esc.getAlertInfo(), 
+                                 new ActionExecutionInfo(esc.getShortReason(),
+                                                         esc.getLongReason()));
         } catch(Exception exc) {
             _log.error("Unable to execute action [" + 
                        action.getClassName() + "] for escalation definition [" +

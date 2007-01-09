@@ -40,6 +40,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.server.action.email.EmailFilter;
 import org.hyperic.hq.bizapp.shared.action.SyslogActionConfig;
 import org.hyperic.hq.events.ActionExecuteException;
+import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
@@ -95,8 +96,7 @@ public class SyslogAction extends SyslogActionConfig
     /** Execute the action
      *
      */
-    public String execute(AlertInterface alert, String shortReason,
-                          String longReason)
+    public String execute(AlertInterface alert, ActionExecutionInfo info) 
         throws ActionExecuteException 
     {
 //        TriggerFiredEvent[] firedEvents = event.getRootEvents();
@@ -118,7 +118,7 @@ public class SyslogAction extends SyslogActionConfig
         log.error("DB_1 " + convertToDBPriority(alertDef.getPriority()) +
                   ' ' + getMeta() + '/' + getProduct() +'/' +
                   getVersion() + ' ' + resName + " :" +
-                  alertDef.getName() + " - " + longReason);
+                  alertDef.getName() + " - " + info.getLongReason());
         
         return "success";
     }

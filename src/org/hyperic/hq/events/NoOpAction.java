@@ -26,27 +26,18 @@
 package org.hyperic.hq.events;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
-import org.hyperic.util.config.InvalidOptionException;
-import org.hyperic.util.config.InvalidOptionValueException;
 
 public class NoOpAction implements ActionInterface {
 
-    public String execute(AlertInterface alert, String shortReason,
-                          String longReason)
-        throws ActionExecuteException 
-    {
+    public String execute(AlertInterface alert, ActionExecutionInfo info) { 
         return "Suppress alerts";
     }
 
-    public void setParentActionConfig(AppdefEntityID aeid,
-                                      ConfigResponse config)
-        throws InvalidActionDataException {}
+    public void setParentActionConfig(AppdefEntityID id, ConfigResponse c) {}
 
-    public ConfigResponse getConfigResponse()
-        throws InvalidOptionException, InvalidOptionValueException {
+    public ConfigResponse getConfigResponse() {
         return new ConfigResponse();
     }
 
@@ -54,13 +45,11 @@ public class NoOpAction implements ActionInterface {
         return new ConfigSchema();
     }
 
-    public void init(ConfigResponse config)
-        throws InvalidActionDataException {}
+    public void init(ConfigResponse config) {}
 
     public String getImplementor() {
         return NoOpAction.class.getName();
     }
 
     public void setImplementor(String implementor) {}
-
 }

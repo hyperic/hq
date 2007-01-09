@@ -43,6 +43,8 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.ConfigProperty;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
+import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
@@ -417,6 +419,14 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
         return ic;
     }
 
+    public static ServerConfigManagerLocal getOne() {
+        try {
+            return ServerConfigManagerUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
+    }
+    
     public void ejbCreate() { }
     public void ejbRemove() { }
     public void ejbActivate() { }

@@ -30,24 +30,23 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.CreateException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
 import org.hyperic.hq.events.ActionExecuteException;
+import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
@@ -56,8 +55,6 @@ import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.shared.AlertManagerLocal;
-import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
@@ -78,17 +75,14 @@ public class EmailAction extends EmailActionConfig
 
     private Log log = LogFactory.getLog( EmailAction.class.getName() );
 
-    /** Holds value of property subjMan. */
-    private AuthzSubjectManagerLocal subjMan = null;
+    private AuthzSubjectManagerLocal subjMan;
 
-    /** Creates a new instance of SharedEmailAction */
     public EmailAction() {
     }
 
-    protected AuthzSubjectManagerLocal getSubjMan()
-        throws NamingException, CreateException {
+    protected AuthzSubjectManagerLocal getSubjMan() {
         if (subjMan == null) {
-            subjMan = AuthzSubjectManagerUtil.getLocalHome().create();
+            subjMan = AuthzSubjectManagerEJBImpl.getOne();
         }
         return subjMan;
     }
@@ -113,10 +107,11 @@ public class EmailAction extends EmailActionConfig
     }
 
     private String getBaseURL()
-        throws ConfigPropertyException, CreateException, NamingException {
+        throws ConfigPropertyException
+    {
         if (baseUrl == null) {
-            baseUrl = ServerConfigManagerUtil.getLocalHome().create().
-                getConfig().getProperty(HQConstants.BaseURL);
+            baseUrl = ServerConfigManagerEJBImpl.getOne()
+                .getConfig().getProperty(HQConstants.BaseURL);
 
             // make sure no extra slashes (/)
             if ( baseUrl.charAt(baseUrl.length() - 1) != '/') {
@@ -127,7 +122,8 @@ public class EmailAction extends EmailActionConfig
     }
 
     protected String createLink(AppdefEntityID aeid, Integer aid)
-        throws ConfigPropertyException, CreateException, NamingException {
+        throws ConfigPropertyException
+    {
         StringBuffer text = new StringBuffer();
 
         // Create link
@@ -141,7 +137,7 @@ public class EmailAction extends EmailActionConfig
     protected String createText(AlertDefinitionInterface alertdef,
                                 String longReason, AppdefEntityID aeid,
                                 Integer alertId)
-        throws NamingException, CreateException, MeasurementNotFoundException
+        throws MeasurementNotFoundException
     {
 //        String alertTime = dformat.format(new Date(event.getTimestamp()));
 
@@ -194,10 +190,6 @@ public class EmailAction extends EmailActionConfig
                 .append(getBaseURL())
                 .append("Dashboard.do")
                 .append(SEPARATOR);
-        } catch (NamingException e) {
-            log.error("Error getting HQ config.  Can't add link to email.", e);
-        } catch (CreateException e) {
-            log.error("Error getting HQ config.  Can't add link to email.", e);
         } catch (ConfigPropertyException e) {
             log.error("Error getting HQ config.  Can't add link to email.", e);
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -210,12 +202,9 @@ public class EmailAction extends EmailActionConfig
     /** 
      * Execute the action
      */
-    public String execute(AlertInterface alert, String shortReason, 
-                          String longReason)
+    public String execute(AlertInterface alert, ActionExecutionInfo info) 
         throws ActionExecuteException 
     {
-        log.warn("Yay, we're executing the email action for [" + shortReason +
-                 "]");
         try {
             InternetAddress[] to = lookupEmailAddr();
 
@@ -226,18 +215,15 @@ public class EmailAction extends EmailActionConfig
             AppdefEntityID appEnt = new AppdefEntityID(alertDef.getAppdefType(),
                                                        alertDef.getAppdefId());
 
-            String body = isSms() ? shortReason :
-                                    createText(alertDef, longReason, appEnt,
-                                               alert.getId());
+            String body = isSms() ? info.getShortReason() :
+                                    createText(alertDef, info.getLongReason(), 
+                                               appEnt, alert.getId()); 
+
             filter.sendAlert(appEnt, to, createSubject(alertDef), body,
                              alertDef.isNotifyFiltered());
 
             StringBuffer result = getLog();
             return result.toString();
-        } catch (CreateException e) {
-            throw new ActionExecuteException(e);
-        } catch (NamingException e) {
-            throw new ActionExecuteException(e);
         } catch (MeasurementNotFoundException e) {
             throw new ActionExecuteException(e);
         } catch (SystemException e) {
@@ -293,14 +279,10 @@ public class EmailAction extends EmailActionConfig
             } catch (AddressException e) {
                 log.warn("Mail address invalid", e);
                 continue;
-            } catch (CreateException e) {
-                throw new ActionExecuteException("Session EJB error", e);
             } catch (PermissionException e) {
                 // authz failure...should not happen since its the overlord
                 // doing the user lookup
                 continue;
-            } catch (NamingException e) {
-                throw new ActionExecuteException("Session EJB error", e);
             }
         }
 
@@ -335,10 +317,6 @@ public class EmailAction extends EmailActionConfig
 
         EmailFilter filter = EmailFilter.getInstance();
 
-        try {
-            filter.sendAlert(null, to, createSubject(alertdef), message, false);
-        } catch (NamingException e) {
-            throw new ActionExecuteException(e);
-        }
+        filter.sendAlert(null, to, createSubject(alertdef), message, false);
     }
 }
