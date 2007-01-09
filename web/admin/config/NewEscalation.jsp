@@ -859,15 +859,15 @@ function showViewEscResponse(originalRequest) {
       </td>
     </tr>
     <tr class="ListRow">
-      <td align="right" width="10%">
+      <td class="BlockLabel">
           <fmt:message key="common.label.Name" />
       </td>
-      <td>
+      <td width="80%">
           <input type="text" size="25" name="escName" id="escName" />
       </td>
     </tr>
     <tr class="ListRow">
-      <td valign="top" align="right">
+      <td class="BlockLabel" valign="top">
           <fmt:message key="common.label.Description" />
       </td>
       <td>

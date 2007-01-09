@@ -822,20 +822,25 @@ function showViewEscResponse(originalRequest) {
 
 <table width="100%" cellpadding="3" cellspacing="0" border="0">
   <tbody>
-    <tr class="tableRowHeader">
-      <td><fmt:message key="alert.config.escalation.scheme" /> <c:out value="${param.escId}"/></option>
-      </select>
-      <span id="escNameSpan">
-      <c:choose>
-        <c:when test="${empty EscalationSchemeForm.escId}">
-          <fmt:message key="common.label.Name" />
-          <input type="text" size="25" name="escName" id="escName" />
-        </c:when>
-        <c:otherwise>
-          <input type="hidden" name="escName" />
-        </c:otherwise>
-      </c:choose>
-      </span>
+    <tr>
+      <td class="BlockTitle" colspan="2">
+      <fmt:message key="alert.config.escalation.scheme" />
+      </td>
+    </tr>
+    <tr class="ListRow">
+      <td class="BlockLabel">
+        <fmt:message key="common.label.Name" />
+      </td>
+      <td width="80%">
+        <c:out value="${param.escId}"/>
+      </td>
+    </tr>
+    <tr class="ListRow">
+      <td class="BlockLabel" valign="top">
+          <fmt:message key="common.label.Description" />
+      </td>
+      <td>
+          &nbsp;
       </td>
     </tr>
   </tbody>
@@ -843,7 +848,7 @@ function showViewEscResponse(originalRequest) {
 <table width="100%" cellpadding="3" cellspacing="0" border="0" id="createEscTable">
   <tbody>
     <tr>
-      <td class="tableRowHeader">If the alert is acknowledged:</td>
+      <td class="BlockTitle"><fmt:message key="alert.config.escalation.acknowledged"/></td>
     </tr>
     <tr class="ListRow">
       <td style="padding-left:15px;padding-bottom:10px;">
@@ -874,7 +879,7 @@ function showViewEscResponse(originalRequest) {
       </td>
     </tr>
     <tr>
-      <td class="tableRowHeader"><fmt:message
+      <td class="BlockTitle"><fmt:message
         key="alert.config.escalation.state.change" /><br>
       </td>
     </tr>
