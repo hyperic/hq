@@ -30,12 +30,13 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
+<tiles:importAttribute name="gad" ignore="true"/>
+<tiles:importAttribute name="alertDef" ignore="true"/>
+
 <script language="JavaScript" src='<html:rewrite page="/js/scriptaculous.js"/>'
   type="text/javascript"></script>
 <script src='<html:rewrite page="/js/dashboard.js"/>' type="text/javascript"></script>
 <script src='<html:rewrite page="/js/effects.js"/>' type="text/javascript"></script>
-
-
 
 <script type="text/javascript">
 onloads.push(requestViewEscalation);
@@ -773,27 +774,24 @@ function showViewEscResponse(originalRequest) {
 </script>
 
 <html:form action="/alerts/ConfigEscalation" method="GET">
-  <html:hidden property="mode" />
+  <input type="hidden" id="ad" name="ad" value='<c:out value="${alertDef.id}"/>' />
   <c:choose>
-    <c:when test="${not empty param.ad}">
-      <input type="hidden" id="ad" name="ad"
-        value='<c:out value="${param.ad}"/>' />
+    <c:when test="${not empty gad}">
+      <html:hidden property="mode" value="viewGroupDefinition"/>
+      <input type="hidden" id="gad" name="gad" value='<c:out value="${alertDef.id}"/>' />
     </c:when>
-    <c:when test="${not empty param.gad}">
-      <input type="hidden" id="gad" name="gad"
-        value='<c:out value="${param.gad}"/>' />
-    </c:when>
+    <c:otherwise>
+      <html:hidden property="mode" />
+    </c:otherwise>
   </c:choose>
-  <c:if test="${not empty alertDef}">
-    <c:choose>
-      <c:when test="${not empty Resource}">
-        <html:hidden property="eid" value="${Resource.entityId}" />
-      </c:when>
-      <c:otherwise>
-        <html:hidden property="aetid" value="${ResourceType.appdefTypeKey}" />
-      </c:otherwise>
-    </c:choose>
-  </c:if>
+  <c:choose>
+    <c:when test="${not empty Resource}">
+      <html:hidden property="eid" value="${Resource.entityId}" />
+    </c:when>
+    <c:otherwise>
+      <html:hidden property="aetid" value="${ResourceType.appdefTypeKey}" />
+    </c:otherwise>
+  </c:choose>
   <html:hidden property="escId" />
 </html:form>
 
@@ -811,13 +809,12 @@ function showViewEscResponse(originalRequest) {
   </c:otherwise>
 </c:choose>
 <c:choose>
-  <c:when test="${not empty param.ad}">
-    <input type="hidden" id="ad" name="ad" value='<c:out value="${param.ad}"/>' />
+  <c:when test="${not empty gad}">
+    <input type="hidden" id="gad" name="gad" value='<c:out value="${gad}"/>' />
   </c:when>
-  <c:when test="${not empty param.gad}">
-    <input type="hidden" id="gad" name="gad"
-      value='<c:out value="${param.gad}"/>' />
-  </c:when>
+  <c:otherwise>
+    <input type="hidden" id="ad" name="ad" value='<c:out value="${alertDef.id}"/>' />
+  </c:otherwise>
 </c:choose>
 <input type="hidden" id="ffff" name="ggg" value='<c:out value="${escalation.id}"/>' />
 
@@ -842,17 +839,15 @@ function showViewEscResponse(originalRequest) {
       </td>
       <td align="right">
          <c:url var="adminUrl" value="/admin/config/Config.do?mode=escalate">
-           <c:if test="${not empty alertDef}">
-             <c:param name="aname" value="${alertDef.name}"/>
-             <c:choose>
-               <c:when test="${not empty param.ad}">
-                 <c:param name="ad" value="${param.ad}"/>
-               </c:when>
-               <c:when test="${not empty param.gad}">
-                 <c:param name="gad" value="${param.gad}"/>
-               </c:when>
-             </c:choose>
-           </c:if>
+           <c:param name="aname" value="${alertDef.name}"/>
+           <c:choose>
+             <c:when test="${not empty gad}">
+               <c:param name="gad" value="${alertDef.id}"/>
+             </c:when>
+             <c:otherwise>
+               <c:param name="ad" value="${alertDef.id}"/>
+             </c:otherwise>
+           </c:choose>
          </c:url>
          <fmt:message key="admin.config.message.to.create">
            <fmt:param value="${adminUrl}"/>

@@ -35,6 +35,7 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
+import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -76,10 +77,18 @@ public class ViewEscalationAction extends ViewDefinitionAction {
         } else if (eForm.getEscId().length() > 0) {
             // We actually need to set the escalation scheme for alert
             // definition
-            // XXX:  This staticly specifies CLASSIC for now, but should change!
-            eb.setEscalationByAlertDefId(sessionId.intValue(), eForm.getEscId(),
-                                         new Integer(eForm.getAd()), 
-                                         ClassicEscalationAlertType.CLASSIC);
+            if (eForm.getGad() > 0) {
+                eb.setEscalationByAlertDefId(sessionId.intValue(),
+                                             eForm.getEscId(),
+                                             new Integer(eForm.getAd()), 
+                                             GalertEscalationAlertType.GALERT);
+            }
+            else {
+                eb.setEscalationByAlertDefId(sessionId.intValue(),
+                                             eForm.getEscId(),
+                                             new Integer(eForm.getAd()), 
+                                             ClassicEscalationAlertType.CLASSIC);
+            }
         }
         
         // Look for the escalation request parameter

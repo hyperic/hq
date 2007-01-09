@@ -42,6 +42,7 @@ public class EscalationSchemeForm extends ResourceForm {
     private long    _pauseRange;
     private int     _notification;
     private int     _ad;
+    private int     _gad;
 
     public String getEscId() {
         return _escId;
@@ -98,6 +99,14 @@ public class EscalationSchemeForm extends ResourceForm {
         _ad = ad;
     }
 
+    public int getGad() {
+        return _gad;
+    }
+
+    public void setGad(int gad) {
+        _gad = gad;
+    }
+
     public EscalationActionBean[] getActions() {
         EscalationActionBean[] actions =
             new EscalationActionBean[_actions.size()];
@@ -132,6 +141,8 @@ public class EscalationSchemeForm extends ResourceForm {
         super.reset(mapping, request);
         _escId = null;
         _escName = null;
+        _ad = 0;
+        _gad = 0;
         resetActions();
     }
 
