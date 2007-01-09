@@ -14,7 +14,6 @@ import org.hyperic.hq.escalation.server.session.MEscalationAlertType;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertSeverity;
-import org.hyperic.hq.events.server.session.Escalation;
 
 public class GalertDef 
     extends PersistedObject 

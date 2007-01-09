@@ -32,7 +32,6 @@ import java.util.List;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.server.session.Action;
-import org.hyperic.hq.events.server.session.EscalationAction;
 import org.hyperic.util.json.JSON;
 import org.json.JSONArray;
 import org.json.JSONException;

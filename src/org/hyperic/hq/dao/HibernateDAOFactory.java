@@ -86,10 +86,6 @@ import org.hyperic.hq.events.server.session.AlertConditionLogDAO;
 import org.hyperic.hq.events.server.session.AlertDAO;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
-import org.hyperic.hq.events.server.session.Escalation;
-import org.hyperic.hq.events.server.session.EscalationDAO;
-import org.hyperic.hq.events.server.session.EscalationState;
-import org.hyperic.hq.events.server.session.EscalationStateDAO;
 import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.events.server.session.EventLogDAO;
 import org.hyperic.hq.events.server.session.RegisteredTrigger;
@@ -173,8 +169,6 @@ public class HibernateDAOFactory extends DAOFactory {
         addDAO(new CpropDAO(this));
         addDAO(new CpropKeyDAO(this));
         addDAO(new CrispoDAO(this));
-        addDAO(new EscalationDAO(this));
-        addDAO(new EscalationStateDAO(this));
         addDAO(new EventLogDAO(this));
         addDAO(new DerivedMeasurementDAO(this));
         addDAO(new MeasurementArgDAO(this));
@@ -395,14 +389,6 @@ public class HibernateDAOFactory extends DAOFactory {
 
     public CrispoDAO getCrispoDAO() {
         return (CrispoDAO)getDAO(Crispo.class);
-    }
-
-    public EscalationDAO getEscalationDAO() {
-        return (EscalationDAO)getDAO(Escalation.class);
-    }
-
-    public EscalationStateDAO getEscalationStateDAO() {
-        return (EscalationStateDAO)getDAO(EscalationState.class);
     }
 
     public EventLogDAO getEventLogDAO() {

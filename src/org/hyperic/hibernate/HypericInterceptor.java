@@ -32,10 +32,9 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.type.Type;
 import org.hyperic.hq.appdef.AppdefBean;
-import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.escalation.server.session.MEscalation;
+import org.hyperic.hq.escalation.server.session.MEscalationState;
 import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.Escalation;
-import org.hyperic.hq.events.server.session.EscalationState;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.product.Plugin;
@@ -51,15 +50,14 @@ import org.hyperic.hq.product.Plugin;
 public class HypericInterceptor 
     extends EmptyInterceptor
 {
-    private static final HQApp _app = HQApp.getInstance(); 
     private final Log _log = LogFactory.getLog(HypericInterceptor.class);
     
     private boolean entHasTimestamp(Object o) {
         return o instanceof Plugin ||
                o instanceof AppdefBean ||
                o instanceof AlertDefinition ||
-               o instanceof Escalation ||
-               o instanceof EscalationState ||
+               o instanceof MEscalation ||
+               o instanceof MEscalationState ||
                o instanceof MeasurementTemplate ||
                o instanceof Measurement;
     }

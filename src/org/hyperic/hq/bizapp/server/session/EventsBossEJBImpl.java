@@ -77,6 +77,7 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.MEscalation;
+import org.hyperic.hq.escalation.server.session.MEscalationAlertType;
 import org.hyperic.hq.escalation.server.session.MEscalationManagerEJBImpl;
 import org.hyperic.hq.escalation.shared.MEscalationManagerLocal;
 import org.hyperic.hq.events.ActionCreateException;
@@ -93,9 +94,7 @@ import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
-import org.hyperic.hq.events.server.session.Escalation;
-import org.hyperic.hq.events.server.session.EscalationAction;
-import org.hyperic.hq.events.server.session.EscalationState;
+import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
 import org.hyperic.hq.events.server.session.RegisteredTriggerNotifier;
 import org.hyperic.hq.events.shared.ActionManagerLocal;
@@ -108,6 +107,7 @@ import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.galerts.server.session.GalertDef;
+import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
@@ -1500,14 +1500,17 @@ public class EventsBossEJBImpl
                                                    Integer id, int alertType) 
         throws FinderException, PermissionException
     {
-        if (alertType == EscalationState.ALERT_TYPE_CLASSIC) {
+        // XXX -- ACK, borken.  We should be able to find the escalation
+        //        from the def via the MEscalationAlertType.  Fixme!
+
+        if (alertType == ClassicEscalationAlertType.CLASSIC.getCode()) {
             Integer mescId = getADM().getById(subject, id).getMEscalationId();
 
             if (mescId == null)
                 return null;
             
             return getMEscMan().findById(mescId);
-        } else if (alertType == EscalationState.ALERT_TYPE_GROUP) {
+        } else if (alertType == GalertEscalationAlertType.GALERT.getCode()) {
             return GalertManagerEJBImpl.getOne().findById(id).getEscalation();
         } else {
             throw new IllegalArgumentException("Unknown alert type [" + 
@@ -1629,49 +1632,6 @@ public class EventsBossEJBImpl
         return jarr;
     }
 
-
-    /**
-     * fake escalation data for short term fix.  will be removed soon
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
-    public JSONObject makeJsonEscalation() throws JSONException
-    {
-        EscalationAction act1 = createEmailAction(
-            new String[] {"joe@gmail.com", "bob@yahoo.com"});
-
-        EscalationAction act2 = createEmailAction(
-            new String[] {"paul@att.com", "bill@google.com"});
-
-        EscalationAction act3 = createSyslogAction("meta", "tomcat", "5.0");
-
-        Escalation e = Escalation.newInstance("escalation " +
-                                              (new Random()).nextInt(10000));
-        e.getActions().add(act1);
-        e.getActions().add(act2);
-        e.getActions().add(act3);
-
-        return new JSONObject().put(e.getJsonName(), e.toJSON());
-    }
-
-    private EscalationAction createEmailAction(String[] users)
-    {
-        HashSet u = new HashSet();
-        for (int i=0; i<users.length; i++) {
-            u.add(users[i]);
-        }
-        return EscalationAction.newEmailAction(
-            EmailActionConfig.TYPE_EMAILS, u, 60000);
-    }
-
-    private EscalationAction createSyslogAction(String metaProject, String proj,
-                                                String version)
-    {
-        return EscalationAction.newSyslogAction(metaProject, proj, version,
-                                                60000);
-    }
-
     private AppdefEntityID getAppdefEntityID(AlertDefinitionValue ad) {
         return new AppdefEntityID(ad.getAppdefType(), ad.getAppdefId());
     }
@@ -1717,9 +1677,11 @@ public class EventsBossEJBImpl
         
         if (alertDefId != null) {
             // The alert def needs to use this escalation
-            if (alertType == EscalationState.ALERT_TYPE_CLASSIC) {
+            if (alertType == ClassicEscalationAlertType.CLASSIC.getCode()) { 
                 getADM().setEscalation(subject, alertDefId, name);
-            } else if (alertType == EscalationState.ALERT_TYPE_GROUP) {
+            } else if (alertType == 
+                       GalertEscalationAlertType.GALERT.getCode()) 
+            {
                 GalertManagerLocal gMan = GalertManagerEJBImpl.getOne();
                 GalertDef def = gMan.findById(alertDefId); 
 
