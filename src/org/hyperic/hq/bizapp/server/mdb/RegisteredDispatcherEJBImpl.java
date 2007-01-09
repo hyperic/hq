@@ -31,10 +31,13 @@ import java.util.Iterator;
 import javax.ejb.EJBException;
 import javax.ejb.MessageDrivenBean;
 import javax.ejb.MessageDrivenContext;
+import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.EventTypeException;
@@ -61,14 +64,8 @@ import org.hyperic.hq.events.ext.RegisteredTriggers;
 public class RegisteredDispatcherEJBImpl 
     implements MessageDrivenBean, MessageListener 
 {
-    private final org.apache.commons.logging.Log log =
-        org.apache.commons.logging.LogFactory.getLog(
-          "org.hyperic.hq.bizapp.server.mdb.RegisteredDispatcherEJBImpl");
-
-    private MessageDrivenContext ctx = null;
-
-    ///////////////////////////////////////
-    // operations
+    private final Log log =
+        LogFactory.getLog(RegisteredDispatcherEJBImpl.class);
 
     private void dispatchEvent(AbstractEvent event) {
         // Get interested triggers
@@ -117,47 +114,24 @@ public class RegisteredDispatcherEJBImpl
                     dispatchEvent(event);
                 }
             }
-        } catch (javax.jms.JMSException e) {
+        } catch (JMSException e) {
             log.error("Cannot open message object", e);
             e.printStackTrace();
         }
     }
 
-    ///////////////////////////////////////
-    // EJB operations
-
     /**
-     * @see javax.ejb.MessageDrivenBean#ejbCreate()
      * @ejb:create-method
      */
     public void ejbCreate() {}
-
-    /**
-     * @see javax.ejb.MessageDrivenBean#ejbPostCreate()
-     */
     public void ejbPostCreate() {}
-
-    /**
-     * @see javax.ejb.MessageDrivenBean#ejbActivate()
-     */
     public void ejbActivate() {}
-
-    /**
-     * @see javax.ejb.MessageDrivenBean#ejbPassivate()
-     */
     public void ejbPassivate() {}
 
     /**
-     * @see javax.ejb.MessageDrivenBean#ejbRemove()
      * @ejb:remove-method
      */
-    public void ejbRemove() {
-        this.ctx = null;
-    }
+    public void ejbRemove() {}
 
-    public void setMessageDrivenContext(MessageDrivenContext ctx)
-        throws EJBException {
-        this.ctx = ctx;
-    }
-
+    public void setMessageDrivenContext(MessageDrivenContext ctx) {}
 }
