@@ -27,11 +27,16 @@ package org.hyperic.hq.ui.json.action.escalation.finder;
 
 import java.rmi.RemoteException;
 
+import javax.ejb.FinderException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.DuplicateObjectException;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.ui.json.JSONResult;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
 import org.hyperic.hq.ui.json.action.escalation.BaseAction;
@@ -50,10 +55,21 @@ public class JsonEscalationByAlertDefId extends BaseAction
                PermissionException, SessionTimeoutException,
                SessionNotFoundException, RemoteException
     {
-        JSONObject escalation = EscalationWebMediator.getInstance()
-                .jsonEscalationByAlertDefId(
+        JSONObject escalation;
+        
+        try {
+            escalation = EscalationWebMediator.getInstance()
+            .jsonEscalationByAlertDefId(
                         context, context.getSessionId(), context.getId(),
                         context.getAlertDefType());
+        } catch(SessionException e) {
+            throw new SystemException(e);
+        } catch(FinderException e) {
+            throw new SystemException(e);
+        } catch(DuplicateObjectException e) {
+            throw new SystemException(e);
+        }
+        
         if (log.isDebugEnabled()) {
             log.debug("JsonEscalationByAlertDefId: " + context.getId() +
                       ": " + escalation);

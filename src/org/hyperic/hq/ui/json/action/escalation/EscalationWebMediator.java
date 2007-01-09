@@ -26,7 +26,9 @@
 package org.hyperic.hq.ui.json.action.escalation;
 
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
@@ -36,6 +38,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.rmi.RemoteException;
+
+import javax.ejb.FinderException;
 
 public class EscalationWebMediator
 {
@@ -81,9 +85,8 @@ public class EscalationWebMediator
                                                  int alertType)
         throws JSONException,
                PermissionException,
-               SessionTimeoutException,
-               SessionNotFoundException,
-               RemoteException
+               SessionException,
+               RemoteException, FinderException, DuplicateObjectException
     {
         return getEventsBoss(context)
             .jsonEscalationByAlertDefId(sessionId, alertDefId, alertType);
@@ -113,9 +116,8 @@ public class EscalationWebMediator
                                      int sessionId, Integer alertDefId,
                                      int alertType, JSONObject json)
         throws PermissionException,
-               SessionTimeoutException,
-               SessionNotFoundException,
-               JSONException, RemoteException
+               SessionException, FinderException, 
+               JSONException, RemoteException, DuplicateObjectException
     {
         getEventsBoss(context).saveEscalation(sessionId, alertDefId,
                                               alertType, json);

@@ -30,9 +30,12 @@ import org.hyperic.hq.ui.json.action.escalation.EscalationWebMediator;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
 import org.hyperic.hq.ui.json.JSONResult;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
+import org.hyperic.hq.common.DuplicateObjectException;
+import org.hyperic.hq.common.SystemException;
 import org.json.JSONException;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -44,6 +47,8 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.List;
 import java.util.StringTokenizer;
+
+import javax.ejb.FinderException;
 
 public class SaveEscalation extends BaseAction
 {
@@ -129,17 +134,26 @@ public class SaveEscalation extends BaseAction
         String[] gad = (String[])map.get(GALERTDEF_ID);
         JSONObject result;
         JSONObject escalation = new JSONObject().put("escalation", json);
-        if (ad != null && !"undefined".equals(ad[0])) {
-            Integer alertDefId = Integer.valueOf((ad)[0]);
-            result = wmed.saveEscalation(context, context.getSessionId(),
-                                         alertDefId, 0, escalation);
-        } else if (gad != null && !"undefined".equals(gad[0])) {
-            Integer alertDefId = Integer.valueOf((gad)[0]);
-            result = wmed.saveEscalation(context, context.getSessionId(),
-                                         alertDefId, 1, escalation);
-        } else {
-            result = wmed.saveEscalation(context, context.getSessionId(),
-                                         null, -1, escalation);
+
+        try {
+            if (ad != null && !"undefined".equals(ad[0])) {
+                Integer alertDefId = Integer.valueOf((ad)[0]);
+                result = wmed.saveEscalation(context, context.getSessionId(),
+                                             alertDefId, 0, escalation);
+            } else if (gad != null && !"undefined".equals(gad[0])) {
+                Integer alertDefId = Integer.valueOf((gad)[0]);
+                result = wmed.saveEscalation(context, context.getSessionId(),
+                                             alertDefId, 1, escalation);
+            } else {
+                result = wmed.saveEscalation(context, context.getSessionId(),
+                                             null, -1, escalation);
+            }
+        } catch(SessionException e) {
+            throw new SystemException(e);
+        } catch(FinderException e) {
+            throw new SystemException(e);
+        } catch(DuplicateObjectException e) {
+            throw new SystemException(e);
         }
         context.setJSONResult(new JSONResult(result));
         context.getRequest().setAttribute("escalation", result);
