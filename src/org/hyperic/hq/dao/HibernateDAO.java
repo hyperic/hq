@@ -29,6 +29,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
+import org.hibernate.Criteria;
 import org.hibernate.LockMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -76,6 +77,10 @@ public abstract class HibernateDAO {
                ? getSession().load(getPersistentClass(), id, LockMode.UPGRADE)
                : getSession().load(getPersistentClass(), id);
     }
+    
+    protected Criteria createCriteria() {
+        return getSession().createCriteria(_persistentClass);
+    }
 
     /**
      * Simple pojo attribute value search, uses Hibernate Example Criteria
@@ -90,12 +95,11 @@ public abstract class HibernateDAO {
     public List findByExample(final PersistedObject p) {
         // searchable properties
         Example.PropertySelector selector =
-                new Example.PropertySelector() {
-                    public boolean include(Object val, String name, Type type)
-                    {
-                        return p.getSearchable().contains(name);
-                    }
-                };
+            new Example.PropertySelector() {
+            public boolean include(Object val, String name, Type type) {
+                return p.getSearchable().contains(name);
+            }
+        };
         
         return getSession().createCriteria(getPersistentClass())
                 .add(Example.create(p).setPropertySelector(selector))
