@@ -1510,8 +1510,8 @@ public class EventsBossEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public String getEscalationNameByAlertDefId(int sessionID, Integer id,
-                                                MEscalationAlertType alertType)
+    public Integer getEscalationIdByAlertDefId(int sessionID, Integer id,
+                                               MEscalationAlertType alertType)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, FinderException
     {
@@ -1520,7 +1520,7 @@ public class EventsBossEJBImpl
         
         esc = findEscalationByAlertDefId(subject, id, alertType);
 
-        return esc == null ? null : esc.getName();
+        return esc == null ? null : esc.getId();
     }
 
     /**
@@ -1529,14 +1529,14 @@ public class EventsBossEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void setEscalationByAlertDefId(int sessionID, String escName,
-                                          Integer id, 
+    public void setEscalationByAlertDefId(int sessionID, Integer id,
+                                          Integer escId,
                                           MEscalationAlertType alertType) 
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
-        getADM().setEscalation(subject, id, escName);
+        getADM().setEscalation(subject, id, escId);
     }
     
     /**

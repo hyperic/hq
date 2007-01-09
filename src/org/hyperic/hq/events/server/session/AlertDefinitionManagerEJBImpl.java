@@ -368,14 +368,14 @@ public class AlertDefinitionManagerEJBImpl
      * @ejb:interface-method
      */
     public void setEscalation(AuthzSubjectValue subj, Integer defId,
-                              String escName)
+                              Integer escId)
         throws PermissionException 
     {
         AlertDefinition def = getAlertDefDAO().findById(defId);
         canManageAlerts(subj, def);
 
         MEscalation escl = 
-            MEscalationManagerEJBImpl.getOne().findByName(escName);
+            MEscalationManagerEJBImpl.getOne().findById(escId);
 
         def.setEscalation(escl);
     }

@@ -35,20 +35,20 @@ import org.hyperic.hq.ui.action.resource.ResourceForm;
 import org.hyperic.hq.ui.beans.EscalationActionBean;
 
 public class EscalationSchemeForm extends ResourceForm {
-    private String _escId;
-    private String _escName;
-    private List   _actions;
+    private Integer _escId;
+    private String  _escName;
+    private List    _actions;
     private boolean _allowPause;
     private long    _pauseRange;
     private int     _notification;
     private int     _ad;
     private int     _gad;
 
-    public String getEscId() {
+    public Integer getEscId() {
         return _escId;
     }
 
-    public void setEscId(String escId) {
+    public void setEscId(Integer escId) {
         _escId = escId;
     }
 

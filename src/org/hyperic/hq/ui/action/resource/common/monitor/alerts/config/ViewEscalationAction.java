@@ -32,8 +32,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.escalation.server.session.MEscalationAlertType;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.hq.ui.Constants;
@@ -55,6 +58,17 @@ public class ViewEscalationAction extends ViewDefinitionAction {
         ServletContext ctx = getServlet().getServletContext();
         Integer sessionId = RequestUtils.getSessionId(request);
 
+        // Get alert type
+        MEscalationAlertType mat = ClassicEscalationAlertType.CLASSIC;
+        try {
+            RequestUtils.getEntityTypeId(request);
+        } catch (ParameterNotFoundException e) {
+            AppdefEntityID aeid = RequestUtils.getEntityId(request);
+            if (aeid.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+                mat = GalertEscalationAlertType.GALERT;
+            }
+        }
+        
         // Get the list of escalations
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
         JSONArray arr = eb.listAllEscalationName(sessionId.intValue());
@@ -68,35 +82,24 @@ public class ViewEscalationAction extends ViewDefinitionAction {
         
         EscalationSchemeForm eForm = (EscalationSchemeForm) form;
         if (eForm.getEscId() == null) {
-            // We need to look up the escalation
-            // XXX:  This staticly specifies CLASSIC for now, but should change!
             eForm.setEscId(
-                eb.getEscalationNameByAlertDefId(sessionId.intValue(),
+                eb.getEscalationIdByAlertDefId(sessionId.intValue(),
                                           new Integer(eForm.getAd()),
-                                          ClassicEscalationAlertType.CLASSIC));
-        } else if (eForm.getEscId().length() > 0) {
+                                          mat));
+        } else {
             // We actually need to set the escalation scheme for alert
             // definition
-            if (eForm.getGad() > 0) {
-                eb.setEscalationByAlertDefId(sessionId.intValue(),
-                                             eForm.getEscId(),
-                                             new Integer(eForm.getAd()), 
-                                             GalertEscalationAlertType.GALERT);
-            }
-            else {
-                eb.setEscalationByAlertDefId(sessionId.intValue(),
-                                             eForm.getEscId(),
-                                             new Integer(eForm.getAd()), 
-                                             ClassicEscalationAlertType.CLASSIC);
-            }
+            eb.setEscalationByAlertDefId(sessionId.intValue(),
+                                         new Integer(eForm.getAd()),
+                                         eForm.getEscId(), mat);
         }
         
         // Look for the escalation request parameter
         try {
-            if (eForm.getEscId() != null && eForm.getEscId().length() > 0) {
+            if (eForm.getEscId() != null) {
                 JSONObject escalation =
-                    eb.jsonByEscalationName(sessionId.intValue(),
-                                            eForm.getEscId());
+                    eb.jsonByEscalationId(sessionId.intValue(),
+                                          eForm.getEscId());
                 request.setAttribute("escalationJSON", escalation.toString());
             }
         } catch (ParameterNotFoundException e) {
