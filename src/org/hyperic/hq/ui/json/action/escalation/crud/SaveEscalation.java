@@ -151,9 +151,8 @@ public class SaveEscalation extends BaseAction
                                              GalertEscalationAlertType.GALERT,
                                              escalation);
             } else {
-                // Else wtf?  We have to have a type!
-                // XXX
-                throw new IllegalStateException();
+                result = wmed.saveEscalation(context, context.getSessionId(),
+                                             null, null, escalation);
             }
         } catch(SessionException e) {
             throw new SystemException(e);
