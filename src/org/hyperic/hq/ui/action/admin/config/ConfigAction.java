@@ -44,6 +44,7 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
@@ -52,6 +53,7 @@ import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
 import org.json.JSONArray;
 
 /**
@@ -101,6 +103,16 @@ public class ConfigAction extends BaseDispatchAction {
         throws Exception {
         createPortal(request, false, "admin.home.EscalationSchemes",
                      ".admin.config.EditEscalationConfig");
+        
+        Integer sessionId = RequestUtils.getSessionId(request);
+        ServletContext ctx = getServlet().getServletContext();
+
+        // Get the list of users
+        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+        PageList availableUsers =
+            authzBoss.getAllSubjects(sessionId, PageControl.PAGE_ALL);
+        request.setAttribute(Constants.AVAIL_USERS_ATTR, availableUsers);
+        
         return null;        
     }
 
