@@ -65,12 +65,9 @@ function showViewEscResponse(originalRequest) {
 
     <c:if test="${not empty EscalationForm.escId}">
           $('viewEscalation').style.display = "";
-          $('createEscTable').style.display = "none";
     </c:if>
     <c:if test="${empty EscalationForm.escId}">
           $('viewEscalation').style.display = "none";
-          $('createEscTable').style.display = "";
-
     </c:if>
   
     var escViewUL = $('viewEscalationUL');
@@ -812,7 +809,8 @@ function showViewEscResponse(originalRequest) {
   <c:otherwise>
     <html:hidden property="aetid" value="${ResourceType.appdefTypeKey}" />
   </c:otherwise>
-</c:choose> <c:choose>
+</c:choose>
+<c:choose>
   <c:when test="${not empty param.ad}">
     <input type="hidden" id="ad" name="ad" value='<c:out value="${param.ad}"/>' />
   </c:when>
@@ -820,8 +818,8 @@ function showViewEscResponse(originalRequest) {
     <input type="hidden" id="gad" name="gad"
       value='<c:out value="${param.gad}"/>' />
   </c:when>
-</c:choose> <input type="hidden" id="ffff" name="ggg"
-  value='<c:out value="${escalation.id}"/>' />
+</c:choose>
+<input type="hidden" id="ffff" name="ggg" value='<c:out value="${escalation.id}"/>' />
 
 <div id="example" style="display:none;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -834,113 +832,35 @@ function showViewEscResponse(originalRequest) {
 </table>
 </div>
 
-<table width="100%" cellpadding="3" cellspacing="0" border="0">
+<table width="100%" cellpadding="4" cellspacing="0" border="0">
   <tbody>
     <tr class="tableRowHeader">
       <td><fmt:message key="alert.config.escalation.scheme" /> <select
         id="escIdSel" name="escId" onchange="schemeChange(this)">
-        <option value=""><fmt:message key="common.label.CreateNew" /></option>
+        <option value=""><fmt:message key="resource.common.inventory.props.SelectOption" /></option>
       </select>
-      <span id="escNameSpan">
-      <c:choose>
-        <c:when test="${empty EscalationSchemeForm.escId}">
-          <fmt:message key="common.label.Name" />
-          <input type="text" size="25" name="escName" id="escName" />
-        </c:when>
-        <c:otherwise>
-          <input type="hidden" name="escName" />
-        </c:otherwise>
-      </c:choose>
-      </span>
+      </td>
+      <td align="right">
+         <c:url var="adminUrl" value="/admin/config/Config.do?mode=escalate">
+           <c:if test="${not empty alertDef}">
+             <c:param name="aname" value="${alertDef.name}"/>
+             <c:choose>
+               <c:when test="${not empty param.ad}">
+                 <c:param name="ad" value="${param.ad}"/>
+               </c:when>
+               <c:when test="${not empty param.gad}">
+                 <c:param name="gad" value="${param.gad}"/>
+               </c:when>
+             </c:choose>
+           </c:if>
+         </c:url>
+         <fmt:message key="admin.config.message.to.create">
+           <fmt:param value="${adminUrl}"/>
+         </fmt:message>
       </td>
     </tr>
   </tbody>
 </table>
-<table width="100%" cellpadding="3" cellspacing="0" border="0" id="createEscTable">
-  <tbody>
-    <tr class="tableRowAction">
-      <td class="section" width="100%">
-      <ul id="rowOrder"></ul>
-      <table width="100%" cellpadding="5" cellspacing="0" border="0"
-        class="ToolbarContent">
-        <tbody>
-          <tr>
-            <td width="40"><a href="#" onclick="addRow();"
-              style="text-decoration:none;"><html:img
-              page="/images/tbb_addtolist.gif" height="16" width="85" border="0" /></a></td>
-          </tr>
-        </tbody>
-      </table>
-      <br>
-      </td>
-    </tr>
-    <tr>
-      <td class="tableRowHeader">If the alert is acknowledged:</td>
-    </tr>
-    <tr class="ListRow">
-      <td style="padding-left:15px;padding-bottom:10px;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tbody>
-          <tr>
-            <td style="padding-top:2px;padding-bottom:2px;"><input
-              type="radio" name="allowPause" value="true" /> <fmt:message
-              key="alert.config.escalation.allow.pause" /> <select
-              id="maxWaitTime" name="maxwaittime">
-              <option value="300000">5 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-              <option value="600000">10 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-              <option value="1200000">20 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-              <option value="1800000">30 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-            </select></td>
-          </tr>
-          <tr>
-            <td style="padding-top:2px;padding-bottom:2px;"><input
-              type="radio" name="allowPause" value="false" checked="true" /> <fmt:message
-              key="alert.config.escalation.allow.continue" /></td>
-          </tr>
-        </tbody>
-      </table>
-      </td>
-    </tr>
-    <tr>
-      <td class="tableRowHeader"><fmt:message
-        key="alert.config.escalation.state.change" /><br>
-      </td>
-    </tr>
-    <tr class="ListRow">
-      <td style="padding-left:15px;padding-bottom:10px;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tbody>
-          <tr>
-            <td style="padding-top:2px;padding-bottom:2px;"><input
-              type="radio" name="notification" value="0" checked="true" /> <fmt:message
-              key="alert.config.escalation.state.change.notify.previous" /></td>
-          </tr>
-          <tr>
-            <td style="padding-top:2px;padding-bottom:2px;"><input
-              type="radio" name="notification" value="1" /> <fmt:message
-              key="alert.config.escalation.state.change.notify.all" /></td>
-          </tr>
-        </tbody>
-      </table>
-      </td>
-    </tr>
-    <tr>
-      <td><br>
-      <br>
-      <input type="button" value="Submit" onclick="sendEscForm();" id="submit"></input>
-      <br>
-      <br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-
-
 
 <div id="usersList" style="display:none;">
 <div class="ListHeader">Select Users</div>

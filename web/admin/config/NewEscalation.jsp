@@ -834,10 +834,28 @@ function showViewEscResponse(originalRequest) {
 
 <table width="100%" cellpadding="3" cellspacing="0" border="0">
   <tbody>
-    <tr class="tableRowHeader">
-      <td colspan="2">
+    <tr>
+      <td class="BlockTitle" colspan="2">
           <fmt:message key="common.label.CreateNew" />
-          <fmt:message key="alert.config.escalation.scheme" />
+          <c:choose>
+            <c:when test="${not empty param.aname}">
+              <fmt:message key="alert.config.escalation.scheme.for">
+                <fmt:param value="${param.aname}"/>
+              </fmt:message>
+              <c:choose>
+                <c:when test="${not empty param.ad}">
+                  <input type="hidden" id="ad" name="ad" value='<c:out value="${param.ad}"/>' />
+                </c:when>
+                <c:when test="${not empty param.gad}">
+                  <input type="hidden" id="gad" name="gad"
+                  value='<c:out value="${param.gad}"/>' />
+                </c:when>
+              </c:choose>
+            </c:when>
+            <c:otherwise>
+              <fmt:message key="alert.config.escalation.scheme" />
+            </c:otherwise>
+          </c:choose>
       </td>
     </tr>
     <tr class="ListRow">
@@ -861,7 +879,7 @@ function showViewEscResponse(originalRequest) {
 <table width="100%" cellpadding="3" cellspacing="0" border="0" id="createEscTable">
   <tbody>
     <tr>
-      <td class="tableRowHeader">If the alert is acknowledged:</td>
+      <td class="BlockTitle"><fmt:message key="alert.config.escalation.acknowledged"/></td>
     </tr>
     <tr class="ListRow">
       <td style="padding-left:15px;padding-bottom:10px;">
@@ -892,7 +910,7 @@ function showViewEscResponse(originalRequest) {
       </td>
     </tr>
     <tr>
-      <td class="tableRowHeader"><fmt:message
+      <td class="BlockTitle"><fmt:message
         key="alert.config.escalation.state.change" /><br>
       </td>
     </tr>
@@ -967,7 +985,7 @@ function showViewEscResponse(originalRequest) {
     </tr>
 
     <tr>
-      <td class="tableRowHeader">If the alert is acknowledged:</td>
+      <td class="BlockTitle"><fmt:message key="alert.config.escalation.acknowledged"/></td>
     </tr>
     <tr class="ListRow">
       <td style="padding-left:15px;padding-bottom:10px;">
