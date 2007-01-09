@@ -3764,44 +3764,6 @@ public class AppdefBossEJBImpl
         return getAppdefStatManager().isNavMapSupported();    
     }
 
-    /**
-     * @param ignoreList a List of Integers representing the resource ids
-     * (that is EAM_RESOURCE.ID) of servers that should NOT be included
-     * in the results.
-     * @return a List of MiniResourceValue objects representing the
-     * unconfigured servers in HQ (adjusted according to the pagecontrol
-     * of course)
-     * @ejb:interface-method
-     */
-    public PageList getServersNotConfiguredForMetrics(int sessionId, 
-                                                      PageControl pc, 
-                                                      List ignoreList)
-        throws SessionTimeoutException, SessionNotFoundException 
-    {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-        return getConfigManager().getServersNotConfiguredForMetrics
-            (subject, pc, ignoreList);
-    }
-
-    /**
-     * @return a List of MiniResourceValue objects representing the servers
-     * whose configs have been set but deemed to be invalid because they
-     * are unable to collect.  Each MiniResourceValue object's "notes" 
-     * attribute will be filled out with the validation error string.
-     * @ejb:interface-method
-     */
-    public PageList getServersWithInvalidConfig(int sessionId,
-                                                PageControl pc,
-                                                List ignoreList)
-        throws SessionTimeoutException, SessionNotFoundException 
-    {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-        PageList p = 
-            getConfigManager().getServersWithInvalidConfig(subject, pc, 
-                                                           ignoreList);
-        return p;
-    }
-
     /** @ejb:create-method */
     public void ejbCreate() throws CreateException {}
     
