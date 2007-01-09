@@ -40,16 +40,6 @@ public class AIIpDAO extends HibernateDAO
         return (AIIp)super.findById(id);
     }
 
-    public void evict(AIIp entity)
-    {
-        super.evict(entity);
-    }
-
-    public AIIp merge(AIIp entity)
-    {
-        return (AIIp)super.merge(entity);
-    }
-
     public void save(AIIp entity)
     {
         super.save(entity);

@@ -43,16 +43,6 @@ public class AgentTypeDAO extends HibernateDAO
         return (AgentType)super.findById(id);
     }
 
-    public void evict(AgentType entity)
-    {
-        super.evict(entity);
-    }
-
-    public AgentType merge(AgentType entity)
-    {
-        return (AgentType)super.merge(entity);
-    }
-
     public void save(AgentType entity)
     {
         super.save(entity);

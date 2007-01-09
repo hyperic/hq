@@ -44,16 +44,6 @@ public class ServerTypeDAO extends HibernateDAO
         return (ServerType)super.findById(id);
     }
 
-    public void evict(ServerType entity)
-    {
-        super.evict(entity);
-    }
-
-    public ServerType merge(ServerType entity)
-    {
-        return (ServerType)super.merge(entity);
-    }
-
     public void save(ServerType entity)
     {
         super.save(entity);

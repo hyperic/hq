@@ -41,16 +41,6 @@ public class ConfigPropertyDAO extends HibernateDAO
         return (ConfigProperty)super.findById(id);
     }
 
-    public void evict(ConfigProperty entity)
-    {
-        super.evict(entity);
-    }
-
-    public ConfigProperty merge(ConfigProperty entity)
-    {
-        return (ConfigProperty)super.merge(entity);
-    }
-
     public void save(ConfigProperty entity)
     {
         super.save(entity);

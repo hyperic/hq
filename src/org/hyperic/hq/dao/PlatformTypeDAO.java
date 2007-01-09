@@ -42,11 +42,6 @@ public class PlatformTypeDAO extends HibernateDAO
         return (PlatformType)super.findById(id);
     }
 
-    public void evict(PlatformType entity)
-    {
-        super.evict(entity);
-    }
-
     public void save(PlatformType entity)
     {
         super.save(entity);

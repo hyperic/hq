@@ -42,28 +42,15 @@ public class AIHistoryDAO extends HibernateDAO
         super(AIHistory.class, f);
     }
 
-    public AIHistory findById(Integer id)
-    {
+    public AIHistory findById(Integer id) {
         return (AIHistory)super.findById(id);
     }
 
-    public void evict(AIHistory entity)
-    {
-        super.evict(entity);
-    }
-
-    public AIHistory merge(AIHistory entity)
-    {
-        return (AIHistory)super.merge(entity);
-    }
-
-    public void save(AIHistory entity)
-    {
+    public void save(AIHistory entity) {
         super.save(entity);
     }
 
-    public void remove(AIHistory entity)
-    {
+    public void remove(AIHistory entity) {
         super.remove(entity);
     }
 

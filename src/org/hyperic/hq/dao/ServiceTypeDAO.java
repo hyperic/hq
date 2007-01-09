@@ -47,16 +47,6 @@ public class ServiceTypeDAO extends HibernateDAO
         return (ServiceType)super.findById(id);
     }
 
-    public void evict(ServiceType entity)
-    {
-        super.evict(entity);
-    }
-
-    public ServiceType merge(ServiceType entity)
-    {
-        return (ServiceType)super.merge(entity);
-    }
-
     public void save(ServiceType entity)
     {
         super.save(entity);

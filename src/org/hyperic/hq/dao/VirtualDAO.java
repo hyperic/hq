@@ -29,7 +29,6 @@ import java.util.Collection;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.server.session.Virtual;
 import org.hyperic.hq.authz.shared.ResourceValue;
 
@@ -39,14 +38,6 @@ import org.hyperic.hq.authz.shared.ResourceValue;
 public class VirtualDAO extends HibernateDAO {
     public VirtualDAO(DAOFactory f) {
         super(Virtual.class, f);
-    }
-
-    public void evict(Virtual entity) {
-        super.evict(entity);
-    }
-
-    public Virtual merge(Virtual entity) {
-        return (Virtual)super.merge(entity);
     }
 
     public void save(Virtual entity) {

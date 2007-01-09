@@ -50,28 +50,15 @@ public class ServiceDAO extends HibernateDAO
         super(Service.class, f);
     }
 
-    public Service findById(Integer id)
-    {
+    public Service findById(Integer id) {
         return (Service)super.findById(id);
     }
 
-    public void evict(Service entity)
-    {
-        super.evict(entity);
-    }
-
-    public Service merge(Service entity)
-    {
-        return (Service)super.merge(entity);
-    }
-
-    public void save(Service entity)
-    {
+    public void save(Service entity) {
         super.save(entity);
     }
 
-    public void remove(Service entity)
-    {
+    public void remove(Service entity) {
         super.remove(entity);
     }
 

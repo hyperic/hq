@@ -89,10 +89,6 @@ public class ResourceGroupDAO extends HibernateDAO
         super.save(entity);
     }
 
-    public ResourceGroup merge(ResourceGroup entity) {
-        return (ResourceGroup) super.merge(entity);
-    }
-
     public void remove(ResourceGroup entity) {
         // remove all roles
         entity.getRoles().clear();
@@ -119,10 +115,6 @@ public class ResourceGroupDAO extends HibernateDAO
         for (int i = 0; i < resources.length; i++) {
             resCol.remove(resources[i]);
         }
-    }
-
-    public void evict(ResourceGroup entity) {
-        super.evict(entity);
     }
 
     public ResourceGroup findByName(String name) {            

@@ -48,11 +48,6 @@ public class ActionDAO extends HibernateDAO {
         super.save(entity);
     }
 
-    public Action merge(Action entity)
-    {
-        return (Action)super.merge(entity);
-    }
-
     protected void remove(Action entity) {
         super.remove(entity);
     }
@@ -68,13 +63,5 @@ public class ActionDAO extends HibernateDAO {
         return getSession().createQuery(sql)
               .setParameter("alert", a)
               .list();
-    }
-
-    public void savePersisted(PersistedObject entity) {
-        save((Action)entity);
-    }
-
-    public void removePersisted(PersistedObject entity) {
-        remove((Action)entity);
     }
 }

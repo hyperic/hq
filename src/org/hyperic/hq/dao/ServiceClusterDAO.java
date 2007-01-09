@@ -54,16 +54,6 @@ public class ServiceClusterDAO extends HibernateDAO {
         return (ServiceCluster)super.findById(id);
     }
 
-    public void evict(ServiceCluster entity)
-    {
-        super.evict(entity);
-    }
-
-    public ServiceCluster merge(ServiceCluster entity)
-    {
-        return (ServiceCluster)super.merge(entity);
-    }
-
     public void save(ServiceCluster entity)
     {
         super.save(entity);

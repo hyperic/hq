@@ -1,14 +1,3 @@
-package org.hyperic.hq.control.server.session;
-
-import java.util.Collection;
-
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Expression;
-import org.hibernate.criterion.Order;
-import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.dao.HibernateDAO;
-
 /*
  * NOTE: This copyright does *not* cover user programs that use HQ
  * program services by normal system calls through the application
@@ -33,6 +22,16 @@ import org.hyperic.hq.dao.HibernateDAO;
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
+package org.hyperic.hq.control.server.session;
+
+import java.util.Collection;
+
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Order;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.dao.HibernateDAO;
 
 public class ControlHistoryDAO extends HibernateDAO
 {
@@ -45,23 +44,11 @@ public class ControlHistoryDAO extends HibernateDAO
         return (ControlHistory)super.findById(id);
     }
 
-    public void evict(ControlHistory entity)
-    {
-        super.evict(entity);
-    }
-
-    public ControlHistory merge(ControlHistory entity)
-    {
-        return (ControlHistory)super.merge(entity);
-    }
-
-    public void save(ControlHistory entity)
-    {
+    public void save(ControlHistory entity) {
         super.save(entity);
     }
 
-    public void remove(ControlHistory entity)
-    {
+    public void remove(ControlHistory entity) {
         super.remove(entity);
     }
 

@@ -45,16 +45,6 @@ public class AIServiceDAO extends HibernateDAO
         return (AIService)super.findById(id);
     }
 
-    public void evict(AIService entity)
-    {
-        super.evict(entity);
-    }
-
-    public AIService merge(AIService entity)
-    {
-        return (AIService)super.merge(entity);
-    }
-
     public void save(AIService entity)
     {
         super.save(entity);

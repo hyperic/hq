@@ -41,16 +41,6 @@ public class AgentDAO extends HibernateDAO
         super(Agent.class, f);
     }
 
-    public void evict(Agent entity)
-    {
-        super.evict(entity);
-    }
-
-    public Agent merge(Agent entity)
-    {
-        return (Agent)super.merge(entity);
-    }
-
     public void save(Agent entity)
     {
         super.save(entity);

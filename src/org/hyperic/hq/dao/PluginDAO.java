@@ -42,16 +42,6 @@ public class PluginDAO extends HibernateDAO
         return (Plugin)super.findById(id);
     }
 
-    public void evict(Plugin entity)
-    {
-        super.evict(entity);
-    }
-
-    public Plugin merge(Plugin entity)
-    {
-        return (Plugin)super.merge(entity);
-    }
-
     public void save(Plugin entity)
     {
         super.save(entity);

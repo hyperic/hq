@@ -53,14 +53,6 @@ public class PlatformDAO extends HibernateDAO {
         return (Platform)super.findById(id);
     }
 
-    public void evict(Platform entity) {
-        super.evict(entity);
-    }
-
-    public Platform merge(Platform entity) {
-        return (Platform)super.merge(entity);
-    }
-
     public void save(Platform entity) {
         super.save(entity);
         getSession().flush();

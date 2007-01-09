@@ -53,16 +53,6 @@ public class AppServiceDAO extends HibernateDAO
         return (AppService)super.findById(id);
     }
 
-    public void evict(AppService entity)
-    {
-        super.evict(entity);
-    }
-
-    public AppService merge(AppService entity)
-    {
-        return (AppService)super.merge(entity);
-    }
-
     public void save(AppService entity)
     {
         super.save(entity);

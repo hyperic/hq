@@ -44,16 +44,6 @@ public class ConfigResponseDAO extends HibernateDAO
         return (ConfigResponseDB)super.findById(id);
     }
 
-    public void evict(ConfigResponseDB entity)
-    {
-        super.evict(entity);
-    }
-
-    public ConfigResponseDB merge(ConfigResponseDB entity)
-    {
-        return (ConfigResponseDB)super.merge(entity);
-    }
-
     public void save(ConfigResponseDB entity)
     {
         super.save(entity);

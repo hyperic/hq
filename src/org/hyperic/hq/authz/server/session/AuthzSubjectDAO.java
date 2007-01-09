@@ -84,19 +84,9 @@ public class AuthzSubjectDAO extends HibernateDAO
         super.save(entity);
     }
 
-    public AuthzSubject merge(AuthzSubject entity)
-    {
-        return (AuthzSubject)super.merge(entity);
-    }
-
     public void remove(AuthzSubject entity)
     {
         super.remove(entity);
-    }
-
-    public void evict(AuthzSubject entity)
-    {
-        super.evict(entity);
     }
 
     public AuthzSubject findByAuth(String name, String dsn)

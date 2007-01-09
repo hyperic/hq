@@ -45,16 +45,6 @@ public class PrincipalDAO extends HibernateDAO
         return (Principal)super.findById(id);
     }
 
-    public void evict(Principal entity)
-    {
-        super.evict(entity);
-    }
-
-    public Principal merge(Principal entity)
-    {
-        return (Principal)super.merge(entity);
-    }
-
     public void save(Principal entity)
     {
         super.save(entity);

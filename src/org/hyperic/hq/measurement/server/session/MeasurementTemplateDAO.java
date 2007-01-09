@@ -143,7 +143,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         mt.setCollectionType(info.getCollectionType());
         mt.setPlugin(pluginName);
         mt.setCategory(cat);
-        update(mt);
+        save(mt);
 
         // Update the derived template
         for (Iterator i = mt.getRawMeasurementArgs().iterator(); i.hasNext();) {
@@ -158,7 +158,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
                 derived.setDefaultOn(info.isDefaultOn());
                 derived.setDefaultInterval(info.getInterval());
                 derived.setCategory(cat);
-                update(mt);
+                save(mt);
                 return;
             }
         }

@@ -103,10 +103,6 @@ public class ResourceDAO extends HibernateDAO
         super.save(entity);
     }
 
-    public Resource merge(Resource entity) {
-        return (Resource) super.merge(entity);
-    }
-
     public void remove(Resource entity) {
         // remove resource from all resourceGroups
         // Currently the resourceGroup collection is the inverse=true
@@ -124,10 +120,6 @@ public class ResourceDAO extends HibernateDAO
         }
         entity.getResourceGroups().clear();
         super.remove(entity);
-    }
-
-    public void evict(Resource entity) {
-        super.evict(entity);
     }
 
     public boolean isOwner(Resource entity, Integer possibleOwner) {

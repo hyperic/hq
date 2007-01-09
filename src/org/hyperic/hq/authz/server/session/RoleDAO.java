@@ -109,16 +109,8 @@ public class RoleDAO extends HibernateDAO {
         super.save(entity);
     }
 
-    Role merge(Role entity) {
-        return (Role) super.merge(entity);
-    }
-
     void remove(Role entity) {
         super.remove(entity);
-    }
-
-    public void evict(Role entity) {
-        super.evict(entity);
     }
 
     public Role findByName(String name)

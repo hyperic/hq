@@ -45,16 +45,6 @@ public class AIServerDAO extends HibernateDAO
         super.remove(entity);
     }
 
-    public void evict(AIServer entity)
-    {
-        super.evict(entity);
-    }
-
-    public AIServer merge(AIServer entity)
-    {
-        return (AIServer)super.merge(entity);
-    }
-
     public void save(AIServer entity)
     {
         super.save(entity);

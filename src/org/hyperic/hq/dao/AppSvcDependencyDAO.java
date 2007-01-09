@@ -42,16 +42,6 @@ public class AppSvcDependencyDAO extends HibernateDAO
         return (AppSvcDependency)super.findById(id);
     }
 
-    public void evict(AppSvcDependency entity)
-    {
-        super.evict(entity);
-    }
-
-    public AppSvcDependency merge(AppSvcDependency entity)
-    {
-        return (AppSvcDependency)super.merge(entity);
-    }
-
     public void save(AppSvcDependency entity)
     {
         super.save(entity);

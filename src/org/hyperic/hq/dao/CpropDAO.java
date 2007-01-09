@@ -47,18 +47,8 @@ public class CpropDAO extends HibernateDAO
         super.save(entity);
     }
 
-    public Cprop merge(Cprop entity)
-    {
-        return (Cprop)super.merge(entity);
-    }
-
     public void remove(Cprop entity)
     {
         super.remove(entity);
-    }
-
-    public void evict(Cprop entity)
-    {
-        super.evict(entity);
     }
 }

@@ -46,16 +46,6 @@ public class AIScheduleDAO extends HibernateDAO
         return (AISchedule)super.findById(id);
     }
 
-    public void evict(AISchedule entity)
-    {
-        super.evict(entity);
-    }
-
-    public AISchedule merge(AISchedule entity)
-    {
-        return (AISchedule)super.merge(entity);
-    }
-
     public void save(AISchedule entity)
     {
         super.save(entity);

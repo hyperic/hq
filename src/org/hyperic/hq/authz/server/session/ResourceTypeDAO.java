@@ -83,17 +83,9 @@ public class ResourceTypeDAO extends HibernateDAO
         super.save(entity);
     }
 
-    public ResourceType merge(ResourceType entity) {
-        return (ResourceType) super.merge(entity);
-    }
-
     public void remove(AuthzSubject whoami, ResourceType entity) {
         // XXX need to check against owner
         super.remove(entity);
-    }
-
-    public void evict(ResourceType entity) {
-        super.evict(entity);
     }
 
     public ResourceType findByName(String name)

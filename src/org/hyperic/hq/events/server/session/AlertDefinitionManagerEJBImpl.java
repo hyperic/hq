@@ -172,17 +172,19 @@ public class AlertDefinitionManagerEJBImpl
         
         // Create new conditions
         AlertConditionValue[] conds = a.getConditions();
+        AlertConditionDAO acDAO = 
+            DAOFactory.getDAOFactory().getAlertConditionDAO();
         for (int i = 0; i < conds.length; i++) {
             RegisteredTrigger trigger = conds[i].getTriggerId() != null ?
                 tDAO.findById(conds[i].getTriggerId()) : null;
 
             AlertCondition cond = res.createCondition(conds[i], trigger);
-            DAOFactory.getDAOFactory().getDAO(cond.getClass())
-                .savePersisted(cond);
+            acDAO.save(cond);
         }
                 
         // Create actions
         ActionValue[] actions = a.getActions();
+        ActionDAO actDAO = DAOFactory.getDAOFactory().getActionDAO();
         for (int i = 0; i < actions.length; i++) {
             Action parent = null;
             
@@ -190,7 +192,7 @@ public class AlertDefinitionManagerEJBImpl
                 parent = aDAO.findById(actions[i].getParentId());
             
             Action act = res.createAction(actions[i], parent);
-            DAOFactory.getDAOFactory().getDAO(act.getClass()).savePersisted(act);
+            actDAO.save(act);
         }
         
         // Set triggers

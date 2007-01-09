@@ -48,16 +48,6 @@ public class ControlScheduleDAO extends HibernateDAO
         return (ControlSchedule)super.findById(id);
     }
 
-    public void evict(ControlSchedule entity)
-    {
-        super.evict(entity);
-    }
-
-    public ControlSchedule merge(ControlSchedule entity)
-    {
-        return (ControlSchedule)super.merge(entity);
-    }
-
     public void save(ControlSchedule entity)
     {
         super.save(entity);

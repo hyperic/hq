@@ -44,16 +44,6 @@ public class CpropKeyDAO extends HibernateDAO
         return (CpropKey)super.findById(id);
     }
 
-    public void evict(CpropKey entity)
-    {
-        super.evict(entity);
-    }
-
-    public CpropKey merge(CpropKey entity)
-    {
-        return (CpropKey)super.merge(entity);
-    }
-
     public void save(CpropKey entity)
     {
         super.save(entity);

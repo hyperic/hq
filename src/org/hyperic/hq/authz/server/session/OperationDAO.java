@@ -61,16 +61,8 @@ public class OperationDAO extends HibernateDAO
         super.save(entity);
     }
 
-    public Operation merge(Operation entity) {
-        return (Operation) super.merge(entity);
-    }
-
     public void remove(Operation entity) {
         super.remove(entity);
-    }
-
-    public void evict(Operation entity) {
-        super.evict(entity);
     }
 
     public Operation findByTypeAndName(ResourceType type, String name)

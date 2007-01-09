@@ -24,97 +24,43 @@
  */
 package org.hyperic.hq.dao;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
-import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.AgentType;
-import org.hyperic.hq.appdef.AppService;
-import org.hyperic.hq.appdef.AppSvcDependency;
-import org.hyperic.hq.appdef.ConfigResponseDB;
-import org.hyperic.hq.appdef.Cprop;
-import org.hyperic.hq.appdef.CpropKey;
-import org.hyperic.hq.appdef.ServiceCluster;
-import org.hyperic.hq.appdef.server.session.Application;
-import org.hyperic.hq.appdef.server.session.ApplicationType;
-import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.PlatformType;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.ServerType;
-import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.server.session.ServiceType;
-import org.hyperic.hq.auth.Principal;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectDAO;
-import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.OperationDAO;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
-import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
-import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.RoleDAO;
-import org.hyperic.hq.authz.server.session.Virtual;
-import org.hyperic.hq.autoinventory.AIHistory;
-import org.hyperic.hq.autoinventory.AIIp;
-import org.hyperic.hq.autoinventory.AIPlatform;
-import org.hyperic.hq.autoinventory.AISchedule;
-import org.hyperic.hq.autoinventory.AIServer;
-import org.hyperic.hq.autoinventory.AIService;
-import org.hyperic.hq.common.ConfigProperty;
-import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.server.session.CrispoDAO;
-import org.hyperic.hq.control.server.session.ControlHistory;
 import org.hyperic.hq.control.server.session.ControlHistoryDAO;
-import org.hyperic.hq.control.server.session.ControlSchedule;
 import org.hyperic.hq.control.server.session.ControlScheduleDAO;
-import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ActionDAO;
-import org.hyperic.hq.events.server.session.Alert;
-import org.hyperic.hq.events.server.session.AlertActionLog;
 import org.hyperic.hq.events.server.session.AlertActionLogDAO;
-import org.hyperic.hq.events.server.session.AlertCondition;
 import org.hyperic.hq.events.server.session.AlertConditionDAO;
-import org.hyperic.hq.events.server.session.AlertConditionLog;
 import org.hyperic.hq.events.server.session.AlertConditionLogDAO;
 import org.hyperic.hq.events.server.session.AlertDAO;
-import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
-import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.events.server.session.EventLogDAO;
-import org.hyperic.hq.events.server.session.RegisteredTrigger;
 import org.hyperic.hq.events.server.session.TriggerDAO;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfoDAO;
-import org.hyperic.hq.measurement.server.session.Baseline;
 import org.hyperic.hq.measurement.server.session.BaselineDAO;
-import org.hyperic.hq.measurement.server.session.Category;
 import org.hyperic.hq.measurement.server.session.CategoryDAO;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
-import org.hyperic.hq.measurement.server.session.MeasurementArg;
 import org.hyperic.hq.measurement.server.session.MeasurementArgDAO;
-import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
-import org.hyperic.hq.measurement.server.session.MetricProblem;
 import org.hyperic.hq.measurement.server.session.MetricProblemDAO;
-import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
-import org.hyperic.hq.measurement.server.session.RawMeasurement;
 import org.hyperic.hq.measurement.server.session.RawMeasurementDAO;
-import org.hyperic.hq.measurement.server.session.ScheduleRevNum;
 import org.hyperic.hq.measurement.server.session.ScheduleRevNumDAO;
-import org.hyperic.hq.product.Plugin;
 
 public class HibernateDAOFactory extends DAOFactory {
-    private static SessionFactory sessionFactory = Util.getSessionFactory();
-    private static HibernateDAOFactory singleton = new HibernateDAOFactory();
-    private Map daoMap = new HashMap();
+    private static final SessionFactory sessionFactory = 
+        Util.getSessionFactory();
+    private static final HibernateDAOFactory singleton = 
+        new HibernateDAOFactory();
 
     public static HibernateDAOFactory getInstance() {
         return singleton;
@@ -131,276 +77,214 @@ public class HibernateDAOFactory extends DAOFactory {
         return sessionFactory;
     }
 
-    public HibernateDAO getDAO(Class pojo) {
-        return (HibernateDAO)daoMap.get(pojo.getName());
-    }
-
-    private void addDAO(HibernateDAO dao) {
-        daoMap.put(dao.getPersistentClass().getName(), dao);
-    }
-
-    protected HibernateDAOFactory () {
-        addDAO(new ActionDAO(this));
-        addDAO(new AgentDAO(this));
-        addDAO(new AgentTypeDAO(this));
-        addDAO(new AIHistoryDAO(this));
-        addDAO(new AIIpDAO(this));
-        addDAO(new AIPlatformDAO(this));
-        addDAO(new AIPlatformDAO(this));
-        addDAO(new AIScheduleDAO(this));
-        addDAO(new AIServiceDAO(this));
-        addDAO(new AIServerDAO(this));
-        addDAO(new AlertDAO(this));
-        addDAO(new AlertActionLogDAO(this));
-        addDAO(new AlertConditionDAO(this));
-        addDAO(new AlertConditionLogDAO(this));
-        addDAO(new AlertDefinitionDAO(this));
-        addDAO(new ApplicationDAO(this));
-        addDAO(new ApplicationTypeDAO(this));
-        addDAO(new AppServiceDAO(this));
-        addDAO(new AppSvcDependencyDAO(this));
-        addDAO(new AuthzSubjectDAO(this));
-        addDAO(new BaselineDAO(this));
-        addDAO(new CategoryDAO(this));
-        addDAO(new ControlScheduleDAO(this));
-        addDAO(new ControlHistoryDAO(this));
-        addDAO(new ConfigPropertyDAO(this));
-        addDAO(new ConfigResponseDAO(this));
-        addDAO(new CpropDAO(this));
-        addDAO(new CpropKeyDAO(this));
-        addDAO(new CrispoDAO(this));
-        addDAO(new EventLogDAO(this));
-        addDAO(new DerivedMeasurementDAO(this));
-        addDAO(new MeasurementArgDAO(this));
-        addDAO(new MeasurementTemplateDAO(this));
-        addDAO(new MetricProblemDAO(this));
-        addDAO(new MonitorableTypeDAO(this));
-        addDAO(new OperationDAO(this));
-        addDAO(new PlatformDAO(this));
-        addDAO(new PlatformTypeDAO(this));
-        addDAO(new PluginDAO(this));
-        addDAO(new PrincipalDAO(this));
-        addDAO(new RawMeasurementDAO(this));
-        addDAO(new TriggerDAO(this));
-        addDAO(new ResourceDAO(this));
-        addDAO(new ResourceTypeDAO(this));
-        addDAO(new ResourceGroupDAO(this));
-        addDAO(new RoleDAO(this));
-        addDAO(new ScheduleRevNumDAO(this));
-        addDAO(new ServerDAO(this));
-        addDAO(new ServerTypeDAO(this));
-        addDAO(new ServiceDAO(this));
-        addDAO(new ServiceClusterDAO(this));
-        addDAO(new ServiceTypeDAO(this));
-        addDAO(new VirtualDAO(this));
-    }
+    private HibernateDAOFactory () {}
 
     public ActionDAO getActionDAO() {
-        return (ActionDAO)getDAO(Action.class);
+        return new ActionDAO(this);
     }
 
     public AlertDefinitionDAO getAlertDefDAO() {
-        return (AlertDefinitionDAO)getDAO(AlertDefinition.class);
+        return new AlertDefinitionDAO(this);
     }
     
     public AlertConditionDAO getAlertConditionDAO() {
-        return (AlertConditionDAO)getDAO(AlertCondition.class);
+        return new AlertConditionDAO(this);
     }
 
     public AgentDAO getAgentDAO() {
-        return (AgentDAO)getDAO(Agent.class);
+        return new AgentDAO(this);
     }
 
     public AgentTypeDAO getAgentTypeDAO() {
-        return (AgentTypeDAO)getDAO(AgentType.class);
+        return new AgentTypeDAO(this);
     }
 
     public ApplicationDAO getApplicationDAO() {
-        return (ApplicationDAO)getDAO(Application.class);
+        return new ApplicationDAO(this);
     }
 
     public ApplicationTypeDAO getApplicationTypeDAO() {
-        return (ApplicationTypeDAO)getDAO(ApplicationType.class);
+        return new ApplicationTypeDAO(this);
     }
 
     public AppServiceDAO getAppServiceDAO() {
-        return (AppServiceDAO)getDAO(AppService.class);
+        return new AppServiceDAO(this);
     }
 
     public AppSvcDependencyDAO getAppSvcDepencyDAO() {
-        return (AppSvcDependencyDAO)getDAO(AppSvcDependency.class);
+        return new AppSvcDependencyDAO(this);
     }
 
     public ConfigResponseDAO getConfigResponseDAO() {
-        return (ConfigResponseDAO)getDAO(ConfigResponseDB.class);
+        return new ConfigResponseDAO(this);
     }
 
     public CpropDAO getCpropDAO() {
-        return (CpropDAO)getDAO(Cprop.class);
+        return new CpropDAO(this);
     }
 
     public CpropKeyDAO getCpropKeyDAO() {
-        return (CpropKeyDAO)getDAO(CpropKey.class);
+        return new CpropKeyDAO(this);
     }
 
     public PlatformDAO getPlatformDAO() {
-        return (PlatformDAO)getDAO(Platform.class);
+        return new PlatformDAO(this);
     }
 
     public PlatformTypeDAO getPlatformTypeDAO() {
-        return (PlatformTypeDAO)getDAO(PlatformType.class);
+        return new PlatformTypeDAO(this);
     }
 
     public ServerDAO getServerDAO() {
-        return (ServerDAO)getDAO(Server.class);
+        return new ServerDAO(this);
     }
 
     public ServiceClusterDAO getServiceClusterDAO() {
-        return (ServiceClusterDAO)getDAO(ServiceCluster.class);
+        return new ServiceClusterDAO(this);
     }
 
     public ServerTypeDAO getServerTypeDAO() {
-        return (ServerTypeDAO)getDAO(ServerType.class);
+        return new ServerTypeDAO(this);
     }
 
     public ServiceDAO getServiceDAO() {
-        return (ServiceDAO)getDAO(Service.class);
+        return new ServiceDAO(this);
     }
 
     public TriggerDAO getTriggerDAO() {
-        return (TriggerDAO)getDAO(RegisteredTrigger.class);
+        return new TriggerDAO(this);
     }
 
     public ServiceTypeDAO getServiceTypeDAO() {
-        return (ServiceTypeDAO)getDAO(ServiceType.class);
+        return new ServiceTypeDAO(this);
     }
 
     public AuthzSubjectDAO getAuthzSubjectDAO() {
-        return (AuthzSubjectDAO)getDAO(AuthzSubject.class);
+        return new AuthzSubjectDAO(this);
     }
 
     public BaselineDAO getBaselineDAO() {
-        return (BaselineDAO)getDAO(Baseline.class);
+        return new BaselineDAO(this);
     }
 
     public CategoryDAO getCategoryDAO() {
-        return (CategoryDAO)getDAO(Category.class);
+        return new CategoryDAO(this);
     }
 
     public PrincipalDAO getPrincipalDAO() {
-        return (PrincipalDAO)getDAO(Principal.class);
+        return new PrincipalDAO(this);
     }
 
     public ResourceDAO getResourceDAO() {
-        return (ResourceDAO)getDAO(Resource.class);
+        return new ResourceDAO(this);
     }
 
     public ResourceGroupDAO getResourceGroupDAO() {
-        return (ResourceGroupDAO)getDAO(ResourceGroup.class);
+        return new ResourceGroupDAO(this);
     }
 
     public ResourceTypeDAO getResourceTypeDAO() {
-        return (ResourceTypeDAO)getDAO(ResourceType.class);
+        return new ResourceTypeDAO(this);
     }
 
     public RoleDAO getRoleDAO() {
-        return (RoleDAO)getDAO(Role.class);
+        return new RoleDAO(this);
     }
 
     public OperationDAO getOperationDAO() {
-        return (OperationDAO)getDAO(Operation.class);
+        return new OperationDAO(this);
     }
 
     public MonitorableTypeDAO getMonitorableTypeDAO() {
-        return (MonitorableTypeDAO)getDAO(MonitorableType.class);
+        return new MonitorableTypeDAO(this);
     }
 
     public RawMeasurementDAO getRawMeasurementDAO() {
-        return (RawMeasurementDAO)getDAO(RawMeasurement.class);
+        return new RawMeasurementDAO(this);
     }
 
     public DerivedMeasurementDAO getDerivedMeasurementDAO() {
-        return (DerivedMeasurementDAO)getDAO(DerivedMeasurement.class);
+        return new DerivedMeasurementDAO(this);
     }
 
     public MeasurementTemplateDAO getMeasurementTemplateDAO() {
-        return (MeasurementTemplateDAO)getDAO(MeasurementTemplate.class);
+        return new MeasurementTemplateDAO(this);
     }
 
     public MeasurementArgDAO getMeasurementArgDAO() {
-        return (MeasurementArgDAO)getDAO(MeasurementArg.class);
+        return new MeasurementArgDAO(this);
     }
 
     public MetricProblemDAO getMetricProblemDAO() {
-        return (MetricProblemDAO)getDAO(MetricProblem.class);
+        return new MetricProblemDAO(this);
     }
 
     public ScheduleRevNumDAO getScheduleRevNumDAO() {
-        return (ScheduleRevNumDAO)getDAO(ScheduleRevNum.class);
+        return new ScheduleRevNumDAO(this);
     }
 
     public AIPlatformDAO getAIPlatformDAO() {
-        return (AIPlatformDAO)getDAO(AIPlatform.class);
+        return new AIPlatformDAO(this);
     }
 
     public AIServerDAO getAIServerDAO() {
-        return (AIServerDAO)getDAO(AIServer.class);
+        return new AIServerDAO(this);
     }
 
     public AIServiceDAO getAIServiceDAO() {
-        return (AIServiceDAO)getDAO(AIService.class);
+        return new AIServiceDAO(this);
     }
 
     public AIIpDAO getAIIpDAO() {
-        return (AIIpDAO)getDAO(AIIp.class);
+        return new AIIpDAO(this);
     }
 
     public AIHistoryDAO getAIHistoryDAO() {
-        return (AIHistoryDAO)getDAO(AIHistory.class);
+        return new AIHistoryDAO(this);
     }
 
     public AIScheduleDAO getAIScheduleDAO() {
-        return (AIScheduleDAO)getDAO(AISchedule.class);
+        return new AIScheduleDAO(this);
     }
 
     public ConfigPropertyDAO getConfigPropertyDAO() {
-        return (ConfigPropertyDAO)getDAO(ConfigProperty.class);
+        return new ConfigPropertyDAO(this);
     }
 
     public PluginDAO getPluginDAO() {
-        return (PluginDAO)getDAO(Plugin.class);
+        return new PluginDAO(this);
     }
 
     public AlertActionLogDAO getAlertActionLogDAO() {
-        return (AlertActionLogDAO)getDAO(AlertActionLog.class);
+        return new AlertActionLogDAO(this);
     }
 
     public AlertConditionLogDAO getAlertConditionLogDAO() {
-        return (AlertConditionLogDAO)getDAO(AlertConditionLog.class);
+        return new AlertConditionLogDAO(this);
     }
 
     public AlertDAO getAlertDAO() {
-        return (AlertDAO)getDAO(Alert.class);
+        return new AlertDAO(this);
     }
 
     public VirtualDAO getVirtualDAO() {
-        return (VirtualDAO)getDAO(Virtual.class);
+        return new VirtualDAO(this);
     }
 
     public CrispoDAO getCrispoDAO() {
-        return (CrispoDAO)getDAO(Crispo.class);
+        return new CrispoDAO(this);
     }
 
     public EventLogDAO getEventLogDAO() {
-        return (EventLogDAO)getDAO(EventLog.class);
+        return new EventLogDAO(this);
     }
 
     public ControlHistoryDAO getControlHistoryDAO() {
-        return (ControlHistoryDAO)getDAO(ControlHistory.class);
+        return new ControlHistoryDAO(this);
     }
 
     public ControlScheduleDAO getControlScheduleDAO() {
-        return (ControlScheduleDAO)getDAO(ControlSchedule.class);
+        return new ControlScheduleDAO(this);
     }
 
     public ExecutionStrategyTypeInfoDAO getExecutionStrategyTypeInfoDAO() {

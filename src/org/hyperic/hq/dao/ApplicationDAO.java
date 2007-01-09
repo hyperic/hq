@@ -58,16 +58,6 @@ public class ApplicationDAO extends HibernateDAO
         return (Application)super.findById(id);
     }
 
-    public void evict(Application entity)
-    {
-        super.evict(entity);
-    }
-
-    public Application merge(Application entity)
-    {
-        return (Application)super.merge(entity);
-    }
-
     public void save(Application entity)
     {
         super.save(entity);

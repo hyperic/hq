@@ -27,17 +27,12 @@ package org.hyperic.hq.dao;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.LockMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.type.Type;
-import org.hibernate.criterion.Example;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -100,54 +95,12 @@ public abstract class HibernateDAO {
             .intValue();
     }
 
-    protected void evict(Object entity) {
-        getSession().evict(entity);
-    }
-
-    protected Object merge(Object entity) {
-        return getSession().merge(entity);
-    }
-
     protected void save(Object entity) {
         getSession().saveOrUpdate(entity);
     }
 
-    protected void update(Object entity) {
-        getSession().update(entity);
-    }
-
     protected void remove(Object entity) {
         getSession().delete(entity);
-    }
-
-    public PersistedObject findPersistedList(PersistedObject entity) {
-        throw new UnsupportedOperationException("findPersistedList not " +
-                                                "supported");
-    }
-
-    public PersistedObject findPersistedById(Integer subjectId, Serializable id)
-        throws PermissionException
-    {
-        throw new UnsupportedOperationException("findPersistedById " +
-                                                "not supported");
-    }
-
-    public PersistedObject findPersisted(PersistedObject entity)
-        throws PermissionException
-    {
-        throw new UnsupportedOperationException("findPersisted not supported");
-    }
-
-    public void savePersisted(PersistedObject entity) throws PermissionException
-    {
-        throw new UnsupportedOperationException("savePersisted not supported");
-    }
-    
-    public void removePersisted(PersistedObject entity)
-        throws PermissionException
-    {
-        throw new UnsupportedOperationException("removePersisted not " +
-                                                "supported");
     }
 
     protected PageList getPagedResults(Query q, int total, PageControl pc) {

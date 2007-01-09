@@ -156,8 +156,6 @@ public abstract class DAOFactory {
     public abstract ControlHistoryDAO getControlHistoryDAO();
     public abstract ControlScheduleDAO getControlScheduleDAO();
 
-    public abstract HibernateDAO getDAO(Class pojo);
-
     public static DAOFactory getDAOFactory() {
         return HibernateDAOFactory.getInstance();
     }
