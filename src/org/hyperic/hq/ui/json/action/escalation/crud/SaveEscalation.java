@@ -74,15 +74,8 @@ public class SaveEscalation extends BaseAction
     // action list order
     private static String ORDER = "rowOrder";
 
-    // escalation attributes
-    private static String ALLOW_PAUSE = "allowPause";
     private static String NOTIFICATION = "notification";
     private static String MAX_WAITTIME = "maxwaittime";
-
-    private static String ALERTDEF_ID = "ad";
-    private static String GALERTDEF_ID = "gad";
-    private static String NAME = "escName";
-    private static String DESCRIPTION = "description";
 
     public void execute(JsonActionContext context)
         throws PermissionException,

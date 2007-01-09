@@ -56,14 +56,7 @@ import javax.ejb.FinderException;
  */
 public class UpdateEscalation extends BaseAction
 {
-    // escalation names
-    private static final String ID = "id";
     private static final String VERSION = "_version_";
-    private static final String NOTIFY_ALL = "notifyAll";
-    private static final String ALLOW_PAUSE = "allowPause";
-    private static final String NAME = "name";
-    private static final String MAX_WAIT_TIME = "maxWaitTime";
-
     // action names
     private static final String LIST_TYPE_PRFIX = "listType_";
     private static final String NAMES_PREFIX = "names_";
@@ -75,9 +68,6 @@ public class UpdateEscalation extends BaseAction
     private static final String VERS_PREFIX = "verson_";
     private static final String WAITTIME_PREFIX = "waitTime_";
     
-    private static String ALERTDEF_ID = "ad";
-    private static String GALERTDEF_ID = "gad";
-    
     // action list order
     private static String ORDER = "rowOrder";
 
@@ -88,9 +78,13 @@ public class UpdateEscalation extends BaseAction
                JSONException,
                RemoteException
     {
-        List actions = parseActions(context);
-
         Map map = context.getParameterMap();
+
+        if (map.get(ID) == null) {
+            throw new IllegalArgumentException("Escalation id not found");
+        }
+
+        List actions = parseActions(context);
 
         JSONArray jarr = new JSONArray();
         for (Iterator i=actions.iterator(); i.hasNext();) {
@@ -119,6 +113,7 @@ public class UpdateEscalation extends BaseAction
 
         JSONObject json = new JSONObject()
             .put("name", ((String[])map.get(NAME))[0])
+            .put("description", ((String[])map.get(DESCRIPTION))[0])
             .put("allowPause",
                  Boolean.valueOf(
                      ((String[])map.get(ALLOW_PAUSE))[0]).booleanValue())
@@ -130,22 +125,9 @@ public class UpdateEscalation extends BaseAction
                      ((String[])map.get(MAX_WAIT_TIME))[0]).longValue())
             .put("actions", jarr);
 
-        if (map.get(ID) != null) {
-            int id = Integer.valueOf(
-                ((String[])map.get(ID))[0]).intValue();
-            long version;
-            if (map.get(VERSION) != null) {
-                version = Long.valueOf(
-                    ((String[])map.get(VERSION))[0]).longValue();
-            } else {
-                throw new IllegalArgumentException(
-                    "Escalation _version_ not found");
-            }
-            json.put("id", id)
-                .put("_version_", version);
-        } else {
-            throw new IllegalArgumentException("Escalation id not found");
-        }
+        Integer id = Integer.valueOf(((String[]) map.get(ID))[0]);
+
+        json.put("id", id);
 
         EscalationWebMediator wmed = EscalationWebMediator.getInstance();
         String[] ad = (String[])map.get(ALERTDEF_ID);
@@ -166,8 +148,8 @@ public class UpdateEscalation extends BaseAction
                                              GalertEscalationAlertType.GALERT,
                                              escalation);
             } else {
-                throw new IllegalArgumentException("Required attribute 'ad' or " +
-                                                   "'gad' is not defined");
+                result = wmed.updateEscalation(context, context.getSessionId(),
+                                               id, escalation);
             }
         } catch(SessionException e) {
             throw new SystemException(e);

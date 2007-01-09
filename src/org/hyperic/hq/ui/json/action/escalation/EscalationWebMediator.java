@@ -116,4 +116,15 @@ public class EscalationWebMediator {
         return getEventsBoss(context)
             .jsonEscalationByAlertDefId(sessionId, alertDefId, alertType);
     }
+
+    public JSONObject updateEscalation(JsonActionContext context,
+                                       int sessionId, Integer id,
+                                       JSONObject json)
+        throws PermissionException,
+               SessionException, FinderException, 
+               JSONException, RemoteException, DuplicateObjectException
+    {
+        getEventsBoss(context).updateEscalation(sessionId, json);
+        return getEventsBoss(context).jsonByEscalationId(sessionId, id);
+    }
 }

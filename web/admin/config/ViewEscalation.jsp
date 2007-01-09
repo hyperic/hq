@@ -56,24 +56,46 @@ function showViewEscResponse(originalRequest) {
     var actions = tmp.escalation.actions;
     var allowPause = tmp.escalation.allowPause;
     var escName = tmp.escalation.name;
+    var description = tmp.escalation.description;
     var id = tmp.escalation.id;
     var maxWaitTime = (tmp.escalation.maxWaitTime / 60000) +
        " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>";
 
-    <c:if test="${not empty EscalationForm.escId}">
-          $('viewEscalation').style.display = "";
-          $('createEscTable').style.display = "none";
-    </c:if>
-    <c:if test="${empty EscalationForm.escId}">
-          $('viewEscalation').style.display = "none";
-          $('createEscTable').style.display = "";
-
-    </c:if>
+    $('viewEscalation').style.display = "";
   
+    $('escId').value = id;
+    $('id').value = id;
+
+    $('name').innerHTML = escName;
+    $('escName').value = escName;
+
+    $('description').innerHTML = description + "&nbsp;";
+    if (description) {
+        $('escDesc').value = description;
+    }
+
+    if (allowPause) {
+        $('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause" /> ' + maxWaitTime;
+        $('allowPauseTrue').checked = "true";
+    }
+    else {
+        $('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.continue" />';
+        $('allowPauseFalse').checked = "true";
+    }
+
+    if (notifyAll) {
+        $('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.all" />';
+        $('notifyAllFalse').checked = "true";
+    }
+    else {
+        $('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.previous" />';
+        $('notifyAllTrue').checked = "true";
+    }
+
     var escViewUL = $('viewEscalationUL');
 
     for(var i=escViewUL.childNodes.length-1; i>1; i--) {
-	 escViewUL.removeChild(escViewUL.childNodes[i]);
+     escViewUL.removeChild(escViewUL.childNodes[i]);
     }
 
     for (i = 0; i < actions.length; i++) {
@@ -88,7 +110,7 @@ function showViewEscResponse(originalRequest) {
          " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>";
   
       var num = actionId;
-	  var liID = 'row'+num;
+      var liID = 'row'+num;
       var viewLi = document.createElement('li');
       var remDiv = document.createElement('div');
       var usersDiv = document.createElement('div');
@@ -219,38 +241,16 @@ function showViewEscResponse(originalRequest) {
 }
     
     function editEscalation () {
-        var row = '<c:out value="${param.escId}"/>';
-        var select1 = document.createElement("select");
-        var idStr = row.parentNode.parentNode.id;
-        var getId = idStr.split('_');
-        var liID = getId[1];
-        var usersEditDiv = ('usersEditDiv_'+ getId[1]);
-        //alert(idStr);
-        var editMaxWait = $('editWait_' + getId[1]);
-        $('wait_' + getId[1]).style.display = "none";
-        $('pauseTimeText').style.display="none";
-        $('pauseTimeEdit').style.display = "";
+        $('escPropertiesTable').style.display = 'none';
+        $('editPropertiesTable').style.display = '';
+    }
 
-        editMaxWait.appendChild(document.createTextNode('<fmt:message key="alert.config.escalation.then"/> '));
-        editMaxWait.appendChild(select1);
-        select1.setAttribute('id', 'waittime_' + liID);
-        select1.name = "waittime_" + liID;
-        addOption(select1, '0', '<fmt:message key="alert.config.escalation.end"/>');
-        addOption(select1, '300000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="5"/></fmt:message>');
-        addOption(select1, '600000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="10"/></fmt:message>');
-        addOption(select1, '1200000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="20"/></fmt:message>');
-        addOption(select1, '1800000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="30"/></fmt:message>');
-        addOption(select1, '2400000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="45"/></fmt:message>');
-        addOption(select1, '3000000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="60"/></fmt:message>');
-
-        if($('usersList')) {
-          usersEditDiv.innerHTML = $('usersList').innerHTML;
-          var usersInputList = usersEditDiv.getElementsByTagName('input');
-          for(i=0;i < usersInputList.length; i++) {
-              var inputNamesArr = usersInputList[i];
-              inputNamesArr.name = inputNamesArr.name + "_" + liID;
-          }
-        }
+    function setEscalation () {
+        var pars = Form.serialize('EscalationForm');
+        var url = '<html:rewrite action="/escalation/updateEscalation"/>';
+        new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showViewEscResponse, onFailure: reportError} );
+        $('escPropertiesTable').style.display = '';
+        $('editPropertiesTable').style.display = 'none';
     }
 
     function addRow() {
@@ -523,67 +523,6 @@ function showViewEscResponse(originalRequest) {
         $('example').style.display= '';
     }
 
-    function initEsc () {
-        // Set up the escalation dropdown
-        var escJson = eval( '( { "escalations":<c:out value="${escalations}" escapeXml="false"/> })' );
-        var escalationSel = $('escIdSel');
-        var schemes = escJson.escalations;
-
-          for (var i = 0; i < schemes.length; i++) {
-
-            if (schemes[i].name == "")
-                continue;
-
-            <c:if test="${not empty EscalationForm.escId}">
-            if (schemes[i].name == '<c:out value="${EscalationForm.escId}"/>')
-                addOption(escalationSel , schemes[i].name, schemes[i].name, true);
-              else
-            </c:if>
-
-            addOption(escalationSel , schemes[i].name, schemes[i].name,
-                      schemes[i].name == document.EscalationSchemeForm.escId.value);
-        }
-        
-        document.EscalationForm.escName.value = document.EscalationSchemeForm.escId.value;
-        $('submit').onclick = function () {
-            var escName = $('escName').value;
-            if (escName == "") {
-                alert('<fmt:message key="alert.config.error.escalation.name.required"/>');
-                return false;
-            }
-
-            // Check to make sure the name is new
-            var escId = $('escIdSel');
-            if (escId.options[escId.selectedIndex].value == "") {
-                for (var i = 0; i < escId.options.length; i++) {
-                    if (escName == escId.options[i].value) {
-                        alert('<fmt:message key="alert.config.error.escalation.name.dup"/>');
-                        return false;
-                    }
-                }
-            }
-
-            sendEscForm();
-
-            addOption(escId, escName, escName, true);
-
-            $('escNameSpan').style.visibility = 'hidden';
-
-            if (reloadScheme) {
-                document.EscalationSchemeForm.escId.value = escName;
-                setTimeout( "initEscalationSchemes()", 1000 );
-            }
-            //schemeChange(escId);
-
-            return false;
-        }
-
-
-      <c:if test="${empty param.escId}">
-        addRow();
-      </c:if>
-    }
-
    function sendEditEscForm() {
         var id;
         var gadId;
@@ -747,11 +686,10 @@ function showViewEscResponse(originalRequest) {
     function getGroupOrder() {
         var sectionID = $('rowOrder');
         var order = Sortable.serialize(sectionID);
-		var alerttext = Sortable.serialize('rowOrder') + '\n';
+        var alerttext = Sortable.serialize('rowOrder') + '\n';
 
-		alert(alerttext);
-
-	}
+        alert(alerttext);
+    }
 
     function hideExample() {
             $('example').style.display= 'none';
@@ -806,8 +744,9 @@ function showViewEscResponse(originalRequest) {
     <input type="hidden" id="gad" name="gad"
       value='<c:out value="${param.gad}"/>' />
   </c:when>
-</c:choose> <input type="hidden" id="ffff" name="ggg"
-  value='<c:out value="${escalation.id}"/>' />
+</c:choose>
+  <input type="hidden" id="ffff" name="ggg" value='<c:out value="${escalation.id}"/>' />
+  <input type="hidden" id="escId" name="id"/>
 
 <div id="example" style="display:none;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -820,45 +759,78 @@ function showViewEscResponse(originalRequest) {
 </table>
 </div>
 
-<table width="100%" cellpadding="3" cellspacing="0" border="0">
+<table width="100%" cellpadding="4" cellspacing="0" border="0" id="escPropertiesTable">
   <tbody>
     <tr>
       <td class="BlockTitle" colspan="2">
       <fmt:message key="alert.config.escalation.scheme" />
       </td>
     </tr>
-    <tr class="ListRow">
+    <tr>
       <td class="BlockLabel">
         <fmt:message key="common.label.Name" />
       </td>
-      <td width="80%">
-        <c:out value="${param.escId}"/>
-      </td>
+      <td width="80%" class="BlockContent" id="name"></td>
     </tr>
-    <tr class="ListRow">
+    <tr>
       <td class="BlockLabel" valign="top">
           <fmt:message key="common.label.Description" />
       </td>
-      <td>
-          &nbsp;
-      </td>
+      <td id="description" class="BlockContent"></td>
+    </tr>
+    <tr>
+      <td class="BlockLabel" nowrap="true"><fmt:message key="alert.config.escalation.acknowledged"/></td>
+      <td id="acknowledged" class="BlockContent"></td>
+    </tr>
+    <tr>
+      <td class="BlockLabel" nowrap="true"><fmt:message key="alert.config.escalation.state.change"/></td>
+      <td id="changed" class="BlockContent"></td>
+    </tr>
+    <tr class="ToolbarContent"><!-- EDIT TOOLBAR -->
+      <td colspan="2"><a href="." onclick="editEscalation(); return false;"><img src="/web/images/tbb_edit.gif" height="16" width="41" border="0"></a></td>
     </tr>
   </tbody>
 </table>
-<table width="100%" cellpadding="3" cellspacing="0" border="0" id="createEscTable">
+
+<table width="100%" cellpadding="3" cellspacing="0" border="0" id="editPropertiesTable" style="display: none;">
   <tbody>
+    <tr>
+      <td class="BlockTitle"><fmt:message key="alert.config.escalation.scheme"/></td>
+    </tr>
+    <tr>
+      <td class="BlockContent">
+        <table width="100%" cellpadding="4" cellspacing="0">
+          <tr>
+            <td class="BlockLabel">
+              <fmt:message key="common.label.Name" />
+            </td>
+            <td width="80%">
+              <input type="text" size="25" name="name" id="escName" />
+            </td>
+          </tr>
+          <tr>
+            <td class="BlockLabel" valign="top">
+              <fmt:message key="common.label.Description" />
+            </td>
+            <td>
+              <textarea cols="40" rows="4" name="description" id="escDesc"></textarea>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
     <tr>
       <td class="BlockTitle"><fmt:message key="alert.config.escalation.acknowledged"/></td>
     </tr>
-    <tr class="ListRow">
+    <tr class="BlockContent">
       <td style="padding-left:15px;padding-bottom:10px;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tbody>
           <tr>
             <td style="padding-top:2px;padding-bottom:2px;"><input
-              type="radio" name="allowPause" value="true" /> <fmt:message
+              type="radio" name="allowPause" id="allowPauseTrue" value="true" /> <fmt:message
               key="alert.config.escalation.allow.pause" /> <select
-              id="maxWaitTime" name="maxwaittime">
+              id="maxWaitTime" name="maxWaitTime">
               <option value="300000">5 <fmt:message
                 key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
               <option value="600000">10 <fmt:message
@@ -871,7 +843,7 @@ function showViewEscResponse(originalRequest) {
           </tr>
           <tr>
             <td style="padding-top:2px;padding-bottom:2px;"><input
-              type="radio" name="allowPause" value="false" checked="true" /> <fmt:message
+              type="radio" name="allowPause" id="allowPauseFalse" value="false" checked="true" /> <fmt:message
               key="alert.config.escalation.allow.continue" /></td>
           </tr>
         </tbody>
@@ -883,59 +855,37 @@ function showViewEscResponse(originalRequest) {
         key="alert.config.escalation.state.change" /><br>
       </td>
     </tr>
-    <tr class="ListRow">
+    <tr class="BlockContent">
       <td style="padding-left:15px;padding-bottom:10px;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tbody>
           <tr>
             <td style="padding-top:2px;padding-bottom:2px;"><input
-              type="radio" name="notification" value="0" checked="true" /> <fmt:message
+              type="radio" name="notifyAll" id="notifyAllFalse" value="false" checked="true" /> <fmt:message
               key="alert.config.escalation.state.change.notify.previous" /></td>
           </tr>
           <tr>
             <td style="padding-top:2px;padding-bottom:2px;"><input
-              type="radio" name="notification" value="1" /> <fmt:message
+              type="radio" name="notifyAll" id="notifyAllTrue" value="true" /> <fmt:message
               key="alert.config.escalation.state.change.notify.all" /></td>
           </tr>
         </tbody>
       </table>
       </td>
     </tr>
-    <tr class="tableRowAction">
-      <td class="section" width="100%">
-      <ul id="rowOrder"></ul>
-      <table width="100%" cellpadding="5" cellspacing="0" border="0"
-        class="ToolbarContent">
-        <tbody>
-          <tr>
-            <td width="40"><a href="#" onclick="addRow();"
-              style="text-decoration:none;"><html:img
-              page="/images/tbb_addtolist.gif" height="16" width="85" border="0" /></a></td>
-          </tr>
-        </tbody>
-      </table>
-      <br>
-      </td>
-    </tr>
-    <tr>
-      <td><br>
-      <br>
-      <input type="button" value="Submit" onclick="sendEscForm();" id="submit"></input>
-      <br>
-      <br>
-      </td>
+    <tr class="ToolbarContent"><!-- SET TOOLBAR -->
+      <td><a href="." onclick="setEscalation(); return false;"><img src="/web/images/tbb_set.gif" border="0"></a></td>
     </tr>
   </tbody>
 </table>
 
-
-
+<br/>
 
 <div id="usersList" style="display:none;">
 <div class="ListHeader">Select Users</div>
 <ul class="boxy">
   <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
-    <li class="ListRow"><input type="checkbox" name="users"
+    <li class="BlockContent"><input type="checkbox" name="users"
       value="<c:out value="${user.id}"/>"> <BLK><c:out
       value="${user.name}" /></BLK></input></li>
   </c:forEach>
@@ -947,7 +897,7 @@ function showViewEscResponse(originalRequest) {
   <div class="ListHeader">Select Roles</div>
   <ul class="boxy">
     <c:forEach var="role" items="${AvailableRoles}" varStatus="status">
-      <li class="ListRow"><input type="checkbox" name="roles"
+      <li class="BlockContent"><input type="checkbox" name="roles"
         value="<c:out value="${role.id}"/>"> <BLK><c:out
         value="${role.name}" /></BLK></input></li>
     </c:forEach>
@@ -963,7 +913,7 @@ function showViewEscResponse(originalRequest) {
     <tr>
       <td class="tableRowHeader">If the alert is acknowledged:</td>
     </tr>
-    <tr class="ListRow">
+    <tr class="BlockContent">
       <td style="padding-left:15px;padding-bottom:10px;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tbody>

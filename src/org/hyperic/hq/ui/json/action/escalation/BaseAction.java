@@ -43,6 +43,15 @@ import java.rmi.RemoteException;
 public abstract class BaseAction extends Action
 {
 
+    protected static final String ID = "id";
+    protected static final String NOTIFY_ALL = "notifyAll";
+    protected static final String ALLOW_PAUSE = "allowPause";
+    protected static final String NAME = "name";
+    protected static final String MAX_WAIT_TIME = "maxWaitTime";
+    protected static String DESCRIPTION = "description";
+    protected static String ALERTDEF_ID = "ad";
+    protected static String GALERTDEF_ID = "gad";
+
     public ActionForward execute(ActionMapping map,
                                  ActionForm form,
                                  HttpServletRequest request,

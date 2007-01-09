@@ -163,7 +163,8 @@ public class MEscalation
 
             JSONObject json = new JSONObject()
                 .put("name", getName())
-                .put("description", getDescription())
+                .put("description",
+                     getDescription() != null ? getDescription() : "")
                 .put("allowPause", isPauseAllowed())
                 .put("maxWaitTime", getMaxPauseTime())
                 .put("notifyAll", isNotifyAll())

@@ -1647,7 +1647,7 @@ public class EventsBossEJBImpl
         maxWaitTime = escObj.getLong("maxWaitTime");
         notifyAll   = escObj.optBoolean("notifyAll");
         jsonActions = escObj.getJSONArray("actions");
-
+    
         res = getMEscMan().createEscalation(name, description, allowPause,
                                             maxWaitTime, notifyAll);
         for (int i=0; i<jsonActions.length(); i++) {
@@ -1665,6 +1665,38 @@ public class EventsBossEJBImpl
             // The alert def needs to use this escalation
             getMEscMan().setEscalation(alertType, alertDefId, res);
         }
+    }
+
+    /**
+     * update escalation
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void updateEscalation(int sessionID, JSONObject escalation)
+        throws SessionTimeoutException, SessionNotFoundException, JSONException,
+               PermissionException, DuplicateObjectException
+    {
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        JSONObject escObj = escalation.getJSONObject(MEscalation.JSON_NAME);
+        boolean allowPause, notifyAll;
+        long maxWaitTime;
+        MEscalation res;
+        JSONArray jsonActions;
+        String name;
+        String description;
+        int id;
+        
+        id          = escObj.getInt("id");
+        name        = escObj.getString("name");
+        description = escObj.getString("description");
+        allowPause  = escObj.optBoolean("allowPause");
+        maxWaitTime = escObj.getLong("maxWaitTime");
+        notifyAll   = escObj.optBoolean("notifyAll");
+        jsonActions = escObj.getJSONArray("actions");
+
+        res = getMEscMan().updateEscalation(subject, new Integer(id), name,
+                                            description, allowPause,
+                                            maxWaitTime, notifyAll);
     }
 
     /**

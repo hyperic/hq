@@ -122,7 +122,7 @@ function showEscRows(originalRequest) {
 
 <br/>
 
-<td>
+<td valign="top">
 <c:choose>
   <c:when test="${not empty param.escId}">
     <tiles:insert page="/admin/config/ViewEscalation.jsp"/>

@@ -107,6 +107,35 @@ public class MEscalationManagerEJBImpl
     }
 
     /**
+     * Update an escalation chain
+     * @throws PermissionException 
+     * 
+     * @see MEscalation for information on fields
+     * @ejb:interface-method  
+     */
+    public MEscalation updateEscalation(AuthzSubjectValue subject, Integer id,
+                                        String name, String description,
+                                        boolean pauseAllowed, long maxWaitTime,
+                                        boolean notifyAll) 
+        throws DuplicateObjectException, PermissionException
+    {
+        SessionBase.canModifyEscalation(subject.getId());
+        MEscalation res = _esclDAO.findById(id);
+        
+        if (!res.getName().equals(name)) {
+            assertEscalationNameIsUnique(name);
+        }
+        
+        res.setName(name);
+        res.setDescription(description);
+        res.setPauseAllowed(pauseAllowed);
+        res.setMaxPauseTime(maxWaitTime);
+        res.setNotifyAll(notifyAll);
+        
+        return res;
+    }
+
+    /**
      * Add an action to the end of an escalation chain.  Any escalations
      * currently in progress using this chain will be canceled.
      * 
