@@ -245,7 +245,12 @@ function showViewEscResponse(originalRequest) {
         $('editPropertiesTable').style.display = '';
     }
 
-    function setEscalation () {
+    function cancelEditEscalation () {
+        $('escPropertiesTable').style.display = '';
+        $('editPropertiesTable').style.display = 'none';
+    }
+
+    function saveEscalation () {
         var pars = Form.serialize('EscalationForm');
         var url = '<html:rewrite action="/escalation/updateEscalation"/>';
         new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showViewEscResponse, onFailure: reportError} );
@@ -787,7 +792,13 @@ function showViewEscResponse(originalRequest) {
       <td id="changed" class="BlockContent"></td>
     </tr>
     <tr class="ToolbarContent"><!-- EDIT TOOLBAR -->
-      <td colspan="2"><a href="." onclick="editEscalation(); return false;"><img src="/web/images/tbb_edit.gif" height="16" width="41" border="0"></a></td>
+      <td colspan="2">
+        <tiles:insert page="/common/components/ActionButton.jsp">
+          <tiles:put name="labelKey" value="common.label.Edit"/>
+          <tiles:put name="buttonHref" value="."/>
+          <tiles:put name="buttonClick" value="editEscalation(); return false;"/>
+        </tiles:insert>
+      </td>
     </tr>
   </tbody>
 </table>
@@ -874,7 +885,22 @@ function showViewEscResponse(originalRequest) {
       </td>
     </tr>
     <tr class="ToolbarContent"><!-- SET TOOLBAR -->
-      <td><a href="." onclick="setEscalation(); return false;"><img src="/web/images/tbb_set.gif" border="0"></a></td>
+      <td>
+        <table cellspacing="4" cellpadding="0">
+        <tr><td>
+        <tiles:insert page="/common/components/ActionButton.jsp">
+          <tiles:put name="labelKey" value="common.label.Save"/>
+          <tiles:put name="buttonHref" value="."/>
+          <tiles:put name="buttonClick" value="saveEscalation(); return false;"/>
+        </tiles:insert>
+        </td><td>
+        <tiles:insert page="/common/components/ActionButton.jsp">
+          <tiles:put name="labelKey" value="common.label.Cancel"/>
+          <tiles:put name="buttonHref" value="."/>
+          <tiles:put name="buttonClick" value="cancelEditEscalation(); return false;"/>
+        </tiles:insert>
+        </td></tr></table>
+      </td>
     </tr>
   </tbody>
 </table>
