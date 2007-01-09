@@ -686,9 +686,11 @@ public abstract class ServerDetector
         if (port.equals(Collector.DEFAULT_FTP_PORT)) {
             return Collector.PROTOCOL_FTP;
         }
-        return isSSLPort(port) ?
-                Collector.PROTOCOL_HTTPS :
-                Collector.PROTOCOL_HTTP;
+        else {
+            //note: for 'https' we use the 'http' protocol
+            //with flag ssl=true
+            return Collector.PROTOCOL_HTTP;
+        }
     }
 
     /**
