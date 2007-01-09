@@ -26,7 +26,6 @@
 package org.hyperic.hq.zevents;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -244,7 +243,8 @@ public class ZeventManager {
      * Enqueue events if the current running transaction successfully commits.
      * @see #enqueueEvents(List)
      */
-    public void enqueueEventsAfterCommit(final List events) {
+    public void enqueueEventsAfterCommit(List inEvents) {
+        final List events = new ArrayList(inEvents);
         HQApp.getInstance().addTransactionListener(new TransactionListener() {
             public void afterCommit(boolean success) {
                 try {
