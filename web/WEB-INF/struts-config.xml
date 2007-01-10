@@ -2007,6 +2007,7 @@
       </action>
 
       <action path="/alerts/ConfigEscalation"
+              scope="request"
               name="EscalationSchemeForm"
               forward=".events.config.layout">
       </action>
