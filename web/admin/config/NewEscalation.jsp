@@ -528,7 +528,7 @@ function showViewEscResponse(originalRequest) {
     function showResponse(originalRequest) {
         try {
           var escJson = eval( '(' + originalRequest.responseText + ')' );
-          document.EscalationSchemeForm.escId.value = escJson.escalation.name;
+          document.EscalationSchemeForm.escId.value = escJson.escalation.id;
           document.EscalationSchemeForm.submit();
         } catch (e) {
           $('escMsg').innerHTML ="<fmt:message key="error.Error.Tab"/>";
