@@ -27,7 +27,7 @@ package org.hyperic.hq.ui.json.action.escalation;
 
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.common.DuplicateObjectException;
-import org.hyperic.hq.escalation.server.session.MEscalationAlertType;
+import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -75,7 +75,7 @@ public class EscalationWebMediator {
     public JSONObject jsonEscalationByAlertDefId(JsonActionContext context,
                                                  int sessionId,
                                                  Integer alertDefId,
-                                                 MEscalationAlertType alertType)
+                                                 EscalationAlertType alertType)
         throws JSONException, PermissionException, SessionException,
                RemoteException, FinderException, DuplicateObjectException
     {
@@ -105,7 +105,7 @@ public class EscalationWebMediator {
 
     public void saveEscalation(JsonActionContext context, int sessionId,
                                Integer alertDefId,
-                               MEscalationAlertType alertType, JSONObject json)
+                               EscalationAlertType alertType, JSONObject json)
         throws PermissionException,
                SessionException, FinderException, 
                JSONException, RemoteException, DuplicateObjectException

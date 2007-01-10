@@ -43,7 +43,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
-import org.hyperic.hq.escalation.server.session.MEscalationManagerEJBImpl;
+import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.AlertCreateException;
@@ -177,7 +177,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
             // Now start escalation
             EscalatableCreator creator = 
                 new ClassicEscalatableCreator(adBasic, event);
-            MEscalationManagerEJBImpl.getOne().startEscalation(adBasic, creator); 
+            EscalationManagerEJBImpl.getOne().startEscalation(adBasic, creator); 
         } catch (FinderException e) {
             throw new ActionExecuteException(
                 "Alert Definition not found for trigger: " + getId());

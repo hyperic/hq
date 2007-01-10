@@ -5,7 +5,7 @@
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping package="org.hyperic.hq.escalation.server.session">
-  <class name="MEscalation" table="EAM_ESCALATION">
+  <class name="Escalation" table="EAM_ESCALATION">
     <id name="id" type="integer">
       <column name="ID" not-null="true" />
       <generator class="sequence">
@@ -49,7 +49,7 @@
     <list name="actionsList" table="EAM_ESCALATION_ACTION">
       <key column="ESCALATION_ID" />
       <list-index column="IDX"/>
-      <composite-element class="MEscalationAction">
+      <composite-element class="EscalationAction">
         <parent name="parent"/>
         <property name="waitTime">
           <column name="WAIT_TIME" not-null="true"/>

@@ -33,16 +33,16 @@ import org.hyperic.util.HypericEnum;
  * own alert type into the escalation manager must create a subclass of
  * this enumeration with a unique code.
  */
-public abstract class MEscalationAlertType 
+public abstract class EscalationAlertType 
     extends HypericEnum 
 {
-    protected MEscalationAlertType(int code, String desc) {
-        super(MEscalationAlertType.class, code, desc);
+    protected EscalationAlertType(int code, String desc) {
+        super(EscalationAlertType.class, code, desc);
     }
     
-    public static MEscalationAlertType findByCode(int code) {
-        return (MEscalationAlertType)findByCode(MEscalationAlertType.class, 
-                                                code);
+    public static EscalationAlertType findByCode(int code) {
+        return (EscalationAlertType)findByCode(EscalationAlertType.class, 
+                                               code);
     }
 
     /**
@@ -61,8 +61,7 @@ public abstract class MEscalationAlertType
      *
      * @param defId ID of the definition to set the escalation for
      */
-    protected abstract void setEscalation(Integer defId, 
-                                          MEscalation escalation);
+    protected abstract void setEscalation(Integer defId, Escalation escalation);                                          
     
     /**
      * Fix an alert.  This method should simply set the alert as fixed and not

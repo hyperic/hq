@@ -87,10 +87,10 @@ public class ViewAlertAction extends TilesAction {
             eb.getAlertDefinition( sessionID, av.getAlertDefId() );
         request.setAttribute(Constants.ALERT_DEFINITION_ATTR, adv);
         
-        if (adv.getMEscalationId() != null) {
+        if (adv.getEscalationId() != null) {
             request.setAttribute("escalation",
                                  eb.findEscalationById(sessionID,
-                                                       adv.getMEscalationId()));
+                                                       adv.getEscalationId()));
         }            
 
         // conditions

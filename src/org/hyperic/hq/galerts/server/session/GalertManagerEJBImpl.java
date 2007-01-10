@@ -21,9 +21,9 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
 import org.hyperic.hq.common.shared.CrispoManagerLocal;
-import org.hyperic.hq.escalation.server.session.MEscalation;
-import org.hyperic.hq.escalation.server.session.MEscalationManagerEJBImpl;
-import org.hyperic.hq.escalation.shared.MEscalationManagerLocal;
+import org.hyperic.hq.escalation.server.session.Escalation;
+import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
+import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.server.session.Action;
@@ -57,7 +57,7 @@ public class GalertManagerEJBImpl
 {
     private final Log _log = LogFactory.getLog(GalertManagerEJBImpl.class);
 
-    private MEscalationManagerLocal      _mescMan;
+    private EscalationManagerLocal       _escMan;
     private ExecutionStrategyTypeInfoDAO _stratTypeDAO;
     private GalertDefDAO                 _defDAO;
     private GalertLogDAO                 _logDAO;
@@ -67,7 +67,7 @@ public class GalertManagerEJBImpl
     public GalertManagerEJBImpl() {
         DAOFactory f = DAOFactory.getDAOFactory();
 
-        _mescMan      = MEscalationManagerEJBImpl.getOne();      
+        _escMan       = EscalationManagerEJBImpl.getOne();      
         _stratTypeDAO = new ExecutionStrategyTypeInfoDAO(f); 
         _defDAO       = new GalertDefDAO(f);
         _logDAO       = new GalertLogDAO(f);
@@ -99,11 +99,11 @@ public class GalertManagerEJBImpl
      * Update the escalation of an alert def
      * @ejb:interface-method  
      */
-    public void update(GalertDef def, MEscalation escalation) {
+    public void update(GalertDef def, Escalation escalation) {
         def.setEscalation(escalation);
         
         // End any escalation we were previously doing.
-        MEscalationManagerEJBImpl.getOne().endEscalation(def);
+        EscalationManagerEJBImpl.getOne().endEscalation(def);
         GalertProcessor.getInstance().alertDefUpdated(def);
     }
     

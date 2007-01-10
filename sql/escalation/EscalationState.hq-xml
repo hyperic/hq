@@ -5,7 +5,7 @@
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping package="org.hyperic.hq.escalation.server.session">
-  <class name="MEscalationState" table="EAM_MESCALATION_STATE">
+  <class name="EscalationState" table="EAM_MESCALATION_STATE">
 
     <id name="id" type="integer">
       <column name="ID" not-null="true" />
@@ -27,7 +27,7 @@
     </property>
 
     <many-to-one name="escalation">
-      <column name="MESCALATION_ID" not-null="true" unique-key="escl_uniq"/>
+      <column name="ESCALATION_ID" not-null="true" unique-key="escl_uniq"/>
     </many-to-one>
 
     <property name="alertTypeEnum">

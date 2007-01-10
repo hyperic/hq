@@ -30,45 +30,45 @@ import org.hibernate.criterion.Expression;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
-class MEscalationStateDAO
+class EscalationStateDAO
     extends HibernateDAO
 {
-    MEscalationStateDAO(DAOFactory f) {
-        super(MEscalationState.class, f);
+    EscalationStateDAO(DAOFactory f) {
+        super(EscalationState.class, f);
     }
 
-    MEscalationState findById(Integer id) {
-        return (MEscalationState)super.findById(id);
+    EscalationState findById(Integer id) {
+        return (EscalationState)super.findById(id);
     }
 
-    void save(MEscalationState s) {
+    void save(EscalationState s) {
         super.save(s);
     }
 
-    void remove(MEscalationState s) {
+    void remove(EscalationState s) {
         super.remove(s);
     }
 
-    MEscalationState find(PerformsEscalations def) { 
-        return (MEscalationState)createCriteria()
+    EscalationState find(PerformsEscalations def) { 
+        return (EscalationState)createCriteria()
             .add(Expression.eq("alertDefinitionId", def.getId()))
             .add(Expression.eq("alertTypeEnum", 
                                new Integer(def.getAlertType().getCode())))
             .uniqueResult();
     }
     
-    MEscalationState find(Escalatable esc) {
+    EscalationState find(Escalatable esc) {
         Integer alertId = esc.getAlertInfo().getId();
         Integer alertType = 
             new Integer(esc.getDefinition().getAlertType().getCode());
         
-        return (MEscalationState)createCriteria()
+        return (EscalationState)createCriteria()
             .add(Expression.eq("alertTypeEnum", alertType))
             .add(Expression.eq("alertId", alertId))
             .uniqueResult();
     }
     
-    Collection findStatesFor(MEscalation mesc) {
+    Collection findStatesFor(Escalation mesc) {
         return createCriteria()
             .add(Expression.eq("escalation", mesc))
             .list();

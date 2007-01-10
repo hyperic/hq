@@ -33,8 +33,8 @@ import java.util.Iterator;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.escalation.server.session.MEscalation;
-import org.hyperic.hq.escalation.server.session.MEscalationAlertType;
+import org.hyperic.hq.escalation.server.session.Escalation;
+import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.shared.ActionValue;
@@ -69,7 +69,7 @@ public class AlertDefinition
     private Collection        _conditions = new ArrayList();
     private Collection        _triggers = new ArrayList();
     private Collection        _actions = new ArrayList();
-    private MEscalation       _escalation;
+    private Escalation       _escalation;
 
     private AlertDefinitionValue      _value;
     private AlertDefinitionBasicValue _basicValue;
@@ -264,11 +264,11 @@ public class AlertDefinition
         _actOnTrigger = actOnTrigger;
     }
 
-    public MEscalation getEscalation() {
+    public Escalation getEscalation() {
         return _escalation;
     }
     
-    protected void setEscalation(MEscalation escalation) {
+    protected void setEscalation(Escalation escalation) {
         _escalation = escalation;
     }
 
@@ -350,10 +350,10 @@ public class AlertDefinition
             _value.setActOnTriggerId(getActOnTrigger().getId().intValue());
         }
         if (getEscalation() != null) {
-            _value.setMEscalationId(getEscalation().getId());
+            _value.setEscalationId(getEscalation().getId());
         }
         else {
-            _value.setMEscalationId(null);
+            _value.setEscalationId(null);
         }
 
         _value.removeAllTriggers();
@@ -506,7 +506,7 @@ public class AlertDefinition
         return _basicValue;
     }
 
-    public MEscalationAlertType getAlertType() {
+    public EscalationAlertType getAlertType() {
         return ClassicEscalationAlertType.CLASSIC;
     }
 

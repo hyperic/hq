@@ -26,18 +26,17 @@ package org.hyperic.hq.events.server.session;
 
 import javax.ejb.FinderException;
 
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
-import org.hyperic.hq.escalation.server.session.MEscalation;
-import org.hyperic.hq.escalation.server.session.MEscalationAlertType;
+import org.hyperic.hq.escalation.server.session.Escalation;
+import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 
 public final class ClassicEscalationAlertType 
-    extends MEscalationAlertType
+    extends EscalationAlertType
 {
     public static final ClassicEscalationAlertType CLASSIC = 
         new ClassicEscalationAlertType(0xdeadbeef, "Classic");
@@ -83,7 +82,7 @@ public final class ClassicEscalationAlertType
         }
     }
     
-    public void setEscalation(Integer defId, MEscalation escalation) {
+    public void setEscalation(Integer defId, Escalation escalation) {
         try {
             getDefMan().getByIdNoCheck(defId).setEscalation(escalation);
         } catch(FinderException e) {

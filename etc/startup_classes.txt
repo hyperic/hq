@@ -2,4 +2,4 @@ org.hyperic.hq.measurement.server.session.SRNStartupListener
 org.hyperic.hq.authz.server.session.GroupingStartupListener
 org.hyperic.hq.galerts.server.session.GalertStartupListener
 org.hyperic.hq.events.server.session.EventsStartupListener
-org.hyperic.hq.escalation.server.session.MEscalationStartupListener
+org.hyperic.hq.escalation.server.session.EscalationStartupListener

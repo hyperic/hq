@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.events;
 
-import org.hyperic.hq.escalation.server.session.MEscalation;
+import org.hyperic.hq.escalation.server.session.Escalation;
 
 /**
  * XXX: Probably should remove getEscalation hfrom here and make it a different
@@ -33,7 +33,7 @@ import org.hyperic.hq.escalation.server.session.MEscalation;
  */
 public interface AlertDefinitionInterface {
     public Integer getId();
-    public MEscalation getEscalation();
+    public Escalation getEscalation();
     public String getName();
     public String getDescription();
     public int getPriority();

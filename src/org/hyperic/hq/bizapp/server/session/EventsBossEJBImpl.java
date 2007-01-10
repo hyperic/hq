@@ -77,10 +77,10 @@ import org.hyperic.hq.bizapp.shared.uibeans.DashboardAlertBean;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.escalation.server.session.MEscalation;
-import org.hyperic.hq.escalation.server.session.MEscalationAlertType;
-import org.hyperic.hq.escalation.server.session.MEscalationManagerEJBImpl;
-import org.hyperic.hq.escalation.shared.MEscalationManagerLocal;
+import org.hyperic.hq.escalation.server.session.Escalation;
+import org.hyperic.hq.escalation.server.session.EscalationAlertType;
+import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
+import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.events.ActionCreateException;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionInterface;
@@ -152,8 +152,8 @@ public class EventsBossEJBImpl
         manager = SessionManager.getInstance();
     }
 
-    private MEscalationManagerLocal getMEscMan() {
-        return MEscalationManagerEJBImpl.getOne();
+    private EscalationManagerLocal getEscMan() {
+        return EscalationManagerEJBImpl.getOne();
     }
     
     private RegisteredTriggerManagerLocal getRTM() {
@@ -1441,9 +1441,9 @@ public class EventsBossEJBImpl
                PermissionException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
-        MEscalation e = getMEscMan().findByName(name);
+        Escalation e = getEscMan().findByName(name);
         
-        getMEscMan().deleteEscalation(subject, e);
+        getEscMan().deleteEscalation(subject, e);
     }
 
     /**
@@ -1467,12 +1467,12 @@ public class EventsBossEJBImpl
                PermissionException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
-        MEscalationManagerLocal mescMan = getMEscMan();
+        EscalationManagerLocal escMan = getEscMan();
 
         for (int i=0; i<ids.length; i++) {
-            MEscalation e = mescMan.findById(ids[i]);
+            Escalation e = escMan.findById(ids[i]);
             
-            mescMan.deleteEscalation(subject, e);
+            escMan.deleteEscalation(subject, e);
         }
     }
 
@@ -1487,7 +1487,7 @@ public class EventsBossEJBImpl
                PermissionException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
-        MEscalation e = getMEscMan().findByName(subject, name); 
+        Escalation e = getEscMan().findByName(subject, name); 
             
         return e == null ? null 
                          : new JSONObject().put(e.getJsonName(), e.toJSON());
@@ -1497,12 +1497,12 @@ public class EventsBossEJBImpl
     /**
      * retrieve escalation by alert definition id.
      */
-    private MEscalation findEscalationByAlertDefId(AuthzSubjectValue subject,
-                                                   Integer id, 
-                                                   MEscalationAlertType type)
+    private Escalation findEscalationByAlertDefId(AuthzSubjectValue subject,
+                                                  Integer id, 
+                                                  EscalationAlertType type)
         throws PermissionException
     {
-        return getMEscMan().findByDefId(type, id);
+        return getEscMan().findByDefId(type, id);
     }
     
     /**
@@ -1512,14 +1512,12 @@ public class EventsBossEJBImpl
      * @ejb:transaction type="REQUIRED"
      */
     public Integer getEscalationIdByAlertDefId(int sessionID, Integer id,
-                                               MEscalationAlertType alertType)
+                                               EscalationAlertType alertType)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, FinderException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
-        MEscalation esc;
-        
-        esc = findEscalationByAlertDefId(subject, id, alertType);
+        Escalation esc = findEscalationByAlertDefId(subject, id, alertType);
 
         return esc == null ? null : esc.getId();
     }
@@ -1532,7 +1530,7 @@ public class EventsBossEJBImpl
      */
     public void setEscalationByAlertDefId(int sessionID, Integer id,
                                           Integer escId,
-                                          MEscalationAlertType alertType) 
+                                          EscalationAlertType alertType) 
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
@@ -1547,13 +1545,13 @@ public class EventsBossEJBImpl
      * @ejb:transaction type="REQUIRED"
      */
     public JSONObject jsonEscalationByAlertDefId(int sessionID, Integer id,
-                                                 MEscalationAlertType alertType)
+                                                 EscalationAlertType alertType)
         throws SessionException, PermissionException, JSONException, 
                FinderException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
 
-        MEscalation e = findEscalationByAlertDefId(subject, id, alertType);
+        Escalation e = findEscalationByAlertDefId(subject, id, alertType);
         return e == null ? null 
                          : new JSONObject().put(e.getJsonName(), e.toJSON());
     }
@@ -1569,7 +1567,7 @@ public class EventsBossEJBImpl
                PermissionException, JSONException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
-        MEscalation e = getMEscMan().findById(subject, id);
+        Escalation e = getEscMan().findById(subject, id);
         return e == null ? null 
                          : new JSONObject().put(e.getJsonName(), e.toJSON());
     }
@@ -1580,12 +1578,12 @@ public class EventsBossEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public MEscalation findEscalationById(int sessionID, Integer id)
+    public Escalation findEscalationById(int sessionID, Integer id)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, JSONException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
-        MEscalation e = getMEscMan().findById(subject, id);
+        Escalation e = getEscMan().findById(subject, id);
 
         // XXX: Temporarily get around lazy loading problem        
         e.isPauseAllowed();
@@ -1607,10 +1605,10 @@ public class EventsBossEJBImpl
                PermissionException
     {
         AuthzSubject  subject = manager.getSubjectPojo(sessionID);
-        Collection all = getMEscMan().findAll(subject);
+        Collection all = getEscMan().findAll(subject);
         JSONArray jarr = new JSONArray();
         for (Iterator i = all.iterator(); i.hasNext(); ) {
-            MEscalation esc = (MEscalation)i.next();
+            Escalation esc = (Escalation)i.next();
             jarr.put(new JSONObject()
                 .put("id", esc.getId())
                 .put("name", esc.getName()));
@@ -1628,16 +1626,16 @@ public class EventsBossEJBImpl
      * @ejb:transaction type="REQUIRED"
      */
     public void saveEscalation(int sessionID, Integer alertDefId,
-                               MEscalationAlertType alertType, 
+                               EscalationAlertType alertType, 
                                JSONObject escalation)
         throws SessionTimeoutException, SessionNotFoundException, JSONException,
                PermissionException, DuplicateObjectException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
-        JSONObject escObj = escalation.getJSONObject(MEscalation.JSON_NAME);
+        JSONObject escObj = escalation.getJSONObject(Escalation.JSON_NAME);
         boolean allowPause, notifyAll;
         long maxWaitTime;
-        MEscalation res;
+        Escalation res;
         JSONArray jsonActions;
         String name;
         String description;
@@ -1649,8 +1647,8 @@ public class EventsBossEJBImpl
         notifyAll   = escObj.optBoolean("notifyAll");
         jsonActions = escObj.getJSONArray("actions");
     
-        res = getMEscMan().createEscalation(name, description, allowPause,
-                                            maxWaitTime, notifyAll);
+        res = getEscMan().createEscalation(name, description, allowPause,
+                                           maxWaitTime, notifyAll);
         for (int i=0; i<jsonActions.length(); i++) {
             JSONObject jsonEscAction = (JSONObject)jsonActions.get(i);
             long waitTime = jsonEscAction.optLong("waitTime");
@@ -1659,12 +1657,12 @@ public class EventsBossEJBImpl
             Action a;
             
             a = getActMan().createAction(jsonAction);
-            getMEscMan().addAction(res, a, waitTime);
+            getEscMan().addAction(res, a, waitTime);
         }
         
         if (alertDefId != null) {
             // The alert def needs to use this escalation
-            getMEscMan().setEscalation(alertType, alertDefId, res);
+            getEscMan().setEscalation(alertType, alertDefId, res);
         }
     }
 
@@ -1678,8 +1676,8 @@ public class EventsBossEJBImpl
                PermissionException, DuplicateObjectException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
-        JSONObject escObj = escalation.getJSONObject(MEscalation.JSON_NAME);
-        MEscalation esc;
+        JSONObject escObj = escalation.getJSONObject(Escalation.JSON_NAME);
+        Escalation esc;
         boolean allowPause, notifyAll;
         long maxWaitTime;
         JSONArray jsonActions;
@@ -1695,9 +1693,9 @@ public class EventsBossEJBImpl
         notifyAll   = escObj.optBoolean("notifyAll");
         jsonActions = escObj.getJSONArray("actions");
 
-        esc = getMEscMan().findById(new Integer(id));
-        getMEscMan().updateEscalation(subject, esc, name, description, 
-                                      allowPause, maxWaitTime, notifyAll);
+        esc = getEscMan().findById(new Integer(id));
+        getEscMan().updateEscalation(subject, esc, name, description, 
+                                     allowPause, maxWaitTime, notifyAll);
     }
 
     /**
@@ -1705,28 +1703,28 @@ public class EventsBossEJBImpl
      * @ejb:transaction type="REQUIRED"
      */
     public void acknowledgeAlert(int sessionID, 
-                                 MEscalationAlertType alertType,
+                                 EscalationAlertType alertType,
                                  Integer alertID, long pauseWaitTime)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, ActionExecuteException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
 
-        getMEscMan().acknowledgeAlert(subject, alertType, alertID);
+        getEscMan().acknowledgeAlert(subject, alertType, alertID);
     }
 
     /**
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void fixAlert(int sessionID, MEscalationAlertType alertType,
+    public void fixAlert(int sessionID, EscalationAlertType alertType,
                          Integer alertID)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, ActionExecuteException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
         
-        getMEscMan().fixAlert(subject, alertType, alertID);
+        getEscMan().fixAlert(subject, alertType, alertID);
     }
     
     /**

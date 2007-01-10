@@ -32,7 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
-import org.hyperic.hq.escalation.shared.MEscalationManagerLocal;
+import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 
 import EDU.oswego.cs.dl.util.concurrent.ClockDaemon;
 import EDU.oswego.cs.dl.util.concurrent.Executor;
@@ -42,7 +42,7 @@ import EDU.oswego.cs.dl.util.concurrent.PooledExecutor;
 /**
  * This class manages the runtime execution of escalation chains.  The
  * persistence part of the escalation engine lives within 
- * {@link MEscalationManagerEJBImpl}
+ * {@link EscalationManagerEJBImpl}
  * 
  * This class does very little within hanging onto and remembering state
  * data.  It only knows about the escalation state ID and the time that it
@@ -54,29 +54,29 @@ import EDU.oswego.cs.dl.util.concurrent.PooledExecutor;
  *        Runtime   ->[ScheduleWatcher]  -- EscalationRunner
  *                                        \_ EscalationRunner 
  *                                            |
- *                                            ->MEsclManager.executeState
+ *                                            ->EsclManager.executeState
  *
  *
- * The Runtime puts {@link MEscalationState}s into the schedule.  When the
+ * The Runtime puts {@link EscalationState}s into the schedule.  When the
  * schedule determines the state's time is ready to run, the task is passed
  * off into an EscalationRunner (which comes from a thread pool) and kicked
  * off.  
  */
-class MEscalationRuntime {
-    private static final MEscalationRuntime INSTANCE = new MEscalationRuntime();
+class EscalationRuntime {
+    private static final EscalationRuntime INSTANCE = new EscalationRuntime();
 
-    private final Log _log = LogFactory.getLog(MEscalationRuntime.class);
+    private final Log _log = LogFactory.getLog(EscalationRuntime.class);
     private final ClockDaemon             _schedule = new ClockDaemon();
     private final Map                     _stateIdsToTasks = new HashMap();
     private final PooledExecutor          _executor;
-    private final MEscalationManagerLocal _esclMan;
+    private final EscalationManagerLocal  _esclMan;
     
-    private MEscalationRuntime() {
+    private EscalationRuntime() {
         _executor = new PooledExecutor(new LinkedQueue());
         _executor.setKeepAliveTime(-1);  // Threads never die off
         _executor.createThreads(3);  // # of threads to service requests
         
-        _esclMan = MEscalationManagerEJBImpl.getOne();
+        _esclMan = EscalationManagerEJBImpl.getOne();
     }
 
     /**
@@ -122,7 +122,7 @@ class MEscalationRuntime {
      * Unschedule the execution of an escalation state.  The unschedule will
      * only occur if the transaction succesfully commits.
      */
-    void unscheduleEscalation(MEscalationState state) {
+    void unscheduleEscalation(EscalationState state) {
         final Integer stateId = state.getId();
         
         HQApp.getInstance().addTransactionListener(new TransactionListener() {
@@ -156,7 +156,7 @@ class MEscalationRuntime {
      * If the state had been previously scheduled, it will be rescheduled with
      * the new time. 
      */
-    void scheduleEscalation(MEscalationState state) {
+    void scheduleEscalation(EscalationState state) {
         final Integer stateId   = state.getId();
         final long    schedTime = state.getNextActionTime();
         
@@ -194,7 +194,7 @@ class MEscalationRuntime {
         _esclMan.executeState(stateId);
     }
     
-    static MEscalationRuntime getInstance() {
+    static EscalationRuntime getInstance() {
         return INSTANCE;
     }
 }

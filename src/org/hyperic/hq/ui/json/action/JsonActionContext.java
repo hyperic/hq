@@ -14,7 +14,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.escalation.server.session.MEscalationAlertType;
+import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.ui.action.BaseActionMapping;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
@@ -63,7 +63,7 @@ public class JsonActionContext extends HashMap
         return Integer.valueOf(id);
     }
 
-    public MEscalationAlertType getAlertDefType() {
+    public EscalationAlertType getAlertDefType() {
         // XXX: implement for galertDef
         return ClassicEscalationAlertType.CLASSIC;
     }

@@ -36,7 +36,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
-import org.hyperic.hq.escalation.server.session.MEscalationAlertType;
+import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.hq.ui.Constants;
@@ -59,7 +59,7 @@ public class ViewEscalationAction extends ViewDefinitionAction {
         Integer sessionId = RequestUtils.getSessionId(request);
 
         // Get alert type
-        MEscalationAlertType mat = ClassicEscalationAlertType.CLASSIC;
+        EscalationAlertType mat = ClassicEscalationAlertType.CLASSIC;
         try {
             RequestUtils.getEntityTypeId(request);
         } catch (ParameterNotFoundException e) {

@@ -37,7 +37,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MEscalation
+public class Escalation
     extends PersistedObject
     implements JSON
 {
@@ -63,9 +63,9 @@ public class MEscalation
     private long _mtime;
     private List _actions = new ArrayList();
 
-    protected MEscalation() {}
+    protected Escalation() {}
 
-    MEscalation(String name, String description, boolean pauseAllowed,
+    Escalation(String name, String description, boolean pauseAllowed,
                 long maxPauseTime, boolean notifyAll)
     {
         _name         = name;
@@ -145,8 +145,8 @@ public class MEscalation
         _actions = actions;
     }
     
-    protected MEscalationAction addAction(long waitTime, Action a) {
-        MEscalationAction res = new MEscalationAction(this, a, waitTime);
+    protected EscalationAction addAction(long waitTime, Action a) {
+        EscalationAction res = new EscalationAction(this, a, waitTime);
 
         getActionsList().add(res);
         return res;
@@ -156,7 +156,7 @@ public class MEscalation
         try {
             JSONArray actions = new JSONArray();
             for (Iterator i = getActions().iterator(); i.hasNext(); ) {
-                MEscalationAction action = (MEscalationAction)i.next();
+                EscalationAction action = (EscalationAction)i.next();
 
                 actions.put(action.toJSON());
             }
@@ -187,11 +187,11 @@ public class MEscalation
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof MEscalation) || !super.equals(obj)) {
+        if (!(obj instanceof Escalation) || !super.equals(obj)) {
             return false;
         }
 
-        MEscalation o = (MEscalation)obj;
+        Escalation o = (Escalation)obj;
         return getName().equals(o.getName());
     }
 

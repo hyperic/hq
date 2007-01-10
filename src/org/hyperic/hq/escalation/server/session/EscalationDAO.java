@@ -28,27 +28,27 @@ import org.hibernate.criterion.Expression;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
-class MEscalationDAO
+class EscalationDAO
     extends HibernateDAO
 {
-    MEscalationDAO(DAOFactory f) {
-        super(MEscalation.class, f);
+    EscalationDAO(DAOFactory f) {
+        super(Escalation.class, f);
     }
 
-    MEscalation findById(Integer id) {
-        return (MEscalation)super.findById(id);
+    Escalation findById(Integer id) {
+        return (Escalation)super.findById(id);
     }
 
-    void save(MEscalation e) {
+    void save(Escalation e) {
         super.save(e);
     }
 
-    void remove(MEscalation e) {
+    void remove(Escalation e) {
         super.remove(e);
     }
     
-    MEscalation findByName(String name) {
-        return (MEscalation) 
+    Escalation findByName(String name) {
+        return (Escalation) 
             createCriteria().add(Expression.eq("name", name))
                             .uniqueResult();
     }

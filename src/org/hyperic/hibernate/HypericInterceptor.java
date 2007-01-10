@@ -32,8 +32,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.type.Type;
 import org.hyperic.hq.appdef.AppdefBean;
-import org.hyperic.hq.escalation.server.session.MEscalation;
-import org.hyperic.hq.escalation.server.session.MEscalationState;
+import org.hyperic.hq.escalation.server.session.Escalation;
+import org.hyperic.hq.escalation.server.session.EscalationState;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
@@ -56,8 +56,8 @@ public class HypericInterceptor
         return o instanceof Plugin ||
                o instanceof AppdefBean ||
                o instanceof AlertDefinition ||
-               o instanceof MEscalation ||
-               o instanceof MEscalationState ||
+               o instanceof Escalation ||
+               o instanceof EscalationState ||
                o instanceof MeasurementTemplate ||
                o instanceof Measurement;
     }

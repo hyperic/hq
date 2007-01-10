@@ -9,8 +9,8 @@ import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.common.server.session.Crispo;
-import org.hyperic.hq.escalation.server.session.MEscalation;
-import org.hyperic.hq.escalation.server.session.MEscalationAlertType;
+import org.hyperic.hq.escalation.server.session.Escalation;
+import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertSeverity;
@@ -24,7 +24,7 @@ public class GalertDef
     private AlertSeverity _severity; 
     private boolean       _enabled;
     private ResourceGroup _group;
-    private MEscalation   _escalation;
+    private Escalation   _escalation;
     private Set           _strategies = new HashSet();
     private long          _ctime;
     private long          _mtime;
@@ -114,11 +114,11 @@ public class GalertDef
         _group = group;
     }
     
-    public MEscalation getEscalation() {
+    public Escalation getEscalation() {
         return _escalation;
     }
     
-    protected void setEscalation(MEscalation escalation) {
+    protected void setEscalation(Escalation escalation) {
         _escalation = escalation;
     }
     
@@ -191,7 +191,7 @@ public class GalertDef
         _mtime = mtime;
     }
 
-    public MEscalationAlertType getAlertType() {
+    public EscalationAlertType getAlertType() {
         return GalertEscalationAlertType.GALERT;
     }
 

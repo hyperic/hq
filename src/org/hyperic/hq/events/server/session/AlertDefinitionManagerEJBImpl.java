@@ -46,8 +46,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.escalation.server.session.MEscalation;
-import org.hyperic.hq.escalation.server.session.MEscalationManagerEJBImpl;
+import org.hyperic.hq.escalation.server.session.Escalation;
+import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.events.ActionCreateException;
 import org.hyperic.hq.events.AlertConditionCreateException;
 import org.hyperic.hq.events.AlertDefinitionCreateException;
@@ -132,7 +132,7 @@ public class AlertDefinitionManagerEJBImpl
         
         // Delete escalation state
         if (alertdef.getEscalation() != null) {
-            MEscalationManagerEJBImpl.getOne().endEscalation(alertdef);
+            EscalationManagerEJBImpl.getOne().endEscalation(alertdef);
         }
 
         // Delete the alerts
@@ -213,10 +213,10 @@ public class AlertDefinitionManagerEJBImpl
             }
         }
 
-        Integer esclId = a.getMEscalationId();
+        Integer esclId = a.getEscalationId();
         if (esclId != null) {
-            MEscalation escalation = 
-                MEscalationManagerEJBImpl.getOne().findById(esclId);
+            Escalation escalation = 
+                EscalationManagerEJBImpl.getOne().findById(esclId);
             res.setAlertDefinitionValueNoRels(a);
             res.setEscalation(escalation);
         }
@@ -322,10 +322,10 @@ public class AlertDefinitionManagerEJBImpl
 
         // Now set the alertdef
         aldef.setAlertDefinitionValueNoRels(adval);
-        if (adval.isMEscalationIdHasBeenSet()) {
-            Integer esclId = adval.getMEscalationId();
-            MEscalation escl = 
-                MEscalationManagerEJBImpl.getOne().findById(esclId);
+        if (adval.isEscalationIdHasBeenSet()) {
+            Integer esclId = adval.getEscalationId();
+            Escalation escl = 
+                EscalationManagerEJBImpl.getOne().findById(esclId);
             
             aldef.setEscalation(escl);
         }
@@ -374,8 +374,8 @@ public class AlertDefinitionManagerEJBImpl
         AlertDefinition def = getAlertDefDAO().findById(defId);
         canManageAlerts(subj, def);
 
-        MEscalation escl = 
-            MEscalationManagerEJBImpl.getOne().findById(escId);
+        Escalation escl = 
+            EscalationManagerEJBImpl.getOne().findById(escId);
 
         def.setEscalation(escl);
     }

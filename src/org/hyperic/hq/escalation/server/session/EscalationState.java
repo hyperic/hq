@@ -30,7 +30,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 /**
  * The escalation state ties an escalation chain to an alert definition. 
  */
-public class MEscalationState 
+public class EscalationState 
     extends PersistedObject
 {
     // Pointer to the next action to execute in the escalation chain
@@ -40,9 +40,9 @@ public class MEscalationState
     private long _nextActionTime;
 
     // Escalation this state is tied to
-    private MEscalation _escalation;
+    private Escalation _escalation;
     
-    private MEscalationAlertType _alertType;
+    private EscalationAlertType _alertType;
     
     // The alert def id -- slightly superfluous, since the alert points at it
     private int _alertDefId;
@@ -56,10 +56,10 @@ public class MEscalationState
     // If the escalation has been acknowledged, this is who did it.
     private AuthzSubject _acknowledgedBy;
     
-    protected MEscalationState(){
+    protected EscalationState(){
     }
 
-    protected MEscalationState(Escalatable alert) {
+    protected EscalationState(Escalatable alert) {
         PerformsEscalations def = alert.getDefinition();
         
         _escalation     = def.getEscalation();
@@ -87,11 +87,11 @@ public class MEscalationState
         _nextActionTime = nextActionTime;
     }
 
-    public MEscalation getEscalation() {
+    public Escalation getEscalation() {
         return _escalation;
     }
 
-    protected void setEscalation(MEscalation escalation) {
+    protected void setEscalation(Escalation escalation) {
         _escalation = escalation;
     }
 
@@ -111,7 +111,7 @@ public class MEscalationState
         _alertId = alertId;
     }
 
-    public MEscalationAlertType getAlertType() {
+    public EscalationAlertType getAlertType() {
         return _alertType;
     }
 
@@ -120,7 +120,7 @@ public class MEscalationState
     }
 
     protected void setAlertTypeEnum(int typeCode) {
-        _alertType = MEscalationAlertType.findByCode(typeCode);
+        _alertType = EscalationAlertType.findByCode(typeCode);
     }
     
     public boolean isPaused() {

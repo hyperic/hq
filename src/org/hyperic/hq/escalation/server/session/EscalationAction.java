@@ -33,29 +33,29 @@ import org.hyperic.util.json.JSON;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MEscalationAction 
+public class EscalationAction 
     implements Serializable, JSON
 {
-    private MEscalation _parent;
+    private Escalation _parent;
     private Action      _action;
     private long        _waitTime;
 
-    protected MEscalationAction() {
+    protected EscalationAction() {
     }
 
-    protected MEscalationAction(MEscalation parent, Action action, 
-                                long waitTime) 
+    protected EscalationAction(Escalation parent, Action action, 
+                               long waitTime) 
     {
         _parent   = parent;
         _action   = action;
         _waitTime = waitTime;
     }
     
-    protected void setParent(MEscalation parent) {
+    protected void setParent(Escalation parent) {
         _parent = parent;
     }
 
-    public MEscalation getParent() {
+    public Escalation getParent() {
         return _parent;
     }
     
@@ -94,11 +94,11 @@ public class MEscalationAction
             return true;
         }
 
-        if (obj == null || !(obj instanceof MEscalationAction)) {
+        if (obj == null || !(obj instanceof EscalationAction)) {
             return false;
         }
 
-        MEscalationAction o = (MEscalationAction)obj;
+        EscalationAction o = (EscalationAction)obj;
         return _parent.equals(o.getParent()) && 
                _waitTime == o.getWaitTime() &&
                _action.equals(o.getAction());

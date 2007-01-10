@@ -26,14 +26,14 @@ package org.hyperic.hq.galerts.server.session;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.escalation.server.session.Escalatable;
-import org.hyperic.hq.escalation.server.session.MEscalation;
-import org.hyperic.hq.escalation.server.session.MEscalationAlertType;
+import org.hyperic.hq.escalation.server.session.Escalation;
+import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
 
 public final class GalertEscalationAlertType 
-    extends MEscalationAlertType
+    extends EscalationAlertType
 {
     public static final GalertEscalationAlertType GALERT = 
         new GalertEscalationAlertType(0xbadbabe, "Group Alert");
@@ -58,7 +58,7 @@ public final class GalertEscalationAlertType
         return getGalertMan().findById(defId);
     }
 
-    public void setEscalation(Integer defId, MEscalation escalation) {
+    public void setEscalation(Integer defId, Escalation escalation) {
         getGalertMan().findById(defId).setEscalation(escalation);
     }
 
