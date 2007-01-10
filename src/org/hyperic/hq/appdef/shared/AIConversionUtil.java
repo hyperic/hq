@@ -34,6 +34,8 @@ import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 
@@ -286,10 +288,9 @@ public class AIConversionUtil {
 
     public static void sendCreateEvent(AuthzSubjectValue subject,
                                        AppdefEntityID aid) {
-        AppdefEvent event = new AppdefEvent(subject, aid,
-                                            AppdefEvent.ACTION_CREATE);
-        Messenger sender = new Messenger();
-        sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
+        ResourceCreatedZevent zevent =
+                    new ResourceCreatedZevent(subject, aid);
+        ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
     }
 
     public static void sendNewConfigEvent(AuthzSubjectValue subject,
