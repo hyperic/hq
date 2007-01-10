@@ -350,7 +350,6 @@
         var resUrl = $('viewResUrl').href;
         var metricTable;
         var noMetricTable;
-        var tbody = $('mtbody');
         var metricFunc
         var token = metricText.token;
         if (token != null) {
@@ -363,6 +362,7 @@
             metricFunc = 'requestMetricsResponse()';
         }
 
+        var tbody = metricTable.getElementsByTagName('tbody')[0];
 
         if (metricValues.values) {
                for (var a = tbody.childNodes.length-1; a > 0; a--) {
