@@ -44,13 +44,9 @@
 
 function showViewEscResponse() {
     var tmp = eval('( <c:out value="${escalationJSON}" escapeXml="false"/> )');
-    var creationTime = tmp.escalation.creationTime;
     var notifyAll = tmp.escalation.notifyAll
-    var _version_ = tmp.escalation._version_;
-    var modifiedTime = tmp.escalation.modifiedTime;
     var actions = tmp.escalation.actions;
     var allowPause = tmp.escalation.allowPause;
-    var escName = tmp.escalation.name;
     var id = tmp.escalation.id;
     var maxWaitTime = (tmp.escalation.maxWaitTime / 60000) +
        " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>";
@@ -71,7 +67,6 @@ function showViewEscResponse() {
       var configSms = actionConfig.sms;
       var actionId = actions[i].action.id;
       var actionsClassName = actions[i].action.className;
-      var actionsVersion = actions[i].action._version_;
       var actionWaitTime = (actions[i].waitTime / 60000) +
          " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>";
   
@@ -106,13 +101,6 @@ function showViewEscResponse() {
       var metaInfo = " ";
       var productInfo = " ";
       var versionInfo = " ";
-  
-      $('creationTime').value = creationTime;
-      $('notifyAll').value = notifyAll;
-      $('_version_').value = _version_;
-      $('modifiedTime').value = modifiedTime;
-      $('allowPause').value = allowPause;
-      $('id').value = id;
   
       escViewUL.appendChild(viewLi)
   
@@ -202,7 +190,20 @@ function showViewEscResponse() {
       usersEditDiv.setAttribute('id', 'usersEditDiv_'+ liID);
       usersEditDiv.setAttribute('width', '40%');
       usersEditDiv.innerHTML = " ";
-      $('pauseTimeText').innerHTML = 'Allow user to pause escalation: ' + allowPause + "<br>";
+      if (allowPause) {
+        $('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause" /> ' + maxWaitTime;
+      }
+      else {
+        $('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.continue" />';
+      }
+
+      if (notifyAll) {
+        $('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.all" />';
+      }
+      else {
+        $('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.previous" />';
+      }
+
       Sortable.create(escViewUL,{ghosting:true,constraint:false});
    }    
 }
@@ -347,80 +348,32 @@ function showViewEscResponse() {
   </tbody>
 </table>
 
-<div id="usersList" style="display:none;">
-<div class="ListHeader">Select Users</div>
-<ul class="boxy">
-  <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
-    <li class="ListRow"><input type="checkbox" name="users"
-      value="<c:out value="${user.id}"/>"> <BLK><c:out
-      value="${user.name}" /></BLK></input></li>
-  </c:forEach>
-</ul>
-</div>
+</form>
 
-<c:if test="${not empty AvailableRoles}">
-  <div id="rolesList" style="display: none;">
-  <div class="ListHeader">Select Roles</div>
-  <ul class="boxy">
-    <c:forEach var="role" items="${AvailableRoles}" varStatus="status">
-      <li class="ListRow"><input type="checkbox" name="roles"
-        value="<c:out value="${role.id}"/>"> <BLK><c:out
-        value="${role.name}" /></BLK></input></li>
-    </c:forEach>
-  </ul>
-  </div>
-</c:if></form>
-
-<form name="viewEscalation" id="viewEscalation" style="display:none;"><input
-  type="hidden" id="alertDefId" name="alertDefId"
-  value='<c:out value="${alertDef.id}"/>' />
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" id="viewEscalation">
   <tbody>
     <tr>
-      <td width="100%">
+      <td class="BlockLabel" width="20%"nowrap="true"><fmt:message key="alert.config.escalation.acknowledged"/></td>
+      <td id="acknowledged" class="BlockContent"></td>
+    </tr>
+    <tr>
+      <td class="BlockLabel" nowrap="true"><fmt:message key="alert.config.escalation.state.change"/></td>
+      <td id="changed" class="BlockContent"></td>
+    </tr>
+    <tr>
+      <td class="BlockLabel" style="text-align: left;" nowrap="true"><fmt:message key="alert.config.escalation.Begin"/></td>
+      <td class="BlockContent">&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="100%" colspan="2">
       <ul id="viewEscalationUL">
       </ul>
       </td>
     </tr>
-
     <tr>
-      <td class="tableRowHeader"><fmt:message key="alert.config.escalation.acknowledged"/></td>
-    </tr>
-    <tr class="ListRow">
-      <td style="padding-left:15px;padding-bottom:10px;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tbody>
-          <tr>
-            <td style="padding-top:10px;padding-bottom:2px;">
-            <div id="pauseTimeText"></div>
-            <div id="pauseTimeEdit" style="display:none;"><input
-              type="radio" name="allowPause" value="true" /> <fmt:message
-              key="alert.config.escalation.allow.pause" /> <select
-              id="maxWaitTime_<c:out value="${alertDef.id}"/>"
-              name="maxwaittime">
-              <option value="300000">5 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-              <option value="600000">10 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-              <option value="1200000">20 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-              <option value="1800000">30 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-            </select></div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      </td>
+      <td class="BlockLabel" style="text-align: left;" nowrap="true"><fmt:message key="alert.config.escalation.TheEnd"/></td>
+      <td class="BlockContent">&nbsp;</td>
     </tr>
   </tbody>
 </table>
-
-<br>
-<br>
-<input type="hidden" value="" id="creationTime"> <input type="hidden"
-  value="" id="_version_"> <input type="hidden" value="" id="notifyAll">
-<input type="hidden" value="" id="modifiedTime"> <input type="hidden"
-  value="" id="allowPause"> <input type="hidden" value="" id="escName">
-<input type="hidden" value="" id="id"></form>
 

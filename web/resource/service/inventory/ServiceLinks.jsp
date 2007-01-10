@@ -35,6 +35,7 @@
 <c:if test="${not empty resource}">
  <hq:userResourcePermissions debug="false" resource="${Resource}"/>
   <table border="0"><tr><td class="LinkBox">
+            <html:link page="/resource/service/Inventory.do?mode=editConfig&eid=${Resource.entityId}"><fmt:message key="resource.service.inventory.link.Configure"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
 
     <tiles:insert definition=".resource.common.quickFavorites">
       <tiles:put name="resource" beanName="resource"/>
