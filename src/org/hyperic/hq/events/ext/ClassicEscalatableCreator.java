@@ -10,7 +10,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
-import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventConstants;
@@ -106,9 +105,12 @@ class ClassicEscalatableCreator
             Action act = (Action) i.next();
 
             try {
-                act.executeAction(alert, 
-                                  new ActionExecutionInfo(shortReason, 
-                                                          longReason));
+                ActionExecutionInfo execInfo = 
+                    new ActionExecutionInfo(shortReason, longReason);
+                                            
+                String detail = act.executeAction(alert, execInfo);
+                
+                alertMan.logActionDetail(alert, act, detail);
             } catch(Exception e) {
                 // For any exception, just log it.  We can't afford not
                 // letting the other actions go un-processed.

@@ -370,9 +370,13 @@ public class MEscalationManagerEJBImpl
         }
         
         try {
-            action.executeAction(esc.getAlertInfo(), 
-                                 new ActionExecutionInfo(esc.getShortReason(),
-                                                         esc.getLongReason()));
+            ActionExecutionInfo execInfo = 
+                new ActionExecutionInfo(esc.getShortReason(),
+                                        esc.getLongReason());
+            
+            String detail = action.executeAction(esc.getAlertInfo(), execInfo);
+            
+            s.getAlertType().logActionDetails(esc.getId(), action, detail);
         } catch(Exception exc) {
             _log.error("Unable to execute action [" + 
                        action.getClassName() + "] for escalation definition [" +
