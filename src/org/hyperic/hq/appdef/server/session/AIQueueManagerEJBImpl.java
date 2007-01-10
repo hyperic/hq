@@ -70,6 +70,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.autoinventory.AIIp;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -595,6 +596,7 @@ public class AIQueueManagerEJBImpl
                     aiplatformLH.findById(id);
                 syncQueue(aiplatform.getAIPlatformValue(), isApproveAction);
             }
+            
             // See above note, now we remove approved servers from the queue
             Collection servers = aiplatform.getAIServers();
             if (servers != null) {
@@ -602,12 +604,19 @@ public class AIQueueManagerEJBImpl
                     servers.remove(aiserversToRemove.get(i));
                 }
             }
-            // Send create messages out
+
+            // Send resource create events
+            List zevents = new ArrayList();
             for (i=0; i<createdResources.size(); i++) {
-                // Send an event to notify creation
-                AIConversionUtil.sendCreateEvent
-                    (subject, (AppdefEntityID) createdResources.get(i));
+                AppdefEntityID createdId =
+                    (AppdefEntityID)createdResources.get(i);
+
+                ResourceCreatedZevent event =
+                    new ResourceCreatedZevent(subject, createdId);
+                 zevents.add(event);
             }
+
+            ZeventManager.getInstance().enqueueEventsAfterCommit(zevents);
         }
     }
 
