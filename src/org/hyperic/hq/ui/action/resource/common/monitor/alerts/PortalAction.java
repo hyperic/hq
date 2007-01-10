@@ -42,6 +42,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.events.AlertNotFoundException;
+import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.ui.Constants;
@@ -172,13 +173,16 @@ public class PortalAction extends ResourceController {
         long pause = 0;
         try {
             RequestUtils.getStringParameter(request, "pause");
-            pause =
-                RequestUtils.getIntParameter(request, "pauseTime").longValue();
+            pause = RequestUtils.getIntParameter(request, 
+                                                 "pauseTime").longValue();
         } catch(ParameterNotFoundException e) {
-            // Don't ened to pause
+            // Don't need to pause
         }
         // pass pause escalation time
-        eb.acknowledgeAlert(sessionID, alertId, pause);
+        // XXX:  Right now this only works with classic alerts
+        eb.acknowledgeAlert(sessionID, 
+                            ClassicEscalationAlertType.CLASSIC,
+                            alertId, pause);
         
         return viewAlert(mapping, form, request, response);
     }
@@ -187,13 +191,16 @@ public class PortalAction extends ResourceController {
                                   ActionForm form,
                                   HttpServletRequest request,
                                   HttpServletResponse response)
-        throws Exception {
+        throws Exception 
+    {
         ServletContext ctx = getServlet().getServletContext();
         int sessionID = RequestUtils.getSessionId(request).intValue();
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
 
         Integer alertId = new Integer( request.getParameter("a") );
-        eb.fixAlert(sessionID, alertId);
+
+        // XXX:  This is staticly specified as classic for now
+        eb.fixAlert(sessionID, ClassicEscalationAlertType.CLASSIC, alertId); 
 
         return viewAlert(mapping, form, request, response);
     }

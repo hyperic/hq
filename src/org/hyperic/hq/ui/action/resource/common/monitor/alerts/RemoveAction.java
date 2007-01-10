@@ -40,6 +40,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.tools.ant.taskdefs.condition.IsReference;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -103,15 +104,25 @@ public class RemoveAction extends BaseAction {
         if (nwForm.isDeleteClicked()) {
             log.debug("!!!!!!!!!!!!!!!! removing alerts!!!!!!!!!!!!");
             boss.deleteAlerts(sessionId.intValue(), alertIds);
-        }
-        else if (nwForm.getButtonAction() != null) {
+        } else if (nwForm.getButtonAction() != null) {
             if ("ACKNOWLEDGE".equals(nwForm.getButtonAction())) {
                 log.debug("Acknowledge alerts");
-                boss.acknowledgeAlerts(sessionId.intValue(), alertIds);
-            }
-            else if ("FIXED".equals(nwForm.getButtonAction())) {
+
+                for (int i=0; i<alertIds.length; i++) {
+                    // XXX:  This only works for classic alert types ATM
+                    boss.acknowledgeAlert(sessionId.intValue(), 
+                                          ClassicEscalationAlertType.CLASSIC,
+                                          alertIds[i], 0);
+                }
+            } else if ("FIXED".equals(nwForm.getButtonAction())) { 
                 log.debug("Fixed alerts");
-                boss.fixAlerts(sessionId.intValue(), alertIds);
+                
+                for (int i=0; i<alertIds.length; i++) {
+                    // XXX:  This only works for classic alert types ATM
+                    boss.fixAlert(sessionId.intValue(), 
+                                  ClassicEscalationAlertType.CLASSIC,
+                                  alertIds[i]);
+                }
             }
         }
 

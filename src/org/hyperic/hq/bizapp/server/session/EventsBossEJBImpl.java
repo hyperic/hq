@@ -64,6 +64,7 @@ import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface;
@@ -1439,7 +1440,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         MEscalation e = getMEscMan().findByName(name);
         
         getMEscMan().deleteEscalation(subject, e);
@@ -1451,7 +1452,7 @@ public class EventsBossEJBImpl
      */
     public void deleteEscalationById(int sessionID, Integer id)
         throws SessionTimeoutException, SessionNotFoundException,
-        PermissionException
+               PermissionException
     {
         deleteEscalationById(sessionID, new Integer[]{id});
     }
@@ -1465,7 +1466,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         MEscalationManagerLocal mescMan = getMEscMan();
 
         for (int i=0; i<ids.length; i++) {
@@ -1485,7 +1486,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException, JSONException,
                PermissionException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         MEscalation e = getMEscMan().findByName(subject, name); 
             
         return e == null ? null 
@@ -1567,7 +1568,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, JSONException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         MEscalation e = getMEscMan().findById(subject, id);
         return e == null ? null 
                          : new JSONObject().put(e.getJsonName(), e.toJSON());
@@ -1583,7 +1584,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, JSONException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         MEscalation e = getMEscMan().findById(subject, id);
 
         // XXX: Temporarily get around lazy loading problem        
@@ -1605,7 +1606,7 @@ public class EventsBossEJBImpl
         throws JSONException, SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject  subject = manager.getSubjectPojo(sessionID);
         Collection all = getMEscMan().findAll(subject);
         JSONArray jarr = new JSONArray();
         for (Iterator i = all.iterator(); i.hasNext(); ) {
@@ -1676,7 +1677,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException, JSONException,
                PermissionException, DuplicateObjectException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         JSONObject escObj = escalation.getJSONObject(MEscalation.JSON_NAME);
         MEscalation esc;
         boolean allowPause, notifyAll;
@@ -1703,85 +1704,37 @@ public class EventsBossEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void acknowledgeAlert(int sessionID, Integer alertID,
-                                 long pauseWaitTime)
+    public void acknowledgeAlert(int sessionID, 
+                                 MEscalationAlertType alertType,
+                                 Integer alertID, long pauseWaitTime)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, ActionExecuteException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
 
-        _log.info("Acknowledge called");
-        /*
-        getMEscMan().acknowledgeAlert(subject, alertID, pauseWaitTime);
-        EscalationMediator med = EscalationMediator.getInstance();
-        med.acknowledgeAlert(subject.getId(), alertID, pauseWaitTime);
-        */
+        getMEscMan().acknowledgeAlert(subject, alertType, alertID);
     }
 
     /**
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void acknowledgeAlerts(int sessionID, Integer[] alertIDs)
-        throws SessionTimeoutException, SessionNotFoundException,
-               PermissionException, ActionExecuteException 
-    {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-        _log.info("Acknowledge called");
-        /*
-        EscalationMediator med = EscalationMediator.getInstance();
-        for (int i = 0; i < alertIDs.length; i++) {
-            med.acknowledgeAlert(subject.getId(), alertIDs[i], 0);
-        }
-        */
-    }
-
-    /**
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
-    public void fixAlert(int sessionID, Integer alertID)
+    public void fixAlert(int sessionID, MEscalationAlertType alertType,
+                         Integer alertID)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, ActionExecuteException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         
-        _log.info("Fix called");
-        /*
-        EscalationMediator med = EscalationMediator.getInstance();
-        med.fixAlert(subject.getId(), alertID);
-        */
-    }
-    
-    /**
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
-    public void fixAlerts(int sessionID, Integer[] alertIDs)
-        throws SessionTimeoutException, SessionNotFoundException,
-               PermissionException, ActionExecuteException
-    {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-        
-        _log.info("Fix called");
-        /*
-        EscalationMediator med = EscalationMediator.getInstance();
-        for (int i = 0; i < alertIDs.length; i++) {
-            med.fixAlert(subject.getId(), alertIDs[i]);
-        }
-        */
+        getMEscMan().fixAlert(subject, alertType, alertID);
     }
     
     /**
      * @ejb:create-method
      */
     public void ejbCreate() {}
-
     public void ejbRemove() {}
-
     public void ejbActivate() {}
-
     public void ejbPassivate() {}
-
     public void setSessionContext(SessionContext ctx) {}
 }

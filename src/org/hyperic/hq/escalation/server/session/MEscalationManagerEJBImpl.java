@@ -35,7 +35,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
@@ -115,7 +114,7 @@ public class MEscalationManagerEJBImpl
      * @see MEscalation for information on fields
      * @ejb:interface-method  
      */
-    public void updateEscalation(AuthzSubjectValue subject, MEscalation esc,
+    public void updateEscalation(AuthzSubject subject, MEscalation esc,
                                  String name, String description,
                                  boolean pauseAllowed, long maxWaitTime,
                                  boolean notifyAll) 
@@ -162,7 +161,7 @@ public class MEscalationManagerEJBImpl
      *        
      * @ejb:interface-method  
      */
-    public void deleteEscalation(AuthzSubjectValue subject, MEscalation e) 
+    public void deleteEscalation(AuthzSubject subject, MEscalation e) 
         throws PermissionException
     {
         SessionBase.canRemoveEscalation(subject.getId());
@@ -179,7 +178,7 @@ public class MEscalationManagerEJBImpl
     /**
      * @ejb:interface-method  
      */
-    public MEscalation findById(AuthzSubjectValue subject, Integer id) 
+    public MEscalation findById(AuthzSubject subject, Integer id) 
         throws PermissionException
     {
         SessionBase.canViewEscalation(subject.getId());
@@ -189,7 +188,7 @@ public class MEscalationManagerEJBImpl
     /**
      * @ejb:interface-method  
      */
-    public Collection findAll(AuthzSubjectValue subject)
+    public Collection findAll(AuthzSubject subject)
         throws PermissionException
     {
         SessionBase.canViewEscalation(subject.getId());
@@ -199,7 +198,7 @@ public class MEscalationManagerEJBImpl
     /**
      * @ejb:interface-method  
      */
-    public MEscalation findByName(AuthzSubjectValue subject, String name) 
+    public MEscalation findByName(AuthzSubject subject, String name) 
         throws PermissionException
     {
         SessionBase.canViewEscalation(subject.getId());
