@@ -52,7 +52,7 @@ public abstract class ResourceZevent extends Zevent {
             getAuthzSubjectValue();
     }
 
-    public static class ResourceZeventSource
+    private static class ResourceZeventSource
         implements ZeventSourceId
     {
         private AppdefEntityID _id;
@@ -70,7 +70,7 @@ public abstract class ResourceZevent extends Zevent {
         }
     }
 
-    public static class ResourceZeventPayload
+    private static class ResourceZeventPayload
         implements ZeventPayload
     {
         private AppdefEntityID _id;

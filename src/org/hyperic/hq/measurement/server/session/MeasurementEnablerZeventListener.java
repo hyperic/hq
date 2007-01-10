@@ -30,7 +30,6 @@ import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEvent;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.bizapp.server.DefaultMetricsEnablerUtil;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
 import org.apache.commons.logging.Log;
@@ -39,12 +38,10 @@ import org.apache.commons.logging.LogFactory;
 import java.util.List;
 import java.util.Iterator;
 
-public class MeasurementEnablerZeventListener implements ZeventListener {
+class MeasurementEnablerZeventListener implements ZeventListener {
 
     private static Log _log =
         LogFactory.getLog(MeasurementEnablerZeventListener.class);
-
-    private static DefaultMetricsEnablerUtil _enabler = null;
 
     public MeasurementEnablerZeventListener() {
         _log.info("MeasurementEnablerListener starting up!");
