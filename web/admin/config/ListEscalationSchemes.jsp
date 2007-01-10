@@ -34,15 +34,17 @@
 
 <table width="100%" cellpadding="0" cellspacing="10">
 <tr>
-<td width="30%" valign="top" style="border: 2px solid grey">
+<td width="30%" valign="top">
 <tiles:insert definition=".portlet.error"/>
 <tiles:insert definition=".portlet.confirm"/>
 
-    <table width="100%" cellpadding="0" cellspacing="0">
+    <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #D5D8DE";>
+    <thead>
     <tr class="ListRow">
       <td class="TableRowHeader"><fmt:message key="common.header.Name"/></td>
       <td class="TableRowHeader" style="text-align: right;"><html:link page="/admin/config/Config.do?mode=escalate"><html:img src="/images/tbb_new.gif" border="0"/></html:link></td>
     </tr>
+    </thead>
     <tbody id="escalations"></tbody>
     </table>
 </td>
@@ -70,11 +72,11 @@ function showEscRows(originalRequest) {
     var tr = document.createElement("tr");
     tr.setAttribute('class', 'ListRow');
 
-    var td = document.createElement("td");
-    td.setAttribute('class', 'ListCell');
-    td.setAttribute('colspan', '2');
-    td.innerHTML = '<fmt:message key="admin.config.message.noEscalations"/>';
-    tr.appendChild(td);
+    var td1 = document.createElement("td");
+    td1.setAttribute((document.all ? 'className' : 'class'), "ListCell");
+    td1.setAttribute('colspan', '2');
+    td1.innerHTML = '<fmt:message key="admin.config.message.noEscalations"/>';
+    tr.appendChild(td1);
 
     escalations.appendChild(tr);
   }
@@ -82,27 +84,28 @@ function showEscRows(originalRequest) {
   for (var i = 0; i < schemes.length; i++) {
     var tr = document.createElement("tr");
     if ((i % 2) == 0) {
-      tr.setAttribute('class', 'tableRowEven');
+      tr.setAttribute((document.all ? 'className' : 'class'), "tableRowEven");
     }
     else {
-      tr.setAttribute('class', 'tableRowOdd');
+      tr.setAttribute((document.all ? 'className' : 'class'), "tableRowOdd");
     }
 
-    var td = document.createElement("td");
-    td.setAttribute('class', 'ListCell');
+    var td2 = document.createElement("td");
+    td2.setAttribute('class', 'ListCell');
     if (schemes[i].id == '<c:out value="${param.escId}"/>') {
-      td.innerHTML = schemes[i].name;
+      td2.innerHTML = schemes[i].name;
     }
     else {
-      td.innerHTML = '<a href="<html:rewrite page="/admin/config/Config.do?mode=escalate&escId="/>' + schemes[i].id + '">' + schemes[i].name + '</a>';
-    }
-    tr.appendChild(td);
+      td2.innerHTML = '<a href="<html:rewrite page="/admin/config/Config.do?mode=escalate&escId="/>' + schemes[i].id + '">' + schemes[i].name + '</a>';
 
-    td = document.createElement("td");
-    td.setAttribute('class', 'ListCell');
-    td.setAttribute('style', 'text-align: right');
-    td.innerHTML = '<a href="<html:rewrite action="/admin/config/RemoveEscalation"/>' + '?esc=' + schemes[i].id + '">' + $('deleteBtn').innerHTML + '</a>';
-    tr.appendChild(td);
+    }
+    tr.appendChild(td2);
+
+    td3 = document.createElement("td");
+    td3.setAttribute((document.all ? 'className' : 'class'), "ListCell");
+    td3.setAttribute('style', 'text-align: right');
+    td3.innerHTML = '<a href="<html:rewrite action="/admin/config/RemoveEscalation"/>' + '?esc=' + schemes[i].id + '">' + $('deleteBtn').innerHTML + '</a>';
+    tr.appendChild(td3);
 
     escalations.appendChild(tr);
   }
