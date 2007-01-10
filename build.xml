@@ -1197,7 +1197,7 @@
           depends="init,xdoclet,hibernate-pojo,build" >
   </target>
 
- <target name="build" depends="init,compile,pack" 
+ <target name="build" depends="init,compile,aspectize-classes,pack" 
          description="Compile and pack - no code generation" >
     <!--  Triger jboss reloading -->
   </target>
