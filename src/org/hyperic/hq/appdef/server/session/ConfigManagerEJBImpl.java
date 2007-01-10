@@ -548,7 +548,6 @@ public class ConfigManagerEJBImpl
 
         ConfigResponseDB existing = getConfigResponse(id);
         boolean configWasUpdated = false;
-        boolean appdefCreated = false;
         byte[] storedConf, newConf;
 
         storedConf = existing.getProductResponse();
