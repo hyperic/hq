@@ -1,4 +1,4 @@
-org.hyperic.hq.measurement.server.session.SRNStartupListener
+org.hyperic.hq.measurement.server.session.MeasurementStartupListener
 org.hyperic.hq.authz.server.session.GroupingStartupListener
 org.hyperic.hq.galerts.server.session.GalertStartupListener
 org.hyperic.hq.events.server.session.EventsStartupListener
