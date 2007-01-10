@@ -904,7 +904,7 @@ text-align:center;
    border-bottom:1px solid gray;
 }
    
-##viewEscalationUL {
+#viewEscalationUL {
   margin:0;
   margin-right: 0px;
   padding:0;
@@ -919,7 +919,6 @@ text-align:center;
   width: 100%;
   border-bottom:1px solid gray;
   background-color:#F2F4F7;
-  
 }
 
 .escTbl {
