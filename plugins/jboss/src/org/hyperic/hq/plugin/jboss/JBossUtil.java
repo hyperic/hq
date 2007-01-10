@@ -218,9 +218,9 @@ public class JBossUtil {
             }
         }
 
+        String attrName = metric.getAttributeName();
         try {
             ObjectName objName = new ObjectName(metric.getObjectName());
-            String attrName = metric.getAttributeName();
 
             if (attrName.substring(1).startsWith(/*S*/"tatistic")) {
                 boolean lc = Character.isLowerCase(attrName.charAt(0));
@@ -244,6 +244,12 @@ public class JBossUtil {
         } catch (InstanceNotFoundException e) {
             throw notfound(metric, e);
         } catch (AttributeNotFoundException e) {
+            //XXX not all MBeans have a reasonable attribute to
+            //determine availability, so just assume if we get this far
+            //the MBean exists and is alive.
+            if (attrName.equals(Metric.ATTR_AVAIL)) {
+                return new Double(Metric.AVAIL_UP);
+            }
             throw notfound(metric, e);
         } catch (ReflectionException e) {
             throw error(metric, e);
