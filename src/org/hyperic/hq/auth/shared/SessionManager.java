@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.Iterator;
 
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 
 public class SessionManager {
@@ -54,9 +56,6 @@ public class SessionManager {
      */
     static private final long DEFAULT_TIMEOUT = 90 * 1000 * 60;
 
-    /**
-     * Default private constructor
-     */
     private SessionManager() {}
 
     /**
@@ -73,7 +72,6 @@ public class SessionManager {
      * @return The session id
      */
     public synchronized int put(AuthzSubjectValue subject) {
-
         return this.put(subject, DEFAULT_TIMEOUT);
     }
 
@@ -152,23 +150,7 @@ public class SessionManager {
     public synchronized Integer getId(int sessionId) 
         throws SessionNotFoundException, SessionTimeoutException
     {
-        
-        Integer id = new Integer(sessionId);
-        
-        AuthSession session = (AuthSession)_cache.get(id);
-        
-        if (session == null) {
-            throw new SessionNotFoundException();
-        }
-
-        if (session.isExpired()) {
-            // XXX: check for other stale sessions?
-            invalidate(sessionId);
-
-            throw new SessionTimeoutException();
-        }
-
-        return session.getAuthzSubjectValue().getId();
+        return getSubject(sessionId).getId();
     }
 
     /**
@@ -180,7 +162,6 @@ public class SessionManager {
     public synchronized AuthzSubjectValue getSubject(int sessionId) 
         throws SessionNotFoundException, SessionTimeoutException
     {
-        
         Integer id = new Integer(sessionId);
 
         AuthSession session = (AuthSession)_cache.get(id);
@@ -196,6 +177,14 @@ public class SessionManager {
         }
 
         return session.getAuthzSubjectValue();
+    }
+
+    public synchronized AuthzSubject getSubjectPojo(int sessionId) 
+        throws SessionNotFoundException, SessionTimeoutException
+    {
+        AuthzSubjectValue sVal = getSubject(sessionId);
+        
+        return AuthzSubjectManagerEJBImpl.getOne().findSubjectById(sVal.getId());
     }
 
     /**
