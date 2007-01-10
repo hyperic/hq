@@ -228,13 +228,13 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   </display:column>
 
   <display:column width="20%" property="name" sort="true" sortAttr="1"
-                  defaultSort="false" title="alerts.config.DefinitionList.ListHeader.AlertDefinition" href="/alerts/Config.do?mode=viewDefinition&eid=${Resource.entityId.appdefKey}" paramId="ad" paramProperty="alertDefId"/>
+                  defaultSort="true" title="alerts.config.DefinitionList.ListHeader.AlertDefinition" href="/alerts/Config.do?mode=viewDefinition&eid=${Resource.entityId.appdefKey}" paramId="ad" paramProperty="alertDefId"/>
     
   <display:column width="20%" property="description"
                   title="common.header.Description" />
 
   <display:column width="20%" property="ctime" sort="true" sortAttr="2"
-                  defaultSort="true" title="alerts.config.DefinitionList.ListHeader.DateCreated" >
+                  defaultSort="false" title="alerts.config.DefinitionList.ListHeader.DateCreated" >
     <display:datedecorator/>
   </display:column>
                   
