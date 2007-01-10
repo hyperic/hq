@@ -38,107 +38,133 @@ import org.hyperic.util.config.ConfigResponse;
  */
 public class AllConfigResponses implements Serializable {
 
-    private AppdefResourceValue resource;
+    private AppdefResourceValue _resource;
 
-    private ConfigResponse[] configs
+    private ConfigResponse[] _configs
         = new ConfigResponse[ProductPlugin.CONFIGURABLE_TYPES.length];
-    private boolean[] supports
+    private boolean[] _supports
         = new boolean[ProductPlugin.CONFIGURABLE_TYPES.length];
-    private boolean[] shouldConfig
+    private boolean[] _shouldConfig
         = new boolean[ProductPlugin.CONFIGURABLE_TYPES.length];
 
-    private boolean enableRuntimeAIScan;
-    private boolean enableEuRT;
-    private boolean enableServiceRT;
+    private boolean _enableRuntimeAIScan;
+    private boolean _enableEuRT;
+    private boolean _enableServiceRT;
 
     public AllConfigResponses () {}
 
-    public void setResource (AppdefResourceValue arv) {
-        resource = arv;
-    }
-    public AppdefResourceValue getResource () { return resource; }
-
-    public void setConfig ( int type, ConfigResponse config ) {
-        configs[type] = config;
-    }
-    public ConfigResponse getConfig ( int type ) {
-        return configs[type];
-    }
-    public void setSupports ( int type, boolean b ) {
-        supports[type] = b;
-    }
-    public boolean getSupports ( int type ) {
-        return supports[type];
-    }
-    public void setShouldConfig ( int type, boolean b ) {
-        shouldConfig[type] = b;
-    }
-    public boolean getShouldConfig ( int type ) {
-        return shouldConfig[type];
+    public void setResource(AppdefResourceValue resource) {
+        _resource = resource;
     }
 
-    public void setEnableRuntimeAIScan ( boolean aiScan ) {
-        enableRuntimeAIScan = aiScan;
+    public AppdefResourceValue getResource() {
+        return _resource;
     }
-    public boolean getEnableRuntimeAIScan () { return enableRuntimeAIScan; }
 
-    public void setEnableEuRT ( boolean eurt ) {
-        enableEuRT = eurt;
+    public void setConfig(int type, ConfigResponse config) {
+        _configs[type] = config;
     }
-    public boolean getEnableEuRT () { return enableEuRT; }
 
-    public void setEnableServiceRT ( boolean serviceRt ) {
-        enableServiceRT = serviceRt;
+    public ConfigResponse getConfig(int type) {
+        return _configs[type];
     }
-    public boolean getEnableServiceRT () { return enableServiceRT; }
+
+    public void setSupports(int type, boolean b) {
+        _supports[type] = b;
+    }
+
+    public boolean getSupports(int type) {
+        return _supports[type];
+    }
+
+    public void setShouldConfig(int type, boolean b) {
+        _shouldConfig[type] = b;
+    }
+
+    public boolean getShouldConfig(int type) {
+        return _shouldConfig[type];
+    }
+
+    public void setEnableRuntimeAIScan(boolean aiScan) {
+        _enableRuntimeAIScan = aiScan;
+    }
+
+    public boolean getEnableRuntimeAIScan() {
+        return _enableRuntimeAIScan;
+    }
+
+    public void setEnableEuRT (boolean eurt) {
+        _enableEuRT = eurt;
+    }
+
+    public boolean getEnableEuRT() {
+        return _enableEuRT;
+    }
+
+    public void setEnableServiceRT(boolean serviceRt) {
+        _enableServiceRT = serviceRt;
+    }
+
+    public boolean getEnableServiceRT() {
+        return _enableServiceRT;
+    }
 
     // Convenience methods
-    public ConfigResponse getProductConfig () {
+    public ConfigResponse getProductConfig() {
         return getConfig(ProductPlugin.CFGTYPE_IDX_PRODUCT);
     }
-    public ConfigResponse getMetricConfig () {
+
+    public ConfigResponse getMetricConfig() {
         return getConfig(ProductPlugin.CFGTYPE_IDX_MEASUREMENT);
     }
-    public ConfigResponse getControlConfig () {
+
+    public ConfigResponse getControlConfig() {
         return getConfig(ProductPlugin.CFGTYPE_IDX_CONTROL);
     }
-    public ConfigResponse getRtConfig () {
+
+    public ConfigResponse getRtConfig() {
         return getConfig(ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME);
     }
 
-    public boolean supportsProductConfig () {
+    public boolean supportsProductConfig() {
         return getSupports(ProductPlugin.CFGTYPE_IDX_PRODUCT);
     }
-    public boolean supportsMetricConfig () {
+
+    public boolean supportsMetricConfig() {
         return getSupports(ProductPlugin.CFGTYPE_IDX_MEASUREMENT);
     }
-    public boolean supportsControlConfig () {
+
+    public boolean supportsControlConfig() {
         return getSupports(ProductPlugin.CFGTYPE_IDX_CONTROL);
     }
-    public boolean supportsRtConfig () {
+
+    public boolean supportsRtConfig() {
         return getSupports(ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME);
     }
 
-    public boolean shouldConfigProduct () {
+    public boolean shouldConfigProduct() {
         return getShouldConfig(ProductPlugin.CFGTYPE_IDX_PRODUCT);
     }
-    public boolean shouldConfigMetric () {
+
+    public boolean shouldConfigMetric() {
         return getShouldConfig(ProductPlugin.CFGTYPE_IDX_MEASUREMENT);
     }
-    public boolean shouldConfigControl () {
+
+    public boolean shouldConfigControl() {
         return getShouldConfig(ProductPlugin.CFGTYPE_IDX_CONTROL);
     }
-    public boolean shouldConfigRt () {
+
+    public boolean shouldConfigRt() {
         return getShouldConfig(ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME);
     }
 
     public String toString () {
-        return "[AllConfigResponses resource=" + resource
-            + " configs=" + StringUtil.arrayToString(configs)
-            + " supports=" + StringUtil.arrayToString(supports)
-            + " shouldConfig=" + StringUtil.arrayToString(shouldConfig)
-            + " enableRuntimeAI=" + enableRuntimeAIScan
-            + " enableEuRT=" + enableEuRT
-            + " enableServiceRT=" + enableServiceRT + "]";
+        return "[AllConfigResponses resource=" + _resource
+            + " configs=" + StringUtil.arrayToString(_configs)
+            + " supports=" + StringUtil.arrayToString(_supports)
+            + " shouldConfig=" + StringUtil.arrayToString(_shouldConfig)
+            + " enableRuntimeAI=" + _enableRuntimeAIScan
+            + " enableEuRT=" + _enableEuRT
+            + " enableServiceRT=" + _enableServiceRT + "]";
     }
 }
