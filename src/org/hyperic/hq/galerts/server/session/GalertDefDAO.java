@@ -34,7 +34,7 @@ class GalertDefDAO
     }
 
     Collection findAll(ResourceGroup g) {
-        String sql = "from GalertDef d where d.group = :group";
+        String sql = "from GalertDef d where d.group = :group order by name";
         
         return getSession().createQuery(sql)
             .setParameter("group", g)
