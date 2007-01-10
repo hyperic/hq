@@ -46,8 +46,6 @@ import org.hyperic.hq.appdef.shared.ServiceManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.PermissionManager;
-import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.product.PlatformTypeInfo;
@@ -92,9 +90,6 @@ public class ConfigManagerEJBImpl
     private static final int MAX_VALIDATION_ERR_LEN = 512;
     private final static String logCtx = ConfigManagerEJBImpl.class.getName();
     protected Log log = LogFactory.getLog(logCtx);
-
-    private static final PermissionManager pm = 
-        PermissionManagerFactory.getInstance();
 
     private PlatformManagerLocalHome platformManagerLocalHome;
     private ServerManagerLocalHome   serverManagerLocalHome;
