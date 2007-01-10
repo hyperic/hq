@@ -33,9 +33,6 @@ import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
 
 public abstract class AIUtil {
 
-    /**
-     * Get a control command client based in an appdefentity
-     */
     public static AICommandsClient getClient(AppdefEntityID aid) 
         throws PermissionException, AgentNotFoundException {
         return new AICommandsClient(AgentConnectionUtil.getClient(aid));

@@ -16,7 +16,6 @@ import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
-import org.hyperic.util.StringUtil;
 
 /*
  * NOTE: This copyright does *not* cover user programs that use HQ
@@ -86,7 +85,6 @@ public class AIPlatformDAO extends HibernateDAO
 
         for ( int i=0; i<newIPs.length; i++ ) {
             AIIpValue ipVal = newIPs[i];
-            // log.info("Adding new IP: " + ipVal);
             AIIp ip = new AIIp(ipVal);
             ip.setAIPlatform(p);
             ipSet.add(ip);
@@ -103,9 +101,8 @@ public class AIPlatformDAO extends HibernateDAO
         // removeAllXXX methods (they actually don't remove anything)
         // The AIQueueManagerEJBImpl.queue method relies on this working.
         HashSet xdocletServerHackSet = new HashSet();
-        for ( int i=0; i<newServers.length; i++ ) {
+        for (int i=0; i<newServers.length; i++) {
             AIServerValue serverVal = newServers[i];
-                // log.info("Adding new Server: " + serverVal);
             AIServer s = new AIServer(serverVal);
             s.setAIPlatform(p);
             serverSet.add(s);
@@ -172,11 +169,11 @@ public class AIPlatformDAO extends HibernateDAO
      * @param aiplatform The new AI data to update this platform with.
      * @param updateServers If true, servers will be updated too.
      */
-    public void updateQueueState ( AIPlatform aip,
-                                   AIPlatformValue aiplatform,
-                                   boolean updateServers,
-                                   boolean isApproval,
-                                   boolean isReport )
+    public void updateQueueState(AIPlatform aip,
+                                 AIPlatformValue aiplatform,
+                                 boolean updateServers,
+                                 boolean isApproval,
+                                 boolean isReport)
     {
         // reassociate platform
         aip = findById(aip.getId());
@@ -196,8 +193,8 @@ public class AIPlatformDAO extends HibernateDAO
         aip.setControlConfig(aiplatform.getControlConfig());
 
         if (isReport || isApproval) {
-            if ( isApproval ) {
-                aiplatform.setLastApproved(new Long(nowTime+1));
+            if (isApproval) {
+                aiplatform.setLastApproved(new Long(nowTime + 1));
             } else {
                 Long lastApproved = aiplatform.getLastApproved();
                 if (lastApproved == null) lastApproved = new Long(0);
@@ -207,7 +204,7 @@ public class AIPlatformDAO extends HibernateDAO
         }
 
         // Sanitize name
-        if ( aip.getName() == null ) {
+        if (aip.getName() == null) {
             aip.setName(aip.getFqdn());
         }
         updateIpSet(aip, aiplatform);
@@ -219,10 +216,8 @@ public class AIPlatformDAO extends HibernateDAO
 
     private void updateIpSet (AIPlatform p, AIPlatformValue aiplatform)
     {
-        // Update IPs
         List newIPs = new ArrayList();
         newIPs.addAll(Arrays.asList(aiplatform.getAIIpValues()));
-        log.debug("UQS: 1--> newIPs=" + StringUtil.listToString(newIPs));
         Collection ipSet = p.getAIIps();
         Iterator i = ipSet.iterator();
         while ( i.hasNext() ) {
@@ -231,7 +226,6 @@ public class AIPlatformDAO extends HibernateDAO
             if ( aiip == null ) {
                 i.remove();
             } else {
-                log.debug("UQS: Updating IP: " + aiip);
                 boolean qIgnored = qip.getIgnored();
                 qip.setAIIpValue(aiip);
                 qip.setIgnored(qIgnored);
@@ -239,11 +233,9 @@ public class AIPlatformDAO extends HibernateDAO
         }
 
         // Add remaining IPs
-        log.debug("UQS: 2--> newIPs=" + StringUtil.listToString(newIPs));
         i = newIPs.iterator();
         while ( i.hasNext() ) {
             AIIpValue aiip = (AIIpValue) i.next();
-            log.debug("UQS: Adding new IP: " + aiip);
             AIIp ip = new AIIp();
             ip.setAIIpValue(aiip);
             ip.setAIPlatform(p);
@@ -253,9 +245,9 @@ public class AIPlatformDAO extends HibernateDAO
 
     private AIIpValue findAndRemoveAIIp (List ips, String addr) {
         AIIpValue aiip;
-        for ( int i=0; i<ips.size(); i++ ) {
+        for (int i=0; i<ips.size(); i++) {
             aiip = (AIIpValue) ips.get(i);
-            if ( aiip.getAddress().equals(addr) ) {
+            if (aiip.getAddress().equals(addr)) {
                 ips.remove(i);
                 return aiip;
             }
@@ -263,26 +255,22 @@ public class AIPlatformDAO extends HibernateDAO
         return null;
     }
 
-    private void updateServerSet (AIPlatform p, AIPlatformValue aiplatform)
+    private void updateServerSet(AIPlatform p, AIPlatformValue aiplatform)
     {
-        // Update servers
         List newServers = new ArrayList();
         newServers.addAll(Arrays.asList(aiplatform.getAIServerValues()));
-        // log.info("UQS: 1--> newServers (allservers)=" + StringUtil.listToString(newServers));
         Collection serverSet = p.getAIServers();
         Iterator i = serverSet.iterator();
-        while ( i.hasNext() ) {
+        while (i.hasNext()) {
             AIServer qserver = (AIServer) i.next();
             AIServerValue aiserver
                 = findAndRemoveAIServer(newServers,
                                         qserver.getAutoinventoryIdentifier());
 
             if ( aiserver == null ) {
-                // log.info("UQS: Removing Server: " + qserver.getAutoinventoryIdentifier());
                 i.remove();
 
             } else {
-                // log.info("UQS: Updating Server: " + aiserver);
                 // keep the user specified ignored value
                 boolean qIgnored = qserver.getIgnored();
                 qserver.setAIServerValue(aiserver);
@@ -290,11 +278,9 @@ public class AIPlatformDAO extends HibernateDAO
             }
         }
 
-        // log.info("UQS: 2--> newServers=" + StringUtil.listToString(newServers));
         i = newServers.iterator();
-        while ( i.hasNext() ) {
+        while (i.hasNext()) {
             AIServerValue aiserver = (AIServerValue) i.next();
-            // log.info("UQS: Adding new Server: " + aiserver);
             AIServer ais = new AIServer();
             ais.setAIServerValue(aiserver);
             p.addAIServer(ais);
@@ -303,7 +289,7 @@ public class AIPlatformDAO extends HibernateDAO
 
     private AIServerValue findAndRemoveAIServer (List servers, String aiid) {
         AIServerValue aiserver;
-        for ( int i=0; i<servers.size(); i++ ) {
+        for (int i=0; i<servers.size(); i++) {
             aiserver = (AIServerValue) servers.get(i);
             if ( aiserver.getAutoinventoryIdentifier().equals(aiid) ) {
                 servers.remove(i);

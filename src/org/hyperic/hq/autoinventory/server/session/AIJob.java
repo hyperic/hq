@@ -204,8 +204,8 @@ public abstract class AIJob extends BaseJob {
         throws JobExecutionException;
 
     /**
-         * loads the scan config object
-         */
+     * loads the scan config object
+     */
     protected ScanConfigurationCore getScanConfig(JobDataMap dataMap)
         throws IOException
     {

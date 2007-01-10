@@ -140,11 +140,11 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public Map getServerSignatures ( AuthzSubjectValue subject,
-                                     List serverTypes )
+    public Map getServerSignatures(AuthzSubjectValue subject,
+                                   List serverTypes)
         throws NamingException, FinderException, 
-               CreateException, AutoinventoryException {
-
+               CreateException, AutoinventoryException
+    {
         // Plug server type names into a map for quick retrieval
         HashMap stNames = null;
         if ( serverTypes != null ) {
@@ -161,15 +161,15 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         Map results = new HashMap();
         String pluginName;
         GenericPlugin plugin;
-        while ( iter.hasNext() ) {
+        while (iter.hasNext()) {
             plugin = (GenericPlugin) plugins.get(iter.next());
             pluginName = plugin.getName();
-            if ( ! (plugin instanceof ServerDetector) ) {
+            if (!(plugin instanceof ServerDetector)) {
                 log.debug("skipping non-server AI plugin: " + pluginName);
                 continue;
             }
-            if ( stNames != null && 
-                 stNames.get(pluginName) == null ) {
+            if (stNames != null &&
+                stNames.get(pluginName) == null) {
                 log.debug("skipping unrequested AI plugin: " + pluginName);
                 continue;
             }
@@ -183,8 +183,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     private boolean isRuntimeDiscoverySupported(AppdefEntityID id) {
         if (id.isServer() || id.isService()) {
             return true;
-        }
-        else {
+        } else {
             log.debug("pushRuntimeDiscoveryConfig not supported for: " + id);
             return false;
         }
@@ -200,8 +199,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void turnOffRuntimeDiscovery ( AuthzSubjectValue subject,
-                                          AppdefEntityID id ) 
+    public void turnOffRuntimeDiscovery(AuthzSubjectValue subject,
+                                        AppdefEntityID id)
         throws PermissionException {
 
         if (!isRuntimeDiscoverySupported(id)) {
@@ -217,7 +216,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                                       "(" + id + "): " + e);
         }
 
-        client.pushRuntimeDiscoveryConfig(id.getType(), id.getID(), null, null, null);
+        client.pushRuntimeDiscoveryConfig(id.getType(), id.getID(),
+                                          null, null, null);
     }
 
     /**
@@ -232,9 +232,9 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void turnOffRuntimeDiscovery ( AuthzSubjectValue subject,
-                                          AppdefEntityID id,
-                                          String agentToken ) 
+    public void turnOffRuntimeDiscovery(AuthzSubjectValue subject,
+                                        AppdefEntityID id,
+                                        String agentToken)
         throws PermissionException {
 
         if (!isRuntimeDiscoverySupported(id)) {
@@ -245,12 +245,13 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         
         try {
             client = AIUtil.getClient(agentToken);
-        } catch ( AgentNotFoundException e ) {
+        } catch (AgentNotFoundException e) {
             throw new SystemException("Error looking up agent for resource " +
                                       "(" + id + "): " + e);
         }
 
-        client.pushRuntimeDiscoveryConfig(id.getType(), id.getID(), null, null, null);
+        client.pushRuntimeDiscoveryConfig(id.getType(), id.getID(),
+                                          null, null, null);
     }
 
     /**
@@ -261,11 +262,11 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void pushRuntimeDiscoveryConfig ( AuthzSubjectValue subject,
-                                             AppdefEntityID id,
-                                             ConfigResponse response ) 
-        throws PermissionException {
-
+    public void pushRuntimeDiscoveryConfig(AuthzSubjectValue subject,
+                                           AppdefEntityID id,
+                                           ConfigResponse response)
+        throws PermissionException
+    {
         if (!isRuntimeDiscoverySupported(id)) {
             return;
         }
@@ -285,16 +286,16 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             else if (id.isService()) {
                 aval.getResourceValue();
             }
-        } catch ( AppdefEntityNotFoundException e ) {
-            throw new SystemException("Error looking up resource "
-                                         + "(" + id + "): " + e);
+        } catch (AppdefEntityNotFoundException e) {
+            throw new SystemException("Error looking up resource " +
+                                      "(" + id + "): " + e);
         }
 
         try {
             client = AIUtil.getClient(id);
         } catch ( AgentNotFoundException e ) {
-            throw new SystemException("Error looking up agent for server "
-                                         + "(" + id + "): " + e);
+            throw new SystemException("Error looking up agent for server " +
+                                      "(" + id + "): " + e);
         }
         String typeName = null, name = null;
         try {
@@ -302,9 +303,9 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             if (!id.isServer()) {
                 name = aval.getName();
             }
-        } catch ( AppdefEntityNotFoundException e ) {
-            throw new SystemException("Error looking up type name for resource"
-                                         + " (" + id + "): " + e);
+        } catch (AppdefEntityNotFoundException e) {
+            throw new SystemException("Error looking up type name for " +
+                                      "resource (" + id + "): " + e);
         }
 
         if (log.isDebugEnabled()) {
@@ -339,15 +340,15 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void startScan ( AuthzSubjectValue subject,
-                            AppdefEntityID aid,
-                            ScanConfigurationCore scanConfig,
-                            String scanName, String scanDesc,
-                            ScheduleValue schedule )
+    public void startScan(AuthzSubjectValue subject,
+                          AppdefEntityID aid,
+                          ScanConfigurationCore scanConfig,
+                          String scanName, String scanDesc,
+                          ScheduleValue schedule )
         throws AgentConnectionException, AgentNotFoundException,
                AutoinventoryException, DuplicateAIScanNameException,
-               ScheduleWillNeverFireException, PermissionException {
-
+               ScheduleWillNeverFireException, PermissionException
+    {
         try {
             // XXX XXX XXX
             // Dude, this is a totally silly, ugly hack.  In my defense,
@@ -377,20 +378,18 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                                               scanName,
                                               scanDesc,
                                               schedule);
-        } 
-        catch (ScheduleWillNeverFireException e) {
+        } catch (ScheduleWillNeverFireException e) {
             throw e;
         } catch (DuplicateAIScanNameException ae) {
             throw ae;
         } catch (AutoinventoryException ae) {
             log.warn("Error starting scan: " + StringUtil.getStackTrace(ae));
             throw ae;
-
         } catch (PermissionException ae) {
             throw ae;
         } catch (Exception e) {
-            throw new SystemException("Error starting scan "
-                                         + "for agent: " + e, e);
+            throw new SystemException("Error starting scan " +
+                                      "for agent: " + e, e);
         }
     }
 
@@ -399,9 +398,9 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void startScan ( AuthzSubjectValue subject,
-                            String agentToken,
-                            ScanConfigurationCore scanConfig )
+    public void startScan(AuthzSubjectValue subject,
+                          String agentToken,
+                          ScanConfigurationCore scanConfig)
         throws AgentConnectionException, AgentNotFoundException,
                AutoinventoryException, PermissionException {
 
@@ -413,9 +412,9 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             DAOFactory.getDAOFactory()
                 .getAIPlatformDAO().findByAgentToken(agentToken);
         if (aipLocal == null) {
-            throw new AutoinventoryException("No platform in auto-discovery "
-                                             + "queue with agentToken="
-                                             + agentToken);
+            throw new AutoinventoryException("No platform in auto-discovery " +
+                                             "queue with agentToken=" +
+                                             agentToken);
         }
         PlatformValue pValue;
         try {
@@ -438,6 +437,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                      + aipLocal.getId() + ": " + e, e);
             throw new SystemException(e);
         }
+
         try {
             AICommandsClient client = AIUtil.getClient(agentToken);
             client.startScan(scanConfig);
@@ -452,16 +452,15 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void stopScan (AuthzSubjectValue subject,
-                          AppdefEntityID aid)
+    public void stopScan(AuthzSubjectValue subject,
+                         AppdefEntityID aid)
         throws AutoinventoryException {
 
         log.info("AutoinventoryManager.stopScan called");
         try { 
             AICommandsClient client = AIUtil.getClient(aid);
             client.stopScan();
-
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             throw new AutoinventoryException("Error stopping scan " +
                                              "for agent: " + e, e);
         }
@@ -480,7 +479,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                AutoinventoryException {
         
         log.info("AutoinventoryManager.getScanStatus called");
-        ScanStateCore core = null;
+        ScanStateCore core;
         try {
             AICommandsClient client = AIUtil.getClient(aid);
             core = client.getScanStatus();
@@ -494,8 +493,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         } catch (AutoinventoryException ae) {
             throw ae;
         } catch (Exception e) {
-            throw new SystemException("Error getting scan status "
-                                         + "for agent: " + e, e);
+            throw new SystemException("Error getting scan status " +
+                                      "for agent: " + e, e);
         }
         return core;
     }
@@ -527,7 +526,6 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                                       errorMessage);
     }
 
-
     /**
      * remove AIHistory
      * @ejb:interface-method
@@ -543,7 +541,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:transaction type="REQUIRED"
      */
     public void updateAIHistory(Integer jobId, long endTime,
-                                   String status, String message)
+                                String status, String message)
         throws FinderException, CreateException, NamingException
     {
         AIHistory local = getHistoryDAO().findById(jobId);
@@ -574,8 +572,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         try {
             AICommandsClient client = AIUtil.getClient(agentToken);
             core = client.getScanStatus();
-        } 
-        catch (AgentNotFoundException ae) {
+        } catch (AgentNotFoundException ae) {
             throw ae;
         } catch (AgentRemoteException ae) {
             throw ae;
@@ -584,13 +581,14 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         } catch (AutoinventoryException ae) {
             throw ae;
         } catch (Exception e) {
-            throw new SystemException("Error getting scan status "
-                                         + "for agent: " + e, e);
+            throw new SystemException("Error getting scan status " +
+                                      "for agent: " + e, e);
         }
         return core;
     }
 
-    private static List buildAIResourceIds(AIAppdefResourceValue[] aiResources) {
+    private static List buildAIResourceIds(AIAppdefResourceValue[] aiResources)
+    {
         List ids = new ArrayList();
         for (int i=0; i<aiResources.length; i++) {
             Integer id = aiResources[i].getId();
@@ -613,7 +611,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
-    public void reportAIData (String agentToken, ScanStateCore stateCore)
+    public void reportAIData(String agentToken, ScanStateCore stateCore)
         throws AutoinventoryException {
 
         ScanState state = new ScanState(stateCore);
@@ -652,7 +650,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             log.debug("AImgr.reportAIData: state.getPlatform()=" + aiPlatform);
         }
         
-        if ( stateCore.getAreServersIncluded() ) {
+        if (stateCore.getAreServersIncluded()) {
             ServerManagerLocal serverLocal;
             try {
                 serverLocal = getServerManagerLocalHome().create();
@@ -673,7 +671,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                     serverLocal.
                         findServerTypeByName(aiServer.getServerTypeName());
                 } catch (FinderException e) {
-                    this.log.error("Ignoring non-existant server type: " +
+                    this.log.error("Ignoring non-existent server type: " +
                                    aiServer.getServerTypeName(), e);
                     continue;
                 }
