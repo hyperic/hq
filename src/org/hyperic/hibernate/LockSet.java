@@ -23,9 +23,6 @@
  * USA.
  */
 
-/**
- *
- */
 package org.hyperic.hibernate;
 
 import java.util.LinkedHashMap;
