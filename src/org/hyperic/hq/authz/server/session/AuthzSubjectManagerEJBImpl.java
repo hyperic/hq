@@ -83,12 +83,11 @@ public class AuthzSubjectManagerEJBImpl
     private Pager subjectPager = null;
 
     // keep a reference to the overlord
-    private AuthzSubjectValue overlord = null;
-    private AuthzSubjectValue root = null;
+    private AuthzSubjectValue overlord;
+    private AuthzSubjectValue root;
 
     private static int DBTYPE = -1;
 
-    /** Creates a new instance of AuthzSubjectManagerEJBImpl */
     public AuthzSubjectManagerEJBImpl() {}
 
     /** Create a subject.
@@ -223,8 +222,9 @@ public class AuthzSubjectManagerEJBImpl
      */
     public AuthzSubjectValue findSubjectById(AuthzSubjectValue whoami,
                                              Integer id)
-        throws PermissionException {
-        AuthzSubject sub = getSubjectDAO().findById(id);
+        throws PermissionException 
+    {
+        AuthzSubject sub = findSubjectById(id);
         
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         // users can see their own entries without requiring special permission
@@ -236,6 +236,13 @@ public class AuthzSubjectManagerEJBImpl
         return sub.getAuthzSubjectValue();
     }
 
+    /** 
+     * @ejb:interface-method
+     */
+    public AuthzSubject findSubjectById(Integer id) {
+        return getSubjectDAO().findById(id);
+    }
+    
     /** 
      * Find a subject by its name
      * @exception PermissionException whoami does not have the viewSubject
