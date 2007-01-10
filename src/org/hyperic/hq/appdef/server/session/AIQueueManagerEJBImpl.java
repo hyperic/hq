@@ -613,7 +613,7 @@ public class AIQueueManagerEJBImpl
 
                 ResourceCreatedZevent event =
                     new ResourceCreatedZevent(subject, createdId);
-                 zevents.add(event);
+                zevents.add(event);
             }
 
             ZeventManager.getInstance().enqueueEventsAfterCommit(zevents);
