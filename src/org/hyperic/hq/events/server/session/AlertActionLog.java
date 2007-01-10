@@ -27,25 +27,29 @@ package org.hyperic.hq.events.server.session;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
 
 public class AlertActionLog  
     extends PersistedObject
 {
-    private String _detail;
-    private Alert  _alert;
-    private Action _action;
-
+    private String       _detail;
+    private Alert        _alert;
+    private Action       _action;
+    private AuthzSubject _subject;
+    
     private AlertActionLogValue _valueObj;
-
     
     protected AlertActionLog() {
     }
    
-    protected AlertActionLog(Alert alert, String detail, Action action) {
-        _detail = detail;
-        _alert  = alert;
-        _action = action;
+    protected AlertActionLog(Alert alert, String detail, Action action,
+                             AuthzSubject subject) 
+    {
+        _detail  = detail;
+        _alert   = alert;
+        _action  = action;
+        _subject = subject;
     }
     
     protected String getDetail() {
@@ -64,12 +68,20 @@ public class AlertActionLog
         _alert = alert;
     }
     
-    protected Action getAction() {
+    public Action getAction() {
         return _action;
     }
     
     protected void setAction(Action action) {
         _action = action;
+    }
+    
+    public AuthzSubject getSubject() {
+        return _subject;
+    }
+    
+    protected void setSubject(AuthzSubject subject) {
+        _subject = subject;
     }
     
     public AlertActionLogValue getAlertActionLogValue() {

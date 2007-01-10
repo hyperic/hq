@@ -93,16 +93,8 @@ public final class ClassicEscalationAlertType
 
     protected void fixAlert(Integer alertId, AuthzSubject fixer) {
         Alert alert = getAlertMan().findAlertById(alertId);
-        String msg = "Fixed by " + fixer.getFullName();
-        
-        alert.setFixed(true);
 
-        AlertActionLog log = new AlertActionLog(alert, msg, null);
-            
-        AlertActionLogDAO dao = 
-            new AlertActionLogDAO(DAOFactory.getDAOFactory());
-            
-        dao.save(log);
+        getAlertMan().fixAlert(alert, fixer);
     }
 
     private ClassicEscalationAlertType(int code, String desc) {

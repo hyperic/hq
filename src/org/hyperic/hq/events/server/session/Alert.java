@@ -32,6 +32,7 @@ import java.util.Iterator;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
@@ -64,8 +65,10 @@ public class Alert
         setAlertDefinition(def);
     }
     
-    protected AlertActionLog createActionLog(String detail, Action action) {
-        AlertActionLog res = new AlertActionLog(this, detail, action);
+    protected AlertActionLog createActionLog(String detail, Action action,
+                                             AuthzSubject fixer) 
+    {
+        AlertActionLog res = new AlertActionLog(this, detail, action, fixer);
     
         _actionLog.add(res);
         return res;

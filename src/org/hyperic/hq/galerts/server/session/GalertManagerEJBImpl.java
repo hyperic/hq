@@ -12,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.GroupChangeCallback;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -158,8 +159,11 @@ public class GalertManagerEJBImpl
     /**
      * @ejb:interface-method  
      */
-    public void createActionLog(GalertLog alert, String detail, Action action) {
-        GalertActionLog log = new GalertActionLog(alert, detail, action);
+    public void createActionLog(GalertLog alert, String detail, Action action,
+                                AuthzSubject subject) 
+    {
+        GalertActionLog log = new GalertActionLog(alert, detail, action, 
+                                                  subject);
         
         _actionLogDAO.save(log);
     }

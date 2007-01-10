@@ -42,11 +42,11 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.events.AlertCreateException;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
@@ -116,6 +116,21 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     }
 
     /**
+     * Mark an alert as fixed, adding the correct logs, etc. 
+     *
+     * @ejb:interface-method
+     */
+    public void fixAlert(Alert alert, AuthzSubject fixer) {
+        String msg = "Fixed by " + fixer.getFullName();
+
+        alert.setFixed(true);
+
+        AlertActionLog log = new AlertActionLog(alert, msg, null, fixer);
+            
+        alert.createActionLog(msg, null, fixer);
+    }
+    
+    /**
      * Update the alert
      *
      * @ejb:interface-method
@@ -145,7 +160,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             Action action = getActionDAO().findById(aalv.getActionId());
                 
             AlertActionLog log = alert.createActionLog(aalv.getDetail(),
-                                                      action);
+                                                       action, null);
             DAOFactory.getDAOFactory().getAlertActionLogDAO().save(log);
         }
         return alert;

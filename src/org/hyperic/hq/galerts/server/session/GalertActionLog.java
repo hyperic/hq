@@ -26,25 +26,30 @@
 package org.hyperic.hq.galerts.server.session;
 
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.events.server.session.Action;
 
 public class GalertActionLog  
     extends PersistedObject
 {
-    private String     _detail;
-    private GalertLog  _galertLog;
-    private Action     _action;
-
+    private String       _detail;
+    private GalertLog    _galertLog;
+    private Action       _action;
+    private AuthzSubject _subject;
+    
     protected GalertActionLog() {
     }
    
-    GalertActionLog(GalertLog alert, String detail, Action action) {
-        _detail = detail;
-        _galertLog  = alert;
-        _action = action;
+    GalertActionLog(GalertLog alert, String detail, Action action,
+                    AuthzSubject subject) 
+    {
+        _detail    = detail;
+        _galertLog = alert;
+        _action    = action;
+        _subject   = subject;
     }
     
-    protected String getDetail() {
+    public String getDetail() {
         return _detail;
     }
     
@@ -52,7 +57,7 @@ public class GalertActionLog
         _detail = detail;
     }
     
-    protected GalertLog getGalertLog() {
+    public GalertLog getGalertLog() {
         return _galertLog;
     }
     
@@ -60,11 +65,19 @@ public class GalertActionLog
         _galertLog = alert;
     }
     
-    protected Action getAction() {
+    public Action getAction() {
         return _action;
     }
     
     protected void setAction(Action action) {
         _action = action;
+    }
+    
+    public AuthzSubject getSubject() {
+        return _subject;
+    }
+    
+    protected void setSubject(AuthzSubject subject) {
+        _subject = subject;
     }
 }

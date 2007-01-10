@@ -25,6 +25,10 @@
     <many-to-one name="action" class="Action">
       <column name="ACTION_ID" />
     </many-to-one>
+
+    <many-to-one name="subject">
+      <column name="SUBJECT_ID" />
+    </many-to-one>
   </class>
 
 </hibernate-mapping>

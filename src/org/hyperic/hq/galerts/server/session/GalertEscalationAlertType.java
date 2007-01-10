@@ -66,7 +66,7 @@ public final class GalertEscalationAlertType
         GalertLog alert = gMan.findAlertLog(alertId);
         String msg = "Alert fixed by " + fixer.getFullName();
         
-        gMan.createActionLog(alert, msg, null);
+        gMan.createActionLog(alert, msg, null, fixer);
     }
 
     private GalertEscalationAlertType(int code, String desc) {
