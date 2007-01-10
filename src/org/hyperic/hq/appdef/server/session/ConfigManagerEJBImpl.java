@@ -598,13 +598,8 @@ public class ConfigManagerEJBImpl
         AppdefEntityID[] affectedEntities = 
                 (AppdefEntityID[])res.toArray(new AppdefEntityID[res.size()]);
 
-        if (configWasUpdated) {
-            if (appdefCreated) {
-                // Creation event -- XXX: This is always false.
-                AIConversionUtil.sendCreateEvent(subject, id);
-            } else if (sendConfigEvent) {
-                AIConversionUtil.sendNewConfigEvent(subject, id);
-            }
+        if (configWasUpdated && sendConfigEvent) {
+            AIConversionUtil.sendNewConfigEvent(subject, id);
         }
 
         return affectedEntities;
