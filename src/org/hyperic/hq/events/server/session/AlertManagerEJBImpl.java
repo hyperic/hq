@@ -53,6 +53,7 @@ import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.hq.events.shared.AlertValue;
+import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.UnitsConvert;
@@ -121,15 +122,19 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public void fixAlert(Alert alert, AuthzSubject fixer) {
-        String msg = "Fixed by " + fixer.getFullName();
-
         alert.setFixed(true);
-
-        AlertActionLog log = new AlertActionLog(alert, msg, null, fixer);
-            
-        alert.createActionLog(msg, null, fixer);
+        alert.createActionLog("Fixed by " + fixer.getFullName(), null, fixer);
     }
     
+    /**
+     * Log the details of an action's execution
+     *
+     * @ejb:interface-method
+     */
+    public void logActionDetail(Alert alert, Action action, String detail) {
+        alert.createActionLog(detail, action, null);
+    }
+
     /**
      * Update the alert
      *

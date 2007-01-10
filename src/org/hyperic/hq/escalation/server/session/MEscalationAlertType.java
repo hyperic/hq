@@ -25,6 +25,7 @@
 package org.hyperic.hq.escalation.server.session;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.util.HypericEnum;
 
 /**
@@ -71,4 +72,13 @@ public abstract class MEscalationAlertType
      * @param alertId  AlertID to mark as fixed
      */
     protected abstract void fixAlert(Integer alertId, AuthzSubject fixer);
+    
+    /**
+     * Log the result of the execution of an action.  The escalation system
+     * executes actions as part of the escalation chain.  Each action spits
+     * out some result text.  This method should put that result text into
+     * the subsytem's log objects.
+     */
+    protected abstract void logActionDetails(Integer alertId, Action action,
+                                             String detail);
 }

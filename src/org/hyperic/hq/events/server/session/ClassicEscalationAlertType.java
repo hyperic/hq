@@ -96,6 +96,14 @@ public final class ClassicEscalationAlertType
 
         getAlertMan().fixAlert(alert, fixer);
     }
+    
+    protected void logActionDetails(Integer alertId, Action action, 
+                                    String detail) 
+    {
+        Alert alert = getAlertMan().findAlertById(alertId);
+        
+        getAlertMan().logActionDetail(alert, action, detail);
+    }
 
     private ClassicEscalationAlertType(int code, String desc) {
         super(code, desc);
