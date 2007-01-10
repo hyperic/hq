@@ -41,9 +41,9 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.shared.ConfigResponseValue;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
@@ -135,8 +135,8 @@ public class EditConfigPropertiesAction extends BaseAction {
             allConfigs.setResource(updatedResource);
             allConfigsRollback.setResource(updatedResource);
 
-            ConfigResponseValue oldConfig =
-                pboss.getConfigResponseValue(sessionInt, aeid);
+            ConfigResponseDB oldConfig =
+                pboss.getConfigResponse(sessionInt, aeid);
             
             // get the configSchemas and existing configs
             for (i = 0; i < numConfigs; i++) {
@@ -173,7 +173,6 @@ public class EditConfigPropertiesAction extends BaseAction {
                               + updatedResource.getName() + ": " + e);
                     log.debug("Blanking for " + cfgTypes[i] + "->(not supported)");
                     blankoutConfig(i, allConfigs, allConfigsRollback);
-                    continue;
                 }
             }
 

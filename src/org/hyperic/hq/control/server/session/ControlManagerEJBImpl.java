@@ -53,12 +53,12 @@ import org.hyperic.hq.appdef.shared.ApplicationManagerUtil;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerUtil;
-import org.hyperic.hq.appdef.shared.ConfigResponseValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.appdef.shared.ServerManagerUtil;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
+import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -402,22 +402,22 @@ public class ControlManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="NOTSUPPORTED"
      */
-    public ConfigResponseValue checkControlEnabled(AuthzSubjectValue subject,
-                                                   AppdefEntityID id)
+    public void checkControlEnabled(AuthzSubjectValue subject,
+                                    AppdefEntityID id)
         throws PluginException
     {
-        ConfigResponseValue cValue;
+        ConfigResponseDB config;
+
         try {
-            cValue = getConfigManager().getConfigResponseValue(id);
+            config = getConfigManager().getConfigResponse(id);
         } catch (Exception e) {
             throw new PluginException(e);
         }
 
-        if (cValue == null || cValue.getControlResponse() == null) {
+        if (config == null || config.getControlResponse() == null) {
             throw new PluginException("Control not " +
                                       "configured for " + id);
         }
-        return cValue;
     }
 
     /**
@@ -430,11 +430,22 @@ public class ControlManagerEJBImpl implements SessionBean {
                                             AppdefEntityID id)
         throws PluginException
     {
+        ConfigResponseDB config;
         ConfigResponse configResponse;
         byte[] controlResponse;
 
-        ConfigResponseValue val = checkControlEnabled(subject, id);   
-        controlResponse = val.getControlResponse();
+        try {
+            config = getConfigManager().getConfigResponse(id);
+        } catch (Exception e) {
+            throw new PluginException(e);
+        }
+
+        if (config == null || config.getControlResponse() == null) {
+            throw new PluginException("Control not " +
+                                      "configured for " + id);
+        }
+
+        controlResponse = config.getControlResponse();
         
         try {
             configResponse = ConfigResponse.decode(controlResponse);

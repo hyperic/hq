@@ -33,6 +33,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 
@@ -247,8 +248,7 @@ public class AIConversionUtil {
                PermissionException, FinderException
     {
         byte[] configBytes;
-        ConfigResponseValue existingConfig
-            = configMgr.getConfigResponseValue(appdefID);
+        ConfigResponseDB existingConfig = configMgr.getConfigResponse(appdefID);
         configBytes =
             mergeConfig(existingConfig.getProductResponse(),
                         productConfig);

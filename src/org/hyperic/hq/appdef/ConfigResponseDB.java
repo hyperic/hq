@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.appdef;
 
-import org.hyperic.hq.appdef.shared.ConfigResponseValue;
 import org.hyperic.hibernate.PersistedObject;
 
 public class ConfigResponseDB extends PersistedObject
@@ -100,33 +99,6 @@ public class ConfigResponseDB extends PersistedObject
 
     public void setValidationError(String validationErr) {
         _validationError = validationErr;
-    }
-
-    private ConfigResponseValue _value = new ConfigResponseValue();
-    /**
-     * Legacy EJB DTO pattern
-     * @deprecated Use (this) ConfigResponseDB object instead
-     */
-    public ConfigResponseValue getConfigResponseValue() {
-        _value.setId(getId());
-        _value.setProductResponse(getProductResponse());
-        _value.setControlResponse(getControlResponse());
-        _value.setMeasurementResponse(getMeasurementResponse());
-        _value.setAutoinventoryResponse(getAutoInventoryResponse());
-        _value.setResponseTimeResponse(getResponseTimeResponse());
-        _value.setUserManaged(getUserManaged());
-        _value.setValidationError(getValidationError());
-        return _value;
-    }
-
-    public void setConfigResponseValue(ConfigResponseValue valueHolder) {
-        setProductResponse( valueHolder.getProductResponse() );
-        setControlResponse( valueHolder.getControlResponse() );
-        setMeasurementResponse( valueHolder.getMeasurementResponse() );
-        setAutoInventoryResponse( valueHolder.getAutoinventoryResponse() );
-        setResponseTimeResponse( valueHolder.getResponseTimeResponse() );
-        setUserManaged( valueHolder.getUserManaged() );
-        setValidationError( valueHolder.getValidationError() );
     }
 
     public boolean equals(Object obj) {

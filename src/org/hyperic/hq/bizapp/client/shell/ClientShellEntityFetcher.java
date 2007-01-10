@@ -55,7 +55,6 @@ import org.hyperic.hq.appdef.shared.CPropKeyExistsException;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropKeyValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.shared.ConfigResponseValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
@@ -67,6 +66,7 @@ import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
+import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -772,7 +772,7 @@ public class ClientShellEntityFetcher {
         return boss.findById(this.auth.getAuthToken(), id);
     }
 
-    public ConfigResponseValue getConfigResponseValue(AppdefEntityID id)
+    public ConfigResponseDB getConfigResponse(AppdefEntityID id)
         throws NamingException, AppdefEntityNotFoundException, RemoteException,
                SessionNotFoundException, SessionTimeoutException,
                ClientShellAuthenticationException
@@ -780,7 +780,7 @@ public class ClientShellEntityFetcher {
         ProductBoss boss;
 
         boss = this.bossManager.getProductBoss();
-        return boss.getConfigResponseValue(this.auth.getAuthToken(), id);
+        return boss.getConfigResponse(this.auth.getAuthToken(), id);
     }
 
     public ConfigSchema getActionConfigSchema(String actionClass)

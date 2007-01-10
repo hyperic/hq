@@ -283,7 +283,7 @@ public abstract class InventoryHelper {
 
         // only check where the config is invalid
         String validationError =
-            pboss.getConfigResponseValue(sessionId, entityId).getValidationError();
+            pboss.getConfigResponse(sessionId, entityId).getValidationError();
 
         if (validationError == null) {
             request.setAttribute(CONFIG_ATTR, Boolean.TRUE);

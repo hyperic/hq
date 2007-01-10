@@ -42,12 +42,12 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
-import org.hyperic.hq.appdef.shared.ConfigResponseValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.Ip;
+import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -159,10 +159,10 @@ public class AI2AppdefDiff {
                 revisedAIplatform.setCpuCount(appdefPlatform.getCpuCount());
             }
             
-            ConfigResponseValue crValue;
+            ConfigResponseDB config;
             try {
-                crValue =
-                    cmLocal.getConfigResponseValue(appdefPlatform.getEntityId());
+                config =
+                    cmLocal.getConfigResponse(appdefPlatform.getEntityId());
             } catch (AppdefEntityNotFoundException e) {
                 // Should not happen, unless the platform was deleted since
                 // we just looked it up moments ago.
@@ -170,22 +170,22 @@ public class AI2AppdefDiff {
             }
             //if the plugin did not set a config, apply the existing config.
             if (revisedAIplatform.getProductConfig() == null) {
-                revisedAIplatform.setProductConfig(crValue.getProductResponse());
+                revisedAIplatform.setProductConfig(config.getProductResponse());
             }
             if (revisedAIplatform.getControlConfig() == null) {
-                revisedAIplatform.setControlConfig(crValue.getControlResponse());
+                revisedAIplatform.setControlConfig(config.getControlResponse());
             }
             if (revisedAIplatform.getMeasurementConfig() == null) {
-                revisedAIplatform.setMeasurementConfig(crValue.getMeasurementResponse());
+                revisedAIplatform.setMeasurementConfig(config.getMeasurementResponse());
             }
 
             //XXX might want to do this for all platforms, just checking devices for now.
             if (!configsEqual(revisedAIplatform.getProductConfig(),
-                              crValue.getProductResponse()) ||
+                              config.getProductResponse()) ||
                 !configsEqual(revisedAIplatform.getControlConfig(),
-                              crValue.getControlResponse()) ||
+                              config.getControlResponse()) ||
                 !configsEqual(revisedAIplatform.getMeasurementConfig(),
-                              crValue.getMeasurementResponse()))
+                              config.getMeasurementResponse()))
             {
                 revisedAIplatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
                 addDiff(revisedAIplatform,
@@ -426,19 +426,19 @@ public class AI2AppdefDiff {
                 boolean configChanged = false;
                 
                 // Look at configs
-                ConfigResponseValue crValue;
+                ConfigResponseDB config;
                 try {
-                    crValue = cmLocal.getConfigResponseValue(aID);
+                    config = cmLocal.getConfigResponse(aID);
                 } catch (AppdefEntityNotFoundException e) {
                     // Should not happen, unless the server was deleted since
                     // we just looked it up moments ago.
                     throw new SystemException(e);
                 }
-                if (!crValue.getUserManaged() && (
-                    !configsEqual(scannedServer.getProductConfig(), crValue.getProductResponse()) ||
-                    !configsEqual(scannedServer.getControlConfig(), crValue.getControlResponse()) ||
-                    !configsEqual(scannedServer.getMeasurementConfig(), crValue.getMeasurementResponse()) ||
-                    !configsEqual(scannedServer.getResponseTimeConfig(), crValue.getResponseTimeResponse())))
+                if (!config.getUserManaged() && (
+                    !configsEqual(scannedServer.getProductConfig(), config.getProductResponse()) ||
+                    !configsEqual(scannedServer.getControlConfig(), config.getControlResponse()) ||
+                    !configsEqual(scannedServer.getMeasurementConfig(), config.getMeasurementResponse()) ||
+                    !configsEqual(scannedServer.getResponseTimeConfig(), config.getResponseTimeResponse())))
                 {
                     // config was changed (and is NOT user-managed)
                     configChanged = true;

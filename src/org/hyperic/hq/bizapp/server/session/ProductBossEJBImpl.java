@@ -40,8 +40,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
-import org.hyperic.hq.appdef.shared.ConfigResponseValue;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
+import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -186,14 +186,13 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
      * @ejb:interface-method
      * @ejb:transaction type="Supports"
      */
-    public ConfigResponseValue getConfigResponseValue(int sessionId,
-                                                      AppdefEntityID id)
+    public ConfigResponseDB getConfigResponse(int sessionId,
+                                              AppdefEntityID id)
         throws AppdefEntityNotFoundException, 
                SessionNotFoundException, SessionTimeoutException
     {
         this.sessionManager.getSubject(sessionId);
-
-        return this.getConfigManager().getConfigResponseValue(id);
+        return this.getConfigManager().getConfigResponse(id);
     }
 
     /**

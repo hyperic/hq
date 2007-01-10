@@ -40,7 +40,6 @@ import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
-import org.hyperic.hq.appdef.shared.ConfigResponseValue;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
@@ -48,6 +47,7 @@ import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
+import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
@@ -366,8 +366,8 @@ public class ClientShell_resource_export
         AppdefEntityID id = 
             new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
                                p.getId());
-        ConfigResponseValue config =
-            this.pBoss.getConfigResponseValue(auth.getAuthToken(), id);
+        ConfigResponseDB config =
+            this.pBoss.getConfigResponse(auth.getAuthToken(), id);
         exportConfig(id, config, ps, INDENT * 2);
 
         // Export Servers
@@ -431,8 +431,8 @@ public class ClientShell_resource_export
         AppdefEntityID id = 
             new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER,
                                s.getId());
-        ConfigResponseValue config =
-            this.pBoss.getConfigResponseValue(auth.getAuthToken(), id);
+        ConfigResponseDB config =
+            this.pBoss.getConfigResponse(auth.getAuthToken(), id);
         exportConfig(id, config, ps, INDENT * 3);
 
         // Export Services
@@ -471,14 +471,14 @@ public class ClientShell_resource_export
         AppdefEntityID id = 
             new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE,
                                s.getId());
-        ConfigResponseValue config =
-            this.pBoss.getConfigResponseValue(auth.getAuthToken(), id);
+        ConfigResponseDB config =
+            this.pBoss.getConfigResponse(auth.getAuthToken(), id);
         exportConfig(id, config, ps, INDENT * 3);
 
         ps.println(s1 + "</service>");
     }
 
-    private void exportConfig(AppdefEntityID id, ConfigResponseValue val, 
+    private void exportConfig(AppdefEntityID id, ConfigResponseDB val,
                               PrintStream ps, int indent)
         throws Exception
     {

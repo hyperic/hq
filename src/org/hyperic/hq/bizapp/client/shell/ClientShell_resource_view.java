@@ -35,7 +35,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
-import org.hyperic.hq.appdef.shared.ConfigResponseValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
@@ -43,6 +42,7 @@ import org.hyperic.hq.appdef.shared.resourceTree.PlatformNode;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.appdef.shared.resourceTree.ServerNode;
 import org.hyperic.hq.appdef.shared.resourceTree.ServiceNode;
+import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.PrintfFormat;
 import org.hyperic.util.StringUtil;
@@ -52,7 +52,6 @@ import org.hyperic.util.pager.StaticPageFetcher;
 import org.hyperic.util.shell.ShellCommandBase;
 import org.hyperic.util.shell.ShellCommandExecException;
 import org.hyperic.util.shell.ShellCommandUsageException;
-
 
 public class ClientShell_resource_view 
     extends ShellCommandBase 
@@ -259,7 +258,7 @@ public class ClientShell_resource_view
     private void printView(int type, String tag, boolean groupContext)
         throws ShellCommandExecException
     {
-        ConfigResponseValue config;
+        ConfigResponseDB config;
         AppdefGroupValue groupVal;
         String format;
         int[] attrTypes, attrs;
@@ -295,7 +294,7 @@ public class ClientShell_resource_view
                                             PLATFORM_ATTRTYPES;
                 attrs     = (groupContext)? PLATFORM_ATTRS_SHORT :
                                             PLATFORM_ATTRS;
-                config    = this.entityFetcher.getConfigResponseValue(id);
+                config    = this.entityFetcher.getConfigResponse(id);
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                 servVal   = this.entityFetcher.getServerValue(tag);
@@ -305,7 +304,7 @@ public class ClientShell_resource_view
                 attrTypes = (groupContext)? SERVER_ATTRTYPES_SHORT:
                                             SERVER_ATTRTYPES;
                 attrs     = (groupContext)? SERVER_ATTRS_SHORT:SERVER_ATTRS;
-                config    = this.entityFetcher.getConfigResponseValue(id);
+                config    = this.entityFetcher.getConfigResponse(id);
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                 serviceVal = this.entityFetcher.getServiceValue(tag);
@@ -316,7 +315,7 @@ public class ClientShell_resource_view
                 attrTypes = (groupContext)? SERVICE_ATTRTYPES_SHORT:
                                             SERVICE_ATTRTYPES;
                 attrs     = (groupContext)? SERVICE_ATTRS_SHORT:SERVICE_ATTRS;
-                config     = this.entityFetcher.getConfigResponseValue(id);
+                config     = this.entityFetcher.getConfigResponse(id);
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                 groupVal   = this.entityFetcher.getGroupValue(tag);

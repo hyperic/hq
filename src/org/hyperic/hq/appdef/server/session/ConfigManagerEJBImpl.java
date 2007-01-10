@@ -34,7 +34,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.shared.ConfigResponseValue;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocalHome;
 import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
@@ -142,7 +141,7 @@ public class ConfigManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public ConfigResponseValue getConfigResponseValue(AppdefEntityID id)
+    public ConfigResponseDB getConfigResponse(AppdefEntityID id)
         throws AppdefEntityNotFoundException {
 
         ConfigResponseDAO dao =
@@ -166,11 +165,7 @@ public class ConfigManagerEJBImpl
                                                "responses");
         }
 
-        if (config == null) {
-            config = dao.create();
-        }
-
-        return config.getConfigResponseValue();
+        return config;
     }
 
     // A Map of entityType->entityId->pluginName
@@ -282,7 +277,7 @@ public class ConfigManagerEJBImpl
         throws AppdefEntityNotFoundException, ConfigFetchException,
                EncodingException, PermissionException
     {
-        ConfigResponseValue configValue;
+        ConfigResponseDB configValue;
         AppdefEntityID platformId = null, serverId = null, serviceId = null;
         byte[][] responseList; // List of config responses to merge
         ConfigResponse res;
@@ -341,7 +336,7 @@ public class ConfigManagerEJBImpl
             boolean platformConfigRequired =
                 (isServerOrService) ? false : required;
 
-            configValue = this.getConfigResponseValue(platformId);
+            configValue = getConfigResponse(platformId);
             data = this.getConfigForType(configValue,
                                          ProductPlugin.TYPE_PRODUCT,
                                          platformId,
@@ -363,7 +358,7 @@ public class ConfigManagerEJBImpl
         
         // Server config (if necessary)
         if (serverId != null) {
-            configValue = this.getConfigResponseValue(serverId);
+            configValue = getConfigResponse(serverId);
             data = this.getConfigForType(configValue,
                                          ProductPlugin.TYPE_PRODUCT,
                                          serverId, required);
@@ -384,7 +379,7 @@ public class ConfigManagerEJBImpl
         // Service config (if necessary)
         if (serviceId != null) {
             required = origReq;     // Reset the required flag
-            configValue  = this.getConfigResponseValue(id);
+            configValue  = this.getConfigResponse(id);
 
             data = this.getConfigForType(configValue, 
                                          ProductPlugin.TYPE_PRODUCT,
@@ -454,7 +449,7 @@ public class ConfigManagerEJBImpl
      *         array.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
+     * @ejb:transaction type="Required"
      */
     public AppdefEntityID[] setConfigResponse(AuthzSubjectValue subject,
                                               AppdefEntityID id, 
@@ -464,24 +459,24 @@ public class ConfigManagerEJBImpl
         throws ConfigFetchException, AppdefEntityNotFoundException,
                PermissionException, EncodingException, FinderException {
 
-        ConfigResponseValue cValue = getConfigResponseValue(id);
+        ConfigResponseDB config = getConfigResponse(id);
         byte[] encodedConfig = response.encode();
         
         if(type.equals(ProductPlugin.TYPE_PRODUCT)) {
-            cValue.setProductResponse(encodedConfig);
+            config.setProductResponse(encodedConfig);
         } else if (type.equals(ProductPlugin.TYPE_MEASUREMENT)) {
-            cValue.setMeasurementResponse(encodedConfig);
+            config.setMeasurementResponse(encodedConfig);
         } else if (type.equals(ProductPlugin.TYPE_CONTROL)) {
-            cValue.setControlResponse(encodedConfig);
+            config.setControlResponse(encodedConfig);
         } else if (type.equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
-            cValue.setResponseTimeResponse(encodedConfig);
+            config.setResponseTimeResponse(encodedConfig);
         } else if (type.equals(ProductPlugin.TYPE_AUTOINVENTORY)) {
-            cValue.setAutoinventoryResponse(encodedConfig);
+            config.setAutoInventoryResponse(encodedConfig);
         } else {
             throw new IllegalArgumentException("Unknown config type: " + type);
         }
 
-        return setConfigResponse(subject, id, cValue, sendConfigEvent);
+        return setConfigResponse(subject, id, config, sendConfigEvent);
     }
 
     /**
@@ -542,16 +537,16 @@ public class ConfigManagerEJBImpl
      * Set all configs for a resource at once.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
+     * @ejb:transaction type="Required"
      */
     public AppdefEntityID[] setConfigResponse(AuthzSubjectValue subject,
                                               AppdefEntityID id, 
-                                              ConfigResponseValue newConfig,
+                                              ConfigResponseDB newConfig,
                                               boolean sendConfigEvent) 
         throws FinderException, PermissionException, 
                AppdefEntityNotFoundException {
 
-        ConfigResponseValue existing = getConfigResponseValue(id);
+        ConfigResponseDB existing = getConfigResponse(id);
         boolean configWasUpdated = false;
         boolean appdefCreated = false;
         byte[] storedConf, newConf;
@@ -584,10 +579,10 @@ public class ConfigManagerEJBImpl
             configWasUpdated = true;
         }
 
-        storedConf = existing.getAutoinventoryResponse();
-        newConf = newConfig.getAutoinventoryResponse();
+        storedConf = existing.getAutoInventoryResponse();
+        newConf = newConfig.getAutoInventoryResponse();
         if(!Arrays.equals(storedConf, newConf)) { 
-            existing.setAutoinventoryResponse(newConf);
+            existing.setAutoInventoryResponse(newConf);
             configWasUpdated = true;
         }
 
@@ -600,41 +595,12 @@ public class ConfigManagerEJBImpl
         List res = new ArrayList();
         res.add(id);
 
-        // - ADDING SERVICES TO AFFECTED ENTRIES IS DISABLED
-        //
-        // since this op requires a new transaction, the only case for 
-        // rollback is if we're unable to assemble the list of affected
-        // entities
-        //try {
-        //    if(id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER){
-        //        ServiceManagerLocal sMan;
-        //        List vals; 
-        //
-        //        sMan = this.getServiceManagerLocal();
-        //        vals = sMan.getServicesByServer(subject, id.getId(),
-        //                                        PageControl.PAGE_ALL);
-        //        
-        //        for(Iterator i=vals.iterator(); i.hasNext(); ){
-        //            res.add(((AppdefResourceValue)i.next()).getEntityId());
-        //        }
-        //    }
-        //} catch (AppdefEntityNotFoundException e) {
-        //    throw e;
-        //} catch (PermissionException e) {
-        //    throw e;
-        //}
-
         AppdefEntityID[] affectedEntities = 
                 (AppdefEntityID[])res.toArray(new AppdefEntityID[res.size()]);
 
-        // Update the config response
         if (configWasUpdated) {
-            ConfigResponseDB cLocal
-                = getConfigResponseDAO().findById(existing.getId());
-            cLocal.setConfigResponseValue(existing);
-        
             if (appdefCreated) {
-                // Creation event
+                // Creation event -- XXX: This is always false.
                 AIConversionUtil.sendCreateEvent(subject, id);
             } else if (sendConfigEvent) {
                 AIConversionUtil.sendNewConfigEvent(subject, id);
@@ -695,7 +661,7 @@ public class ConfigManagerEJBImpl
         }
     }
 
-    private byte[] getConfigForType(ConfigResponseValue val,
+    private byte[] getConfigForType(ConfigResponseDB val,
                                     String productType, 
                                     AppdefEntityID id,
                                     boolean fail)
@@ -710,7 +676,7 @@ public class ConfigManagerEJBImpl
         } else if(productType.equals(ProductPlugin.TYPE_MEASUREMENT)){
             res = val.getMeasurementResponse();
         } else if(productType.equals(ProductPlugin.TYPE_AUTOINVENTORY)){
-            res = val.getAutoinventoryResponse();
+            res = val.getAutoInventoryResponse();
         } else if(productType.equals(ProductPlugin.TYPE_RESPONSE_TIME)){
             res = val.getResponseTimeResponse();
         } else {
