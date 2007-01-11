@@ -1194,10 +1194,10 @@
   </target>
 
   <target name="all" description="xdoclet, compile and pack for everything" 
-          depends="init,xdoclet,hibernate-pojo,build" >
+          depends="init,xdoclet,hibernate-prep,build" >
   </target>
 
- <target name="build" depends="init,compile,aspectize-classes,pack" 
+ <target name="build" depends="init,compile,pack" 
          description="Compile and pack - no code generation" >
     <!--  Triger jboss reloading -->
   </target>
@@ -1606,7 +1606,7 @@
     <unzip src="${jboss.zip}" dest="${jboss.home}/.."/>
   </target>
 
-  <target name="hq-javadoc" depends="xdoclet,hibernate-pojo">
+  <target name="hq-javadoc" depends="xdoclet,hibernate-prep">
     <!-- 
     set this in ~/hq/build.properties if you want it someplace other than 
     your source tree 
