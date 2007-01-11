@@ -5,7 +5,10 @@ aspect SessionAspect {
     ||  execution(javax.ejb.SessionBean+.new(..))
     ||  execution(public    * org.hyperic.hq.hibernate.RequiresSession+.*(..))
 	||  execution(protected * org.hyperic.hq.hibernate.RequiresSession+.*(..))
-    ||  execution(org.hyperic.hq.hibernate.RequiresSession+.new(..));
+    ||  execution(org.hyperic.hq.hibernate.RequiresSession+.new(..))
+	||  execution(public    * javax.jms.MessageListener+.*(..))
+	||  execution(protected * javax.jms.MessageListener+.*(..))
+    ||  execution(javax.jms.MessageListener+.new(..));
 
 
     Object around(): setupSession() {
