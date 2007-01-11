@@ -25,34 +25,35 @@
 
 package org.hyperic.hq.ui.action.portlet.metricviewer;
 
-import org.apache.struts.tiles.actions.TilesAction;
-import org.apache.struts.tiles.ComponentContext;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.action.ActionForm;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.DashboardUtils;
-import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.StringConstants;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.util.pager.PageList;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.config.InvalidOptionException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.servlet.ServletContext;
-import java.util.List;
-import java.util.Iterator;
-import java.util.ArrayList;
+
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.tiles.ComponentContext;
+import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.StringConstants;
+import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.config.InvalidOptionException;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
 
 public class PrepareAction extends TilesAction {
 
@@ -82,12 +83,15 @@ public class PrepareAction extends TilesAction {
         String resTypeKey = PropertiesForm.RES_TYPE;
         String metricKey = PropertiesForm.METRIC;
         String descendingKey = PropertiesForm.DECSENDING;
+        String titleKey = PropertiesForm.TITLE;
+
         if (token != null) {
             numKey += token;
             resKey += token;
             resTypeKey += token;
             metricKey += token;
             descendingKey += token;
+            titleKey += token;
         }
 
         // We set defaults here rather than in DefaultUserPreferences.properites
@@ -95,6 +99,9 @@ public class PrepareAction extends TilesAction {
         String resourceType = user.getPreference(resTypeKey, "");
         String metric = user.getPreference(metricKey, "");
         String descending = user.getPreference(descendingKey, "true");
+        
+        pForm.setTitle(user.getPreference(titleKey, ""));
+
         List resourceList;
         try {
             DashboardUtils.verifyResources(resKey, ctx, user);

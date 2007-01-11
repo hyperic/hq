@@ -55,6 +55,7 @@ Ajax.Responders.register({
 <div class="effectsPortlet">
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="dash.home.AvailSummary"/>
+  <tiles:put name="subTitle" value=" "/>
   <tiles:put name="adminUrl" beanName="adminUrl" />
   <tiles:put name="portletName" beanName="portletName" />
   <tiles:put name="dragDrop" value="true"/>

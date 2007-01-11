@@ -84,9 +84,12 @@ public class ViewAction extends BaseAction {
 
         String resKey = PropertiesForm.RESOURCES;
         String numKey = PropertiesForm.NUM_TO_SHOW;
+        String titleKey = PropertiesForm.TITLE;
+        
         if (token != null) {
             resKey += token;
             numKey += token;
+            titleKey += token;
         }
 
         DashboardUtils.verifyResources(resKey, ctx, user);
@@ -141,6 +144,7 @@ public class ViewAction extends BaseAction {
         } else {
             availSummary.put("token", JSONObject.NULL);
         }
+        availSummary.put("title", user.getPreference(titleKey, ""));
         
         response.getWriter().write(availSummary.toString());
 

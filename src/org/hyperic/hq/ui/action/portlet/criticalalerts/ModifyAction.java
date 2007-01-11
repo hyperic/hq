@@ -81,12 +81,15 @@ public class ModifyAction extends BaseAction {
         String priorityKey = PropertiesForm.PRIORITY;
         String timeKey = PropertiesForm.PAST;
         String selOrAllKey = PropertiesForm.SELECTED_OR_ALL;
+        String titleKey = PropertiesForm.TITLE;
+        
         if (token != null) {
             resKey += token;
             countKey += token;
             priorityKey += token;
             timeKey += token;
             selOrAllKey += token;
+            titleKey += token;
         }
 
         if(pForm.isRemoveClicked()){
@@ -108,6 +111,7 @@ public class ModifyAction extends BaseAction {
         user.setPreference(timeKey, past);
         user.setPreference(priorityKey, prioritity);
         user.setPreference(selOrAllKey, selectedOrAll);
+        user.setPreference(titleKey, pForm.getTitle());
 
         boss.setUserPrefs(user.getSessionId(), user.getId(),
                           user.getPreferences());

@@ -90,12 +90,15 @@ public class ViewAction extends BaseAction {
         String resTypeKey = PropertiesForm.RES_TYPE;
         String metricKey = PropertiesForm.METRIC;
         String descendingKey = PropertiesForm.DECSENDING;
+        String titleKey = PropertiesForm.TITLE;
+
         if (token != null) {
             numKey += token;
             resKey += token;
             resTypeKey += token;
             metricKey += token;
             descendingKey += token;
+            titleKey += token;
         }
 
         JSONObject res = new JSONObject();
@@ -105,6 +108,8 @@ public class ViewAction extends BaseAction {
             res.put("token", JSONObject.NULL);
         }
 
+        res.put("title", user.getPreference(titleKey, ""));
+        
         // Load resources
         List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, user);
         AppdefEntityID[] arrayIds =

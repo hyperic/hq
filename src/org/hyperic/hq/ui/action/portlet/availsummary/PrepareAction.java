@@ -74,14 +74,19 @@ public class PrepareAction extends TilesAction {
 
         String resKey = PropertiesForm.RESOURCES;
         String numKey = PropertiesForm.NUM_TO_SHOW;
+        String titleKey = PropertiesForm.TITLE;
+        
         if (token != null) {
             resKey += token;
             numKey += token;
+            titleKey += token;
         }
 
         // We set defaults here rather than in DefaultUserPreferences.properites
         Integer numberToShow = new Integer(user.getPreference(numKey, "10"));
         pForm.setNumberToShow(numberToShow);
+
+        pForm.setTitle(user.getPreference(titleKey, ""));
         
         List resourceList;
         try {

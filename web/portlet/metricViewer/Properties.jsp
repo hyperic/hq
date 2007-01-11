@@ -72,8 +72,14 @@ var help = '<hq:help/>';
           <td colspan="4" class="BlockContent"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
         </tr>
          <tr valign="top">
-          <td width="20%" class="BlockLabel" valign="center"><fmt:message key="dash.settings.FormLabel.MetricViewerRange"/></td>
+          <td width="20%" class="BlockLabel" valign="center"><fmt:message key="common.label.Description"/></td>
           <td width="80%" class="BlockContent" colspan="3" valign="center">
+            <html:text property="title"/>
+          </td>
+        </tr>
+         <tr valign="top">
+          <td class="BlockLabel" valign="center"><fmt:message key="dash.settings.FormLabel.MetricViewerRange"/></td>
+          <td class="BlockContent" colspan="3" valign="center">
               
             <fmt:message key="dash.settings.metricViewer.top"/>&nbsp;
             <html:select property="numberToShow">

@@ -28,7 +28,6 @@ package org.hyperic.hq.bizapp.server.mdb;
 import java.util.Collection;
 import java.util.Iterator;
 
-import javax.ejb.EJBException;
 import javax.ejb.MessageDrivenBean;
 import javax.ejb.MessageDrivenContext;
 import javax.jms.JMSException;

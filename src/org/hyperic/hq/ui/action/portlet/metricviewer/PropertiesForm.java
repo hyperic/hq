@@ -40,12 +40,15 @@ public class PropertiesForm extends DashboardBaseForm {
         ".dashContent.metricviewer.metric";
     protected final static String DECSENDING =
         ".dashContent.metricviewer.descending";
+    protected final static String TITLE =
+        ".dashContent.metricviewer.title";
 
     private String _resType;
     private String _metric;
     private Integer _numberToShow;
     private String[] _ids;
     private String _descending;
+    private String _title;
 
     public PropertiesForm() {
         super();
@@ -104,5 +107,13 @@ public class PropertiesForm extends DashboardBaseForm {
 
     public void setDescending(String descending) {
         _descending = descending;
+    }
+
+    public String getTitle() {
+        return _title;
+    }
+
+    public void setTitle(String title) {
+        _title = title;
     }
 }

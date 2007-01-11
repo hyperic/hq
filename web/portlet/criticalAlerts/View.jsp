@@ -65,6 +65,7 @@ Ajax.Responders.register({
 <!-- Content Block  -->
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="dash.home.CriticalAlerts"/>
+  <tiles:put name="subTitle" value=" "/>
   <tiles:put name="adminUrl" beanName="adminUrl" />
   <c:if test="${not empty portlet.token}">
     <tiles:put name="adminToken" beanName="portlet" beanProperty="token"/>

@@ -79,12 +79,15 @@ public class PrepareAction extends TilesAction {
         String priorityKey = PropertiesForm.PRIORITY;
         String timeKey = PropertiesForm.PAST;
         String selOrAllKey = PropertiesForm.SELECTED_OR_ALL;
+        String titleKey = PropertiesForm.TITLE;
+        
         if (token != null) {
             resKey += token;
             countKey += token;
             priorityKey += token;
             timeKey += token;
             selOrAllKey += token;
+            titleKey += token;
         }
 
         // This quarantees that the session dosen't contain any resources it
@@ -98,6 +101,8 @@ public class PrepareAction extends TilesAction {
         String priority;
         String selectedOrAll;
 
+        pForm.setTitle(user.getPreference(titleKey, ""));
+        
         try {
             numberOfAlerts = new Integer(user.getPreference(countKey));
         } catch (InvalidOptionException e) {

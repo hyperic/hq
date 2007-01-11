@@ -203,13 +203,18 @@
         var alertTable;
         var tbody = document.createElement('tbody');
         var alertFunc;
+        var descSpan = "Recent Alerts_span";
+
         if (alertText.token != null) {
             alertTable = document.getElementById('recentAlertsTable' + token);
             alertFunc = 'requestRecentAlerts' + token + '()';
+            descSpan += token;
         } else {
             alertTable = document.getElementById('recentAlertsTable');
             alertFunc = 'requestRecentAlerts()';
         }
+
+        $(descSpan).innerHTML = alertText.title;
 
         if (aList != 0) {
             $('noCritAlerts').style.display = 'none';
@@ -289,16 +294,21 @@
         var availTable;
         var tbody = document.createElement('tbody');
         var availFunc;
+        var descSpan = "Availability Summary_span";
+
         if (token != null) {
             availTable = document.getElementById('availTable' + token);
             noAvailTable = 'noAvailTable' + token;
             availFunc = 'requestAvailSummary' + token + '()';
+            descSpan += token;
         } else {
             availTable = document.getElementById('availTable');
             noAvailTable = 'noAvailTable';
             availFunc = 'requestAvailSummary()';
         }
         
+        $(descSpan).innerHTML = availText.title;  
+
         if (availList.length < 1) {
             $(noAvailTable).style.display = '';
         } else {
@@ -352,15 +362,20 @@
         var noMetricTable;
         var metricFunc
         var token = metricText.token;
+        var descSpan = "Metric Viewer_span";
+
         if (token != null) {
             metricTable = document.getElementById('metricTable' + token);
             noMetricTable = 'noMetricTable' + token;
             metricFunc = 'requestMetricsResponse' + token + '()';
+            descSpan += token;
         } else {
             metricTable = document.getElementById('metricTable');
             noMetricTable = 'noMetricTable';
             metricFunc = 'requestMetricsResponse()';
         }
+
+        $(descSpan).innerHTML = metricText.title;  
 
         var tbody = metricTable.getElementsByTagName('tbody')[0];
 

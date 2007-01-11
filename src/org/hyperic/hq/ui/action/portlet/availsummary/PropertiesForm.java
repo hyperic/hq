@@ -33,9 +33,13 @@ public class PropertiesForm extends DashboardBaseForm  {
         ".dashContent.availsummary.resources";
     public final static String NUM_TO_SHOW =
         ".dashContent.availsummary.numToShow";
+    public final static String TITLE =
+        ".dashContent.availsummary.title";
 
-    private Integer _numberToShow;
+    private Integer  _numberToShow;
     private String[] _ids;
+    private String   _title;
+    
     public PropertiesForm() {
         super();
     }
@@ -54,5 +58,13 @@ public class PropertiesForm extends DashboardBaseForm  {
 
     public void setNumberToShow(Integer numberToShow) {
         _numberToShow = numberToShow;
+    }
+
+    public String getTitle() {
+        return _title;
+    }
+
+    public void setTitle(String title) {
+        _title = title;
     }
 }

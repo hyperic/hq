@@ -84,12 +84,15 @@ public class ViewAction extends BaseAction {
         String priorityKey = PropertiesForm.PRIORITY;
         String timeKey = PropertiesForm.PAST;
         String selOrAllKey = PropertiesForm.SELECTED_OR_ALL;
+        String titleKey = PropertiesForm.TITLE;
+        
         if (token != null) {
             resKey += token;
             countKey += token;
             priorityKey += token;
             timeKey += token;
             selOrAllKey += token;
+            titleKey += token;
         }
 
         List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, user);
@@ -143,6 +146,8 @@ public class ViewAction extends BaseAction {
             alerts.put("token", JSONObject.NULL);
         }
 
+        alerts.put("title", user.getPreference(titleKey, ""));
+        
         response.getWriter().write(alerts.toString());
 
         return null;

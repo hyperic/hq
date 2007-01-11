@@ -80,12 +80,15 @@ public class ModifyAction extends BaseAction {
         String resTypeKey = PropertiesForm.RES_TYPE;
         String metricKey = PropertiesForm.METRIC;
         String descendingKey = PropertiesForm.DECSENDING;
+        String titleKey = PropertiesForm.TITLE;
+        
         if (token != null) {
             numKey += token;
             resKey += token;
             resTypeKey += token;
             metricKey += token;
             descendingKey += token;
+            titleKey += token;
         }
 
         Integer numberToShow = pForm.getNumberToShow();
@@ -107,6 +110,7 @@ public class ModifyAction extends BaseAction {
         user.setPreference(numKey, numberToShow.toString());
         user.setPreference(metricKey, metric);
         user.setPreference(descendingKey, descending);
+        user.setPreference(titleKey, pForm.getTitle());
 
         boss.setUserPrefs(user.getSessionId(), user.getId(),
                           user.getPreferences());

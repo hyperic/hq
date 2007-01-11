@@ -62,9 +62,12 @@ public class ModifyAction extends BaseAction {
 
         String numKey = PropertiesForm.NUM_TO_SHOW;
         String resKey = PropertiesForm.RESOURCES;
+        String titleKey = PropertiesForm.TITLE;
+        
         if (token != null) {
-            numKey += token;
             resKey += token;
+            numKey += token;
+            titleKey += token;
         }
 
         if(pForm.isRemoveClicked()){
@@ -80,6 +83,7 @@ public class ModifyAction extends BaseAction {
 
         Integer numberToShow = pForm.getNumberToShow();
         user.setPreference(numKey, numberToShow.toString());
+        user.setPreference(titleKey, pForm.getTitle());
 
         boss.setUserPrefs(user.getSessionId(), user.getId(),
                           user.getPreferences());

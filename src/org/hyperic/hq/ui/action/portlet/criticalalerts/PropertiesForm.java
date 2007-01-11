@@ -39,6 +39,8 @@ public class PropertiesForm extends DashboardBaseForm  {
         ".dashContent.criticalalerts.priority";
     public final static String SELECTED_OR_ALL =
         ".dashContent.criticalalerts.selectedOrAll";
+    public final static String TITLE =
+        ".dashContent.criticalalerts.title";
 
     private Integer _numberOfAlerts;
     private String _priority;
@@ -46,6 +48,8 @@ public class PropertiesForm extends DashboardBaseForm  {
     private String _selectedOrAll;
     private String _key;
     private String[] _ids;
+    private String _title;
+    
     public PropertiesForm() {
         super();
     }
@@ -101,5 +105,13 @@ public class PropertiesForm extends DashboardBaseForm  {
 
     public void setIds(String[] ids) {
         _ids = ids;
+    }
+
+    public String getTitle() {
+        return _title;
+    }
+
+    public void setTitle(String title) {
+        this._title = title;
     }
 }
