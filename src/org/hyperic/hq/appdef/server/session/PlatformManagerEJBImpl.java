@@ -90,6 +90,7 @@ import org.hyperic.hq.dao.PlatformDAO;
 import org.hyperic.hq.dao.PlatformTypeDAO;
 import org.hyperic.hq.dao.ConfigResponseDAO;
 import org.hyperic.hq.dao.ApplicationDAO;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.NonUniqueObjectException;
 import org.hibernate.ObjectNotFoundException;
@@ -126,7 +127,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                                             HQConstants.DATASOURCE);
         } catch(NamingException exc){
             throw new SystemException("Unable to get database context: " +
-                                         exc.getMessage(), exc);
+                                      exc.getMessage(), exc);
         }
     }
 
@@ -283,9 +284,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                                       PlatformTypeValue pType)
         throws CreateException, ValidationException 
     {
-        if (_log.isDebugEnabled()) {
-            _log.debug("Begin createPlatformType: " + pType);
-        }
         return getPlatformTypeDAO().create(pType).getId();
     }
 
@@ -390,19 +388,15 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @exception ValidationException - if the subject is not allowed
      * to create Platforms
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
+     * @ejb:transaction type="REQUIRED"
      */
     public Integer createPlatform(AuthzSubjectValue subject,
-                                  Integer ptpk,
+                                  Integer platformTypeId,
                                   PlatformValue pValue, Integer agentPK)
         throws CreateException, ValidationException, PermissionException,
                AppdefDuplicateNameException, AppdefDuplicateFQDNException,
                ApplicationException 
     {
-        if (_log.isDebugEnabled()) {
-            _log.debug("Begin createPlatform: " + pValue);
-        }
-
         // check if the object already exists
         try {
             try {
@@ -440,12 +434,11 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             validateNewPlatform(pValue);
             PlatformTypeDAO ptLHome =
                 DAOFactory.getDAOFactory().getPlatformTypeDAO();
-            PlatformType pType = ptLHome.findById(ptpk);
-            // set the owner to the creating user
+            PlatformType pType = ptLHome.findById(platformTypeId);
+
             pValue.setOwner(subject.getName());
-            // set the modified by to the person creating 
             pValue.setModifiedBy(subject.getName());
-            // call the create
+
             platform = pType.create(pValue, agent, config);
             getPlatformDAO().save(platform);  // To setup its ID
             // AUTHZ CHECK
@@ -454,18 +447,23 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             createAuthzPlatform(pValue.getName(), platform.getId(),
                                 subject);
 
-            // platforms get configured as part of their creation
+            // Send resource create event
+            ResourceCreatedZevent zevent =
+                new ResourceCreatedZevent(subject, platform.getEntityId());
+            ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
+
             return platform.getId();
         } catch (FinderException e) {
-            throw new CreateException("Unable to find PlatformType: "
-                                      + ptpk + " : " + e.getMessage());
+            throw new CreateException("Unable to find PlatformType: " +
+                                      platformTypeId + " : " + e.getMessage());
         } catch (NamingException e) {
-            throw new CreateException("Unable to get LocalHome " + e.getMessage());
+            throw new CreateException("Unable to get LocalHome " +
+                                      e.getMessage());
         }
     }
 
     private void throwDupPlatform(Serializable id, String platName) {
-        throw new NonUniqueObjectException(id, "duplicate platform found " + 
+        throw new NonUniqueObjectException(id, "Duplicate platform found " + 
                                            "with name: " + platName);
     }
                                   

@@ -44,7 +44,6 @@ import org.hyperic.hq.dao.PlatformDAO;
 import org.hyperic.hq.dao.AIPlatformDAO;
 import org.hyperic.hq.dao.AIServerDAO;
 import org.hyperic.hq.dao.AIIpDAO;
-import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
@@ -70,7 +69,6 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.autoinventory.AIIp;
-import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -604,19 +602,6 @@ public class AIQueueManagerEJBImpl
                     servers.remove(aiserversToRemove.get(i));
                 }
             }
-
-            // Send resource create events
-            List zevents = new ArrayList();
-            for (i=0; i<createdResources.size(); i++) {
-                AppdefEntityID createdId =
-                    (AppdefEntityID)createdResources.get(i);
-
-                ResourceCreatedZevent event =
-                    new ResourceCreatedZevent(subject, createdId);
-                zevents.add(event);
-            }
-
-            ZeventManager.getInstance().enqueueEventsAfterCommit(zevents);
         }
     }
 

@@ -97,6 +97,7 @@ import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.ServiceType;
+import org.hyperic.hq.zevents.ZeventManager;
 
 /**
  * This class is responsible for managing Server objects in appdef
@@ -138,31 +139,24 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @return ServiceValue - the saved value object
      * @exception CreateException - if it fails to add the service
      * @ejb:interface-method
-     * @ejb:transaction type="RequiresNew"
+     * @ejb:transaction type="Required"
      */
     public Integer createService(AuthzSubjectValue subject,
-        Integer spk, Integer stpk, ServiceValue sValue)
+                                 Integer serverId, Integer serviceTypeId,
+                                 ServiceValue sValue)
         throws CreateException, ValidationException, PermissionException,
                ServerNotFoundException, AppdefDuplicateNameException
     {
-        if(log.isDebugEnabled()) {
-            log.debug("Begin createService: " + sValue);
-        }
-
         try {
             validateNewService(sValue);
             trimStrings(sValue);
-            // first we look up the server
-            // if this bombs we go no further
-            Server sLocal = findServerByPK(spk);
 
-            // set the service type
-            ServiceType serviceType = getServiceTypeDAO().findById(stpk);
+            Server sLocal = findServerByPK(serverId);
+            ServiceType serviceType =
+                getServiceTypeDAO().findById(serviceTypeId);
             sValue.setServiceType(serviceType.getServiceTypeValue());
-
             sValue.setOwner(subject.getName());
             sValue.setModifiedBy(subject.getName());
-            // call the create
             Service service = getServiceDAO().createService(sLocal, sValue);
             
             try {
@@ -173,12 +167,11 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                                        sLocal.getPlatform().getId(),
                                        false, 
                                        subject);
-                }
-                else {
+                } else {
                     // now add the authz resource
                     createAuthzService(sValue.getName(), 
                                        service.getId(),
-                                       spk,
+                                       serverId,
                                        true, 
                                        subject);
                 }
@@ -186,21 +179,27 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 throw e;
             }
 
+            // Send resource create event
+            ResourceCreatedZevent zevent =
+                new ResourceCreatedZevent(subject, service.getEntityId());
+            ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
+
             return service.getId();
         } catch (FinderException e) {
             log.error("Unable to find ServiceType", e);
-            throw new CreateException("Unable to find ServiceType: " 
-                + stpk + " : " + e.getMessage());
+            throw new CreateException("Unable to find ServiceType: " +
+                                      serviceTypeId + " : " + e.getMessage());
         } catch (NamingException e) {
             log.error("Unable to get LocalHome", e);
             throw new SystemException("Unable to get LocalHome " +
-                                         e.getMessage());
+                                      e.getMessage());
         } catch (PermissionException e) {
-            // make sure that if there is a permission exception during service creation,
-            // rollback the whole service creation process; otherwise, there would be
-            // a EAM_SERVICE record without its cooresponding EAM_RESOURCE record
-            log.error("User: " + subject.getName() 
-                + " can not add services to server: " + spk);
+            // make sure that if there is a permission exception during
+            // service creation, rollback the whole service creation process;
+            // otherwise, there would be a EAM_SERVICE record without its
+            // cooresponding EAM_RESOURCE record
+            log.error("User: " + subject.getName() +
+                      " can not add services to server: " + serverId);
             throw e;
         }
     }

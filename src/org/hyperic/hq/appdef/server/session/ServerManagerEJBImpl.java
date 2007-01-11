@@ -90,7 +90,7 @@ import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.ServiceType;
-
+import org.hyperic.hq.zevents.ZeventManager;
 
 /**
  * This class is responsible for managing Server objects in appdef
@@ -128,45 +128,44 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * Create a Server which runs on a given platform
+     * Create a Server on the given platform.
+     *
      * @return ServerValue - the saved value object
      * @exception CreateException - if it fails to add the server
      * @ejb:interface-method
-     * @ejb:transaction type="RequiresNew"
+     * @ejb:transaction type="Required"
      */
-    public Integer createServer(AuthzSubjectValue subject, Integer ppk,
-                                Integer stpk, ServerValue sValue)
+    public Integer createServer(AuthzSubjectValue subject,
+                                Integer platformId, Integer serverTypeId,
+                                ServerValue sValue)
         throws CreateException, ValidationException, PermissionException,
                PlatformNotFoundException, AppdefDuplicateNameException {
-        if(log.isDebugEnabled()) {
-            log.debug("Begin createServer: " + sValue);
-        }
 
         try {
             validateNewServer(sValue);
             trimStrings(sValue);
-            // first we look up the platform
-            // if this bombs we go no further
-            Platform pLocal = findPlatformByPK(ppk);
-            ServerType serverType = null;
 
-            serverType = getServerTypeDAO().findById(stpk);
-            // set the serverTypeValue
+            Platform pLocal = findPlatformByPK(platformId);
+            ServerType serverType = getServerTypeDAO().findById(serverTypeId);
+
             sValue.setServerType(serverType.getServerTypeValue());
-
-            // set the owner
             sValue.setOwner(subject.getName());
-            // set modified by
             sValue.setModifiedBy(subject.getName());
-            // call the create
             Server server = getServerDAO().createServer(pLocal, sValue);
-            // now do authz check
-            createAuthzServer(sValue.getName(), 
+
+            createAuthzServer(sValue.getName(),
                               server.getId(),
-                              ppk,
+                              platformId,
                               serverType.getVirtual(), 
                               subject);
+
+            // Send resource create event
+            ResourceCreatedZevent zevent =
+                new ResourceCreatedZevent(subject, server.getEntityId());
+            ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
+
             return server.getId();
+
         } catch (CreateException e) {
             throw e;
         } catch (PermissionException e) {
@@ -175,11 +174,12 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // corresponding resource record.
             throw e;
         } catch (FinderException e) {
-            throw new CreateException("Unable to find server type: "
-                                      + ppk + " : " + e.getMessage());
+            throw new CreateException("Unable to find platform=" + platformId +
+                                      " or server type=" + serverTypeId +
+                                      ":" + e.getMessage());
         } catch (NamingException e) {
             throw new SystemException("Unable to get LocalHome " +
-                                         e.getMessage());
+                                      e.getMessage());
         }
     }
 
