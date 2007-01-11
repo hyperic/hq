@@ -72,11 +72,14 @@ import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.pluginxml.PluginData;
 import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.hq.product.shared.PluginValue;
+import org.hyperic.hq.product.shared.ProductManagerLocal;
+import org.hyperic.hq.product.shared.ProductManagerUtil;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.timer.StopWatch;
 import org.hyperic.hq.dao.PluginDAO;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.dao.DAOFactory;
 
 import org.apache.commons.logging.Log;
@@ -142,6 +145,14 @@ public class ProductManagerEJBImpl
                            e.getMessage());
         }
     }       
+
+    public static ProductManagerLocal getOne() {
+        try {
+            return ProductManagerUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
+    }
 
     public void ejbCreate() {}
     public void ejbRemove() {}
