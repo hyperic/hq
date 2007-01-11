@@ -200,50 +200,55 @@
   </target>
 
   <!-- ==================== Compile java sources ==================== -->
-  <target name="compile" description="Compile sources" 
-          depends="init">
-    <mkdir dir="${build.dir}/classes" />
-    <hq-javac>
-      <classpath>
-          <path refid="alljars"/>
-          <path refid="testjars"/>
-      </classpath>
-      <src>
-        <!-- Generated sources -->
-        <path location="${build.dir}/src" />
-        <!-- Shared and utility sources -->
-        <path location="src" />
-        <!-- Plugin sources -->
-        <dirset dir="plugins">
-          <include name="*/src"/>
-        </dirset>
-      </src>
-      <exclude name="**/*_test.java" />
-    </hq-javac>
-
-    <!-- Copy resources -->
-    <copy toDir="${build.dir}/classes">
-      <fileset dir="src" includes="**/*.properties" />
-    </copy>
-
-    <copy toDir="${build.dir}/classes"
-          file="etc/ehcache.xml"/>
-
-    <mkdir dir="${build.dir}/classes/images"/>
-    <copy toDir="${build.dir}/classes/images">
-      <fileset dir="${webapp.home}/images">
-        <include name="icon_available_green.gif" />
-        <include name="icon_available_red.gif" />
-        <include name="icon_available_error.gif" />
-        <include name="icon_auto-group.gif" />
-        <include name="icon_cluster.gif" />
-        <include name="icon_resource.gif" />
-      </fileset>
-    </copy>
-    <copy toDir="${build.dir}/classes">
-      <fileset dir="${hq.home}/etc" includes="cactus.properties,log_client.properties" />
-    </copy>
+  <target name="compile-app-sources" depends="init">
+      <mkdir dir="${build.dir}/classes" />
+      <hq-javac>
+        <classpath>
+            <path refid="alljars"/>
+            <path refid="testjars"/>
+        </classpath>
+        <src>
+          <!-- Generated sources -->
+          <path location="${build.dir}/src" />
+          <!-- Shared and utility sources -->
+          <path location="src" />
+          <!-- Plugin sources -->
+          <dirset dir="plugins">
+            <include name="*/src"/>
+          </dirset>
+        </src>
+        <exclude name="**/*_test.java" />
+      </hq-javac>
   </target>
+    
+  <target name="copy-resources" depends="init">
+      <!-- Copy resources -->
+      <copy toDir="${build.dir}/classes">
+        <fileset dir="src" includes="**/*.properties" />
+      </copy>
+
+      <copy toDir="${build.dir}/classes"
+            file="etc/ehcache.xml"/>
+
+      <mkdir dir="${build.dir}/classes/images"/>
+      <copy toDir="${build.dir}/classes/images">
+        <fileset dir="${webapp.home}/images">
+          <include name="icon_available_green.gif" />
+          <include name="icon_available_red.gif" />
+          <include name="icon_available_error.gif" />
+          <include name="icon_auto-group.gif" />
+          <include name="icon_cluster.gif" />
+          <include name="icon_resource.gif" />
+        </fileset>
+      </copy>
+      <copy toDir="${build.dir}/classes">
+        <fileset dir="${hq.home}/etc" 
+                 includes="cactus.properties,log_client.properties" />
+      </copy>
+  </target>
+    
+  <target name="compile" description="Compile sources" 
+          depends="compile-app-sources,copy-resources"/>
 
   <!-- ==================== JSP precompile ============================ -->
   
