@@ -1692,11 +1692,6 @@
               scope="request"
               forward="/resource/autogroup/monitor/Visibility.do?mode=resourceMetrics"/>
 
-      <action path="/resource/common/monitor/QuickEnableDefaultMetrics" 
-              type="org.hyperic.hq.ui.action.resource.common.monitor.QuickEnableDefaultMetricsAction">
-              <forward name="success" path="/Dashboard.do" redirect="true"/>
-      </action>
-
       <action path="/dashboard/ReorderPortlets" 
               type="org.hyperic.hq.ui.action.portlet.ReorderAction">
               <forward name="success" path="/Dashboard.do" redirect="true"/>
