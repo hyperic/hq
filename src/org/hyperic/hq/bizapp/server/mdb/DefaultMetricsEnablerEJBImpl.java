@@ -36,12 +36,7 @@ import javax.management.ObjectName;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEvent;
-import org.hyperic.hq.appdef.shared.InvalidConfigException;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.bizapp.server.DefaultMetricsEnablerUtil;
 import org.hyperic.hq.bizapp.server.session.BizappSessionEJB;
-import org.hyperic.hq.common.util.Messenger;
-import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.product.server.MBeanUtil;
 
 import org.apache.commons.logging.Log;
@@ -62,14 +57,8 @@ import org.apache.commons.logging.LogFactory;
 public class DefaultMetricsEnablerEJBImpl
     extends BizappSessionEJB implements MessageDrivenBean, MessageListener {
 
-    private final Log log = LogFactory
-            .getLog("org.hyperic.hq.bizapp.server.mdb.DefaultMetricsEnablerEJBImpl");
-
-    private MessageDrivenContext ctx = null;
-
-    private static DefaultMetricsEnablerUtil metricEnabler = null;
-
-    private static final Messenger sender = new Messenger();
+    private final Log log =
+        LogFactory.getLog(DefaultMetricsEnablerEJBImpl.class);
 
     public void onMessage(Message inMessage) {
         if (!(inMessage instanceof ObjectMessage)) { return; }
@@ -82,47 +71,7 @@ public class DefaultMetricsEnablerEJBImpl
 
             AppdefEvent ae = (AppdefEvent) obj;
 
-            log.debug("Received Appdef Event(" + ae.getAction() +
-                      ") for entity: " + ae.getResource());
-
-            boolean isCreate =
-                ae.getAction() == AppdefEvent.ACTION_CREATE;
-            if (isCreate ||
-                ae.getAction() == AppdefEvent.ACTION_NEWCONFIG) {
-                
-                AppdefEntityID id = ae.getResource();
-                AuthzSubjectValue subject = ae.getSubject();
-
-                // If this is a NEWCONFIG, the transaction that fired
-                // the message might not have committed yet.  Let's wait
-                // a few seconds for it to commit, then try to enable
-                if (ae.getAction() == AppdefEvent.ACTION_NEWCONFIG) {
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {}
-                }
-                try {
-                    if (metricEnabler == null)
-                        metricEnabler = DefaultMetricsEnablerUtil.instance();
-
-                    metricEnabler.enableDefaultMetrics(subject, id,
-                                                       this, isCreate);
-                    
-                    // Send event to notify that metrics have been enabled
-                    ae.setAction(AppdefEvent.ACTION_METRIC_ENABLED);
-                    sender.publishMessage(EventConstants.EVENTS_TOPIC, ae);
-                } catch (InvalidConfigException e) {
-                    // This is where we should do some retry-action
-                    // but for now, the ViewAction in the problem resources
-                    // queue will retry for us.  No need to log this, the
-                    // metricEnabler.enableDefaultMetricsAndRuntimeAI method
-                    // will have already logged it.
-                    log.warn("Caught InvalidConfigException in " +
-                             "DefaultMetricEnabler MDB: " +
-                             e.getMessage());
-                }
-            }
-            else if (ae.getAction() == AppdefEvent.ACTION_UPDATE) {
+            if (ae.getAction() == AppdefEvent.ACTION_UPDATE) {
                 MBeanServer server = MBeanUtil.getMBeanServer(); 
 
                 ObjectName objName = 
@@ -143,9 +92,6 @@ public class DefaultMetricsEnablerEJBImpl
     public void ejbActivate() {}
     public void ejbPassivate() {}
     /** @ejb:remove-method */
-    public void ejbRemove() { this.ctx = null; }
-    public void setMessageDrivenContext(MessageDrivenContext ctx)
-            throws EJBException {
-        this.ctx = ctx;
-    }
+    public void ejbRemove() {}
+    public void setMessageDrivenContext(MessageDrivenContext ctx) {}
 }
