@@ -150,15 +150,17 @@ function showViewEscResponse(originalRequest) {
   
       escViewUL.appendChild(viewLi)
   
-      //viewLi.setAttribute((document.all ? 'className' : 'class'), "lineitem");
+      viewLi.setAttribute((document.all ? 'className' : 'class'), "BlockContent");
       viewLi.setAttribute('id','row_'+ liID);
       $('row_'+ liID).style.margin = "0px";
       $('row_'+ liID).style.padding = "0px";
+      $('row_'+ liID).style.cursor = "move;";
       
       viewLi.appendChild(escTable);
       escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
+      escTable.setAttribute('id','escTbl_'+ liID);
       escTable.setAttribute('border', '0');
-      escTable.setAttribute('cellspacing','3');
+      escTable.setAttribute('cellspacing','4');
       escTable.appendChild(escTableBody);
   
       escTableBody.appendChild(escTr2);
@@ -169,19 +171,34 @@ function showViewEscResponse(originalRequest) {
       //td1.setAttribute('colspan', '3');
       td1.appendChild(waitDiv);
       waitDiv.setAttribute('id','wait_' + liID);
+      waitDiv.setAttribute('width', '100%');
       waitDiv.innerHTML = "Wait time before escalating: " + actionWaitTime + "<br>";
   
       td1.appendChild(editWaitDiv);
       editWaitDiv.setAttribute('id','editWait_' + liID);
   
       escTr2.appendChild(td2);
-      td2.setAttribute('width', '20%');
+      td2.setAttribute('width', '100%');
       td2.setAttribute('valign', 'top');
-  
+      td2.setAttribute((document.all ? 'className' : 'class'), "wrap");
       td2.appendChild(usersTextDiv);
-  
+      td2.setAttribute('id','usersList_' + liID);
+        //$('usersList_' + liID).style.border = "1px solid green";
       if (configListType == "1"){
-          usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/>:  " + emailInfo + "<br>";
+          var emailAdds = emailInfo.split(',');
+          for (var b = 0; b < emailAdds.length; b++) {
+              var displayEmails = "";
+              var emailAdds = emailInfo.split(',');
+              for (var b = 0; b < emailAdds.length; b++) {
+                var comma = ", ";
+                displayEmails += emailAdds[b] + comma;
+
+                  if (displayEmails.lastIndexOf(",") == displayEmails.length - 1);
+              }
+              usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/>:  " + displayEmails + "<br>";
+
+         }
+           
       } else if (configListType == "2") {
           var uids = emailInfo.split(',');
           var userNames = "";
@@ -209,10 +226,10 @@ function showViewEscResponse(originalRequest) {
       }
   
       escTr2.appendChild(td3);
+      td3.setAttribute((document.all ? 'className' : 'class'), "td3");
       td3.setAttribute('width', '20%');
       td3.setAttribute('valign', 'top');
-      td3.style.paddingRight = "20px";
-  
+
       switch(configListType) {
       case 1:
         td3.innerHTML = emailInfo + "<br>";
@@ -237,7 +254,18 @@ function showViewEscResponse(originalRequest) {
       usersEditDiv.setAttribute('width', '40%');
       usersEditDiv.innerHTML = " ";
       $('pauseTimeText').innerHTML = 'Allow user to pause escalation: ' + allowPause + "<br>";
-   }    
+   }
+
+    //Sortable.create(viewEscalationUL,{ghosting:true,constraint:false});
+
+    Sortable.create("viewEscalationUL",
+          {dropOnEmpty: true,
+           //format: /^(.*)$/,
+           containment: ["viewEscalationUL"],
+           onUpdate: function() {
+                ajaxEngine.sendRequest( '/escalation/updateEscalationOrder.do', Sortable.serialize("viewEscalationUL") ); },
+           constraint: 'vertical'});
+
 }
     
     function editEscalation () {
@@ -258,157 +286,157 @@ function showViewEscResponse(originalRequest) {
         $('editPropertiesTable').style.display = 'none';
     }
 
-    function addRow() {
-        var ni = $('rowOrder');
-        var numi = document.getElementById('theValue');
-        var num = (document.getElementById('theValue').value -1)+ 2;
+    <%--function addRow() {--%>
+        <%--var ni = $('rowOrder');--%>
+        <%--var numi = document.getElementById('theValue');--%>
+        <%--var num = (document.getElementById('theValue').value -1)+ 2;--%>
 
-        numi.value = num;
-        var liID = 'row'+num;
-        var escLi = document.createElement('li');
-        var remDiv = document.createElement('div');
-        var usersDiv = document.createElement('div');
-        var rolesDiv = document.createElement('div');
-        var othersDiv = document.createElement('div');
-        var emailDiv = document.createElement('div');
-        var sysDiv = document.createElement('div');
-        var escTable = document.createElement('table');
-        var escTableBody = document.createElement('tbody');
-        var escTr1 = document.createElement('tr');
-        var escTr2 = document.createElement('tr');
-        var td1 = document.createElement('td');
-        var td2 = document.createElement('td');
-        var td3 = document.createElement('td');
-        var td4 = document.createElement('td');
-        var td5 = document.createElement('td');
-        var select1 = document.createElement("select");
-        var select2 = document.createElement("select");
-        var select3 = document.createElement("select");
-        var anchor = document.createElement("a");
+        <%--numi.value = num;--%>
+        <%--var liID = 'row'+num;--%>
+        <%--var escLi = document.createElement('li');--%>
+        <%--var remDiv = document.createElement('div');--%>
+        <%--var usersDiv = document.createElement('div');--%>
+        <%--var rolesDiv = document.createElement('div');--%>
+        <%--var othersDiv = document.createElement('div');--%>
+        <%--var emailDiv = document.createElement('div');--%>
+        <%--var sysDiv = document.createElement('div');--%>
+        <%--var escTable = document.createElement('table');--%>
+        <%--var escTableBody = document.createElement('tbody');--%>
+        <%--var escTr1 = document.createElement('tr');--%>
+        <%--var escTr2 = document.createElement('tr');--%>
+        <%--var td1 = document.createElement('td');--%>
+        <%--var td2 = document.createElement('td');--%>
+        <%--var td3 = document.createElement('td');--%>
+        <%--var td4 = document.createElement('td');--%>
+        <%--var td5 = document.createElement('td');--%>
+        <%--var select1 = document.createElement("select");--%>
+        <%--var select2 = document.createElement("select");--%>
+        <%--var select3 = document.createElement("select");--%>
+        <%--var anchor = document.createElement("a");--%>
 
-        ni.appendChild(escLi);
-        escLi.setAttribute((document.all ? 'className' : 'class'), "lineitem");
-        escLi.setAttribute('id','row_'+ liID);
-        //escLi.innerHTML = "here";
+        <%--ni.appendChild(escLi);--%>
+        <%--escLi.setAttribute((document.all ? 'className' : 'class'), "lineitem");--%>
+        <%--escLi.setAttribute('id','row_'+ liID);--%>
+        <%--//escLi.innerHTML = "here";--%>
 
-        escLi.appendChild(remDiv);
-        remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
-        remDiv.innerHTML ='<a href="#" onclick="removeRow(this);"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
+        <%--escLi.appendChild(remDiv);--%>
+        <%--remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");--%>
+        <%--remDiv.innerHTML ='<a href="#" onclick="removeRow(this);"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';--%>
 
-        escLi.appendChild(escTable);
-        escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
-        escTable.setAttribute('border', '0');
-        escTable.appendChild(escTableBody);
+        <%--escLi.appendChild(escTable);--%>
+        <%--escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");--%>
+        <%--escTable.setAttribute('border', '0');--%>
+        <%--escTable.appendChild(escTableBody);--%>
 
-        escTableBody.appendChild(escTr2);
-        escTableBody.appendChild(escTr1);
+        <%--escTableBody.appendChild(escTr2);--%>
+        <%--escTableBody.appendChild(escTr1);--%>
 
-        escTr1.appendChild(td1);
+        <%--escTr1.appendChild(td1);--%>
 
-        td1.setAttribute('colspan', '3');
-        td1.appendChild(document.createTextNode('<fmt:message key="alert.config.escalation.then"/> '));
+        <%--td1.setAttribute('colspan', '3');--%>
+        <%--td1.appendChild(document.createTextNode('<fmt:message key="alert.config.escalation.then"/> '));--%>
 
-        td1.appendChild(select1);
-        select1.setAttribute('id', 'waittime_' + liID);
+        <%--td1.appendChild(select1);--%>
+        <%--select1.setAttribute('id', 'waittime_' + liID);--%>
 
-        select1.setAttribute('name', 'waittime_' + liID);
-        addOption(select1, '0', '<fmt:message key="alert.config.escalation.end"/>');
-        addOption(select1, '300000', '<fmt:message key="alert.config.escalation.wait">
-                                      <fmt:param value="5"/>
-                                    </fmt:message>');
-        addOption(select1, '600000', '<fmt:message key="alert.config.escalation.wait">
-                                      <fmt:param value="10"/>
-                                    </fmt:message>');
-        addOption(select1, '1200000', '<fmt:message key="alert.config.escalation.wait">
-                                      <fmt:param value="20"/>
-                                    </fmt:message>');
-        addOption(select1, '1800000', '<fmt:message key="alert.config.escalation.wait">
-                                      <fmt:param value="30"/>
-                                    </fmt:message>');
-        addOption(select1, '2400000', '<fmt:message key="alert.config.escalation.wait">
-                                      <fmt:param value="45"/>
-                                    </fmt:message>');
-        addOption(select1, '3000000', '<fmt:message key="alert.config.escalation.wait">
-                                      <fmt:param value="60"/>
-                                    </fmt:message>');
+        <%--select1.setAttribute('name', 'waittime_' + liID);--%>
+        <%--addOption(select1, '0', '<fmt:message key="alert.config.escalation.end"/>');--%>
+        <%--addOption(select1, '300000', '<fmt:message key="alert.config.escalation.wait">--%>
+                                      <%--<fmt:param value="5"/>--%>
+                                    <%--</fmt:message>');--%>
+        <%--addOption(select1, '600000', '<fmt:message key="alert.config.escalation.wait">--%>
+                                      <%--<fmt:param value="10"/>--%>
+                                    <%--</fmt:message>');--%>
+        <%--addOption(select1, '1200000', '<fmt:message key="alert.config.escalation.wait">--%>
+                                      <%--<fmt:param value="20"/>--%>
+                                    <%--</fmt:message>');--%>
+        <%--addOption(select1, '1800000', '<fmt:message key="alert.config.escalation.wait">--%>
+                                      <%--<fmt:param value="30"/>--%>
+                                    <%--</fmt:message>');--%>
+        <%--addOption(select1, '2400000', '<fmt:message key="alert.config.escalation.wait">--%>
+                                      <%--<fmt:param value="45"/>--%>
+                                    <%--</fmt:message>');--%>
+        <%--addOption(select1, '3000000', '<fmt:message key="alert.config.escalation.wait">--%>
+                                      <%--<fmt:param value="60"/>--%>
+                                    <%--</fmt:message>');--%>
 
-        escTr2.appendChild(td2);
-        td2.setAttribute('valign', 'top');
-        td2.setAttribute('class', 'td2');
-
-
-
-        td2.appendChild(select2);
-        select2.setAttribute('id', 'Email_' + liID);
+        <%--escTr2.appendChild(td2);--%>
+        <%--td2.setAttribute('valign', 'top');--%>
+        <%--td2.setAttribute('class', 'td2');--%>
 
 
-        select2.onchange = function(){onchange_handler(this);}
-        select2.setAttribute('name', 'action_' + liID);
-        addOption(select2, 'Email', 'Email');
-        addOption(select2, 'SMS', 'SMS');
-        addOption(select2, 'Syslog', 'Sys Log');
-        addOption(select2, 'NoOp', 'Suppress Alerts');
 
-        escTr2.appendChild(td3);
-        td3.setAttribute('class', 'td3');
-        td3.setAttribute('valign', 'top');
+        <%--td2.appendChild(select2);--%>
+        <%--select2.setAttribute('id', 'Email_' + liID);--%>
 
-        td3.appendChild(select3);
 
-        select3.setAttribute('name', 'who_' + liID);
-        select3.setAttribute('id', 'who_' + liID);
-        select3.onchange = function(){onchange_who(this);}
-        addOption(select3, 'Select', '<fmt:message key="alert.config.escalation.notify.who"/>');
-        <c:if test="${not empty AvailableRoles}">
-        addOption(select3, 'Roles', '<fmt:message key="monitoring.events.MiniTabs.Roles"/>')
-        </c:if>
-        addOption(select3, 'Users', '<fmt:message key="monitoring.events.MiniTabs.Users"/>');
-        addOption(select3, 'Others', '<fmt:message key="monitoring.events.MiniTabs.Others"/>');
+        <%--select2.onchange = function(){onchange_handler(this);}--%>
+        <%--select2.setAttribute('name', 'action_' + liID);--%>
+        <%--addOption(select2, 'Email', 'Email');--%>
+        <%--addOption(select2, 'SMS', 'SMS');--%>
+        <%--addOption(select2, 'Syslog', 'Sys Log');--%>
+        <%--addOption(select2, 'NoOp', 'Suppress Alerts');--%>
 
-        escTr2.appendChild(td4);
-        td5.setAttribute('width', '50%');
+        <%--escTr2.appendChild(td3);--%>
+        <%--td3.setAttribute('class', 'td3');--%>
+        <%--td3.setAttribute('valign', 'top');--%>
 
-        td4.appendChild(emailDiv);
-        emailDiv.setAttribute('class', 'emailDiv');
-        emailDiv.setAttribute('id', 'emailinput' + liID);
-        $('emailinput'+ liID).style.display = 'none';
-        emailDiv.setAttribute('class', 'escInput');
-        emailDiv.setAttribute('width', '40%');
-        emailDiv.innerHTML = "email addresses (comma separated):<br><textarea rows=3 cols=35 id=emailinput_" + liID + " name=emailinput_" + liID + "></textarea>";
+        <%--td3.appendChild(select3);--%>
 
-        td4.appendChild(sysDiv);
-        sysDiv.setAttribute('class', 'escInput'+ liID);
-        sysDiv.setAttribute('id', 'sysloginput'+ liID);
-        $('sysloginput'+ liID).style.display = 'none';
-        sysDiv.setAttribute('width', '40%');
-        sysDiv.innerHTML = "meta: <input type=text name=meta_" + liID + " size=40><br>" + "product: <input type=text name=product_" + liID + " size=40><br>" + "version: <input type=text name=version_" + liID + " size=40><br>";
+        <%--select3.setAttribute('name', 'who_' + liID);--%>
+        <%--select3.setAttribute('id', 'who_' + liID);--%>
+        <%--select3.onchange = function(){onchange_who(this);}--%>
+        <%--addOption(select3, 'Select', '<fmt:message key="alert.config.escalation.notify.who"/>');--%>
+        <%--<c:if test="${not empty AvailableRoles}">--%>
+        <%--addOption(select3, 'Roles', '<fmt:message key="monitoring.events.MiniTabs.Roles"/>')--%>
+        <%--</c:if>--%>
+        <%--addOption(select3, 'Users', '<fmt:message key="monitoring.events.MiniTabs.Users"/>');--%>
+        <%--addOption(select3, 'Others', '<fmt:message key="monitoring.events.MiniTabs.Others"/>');--%>
 
-        td4.appendChild(usersDiv);
-        usersDiv.setAttribute('id', 'usersDiv' + liID);
-        $('usersDiv'+ liID).style.display = 'none';
+        <%--escTr2.appendChild(td4);--%>
+        <%--td5.setAttribute('width', '50%');--%>
 
-        if($('usersList')) {
-          usersDiv.innerHTML = $('usersList').innerHTML;
-          var usersInputList = usersDiv.getElementsByTagName('input');
-          for(i=0;i < usersInputList.length; i++) {
-              var inputNamesArr = usersInputList[i];
-              inputNamesArr.name = inputNamesArr.name + "_" + liID;
-          }
-        }
+        <%--td4.appendChild(emailDiv);--%>
+        <%--emailDiv.setAttribute('class', 'emailDiv');--%>
+        <%--emailDiv.setAttribute('id', 'emailinput' + liID);--%>
+        <%--$('emailinput'+ liID).style.display = 'none';--%>
+        <%--emailDiv.setAttribute('class', 'escInput');--%>
+        <%--emailDiv.setAttribute('width', '40%');--%>
+        <%--emailDiv.innerHTML = "email addresses (comma separated):<br><textarea rows=3 cols=35 id=emailinput_" + liID + " name=emailinput_" + liID + "></textarea>";--%>
 
-        td4.appendChild(rolesDiv);
-        rolesDiv.setAttribute('id', 'rolesDiv' + liID);
-        $('rolesDiv'+ liID).style.display = 'none';
+        <%--td4.appendChild(sysDiv);--%>
+        <%--sysDiv.setAttribute('class', 'escInput'+ liID);--%>
+        <%--sysDiv.setAttribute('id', 'sysloginput'+ liID);--%>
+        <%--$('sysloginput'+ liID).style.display = 'none';--%>
+        <%--sysDiv.setAttribute('width', '40%');--%>
+        <%--sysDiv.innerHTML = "meta: <input type=text name=meta_" + liID + " size=40><br>" + "product: <input type=text name=product_" + liID + " size=40><br>" + "version: <input type=text name=version_" + liID + " size=40><br>";--%>
 
-        if($('rolesList')) {
-          rolesDiv.innerHTML = $('rolesList').innerHTML;
-          var rolesInputList = rolesDiv.getElementsByTagName('input');
-           for(i=0;i < rolesInputList.length; i++) {
-                  var inputRolesArr = rolesInputList[i];
-                  inputRolesArr.name =  inputRolesArr.name + "_" + liID;
-              }
-          }
-      }
+        <%--td4.appendChild(usersDiv);--%>
+        <%--usersDiv.setAttribute('id', 'usersDiv' + liID);--%>
+        <%--$('usersDiv'+ liID).style.display = 'none';--%>
+
+        <%--if($('usersList')) {--%>
+          <%--usersDiv.innerHTML = $('usersList').innerHTML;--%>
+          <%--var usersInputList = usersDiv.getElementsByTagName('input');--%>
+          <%--for(i=0;i < usersInputList.length; i++) {--%>
+              <%--var inputNamesArr = usersInputList[i];--%>
+              <%--inputNamesArr.name = inputNamesArr.name + "_" + liID;--%>
+          <%--}--%>
+        <%--}--%>
+
+        <%--td4.appendChild(rolesDiv);--%>
+        <%--rolesDiv.setAttribute('id', 'rolesDiv' + liID);--%>
+        <%--$('rolesDiv'+ liID).style.display = 'none';--%>
+
+        <%--if($('rolesList')) {--%>
+          <%--rolesDiv.innerHTML = $('rolesList').innerHTML;--%>
+          <%--var rolesInputList = rolesDiv.getElementsByTagName('input');--%>
+           <%--for(i=0;i < rolesInputList.length; i++) {--%>
+                  <%--var inputRolesArr = rolesInputList[i];--%>
+                  <%--inputRolesArr.name =  inputRolesArr.name + "_" + liID;--%>
+              <%--}--%>
+          <%--}--%>
+      <%--}--%>
       /*
       function rowIDs(liID){
          var rows = liID.id;
@@ -700,7 +728,6 @@ function showViewEscResponse(originalRequest) {
             $('example').style.display= 'none';
     }
 
-    //onloads.push(Behaviour.apply());
 
 </script>
 
@@ -905,7 +932,6 @@ function showViewEscResponse(originalRequest) {
   </tbody>
 </table>
 
-<br/>
 
 <div id="usersList" style="display:none;">
 <div class="ListHeader">Select Users</div>
@@ -929,37 +955,22 @@ function showViewEscResponse(originalRequest) {
     </c:forEach>
   </ul>
   </div>
-</c:if></form>
+</c:if>
+
+</form>
 
 <form name="viewEscalation" id="viewEscalation" style="display:none;"><input
   type="hidden" id="alertDefId" name="alertDefId"
   value='<c:out value="${alertDef.id}"/>' />
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tbody>
-    <tr>
-      <td class="tableRowHeader">If the alert is acknowledged:</td>
-    </tr>
     <tr class="BlockContent">
-      <td style="padding-left:15px;padding-bottom:10px;">
+      <td style="padding-left:15px;padding-bottom:0px;display:none;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tbody>
           <tr>
-            <td style="padding-top:10px;padding-bottom:2px;">
+            <td style="padding-top:0px;padding-bottom:0px;">
             <div id="pauseTimeText"></div>
-            <div id="pauseTimeEdit" style="display:none;"><input
-              type="radio" name="allowPause" value="true" /> <fmt:message
-              key="alert.config.escalation.allow.pause" /> <select
-              id="maxWaitTime_<c:out value="${alertDef.id}"/>"
-              name="maxwaittime">
-              <option value="300000">5 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-              <option value="600000">10 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-              <option value="1200000">20 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-              <option value="1800000">30 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-            </select></div>
             </td>
           </tr>
         </tbody>
@@ -967,7 +978,7 @@ function showViewEscResponse(originalRequest) {
       </td>
     </tr>
     <tr>
-      <td width="100%">
+      <td width="100%" id="viewSection">
       <ul id="viewEscalationUL" style="margin-left:0px;">
       </ul>
       </td>
