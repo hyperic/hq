@@ -188,6 +188,16 @@ public class MxNotificationListener implements NotificationListener {
             return;
         }
 
+        if (msg == null) {
+            Object data = notification.getUserData();
+            if (data != null) {
+                msg = data.toString();
+            }
+            else {
+                msg = notification.getType();
+            }
+        }
+
         long time     = notification.getTimeStamp();
         int level     = LogTrackPlugin.LOGLEVEL_INFO;
         String source = notification.getSource().toString();
