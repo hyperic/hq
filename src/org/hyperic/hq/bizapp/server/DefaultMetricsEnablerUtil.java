@@ -33,10 +33,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
-import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.bizapp.server.RuntimeAIUtil;
 import org.hyperic.hq.bizapp.server.session.BizappSessionEJB;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
@@ -88,10 +86,10 @@ public class DefaultMetricsEnablerUtil {
         return mtype;
     }
     
-    public boolean enableDefaultMetricsAndRuntimeAI (AuthzSubjectValue subject,
-                                                     AppdefEntityID id,
-                                                     BizappSessionEJB caller,
-                                                     boolean isCreate) 
+    public boolean enableDefaultMetrics (AuthzSubjectValue subject,
+                                         AppdefEntityID id,
+                                         BizappSessionEJB caller,
+                                         boolean isCreate) 
         throws AppdefEntityNotFoundException, TemplateNotFoundException,
                PermissionException, ConfigFetchException, 
                EncodingException, MeasurementCreateException,
@@ -140,45 +138,7 @@ public class DefaultMetricsEnablerUtil {
 
         metricEnabler.enableDefaultMetrics(subject, id, mtype, mergedCR);
         caller.getConfigManager().clearValidationError(subject, id);
-        
-        if (id.getType() != AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-            // Not a server, so nothing left to do (no runtime AI to turn on)
-            return true;
-        }
-            
-        // This is a server, turn on runtime AI
-        ServerValue sValue 
-            = caller.getServerManager().findServerById(subject, 
-                                                       id.getId());
-        if ( !caller.getAIBoss().isRuntimeAISupported(sValue) ) {
-            // Runtime AI not supported on this server
-            return true;
-        }
-        // enable RuntimeAutoinventory for new resources where
-        // sValue.getRuntimeAutoDiscovery() will always be false.
-        // and enable for existing resources only if RTAD flag is true.
-        if (!(isCreate || sValue.getRuntimeAutodiscovery())) {
-            log.debug("Skipping enablement of Runtime AI " +
-                      "for existing resource=" + sValue.getName());
-            return true;
-        }
-        else {
-            String type = isCreate ? "new" : "existing";
-            log.debug("Enabling runtime AI for " +
-                      type + " resource=" + sValue.getName()); 
-        }
-        // Turn on runtime AI for this server
-        synchronized(RUNTIME_AI_MUTEX) {
-            try {
-                RuntimeAIUtil.toggleRuntimeScan(subject, id, true, caller);
-            } catch (Exception e) {
-                // There are about five thousand different kinds of 
-                // exceptions that get thrown by the above method.
-                // Just log the error and move on
-                log.error("Error turning on runtime-AI: " + e, e);
-                return false;
-            }
-        }
+
         return true;
     }
 }

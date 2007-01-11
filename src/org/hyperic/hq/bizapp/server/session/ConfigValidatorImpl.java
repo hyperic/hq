@@ -48,16 +48,14 @@ public class ConfigValidatorImpl
     extends BizappSessionEJB
     implements ConfigValidator {
 
-    public void validate(AuthzSubjectValue subject,
-                         String type,
-                         AppdefEntityID[] ids,
-                         boolean callAIManager ) 
+    public void validate(AuthzSubjectValue subject, String type,
+                         AppdefEntityID[] ids, boolean callAIManager)
         throws PermissionException, EncodingException, ConfigFetchException,
                AppdefEntityNotFoundException, InvalidConfigException
     {
         if(type.equals(ProductPlugin.TYPE_PRODUCT) || 
            type.equals(ProductPlugin.TYPE_MEASUREMENT)) {
-            this.updateMeasurementConfigs(subject, ids, callAIManager);
+            updateMeasurementConfigs(subject, ids);
         }
     }
 
@@ -66,19 +64,17 @@ public class ConfigValidatorImpl
      * for a number of entities.
      */
     private void updateMeasurementConfigs(AuthzSubjectValue subject,
-                                          AppdefEntityID[] ids, boolean callAIManager)
+                                          AppdefEntityID[] ids)
         throws EncodingException, PermissionException,
                AppdefEntityNotFoundException, InvalidConfigException
     {
         DerivedMeasurementManagerLocal dmMan;
         RawMeasurementManagerLocal rmMan;
-        AutoinventoryManagerLocal aiMan;
         TrackerManagerLocal trackerMan;
         ConfigResponse[] responses;
         ConfigManagerLocal cman;
 
         rmMan     = this.getRawMeasurementManager();
-        aiMan     = this.getAutoInventoryManager();
         cman      = this.getConfigManager();
         responses = new ConfigResponse[ids.length];
 
@@ -90,18 +86,6 @@ public class ConfigValidatorImpl
                                                  ids[i], true);
                 
                 rmMan.checkConfiguration(subject, ids[i], responses[i]);
-
-                // The other place this "pushRuntimeDiscoveryConfig" call is 
-                // made is from the AIBoss's "toggleRuntimeScan" method, 
-                // because when someone turns on RuntimeDiscovery for the 
-                // first time, we need to push the config.
-            
-                // XXX: When the measurementConfig changes, the 
-                // toggleRuntimeAutodiscovery has to be called explicitly.
-                // Hence this is called only when the callAIManager is true.
-                if(callAIManager)
-                    aiMan.pushRuntimeDiscoveryConfig(subject, ids[i], responses[i]);
-
             } catch(ConfigFetchException exc){
                 responses[i] = null;
             } 

@@ -775,7 +775,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
         boolean metricsWereEnabled = false;
         metricsWereEnabled = DefaultMetricsEnablerUtil.instance()
-            .enableDefaultMetricsAndRuntimeAI(subject, id, this, true);
+            .enableDefaultMetrics(subject, id, this, true);
 
         // We didn't turn anything on, so no need to consult the SRNCache
         if (!metricsWereEnabled) return;

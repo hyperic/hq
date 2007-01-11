@@ -105,9 +105,8 @@ public class DefaultMetricsEnablerEJBImpl
                     if (metricEnabler == null)
                         metricEnabler = DefaultMetricsEnablerUtil.instance();
 
-                    metricEnabler.enableDefaultMetricsAndRuntimeAI(subject, id,
-                                                                   this,
-                                                                   isCreate);
+                    metricEnabler.enableDefaultMetrics(subject, id,
+                                                       this, isCreate);
                     
                     // Send event to notify that metrics have been enabled
                     ae.setAction(AppdefEvent.ACTION_METRIC_ENABLED);

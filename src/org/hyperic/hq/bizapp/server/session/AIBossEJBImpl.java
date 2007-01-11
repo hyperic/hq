@@ -52,7 +52,6 @@ import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -67,18 +66,11 @@ import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerLocal;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerUtil;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
-import org.hyperic.hq.bizapp.server.RuntimeAIUtil;
+import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
-import org.hyperic.hq.product.AutoinventoryPluginManager;
-import org.hyperic.hq.product.GenericPlugin;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.PluginNotFoundException;
-import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.product.ServerDetector;
-import org.hyperic.hq.product.shared.ProductManagerLocal;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.util.StringUtil;
@@ -623,15 +615,15 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
 
     /**
      * Process queued AI resources.
-     * @param id A server or group id.
+     * @param id The server to enable runtime-AI for.
      * @param doEnable If true, runtime autodiscovery will be enabled,
      * if false, it will be disabled.
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void toggleRuntimeScan ( int sessionID,
-                                    AppdefEntityID id,
-                                    boolean doEnable ) 
+    public void toggleRuntimeScan(int sessionID,
+                                  AppdefEntityID id,
+                                  boolean doEnable)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, AppdefEntityNotFoundException,
                AppdefGroupNotFoundException, GroupNotCompatibleException,
@@ -639,7 +631,18 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
 
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
 
-        RuntimeAIUtil.toggleRuntimeScan(subject, id, doEnable, this);
+        if (!id.isServer()) {
+            log.warn("toggleRuntimeScan called for non-server type=" + id);
+            return;
+        }
+
+        AutoinventoryManagerLocal aiManager = getAutoInventoryManager();
+        try {
+            aiManager.toggleRuntimeScan(subject, id, doEnable);
+        } catch (Exception e) {
+            log.error("Unable to disable runtime auto-discovery:" +
+                      e.getMessage(), e);
+        }
     }
 
     /**
@@ -694,42 +697,4 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
     public void ejbActivate() {}
     public void ejbPassivate() {}
     public void setSessionContext(SessionContext ctx) {}
-
-    /**
-     * Find out if a server supports runtimeAI
-     * @param server a ServerValue object
-     * @return retVal a boolean
-     * @ejb:interface-method
-     */
-    public boolean isRuntimeAISupported(ServerValue server)
-        throws SessionNotFoundException, SessionTimeoutException,
-               PermissionException
-    {
-        boolean retVal;
-        AutoinventoryPluginManager aiPluginManager ;
-        ProductManagerLocal prodManLocal;
-        try {
-            prodManLocal  = getProductManager();
-            String pluginName = server.getServerType().getName();
-
-            aiPluginManager = (AutoinventoryPluginManager)prodManLocal.
-                getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
-            GenericPlugin plugin = aiPluginManager.getPlugin(pluginName);
-
-            if (plugin instanceof ServerDetector) {
-                retVal =
-                    ((ServerDetector)plugin).isRuntimeDiscoverySupported();
-            } else {
-                retVal = false ;
-            }
-        } catch (PluginNotFoundException pne) {
-            return false;
-        } catch (PluginException e) {
-            log.error("Error getting plugin", e);
-            return false;
-        }
-        
-        return retVal;
-    }
-
 }

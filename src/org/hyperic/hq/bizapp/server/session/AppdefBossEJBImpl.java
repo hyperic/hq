@@ -119,7 +119,6 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceValue;
-import org.hyperic.hq.bizapp.server.RuntimeAIUtil;
 import org.hyperic.hq.bizapp.shared.AIBossLocal;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.EventsBossLocal;
@@ -137,6 +136,7 @@ import org.hyperic.hq.grouping.shared.GroupModificationException;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
@@ -2002,9 +2002,10 @@ public class AppdefBossEJBImpl
             }
 
             try {
-                RuntimeAIUtil.toggleRuntimeScan(getOverlord(),
-                                                serverRes.getEntityId(),
-                                                false, this);
+                AutoinventoryManagerLocal aiManager = getAutoInventoryManager();
+                aiManager.toggleRuntimeScan(getOverlord(),
+                                            serverRes.getEntityId(),
+                                            false);
             } catch (Exception e) {
                 log.error("Error turning off RuntimeScan for: " + serverRes, 
                           e);
@@ -2447,7 +2448,7 @@ public class AppdefBossEJBImpl
      * to modify. Include just those groups that contain the
      * specified appdef entity.
      * @param entity for use in group member filtering.
-     * @param set of group ids for removing.
+     * @param removeIds of group ids for removing.
      * @return List containing AppdefGroupValue.
      * @ejb:interface-method
      * */
@@ -3194,9 +3195,9 @@ public class AppdefBossEJBImpl
     /**
      * Add an appdef entity to a batch of groups.
      *
-     * @param int representing session identifier
-     * @param AppdefEntityID object to be added.
-     * @param group identifier array
+     * @param sessionId representing session identifier
+     * @param entityId object to be added.
+     * @param groupIds identifier array
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
@@ -3277,8 +3278,8 @@ public class AppdefBossEJBImpl
 
     /**
      * Remove an appdef entity from a batch of groups.
-     * @param AppdefEntityID object to be removed
-     * @param group identifier array
+     * @param entityId object to be removed
+     * @param groupIds identifier array
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */

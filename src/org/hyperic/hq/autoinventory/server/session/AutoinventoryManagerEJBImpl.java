@@ -74,6 +74,9 @@ import org.hyperic.hq.appdef.shared.ServiceManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.ServerNotFoundException;
+import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocalHome;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
@@ -91,6 +94,7 @@ import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerLocal;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerUtil;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
+import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerUtil;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
@@ -101,6 +105,9 @@ import org.hyperic.hq.product.AutoinventoryPluginManager;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerDetector;
+import org.hyperic.hq.product.PluginNotFoundException;
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.server.session.ProductManagerEJBImpl;
 import org.hyperic.hq.product.shared.ProductManagerLocal;
 import org.hyperic.hq.product.shared.ProductManagerUtil;
 import org.hyperic.hq.scheduler.ScheduleValue;
@@ -180,13 +187,44 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         return results;
     }
 
-    private boolean isRuntimeDiscoverySupported(AppdefEntityID id) {
-        if (id.isServer() || id.isService()) {
-            return true;
-        } else {
-            log.debug("pushRuntimeDiscoveryConfig not supported for: " + id);
+    /**
+     * Check if a given Appdef entity supports runtime auto-discovery.
+     *
+     * @param id
+     * @return true if the given resource supports runtime auto-discovery.
+     * @ejb:interface-method
+     */
+    public boolean isRuntimeDiscoverySupported(AuthzSubjectValue subject,
+                                               AppdefEntityID id) {
+        boolean retVal;
+        AutoinventoryPluginManager aiPluginManager ;
+        ProductManagerLocal productManager = ProductManagerEJBImpl.getOne();
+        ServerManagerLocal serverManager = ServerManagerEJBImpl.getOne();
+        try {
+            ServerValue server = serverManager.findServerById(subject,
+                                                              id.getId());
+            String pluginName = server.getServerType().getName();
+            aiPluginManager = (AutoinventoryPluginManager)productManager.
+                getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
+            GenericPlugin plugin = aiPluginManager.getPlugin(pluginName);
+
+            if (plugin instanceof ServerDetector) {
+                retVal =
+                    ((ServerDetector)plugin).isRuntimeDiscoverySupported();
+            } else {
+                retVal = false ;
+            }
+        } catch (PluginNotFoundException pne) {
+            return false;
+        } catch (ServerNotFoundException e) {
+            log.error("Unable to find server=" + id);
+            return false;
+        } catch (PluginException e) {
+            log.error("Error getting plugin", e);
             return false;
         }
+
+        return retVal;
     }
     
     /**
@@ -203,7 +241,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                                         AppdefEntityID id)
         throws PermissionException {
 
-        if (!isRuntimeDiscoverySupported(id)) {
+        if (!isRuntimeDiscoverySupported(subject, id)) {
             return;
         }
 
@@ -237,7 +275,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                                         String agentToken)
         throws PermissionException {
 
-        if (!isRuntimeDiscoverySupported(id)) {
+        if (!isRuntimeDiscoverySupported(subject, id)) {
             return;
         }
 
@@ -255,19 +293,54 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     }
 
     /**
+     * Toggle Runtime-AI config for the given server.
+     * @ejb:interface-method
+     */
+    public void toggleRuntimeScan(AuthzSubjectValue subject,
+                                  AppdefEntityID id, boolean enable)
+        throws PermissionException, AutoinventoryException
+    {
+        if (!id.isServer()) {
+            log.warn("toggleRuntimeScan() called for non-server type=" + id);
+            return;
+        }
+
+        if (!isRuntimeDiscoverySupported(subject, id)) {
+            return;
+        }
+
+        ConfigManagerLocal cman = ConfigManagerEJBImpl.getOne();
+        ServerManagerLocal serverManager = ServerManagerEJBImpl.getOne();
+        try {
+            ServerValue serverValue = serverManager.findServerById(subject,
+                                                                   id.getId());
+            serverValue.setRuntimeAutodiscovery(true);
+            serverManager.updateServer(subject, serverValue);
+
+            ConfigResponse metricConfig =
+                cman.getMergedConfigResponse(subject,
+                                             ProductPlugin.TYPE_MEASUREMENT,
+                                             id, true);
+
+            pushRuntimeDiscoveryConfig(subject, id, metricConfig);
+        } catch (Exception e) {
+            throw new AutoinventoryException("Error enabling Runtime-AI for " +
+                                             "server: " + e.getMessage(), e);
+        }
+    }
+
+    /**
      * Push the metric ConfigResponse out to an agent so it can perform 
      * runtime-autodiscovery
      * @param id The appdef entity ID of the server.
      * @param response The configuration info.
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
-    public void pushRuntimeDiscoveryConfig(AuthzSubjectValue subject,
-                                           AppdefEntityID id,
-                                           ConfigResponse response)
+    private void pushRuntimeDiscoveryConfig(AuthzSubjectValue subject,
+                                            AppdefEntityID id,
+                                            ConfigResponse response)
         throws PermissionException
     {
-        if (!isRuntimeDiscoverySupported(id)) {
+        if (!isRuntimeDiscoverySupported(subject, id)) {
             return;
         }
 
@@ -277,8 +350,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         try {
             if (id.isServer()) {
                 ServerValue server = (ServerValue) aval.getResourceValue();
-                // Setting the response to null will disable runtime autodiscovery
-                // at the agent.
+                // Setting the response to null will disable runtime
+                // autodiscovery at the agent.
                 if (!AppdefUtil.areRuntimeScansEnabled(server)) {
                     response = null;
                 }
@@ -306,12 +379,6 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         } catch (AppdefEntityNotFoundException e) {
             throw new SystemException("Error looking up type name for " +
                                       "resource (" + id + "): " + e);
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug("pushRuntimeDiscoveryConfig: " +
-                      id.getType() + "-" + id.getID() + "-" + typeName +
-                      "-->" + response);
         }
         
         client.pushRuntimeDiscoveryConfig(id.getType(), 
@@ -806,6 +873,14 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         sessionCtx = ctx;
     }
 
+    public static AutoinventoryManagerLocal getOne() {
+        try {
+            return AutoinventoryManagerUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
+    }
+    
     /**
      * Create an autoinventory manager session bean.
      * @exception CreateException If an error occurs creating the pager
