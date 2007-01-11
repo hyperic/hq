@@ -251,27 +251,27 @@ public class AIConversionUtil {
     {
         byte[] configBytes;
         ConfigResponseDB existingConfig = configMgr.getConfigResponse(appdefID);
-        configBytes =
-            mergeConfig(existingConfig.getProductResponse(),
-                        productConfig);
+
+        configBytes = mergeConfig(existingConfig.getProductResponse(),
+                                  productConfig);
         if (configBytes != null && configBytes.length > 0) {
             existingConfig.setProductResponse(configBytes);
         }
-        configBytes =
-            mergeConfig(existingConfig.getMeasurementResponse(),
-                        measurementConfig);
+
+        configBytes = mergeConfig(existingConfig.getMeasurementResponse(),
+                                  measurementConfig);
         if (configBytes != null && configBytes.length > 0) {
             existingConfig.setMeasurementResponse(configBytes);
         }
-        configBytes =
-            mergeConfig(existingConfig.getControlResponse(),
-                        controlConfig);
+
+        configBytes = mergeConfig(existingConfig.getControlResponse(),
+                                  controlConfig);
         if (configBytes != null && configBytes.length > 0) {
             existingConfig.setControlResponse(configBytes);
         }
-        configBytes =
-            mergeConfig(existingConfig.getResponseTimeResponse(),
-                        rtConfig);
+
+        configBytes = mergeConfig(existingConfig.getResponseTimeResponse(),
+                                  rtConfig);
         if (configBytes != null && configBytes.length > 0) {
             existingConfig.setResponseTimeResponse(configBytes);
         }
