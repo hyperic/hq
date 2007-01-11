@@ -118,7 +118,6 @@ public class AIQRV_approve implements AIQResourceVisitor {
             }
 
             // Add the AI platform to appdef
-            _log.info("Calling platform create...");
             try {
                 Integer pk =
                     pmLocal.createPlatform(subject, aiplatformValue);
@@ -202,7 +201,6 @@ public class AIQRV_approve implements AIQResourceVisitor {
             // Check to make sure the platform is still in appdef.
 
             // Update existing platform attributes.
-            _log.info("Updating platform...");
             try {
                 pmLocal.updateWithAI(aiplatformValue, subject.getName());
             } catch (PlatformNotFoundException e) {
@@ -278,9 +276,6 @@ public class AIQRV_approve implements AIQResourceVisitor {
         throws AIQApprovalException, PermissionException
     {
         Integer id = aiip.getId();
-
-        _log.info("Visiting ip: " + id + " addr=" + aiip.getAddress());
-
         AIPlatform aiplatform;
         AIPlatformValue aiplatformValue;
         IpValue ipValue;
@@ -337,7 +332,6 @@ public class AIQRV_approve implements AIQResourceVisitor {
             }
 
             // Add the AI ip to appdef
-            _log.info("Calling update with new IP...");
             try {
                 ipValue = AIConversionUtil.convertAIIpToIp(aiip.getAIIpValue());
                 existingPlatformValue.addIpValue(ipValue);
@@ -392,7 +386,6 @@ public class AIQRV_approve implements AIQResourceVisitor {
                 throw new AIQApprovalException(appdefEntityId, 
                                                AIQApprovalException.ERR_REMOVED_FROM_APPDEF);
             }
-            _log.info("Calling update IP...");
 
             try {
                 existingPlatformValue 
@@ -464,9 +457,6 @@ public class AIQRV_approve implements AIQResourceVisitor {
     {
         Integer id = aiserver.getId();
 
-        _log.info("Visiting server: " + id + " AIID=" +
-                  aiserver.getAutoinventoryIdentifier());
-        
         AIPlatform aiplatform;
         AIPlatformValue aiplatformValue;
         PlatformValue existingPlatformValue;
@@ -528,7 +518,6 @@ public class AIQRV_approve implements AIQResourceVisitor {
             }
 
             // Add the AI server to appdef
-            _log.info("Creating server...");
             try {
                 serverValue = AIConversionUtil.
                     convertAIServerToServer(aiserver.getAIServerValue(),
@@ -626,7 +615,6 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                                ERR_REMOVED_FROM_APPDEF);
             }
 
-            _log.info("Updating server...");
             try {
                 serverValue = smLocal.updateServer(subject, 
                                                    serverValue);

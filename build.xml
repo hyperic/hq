@@ -1326,6 +1326,7 @@
         <include name="commons-logging.jar"/>
         <include name="commons-collections.jar"/>
         <include name="hibernate/*.jar"/>
+        <include name="json.jar"/>
       </fileset>
     </copy>
 
