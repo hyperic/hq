@@ -43,6 +43,8 @@ import org.hyperic.hq.appdef.shared.ServerManagerUtil;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
+import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceValue;
@@ -681,6 +683,14 @@ public class ConfigManagerEJBImpl
             throw new ConfigFetchException(productType, id);
         }
         return res;
+    }
+
+    public static ConfigManagerLocal getOne() {
+        try {
+            return ConfigManagerUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
     }
 
     public void ejbCreate() throws CreateException {}

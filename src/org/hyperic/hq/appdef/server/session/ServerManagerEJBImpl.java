@@ -61,6 +61,8 @@ import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerManagerUtil;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -106,8 +108,7 @@ import org.hyperic.hq.zevents.ZeventManager;
 public class ServerManagerEJBImpl extends AppdefSessionEJB
     implements SessionBean {
 
-    private Log log = LogFactory.getLog(
-        "org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl");
+    private Log log = LogFactory.getLog(ServerManagerEJBImpl.class);
 
     private final String VALUE_PROCESSOR
         = "org.hyperic.hq.appdef.server.session.PagerProcessor_server";
@@ -1344,6 +1345,14 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             server.setLocation(server.getLocation().trim());
         if (server.getName() != null)
             server.setName(server.getName().trim());
+    }
+ 
+    public static ServerManagerLocal getOne() {
+        try {
+            return ServerManagerUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
     }
 
     /**
