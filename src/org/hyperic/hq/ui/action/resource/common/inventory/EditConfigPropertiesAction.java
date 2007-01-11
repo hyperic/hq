@@ -331,31 +331,31 @@ public class EditConfigPropertiesAction extends BaseAction {
             }
             return returnSuccess(request, mapping, forwardParams);
         } catch(InvalidConfigException e) {
-            log.error("invalid config " + e);
+            log.error("Invalid config " + e);
             RequestUtils.setErrorWithNullCheck(request, e, ERR_NOMSG, ERR_CONFIG);
             cfgForm.validationErrors = true;
             return returnFailure(request, mapping);
         } catch(InvalidOptionValueException e) {
-            log.error("invalid config " + e);
+            log.error("Invalid config " + e);
             RequestUtils.setErrorWithNullCheck(request, e, ERR_NOMSG, ERR_CONFIG);
             return returnFailure(request, mapping);
         } catch(ConfigFetchException e) {
-            log.error("general configuration set error "+ e, e);
+            log.error("General configuration set error "+ e, e);
             RequestUtils.setErrorWithNullCheck(request, e, ERR_NOMSG, ERR_CONFIG);
             cfgForm.validationErrors = true;
             return returnFailure(request, mapping);
         } catch(EncodingException e) {
-            log.error("Encoding Exception " + e);
+            log.error("Encoding error " + e);
             RequestUtils.setErrorWithNullCheck(request, e, ERR_NOMSG, ERR_CONFIG);
             cfgForm.validationErrors = true;
             return returnFailure(request, mapping);
         } catch(FinderException e) {
-            log.error("finder exception " + e);
+            log.error("Error finding resource " + e);
             RequestUtils.setErrorWithNullCheck(request, e, ERR_NOMSG, ERR_CONFIG);
             cfgForm.validationErrors = true;
             return returnFailure(request, mapping);
         } catch(PluginNotFoundException e) {
-            log.error("Plugin not found exception " + e);
+            log.error("Plugin not found " + e);
             RequestUtils.setErrorObject(
                 request, "resource.common.inventory.error.PluginNotFound",
                 e.getMessage());
