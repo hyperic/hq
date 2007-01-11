@@ -50,8 +50,11 @@ import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.monitor.MonitorCreateException;
 import org.hyperic.hq.measurement.shared.RawMeasurementValue;
+import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.RawMeasurementManagerUtil;
 import org.hyperic.hq.product.MetricInvalidException;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.config.ConfigResponse;
 
 import org.apache.commons.logging.Log;
@@ -309,37 +312,29 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
         getRawMeasurementDAO().deleteByInstances(ids);
     }
 
+    public static RawMeasurementManagerLocal getOne() {
+        try {
+            return RawMeasurementManagerUtil.getLocalHome().create();
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
+    }
+
     /**
-     * @see javax.ejb.SessionBean#ejbCreate()
      * @ejb:create-method
      */
     public void ejbCreate() {}
 
-    /**
-     * @see javax.ejb.SessionBean#ejbPostCreate()
-     */
     public void ejbPostCreate() {}
 
-    /**
-     * @see javax.ejb.SessionBean#ejbActivate()
-     */
     public void ejbActivate() {}
 
-    /**
-     * @see javax.ejb.SessionBean#ejbPassivate()
-     */
     public void ejbPassivate() {}
 
-    /**
-     * @see javax.ejb.SessionBean#ejbRemove()
-     */
     public void ejbRemove() {
         this.ctx = null;
     }
 
-    /**
-     * @see javax.ejb.SessionBean#setSessionContext(SessionContext)
-     */
     public void setSessionContext(SessionContext ctx)
         throws EJBException, RemoteException {
         this.ctx = ctx;

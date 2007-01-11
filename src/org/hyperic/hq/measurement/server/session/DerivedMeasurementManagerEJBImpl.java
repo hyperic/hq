@@ -1312,6 +1312,14 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         sendAgentSchedule(id);
     }
 
+    public static DerivedMeasurementManagerLocal getOne() {
+        try {
+            return DerivedMeasurementManagerUtil.getLocalHome().create();
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
+    }
+
     /**
      * @ejb:create-method
      */
@@ -1322,7 +1330,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             throw new CreateException("Could not create value pager:" + e);
         }
     }
-
 
     public void ejbPostCreate() {}
 
