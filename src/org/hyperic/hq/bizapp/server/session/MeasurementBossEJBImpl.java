@@ -757,43 +757,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     }
     
     /**
-     * Enable default measurements and runtime AI.  This uses
-     * DefaultMetricsEnablerUtil so that it goes through the
-     * MetricEnablerSemaphore so that only one enablement is done
-     * at a time.
-     * @ejb:interface-method
-     */
-    public void enableDefaultMetricsAndRuntimeAI(int sessionId,
-                                                 AppdefEntityID id)
-        throws AppdefEntityNotFoundException, TemplateNotFoundException,
-               PermissionException, ConfigFetchException, 
-               EncodingException, MeasurementCreateException,
-               InvalidConfigException, 
-               SessionTimeoutException, SessionNotFoundException {
-
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-
-        boolean metricsWereEnabled = false;
-        metricsWereEnabled = DefaultMetricsEnablerUtil.instance()
-            .enableDefaultMetrics(subject, id, this, true);
-
-        // We didn't turn anything on, so no need to consult the SRNCache
-        if (!metricsWereEnabled) return;
-
-        // Wait for the srnCache to show that this entity is
-        // not an out-of-sync entity
-        SRNManagerLocal srnManager = getSrnManager();
-
-        while (true) {
-            List oos = srnManager.getOutOfSyncEntities();
-            if (!oos.contains(id)) {
-                return;
-            }
-            try { Thread.sleep(2000); } catch (InterruptedException e) {}
-        }
-    }
-
-    /**
      * Update the measurements - set the interval
      * @ejb:interface-method
      */
