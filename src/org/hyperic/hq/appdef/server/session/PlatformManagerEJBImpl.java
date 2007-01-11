@@ -475,13 +475,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @ejb:transaction type="RequiresNew"
      */
     public Integer createPlatform(AuthzSubjectValue subject,
-                                     AIPlatformValue aipValue)
+                                  AIPlatformValue aipValue)
         throws ApplicationException, CreateException
     {
-        if (_log.isDebugEnabled()) {
-            _log.debug("Begin createPlatform(ai): " + aipValue);
-        }
-
         this.counter.addCPUs(aipValue.getCpuCount().intValue());
 
         PlatformTypeDAO ptDAO = 
@@ -498,8 +494,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         if (checkP != null) {
             throwDupPlatform(checkP.getId(), aipValue.getName());
         }
-            
-        // call the create
+
         Agent agent = getAgentDAO().findByAgentToken(aipValue.getAgentToken());
         
         if (agent == null) {
@@ -511,19 +506,21 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
         Platform platform = platType.create(aipValue, subject.getName(),
                                             config, agent);
-        getPlatformDAO().save(platform); // To give it an ID
+        getPlatformDAO().save(platform);
         
         // AUTHZ CHECK
-        // in order to succeed subject has to be in a role 
-        // which allows creating of authz resources
-        // TODO:  Cleanup exception handling here
         try {
             createAuthzPlatform(aipValue.getName(), platform.getId(), 
                                 subject);
         } catch(Exception e) {
             throw new SystemException(e);
         }
-        // Platforms get configured as part of their creation
+
+        // Send resource create event
+        ResourceCreatedZevent zevent =
+            new ResourceCreatedZevent(subject, platform.getEntityId());
+        ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
+        
         return platform.getId();
     }
 
