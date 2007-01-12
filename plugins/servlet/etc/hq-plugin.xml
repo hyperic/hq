@@ -266,31 +266,7 @@
            include="Servlet Engine" >
   </metrics>
 
-  <metrics name="Tomcat 4.1 Webapp" include="Web Application">
-    <metric name="Expired Sessions"
-            alias="ExpiredSessions"
-            template="Catalina:type=Manager,path=%context%,host=%host%,service=%service%:expiredSessions"
-            category="UTILIZATION"
-            group="Session"
-            units="none"
-            collectionType="trendsup"/>
-
-    <metric name="Rejected Sessions"
-            alias="RejectedSessions"
-            template="Catalina:type=Manager,path=%context%,host=%host%,service=%service%:rejectedSessions"
-            category="UTILIZATION"
-            group="Session"
-            units="none"
-            collectionType="trendsup"/>
-
-    <metric name="Max Active Sessions"
-            alias="MaxActive"
-            template="Catalina:type=Manager,path=%context%,host=%host%,service=%service%:maxActive"
-            category="UTILIZATION"
-            group="Session"
-            units="none"
-            collectionType="dynamic"/>
-  </metrics>
+  <metrics name="Tomcat 4.1 Webapp" include="Web Application"/>
 
   <metrics name="Tomcat 4.1 Connector">
 
