@@ -234,6 +234,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             Iterator servicesIt = services.iterator();
             while(servicesIt.hasNext()) {
                 Service aService = (Service)servicesIt.next();
+                servicesIt.remove();
                 getServiceMgrLocal().removeService(subject, aService, true);
             }
 
