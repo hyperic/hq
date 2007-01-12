@@ -62,7 +62,7 @@
   <tr>
     <td rowspan="2" width="20%" class="BlockLabel">&nbsp;</td>
     <td nowrap="true" class="BlockContent" style="padding: 10px;">
-  <c:if test="${escalation.allowPause && not alert.acknowledged}">
+  <c:if test="${escalation.pauseAllowed && not alert.acknowledged}">
       <input type=checkbox name="pause" value="true"/>
       <fmt:message key="alert.escalation.pause"/>
       <select name="pauseTime">
