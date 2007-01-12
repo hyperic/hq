@@ -165,6 +165,9 @@
     <option name="lookupname"
             description="Lookup Name"
             default="www.hyperic.com"/>
+    <option name="ipmatch"
+            description="IP match"
+            optional="true"/>
   </config>
 
   <config name="ssh"
