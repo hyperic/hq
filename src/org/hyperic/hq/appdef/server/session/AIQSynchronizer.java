@@ -35,20 +35,11 @@ import javax.naming.NamingException;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEvent;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
-import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
 import org.hyperic.hq.appdef.shared.ApplicationManagerUtil;
-import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
-import org.hyperic.hq.appdef.shared.resourceTree.ServiceNode;
-import org.hyperic.hq.appdef.shared.resourceTree.PlatformNode;
-import org.hyperic.hq.appdef.shared.resourceTree.ServerNode;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.dao.AIPlatformDAO;
@@ -154,86 +145,9 @@ public class AIQSynchronizer {
                                               updateServers,
                                               isApproval,
                                               isReport);
-
-                // sending an update event
-                // only if there is an approval action actually taking place
-                if(isApproval) {
-                    this.sendAppdefEvent(subject, aiPlatform,
-                                         AppdefEvent.ACTION_UPDATE);
-                }
             }
         }
         return existingQplatform.getAIPlatformValue();
-    }
-    
-    private void sendAppdefEvent(AuthzSubjectValue subject,
-                                 AIPlatformValue aiPlatform, int eventType)
-        throws NamingException {
-        PlatformValue platform;
-        try {
-            platform =
-                getPlatformMan().getPlatformByAIPlatform(subject, aiPlatform);
-        } catch (PermissionException e) {
-            if (_log.isDebugEnabled()) {
-                _log.debug("sendAppdefEvent(): " + subject.getName() +
-                           " does not have permission to view platform " +
-                           "for certdn: " + aiPlatform.getCertdn() + " fqdn: " +
-                           aiPlatform.getFqdn());
-            }
-            return;
-        }
-
-        if (platform == null) {
-            // I'm not sure why the platform could be null, if there's
-            // supposedly an existing platform when we call this - clee
-            if (_log.isDebugEnabled()) {
-                _log.debug("sendAppdefEvent(): Existing platform not found " +
-                           "for certdn: " + aiPlatform.getCertdn() + " fqdn: " +
-                           aiPlatform.getFqdn());
-            }
-            
-            return;
-        }
-
-        // We'll have to iterate through everything in the platform and send
-        // appdef events
-        AppdefEntityID[] pid = new AppdefEntityID[] { platform.getEntityId() };
-        try {
-            ResourceTree tree;
-
-            try {
-                tree = getAppMan().getResourceTree(subject, pid,
-                                                   ResourceTreeGenerator.
-                                                   TRAVERSE_UP);
-            } catch (PermissionException e) {
-                _log.error("Error sending change events", e);
-                return;
-            }
-
-            for (Iterator p = tree.getPlatformIterator(); p.hasNext(); ) {
-                PlatformNode pn = (PlatformNode) p.next();
-                
-                getPlatformMan().sendAppdefEvent(subject,
-                                                 pn.getPlatform().getEntityId(),
-                                                 eventType);
-                
-                for(Iterator s = pn.getServerIterator(); s.hasNext();) {
-                    ServerNode sn = (ServerNode) s.next();
-                    getPlatformMan().sendAppdefEvent(subject,
-                                                     sn.getServer().getEntityId(),
-                                                     eventType);
-                    
-                    for(Iterator sv = sn.getServiceIterator(); sv.hasNext();) {
-                        ServiceNode svn = (ServiceNode)sv.next();
-                        getPlatformMan().sendAppdefEvent(subject,
-                                                         svn.getService().getEntityId(),
-                                                         eventType);
-                    }
-                }
-            }
-        } catch (AppdefEntityNotFoundException e1) {
-            _log.error("Existing platform not found: " + platform.getEntityId());
-        }
     }
 
     public static AIPlatform getAIQPlatform(AIPlatformDAO aiPlatformLH,
