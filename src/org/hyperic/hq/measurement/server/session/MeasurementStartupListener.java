@@ -26,6 +26,7 @@
 package org.hyperic.hq.measurement.server.session;
 
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
+import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.shared.SRNManagerUtil;
@@ -52,5 +53,13 @@ public class MeasurementStartupListener
         ZeventManager.getInstance().
             addListener(ResourceCreatedZevent.class,
                         new MeasurementEnablerZeventListener());
+
+        /**
+         * Add measurement rescheduler to reschedule metrics when resources
+         * are updated.
+         */
+        ZeventManager.getInstance().
+            addListener(ResourceUpdatedZevent.class,
+                        new MeasurementReschedulerZeventListener());
     }
 }
