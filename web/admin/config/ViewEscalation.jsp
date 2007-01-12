@@ -205,7 +205,7 @@ function showViewEscResponse(originalRequest) {
           for (var b = 0; b < uids.length; b++) {
               <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
                   if (uids[b] == '<c:out value="${user.id}"/>') {
-                      userNames += '<c:out value="${user.name}" /> ';
+                      userNames += '<c:out value="${user.name}" />, ';
                   }
               </c:forEach>
           }
@@ -217,7 +217,7 @@ function showViewEscResponse(originalRequest) {
           for (var b = 0; b < rids.length; b++) {
               <c:forEach var="role" items="${AvailableRoles}" varStatus="status">
                   if (rids[b] == '<c:out value="${role.id}"/>') {
-                      roleNames += '<c:out value="${role.name}" /> ';
+                      roleNames += '<c:out value="${role.name}" />, ';
                   }
               </c:forEach>
           }
@@ -286,169 +286,162 @@ function showViewEscResponse(originalRequest) {
         $('editPropertiesTable').style.display = 'none';
     }
 
-    <%--function addRow() {--%>
-        <%--var ni = $('rowOrder');--%>
-        <%--var numi = document.getElementById('theValue');--%>
-        <%--var num = (document.getElementById('theValue').value -1)+ 2;--%>
+    function saveAddEscalation () {
+        $('escId').value = id;
+        var pars =  "EscId=" + id + Form.serialize('addEscalation');
+        alert(pars)
+        var url = '<html:rewrite action="/escalation/saveAction.do"/>';
+        new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showViewEscResponse, onFailure: reportError} );
+    }
 
-        <%--numi.value = num;--%>
-        <%--var liID = 'row'+num;--%>
-        <%--var escLi = document.createElement('li');--%>
-        <%--var remDiv = document.createElement('div');--%>
-        <%--var usersDiv = document.createElement('div');--%>
-        <%--var rolesDiv = document.createElement('div');--%>
-        <%--var othersDiv = document.createElement('div');--%>
-        <%--var emailDiv = document.createElement('div');--%>
-        <%--var sysDiv = document.createElement('div');--%>
-        <%--var escTable = document.createElement('table');--%>
-        <%--var escTableBody = document.createElement('tbody');--%>
-        <%--var escTr1 = document.createElement('tr');--%>
-        <%--var escTr2 = document.createElement('tr');--%>
-        <%--var td1 = document.createElement('td');--%>
-        <%--var td2 = document.createElement('td');--%>
-        <%--var td3 = document.createElement('td');--%>
-        <%--var td4 = document.createElement('td');--%>
-        <%--var td5 = document.createElement('td');--%>
-        <%--var select1 = document.createElement("select");--%>
-        <%--var select2 = document.createElement("select");--%>
-        <%--var select3 = document.createElement("select");--%>
-        <%--var anchor = document.createElement("a");--%>
+    function addRow() {
+        $(addEscalationUL).style.display = "";
+        var ni = $('addEscalationUL');
+        var numi = document.getElementById('theValue');
+        var num = (document.getElementById('theValue').value -1)+ 2;
 
-        <%--ni.appendChild(escLi);--%>
-        <%--escLi.setAttribute((document.all ? 'className' : 'class'), "lineitem");--%>
-        <%--escLi.setAttribute('id','row_'+ liID);--%>
-        <%--//escLi.innerHTML = "here";--%>
+        numi.value = num;
+        var liID = 'row'+num;
+        var escLi = document.createElement('li');
+        var remDiv = document.createElement('div');
+        var usersDiv = document.createElement('div');
+        var rolesDiv = document.createElement('div');
+        var othersDiv = document.createElement('div');
+        var emailDiv = document.createElement('div');
+        var sysDiv = document.createElement('div');
+        var escTable = document.createElement('table');
+        var escTableBody = document.createElement('tbody');
+        var escTr1 = document.createElement('tr');
+        var escTr2 = document.createElement('tr');
+        var td1 = document.createElement('td');
+        var td2 = document.createElement('td');
+        var td3 = document.createElement('td');
+        var td4 = document.createElement('td');
+        var td5 = document.createElement('td');
+        var select1 = document.createElement("select");
+        var select2 = document.createElement("select");
+        var select3 = document.createElement("select");
+        var anchor = document.createElement("a");
 
-        <%--escLi.appendChild(remDiv);--%>
-        <%--remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");--%>
-        <%--remDiv.innerHTML ='<a href="#" onclick="removeRow(this);"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';--%>
+        ni.appendChild(escLi);
+        escLi.setAttribute((document.all ? 'className' : 'class'), "lineitem");
+        escLi.setAttribute('id','row_'+ liID);
+        //escLi.innerHTML = "here";
 
-        <%--escLi.appendChild(escTable);--%>
-        <%--escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");--%>
-        <%--escTable.setAttribute('border', '0');--%>
-        <%--escTable.appendChild(escTableBody);--%>
+        escLi.appendChild(remDiv);
+        remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
+        remDiv.innerHTML ='<a href="#" onclick="removeRow(this);"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
 
-        <%--escTableBody.appendChild(escTr2);--%>
-        <%--escTableBody.appendChild(escTr1);--%>
+        escLi.appendChild(escTable);
+        escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
+        escTable.setAttribute('border', '0');
+        escTable.appendChild(escTableBody);
 
-        <%--escTr1.appendChild(td1);--%>
+        escTableBody.appendChild(escTr2);
+        escTableBody.appendChild(escTr1);
 
-        <%--td1.setAttribute('colspan', '3');--%>
-        <%--td1.appendChild(document.createTextNode('<fmt:message key="alert.config.escalation.then"/> '));--%>
+        escTr1.appendChild(td1);
 
-        <%--td1.appendChild(select1);--%>
-        <%--select1.setAttribute('id', 'waittime_' + liID);--%>
+        td1.setAttribute('colspan', '3');
+        td1.appendChild(document.createTextNode('<fmt:message key="alert.config.escalation.then"/> '));
 
-        <%--select1.setAttribute('name', 'waittime_' + liID);--%>
-        <%--addOption(select1, '0', '<fmt:message key="alert.config.escalation.end"/>');--%>
-        <%--addOption(select1, '300000', '<fmt:message key="alert.config.escalation.wait">--%>
-                                      <%--<fmt:param value="5"/>--%>
-                                    <%--</fmt:message>');--%>
-        <%--addOption(select1, '600000', '<fmt:message key="alert.config.escalation.wait">--%>
-                                      <%--<fmt:param value="10"/>--%>
-                                    <%--</fmt:message>');--%>
-        <%--addOption(select1, '1200000', '<fmt:message key="alert.config.escalation.wait">--%>
-                                      <%--<fmt:param value="20"/>--%>
-                                    <%--</fmt:message>');--%>
-        <%--addOption(select1, '1800000', '<fmt:message key="alert.config.escalation.wait">--%>
-                                      <%--<fmt:param value="30"/>--%>
-                                    <%--</fmt:message>');--%>
-        <%--addOption(select1, '2400000', '<fmt:message key="alert.config.escalation.wait">--%>
-                                      <%--<fmt:param value="45"/>--%>
-                                    <%--</fmt:message>');--%>
-        <%--addOption(select1, '3000000', '<fmt:message key="alert.config.escalation.wait">--%>
-                                      <%--<fmt:param value="60"/>--%>
-                                    <%--</fmt:message>');--%>
+        td1.appendChild(select1);
+        select1.setAttribute('id', 'waittime_' + liID);
 
-        <%--escTr2.appendChild(td2);--%>
-        <%--td2.setAttribute('valign', 'top');--%>
-        <%--td2.setAttribute('class', 'td2');--%>
+        select1.setAttribute('name', 'waittime_' + liID);
+        addOption(select1, '0', '<fmt:message key="alert.config.escalation.end"/>');
+        addOption(select1, '300000', '<fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="5"/>
+                                    </fmt:message>');
+        addOption(select1, '600000', '<fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="10"/>
+                                    </fmt:message>');
+        addOption(select1, '1200000', '<fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="20"/>
+                                    </fmt:message>');
+        addOption(select1, '1800000', '<fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="30"/>
+                                    </fmt:message>');
+        addOption(select1, '2400000', '<fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="45"/>
+                                    </fmt:message>');
+        addOption(select1, '3000000', '<fmt:message key="alert.config.escalation.wait">
+                                      <fmt:param value="60"/>
+                                    </fmt:message>');
 
+        escTr2.appendChild(td2);
+        td2.setAttribute('valign', 'top');
+        td2.setAttribute('class', 'td2');
 
+        td2.appendChild(select2);
+        select2.setAttribute('id', 'Email_' + liID);
+        select2.onchange = function(){onchange_handler(this);}
+        select2.setAttribute('name', 'action_' + liID);
+        addOption(select2, 'Email', 'Email');
+        addOption(select2, 'SMS', 'SMS');
+        addOption(select2, 'Syslog', 'Sys Log');
+        addOption(select2, 'NoOp', 'Suppress Alerts');
 
-        <%--td2.appendChild(select2);--%>
-        <%--select2.setAttribute('id', 'Email_' + liID);--%>
+        escTr2.appendChild(td3);
+        td3.setAttribute('class', 'td3');
+        td3.setAttribute('valign', 'top');
 
+        td3.appendChild(select3);
+        select3.setAttribute('name', 'who_' + liID);
+        select3.setAttribute('id', 'who_' + liID);
+        select3.onchange = function(){onchange_who(this);}
+        addOption(select3, 'Select', '<fmt:message key="alert.config.escalation.notify.who"/>');
+        <c:if test="${not empty AvailableRoles}">
+        addOption(select3, 'Roles', '<fmt:message key="monitoring.events.MiniTabs.Roles"/>')
+        </c:if>
+        addOption(select3, 'Users', '<fmt:message key="monitoring.events.MiniTabs.Users"/>');
+        addOption(select3, 'Others', '<fmt:message key="monitoring.events.MiniTabs.Others"/>');
 
-        <%--select2.onchange = function(){onchange_handler(this);}--%>
-        <%--select2.setAttribute('name', 'action_' + liID);--%>
-        <%--addOption(select2, 'Email', 'Email');--%>
-        <%--addOption(select2, 'SMS', 'SMS');--%>
-        <%--addOption(select2, 'Syslog', 'Sys Log');--%>
-        <%--addOption(select2, 'NoOp', 'Suppress Alerts');--%>
+        escTr2.appendChild(td4);
+        td4.setAttribute('width', '50%');
+        
+        td4.appendChild(emailDiv);
+        emailDiv.setAttribute('class', 'emailDiv');
+        emailDiv.setAttribute('id', 'emailinput' + liID);
+        $('emailinput'+ liID).style.display = 'none';
+        emailDiv.setAttribute('class', 'escInput');
+        emailDiv.setAttribute('width', '40%');
+        emailDiv.innerHTML = "email addresses (comma separated):<br><textarea rows=3 cols=35 id=emailinput_" + liID + " name=emailinput_" + liID + "></textarea>";
 
-        <%--escTr2.appendChild(td3);--%>
-        <%--td3.setAttribute('class', 'td3');--%>
-        <%--td3.setAttribute('valign', 'top');--%>
+        td4.appendChild(sysDiv);
+        sysDiv.setAttribute('class', 'escInput'+ liID);
+        sysDiv.setAttribute('id', 'sysloginput'+ liID);
+        $('sysloginput'+ liID).style.display = 'none';
+        sysDiv.setAttribute('width', '40%');
+        sysDiv.innerHTML = "meta: <input type=text name=meta_" + liID + " size=40><br>" + "product: <input type=text name=product_" + liID + " size=40><br>" + "version: <input type=text name=version_" + liID + " size=40><br>";
 
-        <%--td3.appendChild(select3);--%>
+        td4.appendChild(usersDiv);
+        usersDiv.setAttribute('id', 'usersDiv' + liID);
+        $('usersDiv'+ liID).style.display = 'none';
 
-        <%--select3.setAttribute('name', 'who_' + liID);--%>
-        <%--select3.setAttribute('id', 'who_' + liID);--%>
-        <%--select3.onchange = function(){onchange_who(this);}--%>
-        <%--addOption(select3, 'Select', '<fmt:message key="alert.config.escalation.notify.who"/>');--%>
-        <%--<c:if test="${not empty AvailableRoles}">--%>
-        <%--addOption(select3, 'Roles', '<fmt:message key="monitoring.events.MiniTabs.Roles"/>')--%>
-        <%--</c:if>--%>
-        <%--addOption(select3, 'Users', '<fmt:message key="monitoring.events.MiniTabs.Users"/>');--%>
-        <%--addOption(select3, 'Others', '<fmt:message key="monitoring.events.MiniTabs.Others"/>');--%>
-
-        <%--escTr2.appendChild(td4);--%>
-        <%--td5.setAttribute('width', '50%');--%>
-
-        <%--td4.appendChild(emailDiv);--%>
-        <%--emailDiv.setAttribute('class', 'emailDiv');--%>
-        <%--emailDiv.setAttribute('id', 'emailinput' + liID);--%>
-        <%--$('emailinput'+ liID).style.display = 'none';--%>
-        <%--emailDiv.setAttribute('class', 'escInput');--%>
-        <%--emailDiv.setAttribute('width', '40%');--%>
-        <%--emailDiv.innerHTML = "email addresses (comma separated):<br><textarea rows=3 cols=35 id=emailinput_" + liID + " name=emailinput_" + liID + "></textarea>";--%>
-
-        <%--td4.appendChild(sysDiv);--%>
-        <%--sysDiv.setAttribute('class', 'escInput'+ liID);--%>
-        <%--sysDiv.setAttribute('id', 'sysloginput'+ liID);--%>
-        <%--$('sysloginput'+ liID).style.display = 'none';--%>
-        <%--sysDiv.setAttribute('width', '40%');--%>
-        <%--sysDiv.innerHTML = "meta: <input type=text name=meta_" + liID + " size=40><br>" + "product: <input type=text name=product_" + liID + " size=40><br>" + "version: <input type=text name=version_" + liID + " size=40><br>";--%>
-
-        <%--td4.appendChild(usersDiv);--%>
-        <%--usersDiv.setAttribute('id', 'usersDiv' + liID);--%>
-        <%--$('usersDiv'+ liID).style.display = 'none';--%>
-
-        <%--if($('usersList')) {--%>
-          <%--usersDiv.innerHTML = $('usersList').innerHTML;--%>
-          <%--var usersInputList = usersDiv.getElementsByTagName('input');--%>
-          <%--for(i=0;i < usersInputList.length; i++) {--%>
-              <%--var inputNamesArr = usersInputList[i];--%>
-              <%--inputNamesArr.name = inputNamesArr.name + "_" + liID;--%>
-          <%--}--%>
-        <%--}--%>
-
-        <%--td4.appendChild(rolesDiv);--%>
-        <%--rolesDiv.setAttribute('id', 'rolesDiv' + liID);--%>
-        <%--$('rolesDiv'+ liID).style.display = 'none';--%>
-
-        <%--if($('rolesList')) {--%>
-          <%--rolesDiv.innerHTML = $('rolesList').innerHTML;--%>
-          <%--var rolesInputList = rolesDiv.getElementsByTagName('input');--%>
-           <%--for(i=0;i < rolesInputList.length; i++) {--%>
-                  <%--var inputRolesArr = rolesInputList[i];--%>
-                  <%--inputRolesArr.name =  inputRolesArr.name + "_" + liID;--%>
-              <%--}--%>
-          <%--}--%>
-      <%--}--%>
-      /*
-      function rowIDs(liID){
-         var rows = liID.id;
-
-        for(i=0;i < rows.length; i++) {
-              var rowIdList = rows[i].id;
-              var rowSplit = rowIdList.split('_');
-              var rowListID = rowSplit[1];
-            alert(rowListID)
-            }
+        if($('usersList')) {
+          usersDiv.innerHTML = $('usersList').innerHTML;
+          var usersInputList = usersDiv.getElementsByTagName('input');
+          for(i=0;i < usersInputList.length; i++) {
+              var inputNamesArr = usersInputList[i];
+              inputNamesArr.name = inputNamesArr.name + "_" + liID;
+          }
         }
-       */
+
+        td4.appendChild(rolesDiv);
+        rolesDiv.setAttribute('id', 'rolesDiv' + liID);
+        $('rolesDiv'+ liID).style.display = 'none';
+
+        if($('rolesList')) {
+          rolesDiv.innerHTML = $('rolesList').innerHTML;
+          var rolesInputList = rolesDiv.getElementsByTagName('input');
+           for(i=0;i < rolesInputList.length; i++) {
+                  var inputRolesArr = rolesInputList[i];
+                  inputRolesArr.name =  inputRolesArr.name + "_" + liID;
+              }
+          }
+      }
+     
       function onchange_handler(el) {
         //alert(el+", value="+ el.options[el.selectedIndex].value );
         var index= el.options[el.selectedIndex].value
@@ -561,7 +554,7 @@ function showViewEscResponse(originalRequest) {
         var gadId;
         var eId;
         var aetId;
-        var escFormSerial = Form.serialize('viewEscalation');
+        var escFormSerial = Form.serialize('viewEscalationUL');
         var url = '<html:rewrite action="/escalation/updateEscalation"/>';
         if ($('gad')) {
            gadId == $('gad').value;
@@ -588,38 +581,7 @@ function showViewEscResponse(originalRequest) {
         new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse, onFailure :reportError} );
 
    }
-    function sendEscForm() {
-        var adId;
-        var gadId;
-        var eId;
-        var aetId;
-        var escFormSerial = Form.serialize('EscalationForm');
-        var url = '<html:rewrite action="/escalation/saveEscalation"/>';
-        if ($('gad')) {
-           gadId == $('gad').value;
-        } else {
-            gadId == '';
-        }
-        if ($('ad')){
-            adId == $('ad').value;
-        } else {
-            adId == '';
-        }
-        if ($('eid')){
-            eID = $('eid').value;
-        } else {
-           eId == '';
-        }
-        if ($('aetid')) {
-            aetId = $('aetid').value;
-        } else {
-            aetId == '';
-        }
-
-        var pars = "rowOrder=" + rowOrder + "escForm=" + escFormSerial + "&ad=" + adId + "&gad=" + gadId + "&eid=" + eId + "aetid=" + aetId;
-        new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse, onFailure: reportError} );
-    }
-
+    
     function configure(id) {
       var sel = $('who' + id);
       var selval = sel.options[sel.selectedIndex].value;
@@ -716,18 +678,15 @@ function showViewEscResponse(originalRequest) {
         alert('Error ' + originalRequest.status + ' -- ' + originalRequest.statusText);
     }
 
-    function getGroupOrder() {
-        var sectionID = $('rowOrder');
-        var order = Sortable.serialize(sectionID);
-        var alerttext = Sortable.serialize('rowOrder') + '\n';
-
-        alert(alerttext);
-    }
 
     function hideExample() {
             $('example').style.display= 'none';
     }
 
+    function cancelAddEscalation() {
+        var addEscalationUL = $('addEscalationUL');
+        addEscalationUL.innerHTML = "";
+    }
 
 </script>
 
@@ -959,9 +918,15 @@ function showViewEscResponse(originalRequest) {
 
 </form>
 
-<form name="viewEscalation" id="viewEscalation" style="display:none;"><input
-  type="hidden" id="alertDefId" name="alertDefId"
+<form name="viewEscalation" id="viewEscalation" style="display:none;">
+    <input type="hidden" id="alertDefId" name="alertDefId"
   value='<c:out value="${alertDef.id}"/>' />
+    <input type="hidden" value="" id="creationTime"> <input type="hidden"
+      value="" id="_version_"> <input type="hidden" value="" id="notifyAll">
+    <input type="hidden" value="" id="modifiedTime"> <input type="hidden"
+      value="" id="allowPause"> <input type="hidden" value="" id="escName">
+    <input type="hidden" value="" id="id">
+
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tbody>
     <tr class="BlockContent">
@@ -983,15 +948,52 @@ function showViewEscResponse(originalRequest) {
       </ul>
       </td>
     </tr>
+ </table>
+    </form>
+<form name="addEscalation" id="addEscalation" style="">
+ <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tbody>
+      <tr>
+      <td width="100%" id="addSection">
+      <ul id="addEscalationUL" style="margin-left:0px;">
+      </ul>
+      </td>
+    </tr>
+    <tr class="ToolbarContent"><!-- SET TOOLBAR -->
+      <td>
+        <table cellspacing="4" cellpadding="0">
+        <tr>
+            <td>
+        <tiles:insert page="/common/components/ActionButton.jsp">
+          <tiles:put name="labelKey" value="common.label.AddAction"/>
+          <tiles:put name="buttonHref" value="."/>
+          <tiles:put name="buttonClick" value="addRow(); return false;"/>
+        </tiles:insert>
+        </td>
+            <td>
+        <tiles:insert page="/common/components/ActionButton.jsp">
+          <tiles:put name="labelKey" value="common.label.Cancel"/>
+          <tiles:put name="buttonHref" value="#"/>
+          <tiles:put name="buttonClick" value="cancelAddEscalation();"/>
+        </tiles:insert>
+        </td>
+        <td>
+        <tiles:insert page="/common/components/ActionButton.jsp">
+          <tiles:put name="labelKey" value="common.label.Save"/>
+          <tiles:put name="buttonHref" value="."/>
+          <tiles:put name="buttonClick" value="saveAddEscalation(); return false;"/>
+        </tiles:insert>
+        </td><td>
+        </tr>
+
+        </table>
+      </td>
+    </tr>
   </tbody>
 </table>
+</form>
+<br>
+<br>
 
-<br>
-<br>
-<!-- <input type="button" value="Submit" onclick="sendEditEscForm();" id="submit"></input>&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" value="Cancel" onclick="clearForm();" id="submit"></input> <br><br>-->
-<input type="hidden" value="" id="creationTime"> <input type="hidden"
-  value="" id="_version_"> <input type="hidden" value="" id="notifyAll">
-<input type="hidden" value="" id="modifiedTime"> <input type="hidden"
-  value="" id="allowPause"> <input type="hidden" value="" id="escName">
-<input type="hidden" value="" id="id"></form>
+</form>
 

@@ -921,6 +921,23 @@ text-align:center;
   background-color:#F2F4F7;
 }
 
+#addEscalationUL {
+  margin:0;
+  margin-right: 0px;
+  padding:0;
+  width:100%;
+}
+
+#addEscalationUL li {
+  font:13px Verdana;
+  margin:0px;
+  padding:0px;
+  list-style: none;
+  width: 100%;
+  border-bottom:1px solid gray;
+  background-color:#F2F4F7;
+}
+
 .escTbl {
   width:100%;
   margin-top:10px;
