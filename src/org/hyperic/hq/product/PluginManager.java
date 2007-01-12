@@ -108,7 +108,7 @@ public abstract class PluginManager {
     }
 
     public String getProperty(String key) {
-        return getProperty(key, null);
+        return getProperty(key, System.getProperty(key));
     }
 
     public boolean isPropertyEnabled(String key, boolean defVal) {
