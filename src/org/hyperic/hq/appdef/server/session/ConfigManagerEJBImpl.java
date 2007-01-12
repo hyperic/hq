@@ -70,7 +70,6 @@ import java.util.Collection;
 import java.util.Iterator;
 
 /**
- *
  * @ejb:bean name="ConfigManager"
  *      jndi-name="ejb/appdef/ConfigManager"
  *      local-jndi-name="LocalConfigManager"
@@ -133,19 +132,6 @@ public class ConfigManagerEJBImpl
         return config;
     }
 
-    // A Map of entityType->entityId->pluginName
-    private static Map typeCache = new HashMap();
-    static {
-        typeCache.put(new Integer(AppdefEntityConstants.APPDEF_TYPE_PLATFORM),
-                      new HashMap());
-        typeCache.put(new Integer(AppdefEntityConstants.APPDEF_TYPE_SERVER),
-                      new HashMap());
-        typeCache.put(new Integer(AppdefEntityConstants.APPDEF_TYPE_SERVICE),
-                      new HashMap());
-        typeCache.put(new Integer(AppdefEntityConstants.APPDEF_TYPE_APPLICATION),
-                      new HashMap());
-    }
-
     /**
      * @ejb:interface-method
      */
@@ -154,12 +140,6 @@ public class ConfigManagerEJBImpl
     {
         Integer intID = id.getId();
         String pname;
-        Map nameMap = (Map) typeCache.get(new Integer(id.getType()));
-
-        synchronized (nameMap) {
-            pname = (String) nameMap.get(intID);
-            if (pname != null) return pname;
-        }
 
         try {
             switch(id.getType()){
@@ -185,10 +165,7 @@ public class ConfigManagerEJBImpl
                                                    "does not support config " +
                                                    "responses");
             }
-            
-            synchronized (nameMap) {
-                nameMap.put(intID, pname);
-            }
+
             return pname;
 
         } catch (NamingException e) {
