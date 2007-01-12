@@ -65,6 +65,7 @@ import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.appdef.shared.resourceTree.PlatformNode;
 import org.hyperic.hq.appdef.shared.resourceTree.ServerNode;
 import org.hyperic.hq.appdef.shared.resourceTree.ServiceNode;
+import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -108,6 +109,7 @@ import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.TrackEvent;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.lather.LatherContext;
 import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
@@ -326,13 +328,13 @@ public class LatherDispatcher
         agentVal.setAgentToken(agentToken);
 
         // Check the to see if it already exists
-        Collection pks = null;
+        Collection ids = null;
         try {
             AgentValue origAgent =
                 getAgentManager().getAgent(agentIP, port);
             
             try {
-                pks = getPlatformManager().
+                ids = getPlatformManager().
                     getPlatformPksByAgentToken(getOverlord(),
                                                origAgent.getAgentToken());
             } catch (Exception e) {
@@ -364,45 +366,50 @@ public class LatherDispatcher
         RegisterAgent_result result =
             new RegisterAgent_result("token:" + agentToken);
 
-        if (pks != null) {
-            for (Iterator it = pks.iterator(); it.hasNext(); ) {
-                Integer pk = (Integer) it.next();
-                try {
+        /**
+         * Reschedule all metrics on a platform when it is started for the
+         * first time.  This allows the schedule to be updated immediately
+         * on either agent updates, or if the user removes the agent data
+         * directory.
+         */
+        if (ids != null) {
+            try {
+                List zevents = new ArrayList();
+                ResourceUpdatedZevent zevent;
+                for (Iterator it = ids.iterator(); it.hasNext();) {
+                    Integer id = (Integer) it.next();
                     PlatformValue platform = getPlatformManager()
-                        .getPlatformById(getOverlord(), pk);
-                    
-                    // Send the agent the schedule
-                    // Tell HQ we have a new agent starting.  This forces an
-                    // update of the metric schedule.
-                    getPlatformManager().sendAppdefEvent(
-                        getOverlord(),
-                        new AppdefEntityID(
-                            AppdefEntityConstants.APPDEF_TYPE_PLATFORM, pk),
-                        AppdefEvent.ACTION_UPDATE);
-                    
+                        .getPlatformById(getOverlord(), id);
+
+                    zevent = new ResourceUpdatedZevent(getOverlord(),
+                                                       platform.getEntityId());
+                    zevents.add(zevent);
+
                     ServerLightValue[] servers = platform.getServerValues();
                     for (int i = 0; i < servers.length; i++) {
-                        getPlatformManager().sendAppdefEvent(
-                             getOverlord(), servers[i].getEntityId(),
-                             AppdefEvent.ACTION_UPDATE);
-                        
+                        zevent = new ResourceUpdatedZevent(getOverlord(),
+                                                           servers[i].getEntityId());
+                        zevents.add(zevent);
+
                         ServerValue server = getServerManager()
                             .getServerById(getOverlord(), servers[i].getId());
-                        
+
                         ServiceLightValue[] services = server.getServiceValues();
                         for (int j = 0; j < services.length; j++) {
-                            getPlatformManager().sendAppdefEvent(
-                                getOverlord(), services[j].getEntityId(),
-                                AppdefEvent.ACTION_UPDATE);
+                            zevent = new ResourceUpdatedZevent(getOverlord(),
+                                                               services[j].getEntityId());
+                            zevents.add(zevent);
                         }
                     }
-                } catch (Exception e) {
-                    // Shouldn't happen, not fatal if by chance it does.  The
-                    // agent schedule will not be immediately updated.
                 }
+
+                ZeventManager.getInstance().enqueueEvents(zevents);
+
+            } catch (Exception e) {
+                // Not fatal, the metrics will eventually be rescheduled...
+                log.error("Unable to refresh agent schedule", e);
             }
         }
-
         return result;
     }
 
