@@ -25,10 +25,6 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -66,20 +62,18 @@ import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
+import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.PermissionManager;
-import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.product.ServiceTypeInfo;
-import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -113,26 +107,12 @@ import org.hyperic.hq.zevents.ZeventManager;
 public class ServiceManagerEJBImpl extends AppdefSessionEJB
     implements SessionBean {
 
-    private Log log = LogFactory.getLog(
-        "org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl");
+    private Log log = LogFactory.getLog(ServiceManagerEJBImpl.class);
 
     private final String VALUE_PROCESSOR
         = "org.hyperic.hq.appdef.server.session.PagerProcessor_service";
     private Pager valuePager = null;
     private final Integer APPDEF_RES_TYPE_UNDEFINED = new Integer(-1);
-
-    private static final PermissionManager pm = 
-        PermissionManagerFactory.getInstance();
-
-    private Connection getDBConn() throws SQLException {
-        try {
-            return DBUtil.getConnByContext(this.getInitialContext(), 
-                                            HQConstants.DATASOURCE);
-        } catch(NamingException exc){
-            throw new SystemException("Unable to get database context: " +
-                                         exc.getMessage(), exc);
-        }
-    }
 
     /**
      * Create a Service which runs on a given server
@@ -1712,6 +1692,14 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         }
     }
 
+    public static ServiceManagerLocal getOne() {
+        try {
+            return ServiceManagerUtil.getLocalHome().create();    
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
+    }
+
     public void ejbCreate() throws CreateException {
         try {
             valuePager = Pager.getPager(VALUE_PROCESSOR);
@@ -1719,11 +1707,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             throw new CreateException("Could not create value pager:" + e);
         }
     }
-    
-    /**
-     * Remove all extraneous spaces from string attributes
-     * see bug 5278
-     */
+
     private void trimStrings(ServiceValue service) {
         if (service.getDescription() != null)
             service.setDescription(service.getDescription().trim());
@@ -1732,6 +1716,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         if (service.getName() != null)
             service.setName(service.getName().trim());
     }
+
     public void ejbRemove() { }
     public void ejbActivate() { }
     public void ejbPassivate() { }
