@@ -67,6 +67,8 @@ import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ConfigResponseDB;
@@ -1365,6 +1367,14 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                 ip.setMACAddress(ip.getMACAddress().trim());
             if (ip.getNetmask() != null) 
                 ip.setNetmask(ip.getNetmask().trim());
+        }
+    }
+
+    public static PlatformManagerLocal getOne() {
+        try {
+            PlatformManagerUtil.getLocalHome().create();
+        } catch (Exception e) {
+            throw new SystemException(e);
         }
     }
 
