@@ -52,6 +52,8 @@ import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
+import org.hyperic.hq.autoinventory.shared.AIScheduleManagerLocal;
+import org.hyperic.hq.autoinventory.shared.AIScheduleManagerUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.AIHistoryDAO;
 import org.hyperic.hq.dao.AIScheduleDAO;
@@ -425,6 +427,14 @@ public class AIScheduleManagerEJBImpl
         return;
     }
 
+    public static AIScheduleManagerLocal getOne() {
+        try {
+            return AIScheduleManagerUtil.getLocalHome().create();    
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
+    }
+    
     /** @ejb:create-method */
     public void ejbCreate() {
         super.ejbCreate();

@@ -54,6 +54,7 @@ import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -63,6 +64,7 @@ import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.hyperic.hq.autoinventory.ScanStateCore;
+import org.hyperic.hq.autoinventory.server.session.AIScheduleManagerEJBImpl;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerLocal;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerUtil;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
@@ -90,34 +92,19 @@ import org.apache.commons.logging.LogFactory;
  */
 public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
 
-    private AIQueueManagerLocal aiqManagerLocal = null;
-    private AIScheduleManagerLocal aiScheduleManagerLocal = null;
-    private ServerConfigManagerLocal camconfig = null;
-
     private SessionManager sessionManager = SessionManager.getInstance();
 
     protected Log log = LogFactory.getLog(AIBossEJBImpl.class.getName());
-    protected boolean debug = log.isDebugEnabled();
+
+    private AIQueueManagerLocal getAIManager() {
+        return AIQueueManagerEJBImpl.getOne();
+    }
+
+    private AIScheduleManagerLocal getAIScheduleManager() {
+        return AIScheduleManagerEJBImpl.getOne();
+    }
 
     public AIBossEJBImpl() {}
-
-    private synchronized void init () {
-        try {
-            if (aiqManagerLocal == null) {
-                aiqManagerLocal = AIQueueManagerUtil.getLocalHome().create();
-            }
-            if (aiScheduleManagerLocal == null) {
-                aiScheduleManagerLocal = AIScheduleManagerUtil.getLocalHome().create();
-            }
-            if (camconfig == null) {
-                camconfig = ServerConfigManagerUtil.getLocalHome().create();
-            }
-        } catch (CreateException ne) {
-            log.error("Unable to initialize", ne);
-        } catch (NamingException ne) {
-            log.error("Unable to initialize", ne);
-        }
-    }
 
     /**
      * Finder for all of the scheduled AI scans for an appdef entity.
@@ -131,11 +118,10 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                PermissionException
     {
         AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
-        if (this.aiScheduleManagerLocal == null) { init(); }
         try {
-            return aiScheduleManagerLocal.findScheduledJobs(subject, id, pc);
-        } catch ( FinderException fe ) {
-            throw new SystemException(fe);
+            return getAIScheduleManager().findScheduledJobs(subject, id, pc);
+        } catch (FinderException e) {
+            throw new SystemException(e);
         }
     }
 
@@ -149,15 +135,10 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
     {
         AuthzSubjectValue subject = sessionManager.getSubject(sessionId);;
 
-        if (this.aiScheduleManagerLocal == null) { init(); }
         try {
-            return aiScheduleManagerLocal.findScheduleByID(subject, id);
-        } catch ( CreateException ce ) {
-            throw new SystemException(ce);
-        } catch ( FinderException fe ) {
-            throw new SystemException(fe);
-        } catch ( NamingException ne ) {
-            throw new SystemException(ne);
+            return getAIScheduleManager().findScheduleByID(subject, id);
+        } catch (Exception e) {
+            throw new SystemException(e);
         }
     }
 
@@ -166,8 +147,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
-     *
-     * @TODO Implement Authz integration
      */
     public PageList findJobHistory(int sessionId, AppdefEntityID id, 
                                    PageControl pc)
@@ -175,13 +154,10 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
               PermissionException
     {
         AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
-        if (this.aiScheduleManagerLocal == null) { init(); }
         try {
-            return aiScheduleManagerLocal.findJobHistory(subject, id, pc);
-        } catch ( FinderException fe ) {
-            throw new SystemException(fe);
-        } catch ( NamingException ne ) {
-            throw new SystemException(ne);
+            return getAIScheduleManager().findJobHistory(subject, id, pc);
+        } catch (Exception e) {
+            throw new SystemException(e);
         }
     }
 
@@ -197,9 +173,8 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                PermissionException, AutoinventoryException
     {
         AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
-        if (this.aiScheduleManagerLocal == null) { init(); }
         try {
-            aiScheduleManagerLocal.deleteAIJob(subject, ids);
+            getAIScheduleManager().deleteAIJob(subject, ids);
         } catch ( NamingException ne ) {
             throw new SystemException(ne);
         }
@@ -399,6 +374,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                              showPlaceholders,
                              false, pc);
     }
+
     /**
      * Get the contents of the AI queue.
      * @param showIgnored If true, even resources in the AI queue that have 
@@ -424,17 +400,13 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException {
 
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
-        PageList queue = null;
-
-        // Call into autoinventory session layer
-        if (aiqManagerLocal == null) init();
 
         // TODO: pagecontrol is currently ignored here...
-        queue = aiqManagerLocal.retrieveQueue(subject, 
-                                              showIgnored,
-                                              showPlaceholders,
-                                              showAlreadyProcessed,
-                                              pc);
+        PageList queue = getAIManager().retrieveQueue(subject,
+                                                      showIgnored,
+                                                      showPlaceholders,
+                                                      showAlreadyProcessed,
+                                                      pc);
         return queue;
     }
 
@@ -449,18 +421,13 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
         AIPlatformValue aiplatform;
 
-        if (aiqManagerLocal == null) init();
         try {
-            aiplatform = aiqManagerLocal.findAIPlatformById(subject, aiplatformID);
-        } catch(CreateException exc){
+            aiplatform = getAIManager().findAIPlatformById(subject,
+                                                           aiplatformID);
+        } catch(Exception exc){
             throw new SystemException(exc);
-        } catch(RemoveException exc){
-            throw new SystemException(exc);
-        } catch(NamingException exc){
-            throw new SystemException(exc);
-        } catch(FinderException exc){
-            throw new SystemException(exc);
-        } 
+        }
+
         return aiplatform;
     }
 
@@ -475,18 +442,12 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
         AIPlatformValue aiplatform;
 
-        if (aiqManagerLocal == null) init();
         try {
-            aiplatform = aiqManagerLocal.findAIPlatformByFqdn(subject, fqdn);
-        } catch(CreateException exc){
-            throw new SystemException(exc);
-        } catch(RemoveException exc){
-            throw new SystemException(exc);
-        } catch(NamingException exc){
-            throw new SystemException(exc);
-        } catch(FinderException exc){
+            aiplatform = getAIManager().findAIPlatformByFqdn(subject, fqdn);
+        } catch(Exception exc){
             throw new SystemException(exc);
         }
+
         return aiplatform;
     }
 
@@ -501,9 +462,8 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
         AIServerValue aiserver;
 
-        if (aiqManagerLocal == null) init();
         try {
-            aiserver = aiqManagerLocal.findAIServerById(subject, serverID);
+            aiserver = getAIManager().findAIServerById(subject, serverID);
         } catch(FinderException exc){
             throw new SystemException(exc);
         }
@@ -519,9 +479,9 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException {
 
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
-        if (aiqManagerLocal == null) init();
+
         try {
-            return aiqManagerLocal.findAIServerByName(subject, name);
+            return getAIManager().findAIServerByName(subject, name);
         } catch(FinderException exc){
             throw new SystemException(exc);
         }
@@ -536,9 +496,9 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException {
         
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
-        if (aiqManagerLocal == null) init();
+
         try {
-            return aiqManagerLocal.findAIIpById(subject, ipID);
+            return getAIManager().findAIIpById(subject, ipID);
         } catch(FinderException exc){
             throw new SystemException(exc);
         }
@@ -553,9 +513,8 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException {
 
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
-        if (aiqManagerLocal == null) init();
         try {
-            return aiqManagerLocal.findAIIpByAddress(subject, address);
+            return getAIManager().findAIIpByAddress(subject, address);
         } catch(FinderException exc){
             throw new SystemException(exc);
         }
@@ -581,22 +540,11 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
 
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
 
-        if (aiqManagerLocal == null) init();
         try {
-            aiqManagerLocal.processQueue(subject, 
-                                         platformList, serverList, ipList, 
-                                         action);
-            if (action == AIQueueConstants.Q_DECISION_APPROVE) {
-                camconfig.vacuumAppdef();
-            }
-
-        } catch(CreateException exc){
-            throw new SystemException(exc);
-        } catch(RemoveException exc){
-            throw new SystemException(exc);
-        } catch(NamingException exc){
-            throw new SystemException(exc);
-        } catch(FinderException exc){
+            getAIManager().processQueue(subject,
+                                        platformList, serverList, ipList,
+                                        action);
+        } catch(Exception exc){
             throw new SystemException(exc);
         }
     }
@@ -642,14 +590,10 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                PermissionException,PlatformNotFoundException
     {
         AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
-        if (aiqManagerLocal == null) init();
+
         try {
-            return aiqManagerLocal.getPlatformByAI(subject, aiPlatformID);
-        } catch(CreateException exc){
-            throw new SystemException(exc);
-        } catch(NamingException exc){
-            throw new SystemException(exc);
-        } catch(FinderException exc){
+            return getAIManager().getPlatformByAI(subject, aiPlatformID);
+        } catch(Exception exc){
             throw new SystemException(exc);
         }
     }
@@ -664,10 +608,10 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                PermissionException, PlatformNotFoundException
     {
         AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
-        if (aiqManagerLocal == null) init();
+
         try {
             AIPlatformValue aiplatform =
-                aiqManagerLocal.getAIPlatformByPlatformID(subject, platformID);
+                getAIManager().getAIPlatformByPlatformID(subject, platformID);
             if (aiplatform != null)
                 return aiplatform;
         } catch(NamingException exc){

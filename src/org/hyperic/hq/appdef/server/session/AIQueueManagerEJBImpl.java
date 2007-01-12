@@ -60,6 +60,7 @@ import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -727,7 +728,15 @@ public class AIQueueManagerEJBImpl
                                             "platform: " +
                                             aipLocal.getId());
     }
-        
+
+    public static AIQueueManagerLocal getOne() {
+        try {
+            return AIQueueManagerUtil.getLocalHome().create();
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
+    }
+
     /**
      * Create an AI queue manager session bean.
      * @exception CreateException If an error occurs creating bean.
