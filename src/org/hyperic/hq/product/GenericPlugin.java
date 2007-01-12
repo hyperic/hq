@@ -41,6 +41,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -460,6 +461,12 @@ public abstract class GenericPlugin {
             return;
         }
 
+        boolean isDebug = getLog().isDebugEnabled();
+        URL[] orig = null;
+        if (isDebug) {
+            orig = loader.getURLs();
+        }
+
         for (int i=0; i<classpath.size(); i++) {
             String path = (String)classpath.get(i);
             File file = new File(path);
@@ -469,12 +476,26 @@ public abstract class GenericPlugin {
             }
 
             file = new File(installpath, path);
-            if (file.exists()) {
+            if ((path.indexOf('*') != -1) || file.exists()) {
                 try {
                     loader.addURL(file.toString());
                 } catch (PluginLoaderException e) {
                     continue;
                 }
+            }
+        }
+
+        if (isDebug) {
+            URL[] curr = loader.getURLs();
+            if (curr.length > orig.length) {
+                for (int i=orig.length; i<curr.length; i++) {
+                    getLog().debug("classpath += " +
+                                   curr[i].getFile());
+                }
+            }
+            else {
+                getLog().debug("classpath unchanged using: " +
+                               installpath);
             }
         }
     }
