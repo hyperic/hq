@@ -253,7 +253,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     }
 
     /**
-     * Find an alert by ID and time
+     * Find an alert by definition ID and time
      * @throws PermissionException 
      * 
      * @ejb:interface-method
@@ -265,6 +265,20 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         AlertDefinition def = getAlertDefDAO().findById(id);
         canManageAlerts(subj, def);
         return aDao.findByAlertDefinitionAndCtime(def, ctime).getAlertValue(); 
+    }
+
+
+    /**
+     * Find the last alert by definition ID
+     * @throws PermissionException 
+     * 
+     * @ejb:interface-method
+     */
+    public Alert getLastByAlertDef(AuthzSubjectValue subj, Integer id)
+        throws PermissionException {
+        AlertDefinition def = getAlertDefDAO().findById(id);
+        canManageAlerts(subj, def);
+        return getAlertDAO().findLastByAlertDefinition(def); 
     }
 
     /**

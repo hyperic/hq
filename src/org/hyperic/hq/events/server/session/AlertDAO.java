@@ -164,6 +164,15 @@ public class AlertDAO extends HibernateDAO {
             .list();
     }
 
+    public Alert findLastByAlertDefinition(AlertDefinition def) {
+        return (Alert) getSession()
+            .createCriteria(Alert.class)
+            .add(Expression.eq("alertDefinition", def))
+            .addOrder(Order.desc("ctime"))
+            .setMaxResults(1)
+            .uniqueResult();
+    }
+
     int deleteByAlertDefinition(Integer def) {
         String sql = "delete Alert a WHERE a.alertDefinition.id = :alertDef";
 
