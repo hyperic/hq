@@ -190,7 +190,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     /**
      * Check if a given Appdef entity supports runtime auto-discovery.
      *
-     * @param id
+     * @param id The entity id to check.
      * @return true if the given resource supports runtime auto-discovery.
      * @ejb:interface-method
      */
