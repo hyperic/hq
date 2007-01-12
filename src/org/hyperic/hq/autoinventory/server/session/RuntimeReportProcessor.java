@@ -91,7 +91,7 @@ public class RuntimeReportProcessor {
                PermissionException, ValidationException, 
                ApplicationException {
         long startTime = System.currentTimeMillis();
-        boolean isDebug = log.isDebugEnabled();
+
         log.info("Processing Runtime AI Report: " + crrr.simpleSummary());
 
         // Before we queue or approve anything, verify that all
@@ -215,8 +215,6 @@ public class RuntimeReportProcessor {
         ServerLightValue[] appdefServers;
         List appdefServerList;
         ServerLightValue appdefServer;
-        int i;
-        boolean isDebug = log.isDebugEnabled();
 
         log.info("Merging platform into appdef: " + aiplatform.getFqdn());
 
@@ -268,7 +266,7 @@ public class RuntimeReportProcessor {
 
         if (aiservers == null) return;
 
-        for (i=0; i<aiservers.length; i++) {
+        for (int i=0; i<aiservers.length; i++) {
             if(aiservers[i] != null) {
                 mergeServerIntoInventory(subject, appdefPlatform, aiservers[i],
                                          appdefServerList, reportingServer,
@@ -283,7 +281,7 @@ public class RuntimeReportProcessor {
 
         // any servers that we haven't handled, we should mark them
         // as AI-zombies.
-        for (i=0; i<appdefServerList.size(); i++) {
+        for (int i=0; i<appdefServerList.size(); i++) {
             appdefServer = (ServerLightValue) appdefServerList.get(i);
 
             // Annoying - serverMgr doesn't support updateServer on 
@@ -375,11 +373,11 @@ public class RuntimeReportProcessor {
             }
         }
 
-        boolean isCreate;
+        boolean update;
 
         try {
             if (foundAppdefServer == null) {
-                isCreate = true;
+                update = false;
                 // CREATE the server
                 // replace %serverName% in aisever's name.
                 String newServerName =
@@ -396,8 +394,7 @@ public class RuntimeReportProcessor {
             
                 foundAppdefServer.setWasAutodiscovered(true);
 
-                serverTypePK
-                    = foundAppdefServer.getServerType().getId();
+                serverTypePK = foundAppdefServer.getServerType().getId();
                 
                 // The server will be owned by whomever owns the platform
                 String serverOwnerName = platform.getOwner();
@@ -422,7 +419,7 @@ public class RuntimeReportProcessor {
                          " (id=" + foundAppdefServer.getId() + ")");
 
             } else {
-                isCreate = false;
+                update = true;
                 // UPDATE SERVER
                 log.info("Updating server: " + foundAppdefServer.getName());
 
@@ -452,14 +449,16 @@ public class RuntimeReportProcessor {
         if (!isPlaceholder(aiserverExt)) {             
             // CONFIGURE SERVER
             try {
-                AIConversionUtil.configureServer(subject,
-                                                 foundAppdefServer.getId(),
-                                                 aiserver.getProductConfig(),
-                                                 aiserver.getMeasurementConfig(),
-                                                 aiserver.getControlConfig(),
-                                                 null,
-                                                 true, //isCreate,
-                                                 configMgr);
+                // Configure resource, telling the config manager to send
+                // an update event if this resource has been updated.
+                configMgr.configureResource(subject,
+                                            foundAppdefServer.getEntityId(),
+                                            aiserver.getProductConfig(),
+                                            aiserver.getMeasurementConfig(),
+                                            aiserver.getControlConfig(),
+                                            null, //RT config
+                                            null,
+                                            update);
             } catch (Exception e) {
                 log.error("Error configuring server: " 
                           + foundAppdefServer.getId() + ": " + e, e);
@@ -568,11 +567,11 @@ public class RuntimeReportProcessor {
             }
         }
 
-        boolean isCreate;
+        boolean update;
 
         try {
             if (foundAppdefService == null) {
-                isCreate = true;
+                update = false;
                 // CREATE SERVICE
                 log.info("Creating new service: " + aiservice.getName());
 
@@ -615,7 +614,7 @@ public class RuntimeReportProcessor {
                 }
                 log.debug("New service created: " + foundAppdefService);
             } else {
-                isCreate = false;
+                update = true;
                 // UPDATE SERVICE
                 log.info("Updating service: " + foundAppdefService.getName());
 
@@ -632,15 +631,14 @@ public class RuntimeReportProcessor {
             }
             
             // CONFIGURE SERVICE
-            AIConversionUtil.configureService(subject,
-                                              foundAppdefService.getId(),
-                                              aiservice.getProductConfig(),
-                                              aiservice.getMeasurementConfig(),
-                                              aiservice.getControlConfig(),
-                                              aiservice.getResponseTimeConfig(),
-                                              null,
-                                              true, //isCreate,
-                                              configMgr);
+            configMgr.configureResource(subject,
+                                        foundAppdefService.getEntityId(),
+                                        aiservice.getProductConfig(),
+                                        aiservice.getMeasurementConfig(),
+                                        aiservice.getControlConfig(),
+                                        aiservice.getResponseTimeConfig(),
+                                        null,
+                                        update);
             
             // SET CUSTOM PROPERTIES FOR SERVICE
             if (aiservice.getCustomProperties() != null) {
@@ -679,7 +677,7 @@ public class RuntimeReportProcessor {
         }
     }
 
-    private boolean isPlaceholder (AIServerExtValue aiserverExt) {
+    private boolean isPlaceholder(AIServerExtValue aiserverExt) {
         return (aiserverExt != null && aiserverExt.getPlaceholder());
     }
     

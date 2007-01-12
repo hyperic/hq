@@ -55,6 +55,8 @@ import org.hyperic.hq.dao.ConfigResponseDAO;
 import org.hyperic.hq.dao.ServerDAO;
 import org.hyperic.hq.dao.ServiceDAO;
 import org.hyperic.hq.dao.PlatformDAO;
+import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.hq.autoinventory.AICompare;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -377,51 +379,6 @@ public class ConfigManagerEJBImpl
     }
 
     /**
-     * Set the config response for an entity/type combination.
-     *
-     * @param id       ID of the object to set the repsonse fo
-     * @param response The response
-     * @param type     One of ProductPlugin.TYPE_*
-     *
-     * @return an array of entities which may be affected by the change
-     *         in configuration.  For updates to platform and service configs,
-     *         there are no other entities other than the given ID returned.  
-     *         If a server is updated, the associated services may require
-     *         changes.  The passed entity will always be returned in the
-     *         array.
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
-     */
-    public AppdefEntityID[] setConfigResponse(AuthzSubjectValue subject,
-                                              AppdefEntityID id, 
-                                              ConfigResponse response,
-                                              String type,
-                                              boolean sendConfigEvent)
-        throws ConfigFetchException, AppdefEntityNotFoundException,
-               PermissionException, EncodingException, FinderException {
-
-        ConfigResponseDB config = getConfigResponse(id);
-        byte[] encodedConfig = response.encode();
-        
-        if(type.equals(ProductPlugin.TYPE_PRODUCT)) {
-            config.setProductResponse(encodedConfig);
-        } else if (type.equals(ProductPlugin.TYPE_MEASUREMENT)) {
-            config.setMeasurementResponse(encodedConfig);
-        } else if (type.equals(ProductPlugin.TYPE_CONTROL)) {
-            config.setControlResponse(encodedConfig);
-        } else if (type.equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
-            config.setResponseTimeResponse(encodedConfig);
-        } else if (type.equals(ProductPlugin.TYPE_AUTOINVENTORY)) {
-            config.setAutoInventoryResponse(encodedConfig);
-        } else {
-            throw new IllegalArgumentException("Unknown config type: " + type);
-        }
-
-        return setConfigResponse(subject, id, config, sendConfigEvent);
-    }
-
-    /**
      * Clear the validation error string for a config response, indicating
      * that the current config is valid
      * @ejb:interface-method
@@ -476,74 +433,158 @@ public class ConfigManagerEJBImpl
     }
 
     /**
-     * Set all configs for a resource at once.
+     * Method to merge configs, maintaining any existing values that are not
+     * present in the AI config (e.g. log/config track enablement)
+     *
+     * @param existingBytes The existing configuration
+     * @param newBytes The new configuration
+     * @return The newly merged configuration
+     */
+    private static byte[] mergeConfig(byte[] existingBytes, byte[] newBytes)
+    {
+        if ((existingBytes == null) || (existingBytes.length == 0)) {
+            return newBytes;
+        }
+
+        if ((newBytes == null) || (newBytes.length == 0)) {
+            return newBytes;
+        }
+        
+        try {
+            ConfigResponse existingConfig =
+                ConfigResponse.decode(existingBytes);
+            ConfigResponse newConfig =
+                ConfigResponse.decode(newBytes);
+            existingConfig.merge(newConfig, true);
+            return existingConfig.encode();
+        } catch (EncodingException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
+    }
+
+
+    /**
+     * Set the config response for an entity/type combination.
+     *
+     * @param id       ID of the object to set the repsonse fo
+     * @param response The response
+     * @param type     One of ProductPlugin.TYPE_*
+     *
+     * @return an array of entities which may be affected by the change
+     *         in configuration.  For updates to platform and service configs,
+     *         there are no other entities other than the given ID returned.
+     *         If a server is updated, the associated services may require
+     *         changes.  The passed entity will always be returned in the
+     *         array.
      *
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
     public AppdefEntityID[] setConfigResponse(AuthzSubjectValue subject,
-                                              AppdefEntityID id, 
-                                              ConfigResponseDB newConfig,
-                                              boolean sendConfigEvent) 
-        throws FinderException, PermissionException, 
-               AppdefEntityNotFoundException {
+                                              AppdefEntityID id,
+                                              ConfigResponse response,
+                                              String type,
+                                              boolean sendConfigEvent)
+        throws ConfigFetchException, AppdefEntityNotFoundException,
+               PermissionException, EncodingException, FinderException
+    {
+        byte[] productBytes = null;
+        byte[] measurementBytes = null;
+        byte[] controlBytes = null;
+        byte[] rtBytes = null;
+        byte[] autoinventoryBytes = null;
 
-        ConfigResponseDB existing = getConfigResponse(id);
-        boolean configWasUpdated = false;
-        byte[] storedConf, newConf;
-
-        storedConf = existing.getProductResponse();
-        newConf = newConfig.getProductResponse();
-        if(!Arrays.equals(storedConf, newConf)) { 
-            existing.setProductResponse(newConf);
-            configWasUpdated = true;
+        if(type.equals(ProductPlugin.TYPE_PRODUCT)) {
+            productBytes = response.encode();
+        } else if (type.equals(ProductPlugin.TYPE_MEASUREMENT)) {
+            measurementBytes = response.encode();
+        } else if (type.equals(ProductPlugin.TYPE_CONTROL)) {
+            controlBytes = response.encode();
+        } else if (type.equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
+            rtBytes = response.encode();
+        } else if (type.equals(ProductPlugin.TYPE_AUTOINVENTORY)) {
+            //XXX: not handled.
+            autoinventoryBytes = response.encode();
+        } else {
+            throw new IllegalArgumentException("Unknown config type: " + type);
         }
 
-        storedConf = existing.getMeasurementResponse();
-        newConf = newConfig.getMeasurementResponse();
-        if(!Arrays.equals(storedConf, newConf)) { 
-            existing.setMeasurementResponse(newConf);
-            configWasUpdated = true;
+        return configureResource(subject, id, productBytes, measurementBytes,
+                                 controlBytes, rtBytes, null, sendConfigEvent);
+    }
+        
+    /**
+     * Set all configs for a resource at once.  If any of the config entities
+     * are updated and the sendConfigEvent flag is set to true, a
+     * ResourceUpdatedZevent will be sent out for this resource.
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public AppdefEntityID[] configureResource(AuthzSubjectValue subject,
+                                              AppdefEntityID appdefID,
+                                              byte[] productConfig,
+                                              byte[] measurementConfig,
+                                              byte[] controlConfig,
+                                              byte[] rtConfig,
+                                              Boolean userManaged,
+                                              boolean sendConfigEvent)
+        throws ConfigFetchException, AppdefEntityNotFoundException,
+               PermissionException, FinderException
+    {
+        byte[] configBytes;
+
+        boolean wasUpdated = false;
+        ConfigResponseDB existingConfig = getConfigResponse(appdefID);
+
+        configBytes = mergeConfig(existingConfig.getProductResponse(),
+                                  productConfig);
+        if (!AICompare.configsEqual(configBytes,
+                                    existingConfig.getProductResponse())) {
+            existingConfig.setProductResponse(configBytes);
+            wasUpdated = true;
         }
 
-        storedConf = existing.getControlResponse();
-        newConf = newConfig.getControlResponse();
-        if(!Arrays.equals(storedConf, newConf)) { 
-            existing.setControlResponse(newConf);
-            configWasUpdated = true;
+        configBytes = mergeConfig(existingConfig.getMeasurementResponse(),
+                                  measurementConfig);
+        if (!AICompare.configsEqual(configBytes,
+                                    existingConfig.getMeasurementResponse())) {
+            existingConfig.setMeasurementResponse(configBytes);
+            wasUpdated = true;
         }
 
-        storedConf = existing.getResponseTimeResponse();
-        newConf = newConfig.getResponseTimeResponse();
-        if(!Arrays.equals(storedConf, newConf)) { 
-            existing.setResponseTimeResponse(newConf);
-            configWasUpdated = true;
+        configBytes = mergeConfig(existingConfig.getControlResponse(),
+                                  controlConfig);
+        if (!AICompare.configsEqual(configBytes,
+                                    existingConfig.getControlResponse())) {
+            existingConfig.setControlResponse(configBytes);
+            wasUpdated = true;
         }
 
-        storedConf = existing.getAutoInventoryResponse();
-        newConf = newConfig.getAutoInventoryResponse();
-        if(!Arrays.equals(storedConf, newConf)) { 
-            existing.setAutoInventoryResponse(newConf);
-            configWasUpdated = true;
+        configBytes = mergeConfig(existingConfig.getResponseTimeResponse(),
+                                  rtConfig);
+        if (!AICompare.configsEqual(configBytes,
+                                    existingConfig.getResponseTimeResponse())) {
+            existingConfig.setResponseTimeResponse(configBytes);
+            wasUpdated = true;
         }
 
-        boolean um = newConfig.getUserManaged();
-        if (existing.getUserManaged() != um) {
-            existing.setUserManaged(um);
-            configWasUpdated = true;
+        if (userManaged != null &&
+            existingConfig.getUserManaged() == userManaged.booleanValue()) {
+            existingConfig.setUserManaged(userManaged.booleanValue());
+            wasUpdated = true;
         }
 
-        List res = new ArrayList();
-        res.add(id);
-
-        AppdefEntityID[] affectedEntities = 
-                (AppdefEntityID[])res.toArray(new AppdefEntityID[res.size()]);
-
-        if (configWasUpdated && sendConfigEvent) {
-            AIConversionUtil.sendNewConfigEvent(subject, id);
+        if (wasUpdated && sendConfigEvent) {
+            ResourceUpdatedZevent event = new ResourceUpdatedZevent(subject,
+                                                                    appdefID);
+            ZeventManager.getInstance().enqueueEventAfterCommit(event);
         }
 
-        return affectedEntities;
+        // XXX: Need to cascade and send events for each resource that may
+        // have been affected by this config update.
+        AppdefEntityID[] ids = { appdefID };
+        return ids;
     }
 
     /** Update the appdef entities based on TypeInfo

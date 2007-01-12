@@ -3670,15 +3670,14 @@ public class AppdefBossEJBImpl
                                         Boolean.TRUE);
                 }
 
-                ids = AIConversionUtil.configureResource(
+                ids = getConfigManager().configureResource(
                     subject, entityId,
                     ConfigResponse.safeEncode(allConfigs.getProductConfig()),
                     ConfigResponse.safeEncode(allConfigs.getMetricConfig()),
                     ConfigResponse.safeEncode(allConfigs.getControlConfig()),
                     ConfigResponse.safeEncode(allConfigs.getRtConfig()),
                     Boolean.TRUE,
-                    false,
-                    getConfigManager());
+                    true);
                 
                 if (doValidation) {
                     Iterator validations = validationTypes.keySet().iterator();
