@@ -40,11 +40,11 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSession;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.common.SystemException;
@@ -58,10 +58,10 @@ import org.hyperic.util.pager.SortAttribute;
 public class PermissionManagerImpl 
     extends AuthzSession implements PermissionManager
 {
-    private static Log log =
+    private static Log _log =
         LogFactory.getLog(PermissionManagerImpl.class.getName());
 
-    private String falseToken = null;
+    private String _falseToken = null;
 
     private static final String VIEWABLE_SQL =
         "SELECT instance_id, sort_name FROM EAM_RESOURCE " +
@@ -84,16 +84,25 @@ public class PermissionManagerImpl
         = " AND authz_r.RESOURCE_TYPE_ID = ? "
         + "AND authz_r.INSTANCE_ID = %%RESID%%";
 
+    private Connection getConnection() {
+        return DAOFactory.getDAOFactory().getAuthzSubjectDAO().getSession()
+            .connection();
+    }
+    
+    private void disconnectSession() {
+        DAOFactory.getDAOFactory().getAuthzSubjectDAO().getSession()
+            .disconnect();
+    }
+
     public PermissionManagerImpl() {
-        Connection conn = null;
         try {
-            conn = DBUtil.getConnByContext(getInitialContext(), DATASOURCE);
-            falseToken = DBUtil.getBooleanValue(false, conn);                
+            Connection conn = getConnection();
+            _falseToken = DBUtil.getBooleanValue(false, conn);                
         } catch (Exception e) {
             throw new SystemException("Unable to initialize " +
                                       "PermissionManager:" + e, e);
         } finally {
-            DBUtil.closeJDBCObjects(ctx, conn, null, null);
+            disconnectSession();
         }
     }
 
@@ -118,7 +127,7 @@ public class PermissionManagerImpl
                                                 PageControl pc) 
         throws FinderException, NamingException, PermissionException
     {
-        log.debug("Checking Scope for Operation: " + opName +
+        _log.debug("Checking Scope for Operation: " + opName +
                   " subject: " + subj);
         ResourceType resTypeBean = getResourceTypeDAO().findByName(resType);
         if (resTypeBean != null) {
@@ -135,10 +144,10 @@ public class PermissionManagerImpl
                                                 Integer opId, PageControl pc) 
         throws FinderException, NamingException, PermissionException
     {
-        log.debug("Checking Scope for Operation: " + opId + " subject: " + 
+        _log.debug("Checking Scope for Operation: " + opId + " subject: " + 
                   subj);
         PageList scope = findScopeBySQL(subj, opId, pc);
-        log.debug("Scope check returned a page of : " + scope.size() +
+        _log.debug("Scope check returned a page of : " + scope.size() +
                   " of " + scope.getTotalSize() + " items");
         return scope;
     }
@@ -169,12 +178,10 @@ public class PermissionManagerImpl
     {
         List viewableInstances = new ArrayList();
         
-        Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;        
         try {
-            conn = 
-                DBUtil.getConnByContext(getInitialContext(), DATASOURCE);
+            Connection conn = getConnection();
             String sql = null;
             if(resName == null) {
                 sql = VIEWABLE_SQL + "ORDER BY EAM_RESOURCE.sort_name ";
@@ -182,7 +189,7 @@ public class PermissionManagerImpl
                     sql = sql + "DESC";
                 }
                 sql = StringUtil.replace(sql, "DB_FALSE_TOKEN",
-                                         falseToken);
+                                         _falseToken);
                 stmt = conn.prepareStatement(sql);
                 stmt.setString(1, resType);
             } else {
@@ -190,7 +197,7 @@ public class PermissionManagerImpl
                 if(!pc.isAscending()) {
                     sql = sql + "DESC";
                 }
-                sql = StringUtil.replace(sql, "DB_FALSE_TOKEN", falseToken);
+                sql = StringUtil.replace(sql, "DB_FALSE_TOKEN", _falseToken);
                 stmt = conn.prepareStatement(sql);
                 stmt.setString(1, resType);
                 // Support wildcards
@@ -200,7 +207,7 @@ public class PermissionManagerImpl
                 stmt.setInt(3, AppdefUtil.resNameToAppdefTypeId(resType));
                 stmt.setString(4, resName);
             }
-            log.debug("Viewable SQL: " + sql);
+            _log.debug("Viewable SQL: " + sql);
             rs = stmt.executeQuery();
 
             for(int i = 1; rs.next(); i++) {
@@ -208,12 +215,11 @@ public class PermissionManagerImpl
             }
             return viewableInstances;
         } catch (SQLException e) {
-            log.error("Error getting scope by SQL", e);
+            _log.error("Error getting scope by SQL", e);
             throw new SystemException("SQL Error getting scope: " + e.getMessage());
-        } catch (NamingException e) {
-            throw new SystemException(e);
         } finally {
-            DBUtil.closeJDBCObjects(ctx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(ctx, null, stmt, rs);
+            disconnectSession();
         }
     }
 
@@ -222,12 +228,11 @@ public class PermissionManagerImpl
                                     PageControl pc)
         throws FinderException, NamingException, PermissionException {
         Pager defaultPager = Pager.getDefaultPager();
-        Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         List instanceIds = null;
         try {
-            conn = DBUtil.getConnByContext(getInitialContext(), DATASOURCE);
+            Connection conn = getConnection();
             // Always return all resources
             stmt = conn.prepareStatement(ALL_RESOURCE_SQL);
             stmt.setInt(1, opId.intValue());
@@ -239,10 +244,11 @@ public class PermissionManagerImpl
             }
             return defaultPager.seek(instanceIds, pc.getPagenum(), pc.getPagesize());
         } catch (SQLException e) {
-            log.error("Error getting scope by SQL", e);
+            _log.error("Error getting scope by SQL", e);
             throw new FinderException("Error getting scope: " + e.getMessage());
         } finally {
-            DBUtil.closeJDBCObjects(ctx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(ctx, null, stmt, rs);
+            disconnectSession();
         }
     }
 
@@ -269,7 +275,7 @@ public class PermissionManagerImpl
             "SELECT RES.INSTANCE_ID FROM " +
             "  EAM_RESOURCE RES, EAM_RESOURCE_TYPE RT " +
             "WHERE " + col + " = RES.INSTANCE_ID " +
-            "  AND RES.FSYSTEM = " + falseToken + 
+            "  AND RES.FSYSTEM = " + _falseToken + 
             "  AND RES.RESOURCE_TYPE_ID = RT.ID " +
             "  AND RT.NAME = ? ";
     }
