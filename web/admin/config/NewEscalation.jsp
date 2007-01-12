@@ -748,7 +748,7 @@ function showViewEscResponse(originalRequest) {
             $('example').style.display= 'none';
     }
 
-    //onloads.push(Behaviour.apply());
+    
 
 </script>
 

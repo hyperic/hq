@@ -125,6 +125,7 @@ function showViewEscResponse(originalRequest) {
       var escTableBody = document.createElement('tbody');
       var escTr1 = document.createElement('tr');
       var escTr2 = document.createElement('tr');
+      var escTrHeader = document.createElement('tr');
       var td1 = document.createElement('td');
       var td2 = document.createElement('td');
       var td3 = document.createElement('td');
@@ -161,6 +162,7 @@ function showViewEscResponse(originalRequest) {
       escTable.setAttribute('id','escTbl_'+ liID);
       escTable.setAttribute('border', '0');
       escTable.setAttribute('cellspacing','4');
+
       escTable.appendChild(escTableBody);
   
       escTableBody.appendChild(escTr2);
@@ -256,8 +258,6 @@ function showViewEscResponse(originalRequest) {
       $('pauseTimeText').innerHTML = 'Allow user to pause escalation: ' + allowPause + "<br>";
    }
 
-    //Sortable.create(viewEscalationUL,{ghosting:true,constraint:false});
-
     Sortable.create("viewEscalationUL",
           {dropOnEmpty: true,
            //format: /^(.*)$/,
@@ -295,6 +295,8 @@ function showViewEscResponse(originalRequest) {
 
     function addRow() {
         $(addEscalationUL).style.display = "";
+        $('addEscButtons').style.display = "";
+        $('addActionHeader').style.display = "";
         var ni = $('addEscalationUL');
         var numi = document.getElementById('theValue');
         var num = (document.getElementById('theValue').value -1)+ 2;
@@ -683,8 +685,9 @@ function showViewEscResponse(originalRequest) {
     }
 
     function cancelAddEscalation() {
-        var addEscalationUL = $('addEscalationUL');
-        addEscalationUL.innerHTML = "";
+        $('addEscalationUL').innerHTML = "";
+        $('addEscButtons').style.display = "none";
+        $('addActionHeader').style.display = "none";
     }
 
 </script>
@@ -752,9 +755,16 @@ function showViewEscResponse(originalRequest) {
 <table width="100%" cellpadding="4" cellspacing="0" border="0" id="escPropertiesTable">
   <tbody>
     <tr>
-      <td class="BlockTitle" colspan="2">
+      <td class="BlockTitle">
       <fmt:message key="alert.config.escalation.scheme" />
       </td>
+        <td class="BlockTitle" align="right" style="padding-right:5px;">
+        <tiles:insert page="/common/components/ActionButton.jsp">
+          <tiles:put name="labelKey" value="common.label.AddAction"/>
+          <tiles:put name="buttonHref" value="."/>
+          <tiles:put name="buttonClick" value="addRow(); return false;"/>
+        </tiles:insert>
+        </td>
     </tr>
     <tr>
       <td class="BlockLabel">
@@ -927,6 +937,13 @@ function showViewEscResponse(originalRequest) {
     <input type="hidden" value="" id="id">
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <thead>
+         <tr>
+             <td class="BlockTitle" valign="top" nowrap>
+             <fmt:message key="common.label.EscalationSchemeActions" />
+             </td>
+        </tr>
+     </thead>
   <tbody>
     <tr class="BlockContent">
       <td style="padding-left:15px;padding-bottom:0px;display:none;">
@@ -949,8 +966,16 @@ function showViewEscResponse(originalRequest) {
     </tr>
  </table>
     </form>
-<form name="addEscalation" id="addEscalation" style="">
+<form name="addEscalation" id="addEscalation">
  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+     <thead>
+         <tr>
+             <td class="BlockTitle" valign="top" nowrap id="addActionHeader" style="display:none">
+              <!--<fmt:message key="common.label.Description" />-->
+                 Add additional action(s) to this escalation scheme:
+             </td>
+        </tr>
+     </thead>
   <tbody>
       <tr>
       <td width="100%" id="addSection">
@@ -958,18 +983,11 @@ function showViewEscResponse(originalRequest) {
       </ul>
       </td>
     </tr>
-    <tr class="ToolbarContent"><!-- SET TOOLBAR -->
-      <td>
+    <tr class="ToolbarContent">
+      <td id="addEscButtons" style="display:none">
         <table cellspacing="4" cellpadding="0">
         <tr>
-            <td>
-        <tiles:insert page="/common/components/ActionButton.jsp">
-          <tiles:put name="labelKey" value="common.label.AddAction"/>
-          <tiles:put name="buttonHref" value="."/>
-          <tiles:put name="buttonClick" value="addRow(); return false;"/>
-        </tiles:insert>
-        </td>
-            <td>
+        <td>
         <tiles:insert page="/common/components/ActionButton.jsp">
           <tiles:put name="labelKey" value="common.label.Cancel"/>
           <tiles:put name="buttonHref" value="#"/>
@@ -982,9 +1000,8 @@ function showViewEscResponse(originalRequest) {
           <tiles:put name="buttonHref" value="."/>
           <tiles:put name="buttonClick" value="saveAddEscalation(); return false;"/>
         </tiles:insert>
-        </td><td>
+        </td>
         </tr>
-
         </table>
       </td>
     </tr>

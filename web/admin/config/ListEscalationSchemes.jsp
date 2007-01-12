@@ -40,9 +40,9 @@
 
     <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #D5D8DE";>
     <thead>
-    <tr class="ListRow">
-      <td class="TableRowHeader"><fmt:message key="common.header.Name"/></td>
-      <td class="TableRowHeader" style="text-align: right;"><html:link page="/admin/config/Config.do?mode=escalate"><html:img src="/images/tbb_new.gif" border="0"/></html:link></td>
+    <tr>
+      <td class="BlockTitle"><fmt:message key="common.header.EscalationName"/></td>
+      <td class="BlockTitle" style="text-align: right;"><html:link page="/admin/config/Config.do?mode=escalate"><html:img src="/images/tbb_new.gif" border="0"/></html:link></td>
     </tr>
     </thead>
     <tbody id="escalations"></tbody>
