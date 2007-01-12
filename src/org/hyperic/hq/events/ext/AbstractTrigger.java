@@ -134,7 +134,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
         publishEvent(event);
 
         AlertDefinitionManagerLocal aman;
-        AlertDefinition adBasic;
+        AlertDefinition alertDef;
         
         aman = AlertDefinitionManagerEJBImpl.getOne();
 
@@ -145,8 +145,8 @@ public abstract class AbstractTrigger implements TriggerInterface {
             if (adId == null)
                 return;
             
-            adBasic = aman.getByIdNoCheck(adId);
-            if (!adBasic.isEnabled())
+            alertDef = aman.getByIdNoCheck(adId);
+            if (!alertDef.isEnabled())
                 return;
             
             if (log.isDebugEnabled())
@@ -154,7 +154,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
                           " causing alert definition ID " + adId + " to fire");
 
             // See if we need to supress this trigger        
-            if (adBasic.getFrequencyType() == EventConstants.FREQ_NO_DUP) {
+            if (alertDef.getFrequencyType() == EventConstants.FREQ_NO_DUP) {
                 TriggerTrackerLocal tracker = TriggerTrackerEJBImpl.getOne();                
 
                 boolean fire = tracker.fire(getId(), getFrequency());
@@ -163,21 +163,28 @@ public abstract class AbstractTrigger implements TriggerInterface {
                     return;
             }
 
-            if (adBasic.getFrequencyType() == EventConstants.FREQ_ONCE ||
-                    adBasic.isWillRecover()) {
+            if (alertDef.getFrequencyType() == EventConstants.FREQ_ONCE ||
+                    alertDef.isWillRecover()) {
             	// Disable the alert definition now that we've fired
                 aman.updateAlertDefinitionsEnable(AuthzSubjectManagerUtil
                     .getLocalHome().create().getOverlord(),
-                    new Integer[]{ adBasic.getId() }, false);
+                    new Integer[]{ alertDef.getId() }, false);
             }
             
             if (log.isDebugEnabled())
                 log.debug("Firing trigger " + getId() + " actions");
 
-            // Now start escalation
             EscalatableCreator creator = 
-                new ClassicEscalatableCreator(adBasic, event);
-            EscalationManagerEJBImpl.getOne().startEscalation(adBasic, creator); 
+                new ClassicEscalatableCreator(alertDef, event);
+            
+            // Now start escalation
+            if (alertDef.getEscalation() != null) {
+                EscalationManagerEJBImpl.getOne().startEscalation(alertDef,
+                                                                  creator); 
+            }
+            else {
+                creator.createEscalatable();
+            }
         } catch (FinderException e) {
             throw new ActionExecuteException(
                 "Alert Definition not found for trigger: " + getId());
