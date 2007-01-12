@@ -349,7 +349,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                InvalidConfigException, ConfigFetchException,
                AppdefEntityNotFoundException
     {
-        this.setConfigResponse(subject, id, response, type, true, true);
+        this.setConfigResponse(subject, id, response, type, true);
     }
 
     /**
@@ -359,7 +359,6 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                                                AppdefEntityID id,
                                                ConfigResponse response, 
                                                String type,
-                                               boolean callAIManager,
                                                boolean shouldValidate)
         throws EncodingException, FinderException, PermissionException,
                InvalidConfigException, ConfigFetchException,
@@ -373,7 +372,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
             ids  = cMan.setConfigResponse(subject, id, response, type, true);
             
             if (shouldValidate) {
-                doValidation(subject, type, ids, callAIManager);
+                doValidation(subject, type, ids);
             }
             doRollback = false;
             return ids;
@@ -388,10 +387,9 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
     /**
      * @ejb:interface-method view-type="local"
      */
-    public void doValidation (AuthzSubjectValue subject,
-                              String type,
-                              AppdefEntityID[] ids,
-                              boolean callAIManager ) 
+    public void doValidation(AuthzSubjectValue subject,
+                             String type,
+                             AppdefEntityID[] ids)
         throws PermissionException, EncodingException, ConfigFetchException,
                AppdefEntityNotFoundException, InvalidConfigException {
 
@@ -399,7 +397,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                 .getPropertyInstance("hyperic.hq.bizapp.configValidator");
         
         if (configValidator != null)
-            configValidator.validate(subject, type, ids, callAIManager);
+            configValidator.validate(subject, type, ids);
     }
 
     /**

@@ -37,8 +37,7 @@ public interface ConfigValidator {
 
     public void validate(AuthzSubjectValue subject,
                          String type,
-                         AppdefEntityID[] ids,
-                         boolean callAIManager)
+                         AppdefEntityID[] ids)
         throws PermissionException, EncodingException, ConfigFetchException,
                AppdefEntityNotFoundException, InvalidConfigException; 
 }
