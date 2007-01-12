@@ -436,9 +436,14 @@ public class EscalationManagerEJBImpl
     private void fixOrNotify(AuthzSubject subject, EscalationAlertType type, 
                              Integer alertId, boolean fixed)
     {
+        // Fixed alerts always get set first before finding the state
+        if (fixed) {
+            type.fixAlert(alertId, subject);
+        }
+
         Escalatable esc = type.findEscalatable(alertId);
         EscalationState state = _stateDAO.find(esc);
-        String sFixed = fixed ? "Fix" : "Acknowledg";
+        String sFixed = fixed ? "Fix" : "Acknowledged";
         
         if (state == null || state.getAcknowledgedBy() != null) {
             _log.warn(sFixed + " alertId[" + alertId + "] for type [" + 
@@ -449,7 +454,6 @@ public class EscalationManagerEJBImpl
         
         if (fixed) {  
             endEscalation(state);
-            type.fixAlert(alertId, subject);
         } else {
             state.setAcknowledgedBy(subject);
         }
