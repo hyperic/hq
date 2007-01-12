@@ -33,14 +33,17 @@
             default="0"/>
 
     <option name="host"
+            optional="true"
             description="Authentication Server Hostname"/>
 
     <option name="user"
+            optional="true"
             description="Username"/>
 
     <option name="pass"
+            optional="true"
             type="secret"
-              description="Password"/>
+            description="Password"/>
   </config>
 
   <config name="vm">
