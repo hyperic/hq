@@ -289,7 +289,7 @@ function showViewEscResponse(originalRequest) {
     function saveAddEscalation () {
         $('escId').value = id;
         var pars =  "EscId=" + id + Form.serialize('addEscalation');
-        var url = '<html:rewrite action="/escalation/saveAction.do"/>';
+        var url = '<html:rewrite action="/escalation/saveAction"/>';
         new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showViewEscResponse, onFailure: reportError} );
     }
 
