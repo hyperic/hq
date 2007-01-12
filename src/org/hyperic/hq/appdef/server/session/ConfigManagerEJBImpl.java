@@ -35,14 +35,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocalHome;
-import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
-import org.hyperic.hq.appdef.shared.ServerManagerLocalHome;
-import org.hyperic.hq.appdef.shared.ServerManagerUtil;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
-import org.hyperic.hq.appdef.shared.ServiceManagerLocalHome;
-import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -92,47 +86,16 @@ public class ConfigManagerEJBImpl
     private final static String logCtx = ConfigManagerEJBImpl.class.getName();
     protected Log log = LogFactory.getLog(logCtx);
 
-    private PlatformManagerLocalHome platformManagerLocalHome;
-    private ServerManagerLocalHome   serverManagerLocalHome;
-    private ServiceManagerLocalHome  serviceManagerLocalHome;
-
     private PlatformManagerLocal getPlatformManagerLocal(){
-        try {
-            if(this.platformManagerLocalHome == null)
-                this.platformManagerLocalHome = 
-                    PlatformManagerUtil.getLocalHome();
-            return this.platformManagerLocalHome.create();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        return PlatformManagerEJBImpl.getOne();
     }
 
     private ServerManagerLocal getServerManagerLocal(){
-        try {
-            if(this.serverManagerLocalHome == null)
-                this.serverManagerLocalHome = ServerManagerUtil.getLocalHome();
-            return this.serverManagerLocalHome.create();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        return ServerManagerEJBImpl.getOne();
     }
 
     private ServiceManagerLocal getServiceManagerLocal(){
-        try {
-            if(this.serviceManagerLocalHome == null)
-                this.serviceManagerLocalHome = 
-                    ServiceManagerUtil.getLocalHome();
-
-            return this.serviceManagerLocalHome.create();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        return ServiceManagerEJBImpl.getOne();
     }
 
     /**

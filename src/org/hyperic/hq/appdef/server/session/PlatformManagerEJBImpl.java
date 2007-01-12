@@ -1372,7 +1372,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     public static PlatformManagerLocal getOne() {
         try {
-            PlatformManagerUtil.getLocalHome().create();
+            return PlatformManagerUtil.getLocalHome().create();
         } catch (Exception e) {
             throw new SystemException(e);
         }
