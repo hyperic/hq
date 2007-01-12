@@ -228,7 +228,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // check if the user has permission to remove it
             // user needs the removeServer permission on the server
             // to succeed
-            ResourceValue rv = this.getServerResourceValue(id);
             checkRemovePermission(subject, server.getEntityId());
             // remove the service resource entries and validate permissions
             Iterator servicesIt = services.iterator();
@@ -242,7 +241,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             Integer cid = server.getConfigResponseId();
 
             // remove the resource
-            this.removeAuthzResource(subject, rv);
+            removeAuthzResource(server.getEntityId());
             getServerDAO().remove(server);
 
             // remove the config response

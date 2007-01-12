@@ -311,12 +311,11 @@ public abstract class AppdefSessionEJB
     /**
      * remove the authz resource entry
      */
-    protected void removeAuthzResource(AuthzSubjectValue subject,
-                                       ResourceValue res)
+    protected void removeAuthzResource(AppdefEntityID aeid)
         throws RemoveException, FinderException {
-        log.debug("Removing authz resource: " + res + " by: " + subject);
+        log.debug("Removing authz resource: " + aeid);
         ResourceManagerLocal rm = getResourceManager();
-        rm.removeResource(subject, res);
+        rm.removeResources(new AppdefEntityID[] { aeid });
     }
 
     /**

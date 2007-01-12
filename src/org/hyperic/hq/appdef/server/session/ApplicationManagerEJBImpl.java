@@ -242,20 +242,15 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         throws ApplicationNotFoundException,
                PermissionException, RemoveException {
         try {
-            Application app =
-                getApplicationDAO().findById(id);
+            Application app = getApplicationDAO().findById(id);
             checkRemovePermission(caller, app.getEntityId());
-            this.removeAuthzResource(caller, 
-                getApplicationResourceValue(id));
+            removeAuthzResource(app.getEntityId());
             getApplicationDAO().remove(app);
 
             // Send service deleted event
             sendAppdefEvent(caller, new AppdefEntityID(
                 AppdefEntityConstants.APPDEF_TYPE_APPLICATION, id),
                             AppdefEvent.ACTION_DELETE);
-        } catch(CreateException e) {
-            throw new RemoveException("Unable to remove application:" + 
-                e.getMessage());
         } catch (FinderException e) {
             throw new ApplicationNotFoundException(id);
         } catch (NamingException e) {

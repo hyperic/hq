@@ -1511,19 +1511,19 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             // validate permission needs removeService on the service
             // to succeed
             checkRemovePermission(subj, service.getEntityId());
-            ResourceValue serviceRv = getServiceResourceValue(serviceId);
+            
             // remove any child services
             for(Iterator i = childSvcs.iterator(); i.hasNext();) {
                 Service child = (Service)i.next();
                 Integer childId = child.getId();
-                this.removeService(subj, childId, deep);
+                removeService(subj, childId, deep);
             }
 
             // keep the configresponseId so we can remove it later
             Integer cid = service.getConfigResponseId();
 
             // remove from authz
-            this.removeAuthzResource(subj, serviceRv);
+            removeAuthzResource(service.getEntityId());
 
             // remove from appdef
             getServiceDAO().remove(service);
@@ -1547,10 +1547,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             sendAppdefEvent(subj, new AppdefEntityID(
                 AppdefEntityConstants.APPDEF_TYPE_SERVICE, serviceId),
                             AppdefEvent.ACTION_DELETE);
-        } catch (CreateException e) {
-            log.error("Unable to getServiceResourceValue", e);
-            throw new RemoveException("Unable to getServiceResourceValue: "
-                + e);
         } catch (NamingException e) {
             throw new SystemException(e);
         }

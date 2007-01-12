@@ -322,11 +322,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                 throw new RemoveException("Platform " + platform.getName()
                     + " has " + numServers + " installed servers");
             }
-            // check to see that the user has the remove permission
-            // on the platform
-            ResourceValue platformRv = this.getPlatformResourceValue(
-                platform.getId());
-            this.checkRemovePermission(subject, platform.getEntityId());
+            
+            checkRemovePermission(subject, platform.getEntityId());
             // remove the resources for any servers and services
             // on this host. This is done because the entity beans
             // are not aware of Authz, and are set up for cascade deletes
@@ -337,7 +334,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             Integer cid = platform.getConfigResponseId();
 
             // now remove the resource for the platform
-            removeAuthzResource(subject, platformRv);
+            removeAuthzResource(platform.getEntityId());
             getPlatformDAO().remove(platform);
 
             // remove the config response
@@ -366,12 +363,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             _log.debug("Error while removing Platform");
             rollback();
             throw e;
-        } catch (CreateException e) {
-            _log.debug("Error while removing Platform");
-            rollback();
-            throw new RemoveException(
-                    "Unable to remove platform: " 
-                    + e.getMessage());
         } catch (PermissionException e) {
             _log.debug("Error while removing Platform");
             rollback();
