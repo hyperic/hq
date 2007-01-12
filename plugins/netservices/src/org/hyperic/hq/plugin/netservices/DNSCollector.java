@@ -30,6 +30,7 @@ import java.net.PortUnreachableException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
+import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
 
 import org.xbill.DNS.DClass;
@@ -46,6 +47,7 @@ public class DNSCollector extends NetServicesCollector {
     private Message query;
     private String lookupName;
     private String nameserver;
+    private String ipmatch;
 
     private SimpleResolver getResolver()
         throws UnknownHostException {
@@ -73,6 +75,7 @@ public class DNSCollector extends NetServicesCollector {
 
         try {
             this.lookupName = getProperty("lookupname");
+            this.ipmatch = getProperty("ipmatch");
 
             Name name =
                 Name.fromString(lookupName, Name.root);
@@ -95,6 +98,7 @@ public class DNSCollector extends NetServicesCollector {
             Message message =
                 getResolver().send(this.query);
             endTime();
+            double avail = Metric.AVAIL_UP; //DNS server itself is available
 
             Record[] answers =
                 message.getSectionArray(Section.ANSWER);
@@ -107,22 +111,51 @@ public class DNSCollector extends NetServicesCollector {
             setValue("AuthorityRecords", authority.length);
             setValue("AdditionalRecords", additional.length);
 
+            boolean matchRequired = this.ipmatch != null;
+            boolean matched = false;
+
             String msg;
             if (answers.length == 0) {
                 msg =
                     this.nameserver +
                     " can't find " +
                     this.lookupName;
-                this.setWarningMessage(msg);
+                if (matchRequired) {
+                    this.setErrorMessage(msg);
+                    //DNS server is available but lookup failed
+                    avail = Metric.AVAIL_WARN;
+                }
+                else {
+                    this.setWarningMessage(msg);
+                }
             }
             else {
                 msg =
-                    "Non-authoritative answer: " +
-                    answers[0].rdataToString();
-                setInfoMessage(msg);
+                    "Non-authoritative answer: '" +
+                    answers[0].rdataToString() + "'";
+                if ((this.ipmatch == null) || (this.ipmatch.equals("*"))) {
+                    matched = true;
+                }
+                else {
+                    for (int i=0; i<answers.length; i++) {
+                        String ip = answers[i].rdataToString();
+                        matched = this.ipmatch.equals(ip);
+                        if (matched) {
+                            break;
+                        }
+                    }
+                }
+                if (matchRequired && !matched) {
+                    avail = Metric.AVAIL_WARN;
+                    setErrorMessage(msg + " invalid, expecting: '" +
+                                    this.ipmatch + "'");
+                }
+                else {
+                    setInfoMessage(msg);
+                }
             }
 
-            setAvailability(true);
+            setAvailability(avail);
             return;
         } catch (PortUnreachableException e) {
             errmsg = this.nameserver + " port unreachable";
