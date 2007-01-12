@@ -82,14 +82,18 @@ public abstract class ProductPlugin extends GenericPlugin {
 
     protected ProductPluginManager manager;
 
+    public String getInstallPath() {
+        //e.g. geronimo.installpath=/usr/local/geronimo-1.0
+        String prop = getName() + "." + PROP_INSTALLPATH;
+        return getManager().getProperty(prop);
+    }
+
     public void init(PluginManager manager)
         throws PluginException
     {
         this.manager = (ProductPluginManager)manager;
+        String installpath = getInstallPath();
 
-        //geronimo.installpath=/usr/local/geronimo-1.0
-        String installpath =
-            manager.getProperty(getName() + "." + PROP_INSTALLPATH);
         if (installpath != null) {
             adjustClassPath(installpath);
         }
