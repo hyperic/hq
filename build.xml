@@ -81,7 +81,7 @@
   <path id="alljars">
     <path refid="pdknative" />
     <fileset dir="${lather.lib}" includes="lather.jar" />
-    <fileset dir="${thirdparty.lib}" includes="*.jar" excludes="aspectj*.jar,strutstest-*.jar,cactus*.jar,mockejb.jar,mockrunner-ejb.jar"/>
+    <fileset dir="${thirdparty.lib}" includes="*.jar" excludes="strutstest-*.jar,cactus*.jar,mockejb.jar,mockrunner-ejb.jar"/>
     <fileset dir="${thirdparty.lib}" includes="*.zip" />      
     <fileset dir="${thirdparty.lib}/oracle_jdbc" includes="*.jar" />
     <fileset dir="${thirdparty.lib}/postgresql"
@@ -156,7 +156,9 @@
      <property name="init-props.notrequired" value="true"/>
   </target>
 
-  <target name="init-internal-taskdefs" unless="init-internal-taskdefs.notrequired">
+  <target name="init-internal-taskdefs" 
+          depends="init-aspectj"
+          unless="init-internal-taskdefs.notrequired">
     <macrodef name="hq-javac">
       <attribute name="destdir"      default="${build.dir}/classes"/>
       <attribute name="source"       default="${hq.javac.source}"/>
@@ -172,13 +174,6 @@
         </javac>
       </sequential>
     </macrodef>
-    
-    <taskdef 
-           resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties">
-      <classpath>
-        <pathelement location="${thirdparty.lib}/aop/aspectjtools.jar"/>
-      </classpath>
-    </taskdef>
 
     <property name="init-internal-taskdefs.notrequired" value="true"/>
   </target>
@@ -201,8 +196,8 @@
 
   <!-- ==================== Compile java sources ==================== -->
   <target name="compile-app-sources" depends="init">
-      <mkdir dir="${build.dir}/classes" />
-      <hq-javac>
+      <mkdir dir="${build.dir}/pre_aspect" />
+      <hq-javac destdir="${build.dir}/pre_aspect">
         <classpath>
             <path refid="alljars"/>
             <path refid="testjars"/>
@@ -1202,10 +1197,31 @@
           depends="init,xdoclet,hibernate-prep,build" >
   </target>
 
- <target name="build" depends="init,compile,aspectize-classes,pack" 
-         description="Compile and pack - no code generation" >
-    <!--  Triger jboss reloading -->
+  <target name="aspects-check" depends="init">
+      <uptodate property="generateAspects.notRequired"
+                targetfile="${build.dir}/aspects.tstamp">
+        <srcfiles dir="${aspectdir}">
+          <include name="*"/>
+        </srcfiles>
+      </uptodate>
   </target>
+    
+  <target name="generate-aspects" depends="init,aspects-check"
+          unless="generateAspects.notRequired">
+      <echo>Generating aspects</echo>
+      <hq-aspectj-compile destDir="${build.dir}/aspects"
+                          aspectDir="${aspectdir}"/>
+      <touch file="${build.dir}/aspects.tstamp"/>
+  </target>
+    
+  <target name="aspectize-classes" depends="init,generate-aspects">
+      <echo>Weaving aspects into classes</echo>
+      <hq-aspectj-weave destDir="${build.dir}/classes"
+                        aspectDir="${build.dir}/aspects"/>
+  </target>
+
+  <target name="build" depends="init,compile,aspectize-classes,pack" 
+         description="Compile and pack - no code generation" />
 
  <target name="clean" depends="remote-clean" description="Clean the build directory" >
     <delete dir="${build.dir}"/>
