@@ -90,9 +90,9 @@ import org.apache.commons.logging.LogFactory;
  */
 public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
 
-    private AIQueueManagerLocal       aiqManagerLocal = null;
-    private AIScheduleManagerLocal    aiScheduleManagerLocal = null;
-    private ServerConfigManagerLocal     camconfig = null;
+    private AIQueueManagerLocal aiqManagerLocal = null;
+    private AIScheduleManagerLocal aiScheduleManagerLocal = null;
+    private ServerConfigManagerLocal camconfig = null;
 
     private SessionManager sessionManager = SessionManager.getInstance();
 
@@ -103,18 +103,18 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
 
     private synchronized void init () {
         try {
-            if ( aiqManagerLocal == null ) {
+            if (aiqManagerLocal == null) {
                 aiqManagerLocal = AIQueueManagerUtil.getLocalHome().create();
             }
-            if ( aiScheduleManagerLocal == null ) {
+            if (aiScheduleManagerLocal == null) {
                 aiScheduleManagerLocal = AIScheduleManagerUtil.getLocalHome().create();
             }
-            if ( camconfig == null ) {
+            if (camconfig == null) {
                 camconfig = ServerConfigManagerUtil.getLocalHome().create();
             }
-        } catch ( CreateException ne ) {
+        } catch (CreateException ne) {
             log.error("Unable to initialize", ne);
-        } catch ( NamingException ne ) {
+        } catch (NamingException ne) {
             log.error("Unable to initialize", ne);
         }
     }
@@ -215,8 +215,8 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public Map getServerSignatures ( int sessionID,
-                                     List serverTypes ) 
+    public Map getServerSignatures(int sessionID,
+                                   List serverTypes)
         throws SessionTimeoutException, SessionNotFoundException, 
                PermissionException, AutoinventoryException {
 
@@ -225,9 +225,8 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
             return getAutoInventoryManager()
                 .getServerSignatures(subject, serverTypes);
 
-        } catch ( Exception e ) {
-            throw new SystemException("Unexpected error in  "
-                                         + "getServerSignatures: " + e, e);
+        } catch (Exception e) {
+            throw new SystemException(e);
         } 
     }
 
@@ -244,12 +243,12 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void startGroupScan ( int sessionID,
-                                 int groupID,
-                                 ScanConfigurationCore scanConfig,
-                                 String scanName,
-                                 String scanDesc,
-                                 ScheduleValue schedule)
+    public void startGroupScan(int sessionID,
+                               int groupID,
+                               ScanConfigurationCore scanConfig,
+                               String scanName,
+                               String scanDesc,
+                               ScheduleValue schedule)
         throws SessionTimeoutException, SessionNotFoundException, 
                PermissionException, AutoinventoryException,
                AgentConnectionException, AgentNotFoundException,
@@ -279,12 +278,12 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void startScan ( int sessionID,
-                            int platformID,
-                            ScanConfigurationCore scanConfig,
-                            String scanName,
-                            String scanDesc,
-                            ScheduleValue schedule)
+    public void startScan(int sessionID,
+                          int platformID,
+                          ScanConfigurationCore scanConfig,
+                          String scanName,
+                          String scanDesc,
+                          ScheduleValue schedule)
         throws SessionTimeoutException, SessionNotFoundException, 
                PermissionException, AutoinventoryException, 
                AgentConnectionException, AgentNotFoundException,
@@ -303,9 +302,9 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void startScan ( int sessionID,
-                            String agentToken,
-                            ScanConfigurationCore scanConfig)
+    public void startScan(int sessionID,
+                          String agentToken,
+                          ScanConfigurationCore scanConfig)
         throws SessionTimeoutException, SessionNotFoundException, 
                PermissionException, AutoinventoryException, 
                AgentConnectionException, AgentNotFoundException {
@@ -319,8 +318,8 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void stopScan ( int sessionID,
-                           int platformID )
+    public void stopScan(int sessionID,
+                         int platformID)
         throws SessionTimeoutException, SessionNotFoundException, 
                PermissionException, AutoinventoryException, 
                AgentConnectionException, AgentNotFoundException {
@@ -338,8 +337,8 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public ScanStateCore getScanStatus ( int sessionID,
-                                         int platformID )
+    public ScanStateCore getScanStatus(int sessionID,
+                                       int platformID)
         throws SessionTimeoutException, SessionNotFoundException, 
                PermissionException, AgentNotFoundException, 
                AgentConnectionException, AgentRemoteException,
@@ -360,8 +359,8 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public ScanStateCore getScanStatusByAgentToken ( int sessionID,
-                                                     String agentToken )
+    public ScanStateCore getScanStatusByAgentToken(int sessionID,
+                                                   String agentToken)
         throws SessionTimeoutException, SessionNotFoundException, 
                PermissionException, AgentNotFoundException, 
                AgentConnectionException, AgentRemoteException,
@@ -390,10 +389,10 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public PageList retrieveQueue ( int sessionID, 
-                                    boolean showIgnored,
-                                    boolean showPlaceholders,
-                                    PageControl pc ) 
+    public PageList retrieveQueue(int sessionID,
+                                  boolean showIgnored,
+                                  boolean showPlaceholders,
+                                  PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException {
         return retrieveQueue(sessionID,
                              showIgnored, 
@@ -417,17 +416,15 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public PageList retrieveQueue ( int sessionID, 
-                                    boolean showIgnored,
-                                    boolean showPlaceholders,
-                                    boolean showAlreadyProcessed,
-                                    PageControl pc ) 
+    public PageList retrieveQueue(int sessionID,
+                                  boolean showIgnored,
+                                  boolean showPlaceholders,
+                                  boolean showAlreadyProcessed,
+                                  PageControl pc )
         throws SessionNotFoundException, SessionTimeoutException {
 
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
         PageList queue = null;
-
-        log.debug("AIBoss.retrieveQueue started");
 
         // Call into autoinventory session layer
         if (aiqManagerLocal == null) init();
@@ -438,9 +435,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                                               showPlaceholders,
                                               showAlreadyProcessed,
                                               pc);
-
-        log.debug("AIBoss.retrieveQueue completed: returning queue=" 
-                  + StringUtil.listToString(queue));
         return queue;
     }
 
@@ -449,7 +443,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public AIPlatformValue findAIPlatformById( int sessionID, int aiplatformID ) 
+    public AIPlatformValue findAIPlatformById(int sessionID, int aiplatformID)
         throws SessionNotFoundException, SessionTimeoutException {
         
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
@@ -475,7 +469,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public AIPlatformValue findAIPlatformByFqdn( int sessionID, String fqdn ) 
+    public AIPlatformValue findAIPlatformByFqdn(int sessionID, String fqdn)
         throws SessionNotFoundException, SessionTimeoutException {
 
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
@@ -501,7 +495,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public AIServerValue findAIServerById( int sessionID, int serverID ) 
+    public AIServerValue findAIServerById(int sessionID, int serverID)
         throws SessionNotFoundException, SessionTimeoutException {
         
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
@@ -555,7 +549,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public AIIpValue findAIIpByAddress( int sessionID, String address ) 
+    public AIIpValue findAIIpByAddress(int sessionID, String address)
         throws SessionNotFoundException, SessionTimeoutException {
 
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
@@ -577,19 +571,13 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void processQueue ( int sessionID, 
-                               List platformList, 
-                               List serverList, 
-                               List ipList,
-                               int action ) 
+    public void processQueue(int sessionID,
+                             List platformList,
+                             List serverList,
+                             List ipList,
+                             int action)
         throws SessionNotFoundException, SessionTimeoutException,
                AIQApprovalException, PermissionException, ValidationException {
-
-        log.debug("AIBoss.processQueue starting:"
-                  + "\n\tplatforms=" + StringUtil.listToString(platformList)
-                  + "\n\tservers=" + StringUtil.listToString(serverList)
-                  + "\n\tips=" + StringUtil.listToString(ipList)
-                  + "\n\taction=" + AIQueueConstants.Q_DECISIONS[action]);
 
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
 
