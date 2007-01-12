@@ -223,4 +223,8 @@ public class GalertDef
     public AlertDefinitionInterface getDefinitionInfo() {
         return this;
     }
+    
+    public boolean performsEscalations() {
+        return true;
+    }
 }

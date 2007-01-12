@@ -25,19 +25,13 @@
 
 package org.hyperic.hq.events;
 
-import org.hyperic.hq.escalation.server.session.Escalation;
-
-/**
- * XXX: Probably should remove getEscalation hfrom here and make it a different
- *      interface
- */
 public interface AlertDefinitionInterface {
     public Integer getId();
-    public Escalation getEscalation();
     public String getName();
     public String getDescription();
     public int getPriority();
     public int getAppdefType();
     public int getAppdefId();
     public boolean isNotifyFiltered();
+    public boolean performsEscalations();
 }

@@ -513,4 +513,8 @@ public class AlertDefinition
     public AlertDefinitionInterface getDefinitionInfo() {
         return this;
     }
+
+    public boolean performsEscalations() {
+        return true;
+    }
 }
