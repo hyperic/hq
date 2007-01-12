@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,18 +33,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ejb.CreateException;
-import javax.ejb.EJBException;
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
-import javax.jms.JMSException;
-import javax.jms.QueueConnection;
-import javax.jms.QueueSession;
 
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
@@ -53,8 +48,6 @@ import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.measurement.server.session.RawMeasurement;
-import org.hyperic.hq.measurement.server.session.SrnId;
-import org.hyperic.hq.measurement.server.session.ScheduleRevNum;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.ext.MonitorFactory;
 import org.hyperic.hq.measurement.ext.MonitorInterface;
@@ -67,6 +60,8 @@ import org.hyperic.hq.measurement.ext.depgraph.RawNode;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.monitor.MonitorCreateException;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
+import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
+import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
 import org.hyperic.hq.measurement.shared.RawMeasurementValue;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 
@@ -86,8 +81,10 @@ import org.hibernate.ObjectNotFoundException;
  *      view-type="local"
  *      type="Stateless"
  */
-public class MeasurementProcessorEJBImpl extends SessionEJB 
-    implements SessionBean {
+public class MeasurementProcessorEJBImpl 
+    extends SessionEJB 
+    implements SessionBean 
+{
     private static final String logCtx = 
         MeasurementProcessorEJBImpl.class.getName();
     private final Log log = LogFactory.getLog(logCtx);
@@ -500,23 +497,21 @@ public class MeasurementProcessorEJBImpl extends SessionEJB
         }
     }
 
+    public static MeasurementProcessorLocal getOne() {
+        try {
+            return MeasurementProcessorUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
+    }
+    
     /**
      * @ejb:create-method
      */
-    public void ejbCreate() throws CreateException {}
-
+    public void ejbCreate() {}
     public void ejbPostCreate() {}
-
     public void ejbActivate() {}
-
     public void ejbPassivate() {}
-
-    public void ejbRemove() {
-        this.ctx = null;
-    }
-
-    public void setSessionContext(SessionContext ctx)
-        throws EJBException, RemoteException {
-        this.ctx = ctx;
-    }
+    public void ejbRemove() {}
+    public void setSessionContext(SessionContext ctx) {}
 }

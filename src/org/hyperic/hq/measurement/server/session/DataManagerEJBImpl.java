@@ -59,6 +59,8 @@ import org.hyperic.hq.measurement.data.AggregateObjectMeasurementValue;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.data.MeasurementDataSourceException;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
+import org.hyperic.hq.measurement.shared.DataManagerLocal;
+import org.hyperic.hq.measurement.shared.DataManagerUtil;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.ZeventManager;
@@ -1936,6 +1938,14 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
+    public static DataManagerLocal getOne() { 
+        try {
+            return DataManagerUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
+    }
+    
     /**
      * @ejb:create-method
      */

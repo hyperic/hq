@@ -31,13 +31,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
-import javax.naming.NamingException;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
@@ -48,13 +45,10 @@ import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.SingleMeasurementReport;
 import org.hyperic.hq.measurement.data.ValueList;
 import org.hyperic.hq.measurement.ext.MonitorFactory;
-import org.hyperic.hq.measurement.ext.PropertyNotFoundException;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
-import org.hyperic.hq.measurement.shared.DataManagerUtil;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerUtil;
+import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
-import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.StringUtil;
@@ -77,46 +71,26 @@ public class ReportProcessorEJBImpl
 {
     private final Log log = LogFactory.getLog(ReportProcessorEJBImpl.class);
 
-    private Integer debugId = null;
-    
-    private DataManagerLocal          dataManager;
-    private MeasurementProcessorLocal measurementProc;
-
-    private DataManagerLocal getDataManagerLocal () {
-        try {
-            this.dataManager = DataManagerUtil.getLocalHome().create();
-        } catch(NamingException exc){
-            throw new SystemException("Unable to get DataManager", exc);
-        } catch(CreateException exc){
-            throw new SystemException("Unable to create DataManager", exc);
-        }
-
-        return this.dataManager;
-    }
+    private final DataManagerLocal _dataMan = 
+        DataManagerEJBImpl.getOne();
+    private final DerivedMeasurementManagerLocal _dmMan =
+        DerivedMeasurementManagerEJBImpl.getOne();
+    private final MeasurementProcessorLocal _measurementProc =
+        MeasurementProcessorEJBImpl.getOne();
+    private Integer _debugId;
     
     private DerivedMeasurementValue getDerivedMeasurement(Integer dmId) {
         try {
-            // We need to decide to short circuit, this isn't pretty
-            // but works. Lookup template, if identity, set interval
-            // which will later be used to instruct datamanager to
-            // insert the DM row in addition to just the RM row.
-            return DerivedMeasurementManagerUtil.getLocalHome().create()
-                .getMeasurement(dmId);
-        } catch (MeasurementNotFoundException e) {
-            log.debug("Unable to locate DM for passThrough data insertion.");
-        } catch (CreateException e) {
-            throw new SystemException(
-                "Unable to create DerivedMeasurementManager", e);
-        } catch (NamingException e) {
-            throw new SystemException(
-                "Unable to look up DerivedMeasurementManager", e);
+            return _dmMan.getMeasurement(dmId);
+        } catch(MeasurementNotFoundException e) {
+            return null;
         }
-        return null;
     }
 
     private void addData(DerivedMeasurementValue dmVal, int dsnId,
                          MetricValue[] dpts, long current,
-                         Map oldDataPoints) {
+                         Map oldDataPoints) 
+    {
         long interval = dmVal.getInterval();
         boolean isPassThrough =
             dmVal.getFormula().equals(MeasurementConstants.TEMPL_IDENTITY);
@@ -138,9 +112,9 @@ public class ReportProcessorEJBImpl
                 long adjust = TimingVoodoo.roundDownTime(retrieval, interval);
                 
                 // Debugging missing data points
-                if (dmVal.getId().equals(debugId)) {
+                if (dmVal.getId().equals(_debugId)) {
                     log.info("metricDebug: ReportProcessor addData: " +
-                             "metric ID " + debugId +
+                             "metric ID " + _debugId +
                              " value=" + dpts[i].getValue() +
                              " at " + adjust);
                 }
@@ -153,7 +127,7 @@ public class ReportProcessorEJBImpl
                 Integer rmid = new Integer(dsnId);
                 
                 // Add the raw measurement if it's not a pass-thru
-                this.getDataManagerLocal().addData(rmid, dpts, true);
+                _dataMan.addData(rmid, dpts, true);
                 
                 // See if we need to add to backfill queue
                 if (retrieval < reservation) {
@@ -170,15 +144,14 @@ public class ReportProcessorEJBImpl
         }
         
         if (isPassThrough) {
-            this.getDataManagerLocal().addData(dmVal.getId(), passThroughs,
-                                               true);
+            _dataMan.addData(dmVal.getId(), passThroughs, true);
         }
 
         // Let's check to see if there is old data, if so, we
         // can tell the scheduler to calculate missing values
         if (oldDataPoints.size() > 0) {
             try {
-                measurementProc.recalculateMeasurements(oldDataPoints);
+                _measurementProc.recalculateMeasurements(oldDataPoints);
             } catch (MeasurementScheduleException e) {
                 log.error("Cannot recalculate measurement(s).", e);
             }
@@ -200,20 +173,6 @@ public class ReportProcessorEJBImpl
         HashMap oldDataPoints = new HashMap();
         DSNList[] dsnLists = report.getClientIdList();
                 
-        if (null == measurementProc) {
-            try {
-                measurementProc =
-                    MeasurementProcessorUtil.getLocalHome().create();
-            } catch (NamingException e) {
-                log.error
-                    ("Error getting MeasurementProcessorLocalHome", e);
-                return;
-            } catch (CreateException e) {
-                log.error("Error creating MeasurementProcessor", e);
-                return;
-            }
-        }
-
         for (int i = 0; i < dsnLists.length; i++) {
             Integer dmId = new Integer(dsnLists[i].getClientId());
             DerivedMeasurementValue dmVal =
@@ -235,13 +194,12 @@ public class ReportProcessorEJBImpl
         SRNManagerLocal srnManager = getSRNManager();
         Collection nonEntities = srnManager.reportAgentSRNs(report.getSRNList());
         
-        if (report.getAgentToken() != null && nonEntities.size() > 0 &&
-            measurementProc != null) {
+        if (report.getAgentToken() != null && nonEntities.size() > 0) {
             // Better tell the agent to stop reporting non-existent entities
             AppdefEntityID[] entIds = (AppdefEntityID[])
                 nonEntities.toArray(new AppdefEntityID[nonEntities.size()]);
             try {
-                measurementProc.unschedule(report.getAgentToken(), entIds);
+                _measurementProc.unschedule(report.getAgentToken(), entIds);
             } catch (MeasurementUnscheduleException e) {
                 log.error("Cannot unschedule entities: " +
                           StringUtil.arrayToString(entIds));
@@ -253,19 +211,17 @@ public class ReportProcessorEJBImpl
      * @ejb:interface-method
      */
     public void handleMeasurementReport(SingleMeasurementReport single){
-        this.getDataManagerLocal().addData(single.getMeasurementId(), 
-                                           single.getMeasurementValue(), true);
+        _dataMan.addData(single.getMeasurementId(), 
+                         single.getMeasurementValue(), true);
     }
 
     public void ejbCreate(){
         try {
-            this.debugId = new Integer(MonitorFactory.getProperty(
-                "agent.metricDebug"));
-        } catch (NumberFormatException e) {
-            this.debugId = null;
-        } catch (PropertyNotFoundException e) {
-            this.debugId = null;
-        }
+            _debugId = 
+                new Integer(MonitorFactory.getProperty("agent.metricDebug"));
+        } catch (Exception e) {
+            _debugId = null;
+        } 
     }
     
     public void ejbPostCreate(){}
@@ -273,5 +229,4 @@ public class ReportProcessorEJBImpl
     public void ejbPassivate(){}
     public void ejbRemove(){}
     public void setSessionContext(SessionContext ctx){}
-
 } 
