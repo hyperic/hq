@@ -570,7 +570,7 @@ public class ConfigManagerEJBImpl
         }
 
         if (userManaged != null &&
-            existingConfig.getUserManaged() == userManaged.booleanValue()) {
+            existingConfig.getUserManaged() != userManaged.booleanValue()) {
             existingConfig.setUserManaged(userManaged.booleanValue());
             wasUpdated = true;
         }
