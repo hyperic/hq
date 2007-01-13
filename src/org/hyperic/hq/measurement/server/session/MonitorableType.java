@@ -25,41 +25,31 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.measurement.shared.MonitorableTypeValue;
 
-public class MonitorableType extends PersistedObject
-    implements java.io.Serializable {
+public class MonitorableType 
+    extends PersistedObject
+{
+    private String     _name;
+    private Integer    _cid;
+    private int        _appdefType;
+    private String     _plugin;
+    private Collection _templates = new ArrayList();
 
-    // Fields    
-     private String _name;
-     private Integer _cid;
-     private int _appdefType;
-     private String _plugin;
-     private Collection _measurementTemplates;
-
-     // Constructors
-    public MonitorableType() {
-    }
-
-    public MonitorableType(String name, int appdefType, String plugin) {
-        _name = name;
-        _appdefType = appdefType;
-        _plugin = plugin;
-    }
-
-    public MonitorableType(String name, Integer cid, int appdefType,
-                           String plugin, Collection measurementTemplates) {
-        _name = name;
-        _cid = cid;
-        _appdefType = appdefType;
-        _plugin = plugin;
-        _measurementTemplates = measurementTemplates;
+    protected MonitorableType() {
     }
     
-    // Property accessors
+    MonitorableType(String name, int appdefType, String plugin) {
+        _name       = name;
+        _appdefType = appdefType;
+        _plugin     = plugin;
+    }
+
     public String getName() {
         return _name;
     }
@@ -93,11 +83,15 @@ public class MonitorableType extends PersistedObject
     }
 
     public Collection getMeasurementTemplates() {
-        return _measurementTemplates;
+        return Collections.unmodifiableCollection(_templates);
     }
     
-    protected void setMeasurementTemplates(Collection measurementTemplates) {
-        _measurementTemplates = measurementTemplates;
+    protected Collection getMeasurementTemplatesBag() {
+        return _templates;
+    }
+
+    protected void setMeasurementTemplatesBag(Collection templates) {
+        _templates = templates;
     }
 
     /**

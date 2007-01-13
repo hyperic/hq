@@ -7,6 +7,8 @@
 <hibernate-mapping package="org.hyperic.hq.measurement.server.session">
 
   <class name="MonitorableType" table="EAM_MONITORABLE_TYPE">
+    <cache usage="read-write" />
+
     <id name="id" type="integer">
       <column name="ID" not-null="true" />
       <generator class="sequence">
@@ -34,7 +36,7 @@
       <column name="PLUGIN" not-null="true" length="250" />
     </property>
 
-    <bag name="measurementTemplates" table="EAM_MEASUREMENT_TEMPL"
+    <bag name="measurementTemplatesBag" table="EAM_MEASUREMENT_TEMPL"
          cascade="save-update,delete,persist,merge,evict"
          inverse="true">
       <key column="MONITORABLE_TYPE_ID" />

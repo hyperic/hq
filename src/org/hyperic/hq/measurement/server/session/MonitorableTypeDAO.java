@@ -28,9 +28,6 @@ package org.hyperic.hq.measurement.server.session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
-/**
- * CRUD methods, finders, etc. for MonitorableType
- */
 public class MonitorableTypeDAO extends HibernateDAO {
     public MonitorableTypeDAO(DAOFactory f) {
         super(MonitorableType.class, f);
@@ -44,13 +41,9 @@ public class MonitorableTypeDAO extends HibernateDAO {
         super.remove(entity);
     }
 
-    MonitorableType create(String name, int appdefType,
-                           String plugin) {
-        MonitorableType mt = new MonitorableType();
+    MonitorableType create(String name, int appdefType, String plugin) {
+        MonitorableType mt = new MonitorableType(name, appdefType, plugin);
 
-        mt.setName(name);
-        mt.setAppdefType(appdefType);
-        mt.setPlugin(plugin);
         save(mt);
         return mt;
     }
