@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hibernate.criterion.Expression;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -242,6 +243,14 @@ public class ServerDAO extends HibernateDAO
             .list();
     }
 
+    public List findByServices(Integer[] ids)
+    {
+        return createCriteria()
+            .createAlias("services", "s")
+            .add( Expression.in("s.id", ids))
+            .list();
+    }
+
     public List findByName(String name)
     {
         String sql="from Server where sortName=?";
@@ -277,5 +286,9 @@ public class ServerDAO extends HibernateDAO
             servers.add(findById(virt.getId()));
         }
         return servers;
+    }
+
+    public Class getPersistentClass() {
+        return Server.class;
     }
 }
