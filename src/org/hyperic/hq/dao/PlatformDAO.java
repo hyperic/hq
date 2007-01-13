@@ -357,6 +357,13 @@ public class PlatformDAO extends HibernateDAO {
         }
         return platforms;
     }
+    
+    public int countPlatforms() {
+        Integer count = (Integer) getSession()
+            .createQuery("select count(*) from Platform")
+            .uniqueResult();
+        return count.intValue();
+    }
 
     public Class getPersistentClass() {
         return Platform.class;
