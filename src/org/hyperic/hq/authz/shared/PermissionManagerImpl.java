@@ -127,8 +127,10 @@ public class PermissionManagerImpl
                                                 PageControl pc) 
         throws FinderException, NamingException, PermissionException
     {
-        _log.debug("Checking Scope for Operation: " + opName +
-                  " subject: " + subj);
+        if (_log.isDebugEnabled()) { 
+            _log.debug("Checking Scope for Operation: " + opName +
+                       " subject: " + subj);
+        }
         ResourceType resTypeBean = getResourceTypeDAO().findByName(resType);
         if (resTypeBean != null) {
             Operation opEJB =
@@ -144,11 +146,16 @@ public class PermissionManagerImpl
                                                 Integer opId, PageControl pc) 
         throws FinderException, NamingException, PermissionException
     {
-        _log.debug("Checking Scope for Operation: " + opId + " subject: " + 
-                  subj);
+        if (_log.isDebugEnabled()) {
+            _log.debug("Checking Scope for Operation: " + opId + " subject: " + 
+                       subj);
+        }
         PageList scope = findScopeBySQL(subj, opId, pc);
-        _log.debug("Scope check returned a page of : " + scope.size() +
-                  " of " + scope.getTotalSize() + " items");
+
+        if (_log.isDebugEnabled()) {
+            _log.debug("Scope check returned a page of : " + scope.size() +
+                       " of " + scope.getTotalSize() + " items");
+        }
         return scope;
     }
 

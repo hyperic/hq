@@ -26,6 +26,8 @@
 package org.hyperic.hq.authz.server.session;
 
 import java.lang.reflect.Array;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -76,9 +78,6 @@ public abstract class AuthzSession
     protected static final String DATASOURCE = HQConstants.DATASOURCE;
     protected static InitialContext ic = null;
 
-    // Homes for the entities
-    
-    // Homes for the sessions
     protected ResourceGroupManagerLocalHome groupMgrHome;
     protected AuthzSubjectManagerLocalHome subjectMgrHome;
     protected ResourceManagerLocalHome resourceMgrHome;
@@ -251,23 +250,23 @@ public abstract class AuthzSession
         boolean isRole = false;
         boolean isAuthzSubject = false;
 
-        if (c == org.hyperic.hq.authz.shared.OperationValue.class) {
+        if (c.equals(OperationValue.class)) {
             values = new OperationValue[locals.size()];
             isOperation = true;
-        } else if (c == org.hyperic.hq.authz.shared.ResourceValue.class) {
+        } else if (c.equals(ResourceValue.class)) {
             values = new ResourceValue[locals.size()];
             isResource = true;
-        } else if (c == org.hyperic.hq.authz.shared.ResourceGroupValue.class) {
+        } else if (c.equals(ResourceGroupValue.class)) {
             values = new ResourceGroupValue[locals.size()];
             isResourceGroup = true;
-        } else if (c == org.hyperic.hq.authz.shared.RoleValue.class) {
+        } else if (c.equals(RoleValue.class)) {
             values = new RoleValue[locals.size()];
             isRole = true;
-        } else if (c == org.hyperic.hq.authz.shared.AuthzSubjectValue.class) {
+        } else if (c.equals(AuthzSubjectValue.class)) {
             values = new AuthzSubjectValue[locals.size()];
             isAuthzSubject = true;
         } else {
-            log.error("Invalid type.");
+            throw new SystemException("Unknown type");
         }
 
         while (it.hasNext()) {
@@ -287,7 +286,7 @@ public abstract class AuthzSession
                 values[counter] =
                     ((AuthzSubject)it.next()).getAuthzSubjectValue();
             } else {
-                log.error("Invalid type.");
+                throw new SystemException("Unknown type");
             }
             counter++;
         }
@@ -398,7 +397,11 @@ public abstract class AuthzSession
         return ic;
     }
 
-   public void setSessionContext(SessionContext ctx) {
+    protected Connection getDBConn() throws SQLException {
+        return DAOFactory.getDAOFactory().getCurrentSession().connection();
+    }
+    
+    public void setSessionContext(SessionContext ctx) {
         this.ctx = ctx;
     }
     

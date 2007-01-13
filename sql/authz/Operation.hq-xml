@@ -33,8 +33,8 @@
       <column name="CID" index="EAM_OPERATION_CID_IDX" not-null="false" />
     </property>
 
-    <bag name="roles" table="EAM_ROLE_OPERATION_MAP"
-        inverse="true">
+    <bag name="rolesBag" table="EAM_ROLE_OPERATION_MAP"
+         inverse="true">
       <key column="OPERATION_ID" />
       <many-to-many class="Role" column="ROLE_ID" />
     </bag>

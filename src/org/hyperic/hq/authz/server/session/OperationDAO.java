@@ -25,22 +25,17 @@
 
 package org.hyperic.hq.authz.server.session;
 
-
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.OperationValue;
 import org.hyperic.hq.dao.HibernateDAO;
 
-/**
- * CRUD methods, finders, etc. for Operation
- */
-public class OperationDAO extends HibernateDAO
-{
+public class OperationDAO extends HibernateDAO {
     public OperationDAO(DAOFactory f) {
         super(Operation.class, f);
     }
 
-    public Operation create(OperationValue createInfo) {
+    Operation create(OperationValue createInfo) {
         Operation res = new Operation(createInfo);
         DAOFactory factory = DAOFactory.getDAOFactory();
         Role rootRole=factory.getRoleDAO().findById(AuthzConstants.rootRoleId);
@@ -53,24 +48,26 @@ public class OperationDAO extends HibernateDAO
         return res;
     }
 
-    public Operation findById(Integer id) {
+    Operation findById(Integer id) {
         return (Operation) super.findById(id);
     }
 
-    public void save(Operation entity) {
+    void save(Operation entity) {
         super.save(entity);
     }
 
-    public void remove(Operation entity) {
+    void remove(Operation entity) {
         super.remove(entity);
     }
 
-    public Operation findByTypeAndName(ResourceType type, String name)
-    {            
+    public Operation findByTypeAndName(ResourceType type, String name) {
         String sql = "from Operation where resourceType.id=? and name=?";
+
         return (Operation)getSession().createQuery(sql)
             .setInteger(0, type.getId().intValue())
             .setString(1, name)
+            .setCacheable(true)
+            .setCacheRegion("Operation.findByTypeAndName")
             .uniqueResult();
     }
 }

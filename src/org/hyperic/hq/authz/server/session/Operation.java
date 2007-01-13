@@ -27,137 +27,109 @@ package org.hyperic.hq.authz.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.hyperic.hq.authz.shared.OperationValue;
 
-public class Operation extends AuthzNamedBean
-{
+public class Operation extends AuthzNamedBean {
+    private ResourceType _resourceType;
+    private Integer      _cid;
+    private Collection   _roles = new ArrayList();
 
-    // Fields
-    private ResourceType resourceType;
-    private Integer cid;
-    private Collection roles = new ArrayList();
+    private OperationValue _operationValue = new OperationValue();
 
-    private OperationValue operationValue = new OperationValue();
-
-    // Constructors
-
-    /**
-     * default constructor
-     */
-    public Operation()
-    {
-        super();
+    protected Operation() {
     }
 
-    /**
-     * minimal constructor
-     */
-    public Operation(OperationValue val)
-    {
-        super();
+    public Operation(OperationValue val) {
         setOperationValue(val);
     }
 
-    /**
-     * full constructor
-     */
+/*
     public Operation(String name, ResourceType resourceType, Integer cid,
                      Collection roles)
     {
         super(name);
-        this.resourceType = resourceType;
-        this.cid = cid;
-        this.roles = roles;
+        _resourceType = resourceType;
+        _cid          = cid;
+        _roles        = roles;
+    }
+    */
+
+    public ResourceType getResourceType() {
+        return _resourceType;
     }
 
-
-    public ResourceType getResourceType()
-    {
-        return resourceType;
+    protected void setResourceType(ResourceType resourceTypeId) {
+        _resourceType = resourceTypeId;
     }
 
-    protected void setResourceType(ResourceType resourceTypeId)
-    {
-        resourceType = resourceTypeId;
+    public Integer getCid() {
+        return _cid;
     }
 
-    public Integer getCid()
-    {
-        return cid;
+    protected void setCid(Integer val) {
+        _cid = val;
     }
 
-    protected void setCid(Integer val)
-    {
-        cid = val;
-    }
-    public Collection getRoles()
-    {
-        return roles;
+    public Collection getRoles() {
+        return Collections.unmodifiableCollection(_roles);
     }
 
-    protected void setRoles(Collection val)
-    {
-        roles = val;
+    protected Collection getRolesBag() {
+        return _roles;
     }
 
-    public void addRole(Role role)
-    {
-        roles.add(role);
+    protected void setRolesBag(Collection val) {
+        _roles = val;
     }
 
-    public void removeRole(Role role)
-    {
-        roles.remove(role);
+    void addRole(Role role) {
+        getRolesBag().add(role);
     }
 
-    public void removeAllRoles()
-    {
-        roles.clear();
+    void removeRole(Role role) {
+        getRolesBag().remove(role);
+    }
+
+    void removeAllRoles() {
+        getRolesBag().clear();
     }
 
     /**
      * @deprecated use (this) Operation instead
      */
-    public OperationValue getOperationValue()
-    {
-        operationValue.setId(getId());
-        operationValue.setName(getName());
-        return operationValue;
+    public OperationValue getOperationValue() {
+        _operationValue.setId(getId());
+        _operationValue.setName(getName());
+        return _operationValue;
     }
 
-    protected void setOperationValue(OperationValue val)
-    {
+    protected void setOperationValue(OperationValue val) {
         setId(val.getId());
         setName(val.getName());
     }
 
-    public Object getValueObject()
-    {
+    public Object getValueObject() {
         return getOperationValue();
     }
 
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         if (!(obj instanceof Operation) || !super.equals(obj)) {
             return false;
         }
         Operation o = (Operation) obj;
-        return
-            ((resourceType == o.getResourceType()) ||
-             (resourceType != null && o.getResourceType() != null &&
-              resourceType.equals(o.getResourceType())));
+        return ((_resourceType == o.getResourceType()) ||
+                (_resourceType != null && o.getResourceType() != null &&
+                 _resourceType.equals(o.getResourceType())));
     }
 
-    public int hashCode()
-    {
+    public int hashCode() {
         int result = super.hashCode();
 
         result =
-            37 * result + (resourceType != null ? resourceType.hashCode() : 0);
+            37 * result + (_resourceType != null ? _resourceType.hashCode() : 0);
 
         return result;
     }
 }
-
-
