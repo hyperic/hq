@@ -292,7 +292,6 @@
         var token = availText.token;
         var noAvailTable;
         var availTable;
-        var tbody = document.createElement('tbody');
         var availFunc;
         var descSpan = "Availability Summary_span";
 
@@ -312,21 +311,21 @@
         if (availList.length < 1) {
             $(noAvailTable).style.display = '';
         } else {
-
-            for (var i = availTable.childNodes.length - 1; i > 1; i--) {
-                availTable.removeChild(availTable.childNodes[i]);
+            var tbody = availTable.getElementsByTagName('tbody')[0];
+            for (var i = tbody.childNodes.length - 1; i > 1; i--) {
+                tbody.removeChild(tbody.childNodes[i]);
             }
 
             for (var i = 0; i < availList.length; i++) {
-
                 var tr = document.createElement('tr');
                 var td1 = document.createElement('td');
                 var td2 = document.createElement('td');
+                var td3 = document.createElement('td');
+                var td4 = document.createElement('td');
                 var newanchor = document.createElement("a");
                 var up = availList[i].numUp;
                 var down = availList[i].numDown;
 
-                availTable.appendChild(tbody);
                 tbody.appendChild(tr);
                 tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
 
@@ -337,13 +336,23 @@
                 newanchor.appendChild(document.createTextNode(availList[i].resourceTypeName));
                 newanchor.setAttribute('href', (browseUrl + availList[i].appdefType + urlParams + availList[i].appdefType + urlColon + availList[i].appdefTypeId));
                 tr.appendChild(td2);
+                tr.appendChild(td3);
+                tr.appendChild(td4);
                 td2.setAttribute((document.all ? 'className' : 'class'), "availResourceStatus");
+                td2.setAttribute('align', 'right');
+                td3.setAttribute((document.all ? 'className' : 'class'), "availResourceStatus");
+                td3.setAttribute('align', 'center');
+                td4.setAttribute((document.all ? 'className' : 'class'), "availResourceStatus");
+                td4.setAttribute('align', 'left');
 
                 if (down > '0') {
-                    td2.innerHTML = '<span style=color:red;>' + down + '</span>' + " | " + up;
+                    td2.innerHTML = '<span style=color:red;>' + down + '</span>';
                 } else {
-                    td2.innerHTML = down + " | " + up;
+                    td2.innerHTML = down;
                 }
+
+                td3.innerHTML = " | ";
+                td4.innerHTML = up;
             }
         }
 

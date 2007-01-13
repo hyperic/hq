@@ -77,11 +77,14 @@ Ajax.Responders.register({
       <tbody>
         <tr class="tableRowHeader">
           <th width="75%" class="tableRowInactive"><fmt:message key="dash.home.TableHeader.Type"/></th>
-          <th width="25%" align="center" class="tableRowInactive">
+          <th align="right" class="tableRowInactive">
               <span style="color:red">
                   <fmt:message key="resource.hub.legend.unavailable"/>
               </span>
-              <fmt:message key="common.label.Pipe"/>
+          <th align="center" class="tableRowInactive" width="1%">
+            <fmt:message key="common.label.Pipe"/>
+          </th>
+          <th align="left" class="tableRowInactive">
               <fmt:message key="resource.hub.legend.available"/>
           </th>
         </tr>
