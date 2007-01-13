@@ -789,9 +789,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         ArrayList platforms = new ArrayList();
         for (Iterator it = foundPlats.iterator(); it.hasNext();) {
             Platform platform = (Platform) it.next();
-            if(!authzPks.contains(platform.getId()))
-                continue;
-            platforms.add(platform);
+            if(authzPks.contains(platform.getId())) {
+                platforms.add(platform);
+            }
         }
         
         return valuePager.seek(platforms, null);
