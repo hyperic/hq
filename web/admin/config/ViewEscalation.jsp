@@ -289,11 +289,11 @@ function showViewEscResponse(originalRequest) {
     function saveAddEscalation () {
         var id = $('id').value;
         var serialAddAction = Form.serialize('addEscalation');
-        var pars =  "EscId=" + id + serialAddAction;
+        var pars =  "EscId=" + id + "&" + serialAddAction;
         var url = '<html:rewrite action="/escalation/saveAction"/>';
 
         new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showViewEscResponse, onFailure: reportError} );
-
+        alert(pars)
     }
 
     function hideAddEscButtons() {
