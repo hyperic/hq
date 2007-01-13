@@ -11,9 +11,7 @@
     <id name="id" type="integer">
       <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />
-      <generator class="sequence">
-        <param name="sequence">EAM_USER_CONFIG_RESP_ID_SEQ</param>
-      </generator>
+      <generator class="assigned" />
     </id>
 
     <version name="_version_" type="long">
