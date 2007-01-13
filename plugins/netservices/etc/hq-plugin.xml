@@ -165,9 +165,21 @@
     <option name="lookupname"
             description="Lookup Name"
             default="www.hyperic.com"/>
+
     <option name="ipmatch"
             description="IP match"
             optional="true"/>
+
+    <option name="type"
+            description="Record type"
+            type="enum">
+      <include name="A"/>
+      <include name="ANY"/>
+      <include name="CNAME"/>
+      <include name="MX"/>
+      <include name="NS"/>
+      <include name="TXT"/>
+    </option>
   </config>
 
   <config name="ssh"

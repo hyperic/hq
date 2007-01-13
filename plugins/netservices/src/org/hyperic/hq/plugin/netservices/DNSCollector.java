@@ -48,6 +48,7 @@ public class DNSCollector extends NetServicesCollector {
     private String lookupName;
     private String nameserver;
     private String ipmatch;
+    private int type = Type.A;
 
     private SimpleResolver getResolver()
         throws UnknownHostException {
@@ -77,11 +78,21 @@ public class DNSCollector extends NetServicesCollector {
             this.lookupName = getProperty("lookupname");
             this.ipmatch = getProperty("ipmatch");
 
+            String recordType = getProperty("type");
+            if (recordType != null) {
+                this.type = Type.value(recordType);
+                if (this.type == -1) {
+                    throw new PluginException("Invalid record type: " +
+                                              recordType);
+                }
+
+            }
+
             Name name =
                 Name.fromString(lookupName, Name.root);
         
             Record record =
-                Record.newRecord(name, Type.A, DClass.IN);
+                Record.newRecord(name, this.type, DClass.IN);
 
             this.query =
                 Message.newQuery(record);
