@@ -26,10 +26,6 @@
 package org.hyperic.hq.authz.server.session;
 
 import java.rmi.RemoteException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collection;
 
 import javax.ejb.CreateException;
@@ -53,8 +49,6 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
-import org.hyperic.util.jdbc.BlobColumn;
-import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -86,8 +80,6 @@ public class AuthzSubjectManagerEJBImpl
     private AuthzSubjectValue overlord;
     private AuthzSubjectValue root;
 
-    private static int DBTYPE = -1;
-
     public AuthzSubjectManagerEJBImpl() {}
 
     /** Create a subject.
@@ -118,11 +110,7 @@ public class AuthzSubjectManagerEJBImpl
             dao.findByAuth(whoami.getName(), whoami.getAuthDsn());
 
         AuthzSubject subjectPojo = dao.create(whoamiPojo, subject);
-        // Flush the session so that we can do direct SQL
-        dao.getSession().flush();
         
-        this.insertUserPrefs(subjectPojo.getId());
-
         return subjectPojo;
     }
 
@@ -436,85 +424,20 @@ public class AuthzSubjectManagerEJBImpl
         updateUserPrefs(subjId, prefs.encode());
     }
 
-    private static final String SQL_PREFS_INSERT
-        = "INSERT INTO EAM_USER_CONFIG_RESP "
-        + "(ID, PREF_RESPONSE) VALUES (?, NULL)";
-    private void insertUserPrefs(Integer subjId) {
-        PreparedStatement ps = null;
-        try {
-            Connection conn = getSubjectDAO().getSession().connection();
-            ps = conn.prepareStatement(SQL_PREFS_INSERT);
-            ps.setInt(1, subjId.intValue());
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new SystemException(e);
-        } finally {
-            DBUtil.closeStatement(log, ps);
-            getSubjectDAO().getSession().disconnect();
-        }
-    }
-    
-    private static final String USERPREF_TABLE    = "EAM_USER_CONFIG_RESP";
-    private static final String USERPREF_COL_ID   = "ID";
-    private static final String USERPREF_COL_BLOB = "PREF_RESPONSE";
     private void updateUserPrefs(Integer subjId, byte[] prefsByteArr) {
-        BlobColumn userPrefs;
-        try {
-            userPrefs = DBUtil.getBlobColumn(DBTYPE, DATASOURCE, 
-                                             USERPREF_TABLE,
-                                             USERPREF_COL_ID,
-                                             USERPREF_COL_BLOB);
-            userPrefs.setId(subjId);
-            userPrefs.setBlobData(prefsByteArr);
-            userPrefs.update();
-
-        } catch (SQLException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        UserConfigResp confResp =
+            getSubjectDAO().findUserConfigResp(subjId);
+        confResp.setPrefResponse(prefsByteArr);
     }
     
-    private static final String SQL_PREFS_SELECT 
-        = "SELECT PREF_RESPONSE FROM EAM_USER_CONFIG_RESP WHERE ID=?";
     private byte[] selectUserPrefs (Integer subjId) {
-        PreparedStatement ps   = null;
-        ResultSet         rs   = null;
-        byte[]            data = null;
-
-        try {
-            Connection conn = getSubjectDAO().getSession().connection();
-            ps = conn.prepareStatement(SQL_PREFS_SELECT);
-            ps.setInt(1, subjId.intValue());
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                data = DBUtil.getBlobColumn(rs, 1);
-            }
-        } catch (SQLException e) {
-            throw new SystemException(e);
-        } finally {
-            DBUtil.closeJDBCObjects(log, null, ps, rs);
-            getSubjectDAO().getSession().disconnect();
-        }
-        return data;
+        UserConfigResp confResp = getSubjectDAO().findUserConfigResp(subjId);
+        return confResp.getPrefResponse();
     }
 
-    private static final String SQL_PREFS_DELETE 
-        = "DELETE FROM EAM_USER_CONFIG_RESP WHERE ID=?";
     private void deleteUserPrefs(Integer subjId) {
-        PreparedStatement ps   = null;
-
-        try {
-            Connection conn = getSubjectDAO().getSession().connection();
-            ps = conn.prepareStatement(SQL_PREFS_DELETE);
-            ps.setInt(1,subjId.intValue());
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new SystemException(e);
-        } finally {
-            DBUtil.closeStatement(log, ps);
-            getSubjectDAO().getSession().disconnect();
-        }
+        UserConfigResp confResp = getSubjectDAO().findUserConfigResp(subjId);
+        getSubjectDAO().remove(confResp);
     }
     /**
      * Get the overlord spider subject value. THe overlord is the systems
@@ -559,18 +482,8 @@ public class AuthzSubjectManagerEJBImpl
         } catch (Exception e) {
             throw new CreateException("Could not create Pager: " + e);
         }
-        if (DBTYPE == -1) {
-            Connection conn = null;
-            try {
-                conn = getDBConn();
-                DBTYPE = DBUtil.getDBType(conn);
-            } catch (Exception e) {
-                throw new CreateException("Error determining DBType: " + e);
-            } finally {
-                DBUtil.closeConnection(log, conn);
-            }
-        }
     }
+    
     public void ejbActivate() throws EJBException, RemoteException {}
     public void ejbPassivate() throws EJBException, RemoteException {}
     public void ejbRemove() throws EJBException, RemoteException {}
