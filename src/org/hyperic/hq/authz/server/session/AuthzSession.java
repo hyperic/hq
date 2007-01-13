@@ -26,8 +26,6 @@
 package org.hyperic.hq.authz.server.session;
 
 import java.lang.reflect.Array;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -64,7 +62,6 @@ import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.hibernate.RequiresSession;
-import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 
 /**
@@ -401,18 +398,7 @@ public abstract class AuthzSession
         return ic;
     }
 
-   protected Connection getDBConn() throws SQLException {
-        Connection conn;
-        try {
-            conn = DBUtil.getConnByContext(this.getInitialContext(), DATASOURCE);
-        } catch(NamingException exc){
-            throw new SystemException("Unable to get database context: " +
-                                         exc.getMessage(), exc);
-        }
-        return conn;
-    }
-    
-    public void setSessionContext(SessionContext ctx) {
+   public void setSessionContext(SessionContext ctx) {
         this.ctx = ctx;
     }
     
