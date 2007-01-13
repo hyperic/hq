@@ -29,6 +29,10 @@ import java.io.IOException;
 import java.net.PortUnreachableException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
@@ -47,7 +51,8 @@ public class DNSCollector extends NetServicesCollector {
     private Message query;
     private String lookupName;
     private String nameserver;
-    private String ipmatch;
+    private Pattern pattern;
+    private boolean isMatchAny = false;
     private int type = Type.A;
 
     private SimpleResolver getResolver()
@@ -76,7 +81,19 @@ public class DNSCollector extends NetServicesCollector {
 
         try {
             this.lookupName = getProperty("lookupname");
-            this.ipmatch = getProperty("ipmatch");
+
+            String pattern = getProperty("pattern");
+            if (pattern != null) {
+                if (pattern.equals("*")) {
+                    pattern = ".*";
+                    this.isMatchAny = true;
+                }
+                try {
+                    this.pattern = Pattern.compile(pattern);
+                } catch (PatternSyntaxException e) {
+                    throw new PluginException(pattern + ": " + e);
+                }
+            }
 
             String recordType = getProperty("type");
             if (recordType != null) {
@@ -122,7 +139,7 @@ public class DNSCollector extends NetServicesCollector {
             setValue("AuthorityRecords", authority.length);
             setValue("AdditionalRecords", additional.length);
 
-            boolean matchRequired = this.ipmatch != null;
+            boolean matchRequired = this.pattern != null;
             boolean matched = false;
 
             String msg;
@@ -141,16 +158,19 @@ public class DNSCollector extends NetServicesCollector {
                 }
             }
             else {
+                List rdata = null;
                 msg =
                     "Non-authoritative answer: '" +
                     answers[0].rdataToString() + "'";
-                if ((this.ipmatch == null) || (this.ipmatch.equals("*"))) {
+                if ((this.pattern == null) || this.isMatchAny) {
                     matched = true;
                 }
                 else {
+                    rdata = new ArrayList();
                     for (int i=0; i<answers.length; i++) {
-                        String ip = answers[i].rdataToString();
-                        matched = this.ipmatch.equals(ip);
+                        String data = answers[i].rdataToString();
+                        rdata.add(data);
+                        matched = this.pattern.matcher(data).find();
                         if (matched) {
                             break;
                         }
@@ -158,8 +178,11 @@ public class DNSCollector extends NetServicesCollector {
                 }
                 if (matchRequired && !matched) {
                     avail = Metric.AVAIL_WARN;
+                    if (answers.length > 1) {
+                        msg = "answers: " + rdata.toString();
+                    }
                     setErrorMessage(msg + " invalid, expecting: '" +
-                                    this.ipmatch + "'");
+                                    this.pattern.pattern() + "'");
                 }
                 else {
                     setInfoMessage(msg);
