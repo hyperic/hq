@@ -27,6 +27,7 @@ package org.hyperic.hq.authz.server.session;
 
 import java.util.Collection;
 
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hyperic.dao.DAOFactory;
@@ -44,8 +45,7 @@ public class AuthzSubjectDAO extends HibernateDAO
         super(AuthzSubject.class, f);
     }
 
-    public AuthzSubject create(AuthzSubject creator,
-                               AuthzSubjectValue createInfo) {
+    AuthzSubject create(AuthzSubject creator, AuthzSubjectValue createInfo) {
         AuthzSubject subject = new AuthzSubject(createInfo);
         save(subject);
 
@@ -71,6 +71,11 @@ public class AuthzSubjectDAO extends HibernateDAO
         }
         subject.getRoles().add(role);
         save(subject);
+        
+        // Insert an empty config response
+        UserConfigResp resp = new UserConfigResp(subject, null);
+        save(resp);
+
         return subject;
     }
 
@@ -79,14 +84,14 @@ public class AuthzSubjectDAO extends HibernateDAO
         return (AuthzSubject)super.findById(id);
     }
 
-    public void save(AuthzSubject entity)
-    {
-        super.save(entity);
-    }
-
     public void remove(AuthzSubject entity)
     {
         super.remove(entity);
+    }
+
+    public void remove(UserConfigResp resp)
+    {
+        super.remove(resp);
     }
 
     public AuthzSubject findByAuth(String name, String dsn)
@@ -184,5 +189,12 @@ public class AuthzSubjectDAO extends HibernateDAO
                          (asc ? "asc" : "desc"))
             .setInteger(0, roleId.intValue())
             .list();
+    }
+    
+    public UserConfigResp findUserConfigResp(Integer subjId) {
+        return (UserConfigResp) getSession()
+            .createCriteria( UserConfigResp.class )
+            .add( Expression.eq("id", subjId))
+            .uniqueResult();
     }
 }
