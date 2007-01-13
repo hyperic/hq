@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hibernate.criterion.Expression;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.Ip;
@@ -247,6 +248,14 @@ public class PlatformDAO extends HibernateDAO {
             .uniqueResult();
     }
 
+    public List findByServers(Integer[] ids)
+    {
+        return createCriteria()
+            .createAlias("servers", "s")
+            .add( Expression.in("s.id", ids))
+            .list();
+    }
+
     public Platform findByServiceId(Integer id)
     {
         String sql = "select distinct p from Platform p " +
@@ -347,5 +356,9 @@ public class PlatformDAO extends HibernateDAO {
             platforms.add(findById(virt.getId()));
         }
         return platforms;
+    }
+
+    public Class getPersistentClass() {
+        return Platform.class;
     }
 }
