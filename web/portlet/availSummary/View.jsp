@@ -95,7 +95,10 @@ Ajax.Responders.register({
         <tbody>
         <tr class="ListRow">
         <td class="ListCell">
-          <fmt:message key="dash.home.no.resource.to.display"/>    
+                <c:url var="path" value="/"/>
+                <fmt:message key="dash.home.add.resources.to.display">
+                  <fmt:param value="${path}"/>
+                </fmt:message>
         </td>
       </tr>
       </tbody>

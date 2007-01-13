@@ -87,7 +87,7 @@
         var table = document.getElementById('favoriteTable');
         var tbody = document.createElement('tbody');
 
-        if (fList) {
+        if (fList && fList.length > 0) {
 
             for (var i = table.childNodes.length - 1; i > 2; i--) {
                 table.removeChild(table.childNodes[i]);
@@ -389,7 +389,7 @@
         var tbody = metricTable.getElementsByTagName('tbody')[0];
 
         if (metricValues.values) {
-               for (var a = tbody.childNodes.length-1; a > 0; a--) {
+            for (var a = tbody.childNodes.length-1; a > 0; a--) {
                tbody.removeChild(tbody.childNodes[a]);
             }
 
@@ -397,7 +397,6 @@
             var trHeader = document.createElement('tr');
             var th1 = document.createElement('th');
             var th2 = document.createElement('th');
-
 
             tbody.appendChild(trHeader);
             trHeader.setAttribute("class", "tableRowHeader");

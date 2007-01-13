@@ -70,7 +70,12 @@ onloads.push(requestMetricsResponse<c:out value="${portlet.token}"/>);
   <table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${noTableName}"/>" style="display:none;">
       <tbody>
     <tr class="ListRow">
-      <td class="ListCell"><fmt:message key="dash.home.no.resource.to.display"/></td>
+            <td class="ListCell">
+                <c:url var="path" value="/"/>
+                <fmt:message key="dash.home.add.resources.to.display">
+                  <fmt:param value="${path}"/>
+                </fmt:message>
+            </td>
     </tr>
       </tbody>
   </table>
