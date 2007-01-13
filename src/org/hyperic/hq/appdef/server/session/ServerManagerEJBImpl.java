@@ -25,19 +25,13 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -53,7 +47,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEvent;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
@@ -71,10 +64,8 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.util.ArrayUtil;
-import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -117,16 +108,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
     private static final PermissionManager pm = 
         PermissionManagerFactory.getInstance();
-
-    private Connection getDBConn() throws SQLException {
-        try {
-            return DBUtil.getConnByContext(this.getInitialContext(), 
-                                            HQConstants.DATASOURCE);
-        } catch(NamingException exc){
-            throw new SystemException("Unable to get database context: " +
-                                         exc.getMessage(), exc);
-        }
-    }
 
     /**
      * Create a Server on the given platform.
@@ -556,52 +537,20 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             throw new SystemException(e);
         }
 
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String sql =
-            "SELECT DISTINCT(server_id) FROM EAM_SERVICE WHERE " +
-            DBUtil.composeConjunctions("id", sIDs.size());
-
-        HashSet serverIds = new HashSet();
-        
-        try {
-            conn = getDBConn();
-            ps = conn.prepareStatement(sql);
-            
-            int i = 1;
-            for (Iterator it = sIDs.iterator(); it.hasNext(); ) {
-                AppdefEntityID svcId = (AppdefEntityID) it.next();
-                if (svcId.getType() !=
-                    AppdefEntityConstants.APPDEF_TYPE_SERVICE)
-                    throw new ServerNotFoundException("Entity not a service " +
-                                                      svcId);
-                ps.setInt(i++, svcId.getID());
-            }
-            
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                serverIds.add(new Integer(rs.getInt(1)));
-            }
-        } catch (SQLException e) {
-            throw new SystemException("Error looking up services by id: " + e,
-                                      e);
-        } finally {
-            DBUtil.closeJDBCObjects(log, conn, ps, rs);
+        Integer[] ids = new Integer[sIDs.size()];
+        int i = 0;
+        for (Iterator it = sIDs.iterator(); it.hasNext(); i++) {
+            AppdefEntityID svrId = (AppdefEntityID) it.next();
+            ids[i] = svrId.getId();
         }
 
+        List foundSvrs = getServerDAO().findByServices(ids);
+
         ArrayList servers = new ArrayList();
-        for (Iterator it = serverIds.iterator(); it.hasNext();) {
-            Integer pk = (Integer) it.next();
-            if(!authzPks.contains(pk))
-                continue;
-            
-            try {
-                Server server = getServerDAO().findById(pk);
+        for (Iterator it = foundSvrs.iterator(); it.hasNext();) {
+            Server server = (Server) it.next();
+            if(authzPks.contains(server.getId())) {
                 servers.add(server);
-            } catch (ObjectNotFoundException e) {
-                continue;
             }
         }
         
