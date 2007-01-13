@@ -93,6 +93,8 @@ public class ResourceTypeDAO extends HibernateDAO
         String sql = "from ResourceType where name=?";
         return (ResourceType)getSession().createQuery(sql)
             .setString(0, name)
+            .setCacheable(true)
+            .setCacheRegion("ResourceType.findByName")
             .uniqueResult();
     }
 }

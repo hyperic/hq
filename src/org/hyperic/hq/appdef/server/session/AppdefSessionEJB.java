@@ -70,6 +70,7 @@ import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
@@ -90,17 +91,8 @@ import org.hyperic.hq.appdef.server.session.ServiceType;
 public abstract class AppdefSessionEJB 
     extends AppdefSessionUtil
 {
-    protected SessionContext myCtx;
-    protected InitialContext ic;
-    
-    // cached resource types
-    protected ResourceTypeValue platformRTV;
-    protected ResourceTypeValue serverRTV;
-    protected ResourceTypeValue serviceRTV;
-    protected ResourceTypeValue applicationRTV;
-    protected ResourceTypeValue rootRTV;
-    protected ResourceTypeValue groupRTV;
-    protected AuthzSubjectValue overlord;
+    protected SessionContext _ctx;
+    protected InitialContext _ic;
 
     protected Log log = LogFactory.getLog(AppdefSessionEJB.class);
 
@@ -111,10 +103,7 @@ public abstract class AppdefSessionEJB
      */
     protected ResourceTypeValue getResourceType(String resType) 
     	throws FinderException {
-            log.debug("Looking up Resource Type: " + resType);
-            ResourceTypeValue resTypeValue = getResourceManager()
-                .findResourceTypeByName(resType);
-            return resTypeValue;
+        return getResourceManager().findResourceTypeByName(resType);
     }
 
     /**
@@ -936,11 +925,7 @@ public abstract class AppdefSessionEJB
     protected ResourceTypeValue getRootResourceType() 
         throws FinderException
     {
-        if(rootRTV != null) {
-            return rootRTV;
-        }
-        rootRTV = this.getResourceType(AuthzConstants.rootResType);
-        return rootRTV; 
+        return getResourceType(AuthzConstants.rootResType);
     }
 
     /**
@@ -985,11 +970,7 @@ public abstract class AppdefSessionEJB
      */
     protected ResourceTypeValue getPlatformResourceType() 
     	throws FinderException {
-        if(platformRTV != null) {
-            return platformRTV;
-        }
-        platformRTV = this.getResourceType(AuthzConstants.platformResType);
-        return platformRTV;
+        return getResourceType(AuthzConstants.platformResType);
     }
 
     /**
@@ -998,11 +979,7 @@ public abstract class AppdefSessionEJB
      */
     protected ResourceTypeValue getApplicationResourceType() 
     	throws FinderException {
-        if(applicationRTV != null) {
-            return applicationRTV;
-        }
-        applicationRTV = this.getResourceType(AuthzConstants.applicationResType);
-        return applicationRTV;
+        return getResourceType(AuthzConstants.applicationResType);
     }
 
     /**
@@ -1011,11 +988,7 @@ public abstract class AppdefSessionEJB
      */
     protected ResourceTypeValue getServerResourceType() 
     	throws FinderException {
-        if(serverRTV != null) {
-            return serverRTV;
-        }
-        serverRTV = this.getResourceType(AuthzConstants.serverResType);
-        return serverRTV;
+        return getResourceType(AuthzConstants.serverResType);
     }
 
     /**
@@ -1024,11 +997,7 @@ public abstract class AppdefSessionEJB
      */
     protected ResourceTypeValue getServiceResourceType() 
     	throws FinderException {
-        if(serviceRTV != null) {
-            return serviceRTV;
-        }
-        serviceRTV = this.getResourceType(AuthzConstants.serviceResType);
-        return serviceRTV;
+        return getResourceType(AuthzConstants.serviceResType);
     }
 
     /**
@@ -1049,11 +1018,7 @@ public abstract class AppdefSessionEJB
      */
      public ResourceTypeValue getGroupResourceType()
          throws FinderException {
-         if (groupRTV != null) {
-             return groupRTV;
-         }
-         groupRTV = getResourceType(AuthzConstants.groupResourceTypeName);
-         return groupRTV;
+         return getResourceType(AuthzConstants.groupResourceTypeName);
      }
 
     /**
@@ -1319,13 +1284,13 @@ public abstract class AppdefSessionEJB
     }
 
     public void setSessionContext(SessionContext ctx) {
-        myCtx = ctx;
+        _ctx = ctx;
     }
 
     public SessionContext getSessionContext() {
-        return myCtx;
+        return _ctx;
     }
-    
+
     protected void rollback() {
         if(!getSessionContext().getRollbackOnly()) {
             getSessionContext().setRollbackOnly();
@@ -1337,21 +1302,13 @@ public abstract class AppdefSessionEJB
      * bean which wants to call an authz bound method while bypassing the check.
      */
     protected AuthzSubjectValue getOverlord() {
-        if (overlord == null) {
-            try {
-                overlord = AuthzSubjectManagerUtil.getLocalHome().create()
-                    .findOverlord();
-            } catch (Exception e) {
-                throw new SystemException(e);
-            }
-        }
-        return overlord;
+        return AuthzSubjectManagerEJBImpl.getOne().findOverlord();             
     }
 
     protected InitialContext getInitialContext() {
         try {
-            if (ic == null) ic = new InitialContext();
-            return ic;
+            if (_ic == null) _ic = new InitialContext();
+            return _ic;
         } catch (NamingException e) {
             throw new SystemException(e);
         }
