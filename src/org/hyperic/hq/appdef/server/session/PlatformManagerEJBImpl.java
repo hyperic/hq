@@ -26,14 +26,9 @@
 package org.hyperic.hq.appdef.server.session;
 
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -75,16 +70,11 @@ import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.PermissionManager;
-import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.product.PlatformTypeInfo;
-import org.hyperic.util.StringUtil;
-import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -119,19 +109,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         PagerProcessor_platform.class.getName();
     private Pager valuePager;
     private PlatformCounter counter;
-
-    private static final PermissionManager pm = 
-        PermissionManagerFactory.getInstance();
-
-    private Connection getDBConn() throws SQLException {
-        try {
-            return DBUtil.getConnByContext(this.getInitialContext(), 
-                                            HQConstants.DATASOURCE);
-        } catch(NamingException exc){
-            throw new SystemException("Unable to get database context: " +
-                                      exc.getMessage(), exc);
-        }
-    }
 
     /**
      * Find a platform type by id
@@ -799,55 +776,22 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         } catch (NamingException e) {
             throw new SystemException(e);
         }
-
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String sql =
-            "SELECT DISTINCT(platform_id) FROM EAM_SERVER WHERE " +
-            DBUtil.composeConjunctions("id", sIDs.size());
-
-        HashSet platformIds = new HashSet();
         
-        try {
-            conn = getDBConn();
-            ps = conn.prepareStatement(sql);
-            
-            int i = 1;
-            for (Iterator it = sIDs.iterator(); it.hasNext(); ) {
-                AppdefEntityID svrId = (AppdefEntityID) it.next();
-                if (svrId.getType() !=
-                    AppdefEntityConstants.APPDEF_TYPE_SERVER)
-                    throw new PlatformNotFoundException("Entity not a server " +
-                                                        svrId);
-                ps.setInt(i++, svrId.getID());
-            }
-            
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                platformIds.add(new Integer(rs.getInt(1)));
-            }
-        } catch (SQLException e) {
-            throw new SystemException("Error looking up servers by id: " + e, e);
-        } finally {
-            DBUtil.closeJDBCObjects(_log, conn, ps, rs);
+        Integer[] ids = new Integer[sIDs.size()];
+        int i = 0;
+        for (Iterator it = sIDs.iterator(); it.hasNext(); i++) {
+            AppdefEntityID svrId = (AppdefEntityID) it.next();
+            ids[i] = svrId.getId();
         }
 
+        List foundPlats = getPlatformDAO().findByServers(ids);
+
         ArrayList platforms = new ArrayList();
-        for (Iterator it = platformIds.iterator(); it.hasNext();) {
-            Integer pk = (Integer) it.next();
-            if(!authzPks.contains(pk))
+        for (Iterator it = foundPlats.iterator(); it.hasNext();) {
+            Platform platform = (Platform) it.next();
+            if(!authzPks.contains(platform.getId()))
                 continue;
-            
-            try {
-                Platform platform =
-                    getPlatformDAO().findById(pk);
-                
-                platforms.add(platform);
-            } catch (ObjectNotFoundException e) {
-                continue;
-            }
+            platforms.add(platform);
         }
         
         return valuePager.seek(platforms, null);
@@ -1233,8 +1177,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      */
     public void updatePlatformTypes(String plugin, PlatformTypeInfo[] infos)
         throws CreateException, FinderException, RemoveException {
-        AuthzSubjectValue overlord = null;
-
         // First, put all of the infos into a Hash
         HashMap infoMap = new HashMap();
         for (int i = 0; i < infos.length; i++) {
