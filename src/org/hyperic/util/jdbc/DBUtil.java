@@ -417,40 +417,12 @@ public class DBUtil {
     /**
      * get a connection for a datasource registered in JNDI
      */
-    public static Connection getConnByContext(Context jndiCtx, 
-        String dsName) throws SQLException, NamingException {
-            DataSource ds = (DataSource) jndiCtx.lookup(dsName);
-            return ds.getConnection();
+    public static Connection getConnByContext(Context jndiCtx, String dsName)
+        throws SQLException, NamingException {
+        
+        DataSource ds = (DataSource) jndiCtx.lookup(dsName);
+        return ds.getConnection();
     } 
-    
-    /**
-     * Get a database specific blob column.
-     * @param dbtype - int specifiying database type
-     * @param dsName - the name of the datasource
-     * @param tableName - the name of the table containing the blob
-     * @param blobColName - the name of the blob column
-     */
-    public static BlobColumn getBlobColumn(int dbType, String dsName, 
-        String tableName, String idColName, String blobColName) 
-        throws NamingException {
-        BlobColumn retVal;
-        switch (dbType) {
-            case DBUtil.DATABASE_ORACLE_8:
-            case DBUtil.DATABASE_ORACLE_9 :
-            case DBUtil.DATABASE_ORACLE_10 :    
-                retVal = new OracleBlobColumn(dsName, tableName, idColName,
-                                              blobColName);
-                break;
-            case DBUtil.DATABASE_POSTGRESQL_7:
-            case DBUtil.DATABASE_POSTGRESQL_8:
-                retVal = new PostgresBlobColumn(dsName, tableName, idColName,
-                                                blobColName);
-                break;
-            default :
-                retVal = new StdBlobColumn(dsName,tableName,idColName, blobColName);
-        }
-        return retVal;
-    }
     
     /**
      * Get a database specific blob column, when you already have the
