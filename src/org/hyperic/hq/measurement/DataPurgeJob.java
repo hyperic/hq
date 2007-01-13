@@ -51,8 +51,7 @@ import org.quartz.JobExecutionException;
 
 public class DataPurgeJob implements Job {
 
-    private static final String logCtx  = "DataPurgeJob";
-    private static final Log    log     = LogFactory.getLog(logCtx);
+    private static final Log _log = LogFactory.getLog(DataPurgeJob.class);
 
     private static boolean running = false;
 
@@ -101,7 +100,7 @@ public class DataPurgeJob implements Job {
 
         // First check if we are already running
         if (running) {
-            log.info("Not starting data compression. (Already running)");
+            _log.info("Not starting data compression. (Already running)");
             return;
         } else {
             running = true;
@@ -109,21 +108,21 @@ public class DataPurgeJob implements Job {
 
         // Announce
         long time_start = System.currentTimeMillis();
-        log.info("Data compression starting at " +
-                 TimeUtil.toString(time_start));
+        _log.info("Data compression starting at " +
+                  TimeUtil.toString(time_start));
         
         try {
             dataCompress.compressData();
         } catch (SQLException e) {
-            log.error("Unable to compress data: " + e, e);
+            _log.error("Unable to compress data: " + e, e);
         } finally {
             running = false;
         }
         
         long time_end = System.currentTimeMillis();
-        log.info("Data compression completed in " +
-                 ((time_end - time_start)/1000) +
-                 " seconds.");
+        _log.info("Data compression completed in " +
+                  ((time_end - time_start)/1000) +
+                  " seconds.");
 
         // Once compression finishes, we check to see if databae maintaince
         // should be performed.  This is defaulted to 1 hour, so it should
@@ -149,7 +148,7 @@ public class DataPurgeJob implements Job {
             conf.getProperty(HQConstants.DataMaintenance);
         if (dataMaintenance == null) {
             // Should never happen
-            log.error("No data maintenance interval found");
+            _log.error("No data maintenance interval found");
             return;
         }
 
@@ -161,21 +160,21 @@ public class DataPurgeJob implements Job {
         Calendar cal = Calendar.getInstance();
         if (TimingVoodoo.roundDownTime(time_start, HOUR) ==
             TimingVoodoo.roundDownTime(time_start, maintInterval)) {
-            log.info("Performing database maintenance (VACUUM ANALYZE)");
+            _log.info("Performing database maintenance (VACUUM ANALYZE)");
             serverConfig.vacuum();
 
             String reindexStr = conf.getProperty(HQConstants.DataReindex);
             boolean reindexNightly = Boolean.valueOf(reindexStr).booleanValue();
             if (cal.get(Calendar.HOUR_OF_DAY) == 0 && reindexNightly) {
-                log.info("Re-indexing HQ data tables");
+                _log.info("Re-indexing HQ data tables");
                 serverConfig.reindex();
             }
 
-            log.info("Database maintenance completed in " +
-                     ((System.currentTimeMillis() - time_end)/1000) +
-                     " seconds.");
+            _log.info("Database maintenance completed in " +
+                      ((System.currentTimeMillis() - time_end)/1000) +
+                      " seconds.");
         } else {
-            log.info("Not performing database maintenance");
+            _log.info("Not performing database maintenance");
         }
     }
 
@@ -197,13 +196,13 @@ public class DataPurgeJob implements Job {
             EventLogManagerLocal eventLogManager =
                 EventLogManagerUtil.getLocalHome().create();
             
-            log.info("Purging events older than " +
+            _log.info("Purging events older than " +
                      TimeUtil.toString(now - purgeEventLog));
             try {
                 eventLogManager.deleteLogs(0, now - purgeEventLog);
-                log.info("Done (Deleting events)");
+                _log.info("Done (Deleting events)");
             } catch (RemoveException e) {
-                log.error("Unable to delete events: " + e.getMessage(), e);
+                _log.error("Unable to delete events: " + e.getMessage(), e);
             }
         }
 }
