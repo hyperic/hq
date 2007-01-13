@@ -156,6 +156,11 @@ function showViewEscResponse(originalRequest) {
       $('row_'+ liID).style.margin = "0px";
       $('row_'+ liID).style.padding = "0px";
       $('row_'+ liID).style.cursor = "move;";
+
+      viewLi.appendChild(remDiv);
+      remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
+      remDiv.innerHTML ='<a href="#" onclick="removeRow(this);removeAction();"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
+
       
       viewLi.appendChild(escTable);
       escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
@@ -256,7 +261,8 @@ function showViewEscResponse(originalRequest) {
       usersEditDiv.setAttribute('width', '40%');
       usersEditDiv.innerHTML = " ";
       $('pauseTimeText').innerHTML = 'Allow user to pause escalation: ' + allowPause + "<br>";
-   }
+
+}
 
     Sortable.create("viewEscalationUL",
           {dropOnEmpty: true,
@@ -556,50 +562,28 @@ function showViewEscResponse(originalRequest) {
         $('escMsg').innerHTML ="Escalation Saved";
 
     }
-    /*
- function showResponse(originalRequest) {
-        try {
-          var escJson = eval( '(' + originalRequest.responseText + ')' );
-          document.EscalationSchemeForm.escId.value = escJson.escalation.id;
-          document.EscalationSchemeForm.submit();
-        } catch (e) {
-          $('escMsg').innerHTML ="Error";
-          $('example').style.display= '';
+
+    function showResponseRemoved() {
+        $('example').style.display= '';
+        $('escMsg').innerHTML ="Action removed from this escalation";
+
+        if ($('viewEscalationUL').firstChild) {
+            $('noActions').style.display = "none";
+            } else {
+            $('noActions').style.display = "";
         }
     }
-    */
 
-   function sendEditEscForm() {
-        var id;
-        var gadId;
-        var eId;
-        var aetId;
-        var escFormSerial = Form.serialize('viewEscalationUL');
-        var url = '<html:rewrite action="/escalation/updateEscalation"/>';
-        if ($('gad')) {
-           gadId == $('gad').value;
-        } else {
-            gadId == '';
-        }
-        if ($('ad')){
-            adId == $('ad').value;
-        } else {
-            adId == '';
-        }
-        if ($('eid')){
-            eID = $('eid').value;
-        } else {
-           eId == '';
-        }
-        if ($('aetid')) {
-            aetId = $('aetid').value;
-        } else {
-            aetId == '';
-        }
+   function removeAction() {
+       var urlBegin = '<html:rewrite action="/escalation/removeAction/';
+        var urlEnd = '.do"/>';
+        var alertDefId = $('alertDefId').value;
+        var url =  urlBegin + alertDefId + urlEnd;
+        var id= $('id').value
+        var pars = "alertDefId=" + alertDefId + "&id" + id;
 
-        var pars = "rowOrder=" + rowOrder + "escForm=" + escFormSerial + "&ad=" + adId + "&gad=" + gadId + "&eid=" + eId + "aetid=" + aetId;
-        new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse, onFailure :reportError} );
-
+        new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponseRemoved, onFailure :reportError} );
+       
    }
     
     function configure(id) {
@@ -736,6 +720,17 @@ function showViewEscResponse(originalRequest) {
   </c:if>
   <html:hidden property="escId" />
 </html:form>
+
+<div id="example" style="display:none;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <td class="ErrorBlock">
+    <html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>
+  </td>
+  <td class="ErrorBlock" width="100%">
+    <div id="escMsg"></div>
+  </td>
+</table>
+</div>
 
 <form action='<html:rewrite action="/escalation/saveEscalation"/>'
   name="EscalationForm" id="EscalationForm" onchange="hideExample();"><input
