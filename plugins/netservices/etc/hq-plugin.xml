@@ -166,8 +166,8 @@
             description="Lookup Name"
             default="www.hyperic.com"/>
 
-    <option name="ipmatch"
-            description="IP match"
+    <option name="pattern"
+            description="Answer Match"
             optional="true"/>
 
     <option name="type"
@@ -556,6 +556,18 @@
 
       <metric name="Additional Records"
               indicator="true"/>
+
+      <help>
+      <![CDATA[
+This service checks availability of a specific DNS server, as specified by the <b>hostname</b> property.
+The service will be considered available <img src="/images/icon_available_green.gif"> if the DNS server can be spoken to,
+even if there are no answers for the specified <b>lookupname</b>.
+The optional <b>match</b> property can be used to change this behavior, where the service availability report at the
+warning level <img src="/images/icon_available_yellow.gif"> if there are no matches in the answer section.
+The <b>match</b> property can be a regular expression or substring, where a value of <b>*</b> simply means
+one or more answers of any value is considered a successful lookup.
+      ]]>
+      </help>
     </service>
 
     <service name="SSH"
