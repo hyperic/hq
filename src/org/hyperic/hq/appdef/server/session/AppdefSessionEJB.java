@@ -87,7 +87,6 @@ import org.hyperic.hq.appdef.server.session.ServiceType;
 /**
  * Parent abstract class of all appdef session ejbs
  */
-
 public abstract class AppdefSessionEJB 
     extends AppdefSessionUtil
 {
@@ -103,7 +102,7 @@ public abstract class AppdefSessionEJB
     protected ResourceTypeValue groupRTV;
     protected AuthzSubjectValue overlord;
 
-    protected Log log = LogFactory.getLog(this.getClass().getName());
+    protected Log log = LogFactory.getLog(AppdefSessionEJB.class);
 
     /**
      * Get the authz resource type value 
@@ -128,9 +127,6 @@ public abstract class AppdefSessionEJB
         TreeSet resTypes = new TreeSet(
             new Comparator() {
                 private String getName(Object obj) {
-                    if (obj instanceof PlatformType)
-                        return ((PlatformType) obj).getSortName();
-
                     if (obj instanceof PlatformType)
                         return ((PlatformType) obj).getSortName();
                     
@@ -169,10 +165,6 @@ public abstract class AppdefSessionEJB
                 ServiceType st = ((Service)o).getServiceType();
                 if (!resTypes.contains(st))
                     resTypes.add(st);
-            } else if (o instanceof Server) {
-                ServerType st = ((Server)o).getServerType();
-                if (!resTypes.contains(st))
-                    resTypes.add(st);
             }
         }
         return resTypes;
@@ -180,6 +172,7 @@ public abstract class AppdefSessionEJB
 
     /**
      * Create an authz resource
+     *
      * @param resTypeVal - the type
      * @param id - the id of the object
      */
@@ -194,8 +187,9 @@ public abstract class AppdefSessionEJB
     
     /**
      * Create an authz resource
+     *
      * @param resTypeVal - the type
-     * @param subject - who
+     * @param who - who
      * @param id - the id of the object
      * @param name - the name of the resource
      * @param fsystem - true if the resource should be non-visible
@@ -207,9 +201,6 @@ public abstract class AppdefSessionEJB
                                        boolean fsystem) 
     	throws CreateException
     {
-        if (log.isDebugEnabled())
-            log.debug("Creating Authz Resource Type: " + resTypeVal +
-                      " id: " + id + " by: " + who);
         getResourceManager().createResource(who, resTypeVal, id,
                                             name, fsystem);
     }
@@ -217,7 +208,6 @@ public abstract class AppdefSessionEJB
     /**
      * Update the authz resource. Used to update the name in the authz
      * resource table
-     * @param resVal - the resourceVal
      */
     protected void updateAuthzResource(ResourceValue rv)
         throws NamingException, UpdateException 
@@ -231,8 +221,6 @@ public abstract class AppdefSessionEJB
 
     /**
      * Retrieve the ResourceValue object for a given Appdef Object
-     * @param Object - the Appdef EJB object
-     * @return ResourceValue
      */
     protected ResourceValue getAuthzResource(ResourceTypeValue rtV,
     										 Integer id)
@@ -244,8 +232,6 @@ public abstract class AppdefSessionEJB
 
     /**
      * Get the authz resource type by AppdefEntityId
-     * @param AppdefEntityId
-     * @return ResourceTypeValue
      */
     protected ResourceTypeValue getAuthzResourceType(AppdefEntityID id)
         throws FinderException {
@@ -269,8 +255,6 @@ public abstract class AppdefSessionEJB
         
     /**
      * Get the authz resource by AppdefEntityId
-     * @param AppdefEntityId
-     * @return ResourceTypeValue
      */
     protected ResourceValue getAuthzResource(AppdefEntityID id)
         throws NamingException, FinderException {
@@ -340,7 +324,6 @@ public abstract class AppdefSessionEJB
         }
     }
 
-    
     /**
      * Find a ServerTypeLocal by primary key
      * @return ServerTypeLocal
@@ -449,8 +432,8 @@ public abstract class AppdefSessionEJB
     /**
      * Check a permission 
      * @param subject - who
-     * @param resourceType - type of resource 
-     * @param instance Id - the id of the object
+     * @param rtV - type of resource
+     * @param id - the id of the object
      * @param operation - the name of the operation to perform
      */
     protected void checkPermission(AuthzSubjectValue subject, 
@@ -458,16 +441,15 @@ public abstract class AppdefSessionEJB
                                    Integer id, String operation)
         throws PermissionException 
     {
-        log.debug("Checking Permission for Operation: "
-            + operation + " ResourceType: " + rtV +
-            " Instance Id: " + id + " Subject: " + subject);
+        log.debug("Checking Permission for Operation: " +
+                  operation + " ResourceType: " + rtV +
+                  " Instance Id: " + id + " Subject: " + subject);
         PermissionManager permMgr = PermissionManagerFactory.getInstance();
         Integer opId = getOpIdByResourceType(rtV, operation);
         Integer subjId = subject.getId();
         Integer typeId = rtV.getId();
         // note, using the "SLOWER" permission check
         permMgr.check(subjId, typeId, id, opId);
-        log.debug("Permission Check Succesful");
     }
 
     /**
@@ -657,7 +639,7 @@ public abstract class AppdefSessionEJB
                                        AppdefEntityID id)
         throws PermissionException {
         int type = id.getType();
-        String opName = null;
+        String opName;
         switch (type) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 opName = AuthzConstants.platformOpMonitorPlatform;
@@ -691,7 +673,7 @@ public abstract class AppdefSessionEJB
                                         AppdefEntityID id)
         throws PermissionException {
         int type = id.getType();
-        String opName = null;
+        String opName;
         switch (type) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 opName = AuthzConstants.platformOpManageAlerts;
@@ -800,8 +782,8 @@ public abstract class AppdefSessionEJB
                 throw new SystemException("Error finding group: " + id, e);
             }
             if (groupMembers.isEmpty()) {
-                throw new SystemException("Can't perform autoinventory "
-                                             + "scan on an empty group");
+                throw new SystemException("Can't perform autoinventory " +
+                                          "scan on an empty group");
             }
 
             for (Iterator i = groupMembers.iterator(); i.hasNext();) {
@@ -809,9 +791,9 @@ public abstract class AppdefSessionEJB
                 checkAIScanPermissionForPlatform(subject, platformEntityID);
             }
         } else {
-            throw new SystemException("Autoinventory scans may only be "
-                                         + "performed on platforms and groups "
-                                         + "of platforms");
+            throw new SystemException("Autoinventory scans may only be " +
+                                      "performed on platforms and groups " +
+                                      "of platforms");
         }
     }
 
@@ -838,10 +820,10 @@ public abstract class AppdefSessionEJB
             // ok, legal operation
         } else {
             // boom, no permissions
-            throw new PermissionException("User " + subject.getName()
-                                          + " is not permitted to start an "
-                                          + "autoinventory scan on platform "
-                                          + platformID);
+            throw new PermissionException("User " + subject.getName() +
+                                          " is not permitted to start an " +
+                                          "autoinventory scan on platform " +
+                                          platformID);
         }
     }
 
@@ -853,7 +835,7 @@ public abstract class AppdefSessionEJB
      * Any other resource will throw an InvalidAppdefTypeException since no other
      * resources have this parent->child relationship with respect to their permissions
      * @param subject 
-     * @param appdefEntityId - what
+     * @param id - what
      * @param subject - who
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
@@ -880,8 +862,8 @@ public abstract class AppdefSessionEJB
     
     /**
      * Get the AppdefResourcePermissions for a given resource
-     * @param subject - who
-     * @param entityID - what
+     * @param who - who
+     * @param eid - what
      * @return AppdefResourcePermissions
      * @throws FinderException
      * @throws NamingException
@@ -938,8 +920,10 @@ public abstract class AppdefSessionEJB
             } catch (InvalidAppdefTypeException e) {
             }
             // finally create the object
-            return new AppdefResourcePermissions(who, eid, canView, canCreateChild,
-                                                 canModify, canRemove, canControl,
+            return new AppdefResourcePermissions(who, eid, canView,
+                                                 canCreateChild,
+                                                 canModify, canRemove,
+                                                 canControl,
                                                  canMonitor, canAlert);
     }
     
@@ -979,8 +963,6 @@ public abstract class AppdefSessionEJB
 
     /**
      * Find an operation by name inside a ResourcetypeValue object
-     * @param opName
-     * @param resTypeVal
      */
     protected OperationValue getOperationByName(ResourceTypeValue rtV,
                                                 String opName)
@@ -992,8 +974,8 @@ public abstract class AppdefSessionEJB
                 return ops[i];
             }
         }
-        throw new PermissionException("Operation: " + opName
-                                      + " not valid for ResourceType: " +
+        throw new PermissionException("Operation: " + opName +
+                                      " not valid for ResourceType: " +
                                       rtV.getName());
     }
 
@@ -1003,9 +985,7 @@ public abstract class AppdefSessionEJB
      */
     protected ResourceTypeValue getPlatformResourceType() 
     	throws FinderException {
-        log.debug("Getting Platform Resource Type");
         if(platformRTV != null) {
-            log.debug("Returning Cached Instance");
             return platformRTV;
         }
         platformRTV = this.getResourceType(AuthzConstants.platformResType);
@@ -1018,9 +998,7 @@ public abstract class AppdefSessionEJB
      */
     protected ResourceTypeValue getApplicationResourceType() 
     	throws FinderException {
-        log.debug("Getting Application Resource Type");
         if(applicationRTV != null) {
-            log.debug("Returning Cached Instance");
             return applicationRTV;
         }
         applicationRTV = this.getResourceType(AuthzConstants.applicationResType);
@@ -1033,7 +1011,6 @@ public abstract class AppdefSessionEJB
      */
     protected ResourceTypeValue getServerResourceType() 
     	throws FinderException {
-        log.debug("Getting Server Resource Type");
         if(serverRTV != null) {
             return serverRTV;
         }
@@ -1047,7 +1024,6 @@ public abstract class AppdefSessionEJB
      */
     protected ResourceTypeValue getServiceResourceType() 
     	throws FinderException {
-        log.debug("Getting Service Resource Type");
         if(serviceRTV != null) {
             return serviceRTV;
         }
@@ -1057,7 +1033,6 @@ public abstract class AppdefSessionEJB
 
     /**
      * Get the AUTHZ ResourceValue for a Server
-     * @param ejb - the Server EJB
      * @return ResourceValue
      * @ejb:interface-method
      * @ejb:transaction type="Required"
@@ -1077,13 +1052,12 @@ public abstract class AppdefSessionEJB
          if (groupRTV != null) {
              return groupRTV;
          }
-         groupRTV = this.getResourceType(AuthzConstants.groupResourceTypeName);
+         groupRTV = getResourceType(AuthzConstants.groupResourceTypeName);
          return groupRTV;
      }
 
     /**
      * Get the AUTHZ ResourceValue for a Platform
-     * @param ejb - the Platform EJB
      * @return ResourceValue
      * @ejb:interface-method
      * @ejb:transaction type="Required"
@@ -1091,34 +1065,29 @@ public abstract class AppdefSessionEJB
     public ResourceValue getPlatformResourceValue(Integer pk)
         throws NamingException, FinderException, CreateException
     {
-        return this.getAuthzResource(getPlatformResourceType(),
-                                     pk);
+        return getAuthzResource(getPlatformResourceType(), pk);
     }
 
     /**
      * Get the AUTHZ ResourceValue for a Service
-     * @param ctx
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
     public ResourceValue getServiceResourceValue(Integer pk)
         throws NamingException, FinderException, CreateException
     {
-        return this.getAuthzResource(getServiceResourceType(),
-                                     pk);
+        return getAuthzResource(getServiceResourceType(), pk);
     }
 
     /**
      * Get the AUTHZ ResourceValue for a Application
-     * @param ctx
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
     public ResourceValue getApplicationResourceValue(Integer  pk)
         throws NamingException, FinderException, CreateException
     {
-        return this.getAuthzResource(getApplicationResourceType(),
-                                     pk);
+        return getAuthzResource(getApplicationResourceType(), pk);
     }
 
     /**
@@ -1127,7 +1096,8 @@ public abstract class AppdefSessionEJB
      * @return List of ServicePK's for which subject has AuthzConstants.serviceOpViewService
      */
     protected List getViewableServices(AuthzSubjectValue whoami) 
-        throws FinderException, NamingException, PermissionException {
+        throws FinderException, NamingException, PermissionException
+    {
         PermissionManager pm = PermissionManagerFactory.getInstance();
         OperationValue opVal = 
             getOperationByName(getServiceResourceType(),
@@ -1147,7 +1117,8 @@ public abstract class AppdefSessionEJB
        service inventory that the subject is authorized to see. This includes
        all services as well as all clusters */
     protected List getViewableServiceInventory (AuthzSubjectValue whoami)
-        throws FinderException, NamingException, PermissionException {
+        throws FinderException, NamingException, PermissionException
+    {
         List idList = getViewableServices(whoami);
         for (int i=0;i<idList.size();i++) {
             Integer pk = (Integer) idList.get(i);
@@ -1176,7 +1147,8 @@ public abstract class AppdefSessionEJB
      * AuthzConstants.applicationOpViewApplication
      */
     protected List getViewableApplications(AuthzSubjectValue whoami)
-        throws FinderException, NamingException, PermissionException {
+        throws FinderException, NamingException, PermissionException
+    {
         PermissionManager pm = PermissionManagerFactory.getInstance();
         OperationValue opVal = 
             getOperationByName(getApplicationResourceType(),
@@ -1200,8 +1172,8 @@ public abstract class AppdefSessionEJB
     protected List getViewableServers(AuthzSubjectValue whoami) 
         throws FinderException, NamingException, PermissionException
     {
-        log.debug("Checking viewable servers for subject: "
-            + whoami.getName());
+        log.debug("Checking viewable servers for subject: " +
+                  whoami.getName());
         PermissionManager pm = PermissionManagerFactory.getInstance();
         OperationValue opVal =
             getOperationByName(getServerResourceType(), 
