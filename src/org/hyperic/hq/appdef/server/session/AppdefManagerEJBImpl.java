@@ -37,7 +37,6 @@ import java.util.TreeMap;
 
 import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
-import javax.naming.NamingException;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -50,7 +49,6 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.util.jdbc.DBUtil;
 
 /**
@@ -89,12 +87,10 @@ public class AppdefManagerEJBImpl
                                             String operation,
                                             String addCond) {
         List resTypeIds = new ArrayList();
-        Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;        
         try {
-            conn = DBUtil.getConnByContext(getInitialContext(),
-                                           HQConstants.DATASOURCE);
+            Connection conn = getPlatformDAO().getSession().connection();
             
             StringBuffer sql = new StringBuffer("SELECT DISTINCT(s.")
                 .append(resourceColumn)
@@ -126,10 +122,9 @@ public class AppdefManagerEJBImpl
             log.error("Error getting scope by SQL", e);
             throw new SystemException("SQL Error getting scope: " +
                                       e.getMessage());
-        } catch (NamingException e) {
-            throw new SystemException(e);
         } finally {
-            DBUtil.closeJDBCObjects(super.getSessionContext(), conn, stmt, rs);
+            DBUtil.closeJDBCObjects(getSessionContext(), null, stmt, rs);
+            getPlatformDAO().getSession().disconnect();
         }
     }
 
@@ -154,8 +149,7 @@ public class AppdefManagerEJBImpl
         for (Iterator it = typeIds.iterator(); it.hasNext(); ) {
             Integer typeId = (Integer) it.next();
             try {
-                PlatformType pt =
-                    getPlatformTypeDAO().findById(typeId);
+                PlatformType pt = getPlatformTypeDAO().findById(typeId);
                 platformTypes.put(pt.getName(), new AppdefEntityTypeID(
                     AppdefEntityConstants.APPDEF_TYPE_PLATFORM, typeId));
             } catch (ObjectNotFoundException e) {
@@ -186,8 +180,7 @@ public class AppdefManagerEJBImpl
         for (Iterator it = ids.iterator(); it.hasNext(); ) {
             Integer id = (Integer) it.next();
             try {
-                Platform plat =
-                    getPlatformDAO().findById(id);
+                Platform plat = getPlatformDAO().findById(id);
                 platformNames.put(plat.getName(), new AppdefEntityID(
                     AppdefEntityConstants.APPDEF_TYPE_PLATFORM, id));
             } catch (ObjectNotFoundException e) {
@@ -219,8 +212,7 @@ public class AppdefManagerEJBImpl
         for (Iterator it = typeIds.iterator(); it.hasNext(); ) {
             Integer typeId = (Integer) it.next();
             try {
-                ServerType st =
-                    getServerTypeDAO().findById(typeId);
+                ServerType st = getServerTypeDAO().findById(typeId);
                 if (!st.getVirtual())
                     serverTypes.put(st.getName(), new AppdefEntityTypeID(
                         AppdefEntityConstants.APPDEF_TYPE_SERVER, typeId));
@@ -251,8 +243,7 @@ public class AppdefManagerEJBImpl
         for (Iterator it = ids.iterator(); it.hasNext(); ) {
             Integer id = (Integer) it.next();
             try {
-                Server svr =
-                    getServerDAO().findById(id);
+                Server svr = getServerDAO().findById(id);
                 serverNames.put(svr.getName(), new AppdefEntityID(
                     AppdefEntityConstants.APPDEF_TYPE_SERVER, id));
             } catch (ObjectNotFoundException e) {
@@ -284,8 +275,7 @@ public class AppdefManagerEJBImpl
         for (Iterator it = typeIds.iterator(); it.hasNext(); ) {
             Integer typeId = (Integer) it.next();
             try {
-                ServiceType st =
-                    getServiceTypeDAO().findById(typeId);
+                ServiceType st = getServiceTypeDAO().findById(typeId);
                 serviceTypes.put(st.getName(), new AppdefEntityTypeID(
                     AppdefEntityConstants.APPDEF_TYPE_SERVICE, typeId));
             } catch (ObjectNotFoundException e) {
@@ -316,8 +306,7 @@ public class AppdefManagerEJBImpl
         for (Iterator it = ids.iterator(); it.hasNext(); ) {
             Integer id = (Integer) it.next();
             try {
-                Service svc =
-                    getServiceDAO().findById(id);
+                Service svc = getServiceDAO().findById(id);
                 serviceNames.put(svc.getName(), new AppdefEntityID(
                     AppdefEntityConstants.APPDEF_TYPE_SERVICE, id));
             } catch (ObjectNotFoundException e) {
