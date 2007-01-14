@@ -287,8 +287,4 @@ public class ServerDAO extends HibernateDAO
         }
         return servers;
     }
-
-    public Class getPersistentClass() {
-        return Server.class;
-    }
 }
