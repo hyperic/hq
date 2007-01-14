@@ -59,9 +59,8 @@ public class ExecutionStrategyTypeInfoDAO
     public ExecutionStrategyTypeInfo find(ExecutionStrategyType sType) {
         Class strategyClass = sType.getClass();
         
-        return (ExecutionStrategyTypeInfo)
-            getSession().createCriteria(ExecutionStrategyTypeInfo.class)
-                        .add(Expression.eq("typeClass", strategyClass))
-                        .uniqueResult();
+        return (ExecutionStrategyTypeInfo) createCriteria()
+            .add(Expression.eq("typeClass", strategyClass))
+            .uniqueResult();
     }
 }

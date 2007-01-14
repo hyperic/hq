@@ -72,7 +72,7 @@ public class EventLogDAO extends HibernateDAO {
     Collection findByEntityAndStatus(AppdefEntityID entId, long begin,
                                      long end, String status) 
     {
-        return getSession().createCriteria(EventLog.class)
+        return createCriteria()
             .add(Expression.eq("entityType", new Integer(entId.getType())))
             .add(Expression.eq("entityId", entId.getId()))
             .add(Expression.eq("status", status))
@@ -85,7 +85,7 @@ public class EventLogDAO extends HibernateDAO {
     Collection findByEntity(AppdefEntityID entId, long begin, long end,
                             String[] eventTypes) 
     {
-        Criteria c = getSession().createCriteria(EventLog.class)
+        Criteria c = createCriteria()
             .add(Expression.eq("entityType", new Integer(entId.getType())))
             .add(Expression.eq("entityId", entId.getId()))
             .add(Expression.between("timestamp", new Long(begin), 
@@ -121,11 +121,11 @@ public class EventLogDAO extends HibernateDAO {
         }
     }
     
-    protected void remove(EventLog l) {
+    void remove(EventLog l) {
         super.remove(l);
     }
     
-    protected void save(EventLog l) { 
+    void save(EventLog l) { 
         super.save(l);
     }
 }

@@ -44,26 +44,26 @@ public class ControlHistoryDAO extends HibernateDAO
         return (ControlHistory)super.findById(id);
     }
 
-    public void save(ControlHistory entity) {
+    void save(ControlHistory entity) {
         super.save(entity);
     }
 
-    public void remove(ControlHistory entity) {
+    void remove(ControlHistory entity) {
         super.remove(entity);
     }
 
-    public ControlHistory create(AppdefEntityID entityId,
-                                 Integer groupId,
-                                 Integer batchId,
-                                 String subject,
-                                 String action,
-                                 String args,
-                                 Boolean scheduled,
-                                 long startTime, long endTime,
-                                 long dateScheduled,
-                                 String status,
-                                 String description,
-                                 String message)
+    ControlHistory create(AppdefEntityID entityId,
+                          Integer groupId,
+                          Integer batchId,
+                          String subject,
+                          String action,
+                          String args,
+                          Boolean scheduled,
+                          long startTime, long endTime,
+                          long dateScheduled,
+                          String status,
+                          String description,
+                          String message)
     {
         ControlHistory h = new ControlHistory();
         h.setGroupId(groupId);
@@ -86,7 +86,7 @@ public class ControlHistoryDAO extends HibernateDAO
 
     public Collection findByStartTime(long time, boolean asc)
     {
-        return getSession().createCriteria(ControlHistory.class)
+        return createCriteria()
             .add(Expression.gt("startTime", new Long(time)))
             .addOrder(asc ? Order.asc("startTime") : Order.desc("startTime"))
             .list();
@@ -182,15 +182,15 @@ public class ControlHistoryDAO extends HibernateDAO
 
     private Criteria createFindByEntity(int type, int id)
     {
-        return getSession().createCriteria(ControlHistory.class)
-                .add(Expression.eq("entityType", new Integer(type)))
-                .add(Expression.eq("entityId", new Integer(id)));
+        return createCriteria()
+            .add(Expression.eq("entityType", new Integer(type)))
+            .add(Expression.eq("entityId", new Integer(id)));
     }
 
     private Criteria createFindByGroup(int groupId, int batchId)
     {
-        return getSession().createCriteria(ControlHistory.class)
-                .add(Expression.eq("groupId", new Integer(groupId)))
-                .add(Expression.eq("batchId", new Integer(batchId)));
+        return createCriteria()
+            .add(Expression.eq("groupId", new Integer(groupId)))
+            .add(Expression.eq("batchId", new Integer(batchId)));
     }
 }

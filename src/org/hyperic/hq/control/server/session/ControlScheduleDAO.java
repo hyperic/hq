@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Collection;
 
 import org.hibernate.Criteria;
-import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hyperic.dao.DAOFactory;
@@ -48,23 +47,23 @@ public class ControlScheduleDAO extends HibernateDAO
         return (ControlSchedule)super.findById(id);
     }
 
-    public void save(ControlSchedule entity)
+    void save(ControlSchedule entity)
     {
         super.save(entity);
     }
 
-    public void remove(ControlSchedule entity)
+    void remove(ControlSchedule entity)
     {
         super.remove(entity);
     }
 
-    public ControlSchedule create(AppdefEntityID entityId,
-                                       String subject,
-                                       String action,
-                                       ScheduleValue schedule,
-                                       long nextFire, String triggerName,
-                                       String jobName,
-                                       String jobOrderData)
+    ControlSchedule create(AppdefEntityID entityId,
+                           String subject,
+                           String action,
+                           ScheduleValue schedule,
+                           long nextFire, String triggerName,
+                           String jobName,
+                           String jobOrderData)
     {
         ControlSchedule s = new ControlSchedule();
 
@@ -88,7 +87,7 @@ public class ControlScheduleDAO extends HibernateDAO
 
     public Collection findByFireTime(boolean asc)
     {
-        return getSession().createCriteria(ControlSchedule.class)
+        return createCriteria()
             .addOrder(asc
                       ? Order.asc("nextFireTime")
                       : Order.desc("nextFireTime"))
@@ -122,8 +121,8 @@ public class ControlScheduleDAO extends HibernateDAO
 
     private Criteria createFindByEntity(int type, int id)
     {
-        return getSession().createCriteria(ControlSchedule.class)
-                .add(Expression.eq("entityType", new Integer(type)))
-                .add(Expression.eq("entityId", new Integer(id)));
+        return createCriteria()
+            .add(Expression.eq("entityType", new Integer(type)))
+            .add(Expression.eq("entityId", new Integer(id)));
     }
 }

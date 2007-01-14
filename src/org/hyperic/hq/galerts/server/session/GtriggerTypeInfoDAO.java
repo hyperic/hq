@@ -51,9 +51,8 @@ class GtriggerTypeInfoDAO
     GtriggerTypeInfo find(GtriggerType type) {
         Class typeClass = type.getClass();
         
-        return (GtriggerTypeInfo)
-            getSession().createCriteria(GtriggerTypeInfo.class)
-                        .add(Expression.eq("typeClass", typeClass))
-                        .uniqueResult();
+        return (GtriggerTypeInfo) createCriteria()
+            .add(Expression.eq("typeClass", typeClass))
+            .uniqueResult();
     }
 }

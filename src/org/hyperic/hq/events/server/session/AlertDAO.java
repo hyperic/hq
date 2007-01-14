@@ -29,7 +29,6 @@ import java.util.List;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.dao.HibernateDAO;
 
@@ -70,11 +69,11 @@ public class AlertDAO extends HibernateDAO {
     }
 
     public List findByCreateTime(long begin, long end, int count) {
-        return getSession().createCriteria(Alert.class)
-                .add(Expression.between("ctime", new Long(begin), new Long(end)))
-                .addOrder(Order.desc("ctime"))
-                .setMaxResults(count)
-                .list();
+        return createCriteria()
+            .add(Expression.between("ctime", new Long(begin), new Long(end)))
+            .addOrder(Order.desc("ctime"))
+            .setMaxResults(count)
+            .list();
     }
 
     public List findByCreateTimeAndPriority(long begin, long end, int priority,
@@ -165,8 +164,7 @@ public class AlertDAO extends HibernateDAO {
     }
 
     public Alert findLastByAlertDefinition(AlertDefinition def) {
-        return (Alert) getSession()
-            .createCriteria(Alert.class)
+        return (Alert) createCriteria()
             .add(Expression.eq("alertDefinition", def))
             .addOrder(Order.desc("ctime"))
             .setMaxResults(1)
@@ -196,9 +194,5 @@ public class AlertDAO extends HibernateDAO {
     
     void save(Alert alert) { 
         super.save(alert);
-    }
-
-    public void savePersisted(PersistedObject entity) {
-        save((Alert)entity);
     }
 }
