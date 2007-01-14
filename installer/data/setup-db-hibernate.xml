@@ -144,10 +144,6 @@
     <property name="hibernate.connection.username" value="${server.database-user}" />
     <property name="hibernate.connection.password" value="${server.database-password}" />
     <property name="hibernate.connection.pool_size" value="0" />
-    <property name="hibernate.connection.release_mode"
-              value="after_transaction" />
-    <property name="hibernate.cache.use_second_level_cache"
-              value="false" />
 
     <echoproperties destfile="${hibernate-properties-gen}" format="text">
       <propertyset>
@@ -158,8 +154,6 @@
         <propertyref name="hibernate.connection.password"/>
         <propertyref name="hibernate.connection.password"/>
         <propertyref name="hibernate.connection.pool_size"/>
-        <propertyref name="hibernate.connection.release_mode"/>
-        <propertyref name="hibernate.cache.use_second_level_cache"/>
       </propertyset>
     </echoproperties> 
 
