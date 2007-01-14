@@ -44,7 +44,6 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.config.ConfigResponse;
@@ -184,23 +183,12 @@ public class AuthzSubjectManagerEJBImpl
                      AuthzConstants.perm_removeSubject);
         }
 
-        deleteUserPrefs(subject);
-
         dao.remove(toDelete);
 
         // remove from cache
         VOCache.getInstance().removeSubject(name);
         return;
 
-    }
-
-    /** Get the Resource entity associated with this Subject.
-     * @ejb:interface-method
-     */
-    public ResourceValue getSubjectResource(AuthzSubjectValue subject)
-        throws NamingException, FinderException {
-        AuthzSubject subj = getSubjectDAO().findById(subject.getId());
-        return subj.getResource().getResourceValue();
     }
 
     /** Find a subject by its id
@@ -395,8 +383,9 @@ public class AuthzSubjectManagerEJBImpl
                      AuthzConstants.subjectOpViewSubject);
         }
 
-        byte[] bytes =
-            selectUserPrefs(subjId);
+        UserConfigResp confResp = getSubjectDAO().findUserConfigResp(subjId);
+        byte[] bytes = confResp.getPrefResponse();
+
         if(bytes == null) {
             return new ConfigResponse(); 
         } else {
@@ -421,24 +410,10 @@ public class AuthzSubjectManagerEJBImpl
                      AuthzConstants.subjectOpModifySubject);
         }
 
-        updateUserPrefs(subjId, prefs.encode());
-    }
-
-    private void updateUserPrefs(Integer subjId, byte[] prefsByteArr) {
-        UserConfigResp confResp =
-            getSubjectDAO().findUserConfigResp(subjId);
-        confResp.setPrefResponse(prefsByteArr);
+        UserConfigResp confResp = getSubjectDAO().findUserConfigResp(subjId);
+        confResp.setPrefResponse(prefs.encode());
     }
     
-    private byte[] selectUserPrefs (Integer subjId) {
-        UserConfigResp confResp = getSubjectDAO().findUserConfigResp(subjId);
-        return confResp.getPrefResponse();
-    }
-
-    private void deleteUserPrefs(Integer subjId) {
-        UserConfigResp confResp = getSubjectDAO().findUserConfigResp(subjId);
-        getSubjectDAO().remove(confResp);
-    }
     /**
      * Get the overlord spider subject value. THe overlord is the systems
      * anonymous user and should be used for non-authz operations

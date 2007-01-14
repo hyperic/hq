@@ -27,7 +27,6 @@ package org.hyperic.hq.authz.server.session;
 
 import java.util.Collection;
 
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hyperic.dao.DAOFactory;
@@ -84,14 +83,11 @@ public class AuthzSubjectDAO extends HibernateDAO
         return (AuthzSubject)super.findById(id);
     }
 
-    public void remove(AuthzSubject entity)
+    void remove(AuthzSubject entity)
     {
-        super.remove(entity);
-    }
-
-    public void remove(UserConfigResp resp)
-    {
+        UserConfigResp resp = findUserConfigResp(entity.getId());
         super.remove(resp);
+        super.remove(entity);
     }
 
     public AuthzSubject findByAuth(String name, String dsn)
@@ -113,7 +109,7 @@ public class AuthzSubjectDAO extends HibernateDAO
 
     public Collection findById_orderName(Integer[] ids, boolean asc)
     {
-        return getSession().createCriteria(AuthzSubject.class)
+        return createCriteria()
             .add(Expression.in("id", ids))
             .add(Expression.eq("system", Boolean.FALSE))
             .addOrder( asc ? Order.asc("sortName") : Order.desc("sortName"))
@@ -121,7 +117,7 @@ public class AuthzSubjectDAO extends HibernateDAO
     }
     
     public Collection findAll_order(String col, boolean asc) {
-        return getSession().createCriteria(AuthzSubject.class)
+        return createCriteria()
             .add(Expression.eq("system", Boolean.FALSE))
             .addOrder( asc ? Order.asc(col) : Order.desc(col))
             .list();
