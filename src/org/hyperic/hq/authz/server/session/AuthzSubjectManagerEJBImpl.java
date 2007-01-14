@@ -323,8 +323,7 @@ public class AuthzSubjectManagerEJBImpl
         }
 
         // find the requested subjects
-        Collection subjects =
-            getSubjectDAO().findById_orderName(ids, pc.isAscending());
+        PageList subjects = getSubjectDAO().findById_orderName(ids, pc);
 
         // check permission unless the list includes only the id of
         // the subject being requested. This is ugly mostly because
@@ -338,12 +337,7 @@ public class AuthzSubjectManagerEJBImpl
                      AuthzConstants.subjectOpViewSubject);
         }
 
-        // return the appropriate page for the found subjects
-        PageList plist = subjectPager.seek(subjects, pc.getPagenum(),
-                                           pc.getPagesize());
-        plist.setTotalSize(subjects.size());        
-        
-        return plist;
+        return subjects;
     }
 
     /**

@@ -29,6 +29,7 @@ import java.io.Serializable;
 import java.util.Collection;
 
 import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -111,7 +112,7 @@ public abstract class HibernateDAO {
         getSession().delete(entity);
     }
 
-    protected PageList getPagedResults(Query q, int total, PageControl pc) {
+    protected PageList getPagedResult(Query q, Integer total, PageControl pc) {
         if (pc.getPagesize() != PageControl.SIZE_UNLIMITED) {
             q.setMaxResults(pc.getPagesize());
         }
@@ -120,6 +121,19 @@ public abstract class HibernateDAO {
             q.setFirstResult(pc.getPageEntityIndex());
         }
         
-        return new PageList(q.list(), total);
+        return new PageList(q.list(), total.intValue());
+    }
+
+    protected PageList getPagedResult(Criteria crit, Integer total,
+                                      PageControl pc) {
+        if (pc.getPagesize() != PageControl.SIZE_UNLIMITED) {
+            crit.setMaxResults(pc.getPagesize());
+        }
+        
+        if (pc.getPageEntityIndex() != 0) {
+            crit.setFirstResult(pc.getPageEntityIndex());
+        }
+        
+        return new PageList(crit.list(), total.intValue());
     }
 }

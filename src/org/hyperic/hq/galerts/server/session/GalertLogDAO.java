@@ -79,7 +79,7 @@ class GalertLogDAO
                 .setParameter("group", g)
                 .setLong("time", begin);
             
-            return getPagedResults(q, count.intValue(), pc);
+            return getPagedResult(q, count, pc);
         }
 
         return new PageList();

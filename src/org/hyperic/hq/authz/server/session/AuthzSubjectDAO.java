@@ -27,13 +27,17 @@ package org.hyperic.hq.authz.server.session;
 
 import java.util.Collection;
 
+import org.hibernate.Criteria;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
 
 /**
  * CRUD methods, finders, etc. for AuthzSubject
@@ -107,15 +111,27 @@ public class AuthzSubjectDAO extends HibernateDAO
             .uniqueResult();
     }
 
-    public Collection findById_orderName(Integer[] ids, boolean asc)
-    {
-        return createCriteria()
-            .add(Expression.in("id", ids))
-            .add(Expression.eq("system", Boolean.FALSE))
-            .addOrder( asc ? Order.asc("sortName") : Order.desc("sortName"))
-            .list();
+    /**
+     * Create the criteria used by findById_orderName() because Criteria does
+     * not yet support Cloneable
+     */
+    private Criteria findById_orderNameCriteria(Integer[] ids) {
+        return createCriteria().add(Expression.in("id", ids));
     }
     
+    public PageList findById_orderName(Integer[] ids, PageControl pc)
+    {
+        Integer count = (Integer) findById_orderNameCriteria(ids)
+            .setProjection(Projections.rowCount())
+            .uniqueResult(); 
+        
+        Criteria crit = findById_orderNameCriteria(ids)
+            .addOrder( pc.isAscending() ? Order.asc("sortName") :
+                                          Order.desc("sortName"));
+        
+        return getPagedResult(crit, count, pc);
+    }
+
     public Collection findAll_order(String col, boolean asc) {
         return createCriteria()
             .add(Expression.eq("system", Boolean.FALSE))
