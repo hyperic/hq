@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -144,19 +145,22 @@ public abstract class ResourceController extends BaseDispatchAction {
                                      resource.getName());
 
                 // set the resource controllability flag
-                ControlBoss controlBoss = ContextUtils.getControlBoss(ctx);
-                // We were doing group Specific isGroupControlEnabled for
-                // groups.
-                // We should just see if the group control is supported
-                // regardless of whether control is enabled or not.  Also we
-                // should be calling isControlSupported on entity and not
-                // controlEnabled.
-                boolean isControllable =
-                    controlBoss.isControlSupported(sessionId.intValue(),
-                                                   resource);
-
-                request.setAttribute(Constants.CONTROL_ENABLED_ATTR,
-                                     new Boolean(isControllable));
+                if (entityId.getType() !=
+                    AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
+                    ControlBoss controlBoss = ContextUtils.getControlBoss(ctx);
+                    // We were doing group Specific isGroupControlEnabled for
+                    // groups.
+                    // We should just see if the group control is supported
+                    // regardless of whether control is enabled or not.  Also we
+                    // should be calling isControlSupported on entity and not
+                    // controlEnabled.
+                    boolean isControllable =
+                        controlBoss.isControlSupported(sessionId.intValue(),
+                                                       resource);
+    
+                    request.setAttribute(Constants.CONTROL_ENABLED_ATTR,
+                                         new Boolean(isControllable));
+                }
 
                 // Set additional flags
                 UIUtils utils = ContextUtils.getUIUtils(ctx);
