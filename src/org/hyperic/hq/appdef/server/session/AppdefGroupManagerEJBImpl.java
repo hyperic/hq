@@ -79,6 +79,7 @@ import org.hyperic.hq.grouping.shared.GroupManagerUtil;
 import org.hyperic.hq.grouping.shared.GroupModificationException;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.grouping.shared.GroupNotFoundException;
+import org.hyperic.hq.grouping.server.session.GroupManagerEJBImpl;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -103,8 +104,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     implements SessionBean {
     private final String APPDEF_PAGER_PROCESSOR =
         "org.hyperic.hq.appdef.shared.pager.AppdefPagerProc";
-    private final Log log = LogFactory.getLog(
-        "org.hyperic.hq.appdef.server.session.AppdefGroupManagerEJBImpl" );
+    private final Log log = LogFactory.getLog(AppdefGroupManagerEJBImpl.class);
     private final int APPDEF_TYPE_UNDEFINED = -1;
     private final int APPDEF_RES_TYPE_UNDEFINED = -1;
     private final int CLUSTER_UNDEFINED = -1;
@@ -112,34 +112,15 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     private ServiceManagerLocal serviceManager;
     
     private GroupManagerLocal getGroupManager () {
-        if ( groupManager == null ) {
-            try {
-                groupManager = GroupManagerUtil.getLocalHome().create();
-            } catch (NamingException ne) {
-                log.error(
-                    "Unable to lookup GroupManagerLocalHome interface", ne);
-                throw new SystemException(
-                    "Unable to lookup GroupManagerLocalHome interface", ne);
-            } catch (CreateException ce) {
-                log.error("Unable to create GroupManagerLocal", ce);
-                throw new SystemException(
-                    "Unable to create GroupManagerLocal interface", ce);
-            }
+        if (groupManager == null) {
+            groupManager = GroupManagerEJBImpl.getOne();
         }
         return groupManager;
     }
 
     private ServiceManagerLocal getServiceManager() {
         if (serviceManager == null) {
-            try {
-                serviceManager = ServiceManagerUtil.getLocalHome().create();
-            } catch (CreateException e) {
-                throw new SystemException(
-                    "Unable to create ServiceManagerLocal", e);
-            } catch (NamingException e) {
-                throw new SystemException(
-                    "Unable to lookup ServiceManagerLocalHome interface", e);
-            }
+            serviceManager = ServiceManagerEJBImpl.getOne();
         }
         return serviceManager;
     }
@@ -164,11 +145,11 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
                                         String description, String location )
         throws GroupCreationException, GroupDuplicateNameException {
 
-        return createGroup (subject,
-                            AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS,
-                            APPDEF_TYPE_UNDEFINED, 
-                            APPDEF_RES_TYPE_UNDEFINED,
-                            name, description, location);
+        return createGroup(subject,
+                           AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS,
+                           APPDEF_TYPE_UNDEFINED,
+                           APPDEF_RES_TYPE_UNDEFINED,
+                           name, description, location);
     }
 
     /**
@@ -206,9 +187,9 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
                 "group or application");
         }
 
-        return createGroup (subject, groupType,
-                            adType, APPDEF_RES_TYPE_UNDEFINED,
-                            name, description, location);
+        return createGroup(subject, groupType,
+                           adType, APPDEF_RES_TYPE_UNDEFINED,
+                           name, description, location);
     }
 
     /**
@@ -299,7 +280,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Lookup and return a group value object by its name.
-     * @param Spider subject value.
+     * @param subject subject value.
      * @param groupName - the unique group name.
      * @throws AppdefGroupNotFoundException when group cannot be located in db.
      * @throws PermissionException if the caller is not authorized.
@@ -333,8 +314,8 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     /**
      * Lookup and return a group value object by its identifier.
      * 
-     * @param Spider subject value.
-     * @param Integer representing the group identifier
+     * @param subject subject value.
+     * @param id representing the group identifier
      * @return AppdefGroupValue object
      * @throw AppdefGroupNotFoundException when group cannot be found.
      * @throw PermissionException when group access is not authorized.
@@ -348,9 +329,9 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     /**
      * Lookup and return a group value object by its identifier.
      * 
-     * @param Spider subject value.
-     * @param Integer represetning group identifier
-     * @param page control for group members.
+     * @param subject subject value.
+     * @param id represetning group identifier
+     * @param pc control for group members.
      * @return AppdefGroupValue object
      * @throw AppdefGroupNotFoundException when group cannot be found.
      * @throw PermissionException when group access is not authorized.
@@ -366,8 +347,8 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Lookup and return a group value object.
-     * @param Spider subject value.
-     * @param appdef entity id
+     * @param subject subject value.
+     * @param id entity id
      * @return AppdefGroupValue object
      * @ejb:interface-method
      * @throws AppdefGroupNotFoundException when group cannot be located in db.
@@ -381,8 +362,8 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Lookup and return a group value object.
-     * @param Spider subject value.
-     * @param appdef entity id
+     * @param subject subject value.
+     * @param id entity id
      * @param pc - page control
      * @return AppdefGroupValue object
      * @throws AppdefGroupNotFoundException when group cannot be located in db.
@@ -551,8 +532,8 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Save a group back to persistent storage.
-     * @param AuthzSubject
-     * @param appdef group vo
+     * @param subject The authz subject
+     * @param gv group vo
        @throws GroupNotCompatibleException - compat group contain incompt items
      * @throws GroupDuplicateNameException - group name already exists 
      * @throws AppSvcClustDuplicateAssignException - service already assigned
@@ -657,8 +638,8 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     /**
      * Produce a paged list of all groups where caller is authorized
      * to modify.
-     * @param Spider subject value.
-     * @param page control
+     * @param subject subject value.
+     * @param pc control
      * @return List containing AppdefGroupValue.
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
@@ -671,9 +652,9 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     /**
      * Produce list of all groups where caller is authorized
      * to modify. Apply filterSet to control group list membership.
-     * @param Spider subject
-     * @param page control
-     * @param filter set for groups
+     * @param subject subject
+     * @param pc control
+     * @param grpFilters set for groups
      * @return PageList containing AppdefGroupValues.
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
@@ -688,16 +669,17 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * Produce list of all groups that contain the specified appdef entity.
      * Apply filterSet to control group list membership.
      *
-     * @param Spider subject
-     * @param AppdefentityID for inclusive search.
-     * @param page control
-     * @param filter set for groups
+     * @param subject subject
+     * @param id for inclusive search.
+     * @param pc control
+     * @param grpFilters set for groups
      * @return PageList containing AppdefGroupValues.
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
      * */
-    public PageList findAllGroups(AuthzSubjectValue subject, 
-        AppdefEntityID id, PageControl pc, AppdefPagerFilter[] grpFilters)
+    public PageList findAllGroups(AuthzSubjectValue subject, AppdefEntityID id,
+                                  PageControl pc,
+                                  AppdefPagerFilter[] grpFilters)
         throws PermissionException, ApplicationException {
         ResourceValue rv;
 
@@ -783,10 +765,8 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * Produce list of all groups that contain the specified appdef entity.
      * Apply filterSet to control group list membership.
      *
-     * @param Spider subject
-     * @param AppdefentityID for inclusive search.
-     * @param page control
-     * @param filter set for groups
+     * @param subject subject
+     * @param id for inclusive search.
      * @return PageList containing AppdefGroupValues.
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
@@ -840,8 +820,8 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Removes a group corresponding to the provided group id.
-     * @param AuthzSubject value.
-     * @param appdef entity id
+     * @param subject value.
+     * @param entityId entity id
      * @throw AppdefGroupNotFoundException when group cannot be found.
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
@@ -853,8 +833,8 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Removes a group corresponding to the provided group id.
-     * @param AuthzSubject value.
-     * @param group id
+     * @param subject value.
+     * @param groupId id
      * @throw AppdefGroupNotFoundException when group cannot be found.
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
@@ -891,14 +871,15 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     /**
      * Change group owner
      * @param subject value of caller.
-     * @param group id to effect change.
-     * @param the subject of the new owner.
+     * @param groupId id to effect change.
+     * @param newOwner subject of the new owner.
      * @throw AppdefGroupNotFoundException when group cannot be found.
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
      */
     public AppdefGroupValue changeGroupOwner(AuthzSubjectValue subject,
-        Integer groupId, AuthzSubjectValue newOwner)
+                                             Integer groupId,
+                                             AuthzSubjectValue newOwner)
         throws AppdefGroupNotFoundException, PermissionException {
         try {
             GroupManagerLocal manager = getGroupManager();
@@ -919,7 +900,6 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
         }
     }
 
-    /** Internal helper methods below **/
     // Page out the collection, applying any filters in the process.
     private PageList getPageList (Collection coll, PageControl pc,
         AppdefPagerFilter[] filters) {
@@ -1109,32 +1089,17 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
         return appLoc.findApplicationTypeById(new Integer(id));
     }
 
-    // ******* EJB lifecycle junk ...
     /**
-     * @see javax.ejb.SessionBean#ejbCreate()
      * @ejb:create-method
-     * @throws javax.ejb.CreateException
      */
     public void ejbCreate() throws CreateException {
     }
 
-    /**
-     * @see javax.ejb.SessionBean#ejbPostCreate()
-     */
     public void ejbPostCreate() {}
 
-    /**
-     * @see javax.ejb.SessionBean#ejbActivate()
-     */
     public void ejbActivate() {}
 
-    /**
-     * @see javax.ejb.SessionBean#ejbPassivate()
-     */
     public void ejbPassivate() {}
 
-    /**
-     * @see javax.ejb.SessionBean#ejbRemove()
-     */
     public void ejbRemove() {}
 }

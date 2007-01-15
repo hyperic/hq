@@ -91,8 +91,7 @@ public class ResourceGroupManagerEJBImpl
 
     /**
      * List the ResourceGroups associated with this resource.
-     * @param whoami The current running user.
-     * @param resource This resource.
+     * @param res This resource.
      * @exception NamingException
      * @exception FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
@@ -364,7 +363,7 @@ public class ResourceGroupManagerEJBImpl
     /**
      * List the resources in this group that the caller is authorized to see.
      * @param whoami The current running user.
-     * @param group This group.
+     * @param groupValue This group.
      * @param pc Paging information for the request
      * @return list of authorized resources in this group.
      * @ejb:interface-method
@@ -548,14 +547,14 @@ public class ResourceGroupManagerEJBImpl
 
     /**
      * Associate roles with this group.
-     * @param whoami The current running user.
      * @param subject The subject.
+     * @param group The group to associate the roles with.
      * @param roles The roles to associate with the group.
      * @exception FinderException Unable to find a given or dependent entities.
      * @exception PermissionException whoami may not perform addRole on this group.
      * @ejb:interface-method
      */
-    public void addRoles(AuthzSubjectValue whoami, ResourceGroupValue group,
+    public void addRoles(AuthzSubjectValue subject, ResourceGroupValue group,
                          RoleValue[] roles) 
     {
         Set roleLocals = toPojos(roles);
@@ -564,7 +563,6 @@ public class ResourceGroupManagerEJBImpl
 
         while (it != null && it.hasNext()) {
             Role role = (Role)it.next();
-//            role.setWhoami(lookupSubject(whoami));
             role.getResourceGroups().add(groupLocal);
         }
     }
@@ -639,7 +637,7 @@ public class ResourceGroupManagerEJBImpl
     /**
      * List the roles this group belongs to.
      * @param whoami The current running user.
-     * @param group This group.
+     * @param groupValue This group.
      * @return Array of roles in this role.
      * @exception FinderException Unable to find a given or dependent entities.
      * @exception PermissionException whoami is not allowed to perform listRoles 
@@ -679,7 +677,6 @@ public class ResourceGroupManagerEJBImpl
 
     /**
      * Get the Resource entity associated with this ResourceGroup.
-     * @param subject This subject.
      * @exception FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
@@ -691,7 +688,7 @@ public class ResourceGroupManagerEJBImpl
     
     /**
      * Get a ResourceGroup owner's AuthzSubjectValue
-     * @param group value object
+     * @param gid The group id
      * @exception NamingException - JNDI failure
      * @exception FinderException Unable to find a group by id
      * @ejb:interface-method
