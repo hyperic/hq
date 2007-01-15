@@ -6,9 +6,16 @@
                 eternal="false"
                 overflowToDisk="false"/>
 
-  <!-- Caching of Derived and Raw Measurements -->
+  <!-- Measurement caches -->
   <cache name="org.hyperic.hq.measurement.server.session.Measurement"
          maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+
+  <cache name="org.hyperic.hq.measurement.server.session.MonitorableType"
+         maxElementsInMemory="1000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -124,20 +131,25 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
 
-  <cache name="org.hyperic.hq.measurement.server.session.MonitorableType"
+  <!-- Permission related caches -->
+  <cache name="org.hyperic.hq.authz.server.session.Resource"
          maxElementsInMemory="1000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-
+  <cache name="org.hyperic.hq.authz.server.session.ResourceType"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
   <cache name="Operation.findByTypeAndName"
          maxElementsInMemory="100"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-
   <cache name="ResourceType.findByName"
          maxElementsInMemory="50"
          eternal="true"
