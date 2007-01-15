@@ -54,7 +54,7 @@ class GalertLogDAO
     }
     
     List findAll(ResourceGroup g) {
-        String sql = "from GalertLog l where l.group = :group " + 
+        String sql = "from GalertLog l where l.alertDef.group = :group " + 
                      "order by l.timestamp";
         
         return getSession().createQuery(sql)
@@ -64,7 +64,7 @@ class GalertLogDAO
 
     PageList findByTimeWindow(ResourceGroup g, long begin, PageControl pc) {
         String sql = "from GalertLog l " +
-                     "where l.group = :group and l.timestamp > :time "; 
+                     "where l.alertDef.group = :group and l.timestamp > :time "; 
                      
         Integer count = (Integer)
             getSession().createQuery("select count(*) " + sql)
@@ -86,7 +86,7 @@ class GalertLogDAO
     }
 
     void removeAll(ResourceGroup g) {
-        String sql = "delete from GalertLog l where l.group = :group";
+        String sql = "delete from GalertLog l where l.alertDef.group = :group";
         
         getSession().createQuery(sql)
             .setParameter("group", g)
