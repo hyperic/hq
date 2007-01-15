@@ -170,8 +170,6 @@ public class GroupInventoryPortalAction extends ResourceInventoryPortalAction {
         throws Exception {
 
         findAndSetResource(request); 
-
-        super.viewResource(mapping,form,request,response);
         
         // clean out the return path 
         SessionUtils.resetReturnPath(request.getSession());
@@ -189,7 +187,7 @@ public class GroupInventoryPortalAction extends ResourceInventoryPortalAction {
                           ".resource.group.inventory.ViewGroup");
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
-        return null;
+        return super.viewResource(mapping,form,request,response);
     }
 
     public ActionForward addRoles(ActionMapping mapping,

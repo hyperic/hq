@@ -140,16 +140,13 @@ public class ServiceInventoryPortalAction extends ResourceInventoryPortalAction 
         throws Exception {
 
         findAndSetResource(request);
-
-
-        super.viewResource(mapping,form,request,response);
                 
         Portal portal = Portal
             .createPortal("resource.service.inventory.ViewServiceTitle",
                           ".resource.service.inventory.ViewService");
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
-        return null;
+        return super.viewResource(mapping, form, request, response);
     }
 
     public ActionForward changeOwner(ActionMapping mapping,

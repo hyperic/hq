@@ -50,10 +50,6 @@ public class ApplicationInventoryPortalAction extends ResourceInventoryPortalAct
     protected static Log log =
         LogFactory.getLog(ApplicationInventoryPortalAction.class.getName());
 
-    private final String RESOURCE_PAGER =
-        "org.hyperic.hq.appdef.server.session.PagerProcessor_service";
-    private static Pager resourcePager = null;
-
     private static Properties keyMethodMap = new Properties();
     static {
         keyMethodMap.setProperty(Constants.MODE_NEW, "newResource");
@@ -99,13 +95,13 @@ public class ApplicationInventoryPortalAction extends ResourceInventoryPortalAct
         throws Exception
     {
         setResource(request);
-        super.viewResource(mapping,form,request,response);
+        
         Portal portal = Portal
             .createPortal("resource.application.inventory.ViewApplicationTitle",
                           ".resource.application.inventory.ViewApplication");
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
-        return null;
+        return super.viewResource(mapping, form, request, response);
     }
 
     public ActionForward editGeneralProperties(ActionMapping mapping,

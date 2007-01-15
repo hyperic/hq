@@ -194,8 +194,6 @@ public class ServerInventoryPortalAction extends ResourceInventoryPortalAction {
         throws Exception {
 
         findAndSetResource(request);
-
-        super.viewResource(mapping,form,request,response);
         
         // clean out the return path 
         SessionUtils.resetReturnPath(request.getSession());
@@ -213,7 +211,7 @@ public class ServerInventoryPortalAction extends ResourceInventoryPortalAction {
                           ".resource.server.inventory.ViewServer");
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
-        return null;
+        return super.viewResource(mapping, form, request, response);
     }
 
     public ActionForward changeOwner(ActionMapping mapping,

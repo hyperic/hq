@@ -93,14 +93,13 @@ public class PlatformInventoryPortalAction extends ResourceInventoryPortalAction
                                       HttpServletResponse response)
         throws Exception {
         setResource(request);
-
-        super.viewResource(mapping,form,request,response);
                         
         Portal portal = Portal
             .createPortal("resource.platform.inventory.ViewPlatformTitle",
                           ".resource.platform.inventory.ViewPlatform");
         request.setAttribute(Constants.PORTAL_KEY, portal);
-        return null;
+
+        return super.viewResource(mapping, form, request, response);
     }
 
     public ActionForward editPlatformGeneralProperties(ActionMapping mapping,
