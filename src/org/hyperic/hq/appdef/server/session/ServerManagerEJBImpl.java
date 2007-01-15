@@ -44,7 +44,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEvent;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
@@ -241,12 +240,10 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             deleteCustomProperties(AppdefEntityConstants.APPDEF_TYPE_SERVER, 
                                    id.intValue());
 
-            // Send server deleted event
-            sendAppdefEvent(subject, new AppdefEntityID(
-                AppdefEntityConstants.APPDEF_TYPE_SERVER, id),
-                            AppdefEvent.ACTION_DELETE);
-        } catch (NamingException e) {
-            throw new SystemException(e);
+            // Send resource delete event
+            ResourceCreatedZevent zevent =
+                new ResourceCreatedZevent(subject, server.getEntityId());
+            ZeventManager.getInstance().enqueueEventAfterCommit(zevent);;
         } catch (FinderException e) {
             throw new ServerNotFoundException(id, e);
         }

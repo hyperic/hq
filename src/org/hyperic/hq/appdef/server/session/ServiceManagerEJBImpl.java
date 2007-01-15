@@ -47,7 +47,6 @@ import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEvent;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
@@ -1488,68 +1487,66 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         service = getServiceDAO().findById(serviceId);
         removeService(subj, service, deep);
     }
-  /**
+
+    /**
      * A removeService method that takes a ServiceLocal.  This is called by
      * ServerManager.removeServer when cascading a delete onto services.
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void removeService(AuthzSubjectValue subj, Service service,
+    public void removeService(AuthzSubjectValue subject, Service service,
                               boolean deep)
         throws RemoveException, FinderException, PermissionException {
 
         Integer serviceId = service.getId();
-        try {
-            // find any children
-            Collection childSvcs = getServiceDAO().findByParent(serviceId);
-            if ( !deep && childSvcs.size() > 0) {
-                throw new RemoveException(
-                    "Service can not be removed since it has children");
-            }
-            Integer serverId = service.getServer().getId();
 
-            // validate permission needs removeService on the service
-            // to succeed
-            checkRemovePermission(subj, service.getEntityId());
-            
-            // remove any child services
-            for(Iterator i = childSvcs.iterator(); i.hasNext();) {
-                Service child = (Service)i.next();
-                Integer childId = child.getId();
-                removeService(subj, childId, deep);
-            }
-
-            // keep the configresponseId so we can remove it later
-            Integer cid = service.getConfigResponseId();
-
-            // remove from authz
-            removeAuthzResource(service.getEntityId());
-
-            // remove from appdef
-            getServiceDAO().remove(service);
-
-            // remove the config response
-            if (cid != null) {
-                try {
-                    ConfigResponseDAO cdao = getConfigResponseDAO();
-                    cdao.remove(cdao.findById(cid));
-                } catch (ObjectNotFoundException e) {
-                    // OK, no config response, just log it
-                    log.warn("Invalid config ID " + cid);
-                }
-            }
-
-            // remove custom properties
-            deleteCustomProperties(AppdefEntityConstants.APPDEF_TYPE_SERVICE,
-                                   serviceId.intValue());
-
-            // Send service deleted event
-            sendAppdefEvent(subj, new AppdefEntityID(
-                AppdefEntityConstants.APPDEF_TYPE_SERVICE, serviceId),
-                            AppdefEvent.ACTION_DELETE);
-        } catch (NamingException e) {
-            throw new SystemException(e);
+        // find any children
+        Collection childSvcs = getServiceDAO().findByParent(serviceId);
+        if (!deep && childSvcs.size() > 0) {
+            throw new RemoveException(
+                "Service can not be removed since it has children");
         }
+        Integer serverId = service.getServer().getId();
+
+        // validate permission needs removeService on the service
+        // to succeed
+        checkRemovePermission(subject, service.getEntityId());
+
+        // remove any child services
+        for (Iterator i = childSvcs.iterator(); i.hasNext();) {
+            Service child = (Service) i.next();
+            Integer childId = child.getId();
+            removeService(subject, childId, deep);
+        }
+
+        // keep the configresponseId so we can remove it later
+        Integer cid = service.getConfigResponseId();
+
+        // remove from authz
+        removeAuthzResource(service.getEntityId());
+
+        // remove from appdef
+        getServiceDAO().remove(service);
+
+        // remove the config response
+        if (cid != null) {
+            try {
+                ConfigResponseDAO cdao = getConfigResponseDAO();
+                cdao.remove(cdao.findById(cid));
+            } catch (ObjectNotFoundException e) {
+                // OK, no config response, just log it
+                log.warn("Invalid config ID " + cid);
+            }
+        }
+
+        // remove custom properties
+        deleteCustomProperties(AppdefEntityConstants.APPDEF_TYPE_SERVICE,
+                               serviceId.intValue());
+
+        // Send resource delete event
+        ResourceCreatedZevent zevent =
+            new ResourceCreatedZevent(subject, service.getEntityId());
+        ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
     }
 
     /**

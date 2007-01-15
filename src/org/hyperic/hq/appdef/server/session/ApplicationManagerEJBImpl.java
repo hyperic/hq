@@ -41,7 +41,6 @@ import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEvent;
 import org.hyperic.hq.appdef.shared.AppdefGroupManagerUtil;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
@@ -68,6 +67,7 @@ import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.AppServiceDAO;
 import org.hyperic.hq.dao.ApplicationDAO;
+import org.hyperic.hq.zevents.ZeventManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -234,27 +234,24 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Remove an application
-     * @param who
-     * @param appId
+     *
      * @ejb:interface-method
      */
-    public void removeApplication(AuthzSubjectValue caller, Integer id)
+    public void removeApplication(AuthzSubjectValue subject, Integer id)
         throws ApplicationNotFoundException,
                PermissionException, RemoveException {
         try {
             Application app = getApplicationDAO().findById(id);
-            checkRemovePermission(caller, app.getEntityId());
+            checkRemovePermission(subject, app.getEntityId());
             removeAuthzResource(app.getEntityId());
             getApplicationDAO().remove(app);
 
-            // Send service deleted event
-            sendAppdefEvent(caller, new AppdefEntityID(
-                AppdefEntityConstants.APPDEF_TYPE_APPLICATION, id),
-                            AppdefEvent.ACTION_DELETE);
+            // Send resource delete event
+            ResourceCreatedZevent zevent =
+                new ResourceCreatedZevent(subject, app.getEntityId());
+            ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
         } catch (FinderException e) {
             throw new ApplicationNotFoundException(id);
-        } catch (NamingException e) {
-            throw new SystemException(e);
         }
     }
 

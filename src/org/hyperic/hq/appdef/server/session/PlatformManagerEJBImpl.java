@@ -49,7 +49,6 @@ import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEvent;
 import org.hyperic.hq.appdef.shared.AppdefGroupManagerUtil;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
@@ -330,12 +329,10 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             deleteCustomProperties(AppdefEntityConstants.APPDEF_TYPE_PLATFORM, 
                                    platform.getId().intValue());
 
-
-            // Send platform deleted event
-            sendAppdefEvent(
-                subject, new AppdefEntityID(
-                AppdefEntityConstants.APPDEF_TYPE_PLATFORM, platform.getId()),
-                AppdefEvent.ACTION_DELETE);
+            // Send resource delete event
+            ResourceCreatedZevent zevent =
+                new ResourceCreatedZevent(subject, platform.getEntityId());
+            ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
         } catch (RemoveException e) {
             _log.debug("Error while removing Platform");
             rollback();
@@ -344,8 +341,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             _log.debug("Error while removing Platform");
             rollback();
             throw e;
-        } catch (NamingException e) {
-            throw new SystemException(e);
         } catch (FinderException e) {
             throw new PlatformNotFoundException(platform.getId());
         }
