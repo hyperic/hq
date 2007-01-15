@@ -273,7 +273,7 @@ function showViewEscResponse(originalRequest) {
            constraint: 'vertical'});
 
 }
-    
+
     function editEscalation () {
         $('escPropertiesTable').style.display = 'none';
         $('editPropertiesTable').style.display = '';
@@ -320,7 +320,7 @@ function showViewEscResponse(originalRequest) {
         var numi = document.getElementById('theValue');
         var num = (document.getElementById('theValue').value -1)+ 2;
 
-        numi.value = num;
+        //numi.value = num;
         var liID = 'row'+num;
         var escLi = document.createElement('li');
         var remDiv = document.createElement('div');
@@ -346,7 +346,6 @@ function showViewEscResponse(originalRequest) {
         ni.appendChild(escLi);
         escLi.setAttribute((document.all ? 'className' : 'class'), "lineitem");
         escLi.setAttribute('id','row_'+ liID);
-        //escLi.innerHTML = "here";
 
         escLi.appendChild(remDiv);
         remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
@@ -368,7 +367,7 @@ function showViewEscResponse(originalRequest) {
         td1.appendChild(select1);
         select1.setAttribute('id', 'waittime_' + liID);
 
-        select1.setAttribute('name', 'waittime_' + liID);
+        select1.setAttribute('name', 'waittime');
         addOption(select1, '0', '<fmt:message key="alert.config.escalation.end"/>');
         addOption(select1, '300000', '<fmt:message key="alert.config.escalation.wait">
                                       <fmt:param value="5"/>
@@ -396,7 +395,7 @@ function showViewEscResponse(originalRequest) {
         td2.appendChild(select2);
         select2.setAttribute('id', 'Email_' + liID);
         select2.onchange = function(){onchange_handler(this);}
-        select2.setAttribute('name', 'action_' + liID);
+        select2.setAttribute('name', 'action');
         addOption(select2, 'Email', 'Email');
         addOption(select2, 'SMS', 'SMS');
         addOption(select2, 'Syslog', 'Sys Log');
@@ -407,7 +406,7 @@ function showViewEscResponse(originalRequest) {
         td3.setAttribute('valign', 'top');
 
         td3.appendChild(select3);
-        select3.setAttribute('name', 'who_' + liID);
+        select3.setAttribute('name', 'who');
         select3.setAttribute('id', 'who_' + liID);
         select3.onchange = function(){onchange_who(this);}
         addOption(select3, 'Select', '<fmt:message key="alert.config.escalation.notify.who"/>');
@@ -426,14 +425,14 @@ function showViewEscResponse(originalRequest) {
         $('emailinput'+ liID).style.display = 'none';
         emailDiv.setAttribute('class', 'escInput');
         emailDiv.setAttribute('width', '40%');
-        emailDiv.innerHTML = "email addresses (comma separated):<br><textarea rows=3 cols=35 id=emailinput_" + liID + " name=emailinput_" + liID + "></textarea>";
+        emailDiv.innerHTML = "email addresses (comma separated):<br><textarea rows=3 cols=35 id=emailinput_" + liID + " name=emailinput" + "></textarea>";
 
         td4.appendChild(sysDiv);
         sysDiv.setAttribute('class', 'escInput'+ liID);
         sysDiv.setAttribute('id', 'sysloginput'+ liID);
         $('sysloginput'+ liID).style.display = 'none';
         sysDiv.setAttribute('width', '40%');
-        sysDiv.innerHTML = "meta: <input type=text name=meta_" + liID + " size=40><br>" + "product: <input type=text name=product_" + liID + " size=40><br>" + "version: <input type=text name=version_" + liID + " size=40><br>";
+        sysDiv.innerHTML = "meta: <input type=text name=meta" + " size=40><br>" + "product: <input type=text name=product" + " size=40><br>" + "version: <input type=text name=version" + " size=40><br>";
 
         td4.appendChild(usersDiv);
         usersDiv.setAttribute('id', 'usersDiv' + liID);
@@ -444,7 +443,7 @@ function showViewEscResponse(originalRequest) {
           var usersInputList = usersDiv.getElementsByTagName('input');
           for(i=0;i < usersInputList.length; i++) {
               var inputNamesArr = usersInputList[i];
-              inputNamesArr.name = inputNamesArr.name + "_" + liID;
+              inputNamesArr.name = inputNamesArr.name;
           }
         }
 
@@ -992,7 +991,7 @@ function showViewEscResponse(originalRequest) {
           <td>
         <tiles:insert page="/common/components/ActionButton.jsp">
           <tiles:put name="labelKey" value="common.label.AddAction"/>
-          <tiles:put name="buttonHref" value="."/>
+          <tiles:put name="buttonHref" value="#"/>
           <tiles:put name="buttonClick" value="addRow(); return false;"/>
         </tiles:insert>
         </td>
@@ -1007,7 +1006,7 @@ function showViewEscResponse(originalRequest) {
             <td>
             <tiles:insert page="/common/components/ActionButton.jsp">
             <tiles:put name="labelKey" value="common.label.Save"/>
-              <tiles:put name="buttonHref" value="."/>
+              <tiles:put name="buttonHref" value="#"/>
             <tiles:put name="buttonClick" value="saveAddEscalation(); return false;"/>
             </tiles:insert>
             </td>
