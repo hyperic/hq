@@ -74,7 +74,7 @@ var pageData = new Array();
 </tiles:insert>
 
 <tiles:insert definition=".tabs.resource.application.inventory">
-  <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
+  <tiles:put name="resourceId" beanName="entityId" beanProperty="id"/>
   <tiles:put name="resourceType" beanName="entityId" beanProperty="type"/>
 </tiles:insert>
 
