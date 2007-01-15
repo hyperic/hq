@@ -116,7 +116,7 @@ public class AuthzSubjectManagerEJBImpl
 
     /** Write the specified entity out to permanent storage.
      * @param whoami The current running user.
-     * @param role The subject to save.
+     * @param subject The subject to save.
      * @exception FinderException Unable to find a given or dependent entities.
      * @exception PermissionException whoami may not perform modifySubject on this subject.
      * @ejb:interface-method
@@ -134,19 +134,16 @@ public class AuthzSubjectManagerEJBImpl
                      AuthzConstants.rootResourceId,
                      AuthzConstants.perm_viewSubject);
         }
-        // Fix for Bug: 5531
         // Root user can not be disabled
         if(subject.getId().equals(AuthzConstants.rootSubjectId)) {
             subject.setActive(true);
         }
         subjectPojo.setAuthzSubjectValue(subject);
-        // remove from cache
-        VOCache.getInstance().removeSubject(subject.getName());
     }
 
     /**
      * Check if a subject can modify users  
-     * @param subject
+     * @param caller
      * @ejb:interface-method
      */
     public void checkModifyUsers(AuthzSubjectValue caller) 
@@ -184,11 +181,6 @@ public class AuthzSubjectManagerEJBImpl
         }
 
         dao.remove(toDelete);
-
-        // remove from cache
-        VOCache.getInstance().removeSubject(name);
-        return;
-
     }
 
     /** Find a subject by its id
@@ -228,20 +220,9 @@ public class AuthzSubjectManagerEJBImpl
     public AuthzSubjectValue findSubjectByName(AuthzSubjectValue whoami,
                                                String name)
         throws PermissionException {
-        // look for the subject in the cache
-        AuthzSubjectValue vo;
-        vo = VOCache.getInstance().getAuthzSubject(name);
-        if(vo == null) {
-            AuthzSubject sub = getSubjectDAO().findByName(name);
 
-            // not in cache. Put it in there
-            vo = sub.getAuthzSubjectValue();
-            VOCache cache = VOCache.getInstance();
-            synchronized(cache.getSubjectLock()) {
-                cache.put(name, vo);
-            }            
-        }
-        return vo;
+        AuthzSubject sub = getSubjectDAO().findByName(name);
+        return sub.getAuthzSubjectValue();
     }
 
     /** 
@@ -353,7 +334,7 @@ public class AuthzSubjectManagerEJBImpl
 
     /**
      * Find the e-mail of the subject specified by name
-     * @param name Name of the subjects.
+     * @param userName Name of the subjects.
      * @return The e-mail address of the subject
      * @ejb:interface-method
      */
@@ -371,7 +352,7 @@ public class AuthzSubjectManagerEJBImpl
         // users can always see their own prefs.
         if(!who.getId().equals(subjId)) { 
             // check that the caller can see users
-            PermissionManager pm = PermissionManagerFactory.getInstance(); 
+            PermissionManager pm = PermissionManagerFactory.getInstance();
             pm.check(who.getId(), getRootResourceType(),
                      AuthzConstants.rootResourceId,
                      AuthzConstants.subjectOpViewSubject);

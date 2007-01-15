@@ -40,7 +40,6 @@ import javax.naming.NamingException;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -50,9 +49,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
-import org.hyperic.hq.authz.shared.ResourceVOHelperUtil;
 import org.hyperic.hq.authz.shared.ResourceValue;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -129,8 +126,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                    ResourceTypeValue type) {
         ResourceTypeDAO dao = DAOFactory.getDAOFactory().getResourceTypeDAO();
         ResourceType rt = dao.findById(type.getId());
-        // flush VOCache
-        VOCache.getInstance().removeResourceType(type.getName());
         AuthzSubject who = DAOFactory.getDAOFactory().getAuthzSubjectDAO()
             .findById(whoami.getId());
         dao.remove(who, rt);
@@ -153,14 +148,15 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                  resType.getResource().getResourceType(), resType.getId(),
                  AuthzConstants.typeOpModifyResourceType);
         resType.setResourceTypeValue(type);
-        VOCache.getInstance().removeResourceType(type.getName());
     }
 
     /**
      * Associate operations with this role.
      * @param whoami The current running user.
      * @param type The type.
-     * @param operations The operations to associate with the role. These operations will be created. Use setOperations() to associate existing operations.
+     * @param operations The operations to associate with the role. These
+     * operations will be created. Use setOperations() to associate existing
+     * operations.
      * @ejb:interface-method
      */
     public void addOperations(AuthzSubjectValue whoami,
@@ -276,15 +272,8 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @ejb:transaction type="NOTSUPPORTED"
      */
     public ResourceValue getResourceTypeResource(ResourceTypeValue type) {
-        try {
-            ResourceType local= getResourceTypeDAO().findById(type.getId());
-            return ResourceVOHelperUtil.getLocalHome().create()
-                    .getResourceValue(local.getResource());
-        } catch (CreateException e) {
-            throw new SystemException(e);        
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        ResourceType resourceType = getResourceTypeDAO().findById(type.getId());
+        return resourceType.getResource().getResourceValue();
     }
 
     /**
@@ -296,15 +285,9 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      */
     public ResourceValue findResourceByInstanceId(ResourceTypeValue type,
                                                   Integer instanceId) {
-        try {    
-            return ResourceVOHelperUtil.getLocalHome().create()
-                .getResourceValue(getResourceDAO()
-                                  .findByInstanceId(type.getId(), instanceId));                                  
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        Resource resource = getResourceDAO().findByInstanceId(type.getId(),
+                                                              instanceId);
+        return resource.getResourceValue();
     }
 
     /**
@@ -315,14 +298,8 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @ejb:transaction type="NOTSUPPORTED"
      */
     public ResourceValue findResourceById(Integer id) {
-        try {
-            return ResourceVOHelperUtil.getLocalHome().create()
-                    .getResourceValue(id);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        Resource resource = getResourceDAO().findById(id);
+        return resource.getResourceValue();
     }
 
     /**
@@ -334,41 +311,32 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      */
     public ResourceValue findResourceByTypeAndInstanceId(String type,
                                                   Integer instanceId) {
-        try {
-            ResourceType resType = getResourceTypeDAO().findByName(type);
-            return ResourceVOHelperUtil.getLocalHome().create()
-                .getResourceValue(getResourceDAO()
-                                  .findByInstanceId(resType.getId(),
-                                                    instanceId));
-        } catch (NamingException e) {
-            throw new SystemException(e);                                        
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        ResourceType resType = getResourceTypeDAO().findByName(type);
+        Resource resource = getResourceDAO().findByInstanceId(resType.getId(),
+                                                              instanceId);
+        return resource.getResourceValue();
     }
 
     /**
      * Write the specified entity out to permanent storage.
-     * @param whoami The current running user.
-     * @param resource The Resource to save.
+     *
+     * @param res The Resource to save.
      * @ejb:interface-method
      */
     public void saveResource(ResourceValue res) {
-        Resource resource = this.lookupResourcePojo(res);
+        Resource resource = lookupResourcePojo(res);
         resource.setResourceValue(res);
-        VOCache.getInstance().removeResource(res.getId());
     }
 
     /**
      * Delete the specified resource.
      * @param whoami The current running user.
-     * @param resource The resource to delete.
+     * @param res The resource to delete.
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
     public void removeResource(AuthzSubjectValue whoami, ResourceValue res) {
         Resource reso = getResourceDAO().findById(res.getId());
-        VOCache.getInstance().removeResource(res.getId());
         getResourceDAO().remove(reso);
     }
 
@@ -384,7 +352,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     /**
      * Set the owner of this Resource.
      * @param whoami The current running user.
-     * @param resource This Resource.
+     * @param res This Resource.
      * @param newOwner The new owner.
      * @throws PermissionException whoami does not own the resource.
      * @ejb:interface-method
@@ -403,7 +371,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
             throw new PermissionException("Only an owner or admin may " +
                                           "reassign ownership.");
         }
-        VOCache.getInstance().removeResource(res.getId());
     }
 
     /**
@@ -480,7 +447,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * cluster unassigned services as well as service clusters. 
      *
      * @param subject
-     * @param page control
+     * @param pc control
      * @return PageList of resource values
      * @ejb:interface-method
      * @ejb:transaction type="Required" 
@@ -530,8 +497,8 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
-    public ResourceValue[] findResourceByOwner(AuthzSubjectValue value) {
-        AuthzSubject owner = getSubjectDAO().findById(value.getId());
+    public ResourceValue[] findResourceByOwner(AuthzSubjectValue subject) {
+        AuthzSubject owner = getSubjectDAO().findById(subject.getId());
         return (ResourceValue[]) this
                 .fromPojos(getResourceDAO().findByOwner(owner),
                            org.hyperic.hq.authz.shared.ResourceValue.class);
@@ -539,8 +506,8 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
 
     /**
      * Gets all the Resources of a particular type owned by the given Subject.
-     * @param resource type
-     * @param subject The owner.
+     * @param resTypeName type
+     * @param subjVal The owner.
      * @return Array of resources owned by the given subject.
      * @exception NamingException
      * @exception FinderException Unable to find a given or dependent entities.

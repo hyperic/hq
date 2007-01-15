@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.authz.server.session;
 
-import org.hyperic.hq.authz.shared.ResourceVOHelperUtil;
 import org.hyperic.util.pager.PagerProcessor;
 
 public class PagerProcessor_resource implements PagerProcessor {
@@ -36,12 +35,11 @@ public class PagerProcessor_resource implements PagerProcessor {
         if (o == null) return null;
         try {
             if (o instanceof Resource) {
-                return ResourceVOHelperUtil.getLocalHome().create()
-                    .getResourceValue((Resource)o);
+                return ((Resource)o).getResourceValue();
             }
         } catch (Exception e) {
-            throw new IllegalStateException("Error converting to ResourceValue: "
-                + e);
+            throw new IllegalStateException("Error converting to " +
+                                            "ResourceValue: " + e);
         }
         return o;
     }
