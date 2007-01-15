@@ -45,17 +45,6 @@ public class Operation extends AuthzNamedBean {
         setOperationValue(val);
     }
 
-/*
-    public Operation(String name, ResourceType resourceType, Integer cid,
-                     Collection roles)
-    {
-        super(name);
-        _resourceType = resourceType;
-        _cid          = cid;
-        _roles        = roles;
-    }
-    */
-
     public ResourceType getResourceType() {
         return _resourceType;
     }
