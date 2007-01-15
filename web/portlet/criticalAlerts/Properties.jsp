@@ -75,7 +75,7 @@ var help = '<hq:help/>';
          <tr valign="top">
           <td width="20%" class="BlockLabel" valign="center"><fmt:message key="common.label.Description"/></td>
           <td width="80%" class="BlockContent" colspan="3" valign="center">
-            <html:text property="title"/>
+            <html:text property="title" maxlength="50"/>
           </td>
         </tr>
          <tr valign="top">
