@@ -29,38 +29,32 @@ import org.hyperic.hibernate.PersistedObject;
 
 public abstract class AuthzNamedBean extends PersistedObject
 {
-    private String name;
-    private String sortName;
+    private String _name;
+    private String _sortName;
 
-    protected AuthzNamedBean()
-    {
+    protected AuthzNamedBean() {
     }
 
-    protected AuthzNamedBean(String name)
-    {
-        this.name = name;
+    protected AuthzNamedBean(String name) {
+        _name = name;
         setSortName(name);
     }
 
-    public String getName()
-    {
-        return name;
+    public String getName() {
+        return _name;
     }
 
-    public void setName(String name)
-    {
-        this.name = name;
+    public void setName(String name) {
+        _name = name;
         setSortName(name);
     }
 
-    public String getSortName()
-    {
-        return sortName;
+    public String getSortName() {
+        return _sortName;
     }
 
-    protected void setSortName(String sortName)
-    {
-        this.sortName = sortName != null ? sortName.toUpperCase() : null;
+    protected void setSortName(String sortName) {
+        _sortName = sortName != null ? sortName.toUpperCase() : null;
     }
 
     /**
@@ -75,15 +69,15 @@ public abstract class AuthzNamedBean extends PersistedObject
         }
         AuthzNamedBean o = (AuthzNamedBean) obj;
         return
-            ((name == o.getName()) ||
-             (name != null && o.getName() != null && name.equals(o.getName())));
+            ((_name == o.getName()) ||
+             (_name != null && o.getName() != null && _name.equals(o.getName())));
     }
 
     public int hashCode()
     {
         int result = super.hashCode();
 
-        result = 37 * result + (name != null ? name.hashCode() : 0);
+        result = 37 * result + (_name != null ? _name.hashCode() : 0);
 
         return result;
     }

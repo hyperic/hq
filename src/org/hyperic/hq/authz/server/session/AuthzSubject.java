@@ -187,7 +187,10 @@ public class AuthzSubject extends AuthzNamedBean {
     public Object getValueObject() {
         return getAuthzSubjectValue();
     }
-    
+
+    /**
+     * @deprecated use (this) AuthzSubject instead
+     */
     public AuthzSubjectValue getAuthzSubjectValue() {
         if (_valueObj == null) 
             _valueObj = new AuthzSubjectValue();

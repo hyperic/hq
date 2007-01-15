@@ -35,98 +35,99 @@ import org.hyperic.hq.authz.values.OwnedRoleValue;
 
 public class Role extends AuthzNamedBean {
 
-    // Fields
-    private Integer cid;
-    private String description;
-    private boolean system = false;
-    private Resource resource;
-    private Collection resourceGroups = new ArrayList();
-    private Collection operations = new HashSet();
-    private Collection subjects = new ArrayList();
-    private RoleValue roleValue = new RoleValue();
+    private Integer _cid;
+    private String _description;
+    private boolean _system = false;
+    private Resource _resource;
+    private Collection _resourceGroups = new ArrayList();
+    private Collection _operations = new HashSet();
+    private Collection _subjects = new ArrayList();
+    private RoleValue _roleValue = new RoleValue();
 
-    // Constructors
-    /** default constructor */
     public Role() {
         super();
     }
 
-	/** minimal constructor */
     public Role(RoleValue val) {
         super();
         setRoleValue(val);
     }
     
     public Integer getCid() {
-        return cid;
+        return _cid;
     }
     
     void setCid(Integer val) {
-        cid = val;
+        _cid = val;
     }
 
     public String getDescription() {
-        return description;
+        return _description;
     }
     
     void setDescription(String val) {
-        description = val;
+        _description = val;
     }
+
     public boolean isSystem() {
-        return system;
+        return _system;
     }
     
     void setSystem(boolean fsystem) {
-        system = fsystem;
+        _system = fsystem;
     }
+
     public Resource getResource() {
-        return resource;
+        return _resource;
     }
     
     void setResource(Resource resourceId) {
-        resource = resourceId;
+        _resource = resourceId;
     }
+
     public Collection getResourceGroups() {
-        return resourceGroups;
+        return _resourceGroups;
     }
     
     void setResourceGroups(Collection val) {
-        resourceGroups = val;
+        _resourceGroups = val;
     }
+
     public Collection getOperations() {
-        return operations;
+        return _operations;
     }
     
     void setOperations(Collection val) {
-        operations = val;
+        _operations = val;
     }
+
     public Collection getSubjects() {
-        return subjects;
+        return _subjects;
     }
     
     void setSubjects(Collection val) {
-        subjects = val;
+        _subjects = val;
     }
 
     /**
      * @deprecated use (this) Role instead
      */
     public RoleValue getRoleValue() {
-        roleValue.setDescription(getDescription());
-        roleValue.setId(getId());
-        roleValue.setName(getName());
-        roleValue.setSortName(getSortName());
-        roleValue.setSystem(isSystem());
+        _roleValue.setDescription(getDescription());
+        _roleValue.setId(getId());
+        _roleValue.setName(getName());
+        _roleValue.setSortName(getSortName());
+        _roleValue.setSystem(isSystem());
         
-        roleValue.removeAllOperationValues();
+        _roleValue.removeAllOperationValues();
         if (getOperations() != null) {
             for (Iterator it = getOperations().iterator(); it.hasNext(); ) {
                 Operation op = (Operation) it.next();
-                roleValue.addOperationValue(op.getOperationValue());
+                _roleValue.addOperationValue(op.getOperationValue());
             }
         }
 
-        return roleValue;
+        return _roleValue;
     }
 
     void setRoleValue(RoleValue val) {
@@ -140,8 +141,7 @@ public class Role extends AuthzNamedBean {
         return getRoleValue();
     }
 
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         return (obj instanceof Role) && super.equals(obj);
     }
 

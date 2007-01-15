@@ -33,84 +33,79 @@ import org.hyperic.hq.authz.shared.ResourceTypeValue;
 
 public class ResourceType extends AuthzNamedBean
 {
-    private Integer cid;
-    private Resource resource;
-    private boolean system = false;
-    private Collection operations = new ArrayList();
+    private Integer _cid;
+    private Resource _resource;
+    private boolean _system = false;
+    private Collection _operations = new ArrayList();
 
-    private ResourceTypeValue resourceTypeValue = new ResourceTypeValue();
+    private ResourceTypeValue _resourceTypeValue = new ResourceTypeValue();
 
-    // Constructors
-
-    /** default constructor */
     public ResourceType() {
         super();
     }
 
-    /** minimal constructor */
     public ResourceType(ResourceTypeValue val) {
         setResourceTypeValue(val);
     }
 
-    /** full constructor */
     public ResourceType(String name, Integer cid, Resource resource,
                         boolean fsystem, Collection operations) {
         super(name);
-        this.cid = cid;
-        this.resource = resource;
-        this.system = fsystem;
-        this.operations = operations;
+        _cid = cid;
+        _resource = resource;
+        _system = fsystem;
+        _operations = operations;
     }
 
     public Integer getCid() {
-        return cid;
+        return _cid;
     }
 
     protected void setCid(Integer val) {
-        cid = val;
+        _cid = val;
     }
 
     public Resource getResource() {
-        return resource;
+        return _resource;
     }
 
     protected void setResource(Resource val) {
-        resource = val;
+        _resource = val;
     }
 
     public boolean isSystem() {
-        return system;
+        return _system;
     }
 
     protected void setSystem(boolean val) {
-        system = val;
+        _system = val;
     }
 
     public Collection getOperations() {
-        return operations;
+        return _operations;
     }
 
     protected void setOperations(Collection val) {
-        operations = val;
+        _operations = val;
     }
 
     /**
      * @deprecated use (this) ResourceType instead
      */
     public ResourceTypeValue getResourceTypeValue() {
-        resourceTypeValue.setId(getId());
-        resourceTypeValue.setName(getName());
-        resourceTypeValue.setSystem(isSystem());
+        _resourceTypeValue.setId(getId());
+        _resourceTypeValue.setName(getName());
+        _resourceTypeValue.setSystem(isSystem());
         
         // Clear out the operation values first
-        resourceTypeValue.removeAllOperationValues();
+        _resourceTypeValue.removeAllOperationValues();
         if (getOperations() != null) {
             for (Iterator it = getOperations().iterator(); it.hasNext(); ) {
                 Operation op = (Operation) it.next();
-                resourceTypeValue.addOperationValue(op.getOperationValue());
+                _resourceTypeValue.addOperationValue(op.getOperationValue());
             }
         }
-        return resourceTypeValue;
+        return _resourceTypeValue;
     }
 
     protected void setResourceTypeValue(ResourceTypeValue val) {
@@ -123,8 +118,7 @@ public class ResourceType extends AuthzNamedBean
         return getResourceTypeValue();
     }
 
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         return (obj instanceof ResourceType) && super.equals(obj);
     }
 }

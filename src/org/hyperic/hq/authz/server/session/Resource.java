@@ -35,119 +35,94 @@ import org.apache.commons.logging.LogFactory;
 
 public class Resource extends AuthzNamedBean
 {
-    public static final Log log = LogFactory.getLog(Resource.class);
+    public static final Log _log = LogFactory.getLog(Resource.class);
 
-    // Fields
-    private ResourceType resourceType;
-    private Integer instanceId;
-    private Integer cid;
-    private AuthzSubject owner;
-    private boolean system = false;
-    private Collection resourceGroups = new ArrayList();
-    private Collection virtuals = new ArrayList();
+    private ResourceType _resourceType;
+    private Integer _instanceId;
+    private Integer _cid;
+    private AuthzSubject _owner;
+    private boolean _system = false;
+    private Collection _resourceGroups = new ArrayList();
+    private Collection _virtuals = new ArrayList();
 
     private ResourceValue resourceValue = new ResourceValue();
 
-    // Constructors
-
-    /**
-     * default constructor
-     */
-    public Resource()
-    {
+    public Resource() {
         super();
     }
 
-    /**
-     * minimal constructor
-     */
-    public Resource(ResourceValue val)
-    {
+    public Resource(ResourceValue val) {
         setResourceValue(val);
     }
 
-    /**
-     * full constructor
-     */
     public Resource(ResourceType resourceTypeId, Integer instanceId,
                     Integer cid, AuthzSubject subjectId, String name,
                     boolean fsystem, Collection resourceGroups)
     {
         super(name);
-        this.resourceType = resourceTypeId;
-        this.instanceId = instanceId;
-        this.cid = cid;
-        this.owner = subjectId;
-        this.system = fsystem;
-        this.resourceGroups = resourceGroups;
+        _resourceType = resourceTypeId;
+        _instanceId = instanceId;
+        _cid = cid;
+        _owner = subjectId;
+        _system = fsystem;
+        _resourceGroups = resourceGroups;
     }
 
-    public ResourceType getResourceType()
-    {
-        return resourceType;
+    public ResourceType getResourceType() {
+        return _resourceType;
     }
 
-    protected void setResourceType(ResourceType resourceTypeId)
-    {
-        resourceType = resourceTypeId;
+    protected void setResourceType(ResourceType resourceTypeId) {
+        _resourceType = resourceTypeId;
     }
 
-    public Integer getInstanceId()
-    {
-        return instanceId;
+    public Integer getInstanceId() {
+        return _instanceId;
     }
 
-    protected void setInstanceId(Integer val)
-    {
-        instanceId = val;
+    protected void setInstanceId(Integer val) {
+        _instanceId = val;
     }
 
-    public Integer getCid()
-    {
-        return cid;
+    public Integer getCid() {
+        return _cid;
     }
 
-    protected void setCid(Integer val)
-    {
-        cid = val;
+    protected void setCid(Integer val) {
+        _cid = val;
     }
 
-    public AuthzSubject getOwner()
-    {
-        return owner;
+    public AuthzSubject getOwner() {
+        return _owner;
     }
 
-    protected void setOwner(AuthzSubject val)
-    {
-        owner = val;
+    protected void setOwner(AuthzSubject val) {
+        _owner = val;
     }
 
-    public boolean isSystem()
-    {
-        return system;
+    public boolean isSystem() {
+        return _system;
     }
 
-    protected void setSystem(boolean fsystem)
-    {
-        system = fsystem;
+    protected void setSystem(boolean fsystem) {
+        _system = fsystem;
     }
 
-    public Collection getResourceGroups()
-    {
-        return resourceGroups;
+    public Collection getResourceGroups() {
+        return _resourceGroups;
     }
 
     public Collection getVirtuals() {
-        return virtuals;
+        return _virtuals;
     }
 
     protected void setVirtuals(Collection virtuals) {
-        this.virtuals = virtuals;
+        _virtuals = virtuals;
     }
 
     protected void setResourceGroups(Collection val)
     {
-        resourceGroups = val;
+        _resourceGroups = val;
     }
 
     /**
@@ -170,8 +145,7 @@ public class Resource extends AuthzNamedBean
         return resourceValue;
     }
 
-    protected void setResourceValue(ResourceValue val)
-    {
+    protected void setResourceValue(ResourceValue val) {
         setId(val.getId());
         setInstanceId(val.getInstanceId());
         setName(val.getName());
@@ -179,24 +153,8 @@ public class Resource extends AuthzNamedBean
         setSystem(val.getSystem());
     }
 
-    public Object getValueObject()
-    {
+    public Object getValueObject() {
         return getResourceValue();
-    }
-
-    public ResourceValue getResourceValueObject()
-    {
-        ResourceValue vo = new ResourceValue();
-        vo.setSortName(getSortName());
-        vo.setInstanceId(getInstanceId());
-        vo.setSystem(isSystem());
-        vo.setName((getName() == null) ? "" : getName());
-        vo.setId(getId());
-        if ( getOwner() != null )
-            vo.setAuthzSubjectValue( getOwner().getAuthzSubjectValue() );
-        else
-            vo.setAuthzSubjectValue( null );
-        return vo;
     }
 
     public boolean isOwner(Integer possibleOwner)
@@ -204,15 +162,16 @@ public class Resource extends AuthzNamedBean
         boolean is = false;
 
         if (possibleOwner == null) {
-            log.error("possible Owner is NULL. This is probably not what you want.");
-            /* XXX throw exception instead */
+            //XXX: Throw exception instead.
+            _log.error("possible Owner is NULL. This is probably not " +
+                       "what you want.");
         } else {
-            /* overlord owns every thing */
-            if (is = possibleOwner.equals(AuthzConstants.overlordId)
-                    == false) {
-                if (log.isDebugEnabled() && possibleOwner != null) {
-                    log.debug("User is " + possibleOwner +
-                              " owner is " + getOwner().getId());
+            // Overlord owns everything.
+            if (is = possibleOwner.equals(AuthzConstants.overlordId) ==
+                false) {
+                if (_log.isDebugEnabled() && possibleOwner != null) {
+                    _log.debug("User is " + possibleOwner +
+                               " owner is " + getOwner().getId());
                 }
                 is = (possibleOwner.equals(getOwner().getId()));
             }
@@ -227,22 +186,21 @@ public class Resource extends AuthzNamedBean
         }
         Resource o = (Resource) obj;
         return
-            ((resourceType == o.getResourceType()) ||
-             (resourceType != null && o.getResourceType() != null &&
-              resourceType.equals(o.getResourceType())))
+            ((_resourceType == o.getResourceType()) ||
+             (_resourceType != null && o.getResourceType() != null &&
+              _resourceType.equals(o.getResourceType())))
             &&
-            ((instanceId == o.getInstanceId()) ||
-             (instanceId != null && o.getInstanceId() != null &&
-              instanceId.equals(o.getInstanceId())));
+            ((_instanceId == o.getInstanceId()) ||
+             (_instanceId != null && o.getInstanceId() != null &&
+              _instanceId.equals(o.getInstanceId())));
     }
 
     public int hashCode()
     {
         int result = super.hashCode();
 
-        result =
-            37 * result + (resourceType != null ? resourceType.hashCode() : 0);
-        result = 37 * result + (instanceId != null ? instanceId.hashCode() : 0);
+        result = 37 * result + (_resourceType != null ? _resourceType.hashCode() : 0);
+        result = 37 * result + (_instanceId != null ? _instanceId.hashCode() : 0);
 
         return result;
     }

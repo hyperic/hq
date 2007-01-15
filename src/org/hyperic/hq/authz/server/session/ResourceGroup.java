@@ -34,45 +34,31 @@ import org.hyperic.hq.authz.shared.ResourceGroupValue;
 
 public class ResourceGroup extends AuthzNamedBean
 {
+    private Integer _cid;
+    private String _description;
+    private String _location;
+    private boolean _system = false;
+    private Integer _groupType;
+    private Integer _groupEntType;
+    private Integer _groupEntResType;
+    private Integer _clusterId;
+    private long _ctime;
+    private long _mtime;
+    private String _modifiedBy;
+    private Resource _resource;
+    private Collection _resourceSet = new HashSet();
+    private Collection _roles = new HashSet();
 
-    private Integer cid;
-    private String description;
-    private String location;
-    private boolean system = false;
-    private Integer groupType;
-    private Integer groupEntType;
-    private Integer groupEntResType;
-    private Integer clusterId;
-    private long ctime;
-    private long mtime;
-    private String modifiedBy;
-    private Resource resource;
-    private Collection resourceSet = new HashSet();
-    private Collection roles = new HashSet();
+    private ResourceGroupValue _resourceGroupValue = new ResourceGroupValue();
 
-    private ResourceGroupValue resourceGroupValue = new ResourceGroupValue();
-
-    // Constructors
-
-    /**
-     * default constructor
-     */
-    public ResourceGroup()
-    {
+    public ResourceGroup() {
         super();
     }
 
-    /**
-     * minimal constructor
-     */
-    public ResourceGroup(ResourceGroupValue val)
-    {
+    public ResourceGroup(ResourceGroupValue val) {
         setResourceGroupValue(val);
     }
 
-    /**
-     * full constructor
-     */
     public ResourceGroup(String name, Integer cid,
                          String description, String location, boolean fsystem,
                          Integer groupType, Integer groupEntType,
@@ -82,144 +68,120 @@ public class ResourceGroup extends AuthzNamedBean
                          Collection roles)
     {
         super(name);
-        this.cid = cid;
-        this.description = description;
-        this.location = location;
-        this.system = fsystem;
-        this.groupType = groupType;
-        this.groupEntType = groupEntType;
-        this.groupEntResType = groupEntResType;
-        this.clusterId = clusterId;
-        this.ctime = ctime;
-        this.mtime = mtime;
-        this.modifiedBy = modifiedBy;
-        this.resource = resourceId;
-        this.resourceSet = resources;
-        this.roles = roles;
+        _cid = cid;
+        _description = description;
+        _location = location;
+        _system = fsystem;
+        _groupType = groupType;
+        _groupEntType = groupEntType;
+        _groupEntResType = groupEntResType;
+        _clusterId = clusterId;
+        _ctime = ctime;
+        _mtime = mtime;
+        _modifiedBy = modifiedBy;
+        _resource = resourceId;
+        _resourceSet = resources;
+        _roles = roles;
     }
 
-    public Integer getCid()
-    {
-        return cid;
+    public Integer getCid() {
+        return _cid;
     }
 
-    protected void setCid(Integer val)
-    {
-        cid = val;
+    protected void setCid(Integer val) {
+        _cid = val;
     }
 
-    public String getDescription()
-    {
-        return description;
+    public String getDescription() {
+        return _description;
     }
 
-    protected void setDescription(String val)
-    {
-        description = val;
+    protected void setDescription(String val) {
+        _description = val;
     }
 
-    public String getLocation()
-    {
-        return location;
+    public String getLocation() {
+        return _location;
     }
 
-    protected void setLocation(String val)
-    {
-        location = val;
+    protected void setLocation(String val) {
+        _location = val;
     }
 
-    public boolean isSystem()
-    {
-        return system;
+    public boolean isSystem() {
+        return _system;
     }
 
-    protected void setSystem(boolean val)
-    {
-        system = val;
+    protected void setSystem(boolean val) {
+        _system = val;
     }
 
-    public Integer getGroupType()
-    {
-        return groupType;
+    public Integer getGroupType() {
+        return _groupType;
     }
 
-    protected void setGroupType(Integer val)
-    {
-        groupType = val;
+    protected void setGroupType(Integer val) {
+        _groupType = val;
     }
 
-    public Integer getGroupEntType()
-    {
-        return groupEntType;
+    public Integer getGroupEntType() {
+        return _groupEntType;
     }
 
-    protected void setGroupEntType(Integer val)
-    {
-        groupEntType = val;
+    protected void setGroupEntType(Integer val) {
+        _groupEntType = val;
     }
 
-    public Integer getGroupEntResType()
-    {
-        return groupEntResType;
+    public Integer getGroupEntResType() {
+        return _groupEntResType;
     }
 
-    protected void setGroupEntResType(Integer val)
-    {
-        groupEntResType = val;
+    protected void setGroupEntResType(Integer val) {
+        _groupEntResType = val;
     }
 
-    public Integer getClusterId()
-    {
-        return clusterId;
+    public Integer getClusterId() {
+        return _clusterId;
     }
 
-    protected void setClusterId(Integer val)
-    {
-        clusterId = val;
+    protected void setClusterId(Integer val) {
+        _clusterId = val;
     }
 
-    public long getCtime()
-    {
-        return ctime;
+    public long getCtime() {
+        return _ctime;
     }
 
-    protected void setCtime(Long val)
-    {
-        ctime = val != null ? val.longValue() : 0;
+    protected void setCtime(Long val) {
+        _ctime = val != null ? val.longValue() : 0;
     }
 
-    public long getMtime()
-    {
-        return mtime;
+    public long getMtime() {
+        return _mtime;
     }
 
-    protected void setMtime(Long val)
-    {
-        mtime = val != null ? val.longValue() : 0;
+    protected void setMtime(Long val) {
+        _mtime = val != null ? val.longValue() : 0;
     }
 
-    public String getModifiedBy()
-    {
-        return modifiedBy;
+    public String getModifiedBy() {
+        return _modifiedBy;
     }
 
-    protected void setModifiedBy(String val)
-    {
-        modifiedBy = val;
+    protected void setModifiedBy(String val) {
+        _modifiedBy = val;
     }
 
-    public Resource getResource()
-    {
-        return resource;
+    public Resource getResource() {
+        return _resource;
     }
 
-    protected void setResource(Resource val)
-    {
-        resource = val;
+    protected void setResource(Resource val) {
+        _resource = val;
     }
 
     protected Collection getResourceSet() {
-        return resourceSet;
+        return _resourceSet;
     }
 
     public Collection getResources()
@@ -228,82 +190,72 @@ public class ResourceGroup extends AuthzNamedBean
         // Filter our the resource that is this group
         for (Iterator it = getResourceSet().iterator(); it.hasNext(); ) {
             Object res = it.next();
-            if (!resource.equals(res)) {
+            if (!_resource.equals(res)) {
                 resources.add(res);
             }
         }
         return Collections.unmodifiableCollection(resources);
     }
 
-    protected void setResourceSet(Collection val)
-    {
-        resourceSet = val;
+    protected void setResourceSet(Collection val) {
+        _resourceSet = val;
     }
 
-    public void addResource(Resource resource)
-    {
+    public void addResource(Resource resource) {
         resource.getResourceGroups().add(this);
-        resourceSet.add(resource);
+        _resourceSet.add(resource);
     }
 
-    public void removeResource(Resource resource)
-    {
-        resourceSet.remove(resource);
+    public void removeResource(Resource resource) {
+        _resourceSet.remove(resource);
     }
 
-    public void removeAllResources()
-    {
-        resourceSet.clear();
+    public void removeAllResources() {
+        _resourceSet.clear();
     }
 
-    public Collection getRoles()
-    {
-        return roles;
-    }
-    protected void setRoles(Collection val)
-    {
-        roles = val;
+    public Collection getRoles() {
+        return _roles;
     }
 
-    public void addRole(Role role)
-    {
+    protected void setRoles(Collection val) {
+        _roles = val;
+    }
+
+    public void addRole(Role role) {
         role.getResourceGroups().add(this);
-        roles.add(role);
+        _roles.add(role);
     }
 
-    public void removeRole(Role role)
-    {
-        roles.remove(role);
+    public void removeRole(Role role) {
+        _roles.remove(role);
     }
 
-    public void removeAllRoles()
-    {
-        roles.clear();
+    public void removeAllRoles() {
+        _roles.clear();
     }
 
     /**
      * @deprecated use (this) ResourceGroup instead
      */
-    public ResourceGroupValue getResourceGroupValue()
-    {
-        resourceGroupValue.setClusterId(getClusterId().intValue());
-        resourceGroupValue.setCTime(new Long(getCtime()));
-        resourceGroupValue.setDescription(getDescription());
-        resourceGroupValue.setGroupEntResType(getGroupEntResType().intValue());
-        resourceGroupValue.setGroupEntType(getGroupEntType().intValue());
-        resourceGroupValue.setGroupType(getGroupType().intValue());
-        resourceGroupValue.setId(getId());
-        resourceGroupValue.setLocation(getLocation());
-        resourceGroupValue.setModifiedBy(getModifiedBy());
-        resourceGroupValue.setMTime(new Long(getMtime()));
-        resourceGroupValue.setName(getName());
-        resourceGroupValue.setSortName(getSortName());
-        resourceGroupValue.setSystem(isSystem());        
-        return resourceGroupValue;
+    public ResourceGroupValue getResourceGroupValue() {
+        _resourceGroupValue.setClusterId(getClusterId().intValue());
+        _resourceGroupValue.setCTime(new Long(getCtime()));
+        _resourceGroupValue.setDescription(getDescription());
+        _resourceGroupValue.setGroupEntResType(getGroupEntResType().intValue());
+        _resourceGroupValue.setGroupEntType(getGroupEntType().intValue());
+        _resourceGroupValue.setGroupType(getGroupType().intValue());
+        _resourceGroupValue.setId(getId());
+        _resourceGroupValue.setLocation(getLocation());
+        _resourceGroupValue.setModifiedBy(getModifiedBy());
+        _resourceGroupValue.setMTime(new Long(getMtime()));
+        _resourceGroupValue.setName(getName());
+        _resourceGroupValue.setSortName(getSortName());
+        _resourceGroupValue.setSystem(isSystem());
+        return _resourceGroupValue;
     }
 
-    protected void setResourceGroupValue(ResourceGroupValue val)
-    {
+    protected void setResourceGroupValue(ResourceGroupValue val) {
         setClusterId(new Integer(val.getClusterId()));
         setCtime(val.getCTime());
         setDescription(val.getDescription());
@@ -318,13 +270,11 @@ public class ResourceGroup extends AuthzNamedBean
         setSystem(val.getSystem());        
     }
 
-    public Object getValueObject()
-    {
+    public Object getValueObject() {
         return getResourceGroupValue();
     }
 
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         return (obj instanceof ResourceGroup) && super.equals(obj);
     }
 }
