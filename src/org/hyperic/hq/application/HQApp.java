@@ -30,8 +30,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Transaction;
 import org.hibernate.action.Executable;
 import org.hibernate.impl.SessionImpl;
 import org.hyperic.hibernate.Util;
@@ -99,24 +103,15 @@ public class HQApp {
     }
     
     private void scheduleCommitCallback() {
-        SessionImpl s = (SessionImpl)
-            Util.getSessionFactory().getCurrentSession();
-        
-        s.getActionQueue().execute(new Executable() {
-            public void afterTransactionCompletion(boolean success) {
-                runPostCommitListeners(success);
+        Transaction t = 
+            Util.getSessionFactory().getCurrentSession().getTransaction();
+
+        t.registerSynchronization(new Synchronization() {
+            public void afterCompletion(int status) {
+                runPostCommitListeners(status == Status.STATUS_COMMITTED);
             }
 
-            public void beforeExecutions() {}
-
-            public void execute() {}
-
-            public Serializable[] getPropertySpaces() {
-                return new Serializable[0];
-            }
-
-            public boolean hasAfterTransactionCompletion() {
-                return true;
+            public void beforeCompletion() {
             }
         });
     }
