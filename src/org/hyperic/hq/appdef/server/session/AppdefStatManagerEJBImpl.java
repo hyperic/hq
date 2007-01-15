@@ -25,6 +25,10 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,16 +36,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
-import javax.naming.NamingException;
-import javax.naming.InitialContext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -58,19 +60,15 @@ import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceValue;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.timer.StopWatch;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /** 
  * AppdefStatManagerEJB provides summary and aggregate statistical
@@ -87,28 +85,10 @@ import org.apache.commons.logging.LogFactory;
 
 public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
     implements SessionBean {
-    private final String logCtx          = "org.hyperic.hq.appdef.server."+
-                                           "session.AppdefStatManagerEJBImpl";
-    private final Log    log             = LogFactory.getLog(logCtx);
-    private static final String TAB_PLATFORM    = "EAM_PLATFORM";
-    private static final String TAB_PLAT_TYPE   = "EAM_PLATFORM_TYPE";
-    private static final String TAB_SERVER      = "EAM_SERVER";
-    private static final String TAB_SERV_TYPE   = "EAM_SERVER_TYPE";
-    private static final String TAB_SERVICE     = "EAM_SERVICE";
-    private static final String TAB_SVC_TYPE    = "EAM_SERVICE_TYPE";
-    private static final String TAB_APP         = "EAM_APPLICATION";
-    private static final String TAB_APP_TYPE    = "EAM_APPLICATION_TYPE";
-    private static final String TAB_RES         = "EAM_RESOURCE";
-    private static final String TAB_ROM         = "EAM_ROLE_OPERATION_MAP";
-    private static final String TAB_OP          = "EAM_OPERATION";
-    private static final String TAB_SRM         = "EAM_SUBJECT_ROLE_MAP";
-    private static final String TAB_RGM         = "EAM_ROLE_RESOURCE_GROUP_MAP";
-    private static final String TAB_RGRM        = "EAM_RES_GRP_RES_MAP";
-    private static final String TAB_GRP         = "EAM_RESOURCE_GROUP";
-    private static final String TAB_RES_TYPE    = "EAM_RESOURCE_TYPE";
-    private int          DB_TYPE                = -1;
-    private String       DB_FALSE_STRING        = null;
-
+    private final String logCtx  = AppdefStatManagerEJBImpl.class.getName();
+    private final Log    log     = LogFactory.getLog(logCtx);
+    private int          DB_TYPE = -1;
+    
     private static final PermissionManager pm =
         PermissionManagerFactory.getInstance();
 
@@ -122,11 +102,10 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         Map               platMap = new HashMap();
         PreparedStatement stmt = null;
         ResultSet         rs = null;
-        Connection        conn = null;
         int               subjectId = subject.getId().intValue();
 
         try {
-            conn = getDBConn();
+            Connection conn = getDBConn();
             String sql =
                 "SELECT PLATT.NAME, COUNT(PLAT.ID) " +
                 "FROM EAM_PLATFORM_TYPE PLATT, EAM_PLATFORM PLAT " +
@@ -156,7 +135,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                       e, e);
             throw new SystemException(e);
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            disconnect();
         } 
         return platMap;
     }
@@ -171,11 +151,10 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         Map               servMap = new HashMap();
         PreparedStatement stmt = null;
         ResultSet         rs = null;
-        Connection        conn = null;
         int               subjectId = subject.getId().intValue();
 
         try {
-            conn = getDBConn();
+            Connection conn = getDBConn();
             String sql =
                 "SELECT SERVT.NAME, COUNT(SERV.ID) " +
                 "FROM EAM_SERVER_TYPE SERVT, EAM_SERVER SERV " +
@@ -202,7 +181,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                         e, e);
              throw new SystemException(e);
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            disconnect();
         } 
         return servMap;
     }
@@ -216,11 +196,10 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         Map               svcMap = new HashMap();
         PreparedStatement stmt = null;
         ResultSet         rs = null;
-        Connection        conn = null;
         int               subjectId = subject.getId().intValue();
 
         try {
-            conn = getDBConn();
+            Connection conn = getDBConn();
             String sql =
                 "SELECT SVCT.NAME, COUNT(SVC.ID) " +
                 "FROM EAM_SERVICE_TYPE SVCT, EAM_SERVICE SVC " +
@@ -247,7 +226,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                        e, e);
             throw new SystemException(e);
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            disconnect();
         } 
         return svcMap;
     }
@@ -261,11 +241,10 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         Map               appMap = new HashMap();
         PreparedStatement stmt = null;
         ResultSet         rs = null;
-        Connection        conn = null;
         int               subjectId = subject.getId().intValue();
 
         try {
-            conn = getDBConn();
+            Connection conn = getDBConn();
             String sql =
                 "SELECT APPT.NAME, COUNT(APP.ID) " +
                 "FROM EAM_APPLICATION_TYPE APPT, EAM_APPLICATION APP " +
@@ -292,7 +271,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                        e, e);
             throw new SystemException(e);
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            disconnect();
         } 
         return appMap;
     }
@@ -306,12 +286,11 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         Map               grpMap = new HashMap();
         PreparedStatement stmt = null;
         ResultSet         rs = null;
-        Connection        conn = null;
         int[] groupTypes = AppdefEntityConstants.getAppdefGroupTypes();
         int  subjectId = subject.getId().intValue();
 
         try {
-            conn = getDBConn();
+            Connection conn = getDBConn();
 
             for (int x=0;x< groupTypes.length; x++) {
                 String sql =
@@ -342,7 +321,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                        e, e);
             throw new SystemException(e);
         } finally {
-            DBUtil.closeConnection(logCtx, conn);
+            disconnect();
         } 
         return grpMap;
     }
@@ -357,9 +336,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public boolean isNavMapSupported () { 
-        Connection conn = null;
         try {
-            conn = getDBConn();
+            Connection conn = getDBConn();
             switch (DBUtil.getDBType(conn)) {
             case DBUtil.DATABASE_ORACLE_8:
             case DBUtil.DATABASE_ORACLE_9:
@@ -374,7 +352,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         } catch (SQLException e) {
             log.error("Unable to determine navmap capability");
         } finally {
-            DBUtil.closeConnection(logCtx, conn);
+            disconnect();
         }
         return false;
     }
@@ -390,7 +368,6 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             PlatformValue platVo = 
                 getPlatformMgrLocal().getPlatformById(subject,platformId);
             ResourceTreeNode[] retVal;
-            StopWatch timer = new StopWatch();
             retVal = getNavMapDataForPlatform(subject,platVo);
             return retVal;
         } catch (SQLException e) {
@@ -405,15 +382,13 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         ResourceTreeNode[] retVal;
         PreparedStatement    stmt;
         ResultSet            rs;
-        Connection           conn;
         StringBuffer         buf;
 
         retVal = null;
-        conn = null;
         stmt = null;
         rs = null;
         try {
-            conn = getDBConn();
+            Connection conn = getDBConn();
             String falseStr = DBUtil.getBooleanValue(false, conn);
             buf = new StringBuffer();
             buf.append("SELECT svr_svrt_svc_svct.server_id, svr_svrt_svc_svct.server_name,   ")
@@ -491,8 +466,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
 
             Set servers       = new HashSet();
             Set services      = new HashSet();
-            Set apps          = new HashSet();
-
+            
             ResourceTreeNode aPlatformNode 
                 = new ResourceTreeNode(
                       platVo.getName(), 
@@ -587,7 +561,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         } catch (SQLException e) {
             throw e;
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            disconnect();
         }
         log.debug(mapToString(retVal));
         return retVal;
@@ -606,15 +581,13 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         ResourceTreeNode[] retVal;
         PreparedStatement    stmt;
         ResultSet            rs;
-        Connection           conn;
         StringBuffer         buf;
 
-        conn = null;
         stmt = null;
         rs = null;
         retVal = null;
         try {
-            conn = getDBConn();
+            Connection conn = getDBConn();
 
             buf = new StringBuffer();
             buf.append("SELECT svc_svct_svr_plat.platform_id, svc_svct_svr_plat.platform_name,")
@@ -723,7 +696,6 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             }
 
             Map serviceMap       = new HashMap();
-            Map appMap           = new HashMap();
             ResourceTreeNode aServerNode;
             ResourceTreeNode aPlatformNode;
 
@@ -806,7 +778,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             log.error("Unable to get NavMap data: " + e, e);
             throw new SystemException(e);
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            disconnect();
         }
         return retVal;
     }
@@ -825,15 +798,13 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         ResourceTreeNode[] retVal;
         PreparedStatement    stmt;
         ResultSet            rs;
-        Connection           conn;
         StringBuffer         buf;
 
-        conn = null;
         stmt = null;
         rs = null;
         retVal = null;
         try {
-            conn = getDBConn();
+            Connection conn = getDBConn();
             
             String trueStr = DBUtil.getBooleanValue(true, conn);
             buf = new StringBuffer();
@@ -1052,7 +1023,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             log.error("Unable to get NavMap data: " + e, e);
             throw new SystemException(e);
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            disconnect();
         }
         return retVal;
     }
@@ -1087,16 +1059,14 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         ResourceTreeNode[] retVal;
         PreparedStatement  stmt;
         ResultSet          rs;
-        Connection         conn;
         StringBuffer       buf;
 
-        conn = null;
         stmt = null;
         rs = null;
         retVal = null;
 
         try {
-            conn = getDBConn();
+            Connection conn = getDBConn();
 
             buf = new StringBuffer();
             buf.append("SELECT asvclust.service_id, asvclust.service_name, ")
@@ -1259,7 +1229,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             log.error("Unable to get NavMap data: " + e, e);
             throw new SystemException(e);
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            disconnect();
         }
         return retVal;
     }
@@ -1312,8 +1283,6 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         ResourceTreeNode[] retVal;
         PreparedStatement  stmt;
         ResultSet          rs;
-        Connection         conn;
-        StringBuffer       buf;
         int                pEntityType;
         int                cEntityType;
         String             sqlStmt;
@@ -1323,7 +1292,6 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         final int          APPDEF_TYPE_UNDEFINED = -1;
         List               parentNodes = null;
 
-        conn = null;
         stmt = null;
         rs = null;
         retVal = null;
@@ -1359,7 +1327,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                     bindMarkerStr += (x<parents.length-1) ? "?," : "?";
                 }
             }
-            conn = getDBConn();
+            Connection conn = getDBConn();
 
             final String platAGSql =
                 "SELECT    p.id as platform_id, p.name as platform_name,            "+
@@ -1466,12 +1434,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                     log.debug("Arg " + (i++) + ": " + authzResName);
                     log.debug("Arg " + (i++) + ": " + authzOpName);
                 }
-
-                int    id        = 0;
-                String name      = null;
-                int    typeId     = 0;
-                String typeName   = null;
-
+                
                 while (rs.next()) {
                     int     thisEntityId       = rs.getInt(1);
                     String  thisEntityName     = rs.getString(2);
@@ -1509,7 +1472,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         } catch (SQLException e) {
             throw e;
         } finally {
-            DBUtil.closeConnection(logCtx, conn);
+            disconnect();
         }
         return retVal;
     }
@@ -1538,17 +1501,12 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         ResourceTreeNode[] retVal;
         PreparedStatement    stmt;
         ResultSet            rs;
-        Connection           conn;
-        StringBuffer         buf;
         String               grpSqlStmt;
         int                  entityType;
         String               bindMarkerStr;
         ResourceTreeNode     grpNode;
         Set                  entitySet;
-        ResourceTreeNode[]   appNodes;
-        boolean              isCluster;
-
-        conn = null;
+        
         stmt = null;
         rs = null;
         retVal = null;
@@ -1556,17 +1514,12 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         entityType = groupVo.getGroupEntType();
 
         try {
-
-            isCluster = (groupVo.getGroupType() == 
-                         AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC &&
-                         groupVo.getClusterId() != -1) ? true : false;
-
             int size = groupVo.getTotalSize();
             for (int x=0;x<size;x++){
                 bindMarkerStr += (x<size-1) ? "?," : "?";
             }
 
-            conn = getDBConn();
+            Connection conn = getDBConn();
 
             final String grpPlatSql = 
                 "SELECT    p.id as platform_id, p.name as platform_name      "+
@@ -1670,7 +1623,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         } catch (SQLException e) {
             throw e;
         } finally {
-            DBUtil.closeConnection(logCtx, conn);
+            disconnect();
         }
         return retVal;
     }
@@ -1678,21 +1631,18 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
     // The methods in this class should call getDBConn() to obtain a connection,
     // because it also initializes the private database-related variables
     private Connection getDBConn() throws SQLException {
-        try {
-            Connection conn =
-                DBUtil.getConnByContext(new InitialContext(),
-                                        HQConstants.DATASOURCE);
-
-            if (this.DB_TYPE == -1) {
-                this.DB_TYPE = DBUtil.getDBType(conn);
-                this.DB_FALSE_STRING = DBUtil.getBooleanValue(false,
-                                                              this.DB_TYPE);
-            }
-
-            return conn;
-        } catch (NamingException e) {
-            throw new SystemException(e);
+        Connection conn = DAOFactory.getDAOFactory().getPlatformDAO()
+            .getSession().connection();
+        
+        if (DB_TYPE == -1) {
+            DB_TYPE = DBUtil.getDBType(conn);
         }
+        
+        return conn;
+    }
+    
+    private void disconnect() {
+        DAOFactory.getDAOFactory().getPlatformDAO().getSession().disconnect();
     }
 
     private int getChildEntityType (int type) {
@@ -1709,7 +1659,10 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
 
     private String getAppdefTypeLabel(int typeId, String desc) {
         String typeLabel = AppdefEntityConstants.typeToString(typeId);
-        if (desc.toLowerCase().indexOf(typeLabel.toLowerCase()) == -1) {
+        if (desc == null) {
+            desc = typeLabel;
+        }
+        else if (desc.toLowerCase().indexOf(typeLabel.toLowerCase()) == -1) {
             desc += " " + typeLabel;
         }
         return desc;
