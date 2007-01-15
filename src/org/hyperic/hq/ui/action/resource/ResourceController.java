@@ -145,8 +145,7 @@ public abstract class ResourceController extends BaseDispatchAction {
                                      resource.getName());
 
                 // set the resource controllability flag
-                if (entityId.getType() !=
-                    AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
+                if (!entityId.isApplication()) {
                     ControlBoss controlBoss = ContextUtils.getControlBoss(ctx);
                     // We were doing group Specific isGroupControlEnabled for
                     // groups.
