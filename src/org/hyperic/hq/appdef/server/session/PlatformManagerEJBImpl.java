@@ -330,8 +330,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                                    platform.getId().intValue());
 
             // Send resource delete event
-            ResourceCreatedZevent zevent =
-                new ResourceCreatedZevent(subject, platform.getEntityId());
+            ResourceDeletedZevent zevent =
+                new ResourceDeletedZevent(subject, platform.getEntityId());
             ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
         } catch (RemoveException e) {
             _log.debug("Error while removing Platform");

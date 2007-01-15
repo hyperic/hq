@@ -247,8 +247,8 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             getApplicationDAO().remove(app);
 
             // Send resource delete event
-            ResourceCreatedZevent zevent =
-                new ResourceCreatedZevent(subject, app.getEntityId());
+            ResourceDeletedZevent zevent =
+                new ResourceDeletedZevent(subject, app.getEntityId());
             ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
         } catch (FinderException e) {
             throw new ApplicationNotFoundException(id);

@@ -241,9 +241,9 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                                    id.intValue());
 
             // Send resource delete event
-            ResourceCreatedZevent zevent =
-                new ResourceCreatedZevent(subject, server.getEntityId());
-            ZeventManager.getInstance().enqueueEventAfterCommit(zevent);;
+            ResourceDeletedZevent zevent =
+                new ResourceDeletedZevent(subject, server.getEntityId());
+            ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
         } catch (FinderException e) {
             throw new ServerNotFoundException(id, e);
         }

@@ -1544,8 +1544,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                                serviceId.intValue());
 
         // Send resource delete event
-        ResourceCreatedZevent zevent =
-            new ResourceCreatedZevent(subject, service.getEntityId());
+        ResourceDeletedZevent zevent =
+            new ResourceDeletedZevent(subject, service.getEntityId());
         ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
     }
 
