@@ -8,6 +8,8 @@
   package="org.hyperic.hq.appdef">
 
   <class name="AgentType" table="EAM_AGENT_TYPE">
+    <cache usage="read-write"/>
+
     <id name="id" type="integer">
       <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />

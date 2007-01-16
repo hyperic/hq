@@ -8,6 +8,8 @@
   package="org.hyperic.hq.appdef">
 
   <class name="Agent" table="EAM_AGENT">
+    <cache usage="read-write"/>
+
     <id name="id" type="integer">
       <column name="ID" not-null="true" />
       <generator class="sequence">
