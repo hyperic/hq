@@ -19,7 +19,7 @@
     </property>
 
     <many-to-one name="alert" class="Alert">
-      <column name="ALERT_ID" index="ALERT_ACTION_LOG_IDX" />
+      <column name="ALERT_ID" not-null="true" index="ALERT_ACTION_LOG_IDX" />
     </many-to-one>
 
     <many-to-one name="action" class="Action">

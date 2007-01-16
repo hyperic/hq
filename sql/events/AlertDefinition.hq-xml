@@ -32,7 +32,7 @@
 
     <!-- Self-referential relationship for alertdef to its children -->
     <many-to-one name="parent" class="AlertDefinition">
-      <column name="PARENT_ID" />
+      <column name="PARENT_ID" index="ALERT_DEF_CHILD_IDX" />
     </many-to-one>
 
     <bag name="childrenBag">
@@ -49,11 +49,11 @@
     </property>
 
     <property name="appdefId" type="integer">
-      <column name="APPDEF_ID" index="ALERT_DEF_RES_IDX" not-null="true" />
+      <column name="APPDEF_ID" not-null="true" index="ALERT_DEF_RES_IDX" />
     </property>
 
     <property name="appdefType" type="integer">
-      <column name="APPDEF_TYPE" index="ALERT_DEF_RES_IDX" not-null="true" />
+      <column name="APPDEF_TYPE" not-null="true" index="ALERT_DEF_RES_IDX" />
     </property>
 
     <property name="enabled" type="boolean">

@@ -32,7 +32,7 @@
     </property>
 
     <property name="timestamp" type="long">
-      <column name="TIMESTAMP" index="EVENT_LOG_IDX" not-null="true" />
+      <column name="TIMESTAMP" not-null="true" index="EVENT_LOG_IDX" />
     </property>
 
     <property name="subject" type="string">

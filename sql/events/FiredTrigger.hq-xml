@@ -16,7 +16,7 @@
     </id>
 
     <property name="triggerId" type="integer">
-      <column name="TRIGGER_ID" index="EAM_FIRED_TRIGGER_REF" not-null="true" />
+      <column name="TRIGGER_ID" not-null="true" index="EAM_FIRED_TRIGGER_IDX" />
     </property>
 
     <property name="timestamp" type="long">

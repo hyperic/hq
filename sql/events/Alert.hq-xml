@@ -19,7 +19,7 @@
     </version>
 
     <property name="ctime" type="long">
-      <column name="CTIME" not-null="true" index="ALERT_IDX_TIME" />
+      <column name="CTIME" not-null="true" index="ALERT_TIME_IDX" />
     </property>
 
     <property name="fixed" type="boolean">
@@ -27,7 +27,7 @@
     </property>
 
     <many-to-one name="alertDefinition" class="AlertDefinition">
-      <column name="ALERT_DEFINITION_ID" index="ALERT_IDX_ALERTDEFINITION" />
+      <column name="ALERT_DEFINITION_ID" not-null="true" index="ALERT_ALERTDEFINITION_IDX" />
     </many-to-one>
 
     <bag name="actionLogBag" table="EAM_ALERT_ACTION_LOG" order-by="ID">

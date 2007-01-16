@@ -21,7 +21,7 @@
     </version>
 
     <property name="name" type="string">
-      <column name="NAME" not-null="true" index="PLUGIN_NAME_UNIQUE" length="200" />
+      <column name="NAME" not-null="true" length="200" unique="true" index="PLUGIN_NAME_UNIQUE" />
     </property>
 
     <property name="path" type="string">

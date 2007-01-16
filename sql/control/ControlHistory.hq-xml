@@ -44,7 +44,7 @@
     </property>
 
     <property name="startTime" type="long">
-      <column name="STARTTIME" index="CTL_HISTORY_STARTTIME" not-null="true" />
+      <column name="STARTTIME" not-null="true" index="CTL_HISTORY_STARTTIME_IDX" />
     </property>
 
     <property name="status" type="string">
