@@ -54,40 +54,14 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
 
-  <!-- Platform Type Caches -->
+  <!-- Platform Caches -->
   <cache name="org.hyperic.hq.appdef.server.session.PlatformType"
          maxElementsInMemory="15"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.appdef.server.session.PlatformType.serverTypesBag"
-         maxElementsInMemory="15"
-         eternal="true"
-         timeToIdleSeconds="0"
-         timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.appdef.server.session.PlatformType.platformBag"
-         maxElementsInMemory="15"
-         eternal="true"
-         timeToIdleSeconds="0"
-         timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>
-
-  <!-- Platform Caches -->
   <cache name="org.hyperic.hq.appdef.server.session.Platform"
-         maxElementsInMemory="50"
-         eternal="true"
-         timeToIdleSeconds="0"
-         timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.appdef.server.session.Platform.servers"
-         maxElementsInMemory="50"
-         eternal="true"
-         timeToIdleSeconds="0"
-         timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.appdef.server.session.Platform.ips"
          maxElementsInMemory="50"
          eternal="true"
          timeToIdleSeconds="0"
@@ -101,27 +75,7 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.appdef.server.session.ServerType.servers"
-         maxElementsInMemory="100"
-         eternal="true"
-         timeToIdleSeconds="0"
-         timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.appdef.server.session.PlatformType.serviceTypes"
-         maxElementsInMemory="100"
-         eternal="true"
-         timeToIdleSeconds="0"
-         timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>
-
-  <!-- Server Caches -->
   <cache name="org.hyperic.hq.appdef.server.session.Server"
-         maxElementsInMemory="500"
-         eternal="true"
-         timeToIdleSeconds="0"
-         timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.appdef.server.session.Server.services"
          maxElementsInMemory="500"
          eternal="true"
          timeToIdleSeconds="0"
@@ -135,14 +89,6 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.appdef.server.session.ServiceType.services"
-         maxElementsInMemory="300"
-         eternal="true"
-         timeToIdleSeconds="0"
-         timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>
-
-  <!-- Service Caches -->
   <cache name="org.hyperic.hq.appdef.server.session.Service"
          maxElementsInMemory="5000"
          eternal="true"
