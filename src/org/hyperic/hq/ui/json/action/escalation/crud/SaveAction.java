@@ -28,30 +28,90 @@ package org.hyperic.hq.ui.json.action.escalation.crud;
 import java.rmi.RemoteException;
 import java.util.Map;
 
+import javax.servlet.ServletContext;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
+import org.hyperic.hq.bizapp.shared.action.SyslogActionConfig;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.escalation.server.session.Escalation;
+import org.hyperic.hq.events.ActionConfigInterface;
+import org.hyperic.hq.events.NoOpAction;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
 import org.hyperic.hq.ui.json.action.escalation.BaseAction;
+import org.hyperic.hq.ui.util.ContextUtils;
 import org.json.JSONException;
 
 /**
  * Called when UI wants to create an escalation action
  */
 public class SaveAction extends BaseAction {
+    private final Log _log = LogFactory.getLog(SaveAction.class);
 
-    public void execute(JsonActionContext context)
+    public void execute(JsonActionContext context) 
         throws PermissionException, SessionTimeoutException,
-        SessionNotFoundException, JSONException, RemoteException {
-        Map map = context.getParameterMap();
-        if (map.get(ID) == null) {
-            throw new IllegalArgumentException("Escalation id not found");
+               SessionNotFoundException, JSONException, RemoteException
+    {
+        ServletContext sctx = context.getServletContext();
+        ActionConfigInterface cfg;
+        
+        Map        map    = context.getParameterMap();
+        String     action = ((String[])map.get("action"))[0];
+        Integer    escId  = Integer.valueOf(((String[])map.get("EscId"))[0]); 
+        EventsBoss eBoss  = ContextUtils.getEventsBoss(sctx);
+        int        sessId = context.getSessionId();
+        Escalation e      = eBoss.findEscalationById(sessId, escId);
+        long       wait   = Long.parseLong(((String[])map.get("waittime"))[0]);
+        
+        if (action.equalsIgnoreCase("Email")) {
+            cfg = makeEmailActionCfg(e, map, false);
+        } else if(action.equalsIgnoreCase("SMS")) {
+            cfg = makeEmailActionCfg(e, map, true);
+        } else if(action.equalsIgnoreCase("Syslog")) {
+            cfg = makeSyslogActionCfg(e, map);
+        } else if (action.equalsIgnoreCase("noop")) {
+            cfg = new NoOpAction();  // Yow.
+        } else {
+            throw new SystemException("Unknown action type [" + action + "]");
         }
         
-        Integer id = context.getId();
+        eBoss.addAction(sessId, e, cfg, wait);
+    }   
+    
+    private ActionConfigInterface
+        makeSyslogActionCfg(Escalation e, Map p)
+    {
+        String meta    = ((String[])p.get("meta"))[0];
+        String version = ((String[])p.get("version"))[0];
+        String product = ((String[])p.get("product"))[0];
         
-        // TODO get action config values from the parameters map and create a
-        // new action for the escalation
+        return new SyslogActionConfig(meta, product, version);
     }
-
+    
+    private ActionConfigInterface 
+        makeEmailActionCfg(Escalation e, Map p, boolean sms) 
+    { 
+        EmailActionConfig cfg = new EmailActionConfig();
+        String sType = ((String[])p.get("who"))[0];
+        String nameVar;
+        
+        if (sType.equals("Users")) {
+            cfg.setType(EmailActionConfig.TYPE_USERS);
+            nameVar = "users";
+        } else if (sType.equals("Others")) {
+            cfg.setType(EmailActionConfig.TYPE_EMAILS);
+            nameVar = "emailinput";
+        } else {
+            throw new SystemException("Unknown email type [" + sType + "]");
+        }
+        
+        cfg.setNames(((String[])p.get(nameVar))[0]);
+        cfg.setSms(sms);
+        return cfg;
+    }
 }
