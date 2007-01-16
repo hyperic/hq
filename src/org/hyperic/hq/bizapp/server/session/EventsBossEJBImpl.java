@@ -72,7 +72,6 @@ import org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger;
 import org.hyperic.hq.bizapp.server.trigger.frequency.CounterTrigger;
 import org.hyperic.hq.bizapp.server.trigger.frequency.DurationTrigger;
 import org.hyperic.hq.bizapp.server.trigger.frequency.FrequencyTriggerInterface;
-import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.bizapp.shared.uibeans.DashboardAlertBean;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.DuplicateObjectException;
@@ -81,6 +80,7 @@ import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
+import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.events.ActionCreateException;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionInterface;
@@ -1592,6 +1592,20 @@ public class EventsBossEJBImpl
     }
 
     /**
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void addAction(int sessionID, Escalation e, 
+                          ActionConfigInterface cfg, long waitTime)  
+        throws SessionTimeoutException, SessionNotFoundException,
+               PermissionException
+    {
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+
+        getEscMan().addAction(e, cfg, waitTime);
+    }
+    
+    /**
      * retrieve all escalation policy names as a Array of JSONObject.
      *
      * Escalation json finders begin with json* to be consistent with
@@ -1649,16 +1663,6 @@ public class EventsBossEJBImpl
     
         res = getEscMan().createEscalation(name, description, allowPause,
                                            maxWaitTime, notifyAll);
-        for (int i=0; i<jsonActions.length(); i++) {
-            JSONObject jsonEscAction = (JSONObject)jsonActions.get(i);
-            long waitTime = jsonEscAction.optLong("waitTime");
-            JSONObject jsonAction = 
-                jsonEscAction.getJSONObject(Action.JSON_NAME);
-            Action a;
-            
-            a = getActMan().createAction(jsonAction);
-            getEscMan().addAction(res, a, waitTime);
-        }
         
         if (alertDefId != null) {
             // The alert def needs to use this escalation
