@@ -1330,9 +1330,10 @@ public class PluginDumper {
                     os.print("\n" + indent + "'" + name +
                              "' " + typeName);
                     if (server != null) {
+                        String pTypes = 
+                            ArrayUtil.toString(server.getValidPlatformTypes());
                         os.print(" ");
-                        ArrayUtil.dumpArray(os,
-                                            server.getValidPlatformTypes());
+                        os.print(pTypes);
                         
                         if (metrics != null) {
                             int numOn = getNumDefaultOn(metrics);
