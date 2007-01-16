@@ -156,7 +156,7 @@ public class DashboardAdminController extends BaseDispatchAction {
                                                   HttpServletRequest request,
                                                   HttpServletResponse response)
         throws Exception {
-        return setPortal(request, "dash.settings.PageTitle.A.addResources",
+        return setPortal(request, "dash.settings.PageTitle.AS.addResources",
                   ".dashContent.admin.availSummary.addResources");
     }
 
@@ -174,7 +174,7 @@ public class DashboardAdminController extends BaseDispatchAction {
                                                   HttpServletRequest request,
                                                   HttpServletResponse response)
         throws Exception {
-        return setPortal(request, "dash.settings.PageTitle.A.addResources",
+        return setPortal(request, "dash.settings.PageTitle.MV.addResources",
                   ".dashContent.admin.metricViewer.addResources");
     }
 }
