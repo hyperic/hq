@@ -64,6 +64,7 @@
     </bag>
 
     <bag name="serviceTypes" table="EAM_SERVICE_TYPE">
+      <cache usage="read-write"/>
       <key column="SERVER_TYPE_ID" />
       <one-to-many class="ServiceType" />
     </bag>
