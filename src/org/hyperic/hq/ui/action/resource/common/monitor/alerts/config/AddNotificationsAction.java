@@ -62,9 +62,7 @@ public abstract class AddNotificationsAction
     extends BaseAction
     implements NotificationsAction
 {
-    private Log log = LogFactory.getLog( AddNotificationsAction.class.getName() );
-
-    // ---------------------------------------------------- Public Methods
+    private Log log = LogFactory.getLog(AddNotificationsAction.class);
 
     /**
      * Add roles to the alert definition specified in the given
@@ -74,7 +72,8 @@ public abstract class AddNotificationsAction
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
-    throws Exception {
+        throws Exception 
+    {
         HttpSession session = request.getSession();
 
         AddNotificationsForm addForm = (AddNotificationsForm)form;
@@ -90,7 +89,8 @@ public abstract class AddNotificationsAction
             params.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
         }
 
-        ActionForward forward = preProcess(request, mapping, addForm, params, session);
+        ActionForward forward = preProcess(request, mapping, addForm, params, 
+                                           session);
         if (forward != null) {
             return forward;
         }
@@ -133,24 +133,21 @@ public abstract class AddNotificationsAction
                                  alertDefId);
     }
 
-    //------------------------------------------------------------------------
-    //-- to be implemented in subclasses
-    //------------------------------------------------------------------------
     protected abstract ActionForward preProcess(HttpServletRequest request,
                                                 ActionMapping mapping,
                                                 AddNotificationsForm form,
                                                 Map params,
                                                 HttpSession session)
-    throws Exception;
-    protected abstract void postProcess(HttpServletRequest request, HttpSession session);
-    protected abstract Set getNotifications(AddNotificationsForm form, HttpSession session);
+        throws Exception;
+    
+    protected abstract void postProcess(HttpServletRequest request, 
+                                        HttpSession session);
+    protected abstract Set getNotifications(AddNotificationsForm form, 
+                                            HttpSession session);
 
-    //------------------------------------------------------------------------
-    //-- private helpers
-    //------------------------------------------------------------------------
     private Object[] getActionObjects(AlertDefinitionValue ad)
-            throws Exception {
-                
+        throws Exception 
+    {
         ActionValue[] actions = ad.getActions();
         for (int i=0; i<actions.length; i++) {
             if ( actions[i].classnameHasBeenSet() &&
@@ -175,5 +172,3 @@ public abstract class AddNotificationsAction
         return null;
     }
 }
-
-// EOF

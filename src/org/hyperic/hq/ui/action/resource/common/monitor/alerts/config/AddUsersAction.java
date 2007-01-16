@@ -29,7 +29,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -37,13 +36,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
-import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
-import org.hyperic.util.StringUtil;
 
 /**
  * An action that adds users to an alert definition in the BizApp.
@@ -58,7 +54,8 @@ public class AddUsersAction extends AddNotificationsAction {
                                        AddNotificationsForm form,
                                        Map params,
                                        HttpSession session)
-     throws Exception {
+        throws Exception 
+    {
         AddUsersForm addForm = (AddUsersForm)form;
         ActionForward forward = checkSubmit(request, mapping, form, params);
         if (forward != null) {
@@ -107,5 +104,3 @@ public class AddUsersAction extends AddNotificationsAction {
 
     public int getNotificationType() { return EmailActionConfig.TYPE_USERS; }
 }
-
-// EOF
