@@ -290,8 +290,7 @@ public class PortalAction extends ResourceController {
                                             Constants.APPDEF_RES_TYPE_ID);
             portal.addPortlet(new Portlet(".admin.alerts.List"), 1);
         } catch (ParameterNotFoundException e) {
-            if (aeid != null &&
-                aeid.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+            if (aeid != null && aeid.isGroup()) {
                 portal.addPortlet(new Portlet(".events.group.config.list"), 1);
             }
             else {

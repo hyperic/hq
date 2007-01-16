@@ -100,10 +100,10 @@ public class PortalAction extends ResourceController {
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         setTitle(aeid, portal, "alerts.alert.platform.AlertList.Title");
         portal.setDialog(false);
-        if (aeid.getType() != AppdefEntityConstants.APPDEF_TYPE_GROUP) {
-            portal.addPortlet(new Portlet(".events.alert.list"), 1);
-        } else {
+        if (aeid.isGroup()) {
             portal.addPortlet(new Portlet(".events.group.alert.list"), 1);
+        } else {
+            portal.addPortlet(new Portlet(".events.alert.list"), 1);
         }
         request.setAttribute(Constants.PORTAL_KEY, portal);
         
