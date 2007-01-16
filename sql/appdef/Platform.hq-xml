@@ -93,6 +93,7 @@
     </bag>
 
     <bag name="servers" table="EAM_SERVER">
+      <cache usage="read-write"/>
       <key column="PLATFORM_ID" />
       <one-to-many class="Server" />
     </bag>
