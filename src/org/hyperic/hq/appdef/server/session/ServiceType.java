@@ -34,133 +34,109 @@ import java.util.ArrayList;
 
 public class ServiceType extends AppdefResourceType
 {
-    private String plugin;
-    private boolean isInternal;
-    private ServerType serverType;
-    private Collection applicationTypes = new HashSet();
-    private Collection appServices = new HashSet();
-    private Collection services = new ArrayList();
-    private Collection serviceClusters = new ArrayList();
+    private String _plugin;
+    private boolean _isInternal;
+    private ServerType _serverType;
+    private Collection _applicationTypes = new HashSet();
+    private Collection _appServices = new HashSet();
+    private Collection _services = new ArrayList();
+    private Collection _serviceClusters = new ArrayList();
 
-    /**
-     * default constructor
-     */
-    public ServiceType()
-    {
+    public ServiceType() {
         super();
     }
 
-    // Property accessors
-    public String getPlugin()
-    {
-        return this.plugin;
+    public String getPlugin() {
+        return _plugin;
     }
 
-    public void setPlugin(String plugin)
-    {
-        this.plugin = plugin;
+    public void setPlugin(String plugin) {
+        _plugin = plugin;
     }
 
-    public boolean isIsInternal()
-    {
-        return this.isInternal;
+    public boolean isIsInternal() {
+        return _isInternal;
     }
 
     /**
      * legacy EJB getter
      * @deprecated use isIsInternal() instead
-     * @return
      */
-    public boolean getIsInternal()
-    {
-        return this.isInternal;
+    public boolean getIsInternal() {
+        return _isInternal;
     }
 
-    public void setIsInternal(boolean internal)
-    {
-        this.isInternal = internal;
+    public void setIsInternal(boolean internal) {
+        _isInternal = internal;
     }
 
-    public ServerType getServerType()
-    {
-        return this.serverType;
+    public ServerType getServerType() {
+        return _serverType;
     }
 
-    public void setServerType(ServerType serverType)
-    {
-        this.serverType = serverType;
+    public void setServerType(ServerType serverType) {
+        _serverType = serverType;
     }
 
-    public Collection getApplicationTypes()
-    {
-        return this.applicationTypes;
+    public Collection getApplicationTypes() {
+        return _applicationTypes;
     }
 
-    public void setApplicationTypes(Collection applications)
-    {
-        this.applicationTypes = applications;
+    public void setApplicationTypes(Collection applications) {
+        _applicationTypes = applications;
     }
 
-    public Collection getAppServices()
-    {
-        return this.appServices;
+    public Collection getAppServices() {
+        return _appServices;
     }
 
-    public void setAppServices(Collection appServices)
-    {
-        this.appServices = appServices;
+    public void setAppServices(Collection appServices) {
+        _appServices = appServices;
     }
 
-    public Collection getServices()
-    {
-        return this.services;
+    public Collection getServices() {
+        return _services;
     }
 
-    public void setServices(Collection services)
-    {
-        this.services = services;
+    public void setServices(Collection services) {
+        _services = services;
     }
 
-    public Collection getServiceClusters()
-    {
-        return this.serviceClusters;
+    public Collection getServiceClusters() {
+        return _serviceClusters;
     }
 
-    public void setServiceClusters(Collection serviceClusters)
-    {
-        this.serviceClusters = serviceClusters;
+    public void setServiceClusters(Collection serviceClusters) {
+        _serviceClusters = serviceClusters;
     }
 
     public int getAppdefType() {
         return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
     }
 
-    private ServiceTypeValue serviceTypeValue = new ServiceTypeValue();
+    private ServiceTypeValue _serviceTypeValue = new ServiceTypeValue();
     /**
      * legacy EJB DTO pattern
      * @deprecated use (this) ServiceType object instead
      * @return
      */
-    public ServiceTypeValue getServiceTypeValue()
-    {
-        serviceTypeValue.setName(getName());
-        serviceTypeValue.setSortName(getSortName());
-        serviceTypeValue.setDescription(getDescription());
-        serviceTypeValue.setPlugin(getPlugin());
-        serviceTypeValue.setIsInternal(getIsInternal());
-        serviceTypeValue.setId(getId());
-        serviceTypeValue.setMTime(getMTime());
-        serviceTypeValue.setCTime(getCTime());
-        return serviceTypeValue;
+    public ServiceTypeValue getServiceTypeValue() {
+        _serviceTypeValue.setName(getName());
+        _serviceTypeValue.setSortName(getSortName());
+        _serviceTypeValue.setDescription(getDescription());
+        _serviceTypeValue.setPlugin(getPlugin());
+        _serviceTypeValue.setIsInternal(getIsInternal());
+        _serviceTypeValue.setId(getId());
+        _serviceTypeValue.setMTime(getMTime());
+        _serviceTypeValue.setCTime(getCTime());
+        return _serviceTypeValue;
     }
 
     /**
      * legacy DTO pattern
-     * @depreacated use (this) ServiceType setters instead
-     * @param val
+     * @deprecated use (this) ServiceType setters instead
      */
-    public void setServiceTypeValue(ServiceTypeValue val)
-    {
+    public void setServiceTypeValue(ServiceTypeValue val) {
         setName( val.getName() );
         setSortName( val.getSortName() );
         setDescription( val.getDescription() );
@@ -170,8 +146,7 @@ public class ServiceType extends AppdefResourceType
         setCreationTime(val.getCTime());
     }
 
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         return (obj instanceof ServiceType) && super.equals(obj);
     }
 }

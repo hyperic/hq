@@ -31,7 +31,6 @@ import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.PlatformLightValue;
-import org.hyperic.hq.appdef.shared.ServerValue;
 
 import java.util.Collection;
 import java.util.Set;
@@ -39,109 +38,77 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.ArrayList;
 
-/**
- * Pojo for hibernate hbm mapping file
- */
 public class Platform extends PlatformBase
 {
-    private String commentText;
-    private PlatformType platformType;
-    private ConfigResponseDB configResponse;
-    private Agent agent;
-    private Collection ips = new ArrayList();
-    private Collection servers =  new ArrayList();
+    private String _commentText;
+    private PlatformType _platformType;
+    private ConfigResponseDB _configResponse;
+    private Agent _agent;
+    private Collection _ips = new ArrayList();
+    private Collection _servers =  new ArrayList();
 
-    /**
-     * default constructor
-     */
-    public Platform()
-    {
+    public Platform() {
         super();
     }
 
-    public String getCommentText()
-    {
-        return this.commentText;
+    public String getCommentText() {
+        return _commentText;
     }
 
-    void setCommentText(String comment)
-    {
-        this.commentText = comment;
+    void setCommentText(String comment) {
+        _commentText = comment;
     }
 
-    public PlatformType getPlatformType()
-    {
-        return this.platformType;
+    public PlatformType getPlatformType() {
+        return _platformType;
     }
 
-    public void setPlatformType(PlatformType platformType)
-    {
-        this.platformType = platformType;
+    public void setPlatformType(PlatformType platformType) {
+        _platformType = platformType;
     }
 
-    public ConfigResponseDB getConfigResponse()
-    {
-        return this.configResponse;
+    public ConfigResponseDB getConfigResponse() {
+        return _configResponse;
     }
 
-    public void setConfigResponse(ConfigResponseDB configResponse)
-    {
-        this.configResponse = configResponse;
+    public void setConfigResponse(ConfigResponseDB configResponse) {
+        _configResponse = configResponse;
     }
 
-    public Agent getAgent()
-    {
-        return this.agent;
+    public Agent getAgent() {
+        return _agent;
     }
 
-    public void setAgent(Agent agent)
-    {
-        this.agent = agent;
+    public void setAgent(Agent agent) {
+        _agent = agent;
     }
 
-    public Collection getIps()
-    {
-        return this.ips;
+    public Collection getIps() {
+        return _ips;
     }
 
-    public void setIps(Collection ips)
-    {
-        this.ips = ips;
+    public void setIps(Collection ips) {
+        _ips = ips;
     }
 
     public void addIp(Ip ip) {
-        ips.add(ip);
+        _ips.add(ip);
         ip.setPlatform(this);
     }
 
-    public Collection getServers()
-    {
-        return this.servers;
+    public Collection getServers() {
+        return _servers;
     }
 
-    public void setServers(Collection servers)
-    {
-        this.servers = servers;
-    }
-
-    public Server createServer(ServerValue sv)
-    {
-        throw new UnsupportedOperationException(
-            "use ServerDAO.createServer()");
-    }
-
-    public void updatePlatform(PlatformValue existing)
-    {
-        throw new UnsupportedOperationException(
-            "use PlatformDAO.updatePlatform()");
+    public void setServers(Collection servers) {
+        _servers = servers;
     }
 
     /**
      * Update an existing appdef platform with data from an AI platform.
      * @param aiplatform the AI platform object to use for data
      */
-    public void updateWithAI(AIPlatformValue aiplatform, String owner)
-    {
+    public void updateWithAI(AIPlatformValue aiplatform, String owner) {
         setFqdn(aiplatform.getFqdn());
         setCertdn(aiplatform.getCertdn());
         if (aiplatform.getName() != null) {
@@ -157,11 +124,9 @@ public class Platform extends PlatformBase
     /**
      * legacy EJB accessor method
      * @deprecated use getConfigResponse()
-     * @return
      */
-    public Integer getConfigResponseId()
-    {
-        return configResponse != null ?configResponse.getId() : null;
+    public Integer getConfigResponseId() {
+        return _configResponse != null ? _configResponse.getId() : null;
     }
 
     /**
@@ -169,9 +134,8 @@ public class Platform extends PlatformBase
      * (legacy code from entity bean)
      * @return true if this platform is the same as the one in the val obj
      */
-    public boolean matchesValueObject(PlatformValue obj)
-    {
-        boolean matches = true;
+    public boolean matchesValueObject(PlatformValue obj) {
+        boolean matches;
 
         matches = super.matchesValueObject(obj) &&
             (this.getName() != null ? this.getName().equals(obj.getName())
@@ -209,15 +173,13 @@ public class Platform extends PlatformBase
      * Get a snapshot of the ServerLocals associated with this platform
      * @deprecated use getServers()
      */
-    public Set getServerSnapshot()
-    {
-        return new LinkedHashSet(servers);
+    public Set getServerSnapshot() {
+        return new LinkedHashSet(_servers);
     }
 
     /**
      * legacy EJB DTO patter
      * @deprecated use (this) Platform object instead
-     * @return
      */
     public PlatformValue getPlatformValueObject()
     {
@@ -249,121 +211,115 @@ public class Platform extends PlatformBase
         return pv;
     }
 
-    private PlatformValue platformValue = new PlatformValue();
+    private PlatformValue _platformValue = new PlatformValue();
+
     /**
-     * legacy EJB DTO patter
+     * legacy EJB DTO pattern
      * @deprecated use (this) Platform object instead
-     * @return
      */
     public PlatformValue getPlatformValue()
     {
-        platformValue.setSortName(getSortName());
-        platformValue.setCommentText(getCommentText());
-        platformValue.setModifiedBy(getModifiedBy());
-        platformValue.setOwner(getOwner());
-        platformValue.setConfigResponseId(getConfigResponseId());
-        platformValue.setCertdn(getCertdn());
-        platformValue.setFqdn(getFqdn());
-        platformValue.setName(getName());
-        platformValue.setLocation(getLocation());
-        platformValue.setDescription(getDescription());
-        platformValue.setCpuCount(getCpuCount());
-        platformValue.setId(getId());
-        platformValue.setMTime(getMTime());
-        platformValue.setCTime(getCTime());
-        platformValue.removeAllIpValues();
+        _platformValue.setSortName(getSortName());
+        _platformValue.setCommentText(getCommentText());
+        _platformValue.setModifiedBy(getModifiedBy());
+        _platformValue.setOwner(getOwner());
+        _platformValue.setConfigResponseId(getConfigResponseId());
+        _platformValue.setCertdn(getCertdn());
+        _platformValue.setFqdn(getFqdn());
+        _platformValue.setName(getName());
+        _platformValue.setLocation(getLocation());
+        _platformValue.setDescription(getDescription());
+        _platformValue.setCpuCount(getCpuCount());
+        _platformValue.setId(getId());
+        _platformValue.setMTime(getMTime());
+        _platformValue.setCTime(getCTime());
+        _platformValue.removeAllIpValues();
         Iterator iIpValue = getIps().iterator();
         while (iIpValue.hasNext()){
-            platformValue.addIpValue( ((Ip)iIpValue.next()).getIpValue() );
+            _platformValue.addIpValue( ((Ip)iIpValue.next()).getIpValue() );
         }
-        platformValue.cleanIpValue();
-        platformValue.removeAllServerValues();
+        _platformValue.cleanIpValue();
+        _platformValue.removeAllServerValues();
         Iterator iServerValue = getServers().iterator();
         while (iServerValue.hasNext()){
-            platformValue.addServerValue(
+            _platformValue.addServerValue(
                 ((Server)iServerValue.next()).getServerLightValue());
         }
-        platformValue.cleanServerValue();
+        _platformValue.cleanServerValue();
         if ( getPlatformType() != null )
-            platformValue.setPlatformType(
+            _platformValue.setPlatformType(
                 getPlatformType().getPlatformTypeValue());
         else
-            platformValue.setPlatformType( null );
+            _platformValue.setPlatformType( null );
         if ( getAgent() != null ) {
-            platformValue.setAgent( getAgent().getAgentValue() );
+            _platformValue.setAgent( getAgent().getAgentValue() );
         }
         else
-            platformValue.setAgent( null );
-        return platformValue;
+            _platformValue.setAgent( null );
+        return _platformValue;
     }
 
 
-    private PlatformLightValue platformLightValue = new PlatformLightValue();
+    private PlatformLightValue _platformLightValue = new PlatformLightValue();
     /**
      * legacy EJB DTO patter
      * @deprecated use (this) Platform object instead
-     * @return
      */
     public PlatformLightValue getPlatformLightValue()
     {
-        platformLightValue.setSortName(getSortName());
-        platformLightValue.setCommentText(getCommentText());
-        platformLightValue.setModifiedBy(getModifiedBy());
-        platformLightValue.setOwner(getOwner());
-        platformLightValue.setConfigResponseId(getConfigResponseId());
-        platformLightValue.setCertdn(getCertdn());
-        platformLightValue.setFqdn(getFqdn());
-        platformLightValue.setName(getName());
-        platformLightValue.setLocation(getLocation());
-        platformLightValue.setDescription(getDescription());
-        platformLightValue.setCpuCount(getCpuCount());
-        platformLightValue.setId(getId());
-        platformLightValue.setMTime(getMTime());
-        platformLightValue.setCTime(getCTime());
-        platformLightValue.removeAllIpValues();
+        _platformLightValue.setSortName(getSortName());
+        _platformLightValue.setCommentText(getCommentText());
+        _platformLightValue.setModifiedBy(getModifiedBy());
+        _platformLightValue.setOwner(getOwner());
+        _platformLightValue.setConfigResponseId(getConfigResponseId());
+        _platformLightValue.setCertdn(getCertdn());
+        _platformLightValue.setFqdn(getFqdn());
+        _platformLightValue.setName(getName());
+        _platformLightValue.setLocation(getLocation());
+        _platformLightValue.setDescription(getDescription());
+        _platformLightValue.setCpuCount(getCpuCount());
+        _platformLightValue.setId(getId());
+        _platformLightValue.setMTime(getMTime());
+        _platformLightValue.setCTime(getCTime());
+        _platformLightValue.removeAllIpValues();
         Iterator iIpValue = getIps().iterator();
         while (iIpValue.hasNext()){
-            platformLightValue.addIpValue( ((Ip)iIpValue.next()).getIpValue() );
+            _platformLightValue.addIpValue(((Ip)iIpValue.next()).getIpValue());
         }
-        platformLightValue.cleanIpValue();
+        _platformLightValue.cleanIpValue();
         if ( getPlatformType() != null )
-            platformLightValue.setPlatformType(
+            _platformLightValue.setPlatformType(
                 getPlatformType().getPlatformTypeValue() );
         else
-            platformLightValue.setPlatformType( null );
-        return platformLightValue;
+            _platformLightValue.setPlatformType( null );
+        return _platformLightValue;
     }
 
     /**
      * convenience method for copying simple values from
      * legacy Platform Value Object.
-     * @param pv
      */
-    public void setPlatformValue(PlatformValue pv)
-    {
+    public void setPlatformValue(PlatformValue pv) {
         setDescription(pv.getDescription());
-        setCommentText( pv.getCommentText() );
-        setModifiedBy( pv.getModifiedBy() );
-        setOwner( pv.getOwner() );
-        setLocation( pv.getLocation() );
-        setCpuCount( pv.getCpuCount() );
-        setCertdn( pv.getCertdn() );
-        setFqdn( pv.getFqdn() );
-        setName( pv.getName() );
+        setCommentText(pv.getCommentText());
+        setModifiedBy(pv.getModifiedBy());
+        setOwner(pv.getOwner());
+        setLocation(pv.getLocation());
+        setCpuCount(pv.getCpuCount());
+        setCertdn(pv.getCertdn());
+        setFqdn(pv.getFqdn());
+        setName(pv.getName());
     }
 
     /**
      * Get a snapshot of the IPLocals associated with this platform
      * @deprecated use getIps()
      */
-    public Set getIpSnapshot()
-    {
+    public Set getIpSnapshot() {
         return new LinkedHashSet(getIps());
     }
 
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         return (obj instanceof Platform) && super.equals(obj);
     }
-
 }

@@ -38,34 +38,27 @@ import java.util.ArrayList;
 
 public class ServerType extends AppdefResourceType
 {
-    private String plugin;
-    private boolean virtual;
-    private Collection platformTypes = new HashSet();
-    private Collection servers = new ArrayList();
-    private Collection serviceTypes = new ArrayList();
+    private String _plugin;
+    private boolean _virtual;
+    private Collection _platformTypes = new HashSet();
+    private Collection _servers = new ArrayList();
+    private Collection _serviceTypes = new ArrayList();
 
-    /**
-     * default constructor
-     */
-    public ServerType()
-    {
+    public ServerType() {
         super();
     }
 
     // Property accessors
-    public String getPlugin()
-    {
-        return this.plugin;
+    public String getPlugin() {
+        return _plugin;
     }
 
-    public void setPlugin(String plugin)
-    {
-        this.plugin = plugin;
+    public void setPlugin(String plugin) {
+        _plugin = plugin;
     }
 
-    public boolean isVirtual()
-    {
-        return this.virtual;
+    public boolean isVirtual() {
+        return _virtual;
     }
 
     /**
@@ -73,56 +66,41 @@ public class ServerType extends AppdefResourceType
      * @deprecated use isVirtual() instead
      * @return
      */
-    public boolean getVirtual()
-    {
-        return this.virtual;
+    public boolean getVirtual() {
+        return _virtual;
     }
 
-    public void setVirtual(boolean virtual)
-    {
-        this.virtual = virtual;
+    public void setVirtual(boolean virtual) {
+        _virtual = virtual;
     }
 
-    public Collection getPlatformTypes()
-    {
-        return this.platformTypes;
+    public Collection getPlatformTypes() {
+        return _platformTypes;
     }
 
-    public void setPlatformTypes(Collection platformTypes)
-    {
-        this.platformTypes = platformTypes;
+    public void setPlatformTypes(Collection platformTypes) {
+        _platformTypes = platformTypes;
     }
 
-    public void addPlatformType(PlatformType ptype)
-    {
-        platformTypes.add(ptype);
+    public void addPlatformType(PlatformType ptype) {
+        _platformTypes.add(ptype);
         ptype.getServerTypesBag().add(this);
     }
 
-    public Collection getServers()
-    {
-        return this.servers;
+    public Collection getServers() {
+        return _servers;
     }
 
-    public void setServers(Collection servers)
-    {
-        this.servers = servers;
+    public void setServers(Collection servers) {
+        _servers = servers;
     }
 
-    public Collection getServiceTypes()
-    {
-        return this.serviceTypes;
+    public Collection getServiceTypes() {
+        return _serviceTypes;
     }
 
-    public void setServiceTypes(Collection serviceTypes)
-    {
-        this.serviceTypes = serviceTypes;
-    }
-
-    public ServiceType createServiceType(ServiceTypeValue stv)
-    {
-        throw new UnsupportedOperationException(
-            "use ServiceTypeDAO.createService()");
+    public void setServiceTypes(Collection serviceTypes) {
+        _serviceTypes = serviceTypes;
     }
 
     public int getAppdefType() {
@@ -133,8 +111,7 @@ public class ServerType extends AppdefResourceType
      * legacy EJB DTO (value object) pattern
      * @deprecated use (this) ServerType object instead
      */
-    public ServerTypeValue getServerTypeValueObject()
-    {
+    public ServerTypeValue getServerTypeValueObject() {
         ServerTypeValue vo = new ServerTypeValue();
         vo.setName(getName());
         vo.setSortName(getSortName());
@@ -147,44 +124,42 @@ public class ServerType extends AppdefResourceType
         return vo;
     }
 
-    private ServerTypeValue serverTypeValue = new ServerTypeValue();
+    private ServerTypeValue _serverTypeValue = new ServerTypeValue();
     /**
      * legacy EJB DTO (value object) pattern
      * @deprecated use (this) ServerType object instead
      */
     public ServerTypeValue getServerTypeValue()
     {
-        serverTypeValue.setName(getName());
-        serverTypeValue.setVirtual(isVirtual());
-        serverTypeValue.setSortName(getSortName());
-        serverTypeValue.setDescription(getDescription());
-        serverTypeValue.setPlugin(getPlugin());
-        serverTypeValue.setId(getId());
-        serverTypeValue.setMTime(getMTime());
-        serverTypeValue.setCTime(getCTime());
-        serverTypeValue.removeAllServiceTypeValues();
+        _serverTypeValue.setName(getName());
+        _serverTypeValue.setVirtual(isVirtual());
+        _serverTypeValue.setSortName(getSortName());
+        _serverTypeValue.setDescription(getDescription());
+        _serverTypeValue.setPlugin(getPlugin());
+        _serverTypeValue.setId(getId());
+        _serverTypeValue.setMTime(getMTime());
+        _serverTypeValue.setCTime(getCTime());
+        _serverTypeValue.removeAllServiceTypeValues();
         Collection types = getServiceTypes();
         if (types != null) {
             Iterator isv = types.iterator();
             while (isv.hasNext()){
-                serverTypeValue.addServiceTypeValue(
+                _serverTypeValue.addServiceTypeValue(
                     ((ServiceType)isv.next()).getServiceTypeValue());
             }
         }
-        serverTypeValue.cleanServiceTypeValue();
-        return serverTypeValue;
+        _serverTypeValue.cleanServiceTypeValue();
+        return _serverTypeValue;
     }
 
-    public Set getServiceTypeSnapshot()
-    {
+    public Set getServiceTypeSnapshot() {
         if (getServiceTypes() == null) {
             return new LinkedHashSet();
         }
         return new LinkedHashSet(getServiceTypes());
     }
 
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         return (obj instanceof ServerType) && super.equals(obj);
     }
 }

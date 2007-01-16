@@ -32,8 +32,6 @@ import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.util.Collection;
 import java.util.Set;
@@ -41,123 +39,89 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.ArrayList;
 
-/**
- * Pojo for hibernate hbm mapping file
- */
 public class Server extends ServerBase
 {
-    private static Log log = LogFactory.getLog(Server.class);
+    private Platform _platform;
+    private boolean _runtimeAutodiscovery;
+    private boolean _wasAutodiscovered;
+    private boolean _autodiscoveryZombie;
+    private ServerType _serverType;
+    private ConfigResponseDB _configResponse;
+    private Collection _services;
 
-    private Platform platform;
-    private boolean runtimeAutodiscovery;
-    private boolean wasAutodiscovered;
-    private boolean autodiscoveryZombie;
-    private ServerType serverType;
-    private ConfigResponseDB configResponse;
-    private Collection services;
-
-    /**
-     * default constructor
-     */
-    public Server()
-    {
+    public Server() {
         super();
     }
 
-    public Server(Integer id)
-    {
+    public Server(Integer id) {
         super();
         setId(id);
     }
 
-    public Service createService(ServiceValue sv)
-    {
-        throw new UnsupportedOperationException(
-            "use ServiceDAO.createService()");
+    public Platform getPlatform() {
+        return _platform;
     }
 
-    // Property accessors
-    public Platform getPlatform()
-    {
-        return this.platform;
+    public void setPlatform(Platform platform) {
+        _platform = platform;
     }
 
-    public void setPlatform(Platform platform)
-    {
-        this.platform = platform;
+    public boolean isRuntimeAutodiscovery() {
+        return _runtimeAutodiscovery;
     }
 
-    public boolean isRuntimeAutodiscovery()
-    {
-        return this.runtimeAutodiscovery;
+    public void setRuntimeAutodiscovery(boolean runtimeAutodiscovery) {
+        _runtimeAutodiscovery = runtimeAutodiscovery;
     }
 
-    public void setRuntimeAutodiscovery(boolean runtimeAutodiscovery)
-    {
-        this.runtimeAutodiscovery = runtimeAutodiscovery;
+    public boolean isWasAutodiscovered() {
+        return _wasAutodiscovered;
     }
 
-    public boolean isWasAutodiscovered()
-    {
-        return this.wasAutodiscovered;
+    public void setWasAutodiscovered(boolean wasAutodiscovered) {
+        _wasAutodiscovered = wasAutodiscovered;
     }
 
-    public void setWasAutodiscovered(boolean wasAutodiscovered)
-    {
-        this.wasAutodiscovered = wasAutodiscovered;
+    public boolean isAutodiscoveryZombie() {
+        return _autodiscoveryZombie;
     }
 
-    public boolean isAutodiscoveryZombie()
-    {
-        return this.autodiscoveryZombie;
+    public void setAutodiscoveryZombie(boolean autodiscoveryZombie) {
+        _autodiscoveryZombie = autodiscoveryZombie;
     }
 
-    public void setAutodiscoveryZombie(boolean autodiscoveryZombie)
-    {
-        this.autodiscoveryZombie = autodiscoveryZombie;
+    public ServerType getServerType() {
+        return _serverType;
     }
 
-    public ServerType getServerType()
-    {
-        return this.serverType;
+    public void setServerType(ServerType serverType) {
+        _serverType = serverType;
     }
 
-    public void setServerType(ServerType serverType)
-    {
-        this.serverType = serverType;
+    public ConfigResponseDB getConfigResponse() {
+        return _configResponse;
     }
 
-    public ConfigResponseDB getConfigResponse()
-    {
-        return this.configResponse;
+    public void setConfigResponse(ConfigResponseDB configResponse) {
+        _configResponse = configResponse;
     }
 
-    public void setConfigResponse(ConfigResponseDB configResponse)
-    {
-        this.configResponse = configResponse;
+    public Collection getServices() {
+        return _services;
     }
 
-    public Collection getServices()
-    {
-        return this.services;
-    }
-
-    public void setServices(Collection services)
-    {
-        this.services = services;
+    public void setServices(Collection services) {
+        _services = services;
     }
 
     /**
      * @deprecated use getConfigResponse().getId()
-     * @return
      */
-    public Integer getConfigResponseId()
-    {
-        return configResponse != null ? configResponse.getId() : null;
+    public Integer getConfigResponseId() {
+        return _configResponse != null ? _configResponse.getId() : null;
     }
 
-
-    private ServerLightValue serverLightValue = new ServerLightValue();
+    private ServerLightValue _serverLightValue = new ServerLightValue();
     /**
      * for legacy EJB DTO pattern
      * @deprecated use (this) Server object instead
@@ -165,31 +129,31 @@ public class Server extends ServerBase
      */
     public ServerLightValue getServerLightValue()
     {
-        serverLightValue.setSortName(getSortName());
-        serverLightValue.setRuntimeAutodiscovery(getRuntimeAutodiscovery());
-        serverLightValue.setWasAutodiscovered(getWasAutodiscovered());
-        serverLightValue.setAutodiscoveryZombie(getAutodiscoveryZombie());
-        serverLightValue.setConfigResponseId(getConfigResponseId());
-        serverLightValue.setModifiedBy(getModifiedBy());
-        serverLightValue.setOwner(getOwner());
-        serverLightValue.setLocation(getLocation());
-        serverLightValue.setName(getName());
-        serverLightValue.setAutoinventoryIdentifier(getAutoinventoryIdentifier());
-        serverLightValue.setInstallPath(getInstallPath());
-        serverLightValue.setDescription(getDescription());
-        serverLightValue.setServicesAutomanaged(getServicesAutomanaged());
-        serverLightValue.setId(getId());
-        serverLightValue.setMTime(getMTime());
-        serverLightValue.setCTime(getCTime());
-        if ( getServerType() != null ) {
-            serverLightValue.setServerType(getServerType().getServerTypeValue());
+        _serverLightValue.setSortName(getSortName());
+        _serverLightValue.setRuntimeAutodiscovery(getRuntimeAutodiscovery());
+        _serverLightValue.setWasAutodiscovered(getWasAutodiscovered());
+        _serverLightValue.setAutodiscoveryZombie(getAutodiscoveryZombie());
+        _serverLightValue.setConfigResponseId(getConfigResponseId());
+        _serverLightValue.setModifiedBy(getModifiedBy());
+        _serverLightValue.setOwner(getOwner());
+        _serverLightValue.setLocation(getLocation());
+        _serverLightValue.setName(getName());
+        _serverLightValue.setAutoinventoryIdentifier(getAutoinventoryIdentifier());
+        _serverLightValue.setInstallPath(getInstallPath());
+        _serverLightValue.setDescription(getDescription());
+        _serverLightValue.setServicesAutomanaged(getServicesAutomanaged());
+        _serverLightValue.setId(getId());
+        _serverLightValue.setMTime(getMTime());
+        _serverLightValue.setCTime(getCTime());
+        if (getServerType() != null) {
+            _serverLightValue.setServerType(getServerType().getServerTypeValue());
         }
         else
-            serverLightValue.setServerType( null );
-        return serverLightValue;
+            _serverLightValue.setServerType( null );
+        return _serverLightValue;
     }
 
-    private ServerValue serverValue = new ServerValue();
+    private ServerValue _serverValue = new ServerValue();
     /**
      * for legacy EJB DTO pattern
      * @deprecated use (this) Server object instead
@@ -197,42 +161,42 @@ public class Server extends ServerBase
      */
     public ServerValue getServerValue()
     {
-        serverValue.setSortName(getSortName());
-        serverValue.setRuntimeAutodiscovery(getRuntimeAutodiscovery());
-        serverValue.setWasAutodiscovered(getWasAutodiscovered());
-        serverValue.setAutodiscoveryZombie(getAutodiscoveryZombie());
-        serverValue.setConfigResponseId(getConfigResponseId());
-        serverValue.setModifiedBy(getModifiedBy());
-        serverValue.setOwner(getOwner());
-        serverValue.setLocation(getLocation());
-        serverValue.setName(getName());
-        serverValue.setAutoinventoryIdentifier(getAutoinventoryIdentifier());
-        serverValue.setInstallPath(getInstallPath());
-        serverValue.setDescription(getDescription());
-        serverValue.setServicesAutomanaged(getServicesAutomanaged());
-        serverValue.setId(getId());
-        serverValue.setMTime(getMTime());
-        serverValue.setCTime(getCTime());
-        serverValue.removeAllServiceValues();
+        _serverValue.setSortName(getSortName());
+        _serverValue.setRuntimeAutodiscovery(getRuntimeAutodiscovery());
+        _serverValue.setWasAutodiscovered(getWasAutodiscovered());
+        _serverValue.setAutodiscoveryZombie(getAutodiscoveryZombie());
+        _serverValue.setConfigResponseId(getConfigResponseId());
+        _serverValue.setModifiedBy(getModifiedBy());
+        _serverValue.setOwner(getOwner());
+        _serverValue.setLocation(getLocation());
+        _serverValue.setName(getName());
+        _serverValue.setAutoinventoryIdentifier(getAutoinventoryIdentifier());
+        _serverValue.setInstallPath(getInstallPath());
+        _serverValue.setDescription(getDescription());
+        _serverValue.setServicesAutomanaged(getServicesAutomanaged());
+        _serverValue.setId(getId());
+        _serverValue.setMTime(getMTime());
+        _serverValue.setCTime(getCTime());
+        _serverValue.removeAllServiceValues();
         Collection services = getServices();
         if (services != null) {
             Iterator isv = services.iterator();
             while (isv.hasNext()){
-                serverValue.addServiceValue(((Service)isv.next()).getServiceLightValue());
+                _serverValue.addServiceValue(((Service)isv.next()).getServiceLightValue());
             }
         }
-        serverValue.cleanServiceValue();
+        _serverValue.cleanServiceValue();
         if ( getServerType() != null ) {
-            serverValue.setServerType(getServerType().getServerTypeValue());
+            _serverValue.setServerType(getServerType().getServerTypeValue());
         }
         else
-            serverValue.setServerType( null );
+            _serverValue.setServerType( null );
         if ( getPlatform() != null ) {
-            serverValue.setPlatform(getPlatform().getPlatformLightValue());
+            _serverValue.setPlatform(getPlatform().getPlatformLightValue());
         }
         else
-            serverValue.setPlatform( null );
-        return serverValue;
+            _serverValue.setPlatform( null );
+        return _serverValue;
     }
 
     /**
@@ -320,7 +284,6 @@ public class Server extends ServerBase
         return matches;
     }
 
-
     /**
      * Validate a new service value object to be hosted by this server
      * @param sv
@@ -350,24 +313,16 @@ public class Server extends ServerBase
      * @param stv - the type to check
      * @return boolean - true if its supported, false otherwise
      */
-    private boolean isSupportedServiceType(ServiceTypeValue stv)
-    {
-        boolean REQUIRED = false;
+    private boolean isSupportedServiceType(ServiceTypeValue stv) {
+        boolean REQUIRED;
         // Look up the ServiceTypeLocal
         // ServiceTypeLocal serviceType =
         //    ServiceTypeUtil.getLocalHome().findByPrimaryKey(
         //        stv.getPrimaryKey());
         // now check to see if it is included in the set of
         // supported services
-        if(log.isDebugEnabled()) {
-            log.debug("Checking to see if Server: " + getName()
-                      + " supports service type: " + stv);
-        }
         Collection suppServiceTypes = getSupportedServiceTypes();
         REQUIRED = suppServiceTypes.contains(stv.getName());
-        if(log.isDebugEnabled()) {
-            log.debug("isSupportedServiceType returning: " + REQUIRED);
-        }
         return REQUIRED;
     }
 
@@ -375,8 +330,7 @@ public class Server extends ServerBase
      * legacy EJB method
      * @param valueHolder
      */
-    public void updateServer(ServerValue valueHolder)
-    {
+    public void updateServer(ServerValue valueHolder) {
         setDescription( valueHolder.getDescription() );
         setRuntimeAutodiscovery( valueHolder.getRuntimeAutodiscovery() );
         setWasAutodiscovered( valueHolder.getWasAutodiscovered() );
@@ -392,48 +346,40 @@ public class Server extends ServerBase
 
     /**
      * @deprecated use isWasAutodiscovered()
-     * @return
      */
-    public boolean getWasAutodiscovered()
-    {
+    public boolean getWasAutodiscovered() {
         return isWasAutodiscovered();
     }
 
     /**
      * @deprecated use isRuntimeAutodiscovery()
-     * @return
      */
-    public boolean getRuntimeAutodiscovery()
-    {
+    public boolean getRuntimeAutodiscovery() {
         return isRuntimeAutodiscovery();
     }
 
     /**
      * @deprecated use isAutodiscoveryZombie()
-     * @return
      */
-    public boolean getAutodiscoveryZombie()
-    {
+    public boolean getAutodiscoveryZombie() {
         return isAutodiscoveryZombie();
     }
 
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         if (!(obj instanceof Server) || !super.equals(obj)) {
             return false;
         }
         Server o = (Server)obj;
         return
-            ((platform == o.getPlatform()) ||
-             (platform!=null && o.getPlatform()!=null &&
-              platform.equals(o.getPlatform())));
+            ((_platform == o.getPlatform()) ||
+             (_platform!=null && o.getPlatform()!=null &&
+              _platform.equals(o.getPlatform())));
     }
 
-    public int hashCode()
-    {
+    public int hashCode() {
         int result = super.hashCode();
 
-        result = 37*result + (platform != null ? platform.hashCode() : 0);
+        result = 37*result + (_platform != null ? _platform.hashCode() : 0);
 
         return result;
     }

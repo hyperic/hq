@@ -33,99 +33,81 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.dao.ServiceTypeDAO;
 import org.hyperic.dao.DAOFactory;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 
 import java.util.Collection;
 
 public class Service extends AppdefResource
 {
-    private static final Log log = LogFactory.getLog(Service.class);
-
-    private boolean autodiscoveryZombie;
-    private boolean serviceRt;
-    private boolean endUserRt;
-    private Service parentService;
-    private Server server;
-    private ServiceType serviceType;
-    private ServiceCluster serviceCluster;
-    private ConfigResponseDB configResponse;
-    private Collection appServices;
+    private boolean _autodiscoveryZombie;
+    private boolean _serviceRt;
+    private boolean _endUserRt;
+    private Service _parentService;
+    private Server _server;
+    private ServiceType _serviceType;
+    private ServiceCluster _serviceCluster;
+    private ConfigResponseDB _configResponse;
+    private Collection _appServices;
 
     public Service() {
     }
 
-    public AppdefEntityID getEntityId()
-    {
+    public AppdefEntityID getEntityId() {
         return new AppdefEntityID(
             AppdefEntityConstants.APPDEF_TYPE_SERVICE,
             getId().intValue());
     }
 
-    public boolean isAutodiscoveryZombie()
-    {
-        return this.autodiscoveryZombie;
+    public boolean isAutodiscoveryZombie() {
+        return _autodiscoveryZombie;
     }
 
     /**
      * legacy EJB getter
      * @deprecated use isAutodiscoveryZombie() instead
-     * @return
      */
-    public boolean getAutodiscoveryZombie()
-    {
+    public boolean getAutodiscoveryZombie() {
         return isAutodiscoveryZombie();
     }
 
-    public void setAutodiscoveryZombie(boolean autodiscoveryZombie)
-    {
-        this.autodiscoveryZombie = autodiscoveryZombie;
+    public void setAutodiscoveryZombie(boolean autodiscoveryZombie) {
+        _autodiscoveryZombie = autodiscoveryZombie;
     }
 
-    public boolean isServiceRt()
-    {
-        return this.serviceRt;
+    public boolean isServiceRt() {
+        return _serviceRt;
     }
 
     /**
      * legacy EJB getter
      * @deprecated use isServiceRt() instead
-     * @return
      */
-    public boolean getServiceRt()
-    {
+    public boolean getServiceRt() {
         return isServiceRt();
     }
 
-    public void setServiceRt(boolean serviceRt)
-    {
-        this.serviceRt = serviceRt;
+    public void setServiceRt(boolean serviceRt) {
+        _serviceRt = serviceRt;
     }
 
-    public boolean isEndUserRt()
-    {
-        return this.endUserRt;
+    public boolean isEndUserRt() {
+        return _endUserRt;
     }
 
     /**
      * legacy EJB getter
      * @deprecated use isEndUserRt() instead
-     * @return
      */
-    public boolean getEndUserRt()
-    {
+    public boolean getEndUserRt() {
         return isEndUserRt();
     }
 
-    public void setEndUserRt(boolean endUserRt)
-    {
-        this.endUserRt = endUserRt;
+    public void setEndUserRt(boolean endUserRt) {
+        _endUserRt = endUserRt;
     }
 
-    public Service getParentService()
-    {
-        return this.parentService;
+    public Service getParentService() {
+        return _parentService;
     }
 
     /**
@@ -133,23 +115,19 @@ public class Service extends AppdefResource
      * @deprecated use getParentService().getId() instead
      * @return
      */
-    public Integer getParentId()
-    {
-        return parentService != null ? parentService.getId() : null;
+    public Integer getParentId() {
+        return _parentService != null ? _parentService.getId() : null;
     }
 
-    public void setParentService(Service parentService)
-    {
-        this.parentService = parentService;
+    public void setParentService(Service parentService) {
+        _parentService = parentService;
     }
 
     /**
      * legacy EJB getter for configresponse id
      * @deprecated use setParentService() instead
-     * @return
      */
-    public void setParentId(Integer parentId)
-    {
+    public void setParentId(Integer parentId) {
         if (parentId != null && parentId.intValue() != 0) {
             Service s = new Service();
             s.setId(parentId);
@@ -159,88 +137,75 @@ public class Service extends AppdefResource
         }
     }
 
-    public Server getServer()
-    {
-        return this.server;
+    public Server getServer() {
+        return _server;
     }
 
-    public void setServer(Server server)
-    {
-        this.server = server;
+    public void setServer(Server server) {
+        _server = server;
     }
 
-    public ServiceType getServiceType()
-    {
-        return this.serviceType;
+    public ServiceType getServiceType() {
+        return _serviceType;
     }
 
-    public void setServiceType(ServiceType serviceType)
-    {
-        this.serviceType = serviceType;
+    public void setServiceType(ServiceType serviceType) {
+        _serviceType = serviceType;
     }
 
-    public ServiceCluster getServiceCluster()
-    {
-        return this.serviceCluster;
+    public ServiceCluster getServiceCluster() {
+        return _serviceCluster;
     }
 
-    public void setServiceCluster(ServiceCluster serviceCluster)
-    {
-        this.serviceCluster = serviceCluster;
+    public void setServiceCluster(ServiceCluster serviceCluster) {
+        _serviceCluster = serviceCluster;
     }
 
-    public ConfigResponseDB getConfigResponse()
-    {
-        return this.configResponse;
+    public ConfigResponseDB getConfigResponse() {
+        return _configResponse;
     }
 
     /**
      * legacy EJB getter for configresponse id
      * @deprecated use getConfigResponse().getId() instead
-     * @return
      */
-    public Integer getConfigResponseId()
-    {
-        return configResponse != null ? configResponse.getId() : null;
+    public Integer getConfigResponseId() {
+        return _configResponse != null ? _configResponse.getId() : null;
     }
 
-    public void setConfigResponse(ConfigResponseDB configResponse)
-    {
-        this.configResponse = configResponse;
+    public void setConfigResponse(ConfigResponseDB configResponse) {
+        _configResponse = configResponse;
     }
 
-    public Collection getAppServices()
-    {
-        return this.appServices;
+    public Collection getAppServices() {
+        return _appServices;
     }
 
-    public void setAppServices(Collection appServices)
-    {
-        this.appServices = appServices;
+    public void setAppServices(Collection appServices) {
+        _appServices = appServices;
     }
 
-    private ServiceLightValue serviceLightValue = new ServiceLightValue();
+    private ServiceLightValue _serviceLightValue = new ServiceLightValue();
     /**
      * legacy EJB DTO pattern
      * @deprecated use (this) Service object instead
-     * @return
      */
     public ServiceLightValue getServiceLightValue()
     {
-        serviceLightValue.setSortName(getSortName());
-        serviceLightValue.setAutodiscoveryZombie(getAutodiscoveryZombie());
-        serviceLightValue.setServiceRt(getServiceRt());
-        serviceLightValue.setEndUserRt(getEndUserRt());
-        serviceLightValue.setModifiedBy(getModifiedBy());
-        serviceLightValue.setOwner(getOwner());
-        serviceLightValue.setLocation(getLocation());
-        serviceLightValue.setConfigResponseId(getConfigResponseId());
-        serviceLightValue.setParentId(getParentId());
-        serviceLightValue.setName(getName());
-        serviceLightValue.setDescription(getDescription());
-        serviceLightValue.setId(getId());
-        serviceLightValue.setMTime(getMTime());
-        serviceLightValue.setCTime(getCTime());
+        _serviceLightValue.setSortName(getSortName());
+        _serviceLightValue.setAutodiscoveryZombie(getAutodiscoveryZombie());
+        _serviceLightValue.setServiceRt(getServiceRt());
+        _serviceLightValue.setEndUserRt(getEndUserRt());
+        _serviceLightValue.setModifiedBy(getModifiedBy());
+        _serviceLightValue.setOwner(getOwner());
+        _serviceLightValue.setLocation(getLocation());
+        _serviceLightValue.setConfigResponseId(getConfigResponseId());
+        _serviceLightValue.setParentId(getParentId());
+        _serviceLightValue.setName(getName());
+        _serviceLightValue.setDescription(getDescription());
+        _serviceLightValue.setId(getId());
+        _serviceLightValue.setMTime(getMTime());
+        _serviceLightValue.setCTime(getCTime());
         if ( getServiceType() != null ) {
             // temporarily rely on EJB until
             // it is hibernized
@@ -249,55 +214,54 @@ public class Service extends AppdefResource
                     DAOFactory.getDAOFactory().getServiceTypeDAO();
                 ServiceType st =
                     shome.findById(getServiceType().getId());
-                serviceLightValue.setServiceType(
+                _serviceLightValue.setServiceType(
                     st.getServiceTypeValue());
             } catch (ObjectNotFoundException e) {
             }
         }
         else
-            serviceLightValue.setServiceType(null);
-        return serviceLightValue;
+            _serviceLightValue.setServiceType(null);
+        return _serviceLightValue;
     }
 
-    private ServiceValue serviceValue = new ServiceValue();
+    private ServiceValue _serviceValue = new ServiceValue();
     /**
      * legacy EJB DTO pattern
      * @deprecated use (this) Service object instead
-     * @return
      */
     public ServiceValue getServiceValue()
     {
-        serviceValue.setSortName(getSortName());
-        serviceValue.setAutodiscoveryZombie(getAutodiscoveryZombie());
-        serviceValue.setServiceRt(getServiceRt());
-        serviceValue.setEndUserRt(getEndUserRt());
-        serviceValue.setModifiedBy(getModifiedBy());
-        serviceValue.setOwner(getOwner());
-        serviceValue.setLocation(getLocation());
-        serviceValue.setConfigResponseId(getConfigResponseId());
-        serviceValue.setParentId(getParentId());
-        serviceValue.setName(getName());
-        serviceValue.setDescription(getDescription());
-        serviceValue.setId(getId());
-        serviceValue.setMTime(getMTime());
-        serviceValue.setCTime(getCTime());
+        _serviceValue.setSortName(getSortName());
+        _serviceValue.setAutodiscoveryZombie(getAutodiscoveryZombie());
+        _serviceValue.setServiceRt(getServiceRt());
+        _serviceValue.setEndUserRt(getEndUserRt());
+        _serviceValue.setModifiedBy(getModifiedBy());
+        _serviceValue.setOwner(getOwner());
+        _serviceValue.setLocation(getLocation());
+        _serviceValue.setConfigResponseId(getConfigResponseId());
+        _serviceValue.setParentId(getParentId());
+        _serviceValue.setName(getName());
+        _serviceValue.setDescription(getDescription());
+        _serviceValue.setId(getId());
+        _serviceValue.setMTime(getMTime());
+        _serviceValue.setCTime(getCTime());
         if (getServer() != null) {
-            serviceValue.setServer(getServer().getServerLightValue());
+            _serviceValue.setServer(getServer().getServerLightValue());
         }
         else
-            serviceValue.setServer( null );
+            _serviceValue.setServer( null );
         if ( getServiceCluster() != null ) {
-            serviceValue.setServiceCluster(
+            _serviceValue.setServiceCluster(
                 getServiceCluster().getServiceClusterValue());
         }
         else
-            serviceValue.setServiceCluster( null );
+            _serviceValue.setServiceCluster( null );
         if ( getServiceType() != null ) {
-            serviceValue.setServiceType(getServiceType().getServiceTypeValue());
+            _serviceValue.setServiceType(getServiceType().getServiceTypeValue());
         }
         else
-            serviceValue.setServiceType( null );
-        return serviceValue;
+            _serviceValue.setServiceType( null );
+        return _serviceValue;
     }
 
     /**
@@ -308,7 +272,7 @@ public class Service extends AppdefResource
      */
     public boolean matchesValueObject(ServiceValue obj)
     {
-        boolean matches = true;
+        boolean matches;
         matches = super.matchesValueObject(obj) &&
             (getName() != null ? getName().equals(obj.getName())
                 : (obj.getName() == null)) &&
@@ -332,8 +296,7 @@ public class Service extends AppdefResource
      * Set the value object. This method does *NOT* update any of the CMR's
      * included in the value object. This is for speed/locking reasons
      */
-    public void updateService(ServiceValue valueHolder)
-    {
+    public void updateService(ServiceValue valueHolder) {
         setDescription( valueHolder.getDescription() );
         setAutodiscoveryZombie( valueHolder.getAutodiscoveryZombie() );
         setServiceRt( valueHolder.getServiceRt() );
@@ -347,23 +310,21 @@ public class Service extends AppdefResource
         setCreationTime( valueHolder.getCTime() );
     }
 
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         if (!(obj instanceof Service) || !super.equals(obj)) {
             return false;
         }
         Service o = (Service)obj;
         return
-            ((server == o.getServer()) ||
-             (server!=null && o.getServer()!=null &&
-              server.equals(o.getServer())));
+            ((_server == o.getServer()) ||
+             (_server!=null && o.getServer()!=null &&
+              _server.equals(o.getServer())));
     }
 
-    public int hashCode()
-    {
+    public int hashCode() {
         int result = super.hashCode();
 
-        result = 37*result + (server != null ? server.hashCode() : 0);
+        result = 37*result + (_server != null ? _server.hashCode() : 0);
 
         return result;
     }
