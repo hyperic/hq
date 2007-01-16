@@ -8,6 +8,7 @@
   package="org.hyperic.hq.appdef">
 
   <class name="Ip" table="EAM_IP">
+    <cache usage="read-write" />
     <id name="id" type="integer">
       <column name="ID" not-null="true" />
       <generator class="sequence">
