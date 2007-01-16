@@ -38,23 +38,29 @@ public class SyslogActionConfig implements ActionConfigInterface {
     public final static String CFG_PROD = "product";
     public final static String CFG_VER  = "version";
     
-    private static String implementor =
+    private static String _implementor =
         "org.hyperic.hq.bizapp.server.action.log.SyslogAction";
     
-    private String meta;
-    private String product;
-    private String version;
+    private String _meta;
+    private String _product;
+    private String _version;
     
     public SyslogActionConfig(){
     }
+    
+    public SyslogActionConfig(String meta, String product, String version) {
+        _meta    = meta;
+        _product = product;
+        _version = version;
+    }
 
-    public void init(ConfigResponse config){
-        this.setMeta(config.getValue(CFG_META));
-        this.setProduct(config.getValue(CFG_PROD));
-        this.setVersion(config.getValue(CFG_VER));
+    public void init(ConfigResponse config) {
+        setMeta(config.getValue(CFG_META));
+        setProduct(config.getValue(CFG_PROD));
+        setVersion(config.getValue(CFG_VER));
     }
     
-    public ConfigSchema getConfigSchema(){
+    public ConfigSchema getConfigSchema() {
         StringConfigOption action;
         ConfigSchema res = new ConfigSchema();
 
@@ -73,74 +79,45 @@ public class SyslogActionConfig implements ActionConfigInterface {
         return res;
     }
 
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.events.ext.ActionInterface#getConfigResponse()
-     */
     public ConfigResponse getConfigResponse()
-        throws InvalidOptionException, InvalidOptionValueException {
+        throws InvalidOptionException, InvalidOptionValueException 
+    {
         ConfigResponse response = new ConfigResponse();
-        response.setValue(CFG_META, this.getMeta());
-        response.setValue(CFG_PROD, this.getProduct());
-        response.setValue(CFG_VER, this.getVersion());
+        response.setValue(CFG_META, getMeta());
+        response.setValue(CFG_PROD, getProduct());
+        response.setValue(CFG_VER, getVersion());
         return response;
     }
 
-    /**
-     * Set the name of the action class
-     * @param impl the name of the implementing class
-     */
     public void setImplementor(String impl) {
-        implementor = impl;
+        _implementor = impl;
     }
 
-    /**
-     * Get the name of the action class
-     * @return the name of the implementing class
-     */
     public String getImplementor() {
-        return implementor;
+        return _implementor;
     }
     
-    /**
-     * @return
-     */
     public String getVersion() {
-        return version;
+        return _version;
     }
 
-    /**
-     * @param string
-     */
     public void setVersion(String string) {
-        version = string;
+        _version = string;
     }
 
-    /**
-     * @return
-     */
     public String getProduct() {
-        return product;
+        return _product;
     }
 
-    /**
-     * @param string
-     */
     public void setProduct(String string) {
-        product = string;
+        _product = string;
     }
 
-    /**
-     * @return
-     */
     public String getMeta() {
-        return meta;
+        return _meta;
     }
 
-    /**
-     * @param string
-     */
     public void setMeta(String string) {
-        meta = string;
+        _meta = string;
     }
-
 }
