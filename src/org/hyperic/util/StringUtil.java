@@ -200,7 +200,9 @@ public class StringUtil {
     }
 
     /**
-     * Print out an array as a String
+     * Print out an array as a String.
+     * 
+     * XXX: Isn't this the same as ArrayUtil.toString()? 
      */
     public static String arrayToString(boolean[] array) {
         if (array == null) {
