@@ -121,11 +121,12 @@ public class Util {
                 String[] caches = stats.getSecondLevelCacheRegionNames();
 
                 String separator = System.getProperty("line.separator");
+                long totalBytes = 0;
                 StringBuffer buf = new StringBuffer();
                 for (int i = 0; i < caches.length; i++) {
                     SecondLevelCacheStatistics cacheStats =
                         stats.getSecondLevelCacheStatistics(caches[i]);
-
+                    totalBytes += cacheStats.getSizeInMemory();
                     buf.append(separator)
                         .append("Cache: ")
                         .append(caches[i])
@@ -137,7 +138,12 @@ public class Util {
                         .append(cacheStats.getHitCount())
                         .append(" misses=")
                         .append(cacheStats.getMissCount());
-    }
+                }
+                buf.append(separator).
+                    append("Total mapped cache size=").
+                    append(totalBytes).
+                    append(" bytes");
+
                 return buf.toString();
             }
 
