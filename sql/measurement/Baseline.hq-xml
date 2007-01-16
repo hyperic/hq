@@ -26,7 +26,7 @@
     </properties>
 
     <property name="computeTime" type="long">
-      <column name="COMPUTE_TIME" index="METRIC_BASELINE_CALCULATED_IDX" not-null="true" />
+      <column name="COMPUTE_TIME" not-null="true" index="METRIC_BASELINE_CALCULATED_IDX" />
     </property>
 
     <property name="userEntered" type="boolean">

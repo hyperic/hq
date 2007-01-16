@@ -13,7 +13,7 @@
         <column name="MEASUREMENT_ID" not-null="true" />
       </key-property>
       <key-property name="timestamp" type="long">
-        <column name="TIMESTAMP" index="MEASUREMENT_DATA_TIME_IDX" not-null="true" />
+        <column name="TIMESTAMP" not-null="true" index="MEASUREMENT_DATA_TIME_IDX" />
       </key-property>
     </composite-id>
 

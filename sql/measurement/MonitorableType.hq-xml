@@ -21,15 +21,15 @@
     </version>
 
     <property name="name" type="string" unique="true">
-      <column name="NAME" index="TYPE_NAME" not-null="true" length="100" />
+      <column name="NAME" not-null="true" length="100" index="TYPE_NAME_IDX" />
     </property>
 
     <property name="cid" type="integer">
       <column name="CID" />
     </property>
 
-    <property name="appdefType" index="MTYPE_IDX_APPDEFTYPE" type="integer">
-      <column name="APPDEF_TYPE" not-null="true" />
+    <property name="appdefType" type="integer">
+      <column name="APPDEF_TYPE" not-null="true" index="MTYPE_IDX_APPDEFTYPE_IDX" />
     </property>
 
     <property name="plugin" type="string">
