@@ -20,12 +20,12 @@
       <column name ="VERSION_COL" default="0" />
     </version>
 
-    <properties name="aIIpId">
+    <properties name="aIIpId" unique="true">
       <many-to-one name="AIPlatform" class="AIPlatform">
-        <column name="AIQ_PLATFORM_ID" index="AIQ_IP_IDX" not-null="false" />
+        <column name="AIQ_PLATFORM_ID" index="AIQ_IP_IDX" />
       </many-to-one>
       <property name="address" type="string">
-        <column name="ADDRESS" index="AIQ_IP_IDX" not-null="true" length="64" />
+        <column name="ADDRESS" not-null="true" length="64" index="AIQ_IP_IDX" />
       </property>
     </properties>
 

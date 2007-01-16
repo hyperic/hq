@@ -11,7 +11,7 @@
 
     <id name="id" type="integer">
       <meta attribute="scope-set">private</meta>
-      <column name="ID" not-null="true" index="EAM_SERVICE_PARENT_IDX"/>
+      <column name="ID" not-null="true" unique-key="EAM_SERVICE_PARENT_IDX"/>
       <generator class="sequence">
         <param name="sequence">EAM_SERVICE_ID_SEQ</param>
       </generator>
@@ -70,7 +70,7 @@
     </property>
 
     <many-to-one name="parentService" class="Service">
-      <column name="PARENT_SERVICE_ID" not-null="false" index="EAM_SERVICE_PARENT_IDX" />
+      <column name="PARENT_SERVICE_ID" not-null="false" unique-key="EAM_SERVICE_PARENT_IDX" />
     </many-to-one>
 
     <many-to-one name="server" class="Server">

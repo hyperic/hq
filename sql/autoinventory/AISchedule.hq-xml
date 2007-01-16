@@ -21,11 +21,11 @@
     </version>
 
     <property name="entityType" type="integer">
-      <column name="ENTITY_TYPE" index="AI_SCHEDULE_ENTITY" not-null="true" />
+      <column name="ENTITY_TYPE" not-null="true" index="AI_SCHEDULE_ENTITY_IDX" />
     </property>
 
     <property name="entityId" type="integer">
-      <column name="ENTITY_ID" index="AI_SCHEDULE_ENTITY" not-null="true" />
+      <column name="ENTITY_ID" not-null="true" index="AI_SCHEDULE_ENTITY_IDX" />
     </property>
 
     <property name="subject" type="string">
@@ -37,15 +37,15 @@
     </property>
 
     <property name="nextFireTime" type="long">
-      <column name="NEXTFIRETIME" index="AI_SCHEDULE_NEXTFIRETIME" not-null="true" />
+      <column name="NEXTFIRETIME" not-null="true" index="AI_SCHEDULE_NEXTFIRETIME_IDX" />
     </property>
 
     <property name="triggerName" type="string">
-      <column name="TRIGGERNAME" index="AI_SCHEDULE_TRIGGERNAME" not-null="true" length="128" />
+      <column name="TRIGGERNAME" not-null="true" length="128" unique="true" index="AI_SCHEDULE_TRIGGERNAME" />
     </property>
 
     <property name="jobName" type="string">
-      <column name="JOBNAME" not-null="true" index="AI_SCHEDULE_JOBNAME" length="128" />
+      <column name="JOBNAME" not-null="true" length="128" unique="true" index="AI_SCHEDULE_JOBNAME_IDX" />
     </property>
 
     <property name="jobOrderData" type="string">
@@ -53,7 +53,7 @@
     </property>
 
     <property name="scanName" type="string">
-      <column name="SCANNAME" index="AI_SCHEDULE_SCANNAME" length="100" />
+      <column name="SCANNAME" length="100" unique="true" index="AI_SCHEDULE_SCANNAME" />
     </property>
 
     <property name="scanDesc" type="string">

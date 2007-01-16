@@ -21,7 +21,7 @@
     </version>
 
     <property name="name" type="string">
-      <column name="NAME" index="AIQ_PLATFORM_NAME" not-null="true" length="100" />
+      <column name="NAME" not-null="true" length="100" unique="true" index="AIQ_PLATFORM_NAME_IDX" />
     </property>
 
     <property name="description" type="string">
@@ -41,15 +41,15 @@
     </property>
 
     <property name="fqdn" type="string">
-      <column name="FQDN" index="AIQ_PLATFORM_FQDN" not-null="true" length="200" />
+      <column name="FQDN" not-null="true" length="200" unique="true" index="AIQ_PLATFORM_FQDN_IDX" />
     </property>
 
     <property name="agentToken" type="string">
-      <column name="AGENTTOKEN" index="AIQ_PLATFORM_AGENTTOKEN" not-null="true" length="100" />
+      <column name="AGENTTOKEN" not-null="true" length="100" index="AIQ_PLATFORM_AGENTTOKEN_IDX" />
     </property>
 
     <property name="certdn" type="string">
-      <column name="CERTDN" index="AIQ_PLATFORM_CERTDN" not-null="false" length="200" />
+      <column name="CERTDN" not-null="false" length="200" unique="true" index="AIQ_PLATFORM_CERTDN_IDX" />
     </property>
 
     <property name="queueStatus" type="integer">

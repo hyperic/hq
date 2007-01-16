@@ -22,10 +22,10 @@
 
     <properties name="aIServerId">
       <many-to-one name="AIPlatform" class="AIPlatform">
-        <column name="AIQ_PLATFORM_ID" index="AIQ_SERVER_UNIQUE_KEY" not-null="false" />
+        <column name="AIQ_PLATFORM_ID" not-null="false" unique-key="AIQ_SERVER_UNIQUE_IDX" />
       </many-to-one>
       <property name="autoinventoryIdentifier" type="string">
-        <column name="AUTOINVENTORYIDENTIFIER" index="AIQ_SERVER_UNIQUE_KEY" not-null="false" length="200" />
+        <column name="AUTOINVENTORYIDENTIFIER" not-null="false" length="200" unique-key="AIQ_SERVER_UNIQUE_IDX" />
       </property>
     </properties>
 

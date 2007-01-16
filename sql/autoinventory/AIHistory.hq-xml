@@ -65,7 +65,7 @@
     </property>
 
     <property name="scanName" type="string">
-      <column name="SCANNAME" index="AI_HIST_SCANNAME" length="100" />
+      <column name="SCANNAME" length="100" index="AI_HIST_SCANNAME_IDX" />
     </property>
 
     <property name="scanDesc" type="string">
