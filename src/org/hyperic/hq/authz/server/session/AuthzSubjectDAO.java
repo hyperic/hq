@@ -28,9 +28,10 @@ package org.hyperic.hq.authz.server.session;
 import java.util.Collection;
 
 import org.hibernate.Criteria;
-import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -116,7 +117,7 @@ public class AuthzSubjectDAO extends HibernateDAO
      * not yet support Cloneable
      */
     private Criteria findById_orderNameCriteria(Integer[] ids) {
-        return createCriteria().add(Expression.in("id", ids));
+        return createCriteria().add(Restrictions.in("id", ids));
     }
     
     public PageList findById_orderName(Integer[] ids, PageControl pc)
@@ -132,53 +133,61 @@ public class AuthzSubjectDAO extends HibernateDAO
         return getPagedResult(crit, count, pc);
     }
 
-    public Collection findAll_order(String col, boolean asc) {
-        return createCriteria()
-            .add(Expression.eq("system", Boolean.FALSE))
-            .addOrder( asc ? Order.asc(col) : Order.desc(col))
-            .list();
+    public Collection findAll_order(boolean isRoot, String col,
+                                    boolean asc, Collection excludes) {
+        Criteria criteria = createCriteria();
+        
+        if (isRoot) {
+            Disjunction disjunctions = Restrictions.disjunction();
+            disjunctions.add(Restrictions.eq("system", Boolean.FALSE));
+            disjunctions.add(Restrictions.eq("id",
+                                             AuthzConstants.rootSubjectId));
+            criteria .add(disjunctions);
+        }
+        else {
+            criteria.add(Restrictions.eq("system", Boolean.FALSE));
+        }
+        
+        criteria.addOrder( asc ? Order.asc(col) : Order.desc(col));
+        
+        if (excludes != null && excludes.size() > 0) {
+            criteria.add( Restrictions.not( Restrictions.in("id", excludes)));
+        }
+        
+        return criteria.list();
+    
     }
 
-    public Collection findAll_orderName(boolean asc)
+    public Collection findAll_orderName(Collection excludes, boolean asc)
     {
-        return findAll_order("sortName", asc);
+        return findAll_order(false, "sortName", asc, excludes);
     }
 
-    public Collection findAll_orderFirstName(boolean asc)
+    public Collection findAll_orderFirstName(Collection excludes, boolean asc)
     {
-        return findAll_order("firstName", asc);
+        return findAll_order(false, "firstName", asc, excludes);
     }
 
-    public Collection findAll_orderLastName(boolean asc)
+    public Collection findAll_orderLastName(Collection excludes, boolean asc)
     {
-        return findAll_order("lastName", asc);
+        return findAll_order(false, "lastName", asc, excludes);
     }
 
-    public Collection findAllRoot_orderName(boolean asc)
+    public Collection findAllRoot_orderName(Collection excludes, boolean asc)
     {
-        return getSession()
-            .createQuery("from AuthzSubject " +
-                         "where system = false or id = 1 " +
-                         "order by sortName " + (asc ? "asc" : "desc"))
-            .list();
+        return findAll_order(true, "sortName", asc, excludes);
     }
 
-    public Collection findAllRoot_orderFirstName(boolean asc)
+    public Collection findAllRoot_orderFirstName(Collection excludes,
+                                                 boolean asc)
     {
-        return getSession()
-            .createQuery("from AuthzSubject " +
-                         "where system = false or id = 1 " +
-                         "order by firstName " + (asc ? "asc" : "desc"))
-            .list();
+        return findAll_order(true, "firstName", asc, excludes);
     }
 
-    public Collection findAllRoot_orderLastName(boolean asc)
+    public Collection findAllRoot_orderLastName(Collection excludes,
+                                                boolean asc)
     {
-        return getSession()
-            .createQuery("from AuthzSubject " +
-                         "where system = false or id = 1 " +
-                         "order by lastName " + (asc ? "asc" : "desc"))
-            .list();
+        return findAll_order(true, "lastName", asc, excludes);
     }
 
     public Collection findByRoleId_orderName(Integer roleId, boolean asc)
@@ -206,7 +215,7 @@ public class AuthzSubjectDAO extends HibernateDAO
     public UserConfigResp findUserConfigResp(Integer subjId) {
         return (UserConfigResp) getSession()
             .createCriteria( UserConfigResp.class )
-            .add( Expression.eq("id", subjId))
+            .add( Restrictions.eq("id", subjId))
             .uniqueResult();
     }
 }

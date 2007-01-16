@@ -72,7 +72,7 @@ public class ListAction extends TilesAction {
         if (log.isTraceEnabled()) {
             log.trace("getting all subjects");
         }
-        PageList users = authzBoss.getAllSubjects(sessionId, pc);
+        PageList users = authzBoss.getAllSubjects(sessionId, null, pc);
         request.setAttribute(Constants.ALL_USERS_ATTR, users);
 
         return null;

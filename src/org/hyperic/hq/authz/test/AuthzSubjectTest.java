@@ -54,7 +54,7 @@ public class AuthzSubjectTest extends HQEJBTestBase {
         AuthzSubjectValue overlord = getOverlord();
         AuthzSubjectManagerLocal zMan = getAuthzManager();
         int numSubjects = zMan.getAllSubjects(overlord,
-                                              PageControl.PAGE_ALL).size();
+                                              null, PageControl.PAGE_ALL).size();
 
         AuthzSubjectValue subjVal = new AuthzSubjectValue();
         subjVal.setName("foo");
@@ -66,7 +66,7 @@ public class AuthzSubjectTest extends HQEJBTestBase {
         AuthzSubject subject = zMan.createSubject(overlord, subjVal);
         assertEquals(numSubjects + 1,
                      zMan.getAllSubjects(overlord,
-                                         PageControl.PAGE_ALL).size());
+                                         null, PageControl.PAGE_ALL).size());
         
         // Look it up by name
         subjVal = zMan.findSubjectByName(overlord, "foo");
@@ -85,7 +85,7 @@ public class AuthzSubjectTest extends HQEJBTestBase {
 
         assertEquals(numSubjects,
                      zMan.getAllSubjects(overlord,
-                                         PageControl.PAGE_ALL).size());
+                                         null, PageControl.PAGE_ALL).size());
         
     }
 }

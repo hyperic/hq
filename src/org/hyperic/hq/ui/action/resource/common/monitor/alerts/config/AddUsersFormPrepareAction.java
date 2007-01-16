@@ -25,10 +25,20 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.tiles.ComponentContext;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
@@ -39,13 +49,6 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
 
 
 /**
@@ -120,15 +123,14 @@ public class AddUsersFormPrepareAction extends AddNotificationsFormPrepareAction
         // pending
         PageControl pca =
             RequestUtils.getPageControl(request, "psa", "pna", "soa", "sca");
+        
+        ArrayList excludes =
+            new ArrayList(pendingUserIds.length + userIds.length);
+        excludes.addAll(Arrays.asList(pendingUserIds));
+        excludes.addAll(Arrays.asList(userIds));
+        
         PageList availableUsers =
-            authzBoss.getAllSubjects(sessionId, pca);
-
-        availableUsers.removeAll(pendingUsers);
-        if (userIds.length > 0) {
-            PageList addedUsers =
-                authzBoss.getSubjectsById(sessionId, userIds, PageControl.PAGE_ALL);
-            availableUsers.removeAll(addedUsers);
-        }
+            authzBoss.getAllSubjects(sessionId, excludes, pca);
 
         request.setAttribute(Constants.PENDING_USERS_ATTR, pendingUsers);
         request.setAttribute(Constants.AVAIL_USERS_ATTR, availableUsers);

@@ -110,7 +110,7 @@ public class ConfigAction extends BaseDispatchAction {
         // Get the list of users
         AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
         PageList availableUsers =
-            authzBoss.getAllSubjects(sessionId, PageControl.PAGE_ALL);
+            authzBoss.getAllSubjects(sessionId, null, PageControl.PAGE_ALL);
         request.setAttribute(Constants.AVAIL_USERS_ATTR, availableUsers);
         
         return null;        

@@ -113,7 +113,7 @@ public class ChangeResourceOwnerFormPrepareAction
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
 
         log.trace("getting all users");
-        PageList allUsers = boss.getAllSubjects(sessionId, pc);
+        PageList allUsers = boss.getAllSubjects(sessionId, null, pc);
 
         // remove the resource's owner from the list of users
         ArrayList owner = new ArrayList();

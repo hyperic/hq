@@ -228,12 +228,13 @@ public class AuthzSubjectManagerEJBImpl
     /** 
      * List all subjects in the system
      * @ejb:interface-method
+     * @param excludes the IDs of subjects to exclude from result
      */
-    public PageList getAllSubjects(AuthzSubjectValue whoami, PageControl pc)
+    public PageList getAllSubjects(AuthzSubjectValue whoami,
+                                   Collection excludes, PageControl pc)
         throws FinderException, PermissionException {
         Collection subjects;
         pc = PageControl.initDefaults(pc, SortAttribute.SUBJECT_NAME);
-        PageList plist = new PageList();
         
         AuthzSubjectDAO dao = getSubjectDAO();
         // if a user does not have permission to view subjects, 
@@ -246,6 +247,8 @@ public class AuthzSubjectManagerEJBImpl
                      AuthzConstants.rootResourceId,
                      AuthzConstants.subjectOpViewSubject);
         } catch (PermissionException e) {
+            PageList plist = new PageList();
+
             // return a list with only the one entry.
             plist.add(who.getAuthzSubjectValue());
             plist.setTotalSize(1);
@@ -255,23 +258,28 @@ public class AuthzSubjectManagerEJBImpl
         switch (pc.getSortattribute()) {
         case SortAttribute.SUBJECT_NAME:
             if (who.isRoot())
-                subjects = dao.findAllRoot_orderName(pc.isAscending());
+                subjects = dao.findAllRoot_orderName(excludes,
+                                                     pc.isAscending());
             else
-                subjects = dao.findAll_orderName(pc.isAscending());
+                subjects = dao.findAll_orderName(excludes, pc.isAscending());
             break;
 
         case SortAttribute.FIRST_NAME:
             if (who.isRoot())
-                subjects = dao.findAllRoot_orderFirstName(pc.isAscending());
+                subjects = dao.findAllRoot_orderFirstName(excludes,
+                                                          pc.isAscending());
             else
-                subjects = dao.findAll_orderFirstName(pc.isAscending());
+                subjects = dao.findAll_orderFirstName(excludes,
+                                                      pc.isAscending());
             break;
 
         case SortAttribute.LAST_NAME:
             if (who.isRoot())
-                subjects = dao.findAllRoot_orderLastName(pc.isAscending());
+                subjects = dao.findAllRoot_orderLastName(excludes,
+                                                         pc.isAscending());
             else
-                subjects = dao.findAll_orderLastName(pc.isAscending());
+                subjects = dao.findAll_orderLastName(excludes,
+                                                     pc.isAscending());
             break;
 
         default:
@@ -279,7 +287,6 @@ public class AuthzSubjectManagerEJBImpl
                                       pc.getSortattribute());
         }                
         
-        plist.setTotalSize(subjects.size());
         return subjectPager.seek(subjects, pc.getPagenum(), pc.getPagesize() );
     }
 
@@ -294,7 +301,7 @@ public class AuthzSubjectManagerEJBImpl
     public PageList getSubjectsById(AuthzSubjectValue subject,
                                     Integer[] ids,
                                     PageControl pc)
-        throws NamingException, FinderException, PermissionException {
+        throws PermissionException {
 
         // PR7251 - Sometimes and for no good reason, different parts of the UI
         // call this method with an empty ids array. In this case, simply return
@@ -318,7 +325,9 @@ public class AuthzSubjectManagerEJBImpl
                      AuthzConstants.subjectOpViewSubject);
         }
 
-        return subjects;
+        // Need to convert to value objects
+        return new PageList(subjectPager.seek(subjects, PageControl.PAGE_ALL),
+                            subjects.getTotalSize());
     }
 
     /**

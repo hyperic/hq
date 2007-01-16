@@ -1083,7 +1083,7 @@ public class ClientShellEntityFetcher {
 
         boss = this.bossManager.getAuthzBoss();
         return boss.getAllSubjects( new Integer( this.auth.getAuthToken() ),
-                                    PageControl.PAGE_ALL );
+                                    null, PageControl.PAGE_ALL );
     }
 
     public void compactMeasurementData()
