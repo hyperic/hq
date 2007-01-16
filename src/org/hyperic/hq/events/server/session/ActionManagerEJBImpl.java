@@ -35,6 +35,7 @@ import javax.ejb.SessionContext;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.events.shared.ActionManagerLocal;
 import org.hyperic.hq.events.shared.ActionManagerUtil;
 import org.hyperic.hq.events.shared.ActionValue;
@@ -161,6 +162,19 @@ public class ActionManagerEJBImpl implements SessionBean {
         throws JSONException
     {
         Action a = Action.newInstance(json); 
+        
+        _actDAO.save(a);
+        return a;
+    }
+
+    /**
+     * Create a free-standing action.  These are linked to from things like
+     * escalations actions.
+     * 
+     * @ejb:interface-method
+     */
+    public Action createAction(ActionConfigInterface cfg) {
+        Action a = Action.createAction(cfg); 
         
         _actDAO.save(a);
         return a;

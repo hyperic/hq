@@ -131,8 +131,7 @@ public class Action
         return newNoOpAction();
     }
     
-    private static Action createAction(ActionConfigInterface config)
-    {
+    static Action createAction(ActionConfigInterface config) {
         Action act = new Action();
         act.setClassName(config.getImplementor());
         try {
