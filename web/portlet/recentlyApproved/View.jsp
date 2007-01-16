@@ -44,7 +44,7 @@
 
 <c:choose >
   <c:when test="${not empty recentlyAdded}">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" class="portletLRBorder">
       <tr>
         <td width="70%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.ResourceName"/></td>
         <td width="30%" class="ListHeaderInactive" align="center"><fmt:message key="dash.home.TableHeader.DateTime"/></td>

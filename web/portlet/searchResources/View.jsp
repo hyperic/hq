@@ -50,7 +50,7 @@ function checkGroup() {
 <html:form action="/ResourceHub" onsubmit="checkGroup()">
 <html:hidden property="g" value="1"/>
 <!-- Content Block Contents -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" class="portletLRBotBorder">
   <tr>
     <td class="BlockContent" colspan="3"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
   </tr>

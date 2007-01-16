@@ -52,7 +52,7 @@ function requestFavoriteResources() {
 onloads.push(requestFavoriteResources);
 </script>
 
- <table class="table" width="100%" border="0" cellspacing="0" cellpadding="0" id="favoriteTable" >
+ <table width="100%" border="0" cellspacing="0" cellpadding="0" id="favoriteTable" class="portletLRBorder">
  	<tbody>
 	<tr class="tableRowHeader">
 		<th width="50%" class="tableRowInactive">
@@ -74,7 +74,7 @@ onloads.push(requestFavoriteResources);
 	 <!-- table rows are inserted here dynamically -->
 		</tbody>
 	</table>
-	<table width="100%" cellpadding="0" cellspacing="0" border="0" id="noFaveResources" style="display:none;">
+	<table width="100%" cellpadding="0" cellspacing="0" border="0" id="noFaveResources" style="display:none;" class="portletLRBorder">
         <tbody>
         <tr class="ListRow">
             <td class="ListCell">

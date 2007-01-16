@@ -62,12 +62,12 @@ onloads.push(requestMetricsResponse<c:out value="${portlet.token}"/>);
   <tiles:put name="portletName"><c:out value="${portlet.fullUrl}"/></tiles:put>
 </tiles:insert>
 
-  <table class="table" width="100%" border="0" cellspacing="0" cellpadding="0" id="<c:out value="${tableName}"/>">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" id="<c:out value="${tableName}"/>" class="portletLRBorder">
     <tbody id="mtbody">
     <!-- table rows are inserted here dynamically -->
     </tbody>
  </table>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${noTableName}"/>" style="display:none;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${noTableName}"/>" style="display:none;" class="portletLRBorder">
       <tbody>
     <tr class="ListRow">
             <td class="ListCell">

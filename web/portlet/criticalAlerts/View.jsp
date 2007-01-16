@@ -81,7 +81,7 @@ Ajax.Responders.register({
 
   <!-- JSON available at /dashboard/ViewCriticalAlerts.do -->
     <html:form method="POST" action="/alerts/RemoveAlerts.do">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${tableName}"/>">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${tableName}"/>" class="portletLRBorder">
   	<tbody>
 		<tr class="ListRow">
 			<td width="1%" class="ListHeaderCheckbox">
@@ -105,7 +105,7 @@ Ajax.Responders.register({
  	 </tbody>
   </table>
     
-     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="display:none;" id="noCritAlerts">
+     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="display:none;" id="noCritAlerts" class="portletLRBorder">
          <tbody>
          <tr class="ListRow">
       		<td class="ListCell"><fmt:message key="dash.home.alerts.no.resource.to.display"/></td>

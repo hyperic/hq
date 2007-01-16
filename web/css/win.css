@@ -184,7 +184,7 @@ td.MastheadBgTop .MastheadContent{color: #ffffff;}
 
 /* DASHBOARD */
 .DashboardPadding {padding: 5px;} /* only in /portal/MultiColumnLayout.jsp */
-.DashboardControlActionsContainer {background-color: #EBEDF2; padding: 10px;}
+.DashboardControlActionsContainer {background-color: #EBEDF2; padding: 10px; border-left:1px solid #D5D8DE;border-right:1px solid #D5D8DE;border-bottom:1px solid #D5D8DE;}
 
 .FormLabel {font-weight: bold; text-align: left;}
 .FormLabelRight {font-weight: bold; text-align: right;}
@@ -974,4 +974,15 @@ border-bottom:1px solid #D5D8DE;
  width:20%;
  padding-right:20px;
  padding-top:5px;
+}
+
+.portletLRBotBorder {
+ border-left:1px solid #D5D8DE;
+ border-right:1px solid #D5D8DE;
+ border-bottom:1px solid #D5D8DE;
+}
+
+.portletLRBorder {
+border-left:1px solid #D5D8DE;
+ border-right:1px solid #D5D8DE;
 }

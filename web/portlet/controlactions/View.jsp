@@ -58,12 +58,12 @@
     <td>
       <c:if test="${displayLastCompleted}">  
         <!-- Recent Actions Contents -->
-        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" class="portletLRBorder">
           <tr>
             <td class="Subhead"><fmt:message key="dash.home.Subhead.Recent"/></td>
           </tr>
         </table>
-        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" class="portletLRBorder">
           <c:choose>    
             <c:when test="${empty lastCompleted}">
               <tr class="ListRow">
@@ -100,7 +100,7 @@
             <td class="Subhead"><fmt:message key="dash.home.Subhead.Quick"/></td>
           </tr>
         </table>  
-        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" class="portletLRBorder">
           <c:choose>
             <c:when test="${empty mostFrequent}">
               <tr class="ListRow">
