@@ -45,11 +45,14 @@ import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.escalation.server.session.EscalationState;
+import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.Action;
+import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.SessionBase;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
+import org.hyperic.util.config.ConfigResponse;
 
 
 /**
@@ -139,9 +142,12 @@ public class EscalationManagerEJBImpl
      * 
      * @ejb:interface-method  
      */
-    public void addAction(Escalation e, Action a, long waitTime) {
+    public void addAction(Escalation e, ActionConfigInterface cfg, 
+                          long waitTime) 
+    {
         EscalationRuntime runtime = EscalationRuntime.getInstance();
         Collection states = _stateDAO.findStatesFor(e);
+        Action a = ActionManagerEJBImpl.getOne().createAction(cfg);
         
         e.addAction(waitTime, a);
         for (Iterator i=states.iterator(); i.hasNext(); ) {
@@ -151,7 +157,7 @@ public class EscalationManagerEJBImpl
             _stateDAO.remove(s);
         }
     }
-    
+
     /**
      * Delete an escalation chain.  This method will throw an exception if
      * the escalation chain is in use.
