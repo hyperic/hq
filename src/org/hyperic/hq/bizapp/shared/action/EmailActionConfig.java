@@ -23,12 +23,6 @@
  * USA.
  */
 
-/*
- * SharedEmailAction.java
- *
- * Created on October 10, 2002, 4:05 PM
- */
-
 package org.hyperic.hq.bizapp.shared.action;
 
 import java.util.ArrayList;
@@ -45,9 +39,6 @@ import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.config.StringConfigOption;
 
-/**
- *
- */
 public class EmailActionConfig implements ActionConfigInterface {
     public static final String CFG_TYPE  = "listType";
     public static final String CFG_NAMES = "names";
@@ -60,12 +51,11 @@ public class EmailActionConfig implements ActionConfigInterface {
     private static String implementor =
         "org.hyperic.hq.bizapp.server.action.email.EmailAction";
     
-    private int _type;
-    private String _names;
-    private List _users;
+    private int     _type;
+    private String  _names;
+    private List    _users;
     private boolean _sms = false;
     
-    /** Creates a new instance of SharedEmailAction */
     public EmailActionConfig() {
     }
        
@@ -76,16 +66,18 @@ public class EmailActionConfig implements ActionConfigInterface {
         ConfigSchema res = new ConfigSchema();
 
         // Determine the type of recipients
-        type = new IntegerConfigOption(
-            CFG_TYPE, "Recipient Type ([1] Emails [2] Users)",
-            new Integer(1));
+        type = new IntegerConfigOption(CFG_TYPE, 
+                                       "Recipient Type ([1] Emails [2] Users)",
+                                       new Integer(1));
         type.setMinValue(TYPE_EMAILS);
         type.setMaxValue(TYPE_USERS);
         res.addOption(type);
 
         // Recipients
-        recip = new StringConfigOption(
-            CFG_NAMES, "Recipients (comma-delimited Emails or ID's)", "");
+        recip = new StringConfigOption(CFG_NAMES, 
+                                  "Recipients (comma-delimited Emails or ID's)", 
+                                  "");
+            
         recip.setMinLength(0);
         res.addOption(recip);
 
@@ -96,11 +88,9 @@ public class EmailActionConfig implements ActionConfigInterface {
         return res;
     }
 
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.events.ext.ActionInterface#getConfigResponse()
-     */
     public ConfigResponse getConfigResponse()
-        throws InvalidOptionException, InvalidOptionValueException {
+        throws InvalidOptionException, InvalidOptionValueException 
+    {
         ConfigResponse response = new ConfigResponse();
         response.setValue(CFG_TYPE, String.valueOf(getType()));
         response.setValue(CFG_NAMES, getNames());
@@ -108,9 +98,8 @@ public class EmailActionConfig implements ActionConfigInterface {
         return response;
     }
 
-    /** Initialize the action instance
-     * @param props configuration properties
-     *
+    /** 
+     * Initialize the action instance
      */
     public void init(ConfigResponse config) throws InvalidActionDataException {
         // First, let's set the type
@@ -119,12 +108,10 @@ public class EmailActionConfig implements ActionConfigInterface {
             throw new InvalidActionDataException(CFG_TYPE +
                                                  " is a required option");
 
-        _type = Integer.parseInt(sType);
-        
+        _type       = Integer.parseInt(sType);
         String sSms = config.getValue(CFG_SMS);
-        _sms = Boolean.valueOf(sSms).booleanValue();
-        
-        _users = new ArrayList();
+        _sms        = Boolean.valueOf(sSms).booleanValue();
+        _users      = new ArrayList();
 
         // Parse the recipients
         _names = config.getValue(CFG_NAMES);
@@ -154,53 +141,27 @@ public class EmailActionConfig implements ActionConfigInterface {
         }
     }
     
-    /**
-     * Returns the type.
-     * 
-     * @return int
-     */
     public int getType() {
         return _type;
     }
 
-    /**
-     * Sets the type.
-     * @param type The type to set
-     */
     public void setType(int type) {
         _type = type;
     }
 
-    /**
-     * Returns the names.
-     * @return String
-     */
     public String getNames() {
         return _names;
     }
 
-    /**
-     * Sets the names.
-     * @param names The names to set
-     */
     public void setNames(String names) {
         _names = names;
     }
 
     /**
      * Returns the users.  This is the list of emails, user ID's, or role ID's
-     * @return List
      */
     public List getUsers() {
         return _users;
-    }
-
-    /**
-     * Sets the users.
-     * @param users The users to set
-     */
-    public void setUsers(List users) {
-        _users = users;
     }
 
     public boolean isSms() {
@@ -211,18 +172,10 @@ public class EmailActionConfig implements ActionConfigInterface {
         _sms = sms;
     }
 
-    /**
-     * Set the name of the action class
-     * @param impl the name of the implementing class
-     */
     public void setImplementor(String impl) {
         implementor = impl;
     }
 
-    /**
-     * Get the name of the action class
-     * @return the name of the implementing class
-     */
     public String getImplementor() {
         return implementor;
     }
