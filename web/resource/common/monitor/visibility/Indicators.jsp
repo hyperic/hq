@@ -151,6 +151,7 @@ function reviewAction(option) {
                 <c:param name="ctype" value="${ctype}"/>
               </c:if>
             </c:url>
+            <html:img page="/images/icon_chart.gif"/>
             <a href="<c:out value="${availChart}"/>">
             <fmt:message key="resource.common.monitor.visibility.availability.value">
               <fmt:param value="${availMetricsAttr}"/>

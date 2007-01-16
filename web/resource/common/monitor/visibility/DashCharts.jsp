@@ -155,6 +155,7 @@
       <table width="100%" border="0" cellpadding="0" cellspacing="1" style="margin-top: 1px; margin-bottom: 1px;">
         <tr>
           <td>
+          <html:img page="/images/icon_chart.gif"/>
           <font class="BoldText">
             <a href="<c:out value="${chartLink}"/>" target="_top"><c:out value="${metric.label}"/></a>
           </font>
