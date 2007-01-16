@@ -44,6 +44,8 @@ public class TimeUtil
     public static final long MILLIS_IN_DAY    = MILLIS_IN_HOUR * 24;
     public static final long MILLIS_IN_WEEK   = MILLIS_IN_DAY * 7;
 
+    private TimeUtil() {}
+    
     public static String toString(long time)
     {
         UnitNumber number =
@@ -250,7 +252,6 @@ public class TimeUtil
 
     private static Date parseSimpleDate(String str){
         DateFormat df;
-        Date res;
 
         df  = DateFormat.getDateInstance(DateFormat.SHORT);
 
@@ -339,5 +340,35 @@ public class TimeUtil
     
     public static long getInterval(long begin, long end, int points) {
         return (end - begin) / points;
+    }
+
+    /**
+     * Give a rough approximation of the time specified by millis. 
+     * 
+     * @param millis Duration in millis to approximate -- this should not be
+     *               millis since the epoch (that would be a very large number)
+     */
+    public static String approxDuration(long millis) {
+        long secs = millis / 1000;
+        
+        if (secs < 60) {
+            return secs + " seconds ago";
+        } else if (secs < 90) {
+            return "1 minute ago";
+        } else if (secs < 60 * 60) {
+            return ((secs + 30) / 60) + " minutes ago"; 
+        } else if (secs < 24 * 60 * 60) {
+            long numHours = (secs + 30 * 60) / (60 * 60);
+            
+            if (numHours == 1)
+                return numHours + " hour ago";
+            return numHours + " hours ago"; 
+        } else {
+            long numDays = (secs + 12 * 60 * 60) / (24 * 60 * 60); 
+
+            if (numDays == 1)
+                return numDays + " day ago";
+            return numDays + " days ago";
+        }
     }
 }
