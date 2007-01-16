@@ -323,7 +323,6 @@ function showViewEscResponse(originalRequest) {
         //numi.value = num;
         var liID = 'row'+num;
         var escLi = document.createElement('li');
-        var remDiv = document.createElement('div');
         var usersDiv = document.createElement('div');
         var rolesDiv = document.createElement('div');
         var othersDiv = document.createElement('div');
@@ -346,10 +345,6 @@ function showViewEscResponse(originalRequest) {
         ni.appendChild(escLi);
         escLi.setAttribute((document.all ? 'className' : 'class'), "lineitem");
         escLi.setAttribute('id','row_'+ liID);
-
-        escLi.appendChild(remDiv);
-        remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
-        remDiv.innerHTML ='<a href="#" onclick="removeRow(this);hideAddEscButtons();showAddEscButton;"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
 
         escLi.appendChild(escTable);
         escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
