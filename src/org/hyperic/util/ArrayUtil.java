@@ -25,7 +25,6 @@
 
 package org.hyperic.util;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -33,15 +32,17 @@ import java.util.Iterator;
 import java.util.List;
 
 public class ArrayUtil {
-    public static void dumpArray(PrintStream out, Object[] array){
-        out.print("{ ");
+    public static String toString(Object[] array) {
+        StringBuffer res = new StringBuffer("{ ");
+
         for(int i=0; i<array.length; i++){
-            out.print(array[i].toString());
+            res.append(array[i].toString());
             if(i != array.length - 1){
-                out.print(", ");
+                res.append(", ");
             }
         }
-        out.print(" }");
+        res.append(" }");
+        return res.toString();
     }
 
     public static Object[] merge(Object[][] arrays, Object[] arrType){
