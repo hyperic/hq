@@ -185,6 +185,15 @@ public class Escalation
     public String getJsonName() {
         return JSON_NAME;
     }
+    
+    public static JSONObject getJSON(Escalation e) 
+        throws JSONException
+    {
+        if (e == null)
+            return null;
+
+        return new JSONObject().put(e.getJsonName(), e.toJSON());
+    }
 
     public boolean equals(Object obj) {
         if (!(obj instanceof Escalation) || !super.equals(obj)) {

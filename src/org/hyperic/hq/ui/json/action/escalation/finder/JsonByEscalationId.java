@@ -25,31 +25,23 @@
 
 package org.hyperic.hq.ui.json.action.escalation.finder;
 
-import org.hyperic.hq.ui.json.action.escalation.BaseAction;
-import org.hyperic.hq.ui.json.action.escalation.EscalationWebMediator;
-import org.hyperic.hq.ui.json.action.JsonActionContext;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.ui.json.JSONResult;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.auth.shared.SessionTimeoutException;
-import org.hyperic.hq.auth.shared.SessionNotFoundException;
-import org.json.JSONObject;
-import org.json.JSONException;
+import org.hyperic.hq.ui.json.action.JsonActionContext;
+import org.hyperic.hq.ui.json.action.escalation.BaseAction;
+import org.hyperic.hq.ui.util.ContextUtils;
 
-import java.rmi.RemoteException;
-
-public class JsonByEscalationId extends BaseAction
+public class JsonByEscalationId 
+    extends BaseAction
 {
-    public void execute(JsonActionContext context)
-        throws JSONException,
-               PermissionException,
-               SessionTimeoutException,
-               SessionNotFoundException,
-               RemoteException
+    public void execute(JsonActionContext ctx)
+        throws Exception
     {
-        JSONObject escalation = EscalationWebMediator
-            .getInstance()
-            .jsonByEscalationId(context, context.getSessionId(),
-                                context.getId());
-        context.setJSONResult(new JSONResult(escalation));
+        EventsBoss eBoss = ContextUtils.getEventsBoss(ctx.getServletContext());
+
+        Escalation e = eBoss.findEscalationById(ctx.getSessionId(), 
+                                                ctx.getId());
+        ctx.setJSONResult(new JSONResult(Escalation.getJSON(e)));
     }
 }

@@ -25,22 +25,16 @@
 
 package org.hyperic.hq.ui.json.action.escalation;
 
-import org.hyperic.hq.bizapp.shared.EventsBoss;
-import org.hyperic.hq.common.DuplicateObjectException;
-import org.hyperic.hq.escalation.server.session.EscalationAlertType;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.auth.shared.SessionException;
-import org.hyperic.hq.auth.shared.SessionTimeoutException;
-import org.hyperic.hq.auth.shared.SessionNotFoundException;
-import org.hyperic.hq.ui.json.action.JsonActionContext;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.json.JSONObject;
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import java.rmi.RemoteException;
 
-import javax.ejb.FinderException;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.ui.json.action.JsonActionContext;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 public class EscalationWebMediator {
     private static final EscalationWebMediator ourInstance =
@@ -56,33 +50,6 @@ public class EscalationWebMediator {
         return ContextUtils.getEventsBoss(context.getServletContext());
     }
 
-    public JSONObject jsonByEscalationName(JsonActionContext context,
-                                           int sessionId, String name)
-        throws JSONException, PermissionException, SessionTimeoutException,
-               SessionNotFoundException, RemoteException
-    {
-        return getEventsBoss(context).jsonByEscalationName(sessionId, name);
-    }
-
-    public JSONObject jsonByEscalationId(JsonActionContext context,
-                                         int sessionId, Integer id)
-        throws JSONException, PermissionException, SessionTimeoutException,
-               SessionNotFoundException, RemoteException
-    {
-        return getEventsBoss(context).jsonByEscalationId(sessionId, id);
-    }
-
-    public JSONObject jsonEscalationByAlertDefId(JsonActionContext context,
-                                                 int sessionId,
-                                                 Integer alertDefId,
-                                                 EscalationAlertType alertType)
-        throws JSONException, PermissionException, SessionException,
-               RemoteException, FinderException, DuplicateObjectException
-    {
-        return getEventsBoss(context)
-            .jsonEscalationByAlertDefId(sessionId, alertDefId, alertType);
-    }
-
     public JSONArray listAllEscalationName(JsonActionContext context,
                                            int sessionId)
         throws JSONException,
@@ -92,14 +59,5 @@ public class EscalationWebMediator {
                RemoteException
     {
         return getEventsBoss(context).listAllEscalationName(sessionId);
-    }
-
-    public void removeEscalation(JsonActionContext context,
-                                 int sessionId, Integer id)
-        throws PermissionException, SessionTimeoutException,
-               SessionNotFoundException, RemoteException
-    {
-        getEventsBoss(context)
-            .deleteEscalationById(sessionId, new Integer[]{id});
     }
 }

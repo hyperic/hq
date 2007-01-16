@@ -1476,23 +1476,6 @@ public class EventsBossEJBImpl
         }
     }
 
-    /**
-     * retrieve escalation JSONObject by name.
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
-    public JSONObject jsonByEscalationName(int sessionID, String name)
-        throws SessionTimeoutException, SessionNotFoundException, JSONException,
-               PermissionException
-    {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
-        Escalation e = getEscMan().findByName(subject, name); 
-            
-        return e == null ? null 
-                         : new JSONObject().put(e.getJsonName(), e.toJSON());
-    }
-
 
     /**
      * retrieve escalation by alert definition id.
@@ -1552,22 +1535,6 @@ public class EventsBossEJBImpl
         AuthzSubjectValue subject = manager.getSubject(sessionID);
 
         Escalation e = findEscalationByAlertDefId(subject, id, alertType);
-        return e == null ? null 
-                         : new JSONObject().put(e.getJsonName(), e.toJSON());
-    }
-
-    /**
-     * retrieve escalation JSONObject by escalation id.
-     * 
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
-    public JSONObject jsonByEscalationId(int sessionID, Integer id)
-        throws SessionTimeoutException, SessionNotFoundException,
-               PermissionException, JSONException
-    {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
-        Escalation e = getEscMan().findById(subject, id);
         return e == null ? null 
                          : new JSONObject().put(e.getJsonName(), e.toJSON());
     }

@@ -30,13 +30,13 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.hq.ui.json.JSONResult;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
 import org.hyperic.hq.ui.json.action.escalation.BaseAction;
-import org.hyperic.hq.ui.json.action.escalation.EscalationWebMediator;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.json.JSONObject;
 
@@ -73,15 +73,11 @@ public class SaveEscalation
         EventsBoss eBoss  = 
             ContextUtils.getEventsBoss(context.getServletContext());
 
-        eBoss.createEscalation(context.getSessionId(), name, desc, 
-                               pausable, maxWait, notifyAll, alertType,
-                               alertDefId);
+        Escalation e = eBoss.createEscalation(context.getSessionId(), name, 
+                                              desc, pausable, maxWait, 
+                                              notifyAll, alertType, alertDefId); 
         
-        EscalationWebMediator wmed = EscalationWebMediator.getInstance();
-        
-        // XXX:  This should get it by id
-        JSONObject result =
-            wmed.jsonByEscalationName(context, context.getSessionId(), name);
+        JSONObject result = Escalation.getJSON((e));
         context.setJSONResult(new JSONResult(result));
         context.getRequest().setAttribute("escalation", result);
     }

@@ -25,27 +25,17 @@
 
 package org.hyperic.hq.ui.json.action.escalation.crud;
 
-import org.hyperic.hq.ui.json.action.escalation.BaseAction;
-import org.hyperic.hq.ui.json.action.escalation.EscalationWebMediator;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.auth.shared.SessionTimeoutException;
-import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.ui.json.action.escalation.BaseAction;
+import org.hyperic.hq.ui.util.ContextUtils;
 
-import java.rmi.RemoteException;
-
-/**
- */
-public class RemoveEscalation extends BaseAction
+public class RemoveEscalation 
+    extends BaseAction
 {
-    public void execute(JsonActionContext context)
-        throws PermissionException,
-               SessionTimeoutException,
-               SessionNotFoundException,
-               RemoteException
-    {
-        EscalationWebMediator.getInstance()
-                .removeEscalation(
-                    context, context.getSessionId(),context.getId());
+    public void execute(JsonActionContext ctx) throws Exception {
+        EventsBoss eBoss = ContextUtils.getEventsBoss(ctx.getServletContext()); 
+          
+        eBoss.deleteEscalationById(ctx.getSessionId(), ctx.getId()); 
     }
 }

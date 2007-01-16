@@ -35,7 +35,6 @@ import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.ui.json.JSONResult;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
 import org.hyperic.hq.ui.json.action.escalation.BaseAction;
-import org.hyperic.hq.ui.json.action.escalation.EscalationWebMediator;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.util.ArrayUtil;
 import org.json.JSONObject;
@@ -72,11 +71,7 @@ public class UpdateEscalation
         eBoss.updateEscalation(context.getSessionId(), escalation,
                                name, desc, maxWait, pausable, notifyAll);
         
-        // XXX:  This should return it by id
-        EscalationWebMediator wmed = EscalationWebMediator.getInstance();
-        JSONObject result =
-            wmed.jsonByEscalationId(context, context.getSessionId(), id);
-
+        JSONObject result = Escalation.getJSON(escalation);
         context.setJSONResult(new JSONResult(result));
         context.getRequest().setAttribute("escalation", result);
     }
