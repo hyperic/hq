@@ -21,7 +21,7 @@
     </version>
 
     <property name="principal" type="string">
-      <column name="PRINCIPAL" not-null="true" length="64" />
+      <column name="PRINCIPAL" not-null="true" length="64" unique="true" index="EAM_PRINCIPAL_PRINCIPAL_IDX" />
     </property>
 
     <property name="password" type="string">

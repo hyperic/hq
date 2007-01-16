@@ -22,7 +22,7 @@
 
     <properties name="resTypeOper" unique="true">
       <property name="name" type="string">
-        <column name="NAME" index="EAM_OPNAME_IDX" not-null="true" length="100" />
+        <column name="NAME" not-null="true" length="100" index="EAM_OPNAME_IDX" />
       </property>
       <many-to-one name="resourceType" class="ResourceType">
         <column name="RESOURCE_TYPE_ID" not-null="false" />
@@ -30,7 +30,7 @@
     </properties>
 
     <property name="cid" type="integer">
-      <column name="CID" index="EAM_OPERATION_CID_IDX" not-null="false" />
+      <column name="CID" not-null="false" />
     </property>
 
     <bag name="rolesBag" table="EAM_ROLE_OPERATION_MAP"

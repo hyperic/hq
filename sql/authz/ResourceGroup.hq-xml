@@ -20,8 +20,8 @@
       <column name ="VERSION_COL" default="0" />
     </version>
 
-    <property name="name" type="string" unique="true">
-      <column name="NAME" index="EAM_RES_GROUP_NAME" not-null="true" length="100" />
+    <property name="name" type="string">
+      <column name="NAME" not-null="true" length="100" unique="true" index="EAM_RES_GROUP_NAME_IDX" />
     </property>
 
     <property name="cid" type="integer">
@@ -72,8 +72,8 @@
       <column name="MODIFIED_BY" length="100" />
     </property>
 
-    <many-to-one name="resource" class="Resource" unique="true">
-      <column name="RESOURCE_ID" index="EAM_RES_GROUP_RES_KEY" />
+    <many-to-one name="resource" class="Resource">
+      <column name="RESOURCE_ID" unique="true" index="EAM_RES_GROUP_RES_IDX" />
     </many-to-one>
 
     <set name="resourceSet" table="EAM_RES_GRP_RES_MAP">
