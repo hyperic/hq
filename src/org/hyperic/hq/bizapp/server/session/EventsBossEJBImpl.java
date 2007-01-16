@@ -1580,7 +1580,7 @@ public class EventsBossEJBImpl
      */
     public Escalation findEscalationById(int sessionID, Integer id)
         throws SessionTimeoutException, SessionNotFoundException,
-               PermissionException, JSONException
+               PermissionException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
         Escalation e = getEscMan().findById(subject, id);
@@ -1635,71 +1635,51 @@ public class EventsBossEJBImpl
     }
 
     /**
-     * save escalation
+     * Create a new escalation.  If alertDefId is non-null, the escalation
+     * will also be associated with the given alert definition.  
+     * 
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void saveEscalation(int sessionID, Integer alertDefId,
-                               EscalationAlertType alertType, 
-                               JSONObject escalation)
-        throws SessionTimeoutException, SessionNotFoundException, JSONException,
+    public Escalation createEscalation(int sessionID, String name, String desc,
+                                       boolean allowPause, long maxWaitTime,
+                                       boolean notifyAll, 
+                                       EscalationAlertType alertType,
+                                       Integer alertDefId)
+        throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, DuplicateObjectException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
-        JSONObject escObj = escalation.getJSONObject(Escalation.JSON_NAME);
-        boolean allowPause, notifyAll;
-        long maxWaitTime;
         Escalation res;
-        JSONArray jsonActions;
-        String name;
-        String description;
         
-        name        = escObj.getString("name");
-        description = escObj.getString("description");
-        allowPause  = escObj.optBoolean("allowPause");
-        maxWaitTime = escObj.getLong("maxWaitTime");
-        notifyAll   = escObj.optBoolean("notifyAll");
-        jsonActions = escObj.getJSONArray("actions");
-    
-        res = getEscMan().createEscalation(name, description, allowPause,
-                                           maxWaitTime, notifyAll);
+        // XXX -- We need to do perm-checking here
+        
+        res = getEscMan().createEscalation(name, desc, allowPause, maxWaitTime, 
+                                           notifyAll);
         
         if (alertDefId != null) {
             // The alert def needs to use this escalation
             getEscMan().setEscalation(alertType, alertDefId, res);
         }
+        return res;
     }
 
     /**
-     * update escalation
+     * Update basic escalation properties
+     * 
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void updateEscalation(int sessionID, JSONObject escalation)
-        throws SessionTimeoutException, SessionNotFoundException, JSONException,
+    public void updateEscalation(int sessionID, Escalation escalation,
+                                 String name, String desc, long maxWait,
+                                 boolean pausable, boolean notifyAll)
+        throws SessionTimeoutException, SessionNotFoundException, 
                PermissionException, DuplicateObjectException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
-        JSONObject escObj = escalation.getJSONObject(Escalation.JSON_NAME);
-        Escalation esc;
-        boolean allowPause, notifyAll;
-        long maxWaitTime;
-        JSONArray jsonActions;
-        String name;
-        String description;
-        int id;
-        
-        id          = escObj.getInt("id");
-        name        = escObj.getString("name");
-        description = escObj.getString("description");
-        allowPause  = escObj.optBoolean("allowPause");
-        maxWaitTime = escObj.getLong("maxWaitTime");
-        notifyAll   = escObj.optBoolean("notifyAll");
-        jsonActions = escObj.getJSONArray("actions");
 
-        esc = getEscMan().findById(new Integer(id));
-        getEscMan().updateEscalation(subject, esc, name, description, 
-                                     allowPause, maxWaitTime, notifyAll);
+        getEscMan().updateEscalation(subject, escalation, name, desc, 
+                                     pausable, maxWait, notifyAll);
     }
 
     /**

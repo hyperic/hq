@@ -25,320 +25,64 @@
 
 package org.hyperic.hq.ui.json.action.escalation.crud;
 
-import org.hyperic.hq.ui.json.action.escalation.BaseAction;
-import org.hyperic.hq.ui.json.action.escalation.EscalationWebMediator;
-import org.hyperic.hq.ui.json.action.JsonActionContext;
-import org.hyperic.hq.ui.json.JSONResult;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.auth.shared.SessionException;
-import org.hyperic.hq.auth.shared.SessionTimeoutException;
-import org.hyperic.hq.auth.shared.SessionNotFoundException;
-import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
-import org.hyperic.hq.common.DuplicateObjectException;
-import org.hyperic.hq.common.SystemException;
+import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
-import org.json.JSONException;
-import org.json.JSONArray;
+import org.hyperic.hq.ui.json.JSONResult;
+import org.hyperic.hq.ui.json.action.JsonActionContext;
+import org.hyperic.hq.ui.json.action.escalation.BaseAction;
+import org.hyperic.hq.ui.json.action.escalation.EscalationWebMediator;
+import org.hyperic.hq.ui.util.ContextUtils;
 import org.json.JSONObject;
 
-import java.rmi.RemoteException;
-import java.util.Map;
-import java.util.Iterator;
-import java.util.ArrayList;
-import java.util.TreeMap;
-import java.util.List;
-import java.util.StringTokenizer;
-
-import javax.ejb.FinderException;
-
-public class SaveEscalation extends BaseAction
+public class SaveEscalation 
+    extends BaseAction
 {
-    // action type
-    private static String ACTION_PREFIX = "action_row";
-
-    // email action parameter
-    private static String WHO_PREFIX = "who_row";
-    private static String USER_PREFIX = "users_row";
-    private static String ROLE_PREFIX = "roles_row";
-    private static String OTHER_PREFIX = "emailinput_row";
-
-    // syslog action parameter
-    private static String META_PREFIX = "meta_row";
-    private static String PRODUCT_PREFIX = "product_row";
-    private static String VERSION_PREFIX = "version_row";
-
-    // action waittime
-    private static String WAITTIME_PREFIX = "waittime_row";
-
-    // action list order
-    private static String ORDER = "rowOrder";
-
-    public void execute(JsonActionContext context)
-        throws PermissionException,
-               SessionTimeoutException,
-               SessionNotFoundException,
-               JSONException, RemoteException
-    {
-        EscalationWebMediator wmed = EscalationWebMediator.getInstance();
-        List actions = parseActions(context);
-
-        Map map = context.getParameterMap();
-
-        JSONArray jarr = new JSONArray();
-        for (Iterator i=actions.iterator(); i.hasNext();) {
-            Object obj = i.next();
-            JSONObject action;
-            if (obj instanceof EmailActionData) {
-                EmailActionData email = (EmailActionData)obj;
-                action = email.toJSON();
-            } else if (obj instanceof SyslogActionData) {
-                SyslogActionData slog = (SyslogActionData)obj;
-                action = slog.toJSON();
-            } else if (obj instanceof NoOpActionData) {
-                NoOpActionData noop = (NoOpActionData)obj;
-                action = noop.toJSON();
-            } else {
-                throw new IllegalArgumentException("Unsupported object type "
-                                                   +obj.getClass().getName());
-            }
-            ActionData data = (ActionData)obj;
-            JSONObject escalationAction = new JSONObject()
-                .put("action", action)
-                .put("waitTime", data.waitTime);
-
-            jarr.put(escalationAction);
-        }
-
-        String name = ((String[])map.get(NAME))[0];
-        JSONObject json = new JSONObject()
-            .put("name", name)
-            .put("description", ((String[])map.get(DESCRIPTION))[0])
-            .put("allowPause",
-                 Boolean.valueOf(
-                     ((String[])map.get(ALLOW_PAUSE))[0]).booleanValue())
-            .put("notifyAll",
-                 Boolean.valueOf(
-                     ((String[])map.get(NOTIFY_ALL))[0]).booleanValue())
-            .put("maxWaitTime",
-                 Long.valueOf(
-                     ((String[])map.get(MAX_WAIT_TIME))[0]).longValue())
-            .put("actions", jarr);
+    private final Log _log = LogFactory.getLog(SaveAction.class);
+    
+    public void execute(JsonActionContext context) throws Exception {
+        Map p = context.getParameterMap();
         
-        String[] ad = (String[])map.get(ALERTDEF_ID);
-        String[] gad = (String[])map.get(GALERTDEF_ID);
-        JSONObject escalation = new JSONObject().put("escalation", json);
+        String  name     = ((String[])p.get("name"))[0];
+        String  desc     = ((String[])p.get("description"))[0];
+        long maxWait     = Long.parseLong(((String[])p.get("maxWaitTime"))[0]); 
+        boolean pausable =
+            Boolean.valueOf(((String[])p.get("allowPause"))[0]).booleanValue();
+        boolean notifyAll = 
+            Boolean.valueOf(((String[])p.get("notifyAll"))[0]).booleanValue();
+            
+        // These specify an optional alert definition to attach to
+        String[] aDef  = (String[])p.get(ALERTDEF_ID);
+        String[] gaDef = (String[])p.get(GALERTDEF_ID);
+        EscalationAlertType alertType = null;
+        Integer alertDefId = null;
 
-        try {
-            if (ad != null && !"undefined".equals(ad[0])) {
-                Integer alertDefId = Integer.valueOf((ad)[0]);
-                wmed.saveEscalation(context, context.getSessionId(),
-                                             alertDefId, 
-                                             ClassicEscalationAlertType.CLASSIC,
-                                             escalation);
-            } else if (gad != null && !"undefined".equals(gad[0])) {
-                Integer alertDefId = Integer.valueOf((gad)[0]);
-                wmed.saveEscalation(context, context.getSessionId(),
-                                             alertDefId,
-                                             GalertEscalationAlertType.GALERT,
-                                             escalation);
-            } else {
-                wmed.saveEscalation(context, context.getSessionId(), null,
-                                    null, escalation);
-            }
-        } catch(SessionException e) {
-            throw new SystemException(e);
-        } catch(FinderException e) {
-            throw new SystemException(e);
-        } catch(DuplicateObjectException e) {
-            throw new SystemException(e);
+        if (aDef != null && !"undefined".equals(aDef[0])) {
+            alertType  = ClassicEscalationAlertType.CLASSIC;
+            alertDefId = Integer.valueOf(aDef[0]);
+        } else if (gaDef != null && !"undefined".equals(gaDef[0])) {
+            alertType  = GalertEscalationAlertType.GALERT;
+            alertDefId = Integer.valueOf(gaDef[0]);
         }
+        
+        EventsBoss eBoss  = 
+            ContextUtils.getEventsBoss(context.getServletContext());
 
+        eBoss.createEscalation(context.getSessionId(), name, desc, 
+                               pausable, maxWait, notifyAll, alertType,
+                               alertDefId);
+        
+        EscalationWebMediator wmed = EscalationWebMediator.getInstance();
+        
+        // XXX:  This should get it by id
         JSONObject result =
             wmed.jsonByEscalationName(context, context.getSessionId(), name);
         context.setJSONResult(new JSONResult(result));
         context.getRequest().setAttribute("escalation", result);
-    }
-
-    private List parseActions(JsonActionContext context)
-    {
-        ArrayList actions = new ArrayList();
-
-        Map map = context.getParameterMap();
-        Map rows = groupKeysByRow(context);
-        for(Iterator i = rows.keySet().iterator(); i.hasNext();) {
-            Integer row = (Integer)i.next();
-            List keys = (List)rows.get(row);
-            if (keys.contains(ACTION_PREFIX + row)) {
-                String[] values = (String[])map.get(ACTION_PREFIX + row);
-                if ("email".equalsIgnoreCase(values[0])) {
-                    actions.add(new EmailActionData(
-                        (String[])map.get(WHO_PREFIX + row),
-                        (String[])map.get(USER_PREFIX + row),
-                        (String[])map.get(ROLE_PREFIX + row),
-                        (String[])map.get(OTHER_PREFIX + row),
-                        false,
-                        (String[])map.get(WAITTIME_PREFIX + row)
-                    ));
-                } else if ("sms".equalsIgnoreCase(values[0])) {
-                    actions.add(new EmailActionData(
-                        (String[])map.get(WHO_PREFIX + row),
-                        (String[])map.get(USER_PREFIX + row),
-                        (String[])map.get(ROLE_PREFIX + row),
-                        (String[])map.get(OTHER_PREFIX + row),
-                        true,
-                        (String[])map.get(WAITTIME_PREFIX + row)
-                    ));
-                } else if ("syslog".equalsIgnoreCase(values[0])) {
-                    actions.add(new SyslogActionData(
-                        (String[])map.get(META_PREFIX + row),
-                        (String[])map.get(PRODUCT_PREFIX + row),
-                        (String[])map.get(VERSION_PREFIX + row),
-                        (String[])map.get(WAITTIME_PREFIX + row)
-                    ));
-                } else if ("noop".equalsIgnoreCase(values[0])) {
-                    actions.add(new NoOpActionData(
-                        (String[])map.get(WAITTIME_PREFIX + row)
-                    ));
-                } else {
-                    throw new IllegalArgumentException(
-                        "Unsupported action type " + values[0]);
-                }
-            }
-        }
-        return actions;
-    }
-
-    private Map groupKeysByRow(JsonActionContext context)
-    {
-        TreeMap rowMap = new TreeMap();
-        Map map = context.getParameterMap();
-        for (Iterator i = map.keySet().iterator(); i.hasNext();) {
-            String key = (String)i.next();
-            if (key.startsWith(ACTION_PREFIX) ||
-                key.startsWith(WHO_PREFIX) ||
-                key.startsWith(USER_PREFIX) ||
-                key.startsWith(ROLE_PREFIX) ||
-                key.startsWith(OTHER_PREFIX) ||
-                key.startsWith(META_PREFIX) ||
-                key.startsWith(PRODUCT_PREFIX) ||
-                key.startsWith(VERSION_PREFIX) ||
-                key.startsWith(WAITTIME_PREFIX)
-                ) {
-                String rowString = key.substring(key.indexOf("_row")+4);
-                Integer row = Integer.valueOf(rowString);
-                List content = (List)rowMap.get(row);
-                if (content == null) {
-                    content = new ArrayList();
-                }
-                content.add(key);
-                rowMap.put(row, content);
-            }
-        }
-        return rowMap;
-    }
-    
-    private static class NoOpActionData extends ActionData
-    {
-        NoOpActionData(String[] timearr) {
-            super(null, null, timearr);
-        }
-        
-        public JSONObject toJSON() throws JSONException
-        {
-            JSONObject action = super.toJSON().put("className", "NoOpAction");
-            action.put("config", new JSONObject());
-
-            return action;
-        }        
-    }
-
-    private static class EmailActionData extends ActionData
-    {
-        int listType;
-        String names;
-        boolean _sms;
-
-        EmailActionData(String[] type, String[] narr, String[] roles,
-                        String[] others, boolean sms, String[] time)
-        {
-            super(null, null, time);
-
-            String[] namesarr;
-            if ("users".equalsIgnoreCase(type[0])) {
-                listType = EmailActionConfig.TYPE_USERS;
-                namesarr = narr;
-            } else if ("roles".equalsIgnoreCase(type[0])) {
-                listType = EmailActionConfig.TYPE_ROLES;
-                namesarr = roles;
-            } else if ("others".equalsIgnoreCase(type[0])) {
-                listType = EmailActionConfig.TYPE_EMAILS;
-                namesarr = others;
-            } else {
-                throw new IllegalArgumentException("Invalid type " + type[0]);
-            }
-
-            // name list
-            if (namesarr != null) {
-                StringTokenizer tokens = new StringTokenizer(namesarr[0], " ,");
-                StringBuffer buf = new StringBuffer();
-                while(tokens.hasMoreTokens()) {
-                    if (buf.length() > 0) {
-                        buf.append(",");
-                    }
-                    buf.append(tokens.nextToken());
-                }
-                names = buf.toString();
-            }
-            
-            _sms = sms;
-        }
-
-        public JSONObject toJSON() throws JSONException
-        {
-            JSONObject action = super.toJSON()
-                .put("className", "EmailAction");
-
-            JSONObject config =  new JSONObject()
-                .put("listType", listType)
-                .put("names", names)
-                .put("sms", _sms);
-
-            action.put("config", config);
-
-            return action;
-        }
-    }
-
-    private static class SyslogActionData extends ActionData
-    {
-        String meta;
-        String product;
-        String version;
-
-        SyslogActionData(String[] met, String[] prod, String[] vers,
-                         String[] time)
-        {
-            super(null, null, time);
-
-            meta = met[0];
-            product = prod[0];
-            version = vers[0];
-        }
-
-        public JSONObject toJSON() throws JSONException
-        {
-            JSONObject action = super.toJSON()
-                .put("className", "SyslogAction");
-
-            JSONObject config =  super.toJSON()
-                .put("meta", meta)
-                .put("version", version)
-                .put("product", product);
-            
-            action.put("config", config);
-
-            return action;
-        }
     }
 }
