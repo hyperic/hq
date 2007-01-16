@@ -19,8 +19,8 @@
       <column name ="VERSION_COL" default="0" />
     </version>
 
-    <property name="name" unique="true" type="string">
-      <column name="NAME" not-null="true" length="200" />
+    <property name="name" type="string">
+      <column name="NAME" not-null="true" length="200" unique="true" index="EAM_APPLICATION_NAME_IDX"/>
     </property>
 
     <property name="cid" type="integer">

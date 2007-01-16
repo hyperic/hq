@@ -21,7 +21,7 @@
     </version>
 
     <property name="name" type="string">
-      <column name="NAME" not-null="true" length="200" />
+      <column name="NAME" not-null="true" length="200" unique="true" index="EAM_SERVER_TYPE_NAME_IDX" />
     </property>
 
     <property name="sortName" type="string">
@@ -45,8 +45,7 @@
     </property>
 
     <property name="plugin" type="string">
-      <column name="PLUGIN" index="EAM_SERVER_TYPE_PLUGIN_IDX"
-              not-null="false" length="250" />
+      <column name="PLUGIN" not-null="false" length="250" index="EAM_SERVER_TYPE_PLUGIN_IDX"/>
     </property>
 
     <property name="virtual" type="boolean">

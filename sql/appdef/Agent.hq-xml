@@ -34,8 +34,8 @@
       <column name="AUTHTOKEN" not-null="true" length="100" />
     </property>
 
-    <property name="agentToken" unique="true" type="string">
-      <column name="AGENTTOKEN" index="AGENT_TOKEN_UNIQUE" not-null="true" length="100" />
+    <property name="agentToken" type="string">
+      <column name="AGENTTOKEN" not-null="true" length="100" unique="true" index="AGENT_TOKEN_IDX" />
     </property>
 
     <property name="version" type="string">

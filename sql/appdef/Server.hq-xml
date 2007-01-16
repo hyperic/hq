@@ -22,7 +22,7 @@
     </version>
 
     <property name="name" unique="true" type="string">
-      <column name="NAME" index="EAM_SERVER_NAME" not-null="true" length="200" />
+      <column name="NAME" not-null="true" length="200" index="EAM_SERVER_NAME_IDX" />
     </property>
 
     <property name="cid" type="integer">
@@ -55,10 +55,10 @@
 
     <properties name="serverAiidIdx">
       <many-to-one name="platform" class="Platform">
-        <column name="PLATFORM_ID" index="EAM_SERVER_AIID_IDX" not-null="false" />
+        <column name="PLATFORM_ID" not-null="false" unique-key="EAM_SERVER_AIID_IDX" index="EAM_SERVER_PLATFORM_IDX" />
       </many-to-one>
       <property name="autoinventoryIdentifier" type="string">
-        <column name="AUTOINVENTORYIDENTIFIER" index="EAM_SERVER_AIID_IDX" not-null="false" length="250" />
+        <column name="AUTOINVENTORYIDENTIFIER" not-null="false" length="250" unique-key="EAM_SERVER_AIID_IDX" />
       </property>
     </properties>
 

@@ -21,12 +21,12 @@
       <column name ="VERSION_COL" default="0" />
     </version>
 
-    <property name="name" unique="true" type="string">
-      <column name="NAME" index="EAM_PLATFORM_NAME" not-null="true" length="100" />
+    <property name="name" type="string">
+      <column name="NAME" not-null="true" length="100" unique="true" index="EAM_PLATFORM_NAME_IDX" />
     </property>
 
     <property name="fqdn" type="string">
-      <column name="FQDN" index="EAM_PLATFORM_FQDN" not-null="true" length="200" />
+      <column name="FQDN" not-null="true" length="200" unique="true" index="EAM_PLATFORM_FQDN_IDX" />
     </property>
 
     <property name="sortName" type="string">
