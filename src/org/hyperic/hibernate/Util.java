@@ -43,8 +43,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Hibernate;
 import org.hibernate.jmx.StatisticsService;
 import org.hibernate.cache.NoCacheProvider;
-import org.hibernate.stat.Statistics;
-import org.hibernate.stat.SecondLevelCacheStatistics;
 import org.hibernate.transaction.JTATransactionFactory;
 
 import org.hibernate.cfg.Configuration;
@@ -63,6 +61,9 @@ import org.hyperic.hq.product.server.MBeanUtil;
 import java.sql.Connection;
 import java.util.Properties;
 import java.util.Iterator;
+
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Cache;
 
 /**
  * from hibernate caveat emptor with modifications to optimize initial 
@@ -113,31 +114,30 @@ public class Util {
             throw new ExceptionInInitializerError(ex);
         }
 
-        // Add second level cache statistics to the diagnostics
+        // Add ehcache statistics to the diagnostics
         DiagnosticObject cacheDiagnostics = new DiagnosticObject() {
             public String getStatus() {
-
-                Statistics stats = getSessionFactory().getStatistics();
-                String[] caches = stats.getSecondLevelCacheRegionNames();
+                CacheManager cacheManager = CacheManager.getInstance();
+                String[] caches = cacheManager.getCacheNames();
 
                 String separator = System.getProperty("line.separator");
                 long totalBytes = 0;
                 StringBuffer buf = new StringBuffer();
                 for (int i = 0; i < caches.length; i++) {
-                    SecondLevelCacheStatistics cacheStats =
-                        stats.getSecondLevelCacheStatistics(caches[i]);
-                    totalBytes += cacheStats.getSizeInMemory();
+                    Cache cache = cacheManager.getCache(caches[i]);
+
+                    totalBytes += cache.calculateInMemorySize();
                     buf.append(separator)
                         .append("Cache: ")
-                        .append(caches[i])
+                        .append(cache.getName())
                         .append(" elements=")
-                        .append(cacheStats.getElementCountInMemory())
+                        .append(cache.getSize())
                         .append(" (")
-                        .append(cacheStats.getSizeInMemory())
+                        .append(cache.calculateInMemorySize())
                         .append(" bytes) hits=")
-                        .append(cacheStats.getHitCount())
+                        .append(cache.getHitCount())
                         .append(" misses=")
-                        .append(cacheStats.getMissCount());
+                        .append(cache.getMissCountNotFound());
                 }
                 buf.append(separator).
                     append("Total mapped cache size=").
@@ -148,7 +148,7 @@ public class Util {
             }
 
             public String toString() {
-                return "Hibernate Cache";
+                return "ehcache";
             }
         };
         DiagnosticThread.addDiagnosticObject(cacheDiagnostics);
