@@ -68,7 +68,6 @@ public class PlatformValue
    private java.lang.Long cTime;
    private boolean cTimeHasBeenSet = false;
    private java.util.Collection IpValues = new java.util.HashSet();
-   private Collection ServerValues = new java.util.HashSet();
    private org.hyperic.hq.appdef.shared.PlatformTypeValue PlatformType;
    private boolean PlatformTypeHasBeenSet = false;
    private org.hyperic.hq.appdef.shared.AgentValue Agent;
@@ -144,8 +143,6 @@ public class PlatformValue
 	  cTimeHasBeenSet = true;
 	// TODO Clone is better no ?
 	  this.IpValues = otherValue.IpValues;
-	// TODO Clone is better no ?
-	  this.ServerValues = otherValue.ServerValues;
 	// TODO Clone is better no ?
 	  this.PlatformType = otherValue.PlatformType;
 	  PlatformTypeHasBeenSet = true;
@@ -418,59 +415,7 @@ public class PlatformValue
 	  // TODO Clone the List ????
 	  this.IpValues = from.IpValues;
    }
-   protected Collection addedServerValues = new java.util.HashSet();
-   protected Collection removedServerValues = new java.util.HashSet();
-   protected Collection updatedServerValues = new java.util.HashSet();
 
-   public Collection getAddedServerValues() { return addedServerValues; }
-   public Collection getRemovedServerValues() { return removedServerValues; }
-   public Collection getUpdatedServerValues() { return updatedServerValues; }
-
-   public org.hyperic.hq.appdef.shared.ServerLightValue[] getServerValues()
-   {
-	  return (org.hyperic.hq.appdef.shared.ServerLightValue[])this.ServerValues.toArray(new org.hyperic.hq.appdef.shared.ServerLightValue[ServerValues.size()]);
-   }
-
-   public void addServerValue(org.hyperic.hq.appdef.shared.ServerLightValue added)
-   {
-	  this.ServerValues.add(added);
-	  if ( ! this.addedServerValues.contains(added))
-		 this.addedServerValues.add(added);
-   }
-
-   public void removeServerValue(org.hyperic.hq.appdef.shared.ServerLightValue removed)
-   {
-	  this.ServerValues.remove(removed);
-	  this.removedServerValues.add(removed);
-	  if (this.addedServerValues.contains(removed))
-		 this.addedServerValues.remove(removed);
-	  if (this.updatedServerValues.contains(removed))
-		 this.updatedServerValues.remove(removed);
-   }
-
-   public void removeAllServerValues()
-   {
-        // DOH. Clear the collection - javier 2/24/03
-        this.ServerValues.clear();
-   }
-
-   public void updateServerValue(org.hyperic.hq.appdef.shared.ServerLightValue updated)
-   {
-	  if ( ! this.updatedServerValues.contains(updated))
-		 this.updatedServerValues.add(updated);
-   }
-
-   public void cleanServerValue(){
-	  this.addedServerValues = new java.util.HashSet();
-	  this.removedServerValues = new java.util.HashSet();
-	  this.updatedServerValues = new java.util.HashSet();
-   }
-
-   public void copyServerValuesFrom(org.hyperic.hq.appdef.shared.PlatformValue from)
-   {
-	  // TODO Clone the List ????
-	  this.ServerValues = from.ServerValues;
-   }
    public org.hyperic.hq.appdef.shared.PlatformTypeValue getPlatformType()
    {
 	  return this.PlatformType;
@@ -664,19 +609,6 @@ public class PlatformValue
 			// lEquals = lEquals && java.util.Arrays.equals(this.getIpValues() , that.getIpValues()) ;
             lEquals = lEquals && cmr1.containsAll(cmr2);
 		 }
-		 if( this.getServerValues() == null )
-		 {
-			lEquals = lEquals && ( that.getServerValues() == null );
-		 }
-		 else
-		 {
-            // XXX Covalent Custom - dont compare the arrays, as order is not significant. ever.    
-            // - javier 7/16/03
-            java.util.Collection cmr1 = java.util.Arrays.asList(this.getServerValues());
-            java.util.Collection cmr2 = java.util.Arrays.asList(that.getServerValues());
-			// lEquals = lEquals && java.util.Arrays.equals(this.getServerValues() , that.getServerValues()) ;
-            lEquals = lEquals && cmr1.containsAll(cmr2);
-		 }
 		 if( this.PlatformType == null )
 		 {
 			lEquals = lEquals && ( that.PlatformType == null );
@@ -733,7 +665,6 @@ public class PlatformValue
       result = 37*result + ((this.cTime != null) ? this.cTime.hashCode() : 0);
 
 	  result = 37*result + ((this.getIpValues() != null) ? this.getIpValues().hashCode() : 0);
-	  result = 37*result + ((this.getServerValues() != null) ? this.getServerValues().hashCode() : 0);
 	  result = 37*result + ((this.PlatformType != null) ? this.PlatformType.hashCode() : 0);
 	  result = 37*result + ((this.Agent != null) ? this.Agent.hashCode() : 0);
 	  return result;

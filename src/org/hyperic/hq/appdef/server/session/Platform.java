@@ -205,23 +205,16 @@ public class Platform extends PlatformBase
             _platformValue.addIpValue( ((Ip)iIpValue.next()).getIpValue() );
         }
         _platformValue.cleanIpValue();
-        _platformValue.removeAllServerValues();
-        Iterator iServerValue = getServers().iterator();
-        while (iServerValue.hasNext()){
-            _platformValue.addServerValue(
-                ((Server)iServerValue.next()).getServerLightValue());
-        }
-        _platformValue.cleanServerValue();
-        if ( getPlatformType() != null )
+        if (getPlatformType() != null)
             _platformValue.setPlatformType(
                 getPlatformType().getPlatformTypeValue());
         else
             _platformValue.setPlatformType( null );
-        if ( getAgent() != null ) {
-            _platformValue.setAgent( getAgent().getAgentValue() );
+        if (getAgent() != null) {
+            _platformValue.setAgent(getAgent().getAgentValue());
         }
         else
-            _platformValue.setAgent( null );
+            _platformValue.setAgent(null);
         return _platformValue;
     }
 
