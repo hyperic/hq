@@ -30,20 +30,13 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
-import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServerLightValue;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
-import org.hyperic.hq.appdef.shared.ServerManagerUtil;
-import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.ServiceLightValue;
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycle;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycleListener;
@@ -54,19 +47,18 @@ import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.server.session.MetricDataCache;
 import org.hyperic.hq.measurement.server.session.SRNCache;
 import org.hyperic.hq.measurement.server.session.ScheduleRevNum;
+import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
-import org.hyperic.hq.measurement.shared.DataManagerUtil;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.hibernate.RequiresSession;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 
-import javax.ejb.CreateException;
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -75,6 +67,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Collection;
 
 /**
  * This job is responsible for filling in missing availabilty metric values.
@@ -84,7 +77,7 @@ import java.util.List;
  */
 public class AvailabilityCheckService
     implements AvailabilityCheckServiceMBean, MBeanRegistration,
-               EjbModuleLifecycleListener {
+               EjbModuleLifecycleListener, RequiresSession {
 
     private MBeanServer server = null;
     private EjbModuleLifecycle haListener = null;
@@ -98,14 +91,7 @@ public class AvailabilityCheckService
              "m.template_id = t.id AND t.monitorable_type_id = mt.id AND " +
              "t.category_id = cat.id AND cat.name = '" +
              MeasurementConstants.CAT_AVAILABILITY + "'";
-    
-    private static final String ENABLED_METRICS_SQL =
-        "SELECT m.id FROM EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t, " +
-                         "EAM_MONITORABLE_TYPE mt " +
-        "WHERE m.enabled = DB_TRUE_TOKEN AND m.coll_interval IS NOT NULL AND " +
-              "m.instance_id = ? AND m.template_id = t.id AND " +
-              "t.monitorable_type_id = mt.id AND mt.appdef_type = ?";    
-    
+       
     private static final String DATASOURCE = HQConstants.DATASOURCE;    
     
     private final String logCtx = AvailabilityCheckService.class.getName();
@@ -117,14 +103,8 @@ public class AvailabilityCheckService
     
     private DataManagerLocal dataMan;
     private DataManagerLocal getDataMan() {
-        try {
-            if (dataMan == null)
-                dataMan = DataManagerUtil.getLocalHome().create();
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        if (dataMan == null)
+            dataMan = DataManagerEJBImpl.getOne();
         
         return dataMan;
     }
@@ -169,7 +149,7 @@ public class AvailabilityCheckService
         SRNCache srnCache = SRNCache.getInstance();
         
         // Fetch all derived availablity measurements
-        List dmList = this.getEnabledAvailabilityMetrics();
+        List dmList = getEnabledAvailabilityMetrics();
         MetricDataCache metCache = MetricDataCache.getInstance();
         
         if (log.isDebugEnabled())
@@ -266,110 +246,87 @@ public class AvailabilityCheckService
             }
         }
         
-        // Now check the servers and services
-        try {
-            PlatformManagerLocal platMan =
-                PlatformManagerUtil.getLocalHome().create();
+        // Check the servers and services.
+        PlatformManagerLocal platMan = PlatformManagerEJBImpl.getOne();
+        AuthzSubjectManagerLocal authzMan = AuthzSubjectManagerEJBImpl.getOne();
+        AuthzSubjectValue overlord = authzMan.getOverlord();
+        ArrayList metrics = new ArrayList();
 
-            ServerManagerLocal svrMan =
-                ServerManagerUtil.getLocalHome().create();
-
-            AuthzSubjectManagerLocal authzMan =
-                AuthzSubjectManagerUtil.getLocalHome().create();
-            AuthzSubjectValue overlord = authzMan.getOverlord();
-            ArrayList metrics = new ArrayList();
-            for (Iterator it = downPlatforms.iterator(); it.hasNext(); ) {
-                AppdefEntityID platId = (AppdefEntityID) it.next();
-                
-                try {
-                    PlatformValue platform =
-                        platMan.getPlatformValueById(overlord, platId.getId());
-                    
-                    // Go through the servers and services
-                    ServerLightValue[] servers = platform.getServerValues();
-                    for (int svrIdx = 0; svrIdx < servers.length; svrIdx++) {
-                        Object dmv =
-                            availMap.remove(servers[svrIdx].getEntityId());
-                        if (dmv != null)
-                            metrics.add(dmv);
-                        
-                        // Find the services
-                        ServerValue server = svrMan.getServerById(overlord,
-                                                 servers[svrIdx].getId());
-                        
-                        ServiceLightValue[] services =
-                            server.getServiceValues();
-                        for (int svcIdx = 0; svcIdx < services.length;
-                             svcIdx++) {
-                            dmv =
-                                availMap.remove(services[svcIdx].getEntityId());
-                            
-                            if (dmv != null)
-                                metrics.add(dmv);
-                        }
-                    }
-                } catch (PlatformNotFoundException e) {
-                    log.error("Unable to find plaform " + platId);
-                } catch (ServerNotFoundException e) {
-                    log.error("Unable to find server for platform " + platId);
-                }
-                
+        for (Iterator i = downPlatforms.iterator(); i.hasNext();) {
+            AppdefEntityID platId = (AppdefEntityID)i.next();
+            // Go through the servers and services
+            Platform platform;
+            try {
+                platform = platMan.findPlatformById(overlord, platId.getId());
+            } catch (Exception e) {
+                log.error("Unable to find platform=" + platId.getId(), e);
+                continue;
             }
-            
-            // Go through the server and service metrics and backfill them
-            for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-                DerivedMeasurementValue dmVo =
-                    (DerivedMeasurementValue) it.next();
-                
-                // End is at least more than 1/2 interval away
-                long end = TimingVoodoo.closestTime(
-                    current - dmVo.getInterval(), dmVo.getInterval());
 
-                // We have to get at least the measurement interval
-                long maxInterval = Math.max(this.interval, dmVo.getInterval());
-                
-                // Begin is maximum of mbean interval or measurement create time
-                long begin = Math.max(end - maxInterval,
-                                      dmVo.getMtime() + dmVo.getInterval());
-                begin = TimingVoodoo.roundDownTime(begin, dmVo.getInterval());
+            Collection servers = platform.getServers();
+            for (Iterator it = servers.iterator(); it.hasNext();) {
+                Server server = (Server)it.next();
+                Object dmv =
+                    availMap.remove(server.getEntityId());
+                if (dmv != null)
+                    metrics.add(dmv);
+                Collection services = server.getServices();
+                for (Iterator serviceItr = services.iterator();
+                     serviceItr.hasNext();) {
+                    Service service = (Service) serviceItr.next();
+                    dmv = availMap.remove(service.getEntityId());
+                    if (dmv != null)
+                        metrics.add(dmv);
+                }
+            }
+        }
 
+        // Go through the server and service metrics and backfill them
+        for (Iterator it = metrics.iterator(); it.hasNext();) {
+            DerivedMeasurementValue dmVo =
+                (DerivedMeasurementValue) it.next();
+
+            // End is at least more than 1/2 interval away
+            long end = TimingVoodoo.closestTime(
+                current - dmVo.getInterval(), dmVo.getInterval());
+
+            // We have to get at least the measurement interval
+            long maxInterval = Math.max(this.interval, dmVo.getInterval());
+
+            // Begin is maximum of mbean interval or measurement create time
+            long begin = Math.max(end - maxInterval,
+                                  dmVo.getMtime() + dmVo.getInterval());
+            begin = TimingVoodoo.roundDownTime(begin, dmVo.getInterval());
+
+            if (log.isDebugEnabled())
+                log.debug("Check metric ID: " + dmVo.getId() +
+                    " from " + begin + " to " + end);
+
+            // If our time range is negative, then we just wait until next
+            if (end < begin)
+                continue;
+
+            long[] theMissing;
+            try {
+                theMissing = getDataMan().getMissingDataTimestamps(
+                    dmVo.getId(), dmVo.getInterval(), begin, end);
+            } catch (DataNotAvailableException e) {
+                log.error("Failed in AvailabilityCheckService", e);
+                continue;
+            }
+
+            // Go through the data and add missing data points
+            MetricValue mval;
+            for (int i = theMissing.length - 1; i >= 0; i--) {
                 if (log.isDebugEnabled())
-                    log.debug("Check metric ID: " + dmVo.getId() +
-                              " from " + begin + " to " + end);
+                    log.debug("Metric ID: " + dmVo.getId() +
+                        " missing data at " + theMissing[i]);
 
-                // If our time range is negative, then we just wait until next
-                if (end < begin)
-                    continue;
-                                                       
-                long[] theMissing;
-                try {
-                    theMissing = getDataMan().getMissingDataTimestamps(
-                            dmVo.getId(), dmVo.getInterval(), begin, end);
-                } catch (DataNotAvailableException e) {
-                    log.error("Failed in AvailabilityCheckService", e);
-                    continue;
-                }
-                
-                // Go through the data and add missing data points
-                MetricValue mval;
-                for (int i = theMissing.length - 1; i >= 0; i--) {
-                    if (log.isDebugEnabled())
-                        log.debug("Metric ID: " + dmVo.getId() +
-                                  " missing data at " + theMissing[i]);
-
-                    // Insert the missing data point
-                    mval = new MetricValue(
-                        MeasurementConstants.AVAIL_DOWN, theMissing[i]);
-                    getDataMan().addData(dmVo.getId(), mval, false);
-                }
+                // Insert the missing data point
+                mval = new MetricValue(
+                    MeasurementConstants.AVAIL_DOWN, theMissing[i]);
+                getDataMan().addData(dmVo.getId(), mval, false);
             }
-        } catch (CreateException e) {
-            log.error("Unable to create PlatformManager");
-        } catch (NamingException e) {
-            log.error("Unable to lookup PlatformManager");
-        } catch (PermissionException e) {
-            log.error("The overlord does not have permission to lookup " +
-                      "platform", e);
         }
     }
     
