@@ -199,43 +199,6 @@ public class Server extends ServerBase
         return _serverValue;
     }
 
-    /**
-     * for legacy EJB DTO pattern
-     * @deprecated use (this) Server object instead
-     * @return
-     */
-    public ServerValue getServerValueObject()
-    {
-        ServerValue vo = new ServerValue();
-        vo.setSortName(getSortName());
-        vo.setDescription(getDescription());
-        vo.setRuntimeAutodiscovery(getRuntimeAutodiscovery());
-        vo.setWasAutodiscovered(getWasAutodiscovered());
-        vo.setAutodiscoveryZombie(getAutodiscoveryZombie());
-        vo.setModifiedBy(getModifiedBy());
-        vo.setOwner(getOwner());
-        vo.setLocation(getLocation());
-        vo.setName(getName());
-        vo.setAutoinventoryIdentifier(getAutoinventoryIdentifier());
-        vo.setInstallPath(getInstallPath());
-        vo.setServicesAutomanaged(getServicesAutomanaged());
-        vo.setId(getId());
-        vo.setMTime(getMTime());
-        vo.setCTime(getCTime());
-        vo.setConfigResponseId(getConfigResponseId());
-        ServerType stype = getServerType();
-        if ( stype != null ) {
-            vo.setServerType( stype.getServerTypeValueObject() );
-        }
-        else
-            vo.setServerType( null );
-        Platform plat = getPlatform();
-        if ( plat != null) {
-            vo.setPlatform(plat.getPlatformLightValue());
-        }
-        return vo;
-    }
-
     public Set getServiceSnapshot()
     {
         if (getServices() == null) {
