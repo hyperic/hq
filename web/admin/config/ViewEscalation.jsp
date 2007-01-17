@@ -94,8 +94,15 @@ function showViewEscResponse(originalRequest) {
 
     var escViewUL = $('viewEscalationUL');
 
-    for(var i=escViewUL.childNodes.length-1; i>1; i--) {
-     escViewUL.removeChild(escViewUL.childNodes[i]);
+    for (var i = escViewUL.childNodes.length - 1; i > -1; i--) {
+        escViewUL.removeChild(escViewUL.childNodes[i]);
+    }
+
+    if (actions.length == 0) {
+        $('noActions').style.display = "";
+    }
+    else {
+        $('viewSection').style.display = "";
     }
 
     for (i = 0; i < actions.length; i++) {
@@ -159,7 +166,7 @@ function showViewEscResponse(originalRequest) {
 
       viewLi.appendChild(remDiv);
       remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
-      remDiv.innerHTML ='<a href="#" onclick="removeRow(this);removeAction();"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
+      remDiv.innerHTML ='<a href="#" onclick="removeRow(this);removeAction(' + id + ');"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
 
       
       viewLi.appendChild(escTable);
@@ -262,7 +269,7 @@ function showViewEscResponse(originalRequest) {
       usersEditDiv.innerHTML = " ";
       $('pauseTimeText').innerHTML = 'Allow user to pause escalation: ' + allowPause + "<br>";
 
-}
+    }
 
     Sortable.create("viewEscalationUL",
           {dropOnEmpty: true,
@@ -298,8 +305,14 @@ function showViewEscResponse(originalRequest) {
         var pars =  "EscId=" + id + "&" + serialAddAction;
         var url = '<html:rewrite action="/escalation/saveAction"/>';
 
-        new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showViewEscResponse, onFailure: reportError} );
-        alert(pars)
+        new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: updateEscView, onFailure: reportError} );
+    }
+
+    function updateEscView( originalRequest ) {
+        $('example').style.display= '';
+        $('escMsg').innerHTML ="Action added to this escalation";
+        cancelAddEscalation();
+        requestViewEscalation();
     }
 
     function hideAddEscButtons() {
@@ -537,8 +550,6 @@ function showViewEscResponse(originalRequest) {
     }
 
     function addOption(sel, val, txt, selected) {
-
-
         var o = document.createElement('option');
         var t = document.createTextNode(txt);
 
@@ -568,16 +579,12 @@ function showViewEscResponse(originalRequest) {
         }
     }
 
-   function removeAction() {
-       var urlBegin = '<html:rewrite action="/escalation/removeAction/';
+   function removeAction(id) {
+        var urlBegin = '<html:rewrite action="/escalation/removeAction/';
         var urlEnd = '.do"/>';
-        var alertDefId = $('alertDefId').value;
-        var url =  urlBegin + alertDefId + urlEnd;
-        var id= $('id').value
-        var pars = "alertDefId=" + alertDefId + "&id" + id;
+        var url =  urlBegin + id + urlEnd;
 
-        new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponseRemoved, onFailure :reportError} );
-       
+        new Ajax.Request( url, {method: 'post', onComplete: showResponseRemoved, onFailure :reportError} );
    }
     
     function configure(id) {
@@ -685,7 +692,6 @@ function showViewEscResponse(originalRequest) {
         $('addEscalationUL').innerHTML = "";
         $('addEscButtons').style.display = "none";
         $('addRowButton').style.display = "";
-        
     }
 
 </script>
@@ -929,6 +935,8 @@ function showViewEscResponse(originalRequest) {
 
 </form>
 
+<br/>
+
 <form name="viewEscalation" id="viewEscalation" style="display:none;">
     <input type="hidden" id="alertDefId" name="alertDefId"
   value='<c:out value="${alertDef.id}"/>' />
@@ -964,12 +972,13 @@ function showViewEscResponse(originalRequest) {
       <td id="noActions" width="100%" style="padding:4px;display:none;">Currently there are no actions for this escalation</td>
     </tr>
     <tr>
-      <td width="100%" id="viewSection">
+      <td width="100%" id="viewSection" style="display:none;">
       <ul id="viewEscalationUL" style="margin-left:0px;"></ul>
       </td>
     </tr>
- </table>
-    </form>
+   </tbody>
+</table>
+</form>
  <form name="addEscalation" id="addEscalation">
  <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tbody>
