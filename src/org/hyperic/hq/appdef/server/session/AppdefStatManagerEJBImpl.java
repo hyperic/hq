@@ -366,7 +366,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         throws PlatformNotFoundException, PermissionException {
         try {
             PlatformValue platVo = 
-                getPlatformMgrLocal().getPlatformById(subject,platformId);
+                getPlatformMgrLocal().getPlatformValueById(subject,platformId);
             ResourceTreeNode[] retVal;
             retVal = getNavMapDataForPlatform(subject,platVo);
             return retVal;

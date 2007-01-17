@@ -173,7 +173,7 @@ public class AIScheduleManagerEJBImpl
 
             PlatformManagerLocal platformManagerLocal = null;
             platformManagerLocal = platformManagerLocalHome.create();
-            pValue = platformManagerLocal.getPlatformById(subject, id.getId());
+            pValue = platformManagerLocal.getPlatformValueById(subject, id.getId());
         } catch (PermissionException e) {
             throw new AutoinventoryException(e);
         } catch (PlatformNotFoundException e) {

@@ -25,9 +25,6 @@
 
 package org.hyperic.hq.events.test;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
@@ -39,7 +36,6 @@ import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.test.HQEJBTestBase;
-import org.hyperic.dao.DAOFactory;
 
 public class AlertDefTest
     extends HQEJBTestBase
@@ -71,7 +67,7 @@ public class AlertDefTest
         pVal.setFqdn(u("My.fqdn.foo"));
         pVal.setCpuCount(new Integer(0));
         ppk = pMan.createPlatform(getOverlord(), ptpk, pVal, null);
-        pVal = pMan.getPlatformById(getOverlord(), ppk);
+        pVal = pMan.getPlatformValueById(getOverlord(), ppk);
         
         // Create alert def
         AlertDefinitionValue aInfo = new AlertDefinitionValue();

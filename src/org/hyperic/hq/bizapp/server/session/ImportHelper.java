@@ -290,7 +290,7 @@ class ImportHelper
                 Integer pk  = this.platMan.createPlatform(this.subject, 
                                                     pType.getId(), 
                                                     aPlatform, agentPk);
-                aPlatform = this.platMan.getPlatformById(this.subject, pk);
+                aPlatform = this.platMan.getPlatformValueById(this.subject, pk);
             } catch (PlatformNotFoundException e) {
                 throw new BatchImportException("Unable to find the platform " +
                                                " we just created");

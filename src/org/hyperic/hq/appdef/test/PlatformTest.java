@@ -64,7 +64,7 @@ public class PlatformTest
         pInfo.setCpuCount(new Integer(0));
         ppk = pMan.createPlatform(getOverlord(), ptpk, pInfo, null);
         
-        assertNotNull(pMan.getPlatformById(getOverlord(), ppk));
+        assertNotNull(pMan.getPlatformValueById(getOverlord(), ppk));
         plat = DAOFactory.getDAOFactory().getPlatformDAO().findById(ppk);
         
         // Refresh platform type and check for platform in list

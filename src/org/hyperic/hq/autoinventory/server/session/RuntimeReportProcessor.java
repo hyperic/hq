@@ -248,7 +248,7 @@ public class RuntimeReportProcessor {
             log.info("Creating new platform: " + aiplatform);
             try {
                 Integer pk = platformMgr.createPlatform(subject, aiplatform);
-                appdefPlatform = platformMgr.getPlatformById(subject, pk);
+                appdefPlatform = platformMgr.getPlatformValueById(subject, pk);
             } catch (PlatformNotFoundException e) {
                 // should never happen
                 log.fatal("Failed to find platform we just created!", e);

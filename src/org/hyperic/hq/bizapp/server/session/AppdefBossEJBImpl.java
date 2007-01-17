@@ -644,7 +644,7 @@ public class AppdefBossEJBImpl
         id = entityId.getId();
         switch(entityId.getType()){
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            return getPlatformManager().getPlatformById(subject, id);
+            return getPlatformManager().getPlatformValueById(subject, id);
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
             return getPlatformManager().getPlatformByServer(subject, id);
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
@@ -968,7 +968,7 @@ public class AppdefBossEJBImpl
         switch (entityId.getType()) {
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
             retVal = 
-                getPlatformManager().getPlatformById(subject, entityId.getId());
+                getPlatformManager().getPlatformValueById(subject, entityId.getId());
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
             ServerValue server =
@@ -1017,7 +1017,7 @@ public class AppdefBossEJBImpl
                PermissionException 
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
-        return getPlatformManager().getPlatformById(subject, id);
+        return getPlatformManager().getPlatformValueById(subject, id);
     }
 
     /**
@@ -1233,7 +1233,7 @@ public class AppdefBossEJBImpl
                 getPlatformManager().createPlatform(subject, platTypePK,
                                                     platformVal, agent);
             PlatformValue savedPlatform = 
-                getPlatformManager().getPlatformById(subject, pk);
+                getPlatformManager().getPlatformValueById(subject, pk);
             return savedPlatform;
         } catch (CreateException e) {
             log.error("Unable to create platform. Rolling back", e);
@@ -1597,7 +1597,7 @@ public class AppdefBossEJBImpl
         try {
             // Lookup the platform (make sure someone else hasn't deleted it)
             PlatformValue platRes =
-                getPlatformManager().getPlatformById(subject,platformId);
+                getPlatformManager().getPlatformValueById(subject,platformId);
 
             // Add it to the list
             List unscheduleList = new ArrayList();

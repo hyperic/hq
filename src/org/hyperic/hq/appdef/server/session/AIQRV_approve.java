@@ -123,7 +123,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                     pmLocal.createPlatform(subject, aiplatformValue);
                 try {
                     newPlatformValue =
-                        pmLocal.getPlatformById(subject, pk);
+                        pmLocal.getPlatformValueById(subject, pk);
 
                     appdefEntityId = new AppdefEntityID(
                             AppdefEntityConstants.APPDEF_TYPE_PLATFORM,

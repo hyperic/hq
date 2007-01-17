@@ -138,7 +138,7 @@ public class AppdefEntityValue {
 
             if (full) {
                 this.platform =
-                    getPlatformManagerLocal().getPlatformById(
+                    getPlatformManagerLocal().getPlatformValueById(
                         this.subject, aId);
             }
             else {

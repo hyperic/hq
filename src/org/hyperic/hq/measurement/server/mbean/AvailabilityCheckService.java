@@ -283,7 +283,7 @@ public class AvailabilityCheckService
                 
                 try {
                     PlatformValue platform =
-                        platMan.getPlatformById(overlord, platId.getId());
+                        platMan.getPlatformValueById(overlord, platId.getId());
                     
                     // Go through the servers and services
                     ServerLightValue[] servers = platform.getServerValues();

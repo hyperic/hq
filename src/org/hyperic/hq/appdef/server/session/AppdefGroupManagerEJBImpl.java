@@ -60,10 +60,8 @@ import org.hyperic.hq.appdef.shared.ServerManagerUtil;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
-import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilter;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -75,7 +73,6 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.grouping.shared.GroupCreationException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupManagerLocal;
-import org.hyperic.hq.grouping.shared.GroupManagerUtil;
 import org.hyperic.hq.grouping.shared.GroupModificationException;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.grouping.shared.GroupNotFoundException;
@@ -954,7 +951,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM: 
                     platformManagerLocal =
                         PlatformManagerUtil.getLocalHome().create();
-                    return platformManagerLocal.getPlatformById(
+                    return platformManagerLocal.getPlatformValueById(
                             subject, entityId.getId());
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                     serverManagerLocal =

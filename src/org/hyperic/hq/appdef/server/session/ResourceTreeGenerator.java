@@ -181,7 +181,7 @@ public class ResourceTreeGenerator {
         PlatformValue val;
 
         try {
-            val = this.platMan.getPlatformById(this.subject, id);
+            val = this.platMan.getPlatformValueById(this.subject, id);
         } catch(PermissionException exc){
             throw new PermissionException("Failed to find platform " + id + 
                                           ": permission denied");
@@ -286,7 +286,7 @@ public class ResourceTreeGenerator {
             
             platId = server.getPlatform().getId();
             try {
-                platform = this.platMan.getPlatformById(this.subject, platId);
+                platform = this.platMan.getPlatformValueById(this.subject, platId);
             } catch(AppdefEntityNotFoundException exc){
                 throw new SystemException("Internal inconsistancy: " +
                                              "could not find platform " +

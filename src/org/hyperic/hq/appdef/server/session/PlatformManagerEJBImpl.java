@@ -529,11 +529,12 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * Get platform by id.
+     * Get a PlatformValue object by id.
+     * @deprecated use getPlatformById instead.
      * @ejb:interface-method
      */
-    public PlatformValue getPlatformById(AuthzSubjectValue subject, 
-                                         Integer id)
+    public PlatformValue getPlatformValueById(AuthzSubjectValue subject,
+                                              Integer id)
         throws PlatformNotFoundException, PermissionException 
     {
         try {
@@ -1093,7 +1094,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     {
         boolean updated = updatePlatformImpl(subject, existing);
         if (updated)
-            return getPlatformById(subject, existing.getId());
+            return getPlatformValueById(subject, existing.getId());
         return existing;
     }
     
