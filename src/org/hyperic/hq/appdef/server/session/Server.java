@@ -122,6 +122,7 @@ public class Server extends ServerBase
     }
 
     private ServerLightValue _serverLightValue = new ServerLightValue();
+
     /**
      * for legacy EJB DTO pattern
      * @deprecated use (this) Server object instead
@@ -149,7 +150,7 @@ public class Server extends ServerBase
             _serverLightValue.setServerType(getServerType().getServerTypeValue());
         }
         else
-            _serverLightValue.setServerType( null );
+            _serverLightValue.setServerType(null);
         return _serverLightValue;
     }
 
@@ -177,25 +178,16 @@ public class Server extends ServerBase
         _serverValue.setId(getId());
         _serverValue.setMTime(getMTime());
         _serverValue.setCTime(getCTime());
-        _serverValue.removeAllServiceValues();
-        Collection services = getServices();
-        if (services != null) {
-            Iterator isv = services.iterator();
-            while (isv.hasNext()){
-                _serverValue.addServiceValue(((Service)isv.next()).getServiceLightValue());
-            }
-        }
-        _serverValue.cleanServiceValue();
         if ( getServerType() != null ) {
             _serverValue.setServerType(getServerType().getServerTypeValue());
         }
         else
-            _serverValue.setServerType( null );
+            _serverValue.setServerType(null);
         if ( getPlatform() != null ) {
             _serverValue.setPlatform(getPlatform().getPlatformLightValue());
         }
         else
-            _serverValue.setPlatform( null );
+            _serverValue.setPlatform(null);
         return _serverValue;
     }
 

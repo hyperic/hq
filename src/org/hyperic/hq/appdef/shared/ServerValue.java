@@ -71,7 +71,6 @@ public class ServerValue
    private boolean mTimeHasBeenSet = false;
    private java.lang.Long cTime;
    private boolean cTimeHasBeenSet = false;
-   private Collection ServiceValues = new java.util.HashSet();
    private org.hyperic.hq.appdef.shared.ServerTypeValue ServerType;
    private boolean ServerTypeHasBeenSet = false;
    private org.hyperic.hq.appdef.shared.PlatformLightValue Platform;
@@ -152,8 +151,6 @@ public class ServerValue
 	  mTimeHasBeenSet = true;
 	  this.cTime = otherValue.cTime;
 	  cTimeHasBeenSet = true;
-	// TODO Clone is better no ?
-	  this.ServiceValues = otherValue.ServiceValues;
 	// TODO Clone is better no ?
 	  this.ServerType = otherValue.ServerType;
 	  ServerTypeHasBeenSet = true;
@@ -403,59 +400,7 @@ public class ServerValue
 	  return cTimeHasBeenSet;
    }
 
-   protected Collection addedServiceValues = new java.util.HashSet();
-   protected Collection removedServiceValues = new java.util.HashSet();
-   protected Collection updatedServiceValues = new java.util.HashSet();
 
-   public Collection getAddedServiceValues() { return addedServiceValues; }
-   public Collection getRemovedServiceValues() { return removedServiceValues; }
-   public Collection getUpdatedServiceValues() { return updatedServiceValues; }
-
-   public org.hyperic.hq.appdef.shared.ServiceLightValue[] getServiceValues()
-   {
-	  return (org.hyperic.hq.appdef.shared.ServiceLightValue[])this.ServiceValues.toArray(new org.hyperic.hq.appdef.shared.ServiceLightValue[ServiceValues.size()]);
-   }
-
-   public void addServiceValue(org.hyperic.hq.appdef.shared.ServiceLightValue added)
-   {
-	  this.ServiceValues.add(added);
-	  if ( ! this.addedServiceValues.contains(added))
-		 this.addedServiceValues.add(added);
-   }
-
-   public void removeServiceValue(org.hyperic.hq.appdef.shared.ServiceLightValue removed)
-   {
-	  this.ServiceValues.remove(removed);
-	  this.removedServiceValues.add(removed);
-	  if (this.addedServiceValues.contains(removed))
-		 this.addedServiceValues.remove(removed);
-	  if (this.updatedServiceValues.contains(removed))
-		 this.updatedServiceValues.remove(removed);
-   }
-
-   public void removeAllServiceValues()
-   {
-        // DOH. Clear the collection - javier 2/24/03
-        this.ServiceValues.clear();
-   }
-
-   public void updateServiceValue(org.hyperic.hq.appdef.shared.ServiceLightValue updated)
-   {
-	  if ( ! this.updatedServiceValues.contains(updated))
-		 this.updatedServiceValues.add(updated);
-   }
-
-   public void cleanServiceValue(){
-	  this.addedServiceValues = new java.util.HashSet();
-	  this.removedServiceValues = new java.util.HashSet();
-	  this.updatedServiceValues = new java.util.HashSet();
-   }
-
-   public void copyServiceValuesFrom(org.hyperic.hq.appdef.shared.ServerValue from)
-   {
-	  // TODO Clone the List ????
-	  this.ServiceValues = from.ServiceValues;
-   }
    public org.hyperic.hq.appdef.shared.ServerTypeValue getServerType()
    {
 	  return this.ServerType;
@@ -624,19 +569,6 @@ public class ServerValue
 		 {
 			lEquals = lEquals && this.cTime.equals( that.cTime );
 		 }
-		 if( this.getServiceValues() == null )
-		 {
-			lEquals = lEquals && ( that.getServiceValues() == null );
-		 }
-		 else
-		 {
-            // XXX Covalent Custom - dont compare the arrays, as order is not significant. ever.    
-            // - javier 7/16/03
-            java.util.Collection cmr1 = java.util.Arrays.asList(this.getServiceValues());
-            java.util.Collection cmr2 = java.util.Arrays.asList(that.getServiceValues());
-			// lEquals = lEquals && java.util.Arrays.equals(this.getServiceValues() , that.getServiceValues()) ;
-            lEquals = lEquals && cmr1.containsAll(cmr2);
-		 }
 		 if( this.ServerType == null )
 		 {
 			lEquals = lEquals && ( that.ServerType == null );
@@ -696,7 +628,6 @@ public class ServerValue
 
       result = 37*result + ((this.cTime != null) ? this.cTime.hashCode() : 0);
 
-	  result = 37*result + ((this.getServiceValues() != null) ? this.getServiceValues().hashCode() : 0);
 	  result = 37*result + ((this.ServerType != null) ? this.ServerType.hashCode() : 0);
 	  result = 37*result + ((this.Platform != null) ? this.Platform.hashCode() : 0);
 	  return result;
