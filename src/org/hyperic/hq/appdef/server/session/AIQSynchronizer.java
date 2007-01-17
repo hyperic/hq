@@ -35,10 +35,6 @@ import javax.naming.NamingException;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
-import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
-import org.hyperic.hq.appdef.shared.ApplicationManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.autoinventory.AIPlatform;
@@ -52,35 +48,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class AIQSynchronizer {
     private static Log _log = LogFactory.getLog(AIQSynchronizer.class);
-    private PlatformManagerLocal _pm = null;
-    private ApplicationManagerLocal _am = null;
     
-    private PlatformManagerLocal getPlatformMan() {
-        if (_pm == null) {
-            try {
-                _pm = PlatformManagerUtil.getLocalHome().create();
-            } catch (CreateException e) {
-                throw new SystemException(e);
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
-        return _pm;
-    }
-
-    private ApplicationManagerLocal getAppMan() {
-        if (_am == null) {
-            try {
-                _am = ApplicationManagerUtil.getLocalHome().create();
-            } catch (CreateException e) {
-                throw new SystemException(e);
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
-        return _am;
-    }
-
     public AIQSynchronizer () {}
 
     /**
@@ -108,7 +76,7 @@ public class AIQSynchronizer {
         if(aiPlatform.getQueueStatus() == AIQueueConstants.Q_STATUS_PLACEHOLDER
            || aiPlatform.getQueueStatus() == AIQueueConstants.Q_STATUS_REMOVED){
             // Was it in the queue?
-            if ( existingQplatform == null ) {
+            if (existingQplatform == null) {
                 // Not in the queue, so nothing to do.
 
             } else {
@@ -129,8 +97,8 @@ public class AIQSynchronizer {
 
         // If the platform is new or changed, then make sure it (and everything 
         // else underneath it) is in the queue.
-        if ( aiPlatform.getQueueStatus() == AIQueueConstants.Q_STATUS_ADDED ||
-             aiPlatform.getQueueStatus() == AIQueueConstants.Q_STATUS_CHANGED ) {
+        if (aiPlatform.getQueueStatus() == AIQueueConstants.Q_STATUS_ADDED ||
+            aiPlatform.getQueueStatus() == AIQueueConstants.Q_STATUS_CHANGED) {
 
             if ( existingQplatform == null ) {
                 // No existing queued platform, so we'll queue everything up.
@@ -155,10 +123,10 @@ public class AIQSynchronizer {
         throws SystemException {
 
         // Is there another platform in the queue with the same certdn?
-        AIPlatform aiPlatform = null;
+        AIPlatform aiPlatform;
         String certdn = aiPlatformValue.getCertdn();
         String fqdn = aiPlatformValue.getFqdn();
-        Collection fqdnMatches = null;
+        Collection fqdnMatches;
         // Try FQDN first
         fqdnMatches = aiPlatformLH.findByFQDN(fqdn);
         if (fqdnMatches.size() == 0) {
