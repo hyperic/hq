@@ -40,6 +40,7 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
@@ -523,6 +524,21 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         try {
             Platform platform = platformLocalHome.findById(id);
             return platform.getPlatformLightValue();
+        } catch (ObjectNotFoundException e) {
+            throw new PlatformNotFoundException(id, e);
+        }
+    }
+
+    /**
+     * Find a Platform by Id
+     * @ejb:interface-method
+     */
+    public Platform findPlatformById(AuthzSubjectValue subject,
+                                     Integer id)
+        throws PlatformNotFoundException
+    {
+        try {
+            return getPlatformDAO().findById(id);
         } catch (ObjectNotFoundException e) {
             throw new PlatformNotFoundException(id, e);
         }
