@@ -128,12 +128,10 @@ public class ServiceTypeDAO extends HibernateDAO
 
     public Collection findVirtualServiceTypesByPlatform(int platformId)
     {
-        String sql="select st from ServiceType st " +
-                   " join fetch st.serverType svt " +
-                   " join fetch svt.servers sv " +
-                   "where svt.virtual = true and " +
-                   "      sv.platform.id=? " +
-                   "order by st.sortName";
+        String sql = "select distinct(st) from ServiceType st, Service s " +
+                " where st = s.serviceType and st.serverType.virtual = true " +
+                " and s.server.platform.id=? order by st.sortName";
+        
         return getSession().createQuery(sql)
             .setInteger(0, platformId)
             .list();
