@@ -42,13 +42,11 @@ onloads.push(requestViewEscalation);
 
  function requestViewEscalation() {
         var alertDefId = $('alertDefId').value;
-        var urlPart1 = '<html:rewrite page="/escalation/jsonEscalationByAlertDefId/';
-        var urlPart2 = '.do"/>';
-        var url = urlPart1 + alertDefId + urlPart2;
-        //var url = "../escalation/jsonEscalationByAlertDefId.do?id=" + alertDefId;
+        var url = '<html:rewrite page="/escalation/jsonByEscalationId/"/>';
+        url += escape('<c:out value="${param.escId}"/>');
+        url += '.do';
         new Ajax.Request(url, {method: 'get', onSuccess:showViewEscResponse, onFailure :reportError});
         }
-
 
 function showViewEscResponse(originalRequest) {
     var tmp = eval('(' + originalRequest.responseText + ')');
