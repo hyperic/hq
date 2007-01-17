@@ -53,10 +53,6 @@ import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServerLightValue;
-import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.ServiceLightValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
@@ -64,6 +60,9 @@ import org.hyperic.hq.appdef.shared.resourceTree.PlatformNode;
 import org.hyperic.hq.appdef.shared.resourceTree.ServerNode;
 import org.hyperic.hq.appdef.shared.resourceTree.ServiceNode;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
+import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -376,26 +375,28 @@ public class LatherDispatcher
                 ResourceUpdatedZevent zevent;
                 for (Iterator it = ids.iterator(); it.hasNext();) {
                     Integer id = (Integer) it.next();
-                    PlatformValue platform = getPlatformManager()
-                        .getPlatformValueById(getOverlord(), id);
+                    Platform platform = getPlatformManager()
+                        .findPlatformById(getOverlord(), id);
 
                     zevent = new ResourceUpdatedZevent(getOverlord(),
                                                        platform.getEntityId());
                     zevents.add(zevent);
 
-                    ServerLightValue[] servers = platform.getServerValues();
-                    for (int i = 0; i < servers.length; i++) {
+                    Collection servers = platform.getServers();
+                    for (Iterator i = servers.iterator(); i.hasNext(); ) {
+                        Server server = (Server)i.next();
+
                         zevent = new ResourceUpdatedZevent(getOverlord(),
-                                                           servers[i].getEntityId());
+                                                           server.getEntityId());
                         zevents.add(zevent);
 
-                        ServerValue server = getServerManager()
-                            .getServerById(getOverlord(), servers[i].getId());
-
-                        ServiceLightValue[] services = server.getServiceValues();
-                        for (int j = 0; j < services.length; j++) {
+                        Collection services = server.getServices();
+                        for (Iterator serviceItr = services.iterator();
+                             serviceItr.hasNext(); )
+                        {
+                            Service service = (Service)serviceItr.next();
                             zevent = new ResourceUpdatedZevent(getOverlord(),
-                                                               services[j].getEntityId());
+                                                               service.getEntityId());
                             zevents.add(zevent);
                         }
                     }
