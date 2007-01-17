@@ -26,7 +26,6 @@
 package org.hyperic.hq.autoinventory.server.session;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.ejb.CreateException;
@@ -211,14 +210,11 @@ public class RuntimeReportProcessor {
                ApplicationException {
 
         AIServerValue[] aiservers = aiplatform.getAIServerValues();
-        PlatformValue appdefPlatform;
-        ServerLightValue[] appdefServers;
-        List appdefServerList;
-        ServerLightValue appdefServer;
 
         log.info("Merging platform into appdef: " + aiplatform.getFqdn());
 
         // Does this platform exist (by fqdn) ?
+        PlatformValue appdefPlatform;
         String fqdn = aiplatform.getFqdn();
         try {
             appdefPlatform = platformMgr.getPlatformByFqdn(subject, fqdn);
@@ -260,9 +256,9 @@ public class RuntimeReportProcessor {
             // that are within it.
         }
 
-        appdefServers = appdefPlatform.getServerValues();
-        appdefServerList = new ArrayList();
-        appdefServerList.addAll(Arrays.asList(appdefServers));
+        PageList appdefServerList =
+            serverMgr.getServersByPlatform(subject, appdefPlatform.getId(),
+                                           false, PageControl.PAGE_ALL);
 
         if (aiservers == null) return;
 
@@ -282,7 +278,7 @@ public class RuntimeReportProcessor {
         // any servers that we haven't handled, we should mark them
         // as AI-zombies.
         for (int i=0; i<appdefServerList.size(); i++) {
-            appdefServer = (ServerLightValue) appdefServerList.get(i);
+            ServerValue appdefServer = (ServerValue) appdefServerList.get(i);
 
             // Annoying - serverMgr doesn't support updateServer on 
             // ServerLightValue objects, so we lookup the full value object.
@@ -328,7 +324,7 @@ public class RuntimeReportProcessor {
         throws CreateException, PermissionException, ValidationException
     {
         int i;
-        ServerLightValue appdefServerLight;
+        ServerValue appdefServer;
         ServerValue foundAppdefServer = null;
         Integer serverTypePK;
 
@@ -341,19 +337,19 @@ public class RuntimeReportProcessor {
                  aiserver.getName() + " AIIdentifier: " +
                  aiserver.getAutoinventoryIdentifier());
         for (i=0; i<appdefServers.size(); i++) {
-            appdefServerLight = (ServerLightValue) appdefServers.get(i);
+            appdefServer = (ServerValue) appdefServers.get(i);
 
             // We can match either on autoinventory identifier, or if
             // this is the reporting server, we can match on its appdef ID
-            appdefServerAIID = appdefServerLight.getAutoinventoryIdentifier();
+            appdefServerAIID = appdefServer.getAutoinventoryIdentifier();
             if (appdefServerAIID.equals(aiServerAIID) ||
                 (aiserverId != null &&
                  aiserverId.equals(reportingServer.getId()) &&
-                 aiserverId.equals(appdefServerLight.getId()))) {
+                 aiserverId.equals(appdefServer.getId()))) {
                 try {
                     foundAppdefServer
                         = serverMgr.getServerById(subject,
-                                                  appdefServerLight.getId());
+                                                  appdefServer.getId());
                     log.info("Found existing server: " +
                              foundAppdefServer.getName() + " as match for: " +
                              aiserver.getAutoinventoryIdentifier());
@@ -365,7 +361,7 @@ public class RuntimeReportProcessor {
                         aiserver.setAutoinventoryIdentifier(appdefServerAIID);
                     }
                 } catch (ServerNotFoundException e) {
-                    log.error("RRP: error finding server: " + appdefServerLight);
+                    log.error("Error finding server: " + appdefServer);
                     throw new SystemException(e);
                 }
                 appdefServers.remove(i);

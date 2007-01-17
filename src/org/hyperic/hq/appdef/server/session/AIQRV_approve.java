@@ -26,6 +26,7 @@
 package org.hyperic.hq.appdef.server.session;
 
 import java.util.List;
+import java.util.Iterator;
 
 import javax.ejb.CreateException;
 
@@ -55,6 +56,8 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIServer;
+import org.hyperic.util.pager.PageList;
+import org.hyperic.util.pager.PageControl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -459,21 +462,18 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
         AIPlatform aiplatform;
         AIPlatformValue aiplatformValue;
-        PlatformValue existingPlatformValue;
-        ServerLightValue serverLightValue = null;
-        ServerLightValue[] serverValues;
-        AIServerValue aiserverValue;
+        PlatformValue platform;
         ServerValue serverValue = null;
+        PageList serverValues;
+        AIServerValue aiserverValue;
         boolean foundServer;
-        int i;
         AppdefEntityID appdefEntityId;
         Integer serverTypePK;
 
         // Get the aiplatform for this server
         aiplatform = aiserver.getAIPlatform();
         aiplatformValue = aiplatform.getAIPlatformValue();
-        existingPlatformValue =
-            getExistingPlatformValue(subject, pmLocal, aiplatformValue);
+        platform = getExistingPlatformValue(subject, pmLocal, aiplatformValue);
 
         int qstat = aiserver.getQueueStatus();
         switch (qstat) {
@@ -499,26 +499,30 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                                ERR_PARENT_NOT_APPROVED);
             }
 
-            // Before we add it, make sure it's not already there...
-            serverValues = existingPlatformValue.getServerValues();
-            for ( i=0; i<serverValues.length; i++ ) {
-                if (serverValues[i].getAutoinventoryIdentifier().
-                    equals(aiserver.getAutoinventoryIdentifier()) ) {
-                    // already added, throw exception
-                    appdefEntityId = new AppdefEntityID(AppdefEntityConstants.
-                                                        APPDEF_TYPE_AISERVER,
-                                                        id);
-                    _log.error("Server already added: serverid=" +
-                               serverValues[i].getId() + ", " +
-                               "cannot approve AIServer " + id);
-                    throw new AIQApprovalException(appdefEntityId, 
-                                                   AIQApprovalException.
-                                                   ERR_ADDED_TO_APPDEF);
-                }
-            }
-
-            // Add the AI server to appdef
             try {
+                // Before we add it, make sure it's not already there...
+                serverValues = smLocal.getServersByPlatform(subject,
+                                                            platform.getId(),
+                                                            false,
+                                                            PageControl.PAGE_ALL);
+                for (Iterator i = serverValues.iterator(); i.hasNext(); ) {
+                    ServerValue server = (ServerValue)i.next();
+
+                    if (server.getAutoinventoryIdentifier().
+                        equals(aiserver.getAutoinventoryIdentifier())) {
+                        // already added, throw exception
+                        appdefEntityId = new AppdefEntityID(AppdefEntityConstants.
+                            APPDEF_TYPE_AISERVER,
+                                                            id);
+                        _log.error("Server already added: serverid=" +
+                                    server.getId() + ", " +
+                                    "cannot approve AIServer " + id);
+                        throw new AIQApprovalException(appdefEntityId,
+                                                       AIQApprovalException.
+                                                           ERR_ADDED_TO_APPDEF);
+                    }
+                }
+
                 serverValue = AIConversionUtil.
                     convertAIServerToServer(aiserver.getAIServerValue(),
                                             smLocal);
@@ -548,16 +552,16 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                           null, /* RT config */
                                           null,
                                           true);
-                } catch (Exception configE) {
-                    _log.warn("Error configuring server: " + configE, configE);
+                } catch (Exception e) {
+                    _log.warn("Error configuring server: " + e, e);
                 }
 
                 setCustomProperties(aiserver, serverValue, cpropMgr);
                 
                 createdResources.add(aID);
-            } catch ( PermissionException e ) {
+            } catch (PermissionException e) {
                 throw e;
-            } catch ( Exception e ) {
+            } catch (Exception e) {
                 throw new SystemException("Error creating platform from " +
                                           "AI data: " + e.getMessage(), e);
             }
@@ -583,40 +587,45 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                                ERR_PARENT_REMOVED);
             }
 
-            // Find the server within the platform
-            serverValues = existingPlatformValue.getServerValues();
-            foundServer = false;
-            for (i=0; i<serverValues.length; i++) {
-                if (serverValues[i].getAutoinventoryIdentifier()
-                    .equals(aiserver.getAutoinventoryIdentifier())) {
-                    aiserverValue = aiserver.getAIServerValue();
-                    try {
-                        serverValue
-                            = smLocal.findServerById(subject, 
-                                                     serverValues[i].getId());
-                    } catch (Exception e) {
-                        throw new SystemException("Error fetching server " +
-                                                  "with id=" +
-                                                  serverValues[i].getId() +
-                                                  ": " + e, e);
-                    }
-                    serverValue = AIConversionUtil.
-                        mergeAIServerIntoServer(aiserverValue, serverValue);
-                    foundServer = true;
-                }
-            }
-            if (!foundServer) {
-                appdefEntityId = new AppdefEntityID(AppdefEntityConstants.
-                                                    APPDEF_TYPE_AISERVER, id);
-                _log.error("Server removed from appdef, " +
-                           "cannot approve AIServer " + id);
-                throw new AIQApprovalException(appdefEntityId, 
-                                               AIQApprovalException.
-                                               ERR_REMOVED_FROM_APPDEF);
-            }
-
             try {
-                serverValue = smLocal.updateServer(subject, 
+                // Find the server within the platform
+                serverValues = smLocal.getServersByPlatform(subject,
+                                                            existingPlatformValue.getId(),
+                                                            false,
+                                                            PageControl.PAGE_ALL);
+                foundServer = false;
+                for (Iterator i = serverValues.iterator(); i.hasNext(); ) {
+                    ServerValue server = (ServerValue)i.next();
+
+                    if (server.getAutoinventoryIdentifier()
+                        .equals(aiserver.getAutoinventoryIdentifier())) {
+                        aiserverValue = aiserver.getAIServerValue();
+                        try {
+                            serverValue
+                                = smLocal.findServerById(subject,
+                                                         server.getId());
+                        } catch (Exception e) {
+                            throw new SystemException("Error fetching server " +
+                                                      "with id=" +
+                                                      server.getId() +
+                                                      ": " + e, e);
+                        }
+                        serverValue = AIConversionUtil.
+                            mergeAIServerIntoServer(aiserverValue, serverValue);
+                        foundServer = true;
+                    }
+                }
+                if (!foundServer) {
+                    appdefEntityId = new AppdefEntityID(AppdefEntityConstants.
+                        APPDEF_TYPE_AISERVER, id);
+                    _log.error("Server removed from appdef, " +
+                               "cannot approve AIServer " + id);
+                    throw new AIQApprovalException(appdefEntityId,
+                                                   AIQApprovalException.
+                                                       ERR_REMOVED_FROM_APPDEF);
+                }
+
+                serverValue = smLocal.updateServer(subject,
                                                    serverValue);
                 try {
                     configMgr.
@@ -653,24 +662,28 @@ public class AIQRV_approve implements AIQResourceVisitor {
                 return;
             }
 
-            // Find the server within the platform
-            serverValues = existingPlatformValue.getServerValues();
-            foundServer = false;
-            for (i=0; i<serverValues.length; i++) {
-                if (serverValues[i].getAutoinventoryIdentifier().
-                    equals(aiserver.getAutoinventoryIdentifier())) {
-                    foundServer = true;
-                    serverLightValue = serverValues[i];
-                }
-            }
-            if (!foundServer) {
-                // Server has already been removed, return.
-                _log.warn("Server has already been removed, cannot " +
-                          "remove aiserver=" + id);
-            }
-            _log.info("Removing Server...");
-            try {
-                smLocal.removeServer(subject, serverLightValue.getId(), true);
+             try {
+                 // Find the server within the platform
+                 serverValues = smLocal.getServersByPlatform(subject,
+                                                             existingPlatformValue.getId(),
+                                                             false,
+                                                             PageControl.PAGE_ALL);
+                 foundServer = false;
+                 for (Iterator i = serverValues.iterator(); i.hasNext(); ) {
+                     ServerValue server = (ServerValue)i.next();
+                     if (server.getAutoinventoryIdentifier().
+                         equals(aiserver.getAutoinventoryIdentifier())) {
+                         foundServer = true;
+                         serverValue = server;
+                     }
+                 }
+                 if (!foundServer) {
+                     // Server has already been removed, return.
+                     _log.warn("Server has already been removed, cannot " +
+                               "remove aiserver=" + id);
+                 }
+                 _log.info("Removing Server...");
+                 smLocal.removeServer(subject, serverValue.getId(), true);
             } catch (PermissionException e) {
                 throw e;
             } catch (Exception e) {
