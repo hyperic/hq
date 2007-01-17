@@ -83,7 +83,10 @@ public class DerivedMeasurementDAO extends HibernateDAO {
 
         return (DerivedMeasurement)getSession().createQuery(sql)
             .setInteger(0, tid.intValue())
-            .setInteger(1, iid.intValue()).uniqueResult();
+            .setInteger(1, iid.intValue())
+            .setCacheable(true)
+            .setCacheRegion("DerivedMeasurement.findByTemplateForInstance")
+            .uniqueResult();
     }
 
     List findByTemplate(Integer id) {
@@ -239,7 +242,10 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         return getSession().createQuery(sql)
             .setInteger(0, iid)
             .setInteger(1, appdefType)
-            .setString(2, cat).list();
+            .setString(2, cat)
+            .setCacheable(true)
+            .setCacheRegion("DerivedMeasurement.findDesignatedByInstanceForCategory")
+            .list();
     }
 
     List findDesignatedByInstance(int type, int id) {
@@ -254,7 +260,10 @@ public class DerivedMeasurementDAO extends HibernateDAO {
 
         return getSession().createQuery(sql)
             .setInteger(0, id)
-            .setInteger(1, type).list();
+            .setInteger(1, type)
+            .setCacheable(true)
+            .setCacheRegion("DerivedMeasurement.findDesignatedByInstance")
+            .list();
     }
 
     List findByRawExcludeIdentity(Integer rid) {
