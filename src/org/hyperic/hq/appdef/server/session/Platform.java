@@ -177,40 +177,6 @@ public class Platform extends PlatformBase
         return new LinkedHashSet(_servers);
     }
 
-    /**
-     * legacy EJB DTO patter
-     * @deprecated use (this) Platform object instead
-     */
-    public PlatformValue getPlatformValueObject()
-    {
-        PlatformValue pv = new PlatformValue();
-        pv.setSortName(getSortName());
-        pv.setDescription(getDescription());
-        pv.setCommentText(getCommentText());
-        pv.setModifiedBy(getModifiedBy());
-        pv.setOwner(getOwner());
-        pv.setCertdn(getCertdn());
-        pv.setFqdn(getFqdn());
-        pv.setName(getName());
-        pv.setLocation(getLocation());
-        pv.setCpuCount(getCpuCount());
-        pv.setId(this.getId());
-        pv.setMTime(getMTime());
-        pv.setCTime(getCTime());
-        pv.setConfigResponseId(getConfigResponseId());
-        PlatformType ptype = getPlatformType();
-        if ( ptype != null )
-            pv.setPlatformType(ptype.getPlatformTypeValue());
-        else
-           pv.setPlatformType( null );
-        Agent agent = getAgent();
-        if ( agent != null )
-            pv.setAgent( agent.getAgentValue() );
-        else
-            pv.setAgent( null );
-        return pv;
-    }
-
     private PlatformValue _platformValue = new PlatformValue();
 
     /**
