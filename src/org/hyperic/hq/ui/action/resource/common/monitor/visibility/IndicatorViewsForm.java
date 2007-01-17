@@ -27,15 +27,14 @@ package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.action.ActionError;
-import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.ui.action.BaseValidatorForm;
 
 /**
  *
  * The form object which captures the view name used for the indicator charts
  */
-public class IndicatorViewsForm extends MetricDisplayRangeForm {
+public class IndicatorViewsForm extends BaseValidatorForm {
 
     private String   action;
     private String   view;
