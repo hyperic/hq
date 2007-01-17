@@ -51,6 +51,8 @@ import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
+import org.hyperic.hq.appdef.shared.ApplicationManagerUtil;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -813,6 +815,14 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                                 app.getId(), app.getName());
         } catch (CreateException e) {
             throw e;
+        }
+    }
+
+    public static ApplicationManagerLocal getOne() {
+        try {
+            return ApplicationManagerUtil.getLocalHome().create();
+        } catch (Exception e) {
+            throw new SystemException(e);
         }
     }
 
