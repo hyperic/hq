@@ -166,7 +166,7 @@ function showViewEscResponse(originalRequest) {
 
       viewLi.appendChild(remDiv);
       remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
-      remDiv.innerHTML ='<a href="#" onclick="removeRow(this);removeAction(' + id + ');"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
+      remDiv.innerHTML ='<a href="#" onclick="removeRow(this);removeAction(' + actionId + ');"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
 
       
       viewLi.appendChild(escTable);
@@ -584,7 +584,10 @@ function showViewEscResponse(originalRequest) {
         var urlEnd = '.do"/>';
         var url =  urlBegin + id + urlEnd;
 
-        new Ajax.Request( url, {method: 'post', onComplete: showResponseRemoved, onFailure :reportError} );
+        var id = $('id').value;
+        var pars =  "EscId=" + id;
+
+        new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponseRemoved, onFailure :reportError} );
    }
     
     function configure(id) {

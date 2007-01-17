@@ -26,12 +26,17 @@
 package org.hyperic.hq.ui.json.action.escalation.crud;
 
 import java.rmi.RemoteException;
+import java.util.Map;
+
+import javax.servlet.ServletContext;
 
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
 import org.hyperic.hq.ui.json.action.escalation.BaseAction;
+import org.hyperic.hq.ui.util.ContextUtils;
 import org.json.JSONException;
 
 /**
@@ -41,10 +46,16 @@ public class RemoveAction extends BaseAction {
 
     public void execute(JsonActionContext context)
         throws PermissionException, SessionTimeoutException,
-        SessionNotFoundException, JSONException, RemoteException {
-        
-        Integer id = context.getId();
-        // TODO Remove the action
+               SessionNotFoundException, JSONException, RemoteException
+    {
+        ServletContext sctx = context.getServletContext();
+        EventsBoss eBoss  = ContextUtils.getEventsBoss(sctx);
+        int sessId = context.getSessionId();
+
+        Integer id    = context.getId();
+        Map     map   = context.getParameterMap();
+        Integer escId = Integer.valueOf(((String[])map.get("EscId"))[0]); 
+        eBoss.removeAction(sessId, escId, id);
     }
 
 }

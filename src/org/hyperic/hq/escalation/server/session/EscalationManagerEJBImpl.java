@@ -159,6 +159,46 @@ public class EscalationManagerEJBImpl
     }
 
     /**
+     * Remove an action from an escalation chain.  Any escalations
+     * currently in progress using this chain will be canceled.
+     * 
+     * @ejb:interface-method  
+     */
+    public void removeAction(Integer id, Integer actId) 
+    {
+        Escalation e = _esclDAO.findById(id);
+        
+        // Iterate through the actions and find the one action
+        Action action = null;
+        for (Iterator it = e.getActionsList().iterator(); it.hasNext(); ) {
+            EscalationAction ea = (EscalationAction) it.next();
+            if (ea.getAction().getId().equals(actId)) {
+                action = ea.getAction();
+                it.remove();
+                break;
+            }
+        }
+        
+        if (action == null) {
+            return;
+        }
+
+        EscalationRuntime runtime = EscalationRuntime.getInstance();
+        Collection states = _stateDAO.findStatesFor(e);
+        
+        // Unschedule any escalations currently in progress
+        for (Iterator i=states.iterator(); i.hasNext(); ) {
+            EscalationState s = (EscalationState)i.next();
+            
+            runtime.unscheduleEscalation(s);
+            _stateDAO.remove(s);
+        }
+        
+        // Remove the action
+        ActionManagerEJBImpl.getOne().deleteAction(action);
+    }
+    
+    /**
      * Delete an escalation chain.  This method will throw an exception if
      * the escalation chain is in use.
      * 

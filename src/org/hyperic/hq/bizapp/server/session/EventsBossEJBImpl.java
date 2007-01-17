@@ -1573,6 +1573,18 @@ public class EventsBossEJBImpl
     }
     
     /**
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void removeAction(int sessionID, Integer escId, Integer actId)  
+        throws SessionTimeoutException, SessionNotFoundException,
+               PermissionException
+    {
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        getEscMan().removeAction(escId, actId);
+    }
+    
+    /**
      * retrieve all escalation policy names as a Array of JSONObject.
      *
      * Escalation json finders begin with json* to be consistent with
