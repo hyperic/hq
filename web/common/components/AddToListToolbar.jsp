@@ -135,7 +135,6 @@
  <td><html:text size="4" maxlength="4" property="collectionInterval"/></td>
  <td><html:select styleClass="FilterFormText" property="collectionUnit">
   <html:option value="60000"><fmt:message key="resource.common.monitor.visibility.config.Minutes"/></html:option>
-  <html:option value="1000"><fmt:message key="resource.common.monitor.visibility.config.Seconds"/></html:option>
   <html:option value="3600000"><fmt:message key="resource.common.monitor.visibility.config.Hours"/>
 </html:option></html:select></td>
     <td width="100%" id="<c:out value="${widgetInstanceName}"/>GoButtonTd"><div id="<c:out value="${widgetInstanceName}"/>GoButtonDiv"><html:img page="/images/tbb_go_gray.gif" border="0"/></div></td>
