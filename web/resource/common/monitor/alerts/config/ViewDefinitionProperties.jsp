@@ -92,6 +92,8 @@
   <c:set var="mode" value="editProperties"/>
 </c:if>
 
+<c:if test="${not alertDef.deleted}">
+
 <tiles:insert definition=".toolbar.edit">
 <c:choose>
   <c:when test="${not empty Resource}">
@@ -102,4 +104,6 @@
   </c:otherwise>
 </c:choose>
 </tiles:insert>
+
+</c:if>
 <br>

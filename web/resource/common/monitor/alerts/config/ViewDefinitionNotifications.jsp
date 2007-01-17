@@ -29,6 +29,8 @@
   USA.
  --%>
 
+<c:if test="${not alertDef.deleted}">
+
 <tiles:importAttribute name="formAction" ignore="true"/>
 <tiles:importAttribute name="addMode" ignore="true"/>
 <tiles:importAttribute name="defaultSortColumn" ignore="true"/>
@@ -130,4 +132,5 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 </c:choose>
 
 <!-- / FORM -->
+</c:if>
 <br>

@@ -41,7 +41,7 @@
   </tr>
 </table>
 </c:if>
-<c:if test="${canEditConditions}">
+<c:if test="${canEditConditions && not alertDef.deleted}">
   <c:if test="${not empty Resource || not empty ResourceType}">
   <tiles:insert definition=".toolbar.edit">
   <c:choose>
