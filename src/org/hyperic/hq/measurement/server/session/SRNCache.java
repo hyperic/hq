@@ -28,16 +28,11 @@ package org.hyperic.hq.measurement.server.session;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.common.DiagnosticObject;
-import org.hyperic.hq.common.DiagnosticThread;
 
 import java.util.List;
 
 public class SRNCache {
-    private static Log _log = LogFactory.getLog(SRNCache.class);
 
     // The cache name, must match the definition in ehcache.xml
     private static String CACHENAME = "SRNCache";
@@ -52,30 +47,6 @@ public class SRNCache {
 
     private SRNCache() {
         _cache = CacheManager.getInstance().getCache(CACHENAME);
-
-        DiagnosticObject cacheDiagnostics = new DiagnosticObject() {
-            public String getStatus() {
-                String separator = System.getProperty("line.separator");
-
-                StringBuffer buf = new StringBuffer();
-                buf.append(separator)
-                    .append(CACHENAME)
-                    .append(" elements=")
-                    .append(_cache.getSize())
-                    .append(" (")
-                    .append(_cache.calculateInMemorySize())
-                    .append(" bytes) hits=")
-                    .append(_cache.getHitCount())
-                    .append(" misses=")
-                    .append(_cache.getMissCountNotFound());
-                return buf.toString();
-            }
-            
-            public String toString() {
-                return "SRN Cache";
-            }
-        };
-        DiagnosticThread.addDiagnosticObject(cacheDiagnostics);
     }
 
     /**

@@ -26,8 +26,6 @@
 package org.hyperic.hq.measurement.server.session;
 
 import org.hyperic.hq.product.MetricValue;
-import org.hyperic.hq.common.DiagnosticObject;
-import org.hyperic.hq.common.DiagnosticThread;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -56,30 +54,6 @@ public class MetricDataCache {
 
     private MetricDataCache() {
         _cache = CacheManager.getInstance().getCache(CACHENAME);
-
-        DiagnosticObject cacheDiagnostics = new DiagnosticObject() {
-            public String getStatus() {
-                String separator = System.getProperty("line.separator");
-
-                StringBuffer buf = new StringBuffer();
-                buf.append(separator)
-                    .append(CACHENAME)
-                    .append(" elements=")
-                    .append(_cache.getSize())
-                    .append(" (")
-                    .append(_cache.calculateInMemorySize())
-                    .append(" bytes) hits=")
-                    .append(_cache.getHitCount())
-                    .append(" misses=")
-                    .append(_cache.getMissCountNotFound());
-                return buf.toString();
-            }
-            
-            public String toString() {
-                return "Metric Data Cache";
-            }
-        };
-        DiagnosticThread.addDiagnosticObject(cacheDiagnostics);
     }
 
     /**
