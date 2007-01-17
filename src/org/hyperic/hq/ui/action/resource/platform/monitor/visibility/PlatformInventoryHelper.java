@@ -26,7 +26,6 @@
 package org.hyperic.hq.ui.action.resource.platform.monitor.visibility;
 
 import java.rmi.RemoteException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -42,13 +41,11 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelper;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
@@ -65,8 +62,6 @@ public class PlatformInventoryHelper extends InventoryHelper {
         super(entityId);
     }
 
-    // ---------------------------------------------------- Public Methods
-
     /**
      * Get the set of server types representing a platform's servers.
      *
@@ -79,11 +74,12 @@ public class PlatformInventoryHelper extends InventoryHelper {
                                       AppdefResourceValue resource)
         throws PermissionException, AppdefEntityNotFoundException,
         RemoteException, SessionNotFoundException,
-        SessionTimeoutException, ServletException {
+        SessionTimeoutException, ServletException
+    {
         AppdefEntityID entityId = resource.getEntityId();
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
-        log.trace("finding servers for resource [" + entityId + "]");
+
         List servers =
             boss.findServersByPlatform(sessionId, entityId.getId(),
                                        PageControl.PAGE_ALL);
@@ -97,16 +93,16 @@ public class PlatformInventoryHelper extends InventoryHelper {
      * @param ctx the servlet context
      * @param id the id of the server type
      */
-    public AppdefResourceTypeValue
-    getChildResourceType(HttpServletRequest request,
-                         ServletContext ctx,
-                         AppdefEntityTypeID id)
+    public AppdefResourceTypeValue getChildResourceType(HttpServletRequest request,
+                                                        ServletContext ctx,
+                                                        AppdefEntityTypeID id)
         throws PermissionException, AppdefEntityNotFoundException,
         RemoteException, SessionNotFoundException, SessionTimeoutException,
-        ServletException {
+        ServletException
+    {
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
-        boolean isPlatformSvc = RequestUtils.parameterExists(request, Constants.INTERN_CHILD_MODE_ATTR);
+
         try {
             switch (id.getType()) {
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
@@ -119,8 +115,7 @@ public class PlatformInventoryHelper extends InventoryHelper {
                     throw new IllegalArgumentException(
                             "Unknown appdef entity type id: " + id);
             }
-        }
-        catch (FinderException e) {
+        } catch (FinderException e) {
             throw new ServerNotFoundException(id.getId());
         }
     }
@@ -138,10 +133,15 @@ public class PlatformInventoryHelper extends InventoryHelper {
                               ServletContext ctx,
                               AppdefResourceValue resource)
         throws PermissionException, AppdefEntityNotFoundException,
-        RemoteException, SessionNotFoundException, SessionTimeoutException,
-        ServletException {
-        PlatformValue platform = (PlatformValue) resource;
-        Collection lights = Arrays.asList(platform.getServerValues());
-        return AppdefResourceValue.getServerTypeCountMap(lights);
+               RemoteException, SessionNotFoundException,
+               SessionTimeoutException, ServletException
+    {
+        int sessionId = RequestUtils.getSessionId(request).intValue();
+        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+
+        Collection servers = boss.findServersByPlatform(sessionId,
+                                                        resource.getId(),
+                                                        PageControl.PAGE_ALL);
+        return AppdefResourceValue.getServerTypeCountMap(servers);
     }
 }
