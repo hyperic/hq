@@ -26,7 +26,6 @@
 package org.hyperic.hq.ui.action.resource.server.monitor.visibility;
 
 import java.rmi.RemoteException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +40,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -62,8 +60,6 @@ public class ServerInventoryHelper extends InventoryHelper {
     public ServerInventoryHelper(AppdefEntityID entityId) {
         super(entityId);
     }
-
-    // ---------------------------------------------------- Public Methods
 
     /**
      * Get the set of service types representing a server's services.
@@ -128,10 +124,15 @@ public class ServerInventoryHelper extends InventoryHelper {
                               ServletContext ctx,
                               AppdefResourceValue resource)
         throws PermissionException, AppdefEntityNotFoundException,
-        RemoteException, SessionNotFoundException, SessionTimeoutException,
-        ServletException {
-        ServerValue server = (ServerValue) resource;
-        Collection lights = Arrays.asList(server.getServiceValues());
-        return AppdefResourceValue.getServiceTypeCountMap(lights);
+               RemoteException, SessionNotFoundException,
+               SessionTimeoutException, ServletException
+    {
+        int sessionId = RequestUtils.getSessionId(request).intValue();
+
+        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+        Collection services = boss.findServicesByServer(sessionId,
+                                                        resource.getId(),
+                                                        PageControl.PAGE_ALL);
+        return AppdefResourceValue.getServiceTypeCountMap(services);
     }
 }
