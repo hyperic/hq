@@ -42,7 +42,7 @@
 
   <!-- Agent Caches -->
   <cache name="org.hyperic.hq.appdef.Agent"
-         maxElementsInMemory="50"
+         maxElementsInMemory="100"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -62,7 +62,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.appdef.server.session.Platform"
-         maxElementsInMemory="50"
+         maxElementsInMemory="100"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -74,13 +74,13 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.appdef.server.session.Platform.ips"
-         maxElementsInMemory="50"
+         maxElementsInMemory="100"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
 
-  <!-- Server Type Caches -->
+  <!-- Server Caches -->
   <cache name="org.hyperic.hq.appdef.server.session.ServerType"
          maxElementsInMemory="100"
          eternal="true"
@@ -94,13 +94,13 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.appdef.server.session.Platform.servers"
-         maxElementsInMemory="50"
+         maxElementsInMemory="100"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.appdef.server.session.PlatformType.serverTypesBag"
-         maxElementsInMemory="50"
+         maxElementsInMemory="15"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -126,7 +126,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.appdef.server.session.ServerType.serviceTypes"
-         maxElementsInMemory="500"
+         maxElementsInMemory="100"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
