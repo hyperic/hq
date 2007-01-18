@@ -586,18 +586,14 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get a PlatformValue object by id.
-     * @deprecated use getPlatformById instead.
+     * @deprecated use findPlatformById instead.
      * @ejb:interface-method
      */
     public PlatformValue getPlatformValueById(AuthzSubjectValue subject,
                                               Integer id)
         throws PlatformNotFoundException, PermissionException 
     {
-        try {
-            return getPlatformDAO().findById(id).getPlatformValue();
-        } catch (ObjectNotFoundException e) {
-            throw new PlatformNotFoundException(id, e);
-        }
+        return findPlatformById(subject, id).getPlatformValue();
     }
 
     /**
@@ -615,10 +611,10 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             try {
                 // First try to find by FQDN
                 return getPlatformByFqdn(subject, fqdn);
-            } catch ( PlatformNotFoundException e ) {
+            } catch (PlatformNotFoundException e) {
                 // Now try to find by certdn
                 return getPlatformByCertDN(subject, certdn);
-            } catch ( Exception e ) {
+            } catch (Exception e) {
                 _log.info("Error finding platform by certdn: " + certdn);
                 throw new SystemException(e);
             }
