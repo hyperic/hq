@@ -69,13 +69,13 @@ onloads.push(requestAvailSummary<c:out value="${portlet.token}"/>);
           <th width="75%" class="tableRowInactive"><fmt:message key="dash.home.TableHeader.Type"/></th>
           <th align="right" class="tableRowInactive">
               <span style="color:red">
-                  <fmt:message key="resource.hub.legend.unavailable"/>
+                  <fmt:message key="dash.availSummary.header.Unavail"/>
               </span>
           <th align="center" class="tableRowInactive" width="1%">
             <fmt:message key="common.label.Pipe"/>
           </th>
           <th align="left" class="tableRowInactive">
-              <fmt:message key="resource.hub.legend.available"/>
+              <fmt:message key="dash.availSummary.header.Avail"/>
           </th>
         </tr>
         <!-- table rows are inserted here dynamically -->
