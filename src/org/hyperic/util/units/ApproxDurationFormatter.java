@@ -26,11 +26,8 @@
 package org.hyperic.util.units;
 
 import java.math.BigDecimal;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
-
-import org.hyperic.util.StringUtil;
 
 /**
  * Format a value into an approximate duration.  
@@ -68,91 +65,11 @@ public class ApproxDurationFormatter extends DurationFormatter
         return new FormattedNumber(res.trim(), "");
     }
 
-    /**
-     * Parse a string which is of the same format that we output, 
-     * when outputting approximate durations.
-     */
-    private UnitNumber parseRegular(String val, Locale locale,
-                                    ParseSpecifics specifics)
-        throws ParseException
-    {
-        final int unitType = UnitsConstants.UNIT_APPROX_DUR;
-        String[] vals;
-        int scale;
-        
-        vals = (String[])StringUtil.explode(val, " ").toArray(new String[0]);
-        if (vals.length != 2) {
-            throw new ParseException(val, 0);
-        }
-        
-        if (vals[1].indexOf("year") > -1) {
-            scale = UnitsConstants.SCALE_YEAR;
-        }
-        else if(vals[1].indexOf("day") > -1) {
-            scale = UnitsConstants.SCALE_DAY;
-        }
-        else {
-            scale = UnitsConstants.SCALE_MIN;
-        }
-
-        try {
-            return new UnitNumber(Integer.parseInt(vals[0]), unitType, scale);
-        } catch(NumberFormatException exc){
-        }
-
-        throw new ParseException(val, 0);
-    }
-
     public UnitNumber parse(String val, Locale locale, 
                             ParseSpecifics specifics)
         throws ParseException
     {
-        NumberFormat fmt = NumberFormat.getInstance(locale);
-        double numberPart;
-        String tagPart;
-        int nonIdx, scale;
-
-        try {
-            return parseRegular(val, locale, specifics);
-        } catch(ParseException exc){
-            // That's fine, try another format
-        }
-
-        nonIdx = UnitsUtil.findNonNumberIdx(val, fmt);
-        if(nonIdx == -1){
-            throw new ParseException("Number had no units with it", 
-                                     val.length());
-        }
-
-        if(nonIdx == 0){
-            throw new ParseException("Invalid number specified", 0);
-        }
-
-        numberPart = fmt.parse(val.substring(0, nonIdx)).doubleValue();
-        tagPart    = val.substring(nonIdx, val.length()).trim();
-
-        if(tagPart.equalsIgnoreCase("year") ||
-           tagPart.equalsIgnoreCase("years"))
-        {
-            scale = UnitsConstants.SCALE_YEAR;
-        } else if(tagPart.equalsIgnoreCase("day") ||
-                  tagPart.equalsIgnoreCase("days"))
-        {
-            scale = UnitsConstants.SCALE_DAY;
-        } else if(tagPart.equalsIgnoreCase("hour") ||
-                  tagPart.equalsIgnoreCase("hours"))
-        {
-            scale = UnitsConstants.SCALE_HOUR;
-        } else if(tagPart.equalsIgnoreCase("minute") ||
-                  tagPart.equalsIgnoreCase("minutes"))
-        {
-            scale = UnitsConstants.SCALE_MIN;
-        } else {
-            throw new ParseException("Unknown duration '" + tagPart + "'",
-                                     nonIdx);
-        }
-
-        return new UnitNumber(numberPart, UnitsConstants.UNIT_APPROX_DUR,
-                              scale);
+        throw new ParseException(
+            "ApproxDurationFormatter does not support parsing of values", 0);
     }
 }
