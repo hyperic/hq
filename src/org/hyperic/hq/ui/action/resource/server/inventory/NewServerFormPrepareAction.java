@@ -27,6 +27,8 @@ package org.hyperic.hq.ui.action.resource.server.inventory;
 
 import java.util.ArrayList;
 import java.util.TreeMap;
+import java.util.List;
+import java.util.Iterator;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -40,35 +42,23 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.pager.PageControl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 
-/**
- * Similar to new platform
- * 
- *
- */
 public class NewServerFormPrepareAction 
     extends WorkflowPrepareAction {
-    /**
-     * Retrieve this data and store it in the
-     * <code>ServerForm</code>:
-     *
-     */
-    public ActionForward workflow(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        Log log =
-            LogFactory.getLog(NewServerFormPrepareAction.class.getName());
 
+    public ActionForward workflow(ComponentContext context,
+                                  ActionMapping mapping,
+                                  ActionForm form,
+                                  HttpServletRequest request,
+                                  HttpServletResponse response)
+        throws Exception
+    {
         ServerForm newForm = (ServerForm) form;
         Integer platformId = newForm.getRid();
         Integer resourceType = newForm.getType();
@@ -88,28 +78,26 @@ public class NewServerFormPrepareAction
                         
             PlatformValue pValue = boss.findPlatformById(sessionId.intValue(), platformId);
 
-            log.trace("getting server types");
-            // XXX this depends on CMRs in the platform->platformType->serverType
-            // vo hierarchy. Blech.
-            ServerTypeValue [] arr = pValue.getPlatformType().getServerTypeValues();
+            List stValues =
+                boss.findServerTypesByPlatform(sessionId.intValue(),
+                                               platformId,
+                                               PageControl.PAGE_ALL);
+
             TreeMap returnMap = new TreeMap();
-            for(int i = 0; i < arr.length; i++) {
-                if (!arr[i].getVirtual()) {
-                    returnMap.put(arr[i].getSortName(), arr[i]);
+            for(Iterator i = stValues.iterator(); i.hasNext();) {
+                ServerTypeValue stv = (ServerTypeValue)i.next();
+                if (!stv.getVirtual()) {
+                    returnMap.put(stv.getSortName(), stv);
                 }
             }
             newForm.setResourceTypes(new ArrayList(returnMap.values()));
-            
             request.setAttribute(Constants.PARENT_RESOURCE_ATTR, pValue);
-            
             newForm.setRid(platformId);
             newForm.setType(resourceType);
 
-                        
             return null;
         } catch (Throwable t) {
-            throw new ServletException("can't prepare new server form", t);
+            throw new ServletException("Can't prepare new server form", t);
         }
     }
-
 }
