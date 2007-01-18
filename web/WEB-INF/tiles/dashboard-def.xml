@@ -150,9 +150,10 @@
   </definition> 
  
   <definition name=".dash.portlets.multi">
-            <putList name="multi.narrow"/>
-            <putList name="multi.wide">
+            <putList name="multi.narrow">
               <add value=".dashContent.availSummary"/>
+            </putList>
+            <putList name="multi.wide">
               <add value=".dashContent.criticalAlerts"/>
               <add value=".dashContent.metricViewer"/>
             </putList>
@@ -160,6 +161,7 @@
 
   <definition name=".dashContent.addContent.narrow"
               controllerUrl="/dashboard/AddContent.do"
+              extends=".dash.portlets.multi"
               path="/portlet/AddContentControl.jsp">
               <put name="wide"      value="false" />
               <putList name="portlets">
