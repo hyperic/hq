@@ -117,7 +117,6 @@
       <tiles:insert definition=".resource.common.monitor.visibility.charts.metric.chart">
       <tiles:put name="multiMetric" value="true"/>
       </tiles:insert>
-      <tiles:insert definition=".resource.common.monitor.visibility.charts.metric.savecharttoolbar"/>
       &nbsp;<br>
       <tiles:insert definition=".resource.common.monitor.visibility.charts.metric.partrsrcs">
       <tiles:put name="multiMetric" value="true"/>
