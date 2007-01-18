@@ -26,7 +26,6 @@
 package org.hyperic.hq.ui.action.portlet.recentlyApproved;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -35,19 +34,18 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
-
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.util.pager.PageControl;
+import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.sigar.pager.SortAttribute;
+import org.hyperic.util.pager.PageControl;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -74,11 +72,11 @@ public class ViewAction extends TilesAction {
         Integer range = new Integer(user.getPreference(PropertiesForm.RANGE));
 
         try {
-            PageControl pc = new PageControl();
-            pc.setSortattribute(SortAttribute.CTIME);
-            pc.setSortorder(PageControl.SORT_DESC);
-            pc.setPagesize(range.intValue());
-            List platforms = appdefBoss.findAllPlatforms(sessionId, pc);
+            // Hard code to look for platforms created in the last two days
+            List platforms =
+                appdefBoss.findRecentPlatforms(sessionId,
+                                               2 * MeasurementConstants.DAY,
+                                               range.intValue());
             context.putAttribute("recentlyAdded", platforms);
         } catch (Exception e) {
             List emptyList = new ArrayList();
