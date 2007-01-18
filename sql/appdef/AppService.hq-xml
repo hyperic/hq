@@ -51,7 +51,7 @@
     </property>
 
     <property name="isEntryPoint" type="boolean">
-      <column name="FENTRY_POINT" not-null="false" />
+      <column name="FENTRY_POINT" not-null="true" />
     </property>
 
     <many-to-one name="serviceType" 
