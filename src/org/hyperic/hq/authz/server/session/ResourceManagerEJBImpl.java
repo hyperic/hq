@@ -50,6 +50,9 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceManagerUtil;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -523,7 +526,14 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
             org.hyperic.hq.authz.shared.ResourceValue.class);
     }
 
-    public void setSessionContext(javax.ejb.SessionContext ctx) { }
+    public static ResourceManagerLocal getOne() {
+        try {
+            return ResourceManagerUtil.getLocalHome().create();
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
+    }
+    
     public void ejbCreate() throws CreateException {
         try {
             resourcePager = Pager.getPager(RESOURCE_PAGER);

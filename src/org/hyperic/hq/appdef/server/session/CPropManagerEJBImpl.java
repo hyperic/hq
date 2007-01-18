@@ -41,6 +41,8 @@ import org.hyperic.hq.appdef.shared.CPropChangeEvent;
 import org.hyperic.hq.appdef.shared.CPropKeyExistsException;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropKeyValue;
+import org.hyperic.hq.appdef.shared.CPropManagerLocal;
+import org.hyperic.hq.appdef.shared.CPropManagerUtil;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
@@ -594,6 +596,14 @@ public class CPropManagerEJBImpl
             throw new CPropKeyNotFoundException(msg);
         }
         return res;
+    }
+
+    public static CPropManagerLocal getOne() {
+        try {
+            return CPropManagerUtil.getLocalHome().create();
+        } catch (Exception e) {
+            throw new SystemException();
+        }
     }
 
     public void ejbCreate() throws CreateException {}
