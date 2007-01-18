@@ -12,7 +12,6 @@
               <put name="wide"      value="true" />
               <putList name="portlets">
                 <add value=".dashContent.autoDiscovery"/>
-                <add value=".dashContent.availSummary"/>
                 <add value=".dashContent.controlActions"/>
                 <add value=".dashContent.resourceHealth"/>
                 <add value=".dashContent.criticalAlerts"/>

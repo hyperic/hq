@@ -163,6 +163,7 @@
               path="/portlet/AddContentControl.jsp">
               <put name="wide"      value="false" />
               <putList name="portlets">
+                <add value=".dashContent.availSummary"/>
                 <add value=".dashContent.recentlyApproved"/>
                 <add value=".dashContent.savedCharts"/>
                 <add value=".dashContent.searchResources"/>
