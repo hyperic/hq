@@ -51,12 +51,14 @@ import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.pager.PageControl;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 /**
  * Action class which saves an auto-discovery.  The autodiscovery
@@ -189,13 +191,17 @@ public class NewAutoDiscoveryAction extends BaseAction {
         int sessionId = RequestUtils.getSessionIdInt(request);
         Integer scheduleId = newForm.getSid();
         
-        // update the ScanConfiguration from the form obect 
-        ServerTypeValue[] serverTypeValObjs =
-            pValue.getPlatformType().getServerTypeValues();
+        // update the ScanConfiguration from the form obect
+        List stValues =
+            boss.findServerTypesByPlatform(sessionId,
+                                           pValue.getId(),
+                                           PageControl.PAGE_ALL);
+        ServerTypeValue[] stArray = (ServerTypeValue[])
+            stValues.toArray(new ServerTypeValue[0]);
         
-        Map serverDetectors = aiboss.getServerSignatures(sessionId,
-                                              newForm.getSelectedServerTypes(
-                                                         serverTypeValObjs));
+        Map serverDetectors =
+            aiboss.getServerSignatures(sessionId,
+                                       newForm.getSelectedServerTypes(stArray));
         
         ServerSignature[] serverDetectorArray =
             new ServerSignature[serverDetectors.size()];
