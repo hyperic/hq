@@ -1581,7 +1581,11 @@ public class EventsBossEJBImpl
                PermissionException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
-        getEscMan().removeAction(escId, actId);
+        Escalation e = getEscMan().findById(escId);
+        
+        if (e != null) {
+            getEscMan().removeAction(e, actId);
+        }
     }
     
     /**

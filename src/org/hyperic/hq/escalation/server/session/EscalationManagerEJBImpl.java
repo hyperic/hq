@@ -52,8 +52,6 @@ import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.SessionBase;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
-import org.hyperic.util.config.ConfigResponse;
-
 
 /**
  * @ejb:bean name="EscalationManager"
@@ -136,6 +134,15 @@ public class EscalationManagerEJBImpl
         esc.setNotifyAll(notifyAll);
     }
 
+    private void unscheduleEscalation(Escalation e) {
+        Collection states = _stateDAO.findStatesFor(e);
+        
+        // Unschedule any escalations currently in progress
+        for (Iterator i=states.iterator(); i.hasNext(); ) {
+            endEscalation((EscalationState) i.next());
+        }
+    }
+
     /**
      * Add an action to the end of an escalation chain.  Any escalations
      * currently in progress using this chain will be canceled.
@@ -145,17 +152,9 @@ public class EscalationManagerEJBImpl
     public void addAction(Escalation e, ActionConfigInterface cfg, 
                           long waitTime) 
     {
-        EscalationRuntime runtime = EscalationRuntime.getInstance();
-        Collection states = _stateDAO.findStatesFor(e);
         Action a = ActionManagerEJBImpl.getOne().createAction(cfg);
-        
         e.addAction(waitTime, a);
-        for (Iterator i=states.iterator(); i.hasNext(); ) {
-            EscalationState s = (EscalationState)i.next();
-            
-            runtime.unscheduleEscalation(s);
-            _stateDAO.remove(s);
-        }
+        unscheduleEscalation(e);
     }
 
     /**
@@ -164,11 +163,9 @@ public class EscalationManagerEJBImpl
      * 
      * @ejb:interface-method  
      */
-    public void removeAction(Integer id, Integer actId) 
+    public void removeAction(Escalation e, Integer actId) 
     {
-        Escalation e = _esclDAO.findById(id);
-        
-        // Iterate through the actions and find the one action
+        // Iterate through the actions and find the one escalation action
         Action action = null;
         for (Iterator it = e.getActionsList().iterator(); it.hasNext(); ) {
             EscalationAction ea = (EscalationAction) it.next();
@@ -183,21 +180,12 @@ public class EscalationManagerEJBImpl
             return;
         }
 
-        EscalationRuntime runtime = EscalationRuntime.getInstance();
-        Collection states = _stateDAO.findStatesFor(e);
+        unscheduleEscalation(e);
         
-        // Unschedule any escalations currently in progress
-        for (Iterator i=states.iterator(); i.hasNext(); ) {
-            EscalationState s = (EscalationState)i.next();
-            
-            runtime.unscheduleEscalation(s);
-            _stateDAO.remove(s);
-        }
-        
-        // Remove the action
+        // Remove the actual action
         ActionManagerEJBImpl.getOne().deleteAction(action);
     }
-    
+
     /**
      * Delete an escalation chain.  This method will throw an exception if
      * the escalation chain is in use.
@@ -387,8 +375,7 @@ public class EscalationManagerEJBImpl
         if (actionIdx >= e.getActions().size()) {
             _log.warn("Attempted to execute escalation state which had run " +
                       "out.  Perhaps the escalation was modified?");
-            EscalationRuntime.getInstance().unscheduleEscalation(s);
-            _stateDAO.remove(s);
+            endEscalation(s);
             return;
         }
         
@@ -401,8 +388,7 @@ public class EscalationManagerEJBImpl
         // escalation so we don't loop fo-eva 
         if (actionIdx >= (e.getActions().size() - 1)) {
             _log.info("Ran out of escalation.  Terminating state");
-            EscalationRuntime.getInstance().unscheduleEscalation(s);
-            _stateDAO.remove(s);
+            endEscalation(s);
         } else {
             long nextTime = System.currentTimeMillis() + eAction.getWaitTime();
             
