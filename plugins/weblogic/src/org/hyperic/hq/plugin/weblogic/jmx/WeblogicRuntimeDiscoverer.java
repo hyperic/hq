@@ -393,6 +393,10 @@ public class WeblogicRuntimeDiscoverer
         if (this.usePlatformName) {
             name = GenericPlugin.getPlatformName() + " " + name;
         }
+        if (name.length() >= 200) {
+            //make sure we dont exceed service name limit
+            name = name.substring(0, 199);
+        }
         aiservice.setName(name);
 
         try {
