@@ -34,13 +34,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
-import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.autoinventory.ScanMethod;
@@ -50,11 +47,11 @@ import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.util.config.ConfigSchema;
+import org.hyperic.util.pager.PageControl;
 
-/**
- *
- */
 public class EditAutoDiscoveryPrepAction extends NewAutoDiscoveryPrepAction {
 
     private static ThreadLocal schedule = new ThreadLocal();
@@ -64,22 +61,20 @@ public class EditAutoDiscoveryPrepAction extends NewAutoDiscoveryPrepAction {
      * <code>PlatformForm</code>.
      */
     public ActionForward workflow(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception 
+                                  ActionMapping mapping,
+                                  ActionForm form,
+                                  HttpServletRequest request,
+                                  HttpServletResponse response)
+        throws Exception
     {
-        Log log = LogFactory.getLog(EditAutoDiscoveryPrepAction.class.getName());
-
         PlatformAutoDiscoveryForm aForm = (PlatformAutoDiscoveryForm) form;
 
         AIScheduleValue sVal = (AIScheduleValue)request.getAttribute(Constants.AISCHEDULE_ATTR);
         schedule.set(sVal);
         aForm.setSid(sVal.getId());
         loadScanConfig(aForm, request);
-        
-        return super.workflow(context, mapping,form, request,response);
+
+        return super.workflow(context, mapping, form, request,response);
     }
 
     /**
@@ -91,9 +86,9 @@ public class EditAutoDiscoveryPrepAction extends NewAutoDiscoveryPrepAction {
     {
         AIScheduleValue sched = (AIScheduleValue)schedule.get();
         ScanMethodConfig[] configs = sched.getConfigObj().getScanMethodConfigs();
-        
+
         if (configs.length == 0)
-            throw new RuntimeException("no ScanMethodConfig objects setup");
+            throw new RuntimeException("No ScanMethodConfig objects setup");
             
         aForm.setName(sched.getScanName());
         aForm.setDescription(sched.getScanDesc());
@@ -112,8 +107,15 @@ public class EditAutoDiscoveryPrepAction extends NewAutoDiscoveryPrepAction {
         aForm.populateFromSchedule(sched.getScheduleValue(), request.getLocale());
         
         PlatformValue pValue = (PlatformValue)RequestUtils.getResource(request);
+
+        Integer sessionId = RequestUtils.getSessionId(request);
+        AppdefBoss boss =
+            ContextUtils.getAppdefBoss(getServlet().getServletContext());
+        List serverTypes = boss.findServerTypesByPlatform(sessionId.intValue(),
+                                                          pValue.getId(),
+                                                          PageControl.PAGE_ALL);
         List selSvrs =
-            buildSelectedServerTypes(pValue.getPlatformType(),
+            buildSelectedServerTypes(serverTypes,
                                      sched.getConfigObj().getServerSignatures());
         Integer[] selSvrIds = new Integer[selSvrs.size()];
         int i = 0;
@@ -127,15 +129,17 @@ public class EditAutoDiscoveryPrepAction extends NewAutoDiscoveryPrepAction {
     /**
      * Get the selected server types. 
      */
-    public List buildSelectedServerTypes(PlatformTypeValue ptValue,
-                                         ServerSignature[] serverSigs) 
+    private List buildSelectedServerTypes(List serverTypes,
+                                          ServerSignature[] serverSigs)
         throws Exception 
     {          
         List serverDetectorList = new ArrayList();
         CollectionUtils.addAll(serverDetectorList, serverSigs);
-        
-        return BizappUtils.buildServerTypesFromServerSig(
-                                ptValue.getServerTypeValues(),
-                                serverDetectorList.iterator() );
+
+        ServerTypeValue[] types = (ServerTypeValue[])
+            serverTypes.toArray(new ServerTypeValue[0]);
+
+        return BizappUtils.
+            buildServerTypesFromServerSig(types, serverDetectorList.iterator());
     }
 }
