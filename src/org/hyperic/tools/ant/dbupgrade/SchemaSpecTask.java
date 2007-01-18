@@ -39,11 +39,10 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 
 public abstract class SchemaSpecTask extends Task {
-    
-    protected String ctx = SchemaSpecTask.class.getName();
+    protected String _ctx = SchemaSpecTask.class.getName();
 
-    private Connection conn = null;
-    private DBUpgrader upgrader = null;
+    private Connection _conn;
+    private DBUpgrader _upgrader;
 
     private static Map SQL_TYPES = new HashMap();
 
@@ -54,7 +53,8 @@ public abstract class SchemaSpecTask extends Task {
             mods = fields[i].getModifiers();
             if ( Modifier.isPublic(mods) &&
                  Modifier.isStatic(mods) &&
-                 Modifier.isFinal(mods) ) {
+                 Modifier.isFinal(mods) ) 
+            {
                 try {
                     SQL_TYPES.put(fields[i].getName(), 
                                   new Integer(fields[i].getInt(null)));
@@ -70,18 +70,22 @@ public abstract class SchemaSpecTask extends Task {
     public SchemaSpecTask () {}
 
     public void initialize(Connection conn, DBUpgrader upgrader) {
-        this.conn = conn;
-        this.upgrader = upgrader;
+        _conn     = conn;
+        _upgrader = upgrader;
     }
-    public Connection getConnection () { return conn; }
+
+    public Connection getConnection () { return _conn; }
+    
     public Connection getNewConnection () throws SQLException {
-        return upgrader.getConnection(); 
+        return _upgrader.getConnection(); 
     }
-    public int getDBType () { return upgrader.getDBType(); }
-    public int getDBUtilType () { return upgrader.getDBUtilType(); }
+
+    public int getDBType () { return _upgrader.getDBType(); }
+    
+    public int getDBUtilType () { return _upgrader.getDBUtilType(); }
 
     public int translateSqlType ( String typeName ) throws BuildException {
-        String mappedType = TypeMap.getMappedType(upgrader.getTypeMaps(), 
+        String mappedType = TypeMap.getMappedType(_upgrader.getTypeMaps(), 
                                                   typeName, "java");
         Integer sqlTypeInteger = (Integer) SQL_TYPES.get(mappedType);
         if ( sqlTypeInteger == null ) {
@@ -91,11 +95,11 @@ public abstract class SchemaSpecTask extends Task {
     }
 
     public String getDBSpecificTypeName( String typeName ) 
-        throws BuildException {
-
-        String mappedType = TypeMap.getMappedType(upgrader.getTypeMaps(),
+        throws BuildException 
+    {
+        String mappedType = TypeMap.getMappedType(_upgrader.getTypeMaps(),
                                                   typeName, 
-                                                  upgrader.getDBType());
+                                                  _upgrader.getDBType());
         if ( mappedType == null ) {
             throw new BuildException("No type mapping for: " + typeName);
         }

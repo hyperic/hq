@@ -64,7 +64,7 @@ public class SST_Prepend extends SST_Update {
 
         try {
             // Check to see if the column exists.
-            boolean foundColumn = DBUtil.checkColumnExists(ctx, c, 
+            boolean foundColumn = DBUtil.checkColumnExists(_ctx, c, 
                                                            table, column);
             if ( !foundColumn ) {
                 throw new BuildException("Cannot update: column " + column
@@ -82,8 +82,8 @@ public class SST_Prepend extends SST_Update {
             while (rs.next()) {
                 pkMap.put(rs.getObject(1), rs.getString(2));
             }
-            DBUtil.closeResultSet(ctx, rs);
-            DBUtil.closeStatement(ctx, ps);
+            DBUtil.closeResultSet(_ctx, rs);
+            DBUtil.closeStatement(_ctx, ps);
 
             ps = c.prepareStatement(updateSql);
             Iterator i = pkMap.keySet().iterator();
@@ -102,8 +102,8 @@ public class SST_Prepend extends SST_Update {
             throw new BuildException("Error updating " + table + "." + column 
                                      + ": " + e, e);
         } finally {
-            DBUtil.closeResultSet(ctx, rs);
-            DBUtil.closeStatement(ctx, ps);
+            DBUtil.closeResultSet(_ctx, rs);
+            DBUtil.closeStatement(_ctx, ps);
         }
         
     }

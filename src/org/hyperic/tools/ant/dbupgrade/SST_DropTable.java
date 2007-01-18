@@ -57,7 +57,7 @@ public class SST_DropTable extends SchemaSpecTask {
                 newC = getNewConnection();
                 foundTable = DBUtil.checkTableExists(newC, table);
             } finally {
-                DBUtil.closeConnection(ctx, newC);
+                DBUtil.closeConnection(_ctx, newC);
             }
             if ( !foundTable ) {
                 log(">>>>> Not dropping table: " + table
@@ -74,7 +74,7 @@ public class SST_DropTable extends SchemaSpecTask {
             throw new BuildException("Error dropping table " 
                                      + table + ": " + e, e);
         } finally {
-            DBUtil.closeStatement(ctx, ps);
+            DBUtil.closeStatement(_ctx, ps);
         }
         
     }

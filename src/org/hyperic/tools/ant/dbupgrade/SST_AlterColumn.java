@@ -36,55 +36,66 @@ import org.apache.tools.ant.Task;
 import org.hyperic.util.jdbc.DBUtil;
 
 public class SST_AlterColumn extends SchemaSpecTask {
-
-    private String table = null;
-    private String column = null;
-    private String columnType = null;
-    private String precision = null;
-    private String nullable = null;
-    private String defval = null;
-    private Initializer initializer = null;
-    private ForeignKey foreignKey = null;
+    private String      _table;
+    private String      _column;
+    private String      _columnType;
+    private String      _precision;
+    private String      _nullable;
+    private String      _defval;
+    private boolean     _quoteDefault = true; // Defaults to true
+    private Initializer _initializer;
+    private ForeignKey  _foreignKey;
 
     public SST_AlterColumn () {}
 
     public void setTable (String t) {
-        table = t;
+        _table = t;
     }
+    
     public void setColumn (String c) {
-        column = c;
+        _column = c;
     }
+    
     public void setColumnType (String ct) {
-        columnType = ct;
+        _columnType = ct;
     }
+    
     public void setPrecision (String p) {
-        precision = p;
+        _precision = p;
     }
+    
     public void setNullable (String n) {
-        nullable = n;
+        _nullable = n;
     }
+    
     public void setDefault (String d) {
-        defval = d;
+        _defval = d;
     }
+    
+    public void setQuoteDefault (String d) {
+        _quoteDefault = d.equalsIgnoreCase("t") || d.equalsIgnoreCase("true") ||
+                        d.equalsIgnoreCase("y") || d.equalsIgnoreCase("yes");
+    }
+    
     public Initializer createInitializer () {
-        if ( initializer != null ) {
+        if ( _initializer != null ) {
             throw new IllegalStateException("Multiple initializers "
                                             + "not permitted");
         }
-        initializer = new Initializer();
-        return initializer;
+        _initializer = new Initializer();
+        return _initializer;
     }
+    
     public ForeignKey createForeignKey () {
-        if ( foreignKey != null ) {
+        if ( _foreignKey != null ) {
             throw new IllegalStateException("Multiple foreignKeys "
                                             + "not permitted");
         }
-        foreignKey = new ForeignKey();
-        return foreignKey;
+        _foreignKey = new ForeignKey();
+        return _foreignKey;
     }
 
     public void execute () throws BuildException {
-
         validateAttributes();
 
         Connection c = getConnection();
@@ -105,23 +116,23 @@ public class SST_AlterColumn extends SchemaSpecTask {
     private void alter_oracle (Connection c) throws BuildException {
         String columnTypeName = null;
         String alterSql =
-            "ALTER TABLE " + table + " MODIFY (" + column;
+            "ALTER TABLE " + _table + " MODIFY (" + _column;
 
-        if (columnType != null) {
-            columnTypeName =  getDBSpecificTypeName(columnType);
+        if (_columnType != null) {
+            columnTypeName =  getDBSpecificTypeName(_columnType);
             alterSql += " " + columnTypeName;
         }
 
-        if (defval != null) {
-            alterSql += " DEFAULT '" + defval + "'";
+        if (_defval != null) {
+            alterSql += " DEFAULT '" + _defval + "'";
         }
         
-        if ( precision != null ) { 
-            alterSql += " (" + precision + ")";
+        if ( _precision != null ) { 
+            alterSql += " (" + _precision + ")";
         }
 
-        if (nullable != null) {
-            alterSql += " " + nullable;
+        if (_nullable != null) {
+            alterSql += " " + _nullable;
         }
         alterSql += ")";
 
@@ -134,38 +145,44 @@ public class SST_AlterColumn extends SchemaSpecTask {
         String columnTypeName = null;
         List sqlList = new ArrayList();
 
-        if (columnType != null) {
-            columnTypeName =  getDBSpecificTypeName(columnType);
-            if ( precision != null ) { 
-                columnTypeName += " (" + precision + ")";
+        if (_columnType != null) {
+            columnTypeName =  getDBSpecificTypeName(_columnType);
+            if ( _precision != null ) { 
+                columnTypeName += " (" + _precision + ")";
             }
             // In PostgreSQL you are not allowed to change a column type.
             // So instead, we rename the column, create a new column with the
             // desired datatype, copy the data over from the renamed/old column,
             // and then drop the renamed/old column.
-            sqlList.add("ALTER TABLE " + table
-                        + " RENAME " + column + " TO tmp_" + column);
-            sqlList.add("ALTER TABLE " + table 
-                        + " ADD " + column + " " + columnType);
-            sqlList.add("UPDATE " + table 
-                        + " SET " + column + " = tmp_" + column);
-            sqlList.add("ALTER TABLE " + table
-                        + " DROP COLUMN tmp_" + column);
+            sqlList.add("ALTER TABLE " + _table
+                        + " RENAME " + _column + " TO tmp_" + _column);
+            sqlList.add("ALTER TABLE " + _table 
+                        + " ADD " + _column + " " + _columnType);
+            sqlList.add("UPDATE " + _table 
+                        + " SET " + _column + " = tmp_" + _column);
+            sqlList.add("ALTER TABLE " + _table
+                        + " DROP COLUMN tmp_" + _column);
         }
 
-        if (defval != null) {
-            sqlList.add("ALTER TABLE " + table + " SET DEFAULT '" + defval + "'");
+        if (_defval != null) {
+            if (_quoteDefault) {
+                sqlList.add("ALTER TABLE " + _table + " ALTER " + _column +
+                            " SET DEFAULT '" + _defval + "'");
+            } else {
+                sqlList.add("ALTER TABLE " + _table + " ALTER " + _column +
+                            " SET DEFAULT " + _defval);
+            }
         }
         
-        if (nullable != null) {
-            if (nullable.equalsIgnoreCase("NOT NULL")) {
-                sqlList.add("ALTER TABLE " + table 
-                            + " ALTER " + column + " SET NOT NULL");
-            } else if (nullable.equalsIgnoreCase("NULL")) {
-                sqlList.add("ALTER TABLE " + table
-                            + " ALTER " + column + " DROP NOT NULL");
+        if (_nullable != null) {
+            if (_nullable.equalsIgnoreCase("NOT NULL")) {
+                sqlList.add("ALTER TABLE " + _table 
+                            + " ALTER " + _column + " SET NOT NULL");
+            } else if (_nullable.equalsIgnoreCase("NULL")) {
+                sqlList.add("ALTER TABLE " + _table
+                            + " ALTER " + _column + " DROP NOT NULL");
             } else {
-                throw new BuildException("Invalid nullable attribute: " + nullable);
+                throw new BuildException("Invalid nullable attribute: " + _nullable);
             }
         }
 
@@ -178,11 +195,11 @@ public class SST_AlterColumn extends SchemaSpecTask {
         try {
             // Check to see if the column exists.  If it doesn't exist
             // then can't alter it
-            boolean foundColumn = DBUtil.checkColumnExists(ctx, c, 
-                                                           table, column);
+            boolean foundColumn = DBUtil.checkColumnExists(_ctx, c, 
+                                                           _table, _column);
             if ( !foundColumn ) {
-                log(">>>>> Not altering column: " + column
-                    + " because it does not exist in table " + table);
+                log(">>>>> Not altering column: " + _column
+                    + " because it does not exist in table " + _table);
                 return;
             }
 
@@ -195,31 +212,31 @@ public class SST_AlterColumn extends SchemaSpecTask {
             }
 
             // Initialize the column
-            if ( initializer != null ) {
-                initializer.init(c);
-                initializer.execute();
+            if ( _initializer != null ) {
+                _initializer.init(c);
+                _initializer.execute();
             }
-            if ( foreignKey != null ) {
-                foreignKey.init(c);
-                foreignKey.execute();
+            if ( _foreignKey != null ) {
+                _foreignKey.init(c);
+                _foreignKey.execute();
             }
 
         } catch ( Exception e ) {
-            throw new BuildException("Error updating " + table + "." + column 
+            throw new BuildException("Error updating " + _table + "." + _column 
                                      + ": " + e, e);
         } finally {
-            DBUtil.closeStatement(ctx, ps);
+            DBUtil.closeStatement(_ctx, ps);
         }
     }
 
     private void validateAttributes () throws BuildException {
-        if ( table == null )
+        if ( _table == null )
             throw new BuildException(
                     "SchemaSpec: update: No 'table' attribute specified.");
-        if ( column == null )
+        if ( _column == null )
             throw new BuildException(
                     "SchemaSpec: update: No 'column' attribute specified.");
-        if ( columnType == null && nullable == null && defval == null)
+        if ( _columnType == null && _nullable == null && _defval == null)
             throw new BuildException(
                     "SchemaSpec: update: No 'columnType', 'default, or " +
                     "'nullable' attribute specified.");
@@ -227,78 +244,78 @@ public class SST_AlterColumn extends SchemaSpecTask {
 
     public class Initializer extends Task {
 
-        private String initSql = null;
-        private Connection conn;
+        private String     _initSql;
+        private Connection _conn;
 
         public Initializer () {}
 
         public void init (Connection conn) {
-            this.conn = conn;
+            _conn = conn;
         }
 
         public void addText(String msg) {
-            if ( initSql == null ) initSql = "";
-            initSql += project.replaceProperties(msg);
+            if ( _initSql == null ) _initSql = "";
+            _initSql += project.replaceProperties(msg);
         }
 
         public void execute() throws BuildException {
 
-            if ( initSql == null ) return;
+            if ( _initSql == null ) return;
 
             PreparedStatement ps = null;
             try {
-                ps = conn.prepareStatement(initSql);
-                log(">>>>> Initializing " + table + "." + column 
-                    + " with " + initSql);
+                ps = _conn.prepareStatement(_initSql);
+                log(">>>>> Initializing " + _table + "." + _column 
+                    + " with " + _initSql);
                 ps.executeUpdate();
 
             } catch ( Exception e ) {
                 throw new BuildException("Error initializing " 
-                                         + table + "." + column 
-                                         + " (sql=" + initSql + ")");
+                                         + _table + "." + _column 
+                                         + " (sql=" + _initSql + ")");
             } finally {
-                DBUtil.closeStatement(ctx, ps);
+                DBUtil.closeStatement(_ctx, ps);
             }
         }
     }
 
     public class ForeignKey extends Task {
-
-        private String constraintName = null;
-        private String refs = null;
-        private Connection conn;
+        private String     _constraintName;
+        private String     _refs;
+        private Connection _conn;
 
         public ForeignKey () {}
 
         public void init (Connection conn) {
-            this.conn = conn;
+            _conn = conn;
         }
 
         public void setConstraintName (String constraintName) {
-            this.constraintName = constraintName;
+            _constraintName = constraintName;
         }
+
         public void setReferences (String refs) {
-            this.refs = refs;
+            _refs = refs;
         }
 
         public void execute () throws BuildException {
             String fkSql
-                = "ALTER TABLE " + table + " "
-                + "ADD CONSTRAINT " + constraintName + " "
-                + "FOREIGN KEY (" + column + ") REFERENCES " + refs;
+                = "ALTER TABLE " + _table + " "
+                + "ADD CONSTRAINT " + _constraintName + " "
+                + "FOREIGN KEY (" + _column + ") REFERENCES " + _refs;
             PreparedStatement ps = null;
             try {
-                ps = conn.prepareStatement(fkSql);
-                log(">>>>> Adding foreign key constraint " + constraintName 
-                    + " on " + table + "." + column + "->" + refs);
+                ps = _conn.prepareStatement(fkSql);
+                log(">>>>> Adding foreign key constraint " + _constraintName 
+                    + " on " + _table + "." + _column + "->" + _refs);
                 ps.executeUpdate();
 
             } catch ( Exception e ) {
                 throw new BuildException("Error adding foreign key for "
-                                         + table + "." + column 
+                                         + _table + "." + _column 
                                          + " (sql=" + fkSql + ")");
             } finally {
-                DBUtil.closeStatement(ctx, ps);
+                DBUtil.closeStatement(_ctx, ps);
             }
         }
     }

@@ -89,7 +89,7 @@ public class SST_Insert extends SchemaSpecTask {
             throw new BuildException("Error inserting data into " + table 
                                      + ": " + e, e);
         } finally {
-            DBUtil.closeStatement(ctx, ps);
+            DBUtil.closeStatement(_ctx, ps);
         }
     }
 

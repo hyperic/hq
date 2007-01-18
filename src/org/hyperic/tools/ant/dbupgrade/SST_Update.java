@@ -72,7 +72,7 @@ public class SST_Update extends SchemaSpecTask {
         
         try {
             // Check to see if the column exists.
-            boolean foundColumn = DBUtil.checkColumnExists(ctx, c, 
+            boolean foundColumn = DBUtil.checkColumnExists(_ctx, c, 
                                                            table, column);
             if ( !foundColumn ) {
                 throw new BuildException("Cannot update: column " + column
@@ -100,7 +100,7 @@ public class SST_Update extends SchemaSpecTask {
             throw new BuildException("Error updating " + table + "." + column 
                                      + ": " + e, e);
         } finally {
-            DBUtil.closeStatement(ctx, ps);
+            DBUtil.closeStatement(_ctx, ps);
         }
         
     }
