@@ -55,6 +55,8 @@ public class UnitsFormat {
                        new PercentageFormatter());
         formatters.put(new Integer(UnitsConstants.UNIT_PERCENT),
                        new PercentFormatter());
+        formatters.put(new Integer(UnitsConstants.UNIT_APPROX_DUR),
+                       new ApproxDurationFormatter());
     }
 
     private static Log log = LogFactory.getLog(UnitsFormat.class);
