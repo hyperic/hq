@@ -45,7 +45,6 @@ import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.BaseDispatchAction;
@@ -54,17 +53,9 @@ import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
-import org.json.JSONArray;
 
-/**
- *
- *  controller action for ServerConfig
- */
 public class ConfigAction extends BaseDispatchAction {
 
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.ui.action.BaseDispatchAction#getKeyMethodMap()
-     */
     protected Properties getKeyMethodMap() {
         Properties map = new Properties();
         map.setProperty(Constants.MODE_EDIT, "editConfig");
@@ -83,12 +74,13 @@ public class ConfigAction extends BaseDispatchAction {
                                     ActionForm form,
                                     HttpServletRequest request,
                                     HttpServletResponse response)
-        throws Exception {
+        throws Exception
+    {
         Integer sessionId = RequestUtils.getSessionId(request);
         ServletContext ctx = getServlet().getServletContext();
         if (!BizappUtils.canAdminHQ(sessionId, ContextUtils.getAuthzBoss(ctx)))
-            throw new PermissionException(
-                    "User not authorized to configure server settings");
+            throw new PermissionException("User not authorized to configure " +
+                                          "server settings");
         
         createPortal(request, true, "admin.settings.EditServerConfig.Title",
                      ".admin.config.EditConfig");
@@ -100,7 +92,8 @@ public class ConfigAction extends BaseDispatchAction {
                                   ActionForm form,
                                   HttpServletRequest request,
                                   HttpServletResponse resp)
-        throws Exception {
+        throws Exception
+    {
         createPortal(request, false, "admin.home.EscalationSchemes",
                      ".admin.config.EditEscalationConfig");
         
@@ -120,34 +113,38 @@ public class ConfigAction extends BaseDispatchAction {
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse resp)
-        throws Exception {
+        throws Exception
+    {
         Integer sessionId = RequestUtils.getSessionId(request);
         ServletContext ctx = getServlet().getServletContext();
         if (!BizappUtils.canAdminHQ(sessionId, ContextUtils.getAuthzBoss(ctx)))
-            throw new PermissionException(
-                    "User not authorized to configure monitor defaults");
+            throw new PermissionException("User not authorized to configure " +
+                                          "monitor defaults");
     
         AppdefBoss apBoss = ContextUtils.getAppdefBoss(ctx);
-        // get platform types
+
         int session = sessionId.intValue();
         List platTypes = apBoss.findAllPlatformTypes(session,
                                                      PageControl.PAGE_ALL);
         request.setAttribute(Constants.ALL_PLATFORM_TYPES_ATTR, platTypes);
-        // get server types
+
         List serverTypes = apBoss.findAllServerTypes(session,
                                                      PageControl.PAGE_ALL);
-        // get the special service types sans windows special case
+
+        // Get the special service types sans windows special case
+        // XXX: What special case?
         List platServices = new ArrayList();
         List winServices = new ArrayList();
         for (int i = 0; i < serverTypes.size(); i++) {
             ServerTypeValue stv = (ServerTypeValue) serverTypes.get(i);
+            List serviceTypes =
+                apBoss.findServiceTypesByServerType(session,
+                                                    stv.getId().intValue());
             if (stv.getVirtual()) {
                 if (stv.getName().startsWith("Win")) {
-                    winServices.addAll(
-                        Arrays.asList(stv.getServiceTypeValues()));
+                    winServices.addAll(serviceTypes);
                 } else {
-                    platServices.addAll(
-                        Arrays.asList(stv.getServiceTypeValues()));
+                    platServices.addAll(serviceTypes);
                 }
             }
         }
