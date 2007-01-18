@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -23,7 +22,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-<%@ page language="java" contentType="text/xml" %>
+<%@ page language="java" %>
 <%@ taglib uri="hq" prefix="hq" %>
 <%@ taglib uri="struts-html-el" prefix="html" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
@@ -32,8 +31,6 @@
 <% response.setHeader("Cache-Control","no-store");%>
 <% response.setDateHeader("Expires",-1);%>
 <hq:recentAlerts var="recentAlerts" sizeVar="recentAlertsSize" maxAlerts="2"/>
-<ajax-response>
-  <response type="element" id="recentAlerts">
   <table><tr><td nowrap="true">
 <c:choose>
   <c:when test="${recentAlertsSize > 0}">
@@ -54,5 +51,3 @@
   </c:otherwise>
 </c:choose>
   </td></tr></table>
-  </response>
-</ajax-response>

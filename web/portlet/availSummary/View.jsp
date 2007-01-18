@@ -40,16 +40,6 @@ function requestAvailSummary<c:out value="${portlet.token}"/>() {
 	new Ajax.Request(availResourcesUrl, {method: 'get', onSuccess:showAvailSummary, onFailure :reportError});
 }
 onloads.push(requestAvailSummary<c:out value="${portlet.token}"/>);
-Ajax.Responders.register({
-	onCreate: function() {
-	       if($('loading') && Ajax.activeRequestCount > 0)
-	               Effect.Appear('loading',{duration: 0.50, queue: 'end'});
-	},
-	onComplete: function() {
-	       if($('loading') && Ajax.activeRequestCount == 0)
-	               Effect.Fade('loading',{duration: 0.2, queue: 'end'});
-	}
-});
 </script>
 
 <div class="effectsPortlet">

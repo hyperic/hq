@@ -105,32 +105,24 @@
       var autoLogout = true;
       
       function refreshAlerts() {
-        Effect.Appear('loading',{duration: 0.50, queue: 'end'});
-
-        ajaxEngine.sendRequest( 'getRecentAlerts' );
         refreshCount++;
 
         if (refreshCount < 30) {
-          setRefresh();
+          setTimeout( "refreshAlerts()", 60*1000 );
         } else if (autoLogout) {
           top.location.href = "<html:rewrite action="/Logout"/>";
         }
 
-        Effect.Fade('loading',{duration: 0.50, queue: 'end'});
+        new Ajax.Request('<html:rewrite page="/common/RecentAlerts.jsp"/>',
+                         {method: 'get', onSuccess:showRecentAlertResponse,
+                                         onFailure :reportError});
       }
 
-      function setRefresh() {
-        setTimeout( "refreshAlerts()", 60*1000 );
+      function showRecentAlertResponse(originalRequest) {
+        $('recentAlerts').innerHTML = originalRequest.responseText;
       }
 
-      function initRecentAlerts() {
-        ajaxEngine.registerRequest( 'getRecentAlerts', '<html:rewrite page="/common/RecentAlerts.jsp"/>');
-        ajaxEngine.registerAjaxElement('recentAlerts');
-      }
-
-      onloads.push( initRecentAlerts );
       onloads.push( refreshAlerts );
-
       //-->
       </script>
       <div id="recentAlerts"></div>

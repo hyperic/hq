@@ -48,16 +48,6 @@ function requestRecentAlerts<c:out value="${portlet.token}"/>() {
 	new Ajax.Request(critAlertUrl, {method: 'get', onSuccess:showRecentAlerts, onFailure :reportError});
 }
 onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
-Ajax.Responders.register({
-	onCreate: function() {
-		if($('loading') && Ajax.activeRequestCount > 0)
-			Effect.Appear('loading',{duration: 0.50, queue: 'end'});
-	},
-	onComplete: function() {
-		if($('loading') && Ajax.activeRequestCount == 0)
-			Effect.Fade('loading',{duration: 0.2, queue: 'end'});
-	}
-});
 </script>
 <c:set var="rssUrl" value="/rss/ViewCriticalAlerts.rss"/>
 
