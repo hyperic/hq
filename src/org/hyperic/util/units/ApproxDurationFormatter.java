@@ -78,31 +78,26 @@ public class ApproxDurationFormatter extends DurationFormatter
     {
         final int unitType = UnitsConstants.UNIT_APPROX_DUR;
         String[] vals;
-
+        int scale;
+        
         vals = (String[])StringUtil.explode(val, " ").toArray(new String[0]);
         if (vals.length != 2) {
             throw new ParseException(val, 0);
         }
         
         if (vals[1].indexOf("year") > -1) {
-            try {
-                return new UnitNumber(Integer.parseInt(vals[0]), unitType,
-                                          UnitsConstants.SCALE_YEAR);
-            } catch(NumberFormatException exc){
-            }
+            scale = UnitsConstants.SCALE_YEAR;
         }
         else if(vals[1].indexOf("day") > -1) {
-            try {
-                return new UnitNumber(Integer.parseInt(vals[0]), unitType,
-                                      UnitsConstants.SCALE_DAY);
-            } catch(NumberFormatException exc){
-            }
-        } else if(vals[1].indexOf("minute")> -1) {
-            try {
-                return new UnitNumber(Integer.parseInt(vals[0]),
-                                      unitType, UnitsConstants.SCALE_MIN);
-            } catch(NumberFormatException exc){
-            }
+            scale = UnitsConstants.SCALE_DAY;
+        }
+        else {
+            scale = UnitsConstants.SCALE_MIN;
+        }
+
+        try {
+            return new UnitNumber(Integer.parseInt(vals[0]), unitType, scale);
+        } catch(NumberFormatException exc){
         }
 
         throw new ParseException(val, 0);
