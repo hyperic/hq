@@ -51,7 +51,6 @@ public class PlatformTypeValue
    private boolean mTimeHasBeenSet = false;
    private java.lang.Long cTime;
    private boolean cTimeHasBeenSet = false;
-   private java.util.Collection ServerTypeValues = new java.util.HashSet();
 
    public PlatformTypeValue()
    {
@@ -92,8 +91,6 @@ public class PlatformTypeValue
 	  mTimeHasBeenSet = true;
 	  this.cTime = otherValue.cTime;
 	  cTimeHasBeenSet = true;
-	// TODO Clone is better no ?
-	  this.ServerTypeValues = otherValue.ServerTypeValues;
    }
 
    public java.lang.String getSortName()
@@ -201,60 +198,6 @@ public class PlatformTypeValue
 	  return cTimeHasBeenSet;
    }
 
-   protected java.util.Collection addedServerTypeValues = new java.util.HashSet();
-   protected java.util.Collection removedServerTypeValues = new java.util.HashSet();
-   protected java.util.Collection updatedServerTypeValues = new java.util.HashSet();
-
-   public java.util.Collection getAddedServerTypeValues() { return addedServerTypeValues; }
-   public java.util.Collection getRemovedServerTypeValues() { return removedServerTypeValues; }
-   public java.util.Collection getUpdatedServerTypeValues() { return updatedServerTypeValues; }
-
-   public org.hyperic.hq.appdef.shared.ServerTypeValue[] getServerTypeValues()
-   {
-	  return (org.hyperic.hq.appdef.shared.ServerTypeValue[])this.ServerTypeValues.toArray(new org.hyperic.hq.appdef.shared.ServerTypeValue[ServerTypeValues.size()]);
-   }
-
-   public void addServerTypeValue(org.hyperic.hq.appdef.shared.ServerTypeValue added)
-   {
-	  this.ServerTypeValues.add(added);
-	  if ( ! this.addedServerTypeValues.contains(added))
-		 this.addedServerTypeValues.add(added);
-   }
-
-   public void removeServerTypeValue(org.hyperic.hq.appdef.shared.ServerTypeValue removed)
-   {
-	  this.ServerTypeValues.remove(removed);
-	  this.removedServerTypeValues.add(removed);
-	  if (this.addedServerTypeValues.contains(removed))
-		 this.addedServerTypeValues.remove(removed);
-	  if (this.updatedServerTypeValues.contains(removed))
-		 this.updatedServerTypeValues.remove(removed);
-   }
-
-   public void removeAllServerTypeValues()
-   {
-        // DOH. Clear the collection - javier 2/24/03
-        this.ServerTypeValues.clear();
-   }
-
-   public void updateServerTypeValue(org.hyperic.hq.appdef.shared.ServerTypeValue updated)
-   {
-	  if ( ! this.updatedServerTypeValues.contains(updated))
-		 this.updatedServerTypeValues.add(updated);
-   }
-
-   public void cleanServerTypeValue(){
-	  this.addedServerTypeValues = new java.util.HashSet();
-	  this.removedServerTypeValues = new java.util.HashSet();
-	  this.updatedServerTypeValues = new java.util.HashSet();
-   }
-
-   public void copyServerTypeValuesFrom(org.hyperic.hq.appdef.shared.PlatformTypeValue from)
-   {
-	  // TODO Clone the List ????
-	  this.ServerTypeValues = from.ServerTypeValues;
-   }
-
    public String toString()
    {
 	  StringBuffer str = new StringBuffer("{");
@@ -360,19 +303,6 @@ public class PlatformTypeValue
 		 {
 			lEquals = lEquals && this.cTime.equals( that.cTime );
 		 }
-		 if( this.getServerTypeValues() == null )
-		 {
-			lEquals = lEquals && ( that.getServerTypeValues() == null );
-		 }
-		 else
-		 {
-            // XXX Covalent Custom - dont compare the arrays, as order is not significant. ever.    
-            // - javier 7/16/03
-            java.util.Collection cmr1 = java.util.Arrays.asList(this.getServerTypeValues());
-            java.util.Collection cmr2 = java.util.Arrays.asList(that.getServerTypeValues());
-			// lEquals = lEquals && java.util.Arrays.equals(this.getServerTypeValues() , that.getServerTypeValues()) ;
-            lEquals = lEquals && cmr1.containsAll(cmr2);
-		 }
 
 		 return lEquals;
 	  }
@@ -398,7 +328,6 @@ public class PlatformTypeValue
 
       result = 37*result + ((this.cTime != null) ? this.cTime.hashCode() : 0);
 
-	  result = 37*result + ((this.getServerTypeValues() != null) ? this.getServerTypeValues().hashCode() : 0);
 	  return result;
    }
 

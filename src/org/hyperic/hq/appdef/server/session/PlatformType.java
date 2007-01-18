@@ -143,40 +143,6 @@ public class PlatformType extends AppdefResourceType {
         return newPlatform(pv, config, agent);
     }
 
-    /*
-    protected Platform create(PlatformType ptype, AIPlatformValue aip, 
-                              AgentPK agent)
-    {
-        AgentDAO aDAO = DAOFactory.getDAOFactory().getAgentDAO();
-        Platform p = findByName(aip.getName());
-
-        if (p != null) {
-            throwDupPlatform(p.getId(), aip.getName());
-        }
-        p = copyAIPlatformValue(aip);
-        p.setPlatformType(ptype);
-        p.setAgent(aDAO.findById(agent.getId()));
-        registerNewPlatform(p);
-        return p;
-    }
-
-    public Platform create(PlatformType ptype, PlatformValue pv, 
-                           AgentPK agent)
-    {
-        AgentDAO aDAO = DAOFactory.getDAOFactory().getAgentDAO();
-        Platform p = findByName(pv.getName());
-
-        if (p != null) {
-            throwDupPlatform(p.getId(), pv.getName());
-        }
-        p = newPlatform(pv);
-        p.setPlatformType(this);
-
-        p.setAgent(aDAO.findById(agent.getId()));
-        return p;
-    }
-    */
-
     private Platform copyAIPlatformValue(AIPlatformValue aip) {
         Platform p = new Platform();
 
@@ -238,14 +204,6 @@ public class PlatformType extends AppdefResourceType {
         _platformTypeValue.setId(getId());
         _platformTypeValue.setMTime(getMTime());
         _platformTypeValue.setCTime(getCTime());
-        _platformTypeValue.removeAllServerTypeValues();
-        if (getServerTypes() != null) {
-            Iterator isv = getServerTypes().iterator();
-            while (isv.hasNext()){
-                _platformTypeValue.addServerTypeValue(
-                    ((ServerType)isv.next()).getServerTypeValue());
-            }
-        }
         return _platformTypeValue;
     }
 
