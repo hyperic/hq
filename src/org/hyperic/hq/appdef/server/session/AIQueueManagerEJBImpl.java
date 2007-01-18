@@ -275,7 +275,6 @@ public class AIQueueManagerEJBImpl
             Iterator iter = queue.iterator();
             AIPlatform aipLocal;
             PlatformValue pValue;
-            AppdefResourcePermissions arp;
             AppdefEntityID aid;
             Integer ppk;
             while (iter.hasNext()) {
