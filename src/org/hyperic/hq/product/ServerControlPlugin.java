@@ -287,10 +287,6 @@ public abstract class ServerControlPlugin extends ControlPlugin {
             // If the pid file does not exist, we are not running
             String err = "Pid file: " + pidFile + " not found";
             getLog().debug(err);
-            // Only set the error message if this was the first error.
-            // This will likely only show up if the plugin is misconfigured
-            if (getMessage() == null)
-                setMessage(err);
             return false;
         } catch (IOException e) {
             // XXX is it right to Assume we are running?
