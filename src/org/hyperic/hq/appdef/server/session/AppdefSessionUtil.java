@@ -40,7 +40,6 @@ import org.hyperic.hq.dao.ApplicationTypeDAO;
 import org.hyperic.hq.dao.ServiceClusterDAO;
 import org.hyperic.hq.dao.AIServerDAO;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
-import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
@@ -48,29 +47,18 @@ import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocalHome;
 import org.hyperic.hq.appdef.shared.AppdefGroupManagerUtil;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
-import org.hyperic.hq.appdef.shared.ApplicationManagerLocalHome;
-import org.hyperic.hq.appdef.shared.ApplicationManagerUtil;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
-import org.hyperic.hq.appdef.shared.CPropManagerUtil;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
-import org.hyperic.hq.appdef.shared.ConfigManagerUtil;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocalHome;
-import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
-import org.hyperic.hq.appdef.shared.ServerManagerLocalHome;
-import org.hyperic.hq.appdef.shared.ServerManagerUtil;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
-import org.hyperic.hq.appdef.shared.ServiceManagerLocalHome;
-import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceManagerUtil;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.product.TypeInfo;
-
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -78,68 +66,27 @@ import javax.naming.NamingException;
 
 public abstract class AppdefSessionUtil {
     private AIQueueManagerLocal         aiqManagerLocal;
-    private ApplicationManagerLocalHome appMgrLHome;
     private AppdefGroupManagerLocalHome grpMgrLHome;
     private ConfigManagerLocal          configMgrL;
-    private PlatformManagerLocalHome    platformMgrLHome;
     private ResourceManagerLocal        rmLocal;
-    private ServerManagerLocalHome      serverMgrLHome;
-    private ServiceManagerLocalHome     serviceMgrLHome;
     private CPropManagerLocal           cpropLocal;
 
     protected CPropManagerLocal getCPropMgrLocal(){
         if(this.cpropLocal == null){
-            try {
-                this.cpropLocal = CPropManagerUtil.getLocalHome().create();
-            } catch(Exception exc){
-                throw new SystemException(exc);
-            }
+            this.cpropLocal = CPropManagerEJBImpl.getOne();
         }
         return this.cpropLocal;
     }
 
     protected ConfigManagerLocal getConfigMgrLocal() {
-        try {
-            if (configMgrL == null) {
-                configMgrL = ConfigManagerUtil.getLocalHome().create();
-            }
-        } catch(Exception exc){
-            throw new SystemException(exc);
+        if (configMgrL == null) {
+            configMgrL = ConfigManagerEJBImpl.getOne();
         }
         return configMgrL;
     }
 
-    protected AgentDAO getAgentDAO()
-    {
-        return DAOFactory.getDAOFactory().getAgentDAO();
-    }
-
-    protected AgentTypeDAO getAgentTypeDAO()
-    {
-        return DAOFactory.getDAOFactory().getAgentTypeDAO();
-    }
-
-    protected ConfigResponseDAO getConfigResponseDAO()
-    {
-        return DAOFactory.getDAOFactory().getConfigResponseDAO();
-    }
-
-    protected ServiceClusterDAO getServiceClusterDAO()
-    {
-        return DAOFactory.getDAOFactory().getServiceClusterDAO();
-    }
-
     protected ApplicationManagerLocal getApplicationMgrLocal() {
-        try {
-            if (appMgrLHome == null) {
-                appMgrLHome = ApplicationManagerUtil.getLocalHome();
-            }
-            return appMgrLHome.create();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        return ApplicationManagerEJBImpl.getOne();
     }
 
     protected AppdefGroupManagerLocalHome getAppdefGroupManagerLocalHome() {
@@ -162,96 +109,64 @@ public abstract class AppdefSessionUtil {
     }
 
     protected PlatformManagerLocal getPlatformMgrLocal() {
-        try {
-            if (platformMgrLHome == null) {
-                platformMgrLHome = PlatformManagerUtil.getLocalHome();
-            }
-            return platformMgrLHome.create();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        return PlatformManagerEJBImpl.getOne();
     }
 
     protected ServerManagerLocal getServerMgrLocal() {
-        try {
-            if (serverMgrLHome == null) {
-                serverMgrLHome = ServerManagerUtil.getLocalHome();
-            }
-            return serverMgrLHome.create();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        return ServerManagerEJBImpl.getOne();
     }
 
     protected ServiceManagerLocal getServiceMgrLocal() {
-        try {
-            if (serviceMgrLHome == null) {
-                serviceMgrLHome = ServiceManagerUtil.getLocalHome();
-            }
-            return serviceMgrLHome.create();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        return ServiceManagerEJBImpl.getOne();
     }
 
-    /**
-     * Get the local interace of the Resource Manager
-     * @return resourceManagerLocal
-     */
-    protected ResourceManagerLocal getResourceManager()
-    {
-        if(rmLocal == null) {   
-        	try {
-        		rmLocal = ResourceManagerUtil.getLocalHome().create();
-        	} catch (Exception e) {
-        		throw new SystemException(e);
-        	}
+    protected ResourceManagerLocal getResourceManager() {
+        if (rmLocal == null) {
+            rmLocal = ResourceManagerEJBImpl.getOne();
         } 
         return rmLocal;
     } 
 
-    /**
-     * Get the LocalHome reference for the PlatformObject
-     */
-    protected PlatformDAO getPlatformDAO() 
-    {
+    protected AIQueueManagerLocal getAIQManagerLocal() {
+        if (aiqManagerLocal == null) {
+            aiqManagerLocal = AIQueueManagerEJBImpl.getOne();
+        }
+        return aiqManagerLocal;
+    }
+
+    protected AgentDAO getAgentDAO() {
+        return DAOFactory.getDAOFactory().getAgentDAO();
+    }
+
+    protected AgentTypeDAO getAgentTypeDAO() {
+        return DAOFactory.getDAOFactory().getAgentTypeDAO();
+    }
+
+    protected ConfigResponseDAO getConfigResponseDAO() {
+        return DAOFactory.getDAOFactory().getConfigResponseDAO();
+    }
+
+    protected ServiceClusterDAO getServiceClusterDAO() {
+        return DAOFactory.getDAOFactory().getServiceClusterDAO();
+    }
+
+    protected PlatformDAO getPlatformDAO() {
         return DAOFactory.getDAOFactory().getPlatformDAO();
     }
 
-    /**
-     * Get the LocalHome reference for the PlatformTypeObject
-     */
-    protected PlatformTypeDAO getPlatformTypeDAO() 
-    {
+    protected PlatformTypeDAO getPlatformTypeDAO() {
         return DAOFactory.getDAOFactory().getPlatformTypeDAO();
     }
 
-    protected ServerDAO getServerDAO()
-    {
+    protected ServerDAO getServerDAO() {
         return DAOFactory.getDAOFactory().getServerDAO();
     }
 
-    /**
-     * Get the LocalHome reference for the ServerTypeObject
-     * @return ServerTypeLocalHome
-     */
-    protected ServerTypeDAO getServerTypeDAO()
-    {
+    protected ServerTypeDAO getServerTypeDAO() {
         return DAOFactory.getDAOFactory().getServerTypeDAO();
     }
 
-    /**
-     * Get the LocalHome reference for the ServiceTypeObject
-     * @return ServiceTypeDAO
-     */
-    protected ServiceTypeDAO getServiceTypeDAO()
-    {
+    protected ServiceTypeDAO getServiceTypeDAO() {
         return DAOFactory.getDAOFactory().getServiceTypeDAO();
     }
 
@@ -259,44 +174,16 @@ public abstract class AppdefSessionUtil {
         return DAOFactory.getDAOFactory().getServiceDAO();
     }
 
-    /**
-     * Get the LocalHome reference for the ApplicationType
-     * @return ApplicationTypeDAO
-     */
-    protected ApplicationTypeDAO getApplicationTypeDAO()
-    {
+    protected ApplicationTypeDAO getApplicationTypeDAO() {
         return DAOFactory.getDAOFactory().getApplicationTypeDAO();
     }
 
-    /**
-     * Get the LocalHome reference for the Application
-     * @return ApplicationLocalHome
-     */
-    protected ApplicationDAO getApplicationDAO()
-    {
+    protected ApplicationDAO getApplicationDAO() {
         return DAOFactory.getDAOFactory().getApplicationDAO();
     }
 
-    /**
-     * Get the LocalHome reference for the AIServer 
-     * @return AIServerLocalHome
-     */
-    protected AIServerDAO getAIServerDAO()
-    {
+    protected AIServerDAO getAIServerDAO() {
         return DAOFactory.getDAOFactory().getAIServerDAO();
-    }
-
-    /**
-     * Get the LocalHome reference for the AIQueueManager 
-     * @return AIServerLocalHome
-     */
-    protected AIQueueManagerLocal getAIQManagerLocal()
-        throws CreateException, NamingException 
-    {
-        if(aiqManagerLocal == null) {
-            aiqManagerLocal = AIQueueManagerUtil.getLocalHome().create();
-        }
-        return aiqManagerLocal;
     }
 
     protected AppdefResourceTypeValue findResourceType(int appdefType,
@@ -317,7 +204,7 @@ public abstract class AppdefSessionUtil {
             try {
                 return smLocal.findServerTypeById(id);
             } catch(FinderException exc){
-                throw new ServerNotFoundException("server type id=" + 
+                throw new ServerNotFoundException("Server type id=" +
                                                   appdefTypeId + 
                                                   " not found");
             }
@@ -328,20 +215,18 @@ public abstract class AppdefSessionUtil {
             try {
                 return vmLocal.findServiceTypeById(id);
             } catch(FinderException exc){
-                throw new ServiceNotFoundException("service type id=" +
+                throw new ServiceNotFoundException("Service type id=" +
                                                    appdefTypeId +
                                                    " not found");
             }
-        } else if(appdefType == 
-                  AppdefEntityConstants.APPDEF_TYPE_APPLICATION)
-        {
+        } else if(appdefType == AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
             ApplicationManagerLocal amLocal;
             
             amLocal = this.getApplicationMgrLocal();
             try {
                 return amLocal.findApplicationTypeById(id);
             } catch(FinderException exc){
-                throw new ApplicationNotFoundException("app type id=" +
+                throw new ApplicationNotFoundException("App type id=" +
                                                        appdefTypeId + 
                                                        "not found");
             }
@@ -351,8 +236,7 @@ public abstract class AppdefSessionUtil {
         }
     }
 
-    protected AppdefResourceType findResourceType(TypeInfo info)
-    {
+    protected AppdefResourceType findResourceType(TypeInfo info) {
         int type = info.getType();
 
         if(type == AppdefEntityConstants.APPDEF_TYPE_PLATFORM){
@@ -362,7 +246,7 @@ public abstract class AppdefSessionUtil {
         } else if(type == AppdefEntityConstants.APPDEF_TYPE_SERVICE){
             return getServiceTypeDAO().findByName(info.getName());
         } else {
-            throw new IllegalArgumentException("Unrecognized appdef type:"+
+            throw new IllegalArgumentException("Unrecognized appdef type:" +
                                                " " + info);
         }
     }
