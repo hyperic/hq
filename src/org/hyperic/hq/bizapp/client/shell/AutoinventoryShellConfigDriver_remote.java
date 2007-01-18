@@ -26,24 +26,19 @@
 package org.hyperic.hq.bizapp.client.shell;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.hyperic.hq.appdef.shared.PlatformTypeValue;
-import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.ServerSignature;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.util.shell.ShellCommandExecException;
+import org.hyperic.util.pager.PageControl;
 
 public class AutoinventoryShellConfigDriver_remote 
     extends AutoinventoryShellConfigDriver {
 
-    private int authToken;
     private int platformID;
     private AIBoss aiBoss;
     private AppdefBoss appdefBoss;
@@ -66,10 +61,10 @@ public class AutoinventoryShellConfigDriver_remote
         List results = new ArrayList();
 
         try {
-            PlatformTypeValue ptype = getPlatformType(this.platformID);
-            ServerTypeValue[] serverTypes = ptype.getServerTypeValues();
-
-            List stypes = Arrays.asList(serverTypes);
+            List stypes =
+                appdefBoss.findServerTypesByPlatform(auth.getAuthToken(),
+                                                     new Integer(platformID),
+                                                     PageControl.PAGE_ALL);
             Map serversigs = aiBoss.getServerSignatures(auth.getAuthToken(),
                                                         stypes);
             Iterator i = serversigs.keySet().iterator();
@@ -83,21 +78,8 @@ public class AutoinventoryShellConfigDriver_remote
             }
             return results;
 
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             throw new AutoinventoryException("Unexpected exception: " + e, e);
-        }
-    }
-    
-    private PlatformTypeValue getPlatformType(int platformID)
-        throws ShellCommandExecException {
-        try { 
-            PlatformValue pValue =
-                this.appdefBoss.findPlatformById(auth.getAuthToken(),
-                                                 new Integer(platformID));
-            return pValue.getPlatformType();
-        } catch ( Exception e ) {
-            throw new ShellCommandExecException("Could not find platform type for id=" +
-                                                platformID);
         }
     }
 }
