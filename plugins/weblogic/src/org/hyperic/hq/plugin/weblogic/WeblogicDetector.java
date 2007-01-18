@@ -308,6 +308,17 @@ public class WeblogicDetector
         }
     }
 
+    private static boolean isAdminDir(String path) {
+        if (path.startsWith("/")) {
+            File config =
+                new File(path, "config.xml.booted");
+            return config.exists();
+        }
+        else {
+            return false;
+        }
+    }
+
     private static List getServerProcessList() {
         ArrayList servers = new ArrayList();
 
@@ -316,23 +327,34 @@ public class WeblogicDetector
         for (int i=0; i<pids.length; i++) {
             //nothin in the ProcArgs to indicate installpath
             String cwd = getProcCwd(pids[i]);
+            boolean haveCwd = cwd != null;
 
             //9.1-specific since config.xml no longer tells us
             //this is an admin server, check the args for this prop,
             //which if found means this is a node server, skip it.
             String[] args = getProcArgs(pids[i]);
             for (int j=0; j<args.length; j++) {
-                if (args[j].startsWith(PROP_MX_SERVER)) {
-                    cwd = null;
+                String arg = args[j];
+                if (arg.startsWith(PROP_MX_SERVER)) {
+                    haveCwd = false;
                     break;
+                }
+                else if (!haveCwd && arg.startsWith("-D")) {
+                    //e.g. -Dapp.home=$PWD
+                    int ix = arg.indexOf("=");
+                    if (ix != -1) {
+                        String path = arg.substring(ix+1).trim();
+                        if (isAdminDir(path)) {
+                            cwd = path;
+                            haveCwd = true;
+                        }
+                    }
                 }
             }
 
-            if (cwd == null) {
-                continue;
+            if (haveCwd) {
+                servers.add(cwd);
             }
-
-            servers.add(cwd);
         }
 
         return servers;
