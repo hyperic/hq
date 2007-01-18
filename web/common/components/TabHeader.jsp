@@ -76,7 +76,9 @@
   </c:otherwise>
 </c:choose>
 <c:out value="${title}" escapeXml="false"/>
-<c:choose><c:when test="${not empty subTitle}"><span id="<c:out value="${title}_span${adminToken}"/>" class="BlockSubTitle"><c:out value="${subTitle}"/></span></c:when></c:choose>
+<c:if test="${not empty subTitle}">
+  <span id="<c:out value="${title}_span${adminToken}"/>" class="BlockSubTitle"><c:out value="${subTitle}"/></span>
+</c:if>
       <c:if test="${not empty rssUrl}">
         <html:link href="${rssUrl}"><html:img border="0" page="/images/xml.gif"/></html:link>
       </c:if>
