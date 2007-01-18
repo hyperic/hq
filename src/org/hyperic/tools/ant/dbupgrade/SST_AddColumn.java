@@ -35,42 +35,47 @@ import org.hyperic.util.jdbc.DBUtil;
 
 public class SST_AddColumn extends SchemaSpecTask {
 
-    private String table = null;
-    private String column = null;
-    private String columnType = null;
-    private String precision = null;
-    private Initializer initializer = null;
-    private ForeignKey foreignKey = null;
+    private String      _table;
+    private String      _column;
+    private String      _columnType;
+    private String      _precision;
+    private Initializer _initializer;
+    private ForeignKey  _foreignKey;
 
     public SST_AddColumn () {}
 
     public void setTable (String t) {
-        table = t;
+        _table = t;
     }
+    
     public void setColumn (String c) {
-        column = c;
+        _column = c;
     }
+    
     public void setColumnType (String ct) {
-        columnType = ct;
+        _columnType = ct;
     }
+    
     public void setPrecision (String p) {
-        precision = p;
+        _precision = p;
     }
+    
     public Initializer createInitializer () {
-        if ( initializer != null ) {
+        if ( _initializer != null ) {
             throw new IllegalStateException("Multiple initializers "
                                             + "not permitted");
         }
-        initializer = new Initializer();
-        return initializer;
+        _initializer = new Initializer();
+        return _initializer;
     }
+    
     public ForeignKey createForeignKey () {
-        if ( foreignKey != null ) {
+        if ( _foreignKey != null ) {
             throw new IllegalStateException("Multiple foreignKeys "
                                             + "not permitted");
         }
-        foreignKey = new ForeignKey();
-        return foreignKey;
+        _foreignKey = new ForeignKey();
+        return _foreignKey;
     }
 
     public void execute () throws BuildException {
@@ -79,137 +84,141 @@ public class SST_AddColumn extends SchemaSpecTask {
 
         Connection c = getConnection();
         PreparedStatement ps = null;
-        String columnTypeName = getDBSpecificTypeName(columnType);
-        String alterSql
-            = "ALTER TABLE " + table + " ADD " + column + " " + columnTypeName;
-        if ( precision != null ) alterSql += "(" + precision + ")";
+        String columnTypeName = getDBSpecificTypeName(_columnType);
+        String alterSql = "ALTER TABLE " + _table + " ADD " + _column + " " + 
+                          columnTypeName;
+        
+        if ( _precision != null ) alterSql += "(" + _precision + ")";
 
         try {
             // Check to see if the column exists.  If it's already there,
             // then don't re-add it.
-            boolean foundColumn = DBUtil.checkColumnExists(ctx, c, 
-                                                           table, column);
+            boolean foundColumn = DBUtil.checkColumnExists(_ctx, c, 
+                                                           _table, _column);
             if ( foundColumn ) {
-                log(">>>>> Not adding column: " + column
-                    + " because it already exists in table " + table);
+                log(">>>>> Not adding column: " + _column
+                    + " because it already exists in table " + _table);
                 return;
             }
 
             // Add the column.
             ps = c.prepareStatement(alterSql);
-            log(">>>>> Adding column " + column + " (type=" + columnTypeName + ") "
-                + " to table " + table);
+            log(">>>>> Adding column " + _column + " (type=" + columnTypeName + 
+                ")  to table " + _table);
+                
             ps.executeUpdate();
 
             // Initialize the column
-            if ( initializer != null ) {
-                initializer.init(c);
-                initializer.execute();
+            if ( _initializer != null ) {
+                _initializer.init(c);
+                _initializer.execute();
             }
-            if ( foreignKey != null ) {
-                foreignKey.init(c);
-                foreignKey.execute();
+            if ( _foreignKey != null ) {
+                _foreignKey.init(c);
+                _foreignKey.execute();
             }
 
         } catch ( Exception e ) {
-            throw new BuildException("Error updating " + table + "." + column 
+            throw new BuildException("Error updating " + _table + "." + _column 
                                      + ": " + e, e);
         } finally {
-            DBUtil.closeStatement(ctx, ps);
+            DBUtil.closeStatement(_ctx, ps);
         }
         
     }
 
     private void validateAttributes () throws BuildException {
-        if ( table == null )
-            throw new BuildException("SchemaSpec: update: No 'table' attribute specified.");
-        if ( column == null )
-            throw new BuildException("SchemaSpec: update: No 'column' attribute specified.");
-        if ( columnType == null )
-            throw new BuildException("SchemaSpec: update: No 'columnType' attribute specified.");
+        if ( _table == null )
+            throw new BuildException("SchemaSpec: update: No 'table' " + 
+                                     "attribute specified.");
+        if ( _column == null )
+            throw new BuildException("SchemaSpec: update: No 'column' " + 
+                                     "attribute specified.");
+        if ( _columnType == null )
+            throw new BuildException("SchemaSpec: update: No 'columnType' " + 
+                                     "attribute specified.");
     }
 
     public class Initializer extends Task {
-
-        private String initSql = null;
-        private Connection conn;
+        private String      _initSql;
+        private Connection  _conn;
 
         public Initializer () {}
 
         public void init (Connection conn) {
-            this.conn = conn;
+            _conn = conn;
         }
 
         public void addText(String msg) {
-            if ( initSql == null ) initSql = "";
-            initSql += project.replaceProperties(msg);
+            if ( _initSql == null ) _initSql = "";
+            _initSql += project.replaceProperties(msg);
         }
 
         public void execute() throws BuildException {
 
-            if ( initSql == null ) return;
+            if ( _initSql == null ) return;
 
             PreparedStatement ps = null;
             try {
                 // Replace %%TRUE%% and %%FALSE%%
-                initSql
-                    = StringUtil.replace(initSql, "%%TRUE%%", 
-                                         DBUtil.getBooleanValue(true, conn));
-                initSql
-                    = StringUtil.replace(initSql, "%%FALSE%%", 
-                                         DBUtil.getBooleanValue(false, conn));
-                ps = conn.prepareStatement(initSql);
-                log(">>>>> Initializing " + table + "." + column 
-                    + " with " + initSql);
+                _initSql
+                    = StringUtil.replace(_initSql, "%%TRUE%%", 
+                                         DBUtil.getBooleanValue(true, _conn));
+                _initSql
+                    = StringUtil.replace(_initSql, "%%FALSE%%", 
+                                         DBUtil.getBooleanValue(false, _conn));
+                ps = _conn.prepareStatement(_initSql);
+                log(">>>>> Initializing " + _table + "." + _column 
+                    + " with " + _initSql);
                 ps.executeUpdate();
 
             } catch ( Exception e ) {
                 throw new BuildException("Error initializing " 
-                                         + table + "." + column 
-                                         + " (sql=" + initSql + ")");
+                                         + _table + "." + _column 
+                                         + " (sql=" + _initSql + ")");
             } finally {
-                DBUtil.closeStatement(ctx, ps);
+                DBUtil.closeStatement(_ctx, ps);
             }
         }
     }
 
     public class ForeignKey extends Task {
-
-        private String constraintName = null;
-        private String refs = null;
-        private Connection conn;
+        private String     _constraintName;
+        private String     _refs;
+        private Connection _conn;
 
         public ForeignKey () {}
 
         public void init (Connection conn) {
-            this.conn = conn;
+            _conn = conn;
         }
 
         public void setConstraintName (String constraintName) {
-            this.constraintName = constraintName;
+            _constraintName = constraintName;
         }
+
         public void setReferences (String refs) {
-            this.refs = refs;
+            _refs = refs;
         }
 
         public void execute () throws BuildException {
             String fkSql
-                = "ALTER TABLE " + table + " "
-                + "ADD CONSTRAINT " + constraintName + " "
-                + "FOREIGN KEY (" + column + ") REFERENCES " + refs;
+                = "ALTER TABLE " + _table + " "
+                + "ADD CONSTRAINT " + _constraintName + " "
+                + "FOREIGN KEY (" + _column + ") REFERENCES " + _refs;
             PreparedStatement ps = null;
             try {
-                ps = conn.prepareStatement(fkSql);
-                log(">>>>> Adding foreign key constraint " + constraintName 
-                    + " on " + table + "." + column + "->" + refs);
+                ps = _conn.prepareStatement(fkSql);
+                log(">>>>> Adding foreign key constraint " + _constraintName 
+                    + " on " + _table + "." + _column + "->" + _refs);
                 ps.executeUpdate();
 
             } catch ( Exception e ) {
                 throw new BuildException("Error adding foreign key for "
-                                         + table + "." + column 
+                                         + _table + "." + _column 
                                          + " (sql=" + fkSql + ")");
             } finally {
-                DBUtil.closeStatement(ctx, ps);
+                DBUtil.closeStatement(_ctx, ps);
             }
         }
     }
