@@ -632,8 +632,8 @@
         <set-property property="title" value="2.2.1"/>
       </action>
 
-      <action path="/resource/platform/inventory/*Platform"
-              type="org.hyperic.hq.ui.action.resource.platform.inventory.{1}PlatformAction"
+      <action path="/resource/platform/inventory/NewPlatform"
+              type="org.hyperic.hq.ui.action.resource.platform.inventory.NewPlatformAction"
               name="NewPlatformForm"
               scope="request"
               validate="true"
@@ -647,6 +647,11 @@
         <forward name="remove" path="/resource/platform/Inventory.do?mode=new"/>
         <forward name="failure" path="/resource/platform/Inventory.do?mode=new"/>
         <forward name="success" path="/resource/platform/Inventory.do?mode=view"/>
+      </action>
+
+      <action path="/resource/platform/inventory/ViewPlatform"
+              type="org.hyperic.hq.ui.action.resource.platform.inventory.ViewPlatformAction">
+        <set-property property="title" value="2.2.6"/>
       </action>
 
       <action path="/resource/platform/inventory/EditPlatformGeneralProperties"
