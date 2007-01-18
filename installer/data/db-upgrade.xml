@@ -1788,6 +1788,952 @@ has already been defined.
     </schemaSpec>
 
     <schemaSpec version="3.00">
+        <schema-addColumn table="EAM_ACTION"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_ACTION SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_ACTION" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+        <schema-directSQL>
+          <statement targetDB="postgresql">
+              alter table eam_action drop constraint 
+                    "eam_action_alert_definition_id_fkey"
+          </statement>
+          <statement targetDB="postgresql">
+              alter table eam_action add constraint "fkd0189b04b5af9d12" 
+                    FOREIGN KEY (alert_definition_id) 
+                    REFERENCES eam_alert_definition(id)
+                    ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+              ALTER TABLE ONLY eam_action ADD CONSTRAINT "fkd0189b04c0bb4c7" 
+                    FOREIGN KEY (parent_id) REFERENCES eam_action(id) 
+                    ON DELETE CASCADE
+          </statement>
+            <statement targetDB="postgresql">
+              drop index aiq_server_name
+            </statement>
+            <statement targetDB="postgresql">
+              drop index aiq_service_name
+            </statement>
+            <statement targetDB="postgresql">
+              drop index alert_idx_alertdefinition
+            </statement>
+            <statement targetDB="postgresql">
+              drop index alert_idx_time
+            </statement>
+            <statement targetDB="postgresql">
+              drop index alert_def_child_idx
+            </statement>
+            <statement targetDB="postgresql">
+              drop index ai_hist_scanname
+            </statement>
+            <statement targetDB="postgresql">
+              drop index ai_schedule_entity
+            </statement>
+            <statement targetDB="postgresql">
+              drop index ai_schedule_nextfiretime
+            </statement>
+            <statement targetDB="postgresql">
+              drop index cresp_verr
+            </statement>
+            <statement targetDB="postgresql">
+              drop index ctl_history_starttime
+            </statement>
+            <statement targetDB="postgresql">
+              drop index ctl_schedule_entity
+            </statement>
+            <statement targetDB="postgresql">
+              drop index ctl_schedule_nextfiretime
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_fired_trigger_id_ind
+            </statement>
+            <statement targetDB="postgresql">
+              drop index metric_prob_id_idx
+            </statement>
+            <statement targetDB="postgresql">
+              drop index mtype_idx_appdeftype
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_operation_cid_idx
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_resource_idx_type
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_resource_instance_id
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_resource_owner_id
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_res_group_res_key
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_server_idx_ctime
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_server_name
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_service_idx_ctime
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_service_name
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_subject_cid_idx
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_subject_resource_key
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_subj_role_map_cid_idx
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_user_config_resp_user_idx
+            </statement>            
+            <statement targetDB="postgresql">
+              drop index aiq_ip_idx
+            </statement>
+            <statement targetDB="postgresql">
+              drop index aiq_platform_certdn
+            </statement>
+            <statement targetDB="postgresql">
+              drop index aiq_platform_agenttoken
+            </statement>
+            <statement targetDB="postgresql">
+              drop index aiq_platform_fqdn
+            </statement>
+            <statement targetDB="postgresql">
+              drop index aiq_platform_name
+            </statement>
+            <statement targetDB="postgresql">
+              drop index aiq_server_unique_key
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_appservice_key
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_application_name_key
+            </statement>
+            <statement targetDB="postgresql">
+              drop index ai_schedule_jobname
+            </statement>
+            <statement targetDB="postgresql">
+              drop index ai_schedule_scanname
+            </statement>
+            <statement targetDB="postgresql">
+              drop index ai_schedule_triggername
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_configuration_key_indx
+            </statement>
+            <statement targetDB="postgresql">
+              drop index ctl_schedule_jobname
+            </statement>
+            <statement targetDB="postgresql">
+              drop index ctl_schedule_triggername
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_cprop_unique
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_cprop_key_unique
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_ip_idx
+            </statement>
+            <statement targetDB="postgresql">
+              drop index measurement_instance
+            </statement>
+            <statement targetDB="postgresql">
+              drop index cat_name
+            </statement>
+            <statement targetDB="postgresql">
+              drop index type_name
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_opname_res_type_idx
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_platform_fqdn
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_platform_name
+            </statement>
+            <statement targetDB="postgresql">
+              drop index plugin_name_unique
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_principal_principal_key
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_resource_instance_key
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_res_group_name
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_res_type_name_key
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_resource_type_resource_key
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_role_name_key
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_server_aiid_idx
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_server_unique_key
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_server_type_name_idx
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_service_parent
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_subject_auth_key
+            </statement>
+            <statement targetDB="postgresql">
+              drop index eam_trigger_event_ref
+            </statement>
+            <statement targetDB="postgresql">
+               ALTER TABLE eam_aiq_server DROP CONSTRAINT "eam_aiq_server_aiq_platform_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_aiq_service DROP CONSTRAINT "eam_aiq_service_server_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_alert DROP CONSTRAINT "eam_alert_alert_definition_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_alert_action_log DROP CONSTRAINT "eam_alert_action_log_action_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_alert_action_log DROP CONSTRAINT "eam_alert_action_log_alert_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_alert_condition DROP CONSTRAINT "eam_alert_condition_alert_definition_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_alert_condition_log DROP CONSTRAINT "eam_alert_condition_log_alert_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_alert_condition_log DROP CONSTRAINT "eam_alert_condition_log_condition_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_app_service DROP CONSTRAINT "eam_app_service_application_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_app_service DROP CONSTRAINT "eam_app_service_cluster_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_app_service DROP CONSTRAINT "eam_app_service_service_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_app_service DROP CONSTRAINT "eam_app_service_service_type_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_app_type_service_type_map DROP CONSTRAINT "eam_app_type_service_type_map_application_type_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_app_type_service_type_map DROP CONSTRAINT "eam_app_type_service_type_map_service_type_id_fkey" CASCADE            </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_application DROP CONSTRAINT "eam_application_application_type_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_ip DROP CONSTRAINT "eam_ip_platform_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_measurement DROP CONSTRAINT "eam_measurement_template_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_measurement_arg DROP CONSTRAINT "eam_measurement_arg_measurement_template_arg_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_measurement_arg DROP CONSTRAINT "eam_measurement_arg_measurement_template_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_measurement_data DROP CONSTRAINT "measurement_data_id_time_pk" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_measurement_data_1d DROP CONSTRAINT "measurement_data_1d_id_time_pk" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_measurement_data_1h DROP CONSTRAINT "measurement_data_1h_id_time_pk" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_measurement_data_6h DROP CONSTRAINT "measurement_data_6h_id_time_pk" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_measurement_templ DROP CONSTRAINT "eam_measurement_templ_category_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_measurement_templ DROP CONSTRAINT "eam_measurement_templ_monitorable_type_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_operation DROP CONSTRAINT "eam_operation_resource_type_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_platform DROP CONSTRAINT "eam_platform_config_response_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_platform DROP CONSTRAINT "eam_platform_platform_type_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_platform_server_type_map DROP CONSTRAINT "eam_platform_server_type_map_platform_type_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_platform_server_type_map DROP CONSTRAINT "eam_platform_server_type_map_server_type_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_qrtz_blob_triggers DROP CONSTRAINT "eam_pk_qrtz_blob_triggers" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_qrtz_blob_triggers DROP CONSTRAINT "eam_fk_qbt_qt" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_qrtz_cron_triggers DROP CONSTRAINT "eam_pk_qrtz_cron_triggers" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_qrtz_cron_triggers DROP CONSTRAINT "eam_fk_qct_qt" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_qrtz_job_details DROP CONSTRAINT "eam_pk_qrtz_job_details" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_qrtz_job_listeners DROP CONSTRAINT "eam_pk_qrtz_job_listeners" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_qrtz_simple_triggers DROP CONSTRAINT "eam_pk_qrtz_simple_triggers" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_qrtz_simple_triggers DROP CONSTRAINT "eam_fk_qst_qt" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_qrtz_trigger_listeners DROP CONSTRAINT "eam_pk_qrtz_trigger_listeners" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_qrtz_triggers DROP CONSTRAINT "eam_pk_qrtz_triggers" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_registered_trigger DROP CONSTRAINT "eam_registered_trigger_alert_definition_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_res_grp_res_map DROP CONSTRAINT "eam_res_group_res_mapping_key" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_res_grp_res_map DROP CONSTRAINT "eam_res_grp_res_map_resource_group_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_res_grp_res_map DROP CONSTRAINT "eam_res_grp_res_map_resource_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_resource DROP CONSTRAINT "eam_resource_resource_type_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_resource_group DROP CONSTRAINT "eam_resource_group_resource_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_role DROP CONSTRAINT "eam_role_resource_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_role_operation_map DROP CONSTRAINT "eam_role_operation_map_key" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_role_operation_map DROP CONSTRAINT "eam_role_operation_map_operation_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_role_operation_map DROP CONSTRAINT "eam_role_operation_map_role_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_role_resource_group_map DROP CONSTRAINT "eam_role_res_group_map_key" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_role_resource_group_map DROP CONSTRAINT "eam_role_resource_group_map_resource_group_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_role_resource_group_map DROP CONSTRAINT "eam_role_resource_group_map_role_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_server DROP CONSTRAINT "eam_server_config_response_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_server DROP CONSTRAINT "eam_server_platform_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_server DROP CONSTRAINT "eam_server_server_type_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_service DROP CONSTRAINT "eam_service_config_response_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_service DROP CONSTRAINT "eam_service_server_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_service DROP CONSTRAINT "eam_service_service_type_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_service DROP CONSTRAINT "eam_service_svc_cluster_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_service_dep_map DROP CONSTRAINT "eam_service_dep_map_appservice_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_service_dep_map DROP CONSTRAINT "eam_service_dep_map_dependent_service_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_service_type DROP CONSTRAINT "eam_service_type_server_type_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_service_type DROP CONSTRAINT "eam_service_type_tier_type_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_srn DROP CONSTRAINT "measurement_srn_res_id" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_subject DROP CONSTRAINT "eam_subject_resource_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_subject_role_map DROP CONSTRAINT "eam_subject_role_mapping_key" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_subject_role_map DROP CONSTRAINT "eam_subject_role_map_role_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_subject_role_map DROP CONSTRAINT "eam_subject_role_map_subject_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_svc_cluster DROP CONSTRAINT "eam_svc_cluster_service_type_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_trigger_event DROP CONSTRAINT "eam_trigger_event_event_id_fkey" CASCADE
+             </statement>
+             <statement targetDB="postgresql">
+               ALTER TABLE eam_user_config_resp DROP CONSTRAINT "eam_user_config_resp_subject_id_fkey" CASCADE
+             </statement>            
+        </schema-directSQL>
+
+        <schema-addColumn table="EAM_ALERT_ACTION_LOG"
+                          column="SUBJECT_ID" columnType="INTEGER"/>
+        <schema-addColumn table="EAM_ALERT_ACTION_LOG"
+                          column="GALERT_ID" columnType="INTEGER"/>
+        <schema-alterColumn table="EAM_ALERT_ACTION_LOG" 
+                            column="ACTION_ID" nullable="NULL"/>
+        <schema-update table="EAM_ALERT_ACTION_LOG" column="ALERT_ID"
+                       columnType="INTEGER" value="0" where="alert_id is null"/>
+        <schema-alterColumn table="EAM_ALERT_ACTION_LOG" 
+                            column="ALERT_ID" nullable="NOT NULL"/>
+
+        <schema-addColumn table="EAM_ALERT"
+                          column="FIXED" columnType="BOOLEAN"/>
+        <schema-update table="EAM_ALERT" column="FIXED"
+                       columnType="BOOLEAN" value="FALSE" />
+        <schema-alterColumn table="EAM_ALERT" 
+                            column="FIXED" nullable="NOT NULL"/>
+
+        <schema-addColumn table="EAM_AGENT"
+                          column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_AGENT SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+        <schema-directSQL>
+          <statement targetDB="postgresql">
+              drop index "agent_address_port"
+          </statement>
+          <statement targetDB="postgresql">
+              drop index "agent_token_unique"
+          </statement>
+          <statement targetDB="postgresql">
+              alter table eam_agent 
+                  drop constraint "eam_agent_agent_type_id_fkey"
+          </statement>
+          <statement targetDB="postgresql">
+              alter table eam_agent add constraint "fke5afd057ccbe6e" 
+                    FOREIGN KEY (agent_type_id) REFERENCES eam_agent_type(id) 
+                    ON DELETE CASCADE
+          </statement>
+        </schema-directSQL>
+
+        
+        <schema-addColumn table="EAM_PLATFORM"
+                          column="VERSION_COL" columnType="LONG">
+          <initializer>
+            UPDATE EAM_PLATFORM SET VERSION_COL=0
+          </initializer>
+        </schema-addColumn>
+        <schema-alterColumn table="EAM_PLATFORM" quoteDefault="f" 
+                            column="VERSION_COL" default="0" nullable="NOT NULL"/>
+        <schema-directSQL>
+            <statement targetDB="postgresql">
+                ALTER TABLE ONLY eam_platform DROP CONSTRAINT 
+                      "eam_platform_agent_id_fkey"
+            </statement>
+        </schema-directSQL>
+
+        
+        <schema-alterColumn table="EAM_AGENT" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+        <schema-addColumn table="EAM_AGENT_TYPE"
+                           column="VERSION_COL" columnType="LONG">
+            <initializer>
+               UPDATE EAM_AGENT_TYPE SET VERSION_COL=0
+            </initializer>
+        </schema-addColumn>
+        <schema-directSQL>
+            <statement targetDB="postgresql">
+                ALTER TABLE ONLY eam_agent DROP CONSTRAINT "eam_agent_pkey"
+            </statement>
+            <statement targetDB="postgresql">
+                ALTER TABLE ONLY eam_agent 
+                    ADD CONSTRAINT eam_agent_address_key UNIQUE (address, port)
+            </statement>
+            <statement targetDB="postgresql">
+                ALTER TABLE ONLY eam_agent 
+                    ADD CONSTRAINT eam_agent_agenttoken_key UNIQUE (agenttoken)
+            </statement>
+            <statement targetDB="postgresql">
+                ALTER TABLE ONLY eam_agent
+                    ADD CONSTRAINT eam_agent_pkey PRIMARY KEY (id)
+            </statement>
+            <statement targetDB="postgresql">
+                CREATE INDEX agent_token_idx ON eam_agent 
+                       USING btree (agenttoken)
+            </statement>
+        </schema-directSQL>
+
+        
+        <schema-alterColumn table="EAM_AGENT_TYPE" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_AIQ_IP"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_AIQ_IP SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_AIQ_IP" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-directSQL>
+             <statement targetDB="postgresql">
+                 ALTER TABLE ONLY eam_aiq_ip
+                       ADD CONSTRAINT eam_aiq_ip_aiq_platform_id_key 
+                       UNIQUE (aiq_platform_id, address)
+             </statement>
+             <statement targetDB="postgresql">
+                 ALTER TABLE ONLY eam_aiq_ip
+                       ADD CONSTRAINT fkd06c1ccb1bff8500 
+                       FOREIGN KEY (aiq_platform_id) 
+                       REFERENCES eam_aiq_platform(id) ON DELETE CASCADE
+             </statement>
+         </schema-directSQL>
+        
+        <schema-addColumn table="EAM_AIQ_PLATFORM"
+                          column="VERSION_COL" columnType="LONG">
+          <initializer>
+            UPDATE EAM_AIQ_PLATFORM SET VERSION_COL=0
+          </initializer>
+        </schema-addColumn>
+        <schema-alterColumn table="EAM_AIQ_PLATFORM" quoteDefault="f" 
+                            column="VERSION_COL" default="0" nullable="NOT NULL"/>
+        <schema-directSQL>
+            <statement targetDB="postgresql">
+                ALTER TABLE ONLY eam_aiq_platform
+                    ADD CONSTRAINT eam_aiq_platform_certdn_key UNIQUE (certdn)
+            </statement>
+            <statement targetDB="postgresql">
+                ALTER TABLE ONLY eam_aiq_platform
+                    ADD CONSTRAINT eam_aiq_platform_fqdn_key UNIQUE (fqdn)
+            </statement>
+            <statement targetDB="postgresql">
+                ALTER TABLE ONLY eam_aiq_platform
+                    ADD CONSTRAINT eam_aiq_platform_name_key UNIQUE (name)
+            </statement>
+        </schema-directSQL>
+        
+        <schema-addColumn table="EAM_AIQ_SERVER"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_AIQ_SERVER SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_AIQ_SERVER" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_AIQ_SERVICE"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_AIQ_SERVICE SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_AIQ_SERVICE" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_ALERT"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_ALERT SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_ALERT" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+        <schema-addColumn table="EAM_ALERT"
+                          column="FIXED" columnType="BOOLEAN"/>
+        <schema-update table="EAM_ALERT" column="FIXED"
+                       columnType="BOOLEAN" value="FALSE" />
+        <schema-alterColumn table="EAM_ALERT" 
+                            column="FIXED" nullable="NOT NULL"/>
+         <schema-directSQL>
+            <statement>
+                UPDATE EAM_ALERT SET ALERT_DEFINITION_ID = 0
+                       WHERE ALERT_DEFINITION_ID IS NULL
+            </statement>
+         </schema-directSQL>
+         <schema-alterColumn table="EAM_ALERT" 
+                             column="ALERT_DEFINITION_ID" nullable="NOT NULL"/>
+
+        
+         <schema-addColumn table="EAM_ALERT_CONDITION"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_ALERT_CONDITION SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_ALERT_CONDITION" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_ALERT_DEFINITION"
+                          column="ESCALATION_ID" columnType="INTEGER"/>
+         <schema-addColumn table="EAM_ALERT_DEFINITION"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_ALERT_DEFINITION SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_ALERT_DEFINITION" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+
+        <schema-update table="EAM_APP_SERVICE" column="FENTRY_POINT"
+                       columnType="BOOLEAN" value="TRUE" 
+                       where="FENTRY_POINT IS NULL"/>
+        <schema-alterColumn table="EAM_APP_SERVICE" column="FENTRY_POINT"
+                            default="1" nullable="NOT NULL"/>
+        <schema-addColumn table="EAM_APP_SERVICE"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_APP_SERVICE SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_APP_SERVICE" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_APPLICATION"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_APPLICATION SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_APPLICATION" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_APPLICATION_TYPE"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_APPLICATION_TYPE SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_APPLICATION_TYPE" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_AUTOINV_HISTORY"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_AUTOINV_HISTORY SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_AUTOINV_HISTORY" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_AUTOINV_SCHEDULE"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_AUTOINV_SCHEDULE SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_AUTOINV_SCHEDULE" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_CONFIG_PROPS"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_CONFIG_PROPS SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_CONFIG_PROPS" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_CONFIG_RESPONSE"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_CONFIG_RESPONSE SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_CONFIG_RESPONSE" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_CONTROL_SCHEDULE"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_CONTROL_SCHEDULE SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_CONTROL_SCHEDULE" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_CPROP"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_CPROP SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_CPROP" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_CPROP_KEY"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_CPROP_KEY SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_CPROP_KEY" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_EVENT"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_EVENT SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_EVENT" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_IP"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_IP SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_IP" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_MEASUREMENT"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_MEASUREMENT SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_MEASUREMENT" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_MEASUREMENT_ARG"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_MEASUREMENT_ARG SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_MEASUREMENT_ARG" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_MEASUREMENT_BL"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_MEASUREMENT_BL SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_MEASUREMENT_BL" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_MEASUREMENT_CAT"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_MEASUREMENT_CAT SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_MEASUREMENT_CAT" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_MEASUREMENT_DATA"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_MEASUREMENT_DATA SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_MEASUREMENT_DATA" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_MEASUREMENT_TEMPL"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_MEASUREMENT_TEMPL SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_MEASUREMENT_TEMPL" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_METRIC_PROB"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_METRIC_PROB SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_METRIC_PROB" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_MONITORABLE_TYPE"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_MONITORABLE_TYPE SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_MONITORABLE_TYPE" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_OPERATION"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_OPERATION SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_OPERATION" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_PLATFORM"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_PLATFORM SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_PLATFORM" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_PLATFORM_TYPE"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_PLATFORM_TYPE SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_PLATFORM_TYPE" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_PLUGIN"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_PLUGIN SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_PLUGIN" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_PRINCIPAL"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_PRINCIPAL SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_PRINCIPAL" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_REGISTERED_TRIGGER"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_REGISTERED_TRIGGER SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_REGISTERED_TRIGGER" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_RESOURCE"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_RESOURCE SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_RESOURCE" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_RESOURCE_GROUP"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_RESOURCE_GROUP SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_RESOURCE_GROUP" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_RESOURCE_TYPE"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_RESOURCE_TYPE SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_RESOURCE_TYPE" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_ROLE"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_ROLE SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_ROLE" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_SERVER"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_SERVER SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_SERVER" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_SERVER_TYPE"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_SERVER_TYPE SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_SERVER_TYPE" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_SERVICE"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_SERVICE SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_SERVICE" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_SERVICE_TYPE"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_SERVICE_TYPE SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_SERVICE_TYPE" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_SRN"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_SRN SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_SRN" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_SUBJECT"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_SUBJECT SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_SUBJECT" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_SVC_CLUSTER"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_SVC_CLUSTER SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_SVC_CLUSTER" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_USER_CONFIG_RESP"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_USER_CONFIG_RESP SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_USER_CONFIG_RESP" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-addColumn table="EAM_VIRTUAL"
+                           column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_VIRTUAL SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_VIRTUAL" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>   
       <schema-directSQL>
         <statement desc="drop default value constraint on eam_cprop"
                    targetDB="postgresql">
