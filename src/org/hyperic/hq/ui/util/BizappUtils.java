@@ -343,28 +343,33 @@ public class BizappUtils {
             if (sType != null) return sType;
         }
 
+        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
         AIBoss aiBoss = ContextUtils.getAIBoss(ctx);
         int sessionId = RequestUtils.getSessionIdInt(request);
-        
-        // build support ai server types 
-        ServerTypeValue[] serverTypeValObjs = ptValue.getServerTypeValues();
 
+        // Build support ai server types
+        List serverTypes = appdefBoss.findServerTypesByPlatform(sessionId,
+                                                                pValue.getId(),
+                                                                PageControl.PAGE_ALL);
         List serverTypeVals = new ArrayList();
-        for (int i=0, size=serverTypeValObjs.length; i<size; i++) {
+        for (Iterator i = serverTypes.iterator(); i.hasNext(); ) {
+            ServerTypeValue stv = (ServerTypeValue)i.next();
             //XXX NewServerFormPrepareAction does similar, should there
             //be a generic method?
-            if (serverTypeValObjs[i].getVirtual()) {
+            if (stv.getVirtual()) {
                 continue;
             }
-            serverTypeVals.add(serverTypeValObjs[i]);
+            serverTypeVals.add(stv);
         }
 
         Map serverSigs = aiBoss.getServerSignatures(sessionId,
                                                     serverTypeVals);
-        
-        List filteredServerTypes = 
-            BizappUtils.buildServerTypesFromServerSig(serverTypeValObjs, 
-                            serverSigs.values().iterator());
+
+        ServerTypeValue[] typeArray =
+            (ServerTypeValue[])serverTypeVals.toArray(new ServerTypeValue[0]);
+        List filteredServerTypes = BizappUtils.
+            buildServerTypesFromServerSig(typeArray,
+                                          serverSigs.values().iterator());
         sType = new AppdefResourceTypeValue[filteredServerTypes.size()];
         
         filteredServerTypes.toArray(sType);                                         
