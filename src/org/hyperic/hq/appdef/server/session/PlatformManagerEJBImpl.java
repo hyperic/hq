@@ -78,6 +78,7 @@ import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
+import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.hq.dao.PlatformDAO;
 import org.hyperic.hq.dao.PlatformTypeDAO;
 import org.hyperic.hq.dao.ConfigResponseDAO;
@@ -512,6 +513,45 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
         return valuePager.seek(ejbs, pc);
+    }
+
+    /**
+     * Get all platforms.
+     * @ejb:interface-method
+     * @param subject The subject trying to list platforms.
+     * @param pc a PageControl object which determines the size of the page and
+     * the sorting, if any.
+     * @return A List of PlatformValue objects representing all of the
+     * platforms that the given subject is allowed to view.
+     */
+    public PageList getRecentPlatforms(AuthzSubjectValue subject,
+                                       long range, int size)
+        throws FinderException, PermissionException {
+
+        Collection platforms;
+        PageControl pc = new PageControl(0, size);
+
+        try {
+            platforms =
+                getPlatformDAO().findByCTime(System.currentTimeMillis() - range);
+
+            // now get the list of PKs
+            List viewable = getViewablePlatformPKs(subject);
+            // and iterate over the list to remove any item not viewable
+            for(Iterator i = platforms.iterator(); i.hasNext();) {
+                Platform platform = (Platform)i.next();
+                if(!viewable.contains(platform.getId())) {
+                    // remove the item, user cant see it
+                    i.remove();
+                }
+            }
+        } catch (NamingException e) {
+            throw new SystemException(e);
+        }
+        
+        // valuePager converts local/remote interfaces to value objects
+        // as it pages through them.
+        return valuePager.seek(platforms, pc);
     }
 
     /**

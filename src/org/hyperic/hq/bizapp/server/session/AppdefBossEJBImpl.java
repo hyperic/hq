@@ -878,8 +878,25 @@ public class AppdefBossEJBImpl
                SessionNotFoundException, PermissionException 
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
-
+    
         return getPlatformManager().getAllPlatforms(subject, pc);
+    }
+
+    /**
+     * Get recently created platforms in the inventory.
+     *
+     * @ejb:interface-method
+     * @param sessionID The current session token.
+     * @return A List of PlatformValue objects representing all of the
+     * platforms that the given subject is allowed to view that was created in
+     * the past time range specified.
+     */
+    public PageList findRecentPlatforms(int sessionID, long range, int size)
+        throws FinderException, SessionTimeoutException, 
+               SessionNotFoundException, PermissionException 
+    {
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        return getPlatformManager().getRecentPlatforms(subject, range, size);
     }
 
     /**
