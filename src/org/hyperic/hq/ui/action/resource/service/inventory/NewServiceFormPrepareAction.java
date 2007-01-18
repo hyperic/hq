@@ -46,30 +46,21 @@ import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
+import org.apache.commons.collections.CollectionUtils;
 
 public class NewServiceFormPrepareAction extends WorkflowPrepareAction {
 
-    /**
-     * Retrieve this data and store it in the
-     * <code>ServiceForm</code>:
-     *
-     */
     public ActionForward workflow(ComponentContext context,
-                                 ActionMapping mapping,
-                                 ActionForm form,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response)
-        throws Exception {
-        Log log =
-            LogFactory.getLog(NewServiceFormPrepareAction.class.getName());
-
+                                  ActionMapping mapping,
+                                  ActionForm form,
+                                  HttpServletRequest request,
+                                  HttpServletResponse response)
+        throws Exception
+    {
         ResourceForm newForm = (ResourceForm) form;
 
         int sessionId = RequestUtils.getSessionId(request).intValue();
@@ -90,17 +81,17 @@ public class NewServiceFormPrepareAction extends WorkflowPrepareAction {
             // parent is a platform, we're creating a platform service
             if (atid.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
                 servers =
-                    boss.findServersByTypeAndPlatform ( sessionId,
-                                                        parentId,
-                                                        atid.getID(),
-                                                        PageControl.PAGE_ALL);
+                    boss.findServersByTypeAndPlatform(sessionId,
+                                                      parentId,
+                                                      atid.getID(),
+                                                      PageControl.PAGE_ALL);
                 // look for the correct server parent
                 svrVal = (ServerValue) servers.get(0);
                 svrType = svrVal.getServerType();
             } else {
                 // Just get the service type
-                serviceTypeVals.add(
-                    boss.findServiceTypeById(sessionId, atid.getId()));
+                serviceTypeVals.add(boss.findServiceTypeById(sessionId,
+                                                             atid.getId()));
                 newForm.setResourceType(atid.getId());
 
                 svrVal =
@@ -135,13 +126,15 @@ public class NewServiceFormPrepareAction extends WorkflowPrepareAction {
             
 
         if (svrType != null) {
+            List serviceTypes =
+                boss.findServiceTypesByServerType(sessionId,
+                                                  svrType.getId().intValue());
             CollectionUtils.addAll(serviceTypeVals,
-                                   svrType.getServiceTypeValues());
+                                   serviceTypes.toArray());
         }
         
         newForm.setResourceTypes(serviceTypeVals);
  
         return null;
     }
-
 }
