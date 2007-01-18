@@ -31,7 +31,6 @@ package org.hyperic.hq.appdef.shared;
 
 /**
  * Value object for ServerType.
- *
  */
 public class ServerTypeValue
    extends org.hyperic.hq.appdef.shared.AppdefResourceTypeValue
@@ -53,7 +52,6 @@ public class ServerTypeValue
    private boolean mTimeHasBeenSet = false;
    private java.lang.Long cTime;
    private boolean cTimeHasBeenSet = false;
-   private java.util.Collection ServiceTypeValues = new java.util.HashSet();
 
    public ServerTypeValue()
    {
@@ -98,9 +96,6 @@ public class ServerTypeValue
 	  mTimeHasBeenSet = true;
 	  this.cTime = otherValue.cTime;
 	  cTimeHasBeenSet = true;
-	// TODO Clone is better no ?
-	  this.ServiceTypeValues = otherValue.ServiceTypeValues;
-
    }
 
    public java.lang.String getName()
@@ -223,60 +218,6 @@ public class ServerTypeValue
 	  return cTimeHasBeenSet;
    }
 
-   protected java.util.Collection addedServiceTypeValues = new java.util.HashSet();
-   protected java.util.Collection removedServiceTypeValues = new java.util.HashSet();
-   protected java.util.Collection updatedServiceTypeValues = new java.util.HashSet();
-
-   public java.util.Collection getAddedServiceTypeValues() { return addedServiceTypeValues; }
-   public java.util.Collection getRemovedServiceTypeValues() { return removedServiceTypeValues; }
-   public java.util.Collection getUpdatedServiceTypeValues() { return updatedServiceTypeValues; }
-
-   public org.hyperic.hq.appdef.shared.ServiceTypeValue[] getServiceTypeValues()
-   {
-	  return (org.hyperic.hq.appdef.shared.ServiceTypeValue[])this.ServiceTypeValues.toArray(new org.hyperic.hq.appdef.shared.ServiceTypeValue[ServiceTypeValues.size()]);
-   }
-
-   public void addServiceTypeValue(org.hyperic.hq.appdef.shared.ServiceTypeValue added)
-   {
-	  this.ServiceTypeValues.add(added);
-	  if ( ! this.addedServiceTypeValues.contains(added))
-		 this.addedServiceTypeValues.add(added);
-   }
-
-   public void removeServiceTypeValue(org.hyperic.hq.appdef.shared.ServiceTypeValue removed)
-   {
-	  this.ServiceTypeValues.remove(removed);
-	  this.removedServiceTypeValues.add(removed);
-	  if (this.addedServiceTypeValues.contains(removed))
-		 this.addedServiceTypeValues.remove(removed);
-	  if (this.updatedServiceTypeValues.contains(removed))
-		 this.updatedServiceTypeValues.remove(removed);
-   }
-
-   public void removeAllServiceTypeValues()
-   {
-        // DOH. Clear the collection - javier 2/24/03
-        this.ServiceTypeValues.clear();
-   }
-
-   public void updateServiceTypeValue(org.hyperic.hq.appdef.shared.ServiceTypeValue updated)
-   {
-	  if ( ! this.updatedServiceTypeValues.contains(updated))
-		 this.updatedServiceTypeValues.add(updated);
-   }
-
-   public void cleanServiceTypeValue(){
-	  this.addedServiceTypeValues = new java.util.HashSet();
-	  this.removedServiceTypeValues = new java.util.HashSet();
-	  this.updatedServiceTypeValues = new java.util.HashSet();
-   }
-
-   public void copyServiceTypeValuesFrom(org.hyperic.hq.appdef.shared.ServerTypeValue from)
-   {
-	  // TODO Clone the List ????
-	  this.ServiceTypeValues = from.ServiceTypeValues;
-   }
-
    public String toString()
    {
 	  StringBuffer str = new StringBuffer("{");
@@ -383,21 +324,8 @@ public class ServerTypeValue
 		 {
 			lEquals = lEquals && this.cTime.equals( that.cTime );
 		 }
-		 if( this.getServiceTypeValues() == null )
-		 {
-			lEquals = lEquals && ( that.getServiceTypeValues() == null );
-		 }
-		 else
-		 {
-            // XXX Covalent Custom - dont compare the arrays, as order is not significant. ever.    
-            // - javier 7/16/03
-            java.util.Collection cmr1 = java.util.Arrays.asList(this.getServiceTypeValues());
-            java.util.Collection cmr2 = java.util.Arrays.asList(that.getServiceTypeValues());
-			// lEquals = lEquals && java.util.Arrays.equals(this.getServiceTypeValues() , that.getServiceTypeValues()) ;
-            lEquals = lEquals && cmr1.containsAll(cmr2);
-		 }
 
-		 return lEquals;
+         return lEquals;
 	  }
 	  else
 	  {
@@ -423,7 +351,6 @@ public class ServerTypeValue
 
       result = 37*result + ((this.cTime != null) ? this.cTime.hashCode() : 0);
 
-	  result = 37*result + ((this.getServiceTypeValues() != null) ? this.getServiceTypeValues().hashCode() : 0);
 	  return result;
    }
 

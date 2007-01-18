@@ -25,13 +25,11 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 
 import java.util.Collection;
 import java.util.Set;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.HashSet;
 import java.util.ArrayList;
@@ -139,16 +137,6 @@ public class ServerType extends AppdefResourceType
         _serverTypeValue.setId(getId());
         _serverTypeValue.setMTime(getMTime());
         _serverTypeValue.setCTime(getCTime());
-        _serverTypeValue.removeAllServiceTypeValues();
-        Collection types = getServiceTypes();
-        if (types != null) {
-            Iterator isv = types.iterator();
-            while (isv.hasNext()){
-                _serverTypeValue.addServiceTypeValue(
-                    ((ServiceType)isv.next()).getServiceTypeValue());
-            }
-        }
-        _serverTypeValue.cleanServiceTypeValue();
         return _serverTypeValue;
     }
 
