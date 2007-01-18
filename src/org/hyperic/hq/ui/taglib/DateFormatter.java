@@ -55,6 +55,7 @@ public class DateFormatter extends VarSetterBaseTag {
     private String _value = null;
     private Boolean _time = Boolean.FALSE;
     private Boolean _showTime = Boolean.TRUE;
+    private Boolean _approx = Boolean.FALSE;
     
     public DateFormatter() {
         super();
@@ -78,8 +79,20 @@ public class DateFormatter extends VarSetterBaseTag {
      * @param date The long to convert to a date.
      */
     private String formatDate(Long date) {
-        int unit = _time.booleanValue() ? UnitsConstants.UNIT_DURATION :
-            UnitsConstants.UNIT_DATE;
+        int unit;
+        
+        if (_time.booleanValue()) {
+            if (_approx.booleanValue()) {
+                unit = UnitsConstants.UNIT_APPROX_DUR;
+            }
+            else {
+                unit = UnitsConstants.UNIT_DURATION;
+            }
+        }
+        else {
+            unit = UnitsConstants.UNIT_DATE;
+        }
+            
         String key = Constants.UNIT_FORMAT_PREFIX_KEY + "epoch-millis";
         
         if (!_showTime.booleanValue())
@@ -139,6 +152,14 @@ public class DateFormatter extends VarSetterBaseTag {
 
     public void setTime(Boolean time) {
         _time = time;
+    }
+
+    public Boolean getApprox() {
+        return _approx;
+    }
+
+    public void setApprox(Boolean approx) {
+        _approx = approx;
     }
 
     public Boolean getShowTime() {

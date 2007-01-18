@@ -516,6 +516,11 @@
       <rtexprvalue>false</rtexprvalue>
     </attribute>
     <attribute>
+      <name>approx</name>
+      <required>false</required>
+      <rtexprvalue>false</rtexprvalue>
+    </attribute>
+    <attribute>
       <name>showTime</name>
       <required>false</required>
       <rtexprvalue>false</rtexprvalue>

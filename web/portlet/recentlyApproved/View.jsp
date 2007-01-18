@@ -31,7 +31,6 @@
   USA.
  --%>
 
-
 <div class="effectsPortlet">
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="dash.home.RecentlyApproved"/>
@@ -47,14 +46,18 @@
     <table width="100%" cellpadding="0" cellspacing="0" border="0" class="portletLRBorder">
       <tr>
         <td width="70%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.ResourceName"/></td>
-        <td width="30%" class="ListHeaderInactive" align="center"><fmt:message key="dash.home.TableHeader.DateTime"/></td>
+        <td width="30%" class="ListHeaderInactive" align="center"><fmt:message key="dash.home.TableHeader.Time"/></td>
       </tr>
       <c:forEach items="${recentlyAdded}" var="platform">
       <tr class="ListRow">
         <td class="ListCell">
             <html:link page="/Resource.do?eid=1:${platform.id}"><c:out value="${platform.name}"/>&nbsp;</html:link>
         </td>
-        <td class="ListCell" align="center"><hq:dateFormatter value="${platform.CTime}"/>&nbsp;</td>
+        <td class="ListCell" align="center">
+        <fmt:message key="dash.recentlyApproved.ago">
+            <fmt:param><hq:dateFormatter time="true" approx="true" value="${current - platform.CTime}"/></fmt:param>
+        </fmt:message>
+        </td>
       </tr>
       </c:forEach> <!-- For each platform -->
     </table>

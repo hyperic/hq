@@ -63,7 +63,6 @@ public class ViewAction extends TilesAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        
         Log log = LogFactory.getLog(ViewAction.class.getName());
         ServletContext ctx = getServlet().getServletContext();
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
@@ -86,7 +85,9 @@ public class ViewAction extends TilesAction {
             context.putAttribute("recentlyApproved", emptyList);
             log.debug("Error getting recent platforms: " + e.getMessage(), e);
         }
-       
+
+        // Store the current time in request
+        request.setAttribute("current", new Long(System.currentTimeMillis()));
         return null;
     }
 }
