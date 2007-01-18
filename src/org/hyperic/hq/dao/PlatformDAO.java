@@ -31,6 +31,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.Ip;
@@ -178,45 +180,24 @@ public class PlatformDAO extends HibernateDAO {
             .list();
     }
 
-    public Platform findByCertdn(String dn)
-    {
-        String sql = "from Platform where certdn = ?";
-        return (Platform)getSession()
-            .createQuery(sql)
-            .setString(0, dn)
-            .uniqueResult();
-    }
-
-    /**
-     * @deprecated use findAll_orderName()
-     * @return
-     */
-    public Collection findAll_orderName_asc()
-    {
-        return findAll_orderName(true);
-    }
-
-    /**
-     * @deprecated use findAll_orderName()
-     * @return
-     */
-    public Collection findAll_orderName_desc()
-    {
-        return findAll_orderName(false);
-    }
-
     public Collection findAll_orderName(boolean asc)
     {
-        return getSession()
-            .createQuery("from Platform order by sortName "+
-                         (asc ? "asc" : "desc"))
+        return createCriteria()
+            .addOrder(asc ? Order.asc("sortName"): Order.desc("sortName"))
             .list();
     }
 
     public Collection findAll_orderCTime(boolean asc) {
-        return getSession()
-            .createQuery("from Platform order by ctime " +
-                         (asc ? "asc" : "desc"))
+        return createCriteria()
+            .addOrder(asc ? Order.asc("creationTime"):
+                            Order.desc("creationTime"))
+            .list();
+    }
+
+    public Collection findByCTime(long ctime) {
+        return createCriteria()
+            .add(Restrictions.gt("creationTime", new Long(ctime)))
+            .addOrder(Order.desc("creationTime"))
             .list();
     }
 
@@ -276,7 +257,11 @@ public class PlatformDAO extends HibernateDAO {
      */
     public Platform findByCertDN(String dn)
     {
-        return findByCertdn(dn);
+        String sql = "from Platform where certdn = ?";
+        return (Platform)getSession()
+            .createQuery(sql)
+            .setString(0, dn)
+            .uniqueResult();
     }
 
     public Collection findByApplication(Application app)
