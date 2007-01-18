@@ -851,13 +851,12 @@ public abstract class AppdefSessionEJB
     
     /**
      * Get the AppdefResourcePermissions for a given resource
-     * @param who - who
-     * @param eid - what
-     * @return AppdefResourcePermissions
-     * @throws FinderException
-     * @throws NamingException
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
+     *
+     * XXX: DON'T USE THIS!!
+     * @deprecated Use the individual check*Permission methods instead.
+     *
      */ 
     public AppdefResourcePermissions 
         getResourcePermissions(AuthzSubjectValue who,

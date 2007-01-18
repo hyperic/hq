@@ -303,13 +303,15 @@ public class AIQueueManagerEJBImpl
                     ppk = pValue.getId();
                     aid = new AppdefEntityID(
                         AppdefEntityConstants.APPDEF_TYPE_PLATFORM, ppk);
-                    arp = getResourcePermissions(subject, aid);
-                    if ( !arp.canModify() ) {
+
+                    try {
+                        checkModifyPermission(subject, aid);
+                    } catch (PermissionException e) {
                         if (log.isDebugEnabled()) {
-                            log.debug("Removing platform because the "
-                                      + "current user doesn't have the "
-                                      + "'modifyPlatform' permission." 
-                                      + " PlatformID=" + pValue.getId());
+                            log.debug("Removing platform because the " +
+                                      "current user doesn't have the " +
+                                      "'modifyPlatform' permission." +
+                                      " PlatformID=" + pValue.getId());
                         }
                         iter.remove();
                     }
