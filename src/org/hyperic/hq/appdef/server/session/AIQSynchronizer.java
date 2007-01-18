@@ -80,16 +80,10 @@ public class AIQSynchronizer {
                 // Not in the queue, so nothing to do.
 
             } else {
-                Integer existingId = existingQplatform.getId();
-                // Leave it in the queue in case something changes later
-                // aiqMgr.removeFromQueue(existingQplatform);
-                aiPlatformLH.updateQueueState(existingQplatform,
-                                              aiPlatform,
-                                              updateServers,
-                                              isApproval,
-                                              isReport);
-                // FIXME why set id again?!?
-                aiPlatform.setId(existingId);
+                // Remove from queue.
+                _log.info("Removing unchanged " + existingQplatform.getName() +
+                          " from queue.");
+                aiqMgr.removeFromQueue(existingQplatform);
             }
 
             return aiPlatform;
