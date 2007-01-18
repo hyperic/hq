@@ -312,7 +312,7 @@ function showViewEscResponse(originalRequest) {
         $('example').style.display= '';
         $('escMsg').innerHTML ="Action added to this escalation";
         cancelAddEscalation();
-        requestViewEscalation();
+        setTimeout( "requestViewEscalation()", 1000 );
     }
 
     function hideAddEscButtons() {
@@ -726,10 +726,10 @@ function showViewEscResponse(originalRequest) {
 
 <div id="example" style="display:none;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <td class="ErrorBlock">
-    <html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>
+  <td class="ConfirmationBlock ">
+    <html:img page="/images/tt_check.gif" height="9" width="9" border="0" alt=""/>
   </td>
-  <td class="ErrorBlock" width="100%">
+  <td class="ConfirmationBlock" width="100%">
     <div id="escMsg"></div>
   </td>
 </table>
