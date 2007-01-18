@@ -53,91 +53,93 @@ public class DBUpgrader extends Task {
     public static final String SCHEMA_MOD_IN_PROGRESS
         = " *** UPGRADE IN PROGRESS: migrating to version ";
 
-    private List   schemaSpecs = new ArrayList();
+    private List   _schemaSpecs = new ArrayList();
 
-    private String jdbcDriver   = null;
-    private String jdbcUrl      = null;
-    private String jdbcUser     = null;
-    private String jdbcPassword = null;
-    private int    dbtype; // this is one of the JDBC.XXX_TYPE constants
-    private int    dbutilType; // this is one of the DBUtil.DATABASE_XXX constants
+    private String _jdbcDriver;
+    private String _jdbcUrl;
+    private String _jdbcUser;
+    private String _jdbcPassword;
+    private int    _dbtype; // this is one of the JDBC.XXX_TYPE constants
+    private int    _dbutilType; // this is one of the DBUtil.DATABASE_XXX constants
 
     // The query to find the existing schema version uses these.
     // It is of the form: 
     // SELECT valueColumn FROM tableName WHERE keyColumn = keyMatch
-    private String valueColumn  = null;
-    private String tableName    = null;
-    private String keyColumn    = null;
-    private String keyMatch     = null;
+    private String _valueColumn;
+    private String _tableName;
+    private String _keyColumn;
+    private String _keyMatch;
 
-    private File   typeMapFile = null;
-    private Collection typeMaps = null;
+    private File       _typeMapFile;
+    private Collection _typeMaps;
 
-    private String startSchemaVersionString = null;
-    private SchemaVersion startSchemaVersion = null;
-    private String targetSchemaVersionString = null;
-    private SchemaVersion targetSchemaVersion = null;
+    private String        _startSchemaVersionStr;
+    private SchemaVersion _startSchemaVersion;
+    private String        _targetSchemaVersionStr;
+    private SchemaVersion _targetSchemaVersion;
 
     public DBUpgrader () {}
 
     public void setJdbcUrl ( String jdbcUrl ) {
-        this.jdbcUrl = jdbcUrl;
+        _jdbcUrl = jdbcUrl;
     }
 
     public void setJdbcUser ( String jdbcUser ) {
-        this.jdbcUser = jdbcUser;
+        _jdbcUser = jdbcUser;
     }
 
     public void setJdbcPassword ( String jdbcPassword ) {
-        this.jdbcPassword = jdbcPassword;
+        _jdbcPassword = jdbcPassword;
     }
 
     public void setValueColumn (String v) {
-        valueColumn = v;
+        _valueColumn = v;
     }
+
     public void setTable (String t) {
-        tableName = t;
+        _tableName = t;
     }
+
     public void setKeyColumn (String k) {
-        keyColumn = k;
+        _keyColumn = k;
     }
+
     public void setKeyMatch (String m) {
-        keyMatch = m;
+        _keyMatch = m;
     }
 
     public void setTypeMap ( File f ) {
-        this.typeMapFile = f;
+        _typeMapFile = f;
     }
 
     public void setTargetSchemaVersion (String v) {
-        this.targetSchemaVersionString = v;
+        _targetSchemaVersionStr = v;
     }
 
     public SchemaSpec createSchemaSpec () {
         SchemaSpec ss = new SchemaSpec(this);
-        schemaSpecs.add(ss);
+        _schemaSpecs.add(ss);
         return ss;
     }
 
-    public Collection getTypeMaps () { return typeMaps; }
-    public int getDBType () { return dbtype; }
-    public int getDBUtilType () { return dbutilType; }
+    public Collection getTypeMaps () { return _typeMaps; }
+    public int getDBType () { return _dbtype; }
+    public int getDBUtilType () { return _dbutilType; }
 
     public void execute () throws BuildException {
-
         validateAttributes();
 
         Project p = getProject();
         List newSpecs = new ArrayList();
         int i;
-        newSpecs.addAll(schemaSpecs);
+        newSpecs.addAll(_schemaSpecs);
 
         // Sort the schema specs - if any reordering occurred, consider that
         // an error.  Also, if there are any duplicate versions, that's an error
         Collections.sort(newSpecs);
-        int size = schemaSpecs.size();
+        int size = _schemaSpecs.size();
         for ( i=0; i<size; i++ ) {
-            if ( !newSpecs.get(i).equals(schemaSpecs.get(i)) ) {
+            if ( !newSpecs.get(i).equals(_schemaSpecs.get(i)) ) {
                 throw new BuildException("DBUpgrader: SchemaSpecs specified "
                                          + "out of proper version ordering.");
             }
@@ -151,27 +153,26 @@ public class DBUpgrader extends Task {
         try {
             // Connect to the database to grab the starting schema version
             c = getConnection();
-            dbutilType = DBUtil.getDBType(c);
-            startSchemaVersionString = loadStartSchemaVersion(c);
-            if (startSchemaVersionString.indexOf(SCHEMA_MOD_IN_PROGRESS) != -1) {
+            _dbutilType = DBUtil.getDBType(c);
+            _startSchemaVersionStr = loadStartSchemaVersion(c);
+            if (_startSchemaVersionStr.indexOf(SCHEMA_MOD_IN_PROGRESS) != -1) {
                 throw new BuildException("DBUpgrader: Database schema is in "
                                          + "an inconsistent state: version="
-                                         + startSchemaVersionString);
+                                         + _startSchemaVersionStr);
             }
             try {
-                startSchemaVersion
-                    = new SchemaVersion(startSchemaVersionString);
+                _startSchemaVersion = new SchemaVersion(_startSchemaVersionStr);
             } catch (IllegalArgumentException e) {
                 throw new BuildException("DBUpgrader: " + e.getMessage(), e);
             }
-            log("Starting schema migration: " + startSchemaVersion 
-                + " -> " + targetSchemaVersion);
+            log("Starting schema migration: " + _startSchemaVersion 
+                + " -> " + _targetSchemaVersion);
 
             // If the target version is LATEST, then figure out the "real"
             // target version.
-            String realTargetSchemaVersion = targetSchemaVersion.toString();
-            if ( targetSchemaVersion.getIsLatest() ) {
-                SchemaSpec latestSpec = (SchemaSpec) schemaSpecs.get(size-1);
+            String realTargetSchemaVersion = _targetSchemaVersion.toString();
+            if ( _targetSchemaVersion.getIsLatest() ) {
+                SchemaSpec latestSpec = (SchemaSpec) _schemaSpecs.get(size-1);
                  realTargetSchemaVersion = latestSpec.getVersion().toString();
             }
 
@@ -181,19 +182,19 @@ public class DBUpgrader extends Task {
             // version is LATEST but the actual latest SchemaSpec is
             // earlier than the current database's schema version, we 
             // consider that a downgrade as well.
-            if ( targetSchemaVersion.compareTo(startSchemaVersion) < 0 ) {
+            if ( _targetSchemaVersion.compareTo(_startSchemaVersion) < 0 ) {
                 throw new BuildException("SchemaSpec: cannot downgrade from "
-                                         + startSchemaVersion + " -> " 
+                                         + _startSchemaVersion + " -> " 
                                          + realTargetSchemaVersion);
             }
         
-            size = schemaSpecs.size();
+            size = _schemaSpecs.size();
             SchemaSpec ss;
             c.setAutoCommit(false);
-            SchemaVersion fromVersion = startSchemaVersion;
+            SchemaVersion fromVersion = _startSchemaVersion;
             SchemaVersion toVersion;
             for ( i=0; i<size; i++ ) {
-                ss = (SchemaSpec) schemaSpecs.get(i);
+                ss = (SchemaSpec) _schemaSpecs.get(i);
                 toVersion = ss.getVersion();
                 if ( !shouldExecSpecVersion(toVersion) ) continue;
                 log("Upgrading " + fromVersion + " -> " + toVersion);
@@ -220,7 +221,7 @@ public class DBUpgrader extends Task {
 
             // If this was a "upgrade to latest", then ensure that
             // the schema version gets set correctly.
-            if ( targetSchemaVersion.getIsLatest() ) {
+            if ( _targetSchemaVersion.getIsLatest() ) {
                 updateSchemaVersion(c, realTargetSchemaVersion);
                 c.commit();
             }
@@ -238,36 +239,36 @@ public class DBUpgrader extends Task {
 
     protected boolean shouldExecSpecVersion (SchemaVersion version) {
         return version.getIsLatest() ||
-            version.between(startSchemaVersion, targetSchemaVersion);
+            version.between(_startSchemaVersion, _targetSchemaVersion);
     }
 
     private void validateAttributes () throws BuildException {
-        if ( jdbcUrl == null )
+        if ( _jdbcUrl == null )
             throw new BuildException("DBUpgrader: No 'jdbcUrl' attribute specified.");
 
-        jdbcDriver = JDBC.getDriverString(jdbcUrl);
+        _jdbcDriver = JDBC.getDriverString(_jdbcUrl);
         try {
-            Class.forName(jdbcDriver).newInstance();
+            Class.forName(_jdbcDriver).newInstance();
         } catch (Exception e) {
             throw new BuildException("Error loading jdbc driver: "
-                                     + jdbcDriver + ": " + e, e);
+                                     + _jdbcDriver + ": " + e, e);
         }
-        dbtype = JDBC.toType(jdbcUrl);
+        _dbtype = JDBC.toType(_jdbcUrl);
 
-        if ( typeMapFile == null )
+        if ( _typeMapFile == null )
             throw new BuildException("DBUpgrader: No 'typeMap' attribute specified.");
         try {
-            typeMaps = TypeMap.loadTypeMapFromFile(typeMapFile);
+            _typeMaps = TypeMap.loadTypeMapFromFile(_typeMapFile);
         } catch ( Exception e ) {
             throw new BuildException("DBUpgrader: Error loading typemap from: "
-                                     + typeMapFile.getAbsolutePath()
+                                     + _typeMapFile.getAbsolutePath()
                                      + ": " + e, e);
         }
 
-        if ( targetSchemaVersionString == null )
+        if ( _targetSchemaVersionStr == null )
             throw new BuildException("DBUpgrader: No 'targetSchemaVersion' attribute specified.");
         try {
-            targetSchemaVersion = new SchemaVersion(targetSchemaVersionString);
+            _targetSchemaVersion = new SchemaVersion(_targetSchemaVersionStr);
         } catch (IllegalArgumentException e) {
             throw new BuildException("SchemaSpec: " + e.getMessage(), e);
         }
@@ -285,8 +286,8 @@ public class DBUpgrader extends Task {
         ResultSet rs = null;
        
         try {
-            tableName = tableName.toUpperCase();
-            String sql = "SELECT * FROM " + tableName;
+            _tableName = _tableName.toUpperCase();
+            String sql = "SELECT * FROM " + _tableName;
             stmt = c.createStatement();
             
             rs = stmt.executeQuery(sql);
@@ -294,7 +295,7 @@ public class DBUpgrader extends Task {
 
             for (int i = 1; i <= rsmd.getColumnCount(); i++) {
                 String column = rsmd.getColumnName(i);
-                if (column.equalsIgnoreCase(valueColumn))
+                if (column.equalsIgnoreCase(_valueColumn))
                     return false;
             }
 
@@ -306,20 +307,19 @@ public class DBUpgrader extends Task {
     }           
 
     private String loadStartSchemaVersion (Connection c) throws BuildException {
-
         PreparedStatement ps = null;
         ResultSet rs = null;
         String versionString;
         String origSql
-            = "SELECT " + valueColumn + " "
-            + "FROM " + tableName + " "
-            + "WHERE " + keyColumn + " = ? ";
+            = "SELECT " + _valueColumn + " "
+            + "FROM " + _tableName + " "
+            + "WHERE " + _keyColumn + " = ? ";
         // tihs because we changed the key/value columns
         // to support mysqls reserved words
         String alternSql
-            = "SELECT PROP" + valueColumn + " " 
-            + "FROM " + tableName + " "
-            + "WHERE PROP" + keyColumn + " = ?"; 
+            = "SELECT PROP" + _valueColumn + " " 
+            + "FROM " + _tableName + " "
+            + "WHERE PROP" + _keyColumn + " = ?"; 
 
         try {
             if(usePrefix(c)) {
@@ -327,7 +327,7 @@ public class DBUpgrader extends Task {
             } else {
                 ps = c.prepareStatement(origSql);
             }
-            ps.setString(1, keyMatch);
+            ps.setString(1, _keyMatch);
             rs = ps.executeQuery();
             if ( rs.next() ) {
                 versionString = rs.getString(1);
@@ -365,14 +365,14 @@ public class DBUpgrader extends Task {
         PreparedStatement ps = null;
         ResultSet rs = null;
         String sql
-            = "UPDATE " + tableName + " "
-            + "SET " + valueColumn + " = ? "
-            + "WHERE " + keyColumn + " = ? ";
+            = "UPDATE " + _tableName + " "
+            + "SET " + _valueColumn + " = ? "
+            + "WHERE " + _keyColumn + " = ? ";
         // mysql support changed these columsn to prefix with prop
         String alternSql
-            = "UPDATE " + tableName + " "
-            + "SET PROP" + valueColumn + " = ? "
-            + "WHERE PROP" + keyColumn + " = ? ";
+            = "UPDATE " + _tableName + " "
+            + "SET PROP" + _valueColumn + " = ? "
+            + "WHERE PROP" + _keyColumn + " = ? ";
         try {
             if(usePrefix(c)) {
                 ps = c.prepareStatement(alternSql);
@@ -380,7 +380,7 @@ public class DBUpgrader extends Task {
                 ps = c.prepareStatement(sql);
             }
             ps.setString(1, v);
-            ps.setString(2, keyMatch);
+            ps.setString(2, _keyMatch);
             ps.executeUpdate();
         } catch ( SQLException e ) {
             throw new BuildException("Error updating schema version to "
@@ -393,10 +393,10 @@ public class DBUpgrader extends Task {
     }
 
     public Connection getConnection () throws SQLException {
-        if ( jdbcUser == null && jdbcPassword == null ) {
-            return DriverManager.getConnection(jdbcUrl);
+        if ( _jdbcUser == null && _jdbcPassword == null ) {
+            return DriverManager.getConnection(_jdbcUrl);
         } else {
-            return DriverManager.getConnection(jdbcUrl, jdbcUser, jdbcPassword);
+            return DriverManager.getConnection(_jdbcUrl, _jdbcUser, _jdbcPassword);
         }
     }
 }
