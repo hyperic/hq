@@ -30,9 +30,6 @@
   USA.
  --%>
 
-<script language="JavaScript" type="text/javascript">
-  var help = "<hq:help/>";
-</script>
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr class="PageTitleBar"> 
@@ -40,7 +37,7 @@
     <td><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
     <td width="34%"><fmt:message key="dash.home.PageTitle"/></td>
     <td width="33%"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
-    <td width="32%"><html:img page="/images/spacer.gif" width="202" height="32" alt="" border="0"/></td>
+    <td width="32%"><html:img page="/images/spacer.gif" width="202" height="26" alt="" border="0"/></td>
   </tr>
   <tr>
   	<td rowspan="99" class="PageTitle"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
