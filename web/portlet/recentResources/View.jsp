@@ -33,7 +33,6 @@
 <tiles:importAttribute name="resourceHealth"/>
 
 <div class="DropDown">
-<fmt:message key="dash.home.RecentResources"/>
 <c:choose>
   <c:when test="${not empty resourceHealth}">   
   <ul style="list-style-type: none;">
