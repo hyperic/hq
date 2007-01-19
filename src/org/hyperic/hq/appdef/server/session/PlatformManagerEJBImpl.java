@@ -67,6 +67,7 @@ import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -84,6 +85,8 @@ import org.hyperic.hq.dao.PlatformTypeDAO;
 import org.hyperic.hq.dao.ConfigResponseDAO;
 import org.hyperic.hq.dao.ApplicationDAO;
 import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.hq.autoinventory.AIIp;
+import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.NonUniqueObjectException;
 import org.hibernate.ObjectNotFoundException;
@@ -373,7 +376,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                 // ok
             }
             try {
-                getPlatformByFqdn(getOverlord(), pValue.getFqdn());
+                findPlatformByFqdn(getOverlord(), pValue.getFqdn());
                 throw new AppdefDuplicateFQDNException();
             } catch ( PlatformNotFoundException e ) {
                 // ok
@@ -598,11 +601,11 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * Get the PlatformValue object for a platform based on an AIPlatformValue.
+     * Get the Platform object based on an AIPlatformValue.
      * @ejb:interface-method
      */
-    public PlatformValue getPlatformValueByAIPlatform(AuthzSubjectValue subject,
-                                                      AIPlatformValue aiPlatform)
+    public Platform getPlatformByAIPlatform(AuthzSubjectValue subject,
+                                            AIPlatform aiPlatform)
         throws PermissionException {
         
         String certdn = aiPlatform.getCertdn();
@@ -611,7 +614,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         try {
             try {
                 // First try to find by FQDN
-                return getPlatformByFqdn(subject, fqdn);
+                return findPlatformByFqdn(subject, fqdn);
             } catch (PlatformNotFoundException e) {
                 // Now try to find by certdn
                 return getPlatformByCertDN(subject, certdn);
@@ -647,10 +650,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get the platform that has the specified CertDN
-     * @ejb:interface-method
      */
-    public PlatformValue getPlatformByCertDN(AuthzSubjectValue subject,
-                                             String certDN)
+    private Platform getPlatformByCertDN(AuthzSubjectValue subject,
+                                         String certDN)
         throws PlatformNotFoundException, PermissionException {
         Platform p;
         try {
@@ -659,23 +661,22 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             p = null;
         }
         if (p == null) {
-            throw new PlatformNotFoundException(
-                "Platform with certdn " + certDN + " not found");
+            throw new PlatformNotFoundException("Platform with certdn " +
+                                                certDN + " not found");
         }
-        PlatformValue platformValue = p.getPlatformValue();
-        // now check if the user can see this at all
-        checkViewPermission(subject, platformValue.getEntityId());
-        return platformValue;
+        
+        checkViewPermission(subject, p.getEntityId());
+        return p;
     }
 
     /**
-     * Get the platform that has the specified Fqdn
+     * Get the Platform that has the specified Fqdn
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public PlatformValue getPlatformByFqdn(AuthzSubjectValue subject,
-                                           String fqdn)
-        throws PlatformNotFoundException, PermissionException 
+    public Platform findPlatformByFqdn(AuthzSubjectValue subject,
+                                       String fqdn)
+        throws PlatformNotFoundException, PermissionException
     {
         Platform p;
         try {
@@ -687,10 +688,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             throw new PlatformNotFoundException("Platform with fqdn "
                                                 + fqdn + " not found");
         }
-        PlatformValue platformValue = p.getPlatformValue();
         // now check if the user can see this at all
-        checkViewPermission(subject, platformValue.getEntityId());
-        return platformValue;
+        checkViewPermission(subject, p.getEntityId());
+        return p;
     }
 
     /**
@@ -1072,7 +1072,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                     // fqdn has changed. check for duplicate and throw
                     // duplicateFQDNException
                     try {
-                        getPlatformByFqdn(subject, existing.getFqdn());
+                        findPlatformByFqdn(subject, existing.getFqdn());
                         // duplicate found, throw a duplicate object exception
                         throw new AppdefDuplicateFQDNException();
                     } catch (PlatformNotFoundException e) {
@@ -1316,8 +1316,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Used to trim all string based attributes present in a platform value
      * object
-     * See Bug: 5076
-     * @param plat
      */
     private void trimStrings(PlatformValue plat) {
         if (plat.getName() != null)
@@ -1350,6 +1348,24 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             if (ip.getNetmask() != null) 
                 ip.setNetmask(ip.getNetmask().trim());
         }
+    }
+
+    /**
+     * Add an IP to a platform
+     * @ejb:interface-method
+     */
+    public void addIp(Platform platform, String address, String netmask,
+                      String macAddress) {
+        platform.addIp(address, netmask, macAddress);
+    }
+
+    /**
+     * Remove an IP on a platform
+     * @ejb:interface-method
+     */
+    public void removeIp(Platform platform, String address, String netmask,
+                         String macAddress) {
+        platform.removeIp(address, netmask, macAddress);
     }
 
     public static PlatformManagerLocal getOne() {

@@ -185,8 +185,7 @@ public class PlatformType extends AppdefResourceType {
 
         for (Iterator i=pv.getAddedIpValues().iterator(); i.hasNext();) {
             IpValue ipv = (IpValue)i.next();
-            Ip ip = new Ip(ipv);
-            p.addIp(ip);
+            p.addIp(ipv.getAddress(), ipv.getNetmask(), ipv.getMACAddress());
         }
         registerNewPlatform(p);
         return p;

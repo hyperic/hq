@@ -91,9 +91,21 @@ public class Platform extends PlatformBase
         _ips = ips;
     }
 
-    public void addIp(Ip ip) {
+    public void addIp(String address, String netmask, String macAddress) {
+        Ip ip = new Ip(address, netmask, macAddress);
         _ips.add(ip);
         ip.setPlatform(this);
+    }
+
+    public void removeIp(String address, String netmask, String macAddress) {
+        for (Iterator i = _ips.iterator(); i.hasNext(); ) {
+            Ip ip = (Ip)i.next();
+            if (ip.getAddress().equals(address) &&
+                ip.getNetmask().equals(netmask) &&
+                ip.getMACAddress().equals(macAddress)) {
+                i.remove();
+            }
+        }
     }
 
     public Collection getServers() {

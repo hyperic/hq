@@ -53,6 +53,7 @@ import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -217,7 +218,8 @@ public class RuntimeReportProcessor {
         PlatformValue appdefPlatform;
         String fqdn = aiplatform.getFqdn();
         try {
-            appdefPlatform = platformMgr.getPlatformByFqdn(subject, fqdn);
+            Platform p = platformMgr.findPlatformByFqdn(subject, fqdn);
+            appdefPlatform = p.getPlatformValue();
         } catch (PlatformNotFoundException e) {
             // Platform doesn't exist by fqdn, so let's try by IP address.
             // This is needed for servers like weblogic, which report platforms 
