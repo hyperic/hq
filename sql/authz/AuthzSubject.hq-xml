@@ -63,11 +63,11 @@
     </property>
 
     <property name="active" type="boolean">
-      <column name="FACTIVE" not-null="false" />
+      <column name="FACTIVE" not-null="true" />
     </property>
 
     <property name="system" type="boolean">
-      <column name="FSYSTEM" not-null="false" />
+      <column name="FSYSTEM" not-null="true" />
     </property>
 
     <many-to-one name="resource" class="Resource">

@@ -28,7 +28,7 @@
     </property>
 
     <property name="description" type="string">
-      <column name="DESCRIPTION" not-null="false" length="256" />
+      <column name="DESCRIPTION" not-null="false" length="500" />
     </property>
 
     <property name="creationTime" type="long">

@@ -2219,6 +2219,9 @@ has already been defined.
              <statement targetDB="postgresql">
                ALTER TABLE eam_user_config_resp DROP CONSTRAINT "eam_user_config_resp_subject_id_fkey" CASCADE
              </statement>            
+            <statement targetDB="postgresql">
+              ALTER TABLE eam_user_alert DROP CONSTRAINT "eam_user_alert_alert_id_fkey" CASCADE
+            </statement>            
         </schema-directSQL>
 
         <schema-addColumn table="EAM_ALERT_ACTION_LOG"
@@ -2417,6 +2420,19 @@ has already been defined.
          <schema-alterColumn table="EAM_ALERT_DEFINITION" quoteDefault="f" 
                              column="VERSION_COL" default="0" nullable="NOT NULL"/>
 
+        <schema-update table="EAM_APP_TYPE_SERVICE_TYPE_MAP" 
+                       column="APPLICATION_TYPE_ID"
+                       columnType="INTEGER" value="0" 
+                       where="APPLICATION_TYPE_ID IS NULL"/>
+        <schema-alterColumn table="EAM_APP_TYPE_SERVICE_TYPE_MAP"
+                            column="APPLICATION_TYPE_ID" nullable="NOT NULL"/>
+        <schema-update table="EAM_APP_TYPE_SERVICE_TYPE_MAP" 
+                       column="SERVICE_TYPE_ID"
+                       columnType="INTEGER" value="0" 
+                       where="APPLICATION_TYPE_ID IS NULL"/>
+        <schema-alterColumn table="EAM_APP_TYPE_SERVICE_TYPE_MAP"
+                            column="SERVICE_TYPE_ID" nullable="NOT NULL"/>
+
         <schema-update table="EAM_APP_SERVICE" column="FENTRY_POINT"
                        columnType="BOOLEAN" value="TRUE" 
                        where="FENTRY_POINT IS NULL"/>
@@ -2518,14 +2534,32 @@ has already been defined.
          </schema-addColumn>
          <schema-alterColumn table="EAM_IP" quoteDefault="f" 
                              column="VERSION_COL" default="0" nullable="NOT NULL"/>
+        <schema-update table="EAM_IP" column="PLATFORM_ID"
+                       columnType="INTEGER" value="0" 
+                       where="PLATFORM_ID IS NULL"/>
+        <schema-alterColumn table="EAM_IP" column="PLATFORM_ID" 
+                            nullable="NOT NULL"/>
+        
          <schema-addColumn table="EAM_MEASUREMENT"
                            column="VERSION_COL" columnType="LONG">
            <initializer>
              UPDATE EAM_MEASUREMENT SET VERSION_COL=0
            </initializer>
          </schema-addColumn>
-         <schema-alterColumn table="EAM_MEASUREMENT" quoteDefault="f" 
-                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+        <!-- The measurement class must be filled out: XXX -->
+        <schema-addColumn table="EAM_MEASUREMENT"
+                           column="MEASUREMENT_CLASS" columnType="CHAR"
+                           precision="1"/>
+        <schema-alterColumn table="EAM_MEASUREMENT" quoteDefault="f" 
+                            column="VERSION_COL" default="0" nullable="NOT NULL"/>
+
+        <schema-update table="EAM_MEASUREMENT" column="ENABLED"
+                       columnType="BOOLEAN" value="1" 
+                       where="ENABLED IS NULL"/>
+        <schema-alterColumn table="EAM_MEASUREMENT" 
+                            column="ENABLED" nullable="NOT NULL"/>
+        <schema-alterColumn table="EAM_MEASUREMENT" 
+                            column="TEMPLATE_ID" nullable="NOT NULL"/>
          <schema-addColumn table="EAM_MEASUREMENT_ARG"
                            column="VERSION_COL" columnType="LONG">
            <initializer>
@@ -2550,14 +2584,10 @@ has already been defined.
          </schema-addColumn>
          <schema-alterColumn table="EAM_MEASUREMENT_CAT" quoteDefault="f" 
                              column="VERSION_COL" default="0" nullable="NOT NULL"/>
-         <schema-addColumn table="EAM_MEASUREMENT_DATA"
-                           column="VERSION_COL" columnType="LONG">
-           <initializer>
-             UPDATE EAM_MEASUREMENT_DATA SET VERSION_COL=0
-           </initializer>
-         </schema-addColumn>
-         <schema-alterColumn table="EAM_MEASUREMENT_DATA" quoteDefault="f" 
-                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+         <schema-alterColumn table="EAM_MEASUREMENT" 
+                             column="CATEGORY_ID" nullable="NOT NULL"/>
+        <schema-alterColumn table="EAM_MEASUREMENT_TEMPL" 
+                            column="CATEGORY_ID" nullable="NOT NULL"/>
          <schema-addColumn table="EAM_MEASUREMENT_TEMPL"
                            column="VERSION_COL" columnType="LONG">
            <initializer>
@@ -2590,6 +2620,12 @@ has already been defined.
          </schema-addColumn>
          <schema-alterColumn table="EAM_OPERATION" quoteDefault="f" 
                              column="VERSION_COL" default="0" nullable="NOT NULL"/>
+        <schema-alterColumn table="EAM_PLATFORM_SERVER_TYPE_MAP"
+                            column="PLATFORM_TYPE_ID" nullable="NOT NULL"/>
+        <schema-alterColumn table="EAM_PLATFORM_SERVER_TYPE_MAP"
+                            column="SERVER_TYPE_ID" nullable="NOT NULL"/>
+        <schema-alterColumn table="EAM_PLATFORM" 
+                            column="PLATFORM_TYPE_ID" nullable="NOT NULL"/>
          <schema-addColumn table="EAM_PLATFORM"
                            column="VERSION_COL" columnType="LONG">
            <initializer>
@@ -2604,6 +2640,8 @@ has already been defined.
              UPDATE EAM_PLATFORM_TYPE SET VERSION_COL=0
            </initializer>
          </schema-addColumn>
+         <schema-alterColumn table="EAM_PLATFORM_TYPE"
+                             column="NAME" nullable="NOT NULL"/>
          <schema-alterColumn table="EAM_PLATFORM_TYPE" quoteDefault="f" 
                              column="VERSION_COL" default="0" nullable="NOT NULL"/>
          <schema-addColumn table="EAM_PLUGIN"
@@ -2662,6 +2700,8 @@ has already been defined.
          </schema-addColumn>
          <schema-alterColumn table="EAM_ROLE" quoteDefault="f" 
                              column="VERSION_COL" default="0" nullable="NOT NULL"/>
+        <schema-alterColumn table="EAM_SERVER"
+                            column="SERVER_TYPE_ID" nullable="NOT NULL"/>
          <schema-addColumn table="EAM_SERVER"
                            column="VERSION_COL" columnType="LONG">
            <initializer>
@@ -2676,8 +2716,12 @@ has already been defined.
              UPDATE EAM_SERVER_TYPE SET VERSION_COL=0
            </initializer>
          </schema-addColumn>
+         <schema-alterColumn table="EAM_SERVER_TYPE"
+                             column="NAME" nullable="NOT NULL"/>
          <schema-alterColumn table="EAM_SERVER_TYPE" quoteDefault="f" 
                              column="VERSION_COL" default="0" nullable="NOT NULL"/>
+        <schema-alterColumn table="EAM_SERVICE"
+                            column="SERVICE_TYPE_ID" nullable="NOT NULL"/>
          <schema-addColumn table="EAM_SERVICE"
                            column="VERSION_COL" columnType="LONG">
            <initializer>
@@ -2686,12 +2730,19 @@ has already been defined.
          </schema-addColumn>
          <schema-alterColumn table="EAM_SERVICE" quoteDefault="f" 
                              column="VERSION_COL" default="0" nullable="NOT NULL"/>
+        <schema-directSQL>
+          <statement>
+            ALTER TABLE EAM_SERVICE_TYPE DROP COLUMN tier_type_id
+          </statement>
+        </schema-directSQL>
          <schema-addColumn table="EAM_SERVICE_TYPE"
                            column="VERSION_COL" columnType="LONG">
            <initializer>
              UPDATE EAM_SERVICE_TYPE SET VERSION_COL=0
            </initializer>
          </schema-addColumn>
+         <schema-alterColumn table="EAM_SERVICE_TYPE"
+                             column="NAME" nullable="NOT NULL"/>
          <schema-alterColumn table="EAM_SERVICE_TYPE" quoteDefault="f" 
                              column="VERSION_COL" default="0" nullable="NOT NULL"/>
          <schema-addColumn table="EAM_SRN"
@@ -2702,6 +2753,16 @@ has already been defined.
          </schema-addColumn>
          <schema-alterColumn table="EAM_SRN" quoteDefault="f" 
                              column="VERSION_COL" default="0" nullable="NOT NULL"/>
+        <schema-update table="EAM_SUBJECT" column="FACTIVE"
+                       columnType="BOOLEAN" value="1" 
+                       where="FACTIVE IS NULL"/>
+        <schema-alterColumn table="EAM_SUBJECT"
+                            column="FACTIVE" nullable="NOT NULL"/>
+        <schema-update table="EAM_SUBJECT" column="FSYSTEM"
+                       columnType="BOOLEAN" value="1" 
+                       where="FSYSTEM IS NULL"/>
+        <schema-alterColumn table="EAM_SUBJECT"
+                            column="FSYSTEM" nullable="NOT NULL"/>
          <schema-addColumn table="EAM_SUBJECT"
                            column="VERSION_COL" columnType="LONG">
            <initializer>
@@ -2724,6 +2785,11 @@ has already been defined.
              UPDATE EAM_USER_CONFIG_RESP SET VERSION_COL=0
            </initializer>
          </schema-addColumn>
+        <schema-directSQL>
+          <statement>
+            ALTER TABLE EAM_USER_CONFIG_RESP DROP COLUMN subject_id
+          </statement>
+        </schema-directSQL>
          <schema-alterColumn table="EAM_USER_CONFIG_RESP" quoteDefault="f" 
                              column="VERSION_COL" default="0" nullable="NOT NULL"/>
          <schema-addColumn table="EAM_VIRTUAL"
@@ -2734,7 +2800,8 @@ has already been defined.
          </schema-addColumn>
          <schema-alterColumn table="EAM_VIRTUAL" quoteDefault="f" 
                              column="VERSION_COL" default="0" nullable="NOT NULL"/>   
-      <schema-directSQL>
+
+        <schema-directSQL>
         <statement desc="drop default value constraint on eam_cprop"
                    targetDB="postgresql">
             alter table eam_cprop alter column id drop default
