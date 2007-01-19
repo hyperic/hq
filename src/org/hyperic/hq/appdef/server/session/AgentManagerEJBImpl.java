@@ -49,7 +49,6 @@ import org.hyperic.hq.appdef.shared.AgentConnectionUtil;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AgentType;
@@ -235,12 +234,7 @@ public class AgentManagerEJBImpl
     }
 
     /**
-     * Update an existing agent.  Currently the only thing updated
-     * is the authentication token.
-     *
-     * @param ip        IP which defines the agent to update
-     * @param port      Port which defines the agent to update
-     * @param authToken New auth token to assign the agent
+     * Update an existing agent.
      *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
@@ -336,9 +330,6 @@ public class AgentManagerEJBImpl
 
     /**
      * Find an agent which can service the given entity ID
-     *
-     * @param aVal Appdef entity which the agent should have the
-     *             ability to manage
      * @return An agent which is set to manage the specified ID
      *
      * @ejb:interface-method
@@ -347,52 +338,27 @@ public class AgentManagerEJBImpl
     public AgentValue getAgent(AppdefEntityID aID)
         throws AgentNotFoundException
     {
-        PlatformDAO platformLocalHome = getPlatformDAO();
-        PlatformValue platformValue;
-        Integer platformId;
-
         try {
-            Platform platformLocal = null;
+            Platform platform;
             switch (aID.getType()) {
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
-                    platformLocal =
-                        platformLocalHome.findByServiceId(aID.getId());
-                    if (platformLocal == null) {
-                        throw new AgentNotFoundException(
-                            "Agent not found: " + aID);
-                    }
-                    platformId = platformLocal.getId();
+                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                    Service service = getServiceDAO().findById(aID.getId());
+                    platform = service.getServer().getPlatform();
                     break;
-                case AppdefEntityConstants.APPDEF_TYPE_SERVER :
-                    platformLocal =
-                        platformLocalHome.findByServerId(aID.getId());
-                    if (platformLocal == null) {
-                        throw new AgentNotFoundException(
-                            "Agent not found: " + aID);
-                    }
-                    platformId = platformLocal.getId();
+                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                    Server server = getServerDAO().findById(aID.getId());
+                    platform = server.getPlatform();
                     break;
-                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM :
-                    platformId = aID.getId();
+                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                    platform = getPlatformDAO().findById(aID.getId());
                     break;
-                default :
-                    throw new SystemException(
-                        "Request for agent from an entity which can return "
-                            + "multiple agents");
+                default:
+                    throw new SystemException("Request for agent from an " +
+                                              "entity which can return " +
+                                              "multiple agents");
             }
+            return platform.getAgent().getAgentValue();
 
-            // Let's see if we have the local object
-            if (platformLocal == null) {
-                platformLocal = platformLocalHome.findById(platformId);
-            }
-
-            Agent agent = platformLocal.getAgent();
-            if (agent == null) {
-                throw new AgentNotFoundException(platformId +
-                    " has no agent which can service it");
-            }
-            
-            return agent.getAgentValue();
         } catch (ObjectNotFoundException exc) {
             throw new AgentNotFoundException("No agent found for " + aID);
         }
