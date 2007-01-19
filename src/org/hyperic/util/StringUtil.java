@@ -44,18 +44,13 @@ public class StringUtil {
      */
     public static String replace(String source, String find, String replace) {
 
-        if (source  == null || 
-            find    == null || 
-            replace == null)
-        {
+        if (source  == null || find == null || replace == null) {  
             return source;
         }
 
         int sourceLen = source.length();
         int findLen = find.length();
-        if ((sourceLen == 0) ||
-            (findLen == 0))
-        {
+        if (sourceLen == 0 || findLen == 0) {   
             return source;
         } 
 
@@ -95,9 +90,7 @@ public class StringUtil {
         StringBuffer remove = new StringBuffer(source);
         
         try {
-            if (source != null && 
-                sourceLen > 0 && 
-                find != null && 
+            if (source != null && sourceLen > 0 && find != null &&   
                 findLen > 0)
             {
                 int fromIndex, idx;
@@ -112,7 +105,8 @@ public class StringUtil {
                 retVal = remove.toString();
             }
         } catch (Exception e) {
-            // XXX This should never happen
+            // XXX This should never happen.
+            //     O'RLY?
             e.printStackTrace();
             retVal = null;
         }
@@ -515,5 +509,28 @@ public class StringUtil {
             str.substring(1, str.length());
 
         return result;
+    }
+    
+    /**
+     * Return a variant of 'str' which contains the beginning and end of
+     * the string, but places '...' in the middle to limit the maximum
+     * length of the string.
+     * 
+     * @param str     String to shorten
+     * @param maxLen  Maximum length of the returned string
+     */
+    public static String dotProximate(String str, int maxLen) {
+        int strLen = str.length();
+        int toChop;
+        
+        if (strLen <= maxLen)
+            return str;
+
+        if (maxLen <= 3)
+            return "...";
+                        
+        toChop = strLen - maxLen + 3;
+        return str.substring(0, strLen / 2 - toChop / 2 - 1) + "..." + 
+               str.substring(strLen / 2 + toChop / 2);
     }
 }
