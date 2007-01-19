@@ -207,6 +207,8 @@ public class ResourceDAO extends HibernateDAO
         return (Resource)getSession().createQuery(sql)
             .setInteger(0, id.intValue())
             .setInteger(1, typeId.intValue())
+            .setCacheable(true)
+            .setCacheRegion("Resource.findByInstanceId")
             .uniqueResult();
     }
     

@@ -8,6 +8,7 @@
   package="org.hyperic.hq.authz.server.session">
 
   <class name="Operation" table="EAM_OPERATION">
+    <cache usage="read-write" />
     <id name="id" type="integer">
       <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />

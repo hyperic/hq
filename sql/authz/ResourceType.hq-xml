@@ -40,6 +40,7 @@
     <bag name="operations" table="EAM_OPERATION"
          cascade="save-update,delete,persist,merge,evict,all-delete-orphan"
          inverse="true" lazy="false">
+      <cache usage="read-write"/>
       <key column="RESOURCE_TYPE_ID" />
       <one-to-many class="Operation" />
     </bag>
