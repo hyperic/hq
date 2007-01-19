@@ -2890,7 +2890,7 @@ has already been defined.
                   short_reason character varying(256) NOT NULL,
                   long_reason character varying(2048) NOT NULL,
                   partition integer NOT NULL
-              )
+              );
          </statement>
          <statement targetDB="postgresql">
              CREATE TABLE eam_gtrigger_types (
@@ -2922,8 +2922,603 @@ has already been defined.
                 acknowledged_by integer
             )
          </statement>
+       </schema-directSQL>
+
+          
+        <schema-directSQL>
+                <statement targetDB="postgresql">
+                  CREATE INDEX aiq_ip_idx ON eam_aiq_ip USING btree (aiq_platform_id, address)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX aiq_platform_agenttoken_idx ON eam_aiq_platform USING btree (agenttoken)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX aiq_platform_certdn_idx ON eam_aiq_platform USING btree (certdn)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX aiq_platform_fqdn_idx ON eam_aiq_platform USING btree (fqdn)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX aiq_platform_name_idx ON eam_aiq_platform USING btree (name)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX aiq_server_name ON eam_aiq_server USING btree (name)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX aiq_service_name_idx ON eam_aiq_service USING btree (name)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX alert_alertdefinition_idx ON eam_alert USING btree (alert_definition_id)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX alert_time_idx ON eam_alert USING btree (ctime)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX galert_action_log_idx ON eam_alert_action_log USING btree (galert_id)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX alert_cond_alert_def_idx ON eam_alert_condition USING btree (alert_definition_id)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX alert_def_child_idx ON eam_alert_definition USING btree (parent_id, priority)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX eam_application_name_idx ON eam_application USING btree (name)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX ai_hist_scanname_idx ON eam_autoinv_history USING btree (scanname)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX ai_schedule_entity_idx ON eam_autoinv_schedule USING btree (entity_type, entity_id)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX ai_schedule_jobname_idx ON eam_autoinv_schedule USING btree (jobname)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX ai_schedule_nextfiretime_idx ON eam_autoinv_schedule USING btree (nextfiretime)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX ai_schedule_scanname ON eam_autoinv_schedule USING btree (scanname)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX ai_schedule_triggername ON eam_autoinv_schedule USING btree (triggername)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX cresp_err_idx ON eam_config_response USING btree (validationerr)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX ctl_history_starttime_idx ON eam_control_history USING btree (starttime)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX ctl_schedule_entity_idx ON eam_control_schedule USING btree (entity_type, entity_id)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX ctl_schedule_jobname_idx ON eam_control_schedule USING btree (jobname)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX ctl_schedule_nextfiretime_idx ON eam_control_schedule USING btree (nextfiretime)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX ctl_schedule_triggername_idx ON eam_control_schedule USING btree (triggername)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX crispo_idx ON eam_crispo_opt USING btree (crispo_id)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX eam_fired_trigger_idx ON eam_fired_trigger USING btree (trigger_id)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX measurement_arg_idx ON eam_measurement_arg USING btree (measurement_template_arg_id)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX cat_name_idx ON eam_measurement_cat USING btree (name)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX state_idx ON eam_mescalation_state USING btree (alert_type, alert_def_id)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX metric_prob_id_idx ON eam_metric_prob USING btree (measurement_id, "timestamp")
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX mtype_idx_appdeftype_idx ON eam_monitorable_type USING btree (appdef_type)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX type_name_idx ON eam_monitorable_type USING btree (name)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX eam_platform_fqdn_idx ON eam_platform USING btree (fqdn)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX eam_platform_name_idx ON eam_platform USING btree (name)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX plugin_name_unique ON eam_plugin USING btree (name)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX eam_principal_principal_idx ON eam_principal USING btree (principal)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX eam_resource_idx_type_idx ON eam_resource USING btree (resource_type_id)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX eam_resource_instance_id_idx ON eam_resource USING btree (instance_id)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX eam_resource_owner_id_idx ON eam_resource USING btree (subject_id)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX eam_res_group_name_idx ON eam_resource_group USING btree (name)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX eam_res_group_res_idx ON eam_resource_group USING btree (resource_id)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX eam_res_type_name_idx ON eam_resource_type USING btree (name)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX eam_resource_type_resource_idx ON eam_resource_type USING btree (resource_id)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX eam_role_name_idx ON eam_role USING btree (name)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX eam_server_name_idx ON eam_server USING btree (name)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX eam_server_platform_idx ON eam_server USING btree (platform_id)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX eam_server_type_name_idx ON eam_server_type USING btree (name)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX eam_service_name_idx ON eam_service USING btree (name)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX eam_service_server_idx ON eam_service USING btree (server_id)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX eam_subject_resource_idx ON eam_subject USING btree (resource_id)
+                </statement>          
+          <statement targetDB="postgresql">
+              ALTER TABLE ONLY eam_qrtz_triggers ADD CONSTRAINT eam_qrtz_triggers_pkey PRIMARY KEY (trigger_name, trigger_group)
+          </statement>
+          <statement targetDB="postgresql">
+             ALTER TABLE ONLY eam_galert_defs ADD CONSTRAINT eam_galert_defs_pkey PRIMARY KEY (id)
+          </statement>
+          <statement targetDB="postgresql">
+             ALTER TABLE ONLY eam_escalation ADD CONSTRAINT eam_escalation_pkey PRIMARY KEY (id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_galert_logs ADD CONSTRAINT eam_galert_logs_pkey PRIMARY KEY (id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_exec_strategy_types ADD CONSTRAINT eam_exec_strategy_types_pkey PRIMARY KEY (id)
+          </statement>
+          <statement targetDB="postgresql">
+              ALTER TABLE ONLY eam_app_type_service_type_map ADD CONSTRAINT eam_app_type_service_type_map_pkey PRIMARY KEY (service_type_id, application_type_id)
+          </statement>
+          <statement targetDB="postgresql">
+              ALTER TABLE ONLY eam_crispo ADD CONSTRAINT eam_crispo_pkey PRIMARY KEY (id)
+          </statement>
+          <statement targetDB="postgresql">
+              ALTER TABLE ONLY eam_crispo_opt ADD CONSTRAINT eam_crispo_opt_pkey PRIMARY KEY (id)
+          </statement>
+          <statement targetDB="postgresql">
+             ALTER TABLE ONLY eam_aiq_server ADD CONSTRAINT eam_aiq_server_aiq_platform_id_key UNIQUE (aiq_platform_id, autoinventoryidentifier)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_aiq_server ADD CONSTRAINT fk60c6c4e71bff8500 FOREIGN KEY (aiq_platform_id) REFERENCES eam_aiq_platform(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_aiq_service ADD CONSTRAINT fkb811e571ea5ff386 FOREIGN KEY (server_id) REFERENCES eam_server(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_alert ADD CONSTRAINT fke5b216aeb5af9d12 FOREIGN KEY (alert_definition_id) REFERENCES eam_alert_definition(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_alert_action_log ADD CONSTRAINT fk423fa3cc1aa4e259 FOREIGN KEY (alert_id) REFERENCES eam_alert(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_alert_action_log ADD CONSTRAINT fk423fa3cc9c76c3bb FOREIGN KEY (action_id) REFERENCES eam_action(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_alert_action_log ADD CONSTRAINT fk423fa3ccc7d09794 FOREIGN KEY (galert_id) REFERENCES eam_galert_logs(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_alert_action_log ADD CONSTRAINT fk423fa3cce82fbc FOREIGN KEY (subject_id) REFERENCES eam_subject(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_alert_condition ADD CONSTRAINT fke4028caab5af9d12 FOREIGN KEY (alert_definition_id) REFERENCES eam_alert_definition(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_alert_condition ADD CONSTRAINT fke4028caad448177 FOREIGN KEY (trigger_id) REFERENCES eam_registered_trigger(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_alert_condition_log ADD CONSTRAINT fkd1647e0f1aa4e259 FOREIGN KEY (alert_id) REFERENCES eam_alert(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_alert_condition_log ADD CONSTRAINT fkd1647e0f2eaa2a9f FOREIGN KEY (condition_id) REFERENCES eam_alert_condition(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_alert_definition ADD CONSTRAINT fk975407845029efd7 FOREIGN KEY (escalation_id) REFERENCES eam_escalation(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_alert_definition ADD CONSTRAINT fk975407845bc79aea FOREIGN KEY (act_on_trigger_id) REFERENCES eam_registered_trigger(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_alert_definition ADD CONSTRAINT fk97540784cb32abfe FOREIGN KEY (parent_id) REFERENCES eam_alert_definition(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_app_service ADD CONSTRAINT eam_app_service_service_id_key UNIQUE (service_id, cluster_id, application_id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_app_service ADD CONSTRAINT fkd1cf8e4967a1226e FOREIGN KEY (service_id) REFERENCES eam_service(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_app_service ADD CONSTRAINT fkd1cf8e4999ee4e8e FOREIGN KEY (application_id) REFERENCES eam_application(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_app_service ADD CONSTRAINT fkd1cf8e49b648cf19 FOREIGN KEY (service_type_id) REFERENCES eam_service_type(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_app_service ADD CONSTRAINT fkd1cf8e49ffb4c31c FOREIGN KEY (cluster_id) REFERENCES eam_svc_cluster(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_app_type_service_type_map ADD CONSTRAINT fk5a2c503aaac031cf FOREIGN KEY (application_type_id) REFERENCES eam_application_type(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_app_type_service_type_map ADD CONSTRAINT fk5a2c503ab648cf19 FOREIGN KEY (service_type_id) REFERENCES eam_service_type(id)
+          </statement>
+          <statement targetDB="postgresql">
+             ALTER TABLE ONLY eam_application ADD CONSTRAINT eam_application_name_key UNIQUE (name)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_application ADD CONSTRAINT fk6c0c122aac031cf FOREIGN KEY (application_type_id) REFERENCES eam_application_type(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+             ALTER TABLE ONLY eam_autoinv_schedule ADD CONSTRAINT eam_autoinv_schedule_jobname_key UNIQUE (jobname)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_autoinv_schedule ADD CONSTRAINT eam_autoinv_schedule_scanname_key UNIQUE (scanname)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_autoinv_schedule ADD CONSTRAINT eam_autoinv_schedule_triggername_key UNIQUE (triggername)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_config_props ADD CONSTRAINT eam_config_props_prefix_key UNIQUE (prefix, propkey)
+          </statement>
+          <statement targetDB="postgresql">
+             ALTER TABLE ONLY eam_control_schedule ADD CONSTRAINT eam_control_schedule_jobname_key UNIQUE (jobname)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_control_schedule ADD CONSTRAINT eam_control_schedule_triggername_key UNIQUE (triggername)
+          </statement>
+          <statement targetDB="postgresql">
+             ALTER TABLE ONLY eam_cprop ADD CONSTRAINT eam_cprop_keyid_key UNIQUE (keyid, appdef_id, value_idx)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_cprop ADD CONSTRAINT fke5d047984eaeab4a FOREIGN KEY (keyid) REFERENCES eam_cprop_key(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+             ALTER TABLE ONLY eam_cprop_key ADD CONSTRAINT eam_cprop_key_appdef_type_key UNIQUE (appdef_type, appdef_typeid, propkey)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_crispo_opt ADD CONSTRAINT fkc161913a6364efcd FOREIGN KEY (crispo_id) REFERENCES eam_crispo(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_escalation ADD CONSTRAINT eam_escalation_name_key UNIQUE (name)
+          </statement>
+          <statement targetDB="postgresql">
+              ALTER TABLE ONLY eam_escalation_action ADD CONSTRAINT eam_escalation_action_pkey PRIMARY KEY (escalation_id, idx)
+          </statement>
+          <statement targetDB="postgresql">
+             ALTER TABLE ONLY eam_exec_strategies ADD CONSTRAINT eam_exec_strategies_pkey PRIMARY KEY (id)
+          </statement>
+          <statement targetDB="postgresql">
+              ALTER TABLE ONLY eam_gtrigger_types ADD CONSTRAINT eam_gtrigger_types_pkey PRIMARY KEY (id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_escalation_action ADD CONSTRAINT fk846de1925029efd7 FOREIGN KEY (escalation_id) REFERENCES eam_escalation(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_escalation_action ADD CONSTRAINT fk846de1929c76c3bb FOREIGN KEY (action_id) REFERENCES eam_action(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_exec_strategies ADD CONSTRAINT fkdc5c7eb11dab49e3 FOREIGN KEY (config_id) REFERENCES eam_crispo(id)          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_exec_strategies ADD CONSTRAINT fkdc5c7eb127e934b3 FOREIGN KEY (type_id) REFERENCES eam_exec_strategy_types(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_exec_strategies ADD CONSTRAINT fkdc5c7eb1706267a5 FOREIGN KEY (def_id) REFERENCES eam_galert_defs(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_galert_defs ADD CONSTRAINT fk64f3daa5029efd7 FOREIGN KEY (escalation_id) REFERENCES eam_escalation(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_galert_defs ADD CONSTRAINT fk64f3daacce79ab8 FOREIGN KEY (group_id) REFERENCES eam_resource_group(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_galert_logs ADD CONSTRAINT fk653064b706267a5 FOREIGN KEY (def_id) REFERENCES eam_galert_defs(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_gtriggers ADD CONSTRAINT eam_gtriggers_pkey PRIMARY KEY (id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_gtriggers ADD CONSTRAINT fk54ae97741dab49e3 FOREIGN KEY (config_id) REFERENCES eam_crispo(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_gtriggers ADD CONSTRAINT fk54ae97747d9b78af FOREIGN KEY (strat_id) REFERENCES eam_exec_strategies(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_gtriggers ADD CONSTRAINT fk54ae9774ce0ff839 FOREIGN KEY (type_id) REFERENCES eam_gtrigger_types(id)          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_ip ADD CONSTRAINT eam_ip_platform_id_key UNIQUE (platform_id, address)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_ip ADD CONSTRAINT fk7976c8f56796aa86 FOREIGN KEY (platform_id) REFERENCES eam_platform(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+             ALTER TABLE ONLY eam_measurement ADD CONSTRAINT eam_measurement_instance_id_key UNIQUE (instance_id, template_id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_measurement ADD CONSTRAINT fk3e0f978ec37f24b8 FOREIGN KEY (template_id) REFERENCES eam_measurement_templ(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_measurement_arg ADD CONSTRAINT fkf6694e051626a4b5 FOREIGN KEY (measurement_template_id) REFERENCES eam_measurement_templ(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_measurement_arg ADD CONSTRAINT fkf6694e05a4c5a63e FOREIGN KEY (measurement_template_arg_id) REFERENCES eam_measurement_templ(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_measurement_bl ADD CONSTRAINT fk1877029bae18683b FOREIGN KEY (measurement_id) REFERENCES eam_measurement(id)
+          </statement>
+          <statement targetDB="postgresql">
+             ALTER TABLE ONLY eam_measurement_cat ADD CONSTRAINT eam_measurement_cat_name_key UNIQUE (name)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_measurement_data ADD CONSTRAINT eam_measurement_data_pkey PRIMARY KEY (measurement_id, "timestamp")          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_measurement_data_1d ADD CONSTRAINT eam_measurement_data_1d_pkey PRIMARY KEY (measurement_id, "timestamp")
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_measurement_data_1h ADD CONSTRAINT eam_measurement_data_1h_pkey PRIMARY KEY (measurement_id, "timestamp")
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_measurement_data_6h ADD CONSTRAINT eam_measurement_data_6h_pkey PRIMARY KEY (measurement_id, "timestamp")
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_measurement_templ ADD CONSTRAINT fk253d70712a378d8 FOREIGN KEY (category_id) REFERENCES eam_measurement_cat(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_measurement_templ ADD CONSTRAINT fk253d707ef33c225 FOREIGN KEY (monitorable_type_id) REFERENCES eam_monitorable_type(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_mescalation_state ADD CONSTRAINT eam_mescalation_state_escalation_id_key UNIQUE (escalation_id, alert_type, alert_def_id, alert_id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_mescalation_state ADD CONSTRAINT eam_mescalation_state_pkey PRIMARY KEY (id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_mescalation_state ADD CONSTRAINT fk3b73b3065029efd7 FOREIGN KEY (escalation_id) REFERENCES eam_escalation(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_mescalation_state ADD CONSTRAINT fk3b73b3068c8d4d5c FOREIGN KEY (acknowledged_by) REFERENCES eam_subject(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_metric_prob ADD CONSTRAINT eam_metric_prob_pkey PRIMARY KEY (measurement_id, "timestamp")
+          </statement>
+          <statement targetDB="postgresql">
+             ALTER TABLE ONLY eam_operation ADD CONSTRAINT eam_operation_name_key UNIQUE (name, resource_type_id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_operation ADD CONSTRAINT fkb6a961b99e309b2b FOREIGN KEY (resource_type_id) REFERENCES eam_resource_type(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+             ALTER TABLE ONLY eam_platform ADD CONSTRAINT eam_platform_fqdn_key UNIQUE (fqdn)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_platform ADD CONSTRAINT eam_platform_name_key UNIQUE (name)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_platform ADD CONSTRAINT fkfed285c1559691a3 FOREIGN KEY (agent_id) REFERENCES eam_agent(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_platform ADD CONSTRAINT fkfed285c162b21414 FOREIGN KEY (config_response_id) REFERENCES eam_config_response(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_platform ADD CONSTRAINT fkfed285c1e3e1026d FOREIGN KEY (platform_type_id) REFERENCES eam_platform_type(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_platform_server_type_map ADD CONSTRAINT eam_platform_server_type_map_pkey PRIMARY KEY (server_type_id, platform_type_id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_platform_server_type_map ADD CONSTRAINT fk4be3f5b539b1d30d FOREIGN KEY (server_type_id) REFERENCES eam_server_type(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_platform_server_type_map ADD CONSTRAINT fk4be3f5b5e3e1026d FOREIGN KEY (platform_type_id) REFERENCES eam_platform_type(id)
+          </statement>
+          <statement targetDB="postgresql">
+             ALTER TABLE ONLY eam_plugin ADD CONSTRAINT eam_plugin_name_key UNIQUE (name)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_principal ADD CONSTRAINT eam_principal_principal_key UNIQUE (principal)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_qrtz_blob_triggers ADD CONSTRAINT eam_qrtz_blob_triggers_pkey PRIMARY KEY (trigger_name, trigger_group)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_qrtz_blob_triggers ADD CONSTRAINT eam_fk_qbt_qt FOREIGN KEY (trigger_name, trigger_group) REFERENCES eam_qrtz_triggers(trigger_name, trigger_group)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_qrtz_cron_triggers ADD CONSTRAINT eam_qrtz_cron_triggers_pkey PRIMARY KEY (trigger_name, trigger_group)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_qrtz_cron_triggers ADD CONSTRAINT eam_fk_qct_qt FOREIGN KEY (trigger_name, trigger_group) REFERENCES eam_qrtz_triggers(trigger_name, trigger_group)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_qrtz_job_details ADD CONSTRAINT eam_qrtz_job_details_pkey PRIMARY KEY (job_name, job_group)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_qrtz_job_listeners ADD CONSTRAINT eam_qrtz_job_listeners_pkey PRIMARY KEY (job_name, job_group, job_listener)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_qrtz_job_listeners ADD CONSTRAINT eam_fk_qjl_qjd FOREIGN KEY (job_name, job_group) REFERENCES eam_qrtz_job_details(job_name, job_group) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_qrtz_simple_triggers ADD CONSTRAINT eam_qrtz_simple_triggers_pkey PRIMARY KEY (trigger_name, trigger_group)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_qrtz_simple_triggers ADD CONSTRAINT eam_fk_qst_qt FOREIGN KEY (trigger_name, trigger_group) REFERENCES eam_qrtz_triggers(trigger_name, trigger_group)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_qrtz_trigger_listeners ADD CONSTRAINT eam_qrtz_trigger_listeners_pkey PRIMARY KEY (trigger_name, trigger_group, trigger_listener)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_qrtz_trigger_listeners ADD CONSTRAINT eam_fk_qtl_qt FOREIGN KEY (trigger_name, trigger_group) REFERENCES eam_qrtz_triggers(trigger_name, trigger_group) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_qrtz_triggers ADD CONSTRAINT eam_fk_qt_qjd FOREIGN KEY (job_name, job_group) REFERENCES eam_qrtz_job_details(job_name, job_group) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_registered_trigger ADD CONSTRAINT fk4a8354a9b5af9d12 FOREIGN KEY (alert_definition_id) REFERENCES eam_alert_definition(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_res_grp_res_map ADD CONSTRAINT eam_res_grp_res_map_pkey PRIMARY KEY (resource_group_id, resource_id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_res_grp_res_map ADD CONSTRAINT fk1c835366da1b7c9 FOREIGN KEY (resource_group_id) REFERENCES eam_resource_group(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_res_grp_res_map ADD CONSTRAINT fk1c83536fc176ae FOREIGN KEY (resource_id) REFERENCES eam_resource(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_resource ADD CONSTRAINT eam_resource_resource_type_id_key UNIQUE (resource_type_id, instance_id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_resource ADD CONSTRAINT fk7ac0e15c9e309b2b FOREIGN KEY (resource_type_id) REFERENCES eam_resource_type(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_resource ADD CONSTRAINT fk7ac0e15ce82fbc FOREIGN KEY (subject_id) REFERENCES eam_subject(id)
+          </statement>
+          <statement targetDB="postgresql">
+             ALTER TABLE ONLY eam_resource_group ADD CONSTRAINT eam_resource_group_name_key UNIQUE (name)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_resource_group ADD CONSTRAINT eam_resource_group_resource_id_key UNIQUE (resource_id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_resource_group ADD CONSTRAINT fk6dbccdbcfc176ae FOREIGN KEY (resource_id) REFERENCES eam_resource(id)
+          </statement>
+          <statement targetDB="postgresql">
+             ALTER TABLE ONLY eam_resource_type ADD CONSTRAINT eam_resource_type_name_key UNIQUE (name)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_resource_type ADD CONSTRAINT eam_resource_type_resource_id_key UNIQUE (resource_id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_resource_type ADD CONSTRAINT fkd203d83dfc176ae FOREIGN KEY (resource_id) REFERENCES eam_resource(id)
+          </statement>
+          <statement targetDB="postgresql">
+             ALTER TABLE ONLY eam_role ADD CONSTRAINT eam_role_name_key UNIQUE (name)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_role ADD CONSTRAINT fkf6ec7cc4fc176ae FOREIGN KEY (resource_id) REFERENCES eam_resource(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_role_operation_map ADD CONSTRAINT eam_role_operation_map_pkey PRIMARY KEY (role_id, operation_id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_role_operation_map ADD CONSTRAINT fkdfbea0999d737ae FOREIGN KEY (role_id) REFERENCES eam_role(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_role_operation_map ADD CONSTRAINT fkdfbea09c848f326 FOREIGN KEY (operation_id) REFERENCES eam_operation(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_role_resource_group_map ADD CONSTRAINT eam_role_resource_group_map_pkey PRIMARY KEY (resource_group_id, role_id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_role_resource_group_map ADD CONSTRAINT fk7d6efc66da1b7c9 FOREIGN KEY (resource_group_id) REFERENCES eam_resource_group(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_role_resource_group_map ADD CONSTRAINT fk7d6efc699d737ae FOREIGN KEY (role_id) REFERENCES eam_role(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_server ADD CONSTRAINT eam_server_platform_id_key UNIQUE (platform_id, autoinventoryidentifier)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_server ADD CONSTRAINT fkeeeb4c1139b1d30d FOREIGN KEY (server_type_id) REFERENCES eam_server_type(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_server ADD CONSTRAINT fkeeeb4c1162b21414 FOREIGN KEY (config_response_id) REFERENCES eam_config_response(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_server ADD CONSTRAINT fkeeeb4c116796aa86 FOREIGN KEY (platform_id) REFERENCES eam_platform(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+             ALTER TABLE ONLY eam_server_type ADD CONSTRAINT eam_server_type_name_key UNIQUE (name)
+          </statement>
+          <statement targetDB="postgresql">
+             ALTER TABLE ONLY eam_service ADD CONSTRAINT eam_service_id_key UNIQUE (id, parent_service_id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_service ADD CONSTRAINT fkee7e438762b21414 FOREIGN KEY (config_response_id) REFERENCES eam_config_response(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_service ADD CONSTRAINT fkee7e438784174123 FOREIGN KEY (parent_service_id) REFERENCES eam_service(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_service ADD CONSTRAINT fkee7e4387a14c9e5b FOREIGN KEY (svc_cluster_id) REFERENCES eam_svc_cluster(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_service ADD CONSTRAINT fkee7e4387b648cf19 FOREIGN KEY (service_type_id) REFERENCES eam_service_type(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_service ADD CONSTRAINT fkee7e4387ea5ff386 FOREIGN KEY (server_id) REFERENCES eam_server(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_service_dep_map ADD CONSTRAINT fkbdab4434642e0910 FOREIGN KEY (dependent_service_id) REFERENCES eam_app_service(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_service_dep_map ADD CONSTRAINT fkbdab443476c4c8b1 FOREIGN KEY (appservice_id) REFERENCES eam_app_service(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_service_type ADD CONSTRAINT fkb0b418f239b1d30d FOREIGN KEY (server_type_id) REFERENCES eam_server_type(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_srn ADD CONSTRAINT eam_srn_pkey PRIMARY KEY (appdef_type, instance_id)
+          </statement>
+          <statement targetDB="postgresql">
+             ALTER TABLE ONLY eam_subject ADD CONSTRAINT eam_subject_name_key UNIQUE (name, dsn)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_subject ADD CONSTRAINT fk8e4d1fefc176ae FOREIGN KEY (resource_id) REFERENCES eam_resource(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_subject_role_map ADD CONSTRAINT eam_subject_role_map_pkey PRIMARY KEY (subject_id, role_id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_subject_role_map ADD CONSTRAINT fk320f631499d737ae FOREIGN KEY (role_id) REFERENCES eam_role(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_subject_role_map ADD CONSTRAINT fk320f6314e82fbc FOREIGN KEY (subject_id) REFERENCES eam_subject(id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_svc_cluster ADD CONSTRAINT fk39da6ecdb648cf19 FOREIGN KEY (service_type_id) REFERENCES eam_service_type(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_trigger_event ADD CONSTRAINT eam_trigger_event_pkey PRIMARY KEY (trigger_id, event_id)
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_trigger_event ADD CONSTRAINT fk82152085cb2c7199 FOREIGN KEY (event_id) REFERENCES eam_event(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_user_config_resp ADD CONSTRAINT fk622ab78723193fc9 FOREIGN KEY (id) REFERENCES eam_subject(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_virtual ADD CONSTRAINT fk94039bddfc176ae FOREIGN KEY (resource_id) REFERENCES eam_resource(id) ON DELETE CASCADE
+          </statement>          
       </schema-directSQL>
-    
+
     </schemaSpec>
 
     <schemaSpec version="3.01">
