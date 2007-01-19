@@ -25,7 +25,7 @@ A.NotBold:hover, .DropDown A:hover {color: #003399; font-weight: normal; text-de
 
 /* BUTTON */
 .Button { font-weight: bold; background-repeat: repeat-x; }
-.Button A:hover { color: #C6CFE5; text-decoration: none; } 
+.Button A:hover { color: #C6CFE5; text-decoration: none; }
 
 input.CompactButton, input.CompactButtonInactive {
     color: #366CD9;
@@ -45,7 +45,7 @@ input.CompactButtonInactive {
 .logoSm{background-color: #d2d2d2;}
 
 /* PAGE TITLE */
-.PageTitle, .PageTitleBar, .PageTitleBar td {font-size: 17px; color: #ffffff; font-weight: bold; background-color: #CCCCCC;}
+.PageTitle, .PageTitleBar, .PageTitleBar td {font-size: 13px; font-family: Verdana, sans-serif;color: #ffffff; font-weight: bold; background-color: #CCCCCC;}
 .PageTitleBar a, .PageTitleBar td a{color: #FFFFFF;}
 .PageTitleGroupBg, .PageTitleRoleBg, .PageTitleUserBg {background-color: #E5E5E5;}
 .PageTitleServerBg {background-color: #E4F2E4;}
@@ -75,7 +75,7 @@ A.ListHeaderLink:link {color: #004680; text-decoration: none;}
 A.ListHeaderLink:visited {color: #004680; text-decoration: none;}
 A.ListHeaderLink:hover {color: #004680; text-decoration: underline;}
 
-.ListHeader, .tableRowHeader, .tableCellHeader {text-align: left; font-weight: bold; color: #004680; background-color: #DBE3F5; padding: 3px; border-top: solid #ABB1C7; border-bottom: solid #D5D8DE; border-width: 1px;} 
+.ListHeader, .tableRowHeader, .tableCellHeader {text-align: left; font-weight: bold; color: #004680; background-color: #DBE3F5; padding: 3px; border-top: solid #ABB1C7; border-bottom: solid #D5D8DE; border-width: 1px;}
 .ListHeaderCheckbox {text-align: center; font-weight: bold; background-color: #DBE3F5; padding: 0px; border-top: solid #ABB1C7; border-bottom: solid #D5D8DE; border-width: 1px;}
 
 .ListHeaderSorted, .tableRowSorted {font-weight: bold; color: #004680; background-color: #C6CFE5; padding: 3px; border-top: solid #ABB1C7; border-bottom: solid #C6CFE5; border-width: 1px;}
@@ -105,7 +105,7 @@ A.ListHeaderLink:hover {color: #004680; text-decoration: underline;}
 .DropDown {
   font-size: 11px;
   z-index: 3000;
-  border-color: #f7faff #99a #99a #f7faff; 
+  border-color: #f7faff #99a #99a #f7faff;
 }
 
 /* list for MONITOR */
@@ -162,13 +162,13 @@ A.GuideLink:hover {color: #003399; font-weight: bold; text-decoration: underline
 .DashTabs {margin-bottom: 4px;}
 
 /* MASTHEAD */
-.MastheadBgTop {background-color: #7bbcfe;}
+.MastheadBgTop {background-color: #60a5ea;}
 .MastheadBgBottom {background-color: #DBE3F6;}
 
-A.MastheadLink:link {font-weight: normal; color: #105CA8; text-decoration: none;}
-A.MastheadLink:visited {font-weight: normal; color: #105CA8; text-decoration: none;}
-A.MastheadLink:hover {font-weight: normal; color: #105CA8; text-decoration: underline;}
-A.MastheadLink:active {font-weight: normal; color: #666666; text-decoration: none;}
+A.MastheadLink:link {font-weight: bold; color: #105CA8; text-decoration: none;}
+A.MastheadLink:visited {font-weight: bold; color: #105CA8; text-decoration: none;}
+A.MastheadLink:hover {font-weight: bold; color: #105CA8; text-decoration: underline;}
+A.MastheadLink:active {font-weight: bold; color: #666666; text-decoration: none;}
 
 .MastheadContent, .RecentAlerts {font-size: 10px; color: #3b3b74;}
 td.MastheadBgTop .MastheadContent{color: #ffffff;}
@@ -190,9 +190,9 @@ td.MastheadBgTop .MastheadContent{color: #ffffff;}
 .FormLabelRight {font-weight: bold; text-align: right;}
 .Subhead {font-weight: bold; text-align: left; color: #F35E0C; background-color: #CCCCCC; padding: 3px;}
 
-A.dashlink:link {font-size: 11px; font-weight: bold; color: #003399; text-decoration: none;} 
+A.dashlink:link {font-size: 11px; font-weight: bold; color: #003399; text-decoration: none;}
 A.dashlink:visited {font-size: 11px; font-weight: bold; color: #003399; text-decoration: none;}
-A.dashlink:hover {font-size: 11px; font-weight: bold; color: #003399; text-decoration: underline;} 
+A.dashlink:hover {font-size: 11px; font-weight: bold; color: #003399; text-decoration: underline;}
 
 /* FILTER */
 .FilterLabelText {font-size: 11px; background-color: #D5D8DE; font-weight: bold; padding: 5px;}
@@ -213,9 +213,9 @@ A.dashlink:hover {font-size: 11px; font-weight: bold; color: #003399; text-decor
 .DisplayLabel {background-color: #EBEDF2; padding: 3px; font-weight: bold; font-size: 11px; color: #000000;}
 .DisplaySubhead {background-color: #EBEDF2; padding: 3px; font-weight: bold; color: #F35E0C;}
 
-A.displaylink:link {font-size: 11px; color: #003399; text-decoration: none;} 
+A.displaylink:link {font-size: 11px; color: #003399; text-decoration: none;}
 A.displaylink:visited {font-size: 11px; color: #003399; text-decoration: none;}
-A.displaylink:hover {font-size: 11px; color: #003399; text-decoration: underline;} 
+A.displaylink:hover {font-size: 11px; color: #003399; text-decoration: underline;}
 
 /* MONITORING */
 .MonitorBlockContainer {background-color: #EBEDF2; padding-top: 10px; border-spacing: 3px; }
@@ -282,7 +282,7 @@ A.displaylink:hover {font-size: 11px; color: #003399; text-decoration: underline
     font-size: 11px;
     text-align: left;
     vertical-align: middle;
-} 
+}
 
 .MiniChartTitle {
     background-color: #EBEDF2;
@@ -296,7 +296,7 @@ A.displaylink:hover {font-size: 11px; color: #003399; text-decoration: underline
 #diagramDiv {
 position: absolute;
 z-index: 100;
-visibility: hidden; 
+visibility: hidden;
 /* TURN THIS OFF B/C OF DROP-SHADOW
 filter: alpha(opacity=85);
 -moz-opacity: 1; // should be 0.85 -- see http://bugzilla.mozilla.org/show_bug.cgi?id=201209
@@ -304,41 +304,41 @@ filter: alpha(opacity=85);
 
 }
 
-/* These are the style specifications for the menu layers.  
+/* These are the style specifications for the menu layers.
    Set width to get more browsers corporation  */
-div.menu { 
+div.menu {
   position:absolute;
-  visibility:hidden; 
+  visibility:hidden;
   width:24em; left:0; top:0;
-  font-size:10px; 
+  font-size:10px;
   background-color: #e6e6e6; color:#000;
   border: 2px solid;
-  border-color: #f7faff #99a #99a #f7faff; 
+  border-color: #f7faff #99a #99a #f7faff;
   z-index:500;
 }
 
 /* Style specifications for menu items and links  */
 div.menu ul, .DropDown ul { margin:0; padding:0 }
 /* Need to set padding of at least one pixel or ie sets very large margin */
-div.menu ul li { 
+div.menu ul li {
   padding:.3em .4em;
-  margin:0; 
+  margin:0;
   list-style-type:none
   }
 
-.DropDown li { 
-  margin: 2px; 
+.DropDown li {
+  margin: 2px;
   list-style-type:none
 }
 
-/* Set display block and position relative so clicks on list items activate links  */  
-div.menu a, div.eventsSummary a { 
+/* Set display block and position relative so clicks on list items activate links  */
+div.menu a, div.eventsSummary a {
   cursor:default;
-  background-color:transparent; 
-  display:block; position:relative; 
-  text-decoration:none 
+  background-color:transparent;
+  display:block; position:relative;
+  text-decoration:none
   }
-  
+
 div.menu a:link { color:#33b }
 div.menu a:visited { color:#339 }
 div.menu a:hover { color:#fff; background-color:#338 }
@@ -497,12 +497,12 @@ span.SpanPopup1:hover span {
   height: auto;
 }
 
-div.overlay { 
+div.overlay {
   position: absolute;
-  visibility: hidden; 
+  visibility: hidden;
   width:9px; height:0px;
   left:0; top:200px;
-  font-size:10px; 
+  font-size:10px;
   background-color: #777777; color:#000;
   border: 0px;
   z-index: 200;
@@ -511,12 +511,12 @@ div.overlay {
 }
 
 /* .99 opacity is for safari bug */
-div.timepopup { 
+div.timepopup {
   position:absolute;
-  visibility:hidden; 
+  visibility:hidden;
   width:70px;
   left:0; top:-20px;
-  font-size:10px; 
+  font-size:10px;
   padding: 3px;
   text-align: center;
   background-color: #e6e6e6; color:#000;
@@ -534,13 +534,13 @@ div.scrollable {
   overflow: auto;
 }
 
-div.eventDetails { 
+div.eventDetails {
   position: absolute;
   width: 672px;
   background-color: #CCE0FF;
   margin-top: 2px;
   border: 1px solid;
-  font-size:10px; 
+  font-size:10px;
   opacity: 0.99;
 }
 
@@ -638,7 +638,7 @@ ul.boxy {
 
 ul.boxy li {
   padding-left: 4px;
-  margin: 0px; 
+  margin: 0px;
 }
 
 .overlay_dialog {
@@ -694,14 +694,14 @@ ul.boxy li {
 .dialog_sizer {
   width: 9px;
   height: 19px;
-  background: transparent url(default/sizer.gif) no-repeat 0 0;  
-  cursor:se-resize;  
+  background: transparent url(default/sizer.gif) no-repeat 0 0;
+  cursor:se-resize;
 }
 
 .dialog_close {
   width: 14px;
   height: 14px;
-  background: transparent url(default/close.gif) no-repeat 0 0;      
+  background: transparent url(default/close.gif) no-repeat 0 0;
   position:absolute;
   top:5px;
   left:8px;
@@ -712,7 +712,7 @@ ul.boxy li {
 .dialog_minimize {
   width: 14px;
   height: 15px;
-  background: transparent url(default/minimize.gif) no-repeat 0 0;      
+  background: transparent url(default/minimize.gif) no-repeat 0 0;
   position:absolute;
   top:5px;
   left:28px;
@@ -723,7 +723,7 @@ ul.boxy li {
 .dialog_maximize {
   width: 14px;
   height: 15px;
-  background: transparent url(default/maximize.gif) no-repeat 0 0;      
+  background: transparent url(default/maximize.gif) no-repeat 0 0;
   position:absolute;
   top:5px;
   left:49px;
@@ -776,16 +776,16 @@ ul.boxy li {
   position: absolute;
 }
 
-.dialog table.table_window  { 
-  border-collapse: collapse; 
-  border-spacing: 0; 
+.dialog table.table_window  {
+  border-collapse: collapse;
+  border-spacing: 0;
   width: 100%;
   margin: 0px;
   padding:0px;
 }
 
-.dialog table.table_window td , .dialog table.table_window th { 
-  padding: 0; 
+.dialog table.table_window td , .dialog table.table_window th {
+  padding: 0;
 }
 
 .dialog .title_window {
@@ -847,9 +847,9 @@ width:49%;
 }
 
 .alertType {
-padding: 3px; 
-border-bottom: 1px solid #D5D8DE; 
-text-align: middle; 
+padding: 3px;
+border-bottom: 1px solid #D5D8DE;
+text-align: center;
 width:20%;
 }
 .resourceTypeName {
@@ -875,7 +875,7 @@ width:20%;
   padding-right:3px;
   border-bottom:1px solid #D5D8DE;
   text-align:center;
-  text-wrap:none;
+  white-space:nowrap;
 }
 
 .availResourceStatus {
@@ -940,12 +940,13 @@ border-bottom:1px solid #D5D8DE;
   width:100%;
   margin-top:10px;
   margin-bottom:10px;
+     cursor:move;
 }
 
 .remove {
   float:right;
   margin-right:10px;
-  margin-top:10px;
+  margin-top:15px;
 }
 
 .escInput {
@@ -986,3 +987,32 @@ border-bottom:1px solid #D5D8DE;
 border-left:1px solid #D5D8DE;
  border-right:1px solid #D5D8DE;
 }
+
+
+#narrowList_false .BlockTitle{
+ background-color:#38538b;
+}
+
+#narrowList_true .BlockTitle{
+ background-color:#b7b7b7;
+ color: #0d86ff;
+ font-weight: bold;
+}
+
+#narrowList_true .BlockContent{
+ background-color:#eaedf2;
+}
+
+.mainNavText {
+ font-family: Helvetica, sans-serif;
+ font-size: 11px;
+ color: #062b7a;
+ font-weight: bold;
+ white-space:nowrap;
+}
+
+.mainNavText a, .mainNavText td a{
+ color: #062b7a;
+ text-decoration:none;
+}
+
