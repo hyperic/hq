@@ -1354,9 +1354,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * Add an IP to a platform
      * @ejb:interface-method
      */
-    public void addIp(Platform platform, String address, String netmask,
-                      String macAddress) {
-        platform.addIp(address, netmask, macAddress);
+    public Ip addIp(Platform platform, String address, String netmask,
+                    String macAddress) {
+        return platform.addIp(address, netmask, macAddress);
     }
 
     /**

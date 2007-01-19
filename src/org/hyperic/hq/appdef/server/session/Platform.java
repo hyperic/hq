@@ -91,10 +91,11 @@ public class Platform extends PlatformBase
         _ips = ips;
     }
 
-    public void addIp(String address, String netmask, String macAddress) {
+    public Ip addIp(String address, String netmask, String macAddress) {
         Ip ip = new Ip(address, netmask, macAddress);
         _ips.add(ip);
         ip.setPlatform(this);
+        return ip;
     }
 
     public void removeIp(String address, String netmask, String macAddress) {
