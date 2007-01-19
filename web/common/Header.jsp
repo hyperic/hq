@@ -30,13 +30,6 @@
   USA.
  --%>
 
-<script language="JavaScript" type="text/javascript">
-    var genHelp = "<hq:help context="false"/>";
-</script>
-<script language="JavaScript" type="text/javascript">
-  var help = "<hq:help/>";
-</script>
-
 <script src="<html:rewrite page="/js/rico.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/"/>diagram.js" type="text/javascript"></script>
 
@@ -128,7 +121,7 @@
                         </td>
                         <td class="mainNavText" nowrap>
                             <html:link href=""
-                                       onclick="window.open(genHelp,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes'); return false;">
+                                       onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');return false;">
                                 <span style="padding-right:10px;padding-left:10px;">Help</span></html:link>
                         </td>
                     </tr>

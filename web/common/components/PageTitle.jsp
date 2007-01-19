@@ -90,9 +90,7 @@
 <c:choose>
   <c:when test="${not empty titleBgStyle && not empty titleImg}">
     <td width="14%"><html:img page="/images/${titleImg}" width="202" height="32" alt="" border="0" style="float: right;"/></td>
-    <td width="1%" nowrap>
-      <html:link href="" onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');return false;"><html:img page="/images/title_pagehelp.gif" width="20" height="20" alt="" border="0" hspace="10"/></html:link>
-    </td>
+    <td><html:img page="/images/spacer.gif" width="20" height="20" alt="" border="0"/></td>
   </c:when>
   <c:otherwise>
     <td width="33%"><html:img page="/images/spacer.gif" width="1" height="32" alt="" border="0"/></td>

@@ -41,13 +41,10 @@
     <td width="34%"><fmt:message key="dash.home.PageTitle"/></td>
     <td width="33%"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
     <td width="32%"><html:img page="/images/spacer.gif" width="202" height="32" alt="" border="0"/></td>
-    <td width="1%" nowrap><html:link href="" onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/title_pagehelp.gif" width="20" height="20" alt="" border="0" hspace="10"/></html:link>
-    <div style="clear: all"></div>
-    </td>
   </tr>
   <tr>
   	<td rowspan="99" class="PageTitle"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
     <td valign="top" align="left" rowspan="99"><html:img page="/images/title_TLcorner.gif" width="8" height="8" alt="" border="0"/></td>
-    <td colspan="4"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
+    <td colspan="3"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
   </tr>
 </table>
