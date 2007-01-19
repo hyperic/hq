@@ -46,7 +46,7 @@
     <subclass name="DerivedMeasurement" extends="Measurement"
               discriminator-value="D">
       <property name="enabled" type="boolean">
-        <column name="ENABLED" not-null="true"/>
+        <column name="ENABLED" not-null="false"/>
       </property>
       <property name="interval" type="long">
         <column name="COLL_INTERVAL" />
