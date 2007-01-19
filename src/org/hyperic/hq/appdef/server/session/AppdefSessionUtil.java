@@ -196,7 +196,7 @@ public abstract class AppdefSessionUtil {
             PlatformManagerLocal pmLocal;
 
             pmLocal = this.getPlatformMgrLocal();
-            return pmLocal.findPlatformTypeById(id);
+            return pmLocal.findPlatformTypeValueById(id);
         } else if(appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVER){
             ServerManagerLocal smLocal;
 

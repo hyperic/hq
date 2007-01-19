@@ -56,7 +56,7 @@ public class AppdefEntityTypeID extends AppdefEntityID implements Serializable {
             switch(this.entityType) {
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                     return PlatformManagerUtil.getLocalHome().create()
-                                .findPlatformTypeById(idInteger);
+                                .findPlatformTypeValueById(idInteger);
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                     return ServerManagerUtil.getLocalHome().create()
                                 .findServerTypeById(idInteger);

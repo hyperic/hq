@@ -1262,7 +1262,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         try {
             switch (entityType) {
                 case (AppdefEntityConstants.APPDEF_TYPE_PLATFORM):
-                    return getPlatformMgrLocal().findPlatformTypeById(resType);
+                    return getPlatformMgrLocal().findPlatformTypeValueById(resType);
                 case (AppdefEntityConstants.APPDEF_TYPE_SERVER):
                     return getServerMgrLocal().findServerTypeById(resType);
                 case (AppdefEntityConstants.APPDEF_TYPE_SERVICE):

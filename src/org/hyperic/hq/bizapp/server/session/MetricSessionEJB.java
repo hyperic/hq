@@ -786,7 +786,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         
         // Get resource type name
         PlatformTypeValue platType =
-            this.getPlatformManager().findPlatformTypeById(platTypeId.getId());
+            this.getPlatformManager().findPlatformTypeValueById(platTypeId.getId());
     
         // Look up the metric summaries of platforms
         return this.getResourceMetrics(subject, platforms, platType.getName(),

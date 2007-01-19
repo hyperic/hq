@@ -41,6 +41,7 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
@@ -85,7 +86,6 @@ import org.hyperic.hq.dao.PlatformTypeDAO;
 import org.hyperic.hq.dao.ConfigResponseDAO;
 import org.hyperic.hq.dao.ApplicationDAO;
 import org.hyperic.hq.zevents.ZeventManager;
-import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.NonUniqueObjectException;
@@ -114,20 +114,27 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     private Pager valuePager;
     private PlatformCounter counter;
 
-    /**
-     * Find a platform type by id
-     * @param id - ID of the platform type
-     * @return platformTypeValue 
+     /**
+     * Find a PlatformType by id
      * @ejb:interface-method
      */
-    public PlatformTypeValue findPlatformTypeById(Integer id) 
+    public PlatformType findPlatformTypeById(Integer id)
         throws PlatformNotFoundException {
         try {
-            PlatformType ptype = getPlatformTypeDAO().findById(id);
-            return ptype.getPlatformTypeValue();
+            return getPlatformTypeDAO().findById(id);
         } catch (ObjectNotFoundException e) {
             throw new PlatformNotFoundException(id);
         }
+    }
+
+    /**
+     * Find a PlatformTypeValue by id.
+     * @deprecated Use findPlatformTypeById instead.
+     * @ejb:interface-method
+     */
+    public PlatformTypeValue findPlatformTypeValueById(Integer id)
+        throws PlatformNotFoundException {
+        return findPlatformTypeById(id).getPlatformTypeValue();
     }
 
     /**

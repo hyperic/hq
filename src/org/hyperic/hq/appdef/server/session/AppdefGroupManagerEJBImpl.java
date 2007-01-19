@@ -1053,7 +1053,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
         } catch (NamingException e) {
             throw new SystemException(e);
         }
-        return platLoc.findPlatformTypeById(new Integer(id));
+        return platLoc.findPlatformTypeValueById(new Integer(id));
     }
 
     private ServerTypeValue getServerTypeById (int id)

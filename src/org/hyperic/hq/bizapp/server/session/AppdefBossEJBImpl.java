@@ -1270,7 +1270,7 @@ public class AppdefBossEJBImpl
         try {
             switch(id.getType()) {
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    return getPlatformManager().findPlatformTypeById(id.getId());
+                    return getPlatformManager().findPlatformTypeValueById(id.getId());
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                     return getServerManager().findServerTypeById(id.getId());
                 case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
@@ -1292,7 +1292,7 @@ public class AppdefBossEJBImpl
                SessionTimeoutException, SessionNotFoundException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
-        return getPlatformManager().findPlatformTypeById(id);
+        return getPlatformManager().findPlatformTypeValueById(id);
     }
 
     /**
