@@ -57,7 +57,7 @@ public class ApproxDurationFormatter extends DurationFormatter
             res   = minutes + (minutes == 1 ? " minute " : " minutes ");
         } else if (granularity == GRANULAR_SECS ||
                    granularity == GRANULAR_MILLIS) {
-            res = " 0 minute ";
+            res = tbd.nSecs + (tbd.nSecs == 1 ? " second " : " seconds ");
         } else {
             throw new IllegalStateException("Unexpected granularity");
         }
