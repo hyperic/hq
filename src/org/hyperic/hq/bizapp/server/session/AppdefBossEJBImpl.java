@@ -1063,18 +1063,6 @@ public class AppdefBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public PlatformValue findPlatformByFqdn(int sessionID, String fqdn)
-        throws AppdefEntityNotFoundException,
-               SessionTimeoutException, SessionNotFoundException,
-               PermissionException 
-    {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-        return getPlatformManager().getPlatformByFqdn(subject, fqdn);
-    }
-
-    /**
-     * @ejb:interface-method
-     */
     public PageList findAllServers(int sessionID, PageControl pc)
         throws FinderException,
                SessionTimeoutException, SessionNotFoundException,
