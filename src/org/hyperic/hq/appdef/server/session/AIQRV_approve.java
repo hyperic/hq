@@ -70,7 +70,6 @@ import org.apache.commons.logging.LogFactory;
 public class AIQRV_approve implements AIQResourceVisitor {
 
     private static Log _log = LogFactory.getLog(AIQRV_approve.class);
-    private PlatformValue existingPlatformValue = null;
 
     public AIQRV_approve () {}
 
@@ -84,18 +83,16 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
         Integer id = aiplatform.getId();
         
-        _log.info("Visiting platform: " + id +
-                  " fqdn=" + aiplatform.getFqdn());
+        _log.info("Visiting platform: " + id + " fqdn=" + aiplatform.getFqdn());
 
-        // Clear out previous platform
-        existingPlatformValue = null;
-        
         AIPlatformValue aiplatformValue = aiplatform.getAIPlatformValue();
-        PlatformValue existingPlatform;
+        PlatformValue existingPlatformValue;
         PlatformValue newPlatformValue;
         AppdefEntityID appdefEntityId;
 
         int qstat = aiplatform.getQueueStatus();
+        existingPlatformValue = getExistingPlatformValue(subject, pmLocal,
+                                                         aiplatformValue);
         switch (qstat) {
         case AIQueueConstants.Q_STATUS_PLACEHOLDER:
             // We don't approve placeholders.  Just let them sit
@@ -105,15 +102,13 @@ public class AIQRV_approve implements AIQResourceVisitor {
         case AIQueueConstants.Q_STATUS_ADDED:
             // This platform exists in the queue but not in appdef,
             // so add it to appdef.
-            existingPlatform =
-                getExistingPlatformValue(subject, pmLocal, aiplatformValue);
 
-            if (existingPlatform != null) {
+            if (existingPlatformValue != null) {
                 appdefEntityId =
                     new AppdefEntityID(AppdefEntityConstants.
                                        APPDEF_TYPE_AIPLATFORM, id);
                 _log.error("Platform already added: platformid="
-                           + existingPlatform.getId() + ", "
+                           + existingPlatformValue.getId() + ", "
                            + "cannot approve AIPlatform " + id);
                 throw new AIQApprovalException(appdefEntityId, 
                                                AIQApprovalException.
@@ -160,15 +155,12 @@ public class AIQRV_approve implements AIQResourceVisitor {
             catch (CreateException e) {
                 // check if this create exception is caused by an existing
                 // platform.
-                existingPlatform =
-                    getExistingPlatformValue(subject, pmLocal, aiplatformValue);
-                
-                if (existingPlatform != null) {
+                if (existingPlatformValue != null) {
                     appdefEntityId =
                         new AppdefEntityID(AppdefEntityConstants.
                                            APPDEF_TYPE_AIPLATFORM, id);
                     _log.error("Platform already added: platformid="
-                               + existingPlatform.getId() + ", "
+                               + existingPlatformValue.getId() + ", "
                                + "cannot approve AIPlatform " + id);
                     throw new AIQApprovalException(appdefEntityId, 
                                                    AIQApprovalException.
@@ -220,15 +212,13 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                              + "AI data.", e);
             }
 
-            existingPlatform =
-                getExistingPlatformValue(subject, pmLocal, aiplatformValue);
-            setCustomProperties(aiplatform, existingPlatform, cpropMgr);
+            setCustomProperties(aiplatform, existingPlatformValue, cpropMgr);
 
             if (aiplatformValue.isPlatformDevice()) {
                 try {
                     configMgr.
                         configureResource(subject,
-                                          existingPlatform.getEntityId(),
+                                          existingPlatformValue.getEntityId(),
                                           aiplatform.getProductConfig(),
                                           aiplatform.getMeasurementConfig(),
                                           aiplatform.getControlConfig(),
@@ -246,10 +236,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
             // We wish to remove the appdef platform.
 
             // If the platform has already been removed, do nothing.
-            existingPlatform =
-                getExistingPlatformValue(subject, pmLocal, aiplatformValue);
-
-            if ( existingPlatform == null ) {
+            if (existingPlatformValue == null) {
                 _log.warn("Platform has already been removed, cannot " +
                           "remove aiplatform=" + id);
                 return;
@@ -258,7 +245,8 @@ public class AIQRV_approve implements AIQResourceVisitor {
             // Remove the platform, the 'true' here mean a 
             // deep/recursive removal.
             try {
-                pmLocal.removePlatform(subject, existingPlatform.getId(), true);
+                pmLocal.removePlatform(subject, existingPlatformValue.getId(),
+                                       true);
             } catch (PermissionException e) {
                 throw e;
             } catch (Exception e) {
@@ -288,24 +276,19 @@ public class AIQRV_approve implements AIQResourceVisitor {
         int i;
         AppdefEntityID appdefEntityId;
 
-        // Get the aiplatform for this ip
         aiplatform = aiip.getAIPlatform();
         aiplatformValue = aiplatform.getAIPlatformValue();
-        existingPlatformValue =
+        PlatformValue existingPlatformValue =
             getExistingPlatformValue(subject, pmLocal, aiplatformValue);
 
         int qstat = aiip.getQueueStatus();
         switch (qstat) {
         case AIQueueConstants.Q_STATUS_PLACEHOLDER:
-            // We don't approve placeholders.  Just let them sit
-            // in the queue.
+            // We don't approve placeholders.  Just let them sit in the queue.
             break;
 
         case AIQueueConstants.Q_STATUS_ADDED:
-            // This ip exists in the queue but not in appdef,
-            // so add it to appdef.
-
-            // If the platform does not exist in appdef, throw an exception
+            // This ip exists in the queue but not in appdef, add it to appdef.
             if (existingPlatformValue == null) {
                 appdefEntityId =
                     new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_AIIP,
@@ -338,8 +321,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
             try {
                 ipValue = AIConversionUtil.convertAIIpToIp(aiip.getAIIpValue());
                 existingPlatformValue.addIpValue(ipValue);
-                existingPlatformValue 
-                    = pmLocal.updatePlatform(subject, existingPlatformValue);
+                pmLocal.updatePlatform(subject, existingPlatformValue);
 
             } catch (PermissionException e) {
                 throw e;
@@ -391,8 +373,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
             }
 
             try {
-                existingPlatformValue 
-                    = pmLocal.updatePlatform(subject, existingPlatformValue);
+                pmLocal.updatePlatform(subject, existingPlatformValue);
             } catch (PermissionException e) {
                 throw e;
             } catch (Exception e) {
@@ -433,8 +414,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
             _log.info("Calling remove IP...");
             try {
-                existingPlatformValue 
-                    = pmLocal.updatePlatform(subject, existingPlatformValue);
+                pmLocal.updatePlatform(subject, existingPlatformValue);
             } catch (PermissionException e) {
                 throw e;
             } catch (Exception e) {
@@ -462,7 +442,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
         AIPlatform aiplatform;
         AIPlatformValue aiplatformValue;
-        PlatformValue platform;
+        PlatformValue existingPlatformValue;
         ServerValue serverValue = null;
         PageList serverValues;
         AIServerValue aiserverValue;
@@ -473,7 +453,8 @@ public class AIQRV_approve implements AIQResourceVisitor {
         // Get the aiplatform for this server
         aiplatform = aiserver.getAIPlatform();
         aiplatformValue = aiplatform.getAIPlatformValue();
-        platform = getExistingPlatformValue(subject, pmLocal, aiplatformValue);
+        existingPlatformValue = getExistingPlatformValue(subject, pmLocal,
+                                                         aiplatformValue);
 
         int qstat = aiserver.getQueueStatus();
         switch (qstat) {
@@ -502,7 +483,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
             try {
                 // Before we add it, make sure it's not already there...
                 serverValues = smLocal.getServersByPlatform(subject,
-                                                            platform.getId(),
+                                                            existingPlatformValue.getId(),
                                                             false,
                                                             PageControl.PAGE_ALL);
                 for (Iterator i = serverValues.iterator(); i.hasNext(); ) {
@@ -701,15 +682,11 @@ public class AIQRV_approve implements AIQResourceVisitor {
     private PlatformValue getExistingPlatformValue(AuthzSubjectValue subject, 
                                                    PlatformManagerLocal pmLocal,
                                                    AIPlatformValue aiplatform) {
-        if (existingPlatformValue == null) {
-            try {
-                existingPlatformValue =
-                    pmLocal.getPlatformByAIPlatform(subject, aiplatform);
-            } catch (PermissionException e) {
-                throw new SystemException(e);
-            }
+        try {
+            return pmLocal.getPlatformValueByAIPlatform(subject, aiplatform);
+        } catch (PermissionException e) {
+            throw new SystemException(e);
         }
-        return existingPlatformValue;
     }
 
     private static void setCustomProperties(AIPlatform aiplatform,

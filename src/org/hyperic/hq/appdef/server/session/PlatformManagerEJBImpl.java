@@ -597,11 +597,11 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * Get platform by AIPlatform.
+     * Get the PlatformValue object for a platform based on an AIPlatformValue.
      * @ejb:interface-method
      */
-    public PlatformValue getPlatformByAIPlatform(AuthzSubjectValue subject, 
-                                                 AIPlatformValue aiPlatform)
+    public PlatformValue getPlatformValueByAIPlatform(AuthzSubjectValue subject,
+                                                      AIPlatformValue aiPlatform)
         throws PermissionException {
         
         String certdn = aiPlatform.getCertdn();
