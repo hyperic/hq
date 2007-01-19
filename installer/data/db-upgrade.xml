@@ -2801,16 +2801,129 @@ has already been defined.
          <schema-alterColumn table="EAM_VIRTUAL" quoteDefault="f" 
                              column="VERSION_COL" default="0" nullable="NOT NULL"/>   
 
-        <schema-directSQL>
-        <statement desc="drop default value constraint on eam_cprop"
-                   targetDB="postgresql">
-            alter table eam_cprop alter column id drop default
-        </statement>
-        <statement desc="drop default value constraint on eam_cprop"
-                   targetDB="postgresql">
-            alter table eam_fired_trigger alter column id drop default
-        </statement>
+      <schema-directSQL>
+          <statement desc="drop default value constraint on eam_cprop"
+                     targetDB="postgresql">
+              alter table eam_cprop alter column id drop default
+          </statement>
+          <statement desc="drop default value constraint on eam_cprop"
+                     targetDB="postgresql">
+              alter table eam_fired_trigger alter column id drop default
+          </statement>
       </schema-directSQL>
+
+      <schema-directSQL>
+        <statement targetDB="postgresql">
+          CREATE TABLE eam_crispo (
+              id integer NOT NULL,
+              version_col bigint DEFAULT 0 NOT NULL
+          )            
+        </statement>
+        <statement targetDB="postgresql">
+            CREATE TABLE eam_crispo_opt (
+                id integer NOT NULL,
+                version_col bigint DEFAULT 0 NOT NULL,
+                "key" character varying(255) NOT NULL,
+                val character varying(255) NOT NULL,
+                crispo_id integer NOT NULL
+            )
+        </statement>
+        <statement targetDB="postgresql">
+            CREATE TABLE eam_escalation (
+                id integer NOT NULL,
+                version_col bigint DEFAULT 0 NOT NULL,
+                name character varying(200) NOT NULL,
+                description character varying(250),
+                allow_pause boolean NOT NULL,
+                max_wait_time bigint NOT NULL,
+                notify_all boolean NOT NULL,
+                ctime bigint NOT NULL,
+                mtime bigint NOT NULL
+            )          
+        </statement>
+        <statement targetDB="postgresql">
+            CREATE TABLE eam_escalation_action (
+                escalation_id integer NOT NULL,
+                wait_time bigint NOT NULL,
+                action_id integer NOT NULL,
+                idx integer NOT NULL
+            )
+         </statement>
+         <statement targetDB="postgresql">
+            CREATE TABLE eam_exec_strategies (
+                id integer NOT NULL,
+                version_col bigint DEFAULT 0 NOT NULL,
+                def_id integer NOT NULL,
+                config_id integer NOT NULL,
+                partition integer NOT NULL,
+                type_id integer NOT NULL
+            )          
+          </statement>
+          <statement targetDB="postgresql">
+             CREATE TABLE eam_exec_strategy_types (
+                 id integer NOT NULL,
+                 version_col bigint DEFAULT 0 NOT NULL,
+                 type_class character varying(255) NOT NULL
+             )
+          </statement>
+          <statement targetDB="postgresql">
+            CREATE TABLE eam_galert_defs (
+              id integer NOT NULL,
+              version_col bigint DEFAULT 0 NOT NULL,
+              name character varying(255) NOT NULL,
+              descr character varying(255),
+              severity integer,
+              enabled boolean,
+              ctime bigint NOT NULL,
+              mtime bigint NOT NULL,
+              group_id integer NOT NULL,
+              escalation_id integer
+           )
+         </statement>
+         <statement targetDB="postgresql">
+              CREATE TABLE eam_galert_logs (
+                  id integer NOT NULL,
+                  version_col bigint DEFAULT 0 NOT NULL,
+                  "timestamp" bigint NOT NULL,
+                  fixed boolean NOT NULL,
+                  def_id integer NOT NULL,
+                  short_reason character varying(256) NOT NULL,
+                  long_reason character varying(2048) NOT NULL,
+                  partition integer NOT NULL
+              )
+         </statement>
+         <statement targetDB="postgresql">
+             CREATE TABLE eam_gtrigger_types (
+                 id integer NOT NULL,
+                 version_col bigint DEFAULT 0 NOT NULL,
+                 type_class character varying(255) NOT NULL
+             )
+         </statement>
+         <statement targetDB="postgresql">
+             CREATE TABLE eam_gtriggers (
+                 id integer NOT NULL,
+                 version_col bigint DEFAULT 0 NOT NULL,
+                 config_id integer NOT NULL,
+                 type_id integer NOT NULL,
+                 strat_id integer NOT NULL,
+                 lidx integer NOT NULL
+             )
+         </statement>
+         <statement targetDB="postgresql">
+            CREATE TABLE eam_mescalation_state (
+                id integer NOT NULL,
+                version_col bigint DEFAULT 0 NOT NULL,
+                next_action_idx integer NOT NULL,
+                next_action_time bigint NOT NULL,
+                escalation_id integer NOT NULL,
+                alert_type integer NOT NULL,
+                alert_def_id integer NOT NULL,
+                alert_id integer NOT NULL,
+                acknowledged_by integer
+            )
+         </statement>
+      </schema-directSQL>
+    
     </schemaSpec>
 
     <schemaSpec version="3.01">
