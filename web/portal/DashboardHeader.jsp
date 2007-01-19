@@ -41,11 +41,8 @@
     <td width="34%"><fmt:message key="dash.home.PageTitle"/></td>
     <td width="33%"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
     <td width="32%"><html:img page="/images/spacer.gif" width="202" height="32" alt="" border="0"/></td>
-    <td width="1%" nowrap><html:img page="/images/title_pagedown.gif" width="20" height="20" alt="" border="0" hspace="10" onmousedown="toggleMenu('recent');" styleId="recentImg"/><html:link href="" onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/title_pagehelp.gif" width="20" height="20" alt="" border="0" hspace="10"/></html:link>
+    <td width="1%" nowrap><html:link href="" onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/title_pagehelp.gif" width="20" height="20" alt="" border="0" hspace="10"/></html:link>
     <div style="clear: all"></div>
-    <div id="recent" style="position:absolute; display: none; z-index: 300; right: 50px;">
-      <tiles:insert definition=".toolbar.recentResources"/>
-    </div>
     </td>
   </tr>
   <tr>
