@@ -90,32 +90,6 @@
                             <fmt:message key="header.RecentAlerts"/>:
                         </td>
                         <td nowrap style="font-weight:bold;">
-                            <script language="JavaScript1.2">
-      <!--
-      var refreshCount = 0;
-      var autoLogout = true;
-
-      function refreshAlerts() {
-        refreshCount++;
-
-        if (refreshCount < 30) {
-          setTimeout( "refreshAlerts()", 60*1000 );
-        } else if (autoLogout) {
-          top.location.href = "<html:rewrite action="/Logout"/>";
-        }
-
-        new Ajax.Request('<html:rewrite page="/common/RecentAlerts.jsp"/>',
-                         {method: 'get', onSuccess:showRecentAlertResponse,
-                                         onFailure :reportError});
-      }
-
-      function showRecentAlertResponse(originalRequest) {
-        $('recentAlerts').innerHTML = originalRequest.responseText;
-      }
-
-      onloads.push( refreshAlerts );
-      //-->
-      </script>
                             <div id="recentAlerts" style="font-weight:bold;"></div>
                         </td>
                        </tr>
@@ -187,7 +161,12 @@
       }
 
       function showRecentAlertResponse(originalRequest) {
-        $('recentAlerts').innerHTML = originalRequest.responseText;
+        if (originalRequest.responseText.indexOf('recentAlertsText') > 0) {
+          $('recentAlerts').innerHTML = originalRequest.responseText;
+        }
+        else {
+          refreshCount = 30;
+        }
       }
 
       onloads.push( refreshAlerts );
