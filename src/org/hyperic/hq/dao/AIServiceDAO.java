@@ -31,9 +31,6 @@ import org.hyperic.hq.autoinventory.AIService;
  * USA.
  */
 
-/**
- * CRUD, finders, etc for AIService
- */
 public class AIServiceDAO extends HibernateDAO
 {
     public AIServiceDAO(DAOFactory f) {

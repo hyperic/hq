@@ -39,9 +39,6 @@ import org.hyperic.hq.appdef.shared.ServiceClusterValue;
  * USA.
  */
 
-/**
- * CRUD methods
- */
 public class ServiceClusterDAO extends HibernateDAO {
     private static final Log log = LogFactory.getLog(ServiceClusterDAO.class);
 

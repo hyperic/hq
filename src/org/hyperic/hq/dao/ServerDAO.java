@@ -43,9 +43,6 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.Virtual;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 
-/**
- * CRUD methods, finders, etc. for Server
- */
 public class ServerDAO extends HibernateDAO
 {
     public ServerDAO(DAOFactory f) {

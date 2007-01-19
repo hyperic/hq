@@ -31,9 +31,6 @@ import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.dao.HibernateDAO;
 
-/**
- * CRUD methods, finders, etc. for ResourceType
- */
 public class ResourceTypeDAO extends HibernateDAO
 {
     public ResourceTypeDAO(DAOFactory f) {

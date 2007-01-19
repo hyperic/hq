@@ -32,9 +32,6 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.appdef.shared.AgentValue;
 
-/**
- * CRUD methods, finders, etc. for Agent
- */
 public class AgentDAO extends HibernateDAO
 {
     public AgentDAO(DAOFactory f) {

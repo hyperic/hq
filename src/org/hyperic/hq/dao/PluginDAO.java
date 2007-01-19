@@ -28,9 +28,6 @@ import org.hyperic.hq.product.Plugin;
  * USA.
  */
 
-/**
- * CRUD, finders, etc for Plugin
- */
 public class PluginDAO extends HibernateDAO
 {
     public PluginDAO(DAOFactory f) {

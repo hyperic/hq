@@ -30,9 +30,6 @@ import java.util.List;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
-/**
- * CRUD methods, finders, etc. for Baseline
- */
 public class BaselineDAO extends HibernateDAO {
     public BaselineDAO(DAOFactory f) {
         super(Baseline.class, f);

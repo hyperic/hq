@@ -32,9 +32,6 @@ import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
  * USA.
  */
 
-/**
- * CRUD, finders, etc for ApplicationType
- */
 public class ApplicationTypeDAO extends HibernateDAO
 {
     private static final Log log = LogFactory.getLog(ApplicationTypeDAO.class);

@@ -31,9 +31,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 
 import java.util.Collection;
 
-/**
- * CRUD methods, finders, etc. for ScheduleRevNum
- */
 public class ScheduleRevNumDAO extends HibernateDAO {
     public ScheduleRevNumDAO(DAOFactory f) {
         super(ScheduleRevNum.class, f);

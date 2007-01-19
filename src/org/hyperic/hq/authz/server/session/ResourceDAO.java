@@ -44,9 +44,6 @@ import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hibernate.Query;
 
-/**
- * CRUD methods, finders, etc. for Resource
- */
 public class ResourceDAO extends HibernateDAO
 {
     Log log = LogFactory.getLog(ResourceDAO.class);

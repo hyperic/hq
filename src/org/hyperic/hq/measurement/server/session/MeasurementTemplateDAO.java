@@ -38,9 +38,6 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateLiteValue;
 import org.hyperic.hq.product.MeasurementInfo;
 
-/**
- * CRUD methods, finders, etc. for MeasurementTemplate
- */
 public class MeasurementTemplateDAO extends HibernateDAO {
     private final static Log log =
         LogFactory.getLog(MeasurementTemplateDAO.class);

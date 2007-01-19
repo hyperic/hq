@@ -35,9 +35,6 @@ import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.dao.HibernateDAO;
 
-/**
- * CRUD methods, finders, etc. for Role
- */
 public class RoleDAO extends HibernateDAO {
     public RoleDAO(DAOFactory f) {
         super(Role.class, f);

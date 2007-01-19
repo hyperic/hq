@@ -40,9 +40,6 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
-/**
- * CRUD methods, finders, etc. for AuthzSubject
- */
 public class AuthzSubjectDAO extends HibernateDAO
 {
     public AuthzSubjectDAO(DAOFactory f) {

@@ -38,9 +38,6 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hibernate.Query;
 
-/**
- * CRUD methods, finders, etc. for DerivedMeasurement
- */
 public class DerivedMeasurementDAO extends HibernateDAO {
     public DerivedMeasurementDAO(DAOFactory f) {
         super(DerivedMeasurement.class, f);

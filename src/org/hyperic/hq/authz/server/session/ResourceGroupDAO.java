@@ -34,9 +34,6 @@ import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.dao.DAOFactory;
 
-/**
- * CRUD methods, finders, etc. for Resource
- */
 public class ResourceGroupDAO extends HibernateDAO
 {
     public ResourceGroupDAO(DAOFactory f) {

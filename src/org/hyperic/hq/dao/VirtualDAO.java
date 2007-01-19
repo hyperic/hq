@@ -32,9 +32,6 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.Virtual;
 import org.hyperic.hq.authz.shared.ResourceValue;
 
-/**
- * CRUD methods, finders, etc. for Virtual
- */
 public class VirtualDAO extends HibernateDAO {
     public VirtualDAO(DAOFactory f) {
         super(Virtual.class, f);

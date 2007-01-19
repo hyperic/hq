@@ -37,9 +37,6 @@ import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hibernate.Query;
 
-/**
- * CRUD methods, finders, etc. for RawMeasurement
- */
 public class RawMeasurementDAO extends HibernateDAO {
     public RawMeasurementDAO(DAOFactory f) {
         super(RawMeasurement.class, f);

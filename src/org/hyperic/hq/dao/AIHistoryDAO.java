@@ -33,9 +33,6 @@ import org.hyperic.hq.autoinventory.ScanConfigurationCore;
  * USA.
  */
 
-/**
- * CRUD, finders, etc for AIHistory
- */
 public class AIHistoryDAO extends HibernateDAO
 {
     public AIHistoryDAO(DAOFactory f) {

@@ -42,9 +42,6 @@ import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.DependencyNode;
 import org.hyperic.hq.appdef.shared.DependencyTree;
 
-/**
- * CRUD methods, finders, etc. for Application
- */
 public class ApplicationDAO extends HibernateDAO
 {
     private static final Log log = LogFactory.getLog(ApplicationDAO.class);

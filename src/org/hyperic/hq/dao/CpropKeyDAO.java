@@ -30,9 +30,6 @@ import java.util.Collection;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.CpropKey;
 
-/**
- * CRUD methods, finders, etc. for CpropKey
- */
 public class CpropKeyDAO extends HibernateDAO
 {
     public CpropKeyDAO(DAOFactory f) {

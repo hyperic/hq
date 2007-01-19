@@ -30,9 +30,6 @@ import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 
-/**
- * CRUD methods, finders, etc. for ConfigResponseDAO
- */
 public class ConfigResponseDAO extends HibernateDAO
 { 
     public ConfigResponseDAO(DAOFactory f) {

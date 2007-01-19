@@ -37,9 +37,6 @@ import org.hyperic.hq.appdef.server.session.Service;
  * USA.
  */
 
-/**
- * CRUD, finders, etc for AppService
- */
 public class AppServiceDAO extends HibernateDAO
 {
     private static final Log log = LogFactory.getLog(ServiceClusterDAO.class);

@@ -28,9 +28,6 @@ package org.hyperic.hq.dao;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.Cprop;
 
-/**
- * CRUD methods, finders, etc. for Cprop
- */
 public class CpropDAO extends HibernateDAO
 {
     public CpropDAO(DAOFactory f) {
