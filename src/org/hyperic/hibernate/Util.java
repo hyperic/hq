@@ -57,8 +57,14 @@ import org.hibernate.engine.SessionFactoryImplementor;
 import org.hyperic.hq.common.DiagnosticThread;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.product.server.MBeanUtil;
+import org.hyperic.util.PrintfFormat;
+import org.hyperic.util.StringUtil;
 
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Properties;
 import java.util.Iterator;
 
@@ -116,28 +122,64 @@ public class Util {
 
         // Add ehcache statistics to the diagnostics
         DiagnosticObject cacheDiagnostics = new DiagnosticObject() {
-            public String getStatus() {
+            private PrintfFormat _fmt = 
+                new PrintfFormat("%-50s %-6d %-6d %-6d %6d");
+            private PrintfFormat _hdr = 
+                new PrintfFormat("%-50s %-6s %-6s %-6s %6s");
+            
+
+            private List getSortedCaches() {
                 CacheManager cacheManager = CacheManager.getInstance();
                 String[] caches = cacheManager.getCacheNames();
+                List res = new ArrayList(caches.length);
+                
+                for (int i=0; i<caches.length; i++) {
+                    res.add(cacheManager.getCache(caches[i]));
+                }
+                
+                Collections.sort(res, new Comparator() {
+                    public int compare(Object o1, Object o2) {
+                        Cache c1 = (Cache)o1;
+                        Cache c2 = (Cache)o2;
 
+                        return c1.getName().compareTo(c2.getName());
+                    }
+                });
+                return res;
+            }
+            
+            public String getStatus() {
                 String separator = System.getProperty("line.separator");
                 long totalBytes = 0;
-                StringBuffer buf = new StringBuffer();
-                for (int i = 0; i < caches.length; i++) {
-                    Cache cache = cacheManager.getCache(caches[i]);
+                StringBuffer buf = new StringBuffer(separator);
+                Object[] fmtArgs = new Object[5];
+
+                fmtArgs[0] = "Cache";
+                fmtArgs[1] = "Size";
+                fmtArgs[2] = "Bytes";
+                fmtArgs[3] = "Hits";
+                fmtArgs[4] = "Misses";
+                buf.append(_hdr.sprintf(fmtArgs))
+                   .append(separator);
+                fmtArgs[0] = "=====";
+                fmtArgs[1] = "====";
+                fmtArgs[2] = "=====";
+                fmtArgs[3] = "====";
+                fmtArgs[4] = "=====";
+                buf.append(_hdr.sprintf(fmtArgs));
+
+                for (Iterator i=getSortedCaches().iterator(); i.hasNext(); ) {
+                    Cache cache = (Cache)i.next();
 
                     totalBytes += cache.calculateInMemorySize();
+                    fmtArgs[0] = StringUtil.dotProximate(cache.getName(), 50);
+                    fmtArgs[1] = new Integer(cache.getSize());
+                    fmtArgs[2] = new Long(cache.calculateInMemorySize());
+                    fmtArgs[3] = new Integer(cache.getHitCount());
+                    fmtArgs[4] = new Integer(cache.getMissCountNotFound());
+                            
                     buf.append(separator)
-                        .append("Cache: ")
-                        .append(cache.getName())
-                        .append(" elements=")
-                        .append(cache.getSize())
-                        .append(" (")
-                        .append(cache.calculateInMemorySize())
-                        .append(" bytes) hits=")
-                        .append(cache.getHitCount())
-                        .append(" misses=")
-                        .append(cache.getMissCountNotFound());
+                       .append(_fmt.sprintf(fmtArgs));
                 }
                 buf.append(separator).
                     append("Total mapped cache size=").
