@@ -563,7 +563,7 @@ public class ResourceGroupManagerEJBImpl
 
         while (it != null && it.hasNext()) {
             Role role = (Role)it.next();
-            role.getResourceGroups().add(groupLocal);
+            groupLocal.addRole(role);
         }
     }
 
@@ -588,8 +588,7 @@ public class ResourceGroupManagerEJBImpl
 
         while (it != null && it.hasNext()) {
             Role role = (Role)it.next();
-//            role.setWhoami(this.lookupSubject(whoami));
-            role.getResourceGroups().remove(groupLocal);
+            groupLocal.removeRole(role);
         }
     }
 

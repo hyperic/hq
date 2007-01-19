@@ -46,7 +46,6 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
-import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSession;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectDAO;
@@ -503,7 +502,10 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         pm.check(whoami.getId(), roleLocal.getResource().getResourceType(),
                  roleLocal.getId(), AuthzConstants.roleOpModifyRole);
 
-        roleLocal.getResourceGroups().addAll(sLocals);
+        for (Iterator it = sLocals.iterator(); it.hasNext(); ) {
+            ResourceGroup group = (ResourceGroup) it.next();
+            group.addRole(roleLocal);
+        }
     }
 
     /**
@@ -524,9 +526,9 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
 //        roleLocal.setWhoami(lookupSubject(whoami));
         HashSet sLocals = new HashSet(ids.length);
         for (int i=0; i<ids.length; i++) {
-            sLocals.add(lookupGroup(ids[i]));
+            ResourceGroup group = lookupGroup(ids[i]);
+            group.addRole(roleLocal);
         }
-        roleLocal.getResourceGroups().addAll(sLocals);
     }
 
     /**
@@ -545,7 +547,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         ResourceGroup group = lookupGroup(gid);
         for (int i = 0; i < ids.length; i++) {
             Role roleLocal = lookupRole(ids[i]);
-            roleLocal.getResourceGroups().add(group);
+            group.addRole(roleLocal);
         }
     }
 
@@ -571,7 +573,10 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         pm.check(whoami.getId(), roleLocal.getResource().getResourceType(),
                  roleLocal.getId(), AuthzConstants.roleOpModifyRole);
 
-        roleLocal.getResourceGroups().removeAll(sLocals);
+        for (Iterator it = sLocals.iterator(); it.hasNext(); ) {
+            ResourceGroup group = (ResourceGroup) it.next();
+            group.removeRole(roleLocal);
+        }
     }
 
     /**
@@ -594,11 +599,10 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         pm.check(whoami.getId(), roleLocal.getResource().getResourceType(),
                  roleLocal.getId(), AuthzConstants.roleOpModifyRole);
 
-        HashSet sLocals = new HashSet(ids.length);
         for (int i=0; i<ids.length; i++) {
-            sLocals.add(lookupGroup(ids[i]));
+            ResourceGroup group = lookupGroup(ids[i]);
+            group.removeRole(roleLocal);
         }
-        roleLocal.getResourceGroups().removeAll(sLocals);
     }
 
     /**
@@ -623,10 +627,11 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
             PermissionManager pm = PermissionManagerFactory.getInstance();
             
             pm.check(whoami.getId(),
-                     roleLocal.getResource().getResourceType(), roleLocal.getId(),
+                     roleLocal.getResource().getResourceType(),
+                     roleLocal.getId(),
                      AuthzConstants.roleOpModifyRole);
 
-            roleLocal.getResourceGroups().remove(group);
+            group.removeRole(roleLocal);
         }
     }
 
@@ -649,7 +654,11 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         pm.check(whoami.getId(), roleLocal.getResource().getResourceType(),
                  roleLocal.getId(), AuthzConstants.roleOpModifyRole);
 
-        roleLocal.getResourceGroups().clear();
+        for (Iterator it = roleLocal.getResourceGroups().iterator();
+             it.hasNext(); ) {
+            ResourceGroup group = (ResourceGroup) it.next();
+            group.removeRole(roleLocal);
+        }
     }
 
     /**
@@ -1034,9 +1043,8 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         AuthzSubject subjectLocal = lookupSubject(subject);
 
         while (it != null && it.hasNext()) {
-            Role role = (Role)it.next();
-//            role.setWhoami(lookupSubject(whoami));
-            role.getSubjects().add(subjectLocal);
+            Role role = (Role) it.next();
+            subjectLocal.addRole(role);
         }
     }
 
@@ -1059,7 +1067,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         while (it != null && it.hasNext()) {
             Role role = (Role)it.next();
 //            role.setWhoami(lookupSubject(whoami));
-            role.getSubjects().remove(subjectLocal);
+            subjectLocal.removeRole(role);
         }
     }
 
@@ -1137,9 +1145,8 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
 
     /**
      * Get the roles for a subject
-     * @ejb:interface-method
      */
-    public Collection getRoleEJBs(AuthzSubjectValue subjectValue)
+    private Collection getRoles(AuthzSubjectValue subjectValue)
         throws PermissionException
     {
         AuthzSubject subjectLocal = lookupSubject(subjectValue);
@@ -1161,7 +1168,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      */
     public List getRoles(AuthzSubjectValue subjectValue, PageControl pc)
         throws NamingException, PermissionException {
-        Collection roles = getRoleEJBs(subjectValue);
+        Collection roles = getRoles(subjectValue);
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
         return rolePager.seek(roles, pc.getPagenum(), pc.getPagesize()); 
     }
@@ -1177,7 +1184,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      */
     public List getOwnedRoles(AuthzSubjectValue subjectValue, PageControl pc) 
         throws PermissionException, NamingException {
-        Collection roles = getRoleEJBs(subjectValue);
+        Collection roles = getRoles(subjectValue);
         pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
         return ownedRolePager.seek(roles, pc.getPagenum(), pc.getPagesize()); 
     }
@@ -1665,7 +1672,10 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         Set sLocals = toPojos(subjects);
         Role roleLocal = lookupRole(role);
 //        roleLocal.setWhoami(lookupSubject(whoami));
-        roleLocal.getSubjects().addAll(sLocals);
+        for (Iterator it = sLocals.iterator(); it.hasNext(); ) {
+            AuthzSubject subj = (AuthzSubject) it.next();
+            subj.addRole(roleLocal);
+        }
     }
     
     /** Add subjects to this role.
@@ -1681,30 +1691,9 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
                             Integer[] ids)
         throws PermissionException {
         Role roleLocal = lookupRole(role);
-//        roleLocal.setWhoami(lookupSubject(whoami));
-        HashSet sLocals = new HashSet(ids.length);
-        for (int i=0; i<ids.length; i++) {
-            sLocals.add(lookupSubject(ids[i]));
+        for (int i = 0; i < ids.length; i++) {
+            lookupSubject(ids[i]).addRole(roleLocal);
         }
-        roleLocal.getSubjects().addAll(sLocals);
-    }
-    
-    /** List the subjects in this role.
-     * @param whoami The current running user.
-     * @param role This role.
-     * @return Array of subjects in this role.
-     * @throws PermissionException whoami is not allowed to perform
-     * listSubjects on this role.
-     * @deprecated this method is only used by the unit tests
-     * @ejb:interface-method
-     */
-    public AuthzSubjectValue[] getSubjects(AuthzSubjectValue whoami, 
-                                           RoleValue roleValue)
-        throws PermissionException {
-        Role roleLocal = lookupRole(roleValue);
-        /** NOTE NO PERMISSION CHECK **/
-        return (AuthzSubjectValue[])
-            fromLocals(roleLocal.getSubjects(), AuthzSubjectValue.class);
     }
     
     /** 
@@ -1897,7 +1886,10 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         Set sLocals = toPojos(subjects);
         Role roleLocal = lookupRole(role);
 //        roleLocal.setWhoami(lookupSubject(whoami));
-        roleLocal.getSubjects().removeAll(sLocals);
+        for (Iterator it = sLocals.iterator(); it.hasNext(); ) {
+            AuthzSubject subj = (AuthzSubject) it.next();
+            subj.removeRole(roleLocal);
+        }
     }
     
     /** Remove subjects from this role.
@@ -1913,12 +1905,10 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
                                Integer[] ids)
         throws PermissionException {
         Role roleLocal = lookupRole(role);
-//        roleLocal.setWhoami(lookupSubject(whoami));
-        HashSet sLocals = new HashSet(ids.length);
         for (int i=0; i<ids.length; i++) {
-            sLocals.add(lookupSubject(ids[i]));
+            AuthzSubject subj = lookupSubject(ids[i]);
+            subj.removeRole(roleLocal);
         }
-        roleLocal.getSubjects().removeAll(sLocals);
     }
     
     /** Remove all subjects from this role.
@@ -1931,8 +1921,10 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
     public void removeAllSubjects(AuthzSubjectValue whoami, RoleValue role)
         throws PermissionException {
         Role roleLocal = lookupRole(role);
-//        roleLocal.setWhoami(lookupSubject(whoami));
-        roleLocal.getSubjects().clear();
+        for (Iterator it = roleLocal.getSubjects().iterator(); it.hasNext(); ) {
+            AuthzSubject subj = (AuthzSubject) it.next();
+            subj.removeRole(roleLocal);
+        }
     }
     
     /** Set the subjects in this role.
