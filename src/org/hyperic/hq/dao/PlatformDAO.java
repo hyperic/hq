@@ -44,10 +44,8 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.Virtual;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 
-/**
- * CRUD methods, finders, etc. for Platform
- */
 public class PlatformDAO extends HibernateDAO {
+
     public PlatformDAO(DAOFactory f) {
         super(Platform.class, f);
     }
@@ -220,15 +218,6 @@ public class PlatformDAO extends HibernateDAO {
             .list();
     }
 
-    public Platform findByServerId(Integer id)
-    {
-        String sql = "select platform from Server s where s.id=?";
-        return (Platform)getSession()
-            .createQuery(sql)
-            .setInteger(0, id.intValue())
-            .uniqueResult();
-    }
-
     public List findByServers(Integer[] ids)
     {
         return createCriteria()
@@ -250,11 +239,6 @@ public class PlatformDAO extends HibernateDAO {
             .uniqueResult();
     }
 
-    /**
-     * legacy EJB finder
-     * @param dn
-     * @return
-     */
     public Platform findByCertDN(String dn)
     {
         String sql = "from Platform where certdn = ?";
