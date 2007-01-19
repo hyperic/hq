@@ -28,93 +28,72 @@ package org.hyperic.hq.autoinventory;
 import org.hyperic.hq.appdef.IpBase;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 
-/**
- * Pojo for hibernate hbm mapping file
- */
 public class AIIp extends IpBase
 {
-    private AIPlatform aIPlatform;
-    private Integer queueStatus;
-    private long diff;
-    private boolean ignored;
+    private AIPlatform _aIPlatform;
+    private Integer _queueStatus;
+    private long _diff;
+    private boolean _ignored;
 
-    /**
-     * default constructor
-     */
-    public AIIp()
-    {
+    public AIIp() {
         super();
     }
 
-    public AIIp(AIIpValue ipv)
-    {
+    public AIIp(AIIpValue ipv) {
         super();
         setAIIpValue(ipv);
     }
 
-    public AIPlatform getAIPlatform()
-    {
-        return this.aIPlatform;
+    public AIPlatform getAIPlatform() {
+        return _aIPlatform;
     }
 
-    public void setAIPlatform(AIPlatform aIPlatform)
-    {
-        this.aIPlatform = aIPlatform;
+    public void setAIPlatform(AIPlatform aIPlatform) {
+        _aIPlatform = aIPlatform;
     }
 
-    public int getQueueStatus()
-    {
-        return queueStatus != null ? queueStatus.intValue() : 0;
+    public int getQueueStatus() {
+        return _queueStatus != null ? _queueStatus.intValue() : 0;
     }
 
-    public void setQueueStatus(Integer queueStatus)
-    {
-        this.queueStatus = queueStatus;
+    public void setQueueStatus(Integer queueStatus) {
+        _queueStatus = queueStatus;
     }
 
     /**
      * @deprecated use setQueueStatus(Integer)
-     * @param queueStatus
      */
-    public void setQueueStatus(int queueStatus)
-    {
+    public void setQueueStatus(int queueStatus) {
         setQueueStatus(new Integer(queueStatus));
     }
 
-    public long getDiff()
-    {
-        return this.diff;
+    public long getDiff() {
+        return _diff;
     }
 
-    public void setDiff(long diff)
-    {
-        this.diff = diff;
+    public void setDiff(long diff) {
+        _diff = diff;
     }
 
-    public boolean isIgnored()
-    {
-        return this.ignored;
+    public boolean isIgnored() {
+        return _ignored;
     }
 
     /**
      * @deprecated use isIgnored()
-     * @return
      */
-    public boolean getIgnored()
-    {
+    public boolean getIgnored() {
         return isIgnored();
     }
 
-    public void setIgnored(boolean ignored)
-    {
-        this.ignored = ignored;
+    public void setIgnored(boolean ignored) {
+        _ignored = ignored;
     }
 
     private AIIpValue aIIpValue = new AIIpValue();
     /**
      * legacy EJB DTO pattern
      * @deprecated use (this) AIIp object instead
-     * @return
      */
     public AIIpValue getAIIpValue()
     {
@@ -132,34 +111,31 @@ public class AIIp extends IpBase
 
     /**
      * @deprecated
-     * @param valueHolder
      */
-    public void setAIIpValue(AIIpValue valueHolder)
-    {
-        setQueueStatus( valueHolder.getQueueStatus() );
-        setDiff( valueHolder.getDiff() );
-        setIgnored( valueHolder.getIgnored() );
-        setAddress( valueHolder.getAddress() );
-        setMACAddress( valueHolder.getMACAddress() );
-        setNetmask( valueHolder.getNetmask() );
+    public void setAIIpValue(AIIpValue valueHolder) {
+        setQueueStatus(valueHolder.getQueueStatus() );
+        setDiff(valueHolder.getDiff());
+        setIgnored(valueHolder.getIgnored());
+        setAddress(valueHolder.getAddress());
+        setMACAddress(valueHolder.getMACAddress());
+        setNetmask(valueHolder.getNetmask());
     }
 
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         if (!(obj instanceof AIIp) || !super.equals(obj)) {
             return false;
         }
         AIIp o = (AIIp) obj;
-        return ((aIPlatform == o.getAIPlatform()) ||
-                (aIPlatform != null && o.getAIPlatform() != null &&
-                 aIPlatform.equals(o.getAIPlatform())));
+        return ((_aIPlatform == o.getAIPlatform()) ||
+                (_aIPlatform != null && o.getAIPlatform() != null &&
+                 _aIPlatform.equals(o.getAIPlatform())));
     }
 
     public int hashCode()
     {
         int result = super.hashCode();
 
-        result = 37*result + (aIPlatform != null ? aIPlatform.hashCode() : 0);
+        result = 37*result + (_aIPlatform != null ? _aIPlatform.hashCode() : 0);
 
         return result;
     }

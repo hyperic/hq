@@ -28,18 +28,11 @@ package org.hyperic.hq.appdef;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.IpValue;
 
-/**
- *
- */
 public class Ip extends IpBase
 {
-    private Platform platform;
+    private Platform _platform;
 
-    /**
-     * default constructor
-     */
-    public Ip()
-    {
+    public Ip() {
         super();
     }
 
@@ -49,32 +42,28 @@ public class Ip extends IpBase
         setMACAddress(ipv.getMACAddress());
     }
 
-    public Platform getPlatform()
-    {
-        return this.platform;
+    public Platform getPlatform() {
+        return _platform;
     }
 
-    public void setPlatform(Platform platform)
-    {
-        this.platform = platform;
+    public void setPlatform(Platform platform) {
+        _platform = platform;
     }
 
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         if (!(obj instanceof Ip) || !super.equals(obj)) {
             return false;
         }
         Ip o = (Ip) obj;
-        return ((platform == o.getPlatform()) ||
-                (platform != null && o.getPlatform() != null &&
-                 platform.equals(o.getPlatform())));
+        return ((_platform == o.getPlatform()) ||
+                (_platform != null && o.getPlatform() != null &&
+                 _platform.equals(o.getPlatform())));
     }
 
-    public int hashCode()
-    {
+    public int hashCode() {
         int result = super.hashCode();
 
-        result = 37*result + (platform != null ? platform.hashCode() : 0);
+        result = 37*result + (_platform != null ? _platform.hashCode() : 0);
 
         return result;
     }
