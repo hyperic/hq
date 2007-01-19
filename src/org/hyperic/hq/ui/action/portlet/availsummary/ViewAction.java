@@ -200,6 +200,10 @@ public class ViewAction extends BaseAction {
             AvailSummary s2 = (AvailSummary)o2;
 
             if (s1.getAvailPercentage() == s2.getAvailPercentage()) {
+                // Sort on the actual number
+                if (s1.getNumDown() != s2.getNumDown()) {
+                    return s1.getNumDown() < s2.getNumDown() ? 1 : -1;
+                }
                 // Sort on type name if equal avail percentage
                 return s1.getTypeName().compareTo(s2.getTypeName());
             } else if (s1.getAvailPercentage() < s2.getAvailPercentage()) {
