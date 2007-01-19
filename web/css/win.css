@@ -656,17 +656,17 @@ ul.boxy li {
 }
 
 .dialog_nw {
-  width: 9px;
-  height: 23px;
+  width: 2px;
+  height: 1px;
 }
 
 .dialog_n {
-  height: 23px;
+  height: 1px;
 }
 
 .dialog_ne {
-  width: 9px;
-  height: 23px;
+  width: 2px;
+  height: 1px;
 }
 
 .dialog_e {
@@ -746,6 +746,10 @@ ul.boxy li {
   font-family: Tahoma, Arial, sans-serif;
   font-size: 10px;
   background-color: #eee;
+}
+
+.dialog_buttons {
+  padding: 4px;
 }
 
 .top_draggable, .bottom_draggable {
