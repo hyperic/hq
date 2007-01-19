@@ -138,6 +138,7 @@ function showViewEscResponse(originalRequest) {
       var td3 = document.createElement('td');
       var td4 = document.createElement('td');
       var td5 = document.createElement('td');
+      var td6 = document.createElement('td');
       var select1 = document.createElement("select");
       var select2 = document.createElement("select");
       var select3 = document.createElement("select");
@@ -162,7 +163,7 @@ function showViewEscResponse(originalRequest) {
       viewLi.setAttribute('id','row_'+ liID);
       $('row_'+ liID).style.margin = "0px";
       $('row_'+ liID).style.padding = "0px";
-      $('row_'+ liID).style.cursor = "move;";
+      //$('row_'+ liID).style.cursor = "move;";
 
       viewLi.appendChild(remDiv);
       remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
@@ -173,13 +174,19 @@ function showViewEscResponse(originalRequest) {
       escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
       escTable.setAttribute('id','escTbl_'+ liID);
       escTable.setAttribute('border', '0');
-      escTable.setAttribute('cellspacing','4');
+      escTable.setAttribute('cellpadding','4');
 
       escTable.appendChild(escTableBody);
-  
+      escTableBody.appendChild(escTrHeader);
       escTableBody.appendChild(escTr2);
       escTableBody.appendChild(escTr1);
-  
+
+      escTrHeader.appendChild(td6)
+      td6.setAttribute('colspan', '3');
+      td6.style.cursor = "move;";
+      td6.setAttribute((document.all ? 'className' : 'class'), "ToolbarContent");
+      td6.innerHTML = '<html:img page="/images/esc_movUp.gif" height="16" width="12" border="0"  alt="" />' + '&nbsp;&nbsp;<span style="color:#062b7a;font-weight:bold;">Drag to reorder escalation actions</span>';
+
       escTr1.appendChild(td1);
   
       //td1.setAttribute('colspan', '3');
