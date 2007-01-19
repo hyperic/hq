@@ -516,13 +516,14 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * Get all platforms.
+     * Get platforms created within a given time range.
      * @ejb:interface-method
      * @param subject The subject trying to list platforms.
-     * @param pc a PageControl object which determines the size of the page and
-     * the sorting, if any.
+     * @param range The range in milliseconds.
+     * @param size The number of platforms to return.
      * @return A List of PlatformValue objects representing all of the
-     * platforms that the given subject is allowed to view.
+     * platforms that the given subject is allowed to view that were created
+     * within the given range.
      */
     public PageList getRecentPlatforms(AuthzSubjectValue subject,
                                        long range, int size)
