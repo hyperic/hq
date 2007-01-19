@@ -31,7 +31,7 @@
 <% response.setHeader("Cache-Control","no-store");%>
 <% response.setDateHeader("Expires",-1);%>
 <hq:recentAlerts var="recentAlerts" sizeVar="recentAlertsSize" maxAlerts="2"/>
-  <table><tr><td nowrap="true">
+  <table id="recentAlertsText"><tr><td nowrap="true">
 <c:choose>
   <c:when test="${recentAlertsSize > 0}">
     <ul class="boxy">
