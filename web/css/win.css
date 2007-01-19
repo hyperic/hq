@@ -945,7 +945,8 @@ border-bottom:1px solid #D5D8DE;
 
 .remove {
   float:right;
-  margin-right:10px;
+  margin-right:5px;
+  margin-left:5px;
   margin-top:15px;
 }
 
@@ -994,8 +995,8 @@ border-left:1px solid #D5D8DE;
 }
 
 #narrowList_true .BlockTitle{
- background-color:#b7b7b7;
- color: #0d86ff;
+ background-color:#868787;
+ color: #ffffff;
  font-weight: bold;
 }
 
