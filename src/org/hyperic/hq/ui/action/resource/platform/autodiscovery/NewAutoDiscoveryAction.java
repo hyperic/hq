@@ -108,15 +108,10 @@ public class NewAutoDiscoveryAction extends BaseAction {
 
             ServletContext ctx = getServlet().getServletContext();
             AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
-            AIBoss aiBoss = ContextUtils.getAIBoss(ctx);
             int sessionId = RequestUtils.getSessionIdInt(request);
             
             PlatformValue pValue =
                 appdefBoss.findPlatformById(sessionId, platformId);
-            ScanStateCore ssc =
-                aiBoss.getScanStatus(sessionId,
-                                     pValue.getId().intValue());
-            
             buildAutoDiscoveryScan(request, newForm, pValue, errors); 
 
             return returnNew(request, mapping, forwardParams);
