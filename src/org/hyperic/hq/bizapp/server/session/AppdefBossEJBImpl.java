@@ -792,41 +792,6 @@ public class AppdefBossEJBImpl
                                                                pc);
     }
 
-    /**
-     * Find all viewable resources of a type
-     *
-     * @return A list of ServerValue objects.
-     * @ejb:interface-method
-     */
-    public List findResourcesByType(int sessionID, AppdefEntityTypeID typeId)
-        throws SessionTimeoutException, SessionNotFoundException,
-               PermissionException 
-    {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-        List resources;
-        switch (typeId.getType()) {
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                resources = this.getPlatformManager()
-                                .findPlatformsByType(subject, typeId.getId(),
-                                                     PageControl.PAGE_ALL);
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                resources = this.getServerManager()
-                                .getServersByType(subject, typeId.getId());
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                resources = this.getServiceManager()
-                                .getServicesByType(subject, typeId.getId());
-            default:
-                resources = new ArrayList(0);
-                break;
-        }
-        
-        // Add the group resources of this type
-        
-        return resources;
-    }
-
     private PageList findServers(int sessionID, int findByType,
                                  Integer typeId, PageControl pc)
         throws AppdefEntityNotFoundException,
