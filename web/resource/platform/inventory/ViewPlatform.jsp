@@ -93,7 +93,7 @@ var pageData = new Array();
 
 <html:form action="/resource/platform/inventory/RemoveServers">
 
-<c:set var="svrAction" value="${selfAction}"/>
+<c:set var="svrAction" value="${selfAction}&accord=2"/>
 <c:if test="${not empty param.fs}">
   <c:set var="svrAction" value="${svrAction}&fs=${param.fs}"/>
 </c:if>
@@ -139,7 +139,7 @@ var pageData = new Array();
 
 </div>
 </div>
-<c:set var="svcAction" value="${selfAction}"/>
+<c:set var="svcAction" value="${selfAction}&accord=3"/>
 <c:if test="${not empty param.fs}">
   <c:set var="svcAction" value="${svcAction}&fs=${param.fs}"/>
 </c:if>
