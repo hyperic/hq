@@ -106,6 +106,7 @@ function showEscRows(originalRequest) {
 
     var td2 = document.createElement("td");
     td2.setAttribute('class', 'ListCell');
+    td2.setAttribute('title', 'click scheme name to edit')
     if (schemes[i].id == '<c:out value="${param.escId}"/>') {
       td2.innerHTML = '<html:img page="/images/icon_right_arrow.gif" border="0" width="10" height="10" style="padding-right:5px;"/>' + '<b>' + schemes[i].name + '</b>';
       td2.setAttribute('style', 'background-color: #dbe3f5');
