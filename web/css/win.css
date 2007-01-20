@@ -940,11 +940,28 @@ border-bottom:1px solid #D5D8DE;
   background-color:#F2F4F7;
 }
 
+#escPropertiesTable #name {
+ border: 1px solid #c6cfe5;
+ background-color:#dbe3f5;
+}
+
+.escListArrow {
+ display:none;
+ padding: 3px; border-bottom: solid #D5D8DE; border-width: 1px;
+}
+
+.selectedHighlight {
+padding: 3px;
+border-bottom: solid #D5D8DE;
+border-width: 1px;
+text-align: right;
+background-color: #dbe3f5
+}
 .escTbl {
   width:100%;
   margin-top:10px;
   margin-bottom:10px;
-     cursor:move;
+  cursor:move;
 }
 
 .remove {
@@ -952,6 +969,7 @@ border-bottom:1px solid #D5D8DE;
   margin-right:5px;
   margin-left:5px;
   margin-top:15px;
+  cursor:pointer;
 }
 
 .escInput {
@@ -974,12 +992,18 @@ border-bottom:1px solid #D5D8DE;
 .td2 {
  padding:5px 0px 10px 20px;
  width:20%;
+ cursor:pointer;
 }
 
 .td3 {
  width:20%;
  padding-right:20px;
  padding-top:5px;
+ cursor:pointer;
+}
+
+.waitTd {
+ cursor:pointer;
 }
 
 .portletLRBotBorder {

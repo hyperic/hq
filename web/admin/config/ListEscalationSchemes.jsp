@@ -31,7 +31,14 @@
  --%>
 
 <tiles:insert page="/admin/config/AdminHomeNav.jsp"/>
+<script type="text/Javascript">
+    function changeHighlight(elem) {
+           elem.previousSibling.style.display = "";
+           elem.parentNode.style.backgroundColor = "#dbe3f5";
+           elem.parentNode.nextSibling.style.backgroundColor = "#dbe3f5";
 
+        }
+</script>
 <table width="100%" cellpadding="0" cellspacing="10">
 <tr>
 <td width="30%" valign="top">
@@ -41,8 +48,14 @@
     <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #D5D8DE";>
     <thead>
     <tr>
-      <td class="BlockTitle"><fmt:message key="common.header.EscalationName"/></td>
-      <td class="BlockTitle" style="text-align: right;"><html:link page="/admin/config/Config.do?mode=escalate"><html:img src="/images/tbb_new.gif" border="0"/></html:link></td>
+          <td colspan="2">
+                <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                    <tr>
+                        <td class="BlockTitle"><fmt:message key="common.header.EscalationName"/></td>
+                        <td class="BlockTitle" style="text-align: right;"><html:link page="/admin/config/Config.do?mode=escalate"><html:img src="/images/tbb_new.gif" border="0"/></html:link></td>
+                </tr>
+            </table>
+        </td>
     </tr>
     </thead>
     <tbody id="escalations"></tbody>
@@ -90,13 +103,15 @@ function showEscRows(originalRequest) {
       tr.setAttribute((document.all ? 'className' : 'class'), "tableRowOdd");
     }
 
+
     var td2 = document.createElement("td");
     td2.setAttribute('class', 'ListCell');
     if (schemes[i].id == '<c:out value="${param.escId}"/>') {
-      td2.innerHTML = schemes[i].name;
+      td2.innerHTML = '<html:img page="/images/icon_right_arrow.gif" border="0" width="10" height="10" style="padding-right:5px;"/>' + '<b>' + schemes[i].name + '</b>';
+      td2.setAttribute('style', 'background-color: #dbe3f5');
     }
     else {
-      td2.innerHTML = '<a href="<html:rewrite page="/admin/config/Config.do?mode=escalate&escId="/>' + schemes[i].id + '">' + schemes[i].name + '</a>';
+      td2.innerHTML = '<html:img page="/images/icon_right_arrow.gif" border="0" width="10" height="10" style="display:none;padding-right:5px;"/>' + '<a href="<html:rewrite page="/admin/config/Config.do?mode=escalate&escId="/>' + schemes[i].id + '" onclick="changeHighlight(this);">' + schemes[i].name + '</a>';
 
     }
     tr.appendChild(td2);
@@ -105,7 +120,11 @@ function showEscRows(originalRequest) {
     td3.setAttribute((document.all ? 'className' : 'class'), "ListCell");
     td3.setAttribute('style', 'text-align: right');
     td3.innerHTML = '<a href="<html:rewrite action="/admin/config/RemoveEscalation"/>' + '?esc=' + schemes[i].id + '">' + $('deleteBtn').innerHTML + '</a>';
-    tr.appendChild(td3);
+      if (schemes[i].id == '<c:out value="${param.escId}"/>') {
+       
+       td3.setAttribute((document.all ? 'className' : 'class'), "selectedHighlight");
+      }
+      tr.appendChild(td3);
 
     escalations.appendChild(tr);
   }
