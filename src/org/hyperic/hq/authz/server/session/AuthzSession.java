@@ -97,7 +97,7 @@ public abstract class AuthzSession
     }
 
     protected AuthzSubjectDAO getSubjectDAO() {
-        return DAOFactory.getDAOFactory().getAuthzSubjectDAO();
+        return new AuthzSubjectDAO(DAOFactory.getDAOFactory());
     }
 
     protected RoleDAO getRoleDAO() {
@@ -161,8 +161,9 @@ public abstract class AuthzSession
      * @ejb:transaction type="Required"
      */
     public AuthzSubjectValue findSubjectByAuth(String name, String authDsn)
-        throws SubjectNotFoundException {
-         AuthzSubject subject = DAOFactory.getDAOFactory().getAuthzSubjectDAO()
+        throws SubjectNotFoundException 
+    {
+         AuthzSubject subject = new AuthzSubjectDAO(DAOFactory.getDAOFactory())
             .findByAuth(name, authDsn);
         if (subject == null) {
             throw new SubjectNotFoundException(
@@ -178,7 +179,8 @@ public abstract class AuthzSession
         }
         
         OperationDAO operDao = null;
-        AuthzSubjectDAO subjDao = null;
+        AuthzSubjectDAO subjDao = 
+            new AuthzSubjectDAO(DAOFactory.getDAOFactory());
         ResourceDAO resDao = null;
         RoleDAO roleDao = null;
         ResourceGroupDAO resGrpDao = null;
@@ -190,9 +192,6 @@ public abstract class AuthzSession
                 ret.add(operDao.findById(((OperationValue) vals[i]).getId()));
             }
             else if (vals[i] instanceof AuthzSubjectValue) {
-                if (subjDao == null) {
-                    subjDao = getSubjectDAO();
-                }
                 ret.add(subjDao.findById(((AuthzSubjectValue)vals[i]).getId()));
             }
             else if (vals[i] instanceof ResourceValue) {
@@ -306,7 +305,7 @@ public abstract class AuthzSession
     }
 
     protected AuthzSubject lookupSubjectPojo(Integer id) {
-        return DAOFactory.getDAOFactory().getAuthzSubjectDAO().findById(id);
+        return new AuthzSubjectDAO(DAOFactory.getDAOFactory()).findById(id);
     }
 
     protected ResourceType lookupType(ResourceTypeValue type) {
@@ -374,7 +373,8 @@ public abstract class AuthzSession
      */
     protected Collection filterViewableGroups(AuthzSubjectValue who,
                                               Collection groups)
-        throws PermissionException, FinderException, NamingException {
+        throws PermissionException, FinderException
+    {
         // finally scope down to only the ones the user can see
         PermissionManager pm = PermissionManagerFactory.getInstance();
         List viewable = pm.findOperationScopeBySubject(who,

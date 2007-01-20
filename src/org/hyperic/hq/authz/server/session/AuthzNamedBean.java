@@ -62,15 +62,18 @@ public abstract class AuthzNamedBean extends PersistedObject
      */
     public abstract Object getValueObject();
 
-    public boolean equals(Object obj)
-    {
-        if (!(obj instanceof AuthzNamedBean) || !super.equals(obj)) {
+    public boolean equals(Object obj) {
+        if (obj == this)
+            return true;
+        
+        if (obj == null || obj instanceof AuthzNamedBean == false) {
             return false;
         }
+        
         AuthzNamedBean o = (AuthzNamedBean) obj;
-        return
-            ((_name == o.getName()) ||
-             (_name != null && o.getName() != null && _name.equals(o.getName())));
+        return ((_name == o.getName()) ||
+                (_name != null && o.getName() != null && 
+                 _name.equals(o.getName())));
     }
 
     public int hashCode()

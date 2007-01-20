@@ -46,9 +46,9 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.AuthzSession;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectDAO;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
@@ -134,7 +134,8 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         // Look up the root role
         Role rootRole = getRoleDAO().findById(AuthzConstants.rootRoleId);
         // Look up the calling subject
-        AuthzSubject caller = getSubjectDAO().findById(subject.getId());
+        AuthzSubject caller = 
+            AuthzSubjectManagerEJBImpl.getOne().findSubjectById(subject.getId());
         if (rootRole.getSubjects().contains(caller))
             return rootRole;
         
@@ -202,7 +203,8 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
     public RoleValue createRole(AuthzSubjectValue whoami, RoleValue role,
                                 OperationValue[] operations,
                                 AuthzSubjectValue[] subjects)
-        throws AuthzDuplicateNameException, PermissionException {
+        throws AuthzDuplicateNameException, PermissionException 
+    {
         validateRole(role);
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
@@ -211,7 +213,8 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
                  AuthzConstants.roleOpCreateRole);
 
         AuthzSubject whoamiLocal =
-            getSubjectDAO().findByAuth(whoami.getName(), whoami.getAuthDsn());
+            AuthzSubjectManagerEJBImpl.getOne().findByAuth(whoami.getName(),
+                                                           whoami.getAuthDsn());
         Role rolePojo = getRoleDAO().create(whoamiLocal, role);
 
         // Associated operations
@@ -254,7 +257,8 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
                  AuthzConstants.roleOpCreateRole);
 
         AuthzSubject whoamiLocal =
-            getSubjectDAO().findByAuth(whoami.getName(), whoami.getAuthDsn());
+            AuthzSubjectManagerEJBImpl.getOne().findByAuth(whoami.getName(),
+                                                           whoami.getAuthDsn());
         Role roleLocal = roleLome.create(whoamiLocal, role);
 
         // Associated operations
@@ -293,7 +297,8 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
                                   Integer[] subjectIds,
                                   Integer[] groupIds)
         throws NamingException, FinderException,
-               AuthzDuplicateNameException, PermissionException {
+               AuthzDuplicateNameException, PermissionException 
+    {
         RoleDAO roleLome = getRoleDAO();
         validateRole(role);
 
@@ -304,7 +309,8 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
                  AuthzConstants.roleOpCreateRole);
 
         AuthzSubject whoamiLocal =
-            getSubjectDAO().findByAuth(whoami.getName(), whoami.getAuthDsn());
+            AuthzSubjectManagerEJBImpl.getOne().findByAuth(whoami.getName(),
+                                                           whoami.getAuthDsn());
         Role roleLocal = roleLome.create(whoamiLocal, role);
 
         // Associated operations
@@ -1471,39 +1477,15 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
     }
     
     /**
-     * Gives you a value-object with updated attributes.
-     * With many of the methods actions are performed which update the
-     * entity but not the associated value-object. Use this method
-     * to sync up your value-object.
-     * @param old Your current value-object.
-     * @return A new Subject value-object.
-     * @throws FinderException Unable to find a given or dependent entities.
-     * @ejb:interface-method
-     */
-    public AuthzSubjectValue updateSubjectValue(AuthzSubjectValue old)
-        throws FinderException {
-        AuthzSubject res = getSubjectDAO().findById(old.getId());
-        AuthzSubjectValue newValue = res.getAuthzSubjectValue();
-        return newValue;
-    }
-
-    /**
      * Get the resource groups applicable to a given role
-     * @param subject
-     * @param roleId
-     * @return resourceGroupList
-     * @throws PermissionException - subject can not listResourceGroups
-     * for the given role
-     * @throws NamingException if database connection cannot be established
-     * @throws FinderException SQL error looking up roles scope or if sort
-     * attribute is not recognized
      * @ejb:interface-method
      */
     public PageList getResourceGroupsByRoleIdAndSystem(AuthzSubjectValue subject, 
                                                        Integer roleId, 
                                                        boolean system,
                                                        PageControl pc)
-        throws PermissionException, NamingException, FinderException {
+        throws PermissionException, FinderException 
+    {
         // first find the role by its id
         getRoleDAO().findById(roleId);
         
@@ -1737,7 +1719,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         Collection subjects;
         pc = PageControl.initDefaults(pc, SortAttribute.SUBJECT_NAME);
         int attr = pc.getSortattribute();
-        AuthzSubjectDAO dao = getSubjectDAO();
+        AuthzSubjectDAO dao = new AuthzSubjectDAO(DAOFactory.getDAOFactory());
         switch (attr) {
         case SortAttribute.SUBJECT_NAME:
             subjects = dao.findByRoleId_orderName(roleLocal.getId(),
@@ -1793,7 +1775,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         Collection subjects;
         pc = PageControl.initDefaults(pc, SortAttribute.SUBJECT_NAME);
         int attr = pc.getSortattribute();
-        AuthzSubjectDAO dao = getSubjectDAO();
+        AuthzSubjectDAO dao = new AuthzSubjectDAO(DAOFactory.getDAOFactory());
         switch (attr) {
 
         case SortAttribute.SUBJECT_NAME:
@@ -1835,7 +1817,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         Collection otherRoles;
         pc = PageControl.initDefaults(pc, SortAttribute.SUBJECT_NAME);
         int attr = pc.getSortattribute();
-        AuthzSubjectDAO dao = getSubjectDAO();
+        AuthzSubjectDAO dao = new AuthzSubjectDAO(DAOFactory.getDAOFactory());
         switch (attr) {
         case SortAttribute.SUBJECT_NAME:
             otherRoles = dao.findByNotRoleId_orderName(roleLocal.getId(),

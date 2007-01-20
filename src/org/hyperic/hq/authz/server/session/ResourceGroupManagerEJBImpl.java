@@ -425,46 +425,40 @@ public class ResourceGroupManagerEJBImpl
     {
         List toBePaged = new ArrayList();
 
-        try {
-            pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
+        pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
 
-            // first get the list of groups subject can view
-            PermissionManager pm = PermissionManagerFactory.getInstance(); 
-            List authGroupIds =
-                pm.findOperationScopeBySubject(subject, 
-                                               AuthzConstants.groupOpViewResourceGroup,
-                                               AuthzConstants.groupResourceTypeName, 
-                                               pc);
+        // first get the list of groups subject can view
+        PermissionManager pm = PermissionManagerFactory.getInstance(); 
+        List authGroupIds =
+            pm.findOperationScopeBySubject(subject, 
+                                           AuthzConstants.groupOpViewResourceGroup,
+                                           AuthzConstants.groupResourceTypeName, 
+                                           pc);
 
-            // Now fetch the ones that are inclusive.
-            Collection incGroups;
-            switch (pc.getSortattribute()) {
-            case SortAttribute.RESOURCE_NAME:
-                incGroups = getResourceGroupDAO()
-                    .findContaining_orderName(
-                        resource.getInstanceId(),
-                        resource.getResourceTypeValue().getId(),
-                        pc.isAscending());
-                break;
-            default:
-                incGroups = getResourceGroupDAO()
-                    .findContaining_orderName(
-                        resource.getInstanceId(),
-                        resource.getResourceTypeValue().getId(),
-                        true);
-            }
+        // Now fetch the ones that are inclusive.
+        Collection incGroups;
+        switch (pc.getSortattribute()) {
+        case SortAttribute.RESOURCE_NAME:
+            incGroups = getResourceGroupDAO()
+             .findContaining_orderName(resource.getInstanceId(),
+                                       resource.getResourceTypeValue().getId(),
+                                       pc.isAscending());
+            break;
+        default:
+            incGroups = getResourceGroupDAO()
+              .findContaining_orderName(resource.getInstanceId(),
+                                        resource.getResourceTypeValue().getId(),
+                                        true);
+        }
 
-            for (Iterator i=incGroups.iterator();i.hasNext();) {
-                ResourceGroup rgLoc = (ResourceGroup) i.next();
-                if (authGroupIds.contains(rgLoc.getId())) {
-                    toBePaged.add(rgLoc);
-                }
+        for (Iterator i=incGroups.iterator();i.hasNext();) {
+            ResourceGroup rgLoc = (ResourceGroup) i.next();
+            if (authGroupIds.contains(rgLoc.getId())) {
+                toBePaged.add(rgLoc);
             }
         }
-        catch (NamingException e) {
-            throw new SystemException(e);
-        }
-        return _ownedGroupPager.seek(toBePaged, pc.getPagenum(), pc.getPagesize());
+        return _ownedGroupPager.seek(toBePaged, pc.getPagenum(), 
+                                     pc.getPagesize());
     }   
 
     /**

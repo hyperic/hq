@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.ejb.FinderException;
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -85,13 +84,11 @@ public class PermissionManagerImpl
         + "AND authz_r.INSTANCE_ID = %%RESID%%";
 
     private Connection getConnection() {
-        return DAOFactory.getDAOFactory().getAuthzSubjectDAO().getSession()
-            .connection();
+        return DAOFactory.getDAOFactory().getCurrentSession().connection();
     }
     
     private void disconnectSession() {
-        DAOFactory.getDAOFactory().getAuthzSubjectDAO().getSession()
-            .disconnect();
+        DAOFactory.getDAOFactory().getCurrentSession().disconnect();
     }
 
     public PermissionManagerImpl() {
@@ -125,7 +122,7 @@ public class PermissionManagerImpl
     public PageList findOperationScopeBySubject(AuthzSubjectValue subj,
                                                 String opName, String resType,
                                                 PageControl pc) 
-        throws FinderException, NamingException, PermissionException
+        throws FinderException, PermissionException
     {
         if (_log.isDebugEnabled()) { 
             _log.debug("Checking Scope for Operation: " + opName +
@@ -144,7 +141,7 @@ public class PermissionManagerImpl
 
     public PageList findOperationScopeBySubject(AuthzSubjectValue subj,
                                                 Integer opId, PageControl pc) 
-        throws FinderException, NamingException, PermissionException
+        throws FinderException, PermissionException
     {
         if (_log.isDebugEnabled()) {
             _log.debug("Checking Scope for Operation: " + opId + " subject: " + 
@@ -230,10 +227,10 @@ public class PermissionManagerImpl
         }
     }
 
-    private PageList findScopeBySQL(AuthzSubjectValue subj, 
-                                    Integer opId,
+    private PageList findScopeBySQL(AuthzSubjectValue subj, Integer opId, 
                                     PageControl pc)
-        throws FinderException, NamingException, PermissionException {
+        throws FinderException, PermissionException 
+    {
         Pager defaultPager = Pager.getDefaultPager();
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -259,9 +256,7 @@ public class PermissionManagerImpl
         }
     }
 
-    public String getSQLWhere(Integer subjectId,
-                              String resId)
-    {
+    public String getSQLWhere(Integer subjectId, String resId) {
         return StringUtil.replace(AUTHZ_WHERE_OVERLORD_INSTANCE,
                                   "%%RESID%%", resId);
     }
@@ -299,7 +294,8 @@ public class PermissionManagerImpl
     }
 
     public List getAllOperations(AuthzSubjectValue subject, PageControl pc)
-        throws NamingException, PermissionException, FinderException {
+        throws PermissionException, FinderException 
+    {
         Role rootRole = getRoleDAO().findById(AuthzConstants.rootRoleId);
         Set ops = new HashSet();
         ops.addAll(rootRole.getOperations());

@@ -129,7 +129,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                    ResourceTypeValue type) {
         ResourceTypeDAO dao = DAOFactory.getDAOFactory().getResourceTypeDAO();
         ResourceType rt = dao.findById(type.getId());
-        AuthzSubject who = DAOFactory.getDAOFactory().getAuthzSubjectDAO()
+        AuthzSubject who = new AuthzSubjectDAO(DAOFactory.getDAOFactory())
             .findById(whoami.getId());
         dao.remove(who, rt);
     }

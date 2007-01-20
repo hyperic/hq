@@ -71,8 +71,8 @@ public class ResourceDAO extends HibernateDAO
         /* set owner */
         AuthzSubjectValue ownerValue = createInfo.getAuthzSubjectValue();
         if (ownerValue != null) {
-            creator = DAOFactory.getDAOFactory().getAuthzSubjectDAO() 
-                .findById(ownerValue.getId());
+            creator = new AuthzSubjectDAO(DAOFactory.getDAOFactory())
+                              .findById(ownerValue.getId());
         }
         resource.setOwner(creator);
         save(resource);

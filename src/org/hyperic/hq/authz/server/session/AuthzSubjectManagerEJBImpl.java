@@ -33,7 +33,6 @@ import javax.ejb.EJBException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -68,31 +67,26 @@ import org.hyperic.util.pager.SortAttribute;
 public class AuthzSubjectManagerEJBImpl
     extends AuthzSession implements SessionBean {
 
-    protected static final Log log
-        = LogFactory.getLog(AuthzSubjectManagerEJBImpl.class.getName());
+    private static final Log _log
+        = LogFactory.getLog(AuthzSubjectManagerEJBImpl.class);
 
-    private static final String SUBJECT_PAGER
-        = "org.hyperic.hq.authz.server.session.PagerProcessor_subject";
-    private Pager subjectPager = null;
-
-    // keep a reference to the overlord
-    private AuthzSubjectValue overlord;
-    private AuthzSubjectValue root;
+    private static final String SUBJECT_PAGER =
+        PagerProcessor_subject.class.getName();
+    private Pager _subjectPager;
 
     public AuthzSubjectManagerEJBImpl() {}
 
-    /** Create a subject.
+    /** 
+     * Create a subject.
      * @param whoami The current running user.
      * @param subject The subject to be created.
      * @return Value-object for the new Subject.
-     * @exception PermissionException whoami may not perform createSubject on the rootResource ResourceType.
-     * @throws CreateException 
-     * @throws NamingException 
      * @ejb:interface-method
      */
     public AuthzSubject createSubject(AuthzSubjectValue whoami,
                                       AuthzSubjectValue subject)
-        throws PermissionException, CreateException {
+        throws PermissionException, CreateException 
+    {
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         pm.check(whoami.getId(), getRootResourceType(),
                  AuthzConstants.rootResourceId,
@@ -105,25 +99,23 @@ public class AuthzSubjectManagerEJBImpl
                                       subject.getName());
         }
 
-        AuthzSubject whoamiPojo =
-            dao.findByAuth(whoami.getName(), whoami.getAuthDsn());
-
+        AuthzSubject whoamiPojo  = findSubjectById(whoami.getId()); 
         AuthzSubject subjectPojo = dao.create(whoamiPojo, subject);
         
         return subjectPojo;
     }
 
 
-    /** Write the specified entity out to permanent storage.
+    /** 
+     * Write the specified entity out to permanent storage.
      * @param whoami The current running user.
      * @param subject The subject to save.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @exception PermissionException whoami may not perform modifySubject on this subject.
      * @ejb:interface-method
      */
     public void saveSubject(AuthzSubjectValue whoami,
                             AuthzSubjectValue subject)
-        throws PermissionException {
+        throws PermissionException 
+    {
         AuthzSubject subjectPojo = this.lookupSubjectPojo(subject);
 
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
@@ -143,11 +135,11 @@ public class AuthzSubjectManagerEJBImpl
 
     /**
      * Check if a subject can modify users  
-     * @param caller
      * @ejb:interface-method
      */
     public void checkModifyUsers(AuthzSubjectValue caller) 
-        throws PermissionException {
+        throws PermissionException 
+    {
         PermissionManager pm = PermissionManagerFactory.getInstance();
         pm.check(caller.getId(),
                  getRootResourceType(),
@@ -155,13 +147,16 @@ public class AuthzSubjectManagerEJBImpl
                  AuthzConstants.subjectOpModifySubject);
     }
 
-    /** Delete the specified subject.
-     * @param whoami The current running user.
+    /** 
+     * Delete the specified subject.
+     * 
+     * @param whoami  The current running user.
      * @param subject The ID of the subject to delete.
      * @ejb:interface-method
      */
     public void removeSubject(AuthzSubjectValue whoami, Integer subject)
-        throws RemoveException, PermissionException {
+        throws RemoveException, PermissionException 
+    {
         // no removing of the root user!
         if (subject.equals(AuthzConstants.rootSubjectId)) {
             throw new RemoveException("Root user can not be deleted");
@@ -170,9 +165,8 @@ public class AuthzSubjectManagerEJBImpl
         AuthzSubjectDAO dao = getSubjectDAO();
         AuthzSubject toDelete = dao.findById(subject);
 
-        String name = toDelete.getName();
         // XXX Should we do anything special for the "suicide" case?
-        // Perhaps a log message?
+        // Perhaps a _log message?
         if ( !whoami.getId().equals(subject) ) {
             PermissionManager pm = PermissionManagerFactory.getInstance(); 
             pm.check(whoami.getId(), getRootResourceType().getId(),
@@ -183,9 +177,15 @@ public class AuthzSubjectManagerEJBImpl
         dao.remove(toDelete);
     }
 
-    /** Find a subject by its id
-     * @exception PermissionException whoami does not have the viewSubject
-     * permission in any of its roles.
+    /**
+     * @ejb:interface-method
+     */
+    public AuthzSubject findByAuth(String name, String authDsn) {
+        return getSubjectDAO().findByAuth(name, authDsn);
+    }
+    
+    
+    /**
      * @ejb:interface-method
      */
     public AuthzSubjectValue findSubjectById(AuthzSubjectValue whoami,
@@ -212,15 +212,12 @@ public class AuthzSubjectManagerEJBImpl
     }
     
     /** 
-     * Find a subject by its name
-     * @exception PermissionException whoami does not have the viewSubject
-     * permission in any of its roles.
      * @ejb:interface-method
      */
     public AuthzSubjectValue findSubjectByName(AuthzSubjectValue whoami,
                                                String name)
-        throws PermissionException {
-
+        throws PermissionException 
+    {
         AuthzSubject sub = getSubjectDAO().findByName(name);
         return sub.getAuthzSubjectValue();
     }
@@ -287,7 +284,7 @@ public class AuthzSubjectManagerEJBImpl
                                       pc.getSortattribute());
         }                
         
-        return subjectPager.seek(subjects, pc.getPagenum(), pc.getPagesize() );
+        return _subjectPager.seek(subjects, pc.getPagenum(), pc.getPagesize() );
     }
 
     /** 
@@ -317,7 +314,7 @@ public class AuthzSubjectManagerEJBImpl
         // the subject being requested. This is ugly mostly because
         // we're using a list api to possibly look up a single Item
         if(subjects.size() > 0) {
-            log.debug("Checking if Subject: " + subject.getName() +
+            _log.debug("Checking if Subject: " + subject.getName() +
                       " can list subjects.");
             PermissionManager pm = PermissionManagerFactory.getInstance(); 
             pm.check(subject.getId(), getRootResourceType(),
@@ -326,7 +323,7 @@ public class AuthzSubjectManagerEJBImpl
         }
 
         // Need to convert to value objects
-        return new PageList(subjectPager.seek(subjects, PageControl.PAGE_ALL),
+        return new PageList(_subjectPager.seek(subjects, PageControl.PAGE_ALL),
                             subjects.getTotalSize());
     }
 
@@ -406,25 +403,18 @@ public class AuthzSubjectManagerEJBImpl
      * @ejb:interface-method
      */
     public AuthzSubjectValue getOverlord() {
-        if (overlord == null) {
-            overlord = getSubjectDAO().findById(
-                AuthzConstants.overlordId).getAuthzSubjectValue();
-        }
-        return overlord;
+        return getSubjectDAO().findById(AuthzConstants.overlordId)
+                              .getAuthzSubjectValue();
     }
 
     /**
      * Get the root spider subject value. THe root is the systems
-     * unrestricted user which can log in.
-     * @return the overlord
+     * unrestricted user which can _log in.
      * @ejb:interface-method
      */
     public AuthzSubjectValue getRoot() {
-        if (root == null) {
-            root = getSubjectDAO().findById(AuthzConstants.rootSubjectId)
-                    .getAuthzSubjectValue();
-        }
-        return root;
+        return getSubjectDAO().findById(AuthzConstants.rootSubjectId)
+                              .getAuthzSubjectValue();
     }
     
     public static AuthzSubjectManagerLocal getOne() {
@@ -437,7 +427,7 @@ public class AuthzSubjectManagerEJBImpl
 
     public void ejbCreate() throws CreateException {
         try {
-            subjectPager = Pager.getPager(SUBJECT_PAGER);
+            _subjectPager = Pager.getPager(SUBJECT_PAGER);
         } catch (Exception e) {
             throw new CreateException("Could not create Pager: " + e);
         }

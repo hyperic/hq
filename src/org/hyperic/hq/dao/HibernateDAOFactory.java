@@ -28,7 +28,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
-import org.hyperic.hq.authz.server.session.AuthzSubjectDAO;
 import org.hyperic.hq.authz.server.session.OperationDAO;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
@@ -157,10 +156,6 @@ public class HibernateDAOFactory extends DAOFactory {
 
     public ServiceTypeDAO getServiceTypeDAO() {
         return new ServiceTypeDAO(this);
-    }
-
-    public AuthzSubjectDAO getAuthzSubjectDAO() {
-        return new AuthzSubjectDAO(this);
     }
 
     public BaselineDAO getBaselineDAO() {

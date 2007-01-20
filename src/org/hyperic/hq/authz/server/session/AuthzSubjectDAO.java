@@ -40,9 +40,10 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
-public class AuthzSubjectDAO extends HibernateDAO
+class AuthzSubjectDAO 
+    extends HibernateDAO
 {
-    public AuthzSubjectDAO(DAOFactory f) {
+    AuthzSubjectDAO(DAOFactory f) {
         super(AuthzSubject.class, f);
     }
 
@@ -80,20 +81,17 @@ public class AuthzSubjectDAO extends HibernateDAO
         return subject;
     }
 
-    public AuthzSubject findById(Integer id)
-    {
+    public AuthzSubject findById(Integer id) {
         return (AuthzSubject)super.findById(id);
     }
 
-    void remove(AuthzSubject entity)
-    {
+    void remove(AuthzSubject entity) {
         UserConfigResp resp = findUserConfigResp(entity.getId());
         super.remove(resp);
         super.remove(entity);
     }
 
-    public AuthzSubject findByAuth(String name, String dsn)
-    {
+    public AuthzSubject findByAuth(String name, String dsn) {
         String sql = "from AuthzSubject s where s.name=? and s.authDsn=?";
         return (AuthzSubject)getSession().createQuery(sql)
             .setString(0, name)
@@ -101,11 +99,12 @@ public class AuthzSubjectDAO extends HibernateDAO
             .uniqueResult();
     }
 
-    public AuthzSubject findByName(String name)
-    {
+    public AuthzSubject findByName(String name) {
         String sql = "from AuthzSubject where name=?";
         return (AuthzSubject)getSession().createQuery(sql)
             .setString(0, name)
+            .setCacheRegion("AuthzSubject.findByName")
+            .setCacheable(true)
             .uniqueResult();
     }
 
@@ -117,8 +116,7 @@ public class AuthzSubjectDAO extends HibernateDAO
         return createCriteria().add(Restrictions.in("id", ids));
     }
     
-    public PageList findById_orderName(Integer[] ids, PageControl pc)
-    {
+    public PageList findById_orderName(Integer[] ids, PageControl pc) {
         Integer count = (Integer) findById_orderNameCriteria(ids)
             .setProjection(Projections.rowCount())
             .uniqueResult(); 
@@ -131,7 +129,8 @@ public class AuthzSubjectDAO extends HibernateDAO
     }
 
     public Collection findAll_order(boolean isRoot, String col,
-                                    boolean asc, Collection excludes) {
+                                    boolean asc, Collection excludes) 
+    {
         Criteria criteria = createCriteria();
         
         if (isRoot) {
@@ -140,8 +139,7 @@ public class AuthzSubjectDAO extends HibernateDAO
             disjunctions.add(Restrictions.eq("id",
                                              AuthzConstants.rootSubjectId));
             criteria .add(disjunctions);
-        }
-        else {
+        } else {
             criteria.add(Restrictions.eq("system", Boolean.FALSE));
         }
         
@@ -155,23 +153,19 @@ public class AuthzSubjectDAO extends HibernateDAO
     
     }
 
-    public Collection findAll_orderName(Collection excludes, boolean asc)
-    {
+    public Collection findAll_orderName(Collection excludes, boolean asc) {
         return findAll_order(false, "sortName", asc, excludes);
     }
 
-    public Collection findAll_orderFirstName(Collection excludes, boolean asc)
-    {
+    public Collection findAll_orderFirstName(Collection excludes, boolean asc) {
         return findAll_order(false, "firstName", asc, excludes);
     }
 
-    public Collection findAll_orderLastName(Collection excludes, boolean asc)
-    {
+    public Collection findAll_orderLastName(Collection excludes, boolean asc) {
         return findAll_order(false, "lastName", asc, excludes);
     }
 
-    public Collection findAllRoot_orderName(Collection excludes, boolean asc)
-    {
+    public Collection findAllRoot_orderName(Collection excludes, boolean asc) {
         return findAll_order(true, "sortName", asc, excludes);
     }
 
@@ -187,8 +181,7 @@ public class AuthzSubjectDAO extends HibernateDAO
         return findAll_order(true, "lastName", asc, excludes);
     }
 
-    public Collection findByRoleId_orderName(Integer roleId, boolean asc)
-    {
+    public Collection findByRoleId_orderName(Integer roleId, boolean asc) {
         return getSession()
             .createQuery("select s from AuthzSubject s join fetch s.roles r " +
                          "where r.id = ? and s.system = false " +
@@ -197,8 +190,7 @@ public class AuthzSubjectDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByNotRoleId_orderName(Integer roleId, boolean asc)
-    {
+    public Collection findByNotRoleId_orderName(Integer roleId, boolean asc) {
         return getSession()
             .createQuery("select distinct s from AuthzSubject s, Role r " +
                          "where r.id = ? and s.id not in " +

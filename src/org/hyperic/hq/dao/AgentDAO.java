@@ -38,18 +38,15 @@ public class AgentDAO extends HibernateDAO
         super(Agent.class, f);
     }
 
-    public void save(Agent entity)
-    {
+    public void save(Agent entity) {
         super.save(entity);
     }
 
-    public void remove(Agent entity)
-    {
+    public void remove(Agent entity) {
         super.remove(entity);
     }
 
-    public Agent findById(Integer id)
-    {
+    public Agent findById(Integer id) {
         return (Agent)super.findById(id);
     }
 
@@ -66,8 +63,7 @@ public class AgentDAO extends HibernateDAO
         return ag;
     }
 
-    public Agent findByIpAndPort(String address, int port)
-    {
+    public Agent findByIpAndPort(String address, int port) {
         String sql = "from Agent where address=? and port=?";
         return (Agent)getSession().createQuery(sql)
             .setString(0, address)
@@ -75,16 +71,16 @@ public class AgentDAO extends HibernateDAO
             .uniqueResult();
     }
 
-    public Agent findByAgentToken(String token)
-    {
+    public Agent findByAgentToken(String token) {
         String sql = "from Agent where agentToken=?";
         return (Agent)getSession().createQuery(sql)
             .setString(0, token)
+            .setCacheRegion("Agent.findByAgentToken")
+            .setCacheable(true)
             .uniqueResult();
     }
 
-    public Collection findUnusedAgents(Integer platformId)
-    {
+    public Collection findUnusedAgents(Integer platformId) {
         String sql = "from Agent where id not in (" +
                      "select agent.id from Platform where " +
                      "id != ?and agent.id is not null)";

@@ -31,7 +31,6 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.ejb.FinderException;
-import javax.naming.NamingException;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.PagerProcessor_operation;
@@ -102,10 +101,6 @@ public interface PermissionManager {
      * Find the list of instance ids for which a given subject id 
      * has the named operation in one of their roles or owns a resource
      * for which the operation is valid
-     * @param subject
-     * @param opName
-     * @param resType
-     * @param pc - PageControl
      * @return List of integer instnace ids
      * @ejb:interface-method
      * @ejb:transaction type="NOTSUPPORTED"
@@ -113,20 +108,17 @@ public interface PermissionManager {
     public PageList findOperationScopeBySubject(AuthzSubjectValue subj,
                                                 String opName, String resType,
                                                 PageControl pc) 
-        throws FinderException, NamingException, PermissionException;
+        throws FinderException, PermissionException;
 
     /**
      * Find the list of instance ids for which a given subject id
      * has a given operation.
-     * @param subject
-     * @param operationValue
-     * @param pc - PageControl
      * @return List of integer instance ids
      */
     public PageList findOperationScopeBySubject(AuthzSubjectValue subj,
                                                 Integer opId,
                                                 PageControl pc)
-        throws FinderException, NamingException, PermissionException;
+        throws FinderException, PermissionException;
 
     /**
      * Find the list of resources for which a given subject id can perform
@@ -161,12 +153,9 @@ public interface PermissionManager {
      * Get all operations for a given subject
      *
      * @return a list of Integers representing instance ids
-     * @throws FinderException 
-     * @throws PermissionException 
-     * @throws NamingException 
      */
     public List getAllOperations(AuthzSubjectValue subject, PageControl pc)
-        throws NamingException, PermissionException, FinderException;
+        throws PermissionException, FinderException;
 
 
     /**
