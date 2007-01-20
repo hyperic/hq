@@ -103,8 +103,6 @@ class AuthzSubjectDAO
         String sql = "from AuthzSubject where name=?";
         return (AuthzSubject)getSession().createQuery(sql)
             .setString(0, name)
-            .setCacheRegion("AuthzSubject.findByName")
-            .setCacheable(true)
             .uniqueResult();
     }
 
