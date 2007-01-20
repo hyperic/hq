@@ -2553,11 +2553,6 @@ has already been defined.
         <schema-alterColumn table="EAM_MEASUREMENT" quoteDefault="f" 
                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
 
-        <schema-update table="EAM_MEASUREMENT" column="ENABLED"
-                       columnType="BOOLEAN" value="1" 
-                       where="ENABLED IS NULL"/>
-        <schema-alterColumn table="EAM_MEASUREMENT" 
-                            column="ENABLED" nullable="NOT NULL"/>
         <schema-alterColumn table="EAM_MEASUREMENT" 
                             column="TEMPLATE_ID" nullable="NOT NULL"/>
          <schema-addColumn table="EAM_MEASUREMENT_ARG"
