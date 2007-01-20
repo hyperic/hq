@@ -77,7 +77,9 @@ public class MeasurementEnabler {
         try {
             mtype = getMonitorableType(subject, id);
             // No monitorable type
-            if (mtype == null) return;
+            if (mtype == null) {
+                return;
+            }
 
             config = ConfigManagerEJBImpl.getOne().
                 getMergedConfigResponse(subject,
@@ -85,22 +87,21 @@ public class MeasurementEnabler {
                                         id, true);
         } catch (Exception e) {
             _log.error("Unable to enable default metrics for id=" + id +
-                ": " + e.getMessage(), e);
+                        ": " + e.getMessage(), e);
             return;
         }
 
         // Check the configuration
         try {
             rmManager.checkConfiguration(subject, id, config);
-        } catch (
-            InvalidConfigException e) {
+        } catch (InvalidConfigException e) {
             _log.warn("Error turning on default metrics, configuration (" +
-                config + ") " + "couldn't be validated: " +
-                e.getMessage());
+                      config + ") " + "couldn't be validated: " +
+                      e.getMessage());
             configManager.setValidationError(subject, id, e.getMessage());
         } catch (Exception e) {
             _log.warn("Error turning on default metrics, " +
-                "error in validation: " + e.getMessage());
+                      "error in validation: " + e.getMessage());
             configManager.setValidationError(subject, id, e.getMessage());
         }
 
@@ -113,7 +114,7 @@ public class MeasurementEnabler {
 
         } catch (Exception e) {
             _log.warn("Unable to enable default metrics for id=" + id +
-                ": " + e.getMessage(), e);
+                      ": " + e.getMessage(), e);
         }
     }
 }
