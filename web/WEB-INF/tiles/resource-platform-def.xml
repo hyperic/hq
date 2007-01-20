@@ -56,16 +56,6 @@
               extends=".tabs.resource.platform">
     <put name="selectedIndex"  value="1" />
     <put name="subSectionName" value="Inventory"/>
-    <putList name="subTabList">
-      <item value="Current" mode="view"
-            link="/resource/platform/Inventory.do"
-            height="25" width="104"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="AutoDisc" mode="view"
-            link="/resource/platform/AutoDiscovery.do" 
-            height="25" width="104"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-    </putList>
   </definition>
 
   <definition name=".tabs.resource.platform.inventory.current"
