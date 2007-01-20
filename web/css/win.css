@@ -964,11 +964,17 @@ background-color: #dbe3f5
   cursor:move;
 }
 
+#viewEscalationUL .escTbl {
+  width:100%;
+  margin-top:0px;
+  margin-bottom:10px;
+}
+
 .remove {
   float:right;
   margin-right:5px;
   margin-left:5px;
-  margin-top:15px;
+  padding-top:15px;
   cursor:pointer;
 }
 
