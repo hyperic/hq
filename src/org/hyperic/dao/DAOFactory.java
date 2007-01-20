@@ -26,7 +26,6 @@
 package org.hyperic.dao;
 
 import org.hibernate.Session;
-import org.hyperic.hq.authz.server.session.AuthzSubjectDAO;
 import org.hyperic.hq.authz.server.session.OperationDAO;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
@@ -130,7 +129,6 @@ public abstract class DAOFactory {
     public abstract PluginDAO getPluginDAO();
 
     // Authz DAOs
-    public abstract AuthzSubjectDAO  getAuthzSubjectDAO();
     public abstract OperationDAO     getOperationDAO();
     public abstract ResourceTypeDAO  getResourceTypeDAO();
     public abstract ResourceDAO      getResourceDAO();
