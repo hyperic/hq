@@ -142,12 +142,6 @@
       function refreshAlerts() {
         refreshCount++;
 
-        if (refreshCount < 30) {
-          setTimeout( "refreshAlerts()", 60*1000 );
-        } else if (autoLogout) {
-          top.location.href = "<html:rewrite action="/Logout"/>";
-        }
-
         new Ajax.Request('<html:rewrite page="/common/RecentAlerts.jsp"/>',
                          {method: 'get', onSuccess:showRecentAlertResponse,
                                          onFailure :reportError});
@@ -158,7 +152,13 @@
           $('recentAlerts').innerHTML = originalRequest.responseText;
         }
         else {
-          refreshCount = 30;
+          refreshCount = 31;
+        }
+
+        if (refreshCount < 30) {
+          setTimeout( "refreshAlerts()", 60*1000 );
+        } else if (autoLogout) {
+          top.location.href = "<html:rewrite action="/Logout"/>";
         }
       }
 
