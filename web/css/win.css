@@ -972,8 +972,8 @@ background-color: #dbe3f5
 
 .remove {
   float:right;
-    display:inline;
-  margin-top:-15px;
+  display:inline;
+  margin-top:5px;
   margin-right:5px;
   margin-left:5px;
   cursor:pointer;
