@@ -188,9 +188,9 @@ public class NewAutoDiscoveryAction extends BaseAction {
         
         // update the ScanConfiguration from the form obect
         List stValues =
-            boss.findServerTypesByPlatform(sessionId,
-                                           pValue.getId(),
-                                           PageControl.PAGE_ALL);
+            boss.findServerTypesByPlatformType(sessionId,
+                                               pValue.getPlatformType().getId(),
+                                               PageControl.PAGE_ALL);
         ServerTypeValue[] stArray = (ServerTypeValue[])
             stValues.toArray(new ServerTypeValue[0]);
         

@@ -79,9 +79,9 @@ public class NewServerFormPrepareAction
             PlatformValue pValue = boss.findPlatformById(sessionId.intValue(), platformId);
 
             List stValues =
-                boss.findServerTypesByPlatform(sessionId.intValue(),
-                                               platformId,
-                                               PageControl.PAGE_ALL);
+                boss.findServerTypesByPlatformType(sessionId.intValue(),
+                                                   pValue.getPlatformType().getId(),
+                                                   PageControl.PAGE_ALL);
 
             TreeMap returnMap = new TreeMap();
             for(Iterator i = stValues.iterator(); i.hasNext();) {

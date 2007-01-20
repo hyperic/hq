@@ -777,6 +777,22 @@ public class AppdefBossEJBImpl
     }
 
     /**
+     * @ejb:interface-method
+     */
+    public PageList findServerTypesByPlatformType(int sessionID,
+                                                  Integer platformId,
+                                                  PageControl pc)
+        throws AppdefEntityNotFoundException,
+               SessionTimeoutException, SessionNotFoundException
+    {
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+
+        return getServerManager().getServerTypesByPlatformType(subject,
+                                                               platformId,
+                                                               pc);
+    }
+
+    /**
      * Find all viewable resources of a type
      *
      * @return A list of ServerValue objects.

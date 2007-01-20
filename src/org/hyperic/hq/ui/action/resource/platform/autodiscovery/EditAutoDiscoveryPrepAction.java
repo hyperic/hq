@@ -111,9 +111,10 @@ public class EditAutoDiscoveryPrepAction extends NewAutoDiscoveryPrepAction {
         Integer sessionId = RequestUtils.getSessionId(request);
         AppdefBoss boss =
             ContextUtils.getAppdefBoss(getServlet().getServletContext());
-        List serverTypes = boss.findServerTypesByPlatform(sessionId.intValue(),
-                                                          pValue.getId(),
-                                                          PageControl.PAGE_ALL);
+        List serverTypes =
+            boss.findServerTypesByPlatformType(sessionId.intValue(),
+                                               pValue.getPlatformType().getId(),
+                                               PageControl.PAGE_ALL);
         List selSvrs =
             buildSelectedServerTypes(serverTypes,
                                      sched.getConfigObj().getServerSignatures());

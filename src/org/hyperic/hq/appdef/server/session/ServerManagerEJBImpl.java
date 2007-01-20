@@ -55,6 +55,7 @@ import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerUtil;
+import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -327,7 +328,29 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         // as it pages through them.
         return valuePager.seek(serverTypes, pc);
     }
-    
+
+    /**
+     * Find all ServerTypes for a givent PlatformType id.
+     *
+     * This can go once we begin passing POJOs to the UI layer.
+     *
+     * @return A list of ServerTypeValue objects for thie PlatformType.
+     * @ejb:interface-method
+     */
+    public PageList getServerTypesByPlatformType(AuthzSubjectValue subject,
+                                                 Integer platformTypeId,
+                                                 PageControl pc)
+        throws PlatformNotFoundException
+    {
+        PlatformManagerLocal platformManager = getPlatformMgrLocal();
+        PlatformType platType =
+            platformManager.findPlatformTypeById(platformTypeId);
+
+        Collection serverTypes = platType.getServerTypes();
+
+        return valuePager.seek(serverTypes, pc);
+    }
+
     /**
      * Find Server by id
      * @param subject - who

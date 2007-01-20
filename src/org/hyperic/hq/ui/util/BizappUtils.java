@@ -348,9 +348,10 @@ public class BizappUtils {
         int sessionId = RequestUtils.getSessionIdInt(request);
 
         // Build support ai server types
-        List serverTypes = appdefBoss.findServerTypesByPlatform(sessionId,
-                                                                pValue.getId(),
-                                                                PageControl.PAGE_ALL);
+        List serverTypes =
+            appdefBoss.findServerTypesByPlatformType(sessionId,
+                                                     pValue.getPlatformType().getId(),
+                                                     PageControl.PAGE_ALL);
         List serverTypeVals = new ArrayList();
         for (Iterator i = serverTypes.iterator(); i.hasNext(); ) {
             ServerTypeValue stv = (ServerTypeValue)i.next();
