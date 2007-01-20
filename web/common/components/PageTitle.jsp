@@ -86,11 +86,11 @@
     </td>
 <c:choose>
   <c:when test="${not empty titleBgStyle && not empty titleImg}">
-    <td width="14%"><html:img page="/images/${titleImg}" width="202" height="32" alt="" border="0" style="float: right;"/></td>
+    <td width="14%"><html:img page="/images/spacer.gif" width="202" height="32" alt="" border="0" style="float: right;"/></td>
     <td><html:img page="/images/spacer.gif" width="20" height="20" alt="" border="0"/></td>
   </c:when>
   <c:otherwise>
-    <td width="33%"><html:img page="/images/spacer.gif" width="1" height="32" alt="" border="0"/></td>
+    <td width="33%"><html:img page="/images/spacer.gif" width="1" height="26" alt="" border="0"/></td>
     <td><html:img page="/images/spacer.gif" width="20" height="20" alt="" border="0"/></td>
   </c:otherwise>
 </c:choose>
