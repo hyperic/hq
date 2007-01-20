@@ -30,7 +30,6 @@ import org.hyperic.hq.dao.ConfigResponseDAO;
 import org.hyperic.hq.dao.PlatformDAO;
 import org.hyperic.hq.dao.PlatformTypeDAO;
 import org.hyperic.hq.dao.ServiceDAO;
-import org.hyperic.hq.dao.ServiceTypeDAO;
 import org.hyperic.hq.dao.ServerDAO;
 import org.hyperic.hq.dao.ServerTypeDAO;
 import org.hyperic.hq.dao.AgentTypeDAO;

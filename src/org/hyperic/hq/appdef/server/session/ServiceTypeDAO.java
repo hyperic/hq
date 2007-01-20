@@ -23,42 +23,34 @@
  * USA. 
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
 
+import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.appdef.server.session.ServerType;
-import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
+import org.hyperic.hq.dao.HibernateDAO;
 
-/**
- * Pojo for hibernate hbm mapping file
- * TODO: fix equals and hashCode
- */
 public class ServiceTypeDAO extends HibernateDAO
 {
     public ServiceTypeDAO(DAOFactory f) {
         super(ServiceType.class, f);
     }
 
-    public ServiceType findById(Integer id)
-    {
-        return (ServiceType)super.findById(id);
+    public ServiceType findById(Integer id) {
+        return (ServiceType) super.findById(id);
     }
 
-    public void save(ServiceType entity)
-    {
+    void save(ServiceType entity) {
         super.save(entity);
     }
 
-    public void remove(ServiceType entity)
-    {
+    void remove(ServiceType entity) {
         super.remove(entity);
     }
 
-    private ServiceType createServiceType(ServiceTypeValue stv)
-    {
+    private ServiceType createServiceType(ServiceTypeValue stv) {
         ServiceType st = new ServiceType();
         st.setName(stv.getName());
         st.setDescription(stv.getDescription());
@@ -67,23 +59,15 @@ public class ServiceTypeDAO extends HibernateDAO
         return st;
     }
 
-    public ServiceType create(ServiceTypeValue stv)
-    {
-        ServiceType st = createServiceType(stv);
+    ServiceType create(ServiceType st) {
         save(st);
         return st;
     }
-
-    public ServiceType create(ServiceType st)
-    {
-        save(st);
-        return st;
-    }
+    
     /**
      * Create a service type for this server type
      */
-    public ServiceType createServiceType(ServerType srvtp, ServiceTypeValue stv)
-    {
+    ServiceType createServiceType(ServerType srvtp, ServiceTypeValue stv) {
         // first create the service type
         ServiceType st = createServiceType(stv);
         // now set the server type to this
@@ -92,32 +76,21 @@ public class ServiceTypeDAO extends HibernateDAO
         return st;
     }
 
-    public ServiceType findByName(String name)
-    {
+    public ServiceType findByName(String name) {
         String sql="from ServiceType where sortName=?";
         return (ServiceType)getSession().createQuery(sql)
             .setString(0, name.toUpperCase())
             .uniqueResult();
     }
 
-    public Collection findByPlugin(String plugin)
-    {
+    public Collection findByPlugin(String plugin) {
         String sql="from ServiceType where plugin=?";
         return getSession().createQuery(sql)
             .setString(0, plugin)
             .list();
     }
 
-    /**
-     * @deprecated use findByServerType_orderName() instead
-     */
-    public Collection findByServerType_orderName_asc(int serverType)
-    {
-        return findByServerType_orderName(serverType, true);
-    }
-
-    public Collection findByServerType_orderName(int serverType, boolean asc)
-    {
+    public Collection findByServerType_orderName(int serverType, boolean asc) {
         String sql="from ServiceType where serverType.id=? " +
                    "order by sortName " +
                    (asc ? "asc" : "desc");
@@ -126,14 +99,17 @@ public class ServiceTypeDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findVirtualServiceTypesByPlatform(int platformId)
-    {
-        String sql = "select distinct(st) from ServiceType st, Service s " +
-                " where st = s.serviceType and st.serverType.virtual = true " +
-                " and s.server.platform.id=? order by st.sortName";
+    public Collection findVirtualServiceTypesByPlatform(int platformId) {
+        // First get the platform
+        Platform platform =
+            DAOFactory.getDAOFactory().getPlatformDAO().findById(
+                new Integer(platformId));
         
-        return getSession().createQuery(sql)
-            .setInteger(0, platformId)
+        return createCriteria()
+            .createAlias("serverType", "svt")
+            .createAlias("svt.platformTypes", "pt")
+            .add(Restrictions.eq("svt.virtual", Boolean.TRUE))
+            .add(Restrictions.eq("pt.id", platform.getPlatformType().getId()))
             .list();
     }
 }
