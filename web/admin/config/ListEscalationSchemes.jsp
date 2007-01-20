@@ -51,7 +51,7 @@
           <td colspan="2">
                 <table cellpadding="0" cellspacing="0" border="0" width="100%">
                     <tr>
-                        <td class="BlockTitle"><fmt:message key="common.header.EscalationName"/> &nbsp;&nbsp; - click name below to edit</td>
+                        <td class="BlockTitle"><fmt:message key="common.header.EscalationName"/></td>
                         <td class="BlockTitle" style="text-align: right;"><html:link page="/admin/config/Config.do?mode=escalate"><html:img src="/images/tbb_new.gif" border="0"/></html:link></td>
                 </tr>
             </table>
