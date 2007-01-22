@@ -64,15 +64,6 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <tr valign="top"> 
     <td colspan='2'>
       <html:form action="/dashboard/ModifySavedQueries.do" onsubmit="SavedQueriesForm.order.value=Sortable.serialize('qryOrd')">
-      <!-- Content Block Title: Display Settings -->
-      <tiles:insert definition=".header.tab">
-        <tiles:put name="tabKey" value="dash.settings.DisplaySettings"/>
-      </tiles:insert>
-
-      <tiles:insert definition=".dashContent.admin.generalSettings">
-        <tiles:put name="portletName" beanName="portletName" />
-      </tiles:insert>
-
       <tiles:insert definition=".header.tab">
         <tiles:put name="tabKey" value="dash.settings.SelectedCharts"/>
       </tiles:insert>
