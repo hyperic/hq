@@ -30,7 +30,7 @@
 package org.hyperic.hq.ui.action.admin.config;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Properties;
 
@@ -135,6 +135,7 @@ public class ConfigAction extends BaseDispatchAction {
         // XXX: What special case?
         List platServices = new ArrayList();
         List winServices = new ArrayList();
+        LinkedHashMap serverTypesMap = new LinkedHashMap();
         for (int i = 0; i < serverTypes.size(); i++) {
             ServerTypeValue stv = (ServerTypeValue) serverTypes.get(i);
             List serviceTypes =
@@ -147,8 +148,11 @@ public class ConfigAction extends BaseDispatchAction {
                     platServices.addAll(serviceTypes);
                 }
             }
+            else {
+                serverTypesMap.put(stv, serviceTypes);
+            }
         }
-        request.setAttribute(Constants.ALL_SERVER_TYPES_ATTR, serverTypes);
+        request.setAttribute(Constants.ALL_SERVER_TYPES_ATTR, serverTypesMap);
         request.setAttribute(Constants.ALL_PLATFORM_SERVICE_TYPES_ATTR,
                              platServices);
         request.setAttribute(Constants.ALL_WINDOWS_SERVICE_TYPES_ATTR,

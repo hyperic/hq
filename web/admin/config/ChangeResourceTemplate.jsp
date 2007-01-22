@@ -107,7 +107,9 @@
       <td class="ListCellHeader" colspan="2"><html:link page="."><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></html:link></td>
 	</tr>
     <c:forEach var="entry" varStatus="status" items="${serverTypes}">
-    <c:if test="${entry.virtual == false}">
+    <c:set var="server" value="${entry.key}"/>
+    <c:set var="services" value="${entry.value}"/>
+    <c:if test="${server.virtual == false}">
     <c:choose>
       <c:when test="${even}">
         <tr class="tableRowEven">
@@ -118,11 +120,11 @@
         <c:set var="even" value="true"/>
       </c:otherwise>
     </c:choose>
-      <td class="ListCellPrimary"><html:link page="/ResourceHub.do?ff=2&ft=2:${entry.id}"><c:out value="${entry.name}"/></html:link></td>
-      <td class="ListCell" align="center"><html:link page="/resource/server/monitor/Config.do?mode=configure&aetid=2:${entry.id}&type=2"><html:img page="/images/tbb_editMetricTemplate.gif" width="136" height="16" border="0"/></html:link></td>
+      <td class="ListCellPrimary"><html:link page="/ResourceHub.do?ff=2&ft=2:${server.id}"><c:out value="${server.name}"/></html:link></td>
+      <td class="ListCell" align="center"><html:link page="/resource/server/monitor/Config.do?mode=configure&aetid=2:${server.id}&type=2"><html:img page="/images/tbb_editMetricTemplate.gif" width="136" height="16" border="0"/></html:link></td>
     </tr>
     <tr class="ListRow">
-        <c:forEach var="serviceType" varStatus="status" items="${entry.serviceTypeValues}">
+        <c:forEach var="serviceType" varStatus="status" items="${services}">
     <c:choose>
       <c:when test="${even}">
         <tr class="tableRowEven">
