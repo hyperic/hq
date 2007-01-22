@@ -54,8 +54,11 @@
             <html:link page="/Resource.do?eid=1:${platform.id}"><c:out value="${platform.name}"/>&nbsp;</html:link>
         </td>
         <td class="ListCell" align="center">
+        <c:set var="formattedTime">
+        <hq:dateFormatter time="true" approx="true" value="${current - platform.CTime}"/>
+        </c:set>
         <fmt:message key="dash.recentlyApproved.ago">
-            <fmt:param><hq:dateFormatter time="true" approx="true" value="${current - platform.CTime}"/></fmt:param>
+          <fmt:param value="${formattedTime}"/>
         </fmt:message>
         </td>
       </tr>
