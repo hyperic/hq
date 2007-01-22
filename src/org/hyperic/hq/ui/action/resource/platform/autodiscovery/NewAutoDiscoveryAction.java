@@ -80,7 +80,6 @@ public class NewAutoDiscoveryAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception 
     { 
-        Log log = LogFactory.getLog(NewAutoDiscoveryAction.class.getName());
         ActionErrors errors = new ActionErrors();
         try {
             PlatformAutoDiscoveryForm newForm = (PlatformAutoDiscoveryForm) form;
@@ -113,6 +112,9 @@ public class NewAutoDiscoveryAction extends BaseAction {
             PlatformValue pValue =
                 appdefBoss.findPlatformById(sessionId, platformId);
             buildAutoDiscoveryScan(request, newForm, pValue, errors); 
+
+            RequestUtils.setConfirmation(request,
+                "resource.platform.inventory.autoinventory.status.NewScan");
 
             return returnNew(request, mapping, forwardParams);
         } catch (AgentConnectionException e) {
@@ -148,9 +150,9 @@ public class NewAutoDiscoveryAction extends BaseAction {
      * cancelled or reset; otherwise return <code>null</code> so that
      * the subclass can continue to execute.
      */
-    public ActionForward checkSubmit(HttpServletRequest request,
-                                     ActionMapping mapping, ActionForm form,
-                                     Map params, boolean doReturnPath)
+    protected ActionForward checkSubmit(HttpServletRequest request,
+                                        ActionMapping mapping, ActionForm form,
+                                        Map params, boolean doReturnPath)
         throws Exception {
         PlatformAutoDiscoveryForm aiForm = (PlatformAutoDiscoveryForm) form;
 
