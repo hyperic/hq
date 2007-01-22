@@ -11,15 +11,15 @@
     <cache usage="read-write" />
 
     <id name="id" type="integer">
-      <column name="ID" not-null="true" />
+      <column name="ID" not-null="true" index="meas_id_class"/>
       <generator class="sequence">
         <param name="sequence">EAM_MEASUREMENT_ID_SEQ</param>
       </generator>
     </id>
 
     <discriminator>
-      <column name="MEASUREMENT_CLASS" not-null="false" sql-type="character"
-              length="1"/>
+      <column name="MEASUREMENT_CLASS" not-null="true" sql-type="character"
+              length="1" index="meas_id_class"/>
     </discriminator>
 
     <version name="_version_" type="long">

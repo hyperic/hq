@@ -1788,6 +1788,49 @@ has already been defined.
     </schemaSpec>
 
     <schemaSpec version="3.00">
+        <schema-addColumn table="EAM_STAT_ERRORS"
+                          column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_STAT_ERRORS SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_STAT_ERRORS" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+        <schema-addColumn table="EAM_SERVICE_REQUEST"
+                          column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_SERVICE_REQUEST SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_SERVICE_REQUEST" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+        <schema-addColumn table="EAM_ERROR_CODE"
+                          column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_ERROR_CODE SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_ERROR_CODE" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+        <schema-addColumn table="EAM_REQUEST_STAT"
+                          column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_REQUEST_STAT SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+         <schema-alterColumn table="EAM_REQUEST_STAT" quoteDefault="f" 
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+        <schema-directSQL>
+          <statement targetDB="postgresql">
+              alter table eam_request_stat drop constraint 
+                    "eam_request_stat_svcreq_id_fkey"
+          </statement>
+          <statement targetDB="postgresql">
+              alter table eam_request_stat add constraint fke8ebbc725a959c18 
+                    FOREIGN KEY (svcreq_id) REFERENCES eam_service_request(id) 
+                    ON DELETE CASCADE
+          </statement>
+        </schema-directSQL>
         <schema-addColumn table="EAM_ACTION"
                            column="VERSION_COL" columnType="LONG">
            <initializer>
@@ -1812,6 +1855,12 @@ has already been defined.
                     FOREIGN KEY (parent_id) REFERENCES eam_action(id) 
                     ON DELETE CASCADE
           </statement>
+            <statement targetDB="postgresql">
+              drop index error_code
+            </statement>
+            <statement targetDB="postgresql">
+              create index error_code on eam_error_code USING btree (code)
+            </statement>
             <statement targetDB="postgresql">
               drop index aiq_server_name
             </statement>
@@ -2003,6 +2052,9 @@ has already been defined.
             </statement>
             <statement targetDB="postgresql">
               drop index eam_trigger_event_ref
+            </statement>
+            <statement targetDB="postgresql">
+              drop index service_request_svcid
             </statement>
             <statement targetDB="postgresql">
                ALTER TABLE eam_aiq_server DROP CONSTRAINT "eam_aiq_server_aiq_platform_id_fkey" CASCADE
@@ -2222,6 +2274,15 @@ has already been defined.
             <statement targetDB="postgresql">
               ALTER TABLE eam_user_alert DROP CONSTRAINT "eam_user_alert_alert_id_fkey" CASCADE
             </statement>            
+            <statement targetDB="postgresql">
+              ALTER TABLE eam_stat_errors DROP CONSTRAINT "eam_stat_errors_error_id_fkey" CASCADE
+            </statement>            
+            <statement targetDB="postgresql">
+              ALTER TABLE eam_stat_errors DROP CONSTRAINT "eam_stat_errors_reqstat_id_fkey" CASCADE
+            </statement>            
+            <statement targetDB="postgresql">
+              ALTER TABLE eam_stat_errors DROP CONSTRAINT "rt_errs_fk_rstat" CASCADE
+            </statement>            
         </schema-directSQL>
 
         <schema-addColumn table="EAM_ALERT_ACTION_LOG"
@@ -2313,7 +2374,18 @@ has already been defined.
             </statement>
         </schema-directSQL>
 
-        
+
+        <schema-directSQL>
+            <statement targetDB="postgresql">
+                drop index "service_request_svcid_url"
+            </statement>
+            <statement targetDB="postgresql">
+                alter table only eam_service_request
+                      add constraint eam_service_request_serviceid_key
+                          unique (serviceid, url)
+            </statement>
+        </schema-directSQL>
+            
         <schema-alterColumn table="EAM_AGENT_TYPE" quoteDefault="f" 
                              column="VERSION_COL" default="0" nullable="NOT NULL"/>
          <schema-addColumn table="EAM_AIQ_IP"
@@ -2546,12 +2618,15 @@ has already been defined.
              UPDATE EAM_MEASUREMENT SET VERSION_COL=0
            </initializer>
          </schema-addColumn>
+        <schema-alterColumn table="EAM_MEASUREMENT" quoteDefault="f" 
+                            column="VERSION_COL" default="0" nullable="NOT NULL"/>
         <!-- The measurement class must be filled out: XXX -->
         <schema-addColumn table="EAM_MEASUREMENT"
                            column="MEASUREMENT_CLASS" columnType="CHAR"
                            precision="1"/>
         <schema-alterColumn table="EAM_MEASUREMENT" quoteDefault="f" 
-                            column="VERSION_COL" default="0" nullable="NOT NULL"/>
+                            column="MEASUREMENT_CLASS" default="0" 
+                            nullable="NOT NULL"/>
 
         <schema-alterColumn table="EAM_MEASUREMENT" 
                             column="TEMPLATE_ID" nullable="NOT NULL"/>
@@ -2867,8 +2942,8 @@ has already been defined.
               version_col bigint DEFAULT 0 NOT NULL,
               name character varying(255) NOT NULL,
               descr character varying(255),
-              severity integer,
-              enabled boolean,
+              severity integer NOT NULL,
+              enabled boolean NOT NULL,
               ctime bigint NOT NULL,
               mtime bigint NOT NULL,
               group_id integer NOT NULL,
@@ -2921,6 +2996,13 @@ has already been defined.
 
           
         <schema-directSQL>
+                <statement targetDB="postgresql">
+                  CREATE INDEX service_request_svcid ON eam_service_request
+                         USING btree (serviceid)
+                </statement>
+                <statement targetDB="postgresql">
+                  CREATE INDEX meas_id_class ON eam_measurement USING btree (id, measurement_class)
+                </statement>
                 <statement targetDB="postgresql">
                   CREATE INDEX aiq_ip_idx ON eam_aiq_ip USING btree (aiq_platform_id, address)
                 </statement>
@@ -3511,6 +3593,27 @@ has already been defined.
           </statement>
           <statement targetDB="postgresql">
             ALTER TABLE ONLY eam_virtual ADD CONSTRAINT fk94039bddfc176ae FOREIGN KEY (resource_id) REFERENCES eam_resource(id) ON DELETE CASCADE
+          </statement>          
+          <statement targetDB="postgresql">
+            ALTER TABLE ONLY eam_stat_errors
+                  ADD CONSTRAINT fk6f2383a828d8858d FOREIGN KEY (reqstat_id) 
+                      REFERENCES eam_request_stat(id);
+          </statement>
+          <statement>
+              ALTER TABLE ONLY eam_stat_errors
+                  ADD CONSTRAINT fk6f2383a8b931cec9 FOREIGN KEY (error_id) 
+                      REFERENCES eam_error_code(id) ON DELETE CASCADE;
+          </statement>
+          <statement>
+              ALTER TABLE ONLY eam_stat_errors
+                  ADD CONSTRAINT fk6f2383a8cb0ab3b7 FOREIGN KEY (error_id) 
+                      REFERENCES eam_request_stat(id) ON DELETE CASCADE;
+          </statement>          
+          <statement>
+            DROP TABLE eam_tier_type
+          </statement>          
+          <statement>
+            DROP TABLE eam_user_alert
           </statement>          
       </schema-directSQL>
 

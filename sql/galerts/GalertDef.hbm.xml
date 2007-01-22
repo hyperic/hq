@@ -26,11 +26,11 @@
     </property>
 
     <property name="severityEnum">
-      <column name="SEVERITY"/>
+      <column name="SEVERITY" not-null="true"/>
     </property>
 
     <property name="enabled">
-      <column name="ENABLED"/>
+      <column name="ENABLED" not-null="true"/>
     </property>
 
     <property name="ctime" type="long">
