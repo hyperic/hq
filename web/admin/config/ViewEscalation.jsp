@@ -66,7 +66,8 @@ function showViewEscResponse(originalRequest) {
     $('escId').value = id;
     $('id').value = id;
 
-    $('name').innerHTML = escName;
+    $('name').innerHTML = '<b>' + escName + '</b>';
+    $('name').style.backgroundColor = "#dbe3f5";
     $('escName').value = escName;
 
     $('description').innerHTML = description + "&nbsp;";
@@ -188,15 +189,18 @@ function showViewEscResponse(originalRequest) {
       td6.innerHTML = '<html:img page="/images/esc_movUp.gif" height="16" width="12" border="0"  alt="" />' + '&nbsp;&nbsp;<span style="color:#062b7a;font-weight:bold;">Drag to reorder escalation actions</span>';
 
       escTr1.appendChild(td1);
-  
+      td1.setAttribute((document.all ? 'className' : 'class'), "waitTd");
       //td1.setAttribute('colspan', '3');
       td1.appendChild(waitDiv);
       waitDiv.setAttribute('id','wait_' + liID);
       waitDiv.setAttribute('width', '100%');
+      $('wait_' + liID).style.cursor = "pointer;";
       waitDiv.innerHTML = "Wait time before escalating: " + actionWaitTime + "<br>";
+
   
       td1.appendChild(editWaitDiv);
       editWaitDiv.setAttribute('id','editWait_' + liID);
+      $('editWait_' + liID).style.cursor = "pointer;";
   
       escTr2.appendChild(td2);
       td2.setAttribute('width', '100%');
@@ -204,6 +208,7 @@ function showViewEscResponse(originalRequest) {
       td2.setAttribute((document.all ? 'className' : 'class'), "wrap");
       td2.appendChild(usersTextDiv);
       td2.setAttribute('id','usersList_' + liID);
+      $('usersList_' + liID).style.cursor = "pointer;";
         //$('usersList_' + liID).style.border = "1px solid green";
       if (configListType == "1"){
           var emailAdds = emailInfo.split(',');
@@ -440,7 +445,7 @@ function showViewEscResponse(originalRequest) {
         $('emailinput'+ liID).style.display = 'none';
         emailDiv.setAttribute('class', 'escInput');
         emailDiv.setAttribute('width', '40%');
-        emailDiv.innerHTML = "email addresses (comma separated):<br><textarea rows=3 cols=35 id=emailinput_" + liID + " name=emailinput" + "></textarea>";
+        emailDiv.innerHTML = "email addresses (comma separated):<br><textarea rows=3 cols=35 id=emailinput name=emailinput onblur=checkEmail();></textarea>";
 
         td4.appendChild(sysDiv);
         sysDiv.setAttribute('class', 'escInput'+ liID);
@@ -702,6 +707,23 @@ function showViewEscResponse(originalRequest) {
         $('addEscalationUL').innerHTML = "";
         $('addEscButtons').style.display = "none";
         $('addRowButton').style.display = "";
+    }
+
+    function checkEmail() {
+        var emailinputText = $('emailinput');
+        var illegalChars= /[\(\)\<\>\;\:\\\/\"\[\]]/;
+        var elemText = emailinputText.value;
+
+        if (elemText != "" && elemText.match(illegalChars)) {
+        //error = "The email address contains illegal characters.\n";
+        $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invaliEmailAddresInput"/>';
+        $('example').style.display= '';
+            return false;
+        } else {
+            $('escMsg').innerHTML ='';
+            $('example').style.display= 'none';
+        }
+
     }
 
 </script>
