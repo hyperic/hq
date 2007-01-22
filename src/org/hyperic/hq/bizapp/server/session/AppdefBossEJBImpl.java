@@ -1568,13 +1568,12 @@ public class AppdefBossEJBImpl
     }
 
     /**
-     * Remove a platform.  Also, remove all measurements associated with the
-     * platform
-     * @param deep - true if all subobjects should be removed
+     * Remove a platform.
+     *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void removePlatform(int sessionId, Integer platformId, boolean deep)
+    public void removePlatform(int sessionId, Integer platformId)
         throws SessionNotFoundException, SessionTimeoutException,
                ApplicationException 
     {
@@ -1589,19 +1588,17 @@ public class AppdefBossEJBImpl
             List unscheduleList = new ArrayList();
             unscheduleList.add(platRes);
 
-            // If we're removing all logical dependents, then add them to
-            // the unschedule list...
-            if (deep) {
-                ServerManagerLocal svrMgrLoc = getServerManager();
-                unscheduleList.addAll(
-                    svrMgrLoc.getServersByPlatform(subject, platformId, false,
-                                                   PageControl.PAGE_ALL));
+            // Add dependent children to the list of metrics to unschedule
+            // XXX: Use POJOs here.
+            ServerManagerLocal svrMgrLoc = getServerManager();
+            unscheduleList.addAll(
+                svrMgrLoc.getServersByPlatform(subject, platformId, false,
+                                               PageControl.PAGE_ALL));
 
-                ServiceManagerLocal svcMgrLoc= getServiceManager();
-                unscheduleList.addAll(
-                    svcMgrLoc.getServicesByPlatform(subject, platformId,
-                        PageControl.PAGE_ALL));
-            }
+            ServiceManagerLocal svcMgrLoc= getServiceManager();
+            unscheduleList.addAll(
+                svcMgrLoc.getServicesByPlatform(subject, platformId,
+                                                PageControl.PAGE_ALL));
 
             EventsBossLocal eventsBoss    = getEventsBoss();
             MeasurementBossLocal measBoss = getMeasurementBoss();
@@ -1649,7 +1646,7 @@ public class AppdefBossEJBImpl
             }
             
             // now, remove the platform.
-            getPlatformManager().removePlatform(subject, platformId, deep);
+            getPlatformManager().removePlatform(subject, platformId);
 
             // Last, remove authz resources
             getAuthzBoss().removeResources(toDeleteResourceIds);
@@ -1942,11 +1939,12 @@ public class AppdefBossEJBImpl
     }
 
     /**
-     * @param deep - true if all subobjects should be removed
+     * Remove a Server from the inventory.
+     *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void removeServer(int sessionId, Integer serverId, boolean deep)
+    public void removeServer(int sessionId, Integer serverId)
         throws PermissionException, ServerNotFoundException,
                SessionNotFoundException, SessionTimeoutException 
     {
@@ -1962,14 +1960,13 @@ public class AppdefBossEJBImpl
             List unscheduleList = new ArrayList();
             unscheduleList.add(serverRes);
 
-            // If we're removing all logical dependents, then add services
-            // to the unschedule list...
-            if (deep) {
-                ServiceManagerLocal svcMgrLoc = getServiceManager();
-                unscheduleList.addAll(
-                    svcMgrLoc.getServicesByServer(subject, serverId,
-                        PageControl.PAGE_ALL));
-            }
+            // Unschedule service metrics.
+            // XXX: Use POJO to lookup services.
+            ServiceManagerLocal svcMgrLoc = getServiceManager();
+            unscheduleList.addAll(
+                svcMgrLoc.getServicesByServer(subject, serverId,
+                                              PageControl.PAGE_ALL));
+
 
             EventsBossLocal eventsBoss    = getEventsBoss();
             MeasurementBossLocal measBoss = getMeasurementBoss();
@@ -1998,7 +1995,7 @@ public class AppdefBossEJBImpl
             }
 
             // finally, remove the server
-            getServerManager().removeServer(subject, serverId, deep);
+            getServerManager().removeServer(subject, serverId);
         } catch (RemoveException e) {
             this.rollback();
             throw new SystemException(e);
@@ -2015,11 +2012,12 @@ public class AppdefBossEJBImpl
     }
 
     /**
-     * @param deep - true if all child services (if any) should be removed
+     * Remove a Service from the inventory.
+     *  
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void removeService(int sessionId, Integer serviceId, boolean deep)
+    public void removeService(int sessionId, Integer serviceId)
         throws ApplicationException 
     {
         try {
@@ -2038,7 +2036,7 @@ public class AppdefBossEJBImpl
             // remove any log or config track plugins
             measBoss.removeTrackers(sessionId, id);
             
-            getServiceManager().removeService(subject, serviceId, deep);
+            getServiceManager().removeService(subject, serviceId);
         } catch (SessionTimeoutException e) {
             this.rollback();
             throw e;

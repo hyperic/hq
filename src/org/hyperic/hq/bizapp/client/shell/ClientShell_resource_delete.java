@@ -147,7 +147,7 @@ public class ClientShell_resource_delete
                         out.println("\nRemoving Platform...");
                         AppdefBoss appdefBoss = shell.getBossManager().
                             getAppdefBoss();
-                        appdefBoss.removePlatform(authToken, id.getId(), true);
+                        appdefBoss.removePlatform(authToken, id.getId());
                         return;
                     } catch (Exception e) {
                         throw new ShellCommandExecException("Unable to " +
@@ -180,7 +180,7 @@ public class ClientShell_resource_delete
                         out.println("\nRemoving Server...");
                         AppdefBoss appdefBoss = shell.getBossManager().
                             getAppdefBoss();
-                        appdefBoss.removeServer(authToken, id.getId(), true);    
+                        appdefBoss.removeServer(authToken, id.getId());
                         return;
                     } catch (Exception e) {
                         throw new ShellCommandExecException("Unable to " +
@@ -193,7 +193,7 @@ public class ClientShell_resource_delete
             try {
                 getOutStream().println("\nRemoving Service...");
                 AppdefBoss appdefBoss = shell.getBossManager().getAppdefBoss();
-                appdefBoss.removeService(authToken, id.getId(), true);
+                appdefBoss.removeService(authToken, id.getId());
                 return;
             } catch (Exception e) {
                 throw new ShellCommandExecException("Unable to remove " +

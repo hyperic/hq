@@ -98,8 +98,6 @@ public class RemoveResourceAction extends BaseAction {
         List entities =
             BizappUtils.buildAppdefEntityIds(resourceList);
         if (resourceItems != null && resourceItems.length > 0) {
-            if (log.isTraceEnabled())
-                log.trace("removing resources " + entities );
             int deleted = 0;
             // about the exception handling:
             // if someone either deleted the entity out from under our user
@@ -115,37 +113,31 @@ public class RemoveResourceAction extends BaseAction {
                     case AppdefEntityConstants.APPDEF_TYPE_PLATFORM :
                         try {
                             boss.removePlatform(sessionId.intValue(), 
-                                                resourceId.getId(), 
-                                                true);
+                                                resourceId.getId());
                             deleted++;
                         } catch (AppdefEntityNotFoundException e) {
-                            if (log.isTraceEnabled())
-                                log.trace("removing resource  " + resourceId +
-                                    " failed");
+                            log.error("Removing resource " + resourceId +
+                                       "failed.");
                         }
                         break;
                     case AppdefEntityConstants.APPDEF_TYPE_SERVER :
                         try {
                             boss.removeServer(sessionId.intValue(), 
-                                              resourceId.getId(), 
-                                              true);
+                                              resourceId.getId());
                             deleted++;
                         } catch (AppdefEntityNotFoundException e) {
-                            if (log.isTraceEnabled())
-                                log.trace("removing resource  " + resourceId +
-                                    " failed");
+                            log.error("Removing resource  " + resourceId +
+                                      " failed");
                         }
                         break;
                     case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
                         try {
                             boss.removeService(sessionId.intValue(), 
-                                               resourceId.getId(), 
-                                               true);
+                                               resourceId.getId());
                             deleted++;
                         } catch (AppdefEntityNotFoundException e) {
-                            if (log.isTraceEnabled())
-                                log.trace("removing resource  " + resourceId +
-                                    " failed");
+                            log.trace("Removing resource  " + resourceId +
+                                      " failed");
                         }
                         break;
                     case AppdefEntityConstants.APPDEF_TYPE_APPLICATION :
@@ -154,9 +146,8 @@ public class RemoveResourceAction extends BaseAction {
                                                    resourceId.getId());
                             deleted++;
                         } catch (AppdefEntityNotFoundException e) {
-                            if (log.isTraceEnabled())
-                                log.trace("removing resource  " + resourceId +
-                                    " failed");
+                            log.trace("Removing resource  " + resourceId +
+                                      " failed");
                         }
                         break;
         
@@ -166,15 +157,13 @@ public class RemoveResourceAction extends BaseAction {
                                              resourceId.getId());
                             deleted++;
                        } catch (AppdefEntityNotFoundException e) {
-                           if (log.isTraceEnabled())
-                               log.trace("removing resource  " + resourceId +
-                                   " failed");
+                           log.trace("Removing resource  " + resourceId +
+                                     " failed");
                        }
                         break;
                     default :
-                        if (log.isTraceEnabled())
-                            log.trace("resource  " + resourceId + 
-                                " isn't something I know how to delete");
+                        log.trace("Resource  " + resourceId +
+                                  " isn't something I know how to delete");
                         break;
                 }
             }

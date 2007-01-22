@@ -1394,7 +1394,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                          svcIt.hasNext(); ) {
                         Service svcLocal = (Service) svcIt.next();
                         try {
-                            removeService(overlord, svcLocal, true);
+                            removeService(overlord, svcLocal);
                         } catch (PermissionException e) {
                             // This should never happen, we're the overlord
                             throw new SystemException(e);
@@ -1475,16 +1475,16 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * @param deep - delete child services also
+     * Remove a Service from the inventory.
+     *
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void removeService(AuthzSubjectValue subj, Integer serviceId, 
-                              boolean deep) 
+    public void removeService(AuthzSubjectValue subj, Integer serviceId)
         throws RemoveException, FinderException, PermissionException {
         Service service;
         service = getServiceDAO().findById(serviceId);
-        removeService(subj, service, deep);
+        removeService(subj, service);
     }
 
     /**
@@ -1493,29 +1493,21 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void removeService(AuthzSubjectValue subject, Service service,
-                              boolean deep)
+    public void removeService(AuthzSubjectValue subject, Service service)
         throws RemoveException, FinderException, PermissionException {
 
         Integer serviceId = service.getId();
 
         // find any children
         Collection childSvcs = getServiceDAO().findByParent(serviceId);
-        if (!deep && childSvcs.size() > 0) {
-            throw new RemoveException(
-                "Service can not be removed since it has children");
-        }
-        Integer serverId = service.getServer().getId();
 
-        // validate permission needs removeService on the service
-        // to succeed
         checkRemovePermission(subject, service.getEntityId());
 
         // remove any child services
         for (Iterator i = childSvcs.iterator(); i.hasNext();) {
             Service child = (Service) i.next();
             Integer childId = child.getId();
-            removeService(subject, childId, deep);
+            removeService(subject, childId);
         }
 
         // keep the configresponseId so we can remove it later

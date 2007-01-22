@@ -91,7 +91,7 @@ public class RemoveServiceAction extends BaseAction {
 
         for (int i = 0; i < resources.length; i++)
         {
-            boss.removeService(sessionId.intValue(), resources[i], false);
+            boss.removeService(sessionId.intValue(), resources[i]);
         }
 
         return returnSuccess(request, mapping, params);        

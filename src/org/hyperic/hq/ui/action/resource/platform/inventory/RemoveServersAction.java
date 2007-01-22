@@ -25,21 +25,16 @@
 
 package org.hyperic.hq.ui.action.resource.platform.inventory;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -88,7 +83,7 @@ public class RemoveServersAction extends BaseAction {
             Iterator i = servers.iterator();
             while (i.hasNext()) {
                 Integer serverId = (Integer) i.next();
-                boss.removeServer(sessionId.intValue(), serverId, true);
+                boss.removeServer(sessionId.intValue(), serverId);
             }
 
             RequestUtils

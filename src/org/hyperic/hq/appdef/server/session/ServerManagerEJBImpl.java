@@ -167,24 +167,21 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Remove a server
-     * @param subject - who
-     * @param id - the id of the server
-     * @param deep - whether to delete subobjects
+     * @param subject The user issuing the delete operation.
+     * @param id  The id of the Server.
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void removeServer(AuthzSubjectValue subject, Integer id,
-                             boolean deep) 
+    public void removeServer(AuthzSubjectValue subject, Integer id)
         throws ServerNotFoundException, RemoveException, PermissionException {
 
         Server server;
-        // find it
         try {
             server = getServerDAO().findById(id);
         } catch (ObjectNotFoundException e) {
             throw new ServerNotFoundException(id);
         }
-        removeServer(subject, server, deep);
+        removeServer(subject, server);
     }
 
     /**
@@ -193,19 +190,13 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void removeServer (AuthzSubjectValue subject,
-                              Server server, boolean deep)
-        throws ServerNotFoundException, RemoveException, PermissionException {
+    public void removeServer(AuthzSubjectValue subject,
+                             Server server)
+        throws ServerNotFoundException, RemoveException, PermissionException
+    {
         Integer id = server.getId();
         try {
-            // check to see if there are services installed on the
-            // server
             Collection services = server.getServices();
-            int numServices = services.size();
-            if(numServices > 0 && !deep) {
-                throw new RemoveException("Server " + server.getName() 
-                    + " has " + numServices + " services");
-            }
             // check if the user has permission to remove it
             // user needs the removeServer permission on the server
             // to succeed
@@ -215,7 +206,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             while(servicesIt.hasNext()) {
                 Service aService = (Service)servicesIt.next();
                 servicesIt.remove();
-                getServiceMgrLocal().removeService(subject, aService, true);
+                getServiceMgrLocal().removeService(subject, aService);
             }
 
             // keep the configresponseId so we can remove it later

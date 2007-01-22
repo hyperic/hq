@@ -225,11 +225,9 @@ public class AIQRV_approve implements AIQResourceVisitor {
                 return;
             }
 
-            // Remove the platform, the 'true' here mean a 
-            // deep/recursive removal.
+            // Remove the platform
             try {
-                pmLocal.removePlatform(subject, existingPlatform.getId(),
-                                       true);
+                pmLocal.removePlatform(subject, existingPlatform.getId());
             } catch (PermissionException e) {
                 throw e;
             } catch (Exception e) {
@@ -508,7 +506,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                "remove aiserver=" + id);
                  }
                  _log.info("Removing Server...");
-                 smLocal.removeServer(subject, serverValue.getId(), true);
+                 smLocal.removeServer(subject, serverValue.getId());
             } catch (PermissionException e) {
                 throw e;
             } catch (Exception e) {

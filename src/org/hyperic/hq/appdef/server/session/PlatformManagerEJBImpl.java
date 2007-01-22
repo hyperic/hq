@@ -279,38 +279,27 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Delete a platform
-     * @param subject - who
-     * @param id - the id of the platform
-     * @param deep - whether to delete all subobjects of this platform
+     * @param subject The user performing the delete operation.
+     * @param id - The id of the Platform
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void removePlatform(AuthzSubjectValue subject, Integer id,
-                               boolean deep)
+    public void removePlatform(AuthzSubjectValue subject, Integer id)
         throws RemoveException, PlatformNotFoundException, PermissionException 
     {
         try {
             // find it
             Platform platform = getPlatformDAO().findById(id);
-            removePlatform(subject, platform, deep);
+            removePlatform(subject, platform);
         } catch (ObjectNotFoundException e) {
             throw new PlatformNotFoundException(id);
         }
     }
     
     private void removePlatform(AuthzSubjectValue subject,
-                                Platform platform, boolean deep)
+                                Platform platform)
         throws RemoveException, PermissionException, PlatformNotFoundException {
         try {
-            // check to see if there are servers installed on the
-            // platform
-            Collection servers = platform.getServers();
-            int numServers = servers.size();
-            if(numServers > 0 && !deep) {
-                throw new RemoveException("Platform " + platform.getName()
-                    + " has " + numServers + " installed servers");
-            }
-            
             checkRemovePermission(subject, platform.getEntityId());
             // remove the resources for any servers and services
             // on this host. This is done because the entity beans
