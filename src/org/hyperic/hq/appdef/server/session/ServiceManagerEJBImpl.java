@@ -1498,23 +1498,22 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
         Integer serviceId = service.getId();
 
-        // find any children
-        Collection childSvcs = getServiceDAO().findByParent(serviceId);
-
         checkRemovePermission(subject, service.getEntityId());
-
-        // remove any child services
-        for (Iterator i = childSvcs.iterator(); i.hasNext();) {
-            Service child = (Service) i.next();
-            Integer childId = child.getId();
-            removeService(subject, childId);
-        }
-
-        // keep the configresponseId so we can remove it later
         Integer cid = service.getConfigResponseId();
 
-        // remove from authz
+        // Remove authz resource.
         removeAuthzResource(service.getEntityId());
+
+        // Remove service from parent Server's Services collection
+        Server server = service.getServer();
+        Collection services = server.getServices();
+        for (Iterator i = services.iterator(); i.hasNext(); ) {
+            Service s = (Service)i.next();
+            if (s.equals(service)) {
+                i.remove();
+                break;
+            }
+        }
 
         // remove from appdef
         getServiceDAO().remove(service);

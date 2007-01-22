@@ -65,6 +65,7 @@ import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
+import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ConfigResponseDB;
@@ -298,20 +299,30 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     
     private void removePlatform(AuthzSubjectValue subject,
                                 Platform platform)
-        throws RemoveException, PermissionException, PlatformNotFoundException {
+        throws RemoveException, PermissionException, PlatformNotFoundException
+    {
         try {
             checkRemovePermission(subject, platform.getEntityId());
-            // remove the resources for any servers and services
-            // on this host. This is done because the entity beans
-            // are not aware of Authz, and are set up for cascade deletes
-            // Hooking up their ejbRemove's to do this operation 
-            // is not necessarily desireable at this point
 
             // keep the configresponseId so we can remove it later
             Integer cid = platform.getConfigResponseId();
 
+            ServerManagerLocal srvMgr = getServerMgrLocal();
+            // Server manager will update the collection, so we need to copy
+            Collection servers = new ArrayList(platform.getServers());
+            for (Iterator i = servers.iterator(); i.hasNext(); ) {
+                Server server = (Server)i.next();
+                try {
+                    // Remove servers
+                    srvMgr.removeServer(subject, server);
+                } catch (ServerNotFoundException e) {
+                    _log.error("Unable to remove server", e);
+                }
+            }
+
             // now remove the resource for the platform
             removeAuthzResource(platform.getEntityId());
+
             getPlatformDAO().remove(platform);
 
             // remove the config response

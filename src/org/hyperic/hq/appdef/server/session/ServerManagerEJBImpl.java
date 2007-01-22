@@ -196,27 +196,35 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     {
         Integer id = server.getId();
         try {
-            Collection services = server.getServices();
-            // check if the user has permission to remove it
-            // user needs the removeServer permission on the server
-            // to succeed
             checkRemovePermission(subject, server.getEntityId());
-            // remove the service resource entries and validate permissions
-            Iterator servicesIt = services.iterator();
-            while(servicesIt.hasNext()) {
-                Service aService = (Service)servicesIt.next();
-                servicesIt.remove();
-                getServiceMgrLocal().removeService(subject, aService);
+
+            // Service manager will update the collection, so we need to copy
+            Collection services = new ArrayList(server.getServices());
+            for (Iterator i = services.iterator(); i.hasNext(); ) {
+                Service service = (Service)i.next();
+                getServiceMgrLocal().removeService(subject, service);
             }
 
-            // keep the configresponseId so we can remove it later
+            // Keep config response ID so it can be deleted later.
             Integer cid = server.getConfigResponseId();
 
-            // remove the resource
+            // Remove authz resource
             removeAuthzResource(server.getEntityId());
+
+            // Remove server from parent Platform Server collection.
+            Platform platform = server.getPlatform();
+            Collection servers = platform.getServers();
+            for (Iterator i = servers.iterator(); i.hasNext(); ) {
+                Server s = (Server)i.next();
+                if (s.equals(server)) {
+                    i.remove();
+                    break;
+                }
+            }
+            
             getServerDAO().remove(server);
 
-            // remove the config response
+            // Remove the config response
             if (cid != null) {
                 try {
                     ConfigResponseDAO cdao =
@@ -228,7 +236,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 }
             }
 
-            // remove custom properties
             deleteCustomProperties(AppdefEntityConstants.APPDEF_TYPE_SERVER, 
                                    id.intValue());
 
