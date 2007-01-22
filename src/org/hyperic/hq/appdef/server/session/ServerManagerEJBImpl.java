@@ -251,7 +251,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                                       PageControl pc)
         throws FinderException {
 
-        Collection serverTypes = getServerTypeDAO().findAll();
+        Collection serverTypes = getServerTypeDAO().findAllOrderByName();
 
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
