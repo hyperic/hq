@@ -359,9 +359,15 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @ejb:transaction type="Required"
      */
     public ServerValue findServerById(AuthzSubjectValue subject,
-                                      Integer id) 
+                                      Integer id)
         throws ServerNotFoundException {
-        Server server = getServerDAO().findById(id);
+
+        Server server;
+        try {
+            server = getServerDAO().findById(id);
+        } catch (ObjectNotFoundException e) {
+            throw new ServerNotFoundException(id);
+        }
         return server.getServerValue();
     }
 
