@@ -2624,6 +2624,12 @@ has already been defined.
         <schema-addColumn table="EAM_MEASUREMENT"
                            column="MEASUREMENT_CLASS" columnType="CHAR"
                            precision="1"/>
+        <schema-update table="EAM_MEASUREMENT" column="MEASUREMENT_CLASS"
+                       columnType="CHAR" value="R"
+                       where="coll_interval is null"/>
+        <schema-update table="EAM_MEASUREMENT" column="MEASUREMENT_CLASS"
+                       columnType="CHAR" value="D"
+                       where="coll_interval is not null"/>
         <schema-alterColumn table="EAM_MEASUREMENT" quoteDefault="f" 
                             column="MEASUREMENT_CLASS" default="0" 
                             nullable="NOT NULL"/>
