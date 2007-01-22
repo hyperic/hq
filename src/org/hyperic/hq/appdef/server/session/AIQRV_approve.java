@@ -82,7 +82,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
         _log.info("Visiting platform: " + id + " fqdn=" + aiplatform.getFqdn());
         AIPlatformValue aiplatformValue = aiplatform.getAIPlatformValue();
         Platform existingPlatform = getExistingPlatform(subject, pmLocal,
-                                                        aiplatform);
+                                                        aiplatformValue);
         int qstat = aiplatform.getQueueStatus();
         switch (qstat) {
         case AIQueueConstants.Q_STATUS_PLACEHOLDER:
@@ -248,8 +248,9 @@ public class AIQRV_approve implements AIQResourceVisitor {
                         PlatformManagerLocal platformMan)
         throws AIQApprovalException, PermissionException
     {
-        Platform platform = getExistingPlatform(subject, platformMan,
-                                                aiip.getAIPlatform());
+        Platform platform =
+            getExistingPlatform(subject, platformMan,
+                                aiip.getAIPlatform().getAIPlatformValue());
         int qstat = aiip.getQueueStatus();
         switch (qstat) {
         case AIQueueConstants.Q_STATUS_PLACEHOLDER:
@@ -297,7 +298,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
         aiplatform = aiserver.getAIPlatform();
         aiplatformValue = aiplatform.getAIPlatformValue();
         existingPlatform = getExistingPlatform(subject, pmLocal,
-                                               aiplatform);
+                                               aiplatformValue);
 
         int qstat = aiserver.getQueueStatus();
         switch (qstat) {
@@ -524,7 +525,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
     private Platform getExistingPlatform(AuthzSubjectValue subject,
                                          PlatformManagerLocal pmLocal,
-                                         AIPlatform aiplatform) {
+                                         AIPlatformValue aiplatform) {
         try {
             return pmLocal.getPlatformByAIPlatform(subject, aiplatform);
         } catch (PermissionException e) {

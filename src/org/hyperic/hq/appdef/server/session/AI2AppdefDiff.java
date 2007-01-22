@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AICompare;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -46,14 +47,12 @@ import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
+import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
-import org.hyperic.hq.dao.PlatformDAO;
-import org.hyperic.dao.DAOFactory;
-import org.hibernate.NonUniqueResultException;
 
 /**
  * A utility class for calculating queue status and diff for an AIPlatform.
@@ -72,7 +71,7 @@ public class AI2AppdefDiff {
      * already identical to those in appdef are removed from the value object).  
      */
     public AIPlatformValue diffAgainstAppdef(AuthzSubjectValue subject,
-                                             PlatformDAO pmLH,
+                                             PlatformManagerLocal pmLH,
                                              ConfigManagerLocal cmLocal,
                                              CPropManagerLocal cpropMgr,
                                              AIPlatformValue aiplatform)
@@ -80,12 +79,6 @@ public class AI2AppdefDiff {
         Platform appdefPlatform;
         AIPlatformValue revisedAIplatform;
         int i;
-
-        if (_log.isDebugEnabled()) {
-            _log.debug("AIPLATFORM=" + aiplatform);
-            _log.debug("At start:=" + StringUtil.
-                arrayToString(aiplatform.getAIIpValues()));
-        }
 
         // We know we'll at least need to copy all the platform-level attributes
         revisedAIplatform = new AIPlatformValue();
@@ -111,7 +104,12 @@ public class AI2AppdefDiff {
         revisedAIplatform.setDiff(AIQueueConstants.Q_DIFF_NONE);
 
         // Get the appdef platform
-        appdefPlatform = getAppdefPlatform(aiplatform);
+        try {
+            appdefPlatform = pmLH.getPlatformByAIPlatform(subject, aiplatform);
+        } catch (PermissionException e) {
+            _log.error("Error looking up platform", e);
+            throw new SystemException(e);
+        }
 
         // If there was no appdef platform...
         if (appdefPlatform == null) {
@@ -538,42 +536,6 @@ public class AI2AppdefDiff {
             //don't overwrite existing appdef description
             aiPlatform.setDescription(appdefDescr);
         }
-    }
-
-    /**
-     * Figure out which platform an autoinventory report is
-     * referring to, by comparing the CertDN in the reported
-     * platform data to existing platforms.
-     *
-     * @param aiPlatform the AI platform to find in appdef
-     * @return The PlatformLocal for the platform that the scan came from.
-     */
-    private Platform getAppdefPlatform(AIPlatformValue aiPlatform)
-    {
-        String certdn = aiPlatform.getCertdn();
-        String fqdn = aiPlatform.getFqdn();
-        // First try to find by fqdn
-        PlatformDAO pdao = DAOFactory.getDAOFactory().getPlatformDAO();
-        Platform platform;
-        try {
-            platform = pdao.findByFQDN(fqdn);
-        } catch (NonUniqueResultException e) {
-            platform = null;
-        }
-        if (platform == null) {
-            try {
-                platform = pdao.findByCertDN(certdn);
-            } catch (NonUniqueResultException e) {
-                platform = null;
-            }
-            if (platform == null) {
-                if (_log.isDebugEnabled()) {
-                    _log.debug("FindByCertDN failed: ");
-                }
-                return null;
-            }
-        }
-        return platform;
     }
 
     private static boolean objectsEqual(Object o1, Object o2) {

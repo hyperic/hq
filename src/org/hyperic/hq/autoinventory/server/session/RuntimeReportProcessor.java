@@ -121,9 +121,8 @@ public class RuntimeReportProcessor {
             try {
                 appdefServers[i]
                     = serverMgr.findServerById(subject, serverId);
-                log.info("Found REPORTING appdef server: " + appdefServers[i]);
+                log.info("Found reporting server: " + appdefServers[i]);
             } catch (ServerNotFoundException e) {
-                // OK, it doesn't exist, that's bad.
                 log.error("Error finding existing server: " + serverId);
                 turnOffRuntimeDiscovery(subject, serverId, aiMgr, 
                                         agentToken);

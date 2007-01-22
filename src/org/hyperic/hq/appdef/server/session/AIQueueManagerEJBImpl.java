@@ -121,7 +121,7 @@ public class AIQueueManagerEJBImpl
         throws NamingException, CreateException, RemoveException
     {
         AIPlatformDAO aiplatformLH = getAIPlatformDAO();
-        PlatformDAO pmLH = getPlatformDAO();
+        PlatformManagerLocal pmLocal = getPlatformMgrLocal();
         AIQueueManagerLocal aiqLocal = getAIQManagerLocal();
         ConfigManagerLocal crmLocal = getConfigMgrLocal();
         CPropManagerLocal cpropMgr = getCPropMgrLocal();
@@ -130,7 +130,7 @@ public class AIQueueManagerEJBImpl
         // existing appdef data.
         AIPlatformValue revisedAIplatform
             = appdefDiffProcessor.diffAgainstAppdef(subject,
-                                                    pmLH, crmLocal, cpropMgr,
+                                                    pmLocal, crmLocal, cpropMgr,
                                                     aiplatform);
 
         // A null return from diffAgainstAppdef means that 
