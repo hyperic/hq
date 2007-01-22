@@ -75,6 +75,7 @@ import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
+import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
@@ -323,6 +324,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                                              id, true);
 
             pushRuntimeDiscoveryConfig(subject, id, metricConfig);
+        } catch (ConfigFetchException e) {
+            // No config, no need to turn off auto-discovery.
         } catch (Exception e) {
             throw new AutoinventoryException("Error enabling Runtime-AI for " +
                                              "server: " + e.getMessage(), e);
