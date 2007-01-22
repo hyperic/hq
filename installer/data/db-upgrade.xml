@@ -2630,6 +2630,8 @@ has already been defined.
 
         <schema-alterColumn table="EAM_MEASUREMENT" 
                             column="TEMPLATE_ID" nullable="NOT NULL"/>
+        <schema-alterColumn table="EAM_MEASUREMENT" 
+                            column="ENABLED" nullable="NULL"/>
          <schema-addColumn table="EAM_MEASUREMENT_ARG"
                            column="VERSION_COL" columnType="LONG">
            <initializer>
