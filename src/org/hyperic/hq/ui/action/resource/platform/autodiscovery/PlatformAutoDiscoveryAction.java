@@ -159,9 +159,9 @@ public class PlatformAutoDiscoveryAction extends ResourceController {
 
         findAndSetResource(request);
 
-        Portal portal = Portal 
-             .createPortal(TITLE_PATH + "ViewPlatformAutodiscoveryTitle",
-                          ".resource.platform.autodiscovery.ViewAutoDiscovery");
+        Portal portal = Portal
+            .createPortal("resource.platform.inventory.ViewPlatformTitle",
+                          ".resource.platform.inventory.ViewPlatform");
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         return null;
