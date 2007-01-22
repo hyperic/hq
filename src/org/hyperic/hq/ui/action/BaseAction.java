@@ -10,14 +10,14 @@
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
- * it under the terms version 2 of the GNU General Public License as
+ * it under the terms version 2 of the GNU General protected License as
  * published by the Free Software Foundation. This program is distributed
  * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * PARTICULAR PURPOSE. See the GNU General protected License for more
  * details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU General protected License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
@@ -52,12 +52,12 @@ import org.apache.struts.tiles.ComponentContext;
  */
 public class BaseAction extends Action {
 
-    public static final boolean YES_RETURN_PATH = true;
-    public static final boolean NO_RETURN_PATH = false;
+    protected static final boolean YES_RETURN_PATH = true;
+    protected static final boolean NO_RETURN_PATH = false;
     
     private static Log log = LogFactory.getLog(BaseAction.class.getName());
 
-    //-------------------------------------public methods
+    //-------------------------------------protected methods
 
     /**
      * Doesn't do a thing.  It's here as a dummy method
@@ -90,7 +90,7 @@ public class BaseAction extends Action {
      * cancelled or reset; otherwise return <code>null</code> so that
      * the subclass can continue to execute.
      */
-    public ActionForward checkSubmit(HttpServletRequest request,
+    protected ActionForward checkSubmit(HttpServletRequest request,
                                      ActionMapping mapping, ActionForm form,
                                      Map params, boolean doReturnPath)
         throws Exception {
@@ -120,27 +120,27 @@ public class BaseAction extends Action {
         return null;
     }
 
-    public ActionForward checkSubmit(HttpServletRequest request,
+    protected ActionForward checkSubmit(HttpServletRequest request,
                                      ActionMapping mapping, ActionForm form,
                                      Map params)
         throws Exception {
         return checkSubmit(request, mapping, form, params, NO_RETURN_PATH);
     }
 
-    public ActionForward checkSubmit(HttpServletRequest request,
+    protected ActionForward checkSubmit(HttpServletRequest request,
                                      ActionMapping mapping, ActionForm form,
                                      boolean doReturnPath)
         throws Exception {
         return checkSubmit(request, mapping, form, null, doReturnPath);
     }
 
-    public ActionForward checkSubmit(HttpServletRequest request,
+    protected ActionForward checkSubmit(HttpServletRequest request,
                                      ActionMapping mapping, ActionForm form)
         throws Exception {
         return checkSubmit(request, mapping, form, null, NO_RETURN_PATH);
     }
 
-    public ActionForward checkSubmit(HttpServletRequest request,
+    protected ActionForward checkSubmit(HttpServletRequest request,
                                      ActionMapping mapping, ActionForm form,
                                      String param, Object value,
                                      boolean doReturnPath)
@@ -150,7 +150,7 @@ public class BaseAction extends Action {
         return checkSubmit(request, mapping, form, params, doReturnPath);
     }
 
-    public ActionForward checkSubmit(HttpServletRequest request,
+    protected ActionForward checkSubmit(HttpServletRequest request,
                                      ActionMapping mapping, ActionForm form,
                                      String param, Object value)
         throws Exception {
@@ -162,7 +162,7 @@ public class BaseAction extends Action {
      * <em>add</em> form gesture, setting the return path to the
      * current URL.
      */
-    public ActionForward returnAdd(HttpServletRequest request,
+    protected ActionForward returnAdd(HttpServletRequest request,
                                    ActionMapping mapping,
                                    Map params)
         throws Exception {
@@ -170,13 +170,13 @@ public class BaseAction extends Action {
                                 params, NO_RETURN_PATH);
     }
 
-    public ActionForward returnAdd(HttpServletRequest request,
+    protected ActionForward returnAdd(HttpServletRequest request,
                                    ActionMapping mapping)
         throws Exception {
         return returnAdd(request, mapping, null);
     }
 
-    public ActionForward returnAdd(HttpServletRequest request,
+    protected ActionForward returnAdd(HttpServletRequest request,
                                    ActionMapping mapping,
                                    String param, Object value)
         throws Exception {
@@ -189,7 +189,7 @@ public class BaseAction extends Action {
      * Return an <code>ActionForward</code> representing the
      * <em>cancel</em> form gesture.
      */
-    public ActionForward returnCancelled(HttpServletRequest request,
+    protected ActionForward returnCancelled(HttpServletRequest request,
                                          ActionMapping mapping,
                                          Map params, boolean doReturnPath)
         throws Exception {
@@ -197,20 +197,20 @@ public class BaseAction extends Action {
                                     params, doReturnPath);
     }
 
-    public ActionForward returnCancelled(HttpServletRequest request,
+    protected ActionForward returnCancelled(HttpServletRequest request,
                                          ActionMapping mapping,
                                          Map params)
         throws Exception {
         return returnCancelled(request, mapping, params, YES_RETURN_PATH);
     }
 
-    public ActionForward returnCancelled(HttpServletRequest request,
+    protected ActionForward returnCancelled(HttpServletRequest request,
                                          ActionMapping mapping)
         throws Exception {
         return returnCancelled(request, mapping, null);
     }
 
-    public ActionForward returnCancelled(HttpServletRequest request,
+    protected ActionForward returnCancelled(HttpServletRequest request,
                                          ActionMapping mapping,
                                          String param, Object value)
         throws Exception {
@@ -224,7 +224,7 @@ public class BaseAction extends Action {
      * Return an <code>ActionForward</code> representing the
      * <em>failure</em> action state.
      */
-    public ActionForward returnFailure(HttpServletRequest request,
+    protected ActionForward returnFailure(HttpServletRequest request,
                                        ActionMapping mapping,
                                        Map params, boolean doReturnPath)
         throws Exception {
@@ -232,26 +232,26 @@ public class BaseAction extends Action {
                                 params, doReturnPath);
     }
 
-    public ActionForward returnFailure(HttpServletRequest request,
+    protected ActionForward returnFailure(HttpServletRequest request,
                                        ActionMapping mapping,
                                        Map params)
         throws Exception {
         return returnFailure(request, mapping, params, NO_RETURN_PATH);
     }
 
-    public ActionForward returnFailure(HttpServletRequest request,
+    protected ActionForward returnFailure(HttpServletRequest request,
                                        ActionMapping mapping,
                                        boolean doReturnPath)
         throws Exception {
         return returnFailure(request, mapping, null, doReturnPath);
     }
-    public ActionForward returnFailure(HttpServletRequest request,
+    protected ActionForward returnFailure(HttpServletRequest request,
                                        ActionMapping mapping)
         throws Exception {
         return returnFailure(request, mapping, NO_RETURN_PATH);
     }
 
-    public ActionForward returnFailure(HttpServletRequest request,
+    protected ActionForward returnFailure(HttpServletRequest request,
                                        ActionMapping mapping,
                                        String param, Object value)
         throws Exception {
@@ -266,7 +266,7 @@ public class BaseAction extends Action {
      * <em>new</em> form gesture, setting the return path to the
      * current URL.
      */
-    public ActionForward returnNew(HttpServletRequest request,
+    protected ActionForward returnNew(HttpServletRequest request,
                                    ActionMapping mapping,
                                    Map params)
         throws Exception {
@@ -274,13 +274,13 @@ public class BaseAction extends Action {
             params, NO_RETURN_PATH);
     }
 
-    public ActionForward returnNew(HttpServletRequest request,
+    protected ActionForward returnNew(HttpServletRequest request,
                                    ActionMapping mapping)
         throws Exception {
         return returnNew(request, mapping, null, NO_RETURN_PATH);
     }
 
-    public ActionForward returnNew(HttpServletRequest request,
+    protected ActionForward returnNew(HttpServletRequest request,
                                    ActionMapping mapping,
                                    String param, Object value)
         throws Exception {
@@ -295,7 +295,7 @@ public class BaseAction extends Action {
      * Return an <code>ActionForward</code> representing the
      * <em>success</em> action state.
      */
-    public ActionForward returnNew(HttpServletRequest request,
+    protected ActionForward returnNew(HttpServletRequest request,
                                        ActionMapping mapping, Map params,
                                        boolean doReturnPath)
         throws Exception {
@@ -305,7 +305,7 @@ public class BaseAction extends Action {
     }
     
 
-    public ActionForward returnNew(HttpServletRequest request,
+    protected ActionForward returnNew(HttpServletRequest request,
                                    ActionMapping mapping, String param,
                                    Object value, boolean doReturnPath)
         throws Exception {
@@ -319,7 +319,7 @@ public class BaseAction extends Action {
      * <em>remove</em> form gesture, setting the return path to the
      * current URL.
      */
-    public ActionForward returnRemove(HttpServletRequest request,
+    protected ActionForward returnRemove(HttpServletRequest request,
                                       ActionMapping mapping,
                                       Map params)
         throws Exception {
@@ -327,14 +327,14 @@ public class BaseAction extends Action {
                                 params, NO_RETURN_PATH);
     }
 
-    public ActionForward returnRemove(HttpServletRequest request,
+    protected ActionForward returnRemove(HttpServletRequest request,
                                    ActionMapping mapping)
         throws Exception {
 
         return returnRemove(request, mapping, null);
     }
 
-    public ActionForward returnRemove(HttpServletRequest request,
+    protected ActionForward returnRemove(HttpServletRequest request,
                                    ActionMapping mapping,
                                    String param, Object value)
         throws Exception {
@@ -347,7 +347,7 @@ public class BaseAction extends Action {
      * Return an <code>ActionForward</code> representing the
      * <em>reset</em> form gesture.
      */
-    public ActionForward returnReset(HttpServletRequest request,
+    protected ActionForward returnReset(HttpServletRequest request,
                                      ActionMapping mapping,
                                      Map params, boolean doReturnPath)
         throws Exception {
@@ -355,20 +355,20 @@ public class BaseAction extends Action {
                                 params, doReturnPath);
     }
 
-    public ActionForward returnReset(HttpServletRequest request,
+    protected ActionForward returnReset(HttpServletRequest request,
                                      ActionMapping mapping,
                                      Map params)
         throws Exception {
         return returnReset(request, mapping, params, NO_RETURN_PATH);
     }
 
-    public ActionForward returnReset(HttpServletRequest request,
+    protected ActionForward returnReset(HttpServletRequest request,
                                      ActionMapping mapping)
         throws Exception {
         return returnReset(request, mapping, null);
     }
 
-    public ActionForward returnReset(HttpServletRequest request,
+    protected ActionForward returnReset(HttpServletRequest request,
                                      ActionMapping mapping,
                                      String param, Object value)
         throws Exception {
@@ -381,7 +381,7 @@ public class BaseAction extends Action {
      * Return an <code>ActionForward</code> representing the
      * <em>okassign</em> action state.
      */
-    public ActionForward returnOkAssign(HttpServletRequest request,
+    protected ActionForward returnOkAssign(HttpServletRequest request,
                                        ActionMapping mapping, Map params)
         throws Exception {
 
@@ -392,7 +392,7 @@ public class BaseAction extends Action {
      * Return an <code>ActionForward</code> representing the
      * <em>okassign</em> action state.
      */
-    public ActionForward returnOkAssign(HttpServletRequest request, ActionMapping mapping,
+    protected ActionForward returnOkAssign(HttpServletRequest request, ActionMapping mapping,
                                         Map params, boolean doReturnPath)
         throws Exception {
 
@@ -404,7 +404,7 @@ public class BaseAction extends Action {
      * Return an <code>ActionForward</code> representing the
      * <em>success</em> action state.
      */
-    public ActionForward returnSuccess(HttpServletRequest request,
+    protected ActionForward returnSuccess(HttpServletRequest request,
                                        ActionMapping mapping, Map params,
                                        boolean doReturnPath)
         throws Exception {
@@ -423,19 +423,19 @@ public class BaseAction extends Action {
         }
     }
 
-    public ActionForward returnSuccess(HttpServletRequest request,
+    protected ActionForward returnSuccess(HttpServletRequest request,
                                        ActionMapping mapping, Map params)
         throws Exception {
         return returnSuccess(request, mapping, params, YES_RETURN_PATH);
     }
 
-    public ActionForward returnSuccess(HttpServletRequest request,
+    protected ActionForward returnSuccess(HttpServletRequest request,
                                        ActionMapping mapping)
         throws Exception {
         return returnSuccess(request, mapping, null);
     }
 
-    public ActionForward returnSuccess(HttpServletRequest request,
+    protected ActionForward returnSuccess(HttpServletRequest request,
                                        ActionMapping mapping, String param,
                                        Object value, boolean doReturnPath)
         throws Exception {
@@ -444,7 +444,7 @@ public class BaseAction extends Action {
         return returnSuccess(request, mapping, params, doReturnPath);
     }
 
-    public ActionForward returnSuccess(HttpServletRequest request,
+    protected ActionForward returnSuccess(HttpServletRequest request,
                                        ActionMapping mapping, String param,
                                        Object value) throws Exception {
         return returnSuccess(request, mapping, param, value, YES_RETURN_PATH);
