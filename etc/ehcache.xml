@@ -6,6 +6,13 @@
                 eternal="false"
                 overflowToDisk="false"/>
 
+  <!-- Timestamp cache for the query cache -->
+  <cache name="org.hibernate.cache.UpdateTimestampsCache"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"/>
+
   <!-- Measurement caches -->
   <cache name="org.hyperic.hq.measurement.server.session.Measurement"
          maxElementsInMemory="10000"
