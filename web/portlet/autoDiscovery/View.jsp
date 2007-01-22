@@ -148,11 +148,27 @@ function setRemoveCheckboxes (cbform) {
           </tr>    
         </c:forEach>
         <tr class="ListRow">
-          <td colspan="5" class="ListCell">
+          <td colspan="5" class="ListCell" nowrap>
+
+            <tiles:insert page="/common/components/ActionButton.jsp">
+            <tiles:put name="labelKey" value="common.label.AddtoInventory"/>
+            <tiles:put name="buttonHref" value="#"/>
+            <tiles:put name="buttonClick">setImportCheckboxes(AIQueueForm); AIQueueForm.queueAction.value="<hq:constant classname="org.hyperic.hq.appdef.shared.AIQueueConstants" symbol="Q_DECISION_APPROVE"/>"; AIQueueForm.submit(); return false;</tiles:put>
+            </tiles:insert>
+            &nbsp;&nbsp;
+            <tiles:insert page="/common/components/ActionButton.jsp">
+            <tiles:put name="labelKey" value="common.label.SkipResources"/>
+            <tiles:put name="buttonHref" value="#"/>
+            <tiles:put name="buttonClick">if(!setRemoveCheckboxes(AIQueueForm)) return false; AIQueueForm.queueAction.value="<hq:constant classname="org.hyperic.hq.appdef.shared.AIQueueConstants" symbol="Q_DECISION_IGNORE"/>"; AIQueueForm.submit(); return false;</tiles:put>
+            </tiles:insert>
+
+         
+
+ <!--
 <a href="." onclick="setImportCheckboxes(AIQueueForm); AIQueueForm.queueAction.value=<hq:constant classname="org.hyperic.hq.appdef.shared.AIQueueConstants" symbol="Q_DECISION_APPROVE"/>; AIQueueForm.submit(); return false;"><html:img page="/images/tbb_import.gif" border="0"/></a>
 &nbsp;&nbsp;
 <a href="." onclick="if (!setRemoveCheckboxes(AIQueueForm)) return false; AIQueueForm.queueAction.value=<hq:constant classname="org.hyperic.hq.appdef.shared.AIQueueConstants" symbol="Q_DECISION_IGNORE"/>; AIQueueForm.submit(); return false;"><html:img page="/images/tbb_remove.gif" border="0"/></a>
-          </td>
+       --></td>
         </tr>
         </html:form>
       </c:otherwise>
