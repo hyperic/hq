@@ -749,7 +749,7 @@
         <forward name="reset"   path="/resource/platform/AutoDiscovery.do?mode=new"
                                      redirect="true"/>
         <forward name="failure" path="/resource/platform/AutoDiscovery.do?mode=new"/>
-        <forward name="success" path="/resource/platform/AutoDiscovery.do?mode=view"/>
+        <forward name="success" path="/resource/platform/Inventory.do?mode=view"/>
         <forward name="dash"  path="/Dashboard.do" redirect="true"/>
       </action>
       
