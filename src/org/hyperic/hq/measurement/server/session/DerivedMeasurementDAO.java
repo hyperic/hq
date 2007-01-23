@@ -47,6 +47,10 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         return (DerivedMeasurement)super.findById(id);
     }
 
+    public DerivedMeasurement get(Integer id) {
+        return (DerivedMeasurement)super.get(id);
+    }
+
     void remove(DerivedMeasurement entity) {
         super.remove(entity);
     }

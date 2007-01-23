@@ -634,8 +634,12 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     public DerivedMeasurementValue getMeasurement(Integer mid)
         throws MeasurementNotFoundException {
 
-        DerivedMeasurement dm = getDerivedMeasurementDAO().findById(mid);
+        DerivedMeasurement dm = getDerivedMeasurementDAO().get(mid);
 
+        if (dm == null) {
+            throw new MeasurementNotFoundException("Metric id=" +  mid +
+                                                   " not found.");
+        }
         return dm.getDerivedMeasurementValue();
     }
 
