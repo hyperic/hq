@@ -129,20 +129,20 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             validateNewService(sValue);
             trimStrings(sValue);
 
-            Server sLocal = findServerByPK(serverId);
+            Server server = findServerByPK(serverId);
             ServiceType serviceType =
                 getServiceTypeDAO().findById(serviceTypeId);
             sValue.setServiceType(serviceType.getServiceTypeValue());
             sValue.setOwner(subject.getName());
             sValue.setModifiedBy(subject.getName());
-            Service service = getServiceDAO().createService(sLocal, sValue);
+            Service service = getServiceDAO().createService(server, sValue);
             
             try {
-                if (sLocal.getServerType().getVirtual()) {
+                if (server.getServerType().getVirtual()) {
                     // Look for the platform authorization
                     createAuthzService(sValue.getName(), 
                                        service.getId(),
-                                       sLocal.getPlatform().getId(),
+                                       server.getPlatform().getId(),
                                        false, 
                                        subject);
                 } else {
@@ -155,6 +155,12 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 }
             } catch (CreateException e) {
                 throw e;
+            }
+
+            // Add Service to parent collection
+            Collection services = server.getServices();
+            if (!services.contains(service)) {
+                services.add(service);
             }
 
             // Send resource create event

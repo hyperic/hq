@@ -127,13 +127,19 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             validateNewServer(sValue);
             trimStrings(sValue);
 
-            Platform pLocal = findPlatformByPK(platformId);
+            Platform platform = findPlatformByPK(platformId);
             ServerType serverType = getServerTypeDAO().findById(serverTypeId);
 
             sValue.setServerType(serverType.getServerTypeValue());
             sValue.setOwner(subject.getName());
             sValue.setModifiedBy(subject.getName());
-            Server server = getServerDAO().createServer(pLocal, sValue);
+            Server server = getServerDAO().createServer(platform, sValue);
+
+            // Add server to parent collection
+            Collection servers = platform.getServers();
+            if (!servers.contains(server)) {
+                servers.add(server);
+            }
 
             createAuthzServer(sValue.getName(),
                               server.getId(),
