@@ -66,7 +66,7 @@
 <td valign="top" width="66%">
     <table border="0" cellpadding="0" cellspacing="0" height="54" width="100%">
         <tr>
-            <td class="MastheadBgTop" colspan="5" height="23" nowrap>
+            <td class="MastheadBgTop" colspan="5" nowrap>
                 <table border="0" cellspacing="0" cellpadding="0">
                     <tr>
 
@@ -76,14 +76,14 @@
                             <html:link page="/Logout.do">Logout</html:link>
                         </td>
                         <td height="18" class="MastheadBgTop" nowrap>
-                        <table border="0" cellspacing="0" cellpadding="0" height="18">
+                        <table border="0" cellspacing="0" cellpadding="0" height="20">
                            <tr>
 
                         <td class="MastheadContent" nowrap style="font-weight:bold;padding-left:9px;">
                             <fmt:message key="header.RecentAlerts"/>:
                         </td>
-                        <td nowrap style="font-weight:bold;">
-                            <div id="recentAlerts" style="font-weight:bold;"></div>
+                        <td style="font-weight:bold;">
+                            <div id="recentAlerts" style="font-weight:bold;color:#ffffff;"></div>
                         </td>
                        </tr>
                     </table>
@@ -97,7 +97,7 @@
     </tr>
        
         <tr>
-            <td class="MastheadBgBottom" style="padding-left:10px;padding-top:2px" align="left" height="23" colspan="5">
+            <td class="MastheadBgBottom" style="padding-left:10px;padding-top:2px" align="left" height="22" colspan="5">
                 <table border="0" cellspacing="0" cellpadding="0">
                     <tr>
                         <td style="border-right:2px solid #ffffff" class="mainNavText" nowrap>
