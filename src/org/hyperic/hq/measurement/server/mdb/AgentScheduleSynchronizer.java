@@ -69,7 +69,6 @@ import org.hyperic.util.pager.PageControl;
 /**
  * This class is used to schedule and unschedule metrics for a given entity.
  * The schedule operation is synchronized to throttle rescheduling.
- * 
  */
 public class AgentScheduleSynchronizer {
     private static final Log log =
@@ -167,7 +166,7 @@ public class AgentScheduleSynchronizer {
             MeasurementTemplateValue tmpl = dmVo.getTemplate();
             
             // Build the graph
-            graphs[i] = GraphBuilder.buildGraph(new Graph(), tmpl);
+            graphs[i] = GraphBuilder.buildGraph(tmpl);
             if ( log.isDebugEnabled() ) {
                 String gString = graphs[i].toString();
                 log.debug(gString);
