@@ -109,6 +109,9 @@ import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterGroupEntityResource;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterGroupMemExclude;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterInternalService;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
+import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -961,24 +964,29 @@ public class AppdefBossEJBImpl
                SessionTimeoutException, SessionNotFoundException 
     {
         AppdefResourceValue retVal = null;
-        AppdefResourceValue host = null;
         
         switch (entityId.getType()) {
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            retVal = 
-                getPlatformManager().getPlatformValueById(subject, entityId.getId());
+            Platform platform = getPlatformManager().getPlatformById(entityId.getId());
+            if (platform == null) {
+                throw new PlatformNotFoundException(entityId);
+            }
+            retVal = platform.getPlatformValue();
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            ServerValue server =
-                getServerManager().getServerById(subject, entityId.getId());
-            host = server.getPlatform();
-            retVal = server;
-            retVal.setHostName(host.getName());
+            Server server = getServerManager().getServerById(entityId.getId());
+            if (server == null) {
+                throw new ServerNotFoundException(entityId);
+            }
+            retVal = server.getServerValue();
+            retVal.setHostName(server.getPlatform().getName());
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            ServiceValue service =
-                getServiceManager().getServiceById(subject, entityId.getId());
-            retVal = service;
+            Service service = getServiceManager().getServiceById(entityId.getId());
+            if (service == null) {
+                throw new ServiceNotFoundException(entityId);
+            }
+            retVal = service.getServiceValue();
             retVal.setHostName(service.getServer().getName());
             break;
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
@@ -1060,7 +1068,7 @@ public class AppdefBossEJBImpl
     public ServerValue findServerById(int sessionID, Integer id)
         throws AppdefEntityNotFoundException,
                SessionTimeoutException, SessionNotFoundException,
-               PermissionException 
+               PermissionException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         return getServerManager().getServerById(subject, id);
