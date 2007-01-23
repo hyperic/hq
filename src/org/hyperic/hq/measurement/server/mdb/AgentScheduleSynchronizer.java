@@ -36,20 +36,21 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.ejb.CreateException;
-import javax.naming.NamingException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
+import org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.RawMeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.ext.depgraph.DerivedNode;
 import org.hyperic.hq.measurement.ext.depgraph.Graph;
 import org.hyperic.hq.measurement.ext.depgraph.GraphBuilder;
@@ -58,21 +59,16 @@ import org.hyperic.hq.measurement.ext.depgraph.Node;
 import org.hyperic.hq.measurement.ext.depgraph.RawNode;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerUtil;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
-import org.hyperic.hq.measurement.shared.MeasurementProcessorLocalHome;
-import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.RawMeasurementManagerUtil;
 import org.hyperic.hq.measurement.shared.RawMeasurementValue;
 import org.hyperic.util.pager.PageControl;
 
 /**
- * This class serves to provide synchronized calls into the EJBs to avoid
- * too many concurrent accesses
- * 
+ * This class is used to schedule and unschedule metrics for a given entity.
+ * The schedule operation is synchronized to throttle rescheduling.
  * 
  */
 public class AgentScheduleSynchronizer {
@@ -89,78 +85,48 @@ public class AgentScheduleSynchronizer {
     private AgentScheduleSynchronizer() {
         // Singleton class, private constructor
     }
-    
+
     private HashMap dmMap          = new HashMap();
-    
+
     private void cacheDM(DerivedMeasurementValue dmVo) {
         Integer tid = dmVo.getTemplate().getId();
         if (!dmMap.containsKey(tid)) {
             dmMap.put(tid, new HashMap());
         }
-                
+
         HashMap tmplMap = (HashMap) dmMap.get(tid);
         tmplMap.put(dmVo.getInstanceId(), dmVo);
     }
-    
+
     private AuthzSubjectValue subject = null;
     private AuthzSubjectValue getSubject() throws SubjectNotFoundException {
-        try {
-            if (subject == null)
-                subject = AuthzSubjectManagerUtil.getLocalHome().create()
-                    .findOverlord();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        if (subject == null)
+            subject = AuthzSubjectManagerEJBImpl.getOne().findOverlord();
                 
         return subject;
     }
 
     private MeasurementProcessorLocal measurementProc = null;
     private MeasurementProcessorLocal getMeasurementProcessor() {
-        try {
-            if (measurementProc == null) {
-                MeasurementProcessorLocalHome sHome =
-                    (MeasurementProcessorLocalHome) 
-                        MeasurementProcessorUtil.getLocalHome();
-                measurementProc = sHome.create();
-            }
-            
-            return measurementProc;
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
+        if (measurementProc == null) {
+            measurementProc = MeasurementProcessorEJBImpl.getOne();
         }
+
+        return measurementProc;
     }
 
     private DerivedMeasurementManagerLocal dman = null;
     private DerivedMeasurementManagerLocal getDMan() {
-        try {
-            if (dman == null)
-                dman = DerivedMeasurementManagerUtil.getLocalHome().create();
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-
+        if (dman == null)
+            dman = DerivedMeasurementManagerEJBImpl.getOne();
         return dman; 
     }
 
     private RawMeasurementManagerLocal rman = null;
     private RawMeasurementManagerLocal getRMan() {
-        try {
-            if (rman == null)
-                rman = RawMeasurementManagerUtil.getLocalHome().create();
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-
-        return rman; 
+        if (rman == null)
+            rman = RawMeasurementManagerEJBImpl.getOne();
+        return rman;
     }
 
     private DerivedMeasurementValue getDMByTemplateAndInstance(
@@ -211,7 +177,7 @@ public class AgentScheduleSynchronizer {
                 graphs[i].getNode( tmpl.getId().intValue() );
 
             // first handle simple IDENTITY derived case
-            if ( MeasurementConstants.TEMPL_IDENTITY.equals(tmpl.getTemplate()))
+            if (MeasurementConstants.TEMPL_IDENTITY.equals(tmpl.getTemplate()))
             {
                 // If this node is an identity, there's only one node below...
                 // the raw node. Fetch it.
@@ -284,8 +250,8 @@ public class AgentScheduleSynchronizer {
             } // end if identity else
         }
 
-        getMeasurementProcessor().schedule(
-            entId, graphs, agentSchedule, serverSchedule);
+        getMeasurementProcessor().schedule(entId, graphs, agentSchedule,
+                                           serverSchedule);
     }
     
     private void unschedule(AppdefEntityID eid)
