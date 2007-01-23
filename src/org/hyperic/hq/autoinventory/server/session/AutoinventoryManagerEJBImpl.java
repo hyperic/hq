@@ -202,8 +202,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         ProductManagerLocal productManager = ProductManagerEJBImpl.getOne();
         ServerManagerLocal serverManager = ServerManagerEJBImpl.getOne();
         try {
-            ServerValue server = serverManager.findServerById(subject,
-                                                              id.getId());
+            ServerValue server = serverManager.findServerValueById(subject,
+                                                                   id.getId());
             String pluginName = server.getServerType().getName();
             aiPluginManager = (AutoinventoryPluginManager)productManager.
                 getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
@@ -313,8 +313,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         ConfigManagerLocal cman = ConfigManagerEJBImpl.getOne();
         ServerManagerLocal serverManager = ServerManagerEJBImpl.getOne();
         try {
-            ServerValue serverValue = serverManager.findServerById(subject,
-                                                                   id.getId());
+            ServerValue serverValue =
+                serverManager.findServerValueById(subject, id.getId());
             serverValue.setRuntimeAutodiscovery(true);
             serverManager.updateServer(subject, serverValue);
 

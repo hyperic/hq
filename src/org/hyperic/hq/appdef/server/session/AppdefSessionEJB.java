@@ -55,7 +55,6 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
-import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
@@ -277,28 +276,6 @@ public abstract class AppdefSessionEJB
         rm.removeResources(new AppdefEntityID[] { aeid });
     }
 
-    /**
-     * Find a ServerLocal by primary key
-     * @return ServerLocal
-     */
-    protected Server findServerByPK(Integer pk)
-        throws ServerNotFoundException, NamingException {
-        try {
-            return getServerDAO().findById(pk);
-        } catch (ObjectNotFoundException e) {
-            throw new ServerNotFoundException(pk, e);
-        }
-    }
-
-    /**
-     * Find a ServerTypeLocal by primary key
-     * @return ServerTypeLocal
-     */
-    protected ServerType findServerTypeByPK(Integer pk)
-        throws FinderException, NamingException {
-            return getServerTypeDAO().findById(pk);
-    }
- 
     /**
      * Find a ServiceLocal by primary key
      * @return ServiceLocal
@@ -1235,7 +1212,8 @@ public abstract class AppdefSessionEJB
                 return plat.getPlatformValue();
             
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                Server serv = findServerByPK(intID);
+                Server serv =
+                    getServerMgrLocal().findServerById(intID);
                 return serv.getServerValue();
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                 Service service = findServiceByPK(intID);

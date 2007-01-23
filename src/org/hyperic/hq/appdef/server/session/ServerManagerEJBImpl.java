@@ -354,23 +354,40 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * Find Server by id
-     * @param subject - who
-     * @param id - id of server
+     * Find a ServerValue by Id.
      * @ejb:interface-method
+     * @deprecated Use findServerById instead.
      * @ejb:transaction type="Required"
      */
-    public ServerValue findServerById(AuthzSubjectValue subject,
-                                      Integer id)
+    public ServerValue findServerValueById(AuthzSubjectValue subject,
+                                           Integer id)
         throws ServerNotFoundException {
 
-        Server server;
+        Server server = findServerById(id);
+        return server.getServerValue();
+    }
+
+    /**
+     * Find a Server by Id.
+     * @ejb:interface-method
+     */
+    public Server findServerById(Integer id)
+        throws ServerNotFoundException
+    {
         try {
-            server = getServerDAO().findById(id);
+            return getServerDAO().findById(id);
         } catch (ObjectNotFoundException e) {
             throw new ServerNotFoundException(id);
         }
-        return server.getServerValue();
+    }
+
+    /**
+     * Get a Server by Id.
+     * @ejb:interface-method 
+     * @return The Server with the given id, or null if not found.
+     */
+    public Server getServerById(Integer id) {
+        return getServerDAO().get(id); 
     }
 
     /**

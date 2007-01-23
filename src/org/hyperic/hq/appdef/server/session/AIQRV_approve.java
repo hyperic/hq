@@ -425,7 +425,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                         aiserverValue = aiserver.getAIServerValue();
                         try {
                             serverValue
-                                = smLocal.findServerById(subject,
+                                = smLocal.findServerValueById(subject,
                                                          server.getId());
                         } catch (Exception e) {
                             throw new SystemException("Error fetching server " +

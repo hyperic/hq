@@ -54,6 +54,11 @@ public class ServerDAO extends HibernateDAO
         return (Server)super.findById(id);
     }
 
+    public Server get(Integer id)
+    {
+        return (Server)super.get(id);
+    }
+
     public void save(Server entity)
     {
         super.save(entity);

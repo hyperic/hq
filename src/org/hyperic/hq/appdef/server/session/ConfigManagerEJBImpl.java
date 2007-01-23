@@ -152,7 +152,7 @@ public class ConfigManagerEJBImpl
 
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                 Server serv = 
-                    this.findServerByPK(intID);
+                    getServerManagerLocal().findServerById(intID);
                 pname = serv.getServerType().getPlugin();
                 break;
 

@@ -43,7 +43,6 @@ import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServerLightValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerValue;
@@ -120,7 +119,7 @@ public class RuntimeReportProcessor {
 
             try {
                 appdefServers[i]
-                    = serverMgr.findServerById(subject, serverId);
+                    = serverMgr.findServerValueById(subject, serverId);
                 log.info("Found reporting server: " + appdefServers[i]);
             } catch (ServerNotFoundException e) {
                 log.error("Error finding existing server: " + serverId);

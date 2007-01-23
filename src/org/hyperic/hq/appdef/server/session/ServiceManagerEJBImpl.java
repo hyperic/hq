@@ -129,7 +129,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             validateNewService(sValue);
             trimStrings(sValue);
 
-            Server server = findServerByPK(serverId);
+            Server server = getServerMgrLocal().findServerById(serverId);
             ServiceType serviceType =
                 getServiceTypeDAO().findById(serviceTypeId);
             sValue.setServiceType(serviceType.getServiceTypeValue());
@@ -173,10 +173,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             log.error("Unable to find ServiceType", e);
             throw new CreateException("Unable to find ServiceType: " +
                                       serviceTypeId + " : " + e.getMessage());
-        } catch (NamingException e) {
-            log.error("Unable to get LocalHome", e);
-            throw new SystemException("Unable to get LocalHome " +
-                                      e.getMessage());
         } catch (PermissionException e) {
             // make sure that if there is a permission exception during
             // service creation, rollback the whole service creation process;
