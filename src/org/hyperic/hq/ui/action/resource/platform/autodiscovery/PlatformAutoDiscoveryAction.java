@@ -47,7 +47,6 @@ import org.hyperic.hq.autoinventory.ScanState;
 import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
 import org.hyperic.hq.bizapp.shared.AIBoss;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.ResourceController;
@@ -159,7 +158,7 @@ public class PlatformAutoDiscoveryAction extends ResourceController {
 
         findAndSetResource(request);
 
-        Portal portal = Portal
+        Portal portal = Portal 
             .createPortal("resource.platform.inventory.ViewPlatformTitle",
                           ".resource.platform.inventory.ViewPlatform");
         request.setAttribute(Constants.PORTAL_KEY, portal);
@@ -199,12 +198,9 @@ public class PlatformAutoDiscoveryAction extends ResourceController {
     private void findAndSetAISchedule(HttpServletRequest request)
         throws Exception {
 
-        PlatformValue pVal = (PlatformValue)RequestUtils.getResource(request);
         ServletContext ctx = getServlet().getServletContext();
         AIBoss aiBoss = ContextUtils.getAIBoss(ctx);
         int sessionId = RequestUtils.getSessionIdInt(request);
-        
-        AIBoss aiboss = ContextUtils.getAIBoss(ctx);
 
         Integer scheduleId = RequestUtils.getScheduleId(request);
         AIScheduleValue sValue = aiBoss.findScheduledJobById(sessionId, scheduleId);
@@ -223,14 +219,7 @@ public class PlatformAutoDiscoveryAction extends ResourceController {
     }
 
     /**
-     * loads the scan state using a platform value
-     * @throws ServletException
-     * @throws RemoteException
-     * @throws AutoinventoryException
-     * @throws AgentRemoteException
-     * @throws PermissionException
-     * @throws SessionNotFoundException
-     * @throws SessionTimeoutException
+     * Loads the scan state using a platform value
      */
     private void loadScanState(HttpServletRequest request, PlatformValue pVal)
         throws ServletException, SessionTimeoutException,
@@ -240,9 +229,9 @@ public class PlatformAutoDiscoveryAction extends ResourceController {
         int sessionId = RequestUtils.getSessionIdInt(request);
         AIBoss aiboss = ContextUtils.getAIBoss(ctx);
         
-        AIPlatformValue aip = null;
-        ScanState ss = null;
-        ScanStateCore ssc = null;
+        AIPlatformValue aip;
+        ScanState ss;
+        ScanStateCore ssc;
         try {
             ssc = aiboss.getScanStatus(sessionId, pVal.getId().intValue());
             ss = new ScanState(ssc);
@@ -266,15 +255,9 @@ public class PlatformAutoDiscoveryAction extends ResourceController {
             aip = aiboss.findAIPlatformByPlatformID(sessionId, 
                                                     pVal.getId().intValue());
         } catch (PlatformNotFoundException e) {
-            if (log.isDebugEnabled())
-                log.debug("info: platform val not found:", e);
             aip = null;
         }
 
-        if (aip == null)
-            RequestUtils.setError(request,
-                "resource.platform.inventory.autoinventory.error.NoAIPlatformFound");
-                                               
         // load the scanstate object            
         request.setAttribute(Constants.SCAN_STATE_ATTR, ss);
         request.setAttribute(Constants.AIPLATFORM_ATTR, aip);
@@ -285,8 +268,7 @@ public class PlatformAutoDiscoveryAction extends ResourceController {
         ServletContext ctx = getServlet().getServletContext();
         AIBoss aiboss = ContextUtils.getAIBoss(ctx);
         int sessionId = RequestUtils.getSessionIdInt(request);
-        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
-        
+
         Integer id =
             RequestUtils.getIntParameter(request, Constants.AI_PLATFORM_PARAM);
         AIPlatformValue aip =
