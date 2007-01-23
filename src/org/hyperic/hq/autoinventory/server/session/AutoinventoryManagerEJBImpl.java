@@ -78,6 +78,7 @@ import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocalHome;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
@@ -201,9 +202,13 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         AutoinventoryPluginManager aiPluginManager ;
         ProductManagerLocal productManager = ProductManagerEJBImpl.getOne();
         ServerManagerLocal serverManager = ServerManagerEJBImpl.getOne();
+
         try {
-            ServerValue server = serverManager.findServerValueById(subject,
-                                                                   id.getId());
+            Server server = serverManager.getServerById(id.getId());
+            if (server == null) {
+                return false;
+            }
+            
             String pluginName = server.getServerType().getName();
             aiPluginManager = (AutoinventoryPluginManager)productManager.
                 getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
@@ -216,9 +221,6 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                 retVal = false ;
             }
         } catch (PluginNotFoundException pne) {
-            return false;
-        } catch (ServerNotFoundException e) {
-            log.error("Unable to find server=" + id);
             return false;
         } catch (PluginException e) {
             log.error("Error getting plugin", e);
@@ -240,12 +242,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      */
     public void turnOffRuntimeDiscovery(AuthzSubjectValue subject,
                                         AppdefEntityID id)
-        throws PermissionException {
-
-        if (!isRuntimeDiscoverySupported(subject, id)) {
-            return;
-        }
-
+        throws PermissionException
+    {
         AICommandsClient client;
 
         try {
@@ -274,12 +272,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     public void turnOffRuntimeDiscovery(AuthzSubjectValue subject,
                                         AppdefEntityID id,
                                         String agentToken)
-        throws PermissionException {
-
-        if (!isRuntimeDiscoverySupported(subject, id)) {
-            return;
-        }
-
+        throws PermissionException
+    {
         AICommandsClient client;
         
         try {

@@ -53,6 +53,7 @@ import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -102,7 +103,7 @@ public class RuntimeReportProcessor {
         // (we don't keep track of which server reports other platforms
         // and servers)
         int i, j;
-        ServerValue[] appdefServers = null;
+        ServerValue[] appdefServers;
         RuntimeResourceReport[] serverReports;
         RuntimeResourceReport serverReport;
         AIPlatformValue[] aiplatforms;
@@ -116,17 +117,15 @@ public class RuntimeReportProcessor {
 
             // Check that reporting server still exists.
             serverId = new Integer(serverReport.getServerId());
-
-            try {
-                appdefServers[i]
-                    = serverMgr.findServerValueById(subject, serverId);
-                log.info("Found reporting server: " + appdefServers[i]);
-            } catch (ServerNotFoundException e) {
+            Server server = serverMgr.getServerById(serverId);
+            if (server == null) {
                 log.error("Error finding existing server: " + serverId);
-                turnOffRuntimeDiscovery(subject, serverId, aiMgr, 
+                turnOffRuntimeDiscovery(subject, serverId, aiMgr,
                                         agentToken);
                 appdefServers[i] = null;
                 continue;
+            } else {
+                appdefServers[i] = server.getServerValue();
             }
 
             // Even if it does exist, make sure runtime reporting is turned
