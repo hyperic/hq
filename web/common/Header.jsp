@@ -32,7 +32,9 @@
 
 <script src="<html:rewrite page="/js/rico.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/"/>diagram.js" type="text/javascript"></script>
-
+<script language="JavaScript" type="text/javascript">
+  var help = "<hq:help/>";
+</script>
 <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-top:2px solid #3399ff;border-bottom:2px solid #3399ff;" height="56">
 
 <tr>
