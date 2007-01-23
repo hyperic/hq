@@ -38,6 +38,10 @@
            elem.parentNode.nextSibling.style.backgroundColor = "#dbe3f5";
 
         }
+
+    function hideCreateButton() {
+        $('createButton').style.display = "none";
+    }
 </script>
 <table width="100%" cellpadding="0" cellspacing="10">
 <tr>
@@ -52,7 +56,7 @@
                 <table cellpadding="0" cellspacing="0" border="0" width="100%">
                     <tr>
                         <td class="BlockTitle"><fmt:message key="common.header.EscalationName"/></td>
-                        <td class="BlockTitle" style="text-align: right;"><html:link page="/admin/config/Config.do?mode=escalate"><html:img src="/images/tbb_new.gif" border="0"/></html:link></td>
+                        <c:if test="${not empty param.escId}"><td class="BlockTitle" id="createButton" style="text-align: right;"><html:link page="/admin/config/Config.do?mode=escalate"><html:img src="/images/tbb_new.gif" border="0"/></html:link></td> </c:if>
                 </tr>
             </table>
         </td>
