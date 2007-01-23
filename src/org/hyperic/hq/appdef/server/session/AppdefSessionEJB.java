@@ -277,28 +277,6 @@ public abstract class AppdefSessionEJB
     }
 
     /**
-     * Find a ServiceLocal by primary key
-     * @return ServiceLocal
-     */
-    protected Service findServiceByPK(Integer pk)
-        throws ServiceNotFoundException, NamingException {
-        try {
-            return getServiceDAO().findById(pk);
-        } catch (ObjectNotFoundException e) {
-            throw new ServiceNotFoundException(pk, e);
-        }
-    }
-
-    /**
-     * Find a ServiceTypeLocal by primary key
-     * @return ServiceType
-     */
-    protected ServiceType findServiceTypeByPK(Integer pk)
-    {
-        return getServiceTypeDAO().findById(pk);
-    }
-
-    /**
      * Find a ApplicationTypeLocal by primary key
      * @return ApplicationType
      */
@@ -1216,7 +1194,8 @@ public abstract class AppdefSessionEJB
                     getServerMgrLocal().findServerById(intID);
                 return serv.getServerValue();
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                Service service = findServiceByPK(intID);
+                Service service =
+                    getServiceMgrLocal().findServiceById(intID);
                 return service.getServiceValue();
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                 Application app =

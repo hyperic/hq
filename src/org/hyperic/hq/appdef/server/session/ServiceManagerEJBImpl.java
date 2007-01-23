@@ -328,7 +328,30 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * Find service type by id
+     * Find Service by Id.
+     * @ejb:interface-method
+     */
+    public Service findServiceById(Integer id)
+        throws ServiceNotFoundException
+    {
+        try {
+            return getServiceDAO().findById(id);
+        } catch (ObjectNotFoundException e) {
+            throw new ServiceNotFoundException(id);
+        }
+    }
+
+    /**
+     * Get Service by Id.
+     * @ejb:interface-method 
+     * @return The Service identified by this id, or null if it does not exist.
+     */
+    public Service getServiceById(Integer id) {
+        return getServiceDAO().get(id);
+    }
+
+    /**
+     * Find ServiceTypeValue by Id.
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */

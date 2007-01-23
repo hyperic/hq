@@ -142,8 +142,7 @@ public class ConfigManagerEJBImpl
         Integer intID = id.getId();
         String pname;
 
-        try {
-            switch(id.getType()){
+        switch (id.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 Platform plat =
                     getPlatformManagerLocal().findPlatformById(intID);
@@ -151,28 +150,25 @@ public class ConfigManagerEJBImpl
                 break;
 
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                Server serv = 
+                Server serv =
                     getServerManagerLocal().findServerById(intID);
                 pname = serv.getServerType().getPlugin();
                 break;
 
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                Service service = findServiceByPK(intID);
+                Service service =
+                    getServiceManagerLocal().findServiceById(intID);
                 pname = service.getServiceType().getPlugin();
                 break;
 
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             default:
                 throw new IllegalArgumentException("The passed entity type " +
-                                                   "does not support config " +
-                                                   "responses");
-            }
-
-            return pname;
-
-        } catch (NamingException e) {
-            throw new SystemException(e);
+                    "does not support config " +
+                    "responses");
         }
+
+        return pname;
     }
 
     /**

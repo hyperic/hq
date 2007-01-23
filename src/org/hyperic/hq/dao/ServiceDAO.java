@@ -51,6 +51,10 @@ public class ServiceDAO extends HibernateDAO
         return (Service)super.findById(id);
     }
 
+    public Service get(Integer id) {
+        return (Service)super.get(id);
+    }
+    
     public void save(Service entity) {
         super.save(entity);
     }
