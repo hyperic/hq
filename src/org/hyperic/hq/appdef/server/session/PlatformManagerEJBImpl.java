@@ -581,11 +581,13 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * Find a Platform by Id
+     * Find a Platform by Id.
+     * @param id The id to look up.
+     * @return A Platform object representing this Platform.
+     * @throws PlatformNotFoundException If the given Platform is not found.
      * @ejb:interface-method
      */
-    public Platform findPlatformById(AuthzSubjectValue subject,
-                                     Integer id)
+    public Platform findPlatformById(Integer id)
         throws PlatformNotFoundException
     {
         try {
@@ -596,15 +598,26 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
+     * Get a Platform by id.
+     * @param id The id to look up.
+     * @return The Platform object with the given id, or null if it does not
+     * exist.
+     * @ejb:interface-method 
+     */
+    public Platform getPlatformById(Integer id) {
+        return getPlatformDAO().get(id);
+    }
+
+    /**
      * Get a PlatformValue object by id.
      * @deprecated use findPlatformById instead.
      * @ejb:interface-method
      */
     public PlatformValue getPlatformValueById(AuthzSubjectValue subject,
                                               Integer id)
-        throws PlatformNotFoundException, PermissionException 
+        throws PlatformNotFoundException, PermissionException
     {
-        return findPlatformById(subject, id).getPlatformValue();
+        return findPlatformById(id).getPlatformValue();
     }
 
     /**

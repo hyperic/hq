@@ -127,7 +127,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             validateNewServer(sValue);
             trimStrings(sValue);
 
-            Platform platform = findPlatformByPK(platformId);
+            Platform platform =
+                getPlatformMgrLocal().findPlatformById(platformId);
             ServerType serverType = getServerTypeDAO().findById(serverTypeId);
 
             sValue.setServerType(serverType.getServerTypeValue());
@@ -165,9 +166,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             throw new CreateException("Unable to find platform=" + platformId +
                                       " or server type=" + serverTypeId +
                                       ":" + e.getMessage());
-        } catch (NamingException e) {
-            throw new SystemException("Unable to get LocalHome " +
-                                      e.getMessage());
         }
     }
 

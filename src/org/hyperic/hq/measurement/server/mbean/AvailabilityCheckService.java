@@ -249,7 +249,6 @@ public class AvailabilityCheckService
         // Check the servers and services.
         PlatformManagerLocal platMan = PlatformManagerEJBImpl.getOne();
         AuthzSubjectManagerLocal authzMan = AuthzSubjectManagerEJBImpl.getOne();
-        AuthzSubjectValue overlord = authzMan.getOverlord();
         ArrayList metrics = new ArrayList();
 
         for (Iterator i = downPlatforms.iterator(); i.hasNext();) {
@@ -257,7 +256,7 @@ public class AvailabilityCheckService
             // Go through the servers and services
             Platform platform;
             try {
-                platform = platMan.findPlatformById(overlord, platId.getId());
+                platform = platMan.findPlatformById(platId.getId());
             } catch (Exception e) {
                 log.error("Unable to find platform=" + platId.getId(), e);
                 continue;

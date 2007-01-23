@@ -60,7 +60,6 @@ import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.OperationValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -269,19 +268,6 @@ public abstract class AppdefSessionEJB
     }
 
     /**
-     * Find a PlatformLocal by primary key
-     * @return PlatformLocal
-     */
-    protected Platform findPlatformByPK(Integer pk)
-        throws PlatformNotFoundException, NamingException {
-        try {            
-            return getPlatformDAO().findById(pk);
-        } catch (ObjectNotFoundException e) {
-            throw new PlatformNotFoundException(pk, e);
-        }
-    }
-
-    /**
      * remove the authz resource entry
      */
     protected void removeAuthzResource(AppdefEntityID aeid)
@@ -289,15 +275,6 @@ public abstract class AppdefSessionEJB
         log.debug("Removing authz resource: " + aeid);
         ResourceManagerLocal rm = getResourceManager();
         rm.removeResources(new AppdefEntityID[] { aeid });
-    }
-
-    /**
-     * Find a PlatformTypeLocal by primary key
-     * @return PlatformTypeLocal
-     */
-    protected PlatformType findPlatformTypeByPK(Integer pk)
-    {
-        return getPlatformTypeDAO().findById(pk);
     }
 
     /**
@@ -1254,7 +1231,7 @@ public abstract class AppdefSessionEJB
             switch(id.getType()){
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 Platform plat = 
-                    this.findPlatformByPK(intID);
+                    getPlatformMgrLocal().findPlatformById(intID);
                 return plat.getPlatformValue();
             
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:

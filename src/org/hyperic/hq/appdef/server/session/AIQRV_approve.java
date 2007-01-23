@@ -110,7 +110,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                            aiplatform.getAIPlatformValue());
                 Platform newPlatform;
                 try {
-                    newPlatform = pmLocal.findPlatformById(subject, pk);
+                    newPlatform = pmLocal.findPlatformById(pk);
                 } catch (PlatformNotFoundException e) {
                     throw new SystemException("Could not find the Platform " +
                                               "we just created id=" + pk);

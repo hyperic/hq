@@ -54,6 +54,10 @@ public class PlatformDAO extends HibernateDAO {
         return (Platform)super.findById(id);
     }
 
+    public Platform get(Integer id) {
+        return (Platform)super.get(id);
+    }
+
     public void save(Platform entity) {
         super.save(entity);
         getSession().flush();

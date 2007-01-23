@@ -29,7 +29,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
-import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -146,7 +145,8 @@ public class ConfigManagerEJBImpl
         try {
             switch(id.getType()){
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                Platform plat = findPlatformByPK(intID);
+                Platform plat =
+                    getPlatformManagerLocal().findPlatformById(intID);
                 pname = plat.getPlatformType().getPlugin();
                 break;
 

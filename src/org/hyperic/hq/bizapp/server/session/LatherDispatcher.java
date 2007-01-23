@@ -376,7 +376,7 @@ public class LatherDispatcher
                 for (Iterator it = ids.iterator(); it.hasNext();) {
                     Integer id = (Integer) it.next();
                     Platform platform = getPlatformManager()
-                        .findPlatformById(getOverlord(), id);
+                        .findPlatformById(id);
 
                     zevent = new ResourceUpdatedZevent(getOverlord(),
                                                        platform.getEntityId());
