@@ -55,7 +55,9 @@
     </c:otherwise>
   </c:choose>
 </c:if>
-
+ <script language="JavaScript" type="text/javascript">
+  var help = "<hq:help/>";
+</script>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr>
     <td colspan="4">
