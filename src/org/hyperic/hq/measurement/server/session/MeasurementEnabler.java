@@ -33,6 +33,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
@@ -85,7 +86,11 @@ public class MeasurementEnabler {
                 getMergedConfigResponse(subject,
                                         ProductPlugin.TYPE_MEASUREMENT,
                                         id, true);
-        } catch (Exception e) {
+        } catch (ConfigFetchException e) {
+            _log.warn("Unable to enable default metrics for id=" + id +
+                      e.getMessage());
+            return;
+        }  catch (Exception e) {
             _log.error("Unable to enable default metrics for id=" + id +
                         ": " + e.getMessage(), e);
             return;
