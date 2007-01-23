@@ -71,9 +71,12 @@ import org.hyperic.hq.measurement.shared.MeasurementArgValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateLiteValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
+import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
+import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.TypeInfo;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -736,6 +739,14 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             if (designated != template.isDesignate()) {
                 template.setDesignate(designated);
             }
+        }
+    }
+
+    public static TemplateManagerLocal getOne() {
+        try {
+            return TemplateManagerUtil.getLocalHome().create();
+        } catch (Exception e) {
+            throw new SystemException();
         }
     }
 
