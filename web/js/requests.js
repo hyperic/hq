@@ -332,10 +332,11 @@
                 var td1 = document.createElement('td');
                 var td2 = document.createElement('td');
                 var td3 = document.createElement('td');
-                var td4 = document.createElement('td');
                 var newanchor = document.createElement("a");
                 var up = availList[i].numUp;
                 var down = availList[i].numDown;
+                var downgraphic = '<span style="padding-right:5px;"><img src=/images/icon_available_red.gif></span>';
+                var upgraphic = '<span style="padding-right:5px;padding-left:5px;"><img src=/images/icon_available_green.gif></span>';
 
                 tbody.appendChild(tr);
                 tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
@@ -348,23 +349,24 @@
                 newanchor.setAttribute('href', (browseUrl + availList[i].appdefType + urlParams + availList[i].appdefType + urlColon + availList[i].appdefTypeId));
                 tr.appendChild(td2);
                 tr.appendChild(td3);
-                tr.appendChild(td4);
+               
                 td2.setAttribute((document.all ? 'className' : 'class'), "availResourceStatus");
                 td2.setAttribute('align', 'right');
                 td3.setAttribute((document.all ? 'className' : 'class'), "availResourceStatus");
-                td3.setAttribute('align', 'center');
-                td4.setAttribute((document.all ? 'className' : 'class'), "availResourceStatus");
-                td4.setAttribute('align', 'left');
+                td3.setAttribute('align', 'left');
 
                 if (down > '0') {
-                    td2.innerHTML = '<span style=color:red;>' + down + '</span>';
+                    td2.innerHTML = downgraphic + '<span style=color:red;>' + down + '</span>';
                 } else {
-                    td2.innerHTML = down;
+                    td2.innerHTML = "";
                 }
 
-                td3.innerHTML = " | ";
-                td4.innerHTML = up;
-            }
+                if (up > '0') {
+                td3.innerHTML = upgraphic + '<span style=color:green;>' + up + '</span>';
+                } else {
+                td3.innerHTML = "";
+                }
+             }
         }
 
         rTimer = setTimeout(availFunc, 60000);
