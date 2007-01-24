@@ -182,42 +182,46 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
         try {
             ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
 
-            ResourceGroup rgVo;
+            ResourceGroup group;
             if (retVal.getName () != null) {
-                rgVo = rgmLoc.findResourceGroupByName(subject,
-                                                      retVal.getName());
+                group = rgmLoc.findResourceGroupByName(subject,
+                                                       retVal.getName());
             } else { 
-                rgVo = rgmLoc.findResourceGroupById(subject,retVal.getId());
+                group = rgmLoc.findResourceGroupById(subject,retVal.getId());
             }
 
-            /* Create our return group vo */
-            retVal.setId                ( rgVo.getId() );
-            retVal.setName              ( rgVo.getName() );
-            retVal.setDescription       ( rgVo.getDescription() );
-            retVal.setLocation          ( rgVo.getLocation() );
-            retVal.setGroupType         ( rgVo.getGroupType().intValue() );
-            retVal.setSubject           ( subject );
-            retVal.setGroupEntType      ( rgVo.getGroupEntType().intValue() );
-            retVal.setGroupEntResType   ( rgVo.getGroupEntResType().intValue() );
-            retVal.setClusterId         ( rgVo.getClusterId().intValue() );
-            retVal.setMTime             ( new Long(rgVo.getMtime()) );
-            retVal.setCTime             ( new Long(rgVo.getCtime()) );
-            retVal.setModifiedBy        ( rgVo.getModifiedBy() );
-            retVal.setOwner             ( fetchGroupOwner(rgVo.getId()) );
+            if (group == null) {
+                throw new GroupNotFoundException();
+            }
 
-            /* Add the group members*/
-            for (Iterator i = rgVo.getResources().iterator(); i.hasNext();) {
+            // Create our return group vo
+            retVal.setId(group.getId());
+            retVal.setName(group.getName());
+            retVal.setDescription(group.getDescription());
+            retVal.setLocation(group.getLocation());
+            retVal.setGroupType(group.getGroupType().intValue());
+            retVal.setSubject(subject);
+            retVal.setGroupEntType(group.getGroupEntType().intValue());
+            retVal.setGroupEntResType(group.getGroupEntResType().intValue());
+            retVal.setClusterId(group.getClusterId().intValue());
+            retVal.setMTime(new Long(group.getMtime()));
+            retVal.setCTime(new Long(group.getCtime()));
+            retVal.setModifiedBy(group.getModifiedBy());
+            retVal.setOwner(fetchGroupOwner(group.getId()));
+
+            // Add the group members
+            for (Iterator i = group.getResources().iterator(); i.hasNext();) {
                 Resource resVo = (Resource) i.next();
                 GroupEntry ge =
                     new GroupEntry(resVo.getInstanceId(),
                                    resVo.getResourceType().getName());
                 retVal.addEntry(ge);
             }
-            retVal.setTotalSize( rgVo.getResources().size() );
+            retVal.setTotalSize( group.getResources().size() );
         } catch (FinderException fe) {
             log.debug("GroupManager caught underlying finder exc "+
                       "attempting to findResourceGroupById(): "+
-                          fe.getMessage());
+                      fe.getMessage());
             throw new GroupNotFoundException("The specified group "+
                                              "does not exist.", fe);
         }
