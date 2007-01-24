@@ -3623,8 +3623,96 @@ has already been defined.
           <statement>
             DROP TABLE eam_user_alert
           </statement>          
-      </schema-directSQL>
-
+          <statement targetDB="postgresql">
+            DROP SEQUENCE eam_tier_type_id_seq
+          </statement>          
+          <statement targetDB="postgresql">
+            DROP SEQUENCE eam_user_alert_id_seq
+          </statement>          
+          <statement targetDB="postgresql">
+            DROP SEQUENCE eam_user_config_resp_id_seq
+          </statement>          
+          <statement targetDB="postgresql">
+            CREATE SEQUENCE eam_crispo_id_seq
+                START WITH 10001
+                INCREMENT BY 1
+                NO MAXVALUE
+                NO MINVALUE
+                CACHE 1;            
+          </statement>          
+          <statement targetDB="postgresql">
+            CREATE SEQUENCE eam_crispo_opt_id_seq
+                START WITH 10001
+                INCREMENT BY 1
+                NO MAXVALUE
+                NO MINVALUE
+                CACHE 1
+          </statement>         
+          <statement targetDB="postgresql">
+            CREATE SEQUENCE eam_escalation_id_seq
+                START WITH 10001
+                INCREMENT BY 1
+                NO MAXVALUE
+                NO MINVALUE
+                CACHE 1
+          </statement>         
+          <statement targetDB="postgresql">
+            CREATE SEQUENCE eam_exec_strategies_id_seq
+                START WITH 10001
+                INCREMENT BY 1
+                NO MAXVALUE
+                NO MINVALUE
+                CACHE 1
+          </statement>         
+          <statement targetDB="postgresql">
+            CREATE SEQUENCE eam_exec_strategy_types_id_seq
+                START WITH 10001
+                INCREMENT BY 1
+                NO MAXVALUE
+                NO MINVALUE
+                CACHE 1
+          </statement>         
+          <statement targetDB="postgresql">
+            CREATE SEQUENCE eam_galert_defs_id_seq
+                START WITH 10001
+                INCREMENT BY 1
+                NO MAXVALUE
+                NO MINVALUE
+                CACHE 1
+          </statement>         
+          <statement targetDB="postgresql">
+            CREATE SEQUENCE eam_galert_logs_id_seq
+                START WITH 10001
+                INCREMENT BY 1
+                NO MAXVALUE
+                NO MINVALUE
+                CACHE 1
+          </statement>         
+          <statement targetDB="postgresql">
+            CREATE SEQUENCE eam_gtrigger_types_id_seq
+                  START WITH 10001
+                  INCREMENT BY 1
+                  NO MAXVALUE
+                  NO MINVALUE
+                  CACHE 1
+          </statement>
+          <statement targetDB="postgresql">
+              CREATE SEQUENCE eam_gtriggers_id_seq
+                  START WITH 10001
+                  INCREMENT BY 1
+                  NO MAXVALUE
+                  NO MINVALUE
+                  CACHE 1
+          </statement>
+          <statement targetDB="postgresql">
+              CREATE SEQUENCE eam_mescalation_state_id_seq
+                  START WITH 10001
+                  INCREMENT BY 1
+                  NO MAXVALUE
+                  NO MINVALUE
+                  CACHE 1
+          </statement>
+        </schema-directSQL>
     </schemaSpec>
 
     <schemaSpec version="3.01">
