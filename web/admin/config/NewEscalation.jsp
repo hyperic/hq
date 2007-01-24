@@ -807,26 +807,13 @@ function showViewEscResponse(originalRequest) {
 </table>
 </div>
 
-
-
-
- <div style="border:1px dotted orange;padding:10px;background-color:#FFFD99;font-weight:bold;margin-bottom:10px;">
+<div style="border:1px dotted orange;padding:10px;background-color:#FFFD99;font-weight:bold;margin-bottom:10px;">
      <table cellpadding="3" cellspacing="0" border="0">
          <tr>
              <td><b>An escalation scheme allows you to order alert notifications and actions, and it can be applied to one or more alert definitions</b></td>
          </tr>
       </table>
  </div>
-
-
-
-
-
-
-
-
-
-
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tbody>
