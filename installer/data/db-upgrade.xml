@@ -1904,6 +1904,9 @@ has already been defined.
               drop index metric_prob_id_idx
             </statement>
             <statement targetDB="postgresql">
+              drop index metric_prob_time_idx
+            </statement>
+            <statement targetDB="postgresql">
               drop index mtype_idx_appdeftype
             </statement>
             <statement targetDB="postgresql">
@@ -2367,10 +2370,6 @@ has already been defined.
             <statement targetDB="postgresql">
                 ALTER TABLE ONLY eam_agent
                     ADD CONSTRAINT eam_agent_pkey PRIMARY KEY (id)
-            </statement>
-            <statement targetDB="postgresql">
-                CREATE INDEX agent_token_idx ON eam_agent 
-                       USING btree (agenttoken)
             </statement>
         </schema-directSQL>
 
@@ -3012,19 +3011,7 @@ has already been defined.
                   CREATE INDEX meas_id_class ON eam_measurement USING btree (id, measurement_class)
                 </statement>
                 <statement targetDB="postgresql">
-                  CREATE INDEX aiq_ip_idx ON eam_aiq_ip USING btree (aiq_platform_id, address)
-                </statement>
-                <statement targetDB="postgresql">
                   CREATE INDEX aiq_platform_agenttoken_idx ON eam_aiq_platform USING btree (agenttoken)
-                </statement>
-                <statement targetDB="postgresql">
-                  CREATE INDEX aiq_platform_certdn_idx ON eam_aiq_platform USING btree (certdn)
-                </statement>
-                <statement targetDB="postgresql">
-                  CREATE INDEX aiq_platform_fqdn_idx ON eam_aiq_platform USING btree (fqdn)
-                </statement>
-                <statement targetDB="postgresql">
-                  CREATE INDEX aiq_platform_name_idx ON eam_aiq_platform USING btree (name)
                 </statement>
                 <statement targetDB="postgresql">
                   CREATE INDEX aiq_server_name ON eam_aiq_server USING btree (name)
@@ -3048,25 +3035,13 @@ has already been defined.
                   CREATE INDEX alert_def_child_idx ON eam_alert_definition USING btree (parent_id, priority)
                 </statement>
                 <statement targetDB="postgresql">
-                  CREATE INDEX eam_application_name_idx ON eam_application USING btree (name)
-                </statement>
-                <statement targetDB="postgresql">
                   CREATE INDEX ai_hist_scanname_idx ON eam_autoinv_history USING btree (scanname)
                 </statement>
                 <statement targetDB="postgresql">
                   CREATE INDEX ai_schedule_entity_idx ON eam_autoinv_schedule USING btree (entity_type, entity_id)
                 </statement>
                 <statement targetDB="postgresql">
-                  CREATE INDEX ai_schedule_jobname_idx ON eam_autoinv_schedule USING btree (jobname)
-                </statement>
-                <statement targetDB="postgresql">
                   CREATE INDEX ai_schedule_nextfiretime_idx ON eam_autoinv_schedule USING btree (nextfiretime)
-                </statement>
-                <statement targetDB="postgresql">
-                  CREATE INDEX ai_schedule_scanname ON eam_autoinv_schedule USING btree (scanname)
-                </statement>
-                <statement targetDB="postgresql">
-                  CREATE INDEX ai_schedule_triggername ON eam_autoinv_schedule USING btree (triggername)
                 </statement>
                 <statement targetDB="postgresql">
                   CREATE INDEX cresp_err_idx ON eam_config_response USING btree (validationerr)
@@ -3084,9 +3059,6 @@ has already been defined.
                   CREATE INDEX ctl_schedule_nextfiretime_idx ON eam_control_schedule USING btree (nextfiretime)
                 </statement>
                 <statement targetDB="postgresql">
-                  CREATE INDEX ctl_schedule_triggername_idx ON eam_control_schedule USING btree (triggername)
-                </statement>
-                <statement targetDB="postgresql">
                   CREATE INDEX crispo_idx ON eam_crispo_opt USING btree (crispo_id)
                 </statement>
                 <statement targetDB="postgresql">
@@ -3096,31 +3068,16 @@ has already been defined.
                   CREATE INDEX measurement_arg_idx ON eam_measurement_arg USING btree (measurement_template_arg_id)
                 </statement>
                 <statement targetDB="postgresql">
-                  CREATE INDEX cat_name_idx ON eam_measurement_cat USING btree (name)
-                </statement>
-                <statement targetDB="postgresql">
                   CREATE INDEX state_idx ON eam_mescalation_state USING btree (alert_type, alert_def_id)
                 </statement>
                 <statement targetDB="postgresql">
-                  CREATE INDEX metric_prob_id_idx ON eam_metric_prob USING btree (measurement_id, "timestamp")
+                  CREATE INDEX metric_prob_id_idx ON eam_metric_prob USING btree (measurement_id)
                 </statement>
                 <statement targetDB="postgresql">
                   CREATE INDEX mtype_idx_appdeftype_idx ON eam_monitorable_type USING btree (appdef_type)
                 </statement>
                 <statement targetDB="postgresql">
                   CREATE INDEX type_name_idx ON eam_monitorable_type USING btree (name)
-                </statement>
-                <statement targetDB="postgresql">
-                  CREATE INDEX eam_platform_fqdn_idx ON eam_platform USING btree (fqdn)
-                </statement>
-                <statement targetDB="postgresql">
-                  CREATE INDEX eam_platform_name_idx ON eam_platform USING btree (name)
-                </statement>
-                <statement targetDB="postgresql">
-                  CREATE INDEX plugin_name_unique ON eam_plugin USING btree (name)
-                </statement>
-                <statement targetDB="postgresql">
-                  CREATE INDEX eam_principal_principal_idx ON eam_principal USING btree (principal)
                 </statement>
                 <statement targetDB="postgresql">
                   CREATE INDEX eam_resource_idx_type_idx ON eam_resource USING btree (resource_type_id)
@@ -3135,25 +3092,7 @@ has already been defined.
                   CREATE INDEX eam_res_group_name_idx ON eam_resource_group USING btree (name)
                 </statement>
                 <statement targetDB="postgresql">
-                  CREATE INDEX eam_res_group_res_idx ON eam_resource_group USING btree (resource_id)
-                </statement>
-                <statement targetDB="postgresql">
-                  CREATE INDEX eam_res_type_name_idx ON eam_resource_type USING btree (name)
-                </statement>
-                <statement targetDB="postgresql">
-                  CREATE INDEX eam_resource_type_resource_idx ON eam_resource_type USING btree (resource_id)
-                </statement>
-                <statement targetDB="postgresql">
-                  CREATE INDEX eam_role_name_idx ON eam_role USING btree (name)
-                </statement>
-                <statement targetDB="postgresql">
                   CREATE INDEX eam_server_name_idx ON eam_server USING btree (name)
-                </statement>
-                <statement targetDB="postgresql">
-                  CREATE INDEX eam_server_platform_idx ON eam_server USING btree (platform_id)
-                </statement>
-                <statement targetDB="postgresql">
-                  CREATE INDEX eam_server_type_name_idx ON eam_server_type USING btree (name)
                 </statement>
                 <statement targetDB="postgresql">
                   CREATE INDEX eam_service_name_idx ON eam_service USING btree (name)
