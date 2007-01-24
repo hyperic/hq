@@ -940,11 +940,6 @@ border-bottom:1px solid #D5D8DE;
   background-color:#F2F4F7;
 }
 
-#escPropertiesTable #name {
- border: 1px solid #c6cfe5;
- background-color:#dbe3f5;
-}
-
 .escListArrow {
  display:none;
  padding: 3px; border-bottom: solid #D5D8DE; border-width: 1px;
@@ -1051,7 +1046,4 @@ border-left:1px solid #D5D8DE;
  color: #062b7a;
  text-decoration:none;
 }
-
-#infoText .BlockTitle {
- background-color: #62b3c6;   
 }
