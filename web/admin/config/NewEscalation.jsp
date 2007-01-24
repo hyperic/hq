@@ -746,8 +746,6 @@ function showViewEscResponse(originalRequest) {
             $('example').style.display= 'none';
     }
 
-    
-
 </script>
 
 <html:form action="/alerts/ConfigEscalation" method="GET">
@@ -809,11 +807,11 @@ function showViewEscResponse(originalRequest) {
 </table>
 </div>
 
-<table width="100%" cellpadding="3" cellspacing="0" border="0">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tbody>
     <tr>
-      <td class="BlockTitle" colspan="2">
-          <fmt:message key="common.label.CreateNew" />
+      <td class="BlockTitle" colspan="3">
+          Step 1 - <fmt:message key="common.label.CreateNew" />
           <c:choose>
             <c:when test="${not empty param.aname}">
               <fmt:message key="alert.config.escalation.scheme.for">
@@ -836,18 +834,30 @@ function showViewEscResponse(originalRequest) {
       </td>
     </tr>
     <tr class="ListRow">
-      <td class="BlockLabel">
+      <td class="BlockLabel" style="padding:3px;">
           <fmt:message key="common.label.Name" />
       </td>
-      <td width="80%">
+      <td width="40%" style="padding:3px;">
           <input type="text" size="25" name="name" id="escName" />
+      </td>
+      <td width="40%" id="infoText" rowspan="2" valign="top">
+          <div style="float:right;">
+          <table cellpadding="3" cellspacing="0" border="0" style="border:1px solid #236d2b;">
+                <tr>
+                    <td class="BlockTitle">Escalations and Actions</td>
+                </tr>
+                <tr>
+                    <td style="background-color:#d5dae5">With an escalation you can control alerting.</td>
+                </tr>
+          </table>
+              </div>
       </td>
     </tr>
     <tr class="ListRow">
-      <td class="BlockLabel" valign="top">
+      <td class="BlockLabel" valign="top" style="padding:3px;">
           <fmt:message key="common.label.Description" />
       </td>
-      <td>
+      <td style="padding:3px;">
           <textarea name="description"></textarea>
       </td>
     </tr>
@@ -912,7 +922,7 @@ function showViewEscResponse(originalRequest) {
     <tr class="ToolbarContent"><!-- SET TOOLBAR -->
       <td>
         <tiles:insert page="/common/components/ActionButton.jsp">
-          <tiles:put name="labelKey" value="common.label.Save"/>
+          <tiles:put name="labelKey" value="common.label.Next"/>
           <tiles:put name="buttonHref" value="."/>
           <tiles:put name="buttonClick" value="return saveNewEscalation();"/>
         </tiles:insert>
