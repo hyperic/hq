@@ -226,8 +226,6 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         String sql =
             "select t from MeasurementTemplate t " +
             "join fetch t.rawMeasurementArgs ra " +
-            "join fetch ra.template dt " +
-            "join fetch t.category c " +
             "join t.monitorableType mt " +
             "where mt.id=? and t.defaultInterval=0";
 
