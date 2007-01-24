@@ -150,14 +150,22 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
-     * Get a measurement template
+     * Get a MeasurementTemplate
      *
-     * @return a MeasurementTemplate value
      * @ejb:interface-method
      */
-    public MeasurementTemplateValue getTemplate(Integer id) {
-       MeasurementTemplate m = getMeasurementTemplateDAO().findById(id);
-       return m.getMeasurementTemplateValue();
+    public MeasurementTemplate getTemplate(Integer id) {
+        return getMeasurementTemplateDAO().findById(id);
+    }
+
+    /**
+     * Get a MeasurementTemplateValue
+     *
+     * @deprecated Use getTemplate() instead.
+     * @ejb:interface-method
+     */
+    public MeasurementTemplateValue getTemplateValue(Integer id) {
+        return getTemplate(id).getMeasurementTemplateValue();
     }
 
     /**

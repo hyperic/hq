@@ -27,9 +27,13 @@ package org.hyperic.hq.measurement.ext.depgraph;
 
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
-import org.hyperic.hq.measurement.shared.MeasurementArgValue;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.server.session.MeasurementArg;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
+
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * Create a Graph structure from the MeasurementTemplate and
@@ -44,37 +48,44 @@ public final class GraphBuilder {
         throws InvalidGraphException, TemplateNotFoundException
     {
         TemplateManagerLocal tmLocal = TemplateManagerEJBImpl.getOne();
-        MeasurementTemplateValue mt = tmLocal.getTemplate(id);
+        MeasurementTemplate mt = tmLocal.getTemplate(id);
 
         return buildGraph(new Graph(), mt);
     }
 
-    public static Graph buildGraph(MeasurementTemplateValue mt)
+    /**
+     * TODO: Convert to use MeasurementTemplate directly.
+     */
+    public static Graph buildGraph(MeasurementTemplateValue mtValue)
         throws InvalidGraphException
     {
+        TemplateManagerLocal tmLocal = TemplateManagerEJBImpl.getOne();
+        MeasurementTemplate mt = tmLocal.getTemplate(mtValue.getId());
         return buildGraph(new Graph(), mt);
     }
 
-    private static Graph buildGraph(Graph g, MeasurementTemplateValue mt)
+    private static Graph buildGraph(Graph g, MeasurementTemplate mt)
         throws InvalidGraphException
     {
         // first, add this measurement if it's not there already
         Node current = g.getNode(mt.getId().intValue());
         if (null == current) {
-            current = new DerivedNode(mt.getId().intValue(), mt);
+            current = new DerivedNode(mt.getId().intValue(),
+                                      mt.getMeasurementTemplateValue());
             g.addNode(current);
         }
 
         // now add our dependents, recursively
-        MeasurementArgValue[] args = mt.getMeasurementArgs();
-        for (int i = 0; i < args.length; i++) {
-            MeasurementArgValue arg = args[i];
-            MeasurementTemplateValue templ = arg.getMeasurementTemplateArg();
-            if (templ.getMeasurementArgs().length == 0) {
+        Collection args = mt.getMeasurementArgs();
+        for (Iterator i = args.iterator(); i.hasNext(); ) {
+            MeasurementArg arg = (MeasurementArg)i.next();
+            MeasurementTemplate templ = arg.getTemplateArg();
+            if (templ.getMeasurementArgs().size() == 0) {
                 // raw measurement
                 RawNode n = (RawNode) g.getNode(templ.getId().intValue());
                 if (null == n) {
-                    n = new RawNode(templ.getId().intValue(), templ);
+                    n = new RawNode(templ.getId().intValue(),
+                                    templ.getMeasurementTemplateValue());
                     g.addNode(n);
                 }
                 g.addEdge(current.getId(), n.getId());
@@ -83,7 +94,8 @@ public final class GraphBuilder {
                 DerivedNode n = (DerivedNode) g.getNode(templ.getId().intValue());
                 boolean buildGraph = false;
                 if (null == n) {
-                    n = new DerivedNode(templ.getId().intValue(), templ);
+                    n = new DerivedNode(templ.getId().intValue(),
+                                        templ.getMeasurementTemplateValue());
                     g.addNode(n);
                     buildGraph = true;
                 }

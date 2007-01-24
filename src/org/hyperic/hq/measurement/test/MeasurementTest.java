@@ -154,7 +154,7 @@ public class MeasurementTest
 
             // Test single lookup
             _log.info("Testing single lookup");
-            MeasurementTemplateValue val = manager.getTemplate(ids[0]);
+            MeasurementTemplateValue val = manager.getTemplateValue(ids[0]);
             assertNotNull(val);
             assertEquals(ids[0], val.getId());
 

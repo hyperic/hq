@@ -67,7 +67,6 @@ import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
-import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
@@ -116,7 +115,6 @@ import org.hyperic.hq.measurement.shared.MeasurementArgValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
-import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.product.ConfigTrackPlugin;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.MetricValue;
@@ -422,7 +420,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                                            Integer id)
         throws SessionNotFoundException, SessionTimeoutException,
                TemplateNotFoundException {
-        return getTemplateManager().getTemplate(id);
+        return getTemplateManager().getTemplateValue(id);
     }
 
     /**
@@ -1448,7 +1446,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId);
 
         MeasurementTemplateValue tmpl = null;
-        tmpl = getTemplateManager().getTemplate(tid);
+        tmpl = getTemplateManager().getTemplateValue(tid);
             
         List metrics = getMetricsForResource(subject, aid, tmpl);
         if (metrics == null || metrics.size() == 0) {
@@ -1528,7 +1526,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId);
     
         MeasurementTemplateValue tmpl = null;
-        tmpl = getTemplateManager().getTemplate(tid);
+        tmpl = getTemplateManager().getTemplateValue(tid);
 
         // Find the measurement IDs of the members in the autogroup for the
         // template
@@ -1749,7 +1747,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         
         // Get the template
-        getTemplateManager().getTemplate(tid);
+        getTemplateManager().getTemplateValue(tid);
         
         List entities;
 
@@ -1983,7 +1981,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         MeasurementTemplateValue tmpl = null;
 
-        tmpl = getTemplateManager().getTemplate(tid);
+        tmpl = getTemplateManager().getTemplateValue(tid);
 
         List pruned = new ArrayList();
         for (int i=0; i<resources.length; ++i) {
