@@ -45,7 +45,14 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.ConfigFetchException;
+import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
@@ -77,6 +84,7 @@ import org.hyperic.hq.measurement.shared.RawMeasurementValue;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -96,7 +104,8 @@ import org.quartz.SchedulerException;
  * @ejb:transaction type="REQUIRED"
  */
 public class DerivedMeasurementManagerEJBImpl extends SessionEJB
-    implements SessionBean {
+    implements SessionBean 
+{
     private final Log log =
         LogFactory.getLog(DerivedMeasurementManagerEJBImpl.class);
 
@@ -1312,6 +1321,79 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         // Now unschedule the DerivedMeasurment
         unscheduleJobs((Integer[])toUnschedule.toArray(new Integer[0]));
         sendAgentSchedule(id);
+    }
+
+    
+    private static String getMonitorableType(AuthzSubjectValue subject,
+                                             AppdefEntityID id)
+        throws AppdefEntityNotFoundException, PermissionException 
+    {
+        if (id.isPlatform() || id.isServer() | id.isService()) {
+            AppdefEntityValue av = new AppdefEntityValue(id, subject);
+
+            return av.getMonitorableType();
+        } 
+        return null;
+    }
+
+    /**
+     * Enable the default metrics for a resource.  This should only
+     * be called by the {@link MeasurementEnabler}.  If you want the behaviour
+     * of this method, use the {@link MeasurementEnabler} 
+     * @ejb:interface-method
+     */
+    public void enableDefaultMetrics(AuthzSubjectValue subject, 
+                                     AppdefEntityID id) 
+        throws AppdefEntityNotFoundException, PermissionException 
+    {
+        RawMeasurementManagerLocal rawMan =
+            RawMeasurementManagerEJBImpl.getOne();
+        ConfigManagerLocal cfgMan = ConfigManagerEJBImpl.getOne();
+        ConfigResponse config;
+        String mtype;
+
+        try {
+            mtype = getMonitorableType(subject, id);
+            // No monitorable type
+            if (mtype == null) {
+                return;
+            }
+
+            config = 
+                cfgMan.getMergedConfigResponse(subject,
+                                               ProductPlugin.TYPE_MEASUREMENT,
+                                               id, true);
+        } catch (ConfigFetchException e) {
+            log.warn("Unable to enable default metrics for [" + id + "]", e);
+            return;
+        }  catch (Exception e) {
+            log.error("Unable to enable default metrics for [" + id + "]", e);
+            return;
+        }
+
+        // Check the configuration
+        try {
+            rawMan.checkConfiguration(subject, id, config);
+        } catch (InvalidConfigException e) {
+            log.warn("Error turning on default metrics, configuration (" +
+                      config + ") " + "couldn't be validated", e);
+            cfgMan.setValidationError(subject, id, e.getMessage());
+        } catch (Exception e) {
+            log.warn("Error turning on default metrics, " +
+                      "error in validation", e);
+            cfgMan.setValidationError(subject, id, e.getMessage());
+        }
+
+        // Enable the metrics
+        try {
+            createDefaultMeasurements(subject, id, mtype, config);
+            cfgMan.clearValidationError(subject, id);
+
+            //XXX: Send new metric event!
+        } catch (Exception e) {
+            log.warn("Unable to enable default metrics for id=" + id +
+                      ": " + e.getMessage(), e);
+        }
     }
 
     public static DerivedMeasurementManagerLocal getOne() {

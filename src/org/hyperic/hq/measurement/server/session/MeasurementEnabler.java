@@ -25,101 +25,83 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.InvalidConfigException;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
-import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
-import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
-import org.hyperic.util.config.ConfigResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.util.LoggingThreadGroup;
+
+import edu.emory.mathcs.backport.java.util.concurrent.BlockingQueue;
+import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
 
 class MeasurementEnabler {
     private static Log _log = LogFactory.getLog(MeasurementEnabler.class);
+    private static final Object INIT_LOCK = new Object();
+    private static MeasurementEnabler INSTANCE;
 
-    private static String getMonitorableType(AuthzSubjectValue subject,
-                                             AppdefEntityID id)
-        throws AppdefEntityNotFoundException, PermissionException 
-    {
-        AppdefEntityValue av;
-        String mtype = null;
-        switch(id.getType()) {
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                av = new AppdefEntityValue(id, subject);
-                mtype = av.getMonitorableType();
-                break;
-            default:
-                break;
-        }
-        return mtype;
+    private final ThreadGroup _tGroup   = new LoggingThreadGroup("Enabler");
+    private BlockingQueue  _enableQueue = new LinkedBlockingQueue(); 
+    private QueueReader    _reader      = new QueueReader();
+    
+    private MeasurementEnabler() {
     }
 
-    public static void enableDefaultMetrics(AuthzSubjectValue subject,
-                                            AppdefEntityID id) {
-        ConfigManagerLocal configManager = ConfigManagerEJBImpl.getOne();
-        RawMeasurementManagerLocal rmManager =
-            RawMeasurementManagerEJBImpl.getOne();
-        DerivedMeasurementManagerLocal dmManager =
-            DerivedMeasurementManagerEJBImpl.getOne();
-
-        String mtype;
-        ConfigResponse config;
-        try {
-            mtype = getMonitorableType(subject, id);
-            // No monitorable type
-            if (mtype == null) {
-                return;
+    public static MeasurementEnabler getInstance() {
+        synchronized (INIT_LOCK) {
+            if (INSTANCE == null) {
+                Thread t;
+                
+                INSTANCE = new MeasurementEnabler();
+                t = new Thread(INSTANCE._tGroup, INSTANCE._reader,
+                               "MeasurementEnabler");
+                t.start();
             }
-
-            config = ConfigManagerEJBImpl.getOne().
-                getMergedConfigResponse(subject,
-                                        ProductPlugin.TYPE_MEASUREMENT,
-                                        id, true);
-        } catch (ConfigFetchException e) {
-            _log.warn("Unable to enable default metrics for id=" + id +
-                      e.getMessage());
-            return;
-        }  catch (Exception e) {
-            _log.error("Unable to enable default metrics for id=" + id +
-                        ": " + e.getMessage(), e);
-            return;
         }
-
-        // Check the configuration
-        try {
-            rmManager.checkConfiguration(subject, id, config);
-        } catch (InvalidConfigException e) {
-            _log.warn("Error turning on default metrics, configuration (" +
-                      config + ") " + "couldn't be validated: " +
-                      e.getMessage());
-            configManager.setValidationError(subject, id, e.getMessage());
-        } catch (Exception e) {
-            _log.warn("Error turning on default metrics, " +
-                      "error in validation: " + e.getMessage());
-            configManager.setValidationError(subject, id, e.getMessage());
+        return INSTANCE;
+    }
+    
+    private static class ScheduleInfo {
+        private AppdefEntityID     _id;
+        private AuthzSubjectValue  _subject;
+    }
+    
+    private class QueueReader implements Runnable {
+        public void run() {
+            while (true) {
+                ScheduleInfo info;
+                
+                try {
+                    info = (ScheduleInfo)_enableQueue.take();
+                } catch(InterruptedException e) {
+                    _log.warn("Unable to take item off queue", e);
+                    continue;
+                }
+    
+                _log.info("Enabling default metrics for [" + info._id + "]");
+                try {
+                    DerivedMeasurementManagerEJBImpl.getOne()
+                        .enableDefaultMetrics(info._subject, info._id);
+                } catch(Exception e) {
+                    _log.warn("Unable to enable default metrics", e);
+                }
+            }
         }
+    }
 
-        // Enable the metrics
+    static void enableDefaultMetrics(AuthzSubjectValue subject,
+                                     AppdefEntityID id)
+    {
+        ScheduleInfo info = new ScheduleInfo();
+        
+        info._id      = id;
+        info._subject = subject;
+        
         try {
-            dmManager.createDefaultMeasurements(subject, id, mtype, config);
-            configManager.clearValidationError(subject, id);
-
-            //XXX: Send new metric event!
-
-        } catch (Exception e) {
-            _log.warn("Unable to enable default metrics for id=" + id +
-                      ": " + e.getMessage(), e);
+            getInstance()._enableQueue.put(info);
+        } catch(InterruptedException e) {
+            _log.warn("Unable to enqueue metrics enable for [" + id + "]", e);
         }
     }
 }
-
