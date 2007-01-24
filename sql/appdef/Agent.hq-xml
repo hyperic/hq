@@ -35,7 +35,7 @@
     </property>
 
     <property name="agentToken" type="string">
-      <column name="AGENTTOKEN" not-null="true" length="100" unique="true" index="AGENT_TOKEN_IDX" />
+      <column name="AGENTTOKEN" not-null="true" length="100" unique="true" />
     </property>
 
     <property name="version" type="string">

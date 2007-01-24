@@ -21,7 +21,7 @@
     </version>
 
     <property name="name" type="string">
-      <column name="NAME" not-null="true" length="100" unique="true" index="CAT_NAME_IDX" />
+      <column name="NAME" not-null="true" length="100" unique="true" />
     </property>
 
     <property name="cid" type="integer">

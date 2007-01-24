@@ -43,11 +43,11 @@
     </property>
 
     <property name="triggerName" type="string">
-      <column name="TRIGGERNAME" not-null="true" length="128" unique="true" index="CTL_SCHEDULE_TRIGGERNAME_IDX" />
+      <column name="TRIGGERNAME" not-null="true" length="128" unique="true" />
     </property>
 
     <property name="jobName" type="string">
-      <column name="JOBNAME" not-null="true" length="128" unique="true" index="CTL_SCHEDULE_JOBNAME_IDX" />
+      <column name="JOBNAME" not-null="true" length="128" unique="true" />
     </property>
 
     <property name="jobOrderData" type="string">

@@ -21,7 +21,7 @@
     </version>
 
     <property name="name" type="string">
-      <column name="NAME" not-null="true" length="200" unique="true" index="EAM_SERVER_TYPE_NAME_IDX" />
+      <column name="NAME" not-null="true" length="200" unique="true" />
     </property>
 
     <property name="sortName" type="string">

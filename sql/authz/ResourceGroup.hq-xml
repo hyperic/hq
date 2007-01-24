@@ -21,7 +21,7 @@
     </version>
 
     <property name="name" type="string">
-      <column name="NAME" not-null="true" length="100" unique="true" index="EAM_RES_GROUP_NAME_IDX" />
+      <column name="NAME" not-null="true" length="100" unique="true" />
     </property>
 
     <property name="cid" type="integer">
@@ -73,7 +73,7 @@
     </property>
 
     <many-to-one name="resource" class="Resource">
-      <column name="RESOURCE_ID" unique="true" index="EAM_RES_GROUP_RES_IDX" />
+      <column name="RESOURCE_ID" unique="true" />
     </many-to-one>
 
     <set name="resourceSet" table="EAM_RES_GRP_RES_MAP">
