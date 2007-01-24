@@ -818,7 +818,7 @@ function showViewEscResponse(originalRequest) {
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tbody>
     <tr>
-      <td class="BlockTitle" colspan="3">
+      <td class="BlockTitle" colspan="2">
           Step 1 - <fmt:message key="common.label.CreateNew" />
           <c:choose>
             <c:when test="${not empty param.aname}">
@@ -842,11 +842,11 @@ function showViewEscResponse(originalRequest) {
       </td>
     </tr>
     <tr class="ListRow">
-      <td class="BlockLabel" style="padding:3px;">
+      <td class="BlockLabel" style="padding:3px;" width="100">
           <fmt:message key="common.label.Name" />
       </td>
-      <td width="40%" style="padding:3px;">
-          <input type="text" size="25" name="name" id="escName" />
+      <td style="padding:3px;" align="left">
+          <input type="text" size="23" name="name" id="escName" />
       </td>
       <!--<td width="40%" id="infoText" rowspan="2" valign="top">
           <div style="float:right;">
@@ -862,10 +862,10 @@ function showViewEscResponse(originalRequest) {
       </td>-->
     </tr>
     <tr class="ListRow">
-      <td class="BlockLabel" valign="top" style="padding:3px;">
+      <td class="BlockLabel" valign="top" style="padding:3px;" width="100">
           <fmt:message key="common.label.Description" />
       </td>
-      <td style="padding:3px;">
+      <td style="padding:3px;" align="left">
           <textarea name="description"></textarea>
       </td>
     </tr>
