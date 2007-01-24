@@ -49,7 +49,7 @@ public class Operation extends AuthzNamedBean {
         return _resourceType;
     }
 
-    void setResourceType(ResourceType resourceTypeId) {
+    protected void setResourceType(ResourceType resourceTypeId) {
         _resourceType = resourceTypeId;
     }
 
@@ -57,7 +57,7 @@ public class Operation extends AuthzNamedBean {
         return _cid;
     }
 
-    void setCid(Integer val) {
+    protected void setCid(Integer val) {
         _cid = val;
     }
 
@@ -65,11 +65,11 @@ public class Operation extends AuthzNamedBean {
         return Collections.unmodifiableCollection(_roles);
     }
 
-    Collection getRolesBag() {
+    protected Collection getRolesBag() {
         return _roles;
     }
 
-    void setRolesBag(Collection val) {
+    protected void setRolesBag(Collection val) {
         _roles = val;
     }
 
@@ -94,7 +94,7 @@ public class Operation extends AuthzNamedBean {
         return _operationValue;
     }
 
-    void setOperationValue(OperationValue val) {
+    protected void setOperationValue(OperationValue val) {
         setId(val.getId());
         setName(val.getName());
     }
