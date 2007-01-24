@@ -34,11 +34,6 @@
       <column name="CID" not-null="false" />
     </property>
 
-    <bag name="rolesBag" table="EAM_ROLE_OPERATION_MAP"
-         inverse="true">
-      <key column="OPERATION_ID" />
-      <many-to-many class="Role" column="ROLE_ID" />
-    </bag>
   </class>
 
 </hibernate-mapping>

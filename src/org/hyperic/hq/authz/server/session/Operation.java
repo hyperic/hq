@@ -25,16 +25,11 @@
 
 package org.hyperic.hq.authz.server.session;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-
 import org.hyperic.hq.authz.shared.OperationValue;
 
 public class Operation extends AuthzNamedBean {
     private ResourceType _resourceType;
     private Integer      _cid;
-    private Collection   _roles = new ArrayList();
 
     private OperationValue _operationValue = new OperationValue();
 
@@ -59,30 +54,6 @@ public class Operation extends AuthzNamedBean {
 
     protected void setCid(Integer val) {
         _cid = val;
-    }
-
-    public Collection getRoles() {
-        return Collections.unmodifiableCollection(_roles);
-    }
-
-    protected Collection getRolesBag() {
-        return _roles;
-    }
-
-    protected void setRolesBag(Collection val) {
-        _roles = val;
-    }
-
-    void addRole(Role role) {
-        getRolesBag().add(role);
-    }
-
-    void removeRole(Role role) {
-        getRolesBag().remove(role);
-    }
-
-    void removeAllRoles() {
-        getRolesBag().clear();
     }
 
     /**
