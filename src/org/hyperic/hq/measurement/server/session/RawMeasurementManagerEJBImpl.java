@@ -25,13 +25,11 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.EJBException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
@@ -74,8 +72,10 @@ import org.apache.commons.logging.LogFactory;
  * @jboss:create-table false
  * @jboss:remove-table false
  */
-public class RawMeasurementManagerEJBImpl extends SessionEJB
-    implements SessionBean {
+public class RawMeasurementManagerEJBImpl 
+    extends SessionEJB
+    implements SessionBean 
+{
     private final Log log =
         LogFactory.getLog(RawMeasurementManagerEJBImpl.class);
 
@@ -93,7 +93,6 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
     /**
      * Create a Measurement object based on a template
      *
-     * @return a RawMeasurement 
      * @ejb:interface-method
      */
     public RawMeasurementValue createMeasurement(Integer templateId,
@@ -118,13 +117,12 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
     /**
      * Update a Measurement object based on new properties
      *
-     * @return a RawMeasurement 
      * @ejb:interface-method
      */
     public void updateMeasurements(AppdefEntityID id,
                                    ConfigResponse config)
-        throws MeasurementCreateException {
-        String tmpl = null;
+        throws MeasurementCreateException 
+    {
         try {
             Collection mcol = 
                 getRawMeasurementDAO().findByInstance(id.getType(),
@@ -132,9 +130,8 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
 
             for (Iterator i = mcol.iterator(); i.hasNext();) {
                 RawMeasurement rm = (RawMeasurement) i.next();
+                String tmpl = rm.getTemplate().getTemplate();
 
-                // Translate the DSN
-                tmpl = rm.getTemplate().getTemplate();
                 rm.setDsn(translate(tmpl, config));
             }
         } catch (MetricInvalidException e) {
@@ -145,7 +142,6 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
     /**
      * Look up a raw measurement EJB
      *
-     * @return a RawMeasurement value
      * @ejb:interface-method
      */
     public RawMeasurementValue getMeasurement(Integer mid) {
@@ -178,22 +174,21 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
         if (entry.isEmpty()) {
             log.debug("No metrics to checkConfiguration for " + entity);
             return;
-        }
-        else {
+        } else {
             log.debug("Using " + entry.dsns.length +
                       " metrics to checkConfiguration for " + entity);
         }
         // there was an error looking up the templates
-        if (entry.exception != null) throw entry.exception;
+        if (entry.exception != null) 
+            throw entry.exception;
 
         String[] dsns = new String[entry.dsns.length];
         for (int i=0; i<dsns.length; i++) {
             dsns[i] = translate(entry.dsns[i], config);
         }
 
-        MetricValue[] mVals;
         try {
-            mVals = this.getLiveMeasurementValues(entity, dsns);
+            getLiveMeasurementValues(entity, dsns);
         } catch(LiveMeasurementException exc){
             throw new InvalidConfigException("Invalid configuration: " +
                                              exc.getMessage(), exc);
@@ -215,7 +210,8 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
      */
     private MetricValue[] getLiveMeasurementValues(AppdefEntityID entity,
                                                    String[] dsns)
-        throws LiveMeasurementException, PermissionException {
+        throws LiveMeasurementException, PermissionException 
+    {
         try {
             MonitorInterface monitor;
             AgentValue aconn;
@@ -238,7 +234,8 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
      * @ejb:interface-method
      */
     public MetricValue[] getLiveMeasurementValues(Integer[] mids)
-        throws LiveMeasurementException, PermissionException  {
+        throws LiveMeasurementException, PermissionException  
+    {
         AppdefEntityID entity = null;
         String[] dsns = new String[mids.length];
 
@@ -257,13 +254,11 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
             dsns[i] = rm.getDsn();
         }
                                                 
-        return this.getLiveMeasurementValues(entity, dsns);
+        return getLiveMeasurementValues(entity, dsns);
     }
 
     /**
      * Look up a raw measurement EJB
-     *
-     * @return a RawMeasurement value
      * @ejb:interface-method
      */
     public RawMeasurementValue findMeasurement(String dsn, Integer id) {
@@ -273,12 +268,9 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
 
     /**
      * Look up a raw measurement EJB
-     *
-     * @return a RawMeasurement value
      * @ejb:interface-method
      */
-    public RawMeasurementValue findMeasurement(Integer tid, 
-                                               Integer instanceId) {
+    public RawMeasurementValue findMeasurement(Integer tid, Integer instanceId){  
         RawMeasurement rm = 
             getRawMeasurementDAO().findByTemplateForInstance(tid, instanceId);
         return rm.getRawMeasurementValue();
@@ -291,7 +283,7 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
      * @ejb:interface-method
      */
     public List findMeasurements(AppdefEntityID id) {
-        ArrayList mlist = new ArrayList();
+        List mlist = new ArrayList();
         
         Collection mcol = getRawMeasurementDAO().findByInstance(id.getType(),
                                                                 id.getID());
@@ -324,19 +316,9 @@ public class RawMeasurementManagerEJBImpl extends SessionEJB
      * @ejb:create-method
      */
     public void ejbCreate() {}
-
     public void ejbPostCreate() {}
-
     public void ejbActivate() {}
-
     public void ejbPassivate() {}
-
-    public void ejbRemove() {
-        this.ctx = null;
-    }
-
-    public void setSessionContext(SessionContext ctx)
-        throws EJBException, RemoteException {
-        this.ctx = ctx;
-    }
+    public void ejbRemove() {}
+    public void setSessionContext(SessionContext ctx) {}
 }

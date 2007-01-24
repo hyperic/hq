@@ -26,7 +26,6 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.math.BigDecimal;
-import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -39,7 +38,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.ejb.CreateException;
-import javax.ejb.EJBException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 import javax.naming.NamingException;
@@ -1953,13 +1951,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     public void ejbPostCreate() {}
     public void ejbActivate() {}
     public void ejbPassivate() {}
-    public void ejbRemove() {
-        this.ctx = null;
-    }
-
-    public void setSessionContext(SessionContext ctx)
-        throws EJBException, RemoteException 
-    {
-        this.ctx = ctx;
-    }
+    public void ejbRemove() {}
+    public void setSessionContext(SessionContext ctx) {}
 }

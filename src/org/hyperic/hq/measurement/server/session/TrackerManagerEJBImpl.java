@@ -25,24 +25,19 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.rmi.RemoteException;
 import javax.ejb.CreateException;
-import javax.ejb.EJBException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
-import javax.naming.NamingException;
-
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AgentConnectionUtil;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
@@ -60,9 +55,10 @@ import org.apache.commons.logging.LogFactory;
  *      view-type="local"
  *      type="Stateless"
  */
-public class TrackerManagerEJBImpl extends SessionEJB 
-    implements SessionBean {
-
+public class TrackerManagerEJBImpl 
+    extends SessionEJB 
+    implements SessionBean 
+{
     private final Log log = LogFactory.getLog(TrackerManagerEJBImpl.class);
 
     /**
@@ -73,14 +69,8 @@ public class TrackerManagerEJBImpl extends SessionEJB
     public void ejbPostCreate() {}
     public void ejbActivate() {}
     public void ejbPassivate() {}
-    public void ejbRemove() {
-        this.ctx = null;
-    }
-
-    public void setSessionContext(SessionContext ctx)
-        throws EJBException, RemoteException {
-        this.ctx = ctx;
-    }
+    public void ejbRemove() {}
+    public void setSessionContext(SessionContext ctx) {}
 
     public MeasurementCommandsClient getClient(AppdefEntityID aid) 
         throws PermissionException, AgentNotFoundException {
@@ -101,15 +91,11 @@ public class TrackerManagerEJBImpl extends SessionEJB
     {
         try {
             MeasurementCommandsClient client = getClient(id);
-            String resourceName = PlatformManagerUtil.getLocalHome().create()
+            String resourceName = PlatformManagerEJBImpl.getOne()
                 .getPlatformPluginName(id);
 
             client.addTrackPlugin(id.getAppdefKey(), pluginType, 
                                   resourceName, response);        
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
         } catch (AppdefEntityNotFoundException e) {
             throw new PluginException("Entity not found: " +
                                       e.getMessage());

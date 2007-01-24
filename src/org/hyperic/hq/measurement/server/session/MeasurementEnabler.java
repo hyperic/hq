@@ -42,14 +42,13 @@ import org.hyperic.util.config.ConfigResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class MeasurementEnabler {
-
+class MeasurementEnabler {
     private static Log _log = LogFactory.getLog(MeasurementEnabler.class);
 
     private static String getMonitorableType(AuthzSubjectValue subject,
-                                        AppdefEntityID id)
-        throws AppdefEntityNotFoundException, PermissionException {
-
+                                             AppdefEntityID id)
+        throws AppdefEntityNotFoundException, PermissionException 
+    {
         AppdefEntityValue av;
         String mtype = null;
         switch(id.getType()) {

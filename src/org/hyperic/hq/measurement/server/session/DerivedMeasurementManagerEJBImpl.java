@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ejb.CreateException;
-import javax.ejb.EJBException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
@@ -1336,17 +1334,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
 
     public void ejbPostCreate() {}
-
     public void ejbActivate() {}
-
     public void ejbPassivate() {}
-
-    public void ejbRemove() {
-        this.ctx = null;
-    }
-
-    public void setSessionContext(SessionContext ctx)
-        throws EJBException, RemoteException {
-        this.ctx = ctx;
-    }
+    public void ejbRemove() {}
+    public void setSessionContext(SessionContext ctx){}
 }

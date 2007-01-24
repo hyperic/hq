@@ -34,8 +34,6 @@ import org.hyperic.hq.measurement.server.session.SRN;
 import javax.ejb.SessionBean;
 import javax.ejb.CreateException;
 import javax.ejb.SessionContext;
-import javax.ejb.EJBException;
-import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.HashSet;
@@ -66,14 +64,8 @@ public class SRNManagerEJBImpl extends SessionEJB
     public void ejbPostCreate() {}
     public void ejbActivate() {}
     public void ejbPassivate() {}
-    public void ejbRemove() {
-        this.ctx = null;
-    }
-
-    public void setSessionContext(SessionContext ctx)
-        throws EJBException, RemoteException {
-        this.ctx = ctx;
-    }
+    public void ejbRemove() {}
+    public void setSessionContext(SessionContext ctx) {}
 
     /**
      * Initialize the SRN Cache, or just return if it's already been

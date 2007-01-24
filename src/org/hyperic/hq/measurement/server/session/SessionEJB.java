@@ -33,7 +33,6 @@ import java.util.Map;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
-import javax.ejb.SessionContext;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -103,10 +102,8 @@ public abstract class SessionEJB {
     private final String ERR_START = "Begin and end times must be positive";
     private final String ERR_END   = "Start time must be earlier than end time";
 
-    // Static Measurement plugin manager
     protected static MeasurementPluginManager mpm = null;
 
-    // SessionBeans are not static
     private DataManagerLocal dataMan;
     private AgentManagerLocal agentMan;
     private SchedulerLocal scheduler;
@@ -115,11 +112,7 @@ public abstract class SessionEJB {
     private TemplateManagerLocal templateMan;
     private SRNManagerLocal srnManager;
 
-    // Static initial context so that there's no need to keep creating
-    private InitialContext ic = null;
-
-    // Every SessionBean has its own context
-    protected SessionContext ctx = null;
+    private InitialContext ic;
 
     protected BaselineDAO getBaselineDAO() {
         return DAOFactory.getDAOFactory().getBaselineDAO();
