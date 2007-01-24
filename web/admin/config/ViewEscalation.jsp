@@ -50,7 +50,7 @@
 function showViewEscResponse(originalRequest) {
     var tmp = eval('(' + originalRequest.responseText + ')');
     var creationTime = tmp.escalation.creationTime;
-    var notifyAll = tmp.escalation.notifyAll
+    var notifyAll = tmp.escalation.notifyAll;
     var _version_ = tmp.escalation._version_;
     var modifiedTime = tmp.escalation.modifiedTime;
     var actions = tmp.escalation.actions;
@@ -101,6 +101,7 @@ function showViewEscResponse(originalRequest) {
 
     if (actions.length == 0) {
         $('noActions').style.display = "";
+         $('infoText').style.display = "";
     }
     else {
         $('viewSection').style.display = "";
@@ -111,6 +112,9 @@ function showViewEscResponse(originalRequest) {
       var configListType = actionConfig.listType;
       var configNames = actionConfig.names;
       var configSms = actionConfig.sms;
+      var configMeta = actionConfig.meta;
+      var configVersion = actionConfig.version;
+      var configProduct = actionConfig.product;
       var actionId = actions[i].action.id;
       var actionsClassName = actions[i].action.className;
       var actionsVersion = actions[i].action._version_;
@@ -146,10 +150,6 @@ function showViewEscResponse(originalRequest) {
       var anchor = document.createElement("a");
   
       var emailInfo = actionConfig.names;
-      var roleInfo = " ";
-      var metaInfo = " ";
-      var productInfo = " ";
-      var versionInfo = " ";
   
       $('creationTime').value = creationTime;
       $('notifyAll').value = notifyAll;
@@ -197,7 +197,7 @@ function showViewEscResponse(originalRequest) {
       $('wait_' + liID).style.cursor = "pointer;";
       waitDiv.innerHTML = "Wait time before escalating: " + actionWaitTime + "<br>";
 
-  
+
       td1.appendChild(editWaitDiv);
       editWaitDiv.setAttribute('id','editWait_' + liID);
       $('editWait_' + liID).style.cursor = "pointer;";
@@ -209,7 +209,18 @@ function showViewEscResponse(originalRequest) {
       td2.appendChild(usersTextDiv);
       td2.setAttribute('id','usersList_' + liID);
       $('usersList_' + liID).style.cursor = "pointer;";
-        //$('usersList_' + liID).style.border = "1px solid green";
+        
+      var actionClass = actionsClassName.split('.');
+
+        for (var d = 0; d < actionClass.length; d++) {
+            if (actionClass[d] == "SyslogAction") {
+            usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowspan="3" valign="top" style="padding-right:3px;">Log to the Syslog:</td><td style="padding:0px 2px 2px 2px;">meta: ' + configMeta + '</td></tr><tr><td style="padding:2px;">product: ' + configProduct + '</td></tr><tr><td style="padding:2px 2px 2px 2px;">version: ' + configVersion + '</td></tr></table>'
+           } else if (actionClass[d] == "NoOpAction") {
+            usersTextDiv.innerHTML = 'Suppress Alerts for: ' + actionWaitTime + '<span style="color:red;padding-left:15px;">* All alerts will be stopped for this period of time *</span>';
+            waitDiv.innerHTML = " ";
+            }
+       }
+
       if (configListType == "1"){
           var emailAdds = emailInfo.split(',');
           for (var b = 0; b < emailAdds.length; b++) {
@@ -221,7 +232,14 @@ function showViewEscResponse(originalRequest) {
 
                   if (displayEmails.lastIndexOf(",") == displayEmails.length - 1);
               }
-              usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/>:  " + displayEmails + "<br>";
+
+              if (configSms == "true") {
+                usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/> via SMS: " + displayEmails + "<br>";
+              } else {
+              usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/> via Email: " + displayEmails + "<br>";
+
+          }
+              //usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/>:  " + displayEmails + "<br>";
 
          }
            
@@ -235,8 +253,12 @@ function showViewEscResponse(originalRequest) {
                   }
               </c:forEach>
           }
-          
-          usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/>: " + userNames + "<br>";
+          if (configSms == "true") {
+          usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/> via SMS: " + userNames + "<br>";
+              } else {
+              usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/> via Email: " + userNames + "<br>";
+        
+          }
       } else  if (configListType == "3") {
           var rids = emailInfo.split(',');
           var roleNames = "";
@@ -259,12 +281,6 @@ function showViewEscResponse(originalRequest) {
       switch(configListType) {
       case 1:
         td3.innerHTML = emailInfo + "<br>";
-        break;
-      case 2:
-        td3.innerHTML = configNames + "<br>";
-        break;
-      case 3:
-        td3.innerHTML = roleInfo + "<br>";
         break;
       }
   
@@ -318,11 +334,12 @@ function showViewEscResponse(originalRequest) {
         var url = '<html:rewrite action="/escalation/saveAction"/>';
 
         new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: updateEscView, onFailure: reportError} );
+        document.addEscalation.reset();
     }
 
     function updateEscView( originalRequest ) {
         $('example').style.display= '';
-        $('escMsg').innerHTML ="Action added to this escalation";
+        $('escMsg').innerHTML ="The action has been added to the escalation. The escalation is complete. You can add additional actions as needed.";
         cancelAddEscalation();
         setTimeout( "requestViewEscalation()", 1000 );
     }
@@ -340,6 +357,7 @@ function showViewEscResponse(originalRequest) {
         $(addEscalationUL).style.display = "";
         $('addEscButtons').style.display = "";
         $('noActions').style.display = "none";
+        $('infoText').style.display = "none";
         $('addRowButton').style.display = "none";
         var ni = $('addEscalationUL');
         var numi = document.getElementById('theValue');
@@ -588,6 +606,7 @@ function showViewEscResponse(originalRequest) {
             $('noActions').style.display = "none";
             } else {
             $('noActions').style.display = "";
+            $('infoText').style.display = "";
         }
     }
 
@@ -725,6 +744,8 @@ function showViewEscResponse(originalRequest) {
         }
 
     }
+
+    
 
 </script>
 
@@ -981,14 +1002,14 @@ function showViewEscResponse(originalRequest) {
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <thead>
          <tr>
-             <td class="BlockTitle" valign="top" nowrap>
-             <fmt:message key="common.label.EscalationSchemeActions" />
+             <td class="BlockTitle" valign="top" nowrap colspan="2">
+             Step 2 - Create <fmt:message key="common.label.EscalationSchemeActions" />
              </td>
         </tr>
      </thead>
   <tbody>
     <tr class="BlockContent">
-      <td style="padding-left:15px;padding-bottom:0px;display:none;">
+      <td style="padding-left:15px;padding-bottom:0px;display:none;" colspan="2">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tbody>
           <tr>
@@ -1001,10 +1022,22 @@ function showViewEscResponse(originalRequest) {
       </td>
     </tr>
     <tr class="BlockContent">
-      <td id="noActions" width="100%" style="padding:4px;display:none;">Currently there are no actions for this escalation</td>
+        <td id="noActions" width="40%" style="padding:4px;display:none;">Currently there are no actions for this escalation</td>
+        <td width="40%" id="infoText" valign="top" align="right" style="display:none;">
+            <div style="float:right">
+                <table cellpadding="3" cellspacing="0" border="0" style="border:1px solid #236d2b;">
+                <tr>
+                    <td class="BlockTitle">Actions</td>
+                </tr>
+                <tr>
+                    <td style="background-color:#d5dae5">By creating escalation actions you can control<br> how an alert is responded to and when.</td>
+                </tr>
+                </table>
+             </div>
+      </td>
     </tr>
     <tr>
-      <td width="100%" id="viewSection" style="display:none;">
+      <td width="100%" id="viewSection" style="display:none;" colspan="2">
       <ul id="viewEscalationUL" style="margin-left:0px;"></ul>
       </td>
     </tr>
@@ -1060,7 +1093,6 @@ function showViewEscResponse(originalRequest) {
 </tbody>
 </table>
 </form>
-<div id="test"></div>
 <br>
 <br>
 
