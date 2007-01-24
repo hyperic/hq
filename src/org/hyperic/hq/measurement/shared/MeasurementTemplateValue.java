@@ -76,7 +76,6 @@ public class MeasurementTemplateValue
    private boolean MonitorableTypeHasBeenSet = false;
    private org.hyperic.hq.measurement.shared.CategoryValue Category;
    private boolean CategoryHasBeenSet = false;
-   private java.util.Collection MeasurementArgs = new java.util.ArrayList();
 
    public MeasurementTemplateValue() {}
 
@@ -145,9 +144,6 @@ public class MeasurementTemplateValue
 	// TODO Clone is better no ?
 	  this.Category = otherValue.Category;
 	  CategoryHasBeenSet = true;
-	// TODO Clone is better no ?
-	  this.MeasurementArgs = otherValue.MeasurementArgs;
-
    }
 
    public Integer getId()
@@ -363,59 +359,6 @@ public class MeasurementTemplateValue
 	  this.Category = Category;
 	  CategoryHasBeenSet = true;
    }
-   protected java.util.Collection addedMeasurementArgs = new java.util.ArrayList();
-   protected java.util.Collection removedMeasurementArgs = new java.util.ArrayList();
-   protected java.util.Collection updatedMeasurementArgs = new java.util.ArrayList();
-
-   public java.util.Collection getAddedMeasurementArgs() { return addedMeasurementArgs; }
-   public java.util.Collection getRemovedMeasurementArgs() { return removedMeasurementArgs; }
-   public java.util.Collection getUpdatedMeasurementArgs() { return updatedMeasurementArgs; }
-
-   public org.hyperic.hq.measurement.shared.MeasurementArgValue[] getMeasurementArgs()
-   {
-	  return (org.hyperic.hq.measurement.shared.MeasurementArgValue[])this.MeasurementArgs.toArray(new org.hyperic.hq.measurement.shared.MeasurementArgValue[MeasurementArgs.size()]);
-   }
-
-   public void addMeasurementArg(org.hyperic.hq.measurement.shared.MeasurementArgValue added)
-   {
-	  this.MeasurementArgs.add(added);
-	  if ( ! this.addedMeasurementArgs.contains(added))
-		 this.addedMeasurementArgs.add(added);
-   }
-
-   public void removeMeasurementArg(org.hyperic.hq.measurement.shared.MeasurementArgValue removed)
-   {
-	  this.MeasurementArgs.remove(removed);
-	  this.removedMeasurementArgs.add(removed);
-	  if (this.addedMeasurementArgs.contains(removed))
-		 this.addedMeasurementArgs.remove(removed);
-	  if (this.updatedMeasurementArgs.contains(removed))
-		 this.updatedMeasurementArgs.remove(removed);
-   }
-
-   public void removeAllMeasurementArgs()
-   {
-        // DOH. Clear the collection - javier 2/24/03
-        this.MeasurementArgs.clear();
-   }
-
-   public void updateMeasurementArg(org.hyperic.hq.measurement.shared.MeasurementArgValue updated)
-   {
-	  if ( ! this.updatedMeasurementArgs.contains(updated))
-		 this.updatedMeasurementArgs.add(updated);
-   }
-
-   public void cleanMeasurementArg(){
-	  this.addedMeasurementArgs = new java.util.ArrayList();
-	  this.removedMeasurementArgs = new java.util.ArrayList();
-	  this.updatedMeasurementArgs = new java.util.ArrayList();
-   }
-
-   public void copyMeasurementArgsFrom(org.hyperic.hq.measurement.shared.MeasurementTemplateValue from)
-   {
-	  // TODO Clone the List ????
-	  this.MeasurementArgs = from.MeasurementArgs;
-   }
 
    public String toString()
    {
@@ -537,21 +480,8 @@ public class MeasurementTemplateValue
 		 {
 			lEquals = lEquals && this.Category.equals( that.Category );
 		 }
-		 if( this.getMeasurementArgs() == null )
-		 {
-			lEquals = lEquals && ( that.getMeasurementArgs() == null );
-		 }
-		 else
-		 {
-            // XXX Covalent Custom - dont compare the arrays, as order is not significant. ever.    
-            // - javier 7/16/03
-            java.util.Collection cmr1 = java.util.Arrays.asList(this.getMeasurementArgs());
-            java.util.Collection cmr2 = java.util.Arrays.asList(that.getMeasurementArgs());
-			// lEquals = lEquals && java.util.Arrays.equals(this.getMeasurementArgs() , that.getMeasurementArgs()) ;
-            lEquals = lEquals && cmr1.containsAll(cmr2);
-		 }
 
-		 return lEquals;
+         return lEquals;
 	  }
 	  else
 	  {
@@ -593,7 +523,6 @@ public class MeasurementTemplateValue
 
 	  result = 37*result + ((this.MonitorableType != null) ? this.MonitorableType.hashCode() : 0);
 	  result = 37*result + ((this.Category != null) ? this.Category.hashCode() : 0);
-	  result = 37*result + ((this.getMeasurementArgs() != null) ? this.getMeasurementArgs().hashCode() : 0);
 	  return result;
    }
 
