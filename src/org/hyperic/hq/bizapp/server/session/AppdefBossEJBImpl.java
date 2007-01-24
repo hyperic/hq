@@ -2267,12 +2267,17 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public ResourceGroup findGroupById(int sessionId, Integer groupId) 
-        throws PermissionException, SessionException
+        throws AppdefGroupNotFoundException, PermissionException,
+               SessionException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        
-        return getResourceGroupManager().findResourceGroupById(subject, 
-                                                               groupId);
+
+        try {
+            return getResourceGroupManager().findResourceGroupById(subject,
+                                                                   groupId);
+        } catch (FinderException e) {
+            throw new AppdefGroupNotFoundException(groupId);
+        }
     }
     
     /**

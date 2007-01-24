@@ -33,6 +33,7 @@ import java.util.List;
 import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
+import javax.ejb.FinderException;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -210,6 +211,8 @@ public class GalertBossEJBImpl
             throw new SystemException(e);
         } catch (NamingException e) {
             throw new SystemException(e);
+        } catch (FinderException e) {
+            throw new SystemException(e);
         }
         
         PageList alertDefs = _galertMan.findAlertDefs(g, pc);
@@ -302,6 +305,8 @@ public class GalertBossEJBImpl
         } catch (CreateException e) {
             throw new SystemException(e);
         } catch (NamingException e) {
+            throw new SystemException(e);
+        } catch (FinderException e) {
             throw new SystemException(e);
         }
         

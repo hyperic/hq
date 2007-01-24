@@ -58,6 +58,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.hibernate.ObjectNotFoundException;
 
 /**
  * Use this session bean to manipulate ResourceGroups,
@@ -142,16 +143,19 @@ public class ResourceGroupManagerEJBImpl
      */
     public ResourceGroup findResourceGroupById(AuthzSubjectValue whoami,
                                                Integer id)
-        throws PermissionException 
+        throws PermissionException, FinderException
     {
-        ResourceGroup groupLocal = getResourceGroupDAO().findById(id);
+        ResourceGroup group = getResourceGroupDAO().get(id);
+        if (group == null) {
+            throw new FinderException("Group id=" + id + " not found.");
+        }
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
         pm.check(whoami.getId(),
-                 groupLocal.getResource().getResourceType(),
-                 groupLocal.getId(),
+                 group.getResource().getResourceType(),
+                 group.getId(),
                  AuthzConstants.groupOpViewResourceGroup);
-        return groupLocal;
+        return group;
     }
 
     /**
@@ -167,17 +171,17 @@ public class ResourceGroupManagerEJBImpl
                                                  String name)
         throws PermissionException, FinderException 
     {
-        ResourceGroup resGroup = getResourceGroupDAO().findByName(name);
-        if (resGroup == null) {
-            throw new FinderException("resource group not found");
+        ResourceGroup group = getResourceGroupDAO().findByName(name);
+        if (group == null) {
+            throw new FinderException("Group name=" + name + " not found.");
         }
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
         pm.check(whoami.getId(),
-                 resGroup.getResource().getResourceType(),
-                 resGroup.getId(),
+                 group.getResource().getResourceType(),
+                 group.getId(),
                  AuthzConstants.groupOpViewResourceGroup);
-        return resGroup;
+        return group;
     }
 
     /**
