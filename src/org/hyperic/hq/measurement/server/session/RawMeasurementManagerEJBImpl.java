@@ -37,9 +37,11 @@ import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
+import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.measurement.MeasurementCreateException;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.RawMeasurement;
 import org.hyperic.hq.measurement.ext.MonitorFactory;
@@ -149,6 +151,53 @@ public class RawMeasurementManagerEJBImpl
         return rm.getRawMeasurementValue();
     }
 
+    private static final int SAMPLE_SIZE = 4;
+    private String[] getTemplatesToCheck(AuthzSubjectValue s,
+                                         AppdefEntityID id) 
+        throws AppdefEntityNotFoundException, PermissionException
+    {
+        MeasurementTemplateDAO dao = getMeasurementTemplateDAO();
+        String mType = (new AppdefEntityValue(id, s)).getMonitorableType();
+        List templates = dao.findDefaultsByMonitorableType(mType, id.getType());
+        if (templates.size() == 0) {
+            String msg = "No default templates for monitorable type " + mType;
+            log.error(msg);
+        }
+
+        List dsnList = new ArrayList(SAMPLE_SIZE);
+        int idx = 0;
+        int availIdx = -1;
+        MeasurementTemplate template;
+        for (int i=0; i<templates.size(); i++) {
+
+            template = (MeasurementTemplate)templates.get(i);
+
+            if (template.getCategory().getName().
+                equals(MeasurementConstants.CAT_AVAILABILITY) &&
+                template.isDesignate()) {
+                availIdx = idx;
+            }
+
+            // Need to get the raw measurements
+            Collection args = template.getMeasurementArgs();
+            MeasurementArg arg = (MeasurementArg)args.iterator().next();
+            template = arg.getTemplateArg();
+
+            if (idx == availIdx
+                || (availIdx == -1 && idx < (SAMPLE_SIZE-1))
+                || (availIdx != -1 && idx < SAMPLE_SIZE))
+            {
+                dsnList.add(template.getTemplate());
+                // Increment only after we have successfully added DSN
+                idx++;
+                if (idx >= SAMPLE_SIZE) break;
+            }
+        }
+
+        return (String[]) dsnList.toArray(new String[dsnList.size()]);
+    }
+
+
     /**
      * Check a configuration to see if it returns DSNs which the agent
      * can use to successfully monitor an entity.  This routine will
@@ -165,26 +214,20 @@ public class RawMeasurementManagerEJBImpl
         throws PermissionException, InvalidConfigException,
                AppdefEntityNotFoundException
     {
-        ConfigCheckCache cache = ConfigCheckCache.instance();
-        ConfigCheckCacheEntry entry
-            = cache.getMetricsToCheck(subject, entity,
-                                      getMeasurementTemplateDAO());
+        String[] templates = getTemplatesToCheck(subject, entity);
 
         // there are no metric templates, just return
-        if (entry.isEmpty()) {
+        if (templates.length == 0) {
             log.debug("No metrics to checkConfiguration for " + entity);
             return;
         } else {
-            log.debug("Using " + entry.dsns.length +
+            log.debug("Using " + templates.length +
                       " metrics to checkConfiguration for " + entity);
         }
-        // there was an error looking up the templates
-        if (entry.exception != null) 
-            throw entry.exception;
 
-        String[] dsns = new String[entry.dsns.length];
-        for (int i=0; i<dsns.length; i++) {
-            dsns[i] = translate(entry.dsns[i], config);
+        String[] dsns = new String[templates.length];
+        for (int i = 0; i < dsns.length; i++) {
+            dsns[i] = translate(templates[i], config);
         }
 
         try {
