@@ -352,19 +352,20 @@
                
                 td2.setAttribute((document.all ? 'className' : 'class'), "availResourceStatus");
                 td2.setAttribute('align', 'right');
+
                 td3.setAttribute((document.all ? 'className' : 'class'), "availResourceStatus");
                 td3.setAttribute('align', 'left');
 
                 if (down > '0') {
                     td2.innerHTML = downgraphic + '<span style=color:red;>' + down + '</span>';
                 } else {
-                    td2.innerHTML = "";
+                    td2.innerHTML = "&nbsp;";
                 }
 
                 if (up > '0') {
                 td3.innerHTML = upgraphic + '<span style=color:green;>' + up + '</span>';
                 } else {
-                td3.innerHTML = "";
+                td3.innerHTML = "&nbsp;";
                 }
              }
         }
