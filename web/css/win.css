@@ -997,7 +997,7 @@ background-color: #dbe3f5
 }
 
 .td2 {
- padding:5px 0px 10px 20px;
+ padding:5px 0px 10px 5px;
  width:20%;
  cursor:pointer;
 }
@@ -1052,3 +1052,6 @@ border-left:1px solid #D5D8DE;
  text-decoration:none;
 }
 
+#infoText .BlockTitle {
+ background-color: #62b3c6;   
+}
