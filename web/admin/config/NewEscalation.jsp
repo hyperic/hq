@@ -807,6 +807,27 @@ function showViewEscResponse(originalRequest) {
 </table>
 </div>
 
+
+
+
+ <div style="border:1px dotted orange;padding:10px;background-color:#FFFD99;font-weight:bold;margin-bottom:10px;">
+     <table cellpadding="3" cellspacing="0" border="0">
+         <tr>
+             <td><b>An escalation scheme allows you to order alert notifications and actions, and it can be applied to one or more alert definitions</b></td>
+         </tr>
+      </table>
+ </div>
+
+
+
+
+
+
+
+
+
+
+
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tbody>
     <tr>
@@ -840,7 +861,7 @@ function showViewEscResponse(originalRequest) {
       <td width="40%" style="padding:3px;">
           <input type="text" size="25" name="name" id="escName" />
       </td>
-      <td width="40%" id="infoText" rowspan="2" valign="top">
+      <!--<td width="40%" id="infoText" rowspan="2" valign="top">
           <div style="float:right;">
           <table cellpadding="3" cellspacing="0" border="0" style="border:1px solid #236d2b;">
                 <tr>
@@ -851,7 +872,7 @@ function showViewEscResponse(originalRequest) {
                 </tr>
           </table>
               </div>
-      </td>
+      </td>-->
     </tr>
     <tr class="ListRow">
       <td class="BlockLabel" valign="top" style="padding:3px;">
