@@ -23,26 +23,27 @@
  * USA.
  */
 
-package org.hyperic.hq.zevents;
+package org.hyperic.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * We use this threadgroup to start off the QueueProcessor, since it gives
- * us a facility for logging critical errors when they occur.
+ * Create your threads using this ThreadGroup to have uncaught exceptions
+ * logged via Log4j 
  */
-class ProcessorThreadGroup 
+public class LoggingThreadGroup 
     extends ThreadGroup
 {
-    private final Log _log = LogFactory.getLog(ProcessorThreadGroup.class);
+    private final Log _log = LogFactory.getLog(LoggingThreadGroup.class);
 
-    ProcessorThreadGroup() {
-        super("ProcessorThreadGroup");
+    public LoggingThreadGroup(String groupName) {
+        super(groupName);
     }
 
     public void uncaughtException(Thread t, Throwable exc) {
-        _log.warn("Unhandled exception", exc);
+        _log.warn("ThreadGroup[" + this.getName() +
+                  "]: Unhandled exception", exc);
         super.uncaughtException(t, exc);
     }
 }
