@@ -64,13 +64,15 @@ import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.RawMeasurementValue;
+import org.hyperic.hq.hibernate.RequiresSession;
 import org.hyperic.util.pager.PageControl;
 
 /**
  * This class is used to schedule and unschedule metrics for a given entity.
  * The schedule operation is synchronized to throttle rescheduling.
  */
-public class AgentScheduleSynchronizer {
+public class AgentScheduleSynchronizer implements RequiresSession {
+    
     private static final Log log =
         LogFactory.getLog(AgentScheduleSynchronizer.class.getName());
 
