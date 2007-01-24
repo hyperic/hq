@@ -40,6 +40,7 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticThread;
+import org.hyperic.util.LoggingThreadGroup;
 
 import edu.emory.mathcs.backport.java.util.concurrent.BlockingQueue;
 import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
@@ -63,7 +64,7 @@ public class ZeventManager {
     private static ZeventManager INSTANCE;
 
     // The thread group that the {@link EventQueueProcessor} comes from 
-    private final ProcessorThreadGroup _threadGroup;
+    private final LoggingThreadGroup _threadGroup;
 
     // The actual queue processor thread
     private Thread _processorThread;
@@ -88,7 +89,7 @@ public class ZeventManager {
 
     
     private ZeventManager() {
-        _threadGroup = new ProcessorThreadGroup();
+        _threadGroup = new LoggingThreadGroup("ZEventProcessor");
         _threadGroup.setDaemon(true);
     }
     
