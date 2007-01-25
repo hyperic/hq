@@ -84,11 +84,14 @@ public class ResourceHubPortalAction extends BaseAction {
 
     private static final int DEFAULT_ENTITY_TYPE = Constants.FILTER_BY_DEFAULT;
     private static final int DEFAULT_RESOURCE_TYPE = -1;
-    private static final int DEFAULT_GROUP_TYPE = -1;
+    private static final int DEFAULT_GROUP_TYPE = 1;
     private static final String DEFAULT_RESOURCE_NAME = null;
 
     private static final String SEPARATOR = " > ";
     private static final String VIEW_ATTRIB = "Resource Hub View";
+    private static final String TYPE_ATTRIB = "Resource Hub Apppdef Type";
+    private static final String GRP_ATTRIB  = "Resource Hub Group Type";
+    private static final String PAGE_ATTRIB = "Resource Hub Page Size";
     
     protected Log log =
         LogFactory.getLog(ResourceHubPortalAction.class.getName());
@@ -104,10 +107,10 @@ public class ResourceHubPortalAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-
+        boolean prefChanged = false;
+        
         ResourceHubForm hubForm = (ResourceHubForm) form;
         
-        PageControl pc = RequestUtils.getPageControl(request);
         int sessionId = RequestUtils.getSessionId(request).intValue();
         ServletContext ctx = getServlet().getServletContext();
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
@@ -116,6 +119,25 @@ public class ResourceHubPortalAction extends BaseAction {
         HttpSession session = request.getSession();
         WebUser user =
             (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
+        
+        PageControl pc = RequestUtils.getPageControl(request);
+
+        if (hubForm.getPs() != null) {
+            user.setPreference(PAGE_ATTRIB, hubForm.getPs());
+            prefChanged = true; // Save new preference
+        } else {
+            try {
+                String pageSizeStr = user.getPreference(PAGE_ATTRIB);
+                Integer pageSize = Integer.valueOf(pageSizeStr);
+                if (pageSize.intValue() != pc.getPagesize()) {
+                    pc.setPagenum(pageSize.intValue());
+                    hubForm.setPs(pageSize);
+                }
+            } catch (InvalidOptionException e) {
+                // Just use default
+            }
+        }
+        
         
         String view = hubForm.getView();
         if (!ResourceHubForm.LIST_VIEW.equals(view) &&
@@ -134,10 +156,8 @@ public class ResourceHubPortalAction extends BaseAction {
             hubForm.setView(prefView);
         }
         else if (!view.equals(prefView)) {
-            user.setPreference(VIEW_ATTRIB, view);      // Save new preference
-            AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
-            boss.setUserPrefs(user.getSessionId(), user.getId(),
-                              user.getPreferences());
+            user.setPreference(VIEW_ATTRIB, view);
+            prefChanged = true;                         // Save new preference
         }
         
         String navHierarchy = null;
@@ -145,12 +165,23 @@ public class ResourceHubPortalAction extends BaseAction {
         // find resources specified by entity type and potentially
         // resource type. collect query parameters and replace invalid
         // ones with defaults.
-
+        int entityType;
+        
+        try {
+            String prefFFStr = user.getPreference(TYPE_ATTRIB);
+            entityType = Integer.parseInt(prefFFStr);
+        } catch (InvalidOptionException e) {
+            entityType = DEFAULT_ENTITY_TYPE;
+        }
+        
         Integer ff = hubForm.getFf();
-        int entityType = (ff == null || ff.intValue() == 0) ?
-            DEFAULT_ENTITY_TYPE : ff.intValue();
-        if (ff == null) {
+        if (ff == null || ff.intValue() == 0) {
             hubForm.setFf(new Integer(entityType));
+        }
+        else if (ff.intValue() != entityType) {
+            entityType = ff.intValue();
+            user.setPreference(TYPE_ATTRIB, new Integer(entityType));
+            prefChanged = true;                         // Save new preference
         }
         
         // start the navHierarchy with the ff type
@@ -193,10 +224,21 @@ public class ResourceHubPortalAction extends BaseAction {
         }
 
         Integer g = hubForm.getG();
-        int groupType = g == null || g.intValue() == 0 ?
-            DEFAULT_GROUP_TYPE : g.intValue();
-        if (g == null) {
+        int groupType;
+        if (g == null || g.intValue() < SELECTOR_GROUP_COMPAT) {
+            try {
+                String grpTypeStr = user.getPreference(GRP_ATTRIB);
+                groupType = Integer.parseInt(grpTypeStr);
+            } catch (InvalidOptionException e) {
+                groupType = DEFAULT_GROUP_TYPE;
+            }
             hubForm.setG(new Integer(groupType));
+        }
+        else {
+            groupType = g.intValue();
+            user.setPreference(GRP_ATTRIB, new Integer(groupType));
+            prefChanged = true;                         // Save new preference
+
         }
 
         MessageResources res = getResources(request);
@@ -369,6 +411,13 @@ public class ResourceHubPortalAction extends BaseAction {
             addTypeOptions(hubForm, types);
         }
 
+        // Save the preferences if necessary
+        if (prefChanged) {
+            AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+            boss.setUserPrefs(user.getSessionId(), user.getId(),
+                              user.getPreferences());
+        }
+        
         // clean out the return path 
         SessionUtils.resetReturnPath(request.getSession());
         
