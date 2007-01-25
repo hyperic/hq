@@ -40,7 +40,7 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticThread;
-import org.hyperic.util.LoggingThreadGroup;
+import org.hyperic.util.thread.LoggingThreadGroup;
 
 import edu.emory.mathcs.backport.java.util.concurrent.BlockingQueue;
 import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;

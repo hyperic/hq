@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- *
+ * 
  * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
- *
+ * 
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,34 +16,37 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
 
-package org.hyperic.util;
+package org.hyperic.util.thread;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import edu.emory.mathcs.backport.java.util.concurrent.ThreadFactory;
 
-/**
- * Create your threads using this ThreadGroup to have uncaught exceptions
- * logged via Log4j 
- */
-public class LoggingThreadGroup 
-    extends ThreadGroup
+public class ThreadGroupFactory 
+    implements ThreadFactory
 {
-    private final Log _log = LogFactory.getLog(LoggingThreadGroup.class);
-
-    public LoggingThreadGroup(String groupName) {
-        super(groupName);
+    private ThreadGroup _group;
+    private String      _namePrefix;
+    private int         _numThreads;
+    private Object      _syncLock = new Object();
+    
+    public ThreadGroupFactory(ThreadGroup group, String namePrefix) {
+        _group      = group;
+        _namePrefix = namePrefix;
+        _numThreads = 0;
     }
-
-    public void uncaughtException(Thread t, Throwable exc) {
-        _log.warn("ThreadGroup[" + this.getName() +
-                  "]: Unhandled exception", exc);
-        super.uncaughtException(t, exc);
+    
+    public Thread newThread(Runnable r) {
+        String name;
+        
+        synchronized (_syncLock) {
+            name = _namePrefix + ++_numThreads; 
+        }
+        return new Thread(_group, r, name);
     }
 }
