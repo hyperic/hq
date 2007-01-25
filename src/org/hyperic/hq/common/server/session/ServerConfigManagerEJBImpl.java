@@ -116,47 +116,31 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
     public Properties getConfig(String prefix) throws ConfigPropertyException {
 
         try {
-            ServerConfigCache configCache = ServerConfigCache.getInstance();
-            // get all properties
-            if (prefix == null) {
-                try {
-                    return configCache.getProperties();                    
-                } catch (IllegalStateException e) {
-                    // continue to look up through EJB
-                    log.debug("ServerConfigCache uninitialized");
-                }
-            }
-            
-            ConfigPropertyDAO ccLH =
+            ConfigPropertyDAO dao =
                 DAOFactory.getDAOFactory().getConfigPropertyDAO();
-            Collection allProps = getProps(ccLH, prefix);
+            Collection allProps = getProps(dao, prefix);
             Properties props = new Properties();
             String key;
 
-            // iterate over ejbs'
             for(Iterator i = allProps.iterator(); i.hasNext();) {
-                ConfigProperty ejb = (ConfigProperty)i.next();
-                key = ejb.getKey();
-                // check if the key has a value
-                if (ejb.getValue() != null && ejb.getValue().length() != 0) {
-                    props.setProperty(key, ejb.getValue());
+                ConfigProperty configProp = (ConfigProperty)i.next();
+                key = configProp.getKey();
+                // Check if the key has a value
+                if (configProp.getValue() != null &&
+                    configProp.getValue().length() != 0) {
+                    props.setProperty(key, configProp.getValue());
                 } else {
-                    // give em the default, if we have one
-                    if (ejb.getDefaultValue() != null) {
-                        props.setProperty(key, ejb.getDefaultValue());
+                    // Use defaults
+                    if (configProp.getDefaultValue() != null) {
+                        props.setProperty(key, configProp.getDefaultValue());
                     } else {
-                        // otherwise give them an empty key.  we dont want
-                        // to prune any keys from the config
+                        // Otherwise return an empty key.  We dont want to
+                        // prune any keys from the config.
                         props.setProperty(key, "");
                     }
                 } 
             }
-            
-            if (prefix == null) {
-                // Store in cache
-                configCache.setProperties(props);
-            }
-            
+
             return props;
         } catch (FinderException e) {
             throw new ConfigPropertyException("Unable to find config property");
@@ -165,7 +149,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
 
     /**
      * Set the server configuration
-     * @param Properties
+     *
      * @throws ConfigPropertyException - if the props object is missing
      * a key that's currently in the database
      * @ejb:interface-method
@@ -225,7 +209,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             }
 
             // create properties that are still left in tempProps
-            if ( prefix != null) {
+            if (prefix != null) {
                 if (tempProps.size() > 0 ) {
                     Enumeration propsToAdd = tempProps.propertyNames();
                     while ( propsToAdd.hasMoreElements() ) {
@@ -235,11 +219,6 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
                         ccLH.create(prefix, key, propValue, propValue);
                     }
                 }
-            }
-            else {
-                // The new props should contain all of the config props,
-                // otherwise, we should have bombed out above
-                ServerConfigCache.getInstance().setProperties(newProps);
             }
         } catch (FinderException e) {
             throw new ApplicationException("Unable to find config property", e);
