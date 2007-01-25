@@ -249,7 +249,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 "SELECT APPT.NAME, COUNT(APP.ID) " +
                 "FROM EAM_APPLICATION_TYPE APPT, EAM_APPLICATION APP " +
                 "WHERE APP.APPLICATION_TYPE_ID = APPT.ID " +
-                " AND APPT.ID IN (" + getResourceTypeSQL("EAM_APPLICATION_TYPE") + ") " +
+                " AND APP.ID IN (" + getResourceTypeSQL("EAM_APPLICATION") + ") " +
                 "GROUP BY APPT.NAME ORDER BY APPT.NAME";
             stmt = conn.prepareStatement(sql);
     
