@@ -26,7 +26,6 @@
 package org.hyperic.hq.bizapp.server.mdb;
 
 import javax.ejb.CreateException;
-import javax.ejb.EJBException;
 import javax.ejb.MessageDrivenBean;
 import javax.ejb.MessageDrivenContext;
 import javax.jms.JMSException;
@@ -37,7 +36,6 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.shared.EventLogManagerLocal;
@@ -65,15 +63,8 @@ public class LoggingDispatcherEJBImpl
         LogFactory.getLog(
             "org.hyperic.hq.bizapp.server.mdb.LoggingDispatcherEJBImpl");
 
-    private static final HQApp _noUseApp= HQApp.getInstance();
-
-    private MessageDrivenContext ctx = null;
     private EventLogManagerLocal elMan = null;
     
-    static {
-        System.out.println("Class init for LoggingDispatcher");
-    }
-
     /**
      * The onMessage method
      */
@@ -140,13 +131,7 @@ public class LoggingDispatcherEJBImpl
      * @see javax.ejb.MessageDrivenBean#ejbRemove()
      * @ejb:remove-method
      */
-    public void ejbRemove() {
-        this.ctx = null;
-    }
+    public void ejbRemove() {}
 
-    public void setMessageDrivenContext(MessageDrivenContext ctx)
-        throws EJBException {
-        this.ctx = ctx;
-    }
-
+    public void setMessageDrivenContext(MessageDrivenContext ctx){}
 }
