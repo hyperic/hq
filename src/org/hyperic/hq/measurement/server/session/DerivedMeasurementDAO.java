@@ -84,7 +84,10 @@ public class DerivedMeasurementDAO extends HibernateDAO {
 
         return (DerivedMeasurement)getSession().createQuery(sql)
             .setInteger(0, tid.intValue())
-            .setInteger(1, iid.intValue()).uniqueResult();
+            .setInteger(1, iid.intValue())
+            .setCacheable(true)
+            .setCacheRegion("DerivedMeasurement.findByTemplateForInstance")
+            .uniqueResult();
     }
 
     List findByTemplate(Integer id) {
