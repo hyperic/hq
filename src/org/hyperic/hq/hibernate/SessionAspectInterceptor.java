@@ -33,10 +33,7 @@ import org.hibernate.SessionFactory;
 import org.hyperic.hibernate.Util;
 
 /**
- * This is the internal class which gets invoked when a session bean's
- * public method is caught by the aspect.
- * 
- * See also:  etc/aspects/SessionAspect.aj
+ * This class manages the creation and deletion of Hibernate sessions.
  */
 public class SessionAspectInterceptor { 
     private static final Log _log = 

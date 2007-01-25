@@ -63,15 +63,12 @@ import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.hibernate.RequiresSession;
 import org.hyperic.util.pager.PageControl;
 
 /**
  * This is the parent class for all Authz Session Beans
  */
-public abstract class AuthzSession 
-    implements RequiresSession
-{ 
+public abstract class AuthzSession { 
     public static final Log log
         = LogFactory.getLog(AuthzSession.class.getName());
 

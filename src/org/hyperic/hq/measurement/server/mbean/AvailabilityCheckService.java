@@ -25,18 +25,32 @@
 
 package org.hyperic.hq.measurement.server.mbean;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.management.MBeanRegistration;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import javax.naming.InitialContext;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycle;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycleListener;
@@ -44,30 +58,15 @@ import org.hyperic.hq.ha.shared.Mode;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
+import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MetricDataCache;
 import org.hyperic.hq.measurement.server.session.SRNCache;
 import org.hyperic.hq.measurement.server.session.ScheduleRevNum;
-import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.product.MetricValue;
-import org.hyperic.hq.hibernate.RequiresSession;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
-
-import javax.management.MBeanRegistration;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import javax.naming.InitialContext;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Collection;
 
 /**
  * This job is responsible for filling in missing availabilty metric values.
@@ -77,8 +76,8 @@ import java.util.Collection;
  */
 public class AvailabilityCheckService
     implements AvailabilityCheckServiceMBean, MBeanRegistration,
-               EjbModuleLifecycleListener, RequiresSession {
-
+               EjbModuleLifecycleListener
+{
     private MBeanServer server = null;
     private EjbModuleLifecycle haListener = null;
     private boolean started = false;
