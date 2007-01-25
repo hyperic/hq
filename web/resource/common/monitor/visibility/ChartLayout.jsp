@@ -67,6 +67,9 @@
                  var="MODE_MON_CHART_SMMR"/>
 
 <script language="JavaScript" src="<html:rewrite page="/js/chart.js"/>" type="text/javascript"></script>
+<script language="javascript">
+setTimeout("window.location.reload()",300000); // 5 minute page refresh
+</script>
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr>
