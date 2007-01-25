@@ -55,10 +55,11 @@ import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerUtil;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.appdef.shared.ServerManagerUtil;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -73,15 +74,13 @@ import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.control.agent.client.ControlCommandsClient;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
-import org.hyperic.hq.control.shared.ControlScheduleManagerUtil;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.product.ControlPluginManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.product.shared.ProductManagerLocal;
-import org.hyperic.hq.product.shared.ProductManagerUtil;
+import org.hyperic.hq.product.server.session.ProductManagerEJBImpl;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.util.config.ConfigResponse;
@@ -101,13 +100,10 @@ public class ControlManagerEJBImpl implements SessionBean {
     private final Log log =
         LogFactory.getLog(ControlManagerEJBImpl.class.getName());
 
-    private ControlPluginManager        controlManager;
-    private ControlScheduleManagerLocal controlScheduleManager;
-    private ProductManagerLocal         productManager;
-    private PlatformManagerLocal        platManager;
+    private ControlPluginManager _controlManager;
+    private ControlScheduleManagerLocal _controlScheduleManager;
 
-    private ControlHistoryDAO getControlHistoryDAO()
-    {
+    private ControlHistoryDAO getControlHistoryDAO() {
         return DAOFactory.getDAOFactory().getControlHistoryDAO();
     }
 
@@ -116,23 +112,14 @@ public class ControlManagerEJBImpl implements SessionBean {
        
         // Get reference to the control plugin manager
         try {
-            this.productManager = ProductManagerUtil.getLocalHome().create();
-            this.controlManager = 
-                (ControlPluginManager)productManager.
-                getPluginManager(ProductPlugin.TYPE_CONTROL);
+            _controlManager = (ControlPluginManager)ProductManagerEJBImpl.
+                getOne().getPluginManager(ProductPlugin.TYPE_CONTROL);
         } catch (Exception e) {
-            this.log.error("Unable to get plugin manager: " +
-                           e.getMessage());
+            this.log.error("Unable to get plugin manager", e);
         }
 
         // Get a reference to the control scheduler ejb
-        try {
-            this.controlScheduleManager =
-                ControlScheduleManagerUtil.getLocalHome().create();
-        } catch (Exception e) {
-            this.log.error("Unable to get control schedule manager: " +
-                           e.getMessage());
-        }
+        _controlScheduleManager = ControlScheduleManagerEJBImpl.getOne();
     }
 
     public void ejbPostCreate() {}
@@ -203,8 +190,8 @@ public class ControlManagerEJBImpl implements SessionBean {
         checkControlEnabled(subject, id);
         checkControlPermission(subject, id);
     
-        this.controlScheduleManager.doSingleAction(id, subject, action,
-                                                   args, null);
+        _controlScheduleManager.doSingleAction(id, subject, action,
+                                               args, null);
     }
 
     /**
@@ -226,8 +213,8 @@ public class ControlManagerEJBImpl implements SessionBean {
         checkControlEnabled(subject, id);
         checkControlPermission(subject, id);
     
-        this.controlScheduleManager.doScheduledAction(id, subject, action,
-                                                      schedule, null);
+        _controlScheduleManager.doScheduledAction(id, subject, action,
+                                                  schedule, null);
     }
 
     /**
@@ -254,8 +241,8 @@ public class ControlManagerEJBImpl implements SessionBean {
             checkControlPermission(subject, entity);
         }
        
-        this.controlScheduleManager.doSingleAction(id, subject, action,
-                                                   args, order);
+        _controlScheduleManager.doSingleAction(id, subject, action,
+                                               args, order);
     }
 
     /**
@@ -284,8 +271,8 @@ public class ControlManagerEJBImpl implements SessionBean {
             checkControlPermission(subject, entity);
         }
 
-        this.controlScheduleManager.doScheduledAction(id, subject, action,
-                                                      schedule, order);
+        _controlScheduleManager.doScheduledAction(id, subject, action,
+                                                  schedule, order);
     }
 
     /**
@@ -302,7 +289,7 @@ public class ControlManagerEJBImpl implements SessionBean {
         String pluginName;
    
         pluginName = getPlatformManager().getPlatformPluginName(id);
-        return this.controlManager.getActions(pluginName);
+        return _controlManager.getActions(pluginName);
     }
 
     /**
@@ -315,7 +302,7 @@ public class ControlManagerEJBImpl implements SessionBean {
     public List getActions(AuthzSubjectValue subject, AppdefEntityTypeID aetid)
         throws PluginNotFoundException {
         String pluginName = aetid.getAppdefResourceTypeValue().getName();        
-        return this.controlManager.getActions(pluginName);
+        return _controlManager.getActions(pluginName);
     }
 
     /**
@@ -363,7 +350,7 @@ public class ControlManagerEJBImpl implements SessionBean {
     /**
      * Checks with the plugin manager to find out if an entity's
      * resource provides support for control.
-     * @param id - appdef entity (of all kinds inc. groups)
+     * @param resType - appdef entity (of all kinds inc. groups)
      * @return flag - true if supported
      *
      * @ejb:interface-method
@@ -372,7 +359,7 @@ public class ControlManagerEJBImpl implements SessionBean {
     public boolean isControlSupported (AuthzSubjectValue subject,
                                        AppdefResourceTypeValue resType) {
         try {
-            this.controlManager.getPlugin(resType.getName());
+            _controlManager.getPlugin(resType.getName());
             return true;
         } catch (PluginNotFoundException e) {
             return false;
@@ -615,7 +602,7 @@ public class ControlManagerEJBImpl implements SessionBean {
             } 
             // Build up the arguments -- operation name array correlated
             // with resource (i.e. type specific operation names)
-            opList.add( getControlPermissionByType(caller,entities[x]) );
+            opList.add(getControlPermissionByType(entities[x]));
             ResourceValue rv = new ResourceValue();
             rv.setInstanceId(entities[x].getId());
             rv.setResourceTypeValue( new ResourceTypeValue(false, AppdefUtil
@@ -720,8 +707,7 @@ public class ControlManagerEJBImpl implements SessionBean {
 
     // Lookup the appropriate control permission based on entity type.
     // Groups are fetched and appropriate type is returned.
-    private String getControlPermissionByType (AuthzSubjectValue caller,
-                                               AppdefEntityID id) {
+    private String getControlPermissionByType(AppdefEntityID id) {
         switch (id.getType()) {
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
             return AuthzConstants.platformOpControlPlatform;
@@ -738,27 +724,10 @@ public class ControlManagerEJBImpl implements SessionBean {
     }
 
     private ConfigManagerLocal getConfigManager() {
-        try {
-            return ConfigManagerUtil.getLocalHome().create();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        return ConfigManagerEJBImpl.getOne();
     }
 
-
     private PlatformManagerLocal getPlatformManager() {
-        if (platManager == null) {
-            try {
-                platManager = PlatformManagerUtil.getLocalHome().create();
-            } catch (CreateException e) {
-                throw new SystemException(e);
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
-        
-        return platManager;
+        return PlatformManagerEJBImpl.getOne();
     }
 }

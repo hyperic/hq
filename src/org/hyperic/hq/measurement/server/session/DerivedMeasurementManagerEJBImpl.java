@@ -118,36 +118,12 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * Needed for calls back into the manager that require setting up a new
      * transaction. (i.e. creation of measurements.
      */
-    private DerivedMeasurementManagerLocal dmMan = null;
     private DerivedMeasurementManagerLocal getDMManager() {
-        try {
-            if (dmMan == null) {
-                dmMan =
-                    DerivedMeasurementManagerUtil.getLocalHome().create();
-            }
-
-            return dmMan;
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        return DerivedMeasurementManagerEJBImpl.getOne();
     }
 
-    private RawMeasurementManagerLocal rmMan = null;
     private RawMeasurementManagerLocal getRmMan() {
-        try {
-            if (rmMan == null) {
-                RawMeasurementManagerLocalHome rmHome =
-                    RawMeasurementManagerUtil.getLocalHome();
-                rmMan = rmHome.create();
-            }
-            return rmMan;
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        return RawMeasurementManagerEJBImpl.getOne();
     }
 
     private DerivedMeasurementValue updateMeasurementInterval(Integer tid,
