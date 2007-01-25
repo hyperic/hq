@@ -53,13 +53,6 @@ public class BaselineDAO extends HibernateDAO {
         return b;
     }
 
-    public Baseline findByMeasurementId(Integer mid) {
-        String sql = "from Baseline b where b.derivedMeasurement.id = ?";
-
-        return (Baseline)getSession().createQuery(sql)
-            .setInteger(0, mid.intValue()).uniqueResult();
-    }
-
     public List findByInstance(int appdefType, int appdefId) {
         String sql =
             "select b from Baseline b " +
