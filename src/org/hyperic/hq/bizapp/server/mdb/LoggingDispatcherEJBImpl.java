@@ -37,6 +37,7 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.shared.EventLogManagerLocal;
@@ -64,8 +65,14 @@ public class LoggingDispatcherEJBImpl
         LogFactory.getLog(
             "org.hyperic.hq.bizapp.server.mdb.LoggingDispatcherEJBImpl");
 
+    private static final HQApp _noUseApp= HQApp.getInstance();
+
     private MessageDrivenContext ctx = null;
     private EventLogManagerLocal elMan = null;
+    
+    static {
+        System.out.println("Class init for LoggingDispatcher");
+    }
 
     /**
      * The onMessage method

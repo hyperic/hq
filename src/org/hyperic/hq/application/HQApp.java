@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.application;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -36,10 +35,13 @@ import javax.transaction.Synchronization;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Transaction;
-import org.hibernate.action.Executable;
-import org.hibernate.impl.SessionImpl;
 import org.hyperic.hibernate.Util;
+import org.hyperic.hq.hibernate.SessionAspectInterceptor;
+import org.hyperic.txsnatch.TxSnatch;
 import org.hyperic.util.callback.CallbackDispatcher;
+import org.jboss.ejb.Interceptor;
+import org.jboss.invocation.Invocation;
+
 
 /**
  * This class represents the central concept of the Hyperic HQ application.  
@@ -52,6 +54,10 @@ public class HQApp {
     private ThreadLocal        _txListeners    = new ThreadLocal();
     private List               _startupClasses = new ArrayList();
     private CallbackDispatcher _callbacks = new CallbackDispatcher();
+
+    static {
+        TxSnatch.setSnatcher(new Snatcher());
+    }
     
     /**
      * @see CallbackDispatcher#generateCaller(Class)
@@ -74,6 +80,39 @@ public class HQApp {
     public void addStartupClass(String className) {
         synchronized (_startupClasses) {
             _startupClasses.add(className);
+        }
+    }
+    
+    private static class Snatcher implements TxSnatch.Snatcher  {
+        private Object invokeNextBoth(Interceptor next, Invocation arg0,
+                                      boolean isHome) 
+            throws Exception 
+        {
+            boolean created = false;
+            
+            created = SessionAspectInterceptor.setupSession("Unknown");
+            try {
+                if (isHome)
+                    return next.invokeHome(arg0);
+                else
+                    return next.invoke(arg0);
+            } finally { 
+                if (created) {
+                    SessionAspectInterceptor.cleanupSession();
+                }
+            }
+        }
+
+        public Object invokeNext(Interceptor next, Invocation arg0) 
+            throws Exception 
+        {
+            return invokeNextBoth(next, arg0, false);
+        }
+        
+        public Object invokeHomeNext(Interceptor next, Invocation arg0) 
+            throws Exception 
+        {
+            return invokeNextBoth(next, arg0, true);
         }
     }
     

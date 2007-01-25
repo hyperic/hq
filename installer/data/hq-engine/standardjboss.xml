@@ -375,6 +375,7 @@
                 <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
                 <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
                 <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
+                <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
                 <interceptor metricsEnabled="true">org.jboss.ejb.plugins.MetricsInterceptor</interceptor>
                 <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
                 <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>                <interceptor>org.jboss.ejb.plugins.EntityInstanceInterceptor</interceptor>
@@ -418,6 +419,7 @@
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
+        <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
         <interceptor>org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>
@@ -466,6 +468,7 @@
          <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
          <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
          <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
+         <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
          <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
          <interceptor>org.jboss.ejb.plugins.EntityInstanceInterceptor</interceptor>
          <interceptor>org.jboss.ejb.plugins.EntityReentranceInterceptor</interceptor>
@@ -507,6 +510,7 @@
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
+        <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
         <interceptor>org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>
@@ -551,6 +555,7 @@
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
+        <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
         <interceptor>org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>
@@ -595,6 +600,7 @@
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
+        <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
         <interceptor>org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>
@@ -626,6 +632,7 @@
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
+        <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
         <interceptor>org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>
@@ -669,6 +676,7 @@
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
+        <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
         <interceptor>org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>
@@ -714,6 +722,7 @@
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
+        <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
         <interceptor>org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>
@@ -743,6 +752,7 @@
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
         <!-- CMT -->
         <interceptor transaction="Container">org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
+        <interceptor transaction="Container">org.hyperic.txsnatch.TxSnatch</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor transaction="Container">org.jboss.webservice.server.ServiceEndpointInterceptor</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.StatelessSessionInstanceInterceptor</interceptor>
@@ -772,6 +782,7 @@
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
         <!-- CMT -->
         <interceptor transaction="Container">org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
+        <interceptor transaction="Container">org.hyperic.txsnatch.TxSnatch</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor transaction="Container">org.jboss.webservice.server.ServiceEndpointInterceptor </interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.StatelessSessionInstanceInterceptor</interceptor>
@@ -803,6 +814,7 @@
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <!-- CMT -->
         <interceptor transaction="Container">org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
+        <interceptor transaction="Container">org.hyperic.txsnatch.TxSnatch</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.StatefulSessionInstanceInterceptor</interceptor>
         <!-- BMT -->
@@ -844,6 +856,7 @@
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <!-- CMT -->
         <interceptor transaction="Container">org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
+        <interceptor transaction="Container">org.hyperic.txsnatch.TxSnatch</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.StatefulSessionInstanceInterceptor</interceptor>
         <!-- BMT -->
@@ -890,6 +903,7 @@
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
+        <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
         <interceptor>org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>
@@ -933,6 +947,7 @@
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
+        <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
         <interceptor>org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>
@@ -978,6 +993,7 @@
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
+        <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
         <interceptor>org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>
@@ -1007,6 +1023,7 @@
         <interceptor>org.jboss.ejb.plugins.RunAsSecurityInterceptor</interceptor>
         <!-- CMT -->
         <interceptor transaction="Container">org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
+        <interceptor transaction="Container">org.hyperic.txsnatch.TxSnatch</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.MessageDrivenInstanceInterceptor</interceptor>
         <!-- BMT -->
@@ -1033,6 +1050,7 @@
         <interceptor>org.jboss.ejb.plugins.RunAsSecurityInterceptor</interceptor>
         <!-- CMT -->
         <interceptor transaction="Container">org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
+        <interceptor transaction="Container">org.hyperic.txsnatch.TxSnatch</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.MessageDrivenInstanceInterceptor</interceptor>
         <!-- BMT -->
@@ -1059,6 +1077,7 @@
         <interceptor>org.jboss.ejb.plugins.RunAsSecurityInterceptor</interceptor>
         <!-- CMT -->
         <interceptor transaction="Container">org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
+        <interceptor transaction="Container">org.hyperic.txsnatch.TxSnatch</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.MessageDrivenInstanceInterceptor</interceptor>
         <!-- BMT -->

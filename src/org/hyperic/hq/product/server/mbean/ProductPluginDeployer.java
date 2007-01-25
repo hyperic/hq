@@ -86,6 +86,8 @@ public class ProductPluginDeployer
     private static final String PRODUCT = "HQ";
     private static final String PLUGIN_DIR = "hq-plugins";
 
+    private static final HQApp _app = HQApp.getInstance();
+
     private Log _log = LogFactory.getLog(ProductPluginDeployer.class);
 
     private ProductPluginManager _ppm;
@@ -421,7 +423,6 @@ public class ProductPluginDeployer
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         InputStream is = 
             loader.getResourceAsStream("META-INF/startup_classes.txt"); 
-        HQApp app = HQApp.getInstance();
         List lines;
         
         try {
@@ -437,9 +438,9 @@ public class ProductPluginDeployer
             if (className.length() == 0 || className.startsWith("#"))
                 continue;
             
-            app.addStartupClass(className);
+            _app.addStartupClass(className);
         }
-        app.runStartupClasses();
+        _app.runStartupClasses();
     }
 
     private void pluginNotify(String name, String type) {
