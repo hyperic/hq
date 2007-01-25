@@ -103,8 +103,10 @@ public class DashboardUtils {
 
     public static void removePortlet(WebUser user, String portlet)
         throws InvalidOptionException, InvalidOptionValueException {
-        String first = user.getPreference(Constants.USER_PORTLETS_FIRST);
-        String second = user.getPreference(Constants.USER_PORTLETS_SECOND);
+        String first = user.getPreference(Constants.USER_PORTLETS_FIRST) +
+                       Constants.DASHBOARD_DELIMITER;
+        String second = user.getPreference(Constants.USER_PORTLETS_SECOND) +
+                       Constants.DASHBOARD_DELIMITER;
 
         first =
             StringUtil.remove(first,  portlet + Constants.DASHBOARD_DELIMITER);
