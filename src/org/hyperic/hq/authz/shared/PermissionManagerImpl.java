@@ -272,11 +272,11 @@ public class PermissionManagerImpl
         return ps_idx;
     }
 
-    public String getResourceTypeSQL(String col) {
+    public String getResourceTypeSQL(String table) {
         return
-            "SELECT RES.INSTANCE_ID FROM " +
-            "  EAM_RESOURCE RES, EAM_RESOURCE_TYPE RT " +
-            "WHERE " + col + " = RES.INSTANCE_ID " +
+            "SELECT TBL.ID FROM EAM_RESOURCE RES, " +
+            " EAM_RESOURCE_TYPE RT, " + table + " TBL " +
+            "WHERE TBL.ID = RES.INSTANCE_ID " +
             "  AND RES.FSYSTEM = " + _falseToken + 
             "  AND RES.RESOURCE_TYPE_ID = RT.ID " +
             "  AND RT.NAME = ? ";

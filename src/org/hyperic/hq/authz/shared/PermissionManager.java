@@ -200,7 +200,7 @@ public interface PermissionManager {
                           Integer resType, Integer operationId) 
         throws SQLException;
 
-    public String getResourceTypeSQL(String col);
+    public String getResourceTypeSQL(String table);
 
     public int prepareResourceTypeSQL(PreparedStatement ps,
                                       int ps_idx,
