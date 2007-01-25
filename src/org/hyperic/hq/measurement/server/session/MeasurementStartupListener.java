@@ -87,11 +87,9 @@ public class MeasurementStartupListener
 
         public void processEvents(List events) {
             for (Iterator i = events.iterator(); i.hasNext();) {
-                ResourceCreatedZevent zevent = (ResourceCreatedZevent) i.next();
-                AuthzSubjectValue subject = zevent.getAuthzSubjectValue();
-                AppdefEntityID id = zevent.getAppdefEntityID();
-                _log.info("Enabling default metrics for " + id);
-                MeasurementEnabler.enableDefaultMetrics(subject, id);
+                ResourceCreatedZevent z= (ResourceCreatedZevent) i.next();
+
+                MeasurementEnabler.getInstance().enableDefaultMetrics(z);
             }
         }
     }
@@ -120,7 +118,8 @@ public class MeasurementStartupListener
                     if (count == 0) {
                         // No enabled metrics, schedule the default metrics
                         _log.info("Enabling default metrics for " + id);
-                        MeasurementEnabler.enableDefaultMetrics(subject, id);
+                        MeasurementEnabler.getInstance()
+                                          .enableDefaultMetrics(zevent);
                     } else {
                         // Reschedule
                         _log.info("Rescheduling metric schedule for " + id);

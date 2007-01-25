@@ -25,83 +25,64 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
+import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
+import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.util.LoggingThreadGroup;
+import org.hyperic.hq.zevents.Zevent;
+import org.hyperic.hq.zevents.ZeventListener;
+import org.hyperic.hq.zevents.ZeventRunnableDecorator;
+import org.hyperic.util.thread.LoggingThreadGroup;
+import org.hyperic.util.thread.ThreadGroupFactory;
 
-import edu.emory.mathcs.backport.java.util.concurrent.BlockingQueue;
 import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
+import edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor;
+import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
-class MeasurementEnabler {
+class MeasurementEnabler 
+    extends ThreadPoolExecutor
+    implements ZeventListener
+{
     private static Log _log = LogFactory.getLog(MeasurementEnabler.class);
-    private static final Object INIT_LOCK = new Object();
-    private static MeasurementEnabler INSTANCE;
+    private static final MeasurementEnabler INSTANCE = new MeasurementEnabler();
 
-    private final ThreadGroup _tGroup   = new LoggingThreadGroup("Enabler");
-    private BlockingQueue  _enableQueue = new LinkedBlockingQueue(); 
-    private QueueReader    _reader      = new QueueReader();
-    
     private MeasurementEnabler() {
+        super(1, 1, 0, TimeUnit.DAYS, new LinkedBlockingQueue(), 
+              new ThreadGroupFactory(new LoggingThreadGroup("MetricEnabler"), 
+                                     "MetricEnabler"));
+    }
+
+    public void processEvents(List events) {
+        for (Iterator i=events.iterator(); i.hasNext(); ) {
+            ResourceZevent z = (ResourceZevent)i.next();
+            AuthzSubjectValue subject = z.getAuthzSubjectValue();
+            AppdefEntityID id = z.getAppdefEntityID();
+        
+            _log.info("Enabling default metrics for [" + id + "]");
+            try {
+                DerivedMeasurementManagerEJBImpl.getOne()
+                    .enableDefaultMetrics(subject, id);
+            } catch(Exception e) {
+                _log.warn("Unable to enable default metrics", e);
+            }
+        }
+    }
+
+    void enableDefaultMetrics(ResourceCreatedZevent z) {
+        execute(new ZeventRunnableDecorator(z, this));
+    }
+
+    void enableDefaultMetrics(ResourceUpdatedZevent z) {
+        execute(new ZeventRunnableDecorator(z, this));
     }
 
     public static MeasurementEnabler getInstance() {
-        synchronized (INIT_LOCK) {
-            if (INSTANCE == null) {
-                Thread t;
-                
-                INSTANCE = new MeasurementEnabler();
-                t = new Thread(INSTANCE._tGroup, INSTANCE._reader,
-                               "MeasurementEnabler");
-                t.start();
-            }
-        }
         return INSTANCE;
-    }
-    
-    private static class ScheduleInfo {
-        private AppdefEntityID     _id;
-        private AuthzSubjectValue  _subject;
-    }
-    
-    private class QueueReader implements Runnable {
-        public void run() {
-            while (true) {
-                ScheduleInfo info;
-                
-                try {
-                    info = (ScheduleInfo)_enableQueue.take();
-                } catch(InterruptedException e) {
-                    _log.warn("Unable to take item off queue", e);
-                    continue;
-                }
-    
-                _log.info("Enabling default metrics for [" + info._id + "]");
-                try {
-                    DerivedMeasurementManagerEJBImpl.getOne()
-                        .enableDefaultMetrics(info._subject, info._id);
-                } catch(Exception e) {
-                    _log.warn("Unable to enable default metrics", e);
-                }
-            }
-        }
-    }
-
-    static void enableDefaultMetrics(AuthzSubjectValue subject,
-                                     AppdefEntityID id)
-    {
-        ScheduleInfo info = new ScheduleInfo();
-        
-        info._id      = id;
-        info._subject = subject;
-        
-        try {
-            getInstance()._enableQueue.put(info);
-        } catch(InterruptedException e) {
-            _log.warn("Unable to enqueue metrics enable for [" + id + "]", e);
-        }
     }
 }
