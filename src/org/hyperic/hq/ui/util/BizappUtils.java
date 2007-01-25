@@ -118,12 +118,6 @@ import org.hyperic.util.units.UnitsFormat;
 
 public class BizappUtils {
 
-    /**
-     * Caches the values returned by buildSupportedAIServerTypes 
-     */
-    private static Map AIServerTypesByPlatform = new HashMap();
-    private static Map platformTypesByName = new HashMap();
-
     private static Log log = LogFactory.getLog(BizappUtils.class.getName());
 
     /**
@@ -192,20 +186,11 @@ public class BizappUtils {
         throws Exception {
     
         PlatformTypeValue ptValue;
-    
-        // check the cache first
-        synchronized (platformTypesByName) {
-            ptValue = (PlatformTypeValue) platformTypesByName.get(name);
-            if (ptValue != null) return ptValue;
-        }
-    
+
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
         int sessionId = RequestUtils.getSessionIdInt(request);
         ptValue = appdefBoss.findPlatformTypeByName(sessionId, name); 
 
-        synchronized (platformTypesByName) {
-            platformTypesByName.put(name, ptValue);
-        }
         return ptValue;
     }
 
@@ -214,7 +199,6 @@ public class BizappUtils {
      * resources or non-ignored.
      * 
      * @param resources List of AIAppdefResources to filter
-     * @param ignored flag to indicate if we get the ignored/non-ignored
      */
     public static List filterAIResourcesByStatus(List resources, Integer status)
     {
@@ -239,9 +223,6 @@ public class BizappUtils {
 
     /**
      * filter on a list of AIAppdefResourceValue by Server Type.
-     * 
-     * @param resources List of AIAppdefResources to filter
-     * @param ignored flag to indicate if we get the ignored/non-ignored
      */
     public static List filterAIResourcesByServerType(List resources, String name)
     {
@@ -335,14 +316,6 @@ public class BizappUtils {
 
         PlatformTypeValue ptValue = pValue.getPlatformType();
 
-        // check the cache first
-        AppdefResourceTypeValue[] sType = null;
-        synchronized(AIServerTypesByPlatform) {
-            sType = (AppdefResourceTypeValue[])
-                AIServerTypesByPlatform.get(ptValue.getId());
-            if (sType != null) return sType;
-        }
-
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
         AIBoss aiBoss = ContextUtils.getAIBoss(ctx);
         int sessionId = RequestUtils.getSessionIdInt(request);
@@ -371,12 +344,12 @@ public class BizappUtils {
         List filteredServerTypes = BizappUtils.
             buildServerTypesFromServerSig(typeArray,
                                           serverSigs.values().iterator());
-        sType = new AppdefResourceTypeValue[filteredServerTypes.size()];
+
+        AppdefResourceTypeValue[] sType =
+            new AppdefResourceTypeValue[filteredServerTypes.size()];
         
         filteredServerTypes.toArray(sType);                                         
-        synchronized(AIServerTypesByPlatform) {
-            AIServerTypesByPlatform.put(ptValue.getId(), sType);
-        }
+
         return sType;
     }
 
@@ -493,9 +466,6 @@ public class BizappUtils {
     
     /**
      * builds a list of server types from ServerSignature objects
-     * 
-     * @param sTypes list of AppdefResourceType objects
-     * @param serverSigs list of ServerSignature objects 
      */
     public static List buildServerTypesFromServerSig(AppdefResourceTypeValue[] sTypes, 
                                                      Iterator sigIterator) 
@@ -516,10 +486,7 @@ public class BizappUtils {
 
     /**
      * find a ResourceTypeValue object from a list of ResourceTypeValue obects.
-     * 
-     * @param resourceTypeVals 
-     * @param name name of the ResourceTypeValue object to find
-     * 
+     *
      * @return a ResourceTypeValue or null
      */
     public static AppdefResourceTypeValue findResourceTypeValue(
@@ -598,7 +565,7 @@ public class BizappUtils {
      * This method builds a list of AppdefEntityID objects from
      * [entityType]:[resourceTypeId] strings
      * 
-     * @param entitIds list of [entityType]:[resourceTypeId] strings
+     * @param entityIds list of [entityType]:[resourceTypeId] strings
      */
     public static List buildAppdefEntityIds(List entityIds)
     {
@@ -714,9 +681,6 @@ public class BizappUtils {
 
     /**
      * Check in the permissions map to see if the user can administer HQ.
-     * @param A Map of Lists that contains the different groups of
-     *        permissions.
-     *
      * @return Whether or not the admin cam is contained in the type map.
      */
     public static boolean canAdminHQ(Integer sessionId,
@@ -1061,7 +1025,6 @@ public class BizappUtils {
      * Gut the <code>String[]</code> appdef key values for the passed-in
      * entity ids.
      *
-     * @param request The servlet request object
      * @param eids the appdef entity ids
      * @return String[] of appdef keys (type:rid)
      */
@@ -1079,7 +1042,6 @@ public class BizappUtils {
      * corresponding values out of the requestParams.  The oldConfig is
      * supplied so that we can tell if anything has actually changed.
      *
-     * @param log The logging context to use (for debugging).
      * @param request The servlet request
      * @param prefix Only parameters with this prefix will be considered.  The 
      * prefix will be stripped before inserting it as a key into the config.
@@ -1092,11 +1054,11 @@ public class BizappUtils {
      * were not any changes to the config, or null if the schema has no keys, so
      * the concept of changes might not make sense.
      */
-    public static Boolean populateConfig ( HttpServletRequest request,
-                                           String prefix,
-                                           ConfigSchema schema,
-                                           ConfigResponse config,
-                                           ConfigResponse oldConfig ) 
+    public static Boolean populateConfig (HttpServletRequest request,
+                                          String prefix,
+                                          ConfigSchema schema,
+                                          ConfigResponse config,
+                                          ConfigResponse oldConfig)
         throws InvalidOptionException, InvalidOptionValueException {
 
         if ( prefix == null ) prefix = "";
@@ -1140,8 +1102,8 @@ public class BizappUtils {
      * Parse a measurement value and units string.  For example:
      * "30MB" = 31,457,280.0
      *
-     * @param value the string to parse
-     * @param dmv the derived measurement being parsed
+     * @param value The string to parse
+     * @param mtv The measurement template being parsed
      * @return the measurement as parsed based on a number and its units
      * @throws ParseException
      */
@@ -1259,8 +1221,6 @@ public class BizappUtils {
     public static void startAutoScan(ServletContext ctx,
                                      int sessionId,
                                      AppdefEntityID entityId) {
-        log.debug("startScan for platform=" + entityId);
-
         try {
             AIBoss aiboss = ContextUtils.getAIBoss(ctx);
 
