@@ -1067,3 +1067,8 @@ border-left:1px solid #D5D8DE;
 .emailDiv {
  text-align:left;
 }
+
+.modifiedDate {
+ padding:2px;
+ background-color: #E5E5E5;
+}

@@ -26,10 +26,12 @@
         for (i = 0; i < mList.length; i++) {
 
             var tr = document.createElement('tr');
+            var trTime = document.createElement('tr');
             var td1 = document.createElement('td');
             var td2 = document.createElement('td');
             var td3 = document.createElement('td');
             var td4 = document.createElement('td');
+            var td5 = document.createElement('td');
             var newanchor = document.createElement("a");
 
             table.appendChild(tr);
@@ -85,6 +87,13 @@
             if (mList[i].oob) {
                 td4.appendChild(document.createTextNode(mList[i].oob));
             }
+
+            tbody.appendChild(trTime);
+                trTime.appendChild(td5);
+                td5.setAttribute('colspan','4');
+                td5.setAttribute('align','right');
+                td5.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
+                td5.appendChild(document.createTextNode('Last updated: '+ refreshDate() + ' ' + refreshTime()));
         }
 
         rTimer = setTimeout('requestProblemResources();', 60000);
@@ -196,6 +205,7 @@
                 } else {
                     td5.innerHTML = "0";
                 }
+
             }
         } else {
             $('noFaveResources').style.display = '';
@@ -237,11 +247,13 @@
             for (i = 0; i < aList.length; i++) {
 
                 var tr = document.createElement('tr');
+                var trTime = document.createElement('tr');
                 var td1 = document.createElement('td');
                 var td2 = document.createElement('td');
                 var td3 = document.createElement('td');
                 var td4 = document.createElement('td');
                 var td5 = document.createElement('td');
+                var td6 = document.createElement('td');
                 var alertAnchor = document.createElement("a");
                 var checkBox = document.createElement("input");
                 var urlAmp = "&a="
@@ -285,6 +297,13 @@
                 } else {
                     td5.appendChild(document.createTextNode("No"));
                 }
+
+                tbody.appendChild(trTime);
+                trTime.appendChild(td6);
+                td6.setAttribute('colspan','5');
+                td6.setAttribute('align','right');
+                td6.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
+                td6.appendChild(document.createTextNode('Last updated: '+ refreshDate() + ' ' + refreshTime()));
             }
         } else {
             $('noCritAlerts').style.display = '';
@@ -329,9 +348,11 @@
 
             for (var i = 0; i < availList.length; i++) {
                 var tr = document.createElement('tr');
+                var trTime = document.createElement('tr');
                 var td1 = document.createElement('td');
                 var td2 = document.createElement('td');
                 var td3 = document.createElement('td');
+                var td4 = document.createElement('td');
                 var newanchor = document.createElement("a");
                 var up = availList[i].numUp;
                 var down = availList[i].numDown;
@@ -368,6 +389,12 @@
                 td3.innerHTML = "&nbsp;";
                 }
              }
+            tbody.appendChild(trTime);
+                trTime.appendChild(td4);
+                td4.setAttribute('colspan','3');
+                td4.setAttribute('align','right');
+                td4.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
+                td4.appendChild(document.createTextNode('Last updated: '+ refreshDate() + ' ' + refreshTime()));
         }
 
         rTimer = setTimeout(availFunc, 60000);
@@ -409,6 +436,7 @@
 
             // Create table headers
             var trHeader = document.createElement('tr');
+            var trTime = document.createElement('tr');
             var th1 = document.createElement('th');
             var th2 = document.createElement('th');
 
@@ -437,6 +465,7 @@
                 var tr = document.createElement('tr');
                 var td1 = document.createElement('td');
                 var td2 = document.createElement('td');
+                var td3 = document.createElement('td');
 
                 tbody.appendChild(tr);
                 tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
@@ -452,13 +481,49 @@
                 tr.appendChild(td2);
                 td2.setAttribute((document.all ? 'className' : 'class'), "metricName");
                 td2.appendChild(document.createTextNode(metricValues.values[i].value));
+
+                tbody.appendChild(trTime);
+                trTime.appendChild(td3);
+                td3.setAttribute('colspan','2');
+                td3.setAttribute('align','right');
+                td3.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
+                td3.appendChild(document.createTextNode('Last updated: '+ refreshDate() + ' ' + refreshTime()));
             }
 
         } else {
             $(noMetricTable).style.display = '';
         }
 
-        rTimer = setTimeout(metricFunc, 20000);
+        rTimer = setTimeout(metricFunc, 60000);
         //Refresh in 60 seconds
     }
+}
+
+function refreshTime() {
+    var curDateTime = new Date()
+    var curHour = curDateTime.getHours()
+    var curMin = curDateTime.getMinutes()
+    var curSec = curDateTime.getSeconds()
+    var curAMPM = " AM"
+    var curTime = ""
+    if (curHour >= 12) {
+        curHour -= 12
+        curAMPM = " PM"
+    }
+    if (curHour == 0) curHour = 12
+    curTime = curHour + ":"
+            + ((curMin < 10) ? "0" : "") + curMin + ":"
+            + ((curSec < 10) ? "0" : "") + curSec
+            + curAMPM
+    return curTime;
+}
+
+function refreshDate() {
+    var today = new Date()
+    var year = today.getYear()
+    if (year < 1000) year += 1900
+
+    var todayDate = (today.getMonth() + 1) + "/" +
+                    today.getDate() + "/" + (year + "").substring(2, 4);
+    return todayDate;
 }
