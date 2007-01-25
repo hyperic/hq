@@ -32,6 +32,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -162,21 +163,13 @@ public class MeasurementTemplateDAO extends HibernateDAO {
     }
 
     List findTemplates(Integer ids[]) {
-        StringBuffer buf = 
-            new StringBuffer("from MeasurementTemplate where id IN (");
-        int len = ids.length;
-        for (int i = 0; i < len - 1; i++) {
-            buf.append(ids[i] + ", ");
-        }
-        buf.append(ids[len - 1] + ")");
-
-        return getSession().createQuery(buf.toString()).list();
+        return createCriteria().add(Restrictions.in("id", ids)).list();
     }
 
     List findTemplatesByMonitorableType(String type) {
         String sql = 
             "select t from MeasurementTemplate t " +
-            "join t.monitorableType mt " +
+            "join fetch t.monitorableType mt " +
             "where mt.name=? and t.defaultInterval > 0 order by t.name";
         return getSession().createQuery(sql).
             setString(0, type).list();
@@ -186,9 +179,8 @@ public class MeasurementTemplateDAO extends HibernateDAO {
                                                    String cat) {
         String sql = 
             "select t from MeasurementTemplate t " +
-            "join t.monitorableType mt " +
-            "join t.category cat " +
-            "where mt.name=? and t.defaultInterval > 0 and cat.name=? " +
+            "where t.monitorableType.name=? and t.defaultInterval > 0 " +
+            "and t.category.name=? " +
             "order by t.name";
         
         return getSession().createQuery(sql)
@@ -199,7 +191,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
     List findDefaultsByMonitorableType(String mt, int appdefType) {
         String sql =
             "select t from MeasurementTemplate t " +
-            "join t.monitorableType mt " +
+            "join fetch t.monitorableType mt " +
             "where mt.name=? and mt.appdefType=? " +
             "and t.defaultInterval > 0 and t.defaultOn = true " +
             "order by mt.name";
@@ -212,7 +204,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
     List findDesignatedByMonitorableType(String mt, int appdefType) {
         String sql =
             "select t from MeasurementTemplate t " +
-            "join t.monitorableType mt " +
+            "join fetch t.monitorableType mt " +
             "where mt.name=? and mt.appdefType=? " +
             "and t.defaultInterval > 0 and t.designate = true " +
             "order by mt.name";
@@ -225,9 +217,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
     List findRawByMonitorableType(Integer mtId) {
         String sql =
             "select t from MeasurementTemplate t " +
-            "join fetch t.rawMeasurementArgs ra " +
-            "join t.monitorableType mt " +
-            "where mt.id=? and t.defaultInterval=0";
+            "where t.monitorableType.id=? and t.defaultInterval=0";
 
         return getSession().createQuery(sql)
             .setInteger(0, mtId.intValue()).list();
@@ -236,7 +226,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
     List findByMeasurementArg(Integer tId) {
         String sql =
             "select t from MeasurementTemplate t " +
-            "join t.measurementArgs args " +
+            "join fetch t.measurementArgs args " +
             "where args.templateArg.id=?";
 
         return getSession().createQuery(sql)
@@ -247,7 +237,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
                                              String template) {
         String sql =
             "select t from MeasurementTemplate t " +
-            "join t.measurementArgs args " +
+            "join fetch t.measurementArgs args " +
             "where args.templateArg.id=? and t.template=?";
         
         return (MeasurementTemplate)getSession().createQuery(sql)
@@ -273,7 +263,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         //
         String sql =
             "select m from MeasurementTemplate m " +
-            "join m.monitorableType mt " +
+            "join fetch m.monitorableType mt " +
             "where mt.name = ? and " +
             "m.defaultInterval > 0 " +
             "order by m.name asc ";
