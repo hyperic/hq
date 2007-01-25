@@ -81,6 +81,8 @@ public class CpropKeyDAO extends HibernateDAO
             .setInteger(0, appdefType)
             .setInteger(1, appdefTypeId)
             .setString(2, key)
+            .setCacheable(true)
+            .setCacheRegion("CpropKey.findByKey")
             .uniqueResult();
     }
 

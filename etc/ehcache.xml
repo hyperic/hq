@@ -39,6 +39,13 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
 
+  <cache name="CpropKey.findByKey"
+         maxElementsInMemory="500"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+
   <!-- Metric data cache, used outside of hibernate -->
   <cache name="MetricDataCache"
          maxElementsInMemory="50000"
