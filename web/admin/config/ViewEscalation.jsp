@@ -67,7 +67,6 @@ function showViewEscResponse(originalRequest) {
     $('id').value = id;
 
     $('name').innerHTML = '<b>' + escName + '</b>';
-    $('name').style.backgroundColor = "#dbe3f5";
     $('escName').value = escName;
 
     $('description').innerHTML = description + "&nbsp;";
@@ -101,7 +100,6 @@ function showViewEscResponse(originalRequest) {
 
     if (actions.length == 0) {
         $('noActions').style.display = "";
-         $('infoText').style.display = "";
     }
     else {
         $('viewSection').style.display = "";
@@ -120,7 +118,7 @@ function showViewEscResponse(originalRequest) {
       var actionsVersion = actions[i].action._version_;
       var actionWaitTime = (actions[i].waitTime / 60000) +
          " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>";
-  
+
       var num = actionId;
       var liID = 'row'+num;
       var viewLi = document.createElement('li');
@@ -175,19 +173,24 @@ function showViewEscResponse(originalRequest) {
       escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
       escTable.setAttribute('id','escTbl_'+ liID);
       escTable.setAttribute('border', '0');
-      escTable.setAttribute('cellpadding','4');
+      escTable.setAttribute('cellpadding','2');
 
       escTable.appendChild(escTableBody);
       escTableBody.appendChild(escTrHeader);
       escTableBody.appendChild(escTr2);
       escTableBody.appendChild(escTr1);
 
-      escTrHeader.appendChild(td6)
+        escTrHeader.appendChild(td6);
+
+      if (actions.length > 1) {
       td6.setAttribute('colspan', '3');
       td6.style.cursor = "move;";
       td6.setAttribute((document.all ? 'className' : 'class'), "ToolbarContent");
       td6.innerHTML = '<html:img page="/images/esc_movUp.gif" height="16" width="12" border="0"  alt="" />' + '&nbsp;&nbsp;<span style="color:#062b7a;font-weight:bold;">Drag to reorder escalation actions</span>';
-
+      } else {
+      td6.innerHTML = "&nbsp;";
+      }
+        
       escTr1.appendChild(td1);
       td1.setAttribute((document.all ? 'className' : 'class'), "waitTd");
       //td1.setAttribute('colspan', '3');
@@ -216,8 +219,8 @@ function showViewEscResponse(originalRequest) {
             if (actionClass[d] == "SyslogAction") {
             usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowspan="3" valign="top" style="padding-right:3px;">Log to the Syslog:</td><td style="padding:0px 2px 2px 2px;">meta: ' + configMeta + '</td></tr><tr><td style="padding:2px;">product: ' + configProduct + '</td></tr><tr><td style="padding:2px 2px 2px 2px;">version: ' + configVersion + '</td></tr></table>'
            } else if (actionClass[d] == "NoOpAction") {
-            usersTextDiv.innerHTML = 'Suppress Alerts for: ' + actionWaitTime + '<span style="color:red;padding-left:15px;">* All alerts will be stopped for this period of time *</span>';
-            waitDiv.innerHTML = " ";
+            usersTextDiv.innerHTML = 'Suppress duplicate alerts for: ' + actionWaitTime;
+            waitDiv.innerHTML = "&nbsp;";
             }
        }
 
@@ -357,7 +360,6 @@ function showViewEscResponse(originalRequest) {
         $(addEscalationUL).style.display = "";
         $('addEscButtons').style.display = "";
         $('noActions').style.display = "none";
-        $('infoText').style.display = "none";
         $('addRowButton').style.display = "none";
         var ni = $('addEscalationUL');
         var numi = document.getElementById('theValue');
@@ -404,7 +406,7 @@ function showViewEscResponse(originalRequest) {
 
         td1.appendChild(select1);
         select1.setAttribute('id', 'waittime_' + liID);
-
+        select1.onchange = function(){onchange_time(this);}
         select1.setAttribute('name', 'waittime');
         addOption(select1, '0', '<fmt:message key="alert.config.escalation.end"/>');
         addOption(select1, '300000', '<fmt:message key="alert.config.escalation.wait">
@@ -432,7 +434,7 @@ function showViewEscResponse(originalRequest) {
 
         td2.appendChild(select2);
         select2.setAttribute('id', 'Email_' + liID);
-        select2.onchange = function(){onchange_handler(this);}
+        select2.onchange = function(){onchange_handler(this);clearDisplay();clearOthers();}
         select2.setAttribute('name', 'action');
         addOption(select2, 'Email', 'Email');
         addOption(select2, 'SMS', 'SMS');
@@ -446,7 +448,7 @@ function showViewEscResponse(originalRequest) {
         td3.appendChild(select3);
         select3.setAttribute('name', 'who');
         select3.setAttribute('id', 'who_' + liID);
-        select3.onchange = function(){onchange_who(this);}
+        select3.onchange = function(){onchange_who(this);clearDisplay();}
         addOption(select3, 'Select', '<fmt:message key="alert.config.escalation.notify.who"/>');
         <c:if test="${not empty AvailableRoles}">
         addOption(select3, 'Roles', '<fmt:message key="monitoring.events.MiniTabs.Roles"/>')
@@ -455,22 +457,20 @@ function showViewEscResponse(originalRequest) {
         addOption(select3, 'Others', '<fmt:message key="monitoring.events.MiniTabs.Others"/>');
 
         escTr2.appendChild(td4);
-        td4.setAttribute('width', '50%');
+        td4.setAttribute('valign', 'top');
         
         td4.appendChild(emailDiv);
         emailDiv.setAttribute('class', 'emailDiv');
-        emailDiv.setAttribute('id', 'emailinput' + liID);
-        $('emailinput'+ liID).style.display = 'none';
-        emailDiv.setAttribute('class', 'escInput');
-        emailDiv.setAttribute('width', '40%');
-        emailDiv.innerHTML = "email addresses (comma separated):<br><textarea rows=3 cols=35 id=emailinput name=emailinput onblur=checkEmail();></textarea>";
+        emailDiv.setAttribute('id', 'emailinputDiv');
+        $('emailinputDiv').style.display = 'none';
+        $('emailinputDiv').innerHTML = "email addresses<br> (comma separated):<br><textarea rows=2 cols=20 id=emailinput name=emailinput onblur=copyOthersEmail(this);checkEmail();></textarea>";
 
         td4.appendChild(sysDiv);
-        sysDiv.setAttribute('class', 'escInput'+ liID);
-        sysDiv.setAttribute('id', 'sysloginput'+ liID);
-        $('sysloginput'+ liID).style.display = 'none';
-        sysDiv.setAttribute('width', '40%');
-        sysDiv.innerHTML = "meta: <input type=text name=meta" + " size=40><br>" + "product: <input type=text name=product" + " size=40><br>" + "version: <input type=text name=version" + " size=40><br>";
+        sysDiv.setAttribute('class', 'escInput');
+        sysDiv.setAttribute('id', 'sysloginput');
+        $('sysloginput').style.display = 'none';
+        //sysDiv.setAttribute('width', '40%');
+        sysDiv.innerHTML = "meta: <input type=text name=meta" + " size=30 onblur=copyMeta(this);><br>" + "product: <input type=text name=product" + " size=30 onblur=copyProduct(this);><br>" + "version: <input type=text name=version" + " size=30 onblur=copyVersion(this);><br>";
 
         td4.appendChild(usersDiv);
         usersDiv.setAttribute('id', 'usersDiv' + liID);
@@ -497,11 +497,60 @@ function showViewEscResponse(originalRequest) {
                   inputRolesArr.name =  inputRolesArr.name + "_" + liID;
               }
           }
+
+        escTr2.appendChild(td5);
+        td5.setAttribute('valign', 'top');
+        td5.setAttribute('width', '30%');
+        td5.setAttribute('rowspan', '2');
+        td5.setAttribute('id', 'displaySelAction');
+        td5.innerHTML = '<table cellpadding="2" cellspacing="0" border="0" width="100%"><tbody><tr><td class=BlockTitle colspan=3>Action Details</td></tr><tr><td id="actionName" valign="top" width="50%">Action: Email</td></tr><tr><td id="userListDisplay" valign="top" style="display:none;"></td></tr><tr><td><table cellpadding="2" cellspacing="0" border="0"><tr><td id=metaText style="display:none"></td></tr><tr><td id=productText style="display:none"></td></tr><tr><td id=versionText style="display:none"></td></tr></table></td></tr><tr><td id="time" colspan="3" valign="top" style="display:none;"></td></tr></tbody></table>';
+
       }
-     
+
+      function copyOthersEmail(el) {
+        var othersDisplay = $('userListDisplay');
+          othersDisplay.style.display = "";
+        othersDisplay.innerHTML = 'Notify email addresses: ' + el.value;
+      }
+
+      function copyMeta(el) {
+        var metaDisplay = $('metaText');
+        metaDisplay.style.display = "";
+        metaDisplay.innerHTML = 'meta: ' + el.value;
+      }
+
+      function copyProduct(el) {
+        var productDisplay = $('productText');
+        productDisplay.style.display = "";
+        productDisplay.innerHTML = 'product: ' + el.value;
+      }
+
+      function copyVersion(el) {
+        var versionDisplay = $('versionText');
+        versionDisplay.style.display = "";
+        versionDisplay.innerHTML = 'version: ' + el.value;
+      }
+
+      function clearDisplay() {
+       $('userListDisplay').innerHTML = "&nbsp;";
+       $('metaText').innerHTML = "&nbsp;";
+       $('productText').innerHTML = "&nbsp;";
+       $('versionText').innerHTML = "&nbsp;";
+       $('time').innerHTML = "&nbsp;";
+      }
+
+      function clearOthers() {
+        $('emailinput').value = "";
+        $('emailinputDiv').style.display = "none";
+      }
       function onchange_handler(el) {
         //alert(el+", value="+ el.options[el.selectedIndex].value );
+          $('userListDisplay').style.display= "";
+        var writeAction = $('actionName');
         var index= el.options[el.selectedIndex].value
+
+
+          writeAction.innerHTML = 'Action: ' +index;
 
          if (index == "Email" || index == "SMS" || index == "NoOp") {
             hideSyslogInput(el);
@@ -519,13 +568,14 @@ function showViewEscResponse(originalRequest) {
       }
 
       function onchange_who(el) {
-        //alert(el+", value="+ el.options[el.selectedIndex].value );
+         clearOthers();
+        $('userListDisplay').style.display= "";
         var index= el.options[el.selectedIndex].value
         var idStr = el.id;
         var getId = idStr.split('_');
         var rolesDivIn = $('rolesDiv' + getId[1]);
         var usersDivIn = $('usersDiv' + getId[1]);
-        var emailDivIn = $('emailinput' + getId[1]);
+        var emailDivIn = $('emailinputDiv');
 
         if (index == "Roles") {
            emailDivIn.style.display = 'none';
@@ -555,17 +605,23 @@ function showViewEscResponse(originalRequest) {
     }
 
     function showSyslogInput(el) {
-        var idStr = el.id;
-        var getId = idStr.split('_');
-        var syslogDivIn = $('sysloginput' + getId[1]);
+
+        var syslogDivIn = $('sysloginput');
         syslogDivIn.style.display='';
     }
 
     function hideSyslogInput(el) {
-        var idStr = el.id;
-        var getId = idStr.split('_');
-        var syslogDivIn = $('sysloginput' + getId[1]);
+
+        var syslogDivIn = $('sysloginput');
         syslogDivIn.style.display='none';
+    }
+
+    function onchange_time(el) {
+        //alert(el+", value="+ el.options[el.selectedIndex].value );
+        var writeTime = $('time');
+        writeTime.style.display = "";
+        var index= el.options[el.selectedIndex].value;
+        writeTime.innerHTML = 'Then wait: ' + (index / 60000) + ' minutes';
     }
 
     function hideDisplay() {
@@ -606,7 +662,6 @@ function showViewEscResponse(originalRequest) {
             $('noActions').style.display = "none";
             } else {
             $('noActions').style.display = "";
-            $('infoText').style.display = "";
         }
     }
 
@@ -659,7 +714,8 @@ function showViewEscResponse(originalRequest) {
       var idStr = el;
       var getId = idStr.split('_');
       var usersDivIn = $('usersDiv' + getId[1]);
-
+      var writeListUsers = $('userListDisplay');
+      
       Dialog.confirm('<div id="usersConfigWindow">' + usersDivIn.innerHTML +
                      '</div>',
                   {windowParameters: {className:'dialog', width:305, height:200,
@@ -671,12 +727,28 @@ function showViewEscResponse(originalRequest) {
                     var updatedInputList =
                       $('usersConfigWindow').getElementsByTagName('input');
 
+                    writeListUsers.appendChild(document.createTextNode('Notify: '));
+
                     for(i = 0; i < usersInputList.length; i++) {
+
                         if (updatedInputList[i].checked) {
                           usersInputList[i].setAttribute("checked", "true");
+                          }
+
+                        if (usersInputList[i].checked) {
+                            var checkedValues = usersInputList[i].value;
+                            //alert('before: ' + checkedValues)
+                            <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
+                            if (checkedValues == <c:out value="${user.id}"/>) {
+                            writeListUsers.appendChild(document.createTextNode('<c:out value="${user.name}" /> '));
+                                }
+                            </c:forEach>
+                            //writeListUsers.appendChild(document.createTextNode(checkedValues +' '));
+
                         }
                     }
-                    new Effect.Fade(Windows.focusedWindow.getId());
+                    new Effect.Fade(Windows.focusedWindow.getId())
+
                     return true;
                   }});
     }
@@ -831,7 +903,7 @@ function showViewEscResponse(originalRequest) {
       <td class="BlockLabel">
         <fmt:message key="common.label.Name" />
       </td>
-      <td width="80%" class="BlockContent" id="name"></td>
+      <td width="80%" id="name" class="BlockLabel" style="text-align:left"></td>
     </tr>
     <tr>
       <td class="BlockLabel" valign="top">
@@ -1009,7 +1081,7 @@ function showViewEscResponse(originalRequest) {
      </thead>
   <tbody>
     <tr class="BlockContent">
-      <td style="padding-left:15px;padding-bottom:0px;display:none;" colspan="2">
+      <td style="padding-left:15px;padding-bottom:0px;display:none;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tbody>
           <tr>
@@ -1022,22 +1094,12 @@ function showViewEscResponse(originalRequest) {
       </td>
     </tr>
     <tr class="BlockContent">
-        <td id="noActions" width="40%" style="padding:4px;display:none;">Currently there are no actions for this escalation</td>
-        <td width="40%" id="infoText" valign="top" align="right" style="display:none;">
-            <div style="float:right">
-                <table cellpadding="3" cellspacing="0" border="0" style="border:1px solid #236d2b;">
-                <tr>
-                    <td class="BlockTitle">Actions</td>
-                </tr>
-                <tr>
-                    <td style="background-color:#d5dae5">By creating escalation actions you can control<br> how an alert is responded to and when.</td>
-                </tr>
-                </table>
-             </div>
-      </td>
+        <td id="noActions" style="padding:5px;display:none;"><b>Currently there are no actions for this escalation. Click on the "Create Action" button below to create an action to perform when this escalation is invoked.</b>
+
+        </td>
     </tr>
     <tr>
-      <td width="100%" id="viewSection" style="display:none;" colspan="2">
+      <td width="100%" id="viewSection" style="display:none;">
       <ul id="viewEscalationUL" style="margin-left:0px;"></ul>
       </td>
     </tr>
@@ -1095,6 +1157,3 @@ function showViewEscResponse(originalRequest) {
 </form>
 <br>
 <br>
-
-
-

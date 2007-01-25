@@ -908,7 +908,6 @@ border-bottom:1px solid #D5D8DE;
    
 #viewEscalationUL {
   margin:0;
-  margin-right: 0px;
   padding:0;
   width:100%;
 }
@@ -929,6 +928,10 @@ border-bottom:1px solid #D5D8DE;
   padding:0;
   width:100%;
 }
+
+#addEscalationUL .escTbl {
+ padding-left:10px;
+    }
 
 #addEscalationUL li {
   font:13px Verdana;
@@ -963,6 +966,7 @@ background-color: #dbe3f5
   width:100%;
   margin-top:0px;
   margin-bottom:10px;
+  padding-left:5px;
 }
 
 .remove {
@@ -977,7 +981,8 @@ background-color: #dbe3f5
 .escInput {
  font:10px Verdana;
  margin:0px;
- width: 100%;
+ padding:0px;
+ text-align:right;
 }
 
 .lineitem {
@@ -993,13 +998,13 @@ background-color: #dbe3f5
 
 .td2 {
  padding:5px 0px 10px 5px;
- width:20%;
+ width:10%;
  cursor:pointer;
 }
 
 .td3 {
- width:20%;
- padding-right:20px;
+ width:10%;
+ padding-right:5px;
  padding-top:5px;
  cursor:pointer;
 }
@@ -1046,4 +1051,19 @@ border-left:1px solid #D5D8DE;
  color: #062b7a;
  text-decoration:none;
 }
+
+#displaySelAction {
+ border: 1px dotted #D5D8DE;
+ width:35%;
+ margin-left:5px;
+}
+
+#displaySelAction .BlockTitle{
+ background-color:#868787;
+ color: #ffffff;
+ font-weight: bold;
+}
+
+.emailDiv {
+ text-align:left;
 }
