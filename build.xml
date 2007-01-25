@@ -9,7 +9,6 @@
     <!ENTITY hibernate-build SYSTEM "build_util/hibernate-build.xml">
     <!ENTITY dbsetup-build SYSTEM "build_util/dbsetup-build.xml">
     <!ENTITY test-build SYSTEM "build_util/test-build.xml">
-    <!ENTITY aspectj-build SYSTEM "build_util/aspectj-build.xml">
 ]>
 
 <project name="HQ" default="build" basedir=".">
@@ -145,19 +144,16 @@
   <!-- Source common targets -->
   &util-build;
   &test-build;
-  &aspectj-build;
     
   <target name="init-props" unless="init-props.notrequired">
      <property file="${version.properties}" />
      <property name="release.comment" value="Development Build"/>
-     <property name="aspectdir" value="${basedir}/etc/aspects"/>
 
      <echo>${release.comment}, version: ${version}, build number: ${build}</echo>
      <property name="init-props.notrequired" value="true"/>
   </target>
 
   <target name="init-internal-taskdefs" 
-          depends="init-aspectj"
           unless="init-internal-taskdefs.notrequired">
     <macrodef name="hq-javac">
       <attribute name="destdir"      default="${build.dir}/classes"/>
@@ -196,11 +192,12 @@
 
   <!-- ==================== Compile java sources ==================== -->
   <target name="compile-app-sources" depends="init">
-      <mkdir dir="${build.dir}/pre_aspect" />
-      <hq-javac destdir="${build.dir}/pre_aspect">
+      <mkdir dir="${build.dir}/classes" />
+      <hq-javac destdir="${build.dir}/classes">
         <classpath>
             <path refid="alljars"/>
             <path refid="testjars"/>
+            <path location="${build.dir}/tools/txsnatch/classes"/>
         </classpath>
         <src>
           <!-- Generated sources -->
@@ -242,8 +239,20 @@
       </copy>
   </target>
     
+  <target name="compile-txsnatch" depends="init">
+      <mkdir dir="${build.dir}/tools/txsnatch/classes" />
+      <hq-javac destdir="${build.dir}/tools/txsnatch/classes">
+        <classpath>
+            <path refid="alljars"/>
+        </classpath>
+        <src>
+          <path location="${basedir}/tools/txsnatch/src" />
+        </src>
+      </hq-javac>
+  </target>
+
   <target name="compile" description="Compile sources" 
-          depends="compile-app-sources,copy-resources"/>
+          depends="compile-txsnatch,compile-app-sources,copy-resources"/>
 
   <!-- ==================== JSP precompile ============================ -->
   
@@ -331,7 +340,6 @@
 
     <!-- TODO: Create separate jars for each component -->
     <jar file="${ear.dir}/hq.jar" basedir="${build.dir}/classes" >
-      <include name="SessionAspect*"/>
       <include name="images/**" />
       <include name="org/hyperic/**" />
       <exclude name="org/hyperic/hq/ui/**" />
@@ -417,9 +425,6 @@
        </fileset>
     </copy>
 
-    <copy tofile="${ear.dir}/lib/aspectjrt.jar" 
-          file="${thirdparty.lib}/aop/aspectjrt.jar" />
-
     <copy tofile="${ear.dir}/lib/jakarta-oro.jar" 
           file="${thirdparty.lib}/jakarta-oro-2.0.7.jar" />
       
@@ -457,7 +462,6 @@
 
     <copy todir="${ear.dir}/hq.war/WEB-INF/lib/" >
       <fileset dir="${thirdparty.lib}" >
-        <include name="aspectjrt-1.2.1.jar" />
         <include name="strutstest-2.1.3.jar" />
         <include name="cactus-1.7.2.jar" />
         <include name="junit.jar" />
@@ -1197,33 +1201,10 @@
           depends="init,xdoclet,hibernate-prep,build" >
   </target>
 
-  <target name="aspects-check" depends="init">
-      <uptodate property="generateAspects.notRequired"
-                targetfile="${build.dir}/aspects.tstamp">
-        <srcfiles dir="${aspectdir}">
-          <include name="*"/>
-        </srcfiles>
-      </uptodate>
-  </target>
-    
-  <target name="generate-aspects" depends="init,aspects-check"
-          unless="generateAspects.notRequired">
-      <echo>Generating aspects</echo>
-      <hq-aspectj-compile destDir="${build.dir}/aspects"
-                          aspectDir="${aspectdir}"/>
-      <touch file="${build.dir}/aspects.tstamp"/>
-  </target>
-    
-  <target name="aspectize-classes" depends="init,generate-aspects">
-      <echo>Weaving aspects into classes</echo>
-      <hq-aspectj-weave destDir="${build.dir}/classes"
-                        aspectDir="${build.dir}/aspects"/>
-  </target>
-
-  <target name="build" depends="init,compile,aspectize-classes,pack" 
+  <target name="build" depends="init,compile,pack" 
          description="Compile and pack - no code generation" />
 
- <target name="clean" depends="remote-clean" description="Clean the build directory" >
+  <target name="clean" depends="remote-clean" description="Clean the build directory" >
     <delete dir="${build.dir}"/>
   </target>
   
@@ -1462,7 +1443,6 @@
     </delete>
     <delete dir="${ear.dir}/hq.war/test" />
     <delete file="${ear.dir}/hq.war/WEB-INF/lib/junit.jar"/>
-    <delete file="${ear.dir}/hq.war/WEB-INF/lib/aspectjrt-*.jar" />
     <delete file="${ear.dir}/hq.war/WEB-INF/lib/cactus-*.jar" />
     <delete file="${ear.dir}/hq.war/WEB-INF/lib/strutstest-*.jar" />
     <delete file="${ear.dir}/hq.war/WEB-INF/lib/mockejb.jar" />
