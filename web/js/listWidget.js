@@ -50,6 +50,9 @@ function ReplaceButton(divId, tdId, tdState, imageId, btnFunction) {
 		newInput.setAttribute("type", "image");
 		newInput.setAttribute("src", imgPath);
 		newInput.setAttribute("name", inputName);
+        if (btnFunction == 'delete' || btnFunction == 'remove') {
+            newInput.setAttribute("onclick", "return confirm('Are you sure you want to delete selections?');");
+        }
 		newDiv.appendChild(newInput);
 	}
 	
