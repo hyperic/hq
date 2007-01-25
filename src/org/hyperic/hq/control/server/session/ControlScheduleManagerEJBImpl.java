@@ -64,6 +64,8 @@ import org.hyperic.hq.control.shared.ControlHistoryValue;
 import org.hyperic.hq.control.shared.ControlScheduleValue;
 import org.hyperic.hq.control.shared.ScheduledJobNotFoundException;
 import org.hyperic.hq.control.shared.ScheduledJobRemoveException;
+import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
+import org.hyperic.hq.control.shared.ControlScheduleManagerUtil;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.scheduler.ScheduleParseException;
 import org.hyperic.hq.scheduler.ScheduleParser;
@@ -115,19 +117,23 @@ public class ControlScheduleManagerEJBImpl
     protected String getJobPrefix ()          { return JOB_PREFIX; }
     protected String getSchedulePrefix ()     { return SCHEDULE_PREFIX; }
 
-    private ControlScheduleDAO getControlScheduleDAO()
-    {
+    private ControlScheduleDAO getControlScheduleDAO() {
         return DAOFactory.getDAOFactory().getControlScheduleDAO();
     }
 
-    private ControlHistoryDAO getControlHistoryDAO()
-    {
+    private ControlHistoryDAO getControlHistoryDAO() {
         return DAOFactory.getDAOFactory().getControlHistoryDAO();
     }
 
     private Map viewableResources = null;
-    
-    // EJB methods
+
+    public static ControlScheduleManagerLocal getOne() {
+        try {
+            return ControlScheduleManagerUtil.getLocalHome().create();
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
+    }
 
     /**
      * @ejb:create-method
