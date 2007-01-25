@@ -29,11 +29,16 @@ import org.hibernate.classic.Session;
 import org.hibernate.context.CurrentSessionContext;
 import org.hibernate.engine.SessionFactoryImplementor;
 
-public class AspectizedCurrentSession implements CurrentSessionContext {
-    public AspectizedCurrentSession(SessionFactoryImplementor factory) {
+/**
+ * This class knows how to find the current Hibernate session.
+ * 
+ * See also:  etc/hibernate.properties
+ */
+public class CurrentSessionFinder implements CurrentSessionContext {
+    public CurrentSessionFinder(SessionFactoryImplementor factory) {
     }
 
     public Session currentSession() {
-        return (Session)SessionAspectInterceptor.currentSession();
+        return (Session)SessionManager.currentSession();
     }
 }

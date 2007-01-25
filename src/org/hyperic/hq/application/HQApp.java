@@ -36,7 +36,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Transaction;
 import org.hyperic.hibernate.Util;
-import org.hyperic.hq.hibernate.SessionAspectInterceptor;
+import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.txsnatch.TxSnatch;
 import org.hyperic.util.callback.CallbackDispatcher;
 import org.jboss.ejb.Interceptor;
@@ -90,7 +90,7 @@ public class HQApp {
         {
             boolean created = false;
             
-            created = SessionAspectInterceptor.setupSession("Unknown");
+            created = SessionManager.setupSession("Unknown");
             try {
                 if (isHome)
                     return next.invokeHome(arg0);
@@ -98,7 +98,7 @@ public class HQApp {
                     return next.invoke(arg0);
             } finally { 
                 if (created) {
-                    SessionAspectInterceptor.cleanupSession();
+                    SessionManager.cleanupSession();
                 }
             }
         }

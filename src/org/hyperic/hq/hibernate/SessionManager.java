@@ -35,17 +35,17 @@ import org.hyperic.hibernate.Util;
 /**
  * This class manages the creation and deletion of Hibernate sessions.
  */
-public class SessionAspectInterceptor { 
+public class SessionManager { 
     private static final Log _log = 
-        LogFactory.getLog(SessionAspectInterceptor.class);
+        LogFactory.getLog(SessionManager.class);
 
-    private static final SessionAspectInterceptor INSTANCE =
-        new SessionAspectInterceptor();
+    private static final SessionManager INSTANCE =
+        new SessionManager();
 
     private ThreadLocal    _sessions = new ThreadLocal();
     private SessionFactory _factory = Util.getSessionFactory();
     
-    private SessionAspectInterceptor() {
+    private SessionManager() {
     }
 
     public interface SessionRunner {

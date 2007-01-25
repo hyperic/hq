@@ -36,8 +36,8 @@ import javax.servlet.ServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.hibernate.SessionAspectInterceptor;
-import org.hyperic.hq.hibernate.SessionAspectInterceptor.SessionRunner;
+import org.hyperic.hq.hibernate.SessionManager;
+import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
 
 /**
  * This filter runs to make sure that the entire duration of the web session
@@ -54,7 +54,7 @@ public class SessionFilter
         throws IOException, ServletException
     {
         try {
-            SessionAspectInterceptor.runInSession(new SessionRunner() {
+            SessionManager.runInSession(new SessionRunner() {
                 public void run() throws Exception {
                     chain.doFilter(request, response);
                 }
