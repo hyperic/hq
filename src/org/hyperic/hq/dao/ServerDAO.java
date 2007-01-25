@@ -165,24 +165,6 @@ public class ServerDAO extends HibernateDAO
         }
     }
 
-    /**
-     * @deprecated use findAll_orderName()
-     * @return
-     */
-    public Collection findAll_orderName_asc()
-    {
-        return findAll_orderName(true);
-    }
-
-    /**
-     * @deprecated use findAll_orderName()
-     * @return
-     */
-    public Collection findAll_orderName_desc()
-    {
-        return findAll_orderName(false);
-    }
-
     public Collection findAll_orderName(boolean asc)
     {
         String sql="from Server s join fetch s.serverType st " +
