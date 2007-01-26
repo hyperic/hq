@@ -163,6 +163,12 @@
       </table>
     </td>
   </tr>
+<logic:messagesPresent property="rn">
+  <tr>
+    <td>&nbsp;</td>
+    <td colspan="3" class="ErrorField"><span class="ErrorFieldContent"><html:errors property="rn"/></span></td>
+  </tr>
+</logic:messagesPresent>
   </c:otherwise>
 </c:choose>
 </table>

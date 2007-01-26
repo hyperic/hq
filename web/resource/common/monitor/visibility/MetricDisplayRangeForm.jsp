@@ -111,9 +111,6 @@
 </logic:messagesNotPresent>
       <html:radio property="a" value="2"/>
       <fmt:message key="monitoring.baseline.BlockContent.WithinRange"/>
-      <logic:messagesPresent>
-      <span class="ErrorField"><html:errors/></span>
-      </logic:messagesPresent>
       <br>
 
       <table width="100%" border="0" cellspacing="0" cellpadding="2">
