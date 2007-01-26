@@ -49,6 +49,8 @@ import org.hyperic.hq.appdef.shared.AgentConnectionUtil;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AgentManagerLocal;
+import org.hyperic.hq.appdef.shared.AgentManagerUtil;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AgentType;
@@ -396,6 +398,14 @@ public class AgentManagerEJBImpl
         }                
 
         return client.agentSendFileData(id, data, streams);
+    }
+
+    public static AgentManagerLocal getOne() {
+        try {
+            return AgentManagerUtil.getLocalHome().create();
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
     }
 
     public void ejbCreate() throws CreateException {}
