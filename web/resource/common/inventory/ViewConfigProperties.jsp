@@ -191,6 +191,7 @@
 </tr>
 </c:if>
 </c:if>
+<c:if test="${controlConfigOptionsCount != null}">
 <tr>
     <td class="ConfigPropHeader" colspan="4"><fmt:message key="resource.common.inventory.configProps.Control"/></td>
   </tr>
@@ -214,6 +215,7 @@
     </c:choose> -->
 </logic:iterate>
 	</tr>
+</c:if>
   <tr>
     <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
   </tr>
