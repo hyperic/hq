@@ -1334,25 +1334,26 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
+     * Change Service owner.
+     *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
      */
     public void changeServiceOwner(AuthzSubjectValue who,
-                                           Integer serviceId,
-                                           AuthzSubjectValue newOwner)
+                                   Integer serviceId,
+                                   AuthzSubjectValue newOwner)
         throws FinderException, PermissionException, CreateException {
         try {
             // first lookup the service
-            Service serviceEJB = getServiceDAO().findById(serviceId);
+            Service service = getServiceDAO().findById(serviceId);
             // check if the caller can modify this service
-            checkModifyPermission(who, serviceEJB.getEntityId());
+            checkModifyPermission(who, service.getEntityId());
             // now get its authz resource
             ResourceValue authzRes = getServiceResourceValue(serviceId);
             // change the authz owner
             getResourceManager().setResourceOwner(who, authzRes, newOwner);
             // update the owner field in the appdef table -- YUCK
-            serviceEJB.setOwner(newOwner.getName());
-            serviceEJB.setModifiedBy(who.getName());
+            service.setOwner(newOwner.getName());
+            service.setModifiedBy(who.getName());
         } catch (NamingException e) {
             throw new SystemException(e);
         }

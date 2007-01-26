@@ -1131,30 +1131,27 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * Change server owner
-     * @param who
-     * @param serverId
-     * @param newOwner
+     * Change Server owner
+     *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
      */
     public void changeServerOwner(AuthzSubjectValue who,
                                          Integer serverId,
                                          AuthzSubjectValue newOwner)
         throws PermissionException, ServerNotFoundException {
-        Server serverEJB;
+        Server server;
         try {
             // first lookup the server
-            serverEJB = getServerDAO().findById(serverId);
+            server = getServerDAO().findById(serverId);
             // check if the caller can modify this server
-            checkModifyPermission(who, serverEJB.getEntityId());
+            checkModifyPermission(who, server.getEntityId());
             // now get its authz resource
             ResourceValue authzRes = getServerResourceValue(serverId);
             // change the authz owner
             getResourceManager().setResourceOwner(who, authzRes, newOwner);
             // update the owner field in the appdef table -- YUCK
-            serverEJB.setOwner(newOwner.getName());
-            serverEJB.setModifiedBy(who.getName());
+            server.setOwner(newOwner.getName());
+            server.setModifiedBy(who.getName());
         } catch (NamingException e) {
             throw new SystemException(e);
         } catch (FinderException e) {

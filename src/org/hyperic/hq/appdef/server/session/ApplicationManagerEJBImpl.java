@@ -293,29 +293,26 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Change Application owner
-     * @param who
-     * @param appID
-     * @param newOwner
+     *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
      */
     public void changeApplicationOwner(AuthzSubjectValue who,
-                                                   Integer appId,
-                                                   AuthzSubjectValue newOwner)
+                                       Integer appId,
+                                       AuthzSubjectValue newOwner)
         throws ApplicationNotFoundException,
                PermissionException, CreateException {
         try {
             // first lookup the service
-            Application appEJB = getApplicationDAO().findById(appId);
+            Application app = getApplicationDAO().findById(appId);
             // check if the caller can modify this service
-            checkModifyPermission(who, appEJB.getEntityId());
+            checkModifyPermission(who, app.getEntityId());
             // now get its authz resource
             ResourceValue authzRes = getApplicationResourceValue(appId);
             // change the authz owner
             getResourceManager().setResourceOwner(who, authzRes, newOwner);
             // update the owner field in the appdef table -- YUCK
-            appEJB.setOwner(newOwner.getName());
-            appEJB.setModifiedBy(who.getName());
+            app.setOwner(newOwner.getName());
+            app.setModifiedBy(who.getName());
         } catch (FinderException e) {
             throw new ApplicationNotFoundException(appId);
         } catch (NamingException e) {

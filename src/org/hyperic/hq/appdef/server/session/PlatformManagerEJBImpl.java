@@ -1172,11 +1172,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     }
     
     /**
-     * Change platform owner
-     * @param who
-     * @param newOwner
+     * Change Platform owner
+     *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
      */
     public void changePlatformOwner(AuthzSubjectValue who,
                                     Integer platformId,
@@ -1184,16 +1182,16 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         throws FinderException, PermissionException {
         try {
             // first lookup the platform
-            Platform platEJB = getPlatformDAO().findById(platformId);
+            Platform platform = getPlatformDAO().findById(platformId);
             // check if the caller can modify this platform
-            checkModifyPermission(who, platEJB.getEntityId());
+            checkModifyPermission(who, platform.getEntityId());
             // now get its authz resource
             ResourceValue authzRes = getPlatformResourceValue(platformId);
             // change the authz owner
             getResourceManager().setResourceOwner(who, authzRes, newOwner);
             // update the owner field in the appdef table -- YUCK
-            platEJB.setOwner(newOwner.getName());
-            platEJB.setModifiedBy(who.getName());
+            platform.setOwner(newOwner.getName());
+            platform.setModifiedBy(who.getName());
         } catch (NamingException e) {
             throw new SystemException(e);
         } catch (CreateException e) {

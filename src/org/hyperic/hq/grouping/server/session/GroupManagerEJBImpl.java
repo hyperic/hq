@@ -475,8 +475,9 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
         throws GroupNotFoundException, PermissionException 
     {
         try {
-            ResourceValue authzRes = getResourceByInstanceId(
-                  AuthzConstants.groupResourceTypeName, groupVo.getId() );
+            ResourceValue authzRes =
+                getResourceByInstanceId(AuthzConstants.groupResourceTypeName,
+                                        groupVo.getId());
             getResourceManager().setResourceOwner(subject, authzRes, newOwner);
             getResourceGroupManager().setGroupModifiedBy(subject,
                                                          groupVo.getId());
