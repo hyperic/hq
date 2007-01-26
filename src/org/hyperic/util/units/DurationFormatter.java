@@ -76,7 +76,7 @@ public class DurationFormatter
         boolean wholeNum;
         
         res = new FormattedNumber[val.length];
-        if((maxIdx = ArrayUtil.max(val)) == -1){
+        if ((maxIdx = ArrayUtil.max(val)) == -1) {
             return res;
         }
 
@@ -120,11 +120,9 @@ public class DurationFormatter
         if(granularity == GRANULAR_YEARS){
             tbd = breakDownTime(baseTime);
             res = tbd.nYears + "y " + tbd.nDays + "d";
-        } else if(granularity == GRANULAR_DAYS){
-            long nDays;
-
+        } else if (granularity == GRANULAR_DAYS) {
             tbd   = breakDownTime(baseTime);
-            nDays = tbd.nYears * 365 + tbd.nDays;
+            long nDays = tbd.nYears * 365 + tbd.nDays;
             res   = nDays + (nDays == 1 ? " day " : " days ") + 
                 StringUtil.formatDuration(tbd.nHours * 60 * 60 * 1000 +
                                           tbd.nMins * 60 * 1000 +
@@ -133,10 +131,9 @@ public class DurationFormatter
         } else if(granularity == GRANULAR_HOURS ||
                   granularity == GRANULAR_MINS ||
                   granularity == GRANULAR_SECS) {
-            long nMillis;
-
-            nMillis = baseTime.divide(UnitsUtil.FACT_MILLIS, 
-                                      BigDecimal.ROUND_HALF_EVEN).longValue();
+            long nMillis =
+                baseTime.divide(UnitsUtil.FACT_MILLIS, 
+                                BigDecimal.ROUND_HALF_EVEN).longValue();
             res = StringUtil.formatDuration(nMillis, milliDigits,
                                             granularity == GRANULAR_SECS);
 
@@ -231,9 +228,8 @@ public class DurationFormatter
         throws ParseException
     {
         double nHours, nMins, nSecs;
-        String[] vals;
-        vals = (String[])StringUtil.explode(duration, 
-                                            ":").toArray(new String[0]);
+        String[] vals =
+            (String[])StringUtil.explode(duration, ":").toArray(new String[0]);
 
         if(vals.length != 3){
             throw new ParseException(duration, 0);
@@ -257,39 +253,36 @@ public class DurationFormatter
                                     ParseSpecifics specifics)
         throws ParseException
     {
-        final int unitType = UnitsConstants.UNIT_DURATION;
-        String[] vals;
-
-        vals = (String[])StringUtil.explode(val, " ").toArray(new String[0]);
+        String[] vals =
+            (String[]) StringUtil.explode(val, " ").toArray(new String[0]);
         
-        if(vals.length == 2 &&
-           vals[0].charAt(vals[0].length() - 1) == 'y' &&
-           vals[1].charAt(vals[1].length() - 1) == 'd')
-        {
-            try {
+        double value;
+        int scale = UnitsConstants.SCALE_SEC;
+        try {
+            if (vals.length == 2 &&
+                vals[0].charAt(vals[0].length() - 1) == 'y' &&
+                vals[1].charAt(vals[1].length() - 1) == 'd')
+            {
                 String yStr = vals[0].substring(0, vals[0].length() - 1);
                 String dStr = vals[1].substring(0, vals[1].length() - 1);
-
-                return new UnitNumber(Integer.parseInt(yStr) * 365 + 
-                                      Integer.parseInt(dStr), unitType,
-                                      UnitsConstants.SCALE_DAY);
-            } catch(NumberFormatException exc){
+                value = Integer.parseInt(yStr) * 365 +
+                        Integer.parseInt(dStr);
+                scale = UnitsConstants.SCALE_DAY;
+            } else if (vals.length == 3 && 
+                       (vals[1].equals("day") || vals[1].equals("days"))) {
+                value = Integer.parseInt(vals[0]) * 24 * 60 * 60+
+                                              parseTimeStr(vals[2]);
+            } else if (vals.length == 1) {
+                value = parseTimeStr(vals[0]);
+            } else {
+                // String not recognized
+                throw new ParseException(val, 0);
             }
-        } else if(vals.length == 3 && 
-                  (vals[1].equals("day") || vals[1].equals("days")))
-        {
-            try {
-                return new UnitNumber(Integer.parseInt(vals[0]) * 24 * 60 * 60+
-                                      parseTimeStr(vals[2]),
-                                      unitType, UnitsConstants.SCALE_SEC);
-            } catch(NumberFormatException exc){
-            }
-        } else if(vals.length == 1){
-            return new UnitNumber(parseTimeStr(vals[0]), unitType,
-                                  UnitsConstants.SCALE_SEC);
+        } catch(NumberFormatException exc){
+            throw new ParseException(val, 0);
         }
 
-        throw new ParseException(val, 0);
+        return new UnitNumber(value, UnitsConstants.UNIT_DURATION, scale);
     }
 
     public UnitNumber parse(String val, Locale locale, 
@@ -324,77 +317,66 @@ public class DurationFormatter
            tagPart.equalsIgnoreCase("yr") ||
            tagPart.equalsIgnoreCase("yrs") ||
            tagPart.equalsIgnoreCase("year") ||
-           tagPart.equalsIgnoreCase("years"))
-        {
+           tagPart.equalsIgnoreCase("years")) {
             scale = UnitsConstants.SCALE_YEAR;
         } else if(tagPart.equalsIgnoreCase("w") ||
                   tagPart.equalsIgnoreCase("wk") ||
                   tagPart.equalsIgnoreCase("wks") ||
                   tagPart.equalsIgnoreCase("week") ||
-                  tagPart.equalsIgnoreCase("weeks"))
-        {
+                  tagPart.equalsIgnoreCase("weeks")) {
             scale = UnitsConstants.SCALE_WEEK;
         } else if(tagPart.equalsIgnoreCase("d") ||
                   tagPart.equalsIgnoreCase("day") ||
-                  tagPart.equalsIgnoreCase("days"))
-        {
+                  tagPart.equalsIgnoreCase("days")) {
             scale = UnitsConstants.SCALE_DAY;
         } else if(tagPart.equalsIgnoreCase("h") ||
                   tagPart.equalsIgnoreCase("hr") ||
                   tagPart.equalsIgnoreCase("hrs") ||
                   tagPart.equalsIgnoreCase("hour") ||
-                  tagPart.equalsIgnoreCase("hours"))
-        {
+                  tagPart.equalsIgnoreCase("hours")) {
             scale = UnitsConstants.SCALE_HOUR;
         } else if(tagPart.equalsIgnoreCase("m") ||
                   tagPart.equalsIgnoreCase("min") ||
                   tagPart.equalsIgnoreCase("mins") ||
                   tagPart.equalsIgnoreCase("minute") ||
-                  tagPart.equalsIgnoreCase("minutes"))
-        {
+                  tagPart.equalsIgnoreCase("minutes")) {
             scale = UnitsConstants.SCALE_MIN;
         } else if(tagPart.equalsIgnoreCase("s") ||
                   tagPart.equalsIgnoreCase("sec") ||
                   tagPart.equalsIgnoreCase("secs") ||
                   tagPart.equalsIgnoreCase("second") ||
-                  tagPart.equalsIgnoreCase("seconds"))
-        {
+                  tagPart.equalsIgnoreCase("seconds")) {
             scale = UnitsConstants.SCALE_SEC;
         } else if(tagPart.equalsIgnoreCase("j") ||
                   tagPart.equalsIgnoreCase("jif") ||
                   tagPart.equalsIgnoreCase("jifs") ||
                   tagPart.equalsIgnoreCase("jiffy") ||
                   tagPart.equalsIgnoreCase("jiffys") ||
-                  tagPart.equalsIgnoreCase("jifferoonies"))
-        {
+                  tagPart.equalsIgnoreCase("jifferoonies")) {
             scale = UnitsConstants.SCALE_JIFFY;
         } else if(tagPart.equalsIgnoreCase("ms") ||
                   tagPart.equalsIgnoreCase("milli") ||
                   tagPart.equalsIgnoreCase("millis") ||
                   tagPart.equalsIgnoreCase("millisecond") ||
-                  tagPart.equalsIgnoreCase("milliseconds"))
-        {
+                  tagPart.equalsIgnoreCase("milliseconds")) {
             scale = UnitsConstants.SCALE_MILLI;
         } else if(tagPart.equalsIgnoreCase("us") ||
                   tagPart.equalsIgnoreCase("micro") ||
                   tagPart.equalsIgnoreCase("micros") ||
                   tagPart.equalsIgnoreCase("microsecond") ||
-                  tagPart.equalsIgnoreCase("microseconds"))
-        {
+                  tagPart.equalsIgnoreCase("microseconds")) {
             scale = UnitsConstants.SCALE_MICRO;
         } else if(tagPart.equalsIgnoreCase("ns") ||
                   tagPart.equalsIgnoreCase("nano") ||
                   tagPart.equalsIgnoreCase("nanos") ||
                   tagPart.equalsIgnoreCase("nanosecond") ||
-                  tagPart.equalsIgnoreCase("nanoseconds"))
-        {
+                  tagPart.equalsIgnoreCase("nanoseconds")) {
             scale = UnitsConstants.SCALE_NANO;
         } else {
             throw new ParseException("Unknown duration '" + tagPart + "'",
                                      nonIdx);
         }
 
-        return new UnitNumber(numberPart, UnitsConstants.UNIT_DURATION,
-                              scale);
+        return new UnitNumber(numberPart, UnitsConstants.UNIT_DURATION, scale);
     }
 }
