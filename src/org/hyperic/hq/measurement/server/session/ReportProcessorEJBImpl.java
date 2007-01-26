@@ -79,21 +79,13 @@ public class ReportProcessorEJBImpl
         MeasurementProcessorEJBImpl.getOne();
     private Integer _debugId;
     
-    private DerivedMeasurementValue getDerivedMeasurement(Integer dmId) {
-        try {
-            return _dmMan.getMeasurement(dmId);
-        } catch(MeasurementNotFoundException e) {
-            return null;
-        }
-    }
-
-    private void addData(DerivedMeasurementValue dmVal, int dsnId,
+    private void addData(DerivedMeasurement dm, int dsnId,
                          MetricValue[] dpts, long current,
                          Map oldDataPoints) 
     {
-        long interval = dmVal.getInterval();
+        long interval = dm.getInterval();
         boolean isPassThrough =
-            dmVal.getFormula().equals(MeasurementConstants.TEMPL_IDENTITY);
+            dm.getFormula().equals(MeasurementConstants.TEMPL_IDENTITY);
 
         // Each datapoint corresponds to a set of measurement
         // values for that cycle.
@@ -112,7 +104,7 @@ public class ReportProcessorEJBImpl
                 long adjust = TimingVoodoo.roundDownTime(retrieval, interval);
                 
                 // Debugging missing data points
-                if (dmVal.getId().equals(_debugId)) {
+                if (dm.getId().equals(_debugId)) {
                     log.info("metricDebug: ReportProcessor addData: " +
                              "metric ID " + _debugId +
                              " value=" + dpts[i].getValue() +
@@ -144,7 +136,7 @@ public class ReportProcessorEJBImpl
         }
         
         if (isPassThrough) {
-            _dataMan.addData(dmVal.getId(), passThroughs, true);
+            _dataMan.addData(dm.getId(), passThroughs, true);
         }
 
         // Let's check to see if there is old data, if so, we
@@ -175,18 +167,17 @@ public class ReportProcessorEJBImpl
                 
         for (int i = 0; i < dsnLists.length; i++) {
             Integer dmId = new Integer(dsnLists[i].getClientId());
-            DerivedMeasurementValue dmVal =
-                this.getDerivedMeasurement(dmId);
+            DerivedMeasurement dm = _dmMan.getMeasurement(dmId);;
             
             // Can't do much if we can't look up the derived measurement
-            if (dmVal == null)
+            if (dm == null)
                 continue;
             
             ValueList[] valLists = dsnLists[i].getDsns();
             for (int j = 0; j < valLists.length; j++) {
                 int dsnId = valLists[j].getDsnId();
                 MetricValue[] vals = valLists[j].getValues();
-                this.addData(dmVal, dsnId, vals, current, oldDataPoints);
+                addData(dm, dsnId, vals, current, oldDataPoints);
             }
         }
         

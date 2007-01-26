@@ -1065,7 +1065,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     public DerivedMeasurementValue getMeasurement(int sessionID, Integer id)
         throws SessionTimeoutException, SessionNotFoundException,
                MeasurementNotFoundException {
-        return getDerivedMeasurementManager().getMeasurement(id);
+        return getDerivedMeasurementManager().getMeasurementValue(id);
     }
 
     /**
@@ -1414,7 +1414,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId);
 
         DerivedMeasurementValue dmv =
-            getDerivedMeasurementManager().getMeasurement(mid);
+            getDerivedMeasurementManager().getMeasurementValue(mid);
         MeasurementTemplateValue tmpl = dmv.getTemplate();
         
         Integer[] mids = new Integer[] { mid };
@@ -2648,7 +2648,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                         try {
                             DerivedMeasurementValue dmv =
                                 getDerivedMeasurementManager()
-                                    .getMeasurement(mids[i]);
+                                    .getMeasurementValue(mids[i]);
                             
                             summary.setThroughputUnits(
                                     dmv.getTemplate().getUnits());

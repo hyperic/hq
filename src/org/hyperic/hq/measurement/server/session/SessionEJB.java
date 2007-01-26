@@ -267,7 +267,7 @@ public abstract class SessionEJB {
      * Utility to get measurement ID's that comprise the arguments
      * of a DerivedMeasurement
      */
-    protected Integer[] getArgumentIds(DerivedMeasurementValue dm)
+    protected Integer[] getArgumentIds(DerivedMeasurement dm)
         throws FinderException {
         Collection mcol = getRawMeasurementDAO().
             findByDerivedMeasurement(dm.getId());
@@ -382,20 +382,16 @@ public abstract class SessionEJB {
             throw new IllegalArgumentException(this.ERR_START);
     }
 
-    /** Performs the evaluation of the expression.
-     * @param the measurement value object
-     * @param the linked hashmap containing the data values.
-     * @return the object result of the expression evaluation.
-     * @throws EvaluationException
-     * */
-    protected Double evaluateExpression(DerivedMeasurementValue measurement,
-                                     Map dataMap)
+    /**
+     * Performs the evaluation of the expression.
+     **/
+    protected Double evaluateExpression(DerivedMeasurement measurement,
+                                        Map dataMap)
         throws EvaluationException {
 
         long evalStart = System.currentTimeMillis();
         Double result = MeasurementConstants.EXPR_EVAL_RESULT_DEFAULT;
         HashMap expValues = new HashMap();
-        ArrayList args = new ArrayList();
 
         // Iterate and build the instantJ properties
         int idx = 0;

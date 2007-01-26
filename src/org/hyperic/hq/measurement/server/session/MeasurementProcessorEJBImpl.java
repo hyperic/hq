@@ -329,9 +329,8 @@ public class MeasurementProcessorEJBImpl
                         new Long(TimingVoodoo.roundDownTime(retrievalTime,
                             dmBean.getInterval())));
                     }
-                    missedDerivedDataPoints.put(
-                        dmBean.getDerivedMeasurementValue(),
-                        scheduledTimes);
+                    missedDerivedDataPoints.put(dmBean,
+                                                scheduledTimes);
                 }
         }
 
@@ -342,8 +341,7 @@ public class MeasurementProcessorEJBImpl
         for (Iterator it=missedDerivedDataPoints.entrySet().iterator();
              it.hasNext();) {
             Map.Entry entry = (Map.Entry)it.next();
-            DerivedMeasurementValue measurement =
-                (DerivedMeasurementValue)entry.getKey();
+            DerivedMeasurement measurement = (DerivedMeasurement)entry.getKey();
             List scheduledTimes = (List)entry.getValue();
             if ( log.isDebugEnabled() ) {
                 log.debug

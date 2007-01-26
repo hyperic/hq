@@ -608,20 +608,26 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Look up a derived measurement EJB
+     * Look up a DerivedMeasurement by Id.
+     * @ejb:interface-method
+     */
+    public DerivedMeasurement getMeasurement(Integer mid) {
+        return getDerivedMeasurementDAO().get(mid);
+    }
+
+    /**
+     * Look up a DerivedMeasurementValue by Id.
      *
      * @return a DerivedMeasurement value
      * @ejb:transaction type="REQUIRESNEW"
+     * @deprecated Use getMeasurement instead.
      * @ejb:interface-method
      */
-    public DerivedMeasurementValue getMeasurement(Integer mid)
+    public DerivedMeasurementValue getMeasurementValue(Integer mid)
         throws MeasurementNotFoundException {
-
-        DerivedMeasurement dm = getDerivedMeasurementDAO().get(mid);
-
+        DerivedMeasurement dm = getMeasurement(mid);
         if (dm == null) {
-            throw new MeasurementNotFoundException("Metric id=" +  mid +
-                                                   " not found.");
+            throw new MeasurementNotFoundException(mid);
         }
         return dm.getDerivedMeasurementValue();
     }
@@ -684,8 +690,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         try {
             DataManagerLocal dataMan = getDataMan();
 
-            DerivedMeasurementValue[] dms =
-                new DerivedMeasurementValue[mids.length];
+            DerivedMeasurement[] dms = new DerivedMeasurement[mids.length];
             Integer[] identRawIds = new Integer[mids.length];
             Arrays.fill(identRawIds, null);
             
@@ -695,7 +700,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 // First, find the derived measurement
                 dms[i] = getMeasurement(mids[i]);
                 
-                if (!dms[i].getEnabled())
+                if (!dms[i].isEnabled())
                     throw new LiveMeasurementException("Metric ID: " +
                                                        mids[i] + 
                                                        " is not currently " +

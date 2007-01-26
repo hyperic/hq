@@ -70,7 +70,7 @@ public class CalculateDerivedMeasurementJob
         LogFactory.getLog(MeasurementConstants.MEA_TIMING_LOG);
 
     private Integer measurementId = null;
-    private DerivedMeasurementValue measurement;
+    private DerivedMeasurement measurement;
     private long reservationTime;
 
     // key=execTime, value=numAttempts
@@ -80,6 +80,11 @@ public class CalculateDerivedMeasurementJob
 
     /**
      * Entry-point for the job.
+     *
+     * XXX: Not sure how this could possibly work within a quartz context, the
+     * private measurement variable is never assigned.  It appears only the
+     * calculate() method is used. --RPM
+     *
      */
     public void execute(JobExecutionContext context)
         throws JobExecutionException {
@@ -109,7 +114,7 @@ public class CalculateDerivedMeasurementJob
             // missed calculation map as a string
             JobDataMap dataMap = context.getJobDetail().getJobDataMap();
             dataMap.put("recentlyMissedCalculations", 
-                recentlyMissedCalculations.encode());
+                        recentlyMissedCalculations.encode());
         } catch (JobExecutionException e) {
             throw e;
         } catch (Exception e) {
@@ -128,14 +133,8 @@ public class CalculateDerivedMeasurementJob
      * of the data we need belongs to the RM, other properties apply to the
      * instance of a RM as it applies to a DM, some data belongs solely to the
      * template and some data belongs wo the tmp argument.
-     *
-     * @param measurement
-     * @param reqTime
-     * @return
-     * @throws FinderException
-     * @throws DataNotAvailableException
      */
-    private Map getMeasurementData(DerivedMeasurementValue measurement,
+    private Map getMeasurementData(DerivedMeasurement measurement,
                                    long reqTime)
         throws FinderException, DataNotAvailableException {
         long    getDataStartTime = System.currentTimeMillis();
@@ -156,12 +155,6 @@ public class CalculateDerivedMeasurementJob
         // and our instance id to lookup the actual RM.
         for (Iterator i = col.iterator(); i.hasNext(); ) {
             MeasurementArg dmMav = (MeasurementArg)i.next();
-
-            if (dmMav == null) {
-                throw new DataNotAvailableException("Could not find an " +
-                    "associated MeasurementArgValue with this template "+
-                    dmMav.getId().intValue());
-            }
 
             // Lookup the RawMeasurement's associated template.
             RawMeasurement rm = getRawMeasurementDAO().
@@ -227,12 +220,11 @@ public class CalculateDerivedMeasurementJob
      * @return true if the calculation was successful or already done,
      * false otherwise
      */
-    public boolean calculate(DerivedMeasurementValue measurement, long when)
+    public boolean calculate(DerivedMeasurement measurement, long when)
         throws FinderException, DataNotAvailableException {
         long calculateStartTime = System.currentTimeMillis();
 
         try {
-
             // First of all, let's see if it's already there
             Integer[] measId = new Integer[] { measurement.getId() };
 
@@ -289,15 +281,18 @@ public class CalculateDerivedMeasurementJob
     }
 
     private void calculateRecentlyMissed()
-        throws FinderException, DataNotAvailableException {
+        throws FinderException, DataNotAvailableException
+    {
         long crmStartTime = System.currentTimeMillis();
 
-        for (Iterator it=recentlyMissedCalculations.entrySet().iterator(); it.hasNext();) {
+        for (Iterator it=recentlyMissedCalculations.entrySet().iterator();
+             it.hasNext();)
+        {
             Map.Entry entry = (Map.Entry)it.next();
-            long execTime = ( (Long)entry.getKey() ).longValue();
-            int attempts = ( (Integer)entry.getValue() ).intValue();
+            long execTime = ((Long)entry.getKey()).longValue();
+            int attempts = ((Integer)entry.getValue()).intValue();
 
-            if ( calculate(measurement, execTime) ) {
+            if (calculate(measurement, execTime)) {
                 // if we succeed, remove this from the failed entries
                 it.remove();
             } else {
@@ -314,7 +309,8 @@ public class CalculateDerivedMeasurementJob
     }
 
     private void init(JobExecutionContext context)
-        throws SchedulerException, FinderException {
+        throws SchedulerException, FinderException
+    {
         long initStart = System.currentTimeMillis();
 
         // when we were triggered
@@ -353,8 +349,8 @@ public class CalculateDerivedMeasurementJob
         long interval = measurement.getInterval();
 
         reservationTime = TimingVoodoo.roundDownTime
-            ( now - TimingVoodoo.percOfInterval( measurement.getInterval() ),
-              measurement.getInterval() );
+            (now - TimingVoodoo.percOfInterval( measurement.getInterval() ),
+             measurement.getInterval() );
 
         logTime("init", initStart);
     }
@@ -410,9 +406,6 @@ public class CalculateDerivedMeasurementJob
         return schedule;
     }
 
-    //---------------------------------------------------------------------
-    //-- private helpers --------------------------------------------------
-    //---------------------------------------------------------------------
     private void logTime (String method, long start) {
         if (timingLog.isDebugEnabled()) {
             long end=System.currentTimeMillis();
