@@ -28,8 +28,11 @@ package org.hyperic.hq.measurement.server.session;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.server.session.ScheduleRevNum;
 import org.hyperic.hq.measurement.server.session.SRN;
+import org.hyperic.hq.measurement.shared.SRNManagerLocal;
+import org.hyperic.hq.measurement.shared.SRNManagerUtil;
 
 import javax.ejb.SessionBean;
 import javax.ejb.CreateException;
@@ -341,5 +344,13 @@ public class SRNManagerEJBImpl extends SessionEJB
         cache.put(srn);
 
         return srn;
+    }
+    
+    public static SRNManagerLocal getOne() {
+        try {
+            return SRNManagerUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
     }
 }
