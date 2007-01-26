@@ -52,6 +52,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
+import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -263,7 +264,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         summary.setCategory(tmpl.getCategory().getName());
         summary.setUnits(tmpl.getUnits());
         summary.setCollectionType(new Integer(tmpl.getCollectionType()));
-        summary.setDesignated(new Boolean(tmpl.getDesignate()));        
+        summary.setDesignated(Boolean.valueOf(tmpl.getDesignate()));
         summary.setMetricSource(tmpl.getMonitorableType().getName());
         
         summary.setCollecting(interval != null);
@@ -353,7 +354,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         long current = System.currentTimeMillis();
         StopWatch watch = new StopWatch(current);
     
-        AgentManagerLocal agentMan = null;
+        AgentManagerLocal agentMan = AgentManagerEJBImpl.getOne();
         
         long liveMillis = MeasurementConstants.ACCEPTABLE_PLATFORM_LIVE_MILLIS;
         
@@ -397,16 +398,6 @@ public class MetricSessionEJB extends BizappSessionEJB {
                     MetricValue mval = (MetricValue) data.get(mid);
                     result[i] = mval.getValue();
                 } else {
-                    if (agentMan == null) {
-                        try {
-                            agentMan = AgentManagerUtil.getLocalHome().create();
-                        } catch (NamingException e) {
-                            throw new SystemException(e);
-                        } catch (CreateException e) {
-                            throw new SystemException(e);
-                        }
-                    }
-                    
                     // First figure out if the agent of this appdef entity
                     // already has a list
                     try {
