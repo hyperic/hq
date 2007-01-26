@@ -28,61 +28,56 @@ package org.hyperic.hq.measurement.server.session;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.zevents.Zevent;
+import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
+import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.hq.zevents.ZeventListener;
-import org.hyperic.hq.zevents.ZeventRunnableDecorator;
-import org.hyperic.util.thread.LoggingThreadGroup;
-import org.hyperic.util.thread.ThreadGroupFactory;
-
-import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
-import edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor;
-import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
 class MeasurementEnabler 
-    extends ThreadPoolExecutor
     implements ZeventListener
 {
-    private static Log _log = LogFactory.getLog(MeasurementEnabler.class);
-    private static final MeasurementEnabler INSTANCE = new MeasurementEnabler();
+    private static final String SCHEDULER_OBJ =
+        "hyperic.jmx:type=Service,name=MeasurementSchedule";
+    private static final String METH = "refreshSchedule";
 
-    private MeasurementEnabler() {
-        super(1, 1, 0, TimeUnit.DAYS, new LinkedBlockingQueue(), 
-              new ThreadGroupFactory(new LoggingThreadGroup("MetricEnabler"), 
-                                     "MetricEnabler"));
-    }
+    private static Log _log = LogFactory.getLog(MeasurementEnabler.class);
 
     public void processEvents(List events) {
+        DerivedMeasurementManagerLocal dm = 
+            DerivedMeasurementManagerEJBImpl.getOne();
+
         for (Iterator i=events.iterator(); i.hasNext(); ) {
             ResourceZevent z = (ResourceZevent)i.next();
             AuthzSubjectValue subject = z.getAuthzSubjectValue();
             AppdefEntityID id = z.getAppdefEntityID();
-        
-            _log.info("Enabling default metrics for [" + id + "]");
+            boolean isUpdate;
+            
+            isUpdate = z instanceof ResourceUpdatedZevent;
+            
             try {
-                DerivedMeasurementManagerEJBImpl.getOne()
-                    .enableDefaultMetrics(subject, id);
+                if (!isUpdate || dm.getEnabledMetricsCount(subject, id) == 0) {
+                    _log.info("Enabling default metrics for [" + id + "]");
+                    dm.enableDefaultMetrics(subject, id);
+                } else {
+                    _log.info("Rescheduling metric schedule for [" + id + "]");
+                    MBeanServer server = MBeanUtil.getMBeanServer();
+                    ObjectName obj = new ObjectName(SCHEDULER_OBJ);
+                    server.invoke(obj, METH,
+                                  new Object[] { id },
+                                  new String[] { AppdefEntityID.class.getName() 
+                    });
+                }
             } catch(Exception e) {
                 _log.warn("Unable to enable default metrics", e);
             }
         }
-    }
-
-    void enableDefaultMetrics(ResourceCreatedZevent z) {
-        execute(new ZeventRunnableDecorator(z, this));
-    }
-
-    void enableDefaultMetrics(ResourceUpdatedZevent z) {
-        execute(new ZeventRunnableDecorator(z, this));
-    }
-
-    public static MeasurementEnabler getInstance() {
-        return INSTANCE;
     }
 }

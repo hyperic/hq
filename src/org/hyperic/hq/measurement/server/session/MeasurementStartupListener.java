@@ -25,25 +25,15 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
-import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.measurement.shared.SRNManagerUtil;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
-import org.hyperic.hq.zevents.ZeventManager;
-import org.hyperic.hq.zevents.ZeventListener;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.product.server.MBeanUtil;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import javax.management.ObjectName;
-import javax.management.MalformedObjectNameException;
-import javax.management.MBeanServer;
-import java.util.List;
-import java.util.Iterator;
+import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
+import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
+import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.zevents.ZeventManager;
 
 public class MeasurementStartupListener
     implements StartupListener
@@ -52,89 +42,18 @@ public class MeasurementStartupListener
         LogFactory.getLog(MeasurementStartupListener.class);
 
     public void hqStarted() {
-
-        /**
-         * Initialize the SRN cache
-         */
-        try {
-            SRNManagerUtil.getLocalHome().create().initializeCache();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+        SRNManagerEJBImpl.getOne().initializeCache();
 
         /**
          * Add measurement enabler listener to enable metrics for newly
-         * created resources.
+         * created resources or to reschedule when resources are updated.
          */
-        ZeventManager.getInstance().
-            addListener(ResourceCreatedZevent.class,
-                        new MeasurementEnablerListener());
-
-        /**
-         * Add measurement rescheduler to reschedule metrics when resources
-         * are updated.
-         */
-        ZeventManager.getInstance().
-            addListener(ResourceUpdatedZevent.class,
-                        new MeasurementReschedulerListener());
-    }
-
-    /**
-     * A ZeventListener that listens for Resource create events, enabling the
-     * default set of metrics
-     */
-    private class MeasurementEnablerListener implements ZeventListener {
-
-        public void processEvents(List events) {
-            for (Iterator i = events.iterator(); i.hasNext();) {
-                ResourceCreatedZevent z= (ResourceCreatedZevent) i.next();
-
-                MeasurementEnabler.getInstance().enableDefaultMetrics(z);
-            }
-        }
-    }
-
-    /**
-     * A ZeventListener that listens for Resource update events, rescheduling
-     * it's metrics with the new configuration.  If no metrics are found for the
-     * resource the default set of metrics are enabled.
-     */
-    private class MeasurementReschedulerListener implements ZeventListener {
-        private static final String SCHEDULER_OBJ =
-            "hyperic.jmx:type=Service,name=MeasurementSchedule";
-        private static final String _method = "refreshSchedule";
-
-        public void processEvents(List events)
-        {
-            for (Iterator i = events.iterator(); i.hasNext(); ) {
-                ResourceUpdatedZevent zevent = (ResourceUpdatedZevent)i.next();
-                AppdefEntityID id = zevent.getAppdefEntityID();
-                AuthzSubjectValue subject = zevent.getAuthzSubjectValue();
-                DerivedMeasurementManagerLocal dmManager =
-                    DerivedMeasurementManagerEJBImpl.getOne();
-
-                try {
-                    int count = dmManager.getEnabledMetricsCount(subject, id);
-                    if (count == 0) {
-                        // No enabled metrics, schedule the default metrics
-                        _log.info("Enabling default metrics for " + id);
-                        MeasurementEnabler.getInstance()
-                                          .enableDefaultMetrics(zevent);
-                    } else {
-                        // Reschedule
-                        _log.info("Rescheduling metric schedule for " + id);
-
-                        MBeanServer server = MBeanUtil.getMBeanServer();
-                        ObjectName obj = new ObjectName(SCHEDULER_OBJ);
-                        server.invoke(obj, _method,
-                                      new Object[] { id },
-                                      new String[] { AppdefEntityID.class.getName() });
-                    }
-                } catch (Exception e) {
-                    _log.error("Unable to refresh schedule for id=" + id, e);
-                }
-            }
-        }
+        Set listenEvents = new HashSet();
+        listenEvents.add(ResourceCreatedZevent.class);
+        listenEvents.add(ResourceUpdatedZevent.class);
+        ZeventManager.getInstance()
+                     .addBufferedListener(listenEvents,
+                                          new MeasurementEnabler());
     }
 }
 
