@@ -44,6 +44,8 @@ public class TxSnatch
     public interface Snatcher {
         Object invokeNext(Interceptor next, Invocation v) throws Exception;
         Object invokeHomeNext(Interceptor next, Invocation v) throws Exception;
+        Object invokeProxyNext(org.jboss.proxy.Interceptor next,
+                               Invocation v) throws Throwable;
     }
     
     public static void setSnatcher(Snatcher snatcher) {
@@ -52,7 +54,13 @@ public class TxSnatch
         }
     }
     
-    public Object invoke(Invocation arg0) throws Exception {
+    static Snatcher getSnatcher() {
+        synchronized (INIT_LOCK) {
+            return _snatcher;
+        }
+    }
+    
+    public Object invoke(Invocation v) throws Exception {
         Snatcher s;
         
         synchronized (INIT_LOCK) {
@@ -60,12 +68,12 @@ public class TxSnatch
         }
 
         if (s != null)  {
-            return s.invokeNext(getNext(), arg0);
+            return s.invokeNext(getNext(), v);
         }
-        return super.invoke(arg0);
+        return super.invoke(v);
     }
 
-    public Object invokeHome(Invocation arg0) throws Exception {
+    public Object invokeHome(Invocation v) throws Exception {
         Snatcher s;
 
         synchronized (INIT_LOCK) {
@@ -73,8 +81,8 @@ public class TxSnatch
         }
 
         if (s != null) { 
-            return s.invokeHomeNext(getNext(), arg0);
+            return s.invokeHomeNext(getNext(), v);
         }
-        return super.invokeHome(arg0);
+        return super.invokeHome(v);
     }
 }

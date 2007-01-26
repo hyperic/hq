@@ -24,6 +24,7 @@
             <interceptor>org.jboss.proxy.ejb.HomeInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
+            <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </home>
@@ -31,6 +32,7 @@
             <interceptor>org.jboss.proxy.ejb.EntityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
+            <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </bean>
@@ -38,6 +40,7 @@
             <interceptor>org.jboss.proxy.ejb.ListEntityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
+            <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </list-entity>
@@ -55,6 +58,7 @@
             <interceptor>org.jboss.proxy.ejb.HomeInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
+            <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </home>
@@ -62,6 +66,7 @@
             <interceptor>org.jboss.proxy.ejb.EntityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
+            <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </bean>
@@ -69,6 +74,7 @@
             <interceptor>org.jboss.proxy.ejb.ListEntityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
+            <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </list-entity>
@@ -86,6 +92,7 @@
             <interceptor>org.jboss.proxy.ejb.HomeInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
+            <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </home>
@@ -93,6 +100,7 @@
             <interceptor>org.jboss.proxy.ejb.StatelessSessionInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
+            <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </bean>
@@ -110,6 +118,7 @@
             <interceptor>org.jboss.proxy.ejb.HomeInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
+            <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </home>
@@ -117,6 +126,7 @@
             <interceptor>org.jboss.proxy.ejb.StatelessSessionInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
+            <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </bean>
@@ -134,6 +144,7 @@
             <interceptor>org.jboss.proxy.ejb.HomeInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
+            <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </home>
@@ -141,6 +152,7 @@
             <interceptor>org.jboss.proxy.ejb.StatefulSessionInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
+            <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </bean>
@@ -158,6 +170,7 @@
             <interceptor>org.jboss.proxy.ejb.HomeInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
+            <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </home>
@@ -165,6 +178,7 @@
             <interceptor>org.jboss.proxy.ejb.StatefulSessionInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
+            <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </bean>
@@ -287,6 +301,7 @@
           <interceptor>org.jboss.proxy.ClientMethodInterceptor</interceptor>
           <interceptor>org.jboss.ejb.plugins.inflow.MessageEndpointInterceptor</interceptor>
           <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
+            <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
           <interceptor>org.jboss.invocation.InvokerInterceptor</interceptor>
         </endpoint-interceptors>
       </proxy-factory-config>
@@ -356,6 +371,7 @@
           <interceptor>org.jboss.proxy.ClientMethodInterceptor</interceptor>
           <interceptor>org.jboss.ejb.plugins.inflow.MessageEndpointInterceptor</interceptor>
           <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
+          <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
           <interceptor>org.jboss.invocation.InvokerInterceptor</interceptor>
         </endpoint-interceptors>
       </proxy-factory-config>

@@ -103,6 +103,13 @@ public class HQApp {
             }
         }
 
+        public Object invokeProxyNext(org.jboss.proxy.Interceptor next, 
+                                      Invocation v) 
+            throws Throwable 
+        {
+            return next.invoke(v);
+        }
+
         public Object invokeNext(Interceptor next, Invocation arg0) 
             throws Exception 
         {

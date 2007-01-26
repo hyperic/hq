@@ -38,8 +38,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.hibernate.SessionManager;
-import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.server.session.ScheduleArgs;
 import org.hyperic.hq.measurement.server.session.UnScheduleArgs;
@@ -68,22 +66,6 @@ public class AgentScheduleEJBImpl
     private final Log timingLog = LogFactory.getLog("timingLog.measurement");
 
     public void onMessage(final Message inMessage) {
-        try {
-            SessionManager.runInSession(new SessionRunner() {
-                public String getName() {
-                    return "AgentSchedule.onMessage";
-                }
-
-                public void run() throws Exception {
-                    onMessageInSession(inMessage);
-                }
-            });
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
-    }
-    
-    private void onMessageInSession(Message inMessage) {
         // Can't do much if it's not the right kind of message
         if (!(inMessage instanceof ObjectMessage)) {
             return;
