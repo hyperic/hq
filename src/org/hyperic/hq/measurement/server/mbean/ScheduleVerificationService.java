@@ -50,6 +50,8 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycle;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycleListener;
 import org.hyperic.hq.ha.shared.Mode;
+import org.hyperic.hq.hibernate.SessionManager;
+import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.ext.depgraph.InvalidGraphException;
@@ -127,16 +129,22 @@ public class ScheduleVerificationService
     }
     
     /**
-     * Refresh the schedule of
-     * a given platform entity
+     * Refresh the schedule of a given platform entity
+     * 
      * @param aid - appdefEntityId for a platform
      * @jmx:managed-operation
-     * 
      */
-    public void refreshSchedule(AppdefEntityID aid) {
+    public void refreshSchedule(final AppdefEntityID aid) {
         try {
-            // rescheduling every time
-            this.agentSync.reschedule(aid);
+            SessionManager.runInSession(new SessionRunner() {
+                public String getName() {
+                    return "ScheduleVerificationService.runInSession";
+                }
+
+                public void run() throws Exception {
+                    agentSync.reschedule(aid);
+                }
+            });
         } catch (MonitorAgentException e) {
             log.error("Unable to communicate with agent for entity: " +
                       aid.getID() + " to refresh metric schedule");
@@ -148,7 +156,23 @@ public class ScheduleVerificationService
     /**
      * @jmx:managed-operation
      */
-    public void hit(Date lDate) {
+    public void hit(final Date lDate) {
+        try {
+            SessionManager.runInSession(new SessionRunner() {
+                public String getName() {
+                    return "ScheduleVerification.hit";
+                }
+
+                public void run() throws Exception {
+                    hitInSession(lDate);
+                }
+            });
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
+    }
+    
+    private void hitInSession(Date lDate) {
         if (!isActive()) return;
         
         // Skip first schedule verification, let the server warm up a bit
