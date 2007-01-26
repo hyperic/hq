@@ -37,11 +37,11 @@ import java.util.LinkedHashSet;
 
 public class Application extends AppdefResource
 {
-    private String engContact;
-    private String opsContact;
-    private String businessContact;
-    private ApplicationType applicationType;
-    private Collection appServices;
+    private String _engContact;
+    private String _opsContact;
+    private String _businessContact;
+    private ApplicationType _applicationType;
+    private Collection _appServices;
 
     /**
      * default constructor
@@ -66,52 +66,52 @@ public class Application extends AppdefResource
 
     public String getEngContact()
     {
-        return this.engContact;
+        return _engContact;
     }
 
     public void setEngContact(String engContact)
     {
-        this.engContact = engContact;
+        _engContact = engContact;
     }
 
     public String getOpsContact()
     {
-        return this.opsContact;
+        return _opsContact;
     }
 
     public void setOpsContact(String opsContact)
     {
-        this.opsContact = opsContact;
+        _opsContact = opsContact;
     }
 
     public String getBusinessContact()
     {
-        return this.businessContact;
+        return _businessContact;
     }
 
     public void setBusinessContact(String businessContact)
     {
-        this.businessContact = businessContact;
+        _businessContact = businessContact;
     }
 
     public ApplicationType getApplicationType()
     {
-        return this.applicationType;
+        return _applicationType;
     }
 
     public void setApplicationType(ApplicationType applicationType)
     {
-        this.applicationType = applicationType;
+        _applicationType = applicationType;
     }
 
     public Collection getAppServices()
     {
-        return this.appServices;
+        return _appServices;
     }
 
     public void setAppServices(Collection appServices)
     {
-        this.appServices = appServices;
+        _appServices = appServices;
     }
 
     public AppService addEntryPoint(Integer aService)
@@ -130,6 +130,17 @@ public class Application extends AppdefResource
     {
         throw new UnsupportedOperationException(
             "use AppServiceDAO.createService()");
+    }
+    
+    public AppService removeService(Integer appServId) {
+        for (Iterator it = _appServices.iterator(); it.hasNext(); ) {
+            AppService service = (AppService) it.next();
+            if (service.getId().equals(appServId)) {
+                it.remove();
+                return service;
+            }
+        }
+        return null;
     }
 
     public Set getAppServiceSnapshot()
