@@ -63,9 +63,15 @@ onloads.push(requestMetricsResponse<c:out value="${portlet.token}"/>);
 </tiles:insert>
 
   <table width="100%" border="0" cellspacing="0" cellpadding="0" id="<c:out value="${tableName}"/>" class="portletLRBorder">
-    <tbody id="mtbody">
+      <tfoot>
+       <tr>
+          <td id="modifiedMetricTime" colspan="2" class="modifiedDate">test info</td>
+       </tr>
+    </tfoot>
+      <tbody id="mtbody">
     <!-- table rows are inserted here dynamically -->
     </tbody>
+
  </table>
   <table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${noTableName}"/>" style="display:none;" class="portletLRBorder">
       <tbody>

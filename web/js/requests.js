@@ -88,14 +88,9 @@
                 td4.appendChild(document.createTextNode(mList[i].oob));
             }
 
-            tbody.appendChild(trTime);
-                trTime.appendChild(td5);
-                td5.setAttribute('colspan','4');
-                td5.setAttribute('align','right');
-                td5.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
-                td5.appendChild(document.createTextNode('Last updated: '+ refreshDate() + ' ' + refreshTime()));
-        }
-
+         }
+        $('modifiedProblemTime').innerHTML = 'Last updated: '+ refreshDate() + ' ' + refreshTime();
+        
         rTimer = setTimeout('requestProblemResources();', 60000);
         //Refresh in 60 seconds
     }
@@ -222,7 +217,7 @@
         var aList = alertText.criticalAlerts;
         var token = alertText.token;
         var alertTable;
-        var tbody = document.createElement('tbody');
+        var tbody = $('mtbody');
         var alertFunc;
         var descSpan = "Recent Alerts_span";
 
@@ -240,8 +235,8 @@
         if (aList != 0) {
             $('noCritAlerts').style.display = 'none';
 
-            for (var i = alertTable.childNodes.length - 1; i > 1; i--) {
-                alertTable.removeChild(alertTable.childNodes[i]);
+            for (var i = alertTable.tbody.childNodes.length - 1; i > 1; i--) {
+                alertTable.tbody.removeChild(alertTable.childNodes[i]);
             }
 
             for (i = 0; i < aList.length; i++) {
@@ -259,7 +254,7 @@
                 var urlAmp = "&a="
                 var alertUrl = $('viewAlertUrl').href;
 
-                alertTable.appendChild(tbody);
+
                 tbody.appendChild(tr);
                 tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
 
@@ -297,18 +292,12 @@
                 } else {
                     td5.appendChild(document.createTextNode("No"));
                 }
-
-                tbody.appendChild(trTime);
-                trTime.appendChild(td6);
-                td6.setAttribute('colspan','5');
-                td6.setAttribute('align','right');
-                td6.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
-                td6.appendChild(document.createTextNode('Last updated: '+ refreshDate() + ' ' + refreshTime()));
             }
         } else {
             $('noCritAlerts').style.display = '';
+          
         }
-
+        $('modifiedCritTime').innerHTML = 'Last updated: '+ refreshDate() + ' ' + refreshTime();
         rTimer = setTimeout(alertFunc, 60000);
         //Refresh in 60 seconds
     }
@@ -389,19 +378,14 @@
                 td3.innerHTML = "&nbsp;";
                 }
              }
-            tbody.appendChild(trTime);
-                trTime.appendChild(td4);
-                td4.setAttribute('colspan','3');
-                td4.setAttribute('align','right');
-                td4.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
-                td4.appendChild(document.createTextNode('Last updated: '+ refreshDate() + ' ' + refreshTime()));
         }
 
+        $('modifiedAvailTime').innerHTML = 'Last updated: '+ refreshDate() + ' ' + refreshTime();
         rTimer = setTimeout(availFunc, 60000);
     }
 
     function showMetricsResponse(originalRequest) {
-
+        $('modifiedMetricTime').innerHTML = 'Last updated: '+ refreshDate() + ' ' + refreshTime();
         var metricText = eval("(" + originalRequest.responseText + ")");
         var metricValues = metricText.metricValues;
         var resourceNameHeader = metricValues.resourceTypeName;
@@ -436,7 +420,6 @@
 
             // Create table headers
             var trHeader = document.createElement('tr');
-            var trTime = document.createElement('tr');
             var th1 = document.createElement('th');
             var th2 = document.createElement('th');
 
@@ -481,14 +464,7 @@
                 tr.appendChild(td2);
                 td2.setAttribute((document.all ? 'className' : 'class'), "metricName");
                 td2.appendChild(document.createTextNode(metricValues.values[i].value));
-
-                tbody.appendChild(trTime);
-                trTime.appendChild(td3);
-                td3.setAttribute('colspan','2');
-                td3.setAttribute('align','right');
-                td3.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
-                td3.appendChild(document.createTextNode('Last updated: '+ refreshDate() + ' ' + refreshTime()));
-            }
+               }
 
         } else {
             $(noMetricTable).style.display = '';

@@ -67,20 +67,15 @@ onloads.push(requestAvailSummary<c:out value="${portlet.token}"/>);
       <tbody>
         <tr class="tableRowHeader">
           <th width="75%" class="tableRowInactive"><fmt:message key="dash.home.TableHeader.Type"/></th>
-          <!--<th align="right" class="tableRowInactive">
-              <span style="color:red">
-                  <fmt:message key="dash.availSummary.header.Unavail"/>
-              </span>
-          <th align="center" class="tableRowInactive" width="1%">
-            <fmt:message key="common.label.Pipe"/>
-          </th>
-          <th align="left" class="tableRowInactive" style="margin-right:3px;">
-              <fmt:message key="dash.availSummary.header.Avail"/>&nbsp;
-          </th>-->
-             <th align="left" colspan="2" class="tableRowInactive" style=>Availability</th>
+          <th align="left" colspan="2" class="tableRowInactive"><fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/></th>
         </tr>
         <!-- table rows are inserted here dynamically -->
       </tbody>
+      <tfoot>
+          <tr>
+             <td id="modifiedAvailTime" colspan="3" class="modifiedDate"></td>
+          </tr>
+      </tfoot>
     </table>
     <table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${noTableName}"/>" style="display:none;">
         <tbody>

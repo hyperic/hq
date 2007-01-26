@@ -72,7 +72,7 @@ onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
   <!-- JSON available at /dashboard/ViewCriticalAlerts.do -->
     <html:form method="POST" action="/alerts/RemoveAlerts.do">
   <table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${tableName}"/>" class="portletLRBorder">
-  	<tbody>
+      <tbody>
 		<tr class="ListRow">
 			<td width="1%" class="ListHeaderCheckbox">
 				<input type="checkbox" onclick="ToggleAll(this, widgetProperties, false)" name="listToggleAll">
@@ -93,6 +93,13 @@ onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
 		
 		 <!-- table rows are inserted here dynamically -->
  	 </tbody>
+    <!--
+     <tfoot>
+          <tr>
+             <td id="modifiedCritTime" class="modifiedDate" valign="bottom" colspan="5"></td>
+          </tr>
+      </tfoot>
+      -->
   </table>
     
      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="display:none;" id="noCritAlerts" class="portletLRBorder">
@@ -112,5 +119,5 @@ onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
       <tiles:put name="defaultSortColumn" value="1"/>
     </tiles:insert>
   </html:form>
-
+    <div id="modifiedCritTime" class="modifiedDate" style="position:absolute;bottom:10px;right:5px;">test</div>
 </div>
