@@ -162,7 +162,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                           aiplatform.getProductConfig(),
                                           aiplatform.getMeasurementConfig(),
                                           aiplatform.getControlConfig(),
-                                          null, null, true);
+                                          null, null, false);
                 } catch (Exception e) {
                     _log.warn("Error configuring platform: " + e, e);
                 }
@@ -374,7 +374,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                           aiserver.getControlConfig(),
                                           null, /* RT config */
                                           null,
-                                          true);
+                                          false);
                 } catch (Exception e) {
                     _log.warn("Error configuring server: " + e, e);
                 }
