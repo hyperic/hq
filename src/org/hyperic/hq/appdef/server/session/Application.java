@@ -132,15 +132,8 @@ public class Application extends AppdefResource
             "use AppServiceDAO.createService()");
     }
     
-    public AppService removeService(Integer appServId) {
-        for (Iterator it = _appServices.iterator(); it.hasNext(); ) {
-            AppService service = (AppService) it.next();
-            if (service.getId().equals(appServId)) {
-                it.remove();
-                return service;
-            }
-        }
-        return null;
+    void removeService(AppService service) {
+        _appServices.remove(service);
     }
 
     public Set getAppServiceSnapshot()

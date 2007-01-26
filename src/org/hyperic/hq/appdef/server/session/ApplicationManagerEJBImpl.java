@@ -276,9 +276,11 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             Application app =
                 DAOFactory.getDAOFactory().getApplicationDAO().findById(appId);
             checkModifyPermission(caller, app.getEntityId());
-            AppService appSvcLoc = app.removeService(appServiceId);
-
-            getAppServiceDAO().remove(appSvcLoc);
+            
+            AppServiceDAO appServDAO = getAppServiceDAO();
+            AppService appSvcLoc = appServDAO.findById(appServiceId);
+            app.removeService(appSvcLoc);
+            appServDAO.remove(appSvcLoc);
         } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(appId);
         }
