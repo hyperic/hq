@@ -41,6 +41,7 @@ import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticThread;
 import org.hyperic.util.thread.LoggingThreadGroup;
+import org.hyperic.util.thread.ThreadGroupFactory;
 
 import edu.emory.mathcs.backport.java.util.concurrent.BlockingQueue;
 import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
@@ -77,7 +78,14 @@ public class ZeventManager {
     /* Map of {@link Class}es subclassing {@link ZEvent} onto lists of 
      * {@link ZeventListener}s */
     private final Map _listeners = new HashMap();
+
+    // Map of {@link ZeventListener} onto {@link BufferedListener}s.
+    private final Map _buffListeners = new HashMap();
     
+    private final ThreadGroupFactory _threadFact =
+        new ThreadGroupFactory(new LoggingThreadGroup("ZeventManager"), 
+                               "BufferedProcessor");
+
     // For diagnostics and warnings
     private long _lastWarnTime;
     private long _maxTimeInQueue;
@@ -179,6 +187,30 @@ public class ZeventManager {
     }
     
     /**
+     * Add a buffered listener for event types.  A buffered listener is one
+     * which implements its own private queue and thread for processing
+     * entries.  If the actions performed by your listener take a while to
+     * complete, then a buffered listener is a good candidate for use, since it
+     * means that it will not be holding up the regular Zevent queue processor.
+     * 
+     * @param eventClasses  {@link Class}es which subclass {@link Zevent} to
+     *                      listen for
+     * @param listener      Listener to invoke with events
+     */
+    public void addBufferedListener(Set eventClasses, ZeventListener listener) { 
+        BufferedListener bListen = new BufferedListener(listener, 
+                                                        _threadFact);
+        
+        synchronized (_listenerLock) {
+            _buffListeners.put(listener, bListen);
+        }
+        
+        for (Iterator i=eventClasses.iterator(); i.hasNext(); ) {
+            addListener((Class)i.next(), bListen);
+        }
+    }
+    
+    /**
      * Add a listener for a specific type of event.
      * 
      * @param eventClass A subclass of {@link Zevent}
@@ -206,8 +238,12 @@ public class ZeventManager {
         
         synchronized (_listenerLock) {
             List listeners = getEventTypeListeners(eventClass);
+            ZeventListener realListener = listener;
             
-            return listeners.remove(listener);
+            if (_buffListeners.containsKey(listener)) 
+                realListener = (ZeventListener)_buffListeners.get(listener); 
+                    
+            return listeners.remove(realListener);
         }
     }
     
