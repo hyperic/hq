@@ -25,19 +25,21 @@
 
 package org.hyperic.hq.autoinventory.server.session;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.zevents.ZeventManager;
-import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.common.SystemException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.util.List;
-import java.util.Iterator;
+import org.hyperic.hq.zevents.ZeventListener;
+import org.hyperic.hq.zevents.ZeventManager;
 
 public class AIStartupListener
     implements StartupListener
@@ -50,9 +52,10 @@ public class AIStartupListener
          * Add the runtime-AI listener to enable resources for runtime
          * autodiscovery as they are created.
          */
+        Set events = new HashSet();
+        events.add(ResourceCreatedZevent.class);
         ZeventManager.getInstance().
-            addListener(ResourceCreatedZevent.class,
-                        new RuntimeAIEnabler());
+            addBufferedListener(events, new RuntimeAIEnabler());
     }
 
     /**
@@ -79,7 +82,7 @@ public class AIStartupListener
                     aiManager.toggleRuntimeScan(subject, id, true);
                 } catch (Exception e) {
                     throw new SystemException("Error enabling Runtime-AI for " +
-                        "server: " + e.getMessage(), e);
+                                              "server [" + id + "]", e);
                 }
             }
         }
