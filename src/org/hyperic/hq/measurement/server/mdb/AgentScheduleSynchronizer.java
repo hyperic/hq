@@ -22,12 +22,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
-/*
- * AgentScheduleSynchronizer.java
- * 
- * Created on Jun 18, 2003
- */
 package org.hyperic.hq.measurement.server.mdb;
 
 import java.util.HashMap;
@@ -44,6 +38,8 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.hibernate.SessionManager;
+import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
@@ -263,15 +259,16 @@ public class AgentScheduleSynchronizer {
     public void reschedule(AppdefEntityID eid)
         throws InvalidGraphException, MeasurementScheduleException,
                MonitorAgentException, PermissionException,
-               MeasurementUnscheduleException, SubjectNotFoundException {
+               MeasurementUnscheduleException, SubjectNotFoundException 
+    {
         log.debug("Reschedule metrics for " + eid);
-        List dms = getDMan().findMeasurements(getSubject(), eid, true,
-                                              null, PageControl.PAGE_ALL);
-        
+        List dms = getDMan().findMeasurements(getSubject(), eid, true, null,  
+                                              PageControl.PAGE_ALL);
+                
         if (dms.size() > 0)
-            this.reschedule(eid, dms);
+            reschedule(eid, dms);
         else
-            this.unschedule(eid);
+            unschedule(eid);
     }
 
     public static void schedule(AppdefEntityID eid) {
