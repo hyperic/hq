@@ -83,15 +83,7 @@ public class AddResourceGroupsFormPrepareAction extends Action {
             .getLog(AddResourceGroupsFormPrepareAction.class.getName());
 
         AddResourceGroupsForm addForm = (AddResourceGroupsForm) form;
-        Integer resourceId = addForm.getRid();
-        Integer entityType = addForm.getType();
-
-        if (resourceId == null) {
-            resourceId = RequestUtils.getResourceId(request);
-        }
-        if (entityType == null) {
-            entityType = RequestUtils.getResourceTypeId(request);
-        }
+        AppdefEntityID entityId = new AppdefEntityID(addForm.getEid());
 
         AppdefResourceValue resource = RequestUtils.getResource(request);
         if (resource == null) {
@@ -99,7 +91,6 @@ public class AddResourceGroupsFormPrepareAction extends Action {
             return null;
         }
 
-        AppdefEntityID entityId = resource.getEntityId();
         addForm.setRid(resource.getId());
         addForm.setType(new Integer(entityId.getType()));
 
@@ -107,48 +98,41 @@ public class AddResourceGroupsFormPrepareAction extends Action {
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
         Integer sessionId = RequestUtils.getSessionId(request);
         PageControl pca =
-            RequestUtils.getPageControl(request, "psa", "pna",
-                                        "soa", "sca");
+            RequestUtils.getPageControl(request, "psa", "pna", "soa", "sca");
         PageControl pcp =
-            RequestUtils.getPageControl(request, "psp", "pnp",
-                                        "sop", "scp");
+            RequestUtils.getPageControl(request, "psp", "pnp", "sop", "scp");
 
         // pending groups are those on the right side of the "add
         // to list" widget- awaiting association with the resource
         // when the form's "ok" button is clicked.
-        boolean groupsArePending = false;
-        if ((SessionUtils.getList(request.getSession(),
-            Constants.PENDING_RESGRPS_SES_ATTR)).length > 0)
-            groupsArePending = true;
+        boolean groupsArePending = (SessionUtils
+                .getList(request.getSession(),
+                         Constants.PENDING_RESGRPS_SES_ATTR)).length > 0;
 
         // available groups are all groups in the system that are
         //  _not_ associated with the resource and are not pending 
         // since the bizapp will return all groups, we'll filter out the
         // the ones that are pending from the "available" list and set 
         // _that_ as a request attribute 
-        log.trace("getting available groups for resource [" + 
-            entityId + "]");
+        log.trace("getting available groups for resource [" +  entityId + "]");
         Integer[] pendingGroupIds =
             SessionUtils.getList(request.getSession(),
-                Constants.PENDING_RESGRPS_SES_ATTR);
+                                 Constants.PENDING_RESGRPS_SES_ATTR);
 
         PageList availableGroups = 
-                boss.findAllGroupsMemberExclusive(sessionId.intValue(),
-                                                  pca, entityId,
-                                                  pendingGroupIds, 
-                                                  resource.getAppdefResourceTypeValue());
+            boss.findAllGroupsMemberExclusive(
+                sessionId.intValue(), pca, entityId, pendingGroupIds, 
+                resource.getAppdefResourceTypeValue());
 
         if (log.isTraceEnabled())
             log.trace("findAllGroups(...) returned these " +
                 "AppdefGroupValues " + availableGroups);
 
         if (groupsArePending) {            
-            log.trace("getting pending groups for resource [" + 
-                entityId + "]");
+            log.trace("getting pending groups for resource [" + entityId + "]");
             PageList pendingGroups =
                 boss.findGroups(sessionId.intValue(), pendingGroupIds, pcp);
-            request.setAttribute(Constants.PENDING_RESGRPS_ATTR,
-                                 pendingGroups);
+            request.setAttribute(Constants.PENDING_RESGRPS_ATTR, pendingGroups);
             request.setAttribute(Constants.NUM_PENDING_RESGRPS_ATTR,
                                  new Integer(pendingGroups.getTotalSize()));
 
@@ -160,10 +144,9 @@ public class AddResourceGroupsFormPrepareAction extends Action {
             request.setAttribute(Constants.NUM_PENDING_RESGRPS_ATTR,
                                  new Integer(0));
         }
-        request.setAttribute(Constants.AVAIL_RESGRPS_ATTR,
-            availableGroups);            
+        request.setAttribute(Constants.AVAIL_RESGRPS_ATTR, availableGroups);            
         request.setAttribute(Constants.NUM_AVAIL_RESGRPS_ATTR,
-            new Integer(availableGroups.getTotalSize()));
+                             new Integer(availableGroups.getTotalSize()));
         return null;
 
     }

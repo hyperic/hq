@@ -36,9 +36,9 @@ import java.util.Arrays;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.hyperic.hq.ui.action.BaseValidatorForm;
-
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.ui.action.BaseValidatorForm;
 
 /**
  * removes a list of groups from a resource
@@ -128,6 +128,19 @@ public class AddResourceGroupsForm extends BaseValidatorForm {
         this.type = type;
     }
 
+    public String getEid() {
+        if (type != null && rid != null)
+            return new AppdefEntityID(type.intValue(), rid).toString();
+
+        return null;
+    }
+    
+    public void setEid(String eidStr) {
+        AppdefEntityID eid = new AppdefEntityID(eidStr);
+        rid = eid.getId();
+        type = new Integer(eid.getType());
+    }
+    
     public void reset(ActionMapping mapping, HttpServletRequest request) {
         super.reset(mapping, request);
         availableGroups = new Integer[0];
