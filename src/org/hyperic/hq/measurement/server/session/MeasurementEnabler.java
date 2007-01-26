@@ -28,9 +28,6 @@ package org.hyperic.hq.measurement.server.session;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
@@ -38,16 +35,11 @@ import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
-import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.hq.zevents.ZeventListener;
 
 class MeasurementEnabler 
     implements ZeventListener
 {
-    private static final String SCHEDULER_OBJ =
-        "hyperic.jmx:type=Service,name=MeasurementSchedule";
-    private static final String METH = "refreshSchedule";
-
     private static Log _log = LogFactory.getLog(MeasurementEnabler.class);
 
     public void processEvents(List events) {
@@ -68,12 +60,7 @@ class MeasurementEnabler
                     dm.enableDefaultMetrics(subject, id);
                 } else {
                     _log.info("Rescheduling metric schedule for [" + id + "]");
-                    MBeanServer server = MBeanUtil.getMBeanServer();
-                    ObjectName obj = new ObjectName(SCHEDULER_OBJ);
-                    server.invoke(obj, METH,
-                                  new Object[] { id },
-                                  new String[] { AppdefEntityID.class.getName() 
-                    });
+                    dm.reschedule(id);
                 }
             } catch(Exception e) {
                 _log.warn("Unable to enable default metrics", e);

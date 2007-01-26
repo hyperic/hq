@@ -41,6 +41,8 @@ import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -81,6 +83,7 @@ import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -1364,6 +1367,25 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         } catch (Exception e) {
             log.warn("Unable to enable default metrics for id=" + id +
                       ": " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public void reschedule(AppdefEntityID id) { 
+        String objName = "hyperic.jmx:type=Service,name=MeasurementSchedule";
+        String meth = "refreshSchedule";
+
+        MBeanServer server = MBeanUtil.getMBeanServer();
+
+        try {
+            ObjectName obj = new ObjectName(objName);
+            server.invoke(obj, meth,
+                          new Object[] { id },
+                          new String[] { AppdefEntityID.class.getName() });
+        } catch(Exception e) {
+            throw new SystemException(e);
         }
     }
 
