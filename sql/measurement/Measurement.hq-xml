@@ -54,10 +54,6 @@
       <property name="formula" type="string">
         <column name="DSN" length="500" />
       </property>
-      <one-to-one name="baseline" fetch="join" class="Baseline"   
-                  property-ref="baselineId.derivedMeasurement"     
-                  cascade="save-update,delete,merge,evict" >    
-      </one-to-one>
     </subclass>
 
     <subclass name="RawMeasurement" extends="Measurement"

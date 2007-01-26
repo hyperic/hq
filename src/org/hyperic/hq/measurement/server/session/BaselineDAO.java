@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.measurement.shared.BaselineValue;
 
 public class BaselineDAO extends HibernateDAO {
     public BaselineDAO(DAOFactory f) {
@@ -47,10 +48,20 @@ public class BaselineDAO extends HibernateDAO {
         super.remove(entity);
     }
 
-    public Baseline create() {
-        Baseline b = new Baseline();
+    public Baseline create(DerivedMeasurement dm, long computeTime,
+                           boolean userEntered, double mean,
+                           double minExpectedValue, double maxExpectedValue) {
+        Baseline b = new Baseline(dm, computeTime, userEntered, mean,
+                                  minExpectedValue, maxExpectedValue);
         save(b);
         return b;
+    }
+
+    public Baseline findByMeasurementId(Integer mid) {
+        String sql = "from Baseline b where b.derivedMeasurement.id = ?";
+
+        return (Baseline)getSession().createQuery(sql)
+            .setInteger(0, mid.intValue()).uniqueResult();
     }
 
     public List findByInstance(int appdefType, int appdefId) {

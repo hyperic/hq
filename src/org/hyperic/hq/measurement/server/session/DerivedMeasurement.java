@@ -26,6 +26,7 @@
 package org.hyperic.hq.measurement.server.session;
 
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
+import org.hyperic.dao.DAOFactory;
 
 public class DerivedMeasurement extends Measurement
     implements java.io.Serializable {
@@ -34,7 +35,6 @@ public class DerivedMeasurement extends Measurement
     private boolean _enabled = true;
     private long _interval;
     private String _formula;
-    private Baseline _baseline;
 
     // Constructors
     public DerivedMeasurement() {
@@ -71,20 +71,6 @@ public class DerivedMeasurement extends Measurement
         _formula = formula;
     }
 
-    /**
-     * XXX: Public for now for access from EE.
-     */
-    public void setBaseline(Baseline b) {
-        if (b != null) {
-            b.setDerivedMeasurement(this);
-        }
-        _baseline = b;
-    }
-
-    public Baseline getBaseline() {
-        return _baseline;
-    }
-
     public int getAppdefType() {
         return getTemplate().getMonitorableType().getAppdefType();
     }
@@ -94,7 +80,9 @@ public class DerivedMeasurement extends Measurement
      * @deprecated Use (this) DerivedMeasurement object instead
      */
     public DerivedMeasurementValue getDerivedMeasurementValue() {
-        Baseline b = getBaseline();
+
+        BaselineDAO dao = DAOFactory.getDAOFactory().getBaselineDAO();
+        Baseline b = dao.findByMeasurementId(getId());
 
         DerivedMeasurementValue val = new DerivedMeasurementValue();
         val.setId(getId());
@@ -108,7 +96,6 @@ public class DerivedMeasurement extends Measurement
         if (b != null) {
             val.setBaseline(b.getBaselineValue());
         }
-
         return val;
     }
 

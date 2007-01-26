@@ -110,6 +110,18 @@ public class Baseline extends PersistedObject
     }
 
     /**
+     * Update a Baseline
+     */
+    public void update(long computeTime, boolean userEntered, double mean,
+                       double minExpectedValue, double maxExpectedValue) {
+        setComputeTime(computeTime);
+        setUserEntered(userEntered);
+        setMean(mean);
+        setMinExpectedVal(minExpectedValue);
+        setMaxExpectedVal(maxExpectedValue);
+    }
+
+    /**
      * Legacy EJB DTO pattern
      * @deprecated Use (this) Baseline object instead
      */
@@ -123,20 +135,6 @@ public class Baseline extends PersistedObject
         b.setMinExpectedValue(new Double(getMinExpectedVal()));
         b.setMaxExpectedValue(new Double(getMaxExpectedVal()));
         return b;
-    }
-
-    /**
-     * Update a Baseline based on a BaselineValue
-     *
-     * @deprecated This method will be removed when we get rid of value objects
-     * @param bVal The BaselineValue to save
-     */
-    public void update(BaselineValue bVal) {
-        setComputeTime(bVal.getComputeTime());
-        setUserEntered(bVal.getUserEntered());
-        setMean(bVal.getMean().doubleValue());
-        setMinExpectedVal(bVal.getMinExpectedValue().doubleValue());
-        setMaxExpectedVal(bVal.getMaxExpectedValue().doubleValue());
     }
 }
 
