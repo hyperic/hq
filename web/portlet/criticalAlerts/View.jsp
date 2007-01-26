@@ -101,7 +101,7 @@ onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
       </tfoot>
       -->
   </table>
-    
+
      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="display:none;" id="noCritAlerts" class="portletLRBorder">
          <tbody>
          <tr class="ListRow">
@@ -119,5 +119,5 @@ onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
       <tiles:put name="defaultSortColumn" value="1"/>
     </tiles:insert>
   </html:form>
-    <div id="modifiedCritTime" class="modifiedDate" style="position:relative;bottom:10px;right:5px;"></div>
+    <div id="modifiedCritTime" class="" style="position:absolute;top:10px;right:50px;color:#ffffff;"></div>
 </div>

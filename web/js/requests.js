@@ -89,7 +89,7 @@
             }
 
          }
-        $('modifiedProblemTime').innerHTML = 'Last updated: '+ refreshDate() + ' ' + refreshTime();
+        //$('modifiedProblemTime').innerHTML = 'Last updated: '+ refreshDate() + ' ' + refreshTime();
         
         rTimer = setTimeout('requestProblemResources();', 60000);
         //Refresh in 60 seconds
