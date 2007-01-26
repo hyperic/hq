@@ -26,6 +26,8 @@
 package org.hyperic.hq.events.server.mbean;
 
 import java.util.Date;
+
+import org.hyperic.hq.common.SessionMBeanBase;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.HeartBeatEvent;
@@ -41,7 +43,10 @@ import org.apache.commons.logging.LogFactory;
  *
  * @jmx:mbean name="hyperic.jmx:type=Service,name=EventsHeartBeat"
  */
-public class HeartBeatService implements HeartBeatServiceMBean {
+public class HeartBeatService 
+    extends SessionMBeanBase
+    implements HeartBeatServiceMBean 
+{
     private String topicName = EventConstants.EVENTS_TOPIC;
     private final Log log = LogFactory.getLog(HeartBeatService.class);
 
@@ -79,6 +84,10 @@ public class HeartBeatService implements HeartBeatServiceMBean {
      * @jmx:managed-operation
      */
     public void hit(Date lDate) {
+        super.hit(lDate);
+    }
+    
+    protected void hitInSession(Date lDate) {
         if (!isActive()) return;
         try {
             // Try to see if RegisteredTriggerManager is available

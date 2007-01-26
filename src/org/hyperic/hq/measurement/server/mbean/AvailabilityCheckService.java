@@ -51,6 +51,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.common.SessionMBeanBase;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycle;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycleListener;
@@ -75,6 +76,7 @@ import org.hyperic.util.jdbc.DBUtil;
  * 
  */
 public class AvailabilityCheckService
+    extends SessionMBeanBase
     implements AvailabilityCheckServiceMBean, MBeanRegistration,
                EjbModuleLifecycleListener
 {
@@ -122,6 +124,10 @@ public class AvailabilityCheckService
      * @jmx:managed-operation
      */
     public void hit(Date lDate) {
+        super.hit(lDate);
+    }
+    
+    protected void hitInSession(Date lDate) {
         if (!started) {
             this.log.debug("HQ Services have not been started for " + logCtx);
             return;

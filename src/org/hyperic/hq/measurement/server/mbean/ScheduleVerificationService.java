@@ -45,6 +45,7 @@ import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.SessionMBeanBase;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycle;
@@ -77,9 +78,10 @@ import org.hyperic.hq.measurement.shared.SRNManagerUtil;
  * 
  */
 public class ScheduleVerificationService
+    extends SessionMBeanBase
     implements ScheduleVerificationServiceMBean, MBeanRegistration,
-               EjbModuleLifecycleListener {
-
+               EjbModuleLifecycleListener 
+{
     private Log log =
         LogFactory.getLog(ScheduleVerificationService.class.getName());
 
@@ -147,6 +149,10 @@ public class ScheduleVerificationService
      * @jmx:managed-operation
      */
     public void hit(final Date lDate) {
+        super.hit(lDate);
+    }
+    
+    protected void hitInSession(final Date lDate) {
         if (!isActive()) return;
         
         // Skip first schedule verification, let the server warm up a bit
