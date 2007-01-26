@@ -977,9 +977,9 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @throws MeasurementNotFoundException
      * @ejb:interface-method
      */
-    public DerivedMeasurementValue getAvailabilityMeasurement(AuthzSubjectValue
-                                                              subject,
-                                                              AppdefEntityID id)
+    public DerivedMeasurement getAvailabilityMeasurement(AuthzSubjectValue
+                                                         subject,
+                                                         AppdefEntityID id)
         throws MeasurementNotFoundException
     {
         List mlocals = getDerivedMeasurementDAO().
@@ -992,7 +992,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
 
         DerivedMeasurement dm = (DerivedMeasurement) mlocals.get(0);
-        return dm.getDerivedMeasurementValue();
+        return dm;
     }
 
     /**

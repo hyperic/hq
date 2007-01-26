@@ -109,6 +109,7 @@ import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.server.session.ResourcesWithoutDataHelper;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.measurement.shared.BaselineValue;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementArgValue;
@@ -437,7 +438,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     
         // Find the autogroup members
         List entIds = getAGMemberIds(subject, new AppdefEntityID[] { aid },
-                                          ctype);
+                                     ctype);
     
         for (Iterator it = entIds.iterator(); it.hasNext();) {
             AppdefEntityID aeId = (AppdefEntityID) it.next();
@@ -457,8 +458,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     private MeasurementTemplateValue getAvailabilityMetricTemplate(
         AuthzSubjectValue subject, AppdefEntityID aeid)
         throws AppdefEntityNotFoundException, PermissionException,
-               MeasurementNotFoundException {
-        DerivedMeasurementValue dmv = null;
+               MeasurementNotFoundException
+    {
+        DerivedMeasurement dm = null;
         if (aeid.getType() == AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
             // Get the appointed front-end service
             AppdefEntityValue aeval = new AppdefEntityValue(aeid, subject);
@@ -484,9 +486,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     aeid = appSvcs[i].getService().getEntityId();
                 }
     
-                dmv = findAvailabilityMetric(subject, aeid);
+                dm = findAvailabilityMetric(subject, aeid);
                 
-                if (dmv != null)
+                if (dm != null)
                     break;
             }
         }
@@ -507,18 +509,18 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             // that we find
             for (Iterator it = grpMembers.iterator(); it.hasNext(); ) {
                 aeid = (AppdefEntityID) it.next();
-                dmv = findAvailabilityMetric(subject, aeid);
+                dm = findAvailabilityMetric(subject, aeid);
                 
-                if (dmv != null)
+                if (dm != null)
                     break;
             }
         }
         else {
-            dmv = findAvailabilityMetric(subject, aeid);
+            dm = findAvailabilityMetric(subject, aeid);
         }
         
-        if (dmv != null)
-            return dmv.getTemplate();
+        if (dm != null)
+            return dm.getTemplate().getMeasurementTemplateValue();
         else
             throw new MeasurementNotFoundException(
                 "Availability metric not found for " + aeid);
@@ -1006,8 +1008,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 }
                 else if (metrics == null &&
                          cats.contains(MeasurementConstants.CAT_AVAILABILITY)) {
-                    DerivedMeasurementValue dmv =
-                        findAvailabilityMetric(subject, id);
+                    DerivedMeasurement dmv = findAvailabilityMetric(subject, id);
                     
                     if (dmv != null) {
                         metrics = new ArrayList(1);

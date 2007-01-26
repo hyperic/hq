@@ -68,6 +68,7 @@ import org.hyperic.hq.measurement.EvaluationException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
@@ -359,8 +360,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         // Allow for the maximum window based on collection interval
         Map midMap = new HashMap(ids.length);        
         for (int i = 0; i < ids.length; i++) {
-            DerivedMeasurementValue dmv =
-                findAvailabilityMetric(subject, ids[i]);
+            DerivedMeasurement dmv = findAvailabilityMetric(subject, ids[i]);
     
             if (dmv != null) {
                 liveMillis = Math.max(liveMillis, 3 * dmv.getInterval());
@@ -491,10 +491,11 @@ public class MetricSessionEJB extends BizappSessionEJB {
         return result;
     }
 
-    protected DerivedMeasurementValue
-        findAvailabilityMetric(AuthzSubjectValue subject, AppdefEntityID id) {
+    protected DerivedMeasurement findAvailabilityMetric(AuthzSubjectValue subject,
+                                                        AppdefEntityID id)
+    {
         try {
-            return this.getDerivedMeasurementManager()
+            return getDerivedMeasurementManager()
                 .getAvailabilityMeasurement(subject, id);
         } catch (MeasurementNotFoundException e) {
             return null;
