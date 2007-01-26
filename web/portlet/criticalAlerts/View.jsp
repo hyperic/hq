@@ -119,5 +119,5 @@ onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
       <tiles:put name="defaultSortColumn" value="1"/>
     </tiles:insert>
   </html:form>
-    <div id="modifiedCritTime" class="modifiedDate" style="position:absolute;bottom:10px;right:5px;">test</div>
+    <div id="modifiedCritTime" class="modifiedDate" style="position:relative;bottom:10px;right:5px;"></div>
 </div>
