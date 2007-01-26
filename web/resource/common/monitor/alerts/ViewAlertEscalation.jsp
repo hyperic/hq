@@ -67,15 +67,15 @@
       <fmt:message key="alert.escalation.pause"/>
       <select name="pauseTime">
         <option value="300000">5</option>
-        <c:if test="${escalation.maxWaitTime >= 600000}">
+        <c:if test="${escalation.maxPauseTime >= 600000}">
         <option value="600000">10</option>
-        <c:if test="${escalation.maxWaitTime >= 900000}">
+        <c:if test="${escalation.maxPauseTime >= 900000}">
         <option value="900000">15</option>
-        <c:if test="${escalation.maxWaitTime >= 1200000}">
+        <c:if test="${escalation.maxPauseTime >= 1200000}">
         <option value="1200000">20</option>
-        <c:if test="${escalation.maxWaitTime >= 1800000}">
+        <c:if test="${escalation.maxPauseTime >= 1800000}">
         <option value="1800000">30</option>
-        <c:if test="${escalation.maxWaitTime >= 3600000}">
+        <c:if test="${escalation.maxPauseTime >= 3600000}">
         <option value="3600000">60</option>
         </c:if>
         </c:if>
@@ -86,10 +86,7 @@
       <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>
   </c:if>&nbsp;
     </td>
-    <td rowspan="2" width="60%" class="BlockLabel">&nbsp;</td>
-  </tr>
-  <tr>
-    <td class="BlockLabel" style="padding-left: 60px; padding-bottom: 10px;">
+    <td rowspan="2" width="60%" class="BlockLabel">
 <tiles:insert page="/common/components/ActionButton.jsp">
   <tiles:put name="labelKey" value="resource.common.alert.action.acknowledge.label"/>
   <tiles:put name="buttonHref" value="javascript:document.forms[0].submit();"/>

@@ -46,9 +46,9 @@ function showViewEscResponse() {
     var tmp = eval('( <c:out value="${escalationJSON}" escapeXml="false"/> )');
     var notifyAll = tmp.escalation.notifyAll
     var actions = tmp.escalation.actions;
-    var allowPause = tmp.escalation.allowPause;
+    var pauseAllowed = tmp.escalation.pauseAllowed;
     var id = tmp.escalation.id;
-    var maxWaitTime = (tmp.escalation.maxWaitTime / 60000) +
+    var maxPauseTime = (tmp.escalation.maxPauseTime / 60000) +
        " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>";
 
     $('viewEscalation').style.display = "";
@@ -58,6 +58,11 @@ function showViewEscResponse() {
 
     for(var i=escViewUL.childNodes.length-1; i>1; i--) {
 	 escViewUL.removeChild(escViewUL.childNodes[i]);
+    }
+
+    if (actions.length == 0) {
+      $('begin').style.display = 'none';
+      $('end').style.display = 'none';
     }
 
     for (i = 0; i < actions.length; i++) {
@@ -190,8 +195,10 @@ function showViewEscResponse() {
       usersEditDiv.setAttribute('id', 'usersEditDiv_'+ liID);
       usersEditDiv.setAttribute('width', '40%');
       usersEditDiv.innerHTML = " ";
-      if (allowPause) {
-        $('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause" /> ' + maxWaitTime;
+    }
+
+      if (pauseAllowed) {
+        $('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause" /> ' + maxPauseTime;
       }
       else {
         $('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.continue" />';
@@ -203,10 +210,8 @@ function showViewEscResponse() {
       else {
         $('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.previous" />';
       }
-
-      Sortable.create(escViewUL,{ghosting:true,constraint:false});
    }    
-}
+
     </c:if>
     
     function addOption(sel, val, txt, selected) {
@@ -227,6 +232,11 @@ function showViewEscResponse() {
         var escJson = eval( '( { "escalations":<c:out value="${escalations}" escapeXml="false"/> })' );
         var escalationSel = $('escIdSel');
         var schemes = escJson.escalations;
+
+        if (schemes.length == 0) {
+            escalationSel.style.display = "none";
+            $('noescalations').style.display = "";;
+        }
 
         for (var i = 0; i < schemes.length; i++) {
 
@@ -327,6 +337,7 @@ function showViewEscResponse() {
         id="escIdSel" name="escId" onchange="schemeChange(this)">
         <option value=""><fmt:message key="resource.common.inventory.props.SelectOption" /></option>
       </select>
+        <span id="noescalations" style="display: none;"><fmt:message key="common.label.None"/></span>
       </td>
       <td align="right">
          <c:url var="adminUrl" value="/admin/config/Config.do?mode=escalate">
@@ -350,7 +361,7 @@ function showViewEscResponse() {
 
 </form>
 
-<table width="100%" cellpadding="0" cellspacing="0" border="0" id="viewEscalation">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" id="viewEscalation" style="display: none;">
   <tbody>
     <tr>
       <td class="BlockLabel" width="20%"nowrap="true"><fmt:message key="alert.config.escalation.acknowledged"/></td>
@@ -360,7 +371,7 @@ function showViewEscResponse() {
       <td class="BlockLabel" nowrap="true"><fmt:message key="alert.config.escalation.state.change"/></td>
       <td id="changed" class="BlockContent"></td>
     </tr>
-    <tr>
+    <tr id="begin">
       <td class="BlockLabel" style="text-align: left;" nowrap="true"><fmt:message key="alert.config.escalation.Begin"/></td>
       <td class="BlockContent">&nbsp;</td>
     </tr>
@@ -370,7 +381,7 @@ function showViewEscResponse() {
       </ul>
       </td>
     </tr>
-    <tr>
+    <tr id="end">
       <td class="BlockLabel" style="text-align: left;" nowrap="true"><fmt:message key="alert.config.escalation.TheEnd"/></td>
       <td class="BlockContent">&nbsp;</td>
     </tr>

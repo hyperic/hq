@@ -56,12 +56,12 @@
   <tiles:insert beanName="action"/>
 </c:forEach>
 
-<table cellpadding="0" cellspacing="0" border="0">
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
 <tr>
-  <td colspan="3" class="BlockBottomLine"><html:img page="/images/spacer.gif" height="1" width="1" border="0"/></td>
+  <td colspan="2" class="BlockBottomLine"><html:img page="/images/spacer.gif" height="1" width="1" border="0"/></td>
 </tr>
 <tr>
-  <td class="BlockContent" width="50%">&nbsp;</td>
+  <td class="BlockContent" width="40%">&nbsp;</td>
   <td class="BlockContent">
 <tiles:insert page="/common/components/ActionButton.jsp">
   <tiles:put name="labelKey" value="resource.common.alert.action.fixed.label"/>
@@ -70,10 +70,9 @@
   <tiles:put name="disabled" beanName="alert" beanProperty="fixed"/>
 </tiles:insert>
   </td>
-  <td class="BlockContent" width="50%">&nbsp;</td>
 </tr>
 <tr>
-  <td colspan="3" class="BlockBottomLine"><html:img page="/images/spacer.gif" height="1" width="1" border="0"/></td>
+  <td colspan="2" class="BlockBottomLine"><html:img page="/images/spacer.gif" height="1" width="1" border="0"/></td>
 </tr>
 </table>
 <br/>
