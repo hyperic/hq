@@ -34,7 +34,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.ResourceController;
@@ -42,12 +48,6 @@ import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ActionUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 
 /**
  * A <code>BaseDispatchAction</code> that sets up common
@@ -142,7 +142,11 @@ public class VisibilityPortalAction extends ResourceController {
                                                          HttpServletResponse response)
         throws Exception
     {
-        setResource(request);
+        try {
+            setResource(request);
+        } catch (AppdefEntityNotFoundException e) {
+            // It's ok, we'll offer to delete the link
+        }
         Portal portal = Portal.createPortal(TITLE_CHART, PORTLET_CHART_SMSR);
         portal.setDialog(false);
         request.setAttribute(Constants.PORTAL_KEY, portal);
@@ -163,7 +167,11 @@ public class VisibilityPortalAction extends ResourceController {
                                                         HttpServletResponse response)
         throws Exception
     {
-        setResource(request);
+        try {
+            setResource(request);
+        } catch (AppdefEntityNotFoundException e) {
+            // It's ok, we'll offer to delete the link
+        }
         Portal portal = Portal.createPortal(TITLE_CHART, PORTLET_CHART_SMMR);
         portal.setDialog(false);
         request.setAttribute(Constants.PORTAL_KEY, portal);
@@ -179,7 +187,11 @@ public class VisibilityPortalAction extends ResourceController {
                                                         HttpServletResponse response)
         throws Exception
     {
-        setResource(request);
+        try {
+            setResource(request);
+        } catch (AppdefEntityNotFoundException e) {
+            // It's ok, we'll offer to delete the link
+        }
         Portal portal = Portal.createPortal(TITLE_CHART, PORTLET_CHART_MMSR);
         portal.setDialog(false);
         request.setAttribute(Constants.PORTAL_KEY, portal);
