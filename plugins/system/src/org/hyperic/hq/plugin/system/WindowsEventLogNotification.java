@@ -28,18 +28,26 @@ package org.hyperic.hq.plugin.system;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.Win32EventLogNotification;
 
+import org.hyperic.sigar.win32.EventLog;
 import org.hyperic.sigar.win32.EventLogRecord;
 
 public class WindowsEventLogNotification
     extends Win32EventLogNotification
 {
+    private String name;
+
     public WindowsEventLogNotification(LogTrackPlugin plugin)
     {
         super(plugin);
+        this.name =
+            plugin.getConfig(PROP_EVENT_LOGS);
+        if (this.name == null) {
+            this.name = EventLog.SYSTEM;
+        }
     }
 
     public String getLogName() {
-        return SYSTEM_LOG;
+        return this.name;
     }
 
     public boolean matches(EventLogRecord record) {

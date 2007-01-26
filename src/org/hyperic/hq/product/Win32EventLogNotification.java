@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.product;
 
-
 import org.hyperic.sigar.win32.EventLogNotification;
 import org.hyperic.sigar.win32.EventLogRecord;
 import org.hyperic.sigar.win32.EventLog;
@@ -38,11 +37,9 @@ import org.hyperic.sigar.win32.EventLog;
 public abstract class Win32EventLogNotification 
     implements EventLogNotification
 {
-    public static final String SYSTEM_LOG = "SYSTEM";
-    public static final String SECURITY_LOG = "SECURITY";
-    public static final String APPLICATION_LOG = "APPLICATION";
+    public static final String PROP_EVENT_LOGS =
+        "platform.log_track.eventlogs";
 
-    private static final String SOURCE = "Windows Event Log";
     private LogTrackPlugin plugin;
 
     public Win32EventLogNotification(LogTrackPlugin plugin) {
@@ -54,12 +51,14 @@ public abstract class Win32EventLogNotification
 
     public String getLogName() {
         String name = plugin.getTypeProperty("EVENT_LOG_NAME");
+
         if (name == null) {
-            name = APPLICATION_LOG;
+            name = EventLog.APPLICATION;
         }
+
         return name;
-    }
-    
+     }
+
     public void handleNotification(EventLogRecord record) { 
 
         // Make time in milliseconds
@@ -71,7 +70,7 @@ public abstract class Win32EventLogNotification
         TrackEvent event =
             this.plugin.newTrackEvent(generated,
                                       mapLogLevel(record.getEventType()),
-                                      SOURCE,
+                                      record.getLogName(),
                                       msg);
     
         if (event != null) {

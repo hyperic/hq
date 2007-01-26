@@ -30,7 +30,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Properties;
+import java.util.StringTokenizer;
 
+import org.hyperic.sigar.win32.EventLog;
 import org.hyperic.sigar.win32.EventLogThread;
 
 import org.hyperic.sigar.FileWatcher;
@@ -83,6 +85,11 @@ public abstract class TrackEventPluginManager
             "Comma delimited list of log files to track. " +
             "Relative files are resolved to ${installpath}."
         },
+        {
+            Win32EventLogNotification.PROP_EVENT_LOGS,
+            "Comma delimited list of Event Log names to track. " +
+            "Value of <b>*</b> will track all existing Event Logs."
+        }
     };
     
     private long fileWatchInterval = 0;
@@ -227,12 +234,58 @@ public abstract class TrackEventPluginManager
         eventLogs.clear();
     }
 
-    public void addEventLogNotification(Win32EventLogNotification notifier) {
-        getEventLogThread(notifier.getLogName()).add(notifier);
+    private String[] getEventLogNames(Win32EventLogNotification notifier)
+        throws PluginException {
+
+        String[] eventLogs = EventLog.getLogNames();
+        String name = notifier.getLogName();
+        if (name.equals("*")) {
+            return eventLogs;
+        }
+        else {
+            //Validate the Event Log exists due to:
+            //http://msdn2.microsoft.com/en-us/library/aa363672.aspx
+            //"If a custom log cannot be found,
+            //the event logging service opens the Application log"
+            HashMap lcNames = new HashMap();
+            for (int i=0; i<eventLogs.length; i++) {
+                lcNames.put(eventLogs[i].toLowerCase(),
+                            Boolean.TRUE);
+            }
+
+            StringTokenizer tok = new StringTokenizer(name, ",");
+            int i=0, num = tok.countTokens();
+            String[] names = new String[num];
+
+            while (tok.hasMoreTokens()) {
+                String logName = tok.nextToken();
+                if (lcNames.get(logName.toLowerCase()) != Boolean.TRUE) {
+                    String msg =
+                        "Event Log '" + logName + "' does not exist";
+                    throw new PluginException(msg);
+                }
+                names[i++] = logName;
+            }
+            return names;
+        }
     }
 
-    public void removeEventLogNotification(Win32EventLogNotification notifier) {
-        getEventLogThread(notifier.getLogName()).remove(notifier);
+    public void addEventLogNotification(Win32EventLogNotification notifier)
+        throws PluginException {
+
+        String[] names = getEventLogNames(notifier);
+        for (int i=0; i<names.length; i++) {
+            getEventLogThread(names[i]).add(notifier);
+        }
+    }
+
+    public void removeEventLogNotification(Win32EventLogNotification notifier)
+        throws PluginException {
+
+        String[] names = getEventLogNames(notifier);
+        for (int i=0; i<names.length; i++) {
+            getEventLogThread(names[i]).remove(notifier);
+        }
     }
     
     private RunnableTrackThread getRunnableTrackThread() {
@@ -265,11 +318,15 @@ public abstract class TrackEventPluginManager
             ltpm.getLogTrackPlugin(info.getName());
         
         for (int i=0; i<GENERIC_HELP.length; i++) {
+            String name = GENERIC_HELP[i][0];
             String key =
                 GenericPlugin.TYPE_LABELS[info.getType()] +
-                GENERIC_HELP[i][0];
+                name;
             String val = GENERIC_HELP[i][1];
             ConfigOption option = schema.getOption(key);
+            if (option == null) {
+                option = schema.getOption(name);
+            }
             if (option == null) {
                 continue;
             }

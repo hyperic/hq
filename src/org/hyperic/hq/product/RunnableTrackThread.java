@@ -108,8 +108,6 @@ class RunnableTrackThread implements Runnable {
     }
 
     public void check() {
-        log.debug("Running loggers");
-
         synchronized (this.watchers) {
             for (Iterator it = this.watchers.iterator();
                  it.hasNext();)

@@ -27,9 +27,13 @@ package org.hyperic.hq.plugin.system;
 
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginManager;
+import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.product.Win32EventLogNotification;
 import org.hyperic.hq.product.Win32EventLogTrackPlugin;
+import org.hyperic.sigar.win32.EventLog;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.ConfigSchema;
+import org.hyperic.util.config.StringConfigOption;
 
 public class WindowsLogTrackPlugin
     extends Win32EventLogTrackPlugin
@@ -62,6 +66,20 @@ public class WindowsLogTrackPlugin
             this.whoTracker = null;
         }
         super.shutdown();
+    }
+
+    public ConfigSchema getConfigSchema(TypeInfo info,
+                                        ConfigResponse config) {
+        ConfigSchema schema =
+            super.getConfigSchema(info, config);
+
+        StringConfigOption option =
+            new StringConfigOption(Win32EventLogNotification.PROP_EVENT_LOGS,
+                                   "Event Log names",
+                                   EventLog.SYSTEM);
+        schema.addOption(option);
+
+        return schema;
     }
 
     public Win32EventLogNotification getEventLogNotification() {
