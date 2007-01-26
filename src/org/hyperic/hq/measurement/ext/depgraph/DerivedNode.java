@@ -30,7 +30,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.util.math.MathUtil;
 
 import org.apache.commons.logging.Log;
@@ -46,15 +46,15 @@ public class DerivedNode extends NodeSupport implements java.io.Serializable {
 
     // if not set, getInterval() will use dependent interval, since
     // it's an LCM calculation
-    private long interval = 1;
+    private long _interval = 1;
 
-    public DerivedNode(int id, MeasurementTemplateValue mtv) {
-        super(id, mtv);
+    public DerivedNode(int id, MeasurementTemplate mt) {
+        super(id, mt);
     }
 
-    public DerivedNode(int id, long interval, MeasurementTemplateValue mtv) {
-        super(id, mtv);
-        this.interval = interval;
+    public DerivedNode(int id, long interval, MeasurementTemplate mt) {
+        super(id, mt);
+        _interval = interval;
     }
 
     public void pushOutgoing(LinkedList stack) {
@@ -70,7 +70,7 @@ public class DerivedNode extends NodeSupport implements java.io.Serializable {
     }
 
     public void setInterval(long interval) {
-        this.interval = interval;
+        _interval = interval;
     }
 
     public long getInterval() throws CircularDependencyException {
@@ -85,28 +85,25 @@ public class DerivedNode extends NodeSupport implements java.io.Serializable {
                     try {
                         DerivedNode dn = (DerivedNode)node;
                         long tmpInterval = dn.getInterval();
-                        interval = MathUtil.lcm((int)interval, (int)tmpInterval);
+                        _interval = MathUtil.lcm((int)_interval,
+                                                 (int)tmpInterval);
                     } catch (ClassCastException e) {
                         // if we are a raw node, leave the interval as-is
                     }
                 } else if (node.getVisited() == VISITING) {
                     // back-edge, this sub-graph is not valid
-                    throw new CircularDependencyException( "Cycle found: " + getId() +
-                                                           " --> " + node.getId() );
+                    throw new CircularDependencyException("Cycle found: " + getId() +
+                                                          " --> " + node.getId() );
                 }
             }
 
             setVisited(VISITED);  // mark node as "already visited"
         }
-        return interval;
+        return _interval;
     }
 
     /**
      * Get all of the raw nodes depended upon by this derived node.
-     *
-     * @return <code>{@link java.util.Collection}</code> of
-     * <code>{@link
-     * org.hyperic.hq.measurement.ext.depgraph.RawNode}</code>.
      */
     public Set getRawOutgoing() {
         HashSet rns = new HashSet();
@@ -120,5 +117,3 @@ public class DerivedNode extends NodeSupport implements java.io.Serializable {
         return rns;
     }
 }
-
-// EOF

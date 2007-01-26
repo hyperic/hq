@@ -70,8 +70,7 @@ public final class GraphBuilder {
         // first, add this measurement if it's not there already
         Node current = g.getNode(mt.getId().intValue());
         if (null == current) {
-            current = new DerivedNode(mt.getId().intValue(),
-                                      mt.getMeasurementTemplateValue());
+            current = new DerivedNode(mt.getId().intValue(), mt);
             g.addNode(current);
         }
 
@@ -84,8 +83,7 @@ public final class GraphBuilder {
                 // raw measurement
                 RawNode n = (RawNode) g.getNode(templ.getId().intValue());
                 if (null == n) {
-                    n = new RawNode(templ.getId().intValue(),
-                                    templ.getMeasurementTemplateValue());
+                    n = new RawNode(templ.getId().intValue(), templ);
                     g.addNode(n);
                 }
                 g.addEdge(current.getId(), n.getId());
@@ -94,8 +92,7 @@ public final class GraphBuilder {
                 DerivedNode n = (DerivedNode) g.getNode(templ.getId().intValue());
                 boolean buildGraph = false;
                 if (null == n) {
-                    n = new DerivedNode(templ.getId().intValue(),
-                                        templ.getMeasurementTemplateValue());
+                    n = new DerivedNode(templ.getId().intValue(), templ);
                     g.addNode(n);
                     buildGraph = true;
                 }

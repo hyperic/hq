@@ -28,13 +28,10 @@ package org.hyperic.hq.measurement.ext.depgraph;
 import java.util.LinkedList;
 import java.util.Set;
 
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 
 /**
- * Interface representing a node in a derived measurement dependency
- * graph.
- *
- * @see <code>{@link org.hyperic.hq.measurement.ext.depgraph.Graph}</code>
+ * Interface representing a node in a derived measurement dependency graph.
  */
 public interface Node {
     /**
@@ -68,17 +65,11 @@ public interface Node {
     /**
      * Return the visitation state of this node during a graph
      * traversal.
-     *
-     * @return one of <code>NOT_VISITED</code>, <code>VISITING</code>
-     * or <code>VISITED</code>
      */
     public int getVisited();
 
     /**
      * Set the visitation state of this node.
-     *
-     * @param one of <code>NOT_VISITED</code>, <code>VISITING</code>
-     * or <code>VISITED</code>
      */
     public void setVisited(int visited);
 
@@ -98,17 +89,11 @@ public interface Node {
 
     /**
      * Return all of the nodes with edges coming into this node.
-     *
-     * @return <code>{@link java.util.set}</code> of <code>{@link
-     * org.hyperic.hq.measurement.ext.depgraph.Node}</code>
      */
     public Set getIncoming();
 
     /**
      * Return all of the nodes to which this node has outgoing edges.
-     *
-     * @return <code>{@link java.util.set}</code> of <code>{@link
-     * org.hyperic.hq.measurement.ext.depgraph.Node}</code>
      */
     public Set getOutgoing();
 
@@ -122,7 +107,7 @@ public interface Node {
     /**
      * Get the measurement template for this node.
      */
-    public MeasurementTemplateValue getMeasurementTemplateValue();
+    public MeasurementTemplate getMeasurementTemplate();
 }
 
-// EOF
+

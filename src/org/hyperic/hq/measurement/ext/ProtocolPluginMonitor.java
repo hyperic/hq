@@ -30,7 +30,7 @@ import java.util.Hashtable;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
-import org.hyperic.hq.measurement.shared.RawMeasurementValue;
+import org.hyperic.hq.measurement.server.session.RawMeasurement;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.MeasurementPluginManager;
@@ -40,51 +40,41 @@ import org.hyperic.hq.product.shared.ProductManagerLocal;
 import org.hyperic.hq.product.shared.ProductManagerUtil;
 import org.hyperic.util.schedule.Schedule;
 
-/**
- */
-public class ProtocolPluginMonitor extends ScheduledMonitor {
-    private static Schedule monitorSchedule = new Schedule();
-    private static Hashtable measurementMeta = new Hashtable();
-    private static MeasurementPluginManager mpm  = null;
+public class ProtocolPluginMonitor
+    extends ScheduledMonitor
+{
+    private static Schedule _monitorSchedule = new Schedule();
+    private static Hashtable _measurementMeta = new Hashtable();
+    private static MeasurementPluginManager _mpm  = null;
 
-    /**
-     * @see org.hyperic.hq.measurement.monitor.ScheduledMonitor#getSchedule()
-     */
     public Schedule getSchedule() {
-        return monitorSchedule;
+        return _monitorSchedule;
     }
 
-    /**
-     * @see org.hyperic.hq.measurement.monitor.ScheduledMonitor#getScheduleMap()
-     */
     public Hashtable getScheduleMap() {
-        return measurementMeta;
+        return _measurementMeta;
     }
 
-    /**
-     * @see org.hyperic.hq.measurement.monitor.ScheduledMonitor#getValues()
-     */
-    public MetricValue[] 
-        getValues(RawMeasurementValue[] measurements) 
+    public MetricValue[] getValues(RawMeasurement[] measurements)
     {
         MetricValue[] vals = 
             new MetricValue[measurements.length];
 
         try {
-            if (mpm == null) {
+            if (_mpm == null) {
                 ProductManagerLocal ppm =
                     ProductManagerUtil.getLocalHome().create();
 
-                mpm = (MeasurementPluginManager)
+                _mpm = (MeasurementPluginManager)
                     ppm.getPluginManager(ProductPlugin.TYPE_MEASUREMENT);
             }
 
             // Get value straight for now
             for (int i = 0; i < measurements.length; i++) {
-                RawMeasurementValue rmv = measurements[i];
+                RawMeasurement rmv = measurements[i];
 
                 try {
-                    vals[i] = mpm.getValue(rmv.getDsn());
+                    vals[i] = _mpm.getValue(rmv.getDsn());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -109,17 +99,17 @@ public class ProtocolPluginMonitor extends ScheduledMonitor {
         try {
             MetricValue[] res;
 
-            if (mpm == null) {
+            if (_mpm == null) {
                 ProductManagerLocal ppm =
                     ProductManagerUtil.getLocalHome().create();
 
-                mpm = (MeasurementPluginManager)
+                _mpm = (MeasurementPluginManager)
                     ppm.getPluginManager(ProductPlugin.TYPE_MEASUREMENT);
             }
 
             res = new MetricValue[dsns.length];
             for(int i=0; i<dsns.length; i++){
-                res[i] = mpm.getValue(dsns[i]);
+                res[i] = _mpm.getValue(dsns[i]);
             }
             return res;
         } catch (PluginNotFoundException e) {

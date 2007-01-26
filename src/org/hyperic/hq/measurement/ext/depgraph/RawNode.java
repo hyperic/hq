@@ -27,7 +27,7 @@ package org.hyperic.hq.measurement.ext.depgraph;
 
 import java.util.LinkedList;
 
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 
 /**
  * A raw node represents a raw measurement.  It cannot have any
@@ -36,8 +36,9 @@ import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
  *
  */
 public class RawNode extends NodeSupport implements java.io.Serializable {
-    public RawNode(int id, MeasurementTemplateValue mtv) {
-        super(id, mtv);
+
+    public RawNode(int id, MeasurementTemplate mt) {
+        super(id, mt);
     }
 
     public void addOutgoing(Node node) throws InvalidGraphException {
@@ -52,5 +53,3 @@ public class RawNode extends NodeSupport implements java.io.Serializable {
         }
     }
 }
-
-// EOF

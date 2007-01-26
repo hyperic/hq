@@ -31,6 +31,8 @@ import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.measurement.server.session.SRN;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.RawMeasurement;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_result;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_args;
@@ -40,8 +42,6 @@ import org.hyperic.hq.measurement.ext.ScheduleMetricInfo;
 import org.hyperic.hq.measurement.ext.UnscheduleMetricInfo;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
-import org.hyperic.hq.measurement.shared.RawMeasurementValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.collection.ExpireMap;
 
@@ -117,9 +117,8 @@ public class AgentMonitor implements MonitorInterface
             args.setSRN(srn);
 
             for(int i=0; i<schedule.length; i++){
-                DerivedMeasurementValue dMetric = 
-                    schedule[i].getDerivedMetric();
-                RawMeasurementValue[] rMetrics = schedule[i].getRawMetrics();
+                DerivedMeasurement dMetric = schedule[i].getDerivedMetric();
+                RawMeasurement[] rMetrics = schedule[i].getRawMetrics();
 
                 for(int j=0; j<rMetrics.length; j++) {
                     String category = 
@@ -195,9 +194,7 @@ public class AgentMonitor implements MonitorInterface
 
     /** Get the live value
      * @param agent the agent to talk to
-     * @param dsn the DSN that identifies the value to fetch
-     * @return
-     *
+     * @param dsns the DSNs that identifies the values to fetch
      */
     public MetricValue[] getLiveValues(AgentValue agent, String[] dsns)
         throws MonitorAgentException, LiveMeasurementException 

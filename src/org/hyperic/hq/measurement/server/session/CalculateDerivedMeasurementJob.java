@@ -359,7 +359,7 @@ public class CalculateDerivedMeasurementJob
         return JOB_PREFIX + mid;
     }
     
-    public static String getJobName(DerivedMeasurementValue measurement) {
+    public static String getJobName(DerivedMeasurement measurement) {
         return getJobName( measurement.getId() );
     }
 
@@ -367,14 +367,14 @@ public class CalculateDerivedMeasurementJob
         return SCHEDULE_PREFIX + mid;
     }
     
-    public static String getScheduleName(DerivedMeasurementValue measurement) {
+    public static String getScheduleName(DerivedMeasurement measurement) {
         return getScheduleName( measurement.getId() );
     }
 
     /**
      * Helper method to get a job for a given measurement.
      */
-    public static JobDetail getJob(DerivedMeasurementValue measurement) {
+    public static JobDetail getJob(DerivedMeasurement measurement) {
         JobDetail job = new JobDetail(getJobName(measurement),
                                       SCHEDULER_GROUP,
                                       CalculateDerivedMeasurementJob.class);
@@ -386,7 +386,7 @@ public class CalculateDerivedMeasurementJob
     /**
      * Helper method to get a schedule for a given measurement.
      */
-    public static SimpleTrigger getSchedule(DerivedMeasurementValue measurement)
+    public static SimpleTrigger getSchedule(DerivedMeasurement measurement)
     {
         // make sure that the scheduled time(s) are evenly divisible
         // by the interval

@@ -46,7 +46,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SessionMBeanBase;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycle;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycleListener;
@@ -57,10 +56,10 @@ import org.hyperic.hq.measurement.ext.depgraph.InvalidGraphException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.monitor.MonitorCreateException;
 import org.hyperic.hq.measurement.server.mdb.AgentScheduleSynchronizer;
+import org.hyperic.hq.measurement.server.session.SRNManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
-import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
-import org.hyperic.hq.measurement.shared.SRNManagerUtil;
 
 /**
  * This job is responsible for verifying measurement jobs.
@@ -89,32 +88,13 @@ public class ScheduleVerificationService
     private EjbModuleLifecycle camListener = null;
     private boolean started = false;
     private boolean firstTime = true;
-    
-    private MeasurementProcessorLocal mproc = null;
-    private MeasurementProcessorLocal getMeasurementProcessor() {
-        if (mproc == null) {
-            try {
-                mproc = MeasurementProcessorUtil.getLocalHome().create();
-            } catch (CreateException e) {
-                throw new SystemException(e);
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
 
-        return mproc;
+    private MeasurementProcessorLocal getMeasurementProcessor() {
+        return MeasurementProcessorEJBImpl.getOne();
     }
 
-    private SRNManagerLocal srnManager;
     private SRNManagerLocal getSrnManager() {
-        if (srnManager == null) {
-            try {
-                srnManager = SRNManagerUtil.getLocalHome().create();
-            } catch (Exception e) {
-                throw new SystemException(e);
-            }
-        }
-        return srnManager;
+        return SRNManagerEJBImpl.getOne();
     }
 
     private AgentScheduleSynchronizer agentSync =

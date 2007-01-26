@@ -27,12 +27,9 @@ package org.hyperic.hq.measurement.ext.depgraph;
 
 /**
  * Error used to indicate that a graph is not valid.
- *
  */
 public class InvalidGraphException extends Exception {
     public InvalidGraphException(String msg) {
         super(msg);
     }
 }
-
-// EOF

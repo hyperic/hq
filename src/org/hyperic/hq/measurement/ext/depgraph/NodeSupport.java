@@ -28,56 +28,51 @@ package org.hyperic.hq.measurement.ext.depgraph;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 
-/**
- * Abstract base class for nodes.
- *
- */
 public abstract class NodeSupport implements Node, java.io.Serializable {
     // data
-    private int id;
-    private int visited = NOT_VISITED;
-    private Set incoming = new HashSet();
-    private Set outgoing = new HashSet();
-    MeasurementTemplateValue measurementTemplateValue;
+    private int _id;
+    private int _visited = NOT_VISITED;
+    private Set _incoming = new HashSet();
+    private Set _outgoing = new HashSet();
+    private MeasurementTemplate _mt;
 
-    public NodeSupport(int id, MeasurementTemplateValue mtv) {
-        this.id = id;
-        this.measurementTemplateValue = mtv;
+    public NodeSupport(int id, MeasurementTemplate mt) {
+        _id = id;
+        _mt = mt;
     }
 
     public int getId() {
-        return id;
+        return _id;
     }
 
     public int getVisited() {
-        return visited;
+        return _visited;
     }
 
     public void setVisited(int visited) {
-        this.visited = visited;
+        _visited = visited;
     }
 
     public void addIncoming(Node node) {
-        incoming.add(node);
+        _incoming.add(node);
     }
 
     public void addOutgoing(Node node) throws InvalidGraphException {
-        outgoing.add(node);
+        _outgoing.add(node);
     }
 
     public Set getIncoming() {
-        return incoming;
+        return _incoming;
     }
 
     public Set getOutgoing() {
-        return outgoing;
+        return _outgoing;
     }
 
-    public MeasurementTemplateValue getMeasurementTemplateValue() {
-        return measurementTemplateValue;
+    public MeasurementTemplate getMeasurementTemplate() {
+        return _mt;
     }
 }
 
-// EOF

@@ -46,8 +46,6 @@ import javax.jms.TopicSession;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-/**
- */
 public class Messenger {
     private static Log _log = LogFactory.getLog(Messenger.class);
 

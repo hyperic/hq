@@ -63,10 +63,9 @@ public class AgentScheduleEJBImpl
 {
     private final Log log =
         LogFactory.getLog(AgentScheduleEJBImpl.class.getName());
-    private final Log timingLog = LogFactory.getLog("timingLog.measurement");
 
     public void onMessage(final Message inMessage) {
-        // Can't do much if it's not the right kind of message
+
         if (!(inMessage instanceof ObjectMessage)) {
             return;
         }
@@ -101,7 +100,6 @@ public class AgentScheduleEJBImpl
             log.error("Failed to unschedule measurements", e);
         }
     }
-
 
     /**
      * @ejb:create-method

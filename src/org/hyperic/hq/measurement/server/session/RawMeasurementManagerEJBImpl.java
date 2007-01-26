@@ -310,13 +310,21 @@ public class RawMeasurementManagerEJBImpl
     }
 
     /**
-     * Look up a raw measurement EJB
+     * Look up a RawMeasurement
      * @ejb:interface-method
      */
-    public RawMeasurementValue findMeasurement(Integer tid, Integer instanceId){  
-        RawMeasurement rm = 
-            getRawMeasurementDAO().findByTemplateForInstance(tid, instanceId);
-        return rm.getRawMeasurementValue();
+    public RawMeasurement findMeasurement(Integer tid, Integer instanceId) {
+        return getRawMeasurementDAO().findByTemplateForInstance(tid, instanceId);
+    }
+
+    /**
+     * Look up a RawMeasurementValue
+     * @deprecated Use findMeasurement instead.
+     * @ejb:interface-method
+     */
+    public RawMeasurementValue findMeasurementValue(Integer tid,
+                                                    Integer instanceId){
+        return findMeasurement(tid, instanceId).getRawMeasurementValue();
     }
 
     /**

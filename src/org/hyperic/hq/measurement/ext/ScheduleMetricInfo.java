@@ -25,8 +25,8 @@
 
 package org.hyperic.hq.measurement.ext;
 
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
-import org.hyperic.hq.measurement.shared.RawMeasurementValue;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.RawMeasurement;
 
 /**
  * This class simply wraps all the data needed to schedule measurements
@@ -34,8 +34,8 @@ import org.hyperic.hq.measurement.shared.RawMeasurementValue;
  */
 
 public class ScheduleMetricInfo {
-    private DerivedMeasurementValue derivedMetric;
-    private RawMeasurementValue[]   rawMetrics;
+    private DerivedMeasurement _derivedMetric;
+    private RawMeasurement[] _rawMetrics;
 
     /**
      * Construct a new ScheduleMetricInfo object, encapsulating a bunch of
@@ -46,18 +46,18 @@ public class ScheduleMetricInfo {
      * @param rawMetrics The raw metrics which will be collected, and are
      *                   constituents of 'derived'
      */
-    public ScheduleMetricInfo(DerivedMeasurementValue derived,
-                              RawMeasurementValue[] rawMetrics)
+    public ScheduleMetricInfo(DerivedMeasurement derived,
+                              RawMeasurement[] rawMetrics)
     {
-        this.derivedMetric = derived;
-        this.rawMetrics    = rawMetrics;
+        _derivedMetric = derived;
+        _rawMetrics = rawMetrics;
     }
 
-    public DerivedMeasurementValue getDerivedMetric(){
-        return this.derivedMetric;
+    public DerivedMeasurement getDerivedMetric(){
+        return _derivedMetric;
     }
 
-    public RawMeasurementValue[] getRawMetrics(){
-        return this.rawMetrics;
+    public RawMeasurement[] getRawMetrics(){
+        return _rawMetrics;
     }
 }

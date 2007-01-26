@@ -173,21 +173,19 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
 
     private DerivedMeasurement createDerivedMeasurement(AppdefEntityID id,
-                                                        MeasurementTemplateValue mtVal,
+                                                        MeasurementTemplate mt,
                                                         long interval)
         throws MeasurementCreateException
     {
         Integer instanceId = id.getId();
-        MonitorableTypeValue monTypeVal = mtVal.getMonitorableType();
+        MonitorableType monTypeVal = mt.getMonitorableType();
 
         if(monTypeVal.getAppdefType() != id.getType()) {
             throw new MeasurementCreateException("Appdef entity (" + id + ")" +
                                                  "/template type (ID: " +
-                                                 mtVal.getId() + ") mismatch");
+                                                 mt.getId() + ") mismatch");
         }
-        
-        MeasurementTemplate mt = 
-            getMeasurementTemplateDAO().findById(mtVal.getId());
+
         return getDerivedMeasurementDAO().create(instanceId, mt, interval);
     }
 
@@ -281,8 +279,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
 
                 DerivedNode derivedNode = (DerivedNode)
                     graphs[i].getNode( dTemplateId.intValue() );
-                MeasurementTemplateValue derivedTemplateValue =
-                    derivedNode.getMeasurementTemplateValue();
+                MeasurementTemplate derivedTemplateValue =
+                    derivedNode.getMeasurementTemplate();
 
                 // we will fill this variable with the actual derived 
                 // measurement that is being enabled
@@ -294,8 +292,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 {
                     RawNode rawNode = (RawNode)
                         derivedNode.getOutgoing().iterator().next();
-                    MeasurementTemplateValue rawTemplateValue =
-                        rawNode.getMeasurementTemplateValue();
+                    MeasurementTemplate rawTemplateValue =
+                        rawNode.getMeasurementTemplate();
 
                     // Check the raw node
                     Integer rmId =
@@ -331,8 +329,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                     for (Iterator graphNodes = graphs[i].getNodes().iterator();
                          graphNodes.hasNext();) {
                         Node node = (Node)graphNodes.next();
-                        MeasurementTemplateValue templArg =
-                            node.getMeasurementTemplateValue();
+                        MeasurementTemplate templArg =
+                            node.getMeasurementTemplate();
     
                         if (node instanceof DerivedNode) {
                             DerivedMeasurement dm;
@@ -1373,7 +1371,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     /**
      * @ejb:interface-method
      */
-    public void reschedule(AppdefEntityID id) { 
+    public void reschedule(AppdefEntityID id) {
         String objName = "hyperic.jmx:type=Service,name=MeasurementSchedule";
         String meth = "refreshSchedule";
 

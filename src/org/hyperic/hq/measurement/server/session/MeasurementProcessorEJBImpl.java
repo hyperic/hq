@@ -59,10 +59,8 @@ import org.hyperic.hq.measurement.ext.depgraph.Graph;
 import org.hyperic.hq.measurement.ext.depgraph.RawNode;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.monitor.MonitorCreateException;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
-import org.hyperic.hq.measurement.shared.RawMeasurementValue;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 
 import org.apache.commons.logging.Log;
@@ -133,7 +131,7 @@ public class MeasurementProcessorEJBImpl
                 Set dns = graphs[i].getDerivedNodes();
                 for (Iterator it=dns.iterator(); it.hasNext();) {
                     DerivedNode dn = (DerivedNode)it.next();
-                    DerivedMeasurementValue dmval =
+                    DerivedMeasurement dm =
                         getDMByTemplateAndInstance(new Integer(dn.getId()),
                                                    entId.getID());
 
@@ -148,19 +146,14 @@ public class MeasurementProcessorEJBImpl
                             new Integer(dn.getId()), e);
                     }
 
-                    if (dmval.getInterval() != interval ||
-                        !dmval.getEnabled()){
+                    if (dm.getInterval() != interval ||
+                        !dm.isEnabled()){
                         log.info("Updating interval for DerivedMeasurement " +
-                                 "from " + dmval.getInterval() + " to " +
+                                 "from " + dm.getInterval() + " to " +
                                  interval);
-
-                        DerivedMeasurement dm = getDerivedMeasurementDAO()
-                            .findById(dmval.getId());
 
                         dm.setInterval(interval);
                         dm.setEnabled(interval != 0);
-                        // Update the derived measurement value
-                        dmval = dm.getDerivedMeasurementValue();
                     }
                     
                     // Do not continue if interval was 0
@@ -175,23 +168,23 @@ public class MeasurementProcessorEJBImpl
                     Set rns = dn.getRawOutgoing();
                     for (Iterator jt=rns.iterator(); jt.hasNext();) {
                         RawNode rn = (RawNode)jt.next();
-                        RawMeasurementValue rmval =
+                        RawMeasurement rm =
                             getRMByTemplateAndInstance(new Integer(rn.getId()),
                                                        entId.getID());
                         // make sure we're supposed to schedule this one
-                        if ( agentSchedule.contains( rmval.getId() ) ) {
-                            rmVals.add(rmval);
+                        if (agentSchedule.contains(rm.getId())) {
+                            rmVals.add(rm);
                         }
                     }
                     if (rmVals.size() > 0) {
                         toScheduleRaw.put(
-                            dmval, rmVals.toArray(new RawMeasurementValue[0]));
+                            dm, rmVals.toArray(new RawMeasurement[0]));
                     }
 
                     // Not pass-thru                
-                    if (!dmval.getFormula().equals
+                    if (!dm.getFormula().equals
                             (MeasurementConstants.TEMPL_IDENTITY)) {
-                        toScheduleDerived.add(dmval);
+                        toScheduleDerived.add(dm);
                     }
                 }
             }
@@ -354,11 +347,13 @@ public class MeasurementProcessorEJBImpl
                 try {
                     calculator.calculate(measurement, scheduledTime);
                 } catch (FinderException e) {
-                    throw new MeasurementScheduleException(
-                        err, measurement.getId(), e);
+                    throw new MeasurementScheduleException(err,
+                                                           measurement.getId(),
+                                                           e);
                 } catch (DataNotAvailableException e) {
-                    throw new MeasurementScheduleException(
-                        err, measurement.getId(), e);
+                    throw new MeasurementScheduleException(err,
+                                                           measurement.getId(),
+                                                           e);
                 }
             }
         }
@@ -383,11 +378,11 @@ public class MeasurementProcessorEJBImpl
 
         for(Iterator i=measurements.entrySet().iterator(); i.hasNext(); ){
             Map.Entry ent = (Map.Entry)i.next();
-            DerivedMeasurementValue dMetric;
-            RawMeasurementValue[] rMetrics;
+            DerivedMeasurement dMetric;
+            RawMeasurement[] rMetrics;
 
-            dMetric  = (DerivedMeasurementValue)ent.getKey();
-            rMetrics = (RawMeasurementValue[])ent.getValue();
+            dMetric  = (DerivedMeasurement)ent.getKey();
+            rMetrics = (RawMeasurement[])ent.getValue();
 
             schedule.add(new ScheduleMetricInfo(dMetric, rMetrics));
         }
@@ -403,19 +398,18 @@ public class MeasurementProcessorEJBImpl
     private void scheduleDerivedMeasurement(List dmvals, Set serverSchedule)
         throws SchedulerException {
         for (Iterator it = dmvals.iterator(); it.hasNext(); ) {
-            DerivedMeasurementValue dmval =
-                (DerivedMeasurementValue) it.next();
+            DerivedMeasurement dm = (DerivedMeasurement) it.next();
                 
             // Only schedule if not identity expression
             // and if it hasn't already been scheduled.
-            if (serverSchedule.contains( dmval.getId() )) {
+            if (serverSchedule.contains(dm.getId())) {
     
                 // if no job yet exists for this derived measurement,
                 // schedule one
                 String jobName =
-                    CalculateDerivedMeasurementJob.getJobName(dmval);
+                    CalculateDerivedMeasurementJob.getJobName(dm);
                 String schedName
-                    = CalculateDerivedMeasurementJob.getScheduleName(dmval);
+                    = CalculateDerivedMeasurementJob.getScheduleName(dm);
                 Object job = getScheduler().getJobDetail
                     (jobName, CalculateDerivedMeasurementJob.SCHEDULER_GROUP);
                 Object schedule = getScheduler().getTrigger
@@ -428,7 +422,7 @@ public class MeasurementProcessorEJBImpl
                 if (null == job) {
                     if (null != schedule) {
                         // schedule exists, job doesn't
-                        if ( log.isDebugEnabled() ) {
+                        if (log.isDebugEnabled()) {
                             log.debug("Schedule " + schedName +
                                       " exists without job; removing it.");
                         }
@@ -440,7 +434,7 @@ public class MeasurementProcessorEJBImpl
                 } else {
                     if (null == schedule) {
                         // job exists, schedule doesn't
-                        if ( log.isDebugEnabled() ) {
+                        if (log.isDebugEnabled()) {
                             log.debug("Job " + jobName +
                                       " exists without schedule; removing it.");
                         }
@@ -455,37 +449,36 @@ public class MeasurementProcessorEJBImpl
                 if (null == job && null == schedule) {
                     long scheduleStart = System.currentTimeMillis();
                     getScheduler().scheduleJob
-                        ( CalculateDerivedMeasurementJob.getJob(dmval),
-                          CalculateDerivedMeasurementJob.getSchedule(dmval) );
+                        (CalculateDerivedMeasurementJob.getJob(dm),
+                         CalculateDerivedMeasurementJob.getSchedule(dm));
                     logTime("schedule.scheduleJob",scheduleStart);
                 }
             } else {
-                if ( log.isDebugEnabled() ) {
-                    log.debug
-                        ("DM " + dmval.getId() + " is already scheduled.");
+                if (log.isDebugEnabled()) {
+                    log.debug("DM " + dm.getId() + " is already scheduled.");
                 }
             }
         }
     }
 
-    private DerivedMeasurementValue getDMByTemplateAndInstance(Integer tid,
-                                                               int instanceId)
+    private DerivedMeasurement getDMByTemplateAndInstance(Integer tid,
+                                                          int instanceId)
         throws FinderException {
         DerivedMeasurement dm = getDerivedMeasurementDAO().
             findByTemplateForInstance(tid, new Integer(instanceId));
         if (dm == null) {
             throw new FinderException();
         }
-        return dm.getDerivedMeasurementValue();
+        return dm;
 
     }
 
-    private RawMeasurementValue getRMByTemplateAndInstance(Integer tid,
-                                                           int instanceId)
+    private RawMeasurement getRMByTemplateAndInstance(Integer tid,
+                                                      int instanceId)
         throws FinderException {
         RawMeasurement rm = getRawMeasurementDAO().
             findByTemplateForInstance(tid, new Integer(instanceId));
-        return rm.getRawMeasurementValue();
+        return rm;
     }
 
     private void logTime (String method, long start) {

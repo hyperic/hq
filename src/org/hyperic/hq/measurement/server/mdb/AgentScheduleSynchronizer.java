@@ -53,12 +53,13 @@ import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl;
 import org.hyperic.hq.measurement.server.session.RawMeasurementManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.server.session.RawMeasurement;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.RawMeasurementValue;
 import org.hyperic.util.pager.PageControl;
 
 /**
@@ -81,7 +82,7 @@ public class AgentScheduleSynchronizer {
         // Singleton class, private constructor
     }
 
-    private HashMap dmMap          = new HashMap();
+    private HashMap dmMap = new HashMap();
 
     private void cacheDM(DerivedMeasurementValue dmVo) {
         Integer tid = dmVo.getTemplate().getId();
@@ -142,8 +143,8 @@ public class AgentScheduleSynchronizer {
     }
     
 
-    private RawMeasurementValue getRMByTemplateAndInstance(Integer tid, 
-                                                           Integer instanceId) {
+    private RawMeasurement getRMByTemplateAndInstance(Integer tid,
+                                                      Integer instanceId) {
         return getRMan().findMeasurement(tid, instanceId);
     }
 
@@ -180,15 +181,15 @@ public class AgentScheduleSynchronizer {
                     derivedNode.getOutgoing().iterator().next();
 
                 // Now grab the raw measurement template
-                MeasurementTemplateValue rawTemplateValue =
-                    rawNode.getMeasurementTemplateValue();
+                MeasurementTemplate rawTemplate =
+                    rawNode.getMeasurementTemplate();
 
                 // Set the new interval time
                 derivedNode.setInterval(dmVo.getInterval());
 
                 // Check the raw node
-                RawMeasurementValue rmVal =
-                    getRMByTemplateAndInstance(rawTemplateValue.getId(),
+                RawMeasurement rmVal =
+                    getRMByTemplateAndInstance(rawTemplate.getId(),
                                                dmVo.getInstanceId());
 
                 if (rmVal == null) {    // Don't reschedule if no raw metric
@@ -213,8 +214,8 @@ public class AgentScheduleSynchronizer {
                     Node node = (Node)graphNodes.next();
 
                     // Fetch the template
-                    MeasurementTemplateValue templArg =
-                        node.getMeasurementTemplateValue();
+                    MeasurementTemplate templArg =
+                        node.getMeasurementTemplate();
 
                     if (node instanceof DerivedNode) {
                         try {
@@ -235,7 +236,7 @@ public class AgentScheduleSynchronizer {
                         }
                     } else {
                         // we are a raw node
-                        RawMeasurementValue rmVal =
+                        RawMeasurement rmVal =
                             getRMByTemplateAndInstance(templArg.getId(), 
                                                        dmVo.getInstanceId());
 

@@ -36,11 +36,11 @@ import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.SRN;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.RawMeasurement;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.MeasurementReportConstructor;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
-import org.hyperic.hq.measurement.shared.RawMeasurementValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.schedule.EmptyScheduleException;
 import org.hyperic.util.schedule.Schedule;
@@ -75,21 +75,14 @@ public abstract class ScheduledMonitor
      */
     protected abstract Hashtable getScheduleMap();
 
-    /** Get the value of a given DSN
-     * @param dsn the DSN which identifies the measurement value
-     * @return a MetricValue
-     */
-    protected abstract MetricValue[] 
-        getValues(RawMeasurementValue[] measurements);
+    protected abstract MetricValue[] getValues(RawMeasurement[] measurements);
 
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.measurement.ext.MonitorInterface#ping(org.hyperic.hq.appdef.shared.AgentValue)
-     */
     public boolean ping(AgentValue agent) {
         return true;
     }
 
-    /** Check the schedule to sleep and then wake up to do some measurements
+    /**
+     * Check the schedule to sleep and then wake up to do some measurements
      */
     public void scheduleMeasurements() {
         try {
@@ -109,7 +102,7 @@ public abstract class ScheduledMonitor
             List scheduledItems = getSchedule().consumeNextItems();
             for (Iterator i = scheduledItems.iterator(); i.hasNext();) {
                 ScheduledItem si = (ScheduledItem) i.next();
-                RawMeasurementValue[] rms = si.getRmvs();
+                RawMeasurement[] rms = si.getRmvs();
                 for (int ind = 0; ind < rms.length; ind++) {
                     Integer rmId = rms[ind].getId();
                     if (measurements.containsKey(rmId))
@@ -125,9 +118,8 @@ public abstract class ScheduledMonitor
 
             // Now get the unique values
             Collection msCol = measurements.values();
-            RawMeasurementValue[] rmvs =
-                (RawMeasurementValue[]) msCol
-                    .toArray(new RawMeasurementValue[msCol.size()]);
+            RawMeasurement[] rmvs =
+                (RawMeasurement[]) msCol.toArray(new RawMeasurement[msCol.size()]);
 
             MetricValue[] values = getValues(rmvs);
 
@@ -181,8 +173,8 @@ public abstract class ScheduledMonitor
         }
 
         for(int i=0; i<schedule.length; i++){
-            DerivedMeasurementValue dMetric = schedule[i].getDerivedMetric();
-            RawMeasurementValue[] rMetrics = schedule[i].getRawMetrics();
+            DerivedMeasurement dMetric = schedule[i].getDerivedMetric();
+            RawMeasurement[] rMetrics = schedule[i].getRawMetrics();
 
             try {
                 // Create new UnscheduleMetricInfo
@@ -240,9 +232,8 @@ public abstract class ScheduledMonitor
         }
     }
 
-    /** Unschedule measurements
-     * @param marker the marker by which to identify this set
-     * of measurements
+    /**
+     * Unschedule measurements
      */
     public void unschedule(AgentValue agent, UnscheduleMetricInfo[] schedule)
         throws MonitorAgentException 
@@ -274,47 +265,30 @@ public abstract class ScheduledMonitor
     }
 
     private class ScheduledItem {
+
+        private DerivedMeasurement _dm;
+        private RawMeasurement[] _rms;
         
-        /** Holds value of property dmv. */
-        private DerivedMeasurementValue dmv;
-        
-        /** Holds value of property rmvs. */
-        private RawMeasurementValue[] rmvs;
-        
-        public ScheduledItem(DerivedMeasurementValue dmv,
-                             RawMeasurementValue[] rmvs) {
-            this.dmv = dmv;
-            this.rmvs = rmvs;
+        public ScheduledItem(DerivedMeasurement dm,
+                             RawMeasurement[] rms) {
+            _dm = dm;
+            _rms = rms;
         }
-        
-        /** Getter for property dmv.
-         * @return Value of property dmv.
-         */
-        public DerivedMeasurementValue getDmv() {
-            return this.dmv;
+
+        public DerivedMeasurement getDmv() {
+            return _dm;
         }
-        
-        /** Setter for property dmv.
-         * @param dmv New value of property dmv.
-         */
-        public void setDmv(DerivedMeasurementValue dmv) {
-            this.dmv = dmv;
+
+        public void setDmv(DerivedMeasurement dm) {
+            _dm = dm;
         }
-        
-        /** Getter for property rmvs.
-         * @return Value of property rmvs.
-         */
-        public RawMeasurementValue[] getRmvs() {
-            return this.rmvs;
+
+        public RawMeasurement[] getRmvs() {
+            return _rms;
         }
-        
-        /** Setter for property rmvs.
-         * @param rmvs New value of property rmvs.
-         */
-        public void setRmvs(RawMeasurementValue[] rmvs) {
-            this.rmvs = rmvs;
+
+        public void setRmvs(RawMeasurement[] rms) {
+            _rms = rms;
         }
-        
     }
-    
 }
