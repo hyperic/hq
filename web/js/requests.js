@@ -89,7 +89,7 @@
             }
 
          }
-        //$('modifiedProblemTime').innerHTML = 'Last updated: '+ refreshDate() + ' ' + refreshTime();
+        //$('modifiedProblemTime').innerHTML = 'Updated: ' + refreshTime();
         
         rTimer = setTimeout('requestProblemResources();', 60000);
         //Refresh in 60 seconds
@@ -297,7 +297,7 @@
             $('noCritAlerts').style.display = '';
           
         }
-        $('modifiedCritTime').innerHTML = 'Last updated: '+ refreshDate() + ' ' + refreshTime();
+        $('modifiedCritTime').innerHTML = 'Updated: ' + refreshTime();
         rTimer = setTimeout(alertFunc, 60000);
         //Refresh in 60 seconds
     }
@@ -380,12 +380,12 @@
              }
         }
 
-        $('modifiedAvailTime').innerHTML = 'Last updated: '+ refreshDate() + ' ' + refreshTime();
+        $('modifiedAvailTime').innerHTML = 'Updated: ' + refreshTime();
         rTimer = setTimeout(availFunc, 60000);
     }
 
     function showMetricsResponse(originalRequest) {
-        $('modifiedMetricTime').innerHTML = 'Last updated: '+ refreshDate() + ' ' + refreshTime();
+
         var metricText = eval("(" + originalRequest.responseText + ")");
         var metricValues = metricText.metricValues;
         var resourceNameHeader = metricValues.resourceTypeName;
@@ -465,6 +465,8 @@
                 td2.setAttribute((document.all ? 'className' : 'class'), "metricName");
                 td2.appendChild(document.createTextNode(metricValues.values[i].value));
                }
+           
+        $('modifiedMetricTime').innerHTML = 'Updated: '+refreshTime();
 
         } else {
             $(noMetricTable).style.display = '';
@@ -488,8 +490,7 @@ function refreshTime() {
     }
     if (curHour == 0) curHour = 12
     curTime = curHour + ":"
-            + ((curMin < 10) ? "0" : "") + curMin + ":"
-            + ((curSec < 10) ? "0" : "") + curSec
+            + ((curMin < 10) ? "0" : "") + curMin
             + curAMPM
     return curTime;
 }

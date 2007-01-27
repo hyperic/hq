@@ -129,7 +129,7 @@
     </tiles:insert>
   </c:when>
   <c:otherwise>
-    <td>&nbsp;</td>
+    <td align="right"><div id="modifiedCritTime" class="ToolBarContent">&nbsp;</div></td>
   </c:otherwise>
 </c:choose>
 </tr>
