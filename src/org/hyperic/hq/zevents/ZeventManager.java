@@ -79,9 +79,6 @@ public class ZeventManager {
      * {@link ZeventListener}s */
     private final Map _listeners = new HashMap();
 
-    // Map of {@link ZeventListener} onto {@link BufferedListener}s.
-    private final Map _buffListeners = new HashMap();
-    
     private final ThreadGroupFactory _threadFact =
         new ThreadGroupFactory(new LoggingThreadGroup("ZeventManager"), 
                                "BufferedProcessor");
@@ -196,18 +193,20 @@ public class ZeventManager {
      * @param eventClasses  {@link Class}es which subclass {@link Zevent} to
      *                      listen for
      * @param listener      Listener to invoke with events
+     * 
+     * @return the buffered listener.  This return value must be used when
+     *         trying to remove the listener later on.
      */
-    public void addBufferedListener(Set eventClasses, ZeventListener listener) { 
+    public ZeventListener addBufferedListener(Set eventClasses, 
+                                              ZeventListener listener) 
+    { 
         BufferedListener bListen = new BufferedListener(listener, 
                                                         _threadFact);
-        
-        synchronized (_listenerLock) {
-            _buffListeners.put(listener, bListen);
-        }
         
         for (Iterator i=eventClasses.iterator(); i.hasNext(); ) {
             addListener((Class)i.next(), bListen);
         }
+        return bListen;
     }
     
     /**
@@ -238,12 +237,8 @@ public class ZeventManager {
         
         synchronized (_listenerLock) {
             List listeners = getEventTypeListeners(eventClass);
-            ZeventListener realListener = listener;
-            
-            if (_buffListeners.containsKey(listener)) 
-                realListener = (ZeventListener)_buffListeners.get(listener); 
                     
-            return listeners.remove(realListener);
+            return listeners.remove(listener);
         }
     }
     
