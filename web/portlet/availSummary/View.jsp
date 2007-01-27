@@ -71,11 +71,6 @@ onloads.push(requestAvailSummary<c:out value="${portlet.token}"/>);
         </tr>
         <!-- table rows are inserted here dynamically -->
       </tbody>
-      <tfoot>
-          <tr>
-             <td id="modifiedAvailTime" colspan="3" class="modifiedDate"></td>
-          </tr>
-      </tfoot>
     </table>
     <table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${noTableName}"/>" style="display:none;">
         <tbody>
@@ -88,6 +83,11 @@ onloads.push(requestAvailSummary<c:out value="${portlet.token}"/>);
         </td>
       </tr>
       </tbody>
+    </table>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        <td id="modifiedAvailTime" class="modifiedDate"></td>
+      </tr>
     </table>
   </div>
 
