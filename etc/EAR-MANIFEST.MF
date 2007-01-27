@@ -20,3 +20,4 @@ Class-Path: @@@HYPERIC_EAR@@@/hq.jar
   @@@HYPERIC_EAR@@@/lib/jxla.jar
   @@@HYPERIC_EAR@@@/lib/ant.jar
   @@@HYPERIC_EAR@@@/lib/snmp4j.jar
+  @@@HYPERIC_EAR@@@/lib/dnsjava-2.0.3.jar

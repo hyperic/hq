@@ -382,6 +382,7 @@
         <include name="quartz-oracle-1.5.1.jar" />
         <include name="instantj-1.6.jar" />
         <include name="snmp4j.jar" />
+        <include name="dnsjava-2.0.3.jar" />
         <include name="ehcache-1.2.4.jar" />
         <include name="json.jar" />
 
