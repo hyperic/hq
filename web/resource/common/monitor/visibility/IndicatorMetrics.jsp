@@ -178,7 +178,7 @@
     </c:if>
 
     <tr>
-      <td class="ListCell"><c:out value="${metric.name}"/></td>
+      <td class="ListCell" style="padding-left: 8px;"><c:out value="${metric.name}"/></td>
       <td class="ListCell">
       <a href="<c:out value="${scriptUrl}"/>"><html:img page="/images/icon_menu.gif" onmouseover="menuLayers.show('metric_menu_${metric.templateId}', event)" onmouseout="menuLayers.hide()" border="0"/></a>
       </td>
