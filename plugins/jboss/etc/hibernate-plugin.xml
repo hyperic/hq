@@ -164,4 +164,10 @@
           template="${OBJECT_NAME}:SecondLevelCacheMissCount"
           category="THROUGHPUT"
           collectionType="trendsup"/>
+
+  <help>
+  <![CDATA[
+See Hibernate's doc: <a href="http://www.hibernate.org/216.html">Publishing statistics through JMX</a>
+]]>
+  </help>
 </service>
