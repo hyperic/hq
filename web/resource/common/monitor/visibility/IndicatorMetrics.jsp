@@ -158,7 +158,7 @@
       <th class="ListHeaderInactive">
           <fmt:message key="resource.common.monitor.visibility.MiniTab.All"/>
       </th>
-      <th class="ListHeaderInactive" width="4%"><fmt:message key="resource.common.monitor.visibility.MiniTab.More"/></th>
+      <th class="ListHeaderInactive" colspan="2"width="4%"><fmt:message key="resource.common.monitor.visibility.MiniTab.More"/></th>
     </tr>
   <c:forEach var="metric" items="${problems}">
     <c:choose>
@@ -173,14 +173,18 @@
     <c:if test="${resourceType != metric.type}">
       <c:set var="resourceType" value="${metric.type}"/>
       <tr>
-        <td class="ListCellSelected" colspan="4"><c:out value="${resourceType}"/></td>
+        <td class="ListCellSelected" colspan="3"><c:out value="${resourceType}"/></td>
       </tr>
     </c:if>
 
     <tr>
       <td class="ListCell" style="padding-left: 8px;"><c:out value="${metric.name}"/></td>
+      </td>
       <td class="ListCell">
-      <a href="<c:out value="${scriptUrl}"/>"><html:img page="/images/icon_menu.gif" onmouseover="menuLayers.show('metric_menu_${metric.templateId}', event)" onmouseout="menuLayers.hide()" border="0"/></a>
+      <html:img page="/images/comment.gif" onmouseover="menuLayers.show('metric_menu_${metric.templateId}', event)" onmouseout="menuLayers.hide()" border="0"/>
+      </td>
+      <td class="ListCell">
+      <a href="<c:out value="${scriptUrl}"/>"><html:img page="/images/icon_menu.gif" border="0"/></a>
       </td>
     </tr>
   </c:forEach>
