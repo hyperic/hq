@@ -483,6 +483,8 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
             clusterVo.setName(gv.getName());
             clusterVo.setDescription(gv.getDescription());
             clusterVo.setGroupId(gv.getId());
+            clusterVo.setServiceType(
+                (ServiceTypeValue) gv.getAppdefResourceTypeValue());
 
             List svcList = new ArrayList();
             List grpMembers = gv.getAppdefGroupEntries();
