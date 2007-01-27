@@ -154,22 +154,25 @@
     <td>
       <table width="100%" border="0" cellpadding="0" cellspacing="1" style="margin-top: 1px; margin-bottom: 1px;">
         <tr>
-          <td>
+          <td class="BoldText">
           <html:img page="/images/icon_chart.gif"/>
-          <font class="BoldText">
             <a href="<c:out value="${chartLink}"/>" target="_top"><c:out value="${metric.label}"/></a>
-          </font>
-          <font class="FooterSmall">
-             <fmt:message key="common.value.parenthesis">
-               <fmt:param value="${metric.metricSource}"/>
-             </fmt:message>
-          </font></td>
-          <td width="15%" nowrap="true"><font class="BoldText"><fmt:message key="resource.common.monitor.visibility.LowTH"/></font>: <c:out value="${metric.minMetric.valueFmt}"/></td>
-          <td width="15%" nowrap="true"><font class="BoldText"><fmt:message key="resource.common.monitor.visibility.AvgTH"/></font>: <c:out value="${metric.avgMetric.valueFmt}"/></td>
-          <td width="15%" nowrap="true"><font class="BoldText"><fmt:message key="resource.common.monitor.visibility.PeakTH"/></font>: <c:out value="${metric.maxMetric.valueFmt}"/></td>
-          <td width="1%"><a href="javascript:moveMetricUp('<c:out value="${metric.templateId}"/>')"><html:img page="/images/dash_icon_up.gif" border="0"/></a></td>
-          <td width="1%"><a href="javascript:moveMetricDown('<c:out value="${metric.templateId}"/>')"><html:img page="/images/dash_icon_down.gif" border="0"/></a></td>
-          <td width="1%"><a href="javascript:removeMetric('<c:out value="${metric.templateId}"/>')"><html:img page="/images/dash-icon_delete.gif" border="0"/></a></td>
+          </td>
+            <td colspan="3" align="right">
+            <a href="javascript:moveMetricUp('<c:out value="${metric.templateId}"/>')"><html:img page="/images/dash_icon_up.gif" border="0"/></a>
+            <a href="javascript:moveMetricDown('<c:out value="${metric.templateId}"/>')"><html:img page="/images/dash_icon_down.gif" border="0"/></a>
+            <a href="javascript:removeMetric('<c:out value="${metric.templateId}"/>')"><html:img page="/images/dash-icon_delete.gif" border="0"/></a>
+            </td>
+        </tr>
+        <tr>
+            <td style="font-size: 10px; padding-left: 12px;">
+              <fmt:message key="common.value.parenthesis">
+                <fmt:param value="${metric.metricSource}"/>
+              </fmt:message>
+            </td>
+          <td nowrap="true" width="13%"><span class="BoldText"><fmt:message key="resource.common.monitor.visibility.LowTH"/></span>: <c:out value="${metric.minMetric.valueFmt}"/></td>
+          <td nowrap="true" width="14%"><span class="BoldText"><fmt:message key="resource.common.monitor.visibility.AvgTH"/></span>: <c:out value="${metric.avgMetric.valueFmt}"/></td>
+          <td nowrap="true" width="15%"><span class="BoldText"><fmt:message key="resource.common.monitor.visibility.PeakTH"/></span>: <c:out value="${metric.maxMetric.valueFmt}"/></td>
         </tr>
       </table>
     </td>
