@@ -84,18 +84,19 @@ public class HQApp {
     }
     
     private static class Snatcher implements TxSnatch.Snatcher  {
-        private Object invokeNextBoth(Interceptor next, Invocation arg0,
+        private Object invokeNextBoth(Interceptor next, Invocation v,
                                       boolean isHome) 
             throws Exception 
         {
             boolean created = false;
             
-            created = SessionManager.setupSession("Unknown");
+            created = SessionManager.setupSession(v.getMethod().getName());
+                                                  
             try {
                 if (isHome)
-                    return next.invokeHome(arg0);
+                    return next.invokeHome(v);
                 else
-                    return next.invoke(arg0);
+                    return next.invoke(v);
             } finally { 
                 if (created) {
                     SessionManager.cleanupSession();
