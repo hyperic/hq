@@ -138,7 +138,7 @@
       <td class="ListCell">
         <html:link page="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=${mode}&eid=${summary.resourceTypeId}:${summary.resourceId}"><c:out value="${summary.resourceName}"/></html:link>
       </td>
-      <td class="ListCellCheckboxLeftLine">
+      <td class="ListCellCheckbox">
       <c:choose>
         <c:when test="${summary.availability == 0}">
           <html:img page="/images/icon_available_red.gif" border="0"
@@ -163,7 +163,7 @@
       </c:choose>
       </td>
       <td class="ListCellCheckbox">
-        <html:link page="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=${mode}&eid=${summary.resourceTypeId}:${summary.resourceId}"><html:img page="/images/icon_menu_up.gif" onmouseover="menuLayers.show('${summary.resourceName}_menu', event)" onmouseout="menuLayers.hide()" border="0"/>
+        <html:link page="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=${mode}&eid=${summary.resourceTypeId}:${summary.resourceId}"><html:img page="/images/comment.gif" onmouseover="menuLayers.show('${summary.resourceName}_menu', event)" onmouseout="menuLayers.hide()" border="0"/>
         </html:link>
       </td>
     </tr>
