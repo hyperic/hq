@@ -63,14 +63,13 @@ public class RemoveServicesAction extends BaseAction {
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
-    throws Exception {                                 
+        throws Exception {                                 
  
         RemoveResourceForm cform = (RemoveResourceForm) form;
-        Integer resourceId = cform.getRid();
-        Integer entityType = cform.getType();
         HashMap forwardParams = new HashMap(2);
-        forwardParams.put(Constants.RESOURCE_PARAM, resourceId);
-        forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
+        forwardParams.put(Constants.ENTITY_ID_PARAM, cform.getEid());
+        forwardParams.put(Constants.ACCORDION_PARAM, "3");
+
         Integer[] appSvcIds = cform.getResources();
         if (appSvcIds != null && appSvcIds.length > 0) {
 
@@ -80,8 +79,10 @@ public class RemoveServicesAction extends BaseAction {
 
             for (int i = 0; i < appSvcIds.length; i++) {
                 Integer appSvcId= appSvcIds[i];
-                log.debug("Removing appSvc = " + appSvcId + "  from application " + resourceId);
-                boss.removeAppService(sessionId.intValue(), resourceId, appSvcId);                
+                log.debug("Removing appSvc = " + appSvcId +
+                          "  from application " + cform.getRid());
+                boss.removeAppService(sessionId.intValue(), cform.getRid(),
+                                      appSvcId);                
             }
 
             RequestUtils
