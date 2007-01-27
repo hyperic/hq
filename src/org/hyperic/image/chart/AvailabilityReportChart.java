@@ -26,20 +26,17 @@
 package org.hyperic.image.chart;
 
 import java.awt.Color;
-import java.awt.AlphaComposite;
-import java.awt.Composite;
-import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.awt.image.IndexColorModel;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.NumberFormat;
+
 import javax.imageio.ImageIO;
-import org.hyperic.image.chart.Chart;
+
 import org.hyperic.util.data.IDataPoint;
 
 public class AvailabilityReportChart extends Chart{
@@ -49,9 +46,6 @@ public class AvailabilityReportChart extends Chart{
     private static BufferedImage DANGER_CIRCLE;
     private static BufferedImage UNKNOWN_CIRCLE;
 
-    private static final int  TEXT_HEIGHT = 11;
-    private static final Font TEXT_FONT   = new Font("Helvetica", Font.PLAIN,
-                                               TEXT_HEIGHT);
     private static final FontMetrics TEXT_METRICS;
     
     private static final Color COLOR_TRANSPARENT = new Color(0,0,255); //,0);
@@ -67,10 +61,9 @@ public class AvailabilityReportChart extends Chart{
          
     static {
         // Get Font Metrics
-        Image img = new BufferedImage(1, 1,
-                                      BufferedImage.TYPE_BYTE_BINARY);
+        Image img = new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_BINARY);
         java.awt.Graphics g = img.getGraphics();
-        TEXT_METRICS  = g.getFontMetrics(TEXT_FONT);
+        TEXT_METRICS  = g.getFontMetrics(DEFAULT_LEGEND_PLAIN);
         g.dispose();
         
         // Load Images        
@@ -117,9 +110,8 @@ public class AvailabilityReportChart extends Chart{
     }
     
     protected Rectangle draw(ChartGraphics g) {
-        g.graphics.setFont(TEXT_FONT); 
+        g.graphics.setFont(DEFAULT_LEGEND_PLAIN); 
          
-        int x         = 0;
         int yCircle   = 0;
         int y2Circle  = CIRCLE_SIZE - 1;
 
