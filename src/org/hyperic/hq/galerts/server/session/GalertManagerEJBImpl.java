@@ -395,40 +395,14 @@ public class GalertManagerEJBImpl
     }
     
     /**
-     * start escalation inside JTA context for Galerts
-     * 
-     * XXX:  Re-look at this method -- it's not correct to just swallow the
-     *       exception. -- JMT 12/29/06
+     * Start an escalation for a group alert definition.
      *
      * @ejb:interface-method
      */
     public void startEscalation(Integer id, ExecutionReason reason) {
         GalertDef def = findById(id);
-        
-        /*
-        _mescMan.startEscalation(alert);
-        
-        Escalation esc = def.getEscalation();
-        
-        if (isEscalationActive(esc, def.getId(),
-                               EscalationState.ALERT_TYPE_GROUP)) {
-            return;
-        }
 
-        GalertLog alert = galertManagerLocal.createAlertLog(def, reason);
-        activateEscalation(esc, def.getId(), alert.getId().intValue(),
-                           EscalationState.ALERT_TYPE_GROUP);
-
-        _mescMan.startEscalation(alert)
-        try {
-            GalertDef def = _defDAO.findById(id);
-            EscalationMediator.getInstance().startGEscalation(def, reason);
-        } catch (ActionExecuteException e) {
-            _log.error("Unable to execute actions", e);
-        } catch (PermissionException e) {
-            _log.error("No permission to begin escalation", e);
-        }
-        */
+        _escMan.startEscalation(def, new GalertEscalatableCreator(def, reason));
     }
 
     /**

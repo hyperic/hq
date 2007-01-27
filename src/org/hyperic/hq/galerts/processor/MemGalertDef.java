@@ -34,20 +34,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ejb.CreateException;
-import javax.naming.NamingException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.galerts.server.session.ExecutionReason;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategy;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo;
 import org.hyperic.hq.galerts.server.session.GalertDef;
+import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
 import org.hyperic.hq.galerts.server.session.GtriggerInfo;
-import org.hyperic.hq.galerts.shared.GalertManagerLocal;
-import org.hyperic.hq.galerts.shared.GalertManagerUtil;
 
 
 /**
@@ -146,15 +141,7 @@ class MemGalertDef {
         _log.info(execReason);
 
         // Dispatch to alert escalation
-        try {
-            GalertManagerLocal alertMan =
-                GalertManagerUtil.getLocalHome().create();
-            alertMan.startEscalation(_id, execReason);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        GalertManagerEJBImpl.getOne().startEscalation(_id, execReason);
         strat.reset();
     }
 }
