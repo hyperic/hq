@@ -190,7 +190,7 @@ public class SNMPValue {
             } catch (UnsupportedOperationException e) {
                 String msg =
                     "Cannot convert " +
-                    Variable.getSyntaxString(this.var.getSyntax()) +
+                    this.var.getSyntaxString() +
                     " to long";
                 throw new SNMPException(msg);
             }
