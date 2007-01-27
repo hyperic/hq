@@ -404,7 +404,7 @@ public class ResourceDAO extends HibernateDAO
      */
     public List findAllResourcesInstancesForOperation(int opId) {
         final String sql = 
-            "SELECT r.instance_id FROM Resource r, Operation o " +
+            "SELECT r.instanceId FROM Resource r, Operation o " +
             "WHERE     o.resourceType = r.resourceType" + 
             "      AND o.id = :opId";
         
