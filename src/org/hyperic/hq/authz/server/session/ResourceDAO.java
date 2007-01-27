@@ -398,4 +398,18 @@ public class ResourceDAO extends HibernateDAO
             .setInteger(0, subjLoc.getId().intValue())
             .list();
     }
+    
+    /**
+     * Returns an ordered list of instance IDs for a given operation.
+     */
+    public List findAllResourcesInstancesForOperation(int opId) {
+        final String sql = 
+            "SELECT r.instance_id FROM Resource r, Operation o " +
+            "WHERE     o.resourceType = r.resourceType" + 
+            "      AND o.id = :opId";
+        
+        return getSession().createQuery(sql)
+            .setInteger("opId", opId)
+            .list();
+    }
 }
