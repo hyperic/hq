@@ -782,7 +782,7 @@
         <!-- for SSH collector within netservices plugin -->
         <include name="jsch-0.1.23.jar"/>
         <!-- for DNS collector within netservices plugin -->
-        <include name="dnsjava-2.0.1.jar"/>
+        <include name="dnsjava-2.0.3.jar"/>
         <!-- for JMX based plugins -->
         <include name="mx4j/*.jar"/>
       </fileset>
