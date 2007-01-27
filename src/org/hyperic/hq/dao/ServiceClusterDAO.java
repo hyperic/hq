@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
 import org.hyperic.hq.appdef.shared.AppSvcClustIncompatSvcException;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
@@ -70,11 +71,25 @@ public class ServiceClusterDAO extends HibernateDAO {
 
         Set services = new HashSet(serviceIds.size());
         ServiceDAO dao = DAOFactory.getDAOFactory().getServiceDAO();
+        ServiceType st = null;
         for (int i = 0; i < serviceIds.size(); i++) {
-            services.add(dao.findById((Integer) serviceIds.get(i)));
+            Service service = dao.findById((Integer) serviceIds.get(i));
+            if (st == null) {
+                st = service.getServiceType();
+            }
+            services.add(service);
         }
         sc.setServices(services);
         
+        if (st == null && scv.getServiceType() != null) {
+            st = DAOFactory.getDAOFactory().getServiceTypeDAO()
+                    .findById(scv.getServiceType().getId());
+        }
+        
+        if (st != null) {
+            sc.setServiceType(st);
+        }
+            
         save(sc);
         return sc;
     }
