@@ -110,7 +110,7 @@
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
 </head>
 
-<body bgcolor="#DBE3F5" <c:if test="${not empty chartDataKeys}">onload="$('slowScreenSplash').style.display = 'none';"</c:if>>
+<body style="background-color: #DBE3F5;" <c:if test="${not empty chartDataKeys}">onload="$('slowScreenSplash').style.display = 'none';"</c:if>>
 <!-- <c:out value="${IndicatorViewsForm.addMetric}"/> -->
 <c:forEach var="id" items="${IndicatorViewsForm.metric}">
 <!-- <c:out value="metric: ${id}"/> -->
