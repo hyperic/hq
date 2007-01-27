@@ -64,21 +64,22 @@ function addMetric(metric) {
 function reviewAction(option) {
     var form = document.IndicatorViewsForm;
     if (option.value == 'go') {
-        form.view.disabled = false;
+        $('viewname').style.display = "";
         form.view.value = option.text;
         form.submit();
     }
     else if (option.value == 'delete') {
         form.view.value = "";
+        form.submit();
     }
     else if (option.value == 'create') {
-        form.view.disabled = false;
+        $('viewname').style.display = "";
         return;
     }
     else if (option.value == 'update') {
         form.view.value = "<c:out value="${view}"/>";
     }
-    form.view.disabled = true;
+    $('viewname').style.display = "none";
 }
 
 </script>
@@ -121,8 +122,10 @@ function reviewAction(option) {
               </c:forEach>
               </c:if>
             </html:select>
+            <span id="viewname" style="display: none;">
             <fmt:message key="common.label.Name"/>
-            <html:text size="20" property="view" disabled="true"/>
+            <html:text size="20" property="view"/>
+            </span>
           </td>
           <td align="right">
             <!-- Use hidden input because IE doesn't pass value of of image -->
