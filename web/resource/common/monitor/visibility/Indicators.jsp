@@ -89,12 +89,10 @@ function reviewAction(option) {
   <input type="hidden" name="ctype" value="<c:out value="${ctype}"/>">
 </c:if>
 
-<table width="680" cellpadding="0" cellspacing="2" border="0">
+<table width="680" cellpadding="2" cellspacing="0" border="0">
   <tr>
-    <td class="ListHeaderInactive" width="100%">CHARTS</td>
-  </tr>
-  <tr>
-    <td valign="middle" align="right" width="100%">
+    <td class="ListHeaderInactive" nowrap="true"><fmt:message key="resource.common.monitor.visibility.IndicatorCharts"/></td>
+    <td class="ListHeaderInactive" valign="middle" align="right" width="100%">
       <table cellspacing="2">
         <tr>
           <td>
@@ -137,33 +135,7 @@ function reviewAction(option) {
   </tr>
   <c:if test="${not empty availabilityMetrics}">
   <tr>
-    <td><font class="BoldText">
-        <c:choose>
-          <c:when test="${entityType eq 'application'}">
-            <fmt:message key="resource.common.monitor.visibility.availability.value">
-              <fmt:param value="${availMetricsAttr}"/>
-            </fmt:message>
-          </c:when>
-          <c:otherwise>
-            <c:url var="availChart" value="/resource/common/monitor/visibility/ViewDesignatedChart.do">
-              <c:param name="eid" value="${eid}"/>
-              <c:if test="${not empty ctype}">
-                <c:param name="ctype" value="${ctype}"/>
-              </c:if>
-            </c:url>
-            <html:img page="/images/icon_chart.gif"/>
-            <a href="<c:out value="${availChart}"/>">
-            <fmt:message key="resource.common.monitor.visibility.availability.value">
-              <fmt:param value="${availMetricsAttr}"/>
-            </fmt:message>
-          </a>
-          </c:otherwise>
-        </c:choose>
-      </font>
-    </td>
-  </tr>
-  <tr>
-    <td> 
+    <td colspan="2"> 
       <table cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td width="8">
@@ -195,13 +167,35 @@ function reviewAction(option) {
           <td width="10" align="left">
             <html:img page="/images/timeline_ur.gif" height="10"/> 
           </td>
+          <td class="BoldText" style="padding-left: 4px;">
+        <c:choose>
+          <c:when test="${entityType eq 'application'}">
+            <fmt:message key="resource.common.monitor.visibility.availability.value">
+              <fmt:param value="${availMetricsAttr}"/>
+            </fmt:message>
+          </c:when>
+          <c:otherwise>
+            <c:url var="availChart" value="/resource/common/monitor/visibility/ViewDesignatedChart.do">
+              <c:param name="eid" value="${eid}"/>
+              <c:if test="${not empty ctype}">
+                <c:param name="ctype" value="${ctype}"/>
+              </c:if>
+            </c:url>
+            <a href="<c:out value="${availChart}"/>">
+            <fmt:message key="resource.common.monitor.visibility.availability.value">
+              <fmt:param value="${availMetricsAttr}"/>
+            </fmt:message>
+          </a>
+          </c:otherwise>
+        </c:choose>
+          </td>
         </tr>
       </table>
     </td>
   </tr>
   </c:if>
   <tr>
-    <td> 
+    <td colspan="2"> 
         <div id="charttop" style="padding-top: 1px; padding-bottom: 1px; z-index: 0;">
         <c:url var="chartUrl" value="/resource/common/monitor/visibility/IndicatorCharts.do">
           <c:param name="eid" value="${eid}" />
@@ -227,7 +221,7 @@ function reviewAction(option) {
     </td>
   </tr>
   <tr>
-    <td>
+    <td colspan="2">
       <tiles:insert definition=".resource.common.monitor.visibility.timeline">
         <c:if test="${entityType eq 'autogroup'}">
           <tiles:put name="hideLogs" value="true"/>
