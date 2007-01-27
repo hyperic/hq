@@ -134,7 +134,7 @@
     <td class="ListHeader" width="100%" colspan="2" align="left"><BLK><fmt:message key="${childResourcesHealthKey}"/><BLK></td>
 
     <c:if test="${not empty summaries}">
-    <td class="ListHeaderInactive" width="20%" align="center" nowrap><fmt:message key="resource.common.monitor.visibility.TotalNumTH"/></td>
+    <!--<td class="ListHeaderInactive" width="20%" align="center" nowrap><fmt:message key="resource.common.monitor.visibility.TotalNumTH"/></td>-->
     <td class="ListHeaderInactive" width="20%" align="center" nowrap><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></td>
     <td class="ListHeaderInactive" width="6%"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
     </c:if>
@@ -203,9 +203,9 @@
       </c:otherwise>
     </c:choose>
     </td>
-    <td class="ListCellCheckbox">
+    <!--<td class="ListCellCheckbox">
         <c:out value="${summary.numResources}" default="0"/>
-    </td>
+    </td>-->
     <td class="ListCellCheckbox">
     <c:choose>
       <c:when test="${summary.availability == 0}">
@@ -232,10 +232,10 @@
     </td>
 
     </td>
-  <td class="ListCellCheckbox">
-    <a href="<c:out value="${url}"/>">
-      <html:img page="/images/icon_menu_up.gif" onmouseover="menuLayers.show('${summary.resourceType.name}_menu', event)" onmouseout="menuLayers.hide()" border="0"/>
-    </a>
+  <td class="ListCellCheckbox" style="padding-right:2px;padding-top:2px;">
+    <!--<a href="<c:out value="${url}"/>">-->
+      <html:img page="/images/comment.gif" onmouseover="menuLayers.show('${summary.resourceType.name}_menu', event)" onmouseout="menuLayers.hide()" border="0"/>
+    <!--</a>-->
     </td>
   </tr>
     
