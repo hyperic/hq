@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.product;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -182,6 +183,11 @@ public abstract class TrackEventPluginManager
         
         ConfigFileTrackPlugin.cleanup();
         LogFileTailPlugin.cleanup();
+        try {
+            SNMPTrapReceiver.shutdown();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     private FileWatcherThread getFileWatcherThread() {
