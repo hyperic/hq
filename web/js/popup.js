@@ -206,9 +206,9 @@ var menuLayers = {
     var x = e.pageX? e.pageX: e.clientX + viewport.scrollX;
     var y = e.pageY? e.pageY: e.clientY + viewport.scrollY;
     
-    if ( x + mnu.offsetWidth + this.offX > viewport.width + viewport.scrollX )
+    //if ( x + mnu.offsetWidth + this.offX > viewport.width + viewport.scrollX )
       x = x - mnu.offsetWidth - this.offX;
-    else x = x + this.offX;
+    //else x = x + this.offX;
   
     if ( y + mnu.offsetHeight + this.offY >
          viewport.height + viewport.scrollY )
