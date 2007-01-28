@@ -29,7 +29,7 @@ public class ScheduleRevNum implements java.io.Serializable {
 
     // Fields    
     private SrnId _id;
-    private long _version_;
+    private long _version;
     private int _srn;
     private long _minInterval = 0;
     private long _lastReported = 0;
@@ -63,11 +63,11 @@ public class ScheduleRevNum implements java.io.Serializable {
     }
 
     public long get_version_() {
-        return _version_;
+        return _version;
     }
     
-    protected void set_version_(long _version_) {
-        _version_ = _version_;
+    protected void set_version_(long version) {
+        _version = version;
     }
 
     public int getSrn() {
