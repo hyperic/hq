@@ -98,7 +98,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 </script>
 
 <html:form action="/resource/server/inventory/RemoveService">
-<!--  /  -->
+<html:hidden property="eid"/>
 
 <tiles:insert page="View_FilterToolbar.jsp"/>
 

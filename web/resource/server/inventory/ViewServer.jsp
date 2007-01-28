@@ -102,7 +102,6 @@ var pageData = new Array();
   <fmt:message key="resource.server.inventory.ServicesTab"/>
 </div>
 <div id="panelContent">
-<html:form action="/resource/server/inventory/RemoveServices">
 <tiles:insert definition=".resource.server.inventory.services">
   <tiles:put name="server" beanName="Resource"/>
   <tiles:put name="services" beanName="ChildResources"/>
@@ -110,9 +109,6 @@ var pageData = new Array();
   <tiles:put name="selfAction" beanName="selfAction"/>
   <tiles:put name="autoInventory" beanName="autoInventory"/>
 </tiles:insert>
-<input type=hidden name="eid" value="<c:out value="${entityId}"/>/>
-<input type="hidden" name="accord" value="2"/>
-</html:form>
 </div>
 </div>
 
