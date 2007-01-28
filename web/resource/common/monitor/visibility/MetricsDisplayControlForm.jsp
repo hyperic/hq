@@ -156,7 +156,7 @@
             </html:select>
           </td>
           <td><html:image property="range" page="/images/dash-button_go-arrow.gif" border="0"/></td>
-          <td width="100%">
+          <td width="100%" style="padding-left: 5px;">
             <html:link href="javascript:showAdvanced()"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.AdvancedSettingsBtn"/></html:link>
           </td>
         </tr>
