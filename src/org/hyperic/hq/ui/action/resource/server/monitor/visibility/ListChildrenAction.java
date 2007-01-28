@@ -74,12 +74,8 @@ public class ListChildrenAction extends TilesAction {
         ServletContext ctx = getServlet().getServletContext();
         MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
 
-        Boolean isInternal =
-            new Boolean((String) context.getAttribute(Constants.CTX_INTERNAL));
-        
         List internalHealths =
-            boss.findSummarizedServiceCurrentHealth(sessionId, entityId,
-                                                    isInternal.booleanValue());
+            boss.findSummarizedServiceCurrentHealth(sessionId, entityId);
 
         context.putAttribute(Constants.CTX_SUMMARIES, internalHealths);
 

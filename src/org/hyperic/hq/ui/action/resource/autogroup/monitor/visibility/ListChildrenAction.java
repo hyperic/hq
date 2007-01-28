@@ -31,18 +31,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelper;
-import org.hyperic.hq.ui.action.resource.platform.monitor.visibility.RootInventoryHelper;
-import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
@@ -50,6 +38,15 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelper;
+import org.hyperic.hq.ui.action.resource.platform.monitor.visibility.RootInventoryHelper;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  *
@@ -73,12 +70,9 @@ public class ListChildrenAction extends TilesAction {
             return null;
         }
         
-        AppdefEntityID entityId = resource.getEntityId();
-
         Integer sessionId = RequestUtils.getSessionId(request);
         ServletContext ctx = getServlet().getServletContext();
-        MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
-
+        
         Boolean isInternal =
             new Boolean((String) context.getAttribute(Constants.CTX_INTERNAL));
         

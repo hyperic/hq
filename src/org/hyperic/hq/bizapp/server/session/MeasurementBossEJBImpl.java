@@ -2735,6 +2735,23 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             (AppdefResourceValue[]) services.toArray(
                 new AppdefResourceValue[services.size()]));
     }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public List findSummarizedServiceCurrentHealth(int sessionId,
+                                                   AppdefEntityID entId)
+        throws SessionTimeoutException, SessionNotFoundException,
+               PermissionException, AppdefEntityNotFoundException {
+        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        
+        // Get the associated services        
+        AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
+        List services= rv.getAssociatedServices(PageControl.PAGE_ALL);
+        return getSummarizedResourceCurrentHealth(subject, 
+            (AppdefResourceValue[]) services.toArray(
+                new AppdefResourceValue[services.size()]));
+    }
 
     /**
      * Method findSummarizedGroupCurrentHealth.

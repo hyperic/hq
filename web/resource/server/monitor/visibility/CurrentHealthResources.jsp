@@ -43,21 +43,8 @@
     <td>
       <tiles:insert definition=".resource.server.monitor.visibility.listchildresources">
         <tiles:put name="mode" beanName="mode"/>
-        <tiles:put name="internal" value="false"/>
         <tiles:put name="childResourceType" value="3"/>
-        <tiles:put name="childResourcesHealthKey" value="resource.common.monitor.visibility.DeployedServicesHealthTab"/>
-        <tiles:put name="childResourcesTypeKey" value="resource.server.monitor.visibility.ServiceTypeTH"/>
-        <tiles:put name="checkboxes" beanName="showProblems"/>
-      </tiles:insert>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <tiles:insert definition=".resource.server.monitor.visibility.listchildresources">
-        <tiles:put name="mode" beanName="mode"/>
-        <tiles:put name="internal" value="true"/>
-        <tiles:put name="childResourceType" value="3"/>
-        <tiles:put name="childResourcesHealthKey" value="resource.common.monitor.visibility.InternalServicesHealthTab"/>
+        <tiles:put name="childResourcesHealthKey" value="resource.server.inventory.ServicesTab"/>
         <tiles:put name="childResourcesTypeKey" value="resource.server.monitor.visibility.ServiceTypeTH"/>
         <tiles:put name="checkboxes" beanName="showProblems"/>
       </tiles:insert>
