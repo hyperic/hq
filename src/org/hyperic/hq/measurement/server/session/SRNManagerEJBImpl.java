@@ -162,10 +162,12 @@ public class SRNManagerEJBImpl extends SessionEJB
             cache.put(srn);
         } else {
             srn.setSrn(srn.getSrn() + 1);
+            // Since the SRNs are cached outside of hibernate, we must call
+            // save to synchronize with the database.
+            getScheduleRevNumDAO().save(srn);
             _log.debug("Updated SRN for "+ aid + " to " + srn.getSrn());
         }
 
-        long now = System.currentTimeMillis();
         if (newMin > 0 && newMin < srn.getMinInterval()) {
             srn.setMinInterval(newMin);
         } else {

@@ -51,6 +51,10 @@ public class ScheduleRevNumDAO extends HibernateDAO {
         super.remove(entity);
     }
 
+    public void save(ScheduleRevNum entity) {
+        super.save(entity);
+    }
+
     public ScheduleRevNum create(int entType, int entId) {
         
         SrnId srnId = new SrnId(entType, entId);
