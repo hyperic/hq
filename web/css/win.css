@@ -100,7 +100,15 @@ A.ListHeaderLink:hover {color: #004680; text-decoration: underline;}
 .ListCellLineEmpty {background-color: #FFFFFF; padding: 0px;}
 .ListCellPrimary {padding: 3px; border-bottom: solid #D5D8DE; border-width: 1px; font-weight: bold;}
 
-.LinkBox, .DropDown {padding: 3px; border: solid #D5D8DE; border-width: 1px; background-color:#F2F9FF; color: #003399; text-decoration: none; font-weight: bold;}
+.LinkBox, .DropDown {
+  padding: 3px;
+  border: 1px solid;
+  border-color: #BDCEF0 #477DDF #477DDF #BDCEF0; 
+  background-color:#EDF0F8;
+  color: #003399;
+  text-decoration: none;
+  font-weight: bold;
+}
 
 .DropDown {
   font-size: 11px;
@@ -304,18 +312,27 @@ filter: alpha(opacity=85);
 
 }
 
+#InventoryProps, .menu {
+  position: absolute;
+  background-color: #F2F4F7;
+  border: 2px solid;
+  border-color: #f7faff #99a #99a #f7faff;
+  filter: alpha(opacity=90);
+  opacity: 0.9;
+}
+
+#InventoryProps {
+  width: 95%;
+  padding: 5px;
+}
+
 /* These are the style specifications for the menu layers.
    Set width to get more browsers corporation  */
 .menu {
-  position:absolute;
-  visibility:hidden;
+  visibility: hidden;
   width:24em; left:0; top:0;
   font-size:10px;
-  background-color: #E6E6E6; color:#000;
-  filter: alpha(opacity=90);
-  opacity: 0.9;
-  border: 2px solid;
-  border-color: #f7faff #99a #99a #f7faff;
+  color:#000;
   z-index:500;
 }
 

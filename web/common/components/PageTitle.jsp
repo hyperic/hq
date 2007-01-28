@@ -106,7 +106,15 @@
   <tr valign="top"> 
   <c:choose>
     <c:when test="${not empty resource}">
+
     <td colspan="2">
+      <span class="LinkBox" onclick="toggleMenu('InventoryProps');" id="toolMenuSpan">
+      <fmt:message key="resource.common.inventory.props.PropertiesBtn">
+        <fmt:param value="${resource.name}"/>
+      </fmt:message>
+      <html:img page="/images/arrow_dropdown.gif" styleId="toolMenuSpan" border="0"/></a></span>
+      <div style="clear: all;"></div>
+      <div id="InventoryProps" style="display: none; margin-top: 4px;" onclick="toggleMenu('InventoryProps');">
       <table width="100%" border="0" cellspacing="0" cellpadding="0">
         <tr> 
           <td class="PageTitleSmallText" valign="top">
@@ -117,7 +125,7 @@
     <td class="PageTitleSmallText" valign="top" colspan="2" nowrap>
       <b><fmt:message key="resource.common.inventory.props.OwnerLabel"/></b> <c:out value="${ownerStr}" escapeXml="false"/> 
       <c:if test="${not empty resource}">
-        - <html:link page="/resource/${resource.entityId.typeName}/Inventory.do?mode=changeOwner&rid=${resource.id}&type=${resource.entityId.type}"><fmt:message key="resource.common.inventory.props.ChangeButton"/></html:link><br>
+        <fmt:message key="common.label.Dash"/> <html:link page="/resource/${resource.entityId.typeName}/Inventory.do?mode=changeOwner&rid=${resource.id}&type=${resource.entityId.type}"><fmt:message key="resource.common.inventory.props.ChangeButton"/></html:link><br>
       </c:if>
           </td>
         </tr>
@@ -146,14 +154,14 @@
   </tr>
 </c:if>
 </logic:present>
+      </table>
+      </div>
       <c:if test="${empty ResourceType}">
-        <tr><td colspan="3">
         <tiles:insert definition=".resource.common.navmap">
           <tiles:put name="resource" beanName="resource"/>
         </tiles:insert>
-        </td></tr>
       </c:if>
-      </table>
+
     </td>
     </c:when>
     <c:when test="${showSearch}">
