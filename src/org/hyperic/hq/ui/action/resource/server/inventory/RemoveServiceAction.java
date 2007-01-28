@@ -71,13 +71,12 @@ public class RemoveServiceAction extends BaseAction {
         RemoveResourceForm nwForm = (RemoveResourceForm) form;
             
         Integer[] resources = nwForm.getResources();
-        Integer rid = nwForm.getRid();
-        int type = nwForm.getType().intValue();
-        Map params = new HashMap();
+        Map params = new HashMap(2);
         params.put(Constants.ENTITY_ID_PARAM,
-                   (new AppdefEntityID(type, rid)).getAppdefKey());
+                   new AppdefEntityID(nwForm.getEid()));
+        params.put(Constants.ACCORDION_PARAM, "1");
             
-        if (resources == null || resources.length == 0){
+        if (resources == null || resources.length == 0) {
             returnSuccess(request, mapping, params); 
         }
 
@@ -89,8 +88,7 @@ public class RemoveServiceAction extends BaseAction {
         log.trace("removing resource");                                                      
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
 
-        for (int i = 0; i < resources.length; i++)
-        {
+        for (int i = 0; i < resources.length; i++) {
             boss.removeService(sessionId.intValue(), resources[i]);
         }
 
