@@ -163,8 +163,9 @@
       </c:choose>
       </td>
       <td class="ListCellCheckbox">
-        <html:link page="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=${mode}&eid=${summary.resourceTypeId}:${summary.resourceId}"><html:img page="/images/comment.gif" onmouseover="menuLayers.show('${summary.resourceName}_menu', event)" onmouseout="menuLayers.hide()" border="0"/>
-        </html:link>
+        <!--<html:link page="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=${mode}&eid=${summary.resourceTypeId}:${summary.resourceId}">-->
+        <html:img page="/images/comment.gif" onmouseover="menuLayers.show('${summary.resourceName}_menu', event)" onmouseout="menuLayers.hide()" border="0"/>
+        <!--</html:link>-->
       </td>
     </tr>
     </c:forEach>

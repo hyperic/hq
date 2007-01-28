@@ -105,7 +105,9 @@
       <html:img page="/resource/Availability?eid=${summary.resourceTypeId}:${summary.resourceId}" width="12" height="12" alt="" border="0"/>
     </td>
     <td class="ListCellCheckbox">
-      <a href="<c:out value="${url}"/>"><html:img page="/images/comment.gif" onmouseover="menuLayers.show('${summary.resourceTypeId}_${summary.resourceId}_menu', event)" onmouseout="menuLayers.hide()" border="0"/></a>
+      <!--<a href="<c:out value="${url}"/>">-->
+      <html:img page="/images/comment.gif" onmouseover="menuLayers.show('${summary.resourceTypeId}_${summary.resourceId}_menu', event)" onmouseout="menuLayers.hide()" border="0"/>
+      <!--</a>-->
     </td>
   </tr>
 

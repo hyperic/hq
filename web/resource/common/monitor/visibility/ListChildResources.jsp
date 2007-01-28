@@ -233,9 +233,9 @@
 
     </td>
   <td class="ListCellCheckbox" style="padding-right:2px;padding-top:2px;">
-    <a href="<c:out value="${url}"/>">
+    <!--<a href="<c:out value="${url}"/>">-->
       <html:img page="/images/comment.gif" onmouseover="menuLayers.show('${summary.resourceType.name}_menu', event)" onmouseout="menuLayers.hide()" border="0"/>
-    </a>
+    <!--</a>-->
     </td>
   </tr>
     
