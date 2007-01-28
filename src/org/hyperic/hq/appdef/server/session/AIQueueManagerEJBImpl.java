@@ -597,11 +597,13 @@ public class AIQueueManagerEJBImpl
                 syncQueue(aiplatform.getAIPlatformValue(), isApproveAction);
             }
             
-            // See above note, now we remove approved servers from the queue
-            Collection servers = aiplatform.getAIServers();
-            if (servers != null) {
-                for (i=0; i<aiserversToRemove.size(); i++) {
-                    servers.remove(aiserversToRemove.get(i));
+            if (aiplatform != null) {
+                // See above note, now we remove approved servers from the queue
+                Collection servers = aiplatform.getAIServers();
+                if (servers != null) {
+                    for (i=0; i<aiserversToRemove.size(); i++) {
+                        servers.remove(aiserversToRemove.get(i));
+                    }
                 }
             }
         }
