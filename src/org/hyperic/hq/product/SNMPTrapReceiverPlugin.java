@@ -26,7 +26,7 @@ public class SNMPTrapReceiverPlugin extends LogTrackPlugin {
         super.shutdown();
 
         try {
-            getReceiver().add(this);
+            getReceiver().remove(this);
         } catch (IOException e) {
             throw new PluginException(e.getMessage(), e);
         }
