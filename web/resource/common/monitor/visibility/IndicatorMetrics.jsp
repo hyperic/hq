@@ -173,12 +173,12 @@
     <c:if test="${resourceType != metric.type}">
       <c:set var="resourceType" value="${metric.type}"/>
       <tr>
-        <td class="ListCellSelected" colspan="3"><c:out value="${resourceType}"/></td>
+        <td class="ListCell" colspan="3"><span class="BoldText" style="margin-left: 2px;"><c:out value="${resourceType}"/></span></td>
       </tr>
     </c:if>
 
     <tr>
-      <td class="ListCell" style="padding-left: 8px;"><c:out value="${metric.name}"/></td>
+      <td class="ListCell" style="padding-left: 10px;"><c:out value="${metric.name}"/></td>
       </td>
       <td class="ListCell">
       <html:img page="/images/comment.gif" onmouseover="menuLayers.show('metric_menu_${metric.templateId}', event)" onmouseout="menuLayers.hide()" border="0"/>
