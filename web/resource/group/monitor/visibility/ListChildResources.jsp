@@ -133,7 +133,7 @@
       <td class="ListCellCheckbox"><html:multibox property="eids" value="${summary.entityId}" styleClass="${listMembersName}" onchange="ToggleGroup(this, widgetProperties)"/></td>
       </c:if>
       <td width="1%" class="ListCellCheckbox">
-        <html:img page="/images/icon_resource.gif" height="10" width="11" border="0" alt=""/>
+        <html:img page="/images/spacer.gif" height="10" width="11" border="0" alt=""/>
       </td>
       <td class="ListCell">
         <html:link page="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=${mode}&eid=${summary.resourceTypeId}:${summary.resourceId}"><c:out value="${summary.resourceName}"/></html:link>

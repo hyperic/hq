@@ -125,7 +125,7 @@ symbol="SUMMARY_TYPE_SINGLETON" var="SINGLETON" />
       <html:img page="/images/icon_cluster.gif" height="10" width="11" border="0" alt=""/>
       </c:when>
       <c:otherwise>
-      <html:img page="/images/icon_resource.gif" height="10" width="11" border="0" alt=""/>
+      <html:img page="/images/spacer.gif" height="10" width="11" border="0" alt=""/>
       </c:otherwise>
     </c:choose>
     </td>

@@ -312,7 +312,7 @@ filter: alpha(opacity=85);
 
 }
 
-#InventoryProps, .menu {
+#InventoryProps, #toolMenu, .menu {
   position: absolute;
   background-color: #F2F4F7;
   border: 2px solid;
