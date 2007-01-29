@@ -124,12 +124,15 @@ function showEscRows(originalRequest) {
     td3 = document.createElement("td");
     td3.setAttribute((document.all ? 'className' : 'class'), "ListCell");
     td3.setAttribute('style', 'text-align: right');
-    td3.innerHTML = '<a href="<html:rewrite action="/admin/config/RemoveEscalation"/>' + '?esc=' + schemes[i].id + '">' + $('deleteBtn').innerHTML + '</a>';
-      if (schemes[i].id == '<c:out value="${param.escId}"/>') {
-       
-       td3.setAttribute((document.all ? 'className' : 'class'), "selectedHighlight");
-      }
-      tr.appendChild(td3);
+
+    if (schemes.length > 1) {
+      td3.innerHTML = '<a href="<html:rewrite action="/admin/config/RemoveEscalation"/>' + '?esc=' + schemes[i].id + '">' + $('deleteBtn').innerHTML + '</a>';
+    }
+
+    if (schemes[i].id == '<c:out value="${param.escId}"/>') {
+      td3.setAttribute((document.all ? 'className' : 'class'), "selectedHighlight");
+    }
+    tr.appendChild(td3);
 
     escalations.appendChild(tr);
   }
