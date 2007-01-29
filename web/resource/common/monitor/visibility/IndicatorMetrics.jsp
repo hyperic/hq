@@ -38,12 +38,17 @@
 
 <!-- Toobar -->
 <c:if test="${not hideTools}">
-<table width="100%" cellpadding="5" cellspacing="0" border="0" class="ToolbarContent">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" class="ToolbarContent" style="padding-bottom:5px;margin-top:-10px;border-top:1px solid #003366;border-bottom:1px solid #003366;">
   <tr>
-    <td><html:image page="/images/fb_addResourcesApply.gif" border="0" onmouseover="imageSwap(this, imagePath + 'fb_addResourcesApply', '_over');" onmouseout="imageSwap(this, imagePath +  'fb_addResourcesApply', '');" onmousedown="imageSwap(this, imagePath +  'fb_addResourcesApply', '_down')"/>
+    <td style="padding-top:3px;padding-right:5px;padding-left:5px;" width="22" valign="top"><html:image page="/images/arrow_branch.gif" border="0"/></td>
+    <td align="left" style="padding-top:5px;padding-right:5px;"><html:image page="/images/fb_addResourcesApply.gif" border="0" onmouseover="imageSwap(this, imagePath + 'fb_addResourcesApply', '_over');" onmouseout="imageSwap(this, imagePath +  'fb_addResourcesApply', '');" onmousedown="imageSwap(this, imagePath +  'fb_addResourcesApply', '_down')"/>
     <html:hidden property="fresh" value="false"/>
     </td>
-  </tr>
+    <td style="padding-top:3px;">Select Resources above to view Metrics then click button</td><td style="padding-left:5px;padding-right:3px;" valign="bottom"> <html:image page="/images/icon_info2.gif" onmouseover="menuLayers.show('stepInfo', event)" onmouseout="menuLayers.hide()" border="0"/></td>
+
+
+ </tr>
+ 
 </table>
 </c:if>
 
@@ -207,3 +212,10 @@
   </c:otherwise>
 </c:choose>
 
+<div id="stepInfo" class="menu">
+  <ul>
+    <li><div class="BoldText">Step 1: Select resources above whose metrics you want to see</div></li>
+    <li><div class="BoldText">Step 2: Click "Set Resources" to show their metrics below</div></li>
+    <li><div class="BoldText">Step 3: Click the right arrow next to a metric to see its chart in the view</div></li>
+  </ul>
+</div>
