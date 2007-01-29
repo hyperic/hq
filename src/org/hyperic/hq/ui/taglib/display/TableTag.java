@@ -149,11 +149,11 @@ public class TableTag extends TablePropertyTag {
     private HttpServletResponse res;
     private JspWriter out;
     private HttpServletRequest req;
-    private StringBuffer buf = new StringBuffer( 8192 );
+    private StringBuffer buf = new StringBuffer(8192);
     
     // variables to hold the previous row columns values.
-    protected Hashtable previousRow = new Hashtable( 10 );
-    protected Hashtable nextRow = new Hashtable( 10 );
+    protected Hashtable previousRow = new Hashtable(10);
+    protected Hashtable nextRow = new Hashtable(10);
     private ColumnDecorator[] colDecorators;
     
     private boolean started = false;
@@ -163,17 +163,13 @@ public class TableTag extends TablePropertyTag {
      * static footer added using the footer tag.
      */
     private String footer;
-    
-    //------------------------------------------------------ static members
+
     private static Log log = LogFactory.getLog(TableTag.class.getName());
 
-    //------------------------------------------------------ support methods
     public void release() {
-        
-        log.debug("releasing values");
-        
+
         super.release();
-        columns = new ArrayList( 10 );
+        columns = new ArrayList(10);
         currentNumCols = 0;
         numCols = 0;
         
@@ -182,11 +178,11 @@ public class TableTag extends TablePropertyTag {
         pageSize = Constants.PAGESIZE_DEFAULT.intValue();
         sortOrder = Constants.SORTORDER_ASC;    
     
-        buf = new StringBuffer( 8192 );
+        buf = new StringBuffer(8192);
     
         // variables to hold the previous row columns values.
-        previousRow = new Hashtable( 10 );
-        nextRow = new Hashtable( 10 );
+        previousRow = new Hashtable(10);
+        nextRow = new Hashtable(10);
         colDecorators = null;
     
         started = false;
@@ -194,9 +190,6 @@ public class TableTag extends TablePropertyTag {
         this.footer = null;
     }
 
-    
-    // ---------------------------------------- Communication with interior tags
-    
     /**
      * Called by interior column tags to help this tag figure out how it is
      * supposed to display the information in the List it is supposed to
@@ -214,9 +207,7 @@ public class TableTag extends TablePropertyTag {
         columns = new ArrayList(10);
         currentNumCols = 0;
     }
-    
-    // --------------------------------------------------------- Tag API methods
-    
+
     /**
      * When the tag starts, we just initialize some of our variables, and do a
      * little bit of error checking to make sure that the user is not trying
@@ -225,9 +216,7 @@ public class TableTag extends TablePropertyTag {
      * @return value returned by super.doStartTag()
      **/
     public int doStartTag() throws JspException {
- 
-        log.debug("beginning of doStartTag()");        
-        
+
         prop =(Properties) pageContext.getServletContext().getAttribute(Constants.PROPS_TAGLIB_NAME);    
         req = (HttpServletRequest) this.pageContext.getRequest();
         res = (HttpServletResponse)this.pageContext.getResponse();
@@ -237,9 +226,8 @@ public class TableTag extends TablePropertyTag {
 
         // Load our table decorator if it is requested
         this.dec = this.loadDecorator();
-        if( this.dec != null ) {
-            log.debug("table decorator found: " + this.dec);
-            this.dec.init( this.pageContext, viewableList );
+        if(this.dec != null) {
+            this.dec.init(this.pageContext, viewableList);
         }
         
         return super.doStartTag();
@@ -253,9 +241,7 @@ public class TableTag extends TablePropertyTag {
      * @exception JspException if a JSP exception has occurred
      */
     public int doAfterBody() throws JspException {
-	    
-        log.debug("in doAfterBody()");
-        
+
         if (!started) {
             numCols = currentNumCols;
 
@@ -266,7 +252,6 @@ public class TableTag extends TablePropertyTag {
                 ColumnDecorator coldec = tmpTag.getDecorator();
                 colDecorators[c] = coldec;
                 if (colDecorators[c] != null) {
-                    log.debug("adding column decorator: " + colDecorators[c]);
                     colDecorators[c].init( this.pageContext, masterList );
                 }
             }
@@ -370,10 +355,11 @@ public class TableTag extends TablePropertyTag {
             // Todo, figure out how to sort this better....
             //Collections.sort( (List)collection, tag.getValue() );
         } else {
-            Collections.sort( viewableData, new BeanSorter( tag.getProperty(), this.dec ) );
+            Collections.sort( viewableData, new BeanSorter(tag.getProperty(),
+                                                           this.dec ) );
         }
         
-        if( (Constants.SORTORDER_DEC).equals(sortOrder) ){
+        if( (Constants.SORTORDER_DEC).equals(sortOrder)){
             Collections.reverse( viewableData );
         }
         
@@ -385,11 +371,10 @@ public class TableTag extends TablePropertyTag {
      * @param row The list object to format as HTML.
      * @return The object formatted as HTML.
      */
-    protected StringBuffer generateRow(Object row, int rowcnt) throws JspException {
-
-        log.trace("generating row with count: " + rowcnt);
-        
-        StringBuffer buf = new StringBuffer( 8192 );
+    protected StringBuffer generateRow(Object row, int rowcnt)
+        throws JspException
+    {
+        StringBuffer buf = new StringBuffer(8192);
 
         if( this.dec != null ) {
             String rt = this.dec.initRow( row, rowcnt, rowcnt + offSet );
@@ -399,23 +384,23 @@ public class TableTag extends TablePropertyTag {
         try {
             for (int c = 0; c < currentNumCols; c++) {
                 if (colDecorators[c] != null) {
-                    log.trace("initializing decorator: " + colDecorators[c]);
-                    colDecorators[c].initRow(row, rowcnt, rowcnt  + (pageSize * (this.pageNumber - 1)));
+                    colDecorators[c].initRow(row, rowcnt, rowcnt  +
+                        (pageSize * (this.pageNumber - 1)));
                 }
             }
             
         } catch (Throwable t) {
             throw new JspException(t);
         }
-        pageContext.setAttribute( "smartRow", row );
+        pageContext.setAttribute("smartRow", row);
         
         // Start building the row to be displayed...
         buf.append( "<tr" );
         
         if( rowcnt % 2 == 0 ) {
-            buf.append( " class=\"tableRowOdd\"" );
+            buf.append(" class=\"tableRowOdd\"");
         } else {
-            buf.append( " class=\"tableRowEven\"" );
+            buf.append(" class=\"tableRowEven\"");
         }
         
         buf.append( ">\n" );
@@ -447,7 +432,8 @@ public class TableTag extends TablePropertyTag {
                 } else if ( tag.getProperty().equals( "null" )) {
                     value = ""; /* user doesn't want output, using c:set or something */
                 } else {
-                    value = this.lookup( pageContext, "smartRow", tag.getProperty(), null, true );
+                    value = this.lookup(pageContext, "smartRow",
+                                        tag.getProperty(), null, true);
                     
                     if (colDecorators[i] != null) {
                         try {
@@ -460,7 +446,6 @@ public class TableTag extends TablePropertyTag {
                                 + " encountered a problem: ", e);
                         }
                      }
-                    
                 }
             }
             
@@ -625,10 +610,6 @@ public class TableTag extends TablePropertyTag {
         
         return buf;
     }
-    
-    
-    
-    // -------------------------------------------------------- Utility Methods
 
     private String spacerImg() {
         return req.getContextPath() + "/images/spacer.gif";
@@ -678,10 +659,8 @@ public class TableTag extends TablePropertyTag {
      * @return Table header in HTML format
      */
     protected String getTableHeader() throws JspException {
-        
-        log.trace("generating table header");
-        
-        StringBuffer buf = new StringBuffer( 1024 );        
+
+        StringBuffer buf = new StringBuffer(1024);
         HttpServletRequest req = (HttpServletRequest)this.pageContext.getRequest();
         String url = makeUrl(false);
         
@@ -709,7 +688,7 @@ public class TableTag extends TablePropertyTag {
 
         for( int i = 0; i < currentNumCols; i++ ) {
 
-            LocalizedColumnTag tag = (LocalizedColumnTag) this.columns.get( i );
+            LocalizedColumnTag tag = (LocalizedColumnTag) this.columns.get(i);
 
             if (colsToSkip > 0) {
                 // we're in the middle of a colspan, so skip this
@@ -865,9 +844,7 @@ public class TableTag extends TablePropertyTag {
      * @return HTML formatted table footer
      **/
     protected String getTableFooter() throws JspException {
-        
-        log.trace("generating footer");
-        
+
         StringBuffer buf = new StringBuffer( 1024 );
         
         HttpServletRequest req = (HttpServletRequest)this.pageContext.getRequest();
@@ -974,9 +951,9 @@ public class TableTag extends TablePropertyTag {
      *   It then groups the column and returns the appropritate string back to the
      *   caller.
      */
-    protected String group ( String value, int group ) {
+    protected String group(String value, int group) {
         
-        if( ( group == 1 ) & this.nextRow.size() > 0 ) { // we are at the begining of the next row so copy the contents from .
+        if((group == 1) & this.nextRow.size() > 0) { // we are at the begining of the next row so copy the contents from .
             // nextRow to the previousRow.
             this.previousRow.clear();
             this.previousRow.putAll( nextRow );
@@ -984,9 +961,9 @@ public class TableTag extends TablePropertyTag {
         }
         
         
-        if( !this.nextRow.containsKey( new Integer( group ) ) ) {
+        if(!this.nextRow.containsKey(new Integer(group))) {
             // Key not found in the nextRow so adding this key now... remember all the old values.
-            this.nextRow.put( new Integer( group ), new String( value ) );
+            this.nextRow.put(new Integer(group), new String(value));
         }
         
         /**
@@ -996,12 +973,11 @@ public class TableTag extends TablePropertyTag {
          *  so reuturn ""
          **/
         
-        if( this.previousRow.containsKey( new Integer( group ) ) ) {
+        if(this.previousRow.containsKey(new Integer(group))) {
             for( int x = 1; x <= group; x++ ) {
                 
-                if( !( (String)this.previousRow.get( new Integer( x ) ) ).equals(
-                ( (String)this.nextRow.get( new Integer( x ) )
-                ) ) ) {
+                if(!((String)this.previousRow.get(new Integer(x))).equals(
+                    ((String)this.nextRow.get(new Integer(x))))) {
                     // no match found so return this value back to the caller.
                     return value;
                 }
@@ -1013,7 +989,7 @@ public class TableTag extends TablePropertyTag {
          * It gets used only the firt time.
          **/
         
-        if( this.previousRow.size() == 0 ) {
+        if(this.previousRow.size() == 0) {
             return value;
         }
         
@@ -1021,17 +997,6 @@ public class TableTag extends TablePropertyTag {
         // There is corresponding value in the previous row so this value need not be printed, return ""
         return "<!-- returning from table tag -->"; // we are done !.
     }
-    
-    /* XXX not used?
-    protected void clearHashForColumGroupings()
-    {
-      // clear the hashes so that the hash does not have any reside from previous reports and not cause any
-      // problems.
-      this.previousRow.clear();
-      this.nextRow.clear();
-    }
-    */
-    
     
     /**
      * Takes all the table pass-through arguments and bundles them up as a
@@ -1172,9 +1137,7 @@ public class TableTag extends TablePropertyTag {
 			  String name,
 			  String scope )
 	throws JspException {
-        
-        log.trace("looking up: " + name + " in scope: " + scope);
-        
+
         Object bean = null;
         if( scope == null )
             bean = pageContext.findAttribute( name );
@@ -1225,24 +1188,20 @@ public class TableTag extends TablePropertyTag {
      *  InvocationTargetException, or NoSuchMethodException
      */
     
-    public Object lookup( PageContext pageContext,
-			  String name,
-			  String property,
-			  String scope, boolean useDecorator )
-	       throws JspException {
-        
-        log.trace("looking up: " + name + ":" + property + " in scope: " + scope);
-        
-        if ( useDecorator && this.dec != null ) {
+    public Object lookup(PageContext pageContext, String name,
+			             String property, String scope, boolean useDecorator)
+	       throws JspException
+    {
+
+        if (useDecorator && this.dec != null) {
             // First check the decorator, and if it doesn't return a value
             // then check the inner object...         
             try {
-                if ( property == null ) {
+                if (property == null) {
                     return this.dec;
                 }
                 return ( PropertyUtils.getProperty( this.dec, property ) );
             } catch ( IllegalAccessException e ) {
-                log.debug("bean access failed:", e);
                 Object[] objs = {name, this.dec};
                 if (prop.getProperty( "error.msg.illegal_access_exception" ) != null) {         
                     throw new JspException( MessageFormat.
@@ -1253,7 +1212,6 @@ public class TableTag extends TablePropertyTag {
                         "property " + name + " from bean " + dec);
                 }
             } catch ( InvocationTargetException e ) {
-                log.debug("bean invocation failed:", e);
                 Object[] objs = {name, this.dec};
                 if (prop.getProperty( "error.msg.invocation_target_exception" ) != null) {         
                     throw new JspException( MessageFormat.
@@ -1265,7 +1223,6 @@ public class TableTag extends TablePropertyTag {
                 }
 
             } catch ( NoSuchMethodException e ) {
-                log.debug("bean getter property access failed:", e);
                 throw new JspException(" bean property getter not found");
             }
         }
@@ -1275,7 +1232,6 @@ public class TableTag extends TablePropertyTag {
         if( property == null ) return ( bean );
         
         if( bean == null ) {
-            log.debug("expected bean was null");
             Object[] objs = {name, scope};
             if (prop.getProperty("error.msg.cant_find_bean") != null) {
                 throw new JspException(MessageFormat.format( prop.getProperty("error.msg.cant_find_bean"), objs ) );
@@ -1289,7 +1245,6 @@ public class TableTag extends TablePropertyTag {
             return ( PropertyUtils.getProperty( bean, property ) );
         } catch( IllegalAccessException e ) {
             Object[] objs = {property, name};
-            log.debug("bean access failed:", e);
             if (prop.getProperty( "error.msg.illegal_access_exception" ) != null) {         
                 throw new JspException( MessageFormat.
                     format( prop.getProperty( "error.msg.illegal_access_exception" ), 
@@ -1309,7 +1264,6 @@ public class TableTag extends TablePropertyTag {
                     "property " + name + " from bean " + dec);
             }        
         }  catch (NoSuchMethodException e ) {
-            log.debug("bean getter property access failed:", e);
             throw new JspException(" bean getter for property " + property + 
                 "  not found in bean " + name);
         }    
@@ -1325,7 +1279,6 @@ public class TableTag extends TablePropertyTag {
      */
     
     protected Decorator loadDecorator() throws JspException {
-        log.trace("loading decorator");
         
         if( getDecorator() == null || getDecorator().length() == 0 ) {
             return null;
@@ -1333,15 +1286,13 @@ public class TableTag extends TablePropertyTag {
         try {
             Class c = Class.forName( getDecorator() );
             
-            if( !Class.forName( "org.hyperic.hq.ui.taglib.display.Decorator" ).isAssignableFrom( c ) ) {
-                throw new JspException( "invalid decorator" );
+            if(!Class.forName("org.hyperic.hq.ui.taglib.display.Decorator").
+                isAssignableFrom(c)) {
+                throw new JspException("Invalid decorator");
             }
-            
             Decorator d = (Decorator)c.newInstance();
-            log.debug("found decorator: " + d);
             return d;
-        } catch( Exception e ) {
-            log.debug("loading and instantiating decorator failed: ", e);
+        } catch(Exception e) {
             throw new JspException("failure loading and instanting decorator " + 
                 e.toString() );
         }
@@ -1359,7 +1310,7 @@ public class TableTag extends TablePropertyTag {
      * I'm doing this via brute-force since I don't want to be dependent on a
      * third party regex package.
      */
-    protected String autoLink( String data ) {
+    protected String autoLink(String data) {
         String work = new String( data );
         int index = -1;
         String results = "";
@@ -1455,18 +1406,6 @@ public class TableTag extends TablePropertyTag {
      */
     protected boolean isFirstIteration()
     {
-        if (log.isDebugEnabled())
-        {
-            log.debug("["
-                + getId()
-                + "] first iteration="
-                + (this.rowcnt == 0)
-                + " (row number="
-                + this.rowcnt
-                + ")");
-        }
-        // in first iteration rowcnt is 0
-        // (rowcnt is incremented in doAfterBody)
         return this.rowcnt == 0;
     }
 
