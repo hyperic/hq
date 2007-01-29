@@ -164,10 +164,6 @@ public class AgentScheduleSynchronizer {
             
             // Build the graph
             graphs[i] = GraphBuilder.buildGraph(tmpl);
-            if ( log.isDebugEnabled() ) {
-                String gString = graphs[i].toString();
-                log.debug(gString);
-            }
             
             DerivedNode derivedNode = (DerivedNode)
                 graphs[i].getNode( tmpl.getId().intValue() );

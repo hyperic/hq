@@ -270,12 +270,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 long interval = intervals[i];
 
                 graphs[i] = GraphBuilder.buildGraph(dTemplateId);
-                
-                if ( log.isDebugEnabled() ) {
-                    // a gString may be expensive, make sure debug is enabled
-                    String gString = graphs[i].toString();
-                    log.debug(gString);
-                }
 
                 DerivedNode derivedNode = (DerivedNode)
                     graphs[i].getNode( dTemplateId.intValue() );
