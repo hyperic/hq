@@ -52,7 +52,7 @@ input.CompactButtonInactive {
 .PageTitlePlatformBg {background-color: #F2EAE4;}
 .PageTitleServiceBg {background-color: #E1EFF0;}
 .PageTitleApplicationBg {background-color: #ECE6F7;}
-.PageTitleSmallText {font-size: 11px; color: #666666; line-height: 14px;}
+.PageTitleSmallText {font-size: 11px; line-height: 14px;}
 
 /* BLOCK & LIST */
 .ListTitle, .BlockTitle {font-size: 12px; color: #ffffff; font-weight: bold; background-color: #60a5ea; padding: 3px;}
@@ -312,11 +312,10 @@ filter: alpha(opacity=85);
 
 }
 
-#InventoryProps, #toolMenu, .menu {
+#InventoryProps, .menu {
   position: absolute;
   background-color: #F2F4F7;
-  border: 2px solid;
-  border-color: #f7faff #99a #99a #f7faff;
+  border: 2px solid #99a;
   filter: alpha(opacity=90);
   opacity: 0.9;
 }
