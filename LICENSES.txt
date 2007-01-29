@@ -102,3 +102,6 @@ License: http://prototype-window.xilinus.com/index.html
 Information:  http://dcl.mathcs.emory.edu/util/backport-util-concurrent
 License: http://creativecommons.org/licenses/publicdomain
 
+- FAMFAMFAM -
+Information: http://www.famfamfam.com/lab/icons/silk/
+License: http://creativecommons.org/licenses/by/2.5/
