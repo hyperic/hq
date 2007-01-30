@@ -58,7 +58,7 @@ public final class GalertEscalationAlertType
         return getGalertMan().findById(defId);
     }
 
-    public void setEscalation(Integer defId, Escalation escalation) {
+    protected void setEscalation(Integer defId, Escalation escalation) {
         getGalertMan().findById(defId).setEscalation(escalation);
     }
 

@@ -82,7 +82,7 @@ public final class ClassicEscalationAlertType
         }
     }
     
-    public void setEscalation(Integer defId, Escalation escalation) {
+    protected void setEscalation(Integer defId, Escalation escalation) {
         try {
             getDefMan().getByIdNoCheck(defId).setEscalation(escalation);
         } catch(FinderException e) {
