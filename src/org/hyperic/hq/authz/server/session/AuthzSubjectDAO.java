@@ -98,6 +98,8 @@ class AuthzSubjectDAO
         return (AuthzSubject)getSession().createQuery(sql)
             .setString(0, name)
             .setString(1, dsn)
+            .setCacheable(true)
+            .setCacheRegion("AuthzSubject.findByAuth")
             .uniqueResult();
     }
 
