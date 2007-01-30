@@ -35,176 +35,133 @@ import org.hyperic.hq.appdef.shared.AppSvcClustIncompatSvcException;
 import java.util.Collection;
 import java.util.List;
 
-/**
- *
- */
 public class ServiceCluster extends AppdefBean
 {
-    private String _foobar;
-    private String name;
-    private String sortName;
-    private String description;
-    private Integer groupId;
-    private ServiceType serviceType;
-    private Collection appServices;
-    private Collection services;
+    private String _name;
+    private String _sortName;
+    private String _description;
+    private Integer _groupId;
+    private ServiceType _serviceType;
+    private Collection _appServices;
+    private Collection _services;
 
-    // Constructors
-
-    /**
-     * default constructor
-     */
-    public ServiceCluster()
-    {
+    public ServiceCluster() {
         super();
     }
 
-    public String getName()
-    {
-        return this.name;
+    public String getName() {
+        return _name;
     }
 
-    public void setName(String name)
-    {
-        this.name = name;
+    public void setName(String name) {
+        _name = name;
         setSortName(name);
     }
 
-    public String getSortName()
-    {
-        return this.sortName;
+    public String getSortName() {
+        return _sortName;
     }
 
-    public void setSortName(String sortName)
-    {
-        this.sortName = (sortName!=null ? sortName.toUpperCase() : null);
+    public void setSortName(String sortName) {
+        _sortName = (sortName!=null ? sortName.toUpperCase() : null);
     }
 
-    public String getDescription()
-    {
-        return this.description;
+    public String getDescription() {
+        return _description;
     }
 
-    public void setDescription(String description)
-    {
-        this.description = description;
+    public void setDescription(String description) {
+        _description = description;
     }
 
-    public Integer getGroupId()
-    {
-        return this.groupId;
+    public Integer getGroupId() {
+        return _groupId;
     }
 
-    public void setGroupId(Integer groupId)
-    {
-        this.groupId = groupId;
+    public void setGroupId(Integer groupId) {
+        _groupId = groupId;
     }
 
-    public ServiceType getServiceType()
-    {
-        return this.serviceType;
+    public ServiceType getServiceType() {
+        return _serviceType;
     }
 
-    public void setServiceType(ServiceType serviceType)
-    {
-        this.serviceType = serviceType;
+    public void setServiceType(ServiceType serviceType) {
+        _serviceType = serviceType;
     }
 
-    public Collection getAppServices()
-    {
-        return this.appServices;
+    public Collection getAppServices() {
+        return _appServices;
     }
 
-    public void setAppServices(Collection appServices)
-    {
-        this.appServices = appServices;
+    public void setAppServices(Collection appServices) {
+        _appServices = appServices;
     }
 
-    public Collection getServices()
-    {
-        return this.services;
+    public Collection getServices() {
+        return _services;
     }
 
-    public void setServices(Collection services)
-    {
-        this.services = services;
+    public void setServices(Collection services) {
+        _services = services;
     }
 
-    public boolean equals(Object obj)
-    {
+    public boolean equals(Object obj) {
         if (!(obj instanceof ServiceCluster) || !super.equals(obj)) {
             return false;
         }
         ServiceCluster o = (ServiceCluster)obj;
-        return (name==o.getName() || (name!=null && o.getName()!=null &&
-                                      name.equals(o.getName())));
+        return (_name==o.getName() || (_name!=null && o.getName()!=null &&
+                                       _name.equals(o.getName())));
     }
 
-    public int hashCode()
-    {
+    public int hashCode() {
         int result = super.hashCode();
 
-        result = 37*result + (name != null ? name.hashCode() : 0);
+        result = 37*result + (_name != null ? _name.hashCode() : 0);
         
         return result;
     }
 
     public AppSvcDependency addDependentService(Integer appPK,
-                                                Integer depPK)
-    {
+                                                Integer depPK) {
         throw new UnsupportedOperationException(
             "use AppServiceDAO.addDependentService()");
     }
 
     public AppSvcDependency addDependentServiceCluster(Integer appPK,
-                                                       Integer depPK)
-    {
+                                                       Integer depPK) {
         throw new UnsupportedOperationException(
             "use AppServiceDAO.addDependentServiceCluster()");
     }
 
-    public void addService(Integer serviceId)
-    {
-        throw new UnsupportedOperationException(
-            "use ServiceClusterDAO.addService()");
-    }
-
-    public void removeService(Integer serviceId)
-    {
-        throw new UnsupportedOperationException(
-            "use ServiceClusterDAO.removeService()");
-    }
-
     public void updateCluster(ServiceClusterValue serviceCluster,
-                              List serviceIds)
-    {
+                              List serviceIds) {
         throw new UnsupportedOperationException(
             "use ServiceClusterDAO.updateCluster()");
     }
 
-    private ServiceClusterValue serviceClusterValue = new ServiceClusterValue();
+    private ServiceClusterValue _serviceClusterValue = new ServiceClusterValue();
     /**
      * legacy EJB DTO pattern
      * @deprecated use (this) ServiceCluster object instead
-     * @return
      */
-    public ServiceClusterValue getServiceClusterValue()
-    {
-        serviceClusterValue.setName(getName());
-        serviceClusterValue.setDescription(getDescription());
-        serviceClusterValue.setGroupId(getGroupId());
-        serviceClusterValue.setOwner("");
-        serviceClusterValue.setModifiedBy("");
-        serviceClusterValue.setLocation("");
-        serviceClusterValue.setId(getId());
-        serviceClusterValue.setMTime(getMTime());
-        serviceClusterValue.setCTime(getCTime());
+    public ServiceClusterValue getServiceClusterValue() {
+        _serviceClusterValue.setName(getName());
+        _serviceClusterValue.setDescription(getDescription());
+        _serviceClusterValue.setGroupId(getGroupId());
+        _serviceClusterValue.setOwner("");
+        _serviceClusterValue.setModifiedBy("");
+        _serviceClusterValue.setLocation("");
+        _serviceClusterValue.setId(getId());
+        _serviceClusterValue.setMTime(getMTime());
+        _serviceClusterValue.setCTime(getCTime());
         if ( getServiceType() != null )
-            serviceClusterValue.setServiceType(
+            _serviceClusterValue.setServiceType(
                 getServiceType().getServiceTypeValue() );
         else
-            serviceClusterValue.setServiceType( null );
-        return serviceClusterValue;
+            _serviceClusterValue.setServiceType( null );
+        return _serviceClusterValue;
     }
 
     public void setServiceClusterValue(ServiceClusterValue val) {
