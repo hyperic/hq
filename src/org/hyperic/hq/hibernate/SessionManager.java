@@ -27,9 +27,10 @@ package org.hyperic.hq.hibernate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.ConnectionReleaseMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
+import org.hibernate.engine.SessionFactoryImplementor;
 import org.hyperic.hibernate.Util;
 
 /**
@@ -42,8 +43,9 @@ public class SessionManager {
     private static final SessionManager INSTANCE =
         new SessionManager();
 
-    private ThreadLocal    _sessions = new ThreadLocal();
-    private SessionFactory _factory = Util.getSessionFactory();
+    private ThreadLocal _sessions = new ThreadLocal();
+    private SessionFactoryImplementor _factory = 
+        (SessionFactoryImplementor)Util.getSessionFactory();
     
     private SessionManager() {
     }
@@ -83,15 +85,17 @@ public class SessionManager {
         Session s = (Session)_sessions.get();
         
         if (s == null) {
-            if (dbgTxt != null && false /* Disabled for now */) {
-                _log.info("New Session:  [" + dbgTxt + "]");
+            if (dbgTxt != null && true /* Disabled for now */) {
+                _log.info("New Session [" + dbgTxt + "]");
             }
             
             if (_log.isDebugEnabled()) {
                 _log.debug("Setting up session for Thread[" + 
                            Thread.currentThread().getName() + "]");
             }
-            s = _factory.openSession();
+            
+            s = _factory.openSession(null, true, false, 
+                                     ConnectionReleaseMode.AFTER_STATEMENT);
             _sessions.set(s);
             return true;
         }
