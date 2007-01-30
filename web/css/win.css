@@ -341,7 +341,7 @@ filter: alpha(opacity=85);
 .menu ul li {
   padding:.3em .4em;
   margin:0;
-  list-style-type:none
+  list-style-type:none;
   }
 
 .DropDown li {
@@ -1087,7 +1087,15 @@ border-left:1px solid #D5D8DE;
 }
 
 .modifiedDate {
- padding:2px;
+ padding:3px;
+ background-color: #E5E5E5;
+ text-align:right;
+}
+
+.modifiedDateNarrow {
+ padding-left:2px;
+    padding-right:2px;
+    padding-top:2px;
  background-color: #E5E5E5;
  text-align:right;
 }

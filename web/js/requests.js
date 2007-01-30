@@ -293,11 +293,24 @@
                     td5.appendChild(document.createTextNode("No"));
                 }
             }
+
+            tbody.appendChild(trTime);
+            trTime.appendChild(td6);
+            td6.setAttribute('colspan', '5');
+            td6.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
+
+            if (token != null) {
+            td6.setAttribute('id','time'+ token);
+            $('time' + token).innerHTML = 'Updated: '+refreshTime();
+            } else {
+             td6.setAttribute('id','time');
+            $('time').innerHTML = 'Updated: '+refreshTime();
+            }
         } else {
             $('noCritAlerts').style.display = '';
           
         }
-        $('modifiedCritTime').innerHTML = 'Updated: ' + refreshTime();
+       //$('modifiedCritTime').innerHTML = 'Updated: ' + refreshTime();
         rTimer = setTimeout(alertFunc, 60000);
         //Refresh in 60 seconds
     }
@@ -378,9 +391,22 @@
                 td3.innerHTML = "&nbsp;";
                 }
              }
+             tbody.appendChild(trTime);
+            trTime.appendChild(td4);
+            td4.setAttribute('colspan', '3');
+            td4.setAttribute((document.all ? 'className' : 'class'), "modifiedDateNarrow");
+
+            if (token != null) {
+            td4.setAttribute('id','time'+ token);
+                $('time' + token).innerHTML = 'Updated: '+refreshTime();
+            } else {
+             td4.setAttribute('id','time');
+                $('time').innerHTML = 'Updated: '+refreshTime();
+            }
+
         }
 
-        $('modifiedAvailTime').innerHTML = 'Updated: ' + refreshTime();
+        //$('modifiedAvailTime').innerHTML = 'Updated: ' + refreshTime();
         rTimer = setTimeout(availFunc, 60000);
     }
 
@@ -420,6 +446,7 @@
 
             // Create table headers
             var trHeader = document.createElement('tr');
+            var trTime = document.createElement('tr');
             var th1 = document.createElement('th');
             var th2 = document.createElement('th');
 
@@ -465,8 +492,20 @@
                 td2.setAttribute((document.all ? 'className' : 'class'), "metricName");
                 td2.appendChild(document.createTextNode(metricValues.values[i].value));
                }
-           
-        $('modifiedMetricTime').innerHTML = 'Updated: '+refreshTime();
+            tbody.appendChild(trTime);
+            trTime.appendChild(td3);
+            td3.setAttribute('colspan', '2');
+            td3.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
+
+            if (token != null) {
+            td3.setAttribute('id','time'+ token);
+                $('time' + token).innerHTML = 'Updated: '+refreshTime();
+            } else {
+             td3.setAttribute('id','time');
+                $('time').innerHTML = 'Updated: '+refreshTime();
+            }
+
+        //$('modifiedMetricTime').innerHTML = 'Updated: '+refreshTime();
 
         } else {
             $(noMetricTable).style.display = '';
