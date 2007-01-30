@@ -1516,7 +1516,7 @@ public class EventsBossEJBImpl
         
         Escalation escalation = findEscalationById(sessionID, escId);
         // TODO: check permission
-        alertType.setEscalation(id, escalation);
+        getEscMan().setEscalation(alertType, id, escalation);
     }
     
     /**
