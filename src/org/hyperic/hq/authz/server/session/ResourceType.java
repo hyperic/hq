@@ -114,7 +114,27 @@ public class ResourceType extends AuthzNamedBean
         return getResourceTypeValue();
     }
 
+    public int hashCode() {
+        int result = super.hashCode();
+
+        result = 37 * result + ((_resource != null && _resource.getId() != null)
+                                ? _resource.getId().intValue() : 0);
+        return result;
+    }
+    
     public boolean equals(Object obj) {
-        return (obj instanceof ResourceType) && super.equals(obj);
+        ResourceType o;
+        
+        if (obj == this)
+            return true;
+        
+        if (obj == null || obj instanceof ResourceType == false)
+            return false;
+        
+        o = (ResourceType)obj;
+        return o.isSystem() == isSystem() &&
+               (o.getResource() == getResource() ||
+                o.getResource() != null && getResource() != null &&
+                o.getResource().getId().equals(getResource().getId()));
     }
 }

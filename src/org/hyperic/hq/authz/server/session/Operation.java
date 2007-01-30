@@ -75,21 +75,20 @@ public class Operation extends AuthzNamedBean {
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof Operation) || !super.equals(obj)) {
+        if (obj == this)
+            return true;
+
+        if (obj == null || obj instanceof Operation == false)
             return false;
-        }
+        
         Operation o = (Operation) obj;
-        return ((_resourceType == o.getResourceType()) ||
-                (_resourceType != null && o.getResourceType() != null &&
-                 _resourceType.equals(o.getResourceType())));
+        return getName().equals(o.getName());
     }
 
     public int hashCode() {
-        int result = super.hashCode();
+        int result = 17;
 
-        result =
-            37 * result + (_resourceType != null ? _resourceType.hashCode() : 0);
-
+        result = 37 * result + getName().hashCode();
         return result;
     }
 }

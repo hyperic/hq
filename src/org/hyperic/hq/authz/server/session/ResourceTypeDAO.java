@@ -81,6 +81,10 @@ public class ResourceTypeDAO
         super.remove(entity);
     }
 
+    protected boolean cacheFindAll() {
+        return true;
+    }
+
     public ResourceType findByName(String name)
     {
         String sql = "from ResourceType where name=?";
