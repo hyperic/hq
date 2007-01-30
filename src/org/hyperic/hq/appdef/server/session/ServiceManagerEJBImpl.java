@@ -1592,10 +1592,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         throws AppSvcClustDuplicateAssignException,
                AppSvcClustIncompatSvcException,
                FinderException, PermissionException { 
-        // find the cluster
-        ServiceCluster clusterEJB =
-            getServiceClusterDAO().findById(cluster.getId());
-        clusterEJB.updateCluster(cluster, serviceIdList);
+
+        getServiceClusterDAO().updateCluster(cluster, serviceIdList);
     }
     
     /**
