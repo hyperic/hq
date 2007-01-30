@@ -109,9 +109,7 @@
 
     <td colspan="2">
       <span class="LinkBox" onclick="toggleMenu('InventoryProps');" id="toolMenuSpan">
-      <fmt:message key="resource.common.inventory.props.PropertiesBtn">
-        <fmt:param value="${resource.name}"/>
-      </fmt:message>
+      <fmt:message key="resource.common.inventory.props.PropertiesBtn"/>
       <html:img page="/images/arrow_dropdown.gif" styleId="toolMenuSpan" border="0"/></a></span>
       <div style="clear: all;"></div>
       <div id="InventoryProps" style="display: none; margin-top: 4px;" onclick="toggleMenu('InventoryProps');">
