@@ -35,6 +35,7 @@ import java.util.Set;
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
+import javax.ejb.SessionContext;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -76,6 +77,7 @@ import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
+import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -137,7 +139,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
     private AutoinventoryPluginManager aiPluginManager;
     private AIScheduleManagerLocal     aiScheduleManager;
-    private javax.ejb.SessionContext   sessionCtx;
+    private SessionContext             sessionCtx;
 
     /**
      * Get server signatures for a set of servertypes.
@@ -387,8 +389,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
     // XXX hack, see usage in startScan method below.
     private static final
-    org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl authzChecker =
-        new org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl();
+        AIQueueManagerEJBImpl authzChecker = new AIQueueManagerEJBImpl();
 
     /**
      * Start an autoinventory scan.
