@@ -84,10 +84,5 @@ onloads.push(requestAvailSummary<c:out value="${portlet.token}"/>);
       </tr>
       </tbody>
     </table>
-    <table width="100%" cellpadding="0" cellspacing="0" border="0">
-      <tr>
-        <td id="modifiedAvailTime" class="modifiedDate"></td>
-      </tr>
-    </table>
   </div>
 

@@ -394,7 +394,7 @@
              tbody.appendChild(trTime);
             trTime.appendChild(td4);
             td4.setAttribute('colspan', '3');
-            td4.setAttribute((document.all ? 'className' : 'class'), "modifiedDateNarrow");
+            td4.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
 
             if (token != null) {
             td4.setAttribute('id','time'+ token);
