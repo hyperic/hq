@@ -37,8 +37,7 @@
       <column name="FSYSTEM" not-null="false" />
     </property>
 
-    <bag name="operations" table="EAM_OPERATION"
-         cascade="save-update,delete,persist,merge,evict,all-delete-orphan"
+    <bag name="operationsBag" table="EAM_OPERATION" cascade="all-delete-orphan"
          inverse="true" lazy="false">
       <cache usage="read-write"/>
       <key column="RESOURCE_TYPE_ID" />

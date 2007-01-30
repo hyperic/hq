@@ -37,13 +37,15 @@ public class PlatformTypeDAO extends HibernateDAO
         super(PlatformType.class, f);
     }
 
-    public PlatformType findById(Integer id)
-    {
+    public PlatformType findById(Integer id) {
         return (PlatformType)super.findById(id);
     }
 
-    public void save(PlatformType entity)
-    {
+    public PlatformType get(Integer id) {
+        return (PlatformType)super.get(id);
+    }
+
+    public void save(PlatformType entity) {
         super.save(entity);
     }
 
@@ -57,16 +59,14 @@ public class PlatformTypeDAO extends HibernateDAO
         return pt;
     }
     
-    public PlatformType findByName(String name)
-    {
+    public PlatformType findByName(String name) {
         String sql = "from PlatformType where name=?";
         return (PlatformType)getSession().createQuery(sql)
             .setString(0, name)
             .uniqueResult();
     }
 
-    public Collection findByPlugin(String plugin)
-    {
+    public Collection findByPlugin(String plugin) {
         String sql = "from PlatformType where plugin=?";
         return getSession().createQuery(sql)
             .setString(0, plugin)

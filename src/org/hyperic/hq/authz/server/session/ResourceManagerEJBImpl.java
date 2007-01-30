@@ -150,7 +150,9 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         pm.check(whoami.getId(),
                  resType.getResource().getResourceType(), resType.getId(),
                  AuthzConstants.typeOpModifyResourceType);
-        resType.setResourceTypeValue(type);
+
+        // XXX:  Fill this in -- what info can be changed, exactly?
+        //resType.setResourceTypeValue(type);
     }
 
     /**
@@ -252,20 +254,15 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @ejb:transaction type="REQUIRED"
      */
     public Resource createResource(AuthzSubjectValue whoami,
-                                   ResourceTypeValue rtv,
-                                   Integer instanceId,
-                                   String name,
-                                   boolean system) {
+                                   ResourceTypeValue rtv, Integer instanceId,
+                                   String name, boolean system) 
+    {
         AuthzSubject owner =
             getSubjectDAO().findByAuth(whoami.getName(),
                                        whoami.getAuthDsn());
-        ResourceValue res = new ResourceValue();
-        res.setInstanceId(instanceId);
-        res.setName(name);
-        res.setResourceTypeValue(rtv);
-        res.setSystem(system);
-        Resource resource = getResourceDAO().create(owner, res);
-        return resource;
+        ResourceType rt = getResourceTypeDAO().findById(rtv.getId()); 
+
+        return getResourceDAO().create(rt, name, owner, instanceId, system);
     }
     
     /**
@@ -328,7 +325,9 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      */
     public void saveResource(ResourceValue res) {
         Resource resource = lookupResourcePojo(res);
-        resource.setResourceValue(res);
+
+        // XXX:  Fill this in -- what info can be changed, exactly?
+        //resource.setResourceValue(res);
     }
 
     /**

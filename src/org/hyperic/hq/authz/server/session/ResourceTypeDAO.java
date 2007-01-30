@@ -28,37 +28,29 @@ package org.hyperic.hq.authz.server.session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
-import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.dao.HibernateDAO;
 
-public class ResourceTypeDAO extends HibernateDAO
+public class ResourceTypeDAO 
+    extends HibernateDAO 
 {
     public ResourceTypeDAO(DAOFactory f) {
         super(ResourceType.class, f);
     }
 
-    public ResourceType create(AuthzSubject creator,
-                               ResourceTypeValue createInfo)
-    {
-        ResourceType resType = new ResourceType(createInfo);
+    ResourceType create(AuthzSubject creator, ResourceTypeValue info) {
+        ResourceType resType = new ResourceType(info.getName(), null,
+                                                info.getSystem());
+
         save(resType);
 
-        // We have to create a new resource
-        ResourceValue resValue = new ResourceValue();
+        // ResourceTypes also have Resources associated with them, so create
+        // that and link  'em up.
+        ResourceType typeResType = findTypeResourceType();
+        Resource res = DAOFactory.getDAOFactory().getResourceDAO()
+                                 .create(typeResType, resType.getName(), 
+                                         creator, resType.getId(), false); 
 
-        ResourceType typeResType = findByName(AuthzConstants.typeResourceTypeName); 
-            
-        if (typeResType == null) {
-            throw new IllegalArgumentException("Resource Type not found: " +
-                                               AuthzConstants.typeResourceTypeName);
-        }
-        resValue.setResourceTypeValue(typeResType.getResourceTypeValue());
-
-        resValue.setInstanceId(resType.getId());
-        resValue.setName(resType.getName());
-        Resource resource = 
-            DAOFactory.getDAOFactory().getResourceDAO().create(creator, resValue);
-        resType.setResource(resource);
+        resType.setResource(res);
 
         ResourceGroup authzGroup = 
             DAOFactory.getDAOFactory().getResourceGroupDAO()
@@ -67,7 +59,7 @@ public class ResourceTypeDAO extends HibernateDAO
             throw new IllegalArgumentException("Resource Group not found: " +
                                                AuthzConstants.authzResourceGroupName);
         }
-        authzGroup.addResource(resource);
+        authzGroup.addResource(res);
 
         return resType;
     }
@@ -78,6 +70,10 @@ public class ResourceTypeDAO extends HibernateDAO
 
     public void save(ResourceType entity) {
         super.save(entity);
+    }
+
+    ResourceType findTypeResourceType() {
+        return findByName(AuthzConstants.typeResourceTypeName);
     }
 
     public void remove(AuthzSubject whoami, ResourceType entity) {

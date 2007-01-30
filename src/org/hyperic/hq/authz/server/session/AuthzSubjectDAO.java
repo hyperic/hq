@@ -61,17 +61,19 @@ class AuthzSubjectDAO
             throw new IllegalArgumentException("resource type not found " +
                                                AuthzConstants.subjectResourceTypeName);
         }
-        ResourceValue rValue = new ResourceValue();
-        rValue.setResourceTypeValue(rt.getResourceTypeValue());
-        rValue.setInstanceId(subject.getId());
-        subject.setResource(daoFactory.getResourceDAO().create(creator, rValue));
+
+        Resource r = daoFactory.getResourceDAO().create(rt, null, /* No Name? */
+                                                        creator, 
+                                                        subject.getId(), false);
+
+        subject.setResource(r);
         Role role = daoFactory.getRoleDAO().findByName(
             AuthzConstants.creatorRoleName);
         if (role == null) {
             throw new IllegalArgumentException("role not found " +
                                                AuthzConstants.creatorRoleName);
         }
-        subject.getRoles().add(role);
+        subject.addRole(role);
         save(subject);
         
         // Insert an empty config response

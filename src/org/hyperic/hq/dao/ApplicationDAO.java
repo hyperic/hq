@@ -50,38 +50,36 @@ public class ApplicationDAO extends HibernateDAO
         super(Application.class, f);
     }
 
-    public Application findById(Integer id)
-    {
+    public Application findById(Integer id) {
         return (Application)super.findById(id);
     }
 
-    public void save(Application entity)
-    {
+    public Application get(Integer id) {
+        return (Application)super.get(id);
+    }
+
+    public void save(Application entity) {
         super.save(entity);
     }
 
-    public void remove(Application entity)
-    {
+    public void remove(Application entity) {
         super.remove(entity);
     }
 
-    public void addAppService(Application a, AppServiceValue added)
-    {
+    public void addAppService(Application a, AppServiceValue added) {
         AppServiceDAO adao = DAOFactory.getDAOFactory().getAppServiceDAO();
         AppService as = adao.findById(added.getId());
         as.setApplication(a);
         a.getAppServices().add(as);
     }
 
-    public void removeAppService(Application a, AppServiceValue removed)
-    {
+    public void removeAppService(Application a, AppServiceValue removed) {
         AppServiceDAO adao = DAOFactory.getDAOFactory().getAppServiceDAO();
         AppService as = adao.findById(removed.getId());
         a.getAppServices().remove(as);
     }
 
-    public DependencyTree getDependencyTree(Application a)
-    {
+    public DependencyTree getDependencyTree(Application a) {
         log.debug("Getting Dependency Tree for Application: " + a.getName());
         // construct the tree
         DependencyTree aTree = new DependencyTree(a.getApplicationValueObject());
@@ -112,8 +110,7 @@ public class ApplicationDAO extends HibernateDAO
         return aTree;
     }
 
-    public void setDependencyTree(Application a, DependencyTree newTree)
-    {
+    public void setDependencyTree(Application a, DependencyTree newTree) {
         log.debug("Setting dependency tree for application: " + a.getName());
         List nodes = newTree.getNodes();
         AppSvcDependencyDAO adao =
@@ -182,8 +179,7 @@ public class ApplicationDAO extends HibernateDAO
         }
     }
 
-    public void setApplicationValue(Application a, ApplicationValue appV)
-    {
+    public void setApplicationValue(Application a, ApplicationValue appV) {
         a.setName( appV.getName() );
         a.setSortName( appV.getSortName() );
         a.setModifiedBy( appV.getModifiedBy() );
@@ -222,8 +218,7 @@ public class ApplicationDAO extends HibernateDAO
         }
     }
 
-    public Application create(ApplicationValue av)
-    {
+    public Application create(ApplicationValue av) {
         Application app = new Application();
         setApplicationValue(app, av);
         
@@ -237,8 +232,7 @@ public class ApplicationDAO extends HibernateDAO
      * @deprecated use findAll_orderName()
      * @return
      */
-    public Collection findAll_orderName_asc()
-    {
+    public Collection findAll_orderName_asc() {
         return findAll_orderName(true);
     }
 
@@ -246,27 +240,23 @@ public class ApplicationDAO extends HibernateDAO
      * @deprecated use findAll_orderName()
      * @return
      */
-    public Collection findAll_orderName_desc()
-    {
+    public Collection findAll_orderName_desc() {
         return findAll_orderName(false);
     }
 
-    public Collection findAll_orderName(boolean asc)
-    {
+    public Collection findAll_orderName(boolean asc) {
         String sql="from Application order by sortName "+(asc ? "asc" : "desc");
         return getSession().createQuery(sql).list();
     }
 
-    public Application findByName(String name)
-    {
+    public Application findByName(String name) {
         String sql="from Application where sortName=?";
         return (Application)getSession().createQuery(sql)
             .setString(0, name.toUpperCase())
             .uniqueResult();
     }
 
-    public Collection findByServiceId_orderName(Integer serviceId)
-    {
+    public Collection findByServiceId_orderName(Integer serviceId) {
         String sql="select a from Application a " +
                    " join fetch a.appServices s " +
                    "where s.service.id=? " +
@@ -293,8 +283,7 @@ public class ApplicationDAO extends HibernateDAO
      * @deprecated use findByServerId_orderName()
      * @return
      */
-    public Collection findByServerId_orderName_asc(Integer serverId)
-    {
+    public Collection findByServerId_orderName_asc(Integer serverId) {
         return findByServerId_orderName(serverId, true);
     }
 
@@ -302,13 +291,11 @@ public class ApplicationDAO extends HibernateDAO
      * @deprecated use findByServerId_orderName()
      * @return
      */
-    public Collection findByServerId_orderName_desc(Integer serverId)
-    {
+    public Collection findByServerId_orderName_desc(Integer serverId) {
         return findByServerId_orderName(serverId, false);
     }
 
-    public Collection findByServerId_orderName(Integer serverId, boolean asc)
-    {
+    public Collection findByServerId_orderName(Integer serverId, boolean asc) {
         String sql="select a from Application a " +
                    " join fetch a.appServices asv " +
                    " join fetch asv.service s " +
@@ -323,8 +310,7 @@ public class ApplicationDAO extends HibernateDAO
      * @deprecated use findByPlatformId_orderName()
      * @return
      */
-    public Collection findByPlatformId_orderName_asc(Integer platformId)
-    {
+    public Collection findByPlatformId_orderName_asc(Integer platformId) {
         return findByPlatformId_orderName(platformId, true);
     }
 
@@ -332,13 +318,11 @@ public class ApplicationDAO extends HibernateDAO
      * @deprecated use findByPlatformId_orderName()
      * @return
      */
-    public Collection findByPlatformId_orderName_desc(Integer platformId)
-    {
+    public Collection findByPlatformId_orderName_desc(Integer platformId) {
         return findByPlatformId_orderName(platformId, false);
     }
 
-    public Collection findByPlatformId_orderName(Integer pid, boolean asc)
-    {
+    public Collection findByPlatformId_orderName(Integer pid, boolean asc) {
         String sql="select a from Application a " +
                    " join fetch a.appServices asv " +
                    " join fetch asv.service s " +
@@ -354,8 +338,7 @@ public class ApplicationDAO extends HibernateDAO
      * @deprecated use findByServiceId_orderOwner()
      * @return
      */
-    public Collection findByServiceId_orderOwner_asc(Integer serviceId)
-    {
+    public Collection findByServiceId_orderOwner_asc(Integer serviceId) {
         return findByServiceId_orderOwner(serviceId, true);
     }
 
@@ -363,8 +346,7 @@ public class ApplicationDAO extends HibernateDAO
      * @deprecated use findByServiceId_orderOwner()
      * @return
      */
-    public Collection findByServiceId_orderOwner_desc(Integer serviceId)
-    {
+    public Collection findByServiceId_orderOwner_desc(Integer serviceId) {
         return findByServiceId_orderOwner(serviceId, false);
     }
 
@@ -384,8 +366,7 @@ public class ApplicationDAO extends HibernateDAO
      * @deprecated use findByServerId_orderOwner()
      * @return
      */
-    public Collection findByServerId_orderOwner_asc(Integer serverId)
-    {
+    public Collection findByServerId_orderOwner_asc(Integer serverId) {
         return findByServerId_orderOwner(serverId, true);
     }
 
@@ -393,13 +374,11 @@ public class ApplicationDAO extends HibernateDAO
      * @deprecated use findByServerId_orderOwner()
      * @return
      */
-    public Collection findByServerId_orderOwner_desc(Integer serverId)
-    {
+    public Collection findByServerId_orderOwner_desc(Integer serverId) {
         return findByServerId_orderOwner(serverId, false);
     }
 
-    public Collection findByServerId_orderOwner(Integer serverId, boolean asc)
-    {
+    public Collection findByServerId_orderOwner(Integer serverId, boolean asc) {
         String sql="select a from Application a " +
                    " join fetch a.appServices asv " +
                    " join fetch asv.service s " +
@@ -415,8 +394,7 @@ public class ApplicationDAO extends HibernateDAO
      * @deprecated use findByPlatformId_orderOwner()
      * @return
      */
-    public Collection findByPlatformId_orderOwner_asc(Integer platformId)
-    {
+    public Collection findByPlatformId_orderOwner_asc(Integer platformId) {
         return findByPlatformId_orderOwner(platformId, true);
     }
 
@@ -424,13 +402,11 @@ public class ApplicationDAO extends HibernateDAO
      * @deprecated use findByPlatformId_orderOwner()
      * @return
      */
-    public Collection findByPlatformId_orderOwner_desc(Integer platformId)
-    {
+    public Collection findByPlatformId_orderOwner_desc(Integer platformId) {
         return findByPlatformId_orderOwner(platformId, false);
     }
 
-    public Collection findByPlatformId_orderOwner(Integer pid, boolean asc)
-    {
+    public Collection findByPlatformId_orderOwner(Integer pid, boolean asc) {
         String sql="select a from Application a " +
                    " join fetch a.appServices asv " +
                    " join fetch asv.service s " +

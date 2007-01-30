@@ -36,26 +36,26 @@ public class ConfigResponseDAO extends HibernateDAO
         super(ConfigResponseDB.class, f);
     }
 
-    public ConfigResponseDB findById(Integer id)
-    {
+    public ConfigResponseDB findById(Integer id) {
         return (ConfigResponseDB)super.findById(id);
     }
 
-    public void save(ConfigResponseDB entity)
-    {
+    public ConfigResponseDB get(Integer id) {
+        return (ConfigResponseDB)super.get(id);
+    }
+
+    public void save(ConfigResponseDB entity) {
         super.save(entity);
     }
 
-    public void remove(ConfigResponseDB entity)
-    {
+    public void remove(ConfigResponseDB entity) {
         super.remove(entity);
     }
 
     /**
      * @return newly instantiated config response object
      */
-    public ConfigResponseDB create()
-    {
+    public ConfigResponseDB create() {
         ConfigResponseDB newConfig = new ConfigResponseDB();
         save(newConfig);
         return newConfig;
@@ -64,8 +64,7 @@ public class ConfigResponseDAO extends HibernateDAO
     /**
      * Initialize the config response for a new platform
      */
-    public ConfigResponseDB createPlatform()
-    {
+    public ConfigResponseDB createPlatform() {
         ConfigResponseDB cLocal = new ConfigResponseDB();
         try {
             ConfigResponse metricCfg = new ConfigResponse();
@@ -79,8 +78,7 @@ public class ConfigResponseDAO extends HibernateDAO
         return cLocal;
     }
 
-    public ConfigResponseDB findByPlatformId(Integer id)
-    {
+    public ConfigResponseDB findByPlatformId(Integer id) {
         String sql = "select c from ConfigResponseDB c, Platform p where " +
                      "c.id = p.configResponse.id and " +
                      "p.id = ?";
@@ -90,8 +88,7 @@ public class ConfigResponseDAO extends HibernateDAO
             .uniqueResult();
     }
 
-    public ConfigResponseDB findByServerId(Integer id)
-    {
+    public ConfigResponseDB findByServerId(Integer id) {
         String sql = "select c from ConfigResponseDB c, Server s where " +
                      "c.id = s.configResponse.id and " +
                      "s.id = ?";
@@ -101,8 +98,7 @@ public class ConfigResponseDAO extends HibernateDAO
             .uniqueResult();
     }
 
-    public ConfigResponseDB findByServiceId(Integer id)
-    {
+    public ConfigResponseDB findByServiceId(Integer id) {
         String sql = "select c from ConfigResponseDB c, Service s where " +
                      "c.id = s.configResponse.id and " +
                      "s.id = ?";
@@ -111,5 +107,4 @@ public class ConfigResponseDAO extends HibernateDAO
             .setInteger(0, id.intValue())
             .uniqueResult();
     }
-
 }

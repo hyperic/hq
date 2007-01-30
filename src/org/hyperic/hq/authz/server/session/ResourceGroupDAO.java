@@ -31,6 +31,7 @@ import org.hibernate.Session;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.dao.DAOFactory;
 
@@ -47,28 +48,24 @@ public class ResourceGroupDAO extends HibernateDAO
 
     public ResourceGroup create(AuthzSubject creator,
                                 ResourceGroupValue createInfo,
-                                boolean isSystem) {
+                                boolean isSystem) 
+    {
         ResourceGroup resGrp = new ResourceGroup(createInfo);
         save(resGrp);
-
-        // We have to create a new resource
-        ResourceValue resValue = new ResourceValue();
 
         ResourceType resType = 
             DAOFactory.getDAOFactory().getResourceTypeDAO()
             .findByName(AuthzConstants.groupResourceTypeName);
         if (resType == null) {
-            throw new IllegalArgumentException("ResourceType not found " +
-                                               AuthzConstants.groupResourceTypeName);
+            throw new SystemException("ResourceType not found " +
+                                      AuthzConstants.groupResourceTypeName);
         }
-        resValue.setResourceTypeValue(resType.getResourceTypeValue());
 
-        resValue.setInstanceId(resGrp.getId());
-        resValue.setName(resGrp.getName());
-        resValue.setSystem(isSystem);
         Resource resource = 
-            DAOFactory.getDAOFactory().getResourceDAO().create(creator, 
-                                                               resValue);
+            DAOFactory.getDAOFactory().getResourceDAO()
+                      .create(resType, resGrp.getName(), creator, 
+                              resGrp.getId(), isSystem);
+            
         resGrp.setResource(resource);
 
         return resGrp;
@@ -114,6 +111,15 @@ public class ResourceGroupDAO extends HibernateDAO
         }
     }
 
+    public ResourceGroup findRootGroup() {
+        ResourceGroup res = findByName(AuthzConstants.rootResourceGroupName);
+        
+        if (res == null) {
+            throw new SystemException("Root group should exist");
+        }
+        return res;
+    }
+        
     public ResourceGroup findByName(String name) {            
         String sql = "from ResourceGroup where lower(name) = lower(?)";
         return (ResourceGroup)getSession().createQuery(sql)

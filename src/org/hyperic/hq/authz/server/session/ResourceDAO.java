@@ -25,68 +25,47 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.HashMap;
-import java.util.ArrayList;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Query;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.ResourceTypeValue;
-import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.dao.HibernateDAO;
-import org.hibernate.Query;
 
-public class ResourceDAO extends HibernateDAO
+public class ResourceDAO 
+    extends HibernateDAO
 {
-    Log log = LogFactory.getLog(ResourceDAO.class);
+    private Log _log = LogFactory.getLog(ResourceDAO.class);
 
     public ResourceDAO(DAOFactory f) { 
         super(Resource.class, f);
     }
 
-    public Resource create(AuthzSubject creator, ResourceValue createInfo) {
-        /* set resource type */
-        ResourceTypeValue typeValue = createInfo.getResourceTypeValue();
-
-        if (typeValue == null) {
-            // XXX - decide what exception to throw here
-            // throw new CreateException("Null resourceType given.");
-            throw new IllegalArgumentException(
-                "ResourceTypevValue is not defined");
+    Resource create(ResourceType type, String name, AuthzSubject creator, 
+                    Integer instanceId, boolean system)
+    {
+        if (type == null) {
+            throw new IllegalArgumentException("ResourceTypevValue is not " +
+                                               "defined");
+            
         }
-        Resource resource = new Resource(createInfo);
-
-        ResourceType resType = DAOFactory.getDAOFactory().getResourceTypeDAO()
-            .findById(typeValue.getId());
-        resource.setResourceType(resType);
-
-        /* set owner */
-        AuthzSubjectValue ownerValue = createInfo.getAuthzSubjectValue();
-        if (ownerValue != null) {
-            creator = new AuthzSubjectDAO(DAOFactory.getDAOFactory())
-                              .findById(ownerValue.getId());
-        }
-        resource.setOwner(creator);
+        Resource resource = new Resource(type, name, creator, instanceId,
+                                         system);
         save(resource);
 
         /* add it to the root resourcegroup */
-        /* This is done as the overlord, since it is meant to be an
-           anonymous, priviledged operation */
         ResourceGroup authzGroup = 
-            DAOFactory.getDAOFactory().getResourceGroupDAO() 
-            .findByName(AuthzConstants.rootResourceGroupName);
-        if (authzGroup == null) {
-            throw new IllegalArgumentException("can not find Resource Group: "+
-                                               AuthzConstants.rootResourceGroupName);
-        }
+            DAOFactory.getDAOFactory().getResourceGroupDAO()
+            .findRootGroup();
         authzGroup.addResource(resource);
 
         return resource;
@@ -123,16 +102,16 @@ public class ResourceDAO extends HibernateDAO
         boolean is = false;
 
         if (possibleOwner == null) {
-            log.error("possible Owner is NULL. " +
-                    "This is probably not what you want.");
+            _log.error("possible Owner is NULL. " +
+                       "This is probably not what you want.");
             /* XXX throw exception instead */
         } else {
             /* overlord owns every thing */
             if (is = possibleOwner.equals(AuthzConstants.overlordId)
                     == false) {
-                if (log.isDebugEnabled() && possibleOwner != null) {
-                    log.debug("User is " + possibleOwner +
-                              " owner is " + entity.getOwner().getId());
+                if (_log.isDebugEnabled() && possibleOwner != null) {
+                    _log.debug("User is " + possibleOwner +
+                               " owner is " + entity.getOwner().getId());
                 }
                 is = (possibleOwner.equals(entity.getOwner().getId()));
             }
