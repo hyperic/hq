@@ -231,6 +231,12 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+  <cache name="AuthzSubject.findByName"
+         maxElementsInMemory="20"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <cache name="PermissionCache"
          maxElementsInMemory="1000"
