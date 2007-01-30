@@ -32,6 +32,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 import org.apache.tools.ant.BuildException;
+import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 
 /**
@@ -67,6 +68,11 @@ public class SST_Insert extends SchemaSpecTask {
         String insertSql = "INSERT INTO " + table + " " + insertCmd;
         
         try {
+            insertSql = StringUtil.replace(insertSql, "%%TRUE%%", 
+                                           DBUtil.getBooleanValue(true, c));
+            insertSql = StringUtil.replace(insertSql, "%%FALSE%%", 
+                                           DBUtil.getBooleanValue(false, c));
+
             ps = c.prepareStatement(insertSql);
             log(">>>>> Inserting into " + table + " " + insertCmd);
             ps.executeUpdate();
