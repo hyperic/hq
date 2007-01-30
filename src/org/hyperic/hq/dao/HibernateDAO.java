@@ -79,7 +79,29 @@ public abstract class HibernateDAO {
         return getSession().createCriteria(_persistentClass);
     }
 
+    /**
+     * This method is intended for sub-classes to specify whether or not
+     * their 'find-all' finder should be automatically added to the query-cache.
+     *
+     * The findAll query will use the persistent class specified in the
+     * constructor, and use the following cache region:
+     * 
+     *     com.my.Persistent.findAll
+     * 
+     * @return true to indicate that the finder should be cached
+     */
+    protected boolean cacheFindAll() {
+        return false;
+    }
+    
     public Collection findAll() {
+        if (cacheFindAll()) {
+            String region = getPersistentClass().getName() + ".findAll";
+            return getSession().createCriteria(getPersistentClass())
+                               .setCacheable(true)
+                               .setCacheRegion(region)
+                               .list();
+        }
         return getSession().createCriteria(getPersistentClass()).list();
     }
 
