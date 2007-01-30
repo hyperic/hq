@@ -220,4 +220,9 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
 
+  <cache name="PermissionCache"
+         maxElementsInMemory="1000"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="15"
+         memoryStoreEvictionPolicy="LRU"/>
 </ehcache>
