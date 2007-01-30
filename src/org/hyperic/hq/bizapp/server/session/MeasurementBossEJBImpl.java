@@ -1008,11 +1008,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 }
                 else if (metrics == null &&
                          cats.contains(MeasurementConstants.CAT_AVAILABILITY)) {
-                    DerivedMeasurement dmv = findAvailabilityMetric(subject, id);
+                    DerivedMeasurement dm = findAvailabilityMetric(subject, id);
                     
-                    if (dmv != null) {
+                    if (dm != null) {
                         metrics = new ArrayList(1);
-                        metrics.add(dmv);
+                        metrics.add(dm.getDerivedMeasurementValue());
                     }
                 }
             }
