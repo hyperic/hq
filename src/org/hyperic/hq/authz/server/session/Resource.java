@@ -33,38 +33,42 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class Resource extends AuthzNamedBean
-{
+public class Resource extends AuthzNamedBean {
     public static final Log _log = LogFactory.getLog(Resource.class);
 
     private ResourceType _resourceType;
-    private Integer _instanceId;
-    private Integer _cid;
+    private Integer      _instanceId;
+    private Integer      _cid;
     private AuthzSubject _owner;
-    private boolean _system = false;
-    private Collection _resourceGroups = new ArrayList();
-    private Collection _virtuals = new ArrayList();
+    private boolean      _system = false;
+    private Collection   _resourceGroups = new ArrayList();
+    private Collection   _virtuals = new ArrayList();
 
     private ResourceValue resourceValue = new ResourceValue();
 
-    public Resource() {
-        super();
+    protected Resource() {
     }
 
-    public Resource(ResourceValue val) {
-        setResourceValue(val);
-    }
-
-    public Resource(ResourceType resourceTypeId, Integer instanceId,
-                    Integer cid, AuthzSubject subjectId, String name,
-                    boolean fsystem, Collection resourceGroups)
+    Resource(ResourceType type, String name, AuthzSubject owner,
+             Integer instanceId, boolean system) 
     {
         super(name);
-        _resourceType = resourceTypeId;
-        _instanceId = instanceId;
-        _cid = cid;
-        _owner = subjectId;
-        _system = fsystem;
+        _resourceType = type;
+        _instanceId   = instanceId;
+        _owner        = owner;
+        _system       = system;
+    }
+
+    Resource(ResourceType resourceTypeId, Integer instanceId,
+             Integer cid, AuthzSubject subjectId, String name,
+             boolean fsystem, Collection resourceGroups)
+    {
+        super(name);
+        _resourceType   = resourceTypeId;
+        _instanceId     = instanceId;
+        _cid            = cid;
+        _owner          = subjectId;
+        _system         = fsystem;
         _resourceGroups = resourceGroups;
     }
 
@@ -143,14 +147,6 @@ public class Resource extends AuthzNamedBean
                 .setResourceTypeValue(getResourceType().getResourceTypeValue());
 
         return resourceValue;
-    }
-
-    protected void setResourceValue(ResourceValue val) {
-        setId(val.getId());
-        setInstanceId(val.getInstanceId());
-        setName(val.getName());
-        setResourceType(new ResourceType(val.getResourceTypeValue()));
-        setSystem(val.getSystem());
     }
 
     public Object getValueObject() {
