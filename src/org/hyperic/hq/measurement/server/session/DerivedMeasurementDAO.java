@@ -25,18 +25,15 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.util.List;
-import java.util.HashMap;
-import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import org.hibernate.Query;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.dao.HibernateDAO;
-import org.hyperic.util.jdbc.DBUtil;
-import org.hibernate.Query;
 
 public class DerivedMeasurementDAO extends HibernateDAO {
     public DerivedMeasurementDAO(DAOFactory f) {
