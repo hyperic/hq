@@ -25,27 +25,26 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.io.Serializable;
+
 import org.hyperic.hibernate.PersistedObject;
 
 public class Measurement extends PersistedObject 
-    implements java.io.Serializable {
-
-    // Fields    
-    private Integer _instanceId;
+    implements Serializable 
+{
+    private Integer             _instanceId;
     private MeasurementTemplate _template;
-    private Integer _cid;
-    private long _mtime;
+    private Integer             _cid;
+    private long                _mtime;
     
-    // Constructors
-    public Measurement() {
+    protected Measurement() {
     }
 
     public Measurement(Integer instanceId, MeasurementTemplate template) {
         _instanceId = instanceId;
-        _template = template;
+        _template   = template;
     }
    
-    // Property accessors
     public Integer getInstanceId() {
         return _instanceId;
     }
