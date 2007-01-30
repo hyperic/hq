@@ -126,7 +126,6 @@ public class Util {
                 new PrintfFormat("%-50s %-6d %-6d %-6d %6d");
             private PrintfFormat _hdr = 
                 new PrintfFormat("%-50s %-6s %-6s %-6s %6s");
-            
 
             private List getSortedCaches() {
                 CacheManager cacheManager = CacheManager.getInstance();
@@ -170,11 +169,11 @@ public class Util {
 
                 for (Iterator i=getSortedCaches().iterator(); i.hasNext(); ) {
                     Cache cache = (Cache)i.next();
-
-                    totalBytes += cache.calculateInMemorySize();
+                    long inMemoryBytes = cache.calculateInMemorySize();
+                    totalBytes += inMemoryBytes;
                     fmtArgs[0] = StringUtil.dotProximate(cache.getName(), 50);
                     fmtArgs[1] = new Integer(cache.getSize());
-                    fmtArgs[2] = new Long(cache.calculateInMemorySize());
+                    fmtArgs[2] = new Long(inMemoryBytes);
                     fmtArgs[3] = new Integer(cache.getHitCount());
                     fmtArgs[4] = new Integer(cache.getMissCountNotFound());
                             
