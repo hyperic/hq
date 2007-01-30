@@ -61,7 +61,7 @@ public abstract class EscalationAlertType
      *
      * @param defId ID of the definition to set the escalation for
      */
-    protected abstract void setEscalation(Integer defId, Escalation escalation);                                          
+    public abstract void setEscalation(Integer defId, Escalation escalation);                                          
     
     /**
      * Fix an alert.  This method should simply set the alert as fixed and not
