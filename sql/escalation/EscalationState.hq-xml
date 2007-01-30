@@ -5,12 +5,12 @@
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping package="org.hyperic.hq.escalation.server.session">
-  <class name="EscalationState" table="EAM_MESCALATION_STATE">
+  <class name="EscalationState" table="EAM_ESCALATION_STATE">
 
     <id name="id" type="integer">
       <column name="ID" not-null="true" />
       <generator class="sequence">
-        <param name="sequence">EAM_MESCALATION_STATE_ID_SEQ</param>
+        <param name="sequence">EAM_ESCALATION_STATE_ID_SEQ</param>
       </generator>
     </id>
 

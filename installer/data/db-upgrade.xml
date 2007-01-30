@@ -3717,6 +3717,19 @@ has already been defined.
       <schema-insert table="EAM_ESCALATION"
                      insertCmd="(ID, VERSION_COL, NAME, DESCRIPTION, ALLOW_PAUSE, MAX_WAIT_TIME, NOTIFY_ALL, CTIME, MTIME) VALUES (100, 0, 'No Actions Escalation', 'This is an Escalation Scheme created by HQ that performs no actions', %%FALSE%%, 300000, %%FALSE%%, 0, 0)"/>
     </schemaSpec>
+
+    <schemaSpec version="3.06">
+      <schema-directSQL>
+        <statement targetDB="postgresql">
+          alter table EAM_MESCALATION_STATE rename to EAM_ESCALATION_STATE
+        </statement>
+        <statement targetDB="postgresql">
+          alter table EAM_MESCALATION_STATE_ID_SEQ 
+                rename to EAM_ESCALATION_STATE_ID_SEQ
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
 </dbupgrade>
 
 </target>
