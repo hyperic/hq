@@ -45,10 +45,12 @@ public class AvailabilityReportChart extends Chart{
     private static BufferedImage GOOD_CIRCLE;
     private static BufferedImage DANGER_CIRCLE;
     private static BufferedImage UNKNOWN_CIRCLE;
+    private static BufferedImage[] CIRCLES;
 
     private static final FontMetrics TEXT_METRICS;
     
-    private static final Color COLOR_TRANSPARENT = new Color(0,0,255); //,0);
+    private static final Color COLOR_TRANSPARENT = new Color(241,243, 246);
+    private static final Color TEXT_COLOR = Color.BLACK;
     
     private static final String LARGEST_NUMBER = "999";
     
@@ -87,6 +89,8 @@ public class AvailabilityReportChart extends Chart{
             System.out.println(e);
         }
 
+        CIRCLES =
+            new BufferedImage[] { GOOD_CIRCLE, DANGER_CIRCLE, UNKNOWN_CIRCLE };
         CIRCLE_WITH_BUFFER_WIDTH = GOOD_CIRCLE.getWidth() + TEXT_BUFFER;
         STANDARD_SET_WIDTH       = CIRCLE_WITH_BUFFER_WIDTH +
                                    TEXT_METRICS.stringWidth(LARGEST_NUMBER) +
@@ -97,81 +101,49 @@ public class AvailabilityReportChart extends Chart{
     public AvailabilityReportChart() {
         super(IMAGE_WIDTH, GOOD_CIRCLE.getHeight());
 
-        this.setBorder(0);
-        //this.useIndexColors = true;
-        this.indexColors = true;
+        setBorder(0);
+        //useIndexColors = true;
+        indexColors = true;
     }
     
     protected void init() {
-        this.showLeftLabels   = false;
-        this.showBottomLabels = false;
-        this.showLeftLegend   = false;
-        this.showTopLegend    = false;
+        showLeftLabels   = false;
+        showBottomLabels = false;
+        showLeftLegend   = false;
+        showTopLegend    = false;
     }
     
     protected Rectangle draw(ChartGraphics g) {
-        g.graphics.setFont(DEFAULT_LEGEND_PLAIN); 
-         
-        int yCircle   = 0;
-        int y2Circle  = CIRCLE_SIZE - 1;
+        g.graphics.setFont(DEFAULT_FONT);
+
+        int yCircle = 0;
+        int y2Circle = CIRCLE_SIZE - 1;
 
         g.graphics.setPaint(COLOR_TRANSPARENT);
-        g.graphics.fillRect(0, 0, this.width, this.height);
-        
-        DataPointCollection datapts = this.getDataPoints();
+        g.graphics.fillRect(0, 0, width, height);
+
+        DataPointCollection datapts = getDataPoints();
         NumberFormat fmt = NumberFormat.getInstance();
         fmt.setMaximumFractionDigits(0);
-        
-        g.graphics.setColor(this.textColor);
-            
-        double val;
-        String text;
-        
-        if(datapts.size() >= 1) {
-            val = ((IDataPoint)datapts.get(0)).getValue();
-            
-            if(val > 0) {
-                text = fmt.format(val);
-                g.graphics.drawImage(GOOD_CIRCLE, 0, yCircle, COLOR_TRANSPARENT,
-                                     null);        
-                g.graphics.drawString(text,
-                                      CIRCLE_WITH_BUFFER_WIDTH,
-                                      y2Circle);
+
+        g.graphics.setColor(TEXT_COLOR);
+
+        for (int i = 0; i < datapts.size(); i++) {
+            double val = ((IDataPoint) datapts.get(i)).getValue();
+
+            if (val > 0) {
+                g.graphics.drawImage(CIRCLES[i], STANDARD_SET_WIDTH * i,
+                                     yCircle, COLOR_TRANSPARENT, null);
+                g.graphics.drawString(fmt.format(val), STANDARD_SET_WIDTH * i +
+                                      CIRCLE_WITH_BUFFER_WIDTH, y2Circle);
             }
         }
         
-        if(datapts.size() >= 2) {
-            val = ((IDataPoint)datapts.get(1)).getValue();
-            
-            if(val > 0) {
-                text = fmt.format(val);
-                g.graphics.drawImage(DANGER_CIRCLE, STANDARD_SET_WIDTH, yCircle,
-                                     COLOR_TRANSPARENT, null);        
-                g.graphics.drawString(text,
-                                  STANDARD_SET_WIDTH + CIRCLE_WITH_BUFFER_WIDTH,
-                                  y2Circle);
-            }
-        }
-        
-                    
-        if(datapts.size() >= 3) {
-            val = ((IDataPoint)datapts.get(2)).getValue();
-            
-            if(val > 0) {
-                text = fmt.format(val);
-                g.graphics.drawImage(UNKNOWN_CIRCLE, STANDARD_SET_WIDTH * 2,
-                                     yCircle, COLOR_TRANSPARENT, null);        
-                g.graphics.drawString(text,
-                              STANDARD_SET_WIDTH * 2 + CIRCLE_WITH_BUFFER_WIDTH,
-                              y2Circle);
-            }
-        }
-        
-        return new Rectangle(0, 0, this.height, this.width);
+        return new Rectangle(0, 0, height, width);
     }
     
-//    protected IndexColorModel getIndexColorModel() {
-//        IndexColorModel cm = super.getIndexColorModel();
+// protected IndexColorModel getIndexColorModel() {
+// IndexColorModel cm = super.getIndexColorModel();
 //
 //        int size = cm.getMapSize();
 //        byte r[] = new byte[size];
@@ -198,7 +170,7 @@ public class AvailabilityReportChart extends Chart{
     protected int getYLabelWidth(Graphics2D g) { return 0; }
     
     protected Rectangle getInteriorRectangle(ChartGraphics g) {
-        return new Rectangle(0, 0, this.width, this.height);
+        return new Rectangle(0, 0, width, height);
     }
     
     protected String[] getXLabels() { return null; }
