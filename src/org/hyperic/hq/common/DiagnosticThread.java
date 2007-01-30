@@ -57,7 +57,7 @@ public class DiagnosticThread implements Runnable {
     private static List _diagnosticObjects = new ArrayList();
 
     // How often the thread prints info
-    private static long _interval = 1000 * 60; // 60 seconds for now
+    private static long _interval = 1000 * 60 * 10; // 10 minutes
 
     private DiagnosticThread() {}
 
