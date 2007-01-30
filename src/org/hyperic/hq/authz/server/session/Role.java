@@ -34,15 +34,14 @@ import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.authz.values.OwnedRoleValue;
 
 public class Role extends AuthzNamedBean {
-
-    private Integer _cid;
-    private String _description;
-    private boolean _system = false;
-    private Resource _resource;
+    private Integer    _cid;
+    private String     _description;
+    private boolean    _system = false;
+    private Resource   _resource;
     private Collection _resourceGroups = new ArrayList();
     private Collection _operations = new HashSet();
     private Collection _subjects = new ArrayList();
-    private RoleValue _roleValue = new RoleValue();
+    private RoleValue  _roleValue = new RoleValue();
 
     public Role() {
         super();
@@ -57,7 +56,7 @@ public class Role extends AuthzNamedBean {
         return _cid;
     }
     
-    void setCid(Integer val) {
+    protected void setCid(Integer val) {
         _cid = val;
     }
 
@@ -65,7 +64,7 @@ public class Role extends AuthzNamedBean {
         return _description;
     }
     
-    void setDescription(String val) {
+    protected void setDescription(String val) {
         _description = val;
     }
 
@@ -73,7 +72,7 @@ public class Role extends AuthzNamedBean {
         return _system;
     }
     
-    void setSystem(boolean fsystem) {
+    protected void setSystem(boolean fsystem) {
         _system = fsystem;
     }
 
@@ -81,7 +80,7 @@ public class Role extends AuthzNamedBean {
         return _resource;
     }
     
-    void setResource(Resource resourceId) {
+    protected void setResource(Resource resourceId) {
         _resource = resourceId;
     }
 
@@ -89,15 +88,19 @@ public class Role extends AuthzNamedBean {
         return _resourceGroups;
     }
     
-    void setResourceGroups(Collection val) {
+    protected void setResourceGroups(Collection val) {
         _resourceGroups = val;
     }
 
+    void addOperation(Operation op) {
+        getOperations().add(op);
+    }
+    
     public Collection getOperations() {
         return _operations;
     }
     
-    void setOperations(Collection val) {
+    protected void setOperations(Collection val) {
         _operations = val;
     }
 
@@ -105,7 +108,7 @@ public class Role extends AuthzNamedBean {
         return _subjects;
     }
     
-    void setSubjects(Collection val) {
+    protected void setSubjects(Collection val) {
         _subjects = val;
     }
 
@@ -152,5 +155,4 @@ public class Role extends AuthzNamedBean {
         return orv;
     }
 }
-
 
