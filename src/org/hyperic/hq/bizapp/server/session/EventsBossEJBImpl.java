@@ -95,7 +95,6 @@ import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
-import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
 import org.hyperic.hq.events.server.session.RegisteredTriggerNotifier;
 import org.hyperic.hq.events.shared.ActionManagerLocal;
@@ -107,10 +106,6 @@ import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
-import org.hyperic.hq.galerts.server.session.GalertDef;
-import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
-import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
-import org.hyperic.hq.galerts.shared.GalertManagerLocal;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.action.MetricAlertAction;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
@@ -1519,15 +1514,9 @@ public class EventsBossEJBImpl
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         
-        if (alertType.equals(ClassicEscalationAlertType.CLASSIC)) {
-            getADM().setEscalation(subject, id, escId);
-        }
-        else if (alertType.equals(GalertEscalationAlertType.GALERT)) {
-            Escalation escalation = findEscalationById(sessionID, escId);
-            GalertManagerLocal gaMan = GalertManagerEJBImpl.getOne();
-            GalertDef def = gaMan.findById(id);
-            gaMan.update(def, escalation);
-        }
+        Escalation escalation = findEscalationById(sessionID, escId);
+        // TODO: check permission
+        alertType.setEscalation(id, escalation);
     }
     
     /**
