@@ -120,12 +120,13 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public PlatformType findPlatformTypeById(Integer id)
-        throws PlatformNotFoundException {
-        try {
-            return getPlatformTypeDAO().findById(id);
-        } catch (ObjectNotFoundException e) {
+        throws PlatformNotFoundException 
+    {
+        PlatformType res = getPlatformTypeDAO().get(id); 
+
+        if (res == null)
             throw new PlatformNotFoundException(id);
-        }
+        return res;
     }
 
     /**
@@ -198,76 +199,63 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @return name of the plugin for the entity's platform
      * such as "Apache 2.0 Linux". It is used as to look up plugins
      * via a generic plugin manager.
-     * @throws CreateException
-     * @throws ValidationException
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
     public String getPlatformPluginName(AppdefEntityID id) 
-        throws AppdefEntityNotFoundException {
-        
-        try {
-            PlatformLightValue pv;
-            String typeName;
-            if(id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
-                // look up the service ejb
-                try {
-                    Service service = getServiceDAO().findById(id.getId());
-                    pv = service.getServer().getPlatform().getPlatformLightValue();
-                    typeName = service.getServiceType().getName();
-                } catch (ObjectNotFoundException e) {
-                    throw new ServiceNotFoundException(e.getMessage());
-                }                
+        throws AppdefEntityNotFoundException 
+    {
+        PlatformLightValue pv;
+        String typeName;
+
+        if (id.isService()) {
+            // look up the service ejb
+            Service service = getServiceDAO().get(id.getId());
+
+            if (service == null)
+                throw new ServiceNotFoundException(id);
+                
+            pv = service.getServer().getPlatform().getPlatformLightValue();
+            typeName = service.getServiceType().getName();
+        } else if (id.isServer()) {
+            // look up the server
+            Server server = getServerDAO().get(id.getId());
+
+            if (server == null)
+                throw new ServerNotFoundException(id);
+            pv = server.getPlatform().getPlatformLightValue();
+            typeName = server.getServerType().getName();
+        } else if (id.isPlatform()) {
+            Platform platform = getPlatformDAO().get(id.getId());                
+
+            if (platform == null)
+                throw new PlatformNotFoundException(id);
+                
+            pv = platform.getPlatformLightValue();    
+            typeName = pv.getPlatformType().getName();
+        } else if(id.isGroup()) {
+            try {
+                AppdefGroupValue agv = AppdefGroupManagerEJBImpl.getOne()
+                .findGroup(getOverlord(), id);
+                return agv.getGroupTypeLabel();
+            } catch (PermissionException e) {
+                // never happens... its the overlord.
+                throw new SystemException(e);
             }
-            else if(id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-                // look up the server
-                try {
-                    Server server = getServerDAO().findById(id.getId());
-                    pv = server.getPlatform().getPlatformLightValue();
-                    typeName = server.getServerType().getName();
-                } catch (ObjectNotFoundException e) {
-                    throw new ServerNotFoundException(e.getMessage());
-				}
-            }
-            else if(id.getType() == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-                try {
-					Platform platform = getPlatformDAO().findById(id.getId());
-					pv = platform.getPlatformLightValue();    
-					typeName = pv.getPlatformType().getName();
-				} catch (ObjectNotFoundException e) {
-                    throw new PlatformNotFoundException(e.getMessage());
-				}
-            }
-            else if(id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
-                try {
-                    AppdefGroupValue agv = AppdefGroupManagerUtil.getLocalHome()   
-                        .create().findGroup(getOverlord(), id);
-                    return agv.getGroupTypeLabel();
-                } catch (PermissionException e) {
-                    // never happens... its the overlord.
-                    throw new SystemException(e);
-                } catch (CreateException e) {
-                    throw new SystemException(e);
-                }
-            }
-            else {
-                throw new IllegalArgumentException("Unsupported AppdefEntityType: "
-                    + id);
-            }
-            if (id.isPlatform()) {
-                return typeName;
-            }
-            else {
-                return typeName + " " + pv.getPlatformType().getName();
-            }
-        } catch (NamingException e) {
-            throw new SystemException(e);
+        } else {
+            throw new IllegalArgumentException("Unsupported entity type: "+
+                                               id);
+        }
+
+        if (id.isPlatform()) {
+            return typeName;
+        } else {
+            return typeName + " " + pv.getPlatformType().getName();
         }
     }
 
     /**
      * Create a platform type
-     * @return PlatformTypeValue
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
@@ -288,13 +276,13 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     public void removePlatform(AuthzSubjectValue subject, Integer id)
         throws RemoveException, PlatformNotFoundException, PermissionException 
     {
-        try {
-            // find it
-            Platform platform = getPlatformDAO().findById(id);
-            removePlatform(subject, platform);
-        } catch (ObjectNotFoundException e) {
+        // find it
+        Platform platform = getPlatformDAO().get(id);
+
+        if (platform == null)
             throw new PlatformNotFoundException(id);
-        }
+        
+        removePlatform(subject, platform);
     }
     
     private void removePlatform(AuthzSubjectValue subject,
@@ -327,13 +315,14 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
             // remove the config response
             if (cid != null) {
-                try {
-                    ConfigResponseDAO cdao =
-                        DAOFactory.getDAOFactory().getConfigResponseDAO();
-                    cdao.remove(cdao.findById(cid));
-                } catch (ObjectNotFoundException e) {
-                    // OK, no config response, just log it
+                ConfigResponseDAO cdao =
+                    DAOFactory.getDAOFactory().getConfigResponseDAO();
+                ConfigResponseDB dbcfg = cdao.get(cid);
+                    
+                if (cid == null) {
                     _log.warn("Invalid config ID " + cid);
+                } else {
+                    cdao.remove(dbcfg);
                 }
             }
 
@@ -360,10 +349,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Create a Platform of a specified type
-     * @return PlatformValue - the saved value object
-     * @exception CreateException - if it fails to add the platform
-     * @exception ValidationException - if the subject is not allowed
-     * to create Platforms
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
@@ -447,9 +432,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Create a Platform from an AIPlatform
      * @param aipValue the AIPlatform to create as a regular appdef platform.
-     * @return PlatformValue - the value object for the newly created platform.
      * @ejb:interface-method
-     * @ejb:transaction type="RequiresNew"
      */
     public Integer createPlatform(AuthzSubjectValue subject,
                                   AIPlatformValue aipValue)
@@ -475,9 +458,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         Agent agent = getAgentDAO().findByAgentToken(aipValue.getAgentToken());
         
         if (agent == null) {
-            throw new ObjectNotFoundException(aipValue.getId(),
-                                              "Unable to find agent: " +
-                                              aipValue.getAgentToken());
+            throw new ApplicationException("Unable to find agent: " +
+                                           aipValue.getAgentToken());
         }
         ConfigResponseDB config = getConfigResponseDAO().createPlatform();
 
@@ -570,14 +552,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public PlatformLightValue getPlatformLightValue(Integer id)
-        throws PlatformNotFoundException {
-        PlatformDAO platformLocalHome = getPlatformDAO();
-        try {
-            Platform platform = platformLocalHome.findById(id);
-            return platform.getPlatformLightValue();
-        } catch (ObjectNotFoundException e) {
-            throw new PlatformNotFoundException(id, e);
-        }
+        throws PlatformNotFoundException 
+    {
+        return findPlatformById(id).getPlatformLightValue();
     }
 
     /**
@@ -590,11 +567,11 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     public Platform findPlatformById(Integer id)
         throws PlatformNotFoundException
     {
-        try {
-            return getPlatformDAO().findById(id);
-        } catch (ObjectNotFoundException e) {
-            throw new PlatformNotFoundException(id, e);
-        }
+        Platform res = getPlatformDAO().get(id);
+        
+        if (res == null)
+            throw new PlatformNotFoundException(id);
+        return res;
     }
 
     /**
@@ -797,19 +774,23 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @param subject The subject trying to list services.
      * @param serverId Server ID.
      */
-    public PlatformValue getPlatformByServer ( AuthzSubjectValue subject,
-                                               Integer serverId ) 
-        throws PlatformNotFoundException, PermissionException {
-        try {
-            Server serverLocal = getServerDAO().findById(serverId);
-            Platform p = serverLocal.getPlatform();
-            PlatformValue platformValue = p.getPlatformValue();
-            checkViewPermission(subject, platformValue.getEntityId());
-            return platformValue;
-        } catch (ObjectNotFoundException e) {
+    public PlatformValue getPlatformByServer(AuthzSubjectValue subject,
+                                             Integer serverId ) 
+        throws PlatformNotFoundException, PermissionException 
+    {
+        Server server = getServerDAO().get(serverId);
+        
+        if (server == null) {
+            // This should throw server not found.  Servers always have
+            // platforms..  
             throw new PlatformNotFoundException("platform for server " +
-                                                serverId + " not found", e);
+                                                serverId + " not found");
         }
+
+        Platform p = server.getPlatform();
+        PlatformValue platformValue = p.getPlatformValue();
+        checkViewPermission(subject, platformValue.getEntityId());
+        return platformValue;
     }
 
     /**
@@ -817,15 +798,16 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @param serverId Server ID.
      */
-    public Integer getPlatformIdByServer ( Integer serverId ) 
-        throws PlatformNotFoundException {
-        try {
-            Server serverLocal = getServerDAO().findById(serverId);
-            return serverLocal.getPlatform().getId();
-        } catch (ObjectNotFoundException e) {
+    public Integer getPlatformIdByServer (Integer serverId) 
+        throws PlatformNotFoundException 
+    {
+        Server server = getServerDAO().get(serverId);
+        
+        if (server == null) 
             throw new PlatformNotFoundException("platform for server " +
-                                                serverId + " not found", e);
-        }
+                                                serverId + " not found");
+            
+        return server.getPlatform().getId();
     }
 
     /**
@@ -882,18 +864,18 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                                                 Integer appId,
                                                 PageControl pc ) 
         throws ApplicationNotFoundException, PlatformNotFoundException, 
-               PermissionException {
-        ApplicationDAO appLocalHome = getApplicationDAO();
+               PermissionException 
+    {
+        ApplicationDAO appDAO = getApplicationDAO();
 
         Application appLocal;
         Collection serviceCollection;
         Iterator it;
         Collection platCollection;
 
-        try {
-            appLocal = appLocalHome.findById(appId);
-        } catch(ObjectNotFoundException e){
-            throw new ApplicationNotFoundException(appId, e);
+        appLocal = appDAO.get(appId);
+        if (appLocal == null) {
+            throw new ApplicationNotFoundException(appId);
         }
 
         platCollection = new ArrayList();
@@ -1157,7 +1139,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @param existing - the value object for the platform you want to
      * save
      * @ejb:interface-method
-     * @ejb:transaction type="RequiresNew"
      */
     public PlatformValue updatePlatform(AuthzSubjectValue subject,
                                         PlatformValue existing)
@@ -1240,7 +1221,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Update platform types
      * @ejb:interface-method
-     * @ejb:transaction type="RequiresNew"
      */
     public void updatePlatformTypes(String plugin, PlatformTypeInfo[] infos)
         throws CreateException, FinderException, RemoveException {
@@ -1292,7 +1272,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Update an existing appdef platform with data from an AI platform.
      * @param aiplatform the AI platform object to use for data
-     * @ejb:transaction type="REQUIRESNEW"
      * @ejb:interface-method
      */
     public void updateWithAI(AIPlatformValue aiplatform, String owner)

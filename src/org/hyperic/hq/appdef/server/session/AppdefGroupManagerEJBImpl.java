@@ -41,6 +41,8 @@ import org.hyperic.hq.appdef.shared.AppSvcClustIncompatSvcException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
+import org.hyperic.hq.appdef.shared.AppdefGroupManagerUtil;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
@@ -1088,6 +1090,14 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
         return appLoc.findApplicationTypeById(new Integer(id));
     }
 
+    public static AppdefGroupManagerLocal getOne() {
+        try {
+            return AppdefGroupManagerUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
+    }
+    
     /**
      * @ejb:create-method
      */
