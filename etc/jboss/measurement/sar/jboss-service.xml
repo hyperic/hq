@@ -12,6 +12,9 @@
 	 name="hyperic.jmx:type=Service,name=MeasurementSchedule">
   </mbean>
 
+  <!-- When enabled, the following service will re-schedule metrics for resources that
+       HQ has not heard from in a while
+
   <mbean code="org.jboss.varia.scheduler.Scheduler" 
 	 name="hyperic.jmx:service=Scheduler,name=MeasurementSchedule">
     <depends>hyperic.jmx:type=Service,name=MeasurementSchedule</depends>
@@ -23,6 +26,7 @@
     <attribute name="SchedulePeriod">300000</attribute>
     <attribute name="InitialRepetitions">-1</attribute>
   </mbean>
+  -->
 
   <!-- This deploys the availability check service -->
   <mbean code="org.hyperic.hq.measurement.server.mbean.AvailabilityCheckService"
