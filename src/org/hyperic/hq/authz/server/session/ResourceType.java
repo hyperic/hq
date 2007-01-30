@@ -83,10 +83,11 @@ public class ResourceType extends AuthzNamedBean
         _operations = val;
     }
     
-    void setOperations(Collection val) {
-        _operations = val;
+    Operation createOperation(String name) {
+        Operation res = new Operation(this, name);
+        return res;
     }
-   
+
     public Collection getOperations() {
         return Collections.unmodifiableCollection(_operations);
     }

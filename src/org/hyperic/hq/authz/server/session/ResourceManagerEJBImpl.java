@@ -98,25 +98,24 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @ejb:transaction type="REQUIRED"
      */
     public ResourceType createResourceType(AuthzSubjectValue whoami,
-                                           ResourceTypeValue type,
-                                           OperationValue[] operations) {
+                                           ResourceTypeValue typeV,
+                                           OperationValue[] operations) 
+    {
         AuthzSubject whoamiPojo = this.lookupSubjectPojo(whoami);
-        ResourceType typePojo =
-            DAOFactory.getDAOFactory().getResourceTypeDAO().create(whoamiPojo,
-                                                                   type);
-
+        DAOFactory factory = DAOFactory.getDAOFactory();
+        ResourceType type =
+            factory.getResourceTypeDAO().create(whoamiPojo, typeV);
+        Role rootRole =factory.getRoleDAO().findById(AuthzConstants.rootRoleId);
+        
         /* create associated operations */
         if (operations != null) {
-            List ops = new ArrayList();
-            OperationDAO dao = DAOFactory.getDAOFactory().getOperationDAO();
             for (int i = 0; i < operations.length; i++) {
-                Operation op = dao.create(operations[i]);
-                ops.add(op);
+                Operation op = type.createOperation(operations[i].getName());
+
+                rootRole.addOperation(op);
             }
-            
-            typePojo.setOperations(ops);
         }
-        return typePojo;
+        return type;
     }
 
     /**
@@ -202,31 +201,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                     ResourceTypeValue type) {
         ResourceType resType = getResourceTypeDAO().findById(type.getId());
         resType.getOperations().clear();
-    }
-
-    /**
-     * Set the operations for this type.
-     * To get the operations call getOperationValues() on the value-object.
-     * @param whoami The current running user.
-     * @param type This type.
-     * @param operations Operations to associate with this role.
-     * @throws PermissionException whoami is not allowed to perform setOperations on this type.
-     * @ejb:interface-method
-     */
-    public void setOperations(AuthzSubjectValue whoami, ResourceTypeValue type,
-                              OperationValue[] operations)
-        throws PermissionException {
-        ResourceType resType = getResourceTypeDAO().findById(type.getId());
-        Set opPojos = toPojos(operations);
-
-        PermissionManager pm = PermissionManagerFactory.getInstance(); 
-        pm.check(whoami.getId(),
-                 resType.getResource().getResourceType(), resType.getId(),
-                 AuthzConstants.typeOpAddOperation);
-        pm.check(whoami.getId(),
-                 resType.getResource().getResourceType(), resType.getId(),
-                 AuthzConstants.typeOpRemoveOperation);
-        resType.setOperations(opPojos);
     }
 
     /**

@@ -27,7 +27,6 @@ package org.hyperic.hq.authz.server.session;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.OperationValue;
 import org.hyperic.hq.dao.HibernateDAO;
 
 public class OperationDAO extends HibernateDAO {
@@ -35,18 +34,6 @@ public class OperationDAO extends HibernateDAO {
         super(Operation.class, f);
     }
 
-    Operation create(OperationValue createInfo) {
-        Operation res = new Operation(createInfo);
-        DAOFactory factory = DAOFactory.getDAOFactory();
-        Role rootRole=factory.getRoleDAO().findById(AuthzConstants.rootRoleId);
-        if (rootRole == null) {
-            throw new IllegalArgumentException("role id not found "+
-                                               AuthzConstants.rootRoleId);
-        }
-        rootRole.getOperations().add(res);
-        save(res);
-        return res;
-    }
 
     Operation findById(Integer id) {
         return (Operation) super.findById(id);

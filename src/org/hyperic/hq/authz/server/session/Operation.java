@@ -36,16 +36,17 @@ public class Operation extends AuthzNamedBean {
     protected Operation() {
     }
 
-    public Operation(OperationValue val) {
-        setOperationValue(val);
+    Operation(ResourceType type, String name) {
+        super(name);
+        _resourceType = type;
     }
 
     public ResourceType getResourceType() {
         return _resourceType;
     }
 
-    protected void setResourceType(ResourceType resourceTypeId) {
-        _resourceType = resourceTypeId;
+    protected void setResourceType(ResourceType resourceType) {
+        _resourceType = resourceType;
     }
 
     public Integer getCid() {
@@ -63,11 +64,6 @@ public class Operation extends AuthzNamedBean {
         _operationValue.setId(getId());
         _operationValue.setName(getName());
         return _operationValue;
-    }
-
-    protected void setOperationValue(OperationValue val) {
-        setId(val.getId());
-        setName(val.getName());
     }
 
     public Object getValueObject() {
