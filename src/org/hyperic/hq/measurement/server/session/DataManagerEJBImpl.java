@@ -113,6 +113,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     // Purge intervals, loaded once on first invocation.
     private long purgeRaw, purge1h, purge6h;
 
+    private static Analyzer analyzer = (Analyzer) ProductProperties
+        .getPropertyInstance("hyperic.hq.measurement.analyzer");
+
     ///////////////////////////////////////
     // operations
 
@@ -231,9 +234,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         Connection conn = null;
         PreparedStatement istmt = null;
         PreparedStatement ustmt = null;
-
-        Analyzer analyzer = (Analyzer) ProductProperties
-                .getPropertyInstance("hyperic.hq.measurement.analyzer");
 
         try {
             conn = DBUtil.getConnByContext(getInitialContext(), 
@@ -574,12 +574,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Fetch the list of historical data points given
      * a start and stop time range and interval
      *
-     * @param id the id of the Derived Measurement
-     * @param beginTrack the start of the time range
-     * @param end the end of the time range
-     * @param interval for the time range
-     * @param type (collection) for the metric
-     * @param wantNull specifies whether intervals with no data should be return as nulls
+     * @param ids The id's of the DerivedMeasurement
+     * @param begin The start of the time range
+     * @param end The end of the time range
+     * @param interval Interval for the time range
+     * @param type Collection type for the metric
+     * @param returnNulls Specifies whether intervals with no data should be return as nulls
      * @return the list of data points
      * @ejb:interface-method
      */
@@ -835,12 +835,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Fetch a list of historical data points of a specific size Note: There is
      * no guarantee that the list will be the size requested. It may be smaller.
      * 
-     * @param id
-     *            the id of the Derived Measurement
-     * @param begin
-     *            the start of the time range
-     * @param end
-     *            the end of the time range
+     * @param id The id of the DerivedMeasurement
+     * @param count The number of data points to return
      * @return the list of data points
      * @ejb:interface-method
      */
@@ -1083,9 +1079,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     /**
      * Fetch the list of data points given a request time
      *
-     * @param id the id of the Derived Measurement
-     * @param begin the start of the time range
-     * @param end the end of the time range
+     * @param ids The id's of the Derived Measurement
      * @return the list of data points
      * @ejb:interface-method
      */
@@ -1174,7 +1168,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     /**
      * Fetch the most recent data point for particular DerivedMeasurements.
      *
-     * @param id the id of the Derived Measurement
+     * @param ids The id's of the DerivedMeasurement
      * @return long value timestamp of last record.
      * @ejb:interface-method
      */
@@ -1289,9 +1283,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
-     * Get a List of <code>{@link
-     * org.hyperic.util.data.IComparableDataPoint}</code> objects in
-     * order to compute a baseline.
+     * Get a Baseline data.
      *
      * @ejb:interface-method
      */
@@ -1345,7 +1337,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Fetch a map of aggregate data values keyed by metric templates given
      * a start and stop time range
      *
-     * @param id the id of the Derived Measurement
+     * @param tids The id's of the Derived Measurement
      * @param begin the start of the time range
      * @param end the end of the time range
      * @return the map of data points
@@ -1526,10 +1518,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Aggregate data across the given metric IDs, returning max, min, avg, and
      * count of number of unique metric IDs
      *
-     * @param id the id of the Derived Measurement
-     * @param begin the start of the time range
-     * @param end the end of the time range
-     * @return the double array of aggregate values
+     * @param mids The id's of the DerivedMeasurement
+     * @param begin The start of the time range
+     * @param end The end of the time range
+     * @return the An array of aggregate values
      * @ejb:interface-method
      */
     public double[] getAggregateData(Integer[] mids, long begin, long end)
@@ -1621,10 +1613,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Fetch a map of aggregate data values keyed by metrics given
      * a start and stop time range
      *
-     * @param id the id of the Derived Measurement
-     * @param begin the start of the time range
-     * @param end the end of the time range
-     * @return the map of data points
+     * @param tids The id's of the Derived Measurement
+     * @param begin The start of the time range
+     * @param end The end of the time range
+     * @return the Map of data points
      * @ejb:interface-method
      */
     public Map getAggregateDataByMetric(Integer[] tids, Integer[] iids,
@@ -1724,9 +1716,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Fetch a map of aggregate data values keyed by metrics given
      * a start and stop time range
      *
-     * @param id the id of the Derived Measurement
-     * @param begin the start of the time range
-     * @param end the end of the time range
+     * @param mids The id's of the Derived Measurement
+     * @param begin The start of the time range
+     * @param end The end of the time range
      * @return the map of data points
      * @ejb:interface-method
      */
