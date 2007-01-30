@@ -135,12 +135,6 @@ public class ServiceCluster extends AppdefBean
             "use AppServiceDAO.addDependentServiceCluster()");
     }
 
-    public void updateCluster(ServiceClusterValue serviceCluster,
-                              List serviceIds) {
-        throw new UnsupportedOperationException(
-            "use ServiceClusterDAO.updateCluster()");
-    }
-
     private ServiceClusterValue _serviceClusterValue = new ServiceClusterValue();
     /**
      * legacy EJB DTO pattern
