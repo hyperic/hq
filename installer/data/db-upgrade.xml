@@ -3662,7 +3662,7 @@ has already been defined.
     <!-- Create escalation permissions -->
     <schemaSpec version="3.02">
       <schema-insert table="EAM_RESOURCE"
-                     insertCmd="(ID, VERSION_COL, RESOURCE_TYPE_ID, INSTANCE_ID, CID, SUBJECT_ID, FSYSTEM) VALUES (401, 0, 0, 401, 401, 0, 'true')"/>
+                     insertCmd="(ID, VERSION_COL, RESOURCE_TYPE_ID, INSTANCE_ID, CID, SUBJECT_ID, FSYSTEM) VALUES (401, 0, 0, 401, 401, 0, %%TRUE%%)"/>
       <schema-insert table="EAM_RESOURCE_TYPE"
                      insertCmd="(ID, VERSION_COL, NAME, CID, RESOURCE_ID, FSYSTEM) VALUES (401, 0, 'EscalationScheme', 401, 401, 'false')"/>
       <schema-insert table="EAM_RES_GRP_RES_MAP"
@@ -3711,6 +3711,11 @@ has already been defined.
           UPDATE EAM_GALERT_LOGS SET FIXED=%%TRUE%%
         </statement>
       </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="3.05">
+      <schema-insert table="EAM_ESCALATION"
+                     insertCmd="(ID, VERSION_COL, NAME, DESCRIPTION, ALLOW_PAUSE, MAX_WAIT_TIME, NOTIFY_ALL, CTIME, MTIME) VALUES (100, 0, 'No Actions Escalation', 'This is an Escalation Scheme created by HQ that performs no actions', %%FALSE%%, 300000, %%FALSE%%, 0, 0)"/>
     </schemaSpec>
 </dbupgrade>
 
