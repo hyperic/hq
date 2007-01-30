@@ -27,34 +27,28 @@ package org.hyperic.hq.authz.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 
 public class ResourceType extends AuthzNamedBean
 {
-    private Integer _cid;
-    private Resource _resource;
-    private boolean _system = false;
+    private Integer    _cid;
+    private Resource   _resource;
+    private boolean    _system = false;
     private Collection _operations = new ArrayList();
 
     private ResourceTypeValue _resourceTypeValue = new ResourceTypeValue();
 
-    public ResourceType() {
+    protected ResourceType() {
         super();
     }
 
-    public ResourceType(ResourceTypeValue val) {
-        setResourceTypeValue(val);
-    }
-
-    public ResourceType(String name, Integer cid, Resource resource,
-                        boolean fsystem, Collection operations) {
+    ResourceType(String name, Resource resource, boolean fsystem) {
         super(name);
-        _cid = cid;
         _resource = resource;
-        _system = fsystem;
-        _operations = operations;
+        _system   = fsystem;
     }
 
     public Integer getCid() {
@@ -81,12 +75,20 @@ public class ResourceType extends AuthzNamedBean
         _system = val;
     }
 
-    public Collection getOperations() {
+    protected Collection getOperationsBag() {
         return _operations;
     }
 
-    protected void setOperations(Collection val) {
+    protected void setOperationsBag(Collection val) {
         _operations = val;
+    }
+    
+    void setOperations(Collection val) {
+        _operations = val;
+    }
+   
+    public Collection getOperations() {
+        return Collections.unmodifiableCollection(_operations);
     }
 
     /**
@@ -106,12 +108,6 @@ public class ResourceType extends AuthzNamedBean
             }
         }
         return _resourceTypeValue;
-    }
-
-    protected void setResourceTypeValue(ResourceTypeValue val) {
-        setId(val.getId());
-        setName(val.getName());
-        setSystem(val.getSystem());
     }
 
     public Object getValueObject() {
