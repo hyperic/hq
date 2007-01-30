@@ -423,9 +423,8 @@ public class ConfigManagerEJBImpl
                     validationError.substring(0, MAX_VALIDATION_ERR_LEN-3) +
                         "...";
             }
-
-            config.setValidationError(validationError);
         }
+        config.setValidationError(validationError);
     }
 
     /**
