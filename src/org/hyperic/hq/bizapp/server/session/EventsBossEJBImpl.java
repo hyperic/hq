@@ -1518,7 +1518,16 @@ public class EventsBossEJBImpl
                PermissionException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
-        getADM().setEscalation(subject, id, escId);
+        
+        if (alertType.equals(ClassicEscalationAlertType.CLASSIC)) {
+            getADM().setEscalation(subject, id, escId);
+        }
+        else if (alertType.equals(GalertEscalationAlertType.GALERT)) {
+            Escalation escalation = findEscalationById(sessionID, escId);
+            GalertManagerLocal gaMan = GalertManagerEJBImpl.getOne();
+            GalertDef def = gaMan.findById(id);
+            gaMan.update(def, escalation);
+        }
     }
     
     /**
