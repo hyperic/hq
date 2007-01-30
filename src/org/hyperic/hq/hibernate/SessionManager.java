@@ -85,7 +85,7 @@ public class SessionManager {
         Session s = (Session)_sessions.get();
         
         if (s == null) {
-            if (dbgTxt != null && true /* Disabled for now */) {
+            if (dbgTxt != null && false /* Disabled for now */) {
                 _log.info("New Session [" + dbgTxt + "]");
             }
             
