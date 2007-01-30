@@ -67,102 +67,227 @@
     <td width="5"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
     <td width="15"><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
     <td width="85%" colspan="2" nowrap>
-<c:choose>
-  <c:when test="${not empty titleKey}">
-    <fmt:message key="${titleKey}">
-      <c:if test="${not empty titleName}">
-        <fmt:param value="${titleName}"/>
-      </c:if>
-      <c:if test="${not empty subTitleName}">
-        <fmt:param value="${subTitleName}"/>
-      </c:if>
-    </fmt:message>
-  </c:when>
-  <c:otherwise>
-    <c:out value="${titleName}" escapeXml="false"/>
-      <c:if test="${not empty subTitleName}">
-        <c:out value="${subTitleName}"/>
-      </c:if>
-  </c:otherwise>
-</c:choose>
+        <c:choose>
+            <c:when test="${not empty titleKey}">
+                <fmt:message key="${titleKey}">
+                    <c:if test="${not empty titleName}">
+                        <fmt:param value="${titleName}"/>
+                    </c:if>
+                    <c:if test="${not empty subTitleName}">
+                        <fmt:param value="${subTitleName}"/>
+                    </c:if>
+                </fmt:message>
+            </c:when>
+            <c:otherwise>
+                <c:out value="${titleName}" escapeXml="false"/>
+                <c:if test="${not empty subTitleName}">
+                    <c:out value="${subTitleName}"/>
+                </c:if>
+            </c:otherwise>
+        </c:choose>
     </td>
-<c:choose>
-  <c:when test="${not empty titleBgStyle && not empty titleImg}">
-    <td width="14%"><html:img page="/images/${titleImg}" width="202" height="26" alt="" border="0" style="float: right;"/></td>
-    <td><html:img page="/images/spacer.gif" width="20" height="20" alt="" border="0"/></td>
-  </c:when>
-  <c:otherwise>
-    <td width="33%"><html:img page="/images/spacer.gif" width="1" height="26" alt="" border="0"/></td>
-    <td><html:img page="/images/spacer.gif" width="20" height="20" alt="" border="0"/></td>
-  </c:otherwise>
-</c:choose>
-  </tr>
-  <tr>
-    <td width="5" rowspan="99" class="PageTitle"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
-    <td valign="top" align="left" rowspan="99"><html:img page="/images/title_TLcorner.gif" width="8" height="8" alt="" border="0"/></td>
-    <td colspan="4"><html:img page="/images/spacer.gif" width="1" height="10" alt="" border="0"/></td>
-  </tr>
+    <c:choose>
+        <c:when test="${not empty titleBgStyle && not empty titleImg}">
+            <td width="14%">
+                <html:img page="/images/${titleImg}" width="202" height="26" alt="" border="0" style="float: right;"/>
+            </td>
+            <td>
+                <html:img page="/images/spacer.gif" width="20" height="20" alt="" border="0"/>
+            </td>
+        </c:when>
+        <c:otherwise>
+            <td width="33%">
+                <html:img page="/images/spacer.gif" width="1" height="26" alt="" border="0"/>
+            </td>
+            <td>
+                <html:img page="/images/spacer.gif" width="20" height="20" alt="" border="0"/>
+            </td>
+        </c:otherwise>
+    </c:choose>
+</tr>
+<tr>
+    <td width="5" rowspan="99" class="PageTitle">
+        <html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/>
+    </td>
+    <td valign="top" align="left" rowspan="99">
+        <html:img page="/images/title_TLcorner.gif" width="8" height="8" alt="" border="0"/>
+    </td>
+    <td colspan="4">
+        <html:img page="/images/spacer.gif" width="1" height="10" alt="" border="0"/>
+    </td>
+</tr>
 <c:if test="${not empty resource || not empty linkUrl || not empty showSearch}">
-  <tr valign="top"> 
-  <c:choose>
-    <c:when test="${not empty resource}">
+<tr valign="top">
+<c:choose>
+<c:when test="${not empty resource}">
 
-    <td colspan="2">
+<td align="left" colspan="4">
+    <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+            <td>
       <span class="LinkBox" onclick="toggleMenu('InventoryProps');" id="toolMenuSpan">
       <fmt:message key="resource.common.inventory.props.PropertiesBtn"/>
       <html:img page="/images/arrow_dropdown.gif" styleId="toolMenuSpan" border="0"/></a></span>
-      <div style="clear: all;"></div>
-      <div id="InventoryProps" style="display: none; margin-top: 4px;" onclick="toggleMenu('InventoryProps');">
-      <table width="100%" border="0" cellspacing="0" cellpadding="0">
-        <tr> 
-          <td class="PageTitleSmallText" valign="top">
-      <b><fmt:message key="common.label.Description"/></b>
-      <hq:shortenText maxlength="30" value="${resource.description}" styleClass="ListCellPopup5"/>
-    </td>
-    <td style="width: 5px;">&nbsp;</td>
-    <td class="PageTitleSmallText" valign="top" colspan="2" nowrap>
-      <b><fmt:message key="resource.common.inventory.props.OwnerLabel"/></b> <c:out value="${ownerStr}" escapeXml="false"/> 
-      <c:if test="${not empty resource}">
-        <fmt:message key="common.label.Dash"/> <html:link page="/resource/${resource.entityId.typeName}/Inventory.do?mode=changeOwner&rid=${resource.id}&type=${resource.entityId.type}"><fmt:message key="resource.common.inventory.props.ChangeButton"/></html:link><br>
-      </c:if>
-          </td>
+            <div style="clear: all;"></div>
+            <div id="InventoryProps" style="display: none; margin-top: 4px;width:95%;"
+                 onclick="toggleMenu('InventoryProps');">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td class="PageTitleSmallText" valign="top">
+                            <b>
+                                <fmt:message key="common.label.Description"/>
+                            </b>
+                            <hq:shortenText maxlength="30" value="${resource.description}" styleClass="ListCellPopup5"/>
+                        </td>
+                        <td style="width: 5px;">&nbsp;</td>
+                        <td class="PageTitleSmallText" valign="top" colspan="2" nowrap>
+                            <b>
+                                <fmt:message key="resource.common.inventory.props.OwnerLabel"/>
+                            </b>
+                            <c:out value="${ownerStr}" escapeXml="false"/>
+                            <c:if test="${not empty resource}">
+                                <fmt:message key="common.label.Dash"/>
+                                <html:link
+                                        page="/resource/${resource.entityId.typeName}/Inventory.do?mode=changeOwner&rid=${resource.id}&type=${resource.entityId.type}">
+                                    <fmt:message key="resource.common.inventory.props.ChangeButton"/>
+                                </html:link>
+                                <br>
+                            </c:if>
+                        </td>
+                    </tr>
+                    <logic:present name="cprops">
+                        <c:set var="leftRight" value="1"/>
+                    <logic:iterate id="cprop" name="cprops">
+                    <c:if test="${leftRight > 0}">
+                    <tr>
+                        </c:if>
+                        <td class="PageTitleSmallText" width="33%" valign="top"><b>
+                            <c:out value="${cprop.key}"/>
+                        </b>
+                            <fmt:message key="common.label.Colon"/>
+                            <hq:shortenText maxlength="30" value="${cprop.value}" styleClass="ListCellPopup5"/>
+                        </td>
+                        <c:choose>
+                        <c:when test="${leftRight < 0}">
+                        <c:set var="leftRight" value="${leftRight * -1}"/>
+                        <td>&nbsp;</td>
+                    </tr>
+                    </c:when>
+                    <c:otherwise>
+                        <c:set var="leftRight" value="${leftRight - 1}"/>
+                    <td>&nbsp;</td>
+                    </c:otherwise>
+                    </c:choose>
+                    </logic:iterate>
+                    <c:if test="${leftRight < 0}">
+                    <td colspan="3">&nbsp;</td>
         </tr>
-<logic:present name="cprops">
-<c:set var="leftRight" value="1"/>
-<logic:iterate id="cprop" name="cprops">
-  <c:if test="${leftRight > 0}">
-    <tr>
-  </c:if>
-      <td class="PageTitleSmallText" width="33%" valign="top"><b><c:out value="${cprop.key}"/></b><fmt:message key="common.label.Colon"/>
-      <hq:shortenText maxlength="30" value="${cprop.value}" styleClass="ListCellPopup5"/></td>
-  <c:choose>
-  <c:when test="${leftRight < 0}">
-    <c:set var="leftRight" value="${leftRight * -1}"/>
-    <td>&nbsp;</td>
-    </tr>
-  </c:when>
-  <c:otherwise>
-    <c:set var="leftRight" value="${leftRight - 1}"/>
-    <td>&nbsp;</td>
-  </c:otherwise>
-  </c:choose>
-</logic:iterate>
-<c:if test="${leftRight < 0}">
-    <td colspan="3">&nbsp;</td>
-  </tr>
+        </c:if>
+        </logic:present>
+    </table>
+</div>
+<c:if test="${empty ResourceType}">
+    <tiles:insert definition=".resource.common.navmap">
+        <tiles:put name="resource" beanName="resource"/>
+    </tiles:insert>
 </c:if>
-</logic:present>
-      </table>
-      </div>
-      <c:if test="${empty ResourceType}">
-        <tiles:insert definition=".resource.common.navmap">
-          <tiles:put name="resource" beanName="resource"/>
-        </tiles:insert>
-      </c:if>
+</td>
 
-    </td>
-    </c:when>
-    <c:when test="${showSearch}">
+<td style="padding-left:20px;">
+    <c:if test="${not empty linkUrl}">
+        <span class="LinkBox" onclick="toggleMenu('toolMenu');" id="toolMenuSpan"><fmt:message
+                key="resource.toolsmenu.text"/><html:img page="/images/arrow_dropdown.gif" styleId="toolMenuSpan"
+                                                         border="0"/></span>
+
+        <div style="clear: both"></div>
+        <div id="toolMenu" style="display: none; position: absolute; margin-top: 2px; margin-left: -2px;">
+            <tiles:insert attribute="linkUrl">
+                <c:if test="${not empty resource}">
+                    <tiles:put name="resource" beanName="resource"/>
+                </c:if>
+            </tiles:insert>
+        </div>
+    </c:if>
+</td>
+
+<td valign="middle" width="90" style="padding-left:20px;">
+    <hq:navMapSupported var="navMapSupported"/>
+    <c:if test="${navMapSupported}">
+
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr valign="top">
+                <c:choose>
+                    <c:when test="${xlib}">
+                        <td class="PageTitleSmallText" colspan="3" style="padding-top: 0px;">
+                            <script src="<html:rewrite page="/js/"/>effects.js" type="text/javascript"></script>
+                            <c:set var="imageWidth" value="800"/>
+                            <hq:navMap areasVar="mapAreas" areasSizeVar="mapAreasSize" imageWidth="${imageWidth}"/>
+
+                            <map name="diagram">
+                                <c:forEach var="mapArea" varStatus="status" items="${mapAreas}">
+                                    <c:url var="mapAreaUrl" value="/ResourceNav.do">
+
+                                        <%-- always set the default page, if the end page is not controllable,
+                                             send the user to the default page.
+                                        --%>
+                                        <c:param name="defaultPage" value="/Resource.do"/>
+                                        <c:if test="${not empty currResourceUrl}">
+                                            <c:param name="currentResType" value="${currResourceType}"/>
+                                            <c:param name="currentMode" value="${currResourceMode}"/>
+                                        </c:if>
+                                        <c:forEach var="entityId" items="${mapArea.entityIds}">
+                                            <c:param name="eid" value="${entityId.appdefKey}"/>
+                                        </c:forEach>
+
+                                        <c:choose>
+                                            <c:when test="${mapArea.hasAutogrouptype}">
+                                                <c:param name="ctype" value="${mapArea.autogrouptype}"/>
+                                            </c:when>
+                                            <c:when test="${mapArea.hasCtype}">
+                                                <c:param name="ctype" value="${mapArea.ctype}"/>
+                                            </c:when>
+                                        </c:choose>
+                                    </c:url>
+                                    <area shape="RECT"
+                                          coords="<c:out value='${mapArea.x1}'/>,<c:out value='${mapArea.y1}'/>,<c:out value='${mapArea.x2}'/>,<c:out value='${mapArea.y2}'/>"
+                                          href="<c:out value='${mapAreaUrl}'/>" alt="<c:out value='${mapArea.alt}'/>">
+                                </c:forEach>
+                            </map>
+
+                            <span onclick="toggleDiagram('diagramDiv');"><html:img imageName="navMapIcon" border="0"
+                                                                                   alt=""
+                                                                                   page="/images/icon_navmap.png"/></span>
+
+                            <div style="clear: all"></div>
+                            <div id="diagramDiv" style="position: absolute; display: none;">
+        <span>
+          <html:img imageName="navMapImage" page="/resource/NavMapImage?treeVar=${treeVar}&imageWidth=${imageWidth}"
+                    alt="" border="0" usemap="#diagram"/>
+        </span>
+                            </div>
+                        </td>
+                    </c:when>
+                    <c:otherwise>
+                        <td class="ErrorBlock" colspan="2">
+                            <fmt:message key="error.NoXLibInstalled"/>
+                        </td>
+                    </c:otherwise>
+                </c:choose>
+                <td class="PageTitleSmallText">&nbsp;</td>
+            </tr>
+        </table>
+
+    </c:if>
+</td>
+
+
+</tr>
+</table>
+</td>
+</c:when>
+
+
+<c:when test="${showSearch}">
     <td>
       <!--  SEARCH TOOLBAR CONTENTS -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -181,29 +306,35 @@
     </c:otherwise>
   </c:choose>
 
-  <td colspan="2">
-    <c:if test="${not empty linkUrl}">
-      <span class="LinkBox" onclick="toggleMenu('toolMenu');" id="toolMenuSpan"><fmt:message key="resource.toolsmenu.text"/><html:img page="/images/arrow_dropdown.gif" styleId="toolMenuSpan" border="0"/></a></span>
-    <div style="clear: both"></div>
-    <div id="toolMenu" style="display: none; position: absolute; margin-top: 2px; margin-left: -2px;">
-<tiles:insert attribute="linkUrl">
-  <c:if test="${not empty resource}">
-    <tiles:put name="resource" beanName="resource"/>
-  </c:if>
-</tiles:insert>
-      </div>
-    </c:if>
-    </td>
-  </tr>
+<%--<td colspan="2">--%>
+<%--<c:if test="${not empty linkUrl}">--%>
+<%--<span class="LinkBox" onclick="toggleMenu('toolMenu');" id="toolMenuSpan"><fmt:message key="resource.toolsmenu.text"/><html:img page="/images/arrow_dropdown.gif" styleId="toolMenuSpan" border="0"/></span>--%>
+<%--<div style="clear: both"></div>--%>
+<%--<div id="toolMenu" style="display: none; position: absolute; margin-top: 2px; margin-left: -2px;">--%>
+<%--<tiles:insert attribute="linkUrl">--%>
+<%--<c:if test="${not empty resource}">--%>
+<%--<tiles:put name="resource" beanName="resource"/>--%>
+<%--</c:if>--%>
+<%--</tiles:insert>--%>
+<%--</div>--%>
+<%--</c:if>--%>
+<%--</td>--%>
+</tr>
 </c:if>
-  <tr> 
-    <td colspan="4"><html:img page="/images/spacer.gif" height="10" alt="" border="0"/></td>
-  </tr>
+<tr>
+    <td colspan="4">
+        <html:img page="/images/spacer.gif" height="10" alt="" border="0"/>
+    </td>
+</tr>
 </table>
 
+</td>
+</tr>
+<tr>
+    <td class="PageTitle">
+        <html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/>
     </td>
-  </tr>
-  <tr>
-    <td class="PageTitle"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
-    <td><html:img page="/images/spacer.gif" width="20" height="1" alt="" border="0"/></td>
+    <td>
+        <html:img page="/images/spacer.gif" width="20" height="1" alt="" border="0"/>
+    </td>
     <td width="100%">
