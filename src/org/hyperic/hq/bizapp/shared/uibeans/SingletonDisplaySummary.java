@@ -33,25 +33,19 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
  * Represents the resource current health summary displayed on the "Current
  * Health" views for a single resource.
  */
-public class SingletonDisplaySummary extends ResourceTypeDisplaySummary
-    implements Serializable {
-
+public class SingletonDisplaySummary 
+    extends ResourceTypeDisplaySummary
+    implements Serializable 
+{
     private AppdefEntityID entityId;
-    private String entityName;
+    private String         entityName;
     
-    /**
-     * Constructor for SingletonDisplaySummary.
-     */
     public SingletonDisplaySummary() {
-        super();
         setNumResources(new Integer(1));
     }
 
-    /**
-     * @see org.hyperic.hq.bizapp.shared.UIConstants#SUMMARY_TYPE_SINGLETON
-     */
     public int getSummaryType() {
-	return UIConstants.SUMMARY_TYPE_SINGLETON;
+        return UIConstants.SUMMARY_TYPE_SINGLETON;
     }
 
     /**
@@ -72,17 +66,10 @@ public class SingletonDisplaySummary extends ResourceTypeDisplaySummary
         entityId = eid;
     }
 
-    /**
-     * @return String
-     */
     public String getEntityName() {
         return entityName;
     }
 
-    /**
-     * Sets the entityName.
-     * @param entityName The entityName to set
-     */
     public void setEntityName(String entityName) {
         this.entityName = entityName;
     }
@@ -90,6 +77,7 @@ public class SingletonDisplaySummary extends ResourceTypeDisplaySummary
     public String toString() {
         StringBuffer sb = new StringBuffer(super.toString());
         sb.append(",entityId=").append(entityId);
+        sb.append(",entityName=").append(entityName);
         return sb.toString();
     }
 }

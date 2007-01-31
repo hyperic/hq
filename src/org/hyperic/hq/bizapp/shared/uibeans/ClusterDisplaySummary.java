@@ -31,21 +31,15 @@ import java.io.Serializable;
  * Represents the resource current health summary displayed on the "Current
  * Health" views for an cluster of resources.
  */
-public class ClusterDisplaySummary extends SingletonDisplaySummary
-    implements Serializable {
-
-    /**
-     * Constructor for ClusterDisplaySummary.
-     */
+public class ClusterDisplaySummary 
+    extends SingletonDisplaySummary
+    implements Serializable 
+{
     public ClusterDisplaySummary() {
         super();
     }
 
-    /**
-     * @see org.hyperic.hq.bizapp.shared.UIConstants#SUMMARY_TYPE_CLUSTER
-     */
-
     public int getSummaryType() {
-	return UIConstants.SUMMARY_TYPE_CLUSTER;
+        return UIConstants.SUMMARY_TYPE_CLUSTER;
     }
 }

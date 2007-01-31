@@ -52,9 +52,6 @@ public abstract class ResourceTypeDisplaySummary
     private Integer _performTempl     = null;
     private Integer _numResources     = null;
     
-    /**
-     * Constructor for ResourceTypeDisplaySummary.
-     */
     public ResourceTypeDisplaySummary() {
         super();
     }
@@ -64,7 +61,7 @@ public abstract class ResourceTypeDisplaySummary
      * resources. Examples of summary types are "autogroup", "cluster"
      * and "singleton".
      *
-     * @see org.hyperic.hq.bizapp.shared.UIConstants
+     * @see UIConstants
      */
     public abstract int getSummaryType();
 
@@ -111,11 +108,6 @@ public abstract class ResourceTypeDisplaySummary
         _performance = performance;
     }
 
-    /**
-     * Returns the resourceType.
-     *
-     * @return AppdefResourceTypeValue
-     */
     public AppdefResourceTypeValue getResourceType() {
         return _resourceType;
     }
@@ -206,8 +198,22 @@ public abstract class ResourceTypeDisplaySummary
     }
 
     public int compareTo(Object o) {
-        ResourceTypeDisplaySummary rtds = (ResourceTypeDisplaySummary) o;
-        return getResourceType().getName().
-            compareTo(rtds.getResourceType().getName());
+        String one, two;
+        
+        /**
+         * Dear reader.  This shitty code is courtesy of whoever decided to make
+         * the singleton display summary have it's own concept of a 'name'
+         */
+        if (this instanceof SingletonDisplaySummary)
+            one = ((SingletonDisplaySummary)this).getEntityName();
+        else
+            one = this.getResourceType().getName();
+            
+        if (o instanceof SingletonDisplaySummary)
+            two = ((SingletonDisplaySummary)o).getEntityName();
+        else
+            two = ((ResourceTypeDisplaySummary)o).getResourceType().getName();
+
+        return one.compareTo(two);
     }
 }
