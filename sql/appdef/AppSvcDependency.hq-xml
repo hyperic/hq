@@ -24,13 +24,15 @@
       <column name="MTIME" not-null="false" />
     </property>
 
-    <many-to-one name="appService" unique="true" class="AppService">
-      <column name="APPSERVICE_ID" not-null="false" />
-    </many-to-one>
+    <properties name="appSvcDepId" unique="true">
+      <many-to-one name="appService" class="AppService">
+        <column name="APPSERVICE_ID" not-null="false" />
+      </many-to-one>
 
-    <many-to-one name="dependentService" class="AppService">
-      <column name="DEPENDENT_SERVICE_ID" not-null="false" />
-    </many-to-one>
+      <many-to-one name="dependentService" class="AppService">
+        <column name="DEPENDENT_SERVICE_ID" not-null="false" />
+      </many-to-one>
+    </properties>
   </class>
 
 </hibernate-mapping>

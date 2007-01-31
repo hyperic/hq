@@ -3730,6 +3730,17 @@ has already been defined.
       </schema-directSQL>
     </schemaSpec>
 
+    <schemaSpec version="3.07">
+      <schema-directSQL>
+          <statement targetDB="postgresql">
+             ALTER TABLE eam_service_dep_map ADD CONSTRAINT eam_service_dep_map_appservice_id_key UNIQUE (appservice_id, dependent_service_id)
+          </statement>
+          <statement targetDB="oracle">
+             ALTER TABLE eam_service_dep_map ADD CONSTRAINT SYS_C00102139 UNIQUE (appservice_id, dependent_service_id)
+          </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
 </dbupgrade>
 
 </target>
