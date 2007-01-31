@@ -1172,8 +1172,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @return long value timestamp of last record.
      * @ejb:interface-method
      */
-    public Map getLastDataPoints(Integer[] ids, long timerange)
-        throws DataNotAvailableException {
+    public Map getLastDataPoints(Integer[] ids, long timerange) {
         final int MAX_ID_LEN = 10;
         
         // The return map
@@ -1267,7 +1266,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             log.error(e.getMessage());
             if (log.isTraceEnabled())
                 log.trace("failed to get measurement id: ", e);            
-            throw new DataNotAvailableException("Cannot get last values", e);
+            throw new SystemException("Cannot get last values", e);
         } catch (NamingException e) {
             throw new SystemException(e);
         } finally {
@@ -1345,7 +1344,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      */
     public Map getAggregateData(Integer[] tids, Integer[] iids,
                                 long begin, long end)
-        throws DataNotAvailableException {
+    {
         // Check the begin and end times
         this.checkTimeArguments(begin, end);
 
@@ -1503,8 +1502,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
             return resMap;
         } catch (SQLException e) {
-            log.debug("getAggregateData()", e);
-            throw new DataNotAvailableException(e);
+            log.warn("getAggregateData()", e);
+            throw new SystemException(e);
         } catch (NamingException e) {
             throw new SystemException(this.ERR_DB, e);
         } finally {
@@ -1524,8 +1523,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @return the An array of aggregate values
      * @ejb:interface-method
      */
-    public double[] getAggregateData(Integer[] mids, long begin, long end)
-        throws DataNotAvailableException {
+    public double[] getAggregateData(Integer[] mids, long begin, long end) {
         // Check the begin and end times
         this.checkTimeArguments(begin, end);
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
@@ -1594,9 +1592,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             }
             
         } catch (SQLException e) {
-            throw new DataNotAvailableException(
-                "Can't get aggregate data for "+ StringUtil.arrayToString(mids),
-                e);
+            throw new SystemException("Can't get aggregate data for "+ 
+                                      StringUtil.arrayToString(mids), e);
         } catch (NamingException e) {
             throw new SystemException(this.ERR_DB, e);
         } finally {
