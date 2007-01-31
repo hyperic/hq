@@ -128,9 +128,6 @@
       <tiles:put name="defaultSortColumn" beanName="defaultSortColumn"/>
     </tiles:insert>
   </c:when>
-  <c:otherwise>
-    <td align="right"><div id="modifiedCritTime" class="ToolBarContent">&nbsp;</div></td>
-  </c:otherwise>
 </c:choose>
 </tr>
 </table>

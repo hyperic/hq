@@ -93,22 +93,9 @@ onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
 		
 		 <!-- table rows are inserted here dynamically -->
  	 </tbody>
-    <!--
      <tfoot>
           <tr>
-             <td id="modifiedCritTime" class="modifiedDate" valign="bottom" colspan="5"></td>
-          </tr>
-      </tfoot>
-      -->
-  </table>
-
-     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="display:none;" id="noCritAlerts" class="portletLRBorder">
-         <tbody>
-         <tr class="ListRow">
-      		<td class="ListCell"><fmt:message key="dash.home.alerts.no.resource.to.display"/></td>
-    	</tr>
-         </tbody>
-  </table>
+             <td colspan="4">
     <tiles:insert definition=".toolbar.list">                
       <tiles:put name="noButtons" value="true"/>
       <tiles:put name="alerts" value="true"/>
@@ -118,6 +105,19 @@ onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
       <tiles:put name="pageNumAction" value=""/>    
       <tiles:put name="defaultSortColumn" value="1"/>
     </tiles:insert>
+             </td>
+             <td id="modifiedCritTime<c:out value="${portlet.token}"/>" class="modifiedDate" nowrap="true"></td>
+          </tr>
+      </tfoot>
+  </table>
+
+     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="display:none;" id="noCritAlerts" class="portletLRBorder">
+         <tbody>
+         <tr class="ListRow">
+      		<td class="ListCell"><fmt:message key="dash.home.alerts.no.resource.to.display"/></td>
+    	</tr>
+         </tbody>
+  </table>
   </html:form>
     
 </div>
