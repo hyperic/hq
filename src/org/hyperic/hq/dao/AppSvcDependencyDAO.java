@@ -2,6 +2,8 @@ package org.hyperic.hq.dao;
 
 import java.util.Collection;
 
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.AppSvcDependency;
@@ -72,11 +74,11 @@ public class AppSvcDependencyDAO extends HibernateDAO
             .uniqueResult();
     }
 
-    public Collection findByAppService(Integer appSrvId)
+    public Collection findByDependents(AppService entity)
     {
-        String sql="from AppSvcDependency where appService.id=?";
+        String sql="from AppSvcDependency where dependentService = :appSvc";
         return getSession().createQuery(sql)
-            .setInteger(0, appSrvId.intValue())
+            .setEntity("appSvc", entity)
             .list();
     }
 

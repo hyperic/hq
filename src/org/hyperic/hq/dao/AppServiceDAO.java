@@ -1,6 +1,7 @@
 package org.hyperic.hq.dao;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -57,6 +58,20 @@ public class AppServiceDAO extends HibernateDAO
 
     public void remove(AppService entity)
     {
+        // Need to make sure that it's removed from the map table
+        Collection appDeps = DAOFactory.getDAOFactory()
+            .getAppSvcDepencyDAO().findByDependents(entity);
+        for (Iterator it = appDeps.iterator(); it.hasNext(); ) {
+            AppSvcDependency appDep = (AppSvcDependency) it.next();
+            AppService appSvc = appDep.getAppService();
+            appSvc.getAppSvcDependencies().remove(appDep);
+            super.remove(appDep);
+        }
+        
+        for (Iterator it = entity.getAppSvcDependencies().iterator();
+             it.hasNext(); ) {
+            super.remove(it.next());
+        }
         super.remove(entity);
     }
 
