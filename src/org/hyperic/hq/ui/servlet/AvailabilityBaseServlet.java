@@ -58,28 +58,6 @@ public abstract class AvailabilityBaseServlet extends HttpServlet {
     private static Log log =
         LogFactory.getLog(AvailabilityBaseServlet.class.getName());
 
-    private static final String THREADGROUP = "AvailabilityThreads";
-
-    private static ThreadGroup getThreadGroup() {
-        return new ThreadGroup(getRootThreadGroup(), THREADGROUP);
-    }
-
-    private static ThreadGroup getRootThreadGroup() {
-        ThreadGroup group = Thread.currentThread().getThreadGroup();
-        
-        while (group.getParent() != null) {
-            group = group.getParent();
-        }
-        
-        return group;
-    }
-
-    protected Long timeoutMillis = null;
-    
-    private boolean isTimeoutSet() {
-        return timeoutMillis != null;
-    }
-
     private Map iconData = new HashMap();
 
     public void init() {
@@ -118,58 +96,29 @@ public abstract class AvailabilityBaseServlet extends HttpServlet {
                 // looks like we got an autogroup
                 atid = new AppdefEntityTypeID(ctype);
             }
-            
-            String strTimeout = RequestUtils.getStringParameter(
-                request, Constants.AVAILABILITY_TIMEOUT_PARAM, null);
-            if (strTimeout != null) {
-                timeoutMillis = new Long(strTimeout);
-            }
-            
-            // we _never_ want the result cached by the browser, ever
+
+            // Don't cache availability icons.
             RequestUtils.bustaCache(request, response);
     
             if (eids != null && log.isDebugEnabled())
-                    log.debug("getting availability for resources [" +
-                              StringUtil.arrayToString(eids) + "]");
-            double val = MeasurementConstants.AVAIL_UNKNOWN;
-            StopWatch timer = new StopWatch();
-            if (isTimeoutSet()) {
-                if (log.isTraceEnabled())
-                    log.trace("timeout is set to " + timeoutMillis.longValue() +
-                              " ms");
-                RunnableAvailabilityCheck ac = 
-                    new RunnableAvailabilityCheck(sessionId, eids, atid);
-                ThreadGroup tg = AvailabilityBaseServlet.getThreadGroup();
-                Thread t = new Thread(tg, ac);
-                t.setDaemon(true);
-                t.start();
-                while (timer.getElapsed() < timeoutMillis.longValue() &&
-                       t.isAlive() && ac.getAvailValue() == null) {
-                    try { 
-                        Thread.sleep(1000); /*  wait a sec  */
-                    } catch (InterruptedException e) {
-                        break;
-                    }
-                }
+                log.debug("Getting availability for resources [" +
+                          StringUtil.arrayToString(eids) + "]");
 
-                if (ac.getAvailValue() != null) {
-                    val = ac.getAvailValue().doubleValue();
-                } else {
-                    log.trace("getAvailValue() is null");
-                }
+            double val;
+            StopWatch timer = new StopWatch();
+
+            MeasurementBoss boss =
+                ContextUtils.getMeasurementBoss(getServletContext());
+            if (null == ctype) {
+                val = boss.getAvailability(sessionId, eids[0]);
             } else {
-                MeasurementBoss boss =
-                    ContextUtils.getMeasurementBoss(getServletContext());
-                if (null == ctype) {
-                    val = boss.getAvailability(sessionId, eids[0]);
-                } else {
-                    val = boss.getAGAvailability(sessionId, eids, atid);
-                }
+                val = boss.getAGAvailability(sessionId, eids, atid);
             }
 
-            if (log.isTraceEnabled())
+            if (log.isTraceEnabled()) {
                 log.trace("Elapsed time: " + timer.getElapsed() + " ms");
-    
+            }
+
             if (val == MeasurementConstants.AVAIL_UNKNOWN) {
                 sendErrorIcon(request, response);
             } else if (val == MeasurementConstants.AVAIL_DOWN) {
@@ -230,50 +179,6 @@ public abstract class AvailabilityBaseServlet extends HttpServlet {
     
         public int getLength() {
             return bytes.length;
-        }
-    }
-
-    protected class RunnableAvailabilityCheck implements Runnable {
-        private int sessionId;
-
-        private AppdefEntityID[] eids;
-
-        private AppdefEntityTypeID ctype;
-
-        private Double availValue;
-
-        public RunnableAvailabilityCheck(int sessionId, AppdefEntityID[] eids,
-                AppdefEntityTypeID ctype) {
-            this.sessionId = sessionId;
-            this.eids = eids;
-            this.ctype = ctype;
-        }
-
-        public void run() {
-            MeasurementBoss boss = ContextUtils
-                    .getMeasurementBoss(getServletContext());
-            double val;
-            availValue = null;
-
-            try {
-                if (null == ctype) {
-                    val = boss.getAvailability(sessionId, eids[0]);
-                } else {
-                    val = boss.getAGAvailability(sessionId, eids, ctype);
-                }
-                availValue = new Double(val);
-                return;
-            } catch (Exception e) {
-                log.trace("Availability check failed:", e);
-            } finally {
-                if (availValue == null) {
-                    availValue = new Double(MeasurementConstants.AVAIL_UNKNOWN);
-                }
-            }
-        }
-
-        public Double getAvailValue() {
-            return availValue;
         }
     }
 }

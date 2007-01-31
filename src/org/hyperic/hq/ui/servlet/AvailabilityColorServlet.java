@@ -53,16 +53,9 @@ public class AvailabilityColorServlet extends AvailabilityBaseServlet {
         PX_ERR_URL, PX_AVAIL_URL, PX_UNAVAIL_URL, PX_WARNING_URL,
         PX_PAUSED_URL };
 
-   /*
-    * (non-Javadoc)
-    * 
-    * @see org.hyperic.hq.ui.servlet.AvailabilityBaseServlet#getIconUrls()
-    */
     protected String[] getIconUrls() {
         return iconUrls;
     }
-
-    //-------------------------------------instance variables
 
     protected void sendAvailIcon(HttpServletRequest request,
                                  HttpServletResponse response) {
