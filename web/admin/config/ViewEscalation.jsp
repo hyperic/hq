@@ -425,7 +425,7 @@ function showViewEscResponse(originalRequest) {
         addOption(select1, '2400000', '<fmt:message key="alert.config.escalation.wait">
                                       <fmt:param value="45"/>
                                     </fmt:message>');
-        addOption(select1, '3000000', '<fmt:message key="alert.config.escalation.wait">
+        addOption(select1, '3600000', '<fmt:message key="alert.config.escalation.wait">
                                       <fmt:param value="60"/>
                                     </fmt:message>');
 
