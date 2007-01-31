@@ -217,7 +217,6 @@
         var aList = alertText.criticalAlerts;
         var token = alertText.token;
         var alertTable;
-        var tbody = $('mtbody');
         var alertFunc;
         var descSpan = "Recent Alerts_span";
 
@@ -230,25 +229,25 @@
             alertFunc = 'requestRecentAlerts()';
         }
 
+        var tbody = alertTable.getElementsByTagName('tbody')[0];
+
         $(descSpan).innerHTML = alertText.title;
 
-        if (aList != 0) {
+        if (aList.length != 0) {
             $('noCritAlerts').style.display = 'none';
 
-            for (var i = alertTable.tbody.childNodes.length - 1; i > 1; i--) {
-                alertTable.tbody.removeChild(alertTable.childNodes[i]);
+            for (var i = tbody.childNodes.length - 1; i > 1; i--) {
+                tbody.removeChild(tbody.childNodes[i]);
             }
 
             for (i = 0; i < aList.length; i++) {
 
                 var tr = document.createElement('tr');
-                var trTime = document.createElement('tr');
                 var td1 = document.createElement('td');
                 var td2 = document.createElement('td');
                 var td3 = document.createElement('td');
                 var td4 = document.createElement('td');
                 var td5 = document.createElement('td');
-                var td6 = document.createElement('td');
                 var alertAnchor = document.createElement("a");
                 var checkBox = document.createElement("input");
                 var urlAmp = "&a="
@@ -293,26 +292,15 @@
                     td5.appendChild(document.createTextNode("No"));
                 }
             }
-
-            tbody.appendChild(trTime);
-            trTime.appendChild(td6);
-            td6.setAttribute('colspan', '5');
-            td6.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
-
-            if (token != null) {
-            td6.setAttribute('id','time'+ token);
-            $('time' + token).innerHTML = 'Updated: '+refreshTime();
-            } else {
-             td6.setAttribute('id','time');
-            $('time').innerHTML = 'Updated: '+refreshTime();
-            }
         } else {
             $('noCritAlerts').style.display = '';
           
         }
-       //$('modifiedCritTime').innerHTML = 'Updated: ' + refreshTime();
-        rTimer = setTimeout(alertFunc, 60000);
-        //Refresh in 60 seconds
+
+       $('modifiedCritTime' + (token != null ? token : '')).innerHTML =
+         'Updated: ' + refreshTime();
+       rTimer = setTimeout(alertFunc, 60000);
+       // Refresh in 60 seconds
     }
 
     function showAvailSummary(originalRequest) {
