@@ -279,7 +279,7 @@
                 }
 
                 tr.appendChild(td4);
-                td4.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlert");
+                td4.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlertLeft");
 
                 if (aList[i].resourceName) {
                     td4.appendChild(document.createTextNode(aList[i].resourceName));
@@ -375,19 +375,25 @@
                
                 td2.setAttribute((document.all ? 'className' : 'class'), "availResourceStatus");
                 td2.setAttribute('align', 'right');
+                td2.setAttribute('width', '40px');
 
                 td3.setAttribute((document.all ? 'className' : 'class'), "availResourceStatus");
                 td3.setAttribute('align', 'left');
 
+
                 if (down > '0') {
+                    td2.setAttribute('width', '40px');
                     td2.innerHTML = downgraphic + '<span style=color:red;>' + down + '</span>';
                 } else {
+                    td2.setAttribute('width', '5px');
                     td2.innerHTML = "&nbsp;";
                 }
 
                 if (up > '0') {
+                td3.setAttribute('width', '40px');
                 td3.innerHTML = upgraphic + '<span style=color:green;>' + up + '</span>';
                 } else {
+                td3.setAttribute('width', '5px');
                 td3.innerHTML = "&nbsp;";
                 }
              }

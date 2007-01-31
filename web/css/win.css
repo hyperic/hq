@@ -863,7 +863,14 @@ ul.boxy li {
 }
 
 .resourceNameAlert {
-width:49%;
+  width:49%;
+  padding:3px;
+  border-bottom:1px solid #D5D8DE;
+}
+
+.resourceNameAlertLeft {
+  width:49%;
+  text-align:left;
   padding:3px;
   border-bottom:1px solid #D5D8DE;
 }
@@ -903,7 +910,7 @@ width:20%;
 .availResourceStatus {
 padding-top:3px;
 padding-bottom:3px;
-padding-right:3px;
+text-align:center;
 border-bottom:1px solid #D5D8DE;
 }
 
