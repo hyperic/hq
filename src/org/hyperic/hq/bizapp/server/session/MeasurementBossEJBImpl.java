@@ -1125,7 +1125,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
          }
          
          MetricValue[] ret = new MetricValue[tids.length];
-         Map data = getDataMan().getLastDataPoints(mids, interval);
+         Map data = getDataMan().getLastDataPoints(mids,
+                                                   System.currentTimeMillis() - interval);
              
          for (int i = 0; i < mids.length; i++) {
              if (data.containsKey(mids[i]))
@@ -2594,8 +2595,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     (Integer[]) midMap.values().toArray(new Integer[0]);
                 
                 // Get absolute last data point
-                Map avails = getDataMan().getLastDataPoints(
-                    mids, MeasurementConstants.ACCEPTABLE_LIVE_MILLIS);
+                Map avails = getDataMan().getLastDataPoints(mids, end -
+                    MeasurementConstants.ACCEPTABLE_LIVE_MILLIS);
 
                 if (avails.size() == 0)
                     summary.setAvailability(
@@ -3012,6 +3013,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         // XXX - optimization for the fact that we can have multiple indicator
         // metrics for each category
         HashSet done = new HashSet();
+        long now = System.currentTimeMillis();
         for (Iterator it = measurements.iterator(); it.hasNext(); ) {
             DerivedMeasurementValue dmv = (DerivedMeasurementValue) it.next();
             String category = dmv.getTemplate().getCategory().getName();
@@ -3036,10 +3038,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             // an array (of length 1) of measurement id's
             Integer[] mids = { dmv.getId() };
 
-            Double theValue = new Double(Double.NaN);
+            Double theValue;
             Map dataMap;
-            dataMap = getDataMan().getLastDataPoints(mids, 
-                                                     MeasurementConstants.HOUR);
+            dataMap = getDataMan().
+                getLastDataPoints(mids, now - MeasurementConstants.HOUR);
 
             if (dataMap.size() < 1)
                 continue;
