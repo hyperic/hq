@@ -27,6 +27,7 @@ package org.hyperic.hq.galerts.server.session;
 
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.events.server.session.Action;
 
 public class GalertActionLog  
@@ -79,5 +80,17 @@ public class GalertActionLog
     
     protected void setSubject(AuthzSubject subject) {
         _subject = subject;
+    }
+
+    protected int getAlertTypeEnum() {
+        return GalertEscalationAlertType.GALERT.getCode();
+    }
+    
+    protected void setAlertTypeEnum(int v) {
+        // Do nothing
+    }
+    
+    public EscalationAlertType getAlertType() {
+        return GalertEscalationAlertType.GALERT;
     }
 }

@@ -3741,6 +3741,19 @@ has already been defined.
       </schema-directSQL>
     </schemaSpec>
 
+    <schemaSpec version="3.08">
+      <schema-alterColumn table="EAM_ALERT_ACTION_LOG"
+                          column="ALERT_ID" nullable="NULL"/>
+      <schema-addColumn table="EAM_ALERT_ACTION_LOG"
+                        column="ALERT_TYPE" columnType="LONG">
+        <initializer>
+          UPDATE EAM_ALERT_ACTION_LOG SET ALERT_TYPE = 195934910
+        </initializer>
+      </schema-addColumn>
+      <schema-alterColumn table="EAM_ALERT_ACTION_LOG"
+                          column="ALERT_TYPE" nullable="NOT NULL"/>
+    </schemaSpec>
+
 </dbupgrade>
 
 </target>

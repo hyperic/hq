@@ -22,6 +22,10 @@
       <column name="GALERT_ID" index="GALERT_ACTION_LOG_IDX" />
     </many-to-one>
 
+	<property name="alertTypeEnum">
+	  <column name="ALERT_TYPE" not-null="true" />
+	</property>
+
     <many-to-one name="action">
       <column name="ACTION_ID" />
     </many-to-one>
@@ -29,6 +33,8 @@
     <many-to-one name="subject">
       <column name="SUBJECT_ID" />
     </many-to-one>
+    
+
   </class>
 
 </hibernate-mapping>

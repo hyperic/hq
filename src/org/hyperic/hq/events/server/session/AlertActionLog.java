@@ -28,15 +28,16 @@ package org.hyperic.hq.events.server.session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
 
 public class AlertActionLog  
     extends PersistedObject
 {
-    private String       _detail;
-    private Alert        _alert;
-    private Action       _action;
-    private AuthzSubject _subject;
+    private String              _detail;
+    private Alert               _alert;
+    private Action              _action;
+    private AuthzSubject        _subject;
     
     private AlertActionLogValue _valueObj;
     
@@ -82,6 +83,18 @@ public class AlertActionLog
     
     protected void setSubject(AuthzSubject subject) {
         _subject = subject;
+    }
+    
+    protected int getAlertTypeEnum() {
+        return ClassicEscalationAlertType.CLASSIC.getCode();
+    }
+    
+    protected void setAlertTypeEnum(int v) {
+        // Do nothing
+    }
+    
+    public EscalationAlertType getAlertType() {
+        return ClassicEscalationAlertType.CLASSIC;
     }
     
     public AlertActionLogValue getAlertActionLogValue() {
