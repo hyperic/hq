@@ -68,14 +68,14 @@ public class MeasurementGtrigger
         LogFactory.getLog(MeasurementGtrigger.class);
 
     private final SizeComparator     _sizeCompare;
-    private final int                _numResources;
+    private final int                _numResources; // Num needed to match
     private final boolean            _isPercent;
     private final int                _templateId;
     private final ComparisonOperator _comparator;
     private final Float              _metricVal;
     private final Set                _interestedEvents;
     private final Map                _processedEvents;
-    private       int                _groupSize;
+    private       int                _groupSize;  // The total size of our group
     private       String             _metricName;
     
     MeasurementGtrigger(SizeComparator sizeCompare, int numResources,
@@ -90,7 +90,7 @@ public class MeasurementGtrigger
         _metricVal        = new Float(metricVal);
         _interestedEvents = new HashSet();
         _processedEvents  = new HashMap(_numResources);
-        _groupSize        = 0;
+        _groupSize        = 0; 
         _metricName       = "Unknown";
     }
     
@@ -122,23 +122,26 @@ public class MeasurementGtrigger
             }
         }
         
+        String leftHandStr;
         int leftHand;
         
-        if (_isPercent)
-            leftHand = numMatched * 100 / _groupSize;
-        else
-            leftHand = numMatched; 
+        if (_isPercent) {
+            leftHand    = numMatched * 100 / _groupSize;
+            leftHandStr = (_numResources * 100 / _groupSize) + "%";
+        } else {
+            leftHand    = numMatched;
+            leftHandStr = "" + _numResources;  
+        }
         
-        _log.info("Checking if " + _sizeCompare + " " + _numResources +
-                  (_isPercent ? "%" : "") +
-                  " of the resources reported " + _metricName + 
-                  " " + _comparator + " " + _metricVal);
-        _log.info("Number of resources matching condition: " + numMatched);
+        _log.debug("Checking if " + _sizeCompare + " " + _numResources +
+                   (_isPercent ? "%" : "") +
+                   " of the resources reported " + _metricName + 
+                   " " + _comparator + " " + _metricVal);
+        _log.debug("Number of resources matching condition: " + numMatched);
         
         if (_sizeCompare.isTrue(leftHand, _numResources)) {
             StringBuffer sr, lr;
             FireReason reason;
-            String leftHandStr = leftHand + (_isPercent ? "%" : ""); 
             
             sr = new StringBuffer();
             lr = new StringBuffer();
@@ -166,10 +169,10 @@ public class MeasurementGtrigger
               .append(_metricVal);
           
             reason = new FireReason(sr.toString(), lr.toString());
-            _log.info("Trigger firing");
+            _log.debug("Trigger firing");
             setFired(reason);
         } else {
-            _log.info("Trigger not firing");
+            _log.debug("Trigger not firing");
             setNotFired();
         }
     }
