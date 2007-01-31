@@ -307,7 +307,8 @@ function showViewEscResponse(originalRequest) {
            //format: /^(.*)$/,
            containment: ["viewEscalationUL"],
            onUpdate: function() {
-                ajaxEngine.sendRequest( '/escalation/updateEscalationOrder.do', Sortable.serialize("viewEscalationUL") ); },
+               var pars = "&id=" + id;
+                ajaxEngine.sendRequest( '/escalation/updateEscalationOrder.do', Sortable.serialize("viewEscalationUL") + pars); },
            constraint: 'vertical'});
 
 }
