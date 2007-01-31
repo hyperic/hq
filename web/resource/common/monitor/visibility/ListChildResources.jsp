@@ -89,7 +89,7 @@
     </c:choose>
   </c:url>
 
-<div id="<c:out value="${summary.resourceType.name}"/>_menu" class="menu" style="background-color:blue">
+<div id="<c:out value="${summary.resourceType.name}"/>_menu" class="menu">
   <ul>
     <li><div class="BoldText"><fmt:message key="${childResourcesTypeKey}"/></div>
     <c:choose>
