@@ -89,7 +89,7 @@
     </c:choose>
   </c:url>
 
-<div id="<c:out value="${summary.resourceType.name}"/>_menu" class="menu">
+<div id="<c:out value="${summary.resourceType.name}"/>_menu" class="menu" style="background-color:blue">
   <ul>
     <li><div class="BoldText"><fmt:message key="${childResourcesTypeKey}"/></div>
     <c:choose>
@@ -242,7 +242,6 @@
     </c:forEach>
 
 </table>
-
 <c:if test="${count > 5}">
   </div>
 </c:if>

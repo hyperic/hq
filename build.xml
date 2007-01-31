@@ -625,6 +625,7 @@
     <copy todir="${jboss.deploy.dir}/web.ear/hq.war" >
       <fileset dir="${webapp.home}" includes="**/*.js*" />
       <fileset dir="${webapp.home}" includes="**/*.css" />
+      <fileset dir="${webapp.home}" includes="**/images/*" />
     </copy>
 
   </target>
