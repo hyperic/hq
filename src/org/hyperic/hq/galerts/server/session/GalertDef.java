@@ -227,4 +227,8 @@ public class GalertDef
     public boolean performsEscalations() {
         return true;
     }
+    
+    public String toString() {
+        return getName();
+    }
 }
