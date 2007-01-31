@@ -37,22 +37,22 @@
 
 <!-- Toobar -->
 <c:if test="${not hideTools}">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" class="ToolbarContent" style="border-top:1px solid #003366;border-bottom:1px solid #003366;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" class="ToolbarContent">
   <tr>
     <td style="padding-top:3px;padding-right:5px;padding-left:5px;padding-bottom:5px;" valign="top"><html:image page="/images/arrow_branch.gif" border="0"/></td>
+    <td style="padding-top:3px;padding-bottom:5px;font-size:10px;">Select Resources above &amp;<br> click button to view metrics</td>
     <td nowrap style="font-size:10px" width="80">
     <tiles:insert page="/common/components/ActionButton.jsp">
           <tiles:put name="labelKey" value="common.label.ViewMetrics"/>
           <tiles:put name="buttonHref" value="."/>
-          <tiles:put name="buttonClick" value="return false;"/>
+          <tiles:put name="buttonClick" value="document.ProblemMetricsDisplayForm.submit(); return false;"/>
         </tiles:insert>
         <html:hidden property="fresh" value="false"/>
 
         <%--<html:image page="/images/fb_addResourcesApply.gif" border="0" onmouseover="imageSwap(this, imagePath + 'fb_addResourcesApply', '_over');" onmouseout="imageSwap(this, imagePath +  'fb_addResourcesApply', '');" onmousedown="imageSwap(this, imagePath +  'fb_addResourcesApply', '_down')"/>
     <html:hidden property="fresh" value="false"/>--%>
     </td>
-    <td style="padding-top:3px;padding-bottom:5px;font-size:10px;">Select Resources above to view metrics then click button</td>
-    <td style="padding-left:5px;padding-right:3px;padding-bottom:5px;" valign="bottom"> <html:image page="/images/icon_info2.gif" onmouseover="menuLayers.show('stepInfo', event)" onmouseout="menuLayers.hide()" border="0"/></td>
+    <td style="padding-left:5px;padding-right:3px"> <html:image page="/images/icon_info2.gif" onmouseover="menuLayers.show('stepInfo', event)" onmouseout="menuLayers.hide()" border="0"/></td>
   </tr>
 </table>
 </c:if>
