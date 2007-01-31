@@ -471,11 +471,6 @@ public interface ParamConstants {
      */
     public static final String CONTROL_ACTION_NONE = "none";
 
-    /*
-     * Request parameter for specifying the availability check timeout
-     */
-    public static final String AVAILABILITY_TIMEOUT_PARAM = "timeout";
-
     /**
      * Constants for indicator views
      */

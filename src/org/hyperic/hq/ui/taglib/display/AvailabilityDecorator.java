@@ -333,12 +333,7 @@ public class AvailabilityDecorator extends ColumnDecorator implements Tag {
            .append("?")
            .append(Constants.ENTITY_ID_PARAM)
            .append("=")
-           .append(aeid.getAppdefKey())
-           // parameters to trigger timing out the availability checks
-           .append("&amp;")
-           .append(Constants.AVAILABILITY_TIMEOUT_PARAM)
-           .append("=")
-           .append(AVAILABILITY_TIMEOUT);
+           .append(aeid.getAppdefKey());
 
         StringBuffer buf = new StringBuffer();
         buf.append("<img name=\"avail")
