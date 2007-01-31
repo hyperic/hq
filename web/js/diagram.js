@@ -104,7 +104,7 @@ function bodyClicked(e) {
     hide($('toolMenu'));
   }
 
-  if ( (!target.id || target.id != 'recentImg') && $('recent').shown ) {
+  if ( (!target.id || target.id != 'recentImg') && $('recent') && $('recent').shown ) {
     hide($('recent'));
   }
 }
