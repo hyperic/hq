@@ -1168,11 +1168,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     /**
      * Fetch the most recent data point for particular DerivedMeasurements.
      *
-     * @param ids The id's of the DerivedMeasurement
-     * @return long value timestamp of last record.
+     * @param ids The id's of the DerivedMeasurements
+     * @param timestamp Only use data points with collection times greater
+     * than the given timestamp.
+     * @return A Map of measurement ids to MetricValues.
      * @ejb:interface-method
      */
-    public Map getLastDataPoints(Integer[] ids, long timerange) {
+    public Map getLastDataPoints(Integer[] ids, long timestamp) {
         final int MAX_ID_LEN = 10;
         
         // The return map
@@ -1184,7 +1186,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         MetricDataCache cache = MetricDataCache.getInstance();
         ArrayList nodata = new ArrayList();
         for (int i = 0; i < ids.length; i++) {
-            MetricValue mval = cache.get(ids[i], timerange);
+            MetricValue mval = cache.get(ids[i], timestamp);
             if (mval != null)
                 data.put(ids[i], mval);
             else
@@ -1208,7 +1210,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
             int length = Math.min(ids.length, MAX_ID_LEN);
             boolean constrain =
-                (timerange != MeasurementConstants.TIMERANGE_UNLIMITED);
+                (timestamp != MeasurementConstants.TIMERANGE_UNLIMITED);
             StringBuffer sqlBuf = this.getLastDataPointsSQL(length, constrain);
 
             stmt = conn.prepareStatement(sqlBuf.toString());
@@ -1243,10 +1245,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 i = this.setStatementArguments(stmt, i, subids);
                 
                 if (constrain) {
-                    stmt.setLong(i++, timerange);
+                    stmt.setLong(i++, timestamp);
 
                     if (log.isTraceEnabled())
-                        log.trace("arg" + (i-1) + ": " + timerange);
+                        log.trace("arg" + (i-1) + ": " + timestamp);
                 }
 
                 rs = stmt.executeQuery();
@@ -1262,10 +1264,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 
                 DBUtil.closeResultSet(logCtx, rs);
             }
-        } catch (SQLException e) {
-            log.error(e.getMessage());
-            if (log.isTraceEnabled())
-                log.trace("failed to get measurement id: ", e);            
+        } catch (SQLException e) {         
             throw new SystemException("Cannot get last values", e);
         } catch (NamingException e) {
             throw new SystemException(e);
