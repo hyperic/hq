@@ -1710,7 +1710,7 @@ has already been defined.
             WHERE CLASSNAME='net.hyperic.hq.measurement.action.MetricAlertAction'
         </statement>
         <statement>
-          DELETE FROM EAM_TRIGGER_EVENT;
+          DELETE FROM EAM_TRIGGER_EVENT
         </statement>
       </schema-directSQL>
     </schemaSpec>
