@@ -29,6 +29,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -129,6 +130,7 @@ import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
+import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.timer.StopWatch;
 
 /** BizApp interface to the Measurement subsystem
@@ -1123,15 +1125,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
          }
          
          MetricValue[] ret = new MetricValue[tids.length];
-         try {
-             Map data = getDataMan().getLastDataPoints(mids, interval);
+         Map data = getDataMan().getLastDataPoints(mids, interval);
              
-             for (int i = 0; i < mids.length; i++) {
-                 if (data.containsKey(mids[i]))
-                     ret[i] = (MetricValue) data.get(mids[i]);
-             }
-         } catch (DataNotAvailableException e) {
-             // Don't worry about it
+         for (int i = 0; i < mids.length; i++) {
+             if (data.containsKey(mids[i]))
+                 ret[i] = (MetricValue) data.get(mids[i]);
          }
          
          return ret;
@@ -2172,50 +2170,45 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         // Now, iterate through each AppdefEntityID
         for (int i = 0; i < entIds.length; i++) {            
             Integer[] eid = new Integer[] { entIds[i].getId() };
-            try {
-                // Now get the aggregate data, keyed by template ID's
-                Map datamap = getDataMan().getAggregateData(mtids, eid,
-                                                                 begin, end);
+            // Now get the aggregate data, keyed by template ID's
+            Map datamap = getDataMan().getAggregateData(mtids, eid,
+                                                        begin, end);
     
-                // For each template, add a new summary
-                for (it = datamap.entrySet().iterator(); it.hasNext(); ) {
-                    Map.Entry entry = (Map.Entry) it.next();
+            // For each template, add a new summary
+            for (it = datamap.entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry entry = (Map.Entry) it.next();
                     
-                    Integer mtid = (Integer) entry.getKey();
-                    // Get the MeasurementTemplateValue
-                    MeasurementTemplateValue tmpl =
-                        (MeasurementTemplateValue) tmplMap.get(mtid.intValue());
+                Integer mtid = (Integer) entry.getKey();
+                // Get the MeasurementTemplateValue
+                MeasurementTemplateValue tmpl =
+                    (MeasurementTemplateValue) tmplMap.get(mtid.intValue());
                         
-                    // Use the MeasurementTemplateValue id to get the array List
-                    List resSummaries =
-                        (List) templateMetrics.get(mtid.intValue());
-                    if (resSummaries == null) // this key hasn't been seen yet
-                        resSummaries = new ArrayList();
+                // Use the MeasurementTemplateValue id to get the array List
+                List resSummaries =
+                    (List) templateMetrics.get(mtid.intValue());
+                if (resSummaries == null) // this key hasn't been seen yet
+                    resSummaries = new ArrayList();
                     
-                    // Get the data
-                    double[] data = (double[]) entry.getValue(); 
+                // Get the data
+                double[] data = (double[]) entry.getValue(); 
                     
-                    AppdefResourceValue v;
-                    rv = new AppdefEntityValue(entIds[i], subject);
+                AppdefResourceValue v;
+                rv = new AppdefEntityValue(entIds[i], subject);
     
-                    if (seen.containsKey(entIds[i])) {
-                        v = (AppdefResourceValue)seen.get(entIds[i]);
-                    } else {
-                        v = rv.getResourceValue();
-                        seen.put(entIds[i], v);  // keep track of what we've seen
-                    }
+                if (seen.containsKey(entIds[i])) {
+                    v = (AppdefResourceValue)seen.get(entIds[i]);
+                } else {
+                    v = rv.getResourceValue();
+                    seen.put(entIds[i], v);  // keep track of what we've seen
+                }
                     
-                    MetricDisplaySummary mds =
-                        getMetricDisplaySummary(subject, tmpl, begin, end,
-                                                     data, entIds[i]);
+                MetricDisplaySummary mds =
+                    getMetricDisplaySummary(subject, tmpl, begin, end,
+                                            data, entIds[i]);
                     
-                    resSummaries.add(new ResourceMetricDisplaySummary(mds, v));
-                    templateMetrics.put(mtid.intValue(), resSummaries);
-                    uniqueTemplates.put(mtid, tmpl);
-                 }
-            } catch (DataNotAvailableException e) {
-                // JW -- don't swallow this
-                log.warn("Data not available.", e);
+                resSummaries.add(new ResourceMetricDisplaySummary(mds, v));
+                templateMetrics.put(mtid.intValue(), resSummaries);
+                uniqueTemplates.put(mtid, tmpl);
             }
         }
         // now take all of the unique lists and unique 
@@ -2476,12 +2469,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     }
 
     /**
-     * @return List the List of ResourceTypeDisplaySummary's
+     * @return a List of ResourceTypeDisplaySummary's
      */    
-    private List getSummarizedResourceCurrentHealth(
-        AuthzSubjectValue subject, AppdefResourceValue[] resources)
+    private List 
+        getSummarizedResourceCurrentHealth(AuthzSubjectValue subject, 
+                                           AppdefResourceValue[] resources)
         throws SessionTimeoutException, SessionNotFoundException,
-               AppdefEntityNotFoundException, PermissionException {
+               AppdefEntityNotFoundException, PermissionException 
+    {
 
         List summaries = new ArrayList();
 
@@ -2496,87 +2491,87 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         // AppdefResourceValues
         HashMap resourcemap = new HashMap();
         // keys are type id's and the values are AppdefResourceTypeValues
-        try {  
-            for (int i = 0; i < resources.length; i++) {
-                if (resources[i] instanceof ServiceClusterValue) {
-                    AppdefResourceValue resource = resources[i];
-                    AppdefEntityID aid = resource.getEntityId();
-                    AppdefEntityValue aeval =
-                        new AppdefEntityValue(aid, subject);
-                    AppdefGroupValue agval =
-                        (AppdefGroupValue) aeval.getResourceValue();
-                    ClusterDisplaySummary cds =
-                        new ClusterDisplaySummary();
-                    cds.setEntityId(resource.getEntityId());
-                    cds.setEntityName(agval.getName());
-                    int size = agval.getTotalSize();
-                    cds.setNumResources(new Integer(size));
-                    try {
-                        // Replace the IDs with all of the members
-                        List memberIds = GroupUtil.getCompatGroupMembers(
-                            subject, aid, null, PageControl.PAGE_ALL);
-                        AppdefEntityID[] ids = (AppdefEntityID[])
-                            memberIds.toArray(new AppdefEntityID[0]);
-                        setResourceTypeDisplaySummary(subject, cds, agval, ids);
-                        summaries.add(cds);
-                    } catch (GroupNotCompatibleException e) {
-                        log.error("Group not compatible: " + aid);
-                        throw new IllegalArgumentException("Invalid appdef state");
-                    }
-                } else {
-                    // all of the non-clusters get organized in here
-                    resourcemap.put(resources[i].getEntityId(), resources[i]);
-                    AppdefResourceTypeValue type =
-                        resources[i].getAppdefResourceTypeValue();
-                    Integer typeId = type.getId();
-                    List siblings = (List) resTypeMap.get(typeId);
-                    if (siblings == null) {
-                        siblings = new ArrayList();
-                        resTypeMap.put(typeId, siblings);               
-                    }            
-                    // Add resource to list
-                    siblings.add(resources[i].getEntityId());
+        for (int i = 0; i < resources.length; i++) {
+            if (resources[i] instanceof ServiceClusterValue) {
+                AppdefResourceValue resource = resources[i];
+                AppdefEntityID aid = resource.getEntityId();
+                AppdefEntityValue aeval = new AppdefEntityValue(aid, subject);
+                AppdefGroupValue agval =
+                    (AppdefGroupValue) aeval.getResourceValue();
+                ClusterDisplaySummary cds = new ClusterDisplaySummary();
+                    
+                cds.setEntityId(resource.getEntityId());
+                cds.setEntityName(agval.getName());
+                int size = agval.getTotalSize();
+                cds.setNumResources(new Integer(size));
+                try {
+                    // Replace the IDs with all of the members
+                    List memberIds = 
+                        GroupUtil.getCompatGroupMembers(subject, aid, null, 
+                                                        PageControl.PAGE_ALL);
+                    AppdefEntityID[] ids = (AppdefEntityID[])
+                        memberIds.toArray(new AppdefEntityID[0]);
+                    setResourceTypeDisplaySummary(subject, cds, agval, ids);
+                    summaries.add(cds);
+                } catch (GroupNotCompatibleException e) {
+                    log.error("Group not compatible: " + aid);
+                    throw new IllegalArgumentException("Invalid appdef state");
                 }
+            } else {
+                // all of the non-clusters get organized in here
+                resourcemap.put(resources[i].getEntityId(), resources[i]);
+                AppdefResourceTypeValue type =
+                    resources[i].getAppdefResourceTypeValue();
+                Integer typeId = type.getId();
+                List siblings = (List) resTypeMap.get(typeId);
+                if (siblings == null) {
+                    siblings = new ArrayList();
+                    resTypeMap.put(typeId, siblings);               
+                }            
+                // Add resource to list
+                siblings.add(resources[i].getEntityId());
             }
-            // first deal with the autogroubz and singletons (singletons
-            // are just the degenerative case of an autogroup, why it's
-            // its own type is... silly)
-            for (Iterator it = resTypeMap.entrySet().iterator(); it.hasNext();){
-                Map.Entry entry = (Map.Entry)it.next();
-                Collection siblings = (Collection) entry.getValue();
-                // Make sure we have valid IDs
-                if (siblings == null || siblings.size() == 0)
-                    continue;                    
-                
-                ResourceTypeDisplaySummary summary;
-                AppdefResourceValue resource;
-                AppdefEntityID[] ids =
-                    (AppdefEntityID[])siblings.toArray(new AppdefEntityID[0]);                
-                AppdefEntityID aid = ids[0];
-                resource = (AppdefResourceValue)resourcemap.get(aid);
-                // autogroup
-                if (ids.length > 1) {
-                    summary = new AutogroupDisplaySummary();
-                    summary.setNumResources(new Integer(ids.length));
-                } else {
-                    // singleton
-                    summary = new SingletonDisplaySummary();
-                    ((SingletonDisplaySummary)summary).setEntityId(aid);
-                    ((SingletonDisplaySummary)summary).setEntityName(resource.getName());
-                }
-                setResourceTypeDisplaySummary(subject, summary, resource, ids);
-                summaries.add(summary);
-            }
-        } catch (DataNotAvailableException e) {
-            throw new SystemException(e);
         }
+        // first deal with the autogroubz and singletons (singletons
+        // are just the degenerative case of an autogroup, why it's
+        // its own type is... silly)
+        for (Iterator it = resTypeMap.entrySet().iterator(); it.hasNext();){
+            Map.Entry entry = (Map.Entry)it.next();
+            Collection siblings = (Collection) entry.getValue();
+            // Make sure we have valid IDs
+            if (siblings == null || siblings.size() == 0)
+                continue;                    
+                
+            ResourceTypeDisplaySummary summary;
+            AppdefResourceValue resource;
+            AppdefEntityID[] ids =
+                (AppdefEntityID[])siblings.toArray(new AppdefEntityID[0]);                
+            AppdefEntityID aid = ids[0];
+            resource = (AppdefResourceValue)resourcemap.get(aid);
+            // autogroup
+            if (ids.length > 1) {
+                summary = new AutogroupDisplaySummary();
+                summary.setNumResources(new Integer(ids.length));
+            } else {
+                // singleton
+                summary = new SingletonDisplaySummary();
+                ((SingletonDisplaySummary)summary).setEntityId(aid);
+                ((SingletonDisplaySummary)summary).setEntityName(resource.getName());
+            }
+            setResourceTypeDisplaySummary(subject, summary, resource, ids);
+            summaries.add(summary);
+        }
+
+        Collections.sort(summaries);
         return summaries;
     }
 
-    private void setResourceTypeDisplaySummary(AuthzSubjectValue subject,
-            ResourceTypeDisplaySummary summary, AppdefResourceValue resource,
-            AppdefEntityID[] ids) 
-        throws DataNotAvailableException {
+    private void 
+        setResourceTypeDisplaySummary(AuthzSubjectValue subject,
+                                      ResourceTypeDisplaySummary summary, 
+                                      AppdefResourceValue resource,
+                                      AppdefEntityID[] ids) 
+    {
         // Now get each category of measurements
         long end = System.currentTimeMillis();
         long begin = end - MeasurementConstants.HEALTH_WINDOW_MILLIS;
@@ -2637,7 +2632,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 Integer[] mids =
                     (Integer[]) midMap.values().toArray(new Integer[0]);
 
-                // this can throw DataNotAvailableException
                 double[] data =
                     getDataMan().getAggregateData(mids, begin,end);
                 log.trace("getting usage data took: " + watch.getElapsed());
@@ -2747,7 +2741,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         
         // Get the associated services        
         AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
-        List services= rv.getAssociatedServices(PageControl.PAGE_ALL);
+        PageControl pc = new PageControl(0, PageControl.SIZE_UNLIMITED,
+                                         PageControl.SORT_ASC, 
+                                         SortAttribute.NAME);
+        List services= rv.getAssociatedServices(pc);
         return getSummarizedResourceCurrentHealth(subject, 
             (AppdefResourceValue[]) services.toArray(
                 new AppdefResourceValue[services.size()]));
@@ -3041,21 +3038,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
             Double theValue = new Double(Double.NaN);
             Map dataMap;
-            try {
-                dataMap = getDataMan()
-                    .getLastDataPoints(mids, MeasurementConstants.HOUR);
-                if (dataMap.size() < 1)
-                    continue;
+            dataMap = getDataMan().getLastDataPoints(mids, 
+                                                     MeasurementConstants.HOUR);
+
+            if (dataMap.size() < 1)
+                continue;
                 
-                theValue =
-                    ((MetricValue) dataMap.get(dmv.getId())).getObjectValue();
-            } catch (DataNotAvailableException e) {
-                if (log.isTraceEnabled())
-                    log.trace("Measurement ID value error ", e);
-                // no measurement available for this cateogry
-                // we're done with the database
-                dataMap = new HashMap(0);
-            }
+            theValue = ((MetricValue)dataMap.get(dmv.getId())).getObjectValue();
             
             if (category.equals(MeasurementConstants.CAT_THROUGHPUT)) {
                 summary.setThroughput(theValue);

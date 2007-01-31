@@ -167,57 +167,50 @@ public class MetricSessionEJB extends BizappSessionEJB {
                 timer.getElapsed());
         }
     
-        try {
-            timer.reset();
+        timer.reset();
             
-            // Now get the aggregate data, keyed by template ID's
-            Map datamap = this.getDataMan()
-                .getAggregateData(mtids, eids, begin, end);
+        // Now get the aggregate data, keyed by template ID's
+        Map datamap = this.getDataMan().getAggregateData(mtids, eids, begin, 
+                                                         end);
+        
+        // Get the intervals, keyed by template ID's as well
+        Map intervals = this.getDerivedMeasurementManager()
+                            .findMetricIntervals(subject, eids, mtids);
             
-            // Get the intervals, keyed by template ID's as well
-            Map intervals = this.getDerivedMeasurementManager()
-                .findMetricIntervals(subject, eids, mtids);
-            
-            if (log.isTraceEnabled()) {
-                log.trace("getResourceMetrics -> getAggregateData took " +
-                    timer.getElapsed());
+        if (log.isTraceEnabled()) {
+            log.trace("getResourceMetrics -> getAggregateData took " +
+                      timer.getElapsed());
+        }
+    
+        for (it = mtVals.iterator(); it.hasNext(); ) {
+            MeasurementTemplateValue tmpl =
+                (MeasurementTemplateValue) it.next();
+    
+            int total = eids.length;
+            String type = tmpl.getMonitorableType().getName();
+            if (totalCounts.containsKey(type)) {
+                total = ((Integer) totalCounts.get(type)).intValue();
             }
     
-            for (it = mtVals.iterator(); it.hasNext(); ) {
-                MeasurementTemplateValue tmpl =
-                    (MeasurementTemplateValue) it.next();
-    
-                int total = eids.length;
-                String type = tmpl.getMonitorableType().getName();
-                if (totalCounts.containsKey(type)) {
-                    total = ((Integer) totalCounts.get(type)).intValue();
-                }
-    
-                double[] data = (double[]) datamap.get(tmpl.getId());
+            double[] data = (double[]) datamap.get(tmpl.getId());
                 
-                if (data == null && !showNoCollect)
-                    continue;
+            if (data == null && !showNoCollect)
+                continue;
     
-                String category = tmpl.getCategory().getName();
-                TreeSet summaries = (TreeSet) resmap.get(category);
-                if (summaries == null) {
-                    summaries = new TreeSet();
-                    resmap.put(category, summaries);
-                }
-                
-                Long interval = (Long) intervals.get(tmpl.getId());
-    
-                // Now create a MetricDisplaySummary and add it to the list
-                MetricDisplaySummary summary =
-                    this.getMetricDisplaySummary(tmpl, interval, begin, end,
-                                                 data, total);
-                summaries.add(summary);
+            String category = tmpl.getCategory().getName();
+            TreeSet summaries = (TreeSet) resmap.get(category);
+            if (summaries == null) {
+                summaries = new TreeSet();
+                resmap.put(category, summaries);
             }
-        } catch (DataNotAvailableException e) {
-            // Then we just return an empty map
-            // don't swallow exception without an
-            // opportunity to log it
-            log.debug("fetching metrics failed: ", e); 
+                
+            Long interval = (Long) intervals.get(tmpl.getId());
+    
+            // Now create a MetricDisplaySummary and add it to the list
+            MetricDisplaySummary summary =
+                this.getMetricDisplaySummary(tmpl, interval, begin, end,
+                                             data, total);
+            summaries.add(summary);
         }
         
         return resmap;
@@ -377,15 +370,11 @@ public class MetricSessionEJB extends BizappSessionEJB {
         Arrays.fill(result, MeasurementConstants.AVAIL_UNKNOWN);
         
         Map data = new HashMap(0);
-        try {
-            if (midMap.size() > 0) {
-                Integer[] mids =
-                    (Integer[]) midMap.values().toArray(new Integer[0]);
-                data = this.getDataMan().getLastDataPoints(mids, acceptable);
-                log.debug("getLastDataPoints() + " + watch.getElapsed());
-            }
-        } catch (DataNotAvailableException e) {
-            // Then we'll have to assume we have no data
+        if (midMap.size() > 0) {
+            Integer[] mids =
+                (Integer[]) midMap.values().toArray(new Integer[0]);
+            data = this.getDataMan().getLastDataPoints(mids, acceptable);
+            log.debug("getLastDataPoints() + " + watch.getElapsed());
         }
     
         // Organize by agent
