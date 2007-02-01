@@ -346,6 +346,10 @@ function showViewEscResponse(originalRequest) {
     }
 
     function saveAddEscalation () {
+        // Convert whitespaces
+        var emails = $('emailinput').value;
+        $('emailinput').value = emails.split(/[\s]/);
+
         var id = $('id').value;
         var serialAddAction = Form.serialize('addEscalation');
         var pars =  "EscId=" + id + "&" + serialAddAction;
