@@ -34,13 +34,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-import javax.ejb.CreateException;
-import javax.naming.NamingException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
-import org.hyperic.hq.appdef.shared.AgentManagerUtil;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefCompatException;
@@ -62,7 +58,6 @@ import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplayConstants;
 import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplayValue;
 import org.hyperic.hq.bizapp.shared.uibeans.ProblemMetricSummary;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.EvaluationException;
@@ -70,9 +65,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
-import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.pager.PageControl;
@@ -343,9 +336,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
     protected double[] getAvailability(AuthzSubjectValue subject,
                                        AppdefEntityID[] ids)
         throws AppdefEntityNotFoundException, PermissionException {
-        final long TIMEOUT = 20000;     // 20 sec 
         long current = System.currentTimeMillis();
-        StopWatch watch = new StopWatch(current);
     
         AgentManagerLocal agentMan = AgentManagerEJBImpl.getOne();
         
@@ -374,7 +365,6 @@ public class MetricSessionEJB extends BizappSessionEJB {
             Integer[] mids =
                 (Integer[]) midMap.values().toArray(new Integer[0]);
             data = this.getDataMan().getLastDataPoints(mids, acceptable);
-            log.debug("getLastDataPoints() + " + watch.getElapsed());
         }
     
         // Organize by agent
@@ -423,47 +413,6 @@ public class MetricSessionEJB extends BizappSessionEJB {
                         break;
                     default :
                         break;
-                }
-            }
-        }
-    
-        // Never get live
-        toGetLive.clear();
-        
-        if (toGetLive.size() > 0) {
-            Iterator it = toGetLive.values().iterator();
-            for (int i = 0; it.hasNext(); i++) {
-                // No more waiting...just return the result
-                if (watch.getElapsed() > TIMEOUT) {
-                    return result;
-                }
-    
-                List indList = (List) it.next();
-                
-                // Have to get int values out of the list
-                Integer[] liveMids = new Integer[indList.size()];
-                Iterator indIt = indList.iterator();
-                for (int ind = 0; indIt.hasNext(); ind++) {
-                    int index = ((Integer) indIt.next()).intValue();
-                    liveMids[ind] = (Integer) midMap.get(ids[index]);
-                }
-                
-                try {
-                    MetricValue[] mvals =
-                        this.getDerivedMeasurementManager()
-                             .getLiveMeasurementValues(subject, liveMids);
-    
-                    indIt = indList.iterator();     // Reset iterator
-                    for (int ind = 0; indIt.hasNext(); ind++) {
-                        int index = ((Integer) indIt.next()).intValue();
-                        result[index] = mvals[ind].getValue();
-                    }
-                } catch (MeasurementNotFoundException e) {
-                    // Leave them as AVAIL_UNKNOWN
-                } catch (EvaluationException e) {
-                    // Leave them as AVAIL_UNKNOWN
-                } catch (LiveMeasurementException e) {
-                    // Leave them as AVAIL_UNKNOWN
                 }
             }
         }
@@ -642,13 +591,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
             default:
                 break;
         }
-        
-        if ( log.isDebugEnabled() ) {
-            log.debug("platforms="+platforms);
-            log.debug("servers="+servers);
-            log.debug("services="+services);
-        }
-        
+
         // Look up the metric summaries of all associated resources
         Map results = new HashMap();
         if (platforms != null)
