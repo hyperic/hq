@@ -96,9 +96,6 @@ public class ResourceHubPortalAction extends BaseAction {
     protected Log log =
         LogFactory.getLog(ResourceHubPortalAction.class.getName());
 
-
-    // ---------------------------------------------------- Public Methods
-
     /**
      * Set up the Resource Hub portal.
      */
@@ -276,15 +273,9 @@ public class ResourceHubPortalAction extends BaseAction {
                 resourceType = DEFAULT_RESOURCE_TYPE;
             }
             else {
-                throw new ServletException("invalid group type: " + groupType);
+                throw new ServletException("Invalid group type: " + groupType);
             }
 
-            if (log.isTraceEnabled()) {
-                log.trace("finding all resources for group subtype [" +
-                          groupSubtype + "] and entity type [" +
-                          entityType + "] and resource type [" + resourceType +
-                          "] and resource name [" + resourceName + "]");
-            }
             resources =
                 appdefBoss.findCompatInventory(sessionId,
                                                groupSubtype,
@@ -296,11 +287,6 @@ public class ResourceHubPortalAction extends BaseAction {
                                                pc);
         }
         else {
-            if (log.isTraceEnabled()) {
-                log.trace("finding all resources for entity type [" +
-                          entityType + "] and resource type [" + resourceType +
-                          "] and resource name [" + resourceName + "]");
-            }
             resources = appdefBoss.findCompatInventory(sessionId, 
                                                        entityType, 
                                                        resourceType,
@@ -310,7 +296,6 @@ public class ResourceHubPortalAction extends BaseAction {
                                                        pc);
         }
 
-        log.trace("found " + resources.size() + " resources");
         request.setAttribute(Constants.ALL_RESOURCES_ATTR, resources);
 
         // check control permissions
@@ -325,7 +310,6 @@ public class ResourceHubPortalAction extends BaseAction {
         if (ids.size() > 0) {
             AppdefEntityID[] idArr =
                 (AppdefEntityID[]) ids.toArray(new AppdefEntityID[0]);
-            log.trace("checking control permissions");
 
             if (prefView.equals(ResourceHubForm.LIST_VIEW) &&
                 !isGroupSelected && resourceType != DEFAULT_RESOURCE_TYPE) {
@@ -353,9 +337,6 @@ public class ResourceHubPortalAction extends BaseAction {
         }
         
         // retrieve inventory summary
-        if (log.isTraceEnabled()) {
-            log.trace("getting inventory summary");
-        }
         AppdefInventorySummary summary =
             appdefBoss.getInventorySummary(sessionId);
         request.setAttribute(Constants.RESOURCE_SUMMARY_ATTR, summary);
@@ -368,25 +349,17 @@ public class ResourceHubPortalAction extends BaseAction {
                 // the entity is a compatible group- we build a
                 // combined menu containing all platform, server and
                 // service types
-                if (log.isTraceEnabled()) {
-                    log.trace("finding viewable platform types");
-                }
+
                 List platformTypes =
                     appdefBoss.findViewablePlatformTypes(sessionId, pc);
                 addCompatTypeOptions(hubForm, platformTypes,
                                      msg(request, PLATFORM_KEY));
 
-                if (log.isTraceEnabled()) {
-                    log.trace("finding viewable server types");
-                }
                 List serverTypes =
                     appdefBoss.findViewableServerTypes(sessionId, pc);
                 addCompatTypeOptions(hubForm, serverTypes,
                                      msg(request, SERVER_KEY));
 
-                if (log.isTraceEnabled()) {
-                    log.trace("finding viewable service types");
-                }
                 List serviceTypes =
                     appdefBoss.findViewableServiceTypes(sessionId, pc);
                 addCompatTypeOptions(hubForm, serviceTypes,
@@ -402,10 +375,6 @@ public class ResourceHubPortalAction extends BaseAction {
         }
         else {
             // the entity is not a group- this is easy.
-            if (log.isTraceEnabled()) {
-                log.trace("finding resource types for entity type [" +
-                          entityType + "]");
-            }
             List types =
                 appdefBoss.findAllResourceTypes(sessionId, entityType, pc);
             addTypeOptions(hubForm, types);
