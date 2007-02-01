@@ -51,7 +51,7 @@ onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
 </script>
 <c:set var="rssUrl" value="/rss/ViewCriticalAlerts.rss"/>
 
-<div class="effectsPortlet" style="border:1px solid red;">
+<div class="effectsPortlet">
 <!-- Content Block  -->
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="dash.home.CriticalAlerts"/>
