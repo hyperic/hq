@@ -88,7 +88,7 @@
     </sql>
   </target>
 
-  <target name="upgrade-db" depends="hibernate-upgrade">
+  <target name="upgrade-db" depends="hibernate-prep">
     <ant antfile="${install.dir}/data/db-upgrade.xml"
          target="upgrade"
          inheritAll="true"

@@ -210,27 +210,6 @@
     </hibernatetool>
   </target>
 
-  <target name="hibernate-schema-upgrade" depends="hibernate-prep">
-
-    <hibernatetool>
-      <classpath>
-        <path location="${hq-ear.dir}" />
-        <path location="${build.dir}/hibernate/classes" />
-      </classpath>
-      <configuration propertyFile="${hibernate-properties-gen}">
-        <fileset dir="${hq-ear.dir}">
-          <include name="**/*.hbm.xml" />
-        </fileset>
-      </configuration>
-
-      <hbm2ddl
-          destdir="${build.dir}/sql"
-          update="true"
-          console="true"
-          />
-    </hibernatetool>
-  </target>
-
   <target name="hibernate-schema-drop" depends="hibernate-prep">
 
     <delete failonerror="false" file="${build.dir}/sql/hibernate.sql" />
@@ -279,5 +258,4 @@
 
   <target name="hibernate-create" depends="hibernate-schema-create" />
   <target name="hibernate-drop" depends="hibernate-schema-drop" />
-  <target name="hibernate-upgrade" depends="hibernate-schema-upgrade" />
   <target name="hibernate-validate" depends="hibernate-schema-validation" />
