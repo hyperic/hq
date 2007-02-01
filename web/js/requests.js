@@ -390,7 +390,7 @@
              }
              tbody.appendChild(trTime);
             trTime.appendChild(td4);
-            td4.setAttribute('colspan', '3');
+            td4.setAttribute('colSpan', '3');
             td4.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
 
             if (token != null) {
@@ -491,7 +491,7 @@
                }
             tbody.appendChild(trTime);
             trTime.appendChild(td3);
-            td3.setAttribute('colspan', '2');
+            td3.setAttribute('colSpan', '2');
             td3.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
 
             if (token != null) {
