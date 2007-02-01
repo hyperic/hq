@@ -257,7 +257,10 @@ public class DerivedMeasurementDAO extends HibernateDAO {
 
         return getSession().createQuery(sql)
             .setInteger(0, id)
-            .setInteger(1, type).list();
+            .setInteger(1, type)
+            .setCacheable(true)
+            .setCacheRegion("DerivedMeasurement.findDesignatedByInstance")
+            .list();
     }
 
     List findByRawExcludeIdentity(Integer rid) {

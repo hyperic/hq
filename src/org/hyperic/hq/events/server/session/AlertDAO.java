@@ -128,6 +128,8 @@ public class AlertDAO extends HibernateDAO {
         return getSession().createQuery(sql)
             .setInteger("aType", id.getType())
             .setInteger("aId", id.getId().intValue())
+            .setCacheable(true)
+            .setCacheRegion("Alert.findByEntity")
             .list();
     }
 
