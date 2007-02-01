@@ -66,7 +66,7 @@
     </table>
 </td>
 <td valign="top" width="66%">
-    <table border="0" cellpadding="0" cellspacing="0" height="54" width="100%">
+    <table border="0" cellpadding="0" cellspacing="0" height="100%" width="100%">
         <tr>
             <td class="MastheadBgTop" colspan="5" nowrap>
                 <table border="0" cellspacing="0" cellpadding="0">
@@ -90,15 +90,14 @@
                        </tr>
                     </table>
                 </td>
-                <div style="display:none;float:right;margin-right:15px;" id="loading">
+                <div style="display:none;position:absolute;top:10px;right:10px;" id="loading">
 		        <html:img page="/images/ajax-loader.gif" border="0" width="16" height="16" /></div>
-		       
+		        <div style="clear:both;"</div>
           </tr>
          </table>
        </td>
     </tr>
-       
-        <tr>
+    <tr>
             <td class="MastheadBgBottom" style="padding-left:10px;padding-top:2px" align="left" height="22" colspan="5">
                 <table border="0" cellspacing="0" cellpadding="0">
                     <tr>
