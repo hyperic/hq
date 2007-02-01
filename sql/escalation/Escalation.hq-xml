@@ -6,6 +6,8 @@
 
 <hibernate-mapping package="org.hyperic.hq.escalation.server.session">
   <class name="Escalation" table="EAM_ESCALATION">
+    <cache usage="read-write" />
+
     <id name="id" type="integer">
       <column name="ID" not-null="true" />
       <generator class="sequence">
@@ -47,6 +49,7 @@
     </property>
 
     <list name="actionsList" table="EAM_ESCALATION_ACTION">
+      <cache usage="read-write" />
       <key column="ESCALATION_ID" />
       <list-index column="IDX"/>
       <composite-element class="EscalationAction">

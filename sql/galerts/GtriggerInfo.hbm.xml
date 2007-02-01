@@ -6,6 +6,7 @@
 
 <hibernate-mapping package="org.hyperic.hq.galerts.server.session">
   <class name="GtriggerInfo" table="EAM_GTRIGGERS">
+    <cache usage="read-write" />
     <id name="id" type="integer">
       <column name="ID" not-null="true" />
       <generator class="sequence">

@@ -6,6 +6,7 @@
 
 <hibernate-mapping package="org.hyperic.hq.escalation.server.session">
   <class name="EscalationState" table="EAM_ESCALATION_STATE">
+    <cache usage="read-write" />
 
     <id name="id" type="integer">
       <column name="ID" not-null="true" />

@@ -6,6 +6,7 @@
 
 <hibernate-mapping package="org.hyperic.hq.common.server.session">
   <class name="CrispoOption" table="EAM_CRISPO_OPT">
+    <cache usage="read-write" />
     <id name="id" type="integer">
       <column name="ID" not-null="true" />
       <generator class="sequence">

@@ -6,6 +6,8 @@
 
 <hibernate-mapping package="org.hyperic.hq.galerts.server.session">
   <class name="GalertDef" table="EAM_GALERT_DEFS">
+    <cache usage="read-write" />
+
     <id name="id" type="integer">
       <column name="ID" not-null="true" />
       <generator class="sequence">
@@ -51,6 +53,7 @@
 
     <set name="strategySet" table="EAM_EXEC_STRATEGIES"
          cascade="all-delete-orphan" inverse="true">
+       <cache usage="read-write" />
        <key column="DEF_ID"/>
        <one-to-many class="ExecutionStrategyInfo"/>
     </set>

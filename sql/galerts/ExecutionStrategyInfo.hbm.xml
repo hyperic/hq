@@ -6,6 +6,8 @@
 
 <hibernate-mapping package="org.hyperic.hq.galerts.server.session">
   <class name="ExecutionStrategyInfo" table="EAM_EXEC_STRATEGIES">
+    <cache usage="read-write" />
+
     <id name="id" type="integer">
       <column name="ID" not-null="true" />
       <generator class="sequence">
@@ -35,6 +37,7 @@
     
     <list name="triggerList" table="EAM_GTRIGGERS"
           cascade="all-delete-orphan" inverse="true">
+      <cache usage="read-write" />
       <key column="STRAT_ID" />
       <list-index>
         <column name="LIDX" not-null="true"/>

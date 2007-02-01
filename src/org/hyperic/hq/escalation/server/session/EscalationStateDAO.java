@@ -54,6 +54,8 @@ class EscalationStateDAO
             .add(Expression.eq("alertDefinitionId", def.getId()))
             .add(Expression.eq("alertTypeEnum", 
                                new Integer(def.getAlertType().getCode())))
+            .setCacheable(true)
+            .setCacheRegion("EscalationState.findByTypeAndDef")
             .uniqueResult();
     }
     
