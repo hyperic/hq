@@ -143,6 +143,7 @@ function showViewEscResponse(originalRequest) {
       var td5 = document.createElement('td');
       var td6 = document.createElement('td');
       var td7 = document.createElement('td');
+      var td8 = document.createElement('td');
       var select1 = document.createElement("select");
       var select2 = document.createElement("select");
       var select3 = document.createElement("select");
@@ -163,11 +164,11 @@ function showViewEscResponse(originalRequest) {
       viewLi.setAttribute('id','row_'+ liID);
       $('row_'+ liID).style.margin = "0px";
       $('row_'+ liID).style.padding = "0px";
-
+      /*
       viewLi.appendChild(remDiv);
       remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
       remDiv.innerHTML ='<a href="#" onclick="removeRow(this);removeAction(' + actionId + ');"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
-
+      */
       
       viewLi.appendChild(escTable);
       escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
@@ -181,7 +182,7 @@ function showViewEscResponse(originalRequest) {
       escTableBody.appendChild(escTr1);
 
       escTrHeader.appendChild(td7);
-      td7.setAttribute('rowspan', '3');
+      td7.setAttribute('rowSpan', '3');
       td7.setAttribute('width', '10');
 
       if (actions.length > 1) {
@@ -190,43 +191,45 @@ function showViewEscResponse(originalRequest) {
       td7.setAttribute((document.all ? 'className' : 'class'), "handle");
       td7.innerHTML = '<html:img page="/images/arrowsEscalation.gif" border="0" alt="drag to reorder the sequence of the escalation actions"/>';
       } else {
-     
+
       td7.innerHTML = "&nbsp;";
       }
 
       escTrHeader.appendChild(td6);
-
-      td6.setAttribute('colspan', '3');
+      td6.setAttribute('colSpan', '3');
       td6.setAttribute((document.all ? 'className' : 'class'), "BlockTitle");
       td6.innerHTML = 'Action Details';
-        
+
+      escTrHeader.appendChild(td8);
+      td8.setAttribute('vAlign','top');
+      td8.setAttribute('rowSpan', '3');
+      td8.setAttribute((document.all ? 'className' : 'class'), "remove");
+      td8.innerHTML ='<a href="#" onclick="removeRow(this);removeAction(' + actionId + ');"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
+
       escTr1.appendChild(td1);
       td1.setAttribute((document.all ? 'className' : 'class'), "waitTd");
-      //td1.setAttribute('colspan', '3');
+      td1.setAttribute('colSpan', '2');
       td1.appendChild(waitDiv);
       waitDiv.setAttribute('id','wait_' + liID);
       waitDiv.setAttribute('width', '100%');
-      $('wait_' + liID).style.cursor = "pointer;";
       waitDiv.innerHTML = "Wait time before escalating: " + actionWaitTime + "<br>";
 
 
       td1.appendChild(editWaitDiv);
       editWaitDiv.setAttribute('id','editWait_' + liID);
-      $('editWait_' + liID).style.cursor = "pointer;";
-  
+
       escTr2.appendChild(td2);
       td2.setAttribute('width', '100%');
-      td2.setAttribute('valign', 'top');
+      td2.setAttribute('vAlign', 'top');
       td2.setAttribute((document.all ? 'className' : 'class'), "wrap");
       td2.appendChild(usersTextDiv);
       td2.setAttribute('id','usersList_' + liID);
-      $('usersList_' + liID).style.cursor = "pointer;";
-        
+
       var actionClass = actionsClassName.split('.');
 
         for (var d = 0; d < actionClass.length; d++) {
             if (actionClass[d] == "SyslogAction") {
-            usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowspan="3" valign="top" style="padding-right:3px;">Log to the Syslog:</td><td style="padding:0px 2px 2px 2px;">meta: ' + configMeta + '</td></tr><tr><td style="padding:2px;">product: ' + configProduct + '</td></tr><tr><td style="padding:2px 2px 2px 2px;">version: ' + configVersion + '</td></tr></table>'
+            usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowSpan="3" vAlign="top" style="padding-right:3px;">Log to the Syslog:</td><td style="padding:0px 2px 2px 2px;">meta: ' + configMeta + '</td></tr><tr><td style="padding:2px;">product: ' + configProduct + '</td></tr><tr><td style="padding:2px 2px 2px 2px;">version: ' + configVersion + '</td></tr></table>'
            } else if (actionClass[d] == "NoOpAction") {
             usersTextDiv.innerHTML = 'Suppress duplicate alerts for: ' + actionWaitTime;
             waitDiv.innerHTML = "&nbsp;";
@@ -288,7 +291,7 @@ function showViewEscResponse(originalRequest) {
       escTr2.appendChild(td3);
       td3.setAttribute((document.all ? 'className' : 'class'), "td3");
       td3.setAttribute('width', '20%');
-      td3.setAttribute('valign', 'top');
+      td3.setAttribute('vAlign', 'top');
 
       switch(configListType) {
       case 1:
@@ -394,6 +397,7 @@ function showViewEscResponse(originalRequest) {
         var sysDiv = document.createElement('div');
         var escTable = document.createElement('table');
         var escTableBody = document.createElement('tbody');
+        var escTrHeader = document.createElement('tr');
         var escTr1 = document.createElement('tr');
         var escTr2 = document.createElement('tr');
         var td1 = document.createElement('td');
@@ -401,6 +405,8 @@ function showViewEscResponse(originalRequest) {
         var td3 = document.createElement('td');
         var td4 = document.createElement('td');
         var td5 = document.createElement('td');
+        var td6 = document.createElement('td');
+        var td7 = document.createElement('td');
         var select1 = document.createElement("select");
         var select2 = document.createElement("select");
         var select3 = document.createElement("select");
@@ -412,15 +418,33 @@ function showViewEscResponse(originalRequest) {
 
         escLi.appendChild(escTable);
         escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
-        escTable.setAttribute('border', '0');
+        escTable.setAttribute('border', '1');
         escTable.appendChild(escTableBody);
-
+        escTableBody.appendChild(escTrHeader);
         escTableBody.appendChild(escTr2);
         escTableBody.appendChild(escTr1);
 
+        escTrHeader.appendChild(td7);
+        td7.setAttribute('rowSpan', '3');
+        td7.setAttribute('width', '10');
+        td7.innerHTML = "&nbsp;"
+
+        escTrHeader.appendChild(td6);
+        td6.setAttribute('colSpan', '3');
+        td6.setAttribute((document.all ? 'className' : 'class'), "BlockTitle");
+        td6.innerHTML = 'Create an Action for this escalation';
+
+        escTrHeader.appendChild(td5);
+                td5.setAttribute('vAlign', 'top');
+                td5.setAttribute('width', '30%');
+                td5.setAttribute('rowSpan', '3');
+                td5.setAttribute('id', 'displaySelAction');
+                td5.innerHTML = '<table cellpadding="2" cellspacing="0" border="0" width="100%"><tbody><tr><td class=BlockTitle colSpan=3>Action Details</td></tr><tr><td id="actionName" vAlign="top" width="50%">Action: Email</td></tr><tr><td id="userListDisplay" valign="top" style="display:none;"></td></tr><tr><td><table cellpadding="2" cellspacing="0" border="0"><tr><td id=metaText style="display:none"></td></tr><tr><td id=productText style="display:none"></td></tr><tr><td id=versionText style="display:none"></td></tr></table></td></tr><tr><td id="time" colspan="3" valign="top" style="display:none;"></td></tr></tbody></table>';
+
+
         escTr1.appendChild(td1);
 
-        td1.setAttribute('colspan', '3');
+        td1.setAttribute('colSpan', '3');
         td1.appendChild(document.createTextNode('<fmt:message key="alert.config.escalation.then"/> '));
 
         td1.appendChild(select1);
@@ -516,13 +540,6 @@ function showViewEscResponse(originalRequest) {
                   inputRolesArr.name =  inputRolesArr.name + "_" + liID;
               }
           }
-
-        escTr2.appendChild(td5);
-        td5.setAttribute('valign', 'top');
-        td5.setAttribute('width', '30%');
-        td5.setAttribute('rowspan', '2');
-        td5.setAttribute('id', 'displaySelAction');
-        td5.innerHTML = '<table cellpadding="2" cellspacing="0" border="0" width="100%"><tbody><tr><td class=BlockTitle colspan=3>Action Details</td></tr><tr><td id="actionName" valign="top" width="50%">Action: Email</td></tr><tr><td id="userListDisplay" valign="top" style="display:none;"></td></tr><tr><td><table cellpadding="2" cellspacing="0" border="0"><tr><td id=metaText style="display:none"></td></tr><tr><td id=productText style="display:none"></td></tr><tr><td id=versionText style="display:none"></td></tr></table></td></tr><tr><td id="time" colspan="3" valign="top" style="display:none;"></td></tr></tbody></table>';
 
       }
 
@@ -836,13 +853,6 @@ function showViewEscResponse(originalRequest) {
 
     }
 
-    function changeCursorOn(el) {
-       el.style.cursor = pointer;
-    }
-
- function changeCursorOut(el) {
-        el.style.cursor = move;
-     }
 
 
 </script>
@@ -921,7 +931,7 @@ function showViewEscResponse(originalRequest) {
 <table width="100%" cellpadding="4" cellspacing="0" border="0" id="escPropertiesTable">
   <tbody>
     <tr>
-      <td class="BlockTitle" colspan="2">
+      <td class="BlockTitle" colSpan="2">
       <fmt:message key="alert.config.escalation.scheme" />
       </td>
     </tr>
@@ -946,7 +956,7 @@ function showViewEscResponse(originalRequest) {
       <td id="changed" class="BlockContent"></td>
     </tr>
     <tr class="ToolbarContent"><!-- EDIT TOOLBAR -->
-      <td colspan="2">
+      <td colSpan="2">
         <tiles:insert page="/common/components/ActionButton.jsp">
           <tiles:put name="labelKey" value="common.label.Edit"/>
           <tiles:put name="buttonHref" value="."/>
@@ -960,7 +970,7 @@ function showViewEscResponse(originalRequest) {
 <table width="100%" cellpadding="3" cellspacing="0" border="0" id="editPropertiesTable" style="display: none;">
   <tbody>
     <tr>
-      <td class="BlockTitle" colspan="2"><fmt:message key="alert.config.escalation.scheme"/></td>
+      <td class="BlockTitle" colSpan="2"><fmt:message key="alert.config.escalation.scheme"/></td>
     </tr>
     <tr>
       <td class="BlockContent">
@@ -1100,7 +1110,7 @@ function showViewEscResponse(originalRequest) {
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <thead>
          <tr>
-             <td class="BlockTitle" valign="top" nowrap colspan="2">
+             <td class="BlockTitle" valign="top" nowrap colSpan="2">
              Step 2 - Create <fmt:message key="common.label.EscalationSchemeActions" />
              </td>
         </tr>

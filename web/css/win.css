@@ -992,8 +992,6 @@ background-color: #dbe3f5
 }
 
 .remove {
-  float:right;
-  display:inline;
   margin-top:5px;
   margin-right:5px;
   margin-left:5px;
@@ -1100,12 +1098,8 @@ border-left:1px solid #D5D8DE;
  font-weight: bold;
  background-color: #f2f4f7;
  color:#333333;
-    
-    border-bottom:1px dotted #aeb0b5;
-}
 
-#viewEscalationUL .escTbl{
- border: 0px dotted #D5D8DE;
+    border-bottom:1px dotted #aeb0b5;
 }
 
 .handle {
