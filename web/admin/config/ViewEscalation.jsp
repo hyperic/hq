@@ -142,6 +142,7 @@ function showViewEscResponse(originalRequest) {
       var td4 = document.createElement('td');
       var td5 = document.createElement('td');
       var td6 = document.createElement('td');
+      var td7 = document.createElement('td');
       var select1 = document.createElement("select");
       var select2 = document.createElement("select");
       var select3 = document.createElement("select");
@@ -162,7 +163,6 @@ function showViewEscResponse(originalRequest) {
       viewLi.setAttribute('id','row_'+ liID);
       $('row_'+ liID).style.margin = "0px";
       $('row_'+ liID).style.padding = "0px";
-      //$('row_'+ liID).style.cursor = "move;";
 
       viewLi.appendChild(remDiv);
       remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
@@ -180,16 +180,25 @@ function showViewEscResponse(originalRequest) {
       escTableBody.appendChild(escTr2);
       escTableBody.appendChild(escTr1);
 
-        escTrHeader.appendChild(td6);
+      escTrHeader.appendChild(td7);
+      td7.setAttribute('rowspan', '3');
+      td7.setAttribute('width', '10');
 
       if (actions.length > 1) {
-      td6.setAttribute('colspan', '3');
-      td6.style.cursor = "move;";
-      td6.setAttribute((document.all ? 'className' : 'class'), "ToolbarContent");
-      td6.innerHTML = '<html:img page="/images/esc_movUp.gif" height="16" width="12" border="0"  alt="" />' + '&nbsp;&nbsp;<span style="color:#062b7a;font-weight:bold;">Drag to reorder escalation actions</span>';
+
+      td7.style.cursor = "move;";
+      td7.setAttribute((document.all ? 'className' : 'class'), "handle");
+      td7.innerHTML = '<html:img page="/images/arrowsEscalation.gif" border="0" alt="drag to reorder the sequence of the escalation actions"/>';
       } else {
-      td6.innerHTML = "&nbsp;";
+     
+      td7.innerHTML = "&nbsp;";
       }
+
+      escTrHeader.appendChild(td6);
+
+      td6.setAttribute('colspan', '3');
+      td6.setAttribute((document.all ? 'className' : 'class'), "BlockTitle");
+      td6.innerHTML = 'Action Details';
         
       escTr1.appendChild(td1);
       td1.setAttribute((document.all ? 'className' : 'class'), "waitTd");
@@ -302,16 +311,21 @@ function showViewEscResponse(originalRequest) {
 
     }
 
-    Sortable.create("viewEscalationUL",
-          {dropOnEmpty: true,
+    Sortable.create('viewEscalationUL',{containment:'viewEscalationUL',handle:'handle',
+            
+          //{dropOnEmpty: false,
            //format: /^(.*)$/,
-           containment: ["viewEscalationUL"],
+          // containment:'viewEscalationUL', handle:'handle',
            onUpdate: function() {
                var pars = "&id=" + id;
                 ajaxEngine.sendRequest( '/escalation/updateEscalationOrder.do', Sortable.serialize("viewEscalationUL") + pars); },
            constraint: 'vertical'});
 
 }
+ function createActionSortable() {
+         Sortable.create('viewEscalationUL',{tag:'div',only:'section',handle:'handle'});
+     }
+
 
     function editEscalation () {
         $('escPropertiesTable').style.display = 'none';
@@ -818,7 +832,14 @@ function showViewEscResponse(originalRequest) {
 
     }
 
-    
+    function changeCursorOn(el) {
+       el.style.cursor = pointer;
+    }
+
+ function changeCursorOut(el) {
+        el.style.cursor = move;
+     }
+
 
 </script>
 

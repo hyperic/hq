@@ -983,15 +983,13 @@ background-color: #dbe3f5
 .escTbl {
   width:100%;
   margin-top:10px;
-  margin-bottom:10px;
-  cursor:move;
+    padding-bottom:0px;
 }
 
 #viewEscalationUL .escTbl {
   width:100%;
   margin-top:0px;
-  margin-bottom:10px;
-  padding-left:5px;
+  padding-left:0px;
 }
 
 .remove {
@@ -1097,4 +1095,25 @@ border-left:1px solid #D5D8DE;
  padding:3px;
  background-color: #E5E5E5;
  text-align:right;
+}
+
+.escTbl .BlockTitle{
+ font-weight: bold;
+ background-color: #f2f4f7;
+ color:#333333;
+    
+    border-bottom:1px dotted #aeb0b5;
+}
+
+#viewEscalationUL .escTbl{
+ border: 0px dotted #D5D8DE;
+}
+
+.handle {
+ border-left: 1px solid #D5D8DE;
+ border-top: 1px solid #D5D8DE;
+ border-right:1px solid #aeb0b5;
+ border-bottom:1px solid #aeb0b5;
+ background-color:#e6e6e6;
+ margin-right:10px;
 }
