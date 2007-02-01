@@ -77,7 +77,7 @@
 </c:choose>
 <c:out value="${title}" escapeXml="false"/>
 <c:if test="${not empty subTitle}">
-  <span id="<c:out value="${title}_span${adminToken}"/>" class="BlockSubTitle"><c:out value="${subTitle}"/></span>
+  <span id="<c:out value="${subTitle}_span${adminToken}"/>" class="BlockSubTitle"><c:out value="${subTitle}"/></span>
 </c:if>
       <c:if test="${not empty rssUrl}">
         <html:link href="${rssUrl}"><html:img border="0" page="/images/xml.gif"/></html:link>

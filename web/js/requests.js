@@ -218,7 +218,7 @@
         var token = alertText.token;
         var alertTable;
         var alertFunc;
-        var descSpan = "Recent Alerts_span";
+        var descSpan = "ra_span";
 
         if (alertText.token != null) {
             alertTable = document.getElementById('recentAlertsTable' + token);
@@ -313,7 +313,7 @@
         var noAvailTable;
         var availTable;
         var availFunc;
-        var descSpan = "Availability Summary_span";
+        var descSpan = "as_span";
 
         if (token != null) {
             availTable = document.getElementById('availTable' + token);
@@ -416,7 +416,7 @@
         var noMetricTable;
         var metricFunc
         var token = metricText.token;
-        var descSpan = "Metric Viewer_span";
+        var descSpan = "mv_span";
 
         if (token != null) {
             metricTable = document.getElementById('metricTable' + token);
