@@ -362,14 +362,13 @@ public abstract class AppdefSessionEJB
                                    Integer id, String operation)
         throws PermissionException 
     {
-        log.debug("Checking Permission for Operation: " +
-                  operation + " ResourceType: " + rtV +
+        log.debug("Checking Permission for operation: " +
+                  operation + " ResourceType: " + rtV.getName() +
                   " Instance Id: " + id + " Subject: " + subject);
         PermissionManager permMgr = PermissionManagerFactory.getInstance();
         Integer opId = getOpIdByResourceType(rtV, operation);
         Integer subjId = subject.getId();
         Integer typeId = rtV.getId();
-        // note, using the "SLOWER" permission check
         permMgr.check(subjId, typeId, id, opId);
     }
 

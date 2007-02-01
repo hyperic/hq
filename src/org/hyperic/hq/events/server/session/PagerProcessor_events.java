@@ -36,33 +36,23 @@ public class PagerProcessor_events implements PagerProcessor {
 
     public PagerProcessor_events () {}
 
-    public Object processElement ( Object o ) {
-        log.debug("PagerProcessor_dm: ZZZZ processElement starting");
+    public Object processElement (Object o) {
 
-        if (o == null) { 
-            log.debug("PagerProcessor_dm: ZZZZ processElement returning " + 
-                      "null for element");
+        if (o == null) {
             return null;
         }
 
         try {
             if (o instanceof Alert) {
-                log.debug("PagerProcessor_dm: ZZZZ processElement " + 
-                          "converting Alert to value object");
                 return ((Alert) o).getAlertValue();
-            } else if ( o instanceof AlertDefinition) {
-                log.debug("PagerProcessor_dm: ZZZZ processElement converting " +
-                          "AlertDefinition to value object");
+            } else if (o instanceof AlertDefinition) {
                 return ((AlertDefinition) o).getAlertDefinitionValue();
             }
         } catch (Exception e) {
             throw new SystemException("Error converting " + o +
                                       " to value object: " + e, e);
         }
-        
-        if (log.isDebugEnabled())
-            log.debug("PagerProcessor_dm: ZZZZ processElement not processing "+
-                      "object " + o.getClass());
+
         return o;
     }
 }
