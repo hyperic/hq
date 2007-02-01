@@ -109,21 +109,21 @@ function showEscRows(originalRequest) {
 
 
     var td2 = document.createElement("td");
-    td2.setAttribute('class', 'ListCell');
     td2.setAttribute('title', 'click scheme name to edit')
     if (schemes[i].id == '<c:out value="${param.escId}"/>') {
       td2.innerHTML = '<html:img page="/images/icon_right_arrow.gif" border="0" width="10" height="10" style="padding-right:5px;"/>' + '<b>' + schemes[i].name + '</b>';
-      td2.setAttribute('style', 'background-color: #dbe3f5');
+      td2.setAttribute((document.all ? 'className' : 'class'), "selectedHighlight");
+      td2.setAttribute("align", "left");
     }
     else {
       td2.innerHTML = '<html:img page="/images/icon_right_arrow.gif" border="0" width="10" height="10" style="display:none;padding-right:5px;"/>' + '<a href="<html:rewrite page="/admin/config/Config.do?mode=escalate&escId="/>' + schemes[i].id + '" onclick="changeHighlight(this);">' + schemes[i].name + '</a>';
 
+      td2.setAttribute((document.all ? 'className' : 'class'), 'ListCell');
     }
     tr.appendChild(td2);
 
     td3 = document.createElement("td");
-    td3.setAttribute((document.all ? 'className' : 'class'), "ListCell");
-    td3.setAttribute('style', 'text-align: right');
+    td3.setAttribute('align', 'right');
 
     if (schemes.length > 1) {
       td3.innerHTML = '<a href="<html:rewrite action="/admin/config/RemoveEscalation"/>' + '?esc=' + schemes[i].id + '">' + $('deleteBtn').innerHTML + '</a>';
@@ -132,6 +132,10 @@ function showEscRows(originalRequest) {
     if (schemes[i].id == '<c:out value="${param.escId}"/>') {
       td3.setAttribute((document.all ? 'className' : 'class'), "selectedHighlight");
     }
+    else {
+      td3.setAttribute((document.all ? 'className' : 'class'), "ListCell");
+    }
+
     tr.appendChild(td3);
 
     escalations.appendChild(tr);
