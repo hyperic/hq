@@ -165,15 +165,20 @@ public class DashboardUtils {
         List resourcelist = preferencesAsEntityIds(key, user);
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
         AuthzBoss authzboss = ContextUtils.getAuthzBoss(ctx);
+        ArrayList toRemove = new ArrayList();
         for (Iterator i = resourcelist.iterator(); i.hasNext();) {
             AppdefEntityID entityID = (AppdefEntityID) i.next();
             try {
                 appdefBoss.findById(user.getSessionId().intValue(), entityID);
             } catch (Exception e) {
                 String entityid = entityID.getAppdefKey();
-                removeResources(new String[] { entityid }, key, user);
-
+                toRemove.add(entityid);
             }
+        }
+
+        if (toRemove.size() > 0) {
+            String[] ids = (String[])toRemove.toArray(new String[0]);
+            removeResources(ids, key, user);
             authzboss.setUserPrefs(user.getSessionId(), user.getId(),
                                    user.getPreferences());
         }
