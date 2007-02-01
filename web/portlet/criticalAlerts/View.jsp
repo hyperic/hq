@@ -72,7 +72,7 @@ onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
   <!-- JSON available at /dashboard/ViewCriticalAlerts.do -->
     <html:form method="POST" action="/alerts/RemoveAlerts.do">
   <table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${tableName}"/>" class="portletLRBorder">
-      <tbody>
+     <thead>
 		<tr class="ListRow">
 			<td width="1%" class="ListHeaderCheckbox">
 				<input type="checkbox" onclick="ToggleAll(this, widgetProperties, false)" name="listToggleAll">
@@ -90,11 +90,15 @@ onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
 				<fmt:message key="alerts.alert.AlertList.ListHeader.Fixed"/>
 			</td>
 		</tr>
-		
+     </thead>
+     <tbody>
 		 <!-- table rows are inserted here dynamically -->
  	 </tbody>
      <tfoot>
-          <tr>
+         <tr class="ListRow" id="noCritAlerts<c:out value="${portlet.token}"/>">
+      		<td class="ListCell" colspan="5"><fmt:message key="dash.home.alerts.no.resource.to.display"/></td>
+    	</tr>
+        <tr>
              <td colspan="4">
     <tiles:insert definition=".toolbar.list">                
       <tiles:put name="noButtons" value="true"/>
@@ -111,13 +115,6 @@ onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
       </tfoot>
   </table>
 
-     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="display:none;" id="noCritAlerts" class="portletLRBorder">
-         <tbody>
-         <tr class="ListRow">
-      		<td class="ListCell"><fmt:message key="dash.home.alerts.no.resource.to.display"/></td>
-    	</tr>
-         </tbody>
-  </table>
   </html:form>
     
 </div>

@@ -233,11 +233,14 @@
 
         $(descSpan).innerHTML = alertText.title;
 
-        if (aList.length != 0) {
-            $('noCritAlerts').style.display = 'none';
+        var noCritAlerts = alertText.token != null ?
+                           $('noCritAlerts' + token) : $('noCritAlerts');
 
-            for (var i = tbody.childNodes.length - 1; i > 1; i--) {
-                tbody.removeChild(tbody.childNodes[i]);
+        if (aList.length != 0) {
+            noCritAlerts.style.display = 'none';
+
+            for (var i = tbody.childNodes.length; i > 0; i--) {
+                tbody.removeChild(tbody.childNodes[i - 1]);
             }
 
             for (i = 0; i < aList.length; i++) {
@@ -293,7 +296,7 @@
                 }
             }
         } else {
-            $('noCritAlerts').style.display = '';
+            noCritAlerts.style.display = '';
           
         }
 
