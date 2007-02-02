@@ -218,20 +218,16 @@
         var token = alertText.token;
         var alertTable;
         var alertFunc;
-        var descSpan = "ra_span";
 
         if (alertText.token != null) {
             alertTable = document.getElementById('recentAlertsTable' + token);
             alertFunc = 'requestRecentAlerts' + token + '()';
-            descSpan += token;
         } else {
             alertTable = document.getElementById('recentAlertsTable');
             alertFunc = 'requestRecentAlerts()';
         }
 
         var tbody = alertTable.getElementsByTagName('tbody')[0];
-
-        $(descSpan).innerHTML = alertText.title;
 
         var noCritAlerts = alertText.token != null ?
                            $('noCritAlerts' + token) : $('noCritAlerts');
@@ -316,21 +312,17 @@
         var noAvailTable;
         var availTable;
         var availFunc;
-        var descSpan = "as_span";
 
         if (token != null) {
             availTable = document.getElementById('availTable' + token);
             noAvailTable = 'noAvailTable' + token;
             availFunc = 'requestAvailSummary' + token + '()';
-            descSpan += token;
         } else {
             availTable = document.getElementById('availTable');
             noAvailTable = 'noAvailTable';
             availFunc = 'requestAvailSummary()';
         }
         
-        $(descSpan).innerHTML = availText.title;  
-
         if (availList.length < 1) {
             $(noAvailTable).style.display = '';
         } else {
@@ -418,20 +410,16 @@
         var noMetricTable;
         var metricFunc
         var token = metricText.token;
-        var descSpan = "mv_span";
 
         if (token != null) {
             metricTable = document.getElementById('metricTable' + token);
             noMetricTable = 'noMetricTable' + token;
             metricFunc = 'requestMetricsResponse' + token + '()';
-            descSpan += token;
         } else {
             metricTable = document.getElementById('metricTable');
             noMetricTable = 'noMetricTable';
             metricFunc = 'requestMetricsResponse()';
         }
-
-        $(descSpan).innerHTML = metricText.title;  
 
         var tbody = metricTable.getElementsByTagName('tbody')[0];
 

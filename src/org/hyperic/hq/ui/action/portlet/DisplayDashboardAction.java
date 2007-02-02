@@ -25,6 +25,9 @@
 
 package org.hyperic.hq.ui.action.portlet;
 
+import java.util.Collection;
+import java.util.Iterator;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,6 +41,7 @@ import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
+import org.hyperic.hq.ui.Portlet;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.util.config.InvalidOptionException;
@@ -67,6 +71,19 @@ public class DisplayDashboardAction extends TilesAction {
             portal.addPortletsFromString(
                 user.getPreference(Constants.USER_PORTLETS_SECOND), 2);
 
+            // Go through the portlets and see if they have descriptions
+            for (Iterator pit = portal.getPortlets().iterator(); pit.hasNext();)
+            {
+                Collection portlets = (Collection) pit.next();
+                for (Iterator it = portlets.iterator(); it
+                        .hasNext();) {
+                    Portlet portlet = (Portlet) it.next();
+                    String titleKey = portlet.getUrl() + ".title" +
+                        (portlet.getToken() != null ? portlet.getToken() : "");
+                    portlet.setDescription(user.getPreference(titleKey, ""));
+                }
+            }
+            
             session.setAttribute(Constants.USERS_SES_PORTAL, portal);
 
             // Make sure there's a valid RSS auth token

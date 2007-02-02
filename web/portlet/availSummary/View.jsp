@@ -45,7 +45,7 @@ onloads.push(requestAvailSummary<c:out value="${portlet.token}"/>);
 <div class="effectsPortlet">
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="dash.home.AvailSummary"/>
-  <tiles:put name="subTitle" value="as"/>
+  <tiles:put name="subTitle" beanName="portlet" beanProperty="description"/>
   <tiles:put name="adminUrl" beanName="adminUrl" />
   <tiles:put name="portletName" beanName="portletName" />
   <tiles:put name="dragDrop" value="true"/>

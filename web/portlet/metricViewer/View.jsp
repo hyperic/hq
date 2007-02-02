@@ -46,7 +46,7 @@ onloads.push(requestMetricsResponse<c:out value="${portlet.token}"/>);
 <div class="effectsPortlet">
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="dash.home.MetricViewer"/>
-  <tiles:put name="subTitle" value="mv"/>
+  <tiles:put name="subTitle" beanName="portlet" beanProperty="description"/>
   <tiles:put name="adminUrl" beanName="adminUrl" />
   <tiles:put name="dragDrop" value="true"/>
 

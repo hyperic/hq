@@ -40,7 +40,7 @@ public class PropertiesForm extends DashboardBaseForm  {
     public final static String SELECTED_OR_ALL =
         ".dashContent.criticalalerts.selectedOrAll";
     public final static String TITLE =
-        ".dashContent.criticalalerts.title";
+        ".dashContent.criticalAlerts.title";
 
     private Integer _numberOfAlerts;
     private String _priority;

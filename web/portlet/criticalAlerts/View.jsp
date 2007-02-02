@@ -55,7 +55,7 @@ onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
 <!-- Content Block  -->
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="dash.home.CriticalAlerts"/>
-  <tiles:put name="subTitle" value="ra"/>
+  <tiles:put name="subTitle" beanName="portlet" beanProperty="description"/>
   <tiles:put name="adminUrl" beanName="adminUrl" />
   <c:if test="${not empty portlet.token}">
     <tiles:put name="adminToken" beanName="portlet" beanProperty="token"/>

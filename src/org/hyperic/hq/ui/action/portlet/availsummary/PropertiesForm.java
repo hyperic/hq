@@ -34,7 +34,7 @@ public class PropertiesForm extends DashboardBaseForm  {
     public final static String NUM_TO_SHOW =
         ".dashContent.availsummary.numToShow";
     public final static String TITLE =
-        ".dashContent.availsummary.title";
+        ".dashContent.availSummary.title";
 
     private Integer  _numberToShow;
     private String[] _ids;
