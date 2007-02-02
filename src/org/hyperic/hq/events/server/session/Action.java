@@ -255,13 +255,7 @@ public class Action
         return JSON_NAME;
     }
 
-    /**
-     * Execute the action specified by the classname and config data.
-     */
-    public String executeAction(AlertInterface alert, 
-                                ActionExecutionInfo info) 
-        throws ActionExecuteException
-    {
+    public ActionInterface getInitializedAction() {
         try {
             Class ac = Class.forName(getClassName());
             ActionInterface action = (ActionInterface) ac.newInstance();
@@ -269,29 +263,22 @@ public class Action
             action.init(ConfigResponse.decode(action.getConfigSchema(),
                                               getConfig()));
         
-            return action.execute(alert, info);
-        } catch (ClassNotFoundException e) {
-            throw new ActionExecuteException("Unable to find action class [" + 
-                                             getClassName() + "]", e);
-        } catch (InstantiationException e) {
-            throw new ActionExecuteException("Error instantiating [" + 
-                                             getClassName() + "]", e);
-        } catch (InvalidActionDataException e) {
-            throw new ActionExecuteException("Error initializing action [" + 
-                                             getClassName() + "]", e);
-        } catch (IllegalAccessException e) {
-            throw new ActionExecuteException("Illegal Access for class [" + 
-                                             getClassName() + "]", e);
-        } catch (EncodingException e) {
-            throw new ActionExecuteException("Unable to decode config for " + 
-                                             "class [" + getClassName() + "]",
-                                             e);
-        } catch (InvalidOptionException e) {
-            throw new ActionExecuteException("Invalid config option for class" +
-                                             " [" + getClassName() + "]", e);
-        } catch (InvalidOptionValueException e) {
-            throw new ActionExecuteException("Invalid option value for class" +
-                                             " [" + getClassName() + "]", e);
+            return action;
+        } catch (Exception e) {
+            throw new SystemException("Unable to get action", e); 
+        }
+    }
+    
+    /**
+     * Execute the action specified by the classname and config data.
+     */
+    public String executeAction(AlertInterface alert, ActionExecutionInfo info)  
+        throws ActionExecuteException
+    {
+        try {
+            return getInitializedAction().execute(alert, info);
+        } catch (Exception e) {
+            throw new ActionExecuteException("Unable to execute action", e); 
         }
     }
 
