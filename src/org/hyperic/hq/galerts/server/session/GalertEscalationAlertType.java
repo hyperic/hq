@@ -65,9 +65,8 @@ public final class GalertEscalationAlertType
     protected void fixAlert(Integer alertId, AuthzSubject fixer) {
         GalertManagerLocal gMan = getGalertMan();
         GalertLog alert = gMan.findAlertLog(alertId);
-        String msg = "Alert fixed by " + fixer.getFullName();
-        
-        gMan.createActionLog(alert, msg, null, fixer);
+
+        gMan.fixAlert(alert, fixer);
     }
 
     protected void logActionDetails(Integer alertId, Action action, 

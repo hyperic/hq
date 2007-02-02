@@ -201,6 +201,17 @@ public class GalertManagerEJBImpl
     }
 
     /**
+     * Simply sets the 'fixed' flag on an alert
+     * @ejb:interface-method  
+     */
+    public void fixAlert(GalertLog alert, AuthzSubject fixer) {
+        String msg = "Alert fixed by " + fixer.getFullName();
+        
+        alert.setFixed(true);
+        createActionLog(alert, msg, null, fixer);
+    }
+    
+    /**
      * @ejb:interface-method  
      */
     public GalertLog findAlertLog(Integer id) {
