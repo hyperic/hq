@@ -66,7 +66,7 @@ onloads.push(requestAvailSummary<c:out value="${portlet.token}"/>);
     <table width="100%" border="0" cellspacing="0" cellpadding="0" id="<c:out value="${tableName}"/>" class="portletLRBorder">
       <tbody>
         <tr class="tableRowHeader">
-          <th width="70%" class="tableRowInactive"><fmt:message key="dash.home.TableHeader.Type"/></th>
+          <th width="72%" class="tableRowInactive"><fmt:message key="dash.home.TableHeader.Type"/></th>
           <th align="center" colspan="2" class="tableRowInactive"><fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/></th>
         </tr>
         <!-- table rows are inserted here dynamically -->

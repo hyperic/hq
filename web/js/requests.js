@@ -375,7 +375,7 @@
                     td2.setAttribute('width', '50px');
                     td2.innerHTML = downgraphic + '<span style=color:red;>' + down + '</span>';
                 } else {
-                    td2.setAttribute('width', '5px');
+                    td2.setAttribute('width', '25px');
                     td2.innerHTML = "&nbsp;";
                 }
 
@@ -383,7 +383,7 @@
                 td3.setAttribute('width', '50px');
                 td3.innerHTML = upgraphic + '<span style=color:green;>' + up + '</span>';
                 } else {
-                td3.setAttribute('width', '5px');
+                td3.setAttribute('width', '25px');
                 td3.innerHTML = "&nbsp;";
                 }
              }
