@@ -302,12 +302,24 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     }
 
     /**
+     * Get the number of alerts for the given array of AppdefEntityID's
+     * @ejb:interface-method
+     */
+    public int[] getAlertCount(AppdefEntityID[] ids) {
+        int[] counts = new int[ids.length];
+        for (int i = 0; i < ids.length; i++) {
+            counts[i] = getAlertCount(ids[i]);
+        }
+        return counts;
+    }
+
+    /**
      * Get a collection of all alerts
      *
      * @ejb:interface-method
      */
     public PageList findAllAlerts() {
-        Collection res = new ArrayList();
+        Collection res;
 
         res = getAlertDAO().findAll();
         for (Iterator i = getAlertDAO().findAll().iterator(); i.hasNext();) {

@@ -373,6 +373,14 @@ public class EventsBossEJBImpl
     }
 
     /**
+     * Get the number of alerts for the given array of AppdefEntityID's
+     * @ejb:interface-method 
+     */
+    public int[] getAlertCount(AppdefEntityID[] ids) {
+        return getAM().getAlertCount(ids);
+    }
+
+    /**
      * Create an alert definition
      *
      * @ejb:interface-method

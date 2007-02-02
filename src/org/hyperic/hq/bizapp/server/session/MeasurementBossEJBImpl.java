@@ -96,8 +96,6 @@ import org.hyperic.hq.bizapp.shared.uibeans.ResourceTypeDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.SingletonDisplaySummary;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.events.shared.AlertManagerLocal;
-import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.DataPurgeJob;
@@ -150,21 +148,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     private final ResourcesWithoutDataHelper resourcesWithoutDataHelper
         = ResourcesWithoutDataHelper.instance();
 
-    private AlertManagerLocal alertMan = null;
-
-    private AlertManagerLocal getAMan() {
-        if (alertMan == null) {
-            try {
-                alertMan = AlertManagerUtil.getLocalHome().create();
-            } catch (CreateException e) {
-                throw new SystemException(e);
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
-        return alertMan;
-    }
-    
     private Integer[] getGroupMemberIDs(AuthzSubjectValue subject,
                                         AppdefEntityID gid)
         throws AppdefEntityNotFoundException, GroupNotCompatibleException,
@@ -2941,10 +2924,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                         resource.getEntityId().getType());
             }            
             setResourceDisplaySummary(summary, resource, parent);
-                        
-            // Set count of alerts
-            summary.setAlerts(new Integer
-                (getAMan().getAlertCount(resource.getEntityId())));            
             summaries.add(summary);
         }        
         summaries.setTotalSize(resources.getTotalSize());

@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceDisplaySummary;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -64,24 +65,37 @@ public class ViewAction extends BaseAction {
     {
         ServletContext ctx = getServlet().getServletContext();
         MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
+        EventsBoss eBoss = ContextUtils.getEventsBoss(ctx);
+        
         WebUser user = (WebUser)
             request.getSession().getAttribute(Constants.WEBUSER_SES_ATTR);
         String key = Constants.USERPREF_KEY_FAVORITE_RESOURCES;
 
+        List entityIds =  DashboardUtils.preferencesAsEntityIds(key, user);
+
+        AppdefEntityID[] arrayIds = new AppdefEntityID[entityIds.size()];
+        arrayIds = (AppdefEntityID[]) entityIds.toArray(arrayIds);
+
         List list;
         try{
-            list = getResources(key, boss, user);
+            list = boss.findResourcesCurrentHealth(user.getSessionId().intValue(),
+                                                   arrayIds);
         } catch(Exception e) {
             DashboardUtils.verifyResources(key, ctx, user);
-            list = getResources(key, boss, user);
+            list = boss.findResourcesCurrentHealth(user.getSessionId().intValue(),
+                                                   arrayIds);
         }
+
+        // Get alert counts for each resource
+        int alerts[] = eBoss.getAlertCount(arrayIds);
 
         // Due to the complexity of the UIBeans, we need to construct the
         // JSON objects by hand.
         JSONObject favorites = new JSONObject();
 
         List resources = new ArrayList();
-        for (Iterator i = list.iterator(); i.hasNext(); ) {
+        int count = 0;
+        for (Iterator i = list.iterator(); i.hasNext(); count++) {
             JSONObject res = new JSONObject();
             ResourceDisplaySummary bean = (ResourceDisplaySummary)i.next();
             res.put("resourceName", bean.getResourceName());
@@ -96,7 +110,7 @@ public class ViewAction extends BaseAction {
                                       bean.getThroughputUnits()));
             res.put("availability", getAvailString(bean.getAvailability()));
             res.put("monitorable", bean.getMonitorable());
-            res.put("alerts", bean.getAlerts());
+            res.put("alerts", alerts[count]);
 
             resources.add(res);
         }

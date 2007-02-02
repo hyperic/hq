@@ -39,7 +39,6 @@ public class ResourceDisplaySummary extends SingletonDisplaySummary
 
     private Boolean showAlerts;        
     private Boolean hasMetrics;
-    private Integer alerts; 
     private String resourceName;
     private String parentResourceName;
     private Integer parentResourceId;
@@ -49,18 +48,6 @@ public class ResourceDisplaySummary extends SingletonDisplaySummary
     private String resourceTypeName;
     private Boolean monitorable;
         
-    /**
-     * Returns the alerts.
-     * 
-     * Returns zero or a positive int with the number of alerts registered for
-     * the resource
-     * 
-     * @return Integer
-     */
-    public Integer getAlerts() {
-        return alerts;
-    }
-
     /**
      * Returns the hasMetrics.
      * 
@@ -72,14 +59,6 @@ public class ResourceDisplaySummary extends SingletonDisplaySummary
      */
     public Boolean getHasMetrics() {
         return hasMetrics;
-    }
-
-    /**
-     * Sets the alerts.
-     * @param alerts The alerts to set
-     */
-    public void setAlerts(Integer alerts) {
-        this.alerts = alerts;
     }
 
     /**
@@ -258,7 +237,6 @@ public class ResourceDisplaySummary extends SingletonDisplaySummary
         sb.append(",parentResourceName=").append(parentResourceName);
         sb.append(",parentResourceId=").append(parentResourceId);
         sb.append(",parentResourceTypeId=").append(parentResourceTypeId);
-        sb.append(",alerts=").append(alerts);
         sb.append(")");
         return sb.toString();
     }
