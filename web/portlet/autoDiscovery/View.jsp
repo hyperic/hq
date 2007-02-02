@@ -167,15 +167,11 @@ function skipResources() {
                 &nbsp;&nbsp;
                 <input type="submit" name="buttonAction" onclick="skipResources(); return false;" value="<fmt:message key="common.label.SkipResources"/>" class="CompactButton">
 
-            
+
                </td>
             </tr>
            </table>
- <!--
-<a href="." onclick="setImportCheckboxes(AIQueueForm); AIQueueForm.queueAction.value=<hq:constant classname="org.hyperic.hq.appdef.shared.AIQueueConstants" symbol="Q_DECISION_APPROVE"/>; AIQueueForm.submit(); return false;"><html:img page="/images/tbb_import.gif" border="0"/></a>
-&nbsp;&nbsp;
-<a href="." onclick="if (!setRemoveCheckboxes(AIQueueForm)) return false; AIQueueForm.queueAction.value=<hq:constant classname="org.hyperic.hq.appdef.shared.AIQueueConstants" symbol="Q_DECISION_IGNORE"/>; AIQueueForm.submit(); return false;"><html:img page="/images/tbb_remove.gif" border="0"/></a>
-       --></td>
+            </td>
         </tr>
         </html:form>
       </c:otherwise>
