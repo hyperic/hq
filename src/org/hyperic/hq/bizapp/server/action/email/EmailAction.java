@@ -35,16 +35,16 @@ import javax.mail.internet.InternetAddress;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.escalation.server.session.Escalatable;
+import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.ActionInterface;
@@ -53,8 +53,6 @@ import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.Notify;
-import org.hyperic.hq.events.server.session.Alert;
-import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
@@ -199,9 +197,6 @@ public class EmailAction extends EmailActionConfig
         return text.toString();
     }
 
-    /** 
-     * Execute the action
-     */
     public String execute(AlertInterface alert, ActionExecutionInfo info) 
         throws ActionExecuteException 
     {
@@ -224,9 +219,7 @@ public class EmailAction extends EmailActionConfig
 
             StringBuffer result = getLog();
             return result.toString();
-        } catch (MeasurementNotFoundException e) {
-            throw new ActionExecuteException(e);
-        } catch (SystemException e) {
+        } catch (Exception e) {
             throw new ActionExecuteException(e);
         }
     }
@@ -298,25 +291,16 @@ public class EmailAction extends EmailActionConfig
         init(config);
     }
 
-    public void send(Integer alertId, String message)
+    public void send(Escalatable alert, String message)
         throws ActionExecuteException
     {
-        // this had better be called from within JTA context!!!
-        log.info("send invoked on EmailAction");
-
-        Alert alert =
-            DAOFactory.getDAOFactory().getAlertDAO().get(alertId);
-        if (alert == null) {
-            // log and return
-            log.error("alert not found (id="+alertId+").");
-            return;
-        }
-        AlertDefinition alertdef = alert.getAlertDefinition();
+        PerformsEscalations def = alert.getDefinition();
         
         InternetAddress[] to = lookupEmailAddr();
 
         EmailFilter filter = EmailFilter.getInstance();
 
-        filter.sendAlert(null, to, createSubject(alertdef), message, false);
+        filter.sendAlert(null, to, createSubject(def.getDefinitionInfo()), 
+                         message, false);
     }
 }

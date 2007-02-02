@@ -39,6 +39,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.server.action.email.EmailFilter;
 import org.hyperic.hq.bizapp.shared.action.SyslogActionConfig;
+import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.ActionInterface;
@@ -129,8 +130,7 @@ public class SyslogAction extends SyslogActionConfig
         init(config);
     }
 
-    public void send(Integer alertId, String message)
-    {
+    public void send(Escalatable alert, String message) {
         log.info(message);
     }
 }

@@ -25,8 +25,9 @@
 
 package org.hyperic.hq.events;
 
-public interface Notify
-{
-    public void send(Integer alertId, String message)
+import org.hyperic.hq.escalation.server.session.Escalatable;
+
+public interface Notify {
+    public void send(Escalatable e, String message)
         throws ActionExecuteException;
 }
