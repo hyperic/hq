@@ -140,10 +140,10 @@ class EscalationRuntime {
          
             if (task != null) {
                 ClockDaemon.cancel(task);
-                _log.info("Canceled state[" + stateId + "]");
+                _log.debug("Canceled state[" + stateId + "]");
             } else {
-                _log.info("Canceling state[" + stateId + "] but was " + 
-                          "not found");
+                _log.debug("Canceling state[" + stateId + "] but was " + 
+                           "not found");
             }
         }
     }
@@ -162,7 +162,7 @@ class EscalationRuntime {
         
         HQApp.getInstance().addTransactionListener(new TransactionListener() {
             public void afterCommit(boolean success) {
-                _log.info("Transaction committed:  success=" + success);
+                _log.debug("Transaction committed:  success=" + success);
                 if (success) {
                     scheduleEscalation_(stateId, schedTime);
                 }
@@ -177,9 +177,9 @@ class EscalationRuntime {
             if (task != null) {
                 // Previously scheduled.  Unschedule
                 ClockDaemon.cancel(task);
-                _log.info("Rescheduling state[" + stateId + "]");
+                _log.debug("Rescheduling state[" + stateId + "]");
             } else {
-                _log.info("Scheduleing state[" + stateId + "]");
+                _log.debug("Scheduleing state[" + stateId + "]");
             }
 
             task = _schedule.executeAt(new Date(schedTime),
@@ -190,7 +190,7 @@ class EscalationRuntime {
     }
     
     private void runEscalation(Integer stateId) {
-        _log.info("Running escalation state [" + stateId + "]");
+        _log.debug("Running escalation state [" + stateId + "]");
         _esclMan.executeState(stateId);
     }
     
