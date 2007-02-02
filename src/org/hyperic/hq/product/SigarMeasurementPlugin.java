@@ -139,6 +139,10 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
             toString();
     }
 
+    private boolean isAvailAttr(String attr) {
+        return attr.equals("State");
+    }
+
     public MetricValue getValue(Metric metric) 
         throws PluginException,
                MetricNotFoundException,
@@ -173,7 +177,12 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
                 systemValue = invoker.invoke(attr);
             }
         } catch (SigarException e) {
-            throw new MetricNotFoundException(e.getMessage(), e);
+            if (isAvailAttr(attr)) {
+                return new MetricValue(Metric.AVAIL_DOWN);
+            }
+            else {
+                throw new MetricNotFoundException(e.getMessage(), e);
+            }
         }
 
         if (systemValue instanceof Double) {
@@ -188,7 +197,7 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
         else if (systemValue instanceof Character) {
             char c = ((Character)systemValue).charValue();
             //process state
-            if (attr.equals("State")) {
+            if (isAvailAttr(attr)) {
                 double avail;
                 switch (c) {
                   case 'Z':
