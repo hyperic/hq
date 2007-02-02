@@ -163,8 +163,7 @@ public class EscalationManagerEJBImpl
      * 
      * @ejb:interface-method  
      */
-    public void removeAction(Escalation e, Integer actId) 
-    {
+    public void removeAction(Escalation e, Integer actId) { 
         // Iterate through the actions and find the one escalation action
         Action action = null;
         for (Iterator it = e.getActionsList().iterator(); it.hasNext(); ) {
@@ -266,20 +265,15 @@ public class EscalationManagerEJBImpl
             return;
         
         if (curState != null) {
-            // XXX -- We need to make this lookup faster.  It's possible that
-            //        an alert definition hammers us with starts, which would
-            //        also hammer the DB.  One possible way is to augment
-            //        EscalationRuntime to also store the alertType/Id with
-            //        the state id
-            _log.info("startEscalation called on [" + def + "] but it was " +
-                      "already running");
+            _log.debug("startEscalation called on [" + def + "] but it was " +
+                       "already running");
             return;  
         }
         
         alert    = creator.createEscalatable();
         curState = new EscalationState(alert);
         _stateDAO.save(curState);
-        _log.info("Escalation started: state=" + curState.getId());
+        _log.debug("Escalation started: state=" + curState.getId());
         EscalationRuntime.getInstance().scheduleEscalation(curState);
     }
      
@@ -301,7 +295,7 @@ public class EscalationManagerEJBImpl
         if (state.isPaused()) {
             // We could throw an exception here, but maybe someone mashes the
             // pause button & we get here.  Let's be nice.
-            _log.info("Double-Pause on state[" + state.getId() + "]");
+            _log.debug("Double-Pause on state[" + state.getId() + "]");
             return;
         }
         
@@ -371,7 +365,7 @@ public class EscalationManagerEJBImpl
         
         // XXX -- Need to make sure the application is running before
         //        we allow this to proceed
-        _log.info("Executing state[" + s.getId() + "]");
+        _log.debug("Executing state[" + s.getId() + "]");
         if (actionIdx >= e.getActions().size()) {
             _log.warn("Attempted to execute escalation state which had run " +
                       "out.  Perhaps the escalation was modified?");
@@ -387,13 +381,13 @@ public class EscalationManagerEJBImpl
         // Always make sure that we increase the state offset of the
         // escalation so we don't loop fo-eva 
         if (actionIdx >= (e.getActions().size() - 1)) {
-            _log.info("Ran out of escalation.  Terminating state");
+            _log.debug("Ran out of escalation.  Terminating state");
             endEscalation(s);
         } else {
             long nextTime = System.currentTimeMillis() + eAction.getWaitTime();
             
-            _log.info("Moving onto next state of escalation, but chillin' for "+
-                      eAction.getWaitTime() + " ms");
+            _log.debug("Moving onto next state of escalation, but chillin' for "
+                       + eAction.getWaitTime() + " ms");
             s.setNextAction(actionIdx + 1);
             s.setNextActionTime(nextTime);
                                 
@@ -471,16 +465,17 @@ public class EscalationManagerEJBImpl
         // Fixed alerts always get set first before finding the state
         if (fixed) {
             type.fixAlert(alertId, subject);
+            _log.debug(subject.getFullName() + " has fixed alertId=" + alertId);
         }
 
         Escalatable esc = type.findEscalatable(alertId);
         EscalationState state = _stateDAO.find(esc);
-        String sFixed = fixed ? "Fix" : "Acknowledged";
+        String sFixed = fixed ? "Fixed" : "Acknowledged";
         
         if (state == null || state.getAcknowledgedBy() != null) {
-            _log.warn(sFixed + " alertId[" + alertId + "] for type [" + 
-                      type + "], but it wasn't running or was previously " + 
-                      sFixed + ".  Button masher?");
+            _log.debug(sFixed + " alertId[" + alertId + "] for type [" + 
+                       type + "], but it wasn't running or was previously " + 
+                       sFixed + ".  Button masher?");
             return;
         }
         
@@ -508,17 +503,22 @@ public class EscalationManagerEJBImpl
             (fixed ? "fixed" : "acknowledged") + " the alert raised by [" +
             alert.getDefinition().getName() + "]";
 
-        Escalation esc = state.getEscalation();
-        int idx = notifyAll ? esc.getActions().size()
-                            : (state.getNextAction() - 1);
-        List actions = esc.getActions();
-        
+        List actions = state.getEscalation().getActions();
+        int idx = (notifyAll ? actions.size() : state.getNextAction()) - 1;
+
         while (idx >= 0) {
-            EscalationAction a = (EscalationAction)actions.get(idx--);
+            EscalationAction ea = (EscalationAction)actions.get(idx--);
+            Action a = (Action)ea.getAction();
             
             try {
-                if (a instanceof Notify)
-                    ((Notify)a).send(alert.getId(), msg);
+                Class c = Class.forName(a.getClassName());
+                Notify n;
+                
+                if (!Notify.class.isAssignableFrom(c))
+                    continue;
+                
+                n = (Notify)a.getInitializedAction();
+                n.send(alert, msg);
             } catch(Exception e) {
                 _log.warn("Unable to send notification alert", e);
             }
