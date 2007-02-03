@@ -119,6 +119,7 @@ public class ResourceHubPortalAction extends BaseAction {
         
         PageControl pc = RequestUtils.getPageControl(request);
 
+        /* Disable setting of paging preferences
         if (hubForm.getPs() != null) {
             user.setPreference(PAGE_ATTRIB, hubForm.getPs());
             prefChanged = true; // Save new preference
@@ -134,6 +135,7 @@ public class ResourceHubPortalAction extends BaseAction {
                 // Just use default
             }
         }
+        */
         
         
         String view = hubForm.getView();
