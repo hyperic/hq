@@ -1245,6 +1245,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         switch (pc.getSortattribute()) {
         case SortAttribute.SERVICE_NAME :
         case SortAttribute.RESOURCE_NAME :
+        case SortAttribute.NAME :
             appServiceCollection =
                 appServLocHome.findByApplication_orderName(appId);
             break;
