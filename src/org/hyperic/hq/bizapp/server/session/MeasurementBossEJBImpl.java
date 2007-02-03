@@ -1224,7 +1224,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
          
          MetricValue[] ret = new MetricValue[tids.length];
          try {
-             Map data = getDataMan().getLastDataPoints(mids, interval);
+             Map data = getDataMan().getLastDataPoints(mids,
+                                                       System.currentTimeMillis() - interval);
              
              for (int i = 0; i < mids.length; i++) {
                  if (data.containsKey(mids[i]))
@@ -2765,7 +2766,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 
                 // Get absolute last data point
                 Map avails = this.getDataMan().getLastDataPoints(
-                    mids, MeasurementConstants.ACCEPTABLE_LIVE_MILLIS);
+                    mids, end - MeasurementConstants.ACCEPTABLE_LIVE_MILLIS);
 
                 if (avails.size() == 0)
                     summary.setAvailability(
@@ -3122,6 +3123,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         // XXX - optimization for the fact that we can have multiple indicator
         // metrics for each category
         HashSet done = new HashSet();
+        long now = System.currentTimeMillis();
         for (Iterator it = measurements.iterator(); it.hasNext(); ) {
             DerivedMeasurementValue dmv = (DerivedMeasurementValue) it.next();
             String category = dmv.getTemplate().getCategory().getName();
@@ -3150,7 +3152,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             Map dataMap;
             try {
                 dataMap = this.getDataMan()
-                    .getLastDataPoints(mids, MeasurementConstants.HOUR);
+                    .getLastDataPoints(mids, now - MeasurementConstants.HOUR);
                 if (dataMap.size() < 1)
                     continue;
                 
