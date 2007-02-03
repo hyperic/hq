@@ -76,12 +76,13 @@
  <tiles:put name="isDetail" value="true"/>
 </tiles:insert>
 
+<br/>
+
 <html:form action="/resource/group/control/RemoveHistory">
 <html:hidden property="rid" value="${Resource.id}"/>
 <html:hidden property="type" value="${Resource.entityId.type}"/>
 
 <c:forEach items="${hstDetailAttr}" var="tmpDetail" end="1">
-<c:out value="hstDetailAttr ${tmpDetail.entityType}"/>
  <c:choose>
   <c:when test="${tmpDetail.entityType eq '2'}">
    <c:set var="resourceType" value="server"/>       
@@ -101,7 +102,7 @@
                items="${hstDetailAttr}" var="hstDetail"> 
   <display:column width="16%" property="entityName" sort="true" sortAttr="9"
                   defaultSort="false" title="resource.group.ControlDetail.ListHeader.Resource" 
-                  href="/resource/${resourceType}/Inventory.do?mode=view&type=${hstDetail.entityType}" paramId="rid" paramProperty="entityId" />
+                  href="/resource/${resourceType}/Control.do?mode=history&eid=${hstDetail.entityType}:${hstDetail.entityId}" />
   <display:column width="10%" property="status" sort="true" sortAttr="10"
                   defaultSort="false" title="resource.group.ControlDetail.ListHeader.Status" /> 
    <display:column width="14%" property="args" title="resource.server.ControlHistory.ListHeader.Arguments">
