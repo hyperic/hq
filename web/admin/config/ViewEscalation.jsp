@@ -119,8 +119,7 @@ function showViewEscResponse(originalRequest) {
       var actionWaitTime = (actions[i].waitTime / 60000) +
          " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>";
 
-      var num = actionId;
-      var liID = 'row'+num;
+      var liID = actionId;
       var viewLi = document.createElement('li');
       var remDiv = document.createElement('div');
       var usersDiv = document.createElement('div');
@@ -241,11 +240,12 @@ function showViewEscResponse(originalRequest) {
           for (var b = 0; b < emailAdds.length; b++) {
               var displayEmails = "";
               var emailAdds = emailInfo.split(',');
+              var comma = ", ";
               for (var b = 0; b < emailAdds.length; b++) {
-                var comma = ", ";
-                displayEmails += emailAdds[b] + comma;
-
-                  if (displayEmails.lastIndexOf(",") == displayEmails.length - 1);
+                displayEmails += emailAdds[b];
+                if (b < emailAdds.length - 1) {
+                  displayEmails += comma;
+                }
               }
 
               if (configSms == "true") {
@@ -321,7 +321,9 @@ function showViewEscResponse(originalRequest) {
           // containment:'viewEscalationUL', handle:'handle',
            onUpdate: function() {
                var pars = "&id=" + id;
-                ajaxEngine.sendRequest( '/escalation/updateEscalationOrder.do', Sortable.serialize("viewEscalationUL") + pars); },
+               var url = '<html:rewrite action="/escalation/updateEscalationOrder"/>?' + Sortable.serialize("viewEscalationUL") + pars;
+               new Ajax.Request(url, {method: 'get', onFailure :reportError});
+           },
            constraint: 'vertical'});
 
 }

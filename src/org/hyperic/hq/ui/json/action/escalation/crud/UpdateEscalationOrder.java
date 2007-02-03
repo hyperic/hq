@@ -46,9 +46,10 @@ public class UpdateEscalationOrder extends BaseAction {
         }
         
         Integer id = context.getId();
-        String order = ((String[]) map.get("order"))[0];
+        String[] order = (String[]) map.get("viewEscalationUL[]");
         
         // TODO Update the escalation actions order
+        // order is array of action IDs
     }
 
 }
