@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hibernate.Criteria;
 import org.hibernate.criterion.Expression;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
@@ -232,6 +233,7 @@ public class ServerDAO extends HibernateDAO
         return createCriteria()
             .createAlias("services", "s")
             .add( Expression.in("s.id", ids))
+            .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
             .list();
     }
 
