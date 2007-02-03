@@ -354,7 +354,7 @@ public class ControlScheduleManagerEJBImpl
                 } catch (Exception e) {
                     // One of NamingException, FinderException, CreateException.
                     // Should never happen
-                    this.log.error("Error looking up appdef name for type=" +
+                    log.error("Error looking up appdef name for type=" +
                                    rs.getInt(1) + " id=" + rs.getInt(2));
                     continue;
                 }
@@ -544,6 +544,16 @@ public class ControlScheduleManagerEJBImpl
             throw new ApplicationException("Unknown sort attribute: " +
                                            sortAttr);
         }
+        
+        // The the entity names
+        for (Iterator it = hist.iterator(); it.hasNext(); ) {
+            ControlHistory ch = (ControlHistory) it.next();
+            AppdefEntityValue aev = new AppdefEntityValue(
+                new AppdefEntityID(ch.getEntityType().intValue(),
+                                   ch.getEntityId()), subject);
+            ch.setEntityName(aev.getName());
+        }
+        
         PageList list = this.historyPager.seek(hist,
                                                pc.getPagenum(),
                                                pc.getPagesize());
@@ -686,7 +696,7 @@ public class ControlScheduleManagerEJBImpl
             // validate the job in the scheduler?
 
         } catch (Exception e) {
-            this.log.error("Unable to get control job info: " +
+            log.error("Unable to get control job info: " +
                            e.getMessage());
             throw new PluginException(e);
         }
@@ -715,7 +725,7 @@ public class ControlScheduleManagerEJBImpl
                 this._scheduler.deleteJob(cScheduleLocal.getJobName(), GROUP);
                 cScheduleLocalHome.remove(cScheduleLocal);
             } catch (Exception e) {
-                this.log.error("Unable to remove job: " + e.getMessage());
+                log.error("Unable to remove job: " + e.getMessage());
                 throw new PluginException(e);
             }
         }
@@ -742,7 +752,7 @@ public class ControlScheduleManagerEJBImpl
                 this._scheduler.deleteJob(cScheduleLocal.getJobName(),
                                          GROUP);
             } catch (SchedulerException e) {
-                this.log.error("Unable to remove job " +
+                log.error("Unable to remove job " +
                                cScheduleLocal.getJobName() + ": " +
                                e.getMessage());
             }
@@ -783,11 +793,11 @@ public class ControlScheduleManagerEJBImpl
         trigger.setVolatility(true);
 
         try {
-            this.log.debug("Scheduling job for immediate execution: " + 
+            log.debug("Scheduling job for immediate execution: " + 
                            jobDetail);
             this._scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
-            this.log.error("Unable to schedule job: " + e.getMessage(), e);
+            log.error("Unable to schedule job: " + e.getMessage(), e);
         }
     }
 
@@ -826,7 +836,7 @@ public class ControlScheduleManagerEJBImpl
         try {
             cronStr = ScheduleParser.getCronString(schedule);
         } catch (ScheduleParseException e) {
-            this.log.error("Unable to get cron string: " + e.getMessage());
+            log.error("Unable to get cron string: " + e.getMessage());
             throw new PluginException(e);
         }
 
@@ -849,7 +859,7 @@ public class ControlScheduleManagerEJBImpl
                                           triggerName,
                                           jobName,null);
             } catch (Exception e) {
-                this.log.error("Unable to schedule job: " + e.getMessage());
+                log.error("Unable to schedule job: " + e.getMessage());
                 throw new PluginException(e);
             }
         } else {        
@@ -877,13 +887,13 @@ public class ControlScheduleManagerEJBImpl
                                           triggerName,
                                           jobName, stringOrder);
             } catch (ParseException e) {
-                this.log.error("Unable to setup cron trigger: " +
+                log.error("Unable to setup cron trigger: " +
                                e.getMessage());
                 throw new PluginException(e);
             } catch (SchedulerException e) {
                 throw new PluginException(e);
             } catch (Exception e) {
-                this.log.error("Unable to schedule job: " + e.getMessage());
+                log.error("Unable to schedule job: " + e.getMessage());
                 throw new PluginException(e);
             }
         }
