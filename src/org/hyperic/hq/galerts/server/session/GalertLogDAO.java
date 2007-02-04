@@ -27,7 +27,11 @@ package org.hyperic.hq.galerts.server.session;
 
 import java.util.List;
 
+import org.hibernate.Criteria;
 import org.hibernate.Query;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -63,23 +67,23 @@ class GalertLogDAO
     }
 
     PageList findByTimeWindow(ResourceGroup g, long begin, PageControl pc) {
-        String sql = "from GalertLog l " +
-                     "where l.alertDef.group = :group and l.timestamp > :time "; 
-                     
-        Integer count = (Integer)
-            getSession().createQuery("select count(*) " + sql)
-                        .setParameter("group", g)
-                        .setLong("time", begin)
-                        .uniqueResult();
+        final String tsProp = "timestamp";
+        Integer count = (Integer) createCriteria()
+            .createAlias("alertDef", "d")
+            .add(Restrictions.eq("d.group", g))
+            .add(Restrictions.ge(tsProp, new Long(begin)))
+            .setProjection(Projections.rowCount())
+            .uniqueResult();
 
         if (count.intValue() > 0) {
-            Query q = getSession()
-                .createQuery(sql + "order by l.timestamp " +
-                             (pc.isDescending() ? "desc" : "asc"))
-                .setParameter("group", g)
-                .setLong("time", begin);
+            Criteria crit = createCriteria()
+                .createAlias("alertDef", "d")
+                .add(Restrictions.eq("d.group", g))
+                .add(Restrictions.ge(tsProp, new Long(begin)))
+                .addOrder(pc.isDescending() ? Order.desc(tsProp) :
+                                              Order.asc(tsProp));
             
-            return getPagedResult(q, count, pc);
+            return getPagedResult(crit, count, pc);
         }
 
         return new PageList();
