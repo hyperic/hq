@@ -262,6 +262,16 @@ public class GalertBossEJBImpl
     }    
 
     /**
+     * @ejb:interface-method
+     */
+    public GalertLog findAlertLog(int sessionId, Integer id)
+        throws SessionException
+    {
+        _sessMan.authenticate(sessionId);
+        return _galertMan.findAlertLog(id);
+    }    
+
+    /**
      * @ejb:interface-method  
      */
     public void update(int sessionId, GalertDef def, String name, String desc, 
@@ -325,6 +335,7 @@ public class GalertBossEJBImpl
                 .put("id", log.getId())
                 .put("time", date)
                 .put("name", log.getAlertDef().getName())
+                .put("defId", log.getAlertDef().getId())
                 .put("reason", log.getExecutionReason().getShortReason())
                 .put("fixed", log.isFixed()));
         }

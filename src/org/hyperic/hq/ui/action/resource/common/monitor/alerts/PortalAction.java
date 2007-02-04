@@ -41,10 +41,12 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.bizapp.shared.GalertBoss;
 import org.hyperic.hq.events.AlertNotFoundException;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertValue;
+import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.Portlet;
@@ -133,20 +135,37 @@ public class PortalAction extends ResourceController {
         int sessionID = RequestUtils.getSessionId(request).intValue();
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
 
+        AppdefEntityID aeid = setResource(request);
         Integer alertId = new Integer( request.getParameter("a") );
         try {
-            AlertValue av = eb.getAlert(sessionID, alertId);
-            AlertDefinitionValue adv =
-                eb.getAlertDefinition( sessionID, av.getAlertDefId() );
-            request.setAttribute(Constants.TITLE_PARAM2_ATTR, adv.getName());
-            
-            AppdefEntityID aeid =
-                new AppdefEntityID(adv.getAppdefType(), adv.getAppdefId());
-            setResource(request, aeid, false);
-
             Portal portal = Portal.createPortal();
             setTitle(aeid, portal, "alert.current.platform.detail.Title");
-            portal.addPortlet(new Portlet(".events.alert.view"), 1);
+            
+            if (aeid.isGroup()) {
+                GalertBoss gb = ContextUtils.getGalertBoss(ctx);
+                
+                // properties
+                GalertLog av = gb.findAlertLog(sessionID, alertId);
+
+                request.setAttribute(Constants.TITLE_PARAM2_ATTR,
+                                     av.getDefinition().getName());
+                
+                portal.addPortlet(new Portlet(".events.group.alert.view"), 1);
+            } else {
+                AlertValue av = eb.getAlert(sessionID, alertId);
+                AlertDefinitionValue adv =
+                    eb.getAlertDefinition( sessionID, av.getAlertDefId() );
+                request.setAttribute(Constants.TITLE_PARAM2_ATTR, adv.getName());
+
+                if (aeid == null) {
+                    setResource(request, new AppdefEntityID(adv.getAppdefType(),
+                                                            adv.getAppdefId()),
+                                false);
+                }
+                
+                portal.addPortlet(new Portlet(".events.alert.view"), 1);
+            }
+
 
             portal.setDialog(true);
             request.setAttribute(Constants.PORTAL_KEY, portal);
