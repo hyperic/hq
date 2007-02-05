@@ -1152,6 +1152,9 @@
         <exclude name="org/hyperic/hq/plugin/**"/>
         <excludesfile name="${hq.home}/etc/shell-jar-excludes.txt"/>
       </fileset>
+      <fileset dir="${hq.home}/build/tools/txsnatch/classes">
+        <include name="org/hyperic/**"/>
+      </fileset>
       <fileset dir="${hq.home}/build/classes">
         <include name="org/hyperic/hq/**/server/**/*Exception.class"/>
         <include name="org/hyperic/hq/**/agent/**/*Exception.class"/>
@@ -1188,6 +1191,11 @@
 
       <fileset dir="${sigar.lib}" includes="*.*" />
       <fileset dir="${jboss.home}/client" includes="jbossall-client.jar"/>
+        
+      <!-- The following is needed for the TxSnatch code.  Not sure why
+           this is tried to load on the client, but don't have lots of 
+           time to look into it ATM ..  JMT 01/05/07 -->
+      <fileset dir="${jboss.home}/server/all/lib" includes="jboss.jar"/>
     </copy>
   </target>
 
