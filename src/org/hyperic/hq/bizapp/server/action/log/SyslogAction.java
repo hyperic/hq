@@ -31,9 +31,6 @@
 
 package org.hyperic.hq.bizapp.server.action.log;
 
-import javax.ejb.CreateException;
-import javax.naming.NamingException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -48,18 +45,13 @@ import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.Notify;
-import org.hyperic.hq.events.server.session.Alert;
-import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
-import org.hyperic.hq.events.shared.AlertManagerLocal;
-import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 
 public class SyslogAction extends SyslogActionConfig
     implements ActionInterface, Notify
 {
-    private Log log = LogFactory.getLog(SyslogAction.class.getName());
+    private Log _log = LogFactory.getLog(SyslogAction.class);
     
     public SyslogAction() {
     }
@@ -93,21 +85,9 @@ public class SyslogAction extends SyslogActionConfig
         return resName;
     }
 
-
-    /** Execute the action
-     *
-     */
     public String execute(AlertInterface alert, ActionExecutionInfo info) 
         throws ActionExecuteException 
     {
-//        TriggerFiredEvent[] firedEvents = event.getRootEvents();
-//        HashMap eventMap = new HashMap();
-//        for (int i = 0; i < firedEvents.length; i++) {
-//            eventMap.put(
-//                firedEvents[i].getInstanceId(),
-//                firedEvents[i].toString());
-//        }
-        
         EmailFilter filter = EmailFilter.getInstance();
         AlertDefinitionInterface alertDef =
             alert.getAlertDefinitionInterface();
@@ -116,7 +96,7 @@ public class SyslogAction extends SyslogActionConfig
         String resName = filter.getAppdefEntityName(aeid);
         resName = hackDBString(resName);
 
-        log.error("DB_1 " + convertToDBPriority(alertDef.getPriority()) +
+        _log.info("DB_1 " + convertToDBPriority(alertDef.getPriority()) +
                   ' ' + getMeta() + '/' + getProduct() +'/' +
                   getVersion() + ' ' + resName + " :" +
                   alertDef.getName() + " - " + info.getLongReason());
@@ -124,13 +104,13 @@ public class SyslogAction extends SyslogActionConfig
         return "success";
     }
     
-    public void setParentActionConfig(AppdefEntityID aeid,
-                                      ConfigResponse config)
-        throws InvalidActionDataException {
-        init(config);
+    public void setParentActionConfig(AppdefEntityID aeid, ConfigResponse cfg)
+        throws InvalidActionDataException 
+    {
+        init(cfg);
     }
 
     public void send(Escalatable alert, String message) {
-        log.info(message);
+        _log.info(message);
     }
 }
