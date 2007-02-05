@@ -69,6 +69,9 @@
     <table border="0" cellpadding="0" cellspacing="0" height="100%" width="100%">
         <tr>
             <td class="MastheadBgTop" colspan="5" nowrap>
+                 <div style="display:none;position:absolute;top:10px;right:10px;" id="loading">
+		        <html:img page="/images/ajax-loader.gif" border="0" width="16" height="16" /></div>
+		        <div style="clear:both;"></div>
                 <table border="0" cellspacing="0" cellpadding="0">
                     <tr>
 
@@ -90,9 +93,6 @@
                        </tr>
                     </table>
                 </td>
-                <div style="display:none;position:absolute;top:10px;right:10px;" id="loading">
-		        <html:img page="/images/ajax-loader.gif" border="0" width="16" height="16" /></div>
-		        <div style="clear:both;"</div>
           </tr>
          </table>
        </td>

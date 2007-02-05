@@ -49,7 +49,7 @@
 <tiles:insert definition=".portlet.error"/>
 <tiles:insert definition=".portlet.confirm"/>
 
-    <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #D5D8DE";>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #D5D8DE;">
     <thead>
     <tr>
           <td colspan="2">
@@ -62,7 +62,9 @@
         </td>
     </tr>
     </thead>
-    <tbody id="escalations"></tbody>
+    <tbody id="escalations">
+
+    </tbody>
     </table>
 </td>
 
