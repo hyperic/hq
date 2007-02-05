@@ -526,7 +526,8 @@ public class EscalationManagerEJBImpl
     }
     
     /**
-     * Re-order the actions for an escalation.
+     * Re-order the actions for an escalation.   If there are any states
+     * associated with the escalation, they will be cleared.
      * 
      * @param actions a list of {@link EscalationAction}s (already contained
      *                within the escalation) specifying the new order.
@@ -546,6 +547,8 @@ public class EscalationManagerEJBImpl
             }
         }
         esc.setActionsList(actions);
+
+        unscheduleEscalation(esc);
     }
 
     /**
