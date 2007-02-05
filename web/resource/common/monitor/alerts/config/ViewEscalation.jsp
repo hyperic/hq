@@ -32,6 +32,11 @@
  --%>
 <tiles:importAttribute name="gad" ignore="true"/>
 <tiles:importAttribute name="alertDef" ignore="true"/>
+<tiles:importAttribute name="chooseScheme" ignore="true"/>
+
+<c:if test="${empty chooseScheme}">
+  <c:set var="chooseScheme" value="true"/>
+</c:if>
 
 <script language="JavaScript" src='<html:rewrite page="/js/scriptaculous.js"/>'
   type="text/javascript"></script>
@@ -46,23 +51,20 @@ function showViewEscResponse() {
     var tmp = eval('( <c:out value="${escalationJSON}" escapeXml="false"/> )');
     var notifyAll = tmp.escalation.notifyAll
     var actions = tmp.escalation.actions;
-    var pauseAllowed = tmp.escalation.pauseAllowed;
+    var allowPause = tmp.escalation.allowPause;
     var id = tmp.escalation.id;
-    var maxPauseTime = (tmp.escalation.maxPauseTime / 60000) +
+    var maxPauseTime = (tmp.escalation.maxWaitTime / 60000) +
        " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>";
 
     $('viewEscalation').style.display = "";
-    document.EscalationSchemeForm.escId.value = id;
+    if (document.EscalationSchemeForm != null) {
+      document.EscalationSchemeForm.escId.value = id;
+    }
   
     var escViewUL = $('viewEscalationUL');
 
     for(var i=escViewUL.childNodes.length-1; i>1; i--) {
-	 escViewUL.removeChild(escViewUL.childNodes[i]);
-    }
-
-    if (actions.length == 0) {
-      $('begin').style.display = 'none';
-      $('end').style.display = 'none';
+	  escViewUL.removeChild(escViewUL.childNodes[i]);
     }
 
     for (i = 0; i < actions.length; i++) {
@@ -70,13 +72,16 @@ function showViewEscResponse() {
       var configListType = actionConfig.listType;
       var configNames = actionConfig.names;
       var configSms = actionConfig.sms;
+      var configMeta = actionConfig.meta;
+      var configVersion = actionConfig.version;
+      var configProduct = actionConfig.product;
       var actionId = actions[i].action.id;
       var actionsClassName = actions[i].action.className;
+      var actionsVersion = actions[i].action._version_;
       var actionWaitTime = (actions[i].waitTime / 60000) +
          " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>";
-  
-      var num = actionId;
-	  var liID = 'row'+num;
+
+      var liID = actionId;
       var viewLi = document.createElement('li');
       var remDiv = document.createElement('div');
       var usersDiv = document.createElement('div');
@@ -91,75 +96,117 @@ function showViewEscResponse() {
       var escTableBody = document.createElement('tbody');
       var escTr1 = document.createElement('tr');
       var escTr2 = document.createElement('tr');
+      var escTrHeader = document.createElement('tr');
       var td1 = document.createElement('td');
       var td2 = document.createElement('td');
       var td3 = document.createElement('td');
       var td4 = document.createElement('td');
-      var td5 = document.createElement('td');
+      var td6 = document.createElement('td');
+      var td8 = document.createElement('td');
       var select1 = document.createElement("select");
       var select2 = document.createElement("select");
       var select3 = document.createElement("select");
       var anchor = document.createElement("a");
   
       var emailInfo = actionConfig.names;
-      var roleInfo = " ";
-      var metaInfo = " ";
-      var productInfo = " ";
-      var versionInfo = " ";
-  
       escViewUL.appendChild(viewLi)
   
-      //viewLi.setAttribute((document.all ? 'className' : 'class'), "lineitem");
+      viewLi.setAttribute((document.all ? 'className' : 'class'), "BlockContent");
       viewLi.setAttribute('id','row_'+ liID);
       $('row_'+ liID).style.margin = "0px";
       $('row_'+ liID).style.padding = "0px";
-      
+       
       viewLi.appendChild(escTable);
       escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
+      escTable.setAttribute('id','escTbl_'+ liID);
       escTable.setAttribute('border', '0');
-      escTable.setAttribute('cellspacing','3');
+      escTable.setAttribute('cellpadding','2');
+
       escTable.appendChild(escTableBody);
-  
+      escTableBody.appendChild(escTrHeader);
       escTableBody.appendChild(escTr2);
       escTableBody.appendChild(escTr1);
-  
+
+      escTrHeader.appendChild(td6);
+      td6.setAttribute('colSpan', '3');
+      td6.setAttribute((document.all ? 'className' : 'class'), "BlockTitle");
+      td6.innerHTML = 'Action Details';
+
       escTr1.appendChild(td1);
-  
-      //td1.setAttribute('colspan', '3');
+      td1.setAttribute((document.all ? 'className' : 'class'), "waitTd");
+      td1.setAttribute('colSpan', '2');
       td1.appendChild(waitDiv);
       waitDiv.setAttribute('id','wait_' + liID);
+      waitDiv.setAttribute('width', '100%');
       waitDiv.innerHTML = "Wait time before escalating: " + actionWaitTime + "<br>";
-  
+
       td1.appendChild(editWaitDiv);
       editWaitDiv.setAttribute('id','editWait_' + liID);
-  
+
       escTr2.appendChild(td2);
-      td2.setAttribute('width', '20%');
-      td2.setAttribute('valign', 'top');
-  
+      td2.setAttribute('width', '100%');
+      td2.setAttribute('vAlign', 'top');
+      td2.setAttribute((document.all ? 'className' : 'class'), "wrap");
       td2.appendChild(usersTextDiv);
-  
+      td2.setAttribute('id','usersList_' + liID);
+
+      var actionClass = actionsClassName.split('.');
+
+        for (var d = 0; d < actionClass.length; d++) {
+            if (actionClass[d] == "SyslogAction") {
+            usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowSpan="3" vAlign="top" style="padding-right:3px;">Log to the Syslog:</td><td style="padding:0px 2px 2px 2px;">meta: ' + configMeta + '</td></tr><tr><td style="padding:2px;">product: ' + configProduct + '</td></tr><tr><td style="padding:2px 2px 2px 2px;">version: ' + configVersion + '</td></tr></table>'
+           } else if (actionClass[d] == "NoOpAction") {
+            usersTextDiv.innerHTML = 'Suppress duplicate alerts for: ' + actionWaitTime;
+            waitDiv.innerHTML = "&nbsp;";
+            }
+       }
+
       if (configListType == "1"){
-          usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/>:  " + emailInfo + "<br>";
+          var emailAdds = emailInfo.split(',');
+          for (var b = 0; b < emailAdds.length; b++) {
+              var displayEmails = "";
+              var emailAdds = emailInfo.split(',');
+              var comma = ", ";
+              for (var b = 0; b < emailAdds.length; b++) {
+                displayEmails += emailAdds[b];
+                if (b < emailAdds.length - 1) {
+                  displayEmails += comma;
+                }
+              }
+
+              if (configSms == "true") {
+                usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/> via SMS: " + displayEmails + "<br>";
+              } else {
+              usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/> via Email: " + displayEmails + "<br>";
+
+          }
+              //usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/>:  " + displayEmails + "<br>";
+
+         }
+           
       } else if (configListType == "2") {
           var uids = emailInfo.split(',');
           var userNames = "";
           for (var b = 0; b < uids.length; b++) {
               <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
                   if (uids[b] == '<c:out value="${user.id}"/>') {
-                      userNames += '<c:out value="${user.name}" /> ';
+                      userNames += '<c:out value="${user.name}" />, ';
                   }
               </c:forEach>
           }
-          
-          usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/>: " + userNames + "<br>";
+          if (configSms == "true") {
+          usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/> via SMS: " + userNames + "<br>";
+              } else {
+              usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/> via Email: " + userNames + "<br>";
+        
+          }
       } else  if (configListType == "3") {
           var rids = emailInfo.split(',');
           var roleNames = "";
           for (var b = 0; b < rids.length; b++) {
               <c:forEach var="role" items="${AvailableRoles}" varStatus="status">
                   if (rids[b] == '<c:out value="${role.id}"/>') {
-                      roleNames += '<c:out value="${role.name}" /> ';
+                      roleNames += '<c:out value="${role.name}" />, ';
                   }
               </c:forEach>
           }
@@ -168,26 +215,19 @@ function showViewEscResponse() {
       }
   
       escTr2.appendChild(td3);
+      td3.setAttribute((document.all ? 'className' : 'class'), "td3");
       td3.setAttribute('width', '20%');
-      td3.setAttribute('valign', 'top');
-      td3.style.paddingRight = "20px";
-  
+      td3.setAttribute('vAlign', 'top');
+
       switch(configListType) {
       case 1:
         td3.innerHTML = emailInfo + "<br>";
-        break;
-      case 2:
-        td3.innerHTML = configNames + "<br>";
-        break;
-      case 3:
-        td3.innerHTML = roleInfo + "<br>";
         break;
       }
   
       td3.style.paddingTop = "5px";
   
       escTr2.appendChild(td4);
-      td5.setAttribute('width', '50%');
   
       td4.appendChild(usersEditDiv);
       usersEditDiv.style.display = 'none';
@@ -197,7 +237,7 @@ function showViewEscResponse() {
       usersEditDiv.innerHTML = " ";
     }
 
-      if (pauseAllowed) {
+      if (allowPause) {
         $('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause" /> ' + maxPauseTime;
       }
       else {
@@ -282,6 +322,7 @@ function showViewEscResponse() {
 
 </script>
 
+<c:if test="${chooseScheme}">
 <html:form action="/alerts/ConfigEscalation">
   <input type="hidden" id="ad" name="ad" value='<c:out value="${alertDef.id}"/>' />
   <c:choose>
@@ -360,6 +401,7 @@ function showViewEscResponse() {
 </table>
 
 </form>
+</c:if>
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0" id="viewEscalation" style="display: none;">
   <tbody>
@@ -371,19 +413,15 @@ function showViewEscResponse() {
       <td class="BlockLabel" nowrap="true"><fmt:message key="alert.config.escalation.state.change"/></td>
       <td id="changed" class="BlockContent"></td>
     </tr>
-    <tr id="begin">
-      <td class="BlockLabel" style="text-align: left;" nowrap="true"><fmt:message key="alert.config.escalation.Begin"/></td>
-      <td class="BlockContent">&nbsp;</td>
+    <tr>
+      <td class="BlockContent" colspan="2">&nbsp;</td>
     </tr>
     <tr>
-      <td width="100%" colspan="2">
+      <td class="BlockLabel" nowrap="true" valign="top"><fmt:message key="common.label.EscalationSchemeActions"/></td>
+      <td class="BlockContent">
       <ul id="viewEscalationUL">
       </ul>
       </td>
-    </tr>
-    <tr id="end">
-      <td class="BlockLabel" style="text-align: left;" nowrap="true"><fmt:message key="alert.config.escalation.TheEnd"/></td>
-      <td class="BlockContent">&nbsp;</td>
     </tr>
   </tbody>
 </table>
