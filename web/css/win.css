@@ -995,7 +995,6 @@ background-color: #dbe3f5
   margin-top:5px;
   margin-right:5px;
   margin-left:5px;
-  cursor:pointer;
 }
 
 .escInput {
@@ -1019,18 +1018,15 @@ background-color: #dbe3f5
 .td2 {
  padding:5px 0px 10px 5px;
  width:10%;
- cursor:pointer;
 }
 
 .td3 {
  width:10%;
  padding-right:5px;
  padding-top:5px;
- cursor:pointer;
 }
 
 .waitTd {
- cursor:pointer;
 }
 
 .portletLRBotBorder {
@@ -1098,8 +1094,6 @@ border-left:1px solid #D5D8DE;
  font-weight: bold;
  background-color: #f2f4f7;
  color:#333333;
-
-    border-bottom:1px dotted #aeb0b5;
 }
 
 .handle {

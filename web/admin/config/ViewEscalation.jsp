@@ -179,7 +179,7 @@ function showViewEscResponse(originalRequest) {
       escTableBody.appendChild(escTrHeader);
       escTableBody.appendChild(escTr2);
       escTableBody.appendChild(escTr1);
-
+     /*
       escTrHeader.appendChild(td7);
       td7.setAttribute('rowSpan', '3');
       td7.setAttribute('width', '10');
@@ -193,11 +193,12 @@ function showViewEscResponse(originalRequest) {
 
       td7.innerHTML = "&nbsp;";
       }
+      */
 
-      escTrHeader.appendChild(td6);
+     escTrHeader.appendChild(td6);
       td6.setAttribute('colSpan', '3');
       td6.setAttribute((document.all ? 'className' : 'class'), "BlockTitle");
-      td6.innerHTML = 'Action Details';
+      td6.innerHTML = '<div style="cursor:move;width:100%;background:#cccccc;padding:2px; border:1px dotted #aeb0b5;">Action Details</div>';
 
       escTrHeader.appendChild(td8);
       td8.setAttribute('vAlign','top');
@@ -314,24 +315,16 @@ function showViewEscResponse(originalRequest) {
 
     }
 
-    Sortable.create('viewEscalationUL',{containment:'viewEscalationUL',handle:'handle',
-            
-          //{dropOnEmpty: false,
-           //format: /^(.*)$/,
-          // containment:'viewEscalationUL', handle:'handle',
-           onUpdate: function() {
+    Sortable.create('viewEscalationUL',{containment:'viewEscalationUL',
+             onUpdate: function() {
                var pars = "&id=" + id;
                var url = '<html:rewrite action="/escalation/updateEscalationOrder"/>?' + Sortable.serialize("viewEscalationUL") + pars;
-               new Ajax.Request(url, {method: 'get', onFailure :reportError});
+               new Ajax.Request(url, {method: 'post', onFailure :reportError});
            },
            constraint: 'vertical'});
 
-}
- function createActionSortable() {
-         Sortable.create('viewEscalationUL',{tag:'div',only:'section',handle:'handle'});
-     }
-
-
+    }
+ 
     function editEscalation () {
         $('escPropertiesTable').style.display = 'none';
         $('editPropertiesTable').style.display = '';
@@ -420,21 +413,22 @@ function showViewEscResponse(originalRequest) {
 
         escLi.appendChild(escTable);
         escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
-        escTable.setAttribute('border', '1');
+        escTable.setAttribute('border', '0');
         escTable.appendChild(escTableBody);
         escTableBody.appendChild(escTrHeader);
         escTableBody.appendChild(escTr2);
         escTableBody.appendChild(escTr1);
-
+        /*
         escTrHeader.appendChild(td7);
         td7.setAttribute('rowSpan', '3');
         td7.setAttribute('width', '10');
         td7.innerHTML = "&nbsp;"
-
+        */
+        
         escTrHeader.appendChild(td6);
         td6.setAttribute('colSpan', '3');
         td6.setAttribute((document.all ? 'className' : 'class'), "BlockTitle");
-        td6.innerHTML = 'Create an Action for this escalation';
+        td6.innerHTML = '<div style="width:100%;background:#cccccc;padding:2px; border:1px dotted #aeb0b5;">Create an Action for this escalation</div>';
 
         escTrHeader.appendChild(td5);
                 td5.setAttribute('vAlign', 'top');
@@ -887,11 +881,13 @@ function showViewEscResponse(originalRequest) {
 <div id="example" style="display:none;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <td class="ConfirmationBlock ">
+      <tr>
     <html:img page="/images/tt_check.gif" height="9" width="9" border="0" alt=""/>
   </td>
   <td class="ConfirmationBlock" width="100%">
     <div id="escMsg"></div>
   </td>
+    </tr>
 </table>
 </div>
 
@@ -918,17 +914,6 @@ function showViewEscResponse(originalRequest) {
 </c:choose>
   <input type="hidden" id="ffff" name="ggg" value='<c:out value="${escalation.id}"/>' />
   <input type="hidden" id="escId" name="id"/>
-
-<div id="example" style="display:none;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <td class="ConfirmationBlock">
-    <html:img page="/images/tt_check.gif" height="9" width="9" border="0" alt=""/>
-  </td>
-  <td class="ConfirmationBlock" width="100%">
-    <div id="escMsg"></div>
-  </td>
-</table>
-</div>
 
 <table width="100%" cellpadding="4" cellspacing="0" border="0" id="escPropertiesTable">
   <tbody>
@@ -1110,11 +1095,14 @@ function showViewEscResponse(originalRequest) {
     <input type="hidden" value="" id="id">
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <thead>
+    <thead>
          <tr>
              <td class="BlockTitle" valign="top" nowrap colSpan="2">
              Step 2 - Create <fmt:message key="common.label.EscalationSchemeActions" />
              </td>
+        </tr>
+        <tr>
+            <td colspan="2" class="ErrorBlock" width="100%" style="padding-left:2px;">drag individual Actions to change the order of events</td>
         </tr>
      </thead>
   <tbody>
