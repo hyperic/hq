@@ -151,6 +151,21 @@ public class Escalation
         getActionsList().add(res);
         return res;
     }
+    
+    /**
+     * Find an escalation action based on the ID of its associated action. 
+     */
+    public EscalationAction getAction(Integer id) {
+        List a = getActions();
+        
+        for (Iterator i=a.iterator(); i.hasNext(); ) {
+            EscalationAction ea = (EscalationAction)i.next();
+            
+            if (ea.getAction().getId().equals(id))
+                return ea;
+        }
+        return null;
+    }
 
     public JSONObject toJSON() {
         try {
@@ -194,7 +209,7 @@ public class Escalation
 
         return new JSONObject().put(e.getJsonName(), e.toJSON());
     }
-
+    
     public boolean equals(Object obj) {
         if (!(obj instanceof Escalation) || !super.equals(obj)) {
             return false;

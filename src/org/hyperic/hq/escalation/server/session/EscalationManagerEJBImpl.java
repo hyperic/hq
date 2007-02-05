@@ -526,6 +526,29 @@ public class EscalationManagerEJBImpl
     }
     
     /**
+     * Re-order the actions for an escalation.
+     * 
+     * @param actions a list of {@link EscalationAction}s (already contained
+     *                within the escalation) specifying the new order.
+     * @ejb:interface-method  
+     */
+    public void updateEscalationOrder(Escalation esc, List actions) {
+        if (actions.size() != esc.getActions().size())
+            throw new IllegalArgumentException("Actions size must be the same");
+        
+        for (Iterator i=actions.iterator(); i.hasNext(); ) {
+            EscalationAction a = (EscalationAction)i.next();
+            
+            if (esc.getAction(a.getAction().getId()) == null) {
+                throw new IllegalArgumentException("Action id=" + 
+                                                   a.getAction().getId() +
+                                                   " not found");
+            }
+        }
+        esc.setActionsList(actions);
+    }
+
+    /**
      * @ejb:interface-method  
      */
     public void startup() {
