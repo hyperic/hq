@@ -38,7 +38,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.GalertBoss;
@@ -46,6 +45,7 @@ import org.hyperic.hq.events.AlertNotFoundException;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertValue;
+import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
@@ -198,6 +198,18 @@ public class PortalAction extends ResourceController {
             // Don't need to pause
         }
         // pass pause escalation time
+        try {
+            AppdefEntityID aeid = RequestUtils.getEntityId(request);
+            
+            if (aeid.isGroup()) {
+                eb.acknowledgeAlert(sessionID, GalertEscalationAlertType.GALERT,
+                                    alertId, pause);
+                return viewAlert(mapping, form, request, response);
+            }
+        } catch (ParameterNotFoundException e) {
+            // not a problem, this can be null
+        }
+
         // XXX:  Right now this only works with classic alerts
         eb.acknowledgeAlert(sessionID, 
                             ClassicEscalationAlertType.CLASSIC,
@@ -216,9 +228,20 @@ public class PortalAction extends ResourceController {
         int sessionID = RequestUtils.getSessionId(request).intValue();
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
 
-        Integer alertId = new Integer( request.getParameter("a") );
+        Integer alertId = RequestUtils.getIntParameter(request, "a");
+        try {
+            AppdefEntityID aeid = RequestUtils.getEntityId(request);
+            
+            if (aeid.isGroup()) {
+                eb.fixAlert(sessionID, GalertEscalationAlertType.GALERT,
+                            alertId);
+                return viewAlert(mapping, form, request, response);
+            }
+        } catch (ParameterNotFoundException e) {
+            // not a problem, this can be null
+        }
 
-        // XXX:  This is staticly specified as classic for now
+        // Fix alert the old fashion way
         eb.fixAlert(sessionID, ClassicEscalationAlertType.CLASSIC, alertId); 
 
         return viewAlert(mapping, form, request, response);
