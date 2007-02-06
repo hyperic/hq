@@ -33,9 +33,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 import javax.ejb.CreateException;
@@ -50,6 +52,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.appdef.server.session.AppdefGroupManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AgentConnectionUtil;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
@@ -2949,26 +2952,30 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         List vals = findGroupMeasurements(sessionId, groupId, null, 
                                           PageControl.PAGE_ALL);
-        Map res = new HashMap();
         AppdefGroupManagerLocal gMan;
 
-        try {
-            gMan = AppdefGroupManagerUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+        gMan = AppdefGroupManagerEJBImpl.getOne();
         
         int numGroupMembers = gMan.findGroup(subject, groupId).getTotalSize();
         
+        SortedMap ents = new TreeMap(); 
         for (Iterator i=vals.iterator(); i.hasNext(); ) {
             GroupMetricDisplaySummary sum = (GroupMetricDisplaySummary)i.next();
             
             if (sum.getActiveMembers() != numGroupMembers)
                 continue;
-            
-            res.put(sum.getTemplateId(), sum.getLabel());
+        
+            ents.put(sum.getLabel(), sum.getTemplateId());
         }
 
+        // Use the previously created SortedMap to create the new linked hash
+        // map, swapping keys and vals
+        Map res = new LinkedHashMap();
+        for (Iterator i=ents.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry ent = (Map.Entry)i.next();
+            
+            res.put(ent.getValue(), ent.getKey());
+        }
         return res;
     }
 
