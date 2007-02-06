@@ -102,16 +102,6 @@ public class PrepareAction extends TilesAction {
         
         pForm.setTitle(user.getPreference(titleKey, ""));
 
-        List resourceList;
-        try {
-            DashboardUtils.verifyResources(resKey, ctx, user);
-            resourceList =
-                user.getPreferenceAsList(resKey,
-                                         StringConstants.DASHBOARD_DELIMITER);
-        } catch (InvalidOptionException e) {
-            resourceList = new ArrayList();
-        }
-
         pForm.setNumberToShow(numberToShow);
         if (resourceType != null && resourceType.length() != 0) {
             pForm.setResourceType(resourceType);
@@ -119,20 +109,14 @@ public class PrepareAction extends TilesAction {
         pForm.setMetric(metric);
         pForm.setDescending(descending);
         
-        Iterator i = resourceList.iterator();
-        while(i.hasNext()) {
-            String appdefKey = (String)i.next();
-            AppdefEntityID entityID = new AppdefEntityID(appdefKey);
-            AppdefResourceValue resource =
-                appdefBoss.findById(sessionId, entityID);
-            resources.add(resource);
-        }
+        List resourceList = DashboardUtils.preferencesAsEntityIds(resKey, user);        
+        AppdefEntityID[] aeids = (AppdefEntityID[])
+            resourceList.toArray(new AppdefEntityID[resourceList.size()]);
 
-        resources.setTotalSize(resources.size());
+        PageControl pc = RequestUtils.getPageControl(request);
+        resources = appdefBoss.findByIds(sessionId, aeids, pc);
         request.setAttribute("descending", descending);
         request.setAttribute("metricViewerList", resources);
-        request.setAttribute("metricViewerTotalSize",
-                             new Integer(resources.getTotalSize()));
 
         PageList viewablePlatformTypes =
             appdefBoss.findViewablePlatformTypes(sessionId,

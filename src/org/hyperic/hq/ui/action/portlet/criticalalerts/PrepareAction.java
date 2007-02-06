@@ -42,6 +42,7 @@ import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.config.InvalidOptionException;
 
@@ -136,18 +137,12 @@ public class PrepareAction extends TilesAction {
         pForm.setSelectedOrAll(selectedOrAll);
 
         List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, user);
+        AppdefEntityID[] aeids = (AppdefEntityID[])
+            entityIds.toArray(new AppdefEntityID[entityIds.size()]);
 
-        for (Iterator i = entityIds.iterator(); i.hasNext(); ) {
-            AppdefEntityID entityID = (AppdefEntityID) i.next();
-            AppdefResourceValue resource =
-                appdefBoss.findById(sessionId.intValue(), entityID);
-            resources.add(resource);  
-        }
-
-        resources.setTotalSize(resources.size());
+        PageControl pc = RequestUtils.getPageControl(request);
+        resources = appdefBoss.findByIds(sessionId.intValue(), aeids, pc);
         request.setAttribute("criticalAlertsList", resources);
-        request.setAttribute("criticalAlertsTotalSize",
-                             new Integer(resources.getTotalSize()));
         return null;
     }
 }

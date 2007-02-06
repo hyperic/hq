@@ -169,7 +169,7 @@ function handleEnter (field, event) {
       <tiles:insert definition=".toolbar.addToList">
         <tiles:put name="addToListUrl"><c:out value="${addToListUrl}"/></tiles:put>
         <tiles:put name="listItems" beanName="criticalAlertsList"/>
-        <tiles:put name="listSize" beanName="criticalAlertsTotalSize"/>
+        <tiles:put name="listSize" beanName="criticalAlertsList" beanProperty="totalSize"/>
         <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>  
         <tiles:put name="pageSizeAction" beanName="selfAction" />
         <tiles:put name="pageNumAction" beanName="selfAction"/>    

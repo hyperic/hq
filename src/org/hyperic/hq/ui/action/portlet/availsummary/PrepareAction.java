@@ -25,32 +25,31 @@
 
 package org.hyperic.hq.ui.action.portlet.availsummary;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.servlet.ServletContext;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.util.pager.PageList;
-import org.hyperic.util.StringUtil;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.InvalidOptionException;
-
-import java.util.List;
-import java.util.Iterator;
-import java.util.ArrayList;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
 
 public class PrepareAction extends TilesAction {
 
@@ -88,29 +87,13 @@ public class PrepareAction extends TilesAction {
 
         pForm.setTitle(user.getPreference(titleKey, ""));
         
-        List resourceList;
-        try {
-            resourceList =
-                user.getPreferenceAsList(resKey,
-                                         StringConstants.DASHBOARD_DELIMITER);
-        } catch (InvalidOptionException e) {
-            resourceList = new ArrayList();
-        }
+        List resourceList = DashboardUtils.preferencesAsEntityIds(resKey, user);        
+        AppdefEntityID[] aeids = (AppdefEntityID[])
+            resourceList.toArray(new AppdefEntityID[resourceList.size()]);
 
-        Iterator i = resourceList.iterator();
-
-        while(i.hasNext()) {
-            String appdefKey = (String)i.next();
-            AppdefEntityID entityID = new AppdefEntityID(appdefKey);
-            AppdefResourceValue resource =
-                appdefBoss.findById(sessionId.intValue(), entityID);
-            resources.add(resource);
-        }
-
-        resources.setTotalSize(resources.size());
+        PageControl pc = RequestUtils.getPageControl(request);
+        resources = appdefBoss.findByIds(sessionId.intValue(), aeids, pc);
         request.setAttribute("availSummaryList", resources);
-        request.setAttribute("availSummaryTotalSize",
-                             new Integer(resources.getTotalSize()));
 
         return null;
     }
