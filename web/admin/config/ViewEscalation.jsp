@@ -483,7 +483,7 @@ function showViewEscResponse(originalRequest) {
         emailDiv.setAttribute('class', 'emailDiv');
         emailDiv.setAttribute('id', 'emailinputDiv');
         $('emailinputDiv').style.display = 'none';
-        $('emailinputDiv').innerHTML = "email addresses<br> (comma separated):<br><textarea rows=2 cols=20 id=emailinput name=emailinput onblur=copyOthersEmail(this);checkEmail();></textarea>";
+        $('emailinputDiv').innerHTML = "email addresses<br> (comma separated):<br><textarea rows=2 cols=20 id=emailinput name=emailinput onblur=checkEmail();copyOthersEmail(this);></textarea>";
 
         td4.appendChild(sysDiv);
         sysDiv.setAttribute('class', 'escInput');
@@ -599,6 +599,7 @@ function showViewEscResponse(originalRequest) {
             //configureUsers(nodeId);
          } else if (index == "Others") {
            emailDivIn.style.display = '';
+            $('emailinput').focus();
            //configureOthers(nodeId);
         }
       }
@@ -821,11 +822,22 @@ function showViewEscResponse(originalRequest) {
         var illegalChars= /[\(\)\<\>\;\:\\\/\"\[\]]/;
         var elemText = emailinputText.value;
 
-        if (elemText != "" && elemText.match(illegalChars)) {
-        //error = "The email address contains illegal characters.\n";
-        $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invaliEmailAddresInput"/>';
+        if (elemText == '') {
+        
         $('example').style.display= '';
-            return false;
+        $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+        $('okCheck').innerHTML = "&nbsp;";
+        $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noEmailAddressInput"/>';
+        return false;
+
+        } else if (elemText.match(illegalChars)) {
+
+        $('example').style.display= '';
+        $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+        $('okCheck').innerHTML = "&nbsp;";
+        $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressInput"/>';
+        return false;
+
         } else {
             $('escMsg').innerHTML ='';
             $('example').style.display= 'none';
@@ -862,14 +874,12 @@ function showViewEscResponse(originalRequest) {
   <html:hidden property="escId" />
 </html:form>
 
-<div id="example" style="display:none;">
+<div id="example" style="display:none;" class="ConfirmationBlock">
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
     <tr>
-  <td class="ConfirmationBlock ">
-
-    <html:img page="/images/tt_check.gif" height="9" width="9" border="0" alt=""/>
+  <td style="padding-right:5px;" id="okCheck"><html:img page="/images/tt_check.gif" height="9" width="9" border="0" alt=""/>
   </td>
-  <td class="ConfirmationBlock" width="100%">
+  <td width="100%">
     <div id="escMsg"></div>
   </td>
     </tr>
