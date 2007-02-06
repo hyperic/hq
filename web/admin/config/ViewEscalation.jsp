@@ -643,10 +643,12 @@ function showViewEscResponse(originalRequest) {
     }
 
     function removeRow(obj) {
-        var oLi = obj.parentNode.parentNode;
+        var oTR = obj.parentNode.parentNode;
+        var oTable = oTR.parentNode.parentNode;
+        var oLi = oTable.parentNode;
         var root = oLi.parentNode;
-        alert(obj.parentNode.parentNode.nodeName)
-        //root.removeChild(oLi);
+
+        root.removeChild(oLi);
     }
 
     function addOption(sel, val, txt, selected) {
