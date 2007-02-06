@@ -988,7 +988,7 @@ background-color: #dbe3f5
 #viewEscalationUL .escTbl {
   width:100%;
   margin-top:0px;
-  padding-left:0px;
+  padding-left:10px;
 }
 
 .remove {
