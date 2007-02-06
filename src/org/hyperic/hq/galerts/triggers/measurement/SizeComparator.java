@@ -38,9 +38,9 @@ public class SizeComparator
     extends HypericEnum
 {
     public static final SizeComparator LESS_THAN = 
-        new SizeComparator(0, "Less Than", ComparisonOperator.LT);
+        new SizeComparator(0, "Less than", ComparisonOperator.LT);
     public static final SizeComparator MORE_THAN = 
-        new SizeComparator(1, "More Than", ComparisonOperator.GT);
+        new SizeComparator(1, "More than", ComparisonOperator.GT);
     
     private final ComparisonOperator _op;
     
