@@ -51,7 +51,7 @@
 
 <hq:pageSize var="pageSize"/>
 <c:set var="selfAction"    
-        value="/resource/group/Inventory.do?mode=view&rid=${Resource.id}&type=${Resource.entityId.type}" />
+        value="/resource/group/Inventory.do?mode=view&eid=${Resource.entityId}&accord=1" />
 <c:set var="widgetInstanceName" value="listGroups"/>
 
 <c:set var="addToListUrl" 
@@ -79,8 +79,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   </c:if>
 </c:url>
 
-<c:url var="pnAction" value="${selfAction}">
-</c:url>
+<c:url var="pnAction" value="${selfAction}"/>
 
 <c:url var="tableAction" value="${selfAction}">
   <c:if test="${not empty param.ps}">
