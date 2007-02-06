@@ -194,13 +194,15 @@
 
   <tr>
     <td class="BlockLabel"><fmt:message key="admin.settings.Reindex"/></td>
-    <td class="BlockLabel">
+    <td class="BlockLabel" align="left">
+      <div style="float:left;">
       <table cellpadding="0" cellspacing="4" border="0">
         <tr>
           <td align="left"><html:radio property="reindex" value="true"/><fmt:message key="yesno.true"/></td>
           <td align="left"><html:radio property="reindex" value="false"/><fmt:message key="yesno.false"/></td>
         </tr>
       </table>
+      </div>
     </td>
     <td class="BlockLabel"></td>
     <td class="BlockContent"></td>
