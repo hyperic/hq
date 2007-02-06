@@ -462,17 +462,13 @@ public class EscalationManagerEJBImpl
     private void fixOrNotify(AuthzSubject subject, EscalationAlertType type, 
                              Integer alertId, boolean fixed)
     {
-        // Fixed alerts always get set first before finding the state
-        if (fixed) {
-            type.fixAlert(alertId, subject);
-            _log.debug(subject.getFullName() + " has fixed alertId=" + alertId);
-        }
-
         Escalatable esc = type.findEscalatable(alertId);
         EscalationState state = _stateDAO.find(esc);
         String sFixed = fixed ? "Fixed" : "Acknowledged";
         
-        if (state == null || state.getAcknowledgedBy() != null) {
+        if (state == null ||
+            (!fixed && state.getAcknowledgedBy() != null)) 
+        {
             _log.debug(sFixed + " alertId[" + alertId + "] for type [" + 
                        type + "], but it wasn't running or was previously " + 
                        sFixed + ".  Button masher?");
@@ -480,8 +476,12 @@ public class EscalationManagerEJBImpl
         }
         
         if (fixed) {  
+            _log.debug(subject.getFullName() + " has fixed alertId=" + alertId);
+            type.fixAlert(alertId, subject);
             endEscalation(state);
         } else {
+            _log.debug(subject.getFullName() + " has acknowledged alertId=" + 
+                       alertId);
             state.setAcknowledgedBy(subject);
         }
 
