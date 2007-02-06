@@ -441,6 +441,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         throws TemplateNotFoundException {
         long current = System.currentTimeMillis();
 
+        HashSet toReschedule = new HashSet();
         for (int i = 0; i < templIds.length; i++) {
             MeasurementTemplate template =
                 getMeasurementTemplateDAO().findById(templIds[i]);
@@ -455,9 +456,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
 
             List metrics =
                 getDerivedMeasurementDAO().findByTemplate(templIds[i]);
-            SRNManagerLocal srnManager = getSRNManager();
-            SRNCache cache = SRNCache.getInstance();
-
             for (Iterator it = metrics.iterator(); it.hasNext(); ) {
                 DerivedMeasurement dm = (DerivedMeasurement)it.next();
 
@@ -470,12 +468,19 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                 AppdefEntityID aeid =
                     new AppdefEntityID(dm.getAppdefType(),
                                        dm.getInstanceId());
-                ScheduleRevNum srn = cache.get(aeid);
-                if (srn != null) {  // Increment SRN only if not null
-                    srnManager.incrementSrn(aeid,
-                                            Math.min(interval,
+                toReschedule.add(aeid);
+            }
+        }
+
+        // Increment schedule number for the effected entities.
+        SRNManagerLocal srnManager = getSRNManager();
+        SRNCache cache = SRNCache.getInstance();
+        for (Iterator it = toReschedule.iterator(); it.hasNext();) {
+            AppdefEntityID id = (AppdefEntityID)it.next();
+            ScheduleRevNum srn = cache.get(id);
+            if (srn != null) {
+                srnManager.incrementSrn(id, Math.min(interval,
                                                      srn.getMinInterval()));
-                }
             }
         }
     }
