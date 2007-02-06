@@ -41,7 +41,7 @@
   <tr>
     <td style="padding-top:3px;padding-right:5px;padding-left:5px;padding-bottom:5px;" valign="top"><html:image page="/images/arrow_branch.gif" border="0"/></td>
     <td style="padding-top:3px;padding-bottom:5px;font-size:10px;">Select Resources above &amp;<br> click button to view metrics</td>
-    <td nowrap style="font-size:10px" width="80">
+    <td nowrap style="font-size:10px" width="90">
     <tiles:insert page="/common/components/ActionButton.jsp">
           <tiles:put name="labelKey" value="common.label.ViewMetrics"/>
           <tiles:put name="buttonHref" value="."/>
