@@ -63,7 +63,7 @@ public class EmailAction extends EmailActionConfig
 {
     protected static final String LINK_FORMAT =
         "alerts/Alerts.do?mode=viewAlert&eid={0,number,#}:{1,number,#}&a={2,number,#}";
-
+        
     private static final String SEPARATOR =
         "\n\n------------------------------------------\n\n";
 
@@ -223,11 +223,11 @@ public class EmailAction extends EmailActionConfig
         // XXX: Should get this strings into a resource file
         switch (getType()) {
         case TYPE_USERS :
-            result.append("HQ Users Notified: ");
+            result.append("Notified users: ");
             break;
         default :
         case TYPE_EMAILS :
-            result.append("Other Recipients Notified: ");
+            result.append("Notified: ");
             break;
         }
         result.append(getNames());
