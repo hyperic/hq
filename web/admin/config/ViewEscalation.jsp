@@ -645,7 +645,8 @@ function showViewEscResponse(originalRequest) {
     function removeRow(obj) {
         var oLi = obj.parentNode.parentNode;
         var root = oLi.parentNode;
-        root.removeChild(oLi);
+        alert(obj.parentNode.parentNode.nodeName)
+        //root.removeChild(oLi);
     }
 
     function addOption(sel, val, txt, selected) {
