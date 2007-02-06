@@ -251,7 +251,7 @@
   <cache name="PermissionCache"
          maxElementsInMemory="1000"
          timeToIdleSeconds="0"
-         timeToLiveSeconds="15"
+         timeToLiveSeconds="60"
          memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Config caches -->
