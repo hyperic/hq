@@ -163,11 +163,6 @@ function showViewEscResponse(originalRequest) {
       viewLi.setAttribute('id','row_'+ liID);
       $('row_'+ liID).style.margin = "0px";
       $('row_'+ liID).style.padding = "0px";
-      /*
-      viewLi.appendChild(remDiv);
-      remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
-      remDiv.innerHTML ='<a href="#" onclick="removeRow(this);removeAction(' + actionId + ');"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
-      */
       
       viewLi.appendChild(escTable);
       escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
@@ -179,26 +174,12 @@ function showViewEscResponse(originalRequest) {
       escTableBody.appendChild(escTrHeader);
       escTableBody.appendChild(escTr2);
       escTableBody.appendChild(escTr1);
-     /*
-      escTrHeader.appendChild(td7);
-      td7.setAttribute('rowSpan', '3');
-      td7.setAttribute('width', '10');
 
-      if (actions.length > 1) {
-
-      td7.style.cursor = "move;";
-      td7.setAttribute((document.all ? 'className' : 'class'), "handle");
-      td7.innerHTML = '<html:img page="/images/arrowsEscalation.gif" border="0" alt="drag to reorder the sequence of the escalation actions"/>';
-      } else {
-
-      td7.innerHTML = "&nbsp;";
-      }
-      */
 
      escTrHeader.appendChild(td6);
       td6.setAttribute('colSpan', '3');
       td6.setAttribute((document.all ? 'className' : 'class'), "BlockTitle");
-      td6.innerHTML = '<div style="cursor:move;width:100%;background:#cccccc;padding:2px; border:1px dotted #aeb0b5;">Action Details</div>';
+      td6.innerHTML = '<div style="cursor:move;width:100%;background:#cccccc;padding:2px; border:1px solid #aeb0b5;">Action Details</div>';
 
       escTrHeader.appendChild(td8);
       td8.setAttribute('vAlign','top');
@@ -880,8 +861,9 @@ function showViewEscResponse(originalRequest) {
 
 <div id="example" style="display:none;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
   <td class="ConfirmationBlock ">
-      <tr>
+
     <html:img page="/images/tt_check.gif" height="9" width="9" border="0" alt=""/>
   </td>
   <td class="ConfirmationBlock" width="100%">
@@ -1102,7 +1084,7 @@ function showViewEscResponse(originalRequest) {
              </td>
         </tr>
         <tr>
-            <td colspan="2" class="ErrorBlock" width="100%" style="padding-left:2px;">drag individual Actions to change the order of events</td>
+            <td colspan="2" class="ErrorBlock" width="100%" style="border: 1px dotted orange; padding:2px; background-color: rgb(255, 253, 153); font-weight: bold;">drag individual Actions to change the order of events</td>
         </tr>
      </thead>
   <tbody>
