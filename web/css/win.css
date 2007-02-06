@@ -548,8 +548,12 @@ div.scrollable {
   left: 400px;
   width: auto;
   height: 165px;
-  margin-right: -6px;
+  margin-right: 0px;
   overflow: auto;
+}
+
+div.scrollable #ResourceTable {
+ width:98%;
 }
 
 div.eventDetails {
