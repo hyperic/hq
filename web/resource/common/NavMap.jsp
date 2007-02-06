@@ -29,7 +29,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
- <%--
+
 <hq:navMapSupported var="navMapSupported"/>
 <c:if test="${navMapSupported}">
 
@@ -49,7 +49,7 @@
 <%-- always set the default page, if the end page is not controllable,
      send the user to the default page.
 --%>
-<%--
+
 <c:param name="defaultPage" value="/Resource.do"/>
 <c:if test="${not empty currResourceUrl}">
     <c:param name="currentResType" value="${currResourceType}"/>
@@ -92,4 +92,4 @@
 </table>
 
 </c:if>
---%>
+
