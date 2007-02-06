@@ -659,14 +659,14 @@ public class BizappUtils {
     /**
      * builds a list of AppdefResourceValue objects from a list
      * of AppdefEntityID objects stored in the group.
-     * 
      * @param group AppdefGroupValue which contains the list of resources
+     * @param pc TODO
+     * 
      * @return a list of AppdefResourceValue objects
      */
-    public static List buildGroupResources(
-        AppdefBoss boss,
-        int sessionId,
-        AppdefGroupValue group) 
+    public static List buildGroupResources(AppdefBoss boss, int sessionId,
+                                           AppdefGroupValue group,
+                                           PageControl pc) 
         throws ObjectNotFoundException, RemoteException, PermissionException,
                SessionTimeoutException, SessionNotFoundException 
     {
@@ -675,7 +675,7 @@ public class BizappUtils {
         AppdefEntityID[] entities = new AppdefEntityID[grpEntries.size()];
         entities = (AppdefEntityID[]) grpEntries.toArray(entities);
                     
-        return boss.findByIds(sessionId, entities);
+        return boss.findByIds(sessionId, entities, pc);
     }
 
 

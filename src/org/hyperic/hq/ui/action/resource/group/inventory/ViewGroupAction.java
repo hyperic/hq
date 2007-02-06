@@ -80,7 +80,7 @@ public class ViewGroupAction extends TilesAction {
         }
 
         List appdefValues =
-            BizappUtils.buildGroupResources(boss, sessionId, group);
+            BizappUtils.buildGroupResources(boss, sessionId, group, pc);
 
         if (group.getGroupType() ==
                 AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP ||
@@ -92,20 +92,7 @@ public class ViewGroupAction extends TilesAction {
             request.setAttribute(Constants.RESOURCE_TYPE_MAP_ATTR, typeMap);
         }
 
-        // Fetch the group again to apply the paging...
-        group = boss.findGroup(sessionId, group.getId(), pc);
-
-        HashSet entries = new HashSet(group.getAppdefGroupEntries());
-        for (Iterator it = appdefValues.iterator(); it.hasNext(); ) {
-            AppdefResourceValue res = (AppdefResourceValue) it.next();
-            if (!entries.contains(res.getEntityId())) {
-                it.remove();
-            }
-        }
-
         request.setAttribute(Constants.APPDEF_ENTRIES_ATTR, appdefValues);
-        request.setAttribute(Constants.NUM_CHILD_RESOURCES_ATTR,
-                             new Integer(group.getTotalSize()));
 
         Locale locale = getLocale(request);
         MessageResources res = getResources(request);

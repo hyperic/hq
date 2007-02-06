@@ -55,6 +55,7 @@ import org.hyperic.hq.ui.beans.OptionItem;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.pager.PageControl;
 
 /**
  * An <code>Action</code> subclass that prepares a control action associated
@@ -104,8 +105,9 @@ public class EditFormPrepareAction extends TilesAction {
         // create an options list, and associate it with the form
         AppdefBoss aBoss = ContextUtils.getAppdefBoss(ctx);
         AppdefGroupValue group = aBoss.findGroup(sessionId, appdefId);
-        List groupMembers 
-            = BizappUtils.buildGroupResources(aBoss, sessionId, group);
+        List groupMembers =
+            BizappUtils.buildGroupResources(aBoss, sessionId, group,
+                                            PageControl.PAGE_ALL);
         Iterator i = groupMembers.iterator();
         ArrayList groupOptions = new ArrayList();
         HashMap mapOfGroupMembers = new HashMap();

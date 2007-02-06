@@ -100,7 +100,7 @@
 </div>
 <div id="panelContent">
 <tiles:insert page="/resource/group/inventory/ResourceCounts.jsp">
-    <tiles:put name="resourceCount" beanName="NumChildResources" />
+    <tiles:put name="resourceCount" beanName="AppdefEntries" beanProperty="totalSize" />
     <tiles:put name="resourceTypeMap" beanName="ResourceTypeMap"/>
 </tiles:insert>
 <tiles:insert definition=".resource.common.inventory.generalProperties.view">

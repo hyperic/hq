@@ -128,7 +128,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <tiles:put name="pageNumAction" beanName="pnAction"/>    
   <tiles:put name="pageNumParam" value="pn"/>
   <tiles:put name="listItems" beanName="AppdefEntries"/>
-  <tiles:put name="listSize" beanName="NumChildResources"/>
+  <tiles:put name="listSize" beanName="AppdefEntries" beanProperty="totalSize"/>
   <tiles:put name="defaultSortColumn" value="5"/>
 </tiles:insert>
 
