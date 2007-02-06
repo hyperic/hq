@@ -518,7 +518,8 @@ public class EscalationManagerEJBImpl
                     continue;
                 
                 n = (Notify)a.getInitializedAction();
-                n.send(alert, msg);
+                n.send(alert, fixed ? EscalationStateChange.FIXED :
+                                      EscalationStateChange.ACKNOWLEDGED, msg);
             } catch(Exception e) {
                 _log.warn("Unable to send notification alert", e);
             }

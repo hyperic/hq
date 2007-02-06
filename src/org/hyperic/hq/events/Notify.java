@@ -26,8 +26,24 @@
 package org.hyperic.hq.events;
 
 import org.hyperic.hq.escalation.server.session.Escalatable;
+import org.hyperic.hq.escalation.server.session.EscalationStateChange;
+import org.hyperic.hq.events.server.session.Action;
 
+/**
+ * {@link Action}s implementing this interface and existing within an 
+ * escalation chain are called when the state of an escalation changes.
+ * 
+ * DevNote:  This should probably be in the escalation package..
+ */
 public interface Notify {
-    public void send(Escalatable e, String message)
+    /**
+     * Send a notification about the change of state in an escalation.
+     * 
+     * @param e       Escalatable which originally kicked off an escalation
+     * @param change  New state of the escalation
+     * @param message Message about the state change
+     */
+    public void send(Escalatable e, EscalationStateChange change, 
+                     String message)
         throws ActionExecuteException;
 }

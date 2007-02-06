@@ -44,6 +44,7 @@ import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.escalation.server.session.Escalatable;
+import org.hyperic.hq.escalation.server.session.EscalationStateChange;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionExecutionInfo;
@@ -71,7 +72,7 @@ public class EmailAction extends EmailActionConfig
 
     protected static String baseUrl = null;
 
-    private Log log = LogFactory.getLog( EmailAction.class.getName() );
+    private Log _log = LogFactory.getLog(EmailAction.class);
 
     private AuthzSubjectManagerLocal subjMan;
 
@@ -85,7 +86,7 @@ public class EmailAction extends EmailActionConfig
         return subjMan;
     }
 
-    protected String createPriority(AlertDefinitionInterface alertdef) {
+    private String createPriority(AlertDefinitionInterface alertdef) {
         StringBuffer pri = new StringBuffer();
         for (int i = 0; i < alertdef.getPriority(); i++) {
             pri.append('!');
@@ -93,7 +94,7 @@ public class EmailAction extends EmailActionConfig
         return pri.toString();
     }
 
-    protected String createSubject(AlertDefinitionInterface alertdef) {
+    private String createSubject(AlertDefinitionInterface alertdef) {
         // XXX - Where can I get product name?
         StringBuffer subj = new StringBuffer("[HQ] ")
             .append(createPriority(alertdef))
@@ -119,7 +120,7 @@ public class EmailAction extends EmailActionConfig
         return baseUrl;
     }
 
-    protected String createLink(AppdefEntityID aeid, Integer aid)
+    private String createLink(AppdefEntityID aeid, Integer aid)
         throws ConfigPropertyException
     {
         StringBuffer text = new StringBuffer();
@@ -132,21 +133,11 @@ public class EmailAction extends EmailActionConfig
         return text.toString();
     }
 
-    protected String createText(AlertDefinitionInterface alertdef,
-                                String longReason, AppdefEntityID aeid,
-                                Integer alertId)
+    private String createText(AlertDefinitionInterface alertdef,
+                              String longReason, AppdefEntityID aeid,
+                              Integer alertId)
         throws MeasurementNotFoundException
     {
-//        String alertTime = dformat.format(new Date(event.getTimestamp()));
-
-        // Organize the events by trigger
-//        TriggerFiredEvent[] firedEvents = event.getRootEvents();
-//        HashMap eventMap = new HashMap();
-//        for (int i = 0; i < firedEvents.length; i++) {
-//            eventMap.put(firedEvents[i].getInstanceId(),
-//                         firedEvents[i]);
-//        }
-
         StringBuffer text = new StringBuffer("The ")
             .append(RES_NAME_HOLDER).append(" ")
             .append(aeid.getTypeName())
@@ -189,12 +180,16 @@ public class EmailAction extends EmailActionConfig
                 .append("Dashboard.do")
                 .append(SEPARATOR);
         } catch (ConfigPropertyException e) {
-            log.error("Error getting HQ config.  Can't add link to email.", e);
+            _log.error("Error getting HQ config.  Can't add link to email.", e);
         } catch (ArrayIndexOutOfBoundsException e) {
-            log.error("Error finding event id.  Can't add link to email.", e);
+            _log.error("Error finding event id.  Can't add link to email.", e);
         }
 
         return text.toString();
+    }
+    
+    private AppdefEntityID getResource(AlertDefinitionInterface def) {
+        return new AppdefEntityID(def.getAppdefType(), def.getAppdefId());
     }
 
     public String execute(AlertInterface alert, ActionExecutionInfo info) 
@@ -207,8 +202,7 @@ public class EmailAction extends EmailActionConfig
 
             AlertDefinitionInterface alertDef =
                 alert.getAlertDefinitionInterface();
-            AppdefEntityID appEnt = new AppdefEntityID(alertDef.getAppdefType(),
-                                                       alertDef.getAppdefId());
+            AppdefEntityID appEnt = getResource(alertDef);
 
             String body = isSms() ? info.getShortReason() :
                                     createText(alertDef, info.getLongReason(), 
@@ -270,7 +264,7 @@ public class EmailAction extends EmailActionConfig
                     break;
                 }
             } catch (AddressException e) {
-                log.warn("Mail address invalid", e);
+                _log.warn("Mail address invalid", e);
                 continue;
             } catch (PermissionException e) {
                 // authz failure...should not happen since its the overlord
@@ -285,14 +279,15 @@ public class EmailAction extends EmailActionConfig
         return to;
     }
 
-    public void setParentActionConfig(AppdefEntityID aeid,
-                                      ConfigResponse config)
-        throws InvalidActionDataException {
-        init(config);
+    public void setParentActionConfig(AppdefEntityID ent, ConfigResponse cfg)
+        throws InvalidActionDataException 
+    {
+        init(cfg);
     }
 
-    public void send(Escalatable alert, String message)
-        throws ActionExecuteException
+    public void send(Escalatable alert, EscalationStateChange change, 
+                     String message) 
+        throws ActionExecuteException 
     {
         PerformsEscalations def = alert.getDefinition();
         
@@ -300,7 +295,9 @@ public class EmailAction extends EmailActionConfig
 
         EmailFilter filter = EmailFilter.getInstance();
 
-        filter.sendAlert(null, to, createSubject(def.getDefinitionInfo()), 
+        AlertDefinitionInterface defInfo = def.getDefinitionInfo();
+        filter.sendAlert(getResource(defInfo), to, 
+                         createSubject(defInfo) + " " + change.getDescription(), 
                          message, false);
     }
 }
