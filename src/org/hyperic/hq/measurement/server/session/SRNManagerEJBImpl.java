@@ -144,63 +144,41 @@ public class SRNManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Begin Increment SRN.
+     * Increment SRN for the given entity.
      *
      * @ejb:interface-method
      * @param aid The AppdefEntityID to remove.
      * @param newMin The new minimum interval
      * @return The ScheduleRevNum for the given entity id
      */
-    public int beginIncrementSrn(AppdefEntityID aid, long newMin) {
+    public int incrementSrn(AppdefEntityID aid, long newMin) {
         SRNCache cache = SRNCache.getInstance();
         SrnId id = new SrnId(aid.getType(), aid.getID());
         ScheduleRevNum srn = cache.get(id);
 
+        // Create the SRN if it does not already exist.
         if (srn == null) {
             // Create it
             srn = getScheduleRevNumDAO().create(aid.getType(), aid.getID());
             cache.put(srn);
-        } else {
-            srn.setSrn(srn.getSrn() + 1);
-            // Since the SRNs are cached outside of hibernate, we must call
-            // save to synchronize with the database.
-            getScheduleRevNumDAO().save(srn);
-            _log.debug("Updated SRN for "+ aid + " to " + srn.getSrn());
+            return srn.getSrn();
         }
 
-        if (newMin > 0 && newMin < srn.getMinInterval()) {
-            srn.setMinInterval(newMin);
-        } else {
+        // Update SRN
+        synchronized(srn) {
+            int newSrn = srn.getSrn() + 1;
+            srn.setSrn(newSrn);
+
+            if (newMin > 0 && newMin < srn.getMinInterval()) {
+                srn.setMinInterval(newMin);
+            } else {
             // Set to default
-            Long defaultMin = getScheduleRevNumDAO().getMinInterval(aid);
-            srn.setMinInterval(defaultMin.longValue());
+                Long defaultMin = getScheduleRevNumDAO().getMinInterval(aid);
+                srn.setMinInterval(defaultMin.longValue());
+            }
         }
-
-        srn.setPending(true);
+        _log.debug("Updated SRN for "+ aid + " to " + srn.getSrn());
         return srn.getSrn();
-    }
-
-    /**
-     * End Increment SRN.
-     *
-     * @ejb:interface-method
-     * @param aid The AppdefEntityID to remove.
-     * @return The ScheduleRevNum for the given entity id.
-     */
-    public ScheduleRevNum endIncrementSrn(AppdefEntityID aid) {
-        SRNCache cache = SRNCache.getInstance();
-        SrnId id = new SrnId(aid.getType(), aid.getID());
-        ScheduleRevNum srn = cache.get(id);
-
-        if (srn == null) {
-            _log.error("No SRN found for " + aid);
-            return null;
-        }
-
-        srn.setPending(false);
-        srn.setLastReported(0);
-        
-        return srn;
     }
 
     /**
@@ -225,33 +203,32 @@ public class SRNManagerEJBImpl extends SessionEJB
                 continue;
             }
 
-            if (!srn.isPending()) {
-                synchronized (srn) {
-                    long current = System.currentTimeMillis();
+            synchronized (srn) {
+                long current = System.currentTimeMillis();
 
-                    if (srns[i].getRevisionNumber() != srn.getSrn()) {
-                        if (srn.getLastReported() >
-                            current - srn.getMinInterval()) {
-                            // If the last reported time is less than an
-                            // interval ago it could be that we just rescheduled
-                            // the agent, so let's not panic yet
-                            _log.debug("Ignore out-of-date SRN for grace " +
-                                       "period of " + srn.getMinInterval());
-                            break;
-                        }
-
-                        // Skip setting last reported time, then
-                        // getOutOfSyncEntities() will be able to return this
-                        if (_log.isDebugEnabled()) {
-                            _log.debug("SRN value for " + srns[i].getEntity() +
-                                       " is out of date, agent reports " +
-                                       srns[i].getRevisionNumber() +
-                                       " but cached is " + srn.getSrn() +
-                                       " do not set last reported time");
-                        }
-                    } else {
-                        srn.setLastReported(current);
+                if (srns[i].getRevisionNumber() != srn.getSrn()) {
+                    if (srn.getLastReported() >
+                        current - srn.getMinInterval()) {
+                        // If the last reported time is less than an
+                        // interval ago it could be that we just rescheduled
+                        // the agent, so let's not panic yet
+                        _log.debug("Ignore out-of-date SRN for grace " +
+                                   "period of " + srn.getMinInterval());
+                        break;
                     }
+
+                    // SRN out of date, reschedule the metrics for the
+                    // given resource.
+                    _log.debug("SRN value for " + srns[i].getEntity() +
+                               " is out of date, agent reports " +
+                               srns[i].getRevisionNumber() +
+                               " but cached is " + srn.getSrn() +
+                               " rescheduling metrics..");
+                    DerivedMeasurementManagerEJBImpl.getOne().
+                        reschedule(srns[i].getEntity());
+                    srn.setLastReported(current);
+                } else {
+                    srn.setLastReported(current);
                 }
             }
         }
@@ -301,12 +278,6 @@ public class SRNManagerEJBImpl extends SessionEJB
 
             SrnId id = (SrnId)i.next();
             ScheduleRevNum srn = cache.get(id);
-
-            // If it's currently pending, then don't check it
-            if (srn.isPending()) {
-                _log.debug("SRNValue is pending");
-                continue;
-            }
 
             long maxInterval = intervals * srn.getMinInterval();
             long curInterval = current - srn.getLastReported();

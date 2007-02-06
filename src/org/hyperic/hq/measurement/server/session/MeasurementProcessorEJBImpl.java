@@ -190,21 +190,14 @@ public class MeasurementProcessorEJBImpl
             }
 
             // Schedule the measurements
-            scheduleRawMeasurements(entId, toScheduleRaw,
-                srnManager.beginIncrementSrn(entId, minInterval));
-            scheduleDerivedMeasurement(toScheduleDerived, serverSchedule);
-        } catch (SchedulerException e) {
-            throw new MeasurementScheduleException(
-                "Cannot schedule measurement", e);
+            int srnNumber = srnManager.incrementSrn(entId, minInterval);
+            scheduleRawMeasurements(entId, toScheduleRaw, srnNumber);
         } catch (FinderException e) {
-            throw new MeasurementScheduleException(
-                "Cannot expand measurement", e);
+            throw new MeasurementScheduleException(e);
         } catch (PermissionException e) {
             throw new MonitorAgentException(e);
         } catch (MonitorCreateException e) {
             throw new MonitorAgentException(e);
-        } finally {
-            srnManager.endIncrementSrn(entId);
         }
         
         logTime("schedule",scheduleTime);

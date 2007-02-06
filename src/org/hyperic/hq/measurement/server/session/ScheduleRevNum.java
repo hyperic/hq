@@ -94,14 +94,6 @@ public class ScheduleRevNum implements java.io.Serializable {
         _lastReported = lastReported;
     }
 
-    public boolean isPending() {
-        return _pending;
-    }
-    
-    public void setPending(boolean pending) {
-        _pending = pending;
-    }
-
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;

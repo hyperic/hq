@@ -472,11 +472,9 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                                        dm.getInstanceId());
                 ScheduleRevNum srn = cache.get(aeid);
                 if (srn != null) {  // Increment SRN only if not null
-                    srnManager.beginIncrementSrn(aeid,
-                                                 Math.min(interval,
-                                                          srn.
-                                                          getMinInterval()));
-                    srnManager.endIncrementSrn(aeid);
+                    srnManager.incrementSrn(aeid,
+                                            Math.min(interval,
+                                                     srn.getMinInterval()));
                 }
             }
         }
@@ -516,8 +514,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                 ScheduleRevNum srn = srnManager.get(aeid);
                 long minInterval = (srn == null) ? dm.getInterval() :
                     srn.getMinInterval();
-                srnManager.beginIncrementSrn(aeid, minInterval);
-                srnManager.endIncrementSrn(aeid);
+                srnManager.incrementSrn(aeid, minInterval);
             }
         }
     }
