@@ -50,8 +50,8 @@ public class SimpleStrategy
         _partition = partition;
         _defName   = defName;
         
-        _log.warn("Configure called: partition=" + partition + 
-                  " defName=" + defName + " triggers=" + triggers);
+        _log.debug("Configure called: partition=" + partition + 
+                   " defName=" + defName + " triggers=" + triggers);
     }
 
     public void reset() {
@@ -60,11 +60,8 @@ public class SimpleStrategy
 
     public ExecutionReason shouldFire() {
         if (_lastReason != null) {
-            String newShort = _defName + " fired: " + 
-                              _lastReason.getShortReason();
-            String newLong  = _defName + " fired:\n" + 
-                              _lastReason.getLongReason();
-            return new ExecutionReason(newShort, newLong, _partition);
+            return new ExecutionReason(_lastReason.getShortReason(), 
+                                       _lastReason.getLongReason(), _partition);
         }
         return null;
     }
