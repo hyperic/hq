@@ -219,8 +219,8 @@
 
 <div id="stepInfo" class="menu">
   <ul>
-    <li><div class="BoldText">Step 1: Select resources above whose metrics you want to see</div></li>
-    <li><div class="BoldText">Step 2: Click "View Metrics" to show their metrics below</div></li>
-    <li><div class="BoldText">Step 3: Click the right arrow next to a metric to see its chart in the view</div></li>
+    <li><div class="BoldText"><fmt:message key="inform.resource.common.monitor.visibility.infoStep1"/></div></li>
+    <li><div class="BoldText"><fmt:message key="inform.resource.common.monitor.visibility.infoStep2"/></div></li>
+    <li><div class="BoldText"><fmt:message key="inform.resource.common.monitor.visibility.infoStep3"/></div></li>
   </ul>
 </div>
