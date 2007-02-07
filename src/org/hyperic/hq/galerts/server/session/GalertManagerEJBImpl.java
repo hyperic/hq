@@ -420,7 +420,7 @@ public class GalertManagerEJBImpl
      * @ejb:interface-method
      */
     public void startup() {
-        _log.warn("Galert manager starting up!");
+        _log.info("Galert manager starting up!");
         
         HQApp.getInstance().registerCallbackListener(GroupChangeCallback.class, 
                                                      new GroupChangeCallback()
@@ -446,7 +446,6 @@ public class GalertManagerEJBImpl
         
         GalertProcessor.getInstance().startupInitialize(_defDAO.findAll());
     }
-
     
     public static GalertManagerLocal getOne() {
         try {
