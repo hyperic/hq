@@ -9,7 +9,10 @@ PDK_LIB=./pdk/lib
 # Shouldn't need to change anything below this
 # -------------
 
-RUNDIR=`echo $0 | sed -e 's@/[^/]*$@@'`
+FINDNAME=$0 
+while [ -h $FINDNAME ] ; do FINDNAME=`ls -ld $FINDNAME | awk '{print $NF}'` ; done 
+RUNDIR=`echo $FINDNAME | sed -e 's@/[^/]*$@@'` 
+unset FINDNAME
 if test -d $RUNDIR; then
   cd $RUNDIR
 fi
