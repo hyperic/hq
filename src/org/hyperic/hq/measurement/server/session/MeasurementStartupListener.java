@@ -28,22 +28,21 @@ package org.hyperic.hq.measurement.server.session;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.zevents.ZeventManager;
 
 public class MeasurementStartupListener
     implements StartupListener
 {
-    private static Log _log =
-        LogFactory.getLog(MeasurementStartupListener.class);
-
+    private static final Object LOCK = new Object();
+    private static DefaultMetricEnableCallback _defEnableCallback;
+    
     public void hqStarted() {
         SRNManagerEJBImpl.getOne().initializeCache();
-
+    
         /**
          * Add measurement enabler listener to enable metrics for newly
          * created resources or to reschedule when resources are updated.
@@ -54,6 +53,18 @@ public class MeasurementStartupListener
         ZeventManager.getInstance()
                      .addBufferedListener(listenEvents,
                                           new MeasurementEnabler());
+
+        HQApp app = HQApp.getInstance();
+
+        synchronized (LOCK) {
+            _defEnableCallback = (DefaultMetricEnableCallback)
+                app.registerCallbackCaller(DefaultMetricEnableCallback.class);
+        }
+    }
+    
+    static DefaultMetricEnableCallback getDefaultEnableObj() {
+        synchronized (LOCK) {
+            return _defEnableCallback;
+        }
     }
 }
-

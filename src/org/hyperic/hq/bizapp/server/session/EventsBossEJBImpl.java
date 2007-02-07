@@ -60,11 +60,13 @@ import org.hyperic.hq.appdef.shared.resourceTree.PlatformNode;
 import org.hyperic.hq.appdef.shared.resourceTree.ServerNode;
 import org.hyperic.hq.appdef.shared.resourceTree.ServiceNode;
 import org.hyperic.hq.appdef.server.session.ResourceTreeGenerator;
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface;
@@ -72,6 +74,8 @@ import org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger;
 import org.hyperic.hq.bizapp.server.trigger.frequency.CounterTrigger;
 import org.hyperic.hq.bizapp.server.trigger.frequency.DurationTrigger;
 import org.hyperic.hq.bizapp.server.trigger.frequency.FrequencyTriggerInterface;
+import org.hyperic.hq.bizapp.shared.EventsBossLocal;
+import org.hyperic.hq.bizapp.shared.EventsBossUtil;
 import org.hyperic.hq.bizapp.shared.uibeans.DashboardAlertBean;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.DuplicateObjectException;
@@ -108,6 +112,7 @@ import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.action.MetricAlertAction;
+import org.hyperic.hq.measurement.server.session.DefaultMetricEnableCallback;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.collection.IntHashMap;
@@ -1698,6 +1703,39 @@ public class EventsBossEJBImpl
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
         
         getEscMan().fixAlert(subject, alertType, alertID);
+    }
+
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void startup() {
+        _log.info("Events Boss starting up!");
+        
+        HQApp app = HQApp.getInstance();
+        app.registerCallbackListener(DefaultMetricEnableCallback.class,
+                                     new DefaultMetricEnableCallback() 
+        {
+            public void metricsEnabled(AppdefEntityID ent) {
+                try {
+                    _log.info("Inheriting type-based alert defs for " + ent);
+                    EventsBossLocal eb = EventsBossEJBImpl.getOne();
+                    AuthzSubjectValue overlord = 
+                        AuthzSubjectManagerEJBImpl.getOne().getOverlord();
+                    eb.inheritResourceTypeAlertDefinition(overlord, ent);
+                } catch(Exception e) {
+                    throw new SystemException(e);
+                }
+            }
+        });
+    }
+
+    public static EventsBossLocal getOne() {
+        try {
+            return EventsBossUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
     }
     
     /**

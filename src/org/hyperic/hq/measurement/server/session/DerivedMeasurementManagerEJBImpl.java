@@ -53,6 +53,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
+import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
@@ -1355,7 +1357,9 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             createDefaultMeasurements(subject, id, mtype, config);
             cfgMan.clearValidationError(subject, id);
 
-            //XXX: Send new metric event!
+            // Execute the callback so other people can do things when the
+            // metrics have been created (like create type-based alerts)
+            MeasurementStartupListener.getDefaultEnableObj().metricsEnabled(id);
         } catch (Exception e) {
             log.warn("Unable to enable default metrics for id=" + id +
                       ": " + e.getMessage(), e);
