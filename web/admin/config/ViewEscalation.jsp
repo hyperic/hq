@@ -149,7 +149,7 @@ function showViewEscResponse(originalRequest) {
       var anchor = document.createElement("a");
   
       var emailInfo = actionConfig.names;
-  
+
       $('creationTime').value = creationTime;
       $('notifyAll').value = notifyAll;
       $('_version_').value = _version_;
@@ -225,6 +225,7 @@ function showViewEscResponse(originalRequest) {
               var comma = ", ";
               for (var b = 0; b < emailAdds.length; b++) {
                 displayEmails += emailAdds[b];
+                  
                 if (b < emailAdds.length - 1) {
                   displayEmails += comma;
                 }
@@ -244,12 +245,13 @@ function showViewEscResponse(originalRequest) {
           var uids = emailInfo.split(',');
           var userNames = "";
           for (var b = 0; b < uids.length; b++) {
-              <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
+               <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
                   if (uids[b] == '<c:out value="${user.id}"/>') {
                       userNames += '<c:out value="${user.name}" />, ';
                   }
               </c:forEach>
           }
+          
           if (configSms == "true") {
           usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/> via SMS: " + userNames + "<br>";
               } else {
@@ -328,7 +330,7 @@ function showViewEscResponse(originalRequest) {
         // Convert whitespaces
         var emails = $('emailinput').value;
         $('emailinput').value = emails.split(/[\s]/);
-
+        $('emailinput').value = emails.split(/,/);
         var id = $('id').value;
         var serialAddAction = Form.serialize('addEscalation');
         var pars =  "EscId=" + id + "&" + serialAddAction;
@@ -758,7 +760,7 @@ function showViewEscResponse(originalRequest) {
                             <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
                             if (checkedValues == <c:out value="${user.id}"/>) {
                             writeListUsers.appendChild(document.createTextNode('<c:out value="${user.name}" /> '));
-                                }
+                            }
                             </c:forEach>
                             //writeListUsers.appendChild(document.createTextNode(checkedValues +' '));
 
