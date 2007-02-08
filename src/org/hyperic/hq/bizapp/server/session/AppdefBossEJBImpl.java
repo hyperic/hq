@@ -910,15 +910,19 @@ public class AppdefBossEJBImpl
      */
     public PageList findByIds(int sessionId, AppdefEntityID[] entities,
                               PageControl pc)
-        throws AppdefEntityNotFoundException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException 
+        throws PermissionException, SessionTimeoutException,
+               SessionNotFoundException 
     {
         // get the user
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         List appdefList = new ArrayList();
 
         for (int i = 0; i < entities.length; i++) {
-            appdefList.add(this.findById(subject, entities[i]));
+            try {
+                appdefList.add(findById(subject, entities[i]));
+            } catch (AppdefEntityNotFoundException e) {
+                log.debug("Entity not found: " + entities[i]);
+            }
         }
         
         if (pc != null) {
