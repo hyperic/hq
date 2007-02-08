@@ -146,7 +146,7 @@ function reviewAction(option) {
           </td>
         <c:forEach var="avail" items="${availabilityMetrics}" varStatus="status">
           <td width="9">
-            <div onmousedown="overlay.moveOverlay(this);overlay.showTimePopup(<c:out value="${status.count - 1}"/>, event)">
+            <div style="width:9px;height:100%;"onmousedown="overlay.moveOverlay(this);overlay.showTimePopupTopMetricChart(<c:out value="${status.count - 1}"/>, event)">
             <c:choose>
               <c:when test="${avail.value == 1}">
                 <html:img page="/images/timeline_green.gif" height="10" width="9" border="0"/> 
@@ -165,10 +165,11 @@ function reviewAction(option) {
               </c:otherwise>
             </c:choose>
           </div>
+
           </td>
         </c:forEach>
           <td width="10" align="left">
-            <html:img page="/images/timeline_ur.gif" height="10"/> 
+            <html:img page="/images/timeline_ur.gif" height="10"/>
           </td>
           <td class="BoldText" style="padding-left: 4px;">
         <c:choose>

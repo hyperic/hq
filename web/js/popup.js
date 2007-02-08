@@ -49,7 +49,7 @@ var overlay = {
         }
         else if (obj.y)
             curtop += obj.y;
-    
+
             return curtop;
     },
 
@@ -81,6 +81,31 @@ var overlay = {
 
         if (e)
             this.curPopup.style.top = e.pageY + 'px';
+        else
+            this.curPopup.style.top = top + 'px';
+
+        new Rico.Effect.FadeTo(this.curPopup, 0, 1, 1, null);
+        this.curPopup.style.visibility ='visible';
+        this.fadeInTimePopup();
+
+        if (e) {
+            setTimeout("overlay.moveTimePopup(" + top + ")", 2500);
+        }
+    },
+
+    showTimePopupTopMetricChart: function (index, e) {
+        if (this.curPopup != null) {
+            this.curPopup.style.visibility='hidden';
+        }
+        var anchor = $('timePopup_' + index);
+        var left = this.findPosX(anchor) - 35;
+        var top = this.findPosY(anchor) + 10;
+        this.curPopup = $('timePopup');
+        this.curPopup.innerHTML = this.times[index];
+        this.curPopup.style.left = left + 'px';
+
+        if (e)
+            this.curPopup.style.top = 290 + 'px';
         else
             this.curPopup.style.top = top + 'px';
 
