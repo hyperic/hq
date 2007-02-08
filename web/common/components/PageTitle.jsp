@@ -175,11 +175,11 @@
     </c:otherwise>
   </c:choose>
 
-  <td colspan="2">
+  <td colspan="2" style="padding-top:4px;padding-bottom:4px;">
     <c:if test="${not empty linkUrl}">
       <span class="LinkBox" onclick="toggleMenu('toolMenu');" id="toolMenuSpan"><fmt:message key="resource.toolsmenu.text"/><html:img page="/images/arrow_dropdown.gif" styleId="toolMenuSpan" border="0"/></a></span>
     <div style="clear: both"></div>
-    <div id="toolMenu" style="display: none; position: absolute; margin-top: 2px; margin-left: -2px;">
+    <div id="toolMenu" style="display: none; position: absolute; margin-top: 2px; margin-left: -2px;z-index:5">
 <tiles:insert attribute="linkUrl">
   <c:if test="${not empty resource}">
     <tiles:put name="resource" beanName="resource"/>
