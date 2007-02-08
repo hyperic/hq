@@ -344,7 +344,8 @@ function showViewEscResponse(originalRequest) {
         $('example').style.display= '';
         $('escMsg').innerHTML ="The action has been added to the escalation. The escalation is complete. You can add additional actions as needed.";
         cancelAddEscalation();
-        setTimeout( "requestViewEscalation()", 1000 );
+        setTimeout( "requestViewEscalation()", 1200 );
+        //requestViewEscalation();
     }
 
     function hideAddEscButtons() {
