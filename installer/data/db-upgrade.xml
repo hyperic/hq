@@ -2872,6 +2872,12 @@ has already been defined.
                     ON DELETE CASCADE
           </statement>
           <statement>
+              delete from eam_action where alert_definition_id is null or
+              id in (select a.id from eam_action a, eam_alert_definition d
+                     where a.alert_definition_id = d.id and d.deleted = %%TRUE%%
+                       and a.id not in (select action_id from eam_alert_action_log))
+          </statement>
+          <statement>
               ALTER TABLE eam_action ADD CONSTRAINT "fkd0189b04c0bb4c7" 
                     FOREIGN KEY (parent_id) REFERENCES eam_action(id) 
                     ON DELETE CASCADE
