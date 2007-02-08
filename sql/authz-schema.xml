@@ -10,9 +10,6 @@
         <column name="RESOURCE_ID" type="INTEGER"/>
         <column name="FSYSTEM" type="BOOLEAN" default="FALSE"/>
 
-        <index name="EAM_RESOURCE_TYPE_RESOURCE_KEY" unique="true">
-            <field ref="RESOURCE_ID" />
-        </index>
         <index name="EAM_RES_TYPE_NAME_KEY" unique="true">
             <field ref="NAME" />
         </index>
@@ -192,10 +189,6 @@
         <column name="DEPARTMENT" size="100" type="VARCHAR2"/>
         <column name="FACTIVE" required="true" type="BOOLEAN" default="TRUE" />
         <column name="FSYSTEM" required="true" type="BOOLEAN" default="FALSE" />
-
-        <index name="EAM_SUBJECT_RESOURCE_KEY">
-            <field ref="RESOURCE_ID"/>
-        </index>
 
         <index name="EAM_SUBJECT_AUTH_KEY" unique="true">
             <field ref="NAME"/>
