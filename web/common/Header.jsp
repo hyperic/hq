@@ -38,7 +38,7 @@
 <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-top:2px solid #3399ff;border-bottom:2px solid #3399ff;" height="56">
 
 <tr>
-<td rowspan="2" width="34%">
+<td rowspan="2">
     <table width="100%" border="0" cellspacing="0" cellpadding="0">
         <tr>
             <td class="logo">
@@ -65,10 +65,10 @@
         </tr>
     </table>
 </td>
-<td valign="top" width="66%">
+<td valign="top" width="100%">
     <table border="0" cellpadding="0" cellspacing="0" height="100%" width="100%">
         <tr>
-            <td class="MastheadBgTop" colspan="5" nowrap>
+            <td class="MastheadBgTop" colspan="5" nowrap style="border-bottom:1px solid #ffffff;">
                  <div style="display:none;position:absolute;top:10px;right:10px;" id="loading">
 		        <html:img page="/images/ajax-loader.gif" border="0" width="16" height="16" /></div>
 		        <div style="clear:both;"></div>
