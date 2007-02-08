@@ -63,8 +63,10 @@ function showViewEscResponse() {
   
     var escViewUL = $('viewEscalationUL');
 
-    for(var i=escViewUL.childNodes.length-1; i>1; i--) {
-	  escViewUL.removeChild(escViewUL.childNodes[i]);
+    if (actions.length > 0) {
+      for (var i=escViewUL.childNodes.length; i > 0; i--) {
+	    escViewUL.removeChild(escViewUL.childNodes[i - 1]);
+      }
     }
 
     for (i = 0; i < actions.length; i++) {
@@ -416,13 +418,19 @@ function showViewEscResponse() {
     <tr>
       <td class="BlockContent" colspan="2">&nbsp;</td>
     </tr>
-    <tr>
       <td class="BlockLabel" nowrap="true" valign="top"><fmt:message key="common.label.EscalationSchemeActions"/></td>
       <td class="BlockContent">
       <ul id="viewEscalationUL">
+        <li style="border: none;"><fmt:message key="common.label.None"/></li>
       </ul>
       </td>
     </tr>
+  <tr>
+    <td colspan="2" class="BlockContent"><span style="height: 1px;"></span></td>
+  </tr>
+  <tr>
+    <td colspan="2" class="BlockBottomLine"><span style="height: 1px;"></span></td>
+  </tr>
   </tbody>
 </table>
 
