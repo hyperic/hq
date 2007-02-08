@@ -1100,11 +1100,6 @@ border-left:1px solid #D5D8DE;
  color:#333333;
 }
 
-.handle {
- border-left: 1px solid #D5D8DE;
- border-top: 1px solid #D5D8DE;
- border-right:1px solid #aeb0b5;
- border-bottom:1px solid #aeb0b5;
- background-color:#e6e6e6;
- margin-right:10px;
+#usersConfigWindow .BlockContent {
+  color:#000000;
 }
