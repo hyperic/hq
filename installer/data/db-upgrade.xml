@@ -1800,7 +1800,7 @@ has already been defined.
         </schema-directSQL>
     </schemaSpec>
 
-    <schemaSpec version="3.00.1">
+    <schemaSpec version="3.01">
         <schema-directSQL>
           <statement>
               drop index error_code
@@ -4034,6 +4034,8 @@ has already been defined.
                              column="NAME" nullable="NOT NULL"/>
          <schema-addColumn table="EAM_ALERT_DEFINITION"
                           column="ESCALATION_ID" columnType="INTEGER"/>
+         <schema-insert table="EAM_ALERT_DEFINITION"
+                        insertCmd="(id, version_col, name, ctime, mtime, priority, appdef_id, appdef_type, enabled, frequency_type, will_recover, notify_filtered, control_filtered, deleted) VALUES (0, 0, 'Resource Type Alerts', 0, 0, 0, 0, 0, %%FALSE%%, 0, %%FALSE%%, %%FALSE%%, %%FALSE%%, %%FALSE%%)"/>
         <schema-directSQL>
           <statement>
               drop index agent_address_port
@@ -4101,6 +4103,9 @@ has already been defined.
                 <statement targetDB="oracle">
                   CREATE INDEX alert_def_child_idx ON eam_alert_definition (parent_id, priority)
                 </statement>
+          <statement>
+            UPDATE eam_alert_definition SET act_on_trigger_id = NULL where act_on_trigger_id = 0
+          </statement>
           <statement>
             ALTER TABLE eam_alert_definition ADD CONSTRAINT fk975407845bc79aea FOREIGN KEY (act_on_trigger_id) REFERENCES eam_registered_trigger(id)
           </statement>
@@ -4438,11 +4443,6 @@ has already been defined.
           </statement>
         </schema-directSQL>
      </schemaSpec>
-
-    <schemaSpec version="3.01">
-      <schema-insert table="EAM_ALERT_DEFINITION"
-                     insertCmd="(VERSION_COL, NAME, CTIME, MTIME, PRIORITY, APPDEF_ID, APPDEF_TYPE, ENABLED, FREQUENCY_TYPE, WILL_RECOVER, NOTIFY_FILTERED, CONTROL_FILTERED, DELETED, ID) VALUES (0, 'Resource Type Alert', 0, 0, 0, 0, 0, %%FALSE%%, 0, %%FALSE%%, %%FALSE%%, %%FALSE%%, %%FALSE%%, 0)"/>
-    </schemaSpec>
 
     <!-- Create escalation permissions -->
     <schemaSpec version="3.02">
