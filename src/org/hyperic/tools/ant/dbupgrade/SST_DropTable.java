@@ -47,8 +47,13 @@ public class SST_DropTable extends SchemaSpecTask {
 
         Connection c = getConnection();
         PreparedStatement ps = null;
-        String sql = "DROP TABLE " + table;
+        String sql = "DROP TABLE " + table + " CASCADE ";
+        
         try {
+            if (DBUtil.isOracle(c)) {
+                sql += "CONSTRAINTS";
+            }
+
             // Check to see if the table exists.  If it's already there,
             // then don't re-add it.
             Connection newC = null;
