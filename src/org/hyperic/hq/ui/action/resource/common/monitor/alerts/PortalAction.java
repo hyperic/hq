@@ -139,9 +139,8 @@ public class PortalAction extends ResourceController {
         Integer alertId = new Integer( request.getParameter("a") );
         try {
             Portal portal = Portal.createPortal();
-            setTitle(aeid, portal, "alert.current.platform.detail.Title");
             
-            if (aeid.isGroup()) {
+            if (aeid != null && aeid.isGroup()) {
                 GalertBoss gb = ContextUtils.getGalertBoss(ctx);
                 
                 // properties
@@ -158,14 +157,16 @@ public class PortalAction extends ResourceController {
                 request.setAttribute(Constants.TITLE_PARAM2_ATTR, adv.getName());
 
                 if (aeid == null) {
-                    setResource(request, new AppdefEntityID(adv.getAppdefType(),
-                                                            adv.getAppdefId()),
-                                false);
+                    aeid = setResource(request,
+                                       new AppdefEntityID(adv.getAppdefType(),
+                                                          adv.getAppdefId()),
+                                       false);
                 }
                 
                 portal.addPortlet(new Portlet(".events.alert.view"), 1);
             }
 
+            setTitle(aeid, portal, "alert.current.platform.detail.Title");
 
             portal.setDialog(true);
             request.setAttribute(Constants.PORTAL_KEY, portal);
