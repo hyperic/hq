@@ -882,7 +882,7 @@ ul.boxy li {
 .alertType {
 padding: 3px;
 border-bottom: 1px solid #D5D8DE;
-text-align: center;
+text-align: left;
 width:20%;
 }
 .resourceTypeName {
