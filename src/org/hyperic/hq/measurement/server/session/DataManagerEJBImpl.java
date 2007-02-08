@@ -30,10 +30,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -224,170 +221,166 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
-     * Write metric datapoints to the DB
-     * 
-     * @param data       {@link Integer} metric IDs onto lists of 
-     *                   {@link MetricValue}s
-     * @param overwrite  If true, attempt to over-write values when an insert
-     *                   of the data fails (i.e. it alread exists)
-     *
-     * @ejb:interface-method
-     */
-    public void addData(Map data, boolean overwrite) {
-        PreparedStatement stmt = null;
-        Connection conn = null;
-        MetricDataCache cache = MetricDataCache.getInstance();
-        ArrayList events  = new ArrayList();
-        List zevents = new ArrayList();
-        
-        try {
-            // XXX:  Get a better connection here.
-            conn = DBUtil.getConnByContext(getInitialContext(), 
-                                           DATASOURCE_NAME);
-            stmt = conn.prepareStatement("INSERT /*+ APPEND */ INTO " + 
-                                         TAB_DATA + 
-                                         " (measurement_id, timestamp, value)"+
-                                         " VALUES (?, ?, ?)");
-            
-            for (Iterator i=data.entrySet().iterator(); i.hasNext(); ) {
-                Map.Entry ent = (Map.Entry)i.next();
-                Integer metricId = (Integer)ent.getKey();
-                List vals = (List)ent.getValue();
-                
-                for (Iterator j=vals.iterator(); j.hasNext(); ) {
-                    MetricValue val = (MetricValue)j.next();
-                    BigDecimal bigDec;
-                    
-                    try {
-                        bigDec = new BigDecimal(val.getValue());
-                    } catch (NumberFormatException e) {
-                        log.warn("addData() encountered something very " +
-                                 "un-numberly (" + val.getValue()); 
-                        continue;
-                    }
-
-                    stmt.setInt(1, metricId.intValue());
-                    stmt.setLong(2, val.getTimestamp());
-                    stmt.setBigDecimal(3, bigDec);            
-                    stmt.addBatch();
-
-                    if (analyzer != null) {
-                        analyzer.analyzeMetricValue(metricId, val);
-                    }
-                        
-                    // Save value in "last" cache -- technically this is not
-                    // transactionally correct.  XXX
-                    if (cache.add(metricId, val)) {
-                        MeasurementEvent event =
-                            new MeasurementEvent(metricId, val);
-                        
-                        if (RegisteredTriggers.isTriggerInterested(event))
-                            events.add(event);
-                        
-                        zevents.add(new MeasurementZevent(metricId.intValue(),
-                                                          val));
-                    }
-                }
-            }
-            
-            int[] execInfo = stmt.executeBatch();
-            log.info("Added " + execInfo.length + " data points in batch");
-            if (overwrite)
-                processAddDataFailures(conn, data, execInfo);
-        } catch(Exception e) {
-            log.warn("Unable to add data", e);
-        } finally {
-            DBUtil.closeStatement(logCtx, stmt);
-            DBUtil.closeConnection(logCtx, conn);
-        }
-        
-        if (!events.isEmpty()) {
-            Messenger sender = new Messenger();
-            sender.publishMessage(EventConstants.EVENTS_TOPIC, events);
-        }
-        
-        if (!zevents.isEmpty()) {
-            try {
-                // XXX:  Shouldn't this be a transactional queueing?
-                ZeventManager.getInstance().enqueueEvents(zevents);
-            } catch(InterruptedException e) {
-                log.warn("Interrupted while sending events.  Some data may " +
-                         "be lost");
-            }
-        }
-    }
-    
-    /**
-     * This method is called to perform 'updates' for any inserts which failed
-     * in addData. 
-     */
-    private void processAddDataFailures(Connection conn, Map data, 
-                                        int[] execInfo)
-    {
-        PreparedStatement stmt = null;
-        int infoIdx = 0;
-        
-        try {
-            stmt = conn.prepareStatement("UPDATE " + TAB_DATA + 
-                                         " SET value = ? " +
-                                         " WHERE measurement_id = ? " + 
-                                         " AND timestamp = ?");
-            
-            for (Iterator i=data.entrySet().iterator(); i.hasNext(); ) {
-                Map.Entry ent = (Map.Entry)i.next();
-                Integer metricId = (Integer)ent.getKey();
-                List vals = (List)ent.getValue();
-                
-                for (Iterator j=vals.iterator(); j.hasNext(); ) {
-                    MetricValue val = (MetricValue)j.next();
-                    BigDecimal bigDec;
-                    
-                    try {
-                        bigDec = new BigDecimal(val.getValue());
-                    } catch (NumberFormatException e) {
-                        log.warn("addData() encountered something very " +
-                                 "un-numberly (" + val.getValue()); 
-                        continue;
-                    }
-
-                    if (execInfo[infoIdx++] != Statement.EXECUTE_FAILED)
-                        continue;
-                        
-                    stmt.setInt(1, metricId.intValue());
-                    stmt.setLong(2, val.getTimestamp());
-                    stmt.setBigDecimal(3, bigDec);            
-                    stmt.addBatch();
-                }
-            }
-            log.info("Executed " + stmt.executeBatch().length + 
-                     " updates in batch");
-        } catch(SQLException e) {
-            log.warn("Sql exception", e);
-        } finally {
-            DBUtil.closeStatement(logCtx, stmt);
-        }
-    }
-
-    /**
      * Save the new MetricValue to the database
      * @ejb:interface-method
      */
     public void addData(Integer mid, MetricValue[] dpts, boolean overwrite) {
-        Map dataMap = new HashMap();
+        // Be ready to send a measurement event
+        ArrayList events = new ArrayList();
+        List zevents = new ArrayList();
+        MetricDataCache cache = MetricDataCache.getInstance();
         
-        dataMap.put(mid, Arrays.asList(dpts));
-        addData(dataMap, !overwrite);
+        // Save the data point
+        Connection conn = null;
+        PreparedStatement istmt = null;
+        PreparedStatement ustmt = null;
+
+        try {
+            conn = DBUtil.getConnByContext(getInitialContext(), 
+                                           DATASOURCE_NAME);
+            
+            conn.setAutoCommit(false);
+
+            if (overwrite && DBUtil.isPostgreSQL(conn)) {
+                istmt = conn.prepareStatement("SELECT add_data(?, ?, ?)");
+            } else {
+                istmt = conn.prepareStatement(
+                    "INSERT  /*+ APPEND */ INTO " + TAB_DATA +
+                    " (measurement_id, timestamp, value) VALUES (?, ?, ?)");
+            }
+
+            for (int ind = 0; ind < dpts.length; ind++) {
+                BigDecimal bigDec;
+                
+                try {
+                    bigDec = new BigDecimal(dpts[ind].getValue());
+                } catch (NumberFormatException e) {
+                    // Don't try to insert if it's not a number
+                    log.debug("addData() encountered " + dpts[ind].getValue() +
+                              " for ID: " + mid);
+                    continue;
+                }
+
+                try {
+                    int i = 1;
+                    istmt.setInt       (i++, mid.intValue());
+                    istmt.setLong      (i++, dpts[ind].getTimestamp());
+                    istmt.setBigDecimal(i++, bigDec);                    
+                    istmt.execute();
+                    
+                    // XXX -- Maybe this would be faster if we used
+                    //        executeBatch?  -- JMT 11/30/06 
+                    
+                    conn.commit();
+                } catch (SQLException e) {
+                    if (e.getMessage().toUpperCase()
+                         .indexOf("MEASUREMENT_DATA_ID_TIME") == -1) {
+                        log.error("addData() SQL Error: " + e.getMessage() +
+                                  " Code: " + e.getErrorCode());
+                        continue;
+                    }
+
+                    if (!overwrite) {
+                        // Do a little verbose logging here
+                        log.debug("addData() value already exists for ID: "
+                                  + mid + " at: " + dpts[ind].getTimestamp()
+                                  + " value: " + dpts[ind]);
+                        continue;
+                    }
+
+                    // Expect a SQLException to be thrown if the data is not
+                    // unique; this is okay, since we only need one data point
+                    try {
+                        if (log.isTraceEnabled())
+                            log.trace("Overwrite data point for ID: " + mid +
+                                      " at: " + dpts[ind].getTimestamp() +
+                                      " Value: " + dpts[ind]/*, e*/);
+
+                        // Roll back previous transaction
+                        conn.rollback();
+
+                        // Overwrite the data
+                        if (ustmt == null) {
+                            ustmt = conn.prepareStatement(
+                                "UPDATE " + TAB_DATA + " SET value = ? " +
+                                "WHERE measurement_id = ? AND timestamp = ?"
+                                );
+                        }
+
+                        int i = 1;
+                        ustmt.setBigDecimal(i++,bigDec);
+                        ustmt.setInt       (i++,mid.intValue());
+                        ustmt.setLong      (i++,dpts[ind].getTimestamp());
+                        ustmt.executeUpdate();
+                        conn.commit();
+                    } catch (SQLException se) {
+                        log.error("Update duplicate data in addData(" +
+                                  mid + ", " + dpts[ind] + ") failed at: " +
+                                  dpts[ind].getTimestamp(), se);
+                    }
+                }
+
+                // Analyze the value
+                if (analyzer != null) {
+                    analyzer.analyzeMetricValue(mid, dpts[ind]);
+                }
+
+                // Save value in "last" cache
+                if (cache.add(mid, dpts[ind])) {
+                    MeasurementEvent event =
+                        new MeasurementEvent(mid, dpts[ind]);
+                    
+                    // See if we need to send the measurement event                
+                    if (RegisteredTriggers.isTriggerInterested(event))
+                        events.add(event);                    
+
+                    zevents.add(new MeasurementZevent(mid.intValue(), 
+                                                      dpts[ind]));
+                }
+            }
+        } catch (NamingException e) {
+            throw new SystemException(e);
+        } catch (SQLException e) {
+            throw new SystemException(
+                "addData() unable to obtain connection or statement", e);
+        } finally {
+            DBUtil.closeStatement(logCtx, istmt);
+            DBUtil.closeStatement(logCtx, ustmt);
+            DBUtil.closeConnection(logCtx, conn);
+        }
+        
+        // Now send the events
+        if (events.size() > 0) {
+            Messenger sender = new Messenger();
+            sender.publishMessage(EventConstants.EVENTS_TOPIC, events);
+
+        }
+
+        if (!zevents.isEmpty()) {
+            try {
+                ZeventManager.getInstance().enqueueEvents(zevents);
+            } catch(InterruptedException e) {
+                log.warn("Timed out while enqueuing events.  Some events may "+
+                         "be lost!");
+            }
+        }
     }
 
     /**
      * Get the server purge configuration and storage option, loaded on startup.
      */
-    private void loadConfigDefaults() { 
-        log.debug("Loading default purge intervals");
+    private void loadConfigDefaults() 
+    {
+        this.log.debug("Loading default purge intervals");
         Properties conf;
         try {
             conf = ServerConfigManagerUtil.getLocalHome().create().getConfig();
-        } catch (Exception e) {
+        } catch (CreateException e) {
+            throw new SystemException(e);
+        } catch (NamingException e) {
+            throw new SystemException(e);
+        } catch (ConfigPropertyException e) {
+            // Not gonna happen
             throw new SystemException(e);
         }
 
@@ -396,10 +389,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         String purge6hString  = conf.getProperty(HQConstants.DataPurge6Hour);
 
         try {
-            purgeRaw = Long.parseLong(purgeRawString);
-            purge1h  = Long.parseLong(purge1hString);
-            purge6h  = Long.parseLong(purge6hString);
-            confDefaultsLoaded = true;
+            this.purgeRaw = Long.parseLong(purgeRawString);
+            this.purge1h = Long.parseLong(purge1hString);
+            this.purge6h = Long.parseLong(purge6hString);
+            this.confDefaultsLoaded = true;
         } catch (NumberFormatException e) {
             // Shouldn't happen unless manual edit of config table
             throw new IllegalArgumentException("Invalid purge interval: " + e);
