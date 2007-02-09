@@ -4123,6 +4123,9 @@ has already been defined.
             UPDATE eam_alert_definition SET act_on_trigger_id = NULL WHERE act_on_trigger_id NOT IN (SELECT id FROM eam_registered_trigger)
           </statement>
           <statement>
+            UPDATE eam_alert_definition SET parent_id = NULL WHERE parent_id NOT IN (SELECT id FROM eam_alert_definition)
+          </statement>
+          <statement>
             ALTER TABLE eam_alert_definition ADD CONSTRAINT fk975407845bc79aea FOREIGN KEY (act_on_trigger_id) REFERENCES eam_registered_trigger(id)
           </statement>
           <statement>
