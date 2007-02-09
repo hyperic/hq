@@ -132,7 +132,7 @@ function showViewEscResponse() {
       escTrHeader.appendChild(td6);
       td6.setAttribute('colSpan', '3');
       td6.setAttribute((document.all ? 'className' : 'class'), "BlockTitle");
-      td6.innerHTML = 'Action Details';
+      td6.innerHTML = 'Action ' + (i+1) + ' details';
 
       escTr1.appendChild(td1);
       td1.setAttribute((document.all ? 'className' : 'class'), "waitTd");

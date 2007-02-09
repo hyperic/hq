@@ -47,21 +47,36 @@
 </script>
 
 <table cellpadding="0" cellspacing="0" border="0" width="100%">
+  <tr>
+    <td width="20%" class="BlockLabel"><fmt:message key="common.header.EscalationName"/></td>
+    <td class="BlockContent" colspan="2"><c:out value="${escalation.name}"/></td>
+  </tr>
+  <tr>
+    <td colspan="3"  class="BlockContent">
+      <tiles:insert page="/resource/common/monitor/alerts/config/ViewEscalation.jsp">
+        <tiles:put name="chooseScheme" value="false"/>
+      </tiles:insert>
+    </td>
+  </tr>
+  <tr>
+    <td width="20%" class="BlockLabel" style="padding-left: 4px;"><fmt:message key="common.label.EscalationActionLogs"/></td>
+    <td class="BlockContent" colspan="2">&nbsp;</td>
+  </tr>
   <c:forEach var="log" varStatus="status" items="${alert.escalationLogs}">
   <tr>
-    <td width="20%" class="BlockLabel" style="border-bottom: solid #D5D8DE 1px;">
+    <td width="20%" class="BlockLabel">
     <fmt:message key="alert.current.detail.escalation.action">
       <fmt:param value="${status.count}"/>
     </fmt:message>
     </td>
-    <td colspan="3"  class="BlockContent" style="padding-left: 4px; border-bottom: solid #D5D8DE 1px;">
+    <td colspan="3"  class="BlockContent" style="padding-left: 4px;">
       <c:out value="${log.detail}"/>
     </td>
   </tr>
   </c:forEach>
   <tr>
-    <td rowspan="2" width="20%" class="BlockLabel">&nbsp;</td>
-    <td nowrap="true" class="BlockContent" style="padding: 10px;">
+    <td rowspan="2" width="20%" class="BlockLabel" style="border-top: solid #D5D8DE 1px; border-bottom: solid #D5D8DE 1px;">&nbsp;</td>
+    <td nowrap="true" class="BlockContent" style="padding: 10px; border-top: solid #D5D8DE 1px;">
   <c:if test="${escalation.pauseAllowed && not alert.acknowledged}">
       <input type=checkbox name="pause" value="true"/>
       <fmt:message key="alert.escalation.pause"/>
@@ -86,7 +101,7 @@
       <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>
   </c:if>&nbsp;
     </td>
-    <td rowspan="2" width="60%" class="BlockLabel">
+    <td rowspan="2" width="60%" class="BlockLabel" style="border-top: solid #D5D8DE 1px;">
 <tiles:insert page="/common/components/ActionButton.jsp">
   <tiles:put name="labelKey" value="resource.common.alert.action.acknowledge.label"/>
   <tiles:put name="buttonHref" value="javascript:document.forms[0].submit();"/>
