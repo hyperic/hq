@@ -93,7 +93,6 @@ chbtWidgetProps = getWidgetProperties('<c:out value="${chbtWidget}"/>');
      <display:column width="4%" value="${tmpImg}" title="&nbsp;"
                      isLocalizedTitle="false" styleClass="ListCellCheckboxLeftLine"
                      href="/alerts/Alerts.do?mode=list&type=${summary.resourceTypeId}" paramId="rid" paramProperty="resourceId" nowrap="true"/>
-     <display:column width="4%" value="<span class=\"MonitorMetricsBaseline\">${summary.alerts}</span>" title="resource.common.monitor.visibility.AlertsTH" styleClass="ListCell" align="center"/>
      <display:column property="resourceId" width="8%" title="resource.common.monitor.visibility.AVAILTH" styleClass="ListCellCheckboxLeftLine" align="center">
       <display:availabilitydecorator resourceId="${summary.resourceId}" resourceTypeId="${summary.resourceTypeId}"/>
      </display:column>
