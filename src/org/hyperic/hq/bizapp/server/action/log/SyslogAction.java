@@ -101,8 +101,9 @@ public class SyslogAction extends SyslogActionConfig
                   ' ' + getMeta() + '/' + getProduct() +'/' +
                   getVersion() + ' ' + resName + " :" +
                   alertDef.getName() + " - " + info.getLongReason());
-        
-        return "success";
+
+        return "Syslog: " + alertDef.getName() + " logged to " +
+               getMeta() + '/' + getProduct() +'/' + getVersion();
     }
     
     public void setParentActionConfig(AppdefEntityID aeid, ConfigResponse cfg)
