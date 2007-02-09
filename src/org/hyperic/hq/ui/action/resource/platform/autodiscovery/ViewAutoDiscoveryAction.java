@@ -52,25 +52,14 @@ import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.util.timer.StopWatch;
 
-/**
- */
 public class ViewAutoDiscoveryAction extends TilesAction {
-    // ---------------------------------------------------- Public Methods
 
-    /**
-     * Retrieve this data and store it in request attributes:
-     *
-     *
-     */
     public ActionForward execute(ComponentContext context,
                                  ActionMapping mapping,
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        StopWatch timer = new StopWatch();
-        Log timingLog = LogFactory.getLog("DASHBOARD-TIMING");
-        Log log = LogFactory.getLog(ViewAutoDiscoveryAction.class.getName());
 
         PlatformValue platform =
             (PlatformValue) RequestUtils.getResource(request);
@@ -100,7 +89,6 @@ public class ViewAutoDiscoveryAction extends TilesAction {
                              rmSchedForm);
         
         request.setAttribute(Constants.ALL_SCHEDULES_ATTR, list);
-        timingLog.trace("ViewAutoDiscoveryAction - timing ["+timer.toString()+"]");
         return null;
     }
 

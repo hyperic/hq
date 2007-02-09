@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.action.resource.platform.autodiscovery;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -39,25 +38,16 @@ import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.bizapp.shared.AIBoss;
-import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.action.resource.server.inventory.NewServerAction;
-import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
-/**
- *
- */
 public class ImportAIResourcesAction extends BaseAction {
 
     /**
@@ -69,64 +59,35 @@ public class ImportAIResourcesAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory.getLog(NewServerAction.class.getName());
         try {
             AutoDiscoveryResultsForm aiForm = (AutoDiscoveryResultsForm) form;
-            Integer rid = null;
-            try {
-                rid = RequestUtils.getResourceId(request);
-            } catch (ParameterNotFoundException e) {
-                // don't care about this exception
-            }
-            Integer resourceId = aiForm.getRid();
-            Integer resourceType = aiForm.getType();
-    
-            HashMap forwardParams = new HashMap(2);
-            forwardParams.put(Constants.RESOURCE_PARAM, resourceId);
-            forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, resourceType);
-
             ActionForward forward = checkSubmit(request, mapping, form,
-                                                forwardParams, YES_RETURN_PATH);
-            AutoDiscoveryResultsForm autoDiscoveryForm = (AutoDiscoveryResultsForm) form;
+                                                YES_RETURN_PATH);
             if (forward != null) { 
                 return forward;
             }         
 
-            PlatformValue pVal = null;
             try {
-                pVal = importAIResource(request, aiForm.getAiPid());
+                importAIResource(request, aiForm.getAiPid());
             } catch (AIQApprovalException e) {
                 RequestUtils.setError(request, 
-                                      "dash.autoDiscovery.import.Error", e.getMessage());
-                return returnFailure(request, mapping, forwardParams);
+                                      "dash.autoDiscovery.import.Error",
+                                      e.getMessage());
+                return returnFailure(request, mapping);
             }
-            if (pVal == null)
-            {
-                RequestUtils.setError(request,
-                                      "resource.platform.inventory.autoinventory.error.NoPlatformFound");
-                return returnFailure(request, mapping, forwardParams);
-            }
-            
-            forwardParams.put(Constants.RESOURCE_PARAM, pVal.getId());
-            forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, new Integer(pVal.getEntityId().getType()));
-            
-            return returnSuccess(request, mapping, forwardParams);
+
+            return returnSuccess(request, mapping);
             
         }
         catch (AIQApprovalException ae) {
-            log.trace("approval error: ", ae);
-            if (ae.getReason() == AIQApprovalException.ERR_PARENT_NOT_APPROVED)
-            {
+            if (ae.getReason() == AIQApprovalException.ERR_PARENT_NOT_APPROVED) {
                 RequestUtils.setError(request,
                                       "resource.platform.inventory.autoinventory.error.NoPlatformFound");
-            }
-            else if (ae.getReason() == AIQApprovalException.ERR_ADDED_TO_APPDEF)
-            {
+            } else if (ae.getReason() == AIQApprovalException.ERR_ADDED_TO_APPDEF) {
                 RequestUtils.setError(request,
                                       "resource.platform.inventory.autoinventory.error.PlatformFound");
-            }
-            else // don't care about any other error
-            {
+            } else {
+                // don't care about any other error
                 throw ae;
             }
             return returnFailure(request, mapping);
@@ -141,8 +102,8 @@ public class ImportAIResourcesAction extends BaseAction {
     /**
      * import the ai resource
      */
-    private PlatformValue importAIResource( HttpServletRequest request, 
-                                            Integer aiPlatformId)
+    private void importAIResource(HttpServletRequest request,
+                                  Integer aiPlatformId)
         throws Exception 
     {
         ServletContext ctx = getServlet().getServletContext();
@@ -151,43 +112,47 @@ public class ImportAIResourcesAction extends BaseAction {
         int sessionInt = sessionId.intValue();
 
         String aiPlatform = AppdefEntityConstants.typeToString(AppdefEntityConstants.
-                                                            APPDEF_TYPE_AIPLATFORM);
+                                                               APPDEF_TYPE_AIPLATFORM);
         String aiServer = AppdefEntityConstants.typeToString(AppdefEntityConstants.
-                                                            APPDEF_TYPE_AISERVER);
+                                                             APPDEF_TYPE_AISERVER);
         String aiIp = AppdefEntityConstants.typeToString(AppdefEntityConstants.
-                                                            APPDEF_TYPE_AIIP);
-        // build the list of platforms to be ignored. This *could* happen from the ui
-        // by clicking from the dashboard. 
+                                                         APPDEF_TYPE_AIIP);
 
-        List aiPlatformIds = buildResources(request, AIQueueConstants.Q_DECISION_IGNORE,
-                                aiPlatform);
+        // build the list of platforms to be ignored. This *could* happen from the ui
+        // by clicking from the dashboard.
+        List aiPlatformIds = buildResources(request,
+                                            AIQueueConstants.Q_DECISION_IGNORE,
+                                            aiPlatform);
 
         // if not empty process this request.
         if(!aiPlatformIds.isEmpty()) 
             aiBoss.processQueue(sessionInt, aiPlatformIds, null, null , 
-                                        AIQueueConstants.Q_DECISION_IGNORE);
+                                AIQueueConstants.Q_DECISION_IGNORE);
         
-        aiPlatformIds = buildResources(request, AIQueueConstants.Q_DECISION_UNIGNORE, 
-                                                                    aiPlatform);
+        aiPlatformIds = buildResources(request,
+                                       AIQueueConstants.Q_DECISION_UNIGNORE,
+                                       aiPlatform);
         if(!aiPlatformIds.isEmpty()) 
             aiBoss.processQueue(sessionInt, aiPlatformIds, null, null , 
-                                        AIQueueConstants.Q_DECISION_UNIGNORE);
+                                AIQueueConstants.Q_DECISION_UNIGNORE);
+
         // Similarly build lists of ignored and unignored AIServers and AIIps in the
         // code below.
-
-        List servers = buildResources(request, AIQueueConstants.Q_DECISION_IGNORE,
-                                                                        aiServer);
-        List ips = buildResources(request, AIQueueConstants.Q_DECISION_IGNORE,aiIp);
+        List servers = buildResources(request,
+                                      AIQueueConstants.Q_DECISION_IGNORE,
+                                      aiServer);
+        List ips = buildResources(request, AIQueueConstants.Q_DECISION_IGNORE,
+                                  aiIp);
         if(!(servers.isEmpty() && ips.isEmpty()))
             aiBoss.processQueue(sessionInt, null, servers, ips , 
-                                            AIQueueConstants.Q_DECISION_IGNORE);
+                                AIQueueConstants.Q_DECISION_IGNORE);
         
         servers = buildResources(request, AIQueueConstants.Q_DECISION_UNIGNORE, 
-                                                                        aiServer);
+                                 aiServer);
         ips = buildResources(request, AIQueueConstants.Q_DECISION_UNIGNORE,aiIp);
         if(!(servers.isEmpty() && ips.isEmpty()))
             aiBoss.processQueue(sessionInt, null, servers, ips, 
-                                            AIQueueConstants.Q_DECISION_UNIGNORE);
+                                AIQueueConstants.Q_DECISION_UNIGNORE);
         AIPlatformValue aiVal = 
                 aiBoss.findAIPlatformById(sessionInt, aiPlatformId.intValue());
 
@@ -199,20 +164,16 @@ public class ImportAIResourcesAction extends BaseAction {
             aiPlatformIds.add(aiPlatformId);
 
         // build the ai ip ids
-        List aiIpIds = BizappUtils.buildAIResourceIds(aiVal.getAIIpValues(), false);
+        List aiIpIds = BizappUtils.buildAIResourceIds(aiVal.getAIIpValues(),
+                                                      false);
 
         // build the server ids
         List aiServerIds = BizappUtils.buildAIResourceIds(aiVal.getAIServerValues(), 
-                                                                            false);
+                                                          false);
 
         aiBoss.processQueue(sessionInt, aiPlatformIds,
                             aiServerIds, aiIpIds, 
                             AIQueueConstants.Q_DECISION_APPROVE);
-
-        PlatformValue pVal = 
-                aiBoss.findPlatformByID(sessionInt, aiPlatformId.intValue());
-        
-        return pVal;                            
     }
     
     /**
@@ -243,5 +204,4 @@ public class ImportAIResourcesAction extends BaseAction {
         }
         return ret;
     }
-
 }

@@ -60,16 +60,8 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 
-/**
- *
- */
 public class ViewResultsPrepAction extends WorkflowPrepareAction {
 
-    /**
-     * Retrieve this data and store it in request attributes:
-     *
-     *
-     */
     public ActionForward workflow(ComponentContext context,
                                  ActionMapping mapping,
                                  ActionForm form,
@@ -88,8 +80,6 @@ public class ViewResultsPrepAction extends WorkflowPrepareAction {
             resourceType = new Integer(aeid.getType());
         } catch (ParameterNotFoundException e) {
             // don't care if no resource type (coming from dashboard)
-            if (log.isDebugEnabled())
-                log.debug("resourceType param not found", e);
         }
         
         aForm.setRid(resourceId);
@@ -110,9 +100,7 @@ public class ViewResultsPrepAction extends WorkflowPrepareAction {
         PlatformValue pValue =
             (PlatformValue) RequestUtils.getResource(request);
         if (pValue != null) {
-            List serverSigList = new ArrayList();
-        
-            AppdefResourceTypeValue[] supportedSTypeFilter = null;
+            AppdefResourceTypeValue[] supportedSTypeFilter;
             supportedSTypeFilter =
                     BizappUtils.buildSupportedAIServerTypes(ctx, request, pValue);
             
@@ -164,5 +152,4 @@ public class ViewResultsPrepAction extends WorkflowPrepareAction {
                                    
         return null;
     }
-
 }
