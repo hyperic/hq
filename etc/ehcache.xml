@@ -180,6 +180,14 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Service.findPlatformServices"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+            
+
 
   <!-- Permission related caches -->
   <cache name="org.hyperic.hq.authz.server.session.Resource"
