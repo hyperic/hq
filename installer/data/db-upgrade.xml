@@ -4519,7 +4519,7 @@ has already been defined.
 
     <schemaSpec version="3.05">
       <schema-insert table="EAM_ESCALATION"
-                     insertCmd="(ID, VERSION_COL, NAME, DESCRIPTION, ALLOW_PAUSE, MAX_WAIT_TIME, NOTIFY_ALL, CTIME, MTIME) VALUES (100, 0, 'No Actions Escalation', 'This is an Escalation Scheme created by HQ that performs no actions', %%FALSE%%, 300000, %%FALSE%%, 0, 0)"/>
+                     insertCmd="(ID, VERSION_COL, NAME, DESCRIPTION, ALLOW_PAUSE, MAX_WAIT_TIME, NOTIFY_ALL, CTIME, MTIME) VALUES (100, 0, 'Default Escalation', 'This is an Escalation Scheme created by HQ that performs no actions', %%FALSE%%, 300000, %%FALSE%%, 0, 0)"/>
     </schemaSpec>
 
     <schemaSpec version="3.06">
