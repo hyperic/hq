@@ -30,14 +30,17 @@ public class MeasurementDataId implements java.io.Serializable {
     // Fields    
     private Integer _measurementId;
     private long _timestamp;
+    private Integer _additional;
 
     // Constructors
     public MeasurementDataId() {
     }
 
-    public MeasurementDataId(Integer measurementId, long timestamp) {
+    public MeasurementDataId(Integer measurementId, long timestamp,
+                             Integer additional) {
         _measurementId = measurementId;
         _timestamp = timestamp;
+        _additional = additional;
     }
    
     // Property accessors
@@ -57,6 +60,14 @@ public class MeasurementDataId implements java.io.Serializable {
     }
 
 
+    public Integer getAdditional() {
+        return _additional;
+    }
+
+    protected void setAdditional(Integer additional) {
+        _additional = additional;
+    }
+
     public boolean equals(Object other) {
         if ((this == other)) return true;
         if ((other == null)) return false;
@@ -67,7 +78,11 @@ public class MeasurementDataId implements java.io.Serializable {
                 (getMeasurementId() != null &&
                  castOther.getMeasurementId() != null &&
                  getMeasurementId().equals(castOther.getMeasurementId()))) &&
-            (getTimestamp() == castOther.getTimestamp());
+            (getTimestamp() == castOther.getTimestamp()) &&
+            ((getAdditional() == castOther.getAdditional()) || 
+                (getAdditional() != null &&
+                 castOther.getAdditional() != null &&
+                 getAdditional().equals(castOther.getAdditional())));
     }
    
     public int hashCode() {
@@ -76,6 +91,8 @@ public class MeasurementDataId implements java.io.Serializable {
         result = 37 * result + 
             (getMeasurementId() == null ? 0 : getMeasurementId().hashCode() );
         result = 37 * result + (int)getTimestamp();
+        result = 37 * result +
+            (getAdditional() == null ? 0 : getAdditional().hashCode() );
         return result;
     }   
 }

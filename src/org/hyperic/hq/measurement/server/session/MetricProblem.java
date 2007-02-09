@@ -30,7 +30,6 @@ public class MetricProblem implements java.io.Serializable {
     // Fields    
     private MeasurementDataId _id;
     private Integer _type;
-    private Integer _additional;
     private long _version_;
 
     // Constructors
@@ -46,7 +45,6 @@ public class MetricProblem implements java.io.Serializable {
                          Integer additional) {
         _id = id;
         _type = type;
-        _additional = additional;
     }
    
     // Property accessors
@@ -72,14 +70,6 @@ public class MetricProblem implements java.io.Serializable {
     
     protected void setType(Integer type) {
         _type = type;
-    }
-
-    public Integer getAdditional() {
-        return _additional;
-    }
-    
-    protected void setAdditional(Integer additional) {
-        _additional = additional;
     }
 
     public boolean equals(Object other) {

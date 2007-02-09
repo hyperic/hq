@@ -44,12 +44,11 @@ public class MetricProblemDAO extends HibernateDAO {
     public MetricProblem create(Integer mid, long time,
                                 int type, Integer additional) {
 
-        MeasurementDataId id = new MeasurementDataId(mid, time);
+        MeasurementDataId id = new MeasurementDataId(mid, time, additional);
 
         MetricProblem p = new MetricProblem();
         p.setId(id);
         p.setType(new Integer(type));
-        p.setAdditional(additional);
 
         save(p);
         return p;
