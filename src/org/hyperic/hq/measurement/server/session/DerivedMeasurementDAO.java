@@ -170,7 +170,10 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         return getSession().createQuery(sql)
             .setInteger(0, type)
             .setInteger(1, id)
-            .setBoolean(2, enabled).list();
+            .setBoolean(2, enabled)
+            .setCacheable(true)
+            .setCacheRegion("DerivedMeasurement.findByInstance")
+            .list();
     }
 
     List findByInstanceForCategory(int type, int id, String cat) {

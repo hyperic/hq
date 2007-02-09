@@ -324,6 +324,8 @@ public class ServiceDAO extends HibernateDAO
         return getSession().createQuery(sql)
             .setInteger(0, id.intValue())
             .setInteger(1, tid.intValue())
+            .setCacheable(true)
+            .setCacheRegion("Service.findByServerAndType")
             .list();
     }
 

@@ -25,7 +25,9 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -162,8 +164,21 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         }
     }
 
-    List findTemplates(Integer ids[]) {
-        return createCriteria().add(Restrictions.in("id", ids)).list();
+    List findTemplates(Integer[] ids) {
+        if (ids.length == 1) {
+            Object res = get(ids[0]);
+            
+            if (res == null)
+                return new ArrayList();
+            
+            return Collections.singletonList(res);
+        }
+        
+        return createCriteria()
+            .add(Restrictions.in("id", ids))
+            .setCacheable(true)
+            .setCacheRegion("MeasurementTemplate.findTemplates")
+            .list();
     }
 
     List findTemplatesByMonitorableType(String type) {

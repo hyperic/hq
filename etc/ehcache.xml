@@ -26,6 +26,12 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+  <cache name="MeasurementTemplate.findTemplates"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.measurement.server.session.MonitorableType"
          maxElementsInMemory="1000"
          eternal="true"
@@ -45,6 +51,12 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="DerivedMeasurement.findDesignatedByInstanceForCategory"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="DerivedMeasurement.findByInstance"
          maxElementsInMemory="10000"
          eternal="true"
          timeToIdleSeconds="0"
@@ -75,6 +87,13 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
 
+  <!-- User config response -->
+  <cache name="org.hyperic.hq.authz.server.session.UserConfigResp"
+         maxElementsInMemory="100"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  
   <!-- Metric data cache, used outside of hibernate -->
   <cache name="MetricDataCache"
          maxElementsInMemory="50000"
@@ -186,6 +205,12 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Service.findByServerAndType"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
   <cache name="Service.findPlatformServices"
          maxElementsInMemory="100"
          eternal="true"
@@ -283,6 +308,20 @@
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.common.server.session.Crispo.optsSet"
          maxElementsInMemory="1000"
+		 eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+
+  <!-- Classic alert caches -->
+  <cache name="Alert.findByCreateTime"
+         maxElementsInMemory="10"
+		 eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.events.server.session.Alert"
+         maxElementsInMemory="100"
 		 eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
