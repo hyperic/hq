@@ -38,6 +38,12 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.measurement.server.session.Baseline"
+         maxElementsInMemory="20000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
   <cache name="DerivedMeasurement.findDesignatedByInstanceForCategory"
          maxElementsInMemory="10000"
          eternal="true"
