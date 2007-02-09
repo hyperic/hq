@@ -4005,7 +4005,7 @@ has already been defined.
           <statement>
             ALTER TABLE eam_stat_errors
                   ADD CONSTRAINT fk6f2383a828d8858d FOREIGN KEY (reqstat_id) 
-                      REFERENCES eam_request_stat(id)
+                      REFERENCES eam_request_stat(id) ON DELETE CASCADE
           </statement>
           <statement>
               ALTER TABLE eam_stat_errors
