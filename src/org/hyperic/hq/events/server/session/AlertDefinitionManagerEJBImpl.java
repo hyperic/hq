@@ -517,12 +517,13 @@ public class AlertDefinitionManagerEJBImpl
      */
     public Integer getIdFromTrigger(Integer tid) {
         RegisteredTrigger trigger = getTriggerDAO().findById(tid);
-        AlertDefinition def = getAlertDefDAO().getFromTrigger(trigger);
+        AlertDefinition def = trigger.getAlertDefinition();
         
-        if (def == null)
-            return null;
-        else
+        if (def != null && def.isEnabled() && !def.isDeleted()) {
             return def.getId();
+        } else {
+            return null;
+        }
     }
     
     /** 

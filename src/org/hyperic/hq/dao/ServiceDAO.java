@@ -142,6 +142,8 @@ public class ServiceDAO extends HibernateDAO
         return getSession()
             .createQuery("from Service order by sortName " +
                          (asc ? "asc" : "desc"))
+            .setCacheable(true)
+            .setCacheRegion("Service.findAll_orderName")
             .list();
     }
 

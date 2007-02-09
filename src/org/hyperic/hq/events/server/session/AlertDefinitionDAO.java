@@ -99,19 +99,6 @@ public class AlertDefinitionDAO extends HibernateDAO {
             .list();
     }
 
-    /**
-     * Find an alert definition where the ActOnTrigger is the passed value
-     * @param trigger Act On Trigger used by the alert def
-     */
-    public AlertDefinition getFromTrigger(RegisteredTrigger trigger) {
-        String sql = "FROM AlertDefinition a WHERE " +
-            "a.actOnTrigger = :trigger AND enabled = true AND deleted = false";
-
-        return (AlertDefinition)getSession().createQuery(sql)
-            .setParameter("trigger", trigger)
-            .uniqueResult();
-    }
-    
     public List findChildAlertDefinitions(AlertDefinition def) {
         String sql = "from AlertDefinition d where d.parent = :parent " + 
             "AND d.deleted = false";

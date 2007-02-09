@@ -186,6 +186,8 @@ public class PlatformDAO extends HibernateDAO {
     {
         return createCriteria()
             .addOrder(asc ? Order.asc("sortName"): Order.desc("sortName"))
+            .setCacheable(true)
+            .setCacheRegion("Platform.findAll_orderName")
             .list();
     }
 

@@ -73,6 +73,8 @@ public class AlertDAO extends HibernateDAO {
             .add(Expression.between("ctime", new Long(begin), new Long(end)))
             .addOrder(Order.desc("ctime"))
             .setMaxResults(count)
+            .setCacheable(true)
+            .setCacheRegion("Alert.findByCreateTime")
             .list();
     }
 

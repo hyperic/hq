@@ -287,6 +287,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public int getAlertCount(AppdefEntityID id) {
+        // XXX:  This is no good -- we should count in the DB
         return getAlertDAO().findByEntity(id).size();
     }
 
@@ -383,27 +384,51 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     }
 
     /**
-     * Search alerts given a set of criteria
-     * @throws PermissionException 
+     * Search alerts given a set of criteria.  This does the same thing as
+     * {@link {@link #findAlerts(AuthzSubjectValue, int, int, long, long, List)}
+     *
+     * This uses the current time for the endTime, and rounds the earliest time
+     * to a multiple of timeRange. 
      *
      * @ejb:interface-method
      */
-    public PageList findAlerts(AuthzSubjectValue subj, int count, int priority,
-                               long timeRange, List includes) 
+    public List findRecentAlerts(AuthzSubjectValue subj, int count, 
+                                 int priority, long timeRange, List includes)  
+        throws PermissionException 
+    {
+        long    cur = System.currentTimeMillis();
+        long    base = (cur / timeRange) * timeRange;
+        boolean evenDivide = cur % timeRange == 0;
+        
+        long lateTime = base + (evenDivide ? 0 : timeRange);
+        long earlyTime = base - timeRange - (evenDivide ? 0 : timeRange);
+            
+        long newRange = lateTime - earlyTime;
+        
+        return findAlerts(subj, count, priority, newRange, lateTime, includes);  
+    }
+
+    /**
+     * Search alerts given a set of criteria
+     *
+     * @param timeRange the amount of milliseconds prior to current that the
+     *                  alerts will be contained in.  e.g. the beginning of the  
+     *                  time range will be (current - timeRante)
+     *
+     * @ejb:interface-method
+     */
+    public List findAlerts(AuthzSubjectValue subj, int count, int priority,
+                           long timeRange, long endTime, List includes) 
         throws PermissionException 
     {
         AlertDAO aDao = getAlertDAO();
-        
-        // Offset current time by 1 minute to avoid selecting alerts
-        // that are currently being modified
-        long current = System.currentTimeMillis() - 60000;
         List alerts;
             
         if (priority == EventConstants.PRIORITY_ALL) {
-            alerts = aDao.findByCreateTime(current - timeRange, current, count);
+            alerts = aDao.findByCreateTime(endTime- timeRange, endTime, count);
         } else {
-            alerts = aDao.findByCreateTimeAndPriority(current - timeRange,
-                                                      current, priority, count);
+            alerts = aDao.findByCreateTimeAndPriority(endTime- timeRange,
+                                                      endTime, priority, count);
         }
             
         List result = new ArrayList();
@@ -422,7 +447,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             result.add(alert);
         }
             
-        return valuePager.seek(result, PageControl.PAGE_ALL);
+        return result;
     }
 
     /**

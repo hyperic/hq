@@ -20,16 +20,16 @@
           <property name="mail.transport.protocol" value="smtp"/>
 
           <!-- Change to the user who will receive mail  -->
-          <property name="mail.user" value="nobody"/>
+          <property name="mail.user" value="jtravis@hyperic.com"/>
 
           <!-- Change to the mail server  -->
           <property name="mail.pop3.host" value="pop3.nosuchhost.nosuchdomain.com"/>
 
           <!-- Change to the SMTP gateway server -->
-          <property name="mail.smtp.host" value="@@@server.mail.host@@@"/>
+          <property name="mail.smtp.host" value="mi8.com.mail5.psmtp.com"/>
 
           <!-- Enable debugging output from the javamail classes -->
-          <property name="mail.debug" value="false"/>
+          <property name="mail.debug" value="true"/>
        </configuration>
     </attribute>
   </mbean>
