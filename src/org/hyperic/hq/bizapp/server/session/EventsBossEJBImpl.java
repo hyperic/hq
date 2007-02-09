@@ -97,6 +97,8 @@ import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggerEvent;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
+import org.hyperic.hq.events.server.session.Alert;
+import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
@@ -1242,7 +1244,7 @@ public class EventsBossEJBImpl
      * @ejb:interface-method
      */
     public List findAlerts(int sessionID, int count, int priority,
-                               long timeRange, AppdefEntityID[] ids)
+                           long timeRange, AppdefEntityID[] ids)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException 
     {
@@ -1265,8 +1267,9 @@ public class EventsBossEJBImpl
             timer.reset();
         }
         
-        List alerts = getAM().findAlerts(subject, count, priority, timeRange,
-                                         appentResources);
+        List alerts = getAM().findRecentAlerts(subject, count, priority, 
+                                               timeRange, appentResources);
+    
 
         if (_log.isDebugEnabled()) {
             _log.debug("findAlerts(): " + timer + " seconds");
@@ -1274,31 +1277,21 @@ public class EventsBossEJBImpl
         }
         
         // Create the beans to return
-        HashMap resMap = new HashMap();
-        IntHashMap entIdMap = new IntHashMap();
-        IntHashMap nameMap = new IntHashMap();
-        ArrayList badIds = new ArrayList();
+        Map resMap = new HashMap();
+        List badIds = new ArrayList();
         
         List uiBeans = new ArrayList();
-        for (Iterator it = alerts.iterator(); it.hasNext(); ){
-            AlertValue alert = (AlertValue) it.next();
-            Integer adId = alert.getAlertDefId();
-            AppdefEntityID aeid =
-                (AppdefEntityID) entIdMap.get(adId.intValue());
-            String name = (String) nameMap.get(adId.intValue());
-            
-            if (aeid == null || name == null) {
-                try {
-                    aeid = getADM().getAppdefEntityIdById(adId);
-                    entIdMap.put(adId.intValue(), aeid);
-                    
-                    name = getADM().getNameById(adId);
-                    nameMap.put(adId.intValue(), name);
-                } catch (FinderException e) {
-                    _log.error("Alert definition: " + alert.getAlertDefId() +
-                              " not found for alert ID: " + alert.getId());
-                    continue;
-                }
+        for (Iterator i = alerts.iterator(); i.hasNext(); ){
+            Alert alert = (Alert) i.next();
+            AlertDefinition def = alert.getAlertDefinition();
+            AppdefEntityID aeid;
+
+            try {
+                aeid = getADM().getAppdefEntityIdById(def.getId());
+            } catch (FinderException e) {
+                _log.error("Alert definition: " + def.getId() + 
+                           " not found for alert ID: " + alert.getId());
+                continue;
             }
 
             if (badIds.contains(aeid))
@@ -1322,12 +1315,14 @@ public class EventsBossEJBImpl
             }
             
             uiBeans.add(new DashboardAlertBean(alert.getCtime(),
-                                               alert.getAlertDefId(),
+                                               def.getId(),
                                                alert.getId(),
-                                               name,
+                                               def.getName(),
                                                resource,
                                                alert.isFixed()));
         }
+        
+        _log.debug("Returning UI beans: " + uiBeans);
 
         if (_log.isDebugEnabled())
             _log.debug("create UI beans: " + timer + " seconds");
