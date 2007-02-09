@@ -29,9 +29,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -574,16 +576,15 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                                          List sIDs) 
         throws PermissionException, ServerNotFoundException 
     {
-        List servers = new ArrayList();
+        Set servers = new HashSet();
         for (Iterator i = sIDs.iterator(); i.hasNext(); ) {
             AppdefEntityID svcId = (AppdefEntityID) i.next();
-            Server server = getServerDAO().findById(svcId.getId());
+            Service svc = getServiceDAO().findById(svcId.getId());
 
-            servers.add(server);
+            servers.add(svc.getServer());
         }
         
-        servers = filterViewableServers(servers, subject);
-        return valuePager.seek(servers, null);
+        return valuePager.seek(filterViewableServers(servers, subject), null);
     }
 
 

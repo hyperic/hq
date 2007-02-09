@@ -1086,7 +1086,9 @@ public abstract class AppdefSessionEJB
     /**
      * Filter a list of {@link Server}s by their viewability by the subject 
      */
-    protected List filterViewableServers(List servers, AuthzSubjectValue who) {
+    protected List filterViewableServers(Collection servers, 
+                                         AuthzSubjectValue who) 
+    {
         PermissionManager permMgr = PermissionManagerFactory.getInstance();
         List res = new ArrayList();
         ResourceTypeValue type;
