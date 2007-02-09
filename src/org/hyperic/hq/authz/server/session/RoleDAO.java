@@ -184,9 +184,10 @@ public class RoleDAO extends HibernateDAO {
     public Collection findAvailableForGroup(boolean system, Integer groupId)
     {
         return getSession()
-            .createQuery("from Role r join fetch r.resourceGroups rg " +
-                         "where r.system = ? and rg.resourceGroup.id = ? and " +
-                         "r.id != rg.role.id order by r.sortName ")
+            .createQuery("from Role r " +
+                         "where r.system = ? and " +
+                               "? not in (select id from r.resourceGroups) " +
+                         "order by r.sortName ")
             .setBoolean(0, system)
             .setInteger(1, groupId.intValue())
             .list();
