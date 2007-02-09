@@ -464,29 +464,37 @@ public class EscalationManagerEJBImpl
     {
         Escalatable esc = type.findEscalatable(alertId);
         EscalationState state = _stateDAO.find(esc);
-        String sFixed = fixed ? "Fixed" : "Acknowledged";
+        boolean acknowledged = !fixed;
         
-        if (state == null ||
-            (!fixed && state.getAcknowledgedBy() != null)) 
-        {
-            _log.debug(sFixed + " alertId[" + alertId + "] for type [" + 
-                       type + "], but it wasn't running or was previously " + 
-                       sFixed + ".  Button masher?");
+        if (esc.getAlertInfo().isFixed()) {
+            _log.warn(subject.getFullName() + " attempted to fix or " +
+                      " acknowledge the " + type + " id=" + alertId + 
+                      " but it was already fixed"); 
+            return;
+        }
+        
+        if (state == null && acknowledged) {
+            _log.debug(subject.getFullName() + " acknowledged alertId[" + 
+                       alertId + "] for type [" + type + "], but it wasn't " +
+                       "running or was previously acknowledged.  " + 
+                       "Button Masher?");
             return;
         }
         
         if (fixed) {  
             _log.debug(subject.getFullName() + " has fixed alertId=" + alertId);
             type.fixAlert(alertId, subject);
-            endEscalation(state);
+            if (state != null)
+                endEscalation(state);
         } else {
             _log.debug(subject.getFullName() + " has acknowledged alertId=" + 
                        alertId);
             state.setAcknowledgedBy(subject);
         }
 
-        sendNotifications(state, esc, subject, 
-                          state.getEscalation().isNotifyAll(), fixed);
+        if (state != null)
+            sendNotifications(state, esc, subject, 
+                              state.getEscalation().isNotifyAll(), fixed);
     }
 
     /**
