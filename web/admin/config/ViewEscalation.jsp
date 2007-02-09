@@ -261,7 +261,6 @@ function showViewEscResponse(originalRequest) {
       } else  if (configListType == "3") {
           var rids = emailInfo.split(',');
           var roleNames = "";
-          alert(rids)
           for (var b = 0; b < rids.length; b++) {
               <c:forEach var="role" items="${AvailableRoles}" varStatus="status">
                   if (rids[b] == '<c:out value="${role.id}"/>') {
