@@ -8,6 +8,7 @@
   package="org.hyperic.hq.appdef">
 
   <class name="ConfigResponseDB" table="EAM_CONFIG_RESPONSE">
+    <cache usage="read-write" />
     <id name="id" type="integer">
       <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />

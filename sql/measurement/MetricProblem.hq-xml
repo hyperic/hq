@@ -7,7 +7,9 @@
 <hibernate-mapping package="org.hyperic.hq.measurement.server.session">
 
   <class name="MetricProblem" table="EAM_METRIC_PROB">
-    <!-- move to EE only -->
+    <cache usage="read-write" />
+  
+      <!-- move to EE only -->
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="measurementId" type="integer">
         <column name="MEASUREMENT_ID" not-null="true" index="METRIC_PROB_ID_IDX" />

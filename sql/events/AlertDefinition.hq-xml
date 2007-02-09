@@ -7,6 +7,8 @@
 <hibernate-mapping package="org.hyperic.hq.events.server.session">
 
   <class name="AlertDefinition" table="EAM_ALERT_DEFINITION">
+    <cache usage="read-write" />
+ 
     <id name="id" type="integer">
       <column name="ID" not-null="true" />
       <generator class="sequence">
@@ -97,16 +99,19 @@
     </many-to-one>
 
     <bag name="actionsBag" table="EAM_ACTION">
+      <cache usage="read-write" />
       <key column="ALERT_DEFINITION_ID" />
       <one-to-many class="Action" />
     </bag>
 
     <bag name="conditionsBag" table="EAM_ALERT_CONDITION">
+      <cache usage="read-write" />
       <key column="ALERT_DEFINITION_ID" />
       <one-to-many class="AlertCondition" />
     </bag>
 
     <bag name="triggersBag" table="EAM_REGISTERED_TRIGGER">
+      <cache usage="read-write" />
       <key column="ALERT_DEFINITION_ID" />
       <one-to-many class="RegisteredTrigger" />
     </bag>
