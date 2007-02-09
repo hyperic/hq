@@ -3160,6 +3160,9 @@ has already been defined.
             ALTER TABLE eam_alert_condition ADD CONSTRAINT fke4028caab5af9d12 FOREIGN KEY (alert_definition_id) REFERENCES eam_alert_definition(id) ON DELETE CASCADE
           </statement>
           <statement>
+            UPDATE eam_alert_condition SET trigger_id = NULL WHERE trigger_id NOT IN (SELECT id FROM eam_registered_trigger)
+          </statement>
+          <statement>
             ALTER TABLE eam_alert_condition ADD CONSTRAINT fke4028caad448177 FOREIGN KEY (trigger_id) REFERENCES eam_registered_trigger(id)
           </statement>
         </schema-directSQL>
@@ -4104,7 +4107,10 @@ has already been defined.
                   CREATE INDEX alert_def_child_idx ON eam_alert_definition (parent_id, priority)
                 </statement>
           <statement>
-            UPDATE eam_alert_definition SET act_on_trigger_id = NULL where act_on_trigger_id = 0
+            UPDATE eam_alert_definition SET act_on_trigger_id = NULL WHERE act_on_trigger_id = 0
+          </statement>
+          <statement>
+            UPDATE eam_alert_definition SET act_on_trigger_id = NULL WHERE act_on_trigger_id NOT IN (SELECT id FROM eam_registered_trigger)
           </statement>
           <statement>
             ALTER TABLE eam_alert_definition ADD CONSTRAINT fk975407845bc79aea FOREIGN KEY (act_on_trigger_id) REFERENCES eam_registered_trigger(id)
