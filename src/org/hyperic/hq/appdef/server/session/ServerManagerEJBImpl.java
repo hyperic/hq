@@ -569,36 +569,20 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * returned list.
      * @ejb:interface-method
      * @ejb:transaction type="Required"
-     * @throws ServerNotFoundException
      */
-    public PageList getServersByServices(AuthzSubjectValue subject, List sIDs) 
-        throws PermissionException, ServerNotFoundException {
-        List authzPks;
-        try {
-            authzPks = getViewableServers(subject);
-        } catch(FinderException exc){
-            return new PageList();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+    public PageList getServersByServices(AuthzSubjectValue subject, 
+                                         List sIDs) 
+        throws PermissionException, ServerNotFoundException 
+    {
+        List servers = new ArrayList();
+        for (Iterator i = sIDs.iterator(); i.hasNext(); ) {
+            AppdefEntityID svcId = (AppdefEntityID) i.next();
+            Server server = getServerDAO().findById(svcId.getId());
 
-        Integer[] ids = new Integer[sIDs.size()];
-        int i = 0;
-        for (Iterator it = sIDs.iterator(); it.hasNext(); i++) {
-            AppdefEntityID svrId = (AppdefEntityID) it.next();
-            ids[i] = svrId.getId();
-        }
-
-        List foundSvrs = getServerDAO().findByServices(ids);
-
-        ArrayList servers = new ArrayList();
-        for (Iterator it = foundSvrs.iterator(); it.hasNext();) {
-            Server server = (Server) it.next();
-            if(authzPks.contains(server.getId())) {
-                servers.add(server);
-            }
+            servers.add(server);
         }
         
+        servers = filterViewableServers(servers, subject);
         return valuePager.seek(servers, null);
     }
 

@@ -265,7 +265,31 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
             
-
+  <!-- Group caches -->
+  <cache name="org.hyperic.hq.authz.server.session.ResourceGroup"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.authz.server.session.ResourceGroup.resourceSet"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.authz.server.session.ResourceGroup.roles"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.authz.server.session.ResGrpResMap"
+         maxElementsInMemory="500"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Permission related caches -->
   <cache name="org.hyperic.hq.authz.server.session.Resource"
@@ -368,7 +392,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.events.server.session.Alert"
-         maxElementsInMemory="30"
+         maxElementsInMemory="5000"
 		 eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"

@@ -1082,6 +1082,37 @@ public abstract class AppdefSessionEJB
         }
         return keyList;
     } 
+    
+    /**
+     * Filter a list of {@link Server}s by their viewability by the subject 
+     */
+    protected List filterViewableServers(List servers, AuthzSubjectValue who) {
+        PermissionManager permMgr = PermissionManagerFactory.getInstance();
+        List res = new ArrayList();
+        ResourceTypeValue type;
+        OperationValue opVal;
+        
+        try {
+            type  = getServerResourceType();
+            opVal = getOperationByName(type, AuthzConstants.serverOpViewServer);
+        } catch(Exception e) {
+            throw new SystemException("Internal error", e);
+        }
+        
+        Integer typeId = type.getId();
+        
+        for (Iterator i=servers.iterator(); i.hasNext(); ) {
+            Server s = (Server)i.next();
+
+            try {
+                permMgr.check(who.getId(), typeId, s.getId(), opVal.getId());
+                res.add(s);
+            } catch(PermissionException e) {
+                // Ok
+            }
+        }
+        return res;
+    }
 
     /**
      * Get the scope of viewable platforms for a given user

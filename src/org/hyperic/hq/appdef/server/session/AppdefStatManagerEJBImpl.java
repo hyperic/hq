@@ -557,14 +557,14 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             aPlatformNode.addUpChildren(svrNodes);
 
             retVal = new ResourceTreeNode[] { aPlatformNode }; 
-            log.debug(mapToString(retVal));
         } catch (SQLException e) {
             throw e;
         } finally {
             DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
             disconnect();
         }
-        log.debug(mapToString(retVal));
+        if (log.isDebugEnabled())
+            log.debug(mapToString(retVal));
         return retVal;
     }
 
@@ -1551,7 +1551,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                                                    "for specified type");
             }
 
-            log.debug(grpSqlStmt);
+            if (log.isDebugEnabled())
+                log.debug(grpSqlStmt);
             grpNode = new ResourceTreeNode (groupVo.getName(),
                                             getAppdefTypeLabel(AppdefEntityConstants
                                                 .APPDEF_TYPE_GROUP,

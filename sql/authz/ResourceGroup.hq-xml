@@ -8,6 +8,7 @@
   package="org.hyperic.hq.authz.server.session">
 
   <class name="ResourceGroup" table="EAM_RESOURCE_GROUP">
+    <cache usage="read-write" />
     <id name="id" type="integer">
       <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />
@@ -77,17 +78,20 @@
     </many-to-one>
 
     <set name="resourceSet" table="EAM_RES_GRP_RES_MAP">
+      <cache usage="read-write" />
       <key column="RESOURCE_GROUP_ID"/>
       <many-to-many class="Resource" column="RESOURCE_ID" />
     </set>
 
     <set name="roles" table="EAM_ROLE_RESOURCE_GROUP_MAP">
+      <cache usage="read-write" />
       <key column="RESOURCE_GROUP_ID" />
       <many-to-many class="Role" column="ROLE_ID" />
     </set>
   </class>
 
   <class name="ResGrpResMap" table="EAM_RES_GRP_RES_MAP">
+    <cache usage="read-write" />
     <composite-id name="id" class="ResGrpResMapId">
       <key-many-to-one name="resource" class="Resource">
         <column name="RESOURCE_ID" not-null="true" />

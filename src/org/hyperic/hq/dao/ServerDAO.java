@@ -166,7 +166,8 @@ public class ServerDAO extends HibernateDAO
         }
     }
 
-    public Collection findAll_orderName(boolean asc) {
+    public Collection findAll_orderName(boolean asc)
+    {
         String sql="from Server s join fetch s.serverType st " +
                    "where st.virtual=false " +
                    "order by s.sortName " + (asc ? "asc" : "desc");
