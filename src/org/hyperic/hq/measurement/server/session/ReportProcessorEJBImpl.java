@@ -79,9 +79,19 @@ public class ReportProcessorEJBImpl
         MeasurementProcessorEJBImpl.getOne();
     private Integer _debugId;
     
-    private void addData(DerivedMeasurement dm, int dsnId,
-                         MetricValue[] dpts, long current,
-                         Map oldDataPoints) 
+    private void addPoint(List points, Integer metricId, MetricValue[] vals) { 
+        for (int i=0; i<vals.length; i++) {
+            try {
+                DataPoint pt = new DataPoint(metricId, vals[i]);
+                points.add(pt);
+            } catch(NumberFormatException e) {
+                // continue .. this may be NaN?
+            }
+        }
+    }
+    
+    private void addData(List dataPoints, DerivedMeasurement dm, int dsnId, 
+                         MetricValue[] dpts, long current, Map oldDataPoints)  
     {
         long interval = dm.getInterval();
         boolean isPassThrough =
@@ -92,8 +102,7 @@ public class ReportProcessorEJBImpl
         MetricValue[] passThroughs = new MetricValue[dpts.length];
             
         // Detect if we need to backfill
-        long reservation =
-            TimingVoodoo.roundDownTime(current, interval);
+        long reservation = TimingVoodoo.roundDownTime(current, interval);
         
         // For each Datapoint/MetricValue associated
         // with the DSN...
@@ -112,14 +121,14 @@ public class ReportProcessorEJBImpl
                 }
                 
                 // Create new Measurement data point with the adjusted time
-                MetricValue modified =
-                    new MetricValue(dpts[i].getValue(), adjust);
+                MetricValue modified = new MetricValue(dpts[i].getValue(), 
+                                                       adjust);
                 passThroughs[i] = modified;
             } else {
                 Integer rmid = new Integer(dsnId);
                 
                 // Add the raw measurement if it's not a pass-thru
-                _dataMan.addData(rmid, dpts, true);
+                addPoint(dataPoints, rmid, dpts);
                 
                 // See if we need to add to backfill queue
                 if (retrieval < reservation) {
@@ -136,7 +145,7 @@ public class ReportProcessorEJBImpl
         }
         
         if (isPassThrough) {
-            _dataMan.addData(dm.getId(), passThroughs, true);
+            addPoint(dataPoints, dm.getId(), passThroughs);
         }
 
         // Let's check to see if there is old data, if so, we
@@ -162,9 +171,11 @@ public class ReportProcessorEJBImpl
         long current = System.currentTimeMillis();
 
         // Keep track of which measurement ids to recalculate
-        HashMap oldDataPoints = new HashMap();
+        Map oldDataPoints = new HashMap();
         DSNList[] dsnLists = report.getClientIdList();
-                
+
+        List dataPoints = new ArrayList();
+        
         for (int i = 0; i < dsnLists.length; i++) {
             Integer dmId = new Integer(dsnLists[i].getClientId());
             DerivedMeasurement dm = _dmMan.getMeasurement(dmId);;
@@ -177,10 +188,11 @@ public class ReportProcessorEJBImpl
             for (int j = 0; j < valLists.length; j++) {
                 int dsnId = valLists[j].getDsnId();
                 MetricValue[] vals = valLists[j].getValues();
-                addData(dm, dsnId, vals, current, oldDataPoints);
+                addData(dataPoints, dm, dsnId, vals, current, oldDataPoints);
             }
         }
         
+        _dataMan.addData(dataPoints, true);
         // Check the SRNs to make sure the agent is up-to-date
         SRNManagerLocal srnManager = getSRNManager();
         Collection nonEntities = srnManager.reportAgentSRNs(report.getSRNList());
