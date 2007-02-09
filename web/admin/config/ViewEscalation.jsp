@@ -1100,7 +1100,7 @@ function showViewEscResponse(originalRequest) {
              </td>
         </tr>
         <tr>
-            <td colspan="2" class="ErrorBlock" width="100%" style="border: 1px dotted orange; padding:2px; background-color: rgb(255, 253, 153); font-weight: bold;">drag individual Actions to change the order of events</td>
+            <td colspan="2" class="ErrorBlock" width="100%" style="border: 1px dotted orange; padding:2px; background-color: rgb(255, 253, 153); font-weight: bold;">Drag individual actions to change the order of events</td>
         </tr>
      </thead>
   <tbody>
