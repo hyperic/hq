@@ -85,6 +85,8 @@ public class ConfigResponseDAO extends HibernateDAO
         return (ConfigResponseDB)getSession()
             .createQuery(sql)
             .setInteger(0, id.intValue())
+            .setCacheable(true)
+            .setCacheRegion("ConfigReponseDB.findByPlatformId")
             .uniqueResult();
     }
 
@@ -95,6 +97,8 @@ public class ConfigResponseDAO extends HibernateDAO
         return (ConfigResponseDB)getSession()
             .createQuery(sql)
             .setInteger(0, id.intValue())
+            .setCacheable(true)
+            .setCacheRegion("ConfigReponseDB.findByServerId")
             .uniqueResult();
     }
 
@@ -105,6 +109,8 @@ public class ConfigResponseDAO extends HibernateDAO
         return (ConfigResponseDB)getSession()
             .createQuery(sql)
             .setInteger(0, id.intValue())
+            .setCacheable(true)
+            .setCacheRegion("ConfigReponseDB.findByServiceId")
             .uniqueResult();
     }
 }

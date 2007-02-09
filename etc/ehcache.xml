@@ -87,6 +87,28 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
 
+  <!-- Appdef config responses -->
+  <cache name="org.hyperic.hq.appdef.ConfigResponseDB"
+         maxElementsInMemory="1000"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="ConfigReponseDB.findByPlatformId"
+         maxElementsInMemory="1000"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="ConfigReponseDB.findByServerId"
+         maxElementsInMemory="1000"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="ConfigReponseDB.findByServiceId"
+         maxElementsInMemory="1000"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+
   <!-- User config response -->
   <cache name="org.hyperic.hq.authz.server.session.UserConfigResp"
          maxElementsInMemory="100"
