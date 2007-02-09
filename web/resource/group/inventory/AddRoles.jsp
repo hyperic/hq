@@ -357,7 +357,7 @@ border="0"/></td>
           </display:column>
           <display:column property="name" title="header.roles" width="50%" 
 	   sort="true" defaultSort="true" sortAttr="1"/>
-          <display:column property="description" title="common.header.Description" width="50%"/>
+          <display:column property="description" title="common.header.Description" nulls="&nbsp;" width="50%"/>
         </display:table>
 
       </div>
@@ -400,7 +400,7 @@ border="0"/></td>
           </display:column>
           <display:column value="${role.name}" title="header.roles" width="50%" 
 	   sort="true" defaultSort="true" sortAttr="1"/>
-          <display:column value="${role.description}" title="common.header.Description" width="50%"/>
+          <display:column value="${role.description}" title="common.header.Description" nulls="&nbsp;" width="50%"/>
         </display:table>
 
       </div>
