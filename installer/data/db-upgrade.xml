@@ -4206,7 +4206,7 @@ has already been defined.
                   CREATE INDEX metric_prob_id_idx ON eam_metric_prob (measurement_id)
                 </statement>
           <statement>
-            ALTER TABLE eam_metric_prob ADD CONSTRAINT eam_metric_prob_pkey PRIMARY KEY (measurement_id, timestamp)
+            ALTER TABLE eam_metric_prob ADD CONSTRAINT eam_metric_prob_pkey PRIMARY KEY (measurement_id, timestamp, additional)
           </statement>
                 <statement targetDB="postgresql">
                   CREATE INDEX mtype_idx_appdeftype_idx ON eam_monitorable_type USING btree (appdef_type)
