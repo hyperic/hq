@@ -261,6 +261,7 @@ function showViewEscResponse(originalRequest) {
       } else  if (configListType == "3") {
           var rids = emailInfo.split(',');
           var roleNames = "";
+          alert(rids)
           for (var b = 0; b < rids.length; b++) {
               <c:forEach var="role" items="${AvailableRoles}" varStatus="status">
                   if (rids[b] == '<c:out value="${role.id}"/>') {
@@ -548,11 +549,11 @@ function showViewEscResponse(originalRequest) {
       }
 
       function clearDisplay() {
-       $('userListDisplay').innerHTML = "&nbsp;";
-       $('metaText').innerHTML = "&nbsp;";
-       $('productText').innerHTML = "&nbsp;";
-       $('versionText').innerHTML = "&nbsp;";
-       $('time').innerHTML = "&nbsp;";
+       $('userListDisplay').innerHTML = "";
+       $('metaText').innerHTML = "";
+       $('productText').innerHTML = "";
+       $('versionText').innerHTML = "";
+       $('time').innerHTML = "";
       }
 
       function clearOthers() {
@@ -777,6 +778,7 @@ function showViewEscResponse(originalRequest) {
       var idStr = el;
       var getId = idStr.split('_');
       var rolesDivIn = $('rolesDiv' + getId[1]);
+      var writeListUsers = $('userListDisplay');
 
       Dialog.confirm('<div id="rolesConfigWindow">' + rolesDivIn.innerHTML +
                      '</div>',
@@ -785,13 +787,29 @@ function showViewEscResponse(originalRequest) {
                   okLabel: "OK", cancelLabel: "Cancel",
                   ok:function(win) {
                     var rolesInputList =
-                      rolesDivIn.getElementsByTagName('input');
+                      rolesDivIn.getElementsByTagName('input');                      
                     var updatedInputList =
                       $('rolesConfigWindow').getElementsByTagName('input');
 
+                    writeListUsers.appendChild(document.createTextNode('Notify: '));
+
                     for(i = 0; i < rolesInputList.length; i++) {
+
+
                         if (updatedInputList[i].checked) {
                           rolesInputList[i].setAttribute("checked", "true");
+                        }
+
+                        if (rolesInputList[i].checked) {
+                            var checkedValues = rolesInputList[i].value;
+                            //alert('before: ' + checkedValues)
+                            <c:forEach var="user" items="${AvailableRoles}" varStatus="status">
+                            if (checkedValues == <c:out value="${user.id}"/>) {
+                            writeListUsers.appendChild(document.createTextNode('<c:out value="${user.name}" /> '));
+                            }
+                            </c:forEach>
+                            //writeListUsers.appendChild(document.createTextNode(checkedValues +' '));
+
                         }
                     }
                     new Effect.Fade(Windows.focusedWindow.getId());
