@@ -3842,6 +3842,9 @@ has already been defined.
             ALTER TABLE eam_service ADD CONSTRAINT fkee7e438762b21414 FOREIGN KEY (config_response_id) REFERENCES eam_config_response(id)
           </statement>
           <statement>
+            UPDATE eam_service SET parent_service_id = NULL WHERE parent_service_id = 0
+          </statement>
+          <statement>
             ALTER TABLE eam_service ADD CONSTRAINT fkee7e438784174123 FOREIGN KEY (parent_service_id) REFERENCES eam_service(id)
           </statement>
           <statement>
