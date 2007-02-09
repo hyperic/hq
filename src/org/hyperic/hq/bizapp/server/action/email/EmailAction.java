@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.bizapp.server.action.email;
 
+import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -211,26 +212,33 @@ public class EmailAction extends EmailActionConfig
             filter.sendAlert(appEnt, to, createSubject(alertDef), body,
                              alertDef.isNotifyFiltered());
 
-            StringBuffer result = getLog();
+            StringBuffer result = getLog(to);
             return result.toString();
         } catch (Exception e) {
             throw new ActionExecuteException(e);
         }
     }
 
-    protected StringBuffer getLog() {
-        StringBuffer result = new StringBuffer();
+    protected StringBuffer getLog(InternetAddress[] to) {
+        StringBuffer result = new StringBuffer(isSms() ? "SMS" : "Notified");
         // XXX: Should get this strings into a resource file
         switch (getType()) {
         case TYPE_USERS :
-            result.append("Notified users: ");
+            result.append(" users: ");
             break;
         default :
         case TYPE_EMAILS :
-            result.append("Notified: ");
+            result.append(": ");
             break;
         }
-        result.append(getNames());
+        
+        for (int i = 0; i < to.length; i++) {
+            result.append(to[i].getPersonal());
+            if (i < to.length - 1) {
+                result.append(", ");
+            }
+        }
+
         return result;
     }
 
@@ -241,34 +249,38 @@ public class EmailAction extends EmailActionConfig
         Integer uid;
         int i = 0;
         List validAddresses = new ArrayList();
+        AuthzSubjectValue overlord = getSubjMan().getOverlord();
         for (Iterator it = getUsers().iterator(); it.hasNext(); i++) {
             try {
-                AuthzSubjectValue overlord = getSubjMan().getOverlord();
+                InternetAddress addr;
                 switch (getType()) {
                 case TYPE_USERS:
                     uid = (Integer) it.next();
                     AuthzSubjectValue who =
                         getSubjMan().findSubjectById(overlord, uid);
                     if (isSms()) {
-                        validAddresses.add(
-                            new InternetAddress(who.getSMSAddress()));
+                        addr = new InternetAddress(who.getSMSAddress());
                     } else {
-                        validAddresses.add(
-                            new InternetAddress(who.getEmailAddress()));
+                        addr = new InternetAddress(who.getEmailAddress());
                     }
+                    addr.setPersonal(who.getName());
                     break;
                 default:
                 case TYPE_EMAILS:
-                    validAddresses.add(new InternetAddress((String) it.next(),
-                                                           true));
+                    addr = new InternetAddress((String) it.next(), true);
+                    addr.setPersonal(addr.getAddress());
                     break;
                 }
+                validAddresses.add(addr);
             } catch (AddressException e) {
                 _log.warn("Mail address invalid", e);
                 continue;
             } catch (PermissionException e) {
                 // authz failure...should not happen since its the overlord
                 // doing the user lookup
+                continue;
+            } catch (UnsupportedEncodingException e) {
+                _log.warn("Username encoding error", e);
                 continue;
             }
         }
