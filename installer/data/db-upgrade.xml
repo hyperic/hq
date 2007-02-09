@@ -4013,11 +4013,6 @@ has already been defined.
                       REFERENCES eam_error_code(id) ON DELETE CASCADE
           </statement>
           <statement>
-              ALTER TABLE eam_stat_errors
-                  ADD CONSTRAINT fk6f2383a8cb0ab3b7 FOREIGN KEY (error_id) 
-                      REFERENCES eam_request_stat(id) ON DELETE CASCADE
-          </statement>          
-          <statement>
             DROP TABLE eam_tier_type
           </statement>          
           <statement>
