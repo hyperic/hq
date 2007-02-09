@@ -1803,6 +1803,18 @@ has already been defined.
     <schemaSpec version="3.01">
         <schema-directSQL>
           <statement>
+              delete from eam_aiq_ip
+          </statement>
+          <statement>
+              delete from eam_aiq_service
+          </statement>
+          <statement>
+              delete from eam_aiq_server
+          </statement>
+          <statement>
+              delete from eam_aiq_platform
+          </statement>
+          <statement>
               drop index error_code
           </statement>
           <statement targetDB="postgresql">
