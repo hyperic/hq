@@ -12,89 +12,6 @@
 
     var rtimer = null;
 
-    function showProblemResponse(originalRequest) {
-        var response = eval("(" + originalRequest.responseText + ")");
-        var mList = response.problems;
-        var table = document.getElementById('problemResourcesTable');
-        var urlColon = ":"
-        var resUrl = $('viewResUrl').href;
-
-        for (var i = table.childNodes.length - 1; i > 2; i--) {
-            table.removeChild(table.childNodes[i]);
-        }
-
-        for (i = 0; i < mList.length; i++) {
-
-            var tr = document.createElement('tr');
-            var trTime = document.createElement('tr');
-            var td1 = document.createElement('td');
-            var td2 = document.createElement('td');
-            var td3 = document.createElement('td');
-            var td4 = document.createElement('td');
-            var td5 = document.createElement('td');
-            var newanchor = document.createElement("a");
-
-            table.appendChild(tr);
-
-            if (i % 2 == 0) {
-                tr.setAttribute((document.all ? 'className' : 'class'), "tableRowOdd");
-            } else {
-                tr.setAttribute((document.all ? 'className' : 'class'), "tableRowEven");
-            }
-
-            tr.appendChild(td1);
-            td1.setAttribute((document.all ? 'className' : 'class'), "resource");
-            td1.setAttribute("id", (mList[i].resource));
-
-            if (mList[i].resourceName) {
-                td1.appendChild(newanchor);
-                newanchor.appendChild(document.createTextNode(mList[i].resourceName));
-                newanchor.setAttribute('href', (resUrl + mList[i].resourceType + urlColon + mList[i].resourceId));
-            }
-
-            tr.appendChild(td2);
-            td2.setAttribute((document.all ? 'className' : 'class'), "availability");
-
-            if (mList[i].availability) {
-                switch (mList[i].availability) {
-                    case "green":
-                        td2.innerHTML = "<img src=images/icon_available_green.gif>";
-                        break;
-                    case "red":
-                        td2.innerHTML = "<img src=images/icon_available_red.gif>";
-                        break;
-                    case "yellow":
-                        td2.innerHTML = "<img src=images/icon_available_yellow.gif>";
-                        break;
-                    case "orange":
-                        td2.innerHTML = "<img src=images/icon_available_orange.gif>";
-                        break;
-                    default:
-                        td2.innerHTML = "<img src=images/icon_available_error.gif>";
-                }
-            }
-
-            tr.appendChild(td3);
-            td3.setAttribute((document.all ? 'className' : 'class'), "alerts");
-
-            if (mList[i].alerts) {
-                td3.appendChild(document.createTextNode(mList[i].alerts));
-            }
-
-            tr.appendChild(td4);
-            td4.setAttribute((document.all ? 'className' : 'class'), "oob");
-
-            if (mList[i].oob) {
-                td4.appendChild(document.createTextNode(mList[i].oob));
-            }
-
-         }
-        //$('modifiedProblemTime').innerHTML = 'Updated: ' + refreshTime();
-        
-        rTimer = setTimeout('requestProblemResources();', 60000);
-        //Refresh in 60 seconds
-    }
-
     function showFavoriteResponse(originalRequest) {
         var tmp = eval('(' + originalRequest.responseText + ')');
 
@@ -211,6 +128,103 @@
     function reportError(originalRequest) {
         alert('Error ' + originalRequest.status + ' -- ' + originalRequest.statusText);
     }
+
+    function showProblemResponse(originalRequest) {
+        var probResp = eval("(" + originalRequest.responseText + ")");
+        var mList = probResp.problems;
+        var problemTable = document.getElementById('problemResourcesTable');
+        var urlColon = ":"
+        var resUrl = $('viewResUrl').href;
+        var noProblemResources = $('noProblemResources');
+
+        if (mList.length < 1) {
+            $('noProblemResources').style.display = '';
+        } else {
+            var tbody = problemTable.getElementsByTagName('tbody')[0];
+            for (var i = tbody.childNodes.length - 1; i > 1; i--) {
+                tbody.removeChild(tbody.childNodes[i]);
+        }
+
+        for (i = 0; i < mList.length; i++) {
+
+            var tr = document.createElement('tr');
+            var trTime = document.createElement('tr');
+            var td1 = document.createElement('td');
+            var td2 = document.createElement('td');
+            var td3 = document.createElement('td');
+            var td4 = document.createElement('td');
+            var td5 = document.createElement('td');
+            var newanchor = document.createElement("a");
+
+            tbody.appendChild(tr);
+
+            if (i % 2 == 0) {
+                tr.setAttribute((document.all ? 'className' : 'class'), "tableRowOdd");
+            } else {
+                tr.setAttribute((document.all ? 'className' : 'class'), "tableRowEven");
+            }
+
+            tr.appendChild(td1);
+            td1.setAttribute((document.all ? 'className' : 'class'), "resource");
+            td1.setAttribute("id", (mList[i].resource));
+
+            if (mList[i].resourceName) {
+                td1.appendChild(newanchor);
+                newanchor.appendChild(document.createTextNode(mList[i].resourceName));
+                newanchor.setAttribute('href', (resUrl + mList[i].resourceType + urlColon + mList[i].resourceId));
+            }
+
+            tr.appendChild(td2);
+            td2.setAttribute((document.all ? 'className' : 'class'), "availability");
+
+            if (mList[i].availability) {
+                switch (mList[i].availability) {
+                    case "green":
+                        td2.innerHTML = "<img src=images/icon_available_green.gif>";
+                        break;
+                    case "red":
+                        td2.innerHTML = "<img src=images/icon_available_red.gif>";
+                        break;
+                    case "yellow":
+                        td2.innerHTML = "<img src=images/icon_available_yellow.gif>";
+                        break;
+                    case "orange":
+                        td2.innerHTML = "<img src=images/icon_available_orange.gif>";
+                        break;
+                    default:
+                        td2.innerHTML = "<img src=images/icon_available_error.gif>";
+                }
+            }
+
+            tr.appendChild(td3);
+            td3.setAttribute((document.all ? 'className' : 'class'), "alerts");
+
+            if (mList[i].alerts) {
+                td3.appendChild(document.createTextNode(mList[i].alerts));
+            }
+
+            tr.appendChild(td4);
+            td4.setAttribute((document.all ? 'className' : 'class'), "oob");
+
+            if (mList[i].oob) {
+                td4.appendChild(document.createTextNode(mList[i].oob));
+            }
+            /*
+            tbody.appendChild(trTime);
+            trTime.appendChild(td5);
+
+            td5.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
+            td5.setAttribute('colSpan', '4');
+            td5.setAttribute('id','problemTime')
+            $('problemTime').innerHTML = 'Updated: ' + refreshTime();
+            */
+           }
+         }
+         $('modifiedProblemTime').innerHTML = 'Updated: ' + refreshTime();
+        rTimer = setTimeout('showProblemResponse();', 60000);
+        //Refresh in 60 seconds
+    }
+
 
     function showRecentAlerts(originalRequest) {
         var alertText = eval("(" + originalRequest.responseText + ")");
