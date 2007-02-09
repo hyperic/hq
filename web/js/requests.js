@@ -125,11 +125,8 @@
         //var rTimer = setTimeout(showFavoriteResponse,20000); //Refresh in 60 seconds
     }
 
-    function reportError(originalRequest) {
-        alert('Error ' + originalRequest.status + ' -- ' + originalRequest.statusText);
-    }
-
     function showProblemResponse(originalRequest) {
+        
         var probResp = eval("(" + originalRequest.responseText + ")");
         var mList = probResp.problems;
         var problemTable = document.getElementById('problemResourcesTable');
@@ -137,13 +134,12 @@
         var resUrl = $('viewResUrl').href;
         var noProblemResources = $('noProblemResources');
 
-        if (mList.length < 1) {
-            $('noProblemResources').style.display = '';
-        } else {
+        if (mList && mList.length > 0) {
+
             var tbody = problemTable.getElementsByTagName('tbody')[0];
             for (var i = tbody.childNodes.length - 1; i > 1; i--) {
                 tbody.removeChild(tbody.childNodes[i]);
-        }
+            }
 
         for (i = 0; i < mList.length; i++) {
 
@@ -219,9 +215,11 @@
             $('problemTime').innerHTML = 'Updated: ' + refreshTime();
             */
            }
-         }
+        } else {
+            $('noProblemResources').style.display = '';
+        }
          $('modifiedProblemTime').innerHTML = 'Updated: ' + refreshTime();
-        rTimer = setTimeout('showProblemResponse();', 60000);
+        //rTimer = setTimeout('showProblemResponse();', 10000);
         //Refresh in 60 seconds
     }
 
@@ -312,7 +310,7 @@
 
        $('modifiedCritTime' + (token != null ? token : '')).innerHTML =
          'Updated: ' + refreshTime();
-       rTimer = setTimeout(alertFunc, 60000);
+       //rTimer = setTimeout(alertFunc, 60000);
        // Refresh in 60 seconds
     }
 
@@ -409,7 +407,7 @@
         }
 
         //$('modifiedAvailTime').innerHTML = 'Updated: ' + refreshTime();
-        rTimer = setTimeout(availFunc, 60000);
+        //rTimer = setTimeout(availFunc, 60000);
     }
 
     function showMetricsResponse(originalRequest) {
@@ -509,7 +507,7 @@
             $(noMetricTable).style.display = '';
         }
 
-        rTimer = setTimeout(metricFunc, 60000);
+        //rTimer = setTimeout(metricFunc, 60000);
         //Refresh in 60 seconds
     }
 }
@@ -540,4 +538,8 @@ function refreshDate() {
     var todayDate = (today.getMonth() + 1) + "/" +
                     today.getDate() + "/" + (year + "").substring(2, 4);
     return todayDate;
+}
+
+function reportError(originalRequest) {
+            alert('Error ' + originalRequest.status + ' -- ' + originalRequest.statusText);
 }

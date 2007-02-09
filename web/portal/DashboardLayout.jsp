@@ -81,6 +81,18 @@
   }
 
 </script>
+<script language="JavaScript" type="text/javascript">
+    function refreshPortlets() {
+        setTimeout("requestAvailSummary<c:out value="${portlet.token}"/>()", 60000);
+        setTimeout("requestProblemResponse()", 60000);
+        setTimeout("requestRecentAlerts<c:out value="${portlet.token}"/>()", 60000);
+        setTimeout("requestFavoriteResources()", 60000);
+
+    }
+
+    onloads.push(refreshPortlets);
+
+</script>
 
 <%
   String divStart;
