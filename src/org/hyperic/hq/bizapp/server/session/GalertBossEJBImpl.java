@@ -219,8 +219,8 @@ public class GalertBossEJBImpl
         for (Iterator i= alertDefs.iterator(); i.hasNext(); ) {
             GalertDef def = (GalertDef)i.next();
             
-            res.add(new AlertDefinitionBean(def.getId(), 0, def.getName(),
-                                            def.getDescription(),
+            res.add(new AlertDefinitionBean(def.getId(), def.getCtime(), 
+                                            def.getName(), def.getDescription(),
                                             def.isEnabled(), null));
         }
         res.setTotalSize(alertDefs.getTotalSize());
