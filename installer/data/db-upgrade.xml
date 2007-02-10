@@ -4207,6 +4207,9 @@ has already been defined.
             ALTER TABLE eam_cprop ADD CONSTRAINT fke5d047984eaeab4a FOREIGN KEY (keyid) REFERENCES eam_cprop_key(id) ON DELETE CASCADE
           </statement>
           <statement>
+            DELETE FROM  eam_measurement_bl WHERE measurement_id NOT IN (SELECT id FROM eam_measurement)
+          </statement>
+          <statement>
             ALTER TABLE eam_measurement_bl ADD CONSTRAINT fk1877029bae18683b FOREIGN KEY (measurement_id) REFERENCES eam_measurement(id)
           </statement>
           <statement>
