@@ -202,9 +202,7 @@
             tr.appendChild(td4);
             td4.setAttribute((document.all ? 'className' : 'class'), "oob");
 
-            if (mList[i].oob) {
-                td4.appendChild(document.createTextNode(mList[i].oob));
-            }
+            td4.appendChild(document.createTextNode(mList[i].oob));
             /*
             tbody.appendChild(trTime);
             trTime.appendChild(td5);
