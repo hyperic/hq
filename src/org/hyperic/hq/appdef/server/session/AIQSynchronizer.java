@@ -35,6 +35,7 @@ import javax.naming.NamingException;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
+import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.autoinventory.AIPlatform;
@@ -80,7 +81,17 @@ public class AIQSynchronizer {
                 // Not in the queue, so nothing to do.
 
             } else {
-                // Remove from queue.
+                // Remove from queue, but only if nothing has been ignored.
+                AIServerValue[] servers = aiPlatform.getAIServerValues();
+                for (int i = 0; i < servers.length; i++) {
+                    AIServerValue s = servers[i];
+                    if (s.getIgnored()) {
+                        _log.info("Platform " + existingQplatform.getName() +
+                                  " has ignored servers, leaving in queue.");
+                        return aiPlatform;
+                    }
+                }
+
                 _log.info("Removing unchanged " + existingQplatform.getName() +
                           " from queue.");
                 aiqMgr.removeFromQueue(existingQplatform);
