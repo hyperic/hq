@@ -517,7 +517,7 @@ function showViewEscResponse(originalRequest) {
           var rolesInputList = rolesDiv.getElementsByTagName('input');
            for(i=0;i < rolesInputList.length; i++) {
                   var inputRolesArr = rolesInputList[i];
-                  inputRolesArr.name =  inputRolesArr.name + "_" + liID;
+                  inputRolesArr.name =  inputRolesArr.name;
               }
           }
 
