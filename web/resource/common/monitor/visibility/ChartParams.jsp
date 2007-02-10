@@ -130,7 +130,7 @@
       <html:link href="${alertLink}"><fmt:message key="resource.common.monitor.visibility.NewAlertLink"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
     </c:if>
       <html:hidden property="saveChart" value="false"/>
-      <html:link href="." onclick="return saveToDashboard();"><fmt:message key="resource.common.monitor.visibility.SaveChartToDash"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
+      <html:link href="#" onclick="return saveToDashboard();"><fmt:message key="resource.common.monitor.visibility.SaveChartToDash"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
 
     <c:if test="${not empty back}">
         <html:link page="${back}"><fmt:message key="resource.common.monitor.visibility.Back2Resource"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
