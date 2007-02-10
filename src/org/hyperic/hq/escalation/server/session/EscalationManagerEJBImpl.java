@@ -367,8 +367,8 @@ public class EscalationManagerEJBImpl
         //        we allow this to proceed
         _log.debug("Executing state[" + s.getId() + "]");
         if (actionIdx >= e.getActions().size()) {
-            _log.warn("Attempted to execute escalation state which had run " +
-                      "out.  Perhaps the escalation was modified?");
+            _log.debug("Reached the end of the escalation state[" + 
+                       s.getId() + "].  Ending it");
             endEscalation(s);
             return;
         }
@@ -380,19 +380,14 @@ public class EscalationManagerEJBImpl
 
         // Always make sure that we increase the state offset of the
         // escalation so we don't loop fo-eva 
-        if (actionIdx >= (e.getActions().size() - 1)) {
-            _log.debug("Ran out of escalation.  Terminating state");
-            endEscalation(s);
-        } else {
-            long nextTime = System.currentTimeMillis() + eAction.getWaitTime();
+        long nextTime = System.currentTimeMillis() + eAction.getWaitTime();
             
-            _log.debug("Moving onto next state of escalation, but chillin' for "
-                       + eAction.getWaitTime() + " ms");
-            s.setNextAction(actionIdx + 1);
-            s.setNextActionTime(nextTime);
+        _log.debug("Moving onto next state of escalation, but chillin' for "
+                   + eAction.getWaitTime() + " ms");
+        s.setNextAction(actionIdx + 1);
+        s.setNextActionTime(nextTime);
                                 
-            EscalationRuntime.getInstance().scheduleEscalation(s);
-        }
+        EscalationRuntime.getInstance().scheduleEscalation(s);
         
         try {
             ActionExecutionInfo execInfo = 
