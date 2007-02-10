@@ -478,12 +478,15 @@ public class EscalationManagerEJBImpl
         
         if (fixed) {  
             _log.debug(subject.getFullName() + " has fixed alertId=" + alertId);
-            type.fixAlert(alertId, subject);
+            type.changeAlertState(alertId, subject, 
+                                  EscalationStateChange.FIXED);
             if (state != null)
                 endEscalation(state);
         } else {
             _log.debug(subject.getFullName() + " has acknowledged alertId=" + 
                        alertId);
+            type.changeAlertState(alertId, subject, 
+                                  EscalationStateChange.ACKNOWLEDGED);
             state.setAcknowledgedBy(subject);
         }
 

@@ -15,4 +15,16 @@ public class EscalationStateChange
     private EscalationStateChange(int code, String desc) {
         super(code, desc);
     }
+    
+    public boolean isCreated() {
+        return equals(CREATED);
+    }
+
+    public boolean isAcknowledged() {
+        return equals(ACKNOWLEDGED);
+    }
+
+    public boolean isFixed() {
+        return equals(FIXED);
+    }
 }

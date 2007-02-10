@@ -31,6 +31,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
+import org.hyperic.hq.escalation.server.session.EscalationStateChange;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
@@ -90,10 +91,16 @@ public final class ClassicEscalationAlertType
         }
     }
 
-    protected void fixAlert(Integer alertId, AuthzSubject fixer) {
+    protected void changeAlertState(Integer alertId, AuthzSubject who,
+                                    EscalationStateChange newState) 
+    {
         Alert alert = getAlertMan().findAlertById(alertId);
 
-        getAlertMan().fixAlert(alert, fixer);
+        if (newState.isFixed()) 
+            getAlertMan().fixAlert(alert, who);
+        else if (newState.isAcknowledged()) 
+            getAlertMan().logActionDetail(alert, null, "Acknowledged by " + 
+                                          who.getFullName()); 
     }
     
     protected void logActionDetails(Integer alertId, Action action, 

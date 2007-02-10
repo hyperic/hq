@@ -28,6 +28,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
+import org.hyperic.hq.escalation.server.session.EscalationStateChange;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
@@ -62,11 +63,17 @@ public final class GalertEscalationAlertType
         getGalertMan().findById(defId).setEscalation(escalation);
     }
 
-    protected void fixAlert(Integer alertId, AuthzSubject fixer) {
+    protected void changeAlertState(Integer alertId, AuthzSubject who, 
+                                    EscalationStateChange newState) 
+    {
         GalertManagerLocal gMan = getGalertMan();
         GalertLog alert = gMan.findAlertLog(alertId);
 
-        gMan.fixAlert(alert, fixer);
+        if (newState.isFixed()) 
+            gMan.fixAlert(alert, who);
+        else if (newState.isAcknowledged())
+            gMan.createActionLog(alert, "Acknowledged by " + who.getFullName(),
+                                 null, who);
     }
 
     protected void logActionDetails(Integer alertId, Action action, 

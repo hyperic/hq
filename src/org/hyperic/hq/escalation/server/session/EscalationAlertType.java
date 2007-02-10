@@ -64,14 +64,16 @@ public abstract class EscalationAlertType
     protected abstract void setEscalation(Integer defId, Escalation escalation);                                          
     
     /**
-     * Fix an alert.  This method should simply set the alert as fixed and not
-     * do much else.  
+     * Change the state of an alert.  This method should simply change the 
+     * state, log it & not much else.
      *  
-     * @param fixer    Person who fixed the alert
-     * @param alertId  AlertID to mark as fixed
+     * @param alertId  AlertID to change state of
+     * @param who      Person changing the state
+     * @param newState New state
      */
-    protected abstract void fixAlert(Integer alertId, AuthzSubject fixer);
-    
+    protected abstract void changeAlertState(Integer alertId, AuthzSubject who,
+                                             EscalationStateChange newState); 
+
     /**
      * Log the result of the execution of an action.  The escalation system
      * executes actions as part of the escalation chain.  Each action spits
