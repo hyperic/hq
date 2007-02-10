@@ -836,7 +836,7 @@ ul.boxy li {
 }
 
 .availability {
-  width:10%;
+  width:8%;
   padding-top:3px;
   padding-bottom:3px;
   border-bottom:1px solid #D5D8DE;
@@ -844,7 +844,7 @@ ul.boxy li {
 }
 
 .alerts {
-  width:10%;
+  width:7%;
   padding-top:3px;
   padding-bottom:3px;
   border-bottom:1px solid #D5D8DE;
@@ -852,7 +852,16 @@ ul.boxy li {
 }
 
 .oob {
-  width:10%;
+  width:5%;
+  padding-top:3px;
+  padding-bottom:3px;
+  padding-right:3px;
+  border-bottom:1px solid #D5D8DE;
+  text-align:center;
+}
+
+.latest {
+  width:20%;
   padding-top:3px;
   padding-bottom:3px;
   padding-right:3px;

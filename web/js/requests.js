@@ -201,8 +201,13 @@
 
             tr.appendChild(td4);
             td4.setAttribute((document.all ? 'className' : 'class'), "oob");
-
             td4.appendChild(document.createTextNode(mList[i].oob));
+
+            tr.appendChild(td5);
+            td5.setAttribute((document.all ? 'className' : 'class'), "latest");
+            td5.setAttribute("nowrap", "true");
+            td5.appendChild(document.createTextNode(mList[i].latest));
+
             /*
             tbody.appendChild(trTime);
             trTime.appendChild(td5);
