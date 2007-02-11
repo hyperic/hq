@@ -78,6 +78,7 @@ public class ServiceClusterDAO extends HibernateDAO {
                 st = service.getServiceType();
             }
             services.add(service);
+            service.setServiceCluster(sc);
         }
         sc.setServices(services);
         
