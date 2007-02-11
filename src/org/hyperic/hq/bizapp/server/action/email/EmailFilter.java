@@ -141,15 +141,15 @@ public class EmailFilter {
                 String name = entVal.getName();
                 String desc = entVal.getDescription();
                 
+                if (desc == null) {
+                    desc = "";
+                }
+                
                 for (int i = 0; i < strs.length; i++) {
                     strs[i] = strs[i].replaceAll(EmailAction.RES_NAME_HOLDER,
                                                  name);
-                    
-                    if (desc != null) {
-                        strs[i] =
-                            strs[i].replaceAll(EmailAction.RES_DESC_HOLDER,
-                                               desc);
-                    }
+                    strs[i] = strs[i].replaceAll(EmailAction.RES_DESC_HOLDER,
+                                                 desc);
                 }
             } catch (AppdefEntityNotFoundException e) {
                 log.error("Entity ID invalid: " + e);
