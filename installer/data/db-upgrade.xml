@@ -4570,6 +4570,17 @@ has already been defined.
                           column="ALERT_TYPE" nullable="NOT NULL"/>
     </schemaSpec>
 
+    <!-- Events are no longer compatible, because they've been changed -->
+    <schemaSpec version="3.09">
+      <schema-directSQL>
+        <statement>
+          DELETE FROM EAM_TRIGGER_EVENT
+        </statement>
+        <statement>
+          DELETE FROM EAM_EVENT
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
 
 </dbupgrade>
 
