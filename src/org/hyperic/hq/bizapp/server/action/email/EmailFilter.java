@@ -144,8 +144,12 @@ public class EmailFilter {
                 for (int i = 0; i < strs.length; i++) {
                     strs[i] = strs[i].replaceAll(EmailAction.RES_NAME_HOLDER,
                                                  name);
-                    strs[i] = strs[i].replaceAll(EmailAction.RES_DESC_HOLDER,
-                                                 desc);
+                    
+                    if (desc != null) {
+                        strs[i] =
+                            strs[i].replaceAll(EmailAction.RES_DESC_HOLDER,
+                                               desc);
+                    }
                 }
             } catch (AppdefEntityNotFoundException e) {
                 log.error("Entity ID invalid: " + e);
