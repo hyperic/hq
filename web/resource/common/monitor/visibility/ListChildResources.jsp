@@ -125,13 +125,13 @@
 <c:if test="${count > 5}">
   <div class="scrollable">
 </c:if>
-<table border="0" cellpadding="1" cellspacing="0" id="ResourceTable" class="portletLRBorder">
+<table border="0" cellpadding="1" cellspacing="0" id="ResourceTable" class="portletLRBorder" width="100%">
   <tr>
     <c:if test="${not empty summaries && checkboxes}">
     <td class="ListHeaderCheckbox" width="3%"><input type="checkbox" onclick="ToggleAllGroup(this, widgetProperties, '<c:out value="${listMembersName}"/>')" name="<c:out value="${listMembersName}"/>All"></td>
     </c:if>
 
-    <td class="ListHeader" width="69%" colspan="2" align="left"><BLK><fmt:message key="${childResourcesHealthKey}"/><BLK></td>
+    <td class="ListHeader" width="100%" colspan="2" align="left"><BLK><fmt:message key="${childResourcesHealthKey}"/><BLK></td>
 
     <c:if test="${not empty summaries}">
     <!--<td class="ListHeaderInactive" width="20%" align="center" nowrap><fmt:message key="resource.common.monitor.visibility.TotalNumTH"/></td>-->
