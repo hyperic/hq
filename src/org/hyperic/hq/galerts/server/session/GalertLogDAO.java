@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
+import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -87,6 +88,36 @@ class GalertLogDAO
         }
 
         return new PageList();
+    }
+
+    List findByCreateTime(long startTime, long endTime, int count) {
+        return createCriteria()
+            .add(Expression.between("timestamp", new Long(startTime), 
+                                    new Long(endTime)))
+            .addOrder(Order.desc("timestamp"))
+            .setMaxResults(count)
+            .setCacheable(true)
+            .setCacheRegion("GalertLog.findByCreateTime")
+            .list();
+    }
+    
+    List findByCreateTimeAndPriority(long begin, long end, int priority,
+                                     int count) 
+    {
+        String sql = "from GalertLog a " +
+            "WHERE a.timestamp between :begin and :end " + 
+            "and (a.alertDef.severityEnum = :priority " +
+            "     or a.alertDef.severityEnum > :priority) " +
+            "order by a.timestamp desc"; 
+        
+        return getSession().createQuery(sql)
+                .setLong("begin", begin)
+                .setLong("end", end)
+                .setInteger("priority", priority)
+                .setMaxResults(count)
+                .setCacheable(true)
+                .setCacheRegion("GalertLog.findByCreateTimeAndPriority")
+                .list();
     }
 
     void removeAll(ResourceGroup g) {

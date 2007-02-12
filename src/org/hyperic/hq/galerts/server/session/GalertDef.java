@@ -32,6 +32,7 @@ import java.util.Set;
 
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.escalation.server.session.Escalation;
@@ -49,7 +50,7 @@ public class GalertDef
     private AlertSeverity _severity; 
     private boolean       _enabled;
     private ResourceGroup _group;
-    private Escalation   _escalation;
+    private Escalation    _escalation;
     private Set           _strategies = new HashSet();
     private long          _ctime;
     private long          _mtime;
@@ -184,6 +185,10 @@ public class GalertDef
         return this;
     }
 
+    public AppdefEntityID getAppdefID() {
+        return new AppdefEntityID(getAppdefType(), getAppdefId());
+    }
+    
     public int getAppdefId() {
         return getGroup().getId().intValue();
     }

@@ -36,6 +36,7 @@ import javax.ejb.SessionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.GroupChangeCallback;
@@ -51,6 +52,7 @@ import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.AlertSeverity;
+import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.galerts.processor.GalertProcessor;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo;
@@ -234,6 +236,49 @@ public class GalertManagerEJBImpl
         return _logDAO.findByTimeWindow(group, begin, pc);
     }
 
+    /**
+     * Find group alerts based on a set of criteria
+     *
+     * @param subj      Subject doing the finding
+     * @param count     Max # of alerts to return
+     * @param priority  A value from {@link EventConstants}
+     * @param timeRange the amount of milliseconds prior to current that the
+     *                  alerts will be contained in.  e.g. the beginning of the  
+     *                  time range will be (current - timeRante)
+     * @param includes  A list of entity IDs to include in the result
+     * @ejb:interface-method
+     */
+    public List findAlerts(AuthzSubjectValue subj, int count, int priority,
+                           long timeRange, long endTime, List includes) 
+        throws PermissionException 
+    {
+        List alerts;
+            
+        if (priority == EventConstants.PRIORITY_ALL) {
+            alerts = _logDAO.findByCreateTime(endTime- timeRange, endTime, 
+                                              count);
+        } else {
+            alerts = _logDAO.findByCreateTimeAndPriority(endTime - timeRange,
+                                                         endTime, priority, 
+                                                         count);
+        }
+            
+        List result = new ArrayList();
+        for (Iterator i=alerts.iterator(); i.hasNext(); ) {
+            GalertLog l = (GalertLog)i.next();
+            GalertDef def = l.getAlertDef();
+            
+            // Filter by appdef entity
+            AppdefEntityID aeid = def.getAppdefID();
+            if (includes != null && !includes.contains(aeid))
+                continue;
+
+            result.add(l);
+        }
+            
+        return result;
+    }
+    
     /**
      * @ejb:interface-method  
      */
