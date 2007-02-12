@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -76,13 +77,14 @@ import org.hyperic.hq.bizapp.server.trigger.frequency.DurationTrigger;
 import org.hyperic.hq.bizapp.server.trigger.frequency.FrequencyTriggerInterface;
 import org.hyperic.hq.bizapp.shared.EventsBossLocal;
 import org.hyperic.hq.bizapp.shared.EventsBossUtil;
-import org.hyperic.hq.bizapp.shared.uibeans.DashboardAlertBean;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
+import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.events.ActionCreateException;
@@ -112,6 +114,8 @@ import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
+import org.hyperic.hq.galerts.shared.GalertManagerLocal;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.action.MetricAlertAction;
 import org.hyperic.hq.measurement.server.session.DefaultMetricEnableCallback;
@@ -1224,66 +1228,81 @@ public class EventsBossEJBImpl
      * @param priority allowable values: 0 (all), 1, 2, or 3
      * @param timeRange the amount of time from current time to include
      * @param ids the IDs of resources to include or null for ALL
+     * @return a list of {@link Escalatable}s
      * @ejb:interface-method
      */
-    public List findAlerts(String username, int count, int priority,
-                               long timeRange, AppdefEntityID[] ids)
+    public List findRecentAlerts(String username, int count, int priority,
+                                 long timeRange, AppdefEntityID[] ids) 
         throws LoginException, ApplicationException, ConfigPropertyException 
     {
         int sessionId = getAuthManager().getUnauthSessionId(username);
-        return findAlerts(sessionId, count, priority, timeRange, ids);
+        return findRecentAlerts(sessionId, count, priority, timeRange, ids);
     }
     
     /**
-     * Search alerts given a set of criteria
+     * Search recent alerts given a set of criteria
      * @param sessionID the session token
      * @param count the maximum number of alerts to return
      * @param priority allowable values: 0 (all), 1, 2, or 3
      * @param timeRange the amount of time from current time to include
      * @param ids the IDs of resources to include or null for ALL
+     * @return a list of {@link Escalatable}s
      * @ejb:interface-method
      */
-    public List findAlerts(int sessionID, int count, int priority,
-                           long timeRange, AppdefEntityID[] ids)
+    public List findRecentAlerts(int sessionID, int count, int priority, 
+                                 long timeRange, AppdefEntityID[] ids)  
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException 
     {
         AuthzSubjectValue subject  = manager.getSubject(sessionID);
-        StopWatch timer = new StopWatch();
+        long cur = System.currentTimeMillis();
+        long base = (cur / timeRange) * timeRange;
+        boolean evenDivide = cur % timeRange == 0;
+        long lateTime = base + (evenDivide ? 0 : timeRange);
+        long earlyTime = base - timeRange - (evenDivide ? 0 : timeRange);
+        long newRange = lateTime - earlyTime;
+        
         List appentResources;
         
         if (ids == null) {
             // Assume if user can be alerted, then they can view resource,
             // otherwise, it'll be filtered out later anyways
             // find ALL alertable resources
-            appentResources = 
-                getPlatformManager().checkAlertingScope(subject);
+            appentResources = getPlatformManager().checkAlertingScope(subject);
         } else {
             appentResources = Arrays.asList(ids);
         }
         
-        if (_log.isDebugEnabled()) {
-            _log.debug("checkAlertingScope(): " + timer + " seconds");
-            timer.reset();
-        }
-        
-        List alerts = getAM().findRecentAlerts(subject, count, priority, 
-                                               timeRange, appentResources);
+        List alerts = getAM().findAlerts(subject, count, priority, 
+                                         newRange, lateTime, appentResources);
+        alerts = getAM().convertAlertsToEscalatables(alerts);
     
+        GalertManagerLocal gMan = GalertManagerEJBImpl.getOne();
+        alerts.addAll(gMan.findAlerts(subject, count, priority, newRange,  
+                                      lateTime, appentResources)); 
 
-        if (_log.isDebugEnabled()) {
-            _log.debug("findAlerts(): " + timer + " seconds");
-            timer.reset();
-        }
+        Collections.sort(alerts, new Comparator() {
+            public int compare(Object o1, Object o2) {
+                long l1 = ((Escalatable)o1).getAlertInfo().getTimestamp();
+                long l2 = ((Escalatable)o2).getAlertInfo().getTimestamp();
+                
+                // Reverse sort
+                if (l1 > l2)
+                    return -1;
+                else if (l1 < l2)
+                    return 1;
+                else 
+                    return 0;
+            }
+        });
         
-        // Create the beans to return
         Map resMap = new HashMap();
         List badIds = new ArrayList();
         
-        List uiBeans = new ArrayList();
+        List res = new ArrayList();
         for (Iterator i = alerts.iterator(); i.hasNext(); ){
-            Alert alert = (Alert) i.next();
-            AlertDefinition def = alert.getAlertDefinition();
+            Escalatable alert = (Escalatable) i.next();
+            PerformsEscalations def = alert.getDefinition();
             AppdefEntityID aeid;
 
             try {
@@ -1314,20 +1333,10 @@ public class EventsBossEJBImpl
                 }
             }
             
-            uiBeans.add(new DashboardAlertBean(alert.getCtime(),
-                                               def.getId(),
-                                               alert.getId(),
-                                               def.getName(),
-                                               resource,
-                                               alert.isFixed()));
+            res.add(alert);
         }
         
-        _log.debug("Returning UI beans: " + uiBeans);
-
-        if (_log.isDebugEnabled())
-            _log.debug("create UI beans: " + timer + " seconds");
-        
-        return uiBeans;
+        return res;
     }
 
     /**
