@@ -4590,7 +4590,30 @@ has already been defined.
         </statement>
       </schema-directSQL>
     </schemaSpec>
-    
+
+    <!-- Add the timeestamp column to alert_action_log -->
+    <schemaSpec version="3.11">
+        <schema-addColumn table="EAM_ALERT_ACTION_LOG"
+                          column="TIMESTAMP" columnType="LONG">
+          <initializer>
+              update eam_alert_action_log l 
+                set timestamp = (select ctime from eam_alert a 
+                                 where a.id = l.alert_id) 
+                where l.alert_id is not null;              
+          </initializer>
+        </schema-addColumn>
+        <schema-directSQL>
+          <statement>
+            update eam_alert_action_log l 
+              set timestamp = (select timestamp from eam_galert_logs a 
+                               where a.id = l.galert_id) 
+              where l.galert_id is not null;              
+          </statement>
+        </schema-directSQL>
+        <schema-alterColumn table="EAM_ALERT_ACTION_LOG"
+                            column="TIMESTAMP" nullable="NOT NULL"/>
+    </schemaSpec>
+
 </dbupgrade>
 
 </target>

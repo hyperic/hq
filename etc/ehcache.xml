@@ -451,6 +451,12 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.events.server.session.AlertConditionLog"
+         maxElementsInMemory="1000"
+		 eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.events.server.session.AlertCondition"
          maxElementsInMemory="5000"
 		 eternal="true"
@@ -502,6 +508,12 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.galerts.server.session.GtriggerInfo"
+         maxElementsInMemory="1000"
+		 eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.galerts.server.session.GalertActionLog"
          maxElementsInMemory="1000"
 		 eternal="true"
          timeToIdleSeconds="0"

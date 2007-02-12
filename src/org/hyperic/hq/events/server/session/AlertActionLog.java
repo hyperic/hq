@@ -38,6 +38,7 @@ public class AlertActionLog
     private Alert               _alert;
     private Action              _action;
     private AuthzSubject        _subject;
+    private long                _timeStamp;
     
     private AlertActionLogValue _valueObj;
     
@@ -47,10 +48,11 @@ public class AlertActionLog
     protected AlertActionLog(Alert alert, String detail, Action action,
                              AuthzSubject subject) 
     {
-        _detail  = detail;
-        _alert   = alert;
-        _action  = action;
-        _subject = subject;
+        _detail    = detail;
+        _alert     = alert;
+        _action    = action;
+        _subject   = subject;
+        _timeStamp = System.currentTimeMillis();
     }
     
     protected String getDetail() {
@@ -95,6 +97,14 @@ public class AlertActionLog
     
     public EscalationAlertType getAlertType() {
         return ClassicEscalationAlertType.CLASSIC;
+    }
+    
+    public long getTimeStamp() {
+        return _timeStamp;
+    }
+    
+    protected void setTimeStamp(long stamp) {
+        _timeStamp = stamp;
     }
     
     public AlertActionLogValue getAlertActionLogValue() {

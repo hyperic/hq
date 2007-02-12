@@ -483,6 +483,13 @@ public class EscalationManagerEJBImpl
             if (state != null)
                 endEscalation(state);
         } else {
+            if (state.getAcknowledgedBy() != null) {
+                _log.warn(subject.getFullName() + " attempted to acknowledge "+
+                          type + " alert=" + alertId + " but it was already "+
+                          "acknowledged by " + 
+                          state.getAcknowledgedBy().getFullName());
+                return;
+            }
             _log.debug(subject.getFullName() + " has acknowledged alertId=" + 
                        alertId);
             type.changeAlertState(alertId, subject, 
