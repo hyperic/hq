@@ -165,7 +165,7 @@ function skipResources() {
                 <td style="padding-right:10px;">
                 <input type="submit" name="buttonAction" onclick="setImportCheckboxes(AIQueueForm);addInventory();" value="<fmt:message key="common.label.AddtoInventory"/>" class="CompactButton">
                 &nbsp;&nbsp;
-                <input type="submit" name="buttonAction" onclick="skipResources(); return false;" value="<fmt:message key="common.label.SkipResources"/>" class="CompactButton">
+                <input type="submit" name="buttonAction" onclick="skipResources(); AIQueueForm.submit(); return false;" value="<fmt:message key="common.label.SkipResources"/>" class="CompactButton">
 
 
                </td>
