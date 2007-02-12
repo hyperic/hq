@@ -1,4 +1,4 @@
-package org.hyperic.hq.product;
+package org.hyperic.hq.plugin.netdevice;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -9,6 +9,7 @@ import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.snmp.SNMPClient;
 
 import org.snmp4j.CommandResponder;
@@ -67,6 +68,7 @@ public class SNMPTrapReceiver
 
     public static void shutdown() throws IOException {
         if (instance != null) {
+            log.debug("Shutdown instance");
             instance._threadPool.cancel();
             instance._snmp.close();
             instance = null;
@@ -117,10 +119,13 @@ public class SNMPTrapReceiver
         _plugins.put(key, plugin);
     }
 
-    public void remove(LogTrackPlugin plugin) {
+    public static void remove(LogTrackPlugin plugin) {
+        if (instance == null) {
+            return;
+        }
         String key = getPluginKey(plugin);
         log.debug("Remove " + plugin.getName() + " for " + key);
-        _plugins.remove(key);
+        instance._plugins.remove(key);
     }
 
     private SNMPTrapReceiver () {}

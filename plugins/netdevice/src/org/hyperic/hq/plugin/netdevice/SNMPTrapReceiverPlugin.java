@@ -1,12 +1,12 @@
-package org.hyperic.hq.product;
+package org.hyperic.hq.plugin.netdevice;
 
 import java.io.IOException;
 
+import org.hyperic.hq.product.LogTrackPlugin;
+import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
 public class SNMPTrapReceiverPlugin extends LogTrackPlugin {
-
-    private boolean _isRegistered = false;
 
     private SNMPTrapReceiver getReceiver()
         throws IOException {
@@ -19,7 +19,6 @@ public class SNMPTrapReceiverPlugin extends LogTrackPlugin {
 
         try {
             getReceiver().add(this);
-            _isRegistered = true;
         } catch (IOException e) {
             throw new PluginException(e.getMessage(), e);
         }
@@ -28,14 +27,6 @@ public class SNMPTrapReceiverPlugin extends LogTrackPlugin {
     public void shutdown() throws PluginException {
         super.shutdown();
 
-        if (!_isRegistered) {
-            return;
-        }
-
-        try {
-            getReceiver().remove(this);
-        } catch (IOException e) {
-            throw new PluginException(e.getMessage(), e);
-        }
+        SNMPTrapReceiver.remove(this);
     }
 }

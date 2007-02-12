@@ -18,6 +18,6 @@
             class="org.hyperic.hq.product.SNMPMeasurementPlugin"/>
 
     <plugin type="log_track"
-            class="org.hyperic.hq.product.SNMPTrapReceiverPlugin"/>
+            class="org.hyperic.hq.plugin.netdevice.SNMPTrapReceiverPlugin"/>
 
     <metrics include="netdevice-platform"/>

@@ -30,7 +30,8 @@
   USA.
  -->
 
-<plugin name="netdevice">
+<plugin name="netdevice"
+        class="org.hyperic.hq.plugin.netdevice.NetworkDeviceProductPlugin">
 
   <filter name="if.config"
           value="snmpIndexName=%interface.index%,snmpIndexValue=%interface%"/>
