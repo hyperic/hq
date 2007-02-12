@@ -41,6 +41,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
+import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -380,6 +381,28 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         
     }
 
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public AuthzSubject getCurrentSubject(int sessionid) 
+        throws SessionException
+    {
+        return manager.getSubjectPojo(sessionid);
+    }
+    
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public AuthzSubject getCurrentSubject(String name)
+        throws SessionException, ApplicationException
+    {
+        int sessionId = getAuthManager().getUnauthSessionId(name);
+        return getCurrentSubject(sessionId);
+    }
+
+    
     /**
      * Register the user by using the overlord to create him.
      * @throws SubjectNotFoundException 
