@@ -30,6 +30,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.bizapp.shared.action.SyslogActionConfig;
@@ -39,15 +41,12 @@ import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.AlertInterface;
-import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.NoOpAction;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
-import org.hyperic.util.config.InvalidOptionException;
-import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.json.JSON;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,6 +55,8 @@ public class Action
     extends PersistedObject
     implements JSON
 {
+    private static final Log _log = LogFactory.getLog(Action.class);
+
     public static final String JSON_NAME = "action";
     
     private String          _className;
@@ -90,13 +91,6 @@ public class Action
         config.setType(json.getInt(EmailActionConfig.CFG_TYPE));
         config.setNames(json.getString(EmailActionConfig.CFG_NAMES));
         config.setSms(json.getBoolean(EmailActionConfig.CFG_SMS));
-        return createAction(config);
-    }
-
-    static Action newEmailAction(int type, Set notifs) {
-        EmailActionConfig config = new EmailActionConfig();
-        config.setType(type);
-        config.setNames(StringUtil.iteratorToString(notifs.iterator(), ",", ""));
 
         return createAction(config);
     }
