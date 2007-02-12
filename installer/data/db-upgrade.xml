@@ -4582,6 +4582,15 @@ has already been defined.
       </schema-directSQL>
     </schemaSpec>
 
+    <!-- Baselines cannot be null -->
+    <schemaSpec version="3.10">
+      <schema-directSQL>
+        <statement>
+          DELETE FROM eam_measurement_bl WHERE mean IS NULL OR min_expected_val IS NULL OR max_expected_val IS NULL
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+    
 </dbupgrade>
 
 </target>
