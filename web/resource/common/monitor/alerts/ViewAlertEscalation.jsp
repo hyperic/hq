@@ -4,6 +4,7 @@
 <%@ taglib uri="jstl-fmt" prefix="fmt" %>
 <%@ taglib uri="struts-tiles" prefix="tiles" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
+<%@ taglib uri="hq" prefix="hq" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -70,6 +71,7 @@
     </fmt:message>
     </td>
     <td colspan="3"  class="BlockContent" style="padding-left: 4px;">
+      <hq:dateFormatter value="${log.timeStamp}"/><br/>
       <c:out value="${log.detail}"/>
     </td>
   </tr>
