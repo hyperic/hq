@@ -472,6 +472,8 @@ public class ServerQuery
                           this.discover.getDomain());
         props.setProperty(WeblogicMetric.PROP_SERVER,
                           getName());
+        props.setProperty(WeblogicMetric.PROP_JVM,
+                          getJVMRuntime().getKeyProperty("Type"));
 
         String log = getAttribute("FileName");
         if (log != null) {

@@ -53,6 +53,7 @@ public class WeblogicMetric {
     public static final String PROP_DOMAIN     = "domain"; //e.g. petstore
     public static final String PROP_SERVER     = "server"; //e.g. petstoreServer
     public static final String PROP_REALM      = "realm"; //e.g. myrealm
+    public static final String PROP_JVM        = "jvm.runtime";
 
     public static final String PROP_APP        = "application"; //e.g. petstore
     public static final String PROP_WEBAPP     = "webapp"; //e.g. supplier
