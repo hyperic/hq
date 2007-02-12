@@ -182,7 +182,7 @@ public class WeblogicMetric {
                       CONNECTOR_SERVICE_RUNTIME);
             
             props.put("JVMRuntime",
-                      JVM_RUNTIME + "JRockitRuntime");
+                      JVM_RUNTIME + "%jvm.runtime%");
 
             props.put("JDBCConnectionPoolRuntime",
                       JDBC_CONNECTION_POOL_RUNTIME + "," +

@@ -918,6 +918,21 @@
             default="medrec"/>
   </config>
 
+  <config name="node" include="domain">
+    <option name="server.url"
+            description="Node URL"
+            default="t3://localhost:9001"/>
+  </config>
+
+  <config name="jvm">
+    <option name="jvm.runtime"
+            description="JVM Runtime"
+            type="enum">
+      <include name="JRockitRuntime"/>
+      <include name="JVMRuntime"/>
+    </option>
+  </config>
+
   <config name="application">
     <option name="application"
             description="Application name"
@@ -945,11 +960,7 @@
           description="Application Server Node"
           platforms="Unix,Win32">
 
-    <config include="domain">
-      <option name="server.url"
-              description="Node URL"
-              default="t3://localhost:9001"/>
-    </config>
+    <config include="node"/>
 
     <help include="weblogic-node"/>
 
@@ -1253,12 +1264,16 @@
           version="9.1"
           include="8.1">
 
+    <config include="node,jvm"/>
+
     <metrics include="jrockit"/>
   </server>
 
   <server name="Weblogic Admin"
           version="9.1"
           include="8.1">
+
+    <config include="domain,jvm"/>
 
     <metrics include="jrockit"/>
 
