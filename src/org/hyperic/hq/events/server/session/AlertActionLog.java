@@ -117,6 +117,7 @@ public class AlertActionLog
         if (getAction() != null) {
             _valueObj.setActionId(getAction().getId());
         }
+        _valueObj.setTimeStamp(_timeStamp);
         return _valueObj;
     }
 

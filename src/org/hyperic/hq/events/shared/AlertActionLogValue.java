@@ -28,20 +28,10 @@
  */
 package org.hyperic.hq.events.shared;
 
-import java.rmi.RemoteException;
-import javax.ejb.CreateException;
-import javax.ejb.EntityBean;
-import javax.ejb.EntityContext;
-import javax.ejb.RemoveException;
+import java.io.Serializable;
 
-
-/**
- * Value object for AlertActionLog.
- *
- */
 public class AlertActionLogValue
-   extends java.lang.Object
-   implements java.io.Serializable
+   implements Serializable
 {
    private Integer id;
    private boolean idHasBeenSet = false;
@@ -49,13 +39,14 @@ public class AlertActionLogValue
    private boolean detailHasBeenSet = false;
    private Integer actionId;
    private boolean actionIdHasBeenSet = false;
-
+   private long timeStamp;
 
    public AlertActionLogValue()
    {
    }
 
-   public AlertActionLogValue( Integer id,String detail,Integer actionId )
+   public AlertActionLogValue( Integer id,String detail,Integer actionId,
+                               long timeStamp)
    {
 	  this.id = id;
 	  idHasBeenSet = true;
@@ -63,6 +54,7 @@ public class AlertActionLogValue
 	  detailHasBeenSet = true;
 	  this.actionId = actionId;
 	  actionIdHasBeenSet = true;
+      this.timeStamp = timeStamp;
    }
 
    //TODO Cloneable is better than this !
@@ -74,7 +66,7 @@ public class AlertActionLogValue
 	  detailHasBeenSet = true;
 	  this.actionId = otherValue.actionId;
 	  actionIdHasBeenSet = true;
-
+      this.timeStamp = otherValue.timeStamp;
    }
 
    public Integer getId()
@@ -116,9 +108,16 @@ public class AlertActionLogValue
    {
 	  this.actionId = actionId;
 	  actionIdHasBeenSet = true;
-
    }
 
+   public long getTimeStamp() {
+       return this.timeStamp;
+   }
+   
+   public void setTimeStamp(long timeStamp) {
+       this.timeStamp = timeStamp;
+   }
+   
    public boolean actionIdHasBeenSet(){
 	  return actionIdHasBeenSet;
    }
