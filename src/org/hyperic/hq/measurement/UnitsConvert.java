@@ -80,6 +80,8 @@ public class UnitsConvert {
         
         unitsToUnit.put(MeasurementConstants.UNITS_BITS,
                         new Integer(UnitsConstants.UNIT_BITS));
+        unitsToUnit.put(MeasurementConstants.UNITS_BYTES_TO_BITS,
+                        new Integer(UnitsConstants.UNIT_BITS));
         unitsToUnit.put(MeasurementConstants.UNITS_KBITS,
                         new Integer(UnitsConstants.UNIT_BITS));
         unitsToUnit.put(MeasurementConstants.UNITS_MBITS,
@@ -136,6 +138,8 @@ public class UnitsConvert {
                          new Integer(UnitsConstants.SCALE_PETA));
         
         unitsToScale.put(MeasurementConstants.UNITS_BITS,
+                         new Integer(UnitsConstants.SCALE_NONE));
+        unitsToScale.put(MeasurementConstants.UNITS_BYTES_TO_BITS,
                          new Integer(UnitsConstants.SCALE_NONE));
         unitsToScale.put(MeasurementConstants.UNITS_KBITS,
                          new Integer(UnitsConstants.SCALE_KILO));
