@@ -110,10 +110,6 @@ public class AlertDefinitionManagerEJBImpl
                                        AlertDefinition alertdef, boolean force)
         throws RemoveException, PermissionException 
     {
-        // If this is a child alert definition, do not delete it unless forced
-        if (!force && alertdef.isResourceTypeDefinition())
-            return;        
-            
         // If there are any children, delete them, too
         for (Iterator i=alertdef.getChildren().iterator(); i.hasNext(); ) { 
             AlertDefinition child = (AlertDefinition) i.next();
