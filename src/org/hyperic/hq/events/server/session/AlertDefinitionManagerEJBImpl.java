@@ -278,8 +278,12 @@ public class AlertDefinitionManagerEJBImpl
 
             getAlertDefDAO().clearConditions(aldef);
             for (int i = 0; i < conds.length; i++) {
-                RegisteredTrigger trigger = 
+                RegisteredTrigger trigger = null;
+                
+                // Trigger ID is null for resource type alerts
+                if (conds[i].getTriggerId() != null) {
                     getTriggerDAO().findById(conds[i].getTriggerId());
+                }
                     
                 aldef.createCondition(conds[i], trigger);
             }
