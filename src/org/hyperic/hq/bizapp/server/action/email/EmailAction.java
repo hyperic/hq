@@ -37,6 +37,7 @@ import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -198,6 +199,10 @@ public class EmailAction extends EmailActionConfig
     {
         try {
             InternetAddress[] to = lookupEmailAddr();
+            
+            if (to.length == 0) {
+                return "No valid users or emails found to send alert";
+            }
 
             EmailFilter filter = EmailFilter.getInstance();
 
@@ -249,15 +254,19 @@ public class EmailAction extends EmailActionConfig
         Integer uid;
         int i = 0;
         List validAddresses = new ArrayList();
-        AuthzSubjectValue overlord = getSubjMan().getOverlord();
         for (Iterator it = getUsers().iterator(); it.hasNext(); i++) {
             try {
                 InternetAddress addr;
                 switch (getType()) {
                 case TYPE_USERS:
                     uid = (Integer) it.next();
-                    AuthzSubjectValue who =
-                        getSubjMan().findSubjectById(overlord, uid);
+                    AuthzSubject who = getSubjMan().getSubjectById(uid);
+                    
+                    if (who == null) {
+                        _log.warn("User not found: " + uid);
+                        continue;
+                    }
+
                     if (isSms()) {
                         addr = new InternetAddress(who.getSMSAddress());
                     } else {
@@ -274,10 +283,6 @@ public class EmailAction extends EmailActionConfig
                 validAddresses.add(addr);
             } catch (AddressException e) {
                 _log.warn("Mail address invalid", e);
-                continue;
-            } catch (PermissionException e) {
-                // authz failure...should not happen since its the overlord
-                // doing the user lookup
                 continue;
             } catch (UnsupportedEncodingException e) {
                 _log.warn("Username encoding error", e);

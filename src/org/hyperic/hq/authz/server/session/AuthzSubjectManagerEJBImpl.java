@@ -214,6 +214,13 @@ public class AuthzSubjectManagerEJBImpl
     /** 
      * @ejb:interface-method
      */
+    public AuthzSubject getSubjectById(Integer id) {
+        return getSubjectDAO().getById(id);
+    }
+    
+    /** 
+     * @ejb:interface-method
+     */
     public AuthzSubjectValue findSubjectByName(AuthzSubjectValue whoami,
                                                String name)
         throws PermissionException 

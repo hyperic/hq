@@ -84,7 +84,11 @@ class AuthzSubjectDAO
     }
 
     public AuthzSubject findById(Integer id) {
-        return (AuthzSubject)super.findById(id);
+        return (AuthzSubject) super.findById(id);
+    }
+
+    public AuthzSubject getById(Integer id) {
+        return (AuthzSubject) super.get(id);
     }
 
     void remove(AuthzSubject entity) {
