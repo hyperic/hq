@@ -127,6 +127,19 @@ public class AlertDefinitionManagerEJBImpl
         // See if there are any alerts
         if (!force && getAlertMan().getAlertCount(alertdef.getId()) > 0) {
             alertdef.setDeleted(true);
+            
+            // Make sure to disassociated from all triggers
+            alertdef.setActOnTrigger(null);
+            
+            for (Iterator it = alertdef.getConditionsBag().iterator();
+                 it.hasNext(); ) {
+                AlertCondition cond = (AlertCondition) it.next();
+                cond.setTrigger(null);
+            }
+            
+            // Disassociate from parent, too
+            alertdef.setParent(null);
+            
             return;
         }
         
