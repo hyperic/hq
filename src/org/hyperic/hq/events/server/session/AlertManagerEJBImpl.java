@@ -383,30 +383,6 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         return valuePager.seek(alerts, pc);
     }
 
-    /**
-     * Search alerts given a set of criteria.  This does the same thing as
-     * {@link {@link #findAlerts(AuthzSubjectValue, int, int, long, long, List)}
-     *
-     * This uses the current time for the endTime, and rounds the earliest time
-     * to a multiple of timeRange. 
-     *
-     * @ejb:interface-method
-     */
-    public List findRecentAlerts(AuthzSubjectValue subj, int count, 
-                                 int priority, long timeRange, List includes)  
-        throws PermissionException 
-    {
-        long    cur = System.currentTimeMillis();
-        long    base = (cur / timeRange) * timeRange;
-        boolean evenDivide = cur % timeRange == 0;
-        
-        long lateTime = base + (evenDivide ? 0 : timeRange);
-        long earlyTime = base - timeRange - (evenDivide ? 0 : timeRange);
-            
-        long newRange = lateTime - earlyTime;
-        
-        return findAlerts(subj, count, priority, newRange, lateTime, includes);  
-    }
 
     /**
      * Search alerts given a set of criteria
@@ -448,6 +424,21 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         }
             
         return result;
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public List convertAlertsToEscalatables(Collection alerts) {
+        List res = new ArrayList(alerts.size());
+
+        for (Iterator i=alerts.iterator(); i.hasNext(); ) {
+            Alert a = (Alert)i.next();
+            
+            res.add(new ClassicEscalatable(a, getShortReason(a),
+                                           getLongReason(a)));
+        }
+        return res;
     }
 
     /**
