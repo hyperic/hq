@@ -34,27 +34,29 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.bizapp.shared.EventsBoss;
-import org.hyperic.hq.bizapp.shared.uibeans.DashboardAlertBean;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.portlet.BaseRSSAction;
-import org.hyperic.hq.ui.action.portlet.RSSFeed;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.units.FormattedNumber;
-import org.hyperic.util.units.UnitNumber;
-import org.hyperic.util.units.UnitsConstants;
-import org.hyperic.util.units.UnitsFormat;
-import org.hyperic.util.units.DateFormatter.DateSpecifics;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.util.MessageResources;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.escalation.server.session.Escalatable;
+import org.hyperic.hq.events.AlertDefinitionInterface;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.portlet.BaseRSSAction;
+import org.hyperic.hq.ui.action.portlet.RSSFeed;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.units.FormattedNumber;
+import org.hyperic.util.units.UnitNumber;
+import org.hyperic.util.units.UnitsConstants;
+import org.hyperic.util.units.UnitsFormat;
+import org.hyperic.util.units.DateFormatter.DateSpecifics;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -79,7 +81,8 @@ public class RSSAction extends BaseRSSAction {
         // Get the recent alerts
         ServletContext ctx = getServlet().getServletContext();
         EventsBoss boss = ContextUtils.getEventsBoss(ctx);
-
+        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx); 
+            
         String user = getUsername(request);
         List list;
         try {
@@ -96,30 +99,35 @@ public class RSSAction extends BaseRSSAction {
             long timeRange = Long.parseLong(preferences
                 .getValue(".dashContent.criticalalerts.past").trim());
 
-            list = boss.findAlerts(user, count, priority, timeRange, null);
+            list = boss.findRecentAlerts(user, count, priority, timeRange, 
+                                         null);
         } catch (Exception e) {
             throw new ServletException("Error finding recent alerts", e);
         }
 
-        for (Iterator it = list.iterator(); it.hasNext(); ) {
-            DashboardAlertBean alert = (DashboardAlertBean) it.next();
-            AppdefEntityID aeid = alert.getResource().getEntityId();
-            
+        for (Iterator i = list.iterator(); i.hasNext(); ) {
+            Escalatable alert = (Escalatable) i.next();
+            AlertDefinitionInterface defInfo = 
+                alert.getDefinition().getDefinitionInfo();
+            AppdefEntityID aeid = new AppdefEntityID(defInfo.getAppdefType(),
+                                                     defInfo.getAppdefId());
+                
             String link = feed.getBaseUrl() +
                           "/alerts/Alerts.do?mode=viewAlert&eid=" +
-                          aeid.getAppdefKey() + "&a=" + alert.getAlertId();
+                          aeid.getAppdefKey() + "&a=" + alert.getId();
 
             DateSpecifics specs = new DateSpecifics();
             specs.setDateFormat(new SimpleDateFormat(res.getMessage(
                 Constants.UNIT_FORMAT_PREFIX_KEY + "epoch-millis")));
             
             FormattedNumber fmtd = UnitsFormat.format(
-                    new UnitNumber(alert.getCtime(), UnitsConstants.UNIT_DATE,
+                    new UnitNumber(alert.getAlertInfo().getTimestamp(),
+                                   UnitsConstants.UNIT_DATE,
                                    UnitsConstants.SCALE_MILLI), 
                                    request.getLocale(), specs);
 
             String desc;
-            if (alert.isFixed()) {
+            if (alert.getAlertInfo().isFixed()) {
                 desc = fmtd.toString() + " " +
                     res.getMessage("parenthesis", res.getMessage(
                                    "resource.common.alert.action.fixed.label"));
@@ -129,18 +137,22 @@ public class RSSAction extends BaseRSSAction {
                           "<td>" + fmtd.toString() + "</td>" +
                           "<td><a href='" + feed.getBaseUrl() +
                           "/alerts/Alerts.do?mode=FIXED&a=" +
-                          alert.getAlertId() + "'>" +
+                          alert.getId() + "'>" +
                           res.getMessage(
                               "resource.common.alert.action.fixed.label") +
                           "</a></td><td><a href='" + feed.getBaseUrl() +
                           "/alerts/Alerts.do?mode=ACKNOWLEDGE&a=" +
-                          alert.getAlertId() + "'>" +
+                          alert.getId() + "'>" +
                           res.getMessage(
                               "resource.common.alert.action.acknowledge.label")+
                           "</a></td></tr></table>";
             }
-            feed.addItem(alert.getResource().getName() + " " +
-                         alert.getAlertDefName(), link, desc, alert.getCtime());
+            
+            AuthzSubject subject = aBoss.getCurrentSubject(user);
+            AppdefEntityValue resource = 
+                new AppdefEntityValue(aeid, subject.getAuthzSubjectValue()); 
+            feed.addItem(resource.getName()+ " " + defInfo.getName(), link, 
+                         desc, alert.getAlertInfo().getTimestamp()); 
         }
         request.setAttribute("rssFeed", feed);
         

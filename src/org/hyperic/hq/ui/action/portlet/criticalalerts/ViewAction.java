@@ -40,8 +40,12 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.util.MessageResources;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
-import org.hyperic.hq.bizapp.shared.uibeans.DashboardAlertBean;
+import org.hyperic.hq.escalation.server.session.Escalatable;
+import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
@@ -66,6 +70,7 @@ public class ViewAction extends BaseAction {
         throws Exception
     {
         ServletContext ctx = getServlet().getServletContext();
+        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
         EventsBoss eventBoss = ContextUtils.getEventsBoss(ctx);
         WebUser user = (WebUser) request.getSession().getAttribute(
             Constants.WEBUSER_SES_ATTR);
@@ -110,9 +115,9 @@ public class ViewAction extends BaseAction {
             arrayIds = null;
         }
 
-        List criticalAlerts =
-            eventBoss.findAlerts(sessionID, count, priority, timeRange,
-                                 arrayIds);
+        List criticalAlerts = eventBoss.findRecentAlerts(sessionID, count, 
+                                                         priority, timeRange, 
+                                                         arrayIds); 
 
         JSONObject alerts = new JSONObject();
         List a = new ArrayList();
@@ -121,22 +126,29 @@ public class ViewAction extends BaseAction {
         String formatString =
             res.getMessage(Constants.UNIT_FORMAT_PREFIX_KEY + "epoch-millis");
 
+        AuthzSubject subject = authzBoss.getCurrentSubject(sessionID); 
         SimpleDateFormat df = new SimpleDateFormat(formatString);
         for (Iterator i = criticalAlerts.iterator(); i.hasNext(); ) {
-            DashboardAlertBean bean = (DashboardAlertBean) i.next();
+            Escalatable alert = (Escalatable) i.next();
+            AlertDefinitionInterface def;
+            AppdefEntityValue aVal;
+            AppdefEntityID eid;
+            
+            String date = 
+                df.format(new Date(alert.getAlertInfo().getTimestamp()));
+            def = alert.getDefinition().getDefinitionInfo();
+            eid = new AppdefEntityID(def.getAppdefType(), def.getAppdefId());
 
-            String date = df.format(new Date(bean.getCtime()));
+            aVal = new AppdefEntityValue(eid, subject.getAuthzSubjectValue());
+            JSONObject jAlert = new JSONObject();
+            jAlert.put("alertId", alert.getId());
+            jAlert.put("appdefKey", eid.getAppdefKey());
+            jAlert.put("resourceName", aVal.getName());
+            jAlert.put("alertDefName", def.getName()); 
+            jAlert.put("cTime", date);
+            jAlert.put("fixed", alert.getAlertInfo().isFixed()); 
 
-            JSONObject alert = new JSONObject();
-            alert.put("alertId", bean.getAlertId());
-            alert.put("appdefKey",
-                      bean.getResource().getEntityId().getAppdefKey());
-            alert.put("resourceName", bean.getResource().getName());
-            alert.put("alertDefName", bean.getAlertDefName());
-            alert.put("cTime", date);
-            alert.put("fixed", bean.isFixed());
-
-            a.add(alert);
+            a.add(jAlert);
         }
 
         alerts.put("criticalAlerts", a);
