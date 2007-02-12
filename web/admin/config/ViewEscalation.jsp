@@ -34,7 +34,6 @@
   type="text/javascript"></script>
 <script src='<html:rewrite page="/js/dashboard.js"/>' type="text/javascript"></script>
 <script src='<html:rewrite page="/js/effects.js"/>' type="text/javascript"></script>
-<script src='<html:rewrite page="/js/popup.js"/>' type="text/javascript"></script>
 
 <script type="text/javascript">
  onloads.push(requestViewEscalation);
@@ -180,7 +179,7 @@ function showViewEscResponse(originalRequest) {
      escTrHeader.appendChild(td6);
       td6.setAttribute('colSpan', '3');
       td6.setAttribute((document.all ? 'className' : 'class'), "BlockTitle");
-      td6.innerHTML = '<div style="cursor:move;width:100%;background:#cccccc;padding:2px; border:1px solid #aeb0b5;"><fmt:message key="common.header.ActionDetails"/></div>';
+      td6.innerHTML = '<div style="cursor:move;width:100%;background:#cccccc;padding:2px; border:1px solid #aeb0b5;">Action Details</div>';
 
       escTrHeader.appendChild(td8);
       td8.setAttribute('vAlign','top');
@@ -211,9 +210,9 @@ function showViewEscResponse(originalRequest) {
 
         for (var d = 0; d < actionClass.length; d++) {
             if (actionClass[d] == "SyslogAction") {
-            usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowSpan="3" vAlign="top" style="padding-right:3px;"><fmt:message key="alert.config.escalation.LogSyslog"/></td><td style="padding:0px 2px 2px 2px;"><fmt:message key="alert.config.escalation.meta"/> ' + configMeta + '</td></tr><tr><td style="padding:2px;"><fmt:message key="alert.config.escalation.product"/> ' + configProduct + '</td></tr><tr><td style="padding:2px 2px 2px 2px;"><fmt:message key="alert.config.escalation.version"/> ' + configVersion + '</td></tr></table>'
+            usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowSpan="3" vAlign="top" style="padding-right:3px;">Log to the Syslog:</td><td style="padding:0px 2px 2px 2px;">meta: ' + configMeta + '</td></tr><tr><td style="padding:2px;">product: ' + configProduct + '</td></tr><tr><td style="padding:2px 2px 2px 2px;">version: ' + configVersion + '</td></tr></table>'
            } else if (actionClass[d] == "NoOpAction") {
-            usersTextDiv.innerHTML = '<fmt:message key="alert.config.escalation.suppress"/> ' + actionWaitTime;
+            usersTextDiv.innerHTML = 'Suppress duplicate alerts for: ' + actionWaitTime;
             waitDiv.innerHTML = "&nbsp;";
             }
        }
@@ -233,9 +232,9 @@ function showViewEscResponse(originalRequest) {
               }
 
               if (configSms == "true") {
-                usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/> <fmt:message key="alert.config.escalation.sms"/> " + displayEmails + "<br>";
+                usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/> via SMS: " + displayEmails + "<br>";
               } else {
-              usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/> <fmt:message key="alert.config.escalation.email"/> " + displayEmails + "<br>";
+              usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/> via Email: " + displayEmails + "<br>";
 
           }
               //usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/>:  " + displayEmails + "<br>";
@@ -254,9 +253,9 @@ function showViewEscResponse(originalRequest) {
           }
           
           if (configSms == "true") {
-          usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/> <fmt:message key="alert.config.escalation.sms"/>  " + userNames + "<br>";
+          usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/> via SMS: " + userNames + "<br>";
               } else {
-              usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/> <fmt:message key="alert.config.escalation.email"/> " + userNames + "<br>";
+              usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/> via Email: " + userNames + "<br>";
         
           }
       } else  if (configListType == "3") {
@@ -295,7 +294,7 @@ function showViewEscResponse(originalRequest) {
       usersEditDiv.setAttribute('id', 'usersEditDiv_'+ liID);
       usersEditDiv.setAttribute('width', '40%');
       usersEditDiv.innerHTML = " ";
-      $('pauseTimeText').innerHTML = '<fmt:message key="alert.config.escalation.allow.pauseEscalation"/> ' + allowPause + "<br>";
+      $('pauseTimeText').innerHTML = 'Allow user to pause escalation: ' + allowPause + "<br>";
 
     }
 
@@ -343,7 +342,7 @@ function showViewEscResponse(originalRequest) {
 
     function updateEscView( originalRequest ) {
         $('example').style.display= '';
-        $('escMsg').innerHTML ="<fmt:message key="inform.config.escalation.scheme.newescalation.escalationActionAdded"/>";
+        $('escMsg').innerHTML ="The action has been added to the escalation. The escalation is complete. You can add additional actions as needed.";
         cancelAddEscalation();
         setTimeout( "requestViewEscalation()", 1200 );
         //requestViewEscalation();
@@ -413,14 +412,14 @@ function showViewEscResponse(originalRequest) {
         escTrHeader.appendChild(td6);
         td6.setAttribute('colSpan', '3');
         td6.setAttribute((document.all ? 'className' : 'class'), "BlockTitle");
-        td6.innerHTML = '<div style="width:100%;background:#cccccc;padding:2px; border:1px dotted #aeb0b5;"><fmt:message key="common.label.CreateAction"/></div>';
+        td6.innerHTML = '<div style="width:100%;background:#cccccc;padding:2px; border:1px dotted #aeb0b5;">Create an Action for this escalation</div>';
 
         escTrHeader.appendChild(td5);
                 td5.setAttribute('vAlign', 'top');
                 td5.setAttribute('width', '30%');
                 td5.setAttribute('rowSpan', '3');
                 td5.setAttribute('id', 'displaySelAction');
-                td5.innerHTML = '<table cellpadding="2" cellspacing="0" border="0" width="100%"><tbody><tr><td class=BlockTitle colSpan=3><fmt:message key="common.label.ActionDetails"/></td></tr><tr><td id="actionName" vAlign="top" width="50%">Action: Email</td></tr><tr><td id="userListDisplay" valign="top" style="display:none;"></td></tr><tr><td><table cellpadding="2" cellspacing="0" border="0"><tr><td id=metaText style="display:none"></td></tr><tr><td id=productText style="display:none"></td></tr><tr><td id=versionText style="display:none"></td></tr></table></td></tr><tr><td id="time" colspan="3" valign="top" style="display:none;"></td></tr></tbody></table>';
+                td5.innerHTML = '<table cellpadding="2" cellspacing="0" border="0" width="100%"><tbody><tr><td class=BlockTitle colSpan=3>Action Details</td></tr><tr><td id="actionName" vAlign="top" width="50%">Action: Email</td></tr><tr><td id="userListDisplay" valign="top" style="display:none;"></td></tr><tr><td><table cellpadding="2" cellspacing="0" border="0"><tr><td id=metaText style="display:none"></td></tr><tr><td id=productText style="display:none"></td></tr><tr><td id=versionText style="display:none"></td></tr></table></td></tr><tr><td id="time" colspan="3" valign="top" style="display:none;"></td></tr></tbody></table>';
 
 
         escTr1.appendChild(td1);
@@ -487,14 +486,14 @@ function showViewEscResponse(originalRequest) {
         emailDiv.setAttribute('class', 'emailDiv');
         emailDiv.setAttribute('id', 'emailinputDiv');
         $('emailinputDiv').style.display = 'none';
-        $('emailinputDiv').innerHTML = "<fmt:message key="inform.config.escalation.scheme.newAction.emailaddresses"/><br> <fmt:message key="inform.config.escalation.scheme.newAction.commaseparated"/><br><textarea rows=2 cols=20 id=emailinput name=emailinput onblur=checkEmail();copyOthersEmail(this);></textarea>";
+        $('emailinputDiv').innerHTML = "email addresses<br> (comma separated):<br><textarea rows=2 cols=20 id=emailinput name=emailinput onblur=checkEmail();copyOthersEmail(this);></textarea>";
 
         td4.appendChild(sysDiv);
         sysDiv.setAttribute('class', 'escInput');
         sysDiv.setAttribute('id', 'sysloginput');
         $('sysloginput').style.display = 'none';
         //sysDiv.setAttribute('width', '40%');
-        sysDiv.innerHTML = "<fmt:message key="alert.config.escalation.meta"/> <input type=text name=meta" + " size=30 onblur=copyMeta(this);><br>" + "<fmt:message key="alert.config.escalation.product"/> <input type=text name=product" + " size=30 onblur=copyProduct(this);><br>" + "<fmt:message key="alert.config.escalation.version"/> <input type=text name=version" + " size=30 onblur=copyVersion(this);><br>";
+        sysDiv.innerHTML = "meta: <input type=text name=meta" + " size=30 onblur=copyMeta(this);><br>" + "product: <input type=text name=product" + " size=30 onblur=copyProduct(this);><br>" + "version: <input type=text name=version" + " size=30 onblur=copyVersion(this);><br>";
 
         td4.appendChild(usersDiv);
         usersDiv.setAttribute('id', 'usersDiv' + liID);
@@ -527,25 +526,25 @@ function showViewEscResponse(originalRequest) {
       function copyOthersEmail(el) {
         var othersDisplay = $('userListDisplay');
           othersDisplay.style.display = "";
-        othersDisplay.innerHTML = '<fmt:message key="alert.config.escalation.notifyemail"/> ' + el.value;
+        othersDisplay.innerHTML = 'Notify email addresses: ' + el.value;
       }
 
       function copyMeta(el) {
         var metaDisplay = $('metaText');
         metaDisplay.style.display = "";
-        metaDisplay.innerHTML = '<fmt:message key="alert.config.escalation.meta"/> ' + el.value;
+        metaDisplay.innerHTML = 'meta: ' + el.value;
       }
 
       function copyProduct(el) {
         var productDisplay = $('productText');
         productDisplay.style.display = "";
-        productDisplay.innerHTML = '<fmt:message key="alert.config.escalation.product"/> ' + el.value;
+        productDisplay.innerHTML = 'product: ' + el.value;
       }
 
       function copyVersion(el) {
         var versionDisplay = $('versionText');
         versionDisplay.style.display = "";
-        versionDisplay.innerHTML = '<fmt:message key="alert.config.escalation.version"/> ' + el.value;
+        versionDisplay.innerHTML = 'version: ' + el.value;
       }
 
       function clearDisplay() {
@@ -639,7 +638,7 @@ function showViewEscResponse(originalRequest) {
         var writeTime = $('time');
         writeTime.style.display = "";
         var index= el.options[el.selectedIndex].value;
-        writeTime.innerHTML = '<fmt:message key="alert.config.escalation.thenwait"/> ' + (index / 60000) + ' <fmt:message key="admin.settings.Minutes"/>';
+        writeTime.innerHTML = 'Then wait: ' + (index / 60000) + ' minutes';
     }
 
     function hideDisplay() {
@@ -671,13 +670,13 @@ function showViewEscResponse(originalRequest) {
     }
 
     function showResponse(originalRequest) {
-        $('escMsg').innerHTML ="<fmt:message key="alert.config.escalation.escalationsaved"/>";
+        $('escMsg').innerHTML ="Escalation Saved";
 
     }
 
     function showResponseRemoved() {
         $('example').style.display= '';
-        $('escMsg').innerHTML ="<fmt:message key="alert.config.escalation.actionremoved"/>";
+        $('escMsg').innerHTML ="Action removed from this escalation";
 
         if ($('viewEscalationUL').firstChild) {
             $('noActions').style.display = "none";
@@ -906,8 +905,6 @@ function showViewEscResponse(originalRequest) {
     </tr>
 </table>
 </div>
-<div id="dragInfo" style="padding:2px; font-weight: bold;display:none;">Drag individual actions to change the order of event</div>
-
 
 <form action='<html:rewrite action="/escalation/saveEscalation"/>'
   name="EscalationForm" id="EscalationForm" onchange="hideExample();"><input
@@ -1115,20 +1112,12 @@ function showViewEscResponse(originalRequest) {
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
     <thead>
          <tr>
-             <td class="BlockTitle" valign="top" nowrap colSpan="2" width="100%">
-                 <table cellpadding="0" cellspacing="0" width="100%">
-                     <tr>
-                         <td class="BlockTitle">
-                        <fmt:message key="inform.config.escalation.scheme.newAction.step2create"/> <fmt:message key="common.label.EscalationSchemeActions" />
-                        </td>
-                        <td style="padding-right:2px;padding-top:2px;text-align:right;">
-
-                        <html:img page="/images/comment.gif" onmouseover="menuLayers.show('dragInfo', event)" onmouseout="menuLayers.hide()" border="0"/>
-
-                        </td>
-                     </tr>
-                 </table>
-            </td>
+             <td class="BlockTitle" valign="top" nowrap colSpan="2">
+             Step 2 - Create <fmt:message key="common.label.EscalationSchemeActions" />
+             </td>
+        </tr>
+        <tr>
+            <td colspan="2" class="ErrorBlock" width="100%" style="border: 1px dotted orange; padding:2px; background-color: rgb(255, 253, 153); font-weight: bold;">Drag individual actions to change the order of events</td>
         </tr>
      </thead>
   <tbody>
@@ -1146,7 +1135,7 @@ function showViewEscResponse(originalRequest) {
       </td>
     </tr>
     <tr class="BlockContent">
-        <td id="noActions" style="padding:5px;display:none;"><b><fmt:message key="inform.config.escalation.scheme.newAction.noactions"/></b>
+        <td id="noActions" style="padding:5px;display:none;"><b>Currently there are no actions for this escalation. Click on the "Create Action" button below to create an action to perform when this escalation is invoked.</b>
 
         </td>
     </tr>
