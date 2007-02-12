@@ -167,7 +167,6 @@
             template="if-${snmp.template}:ifInOctets:${if.config}"
             category="THROUGHPUT"
             units="B"
-            rate="1s"
             collectionType="trendsup"/>
 
     <metric name="Bits Received"
@@ -207,7 +206,6 @@
             template="if-${snmp.template}:ifOutOctets:${if.config}"
             category="THROUGHPUT"
             units="B"
-            rate="1s"
             collectionType="trendsup"/>
 
     <metric name="Bits Sent"
