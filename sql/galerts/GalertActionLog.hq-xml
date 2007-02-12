@@ -7,12 +7,17 @@
 <hibernate-mapping package="org.hyperic.hq.galerts.server.session">
 
   <class name="GalertActionLog" table="EAM_ALERT_ACTION_LOG">
+    <cache usage="read-write" />
     <id name="id" type="integer">
       <column name="ID" not-null="true" />
       <generator class="sequence">
         <param name="sequence">EAM_ALERT_ACTION_LOG_ID_SEQ</param>
       </generator>
     </id>
+
+    <property name="timeStamp">
+      <column name="TIMESTAMP" not-null="true" />
+    </property>
 
     <property name="detail">
       <column name="DETAIL" not-null="true" length="500" />
