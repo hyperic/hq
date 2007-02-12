@@ -1332,7 +1332,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                                ProductPlugin.TYPE_MEASUREMENT,
                                                id, true);
         } catch (ConfigFetchException e) {
-            log.warn("Unable to enable default metrics for [" + id + "]", e);
+            log.debug("Unable to enable default metrics for [" + id + "]", e);
             return;
         }  catch (Exception e) {
             log.error("Unable to enable default metrics for [" + id + "]", e);
