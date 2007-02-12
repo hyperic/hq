@@ -30,10 +30,12 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
+import org.hyperic.hq.events.server.session.Action;
 
 public class GalertLog
     extends PersistedObject 
@@ -66,6 +68,16 @@ public class GalertLog
         _partition   = reason.getPartition();
     }
 
+    GalertActionLog createActionLog(String detail, Action action, 
+                                    AuthzSubject subject) 
+    {
+        GalertActionLog res = new GalertActionLog(this, detail, action, 
+                                                  subject);
+        
+        _actionLog.add(res);
+        return res;
+    }
+    
     public PerformsEscalations getDefinition() {
         return getAlertDef();
     }

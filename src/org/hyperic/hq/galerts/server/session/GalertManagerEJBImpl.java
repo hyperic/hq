@@ -189,8 +189,7 @@ public class GalertManagerEJBImpl
     public void createActionLog(GalertLog alert, String detail, Action action,
                                 AuthzSubject subject) 
     {
-        GalertActionLog log = new GalertActionLog(alert, detail, action, 
-                                                  subject);
+        GalertActionLog log = alert.createActionLog(detail, action, subject);
         
         _actionLogDAO.save(log);
     }
