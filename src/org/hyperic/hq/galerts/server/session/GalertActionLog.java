@@ -37,6 +37,7 @@ public class GalertActionLog
     private GalertLog    _galertLog;
     private Action       _action;
     private AuthzSubject _subject;
+    private long         _timeStamp;
     
     protected GalertActionLog() {
     }
@@ -48,6 +49,7 @@ public class GalertActionLog
         _galertLog = alert;
         _action    = action;
         _subject   = subject;
+        _timeStamp = System.currentTimeMillis();
     }
     
     public String getDetail() {
@@ -92,5 +94,13 @@ public class GalertActionLog
     
     public EscalationAlertType getAlertType() {
         return GalertEscalationAlertType.GALERT;
+    }
+
+    public long getTimeStamp() {
+        return _timeStamp;
+    }
+    
+    protected void setTimeStamp(long stamp) {
+        _timeStamp = stamp;
     }
 }
