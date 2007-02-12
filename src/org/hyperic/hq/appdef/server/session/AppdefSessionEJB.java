@@ -628,33 +628,44 @@ public abstract class AppdefSessionEJB
             PermissionManager pm = PermissionManagerFactory.getInstance();
             // platforms 
             List platIds = 
-                    pm.findOperationScopeBySubject(subj,
-                                                   AuthzConstants.platformOpManageAlerts,
-                                                   AuthzConstants.platformResType,
-                                                   PageControl.PAGE_ALL);
+                pm.findOperationScopeBySubject(subj,
+                                               AuthzConstants.platformOpManageAlerts,
+                                               AuthzConstants.platformResType,
+                                               PageControl.PAGE_ALL);
             for(int i = 0; i < platIds.size(); i++) {
                 Integer id = (Integer)platIds.get(i);
                 entityIds.add(new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM, id));                                                                           
             }
             // servers
             List serverIds = 
-                    pm.findOperationScopeBySubject(subj,
-                                                   AuthzConstants.serverOpManageAlerts,
-                                                   AuthzConstants.serverResType,
-                                                   PageControl.PAGE_ALL);
+                pm.findOperationScopeBySubject(subj,
+                                               AuthzConstants.serverOpManageAlerts,
+                                               AuthzConstants.serverResType,
+                                               PageControl.PAGE_ALL);
             for(int i = 0; i < serverIds.size(); i++) {
                 Integer id = (Integer)serverIds.get(i);
                 entityIds.add(new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER, id));                                                                           
             }
             // services
             List serviceIds =
-                    pm.findOperationScopeBySubject(subj,
-                                                   AuthzConstants.serviceOpManageAlerts,
-                                                   AuthzConstants.serviceResType,
-                                                   PageControl.PAGE_ALL);
+                pm.findOperationScopeBySubject(subj,
+                                               AuthzConstants.serviceOpManageAlerts,
+                                               AuthzConstants.serviceResType,
+                                               PageControl.PAGE_ALL);
             for(int i = 0; i < serviceIds.size(); i++) {
                 Integer id = (Integer)serviceIds.get(i);
                 entityIds.add(new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE, id));
+            }
+            
+            // Groups
+            List groupids = 
+                pm.findOperationScopeBySubject(subj, 
+                                               AuthzConstants.groupOpManageAlerts,
+                                               AuthzConstants.groupResType,
+                                               PageControl.PAGE_ALL);
+            for (int i=0; i<groupids.size(); i++) {
+                Integer id = (Integer)groupids.get(i);
+                entityIds.add(new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP, id));
             }
         } catch (Exception e) {
             throw new SystemException(e);
