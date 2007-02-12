@@ -28,14 +28,11 @@ package org.hyperic.hq.bizapp.server.session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
@@ -45,6 +42,7 @@ import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.ResourceTreeGenerator;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -56,11 +54,10 @@ import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.ServiceValue;
-import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.appdef.shared.resourceTree.PlatformNode;
+import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.appdef.shared.resourceTree.ServerNode;
 import org.hyperic.hq.appdef.shared.resourceTree.ServiceNode;
-import org.hyperic.hq.appdef.server.session.ResourceTreeGenerator;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -97,7 +94,6 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerCreateException;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggerEvent;
-import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
@@ -383,6 +379,31 @@ public class EventsBossEJBImpl
         }
     }
 
+    private void cloneParentActions(AppdefEntityID id,
+                                    AlertDefinitionValue child,
+                                    ActionValue[] actions) {
+        child.removeAllActions();
+        for (int i = 0; i < actions.length; i++) {
+            ActionValue childAct;
+            try {
+                ActionInterface actInst = (ActionInterface)
+                    Class.forName(actions[i].getClassname()).newInstance();
+                ConfigResponse config =
+                    ConfigResponse.decode(actions[i].getConfig());
+                actInst.setParentActionConfig(id, config);
+                childAct =
+                    new ActionValue(null, actInst.getImplementor(),
+                                    actInst.getConfigResponse().encode(),
+                                    actions[i].getId());
+            } catch (Exception e) {
+                // Not a valid action, skip it then
+                _log.debug(actions[i].getClassname(), e);
+                continue;
+            }
+            child.addAction(childAct);
+        }
+    }
+
     /**
      * Get the number of alerts for the given array of AppdefEntityID's
      * @ejb:interface-method 
@@ -559,12 +580,7 @@ public class EventsBossEJBImpl
             triggers.addAll(Arrays.asList(adval.getTriggers()));
 
             // Make sure the actions have the proper parentId
-            adval.removeAllActions();
-            ActionValue[] actions = parent.getActions();
-            for (int i = 0; i < actions.length; i++) {
-                actions[i].setParentId(actions[i].getId());
-                adval.addAction(actions[i]);
-            }
+            cloneParentActions(id, adval, parent.getActions());
             
             // Create a measurement AlertLogAction if necessary
             setMetricAlertAction(adval);
@@ -611,7 +627,6 @@ public class EventsBossEJBImpl
     }
 
     /**
-     * Create an alert definition for a resource type
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
@@ -650,6 +665,9 @@ public class EventsBossEJBImpl
             createTriggers(subject, adval);
             triggers.addAll(Arrays.asList(adval.getTriggers()));
     
+            // Recreate the actions
+            cloneParentActions(id, adval, adval.getActions());
+            
             // Create a measurement AlertLogAction if necessary
             setMetricAlertAction(adval);
     
@@ -776,12 +794,7 @@ public class EventsBossEJBImpl
                 cloneParentConditions(subject, id, child,
                                       adval.getConditions());
 
-                child.removeAllActions();
-                ActionValue[] acts = adval.getActions();
-                for (int i = 0; i < acts.length; i++) {
-                    acts[i].setId(new Integer(0));
-                    child.addAction(acts[i]);
-                }
+                cloneParentActions(id, child, adval.getActions());
                 
                 // Set the alert definition frequency type
                 child.setFrequencyType(adval.getFrequencyType());
