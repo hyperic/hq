@@ -1116,7 +1116,7 @@ function showViewEscResponse(originalRequest) {
                      <tr>
                          <td class="BlockTitle" valign="top" nowrap>Step 2 - Create <fmt:message key="common.label.EscalationSchemeActions"/></td>
                          <td align="right" style="padding-right:3px;">
-                         <html:image page="/images/icon_info2-60A5EA.gif" onmouseover="menuLayers.show('actionsInfoPopup', event)" onmouseout="menuLayers.hide()" border="0"/>
+                         <html:img page="/images/icon_info2-60A5EA.gif" onmouseover="menuLayers.show('actionsInfoPopup', event)" onmouseout="menuLayers.hide()" border="0"/>
                         </td>
                      </tr>
                  </table>
