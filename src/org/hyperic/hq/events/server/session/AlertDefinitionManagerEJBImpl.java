@@ -368,6 +368,11 @@ public class AlertDefinitionManagerEJBImpl
 
         for (Iterator i = alertdefs.iterator(); i.hasNext(); ) {
             AlertDefinition ad = (AlertDefinition) i.next();
+            
+            if (ad.isEnabled() == enable) {
+                continue;
+            }
+
             canManageAlerts(subj, ad);
 
             ad.setEnabled(enable);

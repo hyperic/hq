@@ -252,11 +252,12 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * 
      * @ejb:interface-method
      */
-    public Alert getLastByAlertDef(AuthzSubjectValue subj, Integer id)
+    public Alert findLastUnfixedByDefinition(AuthzSubjectValue subj, Integer id)
         throws PermissionException {
         AlertDefinition def = getAlertDefDAO().findById(id);
         canManageAlerts(subj, def);
-        return getAlertDAO().findLastByAlertDefinition(def); 
+        
+        return getAlertDAO().findLastUnfixedByDefinition(def);
     }
 
     /**
