@@ -71,7 +71,7 @@
     </fmt:message>
     </td>
     <td colspan="3"  class="BlockContent" style="padding-left: 4px;">
-      <hq:dateFormatter value="${log.timeStamp}"/>
+      <span style="color:#333333;"><hq:dateFormatter value="${log.timeStamp}"/> - </span>
       <c:out value="${log.detail}"/>
     </td>
   </tr>
