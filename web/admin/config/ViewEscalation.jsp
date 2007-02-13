@@ -335,7 +335,7 @@ function showViewEscResponse(originalRequest) {
         var serialAddAction = Form.serialize('addEscalation');
         var pars =  "EscId=" + id + "&" + serialAddAction;
         var url = '<html:rewrite action="/escalation/saveAction"/>';
-
+        alert(pars)
         new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: updateEscView, onFailure: reportError} );
         document.addEscalation.reset();
     }
@@ -1082,12 +1082,6 @@ function showViewEscResponse(originalRequest) {
   </c:forEach>
 </ul>
 </div>
-<div id="actionsInfoPopup" class="menu" style="dislay:none;padding:3px;">
-
-           <fmt:message key="inform.config.escalation.scheme.newAction.dragaction"/>
-
-</div>
-
 <c:if test="${not empty AvailableRoles}">
   <div id="rolesList" style="display: none;">
   <div class="ListHeader">Select Roles</div>
@@ -1206,5 +1200,9 @@ function showViewEscResponse(originalRequest) {
 </tbody>
 </table>
 </form>
+<div id="actionsInfoPopup" class="menu" style="padding:3px;">
+<fmt:message key="inform.config.escalation.scheme.newAction.dragaction"/>
+</div>
+
 <br>
 <br>
