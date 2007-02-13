@@ -98,7 +98,7 @@ onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
  	 </tbody>
      <tfoot>
          <tr class="ListRow" id="noCritAlerts<c:out value="${portlet.token}"/>">
-      		<td class="ListCell" colspan="5"><fmt:message key="dash.home.alerts.no.resource.to.display"/></td>
+      		<td class="ListCell" colspan="6"><fmt:message key="dash.home.alerts.no.resource.to.display"/></td>
     	</tr>
         <tr>
              <td colspan="5">
