@@ -807,10 +807,10 @@ function showViewEscResponse(originalRequest) {
 </table>
 </div>
 
-<div style="border:1px dotted orange;padding:10px;background-color:#FFFD99;font-weight:bold;margin-bottom:10px;">
+<div style="margin-bottom:10px;border:1px solid #D5D8DE;" class="ListHeaderInactive">
      <table cellpadding="3" cellspacing="0" border="0">
          <tr>
-             <td><b><fmt:message key="inform.config.escalation.scheme.newescalation.escalationexplanation" /></b></td>
+             <td><fmt:message key="inform.config.escalation.scheme.newescalation.escalationexplanation" /></td>
          </tr>
       </table>
  </div>

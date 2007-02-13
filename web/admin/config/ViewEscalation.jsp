@@ -34,7 +34,7 @@
   type="text/javascript"></script>
 <script src='<html:rewrite page="/js/dashboard.js"/>' type="text/javascript"></script>
 <script src='<html:rewrite page="/js/effects.js"/>' type="text/javascript"></script>
-
+<script src='<html:rewrite page="/js/popup.js"/>' type="text/javascript"></script>
 <script type="text/javascript">
  onloads.push(requestViewEscalation);
 
@@ -1082,6 +1082,11 @@ function showViewEscResponse(originalRequest) {
   </c:forEach>
 </ul>
 </div>
+<div id="actionsInfoPopup" class="menu" style="dislay:none;padding:3px;">
+
+           <fmt:message key="inform.config.escalation.scheme.newAction.dragaction"/>
+
+</div>
 
 <c:if test="${not empty AvailableRoles}">
   <div id="rolesList" style="display: none;">
@@ -1112,12 +1117,17 @@ function showViewEscResponse(originalRequest) {
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
     <thead>
          <tr>
-             <td class="BlockTitle" valign="top" nowrap colSpan="2">
-             Step 2 - Create <fmt:message key="common.label.EscalationSchemeActions" />
-             </td>
-        </tr>
-        <tr>
-            <td colspan="2" class="ErrorBlock" width="100%" style="border: 1px dotted orange; padding:2px; background-color: rgb(255, 253, 153); font-weight: bold;">Drag individual actions to change the order of events</td>
+             <td class="BlockTitle" valign="top" nowrap colspan="2">
+                 <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                     <tr>
+                         <td class="BlockTitle" valign="top" nowrap>Step 2 - Create <fmt:message key="common.label.EscalationSchemeActions"/></td>
+                         <td align="right" style="padding-right:3px;">
+                         <html:image page="/images/icon_info2-60A5EA.gif" onmouseover="menuLayers.show('actionsInfoPopup', event)" onmouseout="menuLayers.hide()" border="0"/>
+                        </td>
+                     </tr>
+                 </table>
+               </td>
+
         </tr>
      </thead>
   <tbody>
@@ -1135,7 +1145,7 @@ function showViewEscResponse(originalRequest) {
       </td>
     </tr>
     <tr class="BlockContent">
-        <td id="noActions" style="padding:5px;display:none;"><b>Currently there are no actions for this escalation. Click on the "Create Action" button below to create an action to perform when this escalation is invoked.</b>
+        <td id="noActions" style="padding:5px;display:none;"><b><fmt:message key="inform.config.escalation.scheme.newAction.noactions"/></b>
 
         </td>
     </tr>
