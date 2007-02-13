@@ -1551,6 +1551,23 @@ public class EventsBossEJBImpl
     }
     
     /**
+     * unset escalation by alert definition id.
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void unsetEscalationByAlertDefId(int sessionID, Integer id,
+                                            EscalationAlertType alertType) 
+        throws SessionTimeoutException, SessionNotFoundException,
+               PermissionException
+    {
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        
+        // TODO: check permission
+        getEscMan().setEscalation(alertType, id, null);
+    }
+    
+    /**
      * retrieve escalation JSONObject by alert definition id.
      *
      * @ejb:interface-method

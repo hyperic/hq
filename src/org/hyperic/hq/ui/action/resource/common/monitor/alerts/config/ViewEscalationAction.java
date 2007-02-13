@@ -84,16 +84,23 @@ public class ViewEscalationAction extends ViewDefinitionAction {
         
         EscalationSchemeForm eForm = (EscalationSchemeForm) form;
         if (eForm.getEscId() == null) {
-            eForm.setEscId(
-                           eb.getEscalationIdByAlertDefId(sessionId,
+            eForm.setEscId(eb.getEscalationIdByAlertDefId(sessionId,
                                           new Integer(eForm.getAd()),
                                           mat));
         } else {
-            // We actually need to set the escalation scheme for alert
-            // definition
-            eb.setEscalationByAlertDefId(sessionId,
-                                         new Integer(eForm.getAd()),
-                                         eForm.getEscId(), mat);
+            if (eForm.getEscId().intValue() == 0) {
+                // Unset current escalation scheme
+                eb.unsetEscalationByAlertDefId(sessionId,
+                                               new Integer(eForm.getAd()), mat);
+                eForm.setEscId(null);
+            }
+            else {
+                // We actually need to set the escalation scheme for alert
+                // definition
+                eb.setEscalationByAlertDefId(sessionId,
+                                             new Integer(eForm.getAd()),
+                                             eForm.getEscId(), mat);
+            }
         }
         
         // Look for the escalation request parameter
