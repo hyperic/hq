@@ -364,4 +364,8 @@ public class Pager {
         dest.setTotalSize(size);
         return dest;
     }
+    
+    public Object processOne(Object one) {
+        return _processor.processElement(one);
+    }
 }

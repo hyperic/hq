@@ -110,10 +110,10 @@
   <tiles:put name="buttonClick">$('mode').setAttribute('value', '<fmt:message key="resource.common.alert.action.acknowledge.label"/>')</tiles:put>
   <c:choose>
     <c:when test="${alert.acknowledgeable}">
-      <tiles:put name="disabled" value="true"/>
+      <tiles:put name="disabled" value="false"/>
     </c:when>
     <c:otherwise>
-      <tiles:put name="disabled" beanName="alert" beanProperty="fixed"/>
+      <tiles:put name="disabled" value="true"/>
     </c:otherwise>
   </c:choose>
 </tiles:insert>
