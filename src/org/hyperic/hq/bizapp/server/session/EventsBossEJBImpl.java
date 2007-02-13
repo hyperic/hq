@@ -1315,7 +1315,8 @@ public class EventsBossEJBImpl
         List badIds = new ArrayList();
         
         List res = new ArrayList();
-        for (Iterator i = alerts.iterator(); i.hasNext(); ){
+        for (Iterator i = alerts.iterator();
+             i.hasNext() && res.size() <= count; ) {
             Escalatable alert = (Escalatable) i.next();
             PerformsEscalations def = alert.getDefinition();
             AppdefEntityID aeid;
