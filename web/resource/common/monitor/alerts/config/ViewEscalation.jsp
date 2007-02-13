@@ -281,12 +281,16 @@ function showViewEscResponse() {
         }
 
         for (var i = 0; i < schemes.length; i++) {
-
             if (schemes[i].name == "")
                 continue;
 
             addOption(escalationSel , schemes[i].id, schemes[i].name,
                       schemes[i].id == document.EscalationSchemeForm.escId.value);
+        }
+
+        if (escalationSel.selectedIndex > 0) {
+            escalationSel.options[0].text = '<fmt:message key="alert.config.escalation.unset"/>';
+            escalationSel.options[0].value = 0;
         }
    }
 

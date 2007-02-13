@@ -40,6 +40,7 @@ import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
@@ -54,6 +55,7 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.NumberUtil;
 import org.hyperic.util.units.FormatSpecifics;
 import org.hyperic.util.units.FormattedNumber;
+import org.json.JSONObject;
 
 /**
  * View an alert.
@@ -88,9 +90,12 @@ public class ViewAlertAction extends TilesAction {
         request.setAttribute(Constants.ALERT_DEFINITION_ATTR, adv);
         
         if (adv.getEscalationId() != null) {
-            request.setAttribute("escalation",
-                                 eb.findEscalationById(sessionID,
-                                                       adv.getEscalationId()));
+            Escalation escalation =
+                eb.findEscalationById(sessionID, adv.getEscalationId());
+            request.setAttribute("escalation", escalation);
+            
+            JSONObject escJson = Escalation.getJSON(escalation);
+            request.setAttribute("escalationJSON", escJson.toString());
         }            
 
         // conditions

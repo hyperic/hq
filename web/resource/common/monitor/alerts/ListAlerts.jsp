@@ -294,7 +294,7 @@ styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
 onclick="ToggleSelection(this,widgetProperties)"
 styleClass="listMember"/> </display:column>
 
-<display:column width="15%" property="priority"
+<display:column width="10%" property="priority"
 title="alerts.alert.AlertList.ListHeader.Priority">
 <display:prioritydecorator
 flagKey="alerts.alert.alertlist.listheader.priority"/>
@@ -314,12 +314,18 @@ paramId="ad" paramProperty="alertDefId"/>
 <display:column width="20%" property="conditionFmt"
 title="alerts.alert.AlertList.ListHeader.AlertCondition"/>
 
-<display:column width="20%" property="value"
+<display:column width="12%" property="value"
 title="alerts.alert.AlertList.ListHeader.ActualValue" />
 
-<display:column width="5%" property="fixed"
+<display:column width="7%" property="fixed"
                 title="alerts.alert.AlertList.ListHeader.Fixed">
   <display:booleandecorator flagKey="yesno"/>
+</display:column>
+
+<display:column width="11%" property="acknowledgeable"
+                title="alerts.alert.AlertList.ListHeader.Acknowledge"
+                href="/alerts/RemoveAlerts.do?eid=${Resource.entityId.appdefKey}&alerts=${Alert.id}&buttonAction=ACKNOWLEDGE">
+  <display:booleandecorator flagKey="acknowledgeable"/>
 </display:column>
 
 </display:table>

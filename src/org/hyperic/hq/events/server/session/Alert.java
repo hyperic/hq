@@ -167,6 +167,8 @@ public class Alert
         _alertVal.setAlertDefId(getAlertDefinition().getId());
         _alertVal.setCtime(getCtime());
         _alertVal.setFixed(isFixed());
+        _alertVal.setAcknowledged(isFixed() ||
+                                  getDefinition().getEscalation() == null);
 
         _alertVal.removeAllConditionLogs();
       

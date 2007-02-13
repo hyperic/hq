@@ -46,6 +46,7 @@ public class AlertBean implements Serializable {
     private String _value;
     private boolean _multiCondition;
     private boolean _fixed;
+    private boolean _acknowledgeable;
 
     // resource fields
     private Integer _rid;
@@ -55,7 +56,8 @@ public class AlertBean implements Serializable {
 
     public AlertBean(Integer id, long ctime,
                      Integer alertDefId, String name, int priority,
-                     Integer rid, Integer type, boolean fixed) {
+                     Integer rid, Integer type, boolean fixed,
+                     boolean acknowledgeable) {
         _id = id;
         _ctime = ctime;
         _alertDefId = alertDefId;
@@ -64,6 +66,7 @@ public class AlertBean implements Serializable {
         _rid = rid;
         _type = type;
         _fixed = fixed;
+        _acknowledgeable = acknowledgeable;
     }
 
     public Integer getId() {
@@ -183,6 +186,14 @@ public class AlertBean implements Serializable {
         _fixed = fixed;
     }
 
+    public boolean isAcknowledgeable() {
+        return _acknowledgeable;
+    }
+
+    public void setAcknowledgeable(boolean acknowledgeable) {
+        this._acknowledgeable = acknowledgeable;
+    }
+
     public String toString() {
         StringBuffer str = new StringBuffer();
         str.append("{id=")
@@ -205,6 +216,8 @@ public class AlertBean implements Serializable {
             .append( getType() )
             .append(" fixed=")
             .append( isFixed() )
+            .append(" acknowledgeable=")
+            .append( isAcknowledgeable() )
             .append('}');
 
         return str.toString();
