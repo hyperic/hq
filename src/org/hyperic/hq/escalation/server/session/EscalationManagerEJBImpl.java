@@ -386,7 +386,8 @@ public class EscalationManagerEJBImpl
                    + eAction.getWaitTime() + " ms");
         s.setNextAction(actionIdx + 1);
         s.setNextActionTime(nextTime);
-                                
+        s.setAcknowledgedBy(null);
+        
         EscalationRuntime.getInstance().scheduleEscalation(s);
         
         try {
