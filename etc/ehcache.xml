@@ -570,6 +570,14 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
 
+  <!-- Measurement stuffs -->
+  <cache name="RawMeasurement.findByTemplateForInstance"
+         maxElementsInMemory="5000"
+		 eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+
   <!-- Alert caches -->
   <cache name="Alert.findByEntity"
          maxElementsInMemory="100"

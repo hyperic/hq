@@ -115,8 +115,7 @@ public class RawMeasurementDAO extends HibernateDAO {
             .setInteger(1, id.intValue()).uniqueResult();
     }
 
-    RawMeasurement findByTemplateForInstance(Integer tid,
-                                                    Integer instanceId) {
+    RawMeasurement findByTemplateForInstance(Integer tid, Integer instanceId) {
         String sql =
             "select m from RawMeasurement m " +
             "join fetch m.template as t " +
@@ -124,7 +123,10 @@ public class RawMeasurementDAO extends HibernateDAO {
 
         return (RawMeasurement)getSession().createQuery(sql)
             .setInteger(0, tid.intValue())
-            .setInteger(1, instanceId.intValue()).uniqueResult();
+            .setInteger(1, instanceId.intValue())
+            .setCacheable(true)
+            .setCacheRegion("RawMeasurement.findByTemplateForInstance")
+            .uniqueResult();
     }
 
     List findByTemplate(Integer id) {
